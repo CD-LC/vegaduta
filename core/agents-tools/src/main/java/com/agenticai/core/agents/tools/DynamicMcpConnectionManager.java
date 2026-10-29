@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -66,9 +65,11 @@ import org.springframework.stereotype.Component;
 public class DynamicMcpConnectionManager implements McpDynamicConnector {
 
     private static final Logger log = LoggerFactory.getLogger(DynamicMcpConnectionManager.class);
+
     /**
-     * The client-side wait for one request to a connected MCP server and for the "test connection" action
-     * ({@code app.tools.mcp.*}). Setter-injected so hand-built managers keep the shipped defaults.
+     * The client-side wait for one request to a connected MCP server and for the "test connection"
+     * action ({@code app.tools.mcp.*}). Setter-injected so hand-built managers keep the shipped
+     * defaults.
      */
     private volatile McpClientProperties clientProperties = new McpClientProperties();
 
@@ -91,7 +92,8 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
     // admin had to notice a broken tool and hit "try again" manually. Five
     // minutes is deliberately not aggressive - a subprocess dying is rare,
     // and each check is a real round-trip against a possibly-slow/hung
-    // client (up to the request timeout, app.tools.mcp.request-timeout-seconds) - see application.yml's scheduling
+    // client (up to the request timeout, app.tools.mcp.request-timeout-seconds) - see
+    // application.yml's scheduling
     // pool-size comment for why this needed its own scheduler thread
     // separate from WorkflowScheduler's once-a-minute tick.
     private static final long HEALTH_CHECK_INTERVAL_MS = 5 * 60 * 1000L;

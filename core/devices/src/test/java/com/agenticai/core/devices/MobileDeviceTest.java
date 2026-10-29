@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * State transitions on the paired-device row: {@link MobileDevice#touch} (heartbeat evidence),
- * {@link MobileDevice#revoke} (the only way a tenant invalidates a device token, since tokens
- * never rotate), and the capability CSV the client declares.
+ * {@link MobileDevice#revoke} (the only way a tenant invalidates a device token, since tokens never
+ * rotate), and the capability CSV the client declares.
  */
 class MobileDeviceTest {
 

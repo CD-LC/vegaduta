@@ -10,8 +10,8 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 
 /**
  * The one place options objects are copied before being mutated (ADR-0012 P1b). A copy is a
- * distinct instance of the same concrete type carrying the same values, so mutating it never
- * leaks back into the caller's options.
+ * distinct instance of the same concrete type carrying the same values, so mutating it never leaks
+ * back into the caller's options.
  */
 class ChatOptionsCopyTest {
 
@@ -28,11 +28,8 @@ class ChatOptionsCopyTest {
 
     @Test
     void theOpenAiOverloadCopiesEveryReadValue() {
-        OpenAiChatOptions source = OpenAiChatOptions.builder()
-            .model("gpt-5")
-            .maxTokens(64)
-            .temperature(0.3)
-            .build();
+        OpenAiChatOptions source =
+                OpenAiChatOptions.builder().model("gpt-5").maxTokens(64).temperature(0.3).build();
 
         OpenAiChatOptions copy = ChatOptionsCopy.of(source);
 

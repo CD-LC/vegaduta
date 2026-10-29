@@ -36,9 +36,15 @@ class OpenApiUrlGuardTest {
 
     @Test
     void blankUrlsAndNonHttpSchemesAreRefusedBeforeAnyLookup() {
-        assertThrows(OpenApiToolException.class, () -> OpenApiUrlGuard.validatePublicHttpUri(null, GUARD));
-        assertThrows(OpenApiToolException.class, () -> OpenApiUrlGuard.validatePublicHttpUri("  ", GUARD));
-        assertThrows(OpenApiToolException.class, () -> OpenApiUrlGuard.validatePublicHttpUri("ftp://x/y", GUARD));
+        assertThrows(
+                OpenApiToolException.class,
+                () -> OpenApiUrlGuard.validatePublicHttpUri(null, GUARD));
+        assertThrows(
+                OpenApiToolException.class,
+                () -> OpenApiUrlGuard.validatePublicHttpUri("  ", GUARD));
+        assertThrows(
+                OpenApiToolException.class,
+                () -> OpenApiUrlGuard.validatePublicHttpUri("ftp://x/y", GUARD));
         assertThrows(
                 OpenApiToolException.class,
                 () -> OpenApiUrlGuard.validatePublicHttpUri("file:///etc/passwd", GUARD));
@@ -50,7 +56,9 @@ class OpenApiUrlGuardTest {
     @Test
     void absurdlyLongUrlsAreRefused() {
         String longUrl = "https://example.com/" + "a".repeat(5_000);
-        assertThrows(OpenApiToolException.class, () -> OpenApiUrlGuard.validatePublicHttpUri(longUrl, GUARD));
+        assertThrows(
+                OpenApiToolException.class,
+                () -> OpenApiUrlGuard.validatePublicHttpUri(longUrl, GUARD));
     }
 
     @Test
@@ -63,11 +71,14 @@ class OpenApiUrlGuardTest {
     @Test
     void privateAddressesAreRewordedAsAnInternalNetworkRefusal() throws Exception {
         SsrfGuard privateHost =
-                SsrfGuard.of(Set.of(), host -> new InetAddress[] {InetAddress.getByName("10.0.0.9")});
+                SsrfGuard.of(
+                        Set.of(), host -> new InetAddress[] {InetAddress.getByName("10.0.0.9")});
         OpenApiToolException e =
                 assertThrows(
                         OpenApiToolException.class,
-                        () -> OpenApiUrlGuard.validatePublicHttpUri("https://internal.local/", privateHost));
+                        () ->
+                                OpenApiUrlGuard.validatePublicHttpUri(
+                                        "https://internal.local/", privateHost));
         assertTrue(e.getMessage().contains("own network"), e.getMessage());
     }
 
@@ -76,7 +87,9 @@ class OpenApiUrlGuardTest {
         OpenApiToolException e =
                 assertThrows(
                         OpenApiToolException.class,
-                        () -> OpenApiUrlGuard.validatePublicHttpUri("http://127.0.0.1:8080/admin", GUARD));
+                        () ->
+                                OpenApiUrlGuard.validatePublicHttpUri(
+                                        "http://127.0.0.1:8080/admin", GUARD));
         assertTrue(e.getMessage().contains("own network"), e.getMessage());
     }
 
@@ -86,6 +99,8 @@ class OpenApiUrlGuardTest {
         // does not contain "private"/"internal" - either way an OpenApiToolException is thrown.
         assertThrows(
                 OpenApiToolException.class,
-                () -> OpenApiUrlGuard.validatePublicHttpUri("http://169.254.169.254/latest", GUARD));
+                () ->
+                        OpenApiUrlGuard.validatePublicHttpUri(
+                                "http://169.254.169.254/latest", GUARD));
     }
 }

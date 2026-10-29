@@ -22,8 +22,15 @@ class ToolCallLogTest {
     @Test
     void theShortConstructorDefaultsFlagAndGrant() {
         ToolCallLog log =
-            new ToolCallLog(AGENT, "session-1", "web_search", "{\"q\":\"x\"}", "result", null,
-                STARTED, COMPLETED);
+                new ToolCallLog(
+                        AGENT,
+                        "session-1",
+                        "web_search",
+                        "{\"q\":\"x\"}",
+                        "result",
+                        null,
+                        STARTED,
+                        COMPLETED);
 
         assertEquals(AGENT, log.getAgentId());
         assertEquals("session-1", log.getSessionId());
@@ -40,8 +47,16 @@ class ToolCallLogTest {
     @Test
     void theValidationFlagConstructorRecordsAFailedOutputCheck() {
         ToolCallLog log =
-            new ToolCallLog(AGENT, "session-1", "create_file", "{}", "rejected", "schema error",
-                STARTED, COMPLETED, true);
+                new ToolCallLog(
+                        AGENT,
+                        "session-1",
+                        "create_file",
+                        "{}",
+                        "rejected",
+                        "schema error",
+                        STARTED,
+                        COMPLETED,
+                        true);
 
         assertEquals("rejected", log.getToolOutput());
         assertEquals("schema error", log.getErrorMessage());
@@ -53,8 +68,17 @@ class ToolCallLogTest {
         UUID grant = UUID.randomUUID();
 
         ToolCallLog log =
-            new ToolCallLog(AGENT, "session-1", "send_email", "{}", null, "boom",
-                STARTED, COMPLETED, false, grant);
+                new ToolCallLog(
+                        AGENT,
+                        "session-1",
+                        "send_email",
+                        "{}",
+                        null,
+                        "boom",
+                        STARTED,
+                        COMPLETED,
+                        false,
+                        grant);
 
         assertEquals(grant, log.getMcpGrantId());
         assertNull(log.getToolOutput());
@@ -64,7 +88,7 @@ class ToolCallLogTest {
     @Test
     void agentVersionIdIsSetOnceFromTheTurnsPin() {
         ToolCallLog log =
-            new ToolCallLog(AGENT, "session-1", "t", null, null, null, STARTED, COMPLETED);
+                new ToolCallLog(AGENT, "session-1", "t", null, null, null, STARTED, COMPLETED);
         UUID version = UUID.randomUUID();
 
         log.setAgentVersionId(version);

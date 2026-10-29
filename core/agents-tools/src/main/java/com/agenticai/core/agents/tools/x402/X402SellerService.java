@@ -328,8 +328,8 @@ public class X402SellerService {
     /**
      * Replay-fold gate for the internal scheme: only a SETTLED record may be returned to the
      * caller. A REJECTED record, or a VERIFIED reservation whose settlement legs never finished,
-     * re-throws so the client retries with a fresh call nonce - the paid resource is never
-     * served on a payment that did not land.
+     * re-throws so the client retries with a fresh call nonce - the paid resource is never served
+     * on a payment that did not land.
      */
     private X402PaymentRecord foldInternalReplay(X402PaymentRecord prior) {
         if (prior.getStatus() == X402PaymentRecord.Status.SETTLED) {

@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.agenticai.core.security.TenantContext;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,9 +13,9 @@ import org.springframework.dao.DuplicateKeyException;
 
 /**
  * {@link InMemorySettingsStore} keeps the same two contracts the JDBC store does: rows are
- * partitioned by the calling thread's tenant (one tenant never sees another's, and a thread with
- * no context gets its own {@code "<none>"} partition), and history is append-only with a real
- * unique constraint on {@code (scope, scope_id, setting_key, version)}.
+ * partitioned by the calling thread's tenant (one tenant never sees another's, and a thread with no
+ * context gets its own {@code "<none>"} partition), and history is append-only with a real unique
+ * constraint on {@code (scope, scope_id, setting_key, version)}.
  */
 class InMemorySettingsStoreTest {
 
@@ -37,7 +36,8 @@ class InMemorySettingsStoreTest {
         TenantContext.set(TenantContext.of(tenantId, "alice", Set.of()));
     }
 
-    private static SettingOverride override(SettingScope scope, String scopeId, String key, Object value) {
+    private static SettingOverride override(
+            SettingScope scope, String scopeId, String key, Object value) {
         return new SettingOverride(scope, scopeId, key, value, 1, "alice", Instant.now());
     }
 
@@ -94,7 +94,8 @@ class InMemorySettingsStoreTest {
         Instant at = Instant.now();
         store.appendHistory(entry(SettingScope.TENANT, "", "k.one", 1, at));
 
-        assertThatThrownBy(() -> store.appendHistory(entry(SettingScope.TENANT, "", "k.one", 1, at)))
+        assertThatThrownBy(
+                        () -> store.appendHistory(entry(SettingScope.TENANT, "", "k.one", 1, at)))
                 .isInstanceOf(DuplicateKeyException.class);
         // A different version of the same key is fine.
         store.appendHistory(entry(SettingScope.TENANT, "", "k.one", 2, at.plusSeconds(1)));

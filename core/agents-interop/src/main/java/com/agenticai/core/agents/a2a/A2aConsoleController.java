@@ -24,13 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
  * spec's ListTasks answers UnsupportedOperationError on the wire, while the console needs exactly
  * that listing to show "who called my agents" and "which remote agents did my agents call".
  *
- * <p><b>Authorization:</b> the protocol surface scopes tasks to their owning subject
- * ({@link A2aTaskStore#find}); this surface crosses subjects - an inbound task is owned by the
- * EXTERNAL caller's subject, which is never the console user's - so every method is gated on the
- * manager authorities below (same trio {@code ScheduledTaskService#isManager} and {@code
+ * <p><b>Authorization:</b> the protocol surface scopes tasks to their owning subject ({@link
+ * A2aTaskStore#find}); this surface crosses subjects - an inbound task is owned by the EXTERNAL
+ * caller's subject, which is never the console user's - so every method is gated on the manager
+ * authorities below (same trio {@code ScheduledTaskService#isManager} and {@code
  * AgentJobOperatorService} accept). The filter chain contributes {@code authenticated()}; the
- * {@code @PreAuthorize} is the real check, which is also what JAVA-006's
- * {@code AuthorizationCoverageTest} requires of a mutating endpoint without a dedicated rule.
+ * {@code @PreAuthorize} is the real check, which is also what JAVA-006's {@code
+ * AuthorizationCoverageTest} requires of a mutating endpoint without a dedicated rule.
  *
  * <p><b>What a task row may contain:</b> the caller's message text and the agent's reply. That is
  * the same content {@code AgentController}'s session/history views already show a tenant manager,
@@ -66,7 +66,8 @@ public class A2aConsoleController {
     }
 
     /**
-     * {@code GET /api/a2a/console/tasks?direction=inbound|outbound&state=<TASK_STATE_*>&agentId=<uuid>&limit=<n>}
+     * {@code GET
+     * /api/a2a/console/tasks?direction=inbound|outbound&state=<TASK_STATE_*>&agentId=<uuid>&limit=<n>}
      * - newest first, summaries only (reply capped at {@value #LIST_REPLY_PREVIEW_CHARS} chars).
      */
     @GetMapping("/tasks")
@@ -92,9 +93,7 @@ public class A2aConsoleController {
                         .limit(capped)
                         .map(t -> toRow(t, LIST_REPLY_PREVIEW_CHARS))
                         .toList();
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noStore())
-                .body(Map.of("tasks", rows));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("tasks", rows));
     }
 
     /** {@code GET /api/a2a/console/tasks/{id}} - the full record, reply included. */
@@ -109,8 +108,7 @@ public class A2aConsoleController {
     /**
      * {@code POST /api/a2a/console/tasks/{id}:cancel} - 404 unknown/cross-tenant, 409 already
      * terminal. Canceling an outbound record annotates the local bookkeeping only; the remote
-     * agent's task is authoritative and unaffected (see {@link
-     * A2aTaskService#consoleCancel}).
+     * agent's task is authoritative and unaffected (see {@link A2aTaskService#consoleCancel}).
      */
     @PostMapping("/tasks/{id}:cancel")
     @PreAuthorize(MANAGER)
@@ -122,10 +120,10 @@ public class A2aConsoleController {
 
     /**
      * {@code GET /api/a2a/console/policy} - the tenant-readable half of the operator outbound
-     * policy: which remote A2A hosts this tenant's agents may call (the allow-list is
-     * operator-set on purpose - a stolen admin session must not be able to widen egress, so this
-     * view is read-only like {@code OutboundPolicyController}) plus this deployment's inbound
-     * endpoints so the UI can show the URLs to hand a peer.
+     * policy: which remote A2A hosts this tenant's agents may call (the allow-list is operator-set
+     * on purpose - a stolen admin session must not be able to widen egress, so this view is
+     * read-only like {@code OutboundPolicyController}) plus this deployment's inbound endpoints so
+     * the UI can show the URLs to hand a peer.
      */
     @GetMapping("/policy")
     @PreAuthorize(MANAGER)

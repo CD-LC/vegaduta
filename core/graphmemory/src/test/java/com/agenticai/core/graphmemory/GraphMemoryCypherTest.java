@@ -26,7 +26,9 @@ class GraphMemoryCypherTest {
     @Test
     void graphNamesOutsideTheAllowlistAreRejected() {
         for (String bad :
-                new String[] {null, "", "Tenant_KG", "kg-name", "name;x", "9lives_kg", "a b", "name.kg"}) {
+                new String[] {
+                    null, "", "Tenant_KG", "kg-name", "name;x", "9lives_kg", "a b", "name.kg"
+                }) {
             assertThatThrownBy(() -> GraphMemoryCypher.cypherCall(bad, "c", "cols"))
                     .as("graph name %s", bad)
                     .isInstanceOf(IllegalArgumentException.class)
@@ -36,7 +38,8 @@ class GraphMemoryCypherTest {
 
     @Test
     void lowercaseSnakeCaseGraphNamesAreAccepted() {
-        assertThat(GraphMemoryCypher.cypherCall("t_9lives_kg", "c", "cols")).contains("t_9lives_kg");
+        assertThat(GraphMemoryCypher.cypherCall("t_9lives_kg", "c", "cols"))
+                .contains("t_9lives_kg");
         assertThat(GraphMemoryCypher.cypherCall("_kg", "c", "cols")).contains("'_kg'");
     }
 
@@ -78,10 +81,7 @@ class GraphMemoryCypherTest {
     void interpolatedValuesAreSanitizedThroughTheEscaper() {
         String cypher =
                 GraphMemoryCypher.buildForgetInvalidateCypher(
-                        "a",
-                        "s",
-                        new GraphFactTextMatcher.ValidEdge("O'Brien", "KNOWS", "x"),
-                        1L);
+                        "a", "s", new GraphFactTextMatcher.ValidEdge("O'Brien", "KNOWS", "x"), 1L);
 
         // The escaper's \' form - a bare quote must never reach the cypher text.
         assertThat(cypher).contains("O\\'Brien");

@@ -54,7 +54,8 @@ class PerUserBudgetCountersTest {
     private static BudgetConfig config() {
         Map<Modality, Integer> split = new EnumMap<>(Modality.class);
         split.put(Modality.TEXT, 100);
-        return new BudgetConfig(true, new BigDecimal("0.15"), 86_400, split, new BigDecimal("0.00015"));
+        return new BudgetConfig(
+                true, new BigDecimal("0.15"), 86_400, split, new BigDecimal("0.00015"));
     }
 
     // ---- key shapes --------------------------------------------------------

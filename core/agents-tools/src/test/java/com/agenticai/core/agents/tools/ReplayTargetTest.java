@@ -69,19 +69,21 @@ class ReplayTargetTest {
     @Test
     void anEnvelopeWithoutAValidAgentIdCannotReplay() {
         String payload = "{\"replay\":{\"agentId\":\"not-a-uuid\",\"toolName\":\"t\"}}";
-        assertThrows(AgentToolReplayException.class, () -> ReplayTarget.resolve(request(payload, null), MAPPER));
+        assertThrows(
+                AgentToolReplayException.class,
+                () -> ReplayTarget.resolve(request(payload, null), MAPPER));
 
         String missing = "{\"replay\":{\"toolName\":\"t\"}}";
-        assertThrows(AgentToolReplayException.class, () -> ReplayTarget.resolve(request(missing, null), MAPPER));
+        assertThrows(
+                AgentToolReplayException.class,
+                () -> ReplayTarget.resolve(request(missing, null), MAPPER));
     }
 
     @Test
     void aLegacyPayloadRecoversToolAgentAndSessionFromLabels() {
         ReplayTarget target =
                 ReplayTarget.resolve(
-                        request(
-                                "{\"fileId\":\"f-9\"}",
-                                "agent:" + AGENT_ID + ":session:sess-42"),
+                        request("{\"fileId\":\"f-9\"}", "agent:" + AGENT_ID + ":session:sess-42"),
                         MAPPER);
 
         assertEquals("send_file", target.toolName(), "the tool comes from the action type");
@@ -97,9 +99,7 @@ class ReplayTargetTest {
         // The discriminator is replay.toolName, not the bare "replay" key.
         ReplayTarget target =
                 ReplayTarget.resolve(
-                        request(
-                                "{\"replay\":{\"level\":2}}",
-                                "agent:" + AGENT_ID + ":session:s"),
+                        request("{\"replay\":{\"level\":2}}", "agent:" + AGENT_ID + ":session:s"),
                         MAPPER);
         assertEquals("send_file", target.toolName());
         assertEquals("s", target.sessionId());
@@ -126,8 +126,7 @@ class ReplayTargetTest {
     @Test
     void aBlankLegacyPayloadBecomesEmptyArguments() {
         ReplayTarget target =
-                ReplayTarget.resolve(
-                        request(null, "agent:" + AGENT_ID + ":session:s"), MAPPER);
+                ReplayTarget.resolve(request(null, "agent:" + AGENT_ID + ":session:s"), MAPPER);
         assertEquals("{}", target.argumentsJson());
     }
 
@@ -143,7 +142,8 @@ class ReplayTargetTest {
                 SessionMemoryService.scopedSessionId("tenant-a", AGENT_ID, "alice", "s"),
                 derivable.memorySessionIdOrDerived());
 
-        ReplayTarget underivable = new ReplayTarget(AGENT_ID, "s", "t", "{}", null, null, null, null);
+        ReplayTarget underivable =
+                new ReplayTarget(AGENT_ID, "s", "t", "{}", null, null, null, null);
         assertNull(underivable.memorySessionIdOrDerived());
     }
 

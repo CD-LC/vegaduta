@@ -8,8 +8,8 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code app.llm.retry.*}: the bounded retry of a transient provider failure. The defaults are
- * the shipped {@code application.yml} values; {@code maxAttempts} clamps at 1 ("never retry") and
+ * {@code app.llm.retry.*}: the bounded retry of a transient provider failure. The defaults are the
+ * shipped {@code application.yml} values; {@code maxAttempts} clamps at 1 ("never retry") and
  * {@code jitter} clamps into [0, 1].
  */
 class LlmRetryPropertiesTest {

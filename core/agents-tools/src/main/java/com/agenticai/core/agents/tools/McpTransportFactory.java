@@ -60,8 +60,9 @@ final class McpTransportFactory {
      * tests only.
      */
     private Supplier<HttpClient.Builder> clientBuilders =
-            () -> new GuardedHttpClientBuilder(REMOTE_SOCKET_TIMEOUT)
-                    .maxResponseBytes(maxResponseBytes);
+            () ->
+                    new GuardedHttpClientBuilder(REMOTE_SOCKET_TIMEOUT)
+                            .maxResponseBytes(maxResponseBytes);
 
     McpTransportFactory(
             AtlassianOAuthService atlassianOAuthService,

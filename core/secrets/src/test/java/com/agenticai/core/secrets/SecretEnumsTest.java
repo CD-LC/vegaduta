@@ -24,8 +24,7 @@ class SecretEnumsTest {
 
     @Test
     void secretScopeHasExactlyTenantAndUser() {
-        assertThat(SecretScope.values())
-                .containsExactly(SecretScope.TENANT, SecretScope.USER);
+        assertThat(SecretScope.values()).containsExactly(SecretScope.TENANT, SecretScope.USER);
     }
 
     @Test
@@ -38,9 +37,7 @@ class SecretEnumsTest {
     void writeForbiddenCarriesTheSharedVaultExplanation() {
         SecretWriteForbiddenException e = new SecretWriteForbiddenException();
 
-        assertThat(e.getMessage())
-                .contains("workspace admin")
-                .contains("scoped to yourself");
+        assertThat(e.getMessage()).contains("workspace admin").contains("scoped to yourself");
     }
 
     @Test

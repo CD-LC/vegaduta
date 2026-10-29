@@ -40,19 +40,19 @@ class CachingPolicyTest {
         assertTrue(semantic.isResponseCachingEnabled());
         assertTrue(semantic.isSemanticResponseCachingEnabled());
         assertNotSame(base, semantic);
-        assertFalse(base.isSemanticResponseCachingEnabled(),
-            "the original is untouched - an immutable copy, not a mutation");
+        assertFalse(
+                base.isSemanticResponseCachingEnabled(),
+                "the original is untouched - an immutable copy, not a mutation");
     }
 
     @Test
     void equalityIsOnBothFlags() {
-        CachingPolicy both = CachingPolicy.off()
-            .withResponseCaching(true)
-            .withSemanticResponseCaching(true);
+        CachingPolicy both =
+                CachingPolicy.off().withResponseCaching(true).withSemanticResponseCaching(true);
 
-        assertEquals(both, CachingPolicy.off()
-            .withResponseCaching(true)
-            .withSemanticResponseCaching(true));
+        assertEquals(
+                both,
+                CachingPolicy.off().withResponseCaching(true).withSemanticResponseCaching(true));
         assertEquals(both.hashCode(), both.hashCode());
         assertNotEquals(both, CachingPolicy.off().withResponseCaching(true));
         assertNotEquals(both, CachingPolicy.off());

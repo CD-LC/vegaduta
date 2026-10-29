@@ -10,7 +10,10 @@ import org.springframework.stereotype.Component;
  * Interval: {@code app.tenancy.migrate-retry-interval} (default 60s).
  */
 @Component
-@ConditionalOnProperty(name = "app.tenancy.migrate-on-boot", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "app.tenancy.migrate-on-boot",
+        havingValue = "true",
+        matchIfMissing = true)
 public class TenantMigrationRetryJob {
 
     private final TenantMigrationService migrationService;

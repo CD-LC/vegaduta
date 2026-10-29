@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * The delegation principal: the agent acts AS the delegating user (the principal IS the user, so
- * existing ACL checks apply unchanged), scopes arrive as {@code SCOPE_*} authorities, and no
- * {@code ROLE_*} authority is ever minted for a delegation token.
+ * existing ACL checks apply unchanged), scopes arrive as {@code SCOPE_*} authorities, and no {@code
+ * ROLE_*} authority is ever minted for a delegation token.
  */
 class DelegationAuthenticationTokenTest {
 

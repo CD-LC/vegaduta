@@ -1,11 +1,10 @@
 package com.agenticai.core.workflow;
 
-
-import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.guardrails.taint.Spotlight;
 import com.agenticai.core.knowledge.KnowledgeSearchService;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
+import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
+import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +25,7 @@ class KnowledgeNodeHandler implements NodeHandler {
     static final int MAX_TOP_K = 20;
 
     private final ObjectProvider<KnowledgeSearchService> knowledgeSearchService;
+
     KnowledgeNodeHandler(ObjectProvider<KnowledgeSearchService> knowledgeSearchService) {
         this.knowledgeSearchService = knowledgeSearchService;
     }
@@ -78,7 +78,12 @@ class KnowledgeNodeHandler implements NodeHandler {
             if (n > 1) {
                 chunks.append("\n---\n");
             }
-            chunks.append('[').append(n).append("] ").append(citation(r)).append('\n').append(r.content());
+            chunks.append('[')
+                    .append(n)
+                    .append("] ")
+                    .append(citation(r))
+                    .append('\n')
+                    .append(r.content());
         }
         // Retrieved chunks are user-supplied documents: framed as untrusted data (same banner and
         // unforgeable delimiters as tool results), with numbered sources the model can cite.
@@ -101,12 +106,26 @@ class KnowledgeNodeHandler implements NodeHandler {
             try {
                 requested = Integer.parseInt(raw.toString().trim());
             } catch (NumberFormatException e) {
-                logLines.add("topK '" + abbreviate(raw.toString()) + "' is not a number; using " + DEFAULT_TOP_K + ".");
+                logLines.add(
+                        "topK '"
+                                + abbreviate(raw.toString())
+                                + "' is not a number; using "
+                                + DEFAULT_TOP_K
+                                + ".");
             }
         }
         int clamped = Math.max(MIN_TOP_K, Math.min(MAX_TOP_K, requested));
         if (clamped != requested) {
-            logLines.add("topK " + requested + " is outside " + MIN_TOP_K + ".." + MAX_TOP_K + "; using " + clamped + ".");
+            logLines.add(
+                    "topK "
+                            + requested
+                            + " is outside "
+                            + MIN_TOP_K
+                            + ".."
+                            + MAX_TOP_K
+                            + "; using "
+                            + clamped
+                            + ".");
         }
         return clamped;
     }

@@ -103,8 +103,9 @@ class WebhookSubscriptionTest {
         }
 
         assertTrue(sub.isEnabled());
-        assertEquals(WebhookSubscription.AUTO_DISABLE_FAILURE_THRESHOLD - 1,
-            sub.getConsecutiveFailures());
+        assertEquals(
+                WebhookSubscription.AUTO_DISABLE_FAILURE_THRESHOLD - 1,
+                sub.getConsecutiveFailures());
         assertNull(sub.getAutoDisabledReason());
     }
 

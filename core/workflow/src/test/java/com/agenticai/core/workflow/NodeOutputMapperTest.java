@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** {@link NodeOutputMapper}: each {@code outputField} switch arm and the JSON serialiser fallback. */
+/**
+ * {@link NodeOutputMapper}: each {@code outputField} switch arm and the JSON serialiser fallback.
+ */
 class NodeOutputMapperTest {
 
     private final NodeOutputMapper mapper = new NodeOutputMapper(new ObjectMapper());
@@ -49,12 +51,13 @@ class NodeOutputMapperTest {
     void writeJsonQuietlyFallsBackToAnEmptyObject() {
         assertEquals("5", mapper.writeJsonQuietly(5));
         assertEquals("null", mapper.writeJsonQuietly(null));
-        Object unserialisable = new Object() {
-            @SuppressWarnings("unused")
-            public String getBroken() {
-                throw new IllegalStateException("no");
-            }
-        };
+        Object unserialisable =
+                new Object() {
+                    @SuppressWarnings("unused")
+                    public String getBroken() {
+                        throw new IllegalStateException("no");
+                    }
+                };
         assertEquals("{}", mapper.writeJsonQuietly(unserialisable));
     }
 }

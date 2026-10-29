@@ -44,7 +44,8 @@ public class AppBuilderImageController {
             ObjectMapper objectMapper,
             ObjectProvider<TenantStatusGuard> tenantStatusGuard) {
         this.orchestrator = orchestrator;
-        this.serviceAuth = new AppBuilderServiceAuth(serviceToken, allowedTenants, tenantStatusGuard);
+        this.serviceAuth =
+                new AppBuilderServiceAuth(serviceToken, allowedTenants, tenantStatusGuard);
         this.objectMapper = objectMapper;
     }
 

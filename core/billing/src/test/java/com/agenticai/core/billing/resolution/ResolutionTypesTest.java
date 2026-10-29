@@ -17,10 +17,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The resolution meter's outcome/evidence vocabularies and the controller DTO
- * mapping: {@code RESOLVED_AI} is the only outcome-priced billable value, and
- * {@code ResolutionEventResponse.from} renders the stored enums as their
- * names so the wire shape stays stable if the enum ever renames.
+ * The resolution meter's outcome/evidence vocabularies and the controller DTO mapping: {@code
+ * RESOLVED_AI} is the only outcome-priced billable value, and {@code ResolutionEventResponse.from}
+ * renders the stored enums as their names so the wire shape stays stable if the enum ever renames.
  */
 class ResolutionTypesTest {
 
@@ -37,19 +36,35 @@ class ResolutionTypesTest {
     @Test
     void theEvidenceVocabularyIsTheSevenDecisionSources() {
         assertEquals(7, ResolutionEvidence.values().length);
-        assertEquals(ResolutionEvidence.USER_RESOLVED_SIGNAL,
-            ResolutionEvidence.valueOf("USER_RESOLVED_SIGNAL"));
+        assertEquals(
+                ResolutionEvidence.USER_RESOLVED_SIGNAL,
+                ResolutionEvidence.valueOf("USER_RESOLVED_SIGNAL"));
         assertEquals(ResolutionEvidence.EXPLICIT_API, ResolutionEvidence.valueOf("EXPLICIT_API"));
         assertEquals(ResolutionEvidence.JUDGE_VERDICT, ResolutionEvidence.valueOf("JUDGE_VERDICT"));
     }
 
     @Test
     void eventResponseRendersOutcomeAndEvidenceAsEnumNames() {
-        ResolutionEvent event = new ResolutionEvent(
-            UUID.randomUUID(), "conv-1", UUID.randomUUID(), "whatsapp",
-            ResolutionOutcome.RESOLVED_AI, ResolutionEvidence.USER_RESOLVED_SIGNAL,
-            new BigDecimal("1.0"), true, "resolved", 15_000L, "INR",
-            Instant.now(), "dedupe-1", "sweep", null, null, null, Instant.now());
+        ResolutionEvent event =
+                new ResolutionEvent(
+                        UUID.randomUUID(),
+                        "conv-1",
+                        UUID.randomUUID(),
+                        "whatsapp",
+                        ResolutionOutcome.RESOLVED_AI,
+                        ResolutionEvidence.USER_RESOLVED_SIGNAL,
+                        new BigDecimal("1.0"),
+                        true,
+                        "resolved",
+                        15_000L,
+                        "INR",
+                        Instant.now(),
+                        "dedupe-1",
+                        "sweep",
+                        null,
+                        null,
+                        null,
+                        Instant.now());
         ResolutionEventResponse response = ResolutionEventResponse.from(event);
         assertEquals("RESOLVED_AI", response.outcome());
         assertEquals("USER_RESOLVED_SIGNAL", response.evidence());
@@ -71,9 +86,16 @@ class ResolutionTypesTest {
 
     @Test
     void theRequestAndEnvelopeRecordsArePlainCarriers() {
-        RecordResolutionRequest record = new RecordResolutionRequest(
-            "conv-2", UUID.randomUUID(), "web", "RESOLVED_AI", "EXPLICIT_API",
-            new BigDecimal("1.0"), Instant.now(), "dedupe-2");
+        RecordResolutionRequest record =
+                new RecordResolutionRequest(
+                        "conv-2",
+                        UUID.randomUUID(),
+                        "web",
+                        "RESOLVED_AI",
+                        "EXPLICIT_API",
+                        new BigDecimal("1.0"),
+                        Instant.now(),
+                        "dedupe-2");
         assertEquals("conv-2", record.conversationKey());
         assertEquals("EXPLICIT_API", record.evidence());
         assertEquals("dedupe-2", record.dedupeKey());
@@ -81,19 +103,43 @@ class ResolutionTypesTest {
         DisputeRequest dispute = new DisputeRequest("customer says unresolved");
         assertEquals("customer says unresolved", dispute.reason());
 
-        ResolutionEventResponse row = ResolutionEventResponse.from(new ResolutionEvent(
-            UUID.randomUUID(), "c", null, "web", ResolutionOutcome.ABANDONED,
-            ResolutionEvidence.NO_ESCALATION_IDLE, new BigDecimal("0.6"), false,
-            "not engaged", null, "INR", Instant.now(), "d", "sweep",
-            null, null, null, Instant.now()));
+        ResolutionEventResponse row =
+                ResolutionEventResponse.from(
+                        new ResolutionEvent(
+                                UUID.randomUUID(),
+                                "c",
+                                null,
+                                "web",
+                                ResolutionOutcome.ABANDONED,
+                                ResolutionEvidence.NO_ESCALATION_IDLE,
+                                new BigDecimal("0.6"),
+                                false,
+                                "not engaged",
+                                null,
+                                "INR",
+                                Instant.now(),
+                                "d",
+                                "sweep",
+                                null,
+                                null,
+                                null,
+                                Instant.now()));
         ResolutionListResponse list = new ResolutionListResponse(List.of(row), 50, 100);
         assertEquals(1, list.events().size());
         assertEquals(50, list.limit());
         assertEquals(100, list.offset());
 
-        ResolutionSummaryResponse summary = new ResolutionSummaryResponse(
-            Instant.now(), Instant.now(), 7, Map.of("RESOLVED_AI", 5L), 5, 75_000,
-            "INR", 15_000, false);
+        ResolutionSummaryResponse summary =
+                new ResolutionSummaryResponse(
+                        Instant.now(),
+                        Instant.now(),
+                        7,
+                        Map.of("RESOLVED_AI", 5L),
+                        5,
+                        75_000,
+                        "INR",
+                        15_000,
+                        false);
         assertEquals(7, summary.totalEvents());
         assertEquals(5L, summary.byOutcome().get("RESOLVED_AI"));
         assertEquals(75_000, summary.billableTotalMinor());

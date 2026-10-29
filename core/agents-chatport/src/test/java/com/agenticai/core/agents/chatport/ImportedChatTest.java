@@ -21,17 +21,24 @@ class ImportedChatTest {
 
     private static ImportedChat chat(List<Map<String, Object>> messages) {
         return new ImportedChat(
-            "alice@example.com", "chatgpt", "conv-1", "Trip planning",
-            Instant.parse("2024-01-01T00:00:00Z"), Instant.parse("2024-01-02T00:00:00Z"),
-            3, true, messages);
+                "alice@example.com",
+                "chatgpt",
+                "conv-1",
+                "Trip planning",
+                Instant.parse("2024-01-01T00:00:00Z"),
+                Instant.parse("2024-01-02T00:00:00Z"),
+                3,
+                true,
+                messages);
     }
 
     @Test
     void theConstructorStampsImportTimeAndCarriesEveryField() {
         Instant before = Instant.now();
-        List<Map<String, Object>> messages = List.of(
-            Map.of("role", "user", "content", "hi"),
-            Map.of("role", "assistant", "content", "hello"));
+        List<Map<String, Object>> messages =
+                List.of(
+                        Map.of("role", "user", "content", "hi"),
+                        Map.of("role", "assistant", "content", "hello"));
 
         ImportedChat chat = chat(messages);
 

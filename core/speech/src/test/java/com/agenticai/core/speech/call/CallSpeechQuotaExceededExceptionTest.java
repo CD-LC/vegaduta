@@ -16,7 +16,8 @@ class CallSpeechQuotaExceededExceptionTest {
     void quotaExceptionCarriesThePersonFacingMessageAndCause() {
         RuntimeException cause = new RuntimeException("upstream");
         CallSpeechQuotaExceededException e =
-                new CallSpeechQuotaExceededException("Daily voice limit reached. Upgrade for more.", cause);
+                new CallSpeechQuotaExceededException(
+                        "Daily voice limit reached. Upgrade for more.", cause);
 
         assertThat(e.getMessage()).isEqualTo("Daily voice limit reached. Upgrade for more.");
         assertThat(e.getCause()).isSameAs(cause);

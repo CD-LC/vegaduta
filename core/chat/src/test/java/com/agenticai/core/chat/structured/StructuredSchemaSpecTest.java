@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * A per-call request for provider-enforced structured output, carried to the factories through the
- * {@code providerOptions} map under {@link StructuredSchemaSpec#OPTION_KEY}. {@code from} returns the
- * spec only when it is present, of the right type, and carries a non-blank schema.
+ * {@code providerOptions} map under {@link StructuredSchemaSpec#OPTION_KEY}. {@code from} returns
+ * the spec only when it is present, of the right type, and carries a non-blank schema.
  */
 class StructuredSchemaSpecTest {
 
@@ -25,21 +25,29 @@ class StructuredSchemaSpecTest {
     void fromReturnsNullForAbsentNullOrForeignValues() {
         assertNull(StructuredSchemaSpec.from(null));
         assertNull(StructuredSchemaSpec.from(Map.of()));
-        assertNull(StructuredSchemaSpec.from(Map.of(StructuredSchemaSpec.OPTION_KEY, "not a spec")));
+        assertNull(
+                StructuredSchemaSpec.from(Map.of(StructuredSchemaSpec.OPTION_KEY, "not a spec")));
         assertNull(StructuredSchemaSpec.from(Map.of("other", new StructuredSchemaSpec("n", "{}"))));
     }
 
     @Test
     void fromRejectsASpecWhoseSchemaIsMissingOrBlank() {
-        assertNull(StructuredSchemaSpec.from(
-            Map.of(StructuredSchemaSpec.OPTION_KEY, new StructuredSchemaSpec("n", null))));
-        assertNull(StructuredSchemaSpec.from(
-            Map.of(StructuredSchemaSpec.OPTION_KEY, new StructuredSchemaSpec("n", "   "))));
+        assertNull(
+                StructuredSchemaSpec.from(
+                        Map.of(
+                                StructuredSchemaSpec.OPTION_KEY,
+                                new StructuredSchemaSpec("n", null))));
+        assertNull(
+                StructuredSchemaSpec.from(
+                        Map.of(
+                                StructuredSchemaSpec.OPTION_KEY,
+                                new StructuredSchemaSpec("n", "   "))));
     }
 
     @Test
     void optionsBuildsTheOneEntryMapFromReadsBack() {
-        Map<String, Object> options = StructuredSchemaSpec.options("answer", "{\"type\":\"object\"}");
+        Map<String, Object> options =
+                StructuredSchemaSpec.options("answer", "{\"type\":\"object\"}");
 
         StructuredSchemaSpec spec = StructuredSchemaSpec.from(options);
         assertEquals("answer", spec.name());

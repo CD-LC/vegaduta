@@ -76,9 +76,23 @@ __all__ = [
     "stop_process",
 ]
 
-ENV_ALLOWLIST = ("PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "TZ",
-                 "JAVA_HOME", "MAVEN_HOME", "GRADLE_HOME", "NODE_PATH",
-                 "PYTHONPATH", "GOPATH", "CARGO_HOME", "DOTNET_ROOT")
+ENV_ALLOWLIST = (
+    "PATH",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "TMPDIR",
+    "TZ",
+    "JAVA_HOME",
+    "MAVEN_HOME",
+    "GRADLE_HOME",
+    "NODE_PATH",
+    "PYTHONPATH",
+    "GOPATH",
+    "CARGO_HOME",
+    "DOTNET_ROOT",
+)
+
 
 class ExecDisabledError(PermissionError):
     pass
@@ -123,18 +137,21 @@ def _scrubbed_env() -> dict[str, str]:
 # ------------------------------------------------------------------ #
 # execution
 
-def _attempt_local(ws_path: str, command: str, timeout: int,
-                   env: dict[str, str]) -> dict:
+
+def _attempt_local(ws_path: str, command: str, timeout: int, env: dict[str, str]) -> dict:
     """One run_command attempt, bare subprocess on this host. UNCHANGED
     logic from before RUN_MODE existed - this is the regression-safety
     branch (see tests/test_run_modes.py)."""
     started = time.time()
     try:
         r = subprocess.run(
-            ["bash", "-lc", command] if os.name != "nt"
-            else ["cmd", "/c", command],
-            cwd=ws_path, env=env, capture_output=True,
-            text=True, timeout=timeout)
+            ["bash", "-lc", command] if os.name != "nt" else ["cmd", "/c", command],
+            cwd=ws_path,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
         return {
             "exit_code": r.returncode,
             "duration_seconds": round(time.time() - started, 2),
@@ -146,15 +163,19 @@ def _attempt_local(ws_path: str, command: str, timeout: int,
         return {
             "exit_code": None,
             "duration_seconds": round(time.time() - started, 2),
-            "stdout": _tail(e.stdout or "" if isinstance(e.stdout, str)
-                            else (e.stdout or b"").decode("utf-8", "replace")),
+            "stdout": _tail(
+                e.stdout or ""
+                if isinstance(e.stdout, str)
+                else (e.stdout or b"").decode("utf-8", "replace")
+            ),
             "stderr": f"timed out after {timeout}s",
             "timed_out": True,
         }
 
 
-def _attempt_docker(ws_path: str, command: str, timeout: int,
-                    env: dict[str, str], image: str | None) -> dict:
+def _attempt_docker(
+    ws_path: str, command: str, timeout: int, env: dict[str, str], image: str | None
+) -> dict:
     """One run_command attempt in a throwaway docker container. docker-py's
     `containers.run` has no clean per-call timeout, so this runs detached
     and enforces the timeout itself via `container.wait(timeout=...)`,
@@ -166,20 +187,22 @@ def _attempt_docker(ws_path: str, command: str, timeout: int,
     try:
         try:
             container = client.containers.run(
-                img, **sandbox_sdk.docker_run_kwargs(ws_path, command, env,
-                                                     SETTINGS, detach=True))
+                img, **sandbox_sdk.docker_run_kwargs(ws_path, command, env, SETTINGS, detach=True)
+            )
         except Exception as e:
             raise WorkspaceError(
                 f"run_mode='docker': failed to start container "
                 f"(image={img!r}) - check the image exists/can be pulled "
-                f"and the Docker daemon is reachable: {e}") from e
+                f"and the Docker daemon is reachable: {e}"
+            ) from e
 
         timed_out = False
         exit_code = None
         try:
             wait_result = container.wait(timeout=timeout)
-            exit_code = (wait_result.get("StatusCode")
-                        if isinstance(wait_result, dict) else wait_result)
+            exit_code = (
+                wait_result.get("StatusCode") if isinstance(wait_result, dict) else wait_result
+            )
         except Exception:
             # docker-py surfaces a timed-out wait() as a client-side
             # exception (e.g. requests.exceptions.ReadTimeout), not a
@@ -188,10 +211,8 @@ def _attempt_docker(ws_path: str, command: str, timeout: int,
             timed_out = True
 
         try:
-            stdout = container.logs(stdout=True, stderr=False).decode(
-                "utf-8", "replace")
-            stderr = container.logs(stdout=False, stderr=True).decode(
-                "utf-8", "replace")
+            stdout = container.logs(stdout=True, stderr=False).decode("utf-8", "replace")
+            stderr = container.logs(stdout=False, stderr=True).decode("utf-8", "replace")
         except Exception:
             stdout, stderr = "", ""
 
@@ -217,22 +238,23 @@ def _attempt_docker(ws_path: str, command: str, timeout: int,
                 pass
 
 
-def _attempt_e2b(ws_path: str, command: str, timeout: int,
-                 env: dict[str, str], image: str | None) -> dict:
+def _attempt_e2b(
+    ws_path: str, command: str, timeout: int, env: dict[str, str], image: str | None
+) -> dict:
     """One run_command attempt in an E2B cloud sandbox. Creates a fresh
     sandbox per attempt (simple, matches the docker branch's throwaway-
     per-run posture) and always kills it in `finally`."""
     started = time.time()
     sandbox = sandbox_sdk.e2b_create_sandbox(
-        image or SETTINGS.e2b_template, timeout + 30, SETTINGS.e2b_api_key)
+        image or SETTINGS.e2b_template, timeout + 30, SETTINGS.e2b_api_key
+    )
     try:
         sandbox_sdk.e2b_upload_workspace(sandbox, ws_path)
         timed_out = False
         exit_code = None
         stdout = stderr = ""
         try:
-            result = sandbox.commands.run(
-                command, cwd="/workspace", envs=env, timeout=timeout)
+            result = sandbox.commands.run(command, cwd="/workspace", envs=env, timeout=timeout)
             exit_code = result.exit_code
             stdout = result.stdout or ""
             stderr = result.stderr or ""
@@ -258,10 +280,16 @@ def _attempt_e2b(ws_path: str, command: str, timeout: int,
             pass
 
 
-def run_command(ws_path: str, command: str, timeout: int = 300,
-                attempts: int = 1, ws_id: str | None = None,
-                run_mode: str | None = None, image: str | None = None,
-                env_overrides: dict | None = None) -> dict:
+def run_command(
+    ws_path: str,
+    command: str,
+    timeout: int = 300,
+    attempts: int = 1,
+    ws_id: str | None = None,
+    run_mode: str | None = None,
+    image: str | None = None,
+    env_overrides: dict | None = None,
+) -> dict:
     """Run `command` in the workspace. `attempts` > 1 reruns UNCHANGED
     code on failure (flaky-test absorption) - distinct from rework.
 
@@ -279,8 +307,9 @@ def run_command(ws_path: str, command: str, timeout: int = 300,
     mode = (run_mode or SETTINGS.run_mode or "local").lower()
     env = _scrubbed_env()
     if env_overrides:
-        env.update({str(k): str(v) for k, v in env_overrides.items()
-                if not _env_override_denied(str(k))})
+        env.update(
+            {str(k): str(v) for k, v in env_overrides.items() if not _env_override_denied(str(k))}
+        )
     if ws_id:
         with _BUSY_LOCK:
             _BUSY_WORKSPACES.add(ws_id)
@@ -294,8 +323,7 @@ def run_command(ws_path: str, command: str, timeout: int = 300,
             elif mode == "e2b":
                 result = _attempt_e2b(ws_path, command, timeout, env, image)
             else:
-                raise WorkspaceError(
-                    f"unknown run_mode: {mode!r} (expected local|docker|e2b)")
+                raise WorkspaceError(f"unknown run_mode: {mode!r} (expected local|docker|e2b)")
             result["attempt"] = attempt
             history.append(result)
             if result["exit_code"] == 0:
@@ -321,7 +349,8 @@ def run_command(ws_path: str, command: str, timeout: int = 300,
             "call apply_files on this workspace with corrected full file "
             "contents and call run_code again with the same command. "
             "Repeat until success, then call workspace_diff to get the "
-            "final patch.")
+            "final patch."
+        )
     return out
 
 
@@ -330,10 +359,16 @@ def run_command(ws_path: str, command: str, timeout: int = 300,
 # See module docstring: unsandboxed long-running host processes are
 # exactly the risk this file exists to close, so "local" is one-shot-only.
 
-def start_process(ws_path: str, command: str, run_mode: str | None = None,
-                  image: str | None = None, port: int | None = None,
-                  env_overrides: dict | None = None,
-                  ws_id: str | None = None) -> dict:
+
+def start_process(
+    ws_path: str,
+    command: str,
+    run_mode: str | None = None,
+    image: str | None = None,
+    port: int | None = None,
+    env_overrides: dict | None = None,
+    ws_id: str | None = None,
+) -> dict:
     """Start a LONG-RUNNING process (e.g. `npm run dev`) and return
     immediately with a `process_id` - NOT captured output, unlike
     run_command. Use process_status/stop_process afterwards.
@@ -352,61 +387,71 @@ def start_process(ws_path: str, command: str, run_mode: str | None = None,
             "run_mode='local' does not support start_process: a "
             "long-running unsandboxed process on the host is exactly the "
             "risk RUN_MODE exists to close. Use run_mode='docker' or "
-            "'e2b' for live-preview / dev-server processes.")
+            "'e2b' for live-preview / dev-server processes."
+        )
 
     env = _scrubbed_env()
     if env_overrides:
-        env.update({str(k): str(v) for k, v in env_overrides.items()
-                if not _env_override_denied(str(k))})
+        env.update(
+            {str(k): str(v) for k, v in env_overrides.items() if not _env_override_denied(str(k))}
+        )
     process_id = "proc-" + uuid.uuid4().hex[:12]
 
     if mode == "docker":
         client = sandbox_sdk.get_docker_client(SETTINGS)
         img = image or SETTINGS.docker_image
-        ports: dict[str, int | None] | None = (
-            {f"{port}/tcp": None} if port else None)
-        labels = {"codeintel.ws_id": ws_id or "",
-                  "codeintel.process_id": process_id}
+        ports: dict[str, int | None] | None = {f"{port}/tcp": None} if port else None
+        labels = {"codeintel.ws_id": ws_id or "", "codeintel.process_id": process_id}
         try:
             container = client.containers.run(
-                img, **sandbox_sdk.docker_run_kwargs(ws_path, command, env,
-                                                     SETTINGS, detach=True,
-                                                     ports=ports, labels=labels))
+                img,
+                **sandbox_sdk.docker_run_kwargs(
+                    ws_path, command, env, SETTINGS, detach=True, ports=ports, labels=labels
+                ),
+            )
         except Exception as e:
             raise WorkspaceError(
-                f"run_mode='docker': failed to start long-running "
-                f"container (image={img!r}): {e}") from e
+                f"run_mode='docker': failed to start long-running container (image={img!r}): {e}"
+            ) from e
         host_port = None
         if port:
             try:
                 container.reload()
-                bindings = (container.attrs.get("NetworkSettings", {})
-                                     .get("Ports", {}).get(f"{port}/tcp"))
+                bindings = (
+                    container.attrs.get("NetworkSettings", {}).get("Ports", {}).get(f"{port}/tcp")
+                )
                 if bindings:
                     host_port = int(bindings[0]["HostPort"])
             except Exception:
                 host_port = None
         with _PROCESS_LOCK:
             _PROCESSES[process_id] = {
-                "run_mode": "docker", "ws_id": ws_id, "container": container,
-                "container_id": container.id, "port": port,
-                "host_port": host_port, "started_at": time.time(),
+                "run_mode": "docker",
+                "ws_id": ws_id,
+                "container": container,
+                "container_id": container.id,
+                "port": port,
+                "host_port": host_port,
+                "started_at": time.time(),
             }
-        return {"process_id": process_id, "run_mode": "docker",
-                "host": container.name, "port": host_port,
-                "container_id": container.id}
+        return {
+            "process_id": process_id,
+            "run_mode": "docker",
+            "host": container.name,
+            "port": host_port,
+            "container_id": container.id,
+        }
 
     if mode == "e2b":
         sandbox = sandbox_sdk.e2b_create_sandbox(
-            image or SETTINGS.e2b_template, 3600, SETTINGS.e2b_api_key)
+            image or SETTINGS.e2b_template, 3600, SETTINGS.e2b_api_key
+        )
         try:
             sandbox_sdk.e2b_upload_workspace(sandbox, ws_path)
             try:
-                sandbox.commands.run(command, cwd="/workspace", envs=env,
-                                     background=True)
+                sandbox.commands.run(command, cwd="/workspace", envs=env, background=True)
             except Exception as e:
-                raise WorkspaceError(
-                    f"run_mode='e2b': failed to start process: {e}") from e
+                raise WorkspaceError(f"run_mode='e2b': failed to start process: {e}") from e
         except Exception:
             try:
                 sandbox.kill()
@@ -422,15 +467,22 @@ def start_process(ws_path: str, command: str, run_mode: str | None = None,
         sandbox_id = getattr(sandbox, "sandbox_id", None)
         with _PROCESS_LOCK:
             _PROCESSES[process_id] = {
-                "run_mode": "e2b", "ws_id": ws_id, "sandbox": sandbox,
-                "sandbox_id": sandbox_id, "port": port,
-                "preview_url": preview_url, "started_at": time.time(),
+                "run_mode": "e2b",
+                "ws_id": ws_id,
+                "sandbox": sandbox,
+                "sandbox_id": sandbox_id,
+                "port": port,
+                "preview_url": preview_url,
+                "started_at": time.time(),
             }
-        return {"process_id": process_id, "run_mode": "e2b",
-                "preview_url": preview_url, "sandbox_id": sandbox_id}
+        return {
+            "process_id": process_id,
+            "run_mode": "e2b",
+            "preview_url": preview_url,
+            "sandbox_id": sandbox_id,
+        }
 
-    raise WorkspaceError(
-        f"unknown run_mode: {mode!r} (expected docker|e2b for start_process)")
+    raise WorkspaceError(f"unknown run_mode: {mode!r} (expected docker|e2b for start_process)")
 
 
 def stop_process(process_id: str) -> None:
@@ -470,24 +522,32 @@ def process_status(process_id: str) -> dict:
         try:
             container.reload()
             running = container.status == "running"
-            exit_code = (None if running
-                        else container.attrs.get("State", {}).get("ExitCode"))
+            exit_code = None if running else container.attrs.get("State", {}).get("ExitCode")
         except Exception:
             running, exit_code = False, None
-        return {"process_id": process_id, "running": running,
-                "exit_code": exit_code, "run_mode": "docker",
-                "host": container.name, "port": record.get("host_port"),
-                "container_id": record.get("container_id")}
+        return {
+            "process_id": process_id,
+            "running": running,
+            "exit_code": exit_code,
+            "run_mode": "docker",
+            "host": container.name,
+            "port": record.get("host_port"),
+            "container_id": record.get("container_id"),
+        }
     # e2b
     sandbox = record["sandbox"]
     try:
         running = sandbox.is_running()
     except Exception:
         running = False
-    return {"process_id": process_id, "running": running,
-            "exit_code": None, "run_mode": "e2b",
-            "preview_url": record.get("preview_url"),
-            "sandbox_id": record.get("sandbox_id")}
+    return {
+        "process_id": process_id,
+        "running": running,
+        "exit_code": None,
+        "run_mode": "e2b",
+        "preview_url": record.get("preview_url"),
+        "sandbox_id": record.get("sandbox_id"),
+    }
 
 
 # env_overrides merges caller env OVER the scrub; loader/injection vars must
@@ -495,10 +555,24 @@ def process_status(process_id: str) -> dict:
 # "load this .so in the supervisor's process"). Command is already arbitrary -
 # this only closes the escalation that is NOT equivalent to the command.
 _ENV_OVERRIDE_DENIED_PREFIXES = (
-    "LD_", "DYLD_", "NODE_OPTIONS", "PYTHON", "BASH_ENV", "ENV",
-    "CDPATH", "IFS", "SHELLOPTS", "BASHOPTS", "PERL5", "RUBYLIB",
-    "GEM_", "JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS",
+    "LD_",
+    "DYLD_",
+    "NODE_OPTIONS",
+    "PYTHON",
+    "BASH_ENV",
+    "ENV",
+    "CDPATH",
+    "IFS",
+    "SHELLOPTS",
+    "BASHOPTS",
+    "PERL5",
+    "RUBYLIB",
+    "GEM_",
+    "JAVA_TOOL_OPTIONS",
+    "JDK_JAVA_OPTIONS",
+    "_JAVA_OPTIONS",
 )
+
 
 def _env_override_denied(name: str) -> bool:
     n = name.strip().upper()

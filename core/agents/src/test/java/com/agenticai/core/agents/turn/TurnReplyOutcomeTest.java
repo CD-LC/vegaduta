@@ -30,12 +30,14 @@ class TurnReplyOutcomeTest {
     void nonCompleteKindsAreNotAnswers() {
         TurnReplyOutcome outcome = new TurnReplyOutcome();
 
-        for (TurnReplyOutcome.Kind kind : new TurnReplyOutcome.Kind[] {
-                TurnReplyOutcome.Kind.TRUNCATED,
-                TurnReplyOutcome.Kind.REFUSED,
-                TurnReplyOutcome.Kind.MALFORMED_TOOL_CALL,
-                TurnReplyOutcome.Kind.EMPTY,
-                TurnReplyOutcome.Kind.INTERRUPTED}) {
+        for (TurnReplyOutcome.Kind kind :
+                new TurnReplyOutcome.Kind[] {
+                    TurnReplyOutcome.Kind.TRUNCATED,
+                    TurnReplyOutcome.Kind.REFUSED,
+                    TurnReplyOutcome.Kind.MALFORMED_TOOL_CALL,
+                    TurnReplyOutcome.Kind.EMPTY,
+                    TurnReplyOutcome.Kind.INTERRUPTED
+                }) {
             outcome.mark(kind);
             assertFalse(outcome.isComplete(), kind.name());
             assertEquals(kind, outcome.kind());

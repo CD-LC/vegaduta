@@ -18,7 +18,12 @@ class ChannelContactTest {
     void constructorDerivesTheDigitProjectionFromTheIdentifier() {
         ChannelContact c =
                 new ChannelContact(
-                        ChannelType.WHATSAPP, "+1 (555) 123-4567", "Asha", GROUP_ID, AGENT_ID, "CSV");
+                        ChannelType.WHATSAPP,
+                        "+1 (555) 123-4567",
+                        "Asha",
+                        GROUP_ID,
+                        AGENT_ID,
+                        "CSV");
 
         assertNull(c.getId());
         assertEquals(ChannelType.WHATSAPP, c.getChannel());

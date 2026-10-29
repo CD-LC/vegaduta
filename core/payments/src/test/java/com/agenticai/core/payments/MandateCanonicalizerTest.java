@@ -11,11 +11,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The signed canonical document is verified verbatim at execution time, so
- * the rules that make it deterministic ARE the security contract: lists are
- * sorted before serialization (input order can never change the bytes), the
- * threshold only appears when it applies, and {@code canonicalHash} is the
- * SHA-256 hex the grant wizard shows for review.
+ * The signed canonical document is verified verbatim at execution time, so the rules that make it
+ * deterministic ARE the security contract: lists are sorted before serialization (input order can
+ * never change the bytes), the threshold only appears when it applies, and {@code canonicalHash} is
+ * the SHA-256 hex the grant wizard shows for review.
  */
 class MandateCanonicalizerTest {
 
@@ -26,19 +25,42 @@ class MandateCanonicalizerTest {
     private static final Instant FROM = Instant.parse("2026-10-01T00:00:00Z");
     private static final Instant UNTIL = Instant.parse("2027-10-01T00:00:00Z");
 
-    private String canonicalize(List<String> vpas, List<String> categories,
-            MandateApprovalPolicy policy, Long threshold) {
+    private String canonicalize(
+            List<String> vpas,
+            List<String> categories,
+            MandateApprovalPolicy policy,
+            Long threshold) {
         return c.canonicalize(
-            MANDATE, "tenant-1", AGENT, "user-1", MandateScope.COLLECT,
-            50_000L, 200_000L, 1_000_000L, vpas, categories, policy, threshold, FROM, UNTIL);
+                MANDATE,
+                "tenant-1",
+                AGENT,
+                "user-1",
+                MandateScope.COLLECT,
+                50_000L,
+                200_000L,
+                1_000_000L,
+                vpas,
+                categories,
+                policy,
+                threshold,
+                FROM,
+                UNTIL);
     }
 
     @Test
     void theDocumentIsDeterministicRegardlessOfListOrder() {
-        String a = canonicalize(List.of("b@upi", "a@upi"), List.of("z-cat", "a-cat"),
-            MandateApprovalPolicy.ALWAYS, null);
-        String b = canonicalize(List.of("a@upi", "b@upi"), List.of("a-cat", "z-cat"),
-            MandateApprovalPolicy.ALWAYS, null);
+        String a =
+                canonicalize(
+                        List.of("b@upi", "a@upi"),
+                        List.of("z-cat", "a-cat"),
+                        MandateApprovalPolicy.ALWAYS,
+                        null);
+        String b =
+                canonicalize(
+                        List.of("a@upi", "b@upi"),
+                        List.of("a-cat", "z-cat"),
+                        MandateApprovalPolicy.ALWAYS,
+                        null);
         assertEquals(a, b);
         assertTrue(a.contains("\"version\":\"" + MandateCanonicalizer.MANDATE_VERSION + "\""));
         assertEquals("vegaduta-upi-mandate/1", MandateCanonicalizer.MANDATE_VERSION);
@@ -61,17 +83,30 @@ class MandateCanonicalizerTest {
         String with = canonicalize(null, null, MandateApprovalPolicy.ABOVE_THRESHOLD, 7_500L);
         assertTrue(with.contains("\"threshold_paise\":7500"), with);
         String without = canonicalize(null, null, MandateApprovalPolicy.ABOVE_THRESHOLD, null);
-        assertFalse(without.contains("threshold_paise"),
-            "a null threshold stays absent rather than serializing as null");
+        assertFalse(
+                without.contains("threshold_paise"),
+                "a null threshold stays absent rather than serializing as null");
     }
 
     @Test
     void anyFieldDifferenceChangesTheSignedBytes() {
         String a = canonicalize(List.of("a@upi"), null, MandateApprovalPolicy.ALWAYS, null);
-        String b = c.canonicalize(
-            MANDATE, "tenant-2", AGENT, "user-1", MandateScope.COLLECT,
-            50_000L, 200_000L, 1_000_000L, List.of("a@upi"), null,
-            MandateApprovalPolicy.ALWAYS, null, FROM, UNTIL);
+        String b =
+                c.canonicalize(
+                        MANDATE,
+                        "tenant-2",
+                        AGENT,
+                        "user-1",
+                        MandateScope.COLLECT,
+                        50_000L,
+                        200_000L,
+                        1_000_000L,
+                        List.of("a@upi"),
+                        null,
+                        MandateApprovalPolicy.ALWAYS,
+                        null,
+                        FROM,
+                        UNTIL);
         assertNotEquals(a, b, "a different tenant can never share a canonical document");
     }
 

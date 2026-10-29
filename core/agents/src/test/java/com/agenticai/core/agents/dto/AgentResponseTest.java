@@ -20,8 +20,18 @@ import org.junit.jupiter.api.Test;
 class AgentResponseTest {
 
     private static Agent agent() {
-        return new Agent("Helper", "be helpful", ProviderName.ANTHROPIC, "claude-opus-4-8",
-            2048, 0.5, 0.9, true, null, ReasoningDepth.CAREFUL, TuningMode.MANUAL);
+        return new Agent(
+                "Helper",
+                "be helpful",
+                ProviderName.ANTHROPIC,
+                "claude-opus-4-8",
+                2048,
+                0.5,
+                0.9,
+                true,
+                null,
+                ReasoningDepth.CAREFUL,
+                TuningMode.MANUAL);
     }
 
     @Test
@@ -61,15 +71,17 @@ class AgentResponseTest {
 
     @Test
     void anAgentWithNoRuntimeLimitOverridesOmitsTheObject() {
-        assertNull(AgentResponse.from(agent()).runtimeLimits(),
-            "empty overrides serialize as an absent field, not an all-null object");
+        assertNull(
+                AgentResponse.from(agent()).runtimeLimits(),
+                "empty overrides serialize as an absent field, not an all-null object");
     }
 
     @Test
     void runtimeLimitsAreCarriedWhenTheAgentOverridesAny() {
         Agent a = agent();
         a.setRuntimeLimits(
-            new com.agenticai.core.agents.runtime.RuntimeLimits(5, null, null, null, null, null, null));
+                new com.agenticai.core.agents.runtime.RuntimeLimits(
+                        5, null, null, null, null, null, null));
 
         AgentResponse r = AgentResponse.from(a);
 

@@ -16,9 +16,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ExpressionEngine} facade details the language/built-in suites do not exercise: the
- * render {@code post} hook, {@code renderValue} edge cases, the result-size exemption for pure
- * paths, node-reference collection and the error conversion wrapper.
+ * {@link ExpressionEngine} facade details the language/built-in suites do not exercise: the render
+ * {@code post} hook, {@code renderValue} edge cases, the result-size exemption for pure paths,
+ * node-reference collection and the error conversion wrapper.
  */
 class ExpressionEngineTest {
 
@@ -109,9 +109,7 @@ class ExpressionEngineTest {
         String bigInput = "{\"blob\":\"" + "x".repeat(500) + "\"}";
         ExpressionEngine tiny =
                 new ExpressionEngine(
-                        Limits.defaults()
-                                .withMaxResultChars(16)
-                                .withMaxWallNanos(10_000_000_000L));
+                        Limits.defaults().withMaxResultChars(16).withMaxWallNanos(10_000_000_000L));
         EvalContext big = BasicEvalContext.ofInput(bigInput);
         Object v = tiny.evaluate("$json.blob", big);
         assertEquals(500, ((String) v).length(), "a pure property path is exempt from the cap");
@@ -125,7 +123,10 @@ class ExpressionEngineTest {
     void looksLikeLegacyKeyRejectsExpressionSyntax() {
         assertTrue(ExpressionEngine.looksLikeLegacyKey("first name"));
         assertTrue(ExpressionEngine.looksLikeLegacyKey("name.with-dots"));
-        for (String c : List.of("$", "(", ")", "[", "]", "'", "\"", "=", "<", ">", "!", "&", "|", "?", ":", ",", "`")) {
+        for (String c :
+                List.of(
+                        "$", "(", ")", "[", "]", "'", "\"", "=", "<", ">", "!", "&", "|", "?", ":",
+                        ",", "`")) {
             assertFalse(ExpressionEngine.looksLikeLegacyKey("a" + c + "b"), c);
         }
     }
@@ -143,7 +144,8 @@ class ExpressionEngineTest {
     void referencedNodeIdsFindsIdCallsAndSkipsBrokenSpans() {
         assertEquals(
                 Set.of("n7", "n8"),
-                engine.referencedNodeIds("{{ $node.id(\"n7\").x }} {{ $node.id('n8') }} {{ 1 + }}"));
+                engine.referencedNodeIds(
+                        "{{ $node.id(\"n7\").x }} {{ $node.id('n8') }} {{ 1 + }}"));
         assertTrue(engine.referencedNodeIds(null).isEmpty());
         assertTrue(engine.referencedNodeIds("{{ $node[\"L\"].x }}").isEmpty());
     }
@@ -189,9 +191,7 @@ class ExpressionEngineTest {
         AtomicLong nanos = new AtomicLong(0);
         ExpressionEngine dying =
                 new ExpressionEngine(
-                        Limits.defaults()
-                                .withNanoTime(nanos::getAndIncrement)
-                                .withMaxWallNanos(0));
+                        Limits.defaults().withNanoTime(nanos::getAndIncrement).withMaxWallNanos(0));
         assertThrows(ExpressionException.class, () -> dying.evaluate("1 + 1", ctx));
     }
 }

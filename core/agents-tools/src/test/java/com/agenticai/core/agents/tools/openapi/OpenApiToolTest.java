@@ -11,7 +11,10 @@ import static org.mockito.Mockito.mock;
 import com.agenticai.core.agents.tools.openapi.OpenApiSpecParser.ParsedOperation;
 import org.junit.jupiter.api.Test;
 
-/** The persisted form of one parsed operation: {@link OpenApiTool#applyOperation} on create and refresh. */
+/**
+ * The persisted form of one parsed operation: {@link OpenApiTool#applyOperation} on create and
+ * refresh.
+ */
 class OpenApiToolTest {
 
     private static final String SPEC =
@@ -54,7 +57,8 @@ class OpenApiToolTest {
 
     @Test
     void applyOperationRefreshesSpecFieldsButKeepsNameAndEnabled() throws Exception {
-        OpenApiTool tool = new OpenApiTool(mock(OpenApiToolSource.class), "p_update_pet", op(1), false);
+        OpenApiTool tool =
+                new OpenApiTool(mock(OpenApiToolSource.class), "p_update_pet", op(1), false);
         assertEquals(OpenApiBodyMode.FLATTENED, tool.getBodyMode());
         assertEquals("application/json", tool.getBodyContentType());
         assertFalse(tool.isEnabled());

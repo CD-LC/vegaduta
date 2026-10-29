@@ -47,7 +47,8 @@ class StderrTailBufferTest {
         String kept = buffer.snapshot().get(0);
         assertEquals(StderrTailBuffer.MAX_LINE_CHARS + 3, kept.length());
         assertTrue(kept.endsWith("..."));
-        assertEquals("x".repeat(StderrTailBuffer.MAX_LINE_CHARS), kept.substring(0, kept.length() - 3));
+        assertEquals(
+                "x".repeat(StderrTailBuffer.MAX_LINE_CHARS), kept.substring(0, kept.length() - 3));
     }
 
     @Test

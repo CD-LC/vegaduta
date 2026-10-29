@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
- * The API-key principal: {@code PERM_} authorities only (never {@code ROLE_*}), a synthetic
- * {@code apikey:<name>:<shortId>} subject that can never be confused with a human user, and no
- * credentials carried once authenticated.
+ * The API-key principal: {@code PERM_} authorities only (never {@code ROLE_*}), a synthetic {@code
+ * apikey:<name>:<shortId>} subject that can never be confused with a human user, and no credentials
+ * carried once authenticated.
  */
 class ApiKeyAuthenticationTokenTest {
 

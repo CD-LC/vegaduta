@@ -17,7 +17,8 @@ import org.junit.jupiter.api.Test;
 class WebhookDeliveryTest {
 
     private static WebhookDelivery pending() {
-        return new WebhookDelivery(UUID.randomUUID(), "workflow.run.completed", "run-9", "{\"k\":1}");
+        return new WebhookDelivery(
+                UUID.randomUUID(), "workflow.run.completed", "run-9", "{\"k\":1}");
     }
 
     @Test

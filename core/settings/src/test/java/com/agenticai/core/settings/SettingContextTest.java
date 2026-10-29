@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link SettingContext}: the factory helpers and the {@code effectiveTenant} isolation rule - a
- * context naming another tenant, or a thread with no tenant at all, resolves nothing from the
- * store (platform value only); one tenant's override must never reach another.
+ * context naming another tenant, or a thread with no tenant at all, resolves nothing from the store
+ * (platform value only); one tenant's override must never reach another.
  */
 class SettingContextTest {
 

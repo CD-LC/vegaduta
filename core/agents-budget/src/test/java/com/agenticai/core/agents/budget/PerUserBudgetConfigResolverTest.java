@@ -98,13 +98,16 @@ class PerUserBudgetConfigResolverTest {
 
     @Test
     void premiumAndUnlimitedPlansScaleTheDailyCap() {
-        BudgetConfig premium = resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.PREMIUM);
+        BudgetConfig premium =
+                resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.PREMIUM);
         assertThat(premium.dailyUsd()).isEqualByComparingTo("0.30");
 
-        BudgetConfig unlimited = resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.UNLIMITED);
+        BudgetConfig unlimited =
+                resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.UNLIMITED);
         assertThat(unlimited.dailyUsd()).isEqualByComparingTo("0.45");
 
-        BudgetConfig free = resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.FREE);
+        BudgetConfig free =
+                resolver.applyPlanTier(resolver.loadGlobalConfig(), "t1", TenantPlan.FREE);
         assertThat(free.dailyUsd()).isEqualByComparingTo("0.15");
     }
 
@@ -138,7 +141,8 @@ class PerUserBudgetConfigResolverTest {
 
         verify(settings).update(PerUserBudgetService.KEY_ENABLED, "false", "admin@x");
         verify(settings).update(PerUserBudgetService.KEY_DAILY_USD, "0.50", "admin@x");
-        verify(settings).update(PerUserBudgetService.KEY_SPLIT_PCT_PREFIX + "text", "50", "admin@x");
+        verify(settings)
+                .update(PerUserBudgetService.KEY_SPLIT_PCT_PREFIX + "text", "50", "admin@x");
         verify(settings, times(3)).update(anyString(), anyString(), anyString());
     }
 

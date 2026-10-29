@@ -25,8 +25,9 @@ class ToolStepLimitPropertiesTest {
         assertEquals(2, props.getSupervisedDivisor());
         assertEquals(3, props.getSupervisedMinSteps());
         assertEquals(2, props.getAutonomousMultiplier());
-        assertTrue(props.getExhaustedMessage().contains("{limit}"),
-            "the shipped text interpolates the ceiling");
+        assertTrue(
+                props.getExhaustedMessage().contains("{limit}"),
+                "the shipped text interpolates the ceiling");
     }
 
     @Test
@@ -37,7 +38,10 @@ class ToolStepLimitPropertiesTest {
         assertEquals(Stage.WITHIN, props.stageOf(1, ceiling));
         assertEquals(Stage.WITHIN, props.stageOf(5, ceiling), "the ceiling itself is still within");
         assertEquals(Stage.EXHAUSTED, props.stageOf(6, ceiling));
-        assertEquals(Stage.EXHAUSTED, props.stageOf(7, ceiling), "grace calls are exhausted, not aborted");
+        assertEquals(
+                Stage.EXHAUSTED,
+                props.stageOf(7, ceiling),
+                "grace calls are exhausted, not aborted");
         assertEquals(Stage.ABORT, props.stageOf(8, ceiling));
     }
 

@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 /**
- * Queue semantics of {@link DeviceCommandService}: enqueue refuses unknown/revoked devices,
- * the poll marks the next pending command DELIVERED (and heartbeats the device), and result
- * reporting only accepts the two terminal states.
+ * Queue semantics of {@link DeviceCommandService}: enqueue refuses unknown/revoked devices, the
+ * poll marks the next pending command DELIVERED (and heartbeats the device), and result reporting
+ * only accepts the two terminal states.
  */
 class DeviceCommandServiceTest {
 
@@ -78,8 +78,7 @@ class DeviceCommandServiceTest {
     @Test
     void nextPendingCommandHeartbeatsTheDeviceAndMarksTheOldestPendingDelivered() {
         MobileDevice device = activeDevice();
-        DeviceCommand pending =
-                new DeviceCommand(device.getId(), "OPEN_APP", "com.example", null);
+        DeviceCommand pending = new DeviceCommand(device.getId(), "OPEN_APP", "com.example", null);
         when(commandRepository.findFirstByDeviceIdAndStatusOrderByCreatedAtAsc(
                         device.getId(), DeviceCommandStatus.PENDING))
                 .thenReturn(Optional.of(pending));
@@ -114,7 +113,8 @@ class DeviceCommandServiceTest {
         MobileDevice device = activeDevice();
         UUID commandId = UUID.randomUUID();
 
-        for (DeviceCommandStatus bad : List.of(DeviceCommandStatus.PENDING, DeviceCommandStatus.DELIVERED)) {
+        for (DeviceCommandStatus bad :
+                List.of(DeviceCommandStatus.PENDING, DeviceCommandStatus.DELIVERED)) {
             assertThatThrownBy(() -> service.recordResult(device, commandId, bad, "x"))
                     .isInstanceOf(DeviceException.class)
                     .hasMessageContaining("COMPLETED or FAILED");
@@ -139,8 +139,7 @@ class DeviceCommandServiceTest {
     @Test
     void recordResultCompletesTheCommandAndPersistsIt() {
         MobileDevice device = activeDevice();
-        DeviceCommand command =
-                new DeviceCommand(device.getId(), "TAP", "{}", null);
+        DeviceCommand command = new DeviceCommand(device.getId(), "TAP", "{}", null);
         command.markDelivered();
         UUID commandId = UUID.randomUUID();
         when(commandRepository.findByIdAndDeviceId(commandId, device.getId()))

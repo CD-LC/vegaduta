@@ -28,8 +28,7 @@ class SpeechInlineMarkupTest {
     @Test
     void entityEncodedTagsAreDecodedThenStrippedByTheSecondPass() {
         // "&lt;b&gt;" is only a tag AFTER entity decoding - the second HTML_TAG pass removes it.
-        assertThat(SpeechInlineMarkup.normalizeInline("&lt;b&gt;hi&lt;/b&gt;"))
-                .isEqualTo("hi");
+        assertThat(SpeechInlineMarkup.normalizeInline("&lt;b&gt;hi&lt;/b&gt;")).isEqualTo("hi");
     }
 
     @Test
@@ -40,7 +39,9 @@ class SpeechInlineMarkupTest {
 
     @Test
     void markdownLinksKeepTheirTextAndImagesKeepAltText() {
-        assertThat(SpeechInlineMarkup.normalizeInline("click [here](https://x.test) and ![logo](i.png)"))
+        assertThat(
+                        SpeechInlineMarkup.normalizeInline(
+                                "click [here](https://x.test) and ![logo](i.png)"))
                 .isEqualTo("click here and logo");
     }
 
@@ -74,7 +75,9 @@ class SpeechInlineMarkupTest {
 
     @Test
     void emphasisMarkersAreRemovedKeepingTheirText() {
-        assertThat(SpeechInlineMarkup.normalizeInline("**bold** __strong__ ~~gone~~ *ital* _under_"))
+        assertThat(
+                        SpeechInlineMarkup.normalizeInline(
+                                "**bold** __strong__ ~~gone~~ *ital* _under_"))
                 .isEqualTo("bold strong gone ital under");
     }
 
@@ -101,7 +104,6 @@ class SpeechInlineMarkupTest {
 
     @Test
     void emojiAreDroppedAlongTheWay() {
-        assertThat(SpeechInlineMarkup.normalizeInline("great 😀 job ✓"))
-                .isEqualTo("great job");
+        assertThat(SpeechInlineMarkup.normalizeInline("great 😀 job ✓")).isEqualTo("great job");
     }
 }

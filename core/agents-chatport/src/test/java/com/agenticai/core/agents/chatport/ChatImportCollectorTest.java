@@ -23,14 +23,26 @@ class ChatImportCollectorTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static JsonNode claude(String uuid, String text) throws Exception {
-        return MAPPER.readTree(bytes(
-            "{\"uuid\": \"" + uuid + "\", \"chat_messages\": [{\"sender\": \"human\", \"text\": \""
-                + text + "\"}]}"));
+        return MAPPER.readTree(
+                bytes(
+                        "{\"uuid\": \""
+                                + uuid
+                                + "\", \"chat_messages\": [{\"sender\": \"human\", \"text\": \""
+                                + text
+                                + "\"}]}"));
     }
 
     private static Limits limits(int maxConversations, long maxCharsPerImport) {
-        return new Limits(maxConversations, 2000, 50_000, 500_000, maxCharsPerImport, 20_000, 10_000,
-            64L << 20, 100);
+        return new Limits(
+                maxConversations,
+                2000,
+                50_000,
+                500_000,
+                maxCharsPerImport,
+                20_000,
+                10_000,
+                64L << 20,
+                100);
     }
 
     @Test
@@ -59,7 +71,10 @@ class ChatImportCollectorTest {
         assertEquals(1, r.chats().size());
         assertEquals("one", r.chats().get(0).messages().get(0).content());
         assertEquals(1, r.skipped());
-        assertEquals(1, r.totalConversations(), "total counts unique conversations that passed the seen-check");
+        assertEquals(
+                1,
+                r.totalConversations(),
+                "total counts unique conversations that passed the seen-check");
     }
 
     @Test
@@ -88,8 +103,7 @@ class ChatImportCollectorTest {
 
     @Test
     void aSelectionSkipsUnchosenConversationsAndStopsWhenAllFound() throws Exception {
-        ChatImportCollector c =
-                new ChatImportCollector(Limits.defaults(), true, Set.of("wanted"));
+        ChatImportCollector c = new ChatImportCollector(Limits.defaults(), true, Set.of("wanted"));
 
         c.accept(claude("unwanted", "x"));
         c.accept(claude("wanted", "y"));
@@ -97,7 +111,8 @@ class ChatImportCollectorTest {
         assertTrue(c.done(), "all selected keys found: no need to read more of the file");
         assertEquals(1, c.result().chats().size());
         assertEquals("wanted", c.result().chats().get(0).key());
-        // The unselected conversation was seen (counted) but is not "skipped" - it was never a candidate.
+        // The unselected conversation was seen (counted) but is not "skipped" - it was never a
+        // candidate.
         assertEquals(2, c.result().totalConversations());
         assertEquals(0, c.result().skipped());
     }

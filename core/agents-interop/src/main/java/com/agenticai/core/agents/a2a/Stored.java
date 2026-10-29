@@ -4,9 +4,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * The serialised half of a task: everything {@link A2aTask#restore} needs, with instants as
- * epoch millis and the agent id as a string so a plain ObjectMapper round-trips it (no JavaTime
- * module on this path). Package-private - only {@link A2aTaskStore} uses it.
+ * The serialised half of a task: everything {@link A2aTask#restore} needs, with instants as epoch
+ * millis and the agent id as a string so a plain ObjectMapper round-trips it (no JavaTime module on
+ * this path). Package-private - only {@link A2aTaskStore} uses it.
  */
 record Stored(
         String id,
@@ -85,4 +85,4 @@ record Stored(
                 reply,
                 failureMessage);
     }
-    }
+}

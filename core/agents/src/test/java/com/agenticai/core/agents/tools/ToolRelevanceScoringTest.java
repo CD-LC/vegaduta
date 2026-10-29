@@ -48,15 +48,19 @@ class ToolRelevanceScoringTest {
 
     @Test
     void nearMatchBoundsAreEnforced() {
-        assertFalse(ToolRelevanceScoring.hasNearMatch("api", Set.of("app")),
-            "tokens under five characters never fuzzy-match");
-        assertFalse(ToolRelevanceScoring.hasNearMatch("search", Set.of("serxhh")),
-            "a five-letter token allows distance 1 only");
+        assertFalse(
+                ToolRelevanceScoring.hasNearMatch("api", Set.of("app")),
+                "tokens under five characters never fuzzy-match");
+        assertFalse(
+                ToolRelevanceScoring.hasNearMatch("search", Set.of("serxhh")),
+                "a five-letter token allows distance 1 only");
         assertTrue(ToolRelevanceScoring.hasNearMatch("search", Set.of("serch")));
-        assertTrue(ToolRelevanceScoring.hasNearMatch("puppeteer", Set.of("pupeeter")),
-            "a seven-plus letter token allows distance 2");
-        assertFalse(ToolRelevanceScoring.hasNearMatch("puppeteer", Set.of("pptr")),
-            "the query token itself must be long enough");
+        assertTrue(
+                ToolRelevanceScoring.hasNearMatch("puppeteer", Set.of("pupeeter")),
+                "a seven-plus letter token allows distance 2");
+        assertFalse(
+                ToolRelevanceScoring.hasNearMatch("puppeteer", Set.of("pptr")),
+                "the query token itself must be long enough");
     }
 
     @Test
@@ -79,15 +83,20 @@ class ToolRelevanceScoringTest {
 
     @Test
     void cosineSimilarityMatchesTheMathAndZeroVectorsScoreZero() {
-        assertEquals(1.0, ToolRelevanceScoring.cosineSimilarity(
-            new float[] {1, 2}, new float[] {1, 2}), 1e-6);
-        assertEquals(0.0, ToolRelevanceScoring.cosineSimilarity(
-            new float[] {1, 0}, new float[] {0, 1}), 1e-6);
-        assertEquals(0.0, ToolRelevanceScoring.cosineSimilarity(
-            new float[] {0, 0}, new float[] {1, 2}));
+        assertEquals(
+                1.0,
+                ToolRelevanceScoring.cosineSimilarity(new float[] {1, 2}, new float[] {1, 2}),
+                1e-6);
+        assertEquals(
+                0.0,
+                ToolRelevanceScoring.cosineSimilarity(new float[] {1, 0}, new float[] {0, 1}),
+                1e-6);
+        assertEquals(
+                0.0, ToolRelevanceScoring.cosineSimilarity(new float[] {0, 0}, new float[] {1, 2}));
         // A length mismatch compares only the shared prefix, never throws.
-        assertTrue(ToolRelevanceScoring.cosineSimilarity(
-            new float[] {1, 0, 9}, new float[] {1, 0}) > 0.9);
+        assertTrue(
+                ToolRelevanceScoring.cosineSimilarity(new float[] {1, 0, 9}, new float[] {1, 0})
+                        > 0.9);
     }
 
     @Test
@@ -95,8 +104,10 @@ class ToolRelevanceScoringTest {
         assertEquals(0, ToolRelevanceScoring.estimateSchemaTokens(tool("t", "d", null)));
         assertEquals(0, ToolRelevanceScoring.estimateSchemaTokens(tool("t", "d", "")));
         assertEquals(2, ToolRelevanceScoring.estimateSchemaTokens(tool("t", "d", "12345678")));
-        assertEquals(5, ToolRelevanceScoring.totalSchemaTokens(List.of(
-            tool("a", "d", "12345678"), tool("b", "d", "123456789012"))));
+        assertEquals(
+                5,
+                ToolRelevanceScoring.totalSchemaTokens(
+                        List.of(tool("a", "d", "12345678"), tool("b", "d", "123456789012"))));
     }
 
     @Test
@@ -107,15 +118,18 @@ class ToolRelevanceScoringTest {
         ToolCallback cheap = tool("cheap", "d", "x".repeat(8));
 
         int[] used = {0};
-        List<ToolCallback> picked = ToolRelevanceScoring.admitExtras(
-            List.of(huge, familyB, familyB2, cheap),
-            4,
-            3, // a three-token budget: the 100-token schema can never fit
-            used,
-            t -> t.getToolDefinition().name().startsWith("b") ? "b-family" : null);
+        List<ToolCallback> picked =
+                ToolRelevanceScoring.admitExtras(
+                        List.of(huge, familyB, familyB2, cheap),
+                        4,
+                        3, // a three-token budget: the 100-token schema can never fit
+                        used,
+                        t -> t.getToolDefinition().name().startsWith("b") ? "b-family" : null);
 
-        assertEquals(List.of(familyB, familyB2, cheap), picked,
-            "one guaranteed b-family pick first, then its sibling and the cheap extra fit the budget");
+        assertEquals(
+                List.of(familyB, familyB2, cheap),
+                picked,
+                "one guaranteed b-family pick first, then its sibling and the cheap extra fit the budget");
         assertFalse(picked.contains(huge));
         assertEquals(2, used[0], "only the admitted extras counted toward the budget");
     }
@@ -127,8 +141,8 @@ class ToolRelevanceScoringTest {
         ToolCallback c = tool("c", "d", "{}");
 
         int[] used = {0};
-        List<ToolCallback> picked = ToolRelevanceScoring.admitExtras(
-            List.of(a, b, c), 2, 1_000, used, t -> null);
+        List<ToolCallback> picked =
+                ToolRelevanceScoring.admitExtras(List.of(a, b, c), 2, 1_000, used, t -> null);
 
         assertEquals(List.of(a, b), picked, "input order is preserved up to the cap");
     }

@@ -9,10 +9,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link AgentWallet} is a (agent, currency) balance mutated only inside the
- * service's row lock via {@code applyMovement}; {@link WalletLedgerEntry} is
- * the append-only record of each movement, built exclusively through {@code
- * of(...)}. {@link WalletDtos}'s mappers are the API shape over both.
+ * {@link AgentWallet} is a (agent, currency) balance mutated only inside the service's row lock via
+ * {@code applyMovement}; {@link WalletLedgerEntry} is the append-only record of each movement,
+ * built exclusively through {@code of(...)}. {@link WalletDtos}'s mappers are the API shape over
+ * both.
  */
 class AgentWalletAndLedgerTest {
 
@@ -45,9 +45,17 @@ class AgentWalletAndLedgerTest {
     @Test
     void aLedgerEntryIsBuiltOnlyThroughOf() {
         UUID wallet = UUID.randomUUID();
-        WalletLedgerEntry e = WalletLedgerEntry.of(
-            wallet, WalletLedgerEntry.EntryKind.DEBIT, 12_500, 37_500,
-            "capture-1", "commerce_mandate", "cart-9", "cart capture", "system");
+        WalletLedgerEntry e =
+                WalletLedgerEntry.of(
+                        wallet,
+                        WalletLedgerEntry.EntryKind.DEBIT,
+                        12_500,
+                        37_500,
+                        "capture-1",
+                        "commerce_mandate",
+                        "cart-9",
+                        "cart capture",
+                        "system");
         assertNull(e.getId(), "IDENTITY id stays null until persist");
         assertEquals(wallet, e.getWalletId());
         assertEquals(WalletLedgerEntry.EntryKind.DEBIT, e.getEntryKind());
@@ -77,9 +85,17 @@ class AgentWalletAndLedgerTest {
         assertEquals(1_000, wr.balanceMinor());
         assertEquals("ACTIVE", wr.status());
 
-        WalletLedgerEntry e = WalletLedgerEntry.of(
-            w.getId(), WalletLedgerEntry.EntryKind.CREDIT, 1_000, 1_000,
-            "credit-1", "admin", "adj-1", "manual top-up", "ops");
+        WalletLedgerEntry e =
+                WalletLedgerEntry.of(
+                        w.getId(),
+                        WalletLedgerEntry.EntryKind.CREDIT,
+                        1_000,
+                        1_000,
+                        "credit-1",
+                        "admin",
+                        "adj-1",
+                        "manual top-up",
+                        "ops");
         WalletDtos.LedgerEntryResponse er = WalletDtos.toResponse(e);
         assertEquals(w.getId(), er.walletId());
         assertEquals("CREDIT", er.entryKind());

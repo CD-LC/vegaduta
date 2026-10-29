@@ -12,11 +12,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The mandate's small value types and its entity lifecycle: {@link
- * MandateScope}'s direction matrix, {@link MandateApprovalPolicy}'s
- * amount-aware decision, the outbox event-type constants, and {@link
- * PaymentMandate}'s revoke/expire transitions - a signed mandate is
- * immutable, so the only writes are those two status moves.
+ * The mandate's small value types and its entity lifecycle: {@link MandateScope}'s direction
+ * matrix, {@link MandateApprovalPolicy}'s amount-aware decision, the outbox event-type constants,
+ * and {@link PaymentMandate}'s revoke/expire transitions - a signed mandate is immutable, so the
+ * only writes are those two status moves.
  */
 class PaymentMandateTypesTest {
 
@@ -38,8 +37,9 @@ class PaymentMandateTypesTest {
         assertFalse(MandateApprovalPolicy.NEVER.requiresApproval(Long.MAX_VALUE, 0L));
         // ABOVE_THRESHOLD with no configured threshold can never trigger.
         assertFalse(MandateApprovalPolicy.ABOVE_THRESHOLD.requiresApproval(100, null));
-        assertFalse(MandateApprovalPolicy.ABOVE_THRESHOLD.requiresApproval(100, 100L),
-            "strictly greater-than - an amount equal to the threshold does not need approval");
+        assertFalse(
+                MandateApprovalPolicy.ABOVE_THRESHOLD.requiresApproval(100, 100L),
+                "strictly greater-than - an amount equal to the threshold does not need approval");
         assertTrue(MandateApprovalPolicy.ABOVE_THRESHOLD.requiresApproval(101, 100L));
     }
 
@@ -134,8 +134,16 @@ class PaymentMandateTypesTest {
         UUID mandateId = UUID.randomUUID();
         UUID txnId = UUID.randomUUID();
         LocalDate day = LocalDate.of(2026, 10, 5);
-        MandateLedgerEntry e = new MandateLedgerEntry(
-            mandateId, txnId, MandateLedgerEntry.KIND_CHARGE, 12_500, day, 45_000, "2026-10", 90_000);
+        MandateLedgerEntry e =
+                new MandateLedgerEntry(
+                        mandateId,
+                        txnId,
+                        MandateLedgerEntry.KIND_CHARGE,
+                        12_500,
+                        day,
+                        45_000,
+                        "2026-10",
+                        90_000);
         assertEquals(mandateId, e.getMandateId());
         assertEquals(txnId, e.getTransactionId());
         assertEquals("CHARGE", e.getEntryKind());

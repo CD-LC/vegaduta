@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link WebhookSignature#sign} is the ONLY thing a receiver checks before trusting a delivery -
- * the timestamp inside the signed content is what lets them bound the replay window, so the
- * {@code t=} value must be the same one that went into the HMAC, and the digest must be over
- * {@code "<t>.<body>"} exactly (UTF-8, literal dot, no padding).
+ * the timestamp inside the signed content is what lets them bound the replay window, so the {@code
+ * t=} value must be the same one that went into the HMAC, and the digest must be over {@code
+ * "<t>.<body>"} exactly (UTF-8, literal dot, no padding).
  */
 class WebhookSignatureTest {
 
@@ -23,7 +23,8 @@ class WebhookSignatureTest {
         Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
         return HexFormat.of()
-                .formatHex(mac.doFinal((epochSeconds + "." + body).getBytes(StandardCharsets.UTF_8)));
+                .formatHex(
+                        mac.doFinal((epochSeconds + "." + body).getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test
@@ -47,16 +48,13 @@ class WebhookSignatureTest {
         // If the timestamp were not inside the signed content these would be equal and a receiver
         // could replay an old delivery with a fresh t=.
         assertNotEquals(
-                WebhookSignature.sign(1L, "s", "body"),
-                WebhookSignature.sign(2L, "s", "body"));
+                WebhookSignature.sign(1L, "s", "body"), WebhookSignature.sign(2L, "s", "body"));
     }
 
     @Test
     void aNullBodyIsSignedAsTheEmptyString() throws Exception {
         String header = WebhookSignature.sign(42L, "s", null);
 
-        assertEquals(
-                "t=42,v1=" + expectedV1(42L, "s", ""),
-                header);
+        assertEquals("t=42,v1=" + expectedV1(42L, "s", ""), header);
     }
 }

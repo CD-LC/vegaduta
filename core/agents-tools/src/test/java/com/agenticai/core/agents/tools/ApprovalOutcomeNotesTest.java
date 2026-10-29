@@ -23,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** The bracketed approval-outcome note: its record shape and when it reaches conversation history. */
+/**
+ * The bracketed approval-outcome note: its record shape and when it reaches conversation history.
+ */
 class ApprovalOutcomeNotesTest {
 
     private static final UUID REQUEST_ID = UUID.randomUUID();
@@ -38,7 +40,14 @@ class ApprovalOutcomeNotesTest {
 
     private static ReplayTarget target(String sessionId, String memorySessionId) {
         return new ReplayTarget(
-                AGENT_ID, sessionId, "send_file", "{\"fileId\":\"f-1\"}", "t", "alice", null, memorySessionId);
+                AGENT_ID,
+                sessionId,
+                "send_file",
+                "{\"fileId\":\"f-1\"}",
+                "t",
+                "alice",
+                null,
+                memorySessionId);
     }
 
     @Test
@@ -70,17 +79,26 @@ class ApprovalOutcomeNotesTest {
 
         ToolLedger denied =
                 ApprovalOutcomeNotes.outcomeRecord(
-                        texts, request, target, ToolLedger.Status.NOT_RUN, "admin@x.com", "too risky");
+                        texts,
+                        request,
+                        target,
+                        ToolLedger.Status.NOT_RUN,
+                        "admin@x.com",
+                        "too risky");
         assertEquals(
                 texts.renderDeniedNote("send_file", "admin@x.com", "too risky"),
                 denied.entries().get(0).result());
 
         ToolLedger failed =
                 ApprovalOutcomeNotes.outcomeRecord(
-                        texts, request, target, ToolLedger.Status.FAILED, "admin@x.com", "smtp down");
+                        texts,
+                        request,
+                        target,
+                        ToolLedger.Status.FAILED,
+                        "admin@x.com",
+                        "smtp down");
         assertEquals(
-                texts.renderFailedNote("send_file", "smtp down"),
-                failed.entries().get(0).result());
+                texts.renderFailedNote("send_file", "smtp down"), failed.entries().get(0).result());
     }
 
     @Test
@@ -90,8 +108,11 @@ class ApprovalOutcomeNotesTest {
         when(provider.getIfAvailable()).thenReturn(memory);
         ToolLedger record = ToolLedger.EMPTY;
 
-        assertNull(ApprovalOutcomeNotes.append(provider, request(), target(null, "c1:m"), record, LOG));
-        assertNull(ApprovalOutcomeNotes.append(provider, request(), target(" ", "c1:m"), record, LOG));
+        assertNull(
+                ApprovalOutcomeNotes.append(
+                        provider, request(), target(null, "c1:m"), record, LOG));
+        assertNull(
+                ApprovalOutcomeNotes.append(provider, request(), target(" ", "c1:m"), record, LOG));
         assertNull(
                 ApprovalOutcomeNotes.append(
                         provider,

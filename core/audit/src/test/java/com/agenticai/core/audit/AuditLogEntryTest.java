@@ -37,8 +37,7 @@ class AuditLogEntryTest {
     @Test
     void aNullActorAndDetailAreStoredAsIs() {
         AuditLogEntry entry =
-                new AuditLogEntry(
-                        null, "system.tick", null, null, AuditOutcome.values()[0], null);
+                new AuditLogEntry(null, "system.tick", null, null, AuditOutcome.values()[0], null);
 
         assertNull(entry.getActorId());
         assertNull(entry.getTargetType());

@@ -10,9 +10,9 @@ import com.agenticai.core.guardrails.ToolEffectSandbox.Verdict;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ToolEffectSandbox.Verdict} is the eval sandbox's run/simulate answer: {@code run()} is
- * one shared instance, and {@code simulate} fails closed on a missing reason - a classification
- * that could not explain itself is logged as "not known to be read-only" rather than as nothing.
+ * {@link ToolEffectSandbox.Verdict} is the eval sandbox's run/simulate answer: {@code run()} is one
+ * shared instance, and {@code simulate} fails closed on a missing reason - a classification that
+ * could not explain itself is logged as "not known to be read-only" rather than as nothing.
  */
 class ToolEffectSandboxTest {
 

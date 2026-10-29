@@ -204,7 +204,9 @@ export function isPlatformAdminPrivilegedApiPath(pathname) {
 // goes non-enforcing while it is set. Warn once per process so a forgotten
 // debug flag is visible instead of silently downgrading every response.
 if ((nodeProcess.env.CSP_REPORT_ONLY || "").trim() === "true") {
-  console.warn("[proxy] CSP_REPORT_ONLY=true - the page Content-Security-Policy is NOT being enforced. Unset it when done debugging.");
+  console.warn(
+    "[proxy] CSP_REPORT_ONLY=true - the page Content-Security-Policy is NOT being enforced. Unset it when done debugging."
+  );
 }
 
 export function isPersonalEditionAtRuntime() {

@@ -27,8 +27,7 @@ class AgentDefaultsTest {
 
     @Test
     void guardrailIdsParseAsACommaSeparatedSet() {
-        AgentDefaults defaults =
-            new AgentDefaults("m", 1, 0, 0, " jailbreak , profanity,,pii , ");
+        AgentDefaults defaults = new AgentDefaults("m", 1, 0, 0, " jailbreak , profanity,,pii , ");
 
         assertEquals(Set.of("jailbreak", "profanity", "pii"), defaults.guardrailIds());
         assertThrows(UnsupportedOperationException.class, () -> defaults.guardrailIds().add("x"));

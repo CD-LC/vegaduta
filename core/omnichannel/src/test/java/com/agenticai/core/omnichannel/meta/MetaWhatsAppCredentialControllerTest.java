@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/** {@link MetaWhatsAppCredentialController}: the same activate/current/disconnect shape as Twilio. */
+/**
+ * {@link MetaWhatsAppCredentialController}: the same activate/current/disconnect shape as Twilio.
+ */
 class MetaWhatsAppCredentialControllerTest {
 
     private MetaWhatsAppCredentialService credentialService;
@@ -34,8 +36,13 @@ class MetaWhatsAppCredentialControllerTest {
                 new MetaActivationRequest("pn-1", "waba-1", "token", "secret");
         MetaCredentialResponse response =
                 new MetaCredentialResponse(
-                        UUID.randomUUID(), "pn-1", "waba-1", "+15551234567",
-                        MetaWhatsAppCredentialStatus.ACTIVE, Instant.now(), Instant.now());
+                        UUID.randomUUID(),
+                        "pn-1",
+                        "waba-1",
+                        "+15551234567",
+                        MetaWhatsAppCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        Instant.now());
         when(credentialService.activate(request)).thenReturn(response);
 
         ResponseEntity<MetaCredentialResponse> result = controller.activate(request);
@@ -48,8 +55,13 @@ class MetaWhatsAppCredentialControllerTest {
     void currentReturns200WhenConnectedAnd204WhenNot() {
         MetaCredentialResponse response =
                 new MetaCredentialResponse(
-                        UUID.randomUUID(), "pn-1", "waba-1", "+15551234567",
-                        MetaWhatsAppCredentialStatus.ACTIVE, Instant.now(), null);
+                        UUID.randomUUID(),
+                        "pn-1",
+                        "waba-1",
+                        "+15551234567",
+                        MetaWhatsAppCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        null);
         when(credentialService.current()).thenReturn(Optional.of(response));
 
         ResponseEntity<MetaCredentialResponse> ok = controller.current();

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Entity coverage for {@link ResourceGrant}: constructor defaults (active, self-stamped {@code
- * grantedAt}), the soft-revoke bookkeeping ({@code revokedAt}/{@code revokedBy} set rather than
- * the row deleted, so revocation history survives), and {@code updateLevel}'s re-grant semantics
- * used by the upsert path in {@code ResourceAccessService#grant}.
+ * grantedAt}), the soft-revoke bookkeeping ({@code revokedAt}/{@code revokedBy} set rather than the
+ * row deleted, so revocation history survives), and {@code updateLevel}'s re-grant semantics used
+ * by the upsert path in {@code ResourceAccessService#grant}.
  */
 class ResourceGrantTest {
 

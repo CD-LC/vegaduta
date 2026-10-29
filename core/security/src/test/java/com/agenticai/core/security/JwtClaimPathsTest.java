@@ -10,10 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 /**
- * {@link JwtClaimPaths}'s two rules in isolation: reads try the whole path as a literal
- * top-level claim BEFORE splitting on {@code '.'} (so namespaced IdP claims survive), and
- * writes mirror that shape. Everything malformed resolves to {@code null} - the fail-closed
- * signal callers key on.
+ * {@link JwtClaimPaths}'s two rules in isolation: reads try the whole path as a literal top-level
+ * claim BEFORE splitting on {@code '.'} (so namespaced IdP claims survive), and writes mirror that
+ * shape. Everything malformed resolves to {@code null} - the fail-closed signal callers key on.
  */
 class JwtClaimPathsTest {
 
@@ -64,12 +63,7 @@ class JwtClaimPathsTest {
 
     @Test
     void valueAsStringReturnsNullForNonStringClaimsInsteadOfStringifying() {
-        Jwt jwt =
-                jwt(
-                        Map.of(
-                                "tenant_id", "tenant_acme",
-                                "roles", List.of("a"),
-                                "count", 7));
+        Jwt jwt = jwt(Map.of("tenant_id", "tenant_acme", "roles", List.of("a"), "count", 7));
 
         assertThat(JwtClaimPaths.valueAsString(jwt, "tenant_id")).isEqualTo("tenant_acme");
         assertThat(JwtClaimPaths.valueAsString(jwt, "roles")).isNull();

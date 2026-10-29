@@ -24,9 +24,9 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * The {@link DevicePairingService} methods the claim-flow test does not exercise: {@code
- * generateCode} (console side, needs a {@link TenantContext}), {@code registerAuthenticated}
- * (the JWT alternative to the code flow) and {@code updateCapabilities} (the device-declared
- * capability CSV, normalised server-side).
+ * generateCode} (console side, needs a {@link TenantContext}), {@code registerAuthenticated} (the
+ * JWT alternative to the code flow) and {@code updateCapabilities} (the device-declared capability
+ * CSV, normalised server-side).
  */
 class DevicePairingServiceCapabilitiesTest {
 

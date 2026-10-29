@@ -11,10 +11,10 @@ import com.agenticai.core.guardrails.ToolDispatchGate.Verdict;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ToolDispatchGate.Verdict} normalises itself at construction: a null outcome reads as
- * ALLOW (a gate that answers nothing never silently denies), and the {@code readOnly} flag only
- * ever survives on an ALLOW - a refusal or an approval requirement is never "safe to run
- * unattended" whatever the caller claimed.
+ * {@link ToolDispatchGate.Verdict} normalises itself at construction: a null outcome reads as ALLOW
+ * (a gate that answers nothing never silently denies), and the {@code readOnly} flag only ever
+ * survives on an ALLOW - a refusal or an approval requirement is never "safe to run unattended"
+ * whatever the caller claimed.
  */
 class ToolDispatchGateTest {
 
@@ -28,10 +28,12 @@ class ToolDispatchGateTest {
     @Test
     void readOnlySurvivesOnlyOnAllow() {
         assertTrue(new Verdict(Outcome.ALLOW, null, true).readOnly());
-        assertFalse(new Verdict(Outcome.DENY, "no", true).readOnly(),
-            "a denial can never be marked read-only");
-        assertFalse(new Verdict(Outcome.REQUIRE_APPROVAL, "needs a human", true).readOnly(),
-            "an approval requirement can never be marked read-only");
+        assertFalse(
+                new Verdict(Outcome.DENY, "no", true).readOnly(),
+                "a denial can never be marked read-only");
+        assertFalse(
+                new Verdict(Outcome.REQUIRE_APPROVAL, "needs a human", true).readOnly(),
+                "an approval requirement can never be marked read-only");
     }
 
     @Test

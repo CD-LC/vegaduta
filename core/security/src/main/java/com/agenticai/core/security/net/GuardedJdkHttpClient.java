@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.ProxySelector;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
@@ -18,9 +16,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -29,15 +25,12 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSession;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.net.URIBuilder;
 
@@ -76,9 +69,9 @@ import org.apache.hc.core5.net.URIBuilder;
 public final class GuardedJdkHttpClient extends HttpClient {
 
     /**
-     * The response body grew past the client's {@code maxResponseBytes} cap. An {@link
-     * IOException} so callers that already handle transport errors need no new catch clause; the
-     * connection is aborted, not drained.
+     * The response body grew past the client's {@code maxResponseBytes} cap. An {@link IOException}
+     * so callers that already handle transport errors need no new catch clause; the connection is
+     * aborted, not drained.
      */
     public static final class ResponseSizeExceededException extends IOException {
         public ResponseSizeExceededException(long limit) {
@@ -238,7 +231,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
         // The feeder owns the response lifecycle once it starts; if subscribing or
         // the body future fails before/while the feeder runs, we close it here or
         // the feeder does.
-        FlowExchange<T> exchange = new FlowExchange<>(request, response, bodyHandler, maxResponseBytes);
+        FlowExchange<T> exchange =
+                new FlowExchange<>(request, response, bodyHandler, maxResponseBytes);
         try {
             T body = exchange.awaitBody();
             if (!exchange.streaming()) {

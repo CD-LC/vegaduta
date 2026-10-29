@@ -7,9 +7,9 @@ import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Test;
 
 /**
- * The pairing code's whole contract is {@link DevicePairingCode#isUsable}: a code is a
- * single-use credential that lives for {@code DevicePairingService}'s ten-minute TTL, so both
- * edges of "not consumed AND not expired" are worth pinning.
+ * The pairing code's whole contract is {@link DevicePairingCode#isUsable}: a code is a single-use
+ * credential that lives for {@code DevicePairingService}'s ten-minute TTL, so both edges of "not
+ * consumed AND not expired" are worth pinning.
  */
 class DevicePairingCodeTest {
 

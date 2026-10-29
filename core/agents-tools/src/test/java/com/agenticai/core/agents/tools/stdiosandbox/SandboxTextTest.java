@@ -41,8 +41,7 @@ class SandboxTextTest {
     void requirePlainRejectsControlCharacters() {
         SandboxText.requirePlain("perfectly ordinary text", "value");
         assertThrows(
-                StdioSandboxException.class,
-                () -> SandboxText.requirePlain("with\ttab", "value"));
+                StdioSandboxException.class, () -> SandboxText.requirePlain("with\ttab", "value"));
         assertThrows(
                 StdioSandboxException.class,
                 () -> SandboxText.requirePlain("with\nnewline", "value"));
@@ -56,9 +55,7 @@ class SandboxTextTest {
 
     @Test
     void requireMountPathRefusesTheMountParserSeparators() {
-        assertEquals(
-                "/mnt/data",
-                SandboxText.requireMountPath(Path.of("/mnt/data"), "mount"));
+        assertEquals("/mnt/data", SandboxText.requireMountPath(Path.of("/mnt/data"), "mount"));
         for (Path bad :
                 new Path[] {
                     Path.of("/mnt/a,b"), Path.of("/mnt/a\"b"), Path.of("/mnt/a\\b"),
@@ -79,8 +76,6 @@ class SandboxTextTest {
         assertEquals("\"plain\"", SandboxText.sbplString("plain"));
         assertEquals("\"a\\\"b\"", SandboxText.sbplString("a\"b"));
         assertEquals("\"a\\\\b\"", SandboxText.sbplString("a\\b"));
-        assertThrows(
-                StdioSandboxException.class,
-                () -> SandboxText.sbplString("line\nbreak"));
+        assertThrows(StdioSandboxException.class, () -> SandboxText.sbplString("line\nbreak"));
     }
 }

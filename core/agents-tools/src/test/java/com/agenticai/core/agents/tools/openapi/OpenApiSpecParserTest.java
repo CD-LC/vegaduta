@@ -268,9 +268,7 @@ class OpenApiSpecParserTest {
         assertThrows(
                 OpenApiToolException.class,
                 () -> parser.parse("{\"openapi\":\"3.0.0\",\"paths\":{\"/a\":{}}}", "p"));
-        assertThrows(
-                OpenApiToolException.class,
-                () -> parser.parse("{not json at all", "p"));
+        assertThrows(OpenApiToolException.class, () -> parser.parse("{not json at all", "p"));
     }
 
     @Test
@@ -303,7 +301,8 @@ class OpenApiSpecParserTest {
         String second = OpenApiSpecParser.uniqueToolName("pfx", null, "GET", "/x", used);
         assertEquals("pfx_get_x_2", second);
         // An all-punctuation slug degrades to "op" rather than an empty name.
-        assertEquals("p_op", OpenApiSpecParser.uniqueToolName("p", "!!!", "GET", "/", new HashSet<>()));
+        assertEquals(
+                "p_op", OpenApiSpecParser.uniqueToolName("p", "!!!", "GET", "/", new HashSet<>()));
     }
 
     @Test

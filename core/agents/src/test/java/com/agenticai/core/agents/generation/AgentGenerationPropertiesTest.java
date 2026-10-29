@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link AgentGenerationProperties} reads the platform's generation-length bounds from
- * {@code /agents/generation.properties}. These pin the shipped values - the ceiling every create
- * and update validates {@code maxTokens} against - and the floor the setters enforce (1 is the
- * least sane bound; 0 would make every agent reply empty).
+ * {@link AgentGenerationProperties} reads the platform's generation-length bounds from {@code
+ * /agents/generation.properties}. These pin the shipped values - the ceiling every create and
+ * update validates {@code maxTokens} against - and the floor the setters enforce (1 is the least
+ * sane bound; 0 would make every agent reply empty).
  */
 class AgentGenerationPropertiesTest {
 
@@ -19,8 +19,9 @@ class AgentGenerationPropertiesTest {
 
         assertEquals(8192, p.getMaxTokensCeiling());
         assertTrue(p.getInferredMaxTokensFloor() >= 1);
-        assertTrue(p.getInferredMaxTokensFloor() <= p.getMaxTokensCeiling(),
-            "the Simple-mode floor must be reachable under the ceiling");
+        assertTrue(
+                p.getInferredMaxTokensFloor() <= p.getMaxTokensCeiling(),
+                "the Simple-mode floor must be reachable under the ceiling");
     }
 
     @Test

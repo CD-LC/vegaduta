@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 /**
  * The schema-aware checks behind {@link StructuredOutput}'s native structured-output switches:
  * OpenAI strict-mode compatibility, the Gemini keyword strip, Anthropic's local-$ref rule and the
- * provider-safe tool name. The load-bearing detail every test pins: a property NAMED like a
- * keyword ("properties", "additionalProperties") is a name, never a keyword.
+ * provider-safe tool name. The load-bearing detail every test pins: a property NAMED like a keyword
+ * ("properties", "additionalProperties") is a name, never a keyword.
  */
 class JsonSchemaRulesTest {
 
@@ -57,50 +57,65 @@ class JsonSchemaRulesTest {
     void openAiStrictModeRejectsOpenObjectsAndMissingRequired() throws Exception {
         // additionalProperties missing or true = open = rejected, properties or not.
         assertFalse(JsonSchemaRules.isStrictCompatible(tree("{\"type\":\"object\"}")));
-        assertFalse(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"additionalProperties\":true}")));
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},\"additionalProperties\":true}")));
         // A property absent from "required" is rejected.
-        assertFalse(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},"
-                + "\"required\":[],\"additionalProperties\":false}")));
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},"
+                                        + "\"required\":[],\"additionalProperties\":false}")));
         // Fully closed passes.
-        assertTrue(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},"
-                + "\"required\":[\"a\"],\"additionalProperties\":false}")));
+        assertTrue(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"properties\":{\"a\":{\"type\":\"string\"}},"
+                                        + "\"required\":[\"a\"],\"additionalProperties\":false}")));
     }
 
     @Test
     void strictCompatibilityWalksNestedSchemasNotPropertyNames() throws Exception {
         // A property literally NAMED "properties"/"additionalProperties" is a name, not a keyword -
         // its VALUE is itself a schema that must also be strict.
-        JsonNode tricky = tree(
-            "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"properties\"],"
-                + "\"properties\":{\"properties\":{\"type\":\"object\",\"additionalProperties\":false,"
-                + "\"required\":[],\"properties\":{}}}}");
+        JsonNode tricky =
+                tree(
+                        "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"properties\"],"
+                                + "\"properties\":{\"properties\":{\"type\":\"object\",\"additionalProperties\":false,"
+                                + "\"required\":[],\"properties\":{}}}}");
         assertTrue(JsonSchemaRules.isStrictCompatible(tricky));
 
-        JsonNode nestedOpen = tree(
-            "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"inner\"],"
-                + "\"properties\":{\"inner\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
-                + "\"required\":[\"x\"]}}}");
-        assertFalse(JsonSchemaRules.isStrictCompatible(nestedOpen),
-            "the nested object is missing its own additionalProperties:false");
+        JsonNode nestedOpen =
+                tree(
+                        "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"inner\"],"
+                                + "\"properties\":{\"inner\":{\"type\":\"object\",\"properties\":{\"x\":{\"type\":\"string\"}},"
+                                + "\"required\":[\"x\"]}}}");
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(nestedOpen),
+                "the nested object is missing its own additionalProperties:false");
     }
 
     @Test
     void strictCompatibilityWalksApplicatorKeywords() throws Exception {
         // An open object under anyOf/items/$defs fails the whole schema.
-        assertFalse(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
-                + "\"anyOf\":[{\"type\":\"object\"}]}")));
-        assertFalse(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
-                + "\"items\":{\"type\":\"object\"}}")));
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
+                                        + "\"anyOf\":[{\"type\":\"object\"}]}")));
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
+                                        + "\"items\":{\"type\":\"object\"}}")));
         // items as an ARRAY of schemas is walked element-wise too.
-        assertTrue(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
-                + "\"items\":[{\"type\":\"string\"},{\"type\":\"object\",\"additionalProperties\":false,"
-                + "\"required\":[],\"properties\":{}}]}")));
+        assertTrue(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[],\"properties\":{},"
+                                        + "\"items\":[{\"type\":\"string\"},{\"type\":\"object\",\"additionalProperties\":false,"
+                                        + "\"required\":[],\"properties\":{}}]}")));
         // A leaf (non-object) node is always compatible.
         assertTrue(JsonSchemaRules.isStrictCompatible(tree("{\"type\":\"string\"}")));
         assertTrue(JsonSchemaRules.isStrictCompatible(null));
@@ -108,23 +123,29 @@ class JsonSchemaRulesTest {
 
     @Test
     void aTypeArrayDeclaringObjectIsStillAnObject() throws Exception {
-        assertFalse(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":[\"object\",\"null\"],\"properties\":{\"a\":{\"type\":\"string\"}},"
-                + "\"required\":[\"a\"]}")),
-            "type:[\"object\",\"null\"] is still an open object without additionalProperties:false");
-        assertTrue(JsonSchemaRules.isStrictCompatible(tree(
-            "{\"type\":[\"object\",\"null\"],\"properties\":{\"a\":{\"type\":\"string\"}},"
-                + "\"required\":[\"a\"],\"additionalProperties\":false}")));
+        assertFalse(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":[\"object\",\"null\"],\"properties\":{\"a\":{\"type\":\"string\"}},"
+                                        + "\"required\":[\"a\"]}")),
+                "type:[\"object\",\"null\"] is still an open object without additionalProperties:false");
+        assertTrue(
+                JsonSchemaRules.isStrictCompatible(
+                        tree(
+                                "{\"type\":[\"object\",\"null\"],\"properties\":{\"a\":{\"type\":\"string\"}},"
+                                        + "\"required\":[\"a\"],\"additionalProperties\":false}")));
     }
 
     // --- subSchemas / containsKey ----------------------------------------------
 
     @Test
     void subSchemasFindsItemsApplicatorsAndDefs() throws Exception {
-        JsonNode node = tree(
-            "{\"items\":{},\"anyOf\":[{}],\"allOf\":[],\"oneOf\":[{}],"
-                + "\"$defs\":{\"a\":{}},\"definitions\":{\"b\":{}},\"properties\":{\"p\":{}}}");
-        // items(1) + anyOf(1) + oneOf(1) + $defs(1) + definitions(1); properties is NOT a subschema.
+        JsonNode node =
+                tree(
+                        "{\"items\":{},\"anyOf\":[{}],\"allOf\":[],\"oneOf\":[{}],"
+                                + "\"$defs\":{\"a\":{}},\"definitions\":{\"b\":{}},\"properties\":{\"p\":{}}}");
+        // items(1) + anyOf(1) + oneOf(1) + $defs(1) + definitions(1); properties is NOT a
+        // subschema.
         assertEquals(5, JsonSchemaRules.subSchemas(node).size());
     }
 
@@ -139,11 +160,13 @@ class JsonSchemaRulesTest {
 
     @Test
     void stripKeysRemovesSchemaOnlyKeywordsButNeverPropertyNames() throws Exception {
-        ObjectNode node = (ObjectNode) tree(
-            "{\"$schema\":\"http://x\",\"type\":\"object\",\"additionalProperties\":false,"
-                + "\"properties\":{\"additionalProperties\":{\"type\":\"object\",\"additionalProperties\":true,"
-                + "\"properties\":{\"nested\":{\"type\":\"string\"},\"$schema\":{\"type\":\"string\"}}}},"
-                + "\"items\":{\"$schema\":\"y\",\"type\":\"object\"}}");
+        ObjectNode node =
+                (ObjectNode)
+                        tree(
+                                "{\"$schema\":\"http://x\",\"type\":\"object\",\"additionalProperties\":false,"
+                                        + "\"properties\":{\"additionalProperties\":{\"type\":\"object\",\"additionalProperties\":true,"
+                                        + "\"properties\":{\"nested\":{\"type\":\"string\"},\"$schema\":{\"type\":\"string\"}}}},"
+                                        + "\"items\":{\"$schema\":\"y\",\"type\":\"object\"}}");
         JsonSchemaRules.stripKeys(node);
 
         assertFalse(node.has("$schema"));
@@ -164,10 +187,15 @@ class JsonSchemaRulesTest {
     @Test
     void onlyRefsPointingOutsideTheDocumentAreNonLocal() throws Exception {
         assertFalse(JsonSchemaRules.hasNonLocalRef(tree("{\"$ref\":\"#/definitions/a\"}")));
-        assertTrue(JsonSchemaRules.hasNonLocalRef(tree("{\"$ref\":\"https://schemas.example/x.json\"}")));
+        assertTrue(
+                JsonSchemaRules.hasNonLocalRef(
+                        tree("{\"$ref\":\"https://schemas.example/x.json\"}")));
         // Found at any depth.
-        assertTrue(JsonSchemaRules.hasNonLocalRef(tree(
-            "{\"a\":{\"b\":[{\"$ref\":\"other.json#/x\"}]}}")));
-        assertFalse(JsonSchemaRules.hasNonLocalRef(tree("{\"a\":[1,2,{\"ref\":\"not-a-dollar-ref\"}]}")));
+        assertTrue(
+                JsonSchemaRules.hasNonLocalRef(
+                        tree("{\"a\":{\"b\":[{\"$ref\":\"other.json#/x\"}]}}")));
+        assertFalse(
+                JsonSchemaRules.hasNonLocalRef(
+                        tree("{\"a\":[1,2,{\"ref\":\"not-a-dollar-ref\"}]}")));
     }
 }

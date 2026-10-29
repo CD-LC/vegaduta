@@ -40,7 +40,8 @@ class WordTokensTest {
         assertTrue(words.contains("please"));
         assertTrue(words.contains("file"));
         assertTrue(words.contains("2024"));
-        assertFalse(words.contains("send_email"), "the underscore is punctuation, not part of a word");
+        assertFalse(
+                words.contains("send_email"), "the underscore is punctuation, not part of a word");
     }
 
     @Test
@@ -67,7 +68,8 @@ class WordTokensTest {
         assertFalse(WordTokens.hasLettersOutsideLatin(null));
         assertFalse(WordTokens.hasLettersOutsideLatin(""));
         assertFalse(WordTokens.hasLettersOutsideLatin("hello world"));
-        assertFalse(WordTokens.hasLettersOutsideLatin("12345 !!!"),
-            "digits and punctuation carry no script signal");
+        assertFalse(
+                WordTokens.hasLettersOutsideLatin("12345 !!!"),
+                "digits and punctuation carry no script signal");
     }
 }

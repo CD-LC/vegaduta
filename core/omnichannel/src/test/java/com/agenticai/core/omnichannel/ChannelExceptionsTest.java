@@ -28,8 +28,7 @@ class ChannelExceptionsTest {
 
     @Test
     void configurationExceptionIsAChannelException() {
-        ChannelConfigurationException e =
-                new ChannelConfigurationException("signal", "bad number");
+        ChannelConfigurationException e = new ChannelConfigurationException("signal", "bad number");
         assertEquals("signal", e.getChannelName());
         assertTrue(e instanceof ChannelException);
     }

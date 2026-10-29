@@ -35,8 +35,11 @@ class ToolSensitivityTest {
     @Test
     void consequentialMatchesTheSinkTiers() {
         for (ToolSensitivity tier : ToolSensitivity.values()) {
-            assertEquals(tier.isTaintSink(), tier.isConsequential(),
-                tier + ": today the two questions have the same answer, and both are exhaustive switches");
+            assertEquals(
+                    tier.isTaintSink(),
+                    tier.isConsequential(),
+                    tier
+                            + ": today the two questions have the same answer, and both are exhaustive switches");
         }
     }
 }

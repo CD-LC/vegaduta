@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * AGENTS.md rule 4 in code form: a browser-facing URL never falls back to {@code localhost} - a
- * missing {@code app.web.public-url} is either refused at boot or throws a clear
- * {@link IllegalStateException} naming the variable to set.
+ * missing {@code app.web.public-url} is either refused at boot or throws a clear {@link
+ * IllegalStateException} naming the variable to set.
  */
 class PublicWebUrlTest {
 
@@ -24,7 +24,8 @@ class PublicWebUrlTest {
     void normalizeTrimsAndStripsEveryTrailingSlash() {
         assertThat(PublicWebUrl.normalize("  https://app.example.com///  "))
                 .isEqualTo("https://app.example.com");
-        assertThat(PublicWebUrl.normalize("https://app.example.com")).isEqualTo("https://app.example.com");
+        assertThat(PublicWebUrl.normalize("https://app.example.com"))
+                .isEqualTo("https://app.example.com");
         assertThat(PublicWebUrl.normalize(null)).isEqualTo("");
         assertThat(PublicWebUrl.normalize("   ")).isEqualTo("");
     }

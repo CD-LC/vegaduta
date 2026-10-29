@@ -7,15 +7,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * The scheduled/event wiring for {@link DynamicMcpConnectionManager}: reconnect-on-boot,
- * liveness re-checks, error retry and package-cache janitor. Split out so the manager stays
- * under the file-size cap; every method delegates to the manager's public entry points, which
- * keep the behaviour (and their javadoc) exactly as before.
+ * The scheduled/event wiring for {@link DynamicMcpConnectionManager}: reconnect-on-boot, liveness
+ * re-checks, error retry and package-cache janitor. Split out so the manager stays under the
+ * file-size cap; every method delegates to the manager's public entry points, which keep the
+ * behaviour (and their javadoc) exactly as before.
  *
- * <p>Deliberately NOT wrapped in {@code PgAdvisoryJobLock}: the state being touched -
- * {@code liveClients}' subprocess/HTTP clients and this host's on-disk caches - is per-JVM, so
- * every replica must run its own sweep. Cross-replica exclusion would leave losing replicas'
- * dead clients reported CONNECTED forever and their caches uncleaned.
+ * <p>Deliberately NOT wrapped in {@code PgAdvisoryJobLock}: the state being touched - {@code
+ * liveClients}' subprocess/HTTP clients and this host's on-disk caches - is per-JVM, so every
+ * replica must run its own sweep. Cross-replica exclusion would leave losing replicas' dead clients
+ * reported CONNECTED forever and their caches uncleaned.
  */
 @Component
 final class DynamicMcpSchedulers {
@@ -36,8 +36,7 @@ final class DynamicMcpSchedulers {
     }
 
     @AllowUnlockedSchedule(
-            reason =
-                    "Pings this JVM's own liveClients (subprocess/HTTP clients are per-JVM).")
+            reason = "Pings this JVM's own liveClients (subprocess/HTTP clients are per-JVM).")
     @Scheduled(fixedRate = HEALTH_CHECK_INTERVAL_MS)
     public void healthCheckLiveConnections() {
         manager.healthCheckLiveConnections();

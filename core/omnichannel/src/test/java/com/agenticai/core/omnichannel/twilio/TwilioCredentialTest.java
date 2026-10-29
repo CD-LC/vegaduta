@@ -34,9 +34,11 @@ class TwilioCredentialTest {
     void usesApiKeyOnlyWhenASidIsReallySet() {
         assertTrue(credential().usesApiKey());
         assertFalse(
-                new TwilioCredential("AC123", "enc-token", null, null, "+15551234567").usesApiKey());
+                new TwilioCredential("AC123", "enc-token", null, null, "+15551234567")
+                        .usesApiKey());
         assertFalse(
-                new TwilioCredential("AC123", "enc-token", "  ", null, "+15551234567").usesApiKey());
+                new TwilioCredential("AC123", "enc-token", "  ", null, "+15551234567")
+                        .usesApiKey());
     }
 
     @Test

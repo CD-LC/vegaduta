@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Direct coverage for the {@link TenantPlanState} halves {@link TenantTest} does not reach:
- * the gateway-subscription columns, the D5 past-due / cancel-scheduled bookkeeping, {@code
+ * Direct coverage for the {@link TenantPlanState} halves {@link TenantTest} does not reach: the
+ * gateway-subscription columns, the D5 past-due / cancel-scheduled bookkeeping, {@code
  * downgradeToFree}, the two-arg {@code confirmUpgrade} (multi-gateway), the event-trial claim
  * record, and the referral columns. Exercised through {@link Tenant}, the only subclass - pure
  * entity logic, no mocks.
@@ -139,8 +139,7 @@ class TenantPlanStateTest {
 
     @Test
     void confirmUpgradeClearsALiveCompGrantSoTheReverterCannotUndoThePurchase() {
-        tenant.grantComplimentaryPlan(
-                TenantPlan.PREMIUM, Instant.now(), Instant.now(), "trial");
+        tenant.grantComplimentaryPlan(TenantPlan.PREMIUM, Instant.now(), Instant.now(), "trial");
         tenant.beginUpgrade(TenantPlan.PREMIUM, "sub_paid");
 
         tenant.confirmUpgrade("active");

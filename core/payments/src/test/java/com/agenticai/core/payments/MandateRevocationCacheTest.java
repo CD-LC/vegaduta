@@ -19,10 +19,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 /**
- * The revocation tombstone is fail-soft: the DB row is authoritative, so a
- * missing Redis bean or a Redis error degrades to "the cache says nothing"
- * rather than an exception - and a tombstone write failure is logged, never
- * thrown, for the same reason.
+ * The revocation tombstone is fail-soft: the DB row is authoritative, so a missing Redis bean or a
+ * Redis error degrades to "the cache says nothing" rather than an exception - and a tombstone write
+ * failure is logged, never thrown, for the same reason.
  */
 class MandateRevocationCacheTest {
 
@@ -79,7 +78,8 @@ class MandateRevocationCacheTest {
         ValueOperations<String, String> ops = mock(ValueOperations.class);
         when(template.opsForValue()).thenReturn(ops);
         org.mockito.Mockito.doThrow(new RuntimeException("connection reset"))
-            .when(ops).set(anyString(), anyString(), any(Duration.class));
+                .when(ops)
+                .set(anyString(), anyString(), any(Duration.class));
         MandateRevocationCache cache = new MandateRevocationCache(providerOf(template));
 
         UUID id = UUID.randomUUID();

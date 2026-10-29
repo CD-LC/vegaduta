@@ -8,11 +8,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code vertex.pool.*}: a slot is usable only when it names a project AND has
- * a credential source (a key-file path or Application Default Credentials) -
- * the "blank means unconfigured" posture the class javadoc documents. The
- * provider-side view orders usable slots lowest-priority-first and honours
- * the master kill switch.
+ * {@code vertex.pool.*}: a slot is usable only when it names a project AND has a credential source
+ * (a key-file path or Application Default Credentials) - the "blank means unconfigured" posture the
+ * class javadoc documents. The provider-side view orders usable slots lowest-priority-first and
+ * honours the master kill switch.
  */
 class VertexPoolPropertiesTest {
 

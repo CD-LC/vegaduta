@@ -33,12 +33,14 @@ class ClaudeImportFormatTest {
     @Test
     void aMissingOrNonArrayChatMessagesConvertsToNull() throws Exception {
         assertNull(format.convert(tree("{\"name\": \"x\"}"), "k", "claude", null, collector()));
-        assertNull(format.convert(tree("{\"chat_messages\": {}}"), "k", "claude", null, collector()));
+        assertNull(
+                format.convert(tree("{\"chat_messages\": {}}"), "k", "claude", null, collector()));
     }
 
     @Test
     void contentTextBlocksWinOverTheFlatTextField() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"uuid": "c1", "name": "N", "chat_messages": [
               {"sender": "human", "text": "flat is a fallback",
                "content": [{"type": "text", "text": "block one"}, {"type": "text", "text": "block two"}]}]}
@@ -50,7 +52,8 @@ class ClaudeImportFormatTest {
 
     @Test
     void senderAliasesAndEmptyMessagesAreHandled() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"uuid": "c2", "chat_messages": [
               {"sender": "user", "text": "user-alias works"},
               {"sender": "tool", "text": "never imported"},
@@ -67,7 +70,8 @@ class ClaudeImportFormatTest {
 
     @Test
     void attachmentsAndFilesContributeNamesOnlyAndBlankMessagesAreSkipped() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"uuid": "c3", "name": "Files", "created_at": "2024-01-02T03:04:05Z",
              "chat_messages": [
                {"sender": "human", "text": "", "created_at": "2024-01-02T03:04:06Z",
@@ -84,7 +88,8 @@ class ClaudeImportFormatTest {
 
     @Test
     void aConversationOfOnlyUnusableMessagesConvertsToNull() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"uuid": "c4", "chat_messages": [
               {"sender": "system", "text": "x"}, "not-an-object", {"sender": "human"}]}
             """;
@@ -93,7 +98,8 @@ class ClaudeImportFormatTest {
 
     @Test
     void contentBlocksThatAreAllNonTextFallBackToTheFlatText() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"uuid": "c5", "chat_messages": [
               {"sender": "assistant", "text": "the answer",
                "content": [{"type": "thinking", "thinking": "..."}]}]}

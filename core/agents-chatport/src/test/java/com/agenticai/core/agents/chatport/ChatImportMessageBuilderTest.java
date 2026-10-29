@@ -20,8 +20,16 @@ import org.junit.jupiter.api.Test;
 class ChatImportMessageBuilderTest {
 
     private static Limits limits(int maxMessages, int perMessage, int perChat) {
-        return new Limits(5000, maxMessages, perMessage, perChat, 20_000_000L, 20_000, 10_000,
-            64L << 20, 100);
+        return new Limits(
+                5000,
+                maxMessages,
+                perMessage,
+                perChat,
+                20_000_000L,
+                20_000,
+                10_000,
+                64L << 20,
+                100);
     }
 
     @Test
@@ -35,8 +43,8 @@ class ChatImportMessageBuilderTest {
 
         ParsedChat chat = b.build("k", "claude", "id-1", "Title", ts, null, false);
         assertEquals(3, chat.messageCount());
-        assertEquals("hi".length() + "hello there".length() + "second user turn".length(),
-            chat.chars());
+        assertEquals(
+                "hi".length() + "hello there".length() + "second user turn".length(), chat.chars());
         assertEquals("hello there", chat.firstUserText());
         assertEquals(List.of("f.txt"), chat.messages().get(1).attachments());
         assertEquals(List.of(), chat.messages().get(0).attachments());

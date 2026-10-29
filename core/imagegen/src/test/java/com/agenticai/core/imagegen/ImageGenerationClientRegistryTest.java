@@ -24,7 +24,8 @@ class ImageGenerationClientRegistryTest {
         when(openai.supportedProvider()).thenReturn(ProviderName.OPENAI);
         when(vertex.supportedProvider()).thenReturn(ProviderName.GOOGLE_VERTEX);
         ImageGenerationClient.GeneratedImage expected =
-                new ImageGenerationClient.GeneratedImage(new byte[] {1, 2}, "image/png", "dall-e-3");
+                new ImageGenerationClient.GeneratedImage(
+                        new byte[] {1, 2}, "image/png", "dall-e-3");
         when(openai.generate("key-1", "a cat", "dall-e-3")).thenReturn(expected);
 
         ImageGenerationClientRegistry registry =

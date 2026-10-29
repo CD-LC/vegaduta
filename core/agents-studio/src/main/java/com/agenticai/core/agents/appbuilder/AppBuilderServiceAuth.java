@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Shared service-to-service gate for the {@code /api/internal/app-builder/**} controllers:
- * the {@code X-Service-Token} shared-secret check (constant-time, fail closed when unconfigured)
- * plus the checks that bound the caller-chosen {@code X-Tenant-Id} claim.
+ * Shared service-to-service gate for the {@code /api/internal/app-builder/**} controllers: the
+ * {@code X-Service-Token} shared-secret check (constant-time, fail closed when unconfigured) plus
+ * the checks that bound the caller-chosen {@code X-Tenant-Id} claim.
  *
  * <p>The token is a single static credential not bound to any tenant, so the claim needs its own
  * enforcement: a reserved/system schema is never a tenant (mirrors {@code TenantContextFilter}),
@@ -39,9 +39,9 @@ final class AppBuilderServiceAuth {
         this.allowedTenants = parseAllowedTenants(allowedTenantsRaw);
         if (this.allowedTenants.isEmpty()) {
             log.warn(
-                "app.app-builder.allowed-tenants is empty - the X-Service-Token credential can drive"
-                    + " generation for ANY tenant id presented in X-Tenant-Id. Set"
-                    + " APP_BUILDER_ALLOWED_TENANTS to the tenant schemas app-builder may act for.");
+                    "app.app-builder.allowed-tenants is empty - the X-Service-Token credential can drive"
+                            + " generation for ANY tenant id presented in X-Tenant-Id. Set"
+                            + " APP_BUILDER_ALLOWED_TENANTS to the tenant schemas app-builder may act for.");
         }
     }
 
@@ -51,7 +51,7 @@ final class AppBuilderServiceAuth {
             // Fail closed: no configured secret means no caller can ever be trusted.
             throw new AppBuilderTokenMissingException(
                     "App Builder service token is not configured on this server; endpoint"
-                        + " disabled.");
+                            + " disabled.");
         }
         if (presentedToken == null || presentedToken.isBlank()) {
             throw new AppBuilderTokenMissingException("Missing X-Service-Token header.");
@@ -72,7 +72,8 @@ final class AppBuilderServiceAuth {
      */
     void authorizeTenantClaim(String tenantId) {
         if (TenantContextFilter.isSystemSchemaClaim(tenantId)) {
-            throw new AppBuilderTokenInvalidException("X-Tenant-Id names a reserved schema, not a tenant.");
+            throw new AppBuilderTokenInvalidException(
+                    "X-Tenant-Id names a reserved schema, not a tenant.");
         }
         if (!allowedTenants.isEmpty() && !allowedTenants.contains(tenantId.trim())) {
             throw new AppBuilderTokenInvalidException(

@@ -19,8 +19,8 @@ class TurnFeedbackRecordedEventTest {
         UUID agentId = UUID.randomUUID();
 
         TurnFeedbackRecordedEvent event =
-                new TurnFeedbackRecordedEvent(source, "alice@example.com", agentId, "sess-9",
-                    "person's own words");
+                new TurnFeedbackRecordedEvent(
+                        source, "alice@example.com", agentId, "sess-9", "person's own words");
 
         assertSame(source, event.getSource());
         assertEquals("alice@example.com", event.getSubject());

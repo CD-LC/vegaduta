@@ -23,7 +23,8 @@ class McpAppsRequestGuardTest {
         assertFalse(McpAppsRequestGuard.mentionsUiUri(tree("{}"), 0));
         assertFalse(McpAppsRequestGuard.mentionsUiUri(tree("{\"a\":1,\"b\":[true,null]}"), 0));
         assertFalse(
-                McpAppsRequestGuard.mentionsUiUri(tree("{\"url\":\"https://x.example.com/ui\"}"), 0));
+                McpAppsRequestGuard.mentionsUiUri(
+                        tree("{\"url\":\"https://x.example.com/ui\"}"), 0));
     }
 
     @Test

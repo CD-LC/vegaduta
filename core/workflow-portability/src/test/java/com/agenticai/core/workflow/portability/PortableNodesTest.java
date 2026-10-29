@@ -20,15 +20,22 @@ class PortableNodesTest {
 
     @Test
     void positionRoundsToWholePixels() {
-        assertThat(PortableNodes.position(10.4, 20.6)).containsEntry("x", 10L).containsEntry("y", 21L);
+        assertThat(PortableNodes.position(10.4, 20.6))
+                .containsEntry("x", 10L)
+                .containsEntry("y", 21L);
     }
 
     @Test
     void nodeBuildsTheCanvasShapeAndCarriesReviewFlags() {
         WorkflowNodeDto node =
                 PortableNodes.node(
-                        "n1", "http", "Call API", PortableNodes.position(1, 2),
-                        Map.of("method", "GET"), List.of("check this"), true);
+                        "n1",
+                        "http",
+                        "Call API",
+                        PortableNodes.position(1, 2),
+                        Map.of("method", "GET"),
+                        List.of("check this"),
+                        true);
 
         assertThat(node.id()).isEqualTo("n1");
         assertThat(node.type()).isEqualTo("http");
@@ -41,7 +48,8 @@ class PortableNodesTest {
     @Test
     void nodeOmitsReviewKeysWhenNothingNeedsReview() {
         WorkflowNodeDto node =
-                PortableNodes.node("n1", "code", "T", PortableNodes.position(0, 0), null, null, false);
+                PortableNodes.node(
+                        "n1", "code", "T", PortableNodes.position(0, 0), null, null, false);
         assertThat(node.data()).doesNotContainKeys("needsReview", "importNotes");
         assertThat(node.config()).isEmpty();
     }

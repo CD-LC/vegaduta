@@ -7,15 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 /**
- * The singleton alert-settings row: fixed id, the V84 default threshold, and
- * the audit stamp every update leaves behind.
+ * The singleton alert-settings row: fixed id, the V84 default threshold, and the audit stamp every
+ * update leaves behind.
  */
 class PlatformAlertSettingsTest {
 
     @Test
     void theSingletonRowHasTheFixedIdAndDefaultThreshold() {
         PlatformAlertSettings settings =
-            new PlatformAlertSettings(PlatformAlertSettings.DEFAULT_FALLBACK_FAILURE_THRESHOLD);
+                new PlatformAlertSettings(PlatformAlertSettings.DEFAULT_FALLBACK_FAILURE_THRESHOLD);
 
         assertEquals(PlatformAlertSettings.SINGLETON_ID, settings.getId());
         assertEquals(10, PlatformAlertSettings.DEFAULT_FALLBACK_FAILURE_THRESHOLD);

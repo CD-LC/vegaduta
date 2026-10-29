@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.agenticai.core.agents.tools.mcpapps.McpAppUiMeta.DeclaredCsp;
 import com.agenticai.core.agents.tools.mcpapps.McpAppUiMeta.Declaration;
+import com.agenticai.core.agents.tools.mcpapps.McpAppUiMeta.DeclaredCsp;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,7 +59,8 @@ class McpAppUiMetaTest {
         assertTrue(
                 McpAppUiMeta.declarationOf(Map.of("ui", Map.of("resourceUri", "https://evil/x")))
                         .isEmpty());
-        assertTrue(McpAppUiMeta.declarationOf(Map.of("ui/resourceUri", "data:text/html,x")).isEmpty());
+        assertTrue(
+                McpAppUiMeta.declarationOf(Map.of("ui/resourceUri", "data:text/html,x")).isEmpty());
     }
 
     @Test
@@ -68,12 +69,13 @@ class McpAppUiMetaTest {
                 Map.of(
                         "ui",
                         Map.of(
-                                "resourceUri", "ui://app/main",
+                                "resourceUri",
+                                "ui://app/main",
                                 "csp",
-                                        Map.of(
-                                                "connectDomains",
-                                                        List.of("https://api.example.com", " ", 7),
-                                                "resourceDomains", List.of("cdn.example.com"))));
+                                Map.of(
+                                        "connectDomains",
+                                                List.of("https://api.example.com", " ", 7),
+                                        "resourceDomains", List.of("cdn.example.com"))));
         Declaration d = McpAppUiMeta.declarationOf(meta).orElseThrow();
 
         assertEquals(List.of("https://api.example.com"), d.csp().connectDomains());

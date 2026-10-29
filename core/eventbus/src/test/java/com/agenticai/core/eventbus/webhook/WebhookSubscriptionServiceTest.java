@@ -87,16 +87,21 @@ class WebhookSubscriptionServiceTest {
 
     @Test
     void createRejectsBadNamesAndEmptyOrJunkTypeSetsBeforeAnySave() {
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create(" ", "https://x.invalid", Set.of("*")));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("n".repeat(121), "https://x.invalid", Set.of("*")));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("ok", "https://x.invalid", null));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("ok", "https://x.invalid", Set.of()));
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("ok", "https://x.invalid", Set.of(" ", "t".repeat(201))));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create(" ", "https://x.invalid", Set.of("*")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("n".repeat(121), "https://x.invalid", Set.of("*")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("ok", "https://x.invalid", null));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("ok", "https://x.invalid", Set.of()));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("ok", "https://x.invalid", Set.of(" ", "t".repeat(201))));
 
         verify(subscriptions, never()).save(any());
     }
@@ -106,26 +111,29 @@ class WebhookSubscriptionServiceTest {
         when(subscriptions.count())
                 .thenReturn((long) WebhookSubscriptionService.MAX_SUBSCRIPTIONS_PER_TENANT);
 
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("ok", "https://x.invalid", Set.of("*")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("ok", "https://x.invalid", Set.of("*")));
         verify(subscriptions, never()).save(any());
     }
 
     @Test
     void createPropagatesTheUrlGuardRefusal() {
         doThrow(new IllegalArgumentException("not a public URL"))
-                .when(urlGuard).requireAllowed("http://169.254.169.254/");
+                .when(urlGuard)
+                .requireAllowed("http://169.254.169.254/");
 
-        assertThrows(IllegalArgumentException.class,
-            () -> service.create("ok", "http://169.254.169.254/", Set.of("*")));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.create("ok", "http://169.254.169.254/", Set.of("*")));
         verify(subscriptions, never()).save(any());
     }
 
     @Test
     void getAndListNeverExposeASecretAndUnknownIdsThrowNotFound() {
         UUID id = UUID.randomUUID();
-        WebhookSubscription sub = new WebhookSubscription("h", "https://x.invalid", "enc",
-            Set.of("*"), "it");
+        WebhookSubscription sub =
+                new WebhookSubscription("h", "https://x.invalid", "enc", Set.of("*"), "it");
         ReflectionTestUtils.setField(sub, "id", id);
         when(subscriptions.findById(id)).thenReturn(Optional.of(sub));
         when(subscriptions.findAllByOrderByCreatedAtDesc()).thenReturn(List.of(sub));
@@ -136,8 +144,9 @@ class WebhookSubscriptionServiceTest {
 
         UUID missing = UUID.randomUUID();
         when(subscriptions.findById(missing)).thenReturn(Optional.empty());
-        WebhookSubscriptionNotFoundException ex = assertThrows(
-            WebhookSubscriptionNotFoundException.class, () -> service.get(missing));
+        WebhookSubscriptionNotFoundException ex =
+                assertThrows(
+                        WebhookSubscriptionNotFoundException.class, () -> service.get(missing));
         assertTrue(ex.getMessage().contains(missing.toString()));
         assertThrows(WebhookSubscriptionNotFoundException.class, () -> service.delete(missing));
     }
@@ -145,8 +154,8 @@ class WebhookSubscriptionServiceTest {
     @Test
     void updateKeepsFieldsLeftNullAndAppliesTheOnesGiven() {
         UUID id = UUID.randomUUID();
-        WebhookSubscription sub = new WebhookSubscription("old", "https://x.invalid/a", "enc",
-            Set.of("a"), "it");
+        WebhookSubscription sub =
+                new WebhookSubscription("old", "https://x.invalid/a", "enc", Set.of("a"), "it");
         ReflectionTestUtils.setField(sub, "id", id);
         when(subscriptions.findById(id)).thenReturn(Optional.of(sub));
 
@@ -170,8 +179,8 @@ class WebhookSubscriptionServiceTest {
     @Test
     void rotateSecretStoresTheEncryptedReplacementAndReturnsItOnce() {
         UUID id = UUID.randomUUID();
-        WebhookSubscription sub = new WebhookSubscription("h", "https://x.invalid", "enc(old)",
-            Set.of("*"), "it");
+        WebhookSubscription sub =
+                new WebhookSubscription("h", "https://x.invalid", "enc(old)", Set.of("*"), "it");
         ReflectionTestUtils.setField(sub, "id", id);
         when(subscriptions.findById(id)).thenReturn(Optional.of(sub));
 
@@ -184,15 +193,17 @@ class WebhookSubscriptionServiceTest {
     @Test
     void enqueueTestDeliveryPersistsASyntheticWebhookTestRow() {
         UUID id = UUID.randomUUID();
-        WebhookSubscription sub = new WebhookSubscription("h", "https://x.invalid", "enc",
-            Set.of("*"), "it");
+        WebhookSubscription sub =
+                new WebhookSubscription("h", "https://x.invalid", "enc", Set.of("*"), "it");
         ReflectionTestUtils.setField(sub, "id", id);
         when(subscriptions.findById(id)).thenReturn(Optional.of(sub));
-        when(deliveries.save(any(WebhookDelivery.class))).thenAnswer(inv -> {
-            WebhookDelivery d = inv.getArgument(0);
-            ReflectionTestUtils.setField(d, "id", UUID.randomUUID());
-            return d;
-        });
+        when(deliveries.save(any(WebhookDelivery.class)))
+                .thenAnswer(
+                        inv -> {
+                            WebhookDelivery d = inv.getArgument(0);
+                            ReflectionTestUtils.setField(d, "id", UUID.randomUUID());
+                            return d;
+                        });
 
         UUID deliveryId = service.enqueueTestDelivery(id);
 
@@ -210,8 +221,8 @@ class WebhookSubscriptionServiceTest {
     @Test
     void deleteRemovesTheTenantsRow() {
         UUID id = UUID.randomUUID();
-        WebhookSubscription sub = new WebhookSubscription("h", "https://x.invalid", "enc",
-            Set.of("*"), "it");
+        WebhookSubscription sub =
+                new WebhookSubscription("h", "https://x.invalid", "enc", Set.of("*"), "it");
         ReflectionTestUtils.setField(sub, "id", id);
         when(subscriptions.findById(id)).thenReturn(Optional.of(sub));
 

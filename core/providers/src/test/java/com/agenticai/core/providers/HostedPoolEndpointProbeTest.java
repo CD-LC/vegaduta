@@ -21,22 +21,21 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 /**
- * {@link HostedPoolEndpointProbe}'s URL shaping is pure static logic (a
- * trailing {@code /v1} is stripped so it never doubles into {@code
- * /v1/v1/chat/completions}; a custom {@code completionsPath} swaps its
- * {@code /chat/completions} tail for {@code /models}), and the two live
- * probes go through an ordinary {@code RestClient} a bound {@code
- * MockRestServiceServer} can serve.
+ * {@link HostedPoolEndpointProbe}'s URL shaping is pure static logic (a trailing {@code /v1} is
+ * stripped so it never doubles into {@code /v1/v1/chat/completions}; a custom {@code
+ * completionsPath} swaps its {@code /chat/completions} tail for {@code /models}), and the two live
+ * probes go through an ordinary {@code RestClient} a bound {@code MockRestServiceServer} can serve.
  */
 class HostedPoolEndpointProbeTest {
 
     /** Public-address resolution without real DNS, for the guard discoverModels consults. */
     private static SsrfGuard publicGuard() {
         return SsrfGuard.of(
-            Set.of(),
-            host -> "10.0.0.5".equals(host)
-                ? new InetAddress[] {InetAddress.getByName("10.0.0.5")}
-                : new InetAddress[] {InetAddress.getByName("93.184.216.34")});
+                Set.of(),
+                host ->
+                        "10.0.0.5".equals(host)
+                                ? new InetAddress[] {InetAddress.getByName("10.0.0.5")}
+                                : new InetAddress[] {InetAddress.getByName("93.184.216.34")});
     }
 
     // --- normalizeBaseUrl / effectiveBaseUrl ---------------------------------
@@ -44,22 +43,34 @@ class HostedPoolEndpointProbeTest {
     @Test
     void normalizeBaseUrlStripsExactlyOneTrailingV1() {
         assertNull(HostedPoolEndpointProbe.normalizeBaseUrl(null));
-        assertEquals("https://x.example", HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1"));
-        assertEquals("https://x.example", HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1/"));
-        assertEquals("https://x.example", HostedPoolEndpointProbe.normalizeBaseUrl("  https://x.example  "));
-        assertEquals("https://x.example/v1/v1",
-            HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1/v1/v1"),
-            "only ONE trailing /v1 is stripped - a doubled one is the bug being prevented");
-        assertEquals("https://x.example/v10", HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v10"));
+        assertEquals(
+                "https://x.example",
+                HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1"));
+        assertEquals(
+                "https://x.example",
+                HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1/"));
+        assertEquals(
+                "https://x.example",
+                HostedPoolEndpointProbe.normalizeBaseUrl("  https://x.example  "));
+        assertEquals(
+                "https://x.example/v1/v1",
+                HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v1/v1/v1"),
+                "only ONE trailing /v1 is stripped - a doubled one is the bug being prevented");
+        assertEquals(
+                "https://x.example/v10",
+                HostedPoolEndpointProbe.normalizeBaseUrl("https://x.example/v10"));
     }
 
     @Test
     void effectiveBaseUrlSkipsNormalizationForACustomCompletionsPath() {
-        assertEquals("https://x.example/v1",
-            HostedPoolEndpointProbe.effectiveBaseUrl("https://x.example/v1", "/v1beta/openai/chat/completions"),
-            "a custom-path row keeps its base URL verbatim");
-        assertEquals("https://x.example",
-            HostedPoolEndpointProbe.effectiveBaseUrl("https://x.example/v1", null));
+        assertEquals(
+                "https://x.example/v1",
+                HostedPoolEndpointProbe.effectiveBaseUrl(
+                        "https://x.example/v1", "/v1beta/openai/chat/completions"),
+                "a custom-path row keeps its base URL verbatim");
+        assertEquals(
+                "https://x.example",
+                HostedPoolEndpointProbe.effectiveBaseUrl("https://x.example/v1", null));
         assertNull(HostedPoolEndpointProbe.effectiveBaseUrl(null, null));
     }
 
@@ -75,13 +86,17 @@ class HostedPoolEndpointProbeTest {
     @Test
     void deriveModelsUrlSwapsTheCompletionsTailForModels() {
         assertEquals(
-            "https://generativelanguage.googleapis.com/v1beta/openai/models",
-            HostedPoolEndpointProbe.deriveModelsUrl(
-                "https://generativelanguage.googleapis.com", "/v1beta/openai/chat/completions"));
-        assertEquals("https://x.example/v1/models",
-            HostedPoolEndpointProbe.deriveModelsUrl("https://x.example/", "/v1/chat/completions"));
-        assertNull(HostedPoolEndpointProbe.deriveModelsUrl("https://x.example", "/custom/path"),
-            "an unusual custom path means no probe is possible");
+                "https://generativelanguage.googleapis.com/v1beta/openai/models",
+                HostedPoolEndpointProbe.deriveModelsUrl(
+                        "https://generativelanguage.googleapis.com",
+                        "/v1beta/openai/chat/completions"));
+        assertEquals(
+                "https://x.example/v1/models",
+                HostedPoolEndpointProbe.deriveModelsUrl(
+                        "https://x.example/", "/v1/chat/completions"));
+        assertNull(
+                HostedPoolEndpointProbe.deriveModelsUrl("https://x.example", "/custom/path"),
+                "an unusual custom path means no probe is possible");
     }
 
     // --- validateKey ----------------------------------------------------------
@@ -90,10 +105,12 @@ class HostedPoolEndpointProbeTest {
     void validateKeyProbesTheConventionalModelsUrlWithTheBearerKey() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
         server.expect(requestTo("https://api.groq.com/openai/v1/models"))
-            .andExpect(header("Authorization", "Bearer key-1"))
-            .andRespond(withSuccess());
+                .andExpect(header("Authorization", "Bearer key-1"))
+                .andRespond(withSuccess());
         assertDoesNotThrow(() -> probe.validateKey("https://api.groq.com/openai", " key-1 ", null));
     }
 
@@ -101,7 +118,9 @@ class HostedPoolEndpointProbeTest {
     void validateKeySendsNoAuthorizationHeaderForABlankKey() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
         server.expect(requestTo("http://local.example/v1/models")).andRespond(withSuccess());
         assertDoesNotThrow(() -> probe.validateKey("http://local.example", " ", null));
     }
@@ -110,8 +129,11 @@ class HostedPoolEndpointProbeTest {
     void validateKeySkipsTheProbeForAnUnprobeableCustomPath() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
-        assertDoesNotThrow(() -> probe.validateKey("https://x.example", "k", "/totally/custom/path"));
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        assertDoesNotThrow(
+                () -> probe.validateKey("https://x.example", "k", "/totally/custom/path"));
         server.verify(); // nothing was requested
     }
 
@@ -119,19 +141,25 @@ class HostedPoolEndpointProbeTest {
     void validateKeyFailsOnARejectedProbeAndOnAnUnreachableHost() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
-        server.expect(requestTo("https://api.groq.com/openai/v1/models")).andRespond(withUnauthorizedRequest());
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        server.expect(requestTo("https://api.groq.com/openai/v1/models"))
+                .andRespond(withUnauthorizedRequest());
         ProviderValidationException rejected =
-            assertThrows(ProviderValidationException.class,
-                () -> probe.validateKey("https://api.groq.com/openai", "bad", null));
+                assertThrows(
+                        ProviderValidationException.class,
+                        () -> probe.validateKey("https://api.groq.com/openai", "bad", null));
         assertTrue(rejected.getMessage().contains("HTTP 401"), rejected.getMessage());
 
         // A closed loopback port is refused immediately - no real network needed.
         HostedPoolEndpointProbe realProbe =
-            new HostedPoolEndpointProbe(RestClient.builder().build(), HostedPoolEndpointProbeTest::publicGuard);
-        ProviderValidationException unreachable = assertThrows(
-            ProviderValidationException.class,
-            () -> realProbe.validateKey("http://127.0.0.1:1", "k", null));
+                new HostedPoolEndpointProbe(
+                        RestClient.builder().build(), HostedPoolEndpointProbeTest::publicGuard);
+        ProviderValidationException unreachable =
+                assertThrows(
+                        ProviderValidationException.class,
+                        () -> realProbe.validateKey("http://127.0.0.1:1", "k", null));
         assertTrue(unreachable.getMessage().contains("Could not reach"), unreachable.getMessage());
     }
 
@@ -141,33 +169,47 @@ class HostedPoolEndpointProbeTest {
     void discoverModelsReturnsTheIdsFromTheDataArray() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
         server.expect(requestTo("https://api.groq.com/openai/v1/models"))
-            .andExpect(header("Authorization", "Bearer k"))
-            .andRespond(withSuccess(
-                "{\"data\":[{\"id\":\"llama-3.1-8b-instant\"},{\"id\":\"\"},{\"no_id\":1}]}",
-                MediaType.APPLICATION_JSON));
-        assertEquals(List.of("llama-3.1-8b-instant"),
-            probe.discoverModels("https://api.groq.com/openai", "k", null));
+                .andExpect(header("Authorization", "Bearer k"))
+                .andRespond(
+                        withSuccess(
+                                "{\"data\":[{\"id\":\"llama-3.1-8b-instant\"},{\"id\":\"\"},{\"no_id\":1}]}",
+                                MediaType.APPLICATION_JSON));
+        assertEquals(
+                List.of("llama-3.1-8b-instant"),
+                probe.discoverModels("https://api.groq.com/openai", "k", null));
     }
 
     @Test
     void discoverModelsDerivesTheModelsUrlForACustomPathRow() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
         server.expect(requestTo("https://generativelanguage.googleapis.com/v1beta/openai/models"))
-            .andRespond(withSuccess("{\"data\":[{\"id\":\"gemini-2.5-flash\"}]}", MediaType.APPLICATION_JSON));
-        assertEquals(List.of("gemini-2.5-flash"),
-            probe.discoverModels(
-                "https://generativelanguage.googleapis.com", "k", "/v1beta/openai/chat/completions"));
+                .andRespond(
+                        withSuccess(
+                                "{\"data\":[{\"id\":\"gemini-2.5-flash\"}]}",
+                                MediaType.APPLICATION_JSON));
+        assertEquals(
+                List.of("gemini-2.5-flash"),
+                probe.discoverModels(
+                        "https://generativelanguage.googleapis.com",
+                        "k",
+                        "/v1beta/openai/chat/completions"));
     }
 
     @Test
     void discoverModelsFailsSoftOnAGuardRefusalAndOnAMissingDataArray() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-        HostedPoolEndpointProbe probe = new HostedPoolEndpointProbe(builder.build(), HostedPoolEndpointProbeTest::publicGuard);
+        HostedPoolEndpointProbe probe =
+                new HostedPoolEndpointProbe(
+                        builder.build(), HostedPoolEndpointProbeTest::publicGuard);
 
         // An IP literal is classified by the guard without any DNS lookup: a
         // private address is refused before the transport, and discovery
@@ -175,7 +217,7 @@ class HostedPoolEndpointProbeTest {
         assertEquals(List.of(), probe.discoverModels("http://10.0.0.5", "k", null));
 
         server.expect(requestTo("https://api.groq.com/openai/v1/models"))
-            .andRespond(withSuccess("{\"nope\":[]}", MediaType.APPLICATION_JSON));
+                .andRespond(withSuccess("{\"nope\":[]}", MediaType.APPLICATION_JSON));
         assertEquals(List.of(), probe.discoverModels("https://api.groq.com/openai", "k", null));
     }
 }

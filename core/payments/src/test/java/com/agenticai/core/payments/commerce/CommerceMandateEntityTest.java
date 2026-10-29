@@ -9,12 +9,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link CommerceMandate}'s lifecycle: an INTENT is born ACTIVE, a CART waits
- * at PENDING_AUTHORIZATION until {@code applyBuyerAuthorization} moves it to
- * AUTHORIZED with the signed sub-document attached, and the terminal marks
- * (capture/fail/refund/revoke) stamp {@code updatedAt} and, for revoke, the
- * who/when/why. {@link CommerceMandateException}'s HTTP mapping is part of
- * the API contract and pinned here too.
+ * {@link CommerceMandate}'s lifecycle: an INTENT is born ACTIVE, a CART waits at
+ * PENDING_AUTHORIZATION until {@code applyBuyerAuthorization} moves it to AUTHORIZED with the
+ * signed sub-document attached, and the terminal marks (capture/fail/refund/revoke) stamp {@code
+ * updatedAt} and, for revoke, the who/when/why. {@link CommerceMandateException}'s HTTP mapping is
+ * part of the API contract and pinned here too.
  */
 class CommerceMandateEntityTest {
 
@@ -119,9 +118,12 @@ class CommerceMandateEntityTest {
         assertEquals(409, new CommerceMandateException("CART_EXPIRED", "x").httpStatus());
         assertEquals(409, new CommerceMandateException("CAPTURE_FAILED", "x").httpStatus());
         assertEquals(400, new CommerceMandateException("SIGNATURE_INVALID", "x").httpStatus());
-        assertEquals(400, new CommerceMandateException("SOME_FUTURE_CODE", "x").httpStatus(),
-            "an unknown code degrades to 400");
-        CommerceMandateException e = new CommerceMandateException("OVER_CEILING", "cart over ceiling");
+        assertEquals(
+                400,
+                new CommerceMandateException("SOME_FUTURE_CODE", "x").httpStatus(),
+                "an unknown code degrades to 400");
+        CommerceMandateException e =
+                new CommerceMandateException("OVER_CEILING", "cart over ceiling");
         assertEquals("OVER_CEILING", e.getCode());
         assertEquals("OVER_CEILING", e.errorCode());
         assertTrue(e.getMessage().contains("cart over ceiling"));

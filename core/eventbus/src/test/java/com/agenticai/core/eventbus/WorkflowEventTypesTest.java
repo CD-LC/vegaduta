@@ -14,22 +14,35 @@ class WorkflowEventTypesTest {
 
     @Test
     void theLiteralsAreTheWireContract() {
-        assertEquals("channel.whatsapp.message.received",
-            WorkflowEventTypes.CHANNEL_WHATSAPP_MESSAGE_RECEIVED);
-        assertEquals("channel.messenger.message.received",
-            WorkflowEventTypes.CHANNEL_MESSENGER_MESSAGE_RECEIVED);
-        assertEquals("channel.instagram.message.received",
-            WorkflowEventTypes.CHANNEL_INSTAGRAM_MESSAGE_RECEIVED);
-        assertEquals("channel.slack.message.received", WorkflowEventTypes.CHANNEL_SLACK_MESSAGE_RECEIVED);
-        assertEquals("channel.discord.message.received",
-            WorkflowEventTypes.CHANNEL_DISCORD_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.whatsapp.message.received",
+                WorkflowEventTypes.CHANNEL_WHATSAPP_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.messenger.message.received",
+                WorkflowEventTypes.CHANNEL_MESSENGER_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.instagram.message.received",
+                WorkflowEventTypes.CHANNEL_INSTAGRAM_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.slack.message.received",
+                WorkflowEventTypes.CHANNEL_SLACK_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.discord.message.received",
+                WorkflowEventTypes.CHANNEL_DISCORD_MESSAGE_RECEIVED);
         assertEquals("channel.x.message.received", WorkflowEventTypes.CHANNEL_X_MESSAGE_RECEIVED);
-        assertEquals("channel.telegram.message.received",
-            WorkflowEventTypes.CHANNEL_TELEGRAM_MESSAGE_RECEIVED);
-        assertEquals("channel.email.message.received", WorkflowEventTypes.CHANNEL_EMAIL_MESSAGE_RECEIVED);
-        assertEquals("channel.teams.message.received", WorkflowEventTypes.CHANNEL_TEAMS_MESSAGE_RECEIVED);
-        assertEquals("channel.sms.message.received", WorkflowEventTypes.CHANNEL_SMS_MESSAGE_RECEIVED);
-        assertEquals("document.generation.completed", WorkflowEventTypes.DOCUMENT_GENERATION_COMPLETED);
+        assertEquals(
+                "channel.telegram.message.received",
+                WorkflowEventTypes.CHANNEL_TELEGRAM_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.email.message.received",
+                WorkflowEventTypes.CHANNEL_EMAIL_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.teams.message.received",
+                WorkflowEventTypes.CHANNEL_TEAMS_MESSAGE_RECEIVED);
+        assertEquals(
+                "channel.sms.message.received", WorkflowEventTypes.CHANNEL_SMS_MESSAGE_RECEIVED);
+        assertEquals(
+                "document.generation.completed", WorkflowEventTypes.DOCUMENT_GENERATION_COMPLETED);
         assertEquals("agent.message.completed", WorkflowEventTypes.AGENT_MESSAGE_COMPLETED);
         assertEquals("email.reply_received", WorkflowEventTypes.EMAIL_REPLY_RECEIVED);
         assertEquals("email.bounced", WorkflowEventTypes.EMAIL_BOUNCED);
@@ -42,10 +55,12 @@ class WorkflowEventTypesTest {
     void everyFieldIsAPublicStaticConstantSoTheClassStaysUninstantiable() throws Exception {
         for (var field : WorkflowEventTypes.class.getDeclaredFields()) {
             int modifiers = field.getModifiers();
-            assertEquals(true,
-                Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)
-                    && Modifier.isFinal(modifiers),
-                field.getName() + " must be a public static final constant");
+            assertEquals(
+                    true,
+                    Modifier.isPublic(modifiers)
+                            && Modifier.isStatic(modifiers)
+                            && Modifier.isFinal(modifiers),
+                    field.getName() + " must be a public static final constant");
         }
         var ctor = WorkflowEventTypes.class.getDeclaredConstructor();
         assertEquals(true, Modifier.isPrivate(ctor.getModifiers()));

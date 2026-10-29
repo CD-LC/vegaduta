@@ -55,13 +55,13 @@ class N8nSubNodeLimitsTest {
 
     @Test
     void warningTextNamesTheLimitAndTheParent() {
-        assertThat(
-                        N8nSubNodeLimits.warning(
-                                N8nSubNodeLimits.Verdict.WARN_TOTAL_FULL, "agent"))
+        assertThat(N8nSubNodeLimits.warning(N8nSubNodeLimits.Verdict.WARN_TOTAL_FULL, "agent"))
                 .contains(String.valueOf(N8nSubNodeLimits.TOTAL));
         String parentWarning =
                 N8nSubNodeLimits.warning(N8nSubNodeLimits.Verdict.WARN_PARENT_FULL, "my agent");
-        assertThat(parentWarning).contains("my agent").contains(String.valueOf(N8nSubNodeLimits.PER_PARENT));
+        assertThat(parentWarning)
+                .contains("my agent")
+                .contains(String.valueOf(N8nSubNodeLimits.PER_PARENT));
         // KEEP / SKIP share the per-parent wording (the caller only asks for WARN_*).
         assertThat(N8nSubNodeLimits.warning(N8nSubNodeLimits.Verdict.SKIP, "x"))
                 .contains(String.valueOf(N8nSubNodeLimits.PER_PARENT));

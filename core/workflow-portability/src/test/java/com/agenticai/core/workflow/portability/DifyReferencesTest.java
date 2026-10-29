@@ -104,8 +104,7 @@ class DifyReferencesTest {
     void selectorExpressionReadsAnArraySelector() throws Exception {
         RecordingSink sink = new RecordingSink();
         JsonNode selector = json("['llm1', 'text']");
-        assertThat(refs().selectorExpression(sink, selector))
-                .isEqualTo("$node[\"LLM Step\"].text");
+        assertThat(refs().selectorExpression(sink, selector)).isEqualTo("$node[\"LLM Step\"].text");
         assertThat(sink.refsSeen).isEqualTo(1);
 
         assertThat(refs().selectorExpression(new RecordingSink(), json("['only']"))).isNull();
@@ -150,8 +149,7 @@ class DifyReferencesTest {
     @Test
     void conditionFailsForAnUnknownOperatorOrOperand() throws Exception {
         assertThat(
-                        refs()
-                                .condition(
+                        refs().condition(
                                         new RecordingSink(),
                                         json(
                                                 "{'comparison_operator': 'about',"
@@ -162,8 +160,7 @@ class DifyReferencesTest {
         assertThat(refs().condition(new RecordingSink(), json("{'value': 'x'}"))).isNull();
         // Left-hand side that cannot be expressed.
         assertThat(
-                        refs()
-                                .condition(
+                        refs().condition(
                                         new RecordingSink(),
                                         json(
                                                 "{'comparison_operator': 'is',"

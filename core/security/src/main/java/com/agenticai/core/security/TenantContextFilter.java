@@ -62,8 +62,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     /**
      * @param tenantClaim the JWT claim carrying the tenant/schema id - {@code
-     *     app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank
-     *     falls back to the Keycloak default {@code tenant_id}.
+     *     app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank falls back to the
+     *     Keycloak default {@code tenant_id}.
      */
     public TenantContextFilter(
             Optional<TenantStatusGuard> tenantStatusGuard,
@@ -135,13 +135,13 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (tenantMissing && !hasPlatformAdminAuthority(jwtAuth) && !onboardingPath) {
                     log.warn(
                             "Rejected {} {} - authenticated JWT for subject '{}' carries no"
-                                + " '{}' claim and no ROLE_platform-admin authority. The"
-                                + " identity-provider user is missing the attribute mapped to the"
-                                + " tenant claim (Keycloak: repair with"
-                                + " scripts/keycloak/check-tenant-claim.ps1), or the token predates"
-                                + " that attribute and the caller needs to log out and back in for"
-                                + " a fresh one. Returning 403 instead of letting every"
-                                + " tenant-scoped controller fail with a raw 500.",
+                                    + " '{}' claim and no ROLE_platform-admin authority. The"
+                                    + " identity-provider user is missing the attribute mapped to the"
+                                    + " tenant claim (Keycloak: repair with"
+                                    + " scripts/keycloak/check-tenant-claim.ps1), or the token predates"
+                                    + " that attribute and the caller needs to log out and back in for"
+                                    + " a fresh one. Returning 403 instead of letting every"
+                                    + " tenant-scoped controller fail with a raw 500.",
                             request.getMethod(),
                             LogMasking.path(request.getRequestURI()),
                             jwt.getSubject(),
@@ -217,9 +217,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                         && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
                             "Rejected {} {} - tenant '{}' resolved from the JWT is not usable"
-                                + " (provisioning never completed, or was rolled back). Returning"
-                                + " 403 instead of letting every downstream schema-scoped query"
-                                + " fail with 'relation does not exist'.",
+                                    + " (provisioning never completed, or was rolled back). Returning"
+                                    + " 403 instead of letting every downstream schema-scoped query"
+                                    + " fail with 'relation does not exist'.",
                             request.getMethod(),
                             LogMasking.path(request.getRequestURI()),
                             tenantId);
@@ -242,7 +242,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 String tenantId = apiKeyAuth.getTenantId();
                 String subject = apiKeyAuth.getPrincipal().toString();
                 TenantContext.set(
-                        TenantContext.of(tenantId, subject,
+                        TenantContext.of(
+                                tenantId,
+                                subject,
                                 apiKeyAuth.getAuthorities().stream()
                                         .map(GrantedAuthority::getAuthority)
                                         .collect(Collectors.toUnmodifiableSet())));
@@ -259,8 +261,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     reject(response, TENANT_UNUSABLE_BODY, request);
                     return;
                 }
-                if (tenantStatusGuard.isPresent()
-                        && !tenantStatusGuard.get().isUsable(tenantId)) {
+                if (tenantStatusGuard.isPresent() && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
                             "Rejected {} {} - API key '{}' resolved tenant '{}' which is not usable.",
                             request.getMethod(),
@@ -335,9 +336,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 // instanceof alone doesn't surface anywhere else.
                 log.warn(
                         "TenantContextFilter saw a non-JWT Authentication ({}) for {} {} -"
-                            + " TenantContext will be empty for this request, and any tenant-scoped"
-                            + " code downstream (UserAdminController, Hibernate's schema resolver,"
-                            + " etc.) will fail. Authorities: {}",
+                                + " TenantContext will be empty for this request, and any tenant-scoped"
+                                + " code downstream (UserAdminController, Hibernate's schema resolver,"
+                                + " etc.) will fail. Authorities: {}",
                         authentication.getClass().getName(),
                         request.getMethod(),
                         LogMasking.path(request.getRequestURI()),

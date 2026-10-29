@@ -62,7 +62,8 @@ class ElevenLabsCredentialTest {
     @Test
     void credentialStatusHasExactlyTheTwoStates() {
         assertThat(ElevenLabsCredentialStatus.values())
-                .containsExactly(ElevenLabsCredentialStatus.ACTIVE, ElevenLabsCredentialStatus.INACTIVE);
+                .containsExactly(
+                        ElevenLabsCredentialStatus.ACTIVE, ElevenLabsCredentialStatus.INACTIVE);
     }
 
     @Test

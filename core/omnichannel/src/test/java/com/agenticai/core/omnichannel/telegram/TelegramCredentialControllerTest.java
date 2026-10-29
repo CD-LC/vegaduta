@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/** {@link TelegramCredentialController}: activate/current/disconnect over the credential service. */
+/**
+ * {@link TelegramCredentialController}: activate/current/disconnect over the credential service.
+ */
 class TelegramCredentialControllerTest {
 
     private TelegramCredentialService credentialService;
@@ -33,8 +35,12 @@ class TelegramCredentialControllerTest {
         TelegramActivationRequest request = new TelegramActivationRequest("bot-token");
         TelegramCredentialResponse response =
                 new TelegramCredentialResponse(
-                        UUID.randomUUID(), "12", "help_bot",
-                        TelegramCredentialStatus.ACTIVE, Instant.now(), Instant.now());
+                        UUID.randomUUID(),
+                        "12",
+                        "help_bot",
+                        TelegramCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        Instant.now());
         when(credentialService.activate(request)).thenReturn(response);
 
         ResponseEntity<TelegramCredentialResponse> result = controller.activate(request);
@@ -47,8 +53,12 @@ class TelegramCredentialControllerTest {
     void currentReturns200WhenConnectedAnd204WhenNot() {
         TelegramCredentialResponse response =
                 new TelegramCredentialResponse(
-                        UUID.randomUUID(), "12", "help_bot",
-                        TelegramCredentialStatus.ACTIVE, Instant.now(), null);
+                        UUID.randomUUID(),
+                        "12",
+                        "help_bot",
+                        TelegramCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        null);
         when(credentialService.current()).thenReturn(Optional.of(response));
 
         ResponseEntity<TelegramCredentialResponse> ok = controller.current();

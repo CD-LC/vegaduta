@@ -15,13 +15,15 @@ class VoiceSpeechExceptionTest {
     void failureIsCarriedThroughBothConstructors() {
         VoiceSpeechException notConfigured =
                 new VoiceSpeechException(VoiceSpeechException.Failure.NOT_CONFIGURED, "no key");
-        assertThat(notConfigured.getFailure()).isEqualTo(VoiceSpeechException.Failure.NOT_CONFIGURED);
+        assertThat(notConfigured.getFailure())
+                .isEqualTo(VoiceSpeechException.Failure.NOT_CONFIGURED);
         assertThat(notConfigured.getMessage()).isEqualTo("no key");
         assertThat(notConfigured.getCause()).isNull();
 
         RuntimeException upstream = new RuntimeException("boom");
         VoiceSpeechException failed =
-                new VoiceSpeechException(VoiceSpeechException.Failure.UPSTREAM_FAILED, "bad call", upstream);
+                new VoiceSpeechException(
+                        VoiceSpeechException.Failure.UPSTREAM_FAILED, "bad call", upstream);
         assertThat(failed.getFailure()).isEqualTo(VoiceSpeechException.Failure.UPSTREAM_FAILED);
         assertThat(failed.getMessage()).isEqualTo("bad call");
         assertThat(failed.getCause()).isSameAs(upstream);

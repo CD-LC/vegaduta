@@ -16,10 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The approval-gate executor for {@code channel.slack.send}: the payload JSON is parsed
- * fail-fast (a malformed payload is NOT retryable), the send goes through {@link SlackApiClient}
- * with the tenant's decrypted bot token, a send failure IS retryable, and a success is recorded
- * in the outbound log.
+ * The approval-gate executor for {@code channel.slack.send}: the payload JSON is parsed fail-fast
+ * (a malformed payload is NOT retryable), the send goes through {@link SlackApiClient} with the
+ * tenant's decrypted bot token, a send failure IS retryable, and a success is recorded in the
+ * outbound log.
  */
 class SlackChannelAdapterTest {
 

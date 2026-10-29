@@ -14,12 +14,11 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The run's state machine lives in the entity so no caller can forget a guard;
- * these tests pin the legal transitions, the terminal-state refusals, and the
- * trigger-time snapshots (mode, judge config, agent config hash) a finished run
- * must keep verbatim. {@link EvalMode}'s parsing rules and {@link
- * CanonicalJson}'s canonical form are exercised alongside, since the entity is
- * their main consumer.
+ * The run's state machine lives in the entity so no caller can forget a guard; these tests pin the
+ * legal transitions, the terminal-state refusals, and the trigger-time snapshots (mode, judge
+ * config, agent config hash) a finished run must keep verbatim. {@link EvalMode}'s parsing rules
+ * and {@link CanonicalJson}'s canonical form are exercised alongside, since the entity is their
+ * main consumer.
  */
 class EvalRunTest {
 
@@ -27,7 +26,8 @@ class EvalRunTest {
     private static final UUID AGENT = UUID.randomUUID();
 
     private static EvalRun queuedRun() {
-        return new EvalRun(DATASET, AGENT, "tenant-1", "tester@example.com", "tenant-admin", 0.7, 5);
+        return new EvalRun(
+                DATASET, AGENT, "tenant-1", "tester@example.com", "tenant-admin", 0.7, 5);
     }
 
     // ---------------------------------------------------------------- lifecycle
@@ -49,8 +49,10 @@ class EvalRunTest {
         assertEquals(0, BigDecimal.valueOf(5.00).compareTo(run.getBudgetUsd()));
         assertFalse(run.isCancelRequested());
         assertFalse(run.isAutoApproved());
-        assertEquals(EvalMode.QUICK, run.getEvalMode(),
-            "a run with no bound mode falls back to QUICK, the cheap default");
+        assertEquals(
+                EvalMode.QUICK,
+                run.getEvalMode(),
+                "a run with no bound mode falls back to QUICK, the cheap default");
         assertNotNull(run.getCreatedAt());
         assertNull(run.getStartedAt());
         assertNull(run.getFinishedAt());
@@ -79,19 +81,26 @@ class EvalRunTest {
     void illegalTransitionsAreRefusedFromTheEntityNotTheCaller() {
         EvalRun run = queuedRun();
 
-        assertThrows(IllegalStateException.class,
-            () -> run.complete(0.5, 1, 0, 0, EvalRunVerdict.PASSED),
-            "complete() requires RUNNING - a queued run cannot skip pickup");
+        assertThrows(
+                IllegalStateException.class,
+                () -> run.complete(0.5, 1, 0, 0, EvalRunVerdict.PASSED),
+                "complete() requires RUNNING - a queued run cannot skip pickup");
 
         run.markRunning(null);
-        assertThrows(IllegalStateException.class, () -> run.markRunning("j"),
-            "a running run cannot be picked up twice");
+        assertThrows(
+                IllegalStateException.class,
+                () -> run.markRunning("j"),
+                "a running run cannot be picked up twice");
 
         run.complete(0.9, 5, 0, 0, EvalRunVerdict.PASSED);
-        assertThrows(IllegalStateException.class, () -> run.fail("too late"),
-            "a terminal run cannot fail");
-        assertThrows(IllegalStateException.class, run::markCancelled,
-            "a terminal run cannot be cancelled");
+        assertThrows(
+                IllegalStateException.class,
+                () -> run.fail("too late"),
+                "a terminal run cannot fail");
+        assertThrows(
+                IllegalStateException.class,
+                run::markCancelled,
+                "a terminal run cannot be cancelled");
     }
 
     @Test
@@ -114,8 +123,10 @@ class EvalRunTest {
         run.requestCancel("ops@example.com");
         assertTrue(run.isCancelRequested());
         assertEquals("ops@example.com", run.getCancelRequestedBy());
-        assertEquals(EvalRunStatus.QUEUED, run.getStatus(),
-            "requestCancel never writes status - only the owning worker does");
+        assertEquals(
+                EvalRunStatus.QUEUED,
+                run.getStatus(),
+                "requestCancel never writes status - only the owning worker does");
 
         run.markRunning("j");
         run.cancelWithNote("budget cap exceeded");
@@ -129,8 +140,8 @@ class EvalRunTest {
     void runConfigIsSnapshottedBeforeFirstSave() {
         EvalRun run = queuedRun();
 
-        run.applyRunConfig("abc123hash", "requested-judge", true, 3,
-            BigDecimal.valueOf(2.50), "idem-key-1");
+        run.applyRunConfig(
+                "abc123hash", "requested-judge", true, 3, BigDecimal.valueOf(2.50), "idem-key-1");
 
         assertEquals("abc123hash", run.getDatasetHash());
         assertEquals("requested-judge", run.getRequestedJudgeModel());
@@ -159,8 +170,9 @@ class EvalRunTest {
     @Test
     void theAgentConfigSnapshotIsStoredAsCanonicalJsonPlusItsHash() {
         EvalRun run = queuedRun();
-        AgentConfigSnapshot snapshot = new AgentConfigSnapshot(
-            "model-x", 0.7, null, 512, 42, "prompt-sha", List.of("tool-a", "tool-b"));
+        AgentConfigSnapshot snapshot =
+                new AgentConfigSnapshot(
+                        "model-x", 0.7, null, 512, 42, "prompt-sha", List.of("tool-a", "tool-b"));
 
         run.applyAgentSnapshot(snapshot);
 
@@ -181,8 +193,8 @@ class EvalRunTest {
         assertEquals(Optional.empty(), EvalMode.parse(null));
         assertEquals(Optional.empty(), EvalMode.parse("   "));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> EvalMode.parse("turbo"));
+        IllegalArgumentException thrown =
+                assertThrows(IllegalArgumentException.class, () -> EvalMode.parse("turbo"));
         assertTrue(thrown.getMessage().contains("FULL or QUICK"));
     }
 
@@ -220,11 +232,12 @@ class EvalRunTest {
 
     @Test
     void theSnapshotHashCoversTheCanonicalDocumentOnly() {
-        AgentConfigSnapshot snapshot = new AgentConfigSnapshot(
-            "m", null, null, null, null, null, null);
+        AgentConfigSnapshot snapshot =
+                new AgentConfigSnapshot("m", null, null, null, null, null, null);
 
         assertEquals(snapshot.hash(), CanonicalJson.sha256Hex(snapshot.canonicalJson()));
-        assertTrue(snapshot.canonicalJson().contains("\"tools\":[]"),
-            "a null allow-list serialises as empty - 'no restriction', not 'no tools'");
+        assertTrue(
+                snapshot.canonicalJson().contains("\"tools\":[]"),
+                "a null allow-list serialises as empty - 'no restriction', not 'no tools'");
     }
 }

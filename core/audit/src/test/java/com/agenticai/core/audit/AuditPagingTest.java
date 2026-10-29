@@ -13,8 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 
 /**
- * {@link AuditPaging}: the {@code limit}/{@code offset} clamps, the {@code X-Total-Count} /
- * {@code X-Has-More} header contract (the count only runs when it can change the answer), and the
+ * {@link AuditPaging}: the {@code limit}/{@code offset} clamps, the {@code X-Total-Count} / {@code
+ * X-Has-More} header contract (the count only runs when it can change the answer), and the
  * exact-offset {@link Pageable} {@code PageRequest} cannot express.
  */
 class AuditPagingTest {
@@ -42,7 +42,10 @@ class AuditPagingTest {
 
         ResponseEntity<List<String>> response =
                 AuditPaging.respond(
-                        List.of("a", "b"), 50, 0, () -> {
+                        List.of("a", "b"),
+                        50,
+                        0,
+                        () -> {
                             counted.set(true);
                             return 999L;
                         });
@@ -63,20 +66,20 @@ class AuditPagingTest {
 
     @Test
     void anEmptyPageStillRunsTheCount() {
-        ResponseEntity<List<String>> response =
-                AuditPaging.respond(List.of(), 50, 200, () -> 210L);
+        ResponseEntity<List<String>> response = AuditPaging.respond(List.of(), 50, 200, () -> 210L);
 
         assertEquals("210", response.getHeaders().getFirst("X-Total-Count"));
-        assertEquals("true", response.getHeaders().getFirst("X-Has-More"),
-            "210 total rows still sit ahead of the 200 offset - there is more to page");
+        assertEquals(
+                "true",
+                response.getHeaders().getFirst("X-Has-More"),
+                "210 total rows still sit ahead of the 200 offset - there is more to page");
     }
 
     @Test
     void totalIsNeverReportedBelowWhatTheCallerHasAlreadySeen() {
         // A shrinking table: count says 3 but the page already exposed 10
         // rows - the header must not lie below seen.
-        ResponseEntity<List<String>> response =
-                AuditPaging.respond(List.of("x"), 5, 9, () -> 3L);
+        ResponseEntity<List<String>> response = AuditPaging.respond(List.of("x"), 5, 9, () -> 3L);
 
         assertEquals("10", response.getHeaders().getFirst("X-Total-Count"));
         assertEquals("false", response.getHeaders().getFirst("X-Has-More"));

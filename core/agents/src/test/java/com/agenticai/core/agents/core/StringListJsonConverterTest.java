@@ -35,8 +35,9 @@ class StringListJsonConverterTest {
         assertTrue(converter.convertToEntityAttribute("").isEmpty());
         assertTrue(converter.convertToEntityAttribute("   ").isEmpty());
         assertTrue(converter.convertToEntityAttribute("not json").isEmpty());
-        assertTrue(converter.convertToEntityAttribute("[{\"a\":1}]").isEmpty(),
-            "a JSON array of objects is unreadable as List<String>");
+        assertTrue(
+                converter.convertToEntityAttribute("[{\"a\":1}]").isEmpty(),
+                "a JSON array of objects is unreadable as List<String>");
         assertTrue(converter.convertToEntityAttribute("{\"a\":1}").isEmpty());
     }
 

@@ -21,8 +21,15 @@ class AgentVersionTest {
         String configJson = "{\"provider\":\"ANTHROPIC\",\"model\":\"claude-opus-4-8\"}";
 
         AgentVersion v =
-            AgentVersion.snapshot(agentId, 3, configJson, "Helper", "ANTHROPIC", "claude-opus-4-8",
-                "Model change", "user-sub");
+                AgentVersion.snapshot(
+                        agentId,
+                        3,
+                        configJson,
+                        "Helper",
+                        "ANTHROPIC",
+                        "claude-opus-4-8",
+                        "Model change",
+                        "user-sub");
 
         assertEquals(agentId, v.getAgentId());
         assertEquals(3, v.getVersionNumber());
@@ -33,7 +40,8 @@ class AgentVersionTest {
         assertEquals("Model change", v.getChangeSummary());
         assertEquals("user-sub", v.getCreatedBy());
         assertNull(v.getLabel());
-        assertNotNull(v.getCreatedAt(), "snapshot stamps its own time - a caller cannot backdate it");
+        assertNotNull(
+                v.getCreatedAt(), "snapshot stamps its own time - a caller cannot backdate it");
         // The hash is computed inside the factory so no writer can forget it.
         assertEquals(VersionHashing.sha256Hex(configJson), v.getBundleHash());
     }
@@ -43,22 +51,24 @@ class AgentVersionTest {
         String longSummary = "x".repeat(600);
 
         AgentVersion v =
-            AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", longSummary, null);
+                AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", longSummary, null);
 
         assertEquals(500, v.getChangeSummary().length());
         // Exactly at the limit and null both pass through untouched.
-        assertEquals("y".repeat(500),
-            AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", "y".repeat(500), null)
-                .getChangeSummary());
+        assertEquals(
+                "y".repeat(500),
+                AgentVersion.snapshot(
+                                UUID.randomUUID(), 1, "{}", "n", "p", "m", "y".repeat(500), null)
+                        .getChangeSummary());
         assertNull(
-            AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", null, null)
-                .getChangeSummary());
+                AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", null, null)
+                        .getChangeSummary());
     }
 
     @Test
     void theLabelIsTheOnlyMutableField() {
         AgentVersion v =
-            AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", "s", null);
+                AgentVersion.snapshot(UUID.randomUUID(), 1, "{}", "n", "p", "m", "s", null);
 
         v.assignLabel(AgentVersionLabel.PRODUCTION);
         assertEquals(AgentVersionLabel.PRODUCTION, v.getLabel());

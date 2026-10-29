@@ -47,10 +47,13 @@ class DeviceAuthResolverTest {
         when(deviceRepository.findByDeviceToken("tok-1")).thenReturn(Optional.of(device));
 
         AtomicReference<TenantContext> inside = new AtomicReference<>();
-        MobileDevice result = resolver.run("tok-1", d -> {
-            inside.set(TenantContext.current().orElseThrow());
-            return d;
-        });
+        MobileDevice result =
+                resolver.run(
+                        "tok-1",
+                        d -> {
+                            inside.set(TenantContext.current().orElseThrow());
+                            return d;
+                        });
 
         assertThat(result).isSameAs(device);
         assertThat(inside.get().getTenantId()).isEqualTo("tenant_acme");

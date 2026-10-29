@@ -29,7 +29,8 @@ class ImageGenApiExceptionTest {
 
     @Test
     void notConfiguredMapsTo400WithoutAWarn() {
-        ImageGenNotConfiguredException e = new ImageGenNotConfiguredException("no OPENAI credential");
+        ImageGenNotConfiguredException e =
+                new ImageGenNotConfiguredException("no OPENAI credential");
 
         assertThat(e.getMessage()).isEqualTo("no OPENAI credential");
         assertThat(e.httpStatus()).isEqualTo(400);

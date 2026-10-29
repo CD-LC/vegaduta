@@ -15,8 +15,7 @@ class GraphFactTest {
     void asSentenceLowercasesTheRelationAndUnsnakesIt() {
         assertThat(new GraphFact("Priya", "MANAGER_OF_BY", "Raj").asSentence())
                 .isEqualTo("Priya manager of by Raj");
-        assertThat(new GraphFact("User", "LIKES", "Tea").asSentence())
-                .isEqualTo("User likes Tea");
+        assertThat(new GraphFact("User", "LIKES", "Tea").asSentence()).isEqualTo("User likes Tea");
     }
 
     @Test

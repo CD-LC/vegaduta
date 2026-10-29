@@ -12,9 +12,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * One persisted row per real LLM call: the 21-argument constructor writes every column, the
- * pre-C1 20-argument one records a null {@code agent_version_id} as an honest "unknown", and
- * {@code reasoningTokens} is the only mutable field (null = not reported, never a fabricated 0).
+ * One persisted row per real LLM call: the 21-argument constructor writes every column, the pre-C1
+ * 20-argument one records a null {@code agent_version_id} as an honest "unknown", and {@code
+ * reasoningTokens} is the only mutable field (null = not reported, never a fabricated 0).
  */
 class LlmCallLogTest {
 
@@ -24,12 +24,29 @@ class LlmCallLogTest {
 
     @Test
     void theFullConstructorPopulatesEveryGetter() {
-        LlmCallLog log = new LlmCallLog(
-            AGENT, "s-1", ProviderName.ANTHROPIC, "claude-sonnet-5",
-            100L, 50L, 150L, new BigDecimal("0.002500"),
-            false, "boom", "req-9", "IllegalStateException", "trace...",
-            42L, STARTED, "exp=a", "t".repeat(32), "s".repeat(16),
-            7L, 11L, VERSION);
+        LlmCallLog log =
+                new LlmCallLog(
+                        AGENT,
+                        "s-1",
+                        ProviderName.ANTHROPIC,
+                        "claude-sonnet-5",
+                        100L,
+                        50L,
+                        150L,
+                        new BigDecimal("0.002500"),
+                        false,
+                        "boom",
+                        "req-9",
+                        "IllegalStateException",
+                        "trace...",
+                        42L,
+                        STARTED,
+                        "exp=a",
+                        "t".repeat(32),
+                        "s".repeat(16),
+                        7L,
+                        11L,
+                        VERSION);
 
         assertNull(log.getId(), "the id is database-generated");
         assertEquals(AGENT, log.getAgentId());
@@ -57,11 +74,28 @@ class LlmCallLogTest {
 
     @Test
     void theLegacyConstructorLeavesTheVersionPinNull() {
-        LlmCallLog log = new LlmCallLog(
-            null, null, ProviderName.OPENAI, "gpt-5",
-            null, null, null, null,
-            true, null, null, null, null,
-            0L, STARTED, null, null, null, null, null);
+        LlmCallLog log =
+                new LlmCallLog(
+                        null,
+                        null,
+                        ProviderName.OPENAI,
+                        "gpt-5",
+                        null,
+                        null,
+                        null,
+                        null,
+                        true,
+                        null,
+                        null,
+                        null,
+                        null,
+                        0L,
+                        STARTED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         assertNull(log.getAgentId());
         assertNull(log.getSessionId());
@@ -74,11 +108,29 @@ class LlmCallLogTest {
 
     @Test
     void reasoningTokensIsTheOnlyMutableField() {
-        LlmCallLog log = new LlmCallLog(
-            AGENT, null, ProviderName.OPENAI, "gpt-5",
-            null, null, null, null,
-            true, null, null, null, null,
-            1L, STARTED, null, null, null, null, null, null);
+        LlmCallLog log =
+                new LlmCallLog(
+                        AGENT,
+                        null,
+                        ProviderName.OPENAI,
+                        "gpt-5",
+                        null,
+                        null,
+                        null,
+                        null,
+                        true,
+                        null,
+                        null,
+                        null,
+                        null,
+                        1L,
+                        STARTED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         assertNull(log.getReasoningTokens());
         log.setReasoningTokens(640L);

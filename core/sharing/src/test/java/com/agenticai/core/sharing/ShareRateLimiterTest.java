@@ -20,9 +20,9 @@ import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * {@link ShareRateLimiter}: per {@code tenantId:subject} fixed windows with independent read and
- * write caps, no limiting at all without a tenant context (authentication is SecurityConfig's
- * job, not this throttle's), and the Redis-down degradation to the in-process limiter rather
- * than failing open.
+ * write caps, no limiting at all without a tenant context (authentication is SecurityConfig's job,
+ * not this throttle's), and the Redis-down degradation to the in-process limiter rather than
+ * failing open.
  */
 class ShareRateLimiterTest {
 
@@ -115,10 +115,8 @@ class ShareRateLimiterTest {
     @Test
     void eachCallersBucketIsIndependent() {
         loginAs("tenant-1", "alice");
-        when(valueOperations.increment("agentic:share-rate:write:tenant-1:alice"))
-                .thenReturn(3L);
-        when(valueOperations.increment("agentic:share-rate:write:tenant-1:bob"))
-                .thenReturn(1L);
+        when(valueOperations.increment("agentic:share-rate:write:tenant-1:alice")).thenReturn(3L);
+        when(valueOperations.increment("agentic:share-rate:write:tenant-1:bob")).thenReturn(1L);
 
         assertThrows(ShareRateLimitExceededException.class, limiter::assertGrantWriteAllowed);
 

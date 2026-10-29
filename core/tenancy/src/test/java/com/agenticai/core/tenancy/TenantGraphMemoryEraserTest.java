@@ -19,19 +19,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link TenantGraphMemoryEraser}: the SEC-001 never-drop-another-tenant's-schema guard, the
- * {@code drop_graph} path when the AGE graph is registered, the plain {@code DROP SCHEMA}
- * fallback when it is not (or when {@code drop_graph} itself fails), and best-effort {@code
- * false} on any database problem - the postmortem contract that a stuck {@code _kg} schema must
- * never again leave a tenant unerasable.
+ * {@link TenantGraphMemoryEraser}: the SEC-001 never-drop-another-tenant's-schema guard, the {@code
+ * drop_graph} path when the AGE graph is registered, the plain {@code DROP SCHEMA} fallback when it
+ * is not (or when {@code drop_graph} itself fails), and best-effort {@code false} on any database
+ * problem - the postmortem contract that a stuck {@code _kg} schema must never again leave a tenant
+ * unerasable.
  */
 class TenantGraphMemoryEraserTest {
 
     private static final String GRAPH_REGISTERED =
             "SELECT COUNT(*) FROM ag_catalog.ag_graph WHERE name::text = ?";
     private static final String DROP_GRAPH = "SELECT * FROM ag_catalog.drop_graph(?::name, true)";
-    private static final String AGE_PROBE =
-            "SELECT to_regclass('ag_catalog.ag_graph') IS NOT NULL";
+    private static final String AGE_PROBE = "SELECT to_regclass('ag_catalog.ag_graph') IS NOT NULL";
 
     private TenantRepository tenantRepository;
     private DataSource dataSource;
@@ -70,8 +69,7 @@ class TenantGraphMemoryEraserTest {
         when(probe.getBoolean(1)).thenReturn(ageInstalled);
         ResultSet empty = emptyResultSet();
         org.mockito.Mockito.doAnswer(
-                        invocation ->
-                                AGE_PROBE.equals(invocation.getArgument(0)) ? probe : empty)
+                        invocation -> AGE_PROBE.equals(invocation.getArgument(0)) ? probe : empty)
                 .when(statement)
                 .executeQuery(anyString());
     }

@@ -94,9 +94,9 @@ public final class GuardedHttpClientBuilder implements HttpClient.Builder {
     /**
      * Per-response body byte cap on every client this builder hands out ({@code <= 0} means
      * unlimited, the default). Not part of {@link HttpClient.Builder} - set it on this concrete
-     * type before {@link #build()}: a peer streaming past the cap fails the body future with
-     * {@link GuardedJdkHttpClient.ResponseSizeExceededException} rather than growing the heap
-     * (the remote-MCP heap-exhaustion fix).
+     * type before {@link #build()}: a peer streaming past the cap fails the body future with {@link
+     * GuardedJdkHttpClient.ResponseSizeExceededException} rather than growing the heap (the
+     * remote-MCP heap-exhaustion fix).
      */
     public GuardedHttpClientBuilder maxResponseBytes(long maxResponseBytes) {
         this.maxResponseBytes = maxResponseBytes;

@@ -18,13 +18,11 @@ class BetaSamplerTest {
     @Test
     void everyDrawStaysInsideTheUnitIntervalAcrossPosteriorShapes() {
         Random rng = new Random(42);
-        for (double[] ab : new double[][] {
-            {1.0, 1.0}, {0.5, 0.5}, {0.1, 5.0}, {8.0, 2.0}, {30.0, 30.0}
-        }) {
+        for (double[] ab :
+                new double[][] {{1.0, 1.0}, {0.5, 0.5}, {0.1, 5.0}, {8.0, 2.0}, {30.0, 30.0}}) {
             for (int i = 0; i < 200; i++) {
                 double s = BetaSampler.sampleBeta(ab[0], ab[1], rng);
-                assertTrue(s >= 0.0 && s <= 1.0,
-                    "Beta(" + ab[0] + ", " + ab[1] + ") sampled " + s);
+                assertTrue(s >= 0.0 && s <= 1.0, "Beta(" + ab[0] + ", " + ab[1] + ") sampled " + s);
             }
         }
     }
@@ -34,8 +32,8 @@ class BetaSamplerTest {
         Random a = new Random(7);
         Random b = new Random(7);
         for (int i = 0; i < 50; i++) {
-            assertEquals(BetaSampler.sampleBeta(2.0, 3.0, a),
-                BetaSampler.sampleBeta(2.0, 3.0, b), 0.0);
+            assertEquals(
+                    BetaSampler.sampleBeta(2.0, 3.0, a), BetaSampler.sampleBeta(2.0, 3.0, b), 0.0);
         }
     }
 

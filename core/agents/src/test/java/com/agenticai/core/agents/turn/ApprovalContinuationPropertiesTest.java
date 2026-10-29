@@ -8,10 +8,11 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ApprovalContinuationProperties} reads its defaults from {@code /approval/continuation.properties}
- * on the classpath - the values a slim context (or a tenant override) starts from. These pin that the
- * resource is on the module's classpath, that the numeric setters clamp at 0, and that the {@code {x}}
- * placeholders in the note templates are filled exactly as the turn code relies on.
+ * {@link ApprovalContinuationProperties} reads its defaults from {@code
+ * /approval/continuation.properties} on the classpath - the values a slim context (or a tenant
+ * override) starts from. These pin that the resource is on the module's classpath, that the numeric
+ * setters clamp at 0, and that the {@code {x}} placeholders in the note templates are filled
+ * exactly as the turn code relies on.
  */
 class ApprovalContinuationPropertiesTest {
 
@@ -69,21 +70,27 @@ class ApprovalContinuationPropertiesTest {
     @Test
     void renderDeniedNoteFillsToolApproverAndReason() {
         String note = props.renderDeniedNote("delete_file", "alice@example.com", "too risky");
-        assertEquals("[action 'delete_file' was DENIED by alice@example.com: too risky - it did not run]", note);
+        assertEquals(
+                "[action 'delete_file' was DENIED by alice@example.com: too risky - it did not run]",
+                note);
     }
 
     @Test
     void blankApproverAndReasonFallBackToTheConfiguredStandIns() {
         String note = props.renderDeniedNote("send_email", "  ", null);
-        assertEquals("[action 'send_email' was DENIED by a reviewer: no reason was given - it did not run]", note);
+        assertEquals(
+                "[action 'send_email' was DENIED by a reviewer: no reason was given - it did not run]",
+                note);
     }
 
     @Test
     void renderCompletedAndFailedNotesFillTheirPlaceholders() {
-        assertEquals("[approved action 'create_file' completed: file-7]",
-            props.renderCompletedNote("create_file", "file-7"));
-        assertEquals("[approved action 'create_file' failed: disk full]",
-            props.renderFailedNote("create_file", "disk full"));
+        assertEquals(
+                "[approved action 'create_file' completed: file-7]",
+                props.renderCompletedNote("create_file", "file-7"));
+        assertEquals(
+                "[approved action 'create_file' failed: disk full]",
+                props.renderFailedNote("create_file", "disk full"));
         // Nulls render as empty text, never the literal "null" or a thrown NPE on a missing result.
         assertEquals("[approved action 't' completed: ]", props.renderCompletedNote("t", null));
         assertEquals("[approved action 't' failed: ]", props.renderFailedNote("t", null));

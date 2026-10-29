@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code app.chat.tools.*}: the shipped defaults come from {@code /chat/tool-loop.properties}
- * (the same text as {@code application.yml}), the numeric setters clamp at zero, and {@code
- * max-rounds-per-invocation=0} means the round cap is derived from the CALL ceiling so a round
- * cap can never end a turn before the call policy does.
+ * {@code app.chat.tools.*}: the shipped defaults come from {@code /chat/tool-loop.properties} (the
+ * same text as {@code application.yml}), the numeric setters clamp at zero, and {@code
+ * max-rounds-per-invocation=0} means the round cap is derived from the CALL ceiling so a round cap
+ * can never end a turn before the call policy does.
  */
 class ToolLoopPropertiesTest {
 
@@ -26,7 +26,9 @@ class ToolLoopPropertiesTest {
         assertTrue(p.getHardStopReply().length() > 20);
         assertNotNull(p.getResultClearing());
         assertTrue(p.getResultClearing().isEnabled());
-        assertEquals(ToolResultClearing.DEFAULT_THRESHOLD_CHARS, p.getResultClearing().getThresholdChars());
+        assertEquals(
+                ToolResultClearing.DEFAULT_THRESHOLD_CHARS,
+                p.getResultClearing().getThresholdChars());
         assertEquals(ToolResultClearing.DEFAULT_KEEP_LAST, p.getResultClearing().getKeepLast());
         assertNotNull(p.getResultClearing().getRestoreHint());
     }

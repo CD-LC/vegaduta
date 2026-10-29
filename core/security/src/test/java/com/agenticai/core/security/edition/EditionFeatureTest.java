@@ -37,8 +37,7 @@ class EditionFeatureTest {
     @Test
     void theExplicitPerFeatureOverrideWinsOverTheTier() {
         MockEnvironment env =
-                env()
-                        .withProperty(EditionTier.PROPERTY, "personal")
+                env().withProperty(EditionTier.PROPERTY, "personal")
                         .withProperty("app.edition.features.cloud-speech.enabled", "true");
 
         assertThat(EditionFeature.CLOUD_SPEECH.isEnabled(env)).isTrue();
@@ -74,8 +73,7 @@ class EditionFeatureTest {
         MockEnvironment personal = env().withProperty(EditionTier.PROPERTY, "personal");
         assertThat(EditionFeature.BILLING_PAYMENTS.isEnabled(personal)).isTrue();
 
-        MockEnvironment off =
-                env().withProperty(ConditionalOnBillingEdition.PROPERTY, "false");
+        MockEnvironment off = env().withProperty(ConditionalOnBillingEdition.PROPERTY, "false");
         assertThat(EditionFeature.BILLING_PAYMENTS.isEnabled(off)).isFalse();
     }
 }

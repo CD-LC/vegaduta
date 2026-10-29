@@ -12,9 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Slack's card on the Channels screen: the summary counts ACTIVE credentials only (a
- * DISCONNECTED row must not read as connected), and the probe is the same real auth.test call
- * activation used.
+ * Slack's card on the Channels screen: the summary counts ACTIVE credentials only (a DISCONNECTED
+ * row must not read as connected), and the probe is the same real auth.test call activation used.
  */
 class SlackChannelConnectionTest {
 
@@ -29,8 +28,7 @@ class SlackChannelConnectionTest {
         connection = new SlackChannelConnection(credentialService, apiClient);
     }
 
-    private static SlackCredentialResponse response(
-            String teamName, SlackCredentialStatus status) {
+    private static SlackCredentialResponse response(String teamName, SlackCredentialStatus status) {
         return new SlackCredentialResponse(null, "T123", teamName, status, null, null);
     }
 

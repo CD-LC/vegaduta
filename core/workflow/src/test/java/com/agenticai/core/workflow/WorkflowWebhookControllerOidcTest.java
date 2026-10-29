@@ -31,10 +31,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The OIDC trigger reads the tenant and the roles list through {@link
- * com.agenticai.core.security.JwtClaimPaths} with the shared
- * {@code app.security.oidc.*} mapping, not hard-coded Keycloak claim names.
- * Covers the Keycloak default shape and an Entra-style flat layout to prove
- * the same endpoint serves non-Keycloak issuers.
+ * com.agenticai.core.security.JwtClaimPaths} with the shared {@code app.security.oidc.*} mapping,
+ * not hard-coded Keycloak claim names. Covers the Keycloak default shape and an Entra-style flat
+ * layout to prove the same endpoint serves non-Keycloak issuers.
  */
 class WorkflowWebhookControllerOidcTest {
 
@@ -55,15 +54,15 @@ class WorkflowWebhookControllerOidcTest {
         when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
         when(jwtDecoder.decode(anyString())).thenAnswer(inv -> jwtWith(inv.getArgument(0)));
 
-        controller = new WorkflowWebhookController(
-            mock(TenantResolutionService.class),
-            definitionRepositoryWithActiveWorkflow(),
-            triggerNodeService,
-            workflowService,
-            new ObjectMapper(),
-            jwtDecoderProvider,
-            mock(InboundMessageDedupService.class)
-        );
+        controller =
+                new WorkflowWebhookController(
+                        mock(TenantResolutionService.class),
+                        definitionRepositoryWithActiveWorkflow(),
+                        triggerNodeService,
+                        workflowService,
+                        new ObjectMapper(),
+                        jwtDecoderProvider,
+                        mock(InboundMessageDedupService.class));
 
         // Default: the target workflow HAS a WEBHOOK trigger node configured
         // for OAUTH2, so only the role/tenant checks stand between the caller
@@ -72,14 +71,14 @@ class WorkflowWebhookControllerOidcTest {
         stubOauth2TriggerNode();
 
         when(workflowService.run(any(), any(), anyString(), anyString()))
-            .thenReturn(mock(WorkflowRunResponse.class));
+                .thenReturn(mock(WorkflowRunResponse.class));
     }
 
     private void stubOauth2TriggerNode() {
         com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode node =
-            mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
+                mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
         when(node.getChannel())
-            .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
+                .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
         when(node.getWebhookAuthMode()).thenReturn("OAUTH2");
         when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of(node));
     }
@@ -98,10 +97,10 @@ class WorkflowWebhookControllerOidcTest {
         Jwt.Builder builder = Jwt.withTokenValue(token).header("alg", "none").subject("svc-caller");
         if (token.startsWith("keycloak:")) {
             builder.claim("tenant_id", "tenant_a")
-                .claim("realm_access", Map.of("roles", List.of("workflow-trigger")));
+                    .claim("realm_access", Map.of("roles", List.of("workflow-trigger")));
         } else if (token.startsWith("entra:")) {
             builder.claim("organization_id", "tenant_b")
-                .claim("roles", List.of("workflow-trigger", "user"));
+                    .claim("roles", List.of("workflow-trigger", "user"));
         } else if (token.startsWith("entra-norole:")) {
             builder.claim("organization_id", "tenant_b").claim("roles", List.of("user"));
         } else if (token.startsWith("notenant:")) {
@@ -118,7 +117,7 @@ class WorkflowWebhookControllerOidcTest {
     @Test
     void keycloakDefaultClaimsStillWork() {
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(workflowService).run(eq(WORKFLOW_ID), any(), anyString(), anyString());
     }
@@ -129,7 +128,7 @@ class WorkflowWebhookControllerOidcTest {
         ReflectionTestUtils.setField(controller, "rolesClaimPath", "roles");
 
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer entra:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer entra:t", Map.of());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(workflowService).run(eq(WORKFLOW_ID), any(), anyString(), anyString());
     }
@@ -141,7 +140,7 @@ class WorkflowWebhookControllerOidcTest {
         when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of());
 
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(workflowService, never()).run(any(), any(), anyString(), anyString());
     }
@@ -149,14 +148,14 @@ class WorkflowWebhookControllerOidcTest {
     @Test
     void sharedSecretOnlyTriggerNodeIsForbidden() {
         com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode node =
-            mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
+                mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
         when(node.getChannel())
-            .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
+                .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
         when(node.getWebhookAuthMode()).thenReturn("SHARED_SECRET");
         when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of(node));
 
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(workflowService, never()).run(any(), any(), anyString(), anyString());
     }
@@ -167,7 +166,7 @@ class WorkflowWebhookControllerOidcTest {
         ReflectionTestUtils.setField(controller, "rolesClaimPath", "roles");
 
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer entra-norole:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer entra-norole:t", Map.of());
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(workflowService, never()).run(any(), any(), anyString(), anyString());
     }
@@ -177,7 +176,7 @@ class WorkflowWebhookControllerOidcTest {
         ReflectionTestUtils.setField(controller, "rolesClaimPath", "roles");
 
         ResponseEntity<?> response =
-            controller.triggerOidc(WORKFLOW_ID, "Bearer notenant:t", Map.of());
+                controller.triggerOidc(WORKFLOW_ID, "Bearer notenant:t", Map.of());
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         assertTrue(String.valueOf(response.getBody()).contains("tenant_id"));
         verify(workflowService, never()).run(any(), any(), anyString(), anyString());

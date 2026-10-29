@@ -8,8 +8,8 @@ import java.util.OptionalDouble;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link OggOpusProbe}: the dependency-free duration read - last Ogg page granule minus the
- * {@code OpusHead} pre-skip, over 48 kHz.
+ * {@link OggOpusProbe}: the dependency-free duration read - last Ogg page granule minus the {@code
+ * OpusHead} pre-skip, over 48 kHz.
  */
 class OggOpusProbeTest {
 

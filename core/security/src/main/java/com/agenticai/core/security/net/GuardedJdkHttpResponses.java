@@ -34,7 +34,10 @@ final class ResponseInfoImpl implements ResponseInfo {
         }
         this.headers = HttpHeaders.of(map, (k, v) -> true);
         ProtocolVersion pv = response.getVersion();
-        this.version = pv != null && pv.getMajor() >= 2 ? HttpClient.Version.HTTP_2 : HttpClient.Version.HTTP_1_1;
+        this.version =
+                pv != null && pv.getMajor() >= 2
+                        ? HttpClient.Version.HTTP_2
+                        : HttpClient.Version.HTTP_1_1;
     }
 
     @Override

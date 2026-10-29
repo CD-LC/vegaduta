@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The registry's key assignment, de-duplication and the {@code @placeholder:} token grammar. A
- * regression here either leaks a foreign id into an exported file or drops a use the import
- * preview promised to list.
+ * regression here either leaks a foreign id into an exported file or drops a use the import preview
+ * promised to list.
  */
 class PlaceholderRegistryTest {
 
@@ -20,7 +20,10 @@ class PlaceholderRegistryTest {
                 .isEqualTo("agent_2");
         assertThat(
                         registry.register(
-                                PlaceholderRegistry.KNOWLEDGE_BASE, "kb-1", "Docs", "n3",
+                                PlaceholderRegistry.KNOWLEDGE_BASE,
+                                "kb-1",
+                                "Docs",
+                                "n3",
                                 "collectionId"))
                 .isEqualTo("kb_1");
     }
@@ -29,9 +32,11 @@ class PlaceholderRegistryTest {
     void theSameIdentitySharesOneKeyAndCollectsItsUses() {
         PlaceholderRegistry registry = new PlaceholderRegistry();
         String first =
-                registry.register(PlaceholderRegistry.AGENT, "uuid-1", "Researcher", "n1", "agentId");
+                registry.register(
+                        PlaceholderRegistry.AGENT, "uuid-1", "Researcher", "n1", "agentId");
         String second =
-                registry.register(PlaceholderRegistry.AGENT, "uuid-1", "Researcher", "n2", "agentId");
+                registry.register(
+                        PlaceholderRegistry.AGENT, "uuid-1", "Researcher", "n2", "agentId");
         assertThat(second).isEqualTo(first);
 
         PlaceholderRegistry.Entry entry = registry.get(first);
@@ -86,7 +91,8 @@ class PlaceholderRegistryTest {
     @Test
     void useListsAreCappedSoAHostileFileStaysSmall() {
         PlaceholderRegistry registry = new PlaceholderRegistry();
-        String key = registry.register(PlaceholderRegistry.WORKFLOW, "w-1", "W", "n0", "workflowId");
+        String key =
+                registry.register(PlaceholderRegistry.WORKFLOW, "w-1", "W", "n0", "workflowId");
         for (int i = 0; i < 40; i++) {
             registry.use(key, "n" + i, "f" + i);
         }

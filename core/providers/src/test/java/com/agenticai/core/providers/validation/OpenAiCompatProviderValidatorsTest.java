@@ -18,10 +18,9 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
 /**
- * The three OpenAI-compatible single-key validators added in the July 2026
- * provider fan-out share one shape - a free {@code GET {vendor}/v1/models}
- * probe with the key as a Bearer token, a 401/403 worded as "the provider
- * rejected this key," and anything else worded as transient. See {@code
+ * The three OpenAI-compatible single-key validators added in the July 2026 provider fan-out share
+ * one shape - a free {@code GET {vendor}/v1/models} probe with the key as a Bearer token, a 401/403
+ * worded as "the provider rejected this key," and anything else worded as transient. See {@code
  * OpenAIProviderValidatorTest} for the original of this pattern.
  */
 class OpenAiCompatProviderValidatorsTest {
@@ -38,8 +37,8 @@ class OpenAiCompatProviderValidatorsTest {
 
         assertEquals(ProviderName.GROQ, validator.supportedProvider());
         server.expect(requestTo("https://api.groq.com/openai/v1/models"))
-            .andExpect(header("Authorization", "Bearer groq-key"))
-            .andRespond(withSuccess());
+                .andExpect(header("Authorization", "Bearer groq-key"))
+                .andRespond(withSuccess());
         assertDoesNotThrow(() -> validator.validate("groq-key"));
     }
 
@@ -49,16 +48,21 @@ class OpenAiCompatProviderValidatorsTest {
         MockRestServiceServer server = bind(builder);
         GroqProviderValidator validator = new GroqProviderValidator(builder);
 
-        server.expect(requestTo("https://api.groq.com/openai/v1/models")).andRespond(withUnauthorizedRequest());
-        server.expect(requestTo("https://api.groq.com/openai/v1/models")).andRespond(withServerError());
+        server.expect(requestTo("https://api.groq.com/openai/v1/models"))
+                .andRespond(withUnauthorizedRequest());
+        server.expect(requestTo("https://api.groq.com/openai/v1/models"))
+                .andRespond(withServerError());
         ProviderValidationException rejected =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
-        assertTrue(rejected.getMessage().contains("Groq rejected this API key"), rejected.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
+        assertTrue(
+                rejected.getMessage().contains("Groq rejected this API key"),
+                rejected.getMessage());
         assertTrue(rejected.getMessage().contains("console.groq.com"), rejected.getMessage());
 
         ProviderValidationException transientFailure =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
-        assertTrue(transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
+        assertTrue(
+                transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
     }
 
     @Test
@@ -69,8 +73,8 @@ class OpenAiCompatProviderValidatorsTest {
 
         assertEquals(ProviderName.MISTRAL, validator.supportedProvider());
         server.expect(requestTo("https://api.mistral.ai/v1/models"))
-            .andExpect(header("Authorization", "Bearer mistral-key"))
-            .andRespond(withSuccess());
+                .andExpect(header("Authorization", "Bearer mistral-key"))
+                .andRespond(withSuccess());
         assertDoesNotThrow(() -> validator.validate("mistral-key"));
     }
 
@@ -81,16 +85,19 @@ class OpenAiCompatProviderValidatorsTest {
         MistralProviderValidator validator = new MistralProviderValidator(builder);
 
         server.expect(requestTo("https://api.mistral.ai/v1/models"))
-            .andRespond(withStatus(HttpStatus.FORBIDDEN));
+                .andRespond(withStatus(HttpStatus.FORBIDDEN));
         server.expect(requestTo("https://api.mistral.ai/v1/models"))
-            .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
+                .andRespond(withStatus(HttpStatus.TOO_MANY_REQUESTS));
         ProviderValidationException rejected =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
-        assertTrue(rejected.getMessage().contains("Mistral AI rejected this API key"), rejected.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
+        assertTrue(
+                rejected.getMessage().contains("Mistral AI rejected this API key"),
+                rejected.getMessage());
 
         ProviderValidationException transientFailure =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
-        assertTrue(transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
+        assertTrue(
+                transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
     }
 
     @Test
@@ -101,8 +108,8 @@ class OpenAiCompatProviderValidatorsTest {
 
         assertEquals(ProviderName.DEEPSEEK, validator.supportedProvider());
         server.expect(requestTo("https://api.deepseek.com/v1/models"))
-            .andExpect(header("Authorization", "Bearer deepseek-key"))
-            .andRespond(withSuccess());
+                .andExpect(header("Authorization", "Bearer deepseek-key"))
+                .andRespond(withSuccess());
         assertDoesNotThrow(() -> validator.validate("deepseek-key"));
     }
 
@@ -112,15 +119,20 @@ class OpenAiCompatProviderValidatorsTest {
         MockRestServiceServer server = bind(builder);
         DeepSeekProviderValidator validator = new DeepSeekProviderValidator(builder);
 
-        server.expect(requestTo("https://api.deepseek.com/v1/models")).andRespond(withUnauthorizedRequest());
-        server.expect(requestTo("https://api.deepseek.com/v1/models")).andRespond(withServerError());
+        server.expect(requestTo("https://api.deepseek.com/v1/models"))
+                .andRespond(withUnauthorizedRequest());
+        server.expect(requestTo("https://api.deepseek.com/v1/models"))
+                .andRespond(withServerError());
         ProviderValidationException rejected =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
-        assertTrue(rejected.getMessage().contains("DeepSeek rejected this API key"), rejected.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("bad"));
+        assertTrue(
+                rejected.getMessage().contains("DeepSeek rejected this API key"),
+                rejected.getMessage());
         assertTrue(rejected.getMessage().contains("platform.deepseek.com"), rejected.getMessage());
 
         ProviderValidationException transientFailure =
-            assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
-        assertTrue(transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
+                assertThrows(ProviderValidationException.class, () -> validator.validate("key"));
+        assertTrue(
+                transientFailure.getMessage().contains("Try again"), transientFailure.getMessage());
     }
 }

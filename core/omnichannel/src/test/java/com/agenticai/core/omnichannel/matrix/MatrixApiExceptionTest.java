@@ -21,7 +21,8 @@ class MatrixApiExceptionTest {
     @Test
     void fullConstructorCarriesEverything() {
         RuntimeException cause = new RuntimeException("io");
-        MatrixApiException e = new MatrixApiException(429, "M_LIMIT_EXCEEDED", "slow down", 5000, cause);
+        MatrixApiException e =
+                new MatrixApiException(429, "M_LIMIT_EXCEEDED", "slow down", 5000, cause);
         assertEquals(429, e.status());
         assertEquals("M_LIMIT_EXCEEDED", e.errcode());
         assertEquals(5000, e.retryAfterMs());

@@ -7,19 +7,30 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The invoice record's one derived value - the taxable base is always
- * {@code amountMinor - gstAmountMinor} in minor units - and the seller
- * {@code @ConfigurationProperties} bean's defaults: a real operating-company
- * name with a deliberately blank GSTIN until deployment config supplies the
- * registration.
+ * The invoice record's one derived value - the taxable base is always {@code amountMinor -
+ * gstAmountMinor} in minor units - and the seller {@code @ConfigurationProperties} bean's defaults:
+ * a real operating-company name with a deliberately blank GSTIN until deployment config supplies
+ * the registration.
  */
 class BillingInvoiceTypesTest {
 
     private static BillingInvoice invoice(long amountMinor, long gstMinor) {
         return new BillingInvoice(
-            UUID.randomUUID(), UUID.randomUUID(), "INV-2026-0001", "razorpay", "pay_1",
-            "PREMIUM", "monthly", "INR", amountMinor, 1800, gstMinor,
-            "KA", "29AAAAA0000A1Z5", "Acme", Instant.now());
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "INV-2026-0001",
+                "razorpay",
+                "pay_1",
+                "PREMIUM",
+                "monthly",
+                "INR",
+                amountMinor,
+                1800,
+                gstMinor,
+                "KA",
+                "29AAAAA0000A1Z5",
+                "Acme",
+                Instant.now());
     }
 
     @Test
@@ -50,8 +61,10 @@ class BillingInvoiceTypesTest {
         InvoiceSellerProperties props = new InvoiceSellerProperties();
         assertEquals("Cloudspace Learning and Development Pvt Ltd", props.getName());
         assertEquals("", props.getAddress());
-        assertEquals("", props.getGstin(),
-            "the invoice renders 'GSTIN: (registration pending)' until config supplies it");
+        assertEquals(
+                "",
+                props.getGstin(),
+                "the invoice renders 'GSTIN: (registration pending)' until config supplies it");
     }
 
     @Test

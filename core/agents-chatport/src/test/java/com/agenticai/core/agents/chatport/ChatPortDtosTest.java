@@ -48,8 +48,9 @@ class ChatPortDtosTest {
 
     @Test
     void previewRecordsCarryTheStatsTheCardShows() {
-        PreviewConversation pc = new PreviewConversation(
-            "conv-1", "chatgpt", "Title", NOW, 7, "snippet", true, false);
+        PreviewConversation pc =
+                new PreviewConversation(
+                        "conv-1", "chatgpt", "Title", NOW, 7, "snippet", true, false);
         assertEquals("conv-1", pc.id());
         assertEquals("chatgpt", pc.source());
         assertEquals("Title", pc.title());
@@ -104,7 +105,8 @@ class ChatPortDtosTest {
         assertEquals("user", msg.role());
         assertEquals(List.of("a.txt"), msg.attachments());
 
-        ImportedChatView view = new ImportedChatView(id, "claude", "T", NOW, NOW, 2, false, List.of(msg));
+        ImportedChatView view =
+                new ImportedChatView(id, "claude", "T", NOW, NOW, 2, false, List.of(msg));
         assertEquals(id, view.id());
         assertEquals(1, view.messages().size());
         assertEquals(msg, view.messages().get(0));

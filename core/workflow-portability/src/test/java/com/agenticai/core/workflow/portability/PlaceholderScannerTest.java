@@ -42,7 +42,12 @@ class PlaceholderScannerTest {
     void tokensAreSkippedWhenTheCallerAsksForMarkersOnly() {
         PlaceholderRegistry registry = new PlaceholderRegistry();
         PlaceholderScanner.scan(
-                Map.of("agentId", "@placeholder:agent_1"), "n1", "Fetch", registry, Map.of(), false);
+                Map.of("agentId", "@placeholder:agent_1"),
+                "n1",
+                "Fetch",
+                registry,
+                Map.of(),
+                false);
         assertThat(registry.isEmpty()).isTrue();
     }
 

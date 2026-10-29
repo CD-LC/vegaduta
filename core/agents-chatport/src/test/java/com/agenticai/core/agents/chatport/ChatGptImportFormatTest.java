@@ -3,7 +3,6 @@ package com.agenticai.core.agents.chatport;
 import static com.agenticai.core.agents.chatport.ChatPortFixtures.bytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.agenticai.core.agents.chatport.ChatImportParser.Limits;
 import com.agenticai.core.agents.chatport.ChatImportParser.ParsedChat;
@@ -13,10 +12,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ChatGptImportFormat#convert} beyond the golden path (the end-to-end shapes live in
- * {@code ChatImportParserTest}): content-type dispatch (code fences, asset pointers become
- * attachment names, unknown types yield nothing), the recipient/visibility filters, and the
- * early nulls when the {@code mapping} is missing, oversized or messageless.
+ * {@link ChatGptImportFormat#convert} beyond the golden path (the end-to-end shapes live in {@code
+ * ChatImportParserTest}): content-type dispatch (code fences, asset pointers become attachment
+ * names, unknown types yield nothing), the recipient/visibility filters, and the early nulls when
+ * the {@code mapping} is missing, oversized or messageless.
  */
 class ChatGptImportFormatTest {
 
@@ -32,9 +31,17 @@ class ChatGptImportFormatTest {
     }
 
     private static String userNode(String id, String parent, String text) {
-        return "\"" + id + "\": {\"id\": \"" + id + "\", \"parent\": " + parent + ", \"children\": [],"
-            + " \"message\": {\"author\": {\"role\": \"user\"},"
-            + " \"content\": {\"content_type\": \"text\", \"parts\": [\"" + text + "\"]}}}";
+        return "\""
+                + id
+                + "\": {\"id\": \""
+                + id
+                + "\", \"parent\": "
+                + parent
+                + ", \"children\": [],"
+                + " \"message\": {\"author\": {\"role\": \"user\"},"
+                + " \"content\": {\"content_type\": \"text\", \"parts\": [\""
+                + text
+                + "\"]}}}";
     }
 
     @Test
@@ -45,17 +52,30 @@ class ChatGptImportFormatTest {
 
     @Test
     void aMappingOverTheNodeCapWarnsAndConvertsToNull() throws Exception {
-        ChatImportCollector c = new ChatImportCollector(
-            new Limits(5000, 2000, 50_000, 500_000, 20_000_000L, 1, 10_000, 64L << 20, 100),
-            true, null);
-        assertNull(format.convert(
-            tree("{\"mapping\": {\"a\": {}, \"b\": {}}}"), "k", "chatgpt", null, c));
+        ChatImportCollector c =
+                new ChatImportCollector(
+                        new Limits(
+                                5000,
+                                2000,
+                                50_000,
+                                500_000,
+                                20_000_000L,
+                                1,
+                                10_000,
+                                64L << 20,
+                                100),
+                        true,
+                        null);
+        assertNull(
+                format.convert(
+                        tree("{\"mapping\": {\"a\": {}, \"b\": {}}}"), "k", "chatgpt", null, c));
         assertEquals(1, c.result().warnings().size());
     }
 
     @Test
     void codeContentBecomesAFencedBlockWithASanitisedLanguage() throws Exception {
-        String conv = """
+        String conv =
+                """
             [{"title": "Code", "conversation_id": "cc", "current_node": "n",
               "mapping": {
                 "n": {"id": "n", "parent": null, "children": [],
@@ -68,13 +88,15 @@ class ChatGptImportFormatTest {
         assertEquals("```python\nprint(1)\n```", chat.messages().get(0).content());
 
         String weirdLang = conv.replace("\"python\"", "\"unknown\"");
-        ParsedChat noLang = format.convert(tree(weirdLang).get(0), "k", "chatgpt", "cc", collector());
+        ParsedChat noLang =
+                format.convert(tree(weirdLang).get(0), "k", "chatgpt", "cc", collector());
         assertEquals("```\nprint(1)\n```", noLang.messages().get(0).content());
     }
 
     @Test
     void assetPointerPartsBecomeAttachmentNamesAndToolRecipientsAreDropped() throws Exception {
-        String conv = """
+        String conv =
+                """
             [{"title": "Media", "conversation_id": "mm", "current_node": "n3",
               "mapping": {
                 "n1": {"id": "n1", "parent": null, "children": ["n2"],
@@ -100,7 +122,8 @@ class ChatGptImportFormatTest {
 
     @Test
     void aConversationWithNoImportableMessageConvertsToNull() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"title": "Empty", "current_node": "n",
              "mapping": {"n": {"id": "n", "parent": null, "children": [],
                "message": {"author": {"role": "system"},
@@ -111,9 +134,12 @@ class ChatGptImportFormatTest {
 
     @Test
     void anUntitledConversationFallsBackToTheFirstUserText() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"conversation_id": "untitled", "current_node": "n",
-             "mapping": {""" + userNode("n", "null", "what is the capital of France?") + "}}";
+             "mapping": {"""
+                        + userNode("n", "null", "what is the capital of France?")
+                        + "}}";
         ParsedChat chat = format.convert(tree(conv), "k", "chatgpt", null, collector());
 
         assertEquals("what is the capital of France?", chat.title());
@@ -122,7 +148,8 @@ class ChatGptImportFormatTest {
 
     @Test
     void hiddenAndBlankNodesAreSkippedButStillWalkTheChain() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"title": "T", "conversation_id": "h", "current_node": "n3",
              "mapping": {
                "n1": {"id": "n1", "parent": null, "children": ["n2"],
@@ -141,7 +168,8 @@ class ChatGptImportFormatTest {
 
     @Test
     void textPartsJoinWithNewlinesAndEmptyPartsAreIgnored() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"conversation_id": "join", "current_node": "n",
              "mapping": {"n": {"id": "n", "parent": null, "children": [],
                "message": {"author": {"role": "user"},

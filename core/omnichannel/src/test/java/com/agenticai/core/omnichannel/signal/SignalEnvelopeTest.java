@@ -68,12 +68,16 @@ class SignalEnvelopeTest {
     void parseDropsAnythingWithoutADataMessage() {
         assertTrue(SignalEnvelope.parse(null, ACCOUNT).isEmpty());
         assertTrue(SignalEnvelope.parse(json("[1,2]"), ACCOUNT).isEmpty());
-        assertTrue(SignalEnvelope.parse(json("{\"envelope\":{\"receiptMessage\":{}}}"), ACCOUNT).isEmpty());
+        assertTrue(
+                SignalEnvelope.parse(json("{\"envelope\":{\"receiptMessage\":{}}}"), ACCOUNT)
+                        .isEmpty());
     }
 
     @Test
     void parseDropsReactionsDeletesAndStoryContext() {
-        assertTrue(SignalEnvelope.parse(json(direct(",\"reaction\":{\"emoji\":\"x\"}")), ACCOUNT).isEmpty());
+        assertTrue(
+                SignalEnvelope.parse(json(direct(",\"reaction\":{\"emoji\":\"x\"}")), ACCOUNT)
+                        .isEmpty());
         assertTrue(SignalEnvelope.parse(json(direct(",\"remoteDelete\":{}")), ACCOUNT).isEmpty());
         assertTrue(SignalEnvelope.parse(json(direct(",\"storyContext\":{}")), ACCOUNT).isEmpty());
     }

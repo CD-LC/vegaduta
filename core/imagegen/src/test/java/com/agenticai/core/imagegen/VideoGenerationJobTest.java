@@ -14,7 +14,8 @@ class VideoGenerationJobTest {
 
     @Test
     void aNewJobStartsQueuedWithTimestamps() {
-        VideoGenerationJob job = new VideoGenerationJob("a kite over the beach", "veo-3", 8, "GOOGLE_VERTEX");
+        VideoGenerationJob job =
+                new VideoGenerationJob("a kite over the beach", "veo-3", 8, "GOOGLE_VERTEX");
 
         assertThat(job.getStatus()).isEqualTo(VideoGenerationJobStatus.QUEUED);
         assertThat(job.getPrompt()).isEqualTo("a kite over the beach");

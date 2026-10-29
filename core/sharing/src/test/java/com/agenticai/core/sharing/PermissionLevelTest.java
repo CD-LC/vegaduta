@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link PermissionLevel}'s DECLARATION ORDER is load-bearing: {@code
- * ResourceAccessService#requireAccess} compares grants via {@link Enum#compareTo}, so
- * RUNNER < VIEWER < EDITOR must hold forever - a reorder silently grants higher privilege than
- * every stored grant intends. This test pins that contract so an accidental reorder fails here
- * instead of in production.
+ * ResourceAccessService#requireAccess} compares grants via {@link Enum#compareTo}, so RUNNER <
+ * VIEWER < EDITOR must hold forever - a reorder silently grants higher privilege than every stored
+ * grant intends. This test pins that contract so an accidental reorder fails here instead of in
+ * production.
  */
 class PermissionLevelTest {
 

@@ -21,10 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * {@link WebhookSubscriptionController} is thin, but it owns two real behaviors the service
- * cannot: adapting the {@link DeliveryView} record off the delivery entity (field-by-field, newest
- * first) and translating each endpoint into the matching service call - including the 404
- * precondition on the deliveries route.
+ * {@link WebhookSubscriptionController} is thin, but it owns two real behaviors the service cannot:
+ * adapting the {@link DeliveryView} record off the delivery entity (field-by-field, newest first)
+ * and translating each endpoint into the matching service call - including the 404 precondition on
+ * the deliveries route.
  */
 class WebhookSubscriptionControllerTest {
 
@@ -34,8 +34,18 @@ class WebhookSubscriptionControllerTest {
             new WebhookSubscriptionController(service, deliveries);
 
     private static SubscriptionView view(UUID id) {
-        return new SubscriptionView(id, "h", "https://x.invalid", Set.of("*"), true, 0, null,
-            "it", Instant.now(), Instant.now(), null);
+        return new SubscriptionView(
+                id,
+                "h",
+                "https://x.invalid",
+                Set.of("*"),
+                true,
+                0,
+                null,
+                "it",
+                Instant.now(),
+                Instant.now(),
+                null);
     }
 
     @Test
@@ -43,16 +53,22 @@ class WebhookSubscriptionControllerTest {
         UUID id = UUID.randomUUID();
         when(service.get(id)).thenReturn(view(id));
         when(service.create("n", "https://x.invalid", Set.of("a"))).thenReturn(view(id));
-        when(service.update(eq(id), eq("n2"), eq("https://x.invalid/2"), eq(Set.of("b")), eq(false)))
+        when(service.update(
+                        eq(id), eq("n2"), eq("https://x.invalid/2"), eq(Set.of("b")), eq(false)))
                 .thenReturn(view(id));
         when(service.rotateSecret(id)).thenReturn(view(id));
 
         assertEquals(id, controller.get(id).id());
-        assertEquals(id,
-            controller.create(new CreateRequest("n", "https://x.invalid", Set.of("a"))).id());
-        assertEquals(id,
-            controller.update(id,
-                new UpdateRequest("n2", "https://x.invalid/2", Set.of("b"), false)).id());
+        assertEquals(
+                id,
+                controller.create(new CreateRequest("n", "https://x.invalid", Set.of("a"))).id());
+        assertEquals(
+                id,
+                controller
+                        .update(
+                                id,
+                                new UpdateRequest("n2", "https://x.invalid/2", Set.of("b"), false))
+                        .id());
         assertEquals(id, controller.rotateSecret(id).id());
     }
 

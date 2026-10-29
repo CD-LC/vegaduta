@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link ChatImportFormat#forConversation} checks {@link ChatImportFormat#REGISTERED} in order and
  * the order is the contract: a ChatGPT {@code mapping} wins over a Claude {@code chat_messages},
- * which wins over this platform's own {@code messages}. {@code matches} / {@code source} /
- * {@code sourceId} are the other two seams every format implements.
+ * which wins over this platform's own {@code messages}. {@code matches} / {@code source} / {@code
+ * sourceId} are the other two seams every format implements.
  */
 class ChatImportFormatDispatchTest {
 
@@ -42,12 +42,16 @@ class ChatImportFormatDispatchTest {
 
     @Test
     void dispatchHonoursTheRegisteredOrderWhenShapesOverlap() throws Exception {
-        assertInstanceOf(ChatGptImportFormat.class,
-            ChatImportFormat.forConversation(tree("{\"mapping\": {}, \"chat_messages\": []}")));
-        assertInstanceOf(ClaudeImportFormat.class,
-            ChatImportFormat.forConversation(tree("{\"chat_messages\": [], \"messages\": []}")));
-        assertInstanceOf(VegaDutaImportFormat.class,
-            ChatImportFormat.forConversation(tree("{\"messages\": []}")));
+        assertInstanceOf(
+                ChatGptImportFormat.class,
+                ChatImportFormat.forConversation(tree("{\"mapping\": {}, \"chat_messages\": []}")));
+        assertInstanceOf(
+                ClaudeImportFormat.class,
+                ChatImportFormat.forConversation(
+                        tree("{\"chat_messages\": [], \"messages\": []}")));
+        assertInstanceOf(
+                VegaDutaImportFormat.class,
+                ChatImportFormat.forConversation(tree("{\"messages\": []}")));
         assertNull(ChatImportFormat.forConversation(tree("{\"unrelated\": true}")));
     }
 
@@ -66,13 +70,13 @@ class ChatImportFormatDispatchTest {
         assertEquals(ChatImportParser.SOURCE_CLAUDE, claude.source(c));
         assertEquals("u-1", claude.sourceId(c));
 
-        // A re-exported ChatGPT/Claude import keeps its original source; anything else is "vegaduta".
-        assertEquals(ChatImportParser.SOURCE_CHATGPT,
-            own.source(tree("{\"source\": \"chatgpt\"}")));
-        assertEquals(ChatImportParser.SOURCE_CLAUDE,
-            own.source(tree("{\"source\": \"claude\"}")));
-        assertEquals(ChatImportParser.SOURCE_VEGADUTA,
-            own.source(tree("{\"source\": \"untrusted\"}")));
+        // A re-exported ChatGPT/Claude import keeps its original source; anything else is
+        // "vegaduta".
+        assertEquals(
+                ChatImportParser.SOURCE_CHATGPT, own.source(tree("{\"source\": \"chatgpt\"}")));
+        assertEquals(ChatImportParser.SOURCE_CLAUDE, own.source(tree("{\"source\": \"claude\"}")));
+        assertEquals(
+                ChatImportParser.SOURCE_VEGADUTA, own.source(tree("{\"source\": \"untrusted\"}")));
         assertEquals(ChatImportParser.SOURCE_VEGADUTA, own.source(tree("{}")));
         assertEquals("s-9", own.sourceId(tree("{\"id\": \"s-9\"}")));
         assertNull(own.sourceId(tree("{}")));

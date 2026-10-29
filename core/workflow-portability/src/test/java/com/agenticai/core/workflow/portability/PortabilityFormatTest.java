@@ -7,9 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 /**
- * Format detection for an uploaded workflow file: only distinctive markers decide, and an
- * ambiguous document returns empty so the caller asks the person to choose rather than
- * mis-converting.
+ * Format detection for an uploaded workflow file: only distinctive markers decide, and an ambiguous
+ * document returns empty so the caller asks the person to choose rather than mis-converting.
  */
 class PortabilityFormatTest {
 

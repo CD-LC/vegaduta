@@ -112,7 +112,8 @@ class TwilioCredentialServiceTest {
 
     @Test
     void resolveActiveDecryptsTheApiKeyPairWhenConfigured() {
-        TwilioCredential stored = new TwilioCredential("AC1", "enc-tok", "SK9", "enc-secret", "+1555");
+        TwilioCredential stored =
+                new TwilioCredential("AC1", "enc-tok", "SK9", "enc-secret", "+1555");
         when(repository.findFirstByOrderByCreatedAtAsc()).thenReturn(Optional.of(stored));
         when(encryptionService.decrypt("enc-tok")).thenReturn("raw-token");
         when(encryptionService.decrypt("enc-secret")).thenReturn("raw-secret");
@@ -164,8 +165,7 @@ class TwilioCredentialServiceTest {
                 TenantLimitExceededException.class,
                 () ->
                         service.activate(
-                                new TwilioActivationRequest(
-                                        "AC1", "token", null, null, "+1555")));
+                                new TwilioActivationRequest("AC1", "token", null, null, "+1555")));
 
         verifyNoInteractions(repository);
     }

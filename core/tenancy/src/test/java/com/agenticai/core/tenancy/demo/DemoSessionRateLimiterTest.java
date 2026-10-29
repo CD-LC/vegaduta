@@ -21,9 +21,9 @@ import org.springframework.data.redis.core.ValueOperations;
 
 /**
  * {@link DemoSessionRateLimiter}: the exempt-IP allowlist, the fail-open-on-missing-Redis posture,
- * the INCR+EXPIRE fixed window itself, the Redis-down in-process fallback, and that every
- * {@code tryAcquire*} variant counts against its own key prefix (counters must never be shared -
- * see the prefix javadocs on the class).
+ * the INCR+EXPIRE fixed window itself, the Redis-down in-process fallback, and that every {@code
+ * tryAcquire*} variant counts against its own key prefix (counters must never be shared - see the
+ * prefix javadocs on the class).
  */
 class DemoSessionRateLimiterTest {
 
@@ -51,13 +51,20 @@ class DemoSessionRateLimiterTest {
                 .thenAnswer(invocation -> invocation.getArgument(1));
         limiter =
                 new DemoSessionRateLimiter(
-                        redisProvider, settings,
-                        3 /* maxAttempts */, 1440 /* windowMinutes */,
-                        6 /* imageMaxAttempts */, 1440,
-                        2 /* videoMaxAttempts */, 1440,
-                        6 /* transcriptEmailMaxAttempts */, 1440,
-                        20 /* shareChatMaxAttempts */, 60,
-                        5 /* shareReportMaxAttempts */, 1440);
+                        redisProvider,
+                        settings,
+                        3 /* maxAttempts */,
+                        1440 /* windowMinutes */,
+                        6 /* imageMaxAttempts */,
+                        1440,
+                        2 /* videoMaxAttempts */,
+                        1440,
+                        6 /* transcriptEmailMaxAttempts */,
+                        1440,
+                        20 /* shareChatMaxAttempts */,
+                        60,
+                        5 /* shareReportMaxAttempts */,
+                        1440);
         LocalRateLimitFallback.reset();
     }
 
@@ -83,8 +90,8 @@ class DemoSessionRateLimiterTest {
 
         assertTrue(limiter.tryAcquire("198.51.100.9"));
         // First hit arms the 24h window.
-        verify(redisTemplate).expire(
-                "agentic:demo-session-rate:198.51.100.9", Duration.ofMinutes(1440));
+        verify(redisTemplate)
+                .expire("agentic:demo-session-rate:198.51.100.9", Duration.ofMinutes(1440));
     }
 
     @Test

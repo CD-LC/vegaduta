@@ -23,8 +23,9 @@ class ChatImportFieldsTest {
 
     @Test
     void textReturnsOnlyTextualValues() throws Exception {
-        var node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
-            "{\"s\": \"v\", \"n\": 1, \"o\": {}, \"z\": null}");
+        var node =
+                new com.fasterxml.jackson.databind.ObjectMapper()
+                        .readTree("{\"s\": \"v\", \"n\": 1, \"o\": {}, \"z\": null}");
         assertEquals("v", ChatImportFields.text(node, "s"));
         assertNull(ChatImportFields.text(node, "n"));
         assertNull(ChatImportFields.text(node, "o"));
@@ -43,8 +44,9 @@ class ChatImportFieldsTest {
         assertNull(ChatImportFields.cleanId(" ", " "));
         // Newlines and control characters cannot survive an id.
         assertEquals("a b", ChatImportFields.cleanId("a\nb", null));
-        assertEquals(ChatImportParser.MAX_ID_CHARS,
-            ChatImportFields.cleanId("x".repeat(500), null).length());
+        assertEquals(
+                ChatImportParser.MAX_ID_CHARS,
+                ChatImportFields.cleanId("x".repeat(500), null).length());
     }
 
     @Test
@@ -53,8 +55,9 @@ class ChatImportFieldsTest {
         assertEquals("first thing asked", ChatImportFields.cleanTitle(" ", "first thing asked"));
         assertEquals("Untitled chat", ChatImportFields.cleanTitle(null, null));
         assertEquals("Untitled chat", ChatImportFields.cleanTitle("", "  "));
-        assertEquals(ChatImportParser.MAX_TITLE_CHARS,
-            ChatImportFields.cleanTitle("t".repeat(500), null).length());
+        assertEquals(
+                ChatImportParser.MAX_TITLE_CHARS,
+                ChatImportFields.cleanTitle("t".repeat(500), null).length());
     }
 
     @Test
@@ -66,10 +69,10 @@ class ChatImportFieldsTest {
         assertNull(ChatImportFields.epochSeconds(new DoubleNode(Double.NaN)));
         assertNull(ChatImportFields.epochSeconds(new DoubleNode(9e15)));
         assertNull(ChatImportFields.epochSeconds(new DoubleNode(4_102_444_801d))); // past 2100
-        assertEquals(Instant.ofEpochMilli(1_700_000_000_000L),
-            ChatImportFields.epochSeconds(new DoubleNode(1_700_000_000d)));
-        assertEquals(Instant.ofEpochMilli(1_000L),
-            ChatImportFields.epochSeconds(new IntNode(1)));
+        assertEquals(
+                Instant.ofEpochMilli(1_700_000_000_000L),
+                ChatImportFields.epochSeconds(new DoubleNode(1_700_000_000d)));
+        assertEquals(Instant.ofEpochMilli(1_000L), ChatImportFields.epochSeconds(new IntNode(1)));
     }
 
     @Test
@@ -78,11 +81,13 @@ class ChatImportFieldsTest {
         assertNull(ChatImportFields.parseIso(" "));
         assertNull(ChatImportFields.parseIso("yesterday"));
         assertNull(ChatImportFields.parseIso("x".repeat(60)));
-        assertEquals(Instant.parse("2024-03-01T10:00:00Z"),
-            ChatImportFields.parseIso("2024-03-01T10:00:00Z"));
+        assertEquals(
+                Instant.parse("2024-03-01T10:00:00Z"),
+                ChatImportFields.parseIso("2024-03-01T10:00:00Z"));
         // An offset (not Z) timestamp goes through the OffsetDateTime fallback.
-        assertEquals(Instant.parse("2024-03-01T10:00:00Z"),
-            ChatImportFields.parseIso("2024-03-01T11:00:00+01:00"));
+        assertEquals(
+                Instant.parse("2024-03-01T10:00:00Z"),
+                ChatImportFields.parseIso("2024-03-01T11:00:00+01:00"));
     }
 
     @Test

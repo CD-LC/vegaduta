@@ -31,11 +31,19 @@ class EmailCredentialControllerTest {
     @Test
     void activateReturns201WithTheStoredCredentialShape() {
         EmailActivationRequest request =
-                new EmailActivationRequest("imap.example.com", 993, "support@example.com", "pw", true);
+                new EmailActivationRequest(
+                        "imap.example.com", 993, "support@example.com", "pw", true);
         EmailCredentialResponse response =
                 new EmailCredentialResponse(
-                        UUID.randomUUID(), "imap.example.com", 993, "support@example.com", true,
-                        EmailCredentialStatus.ACTIVE, Instant.now(), Instant.now(), null);
+                        UUID.randomUUID(),
+                        "imap.example.com",
+                        993,
+                        "support@example.com",
+                        true,
+                        EmailCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        Instant.now(),
+                        null);
         when(credentialService.activate(request)).thenReturn(response);
 
         ResponseEntity<EmailCredentialResponse> result = controller.activate(request);
@@ -48,8 +56,15 @@ class EmailCredentialControllerTest {
     void currentReturns200WhenConnectedAnd204WhenNot() {
         EmailCredentialResponse response =
                 new EmailCredentialResponse(
-                        UUID.randomUUID(), "imap.example.com", 993, "support@example.com", true,
-                        EmailCredentialStatus.ACTIVE, Instant.now(), null, null);
+                        UUID.randomUUID(),
+                        "imap.example.com",
+                        993,
+                        "support@example.com",
+                        true,
+                        EmailCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        null,
+                        null);
         when(credentialService.current()).thenReturn(Optional.of(response));
 
         ResponseEntity<EmailCredentialResponse> ok = controller.current();

@@ -1,7 +1,7 @@
 package com.agenticai.core.omnichannel.imessage;
 
-import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.crypto.EncryptionService;
+import com.agenticai.core.omnichannel.session.UnknownSenderPolicy;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
@@ -20,11 +20,11 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * BYOK activation of a tenant's BlueBubbles server. Activation proves the address and password
- * with a real call (the server must answer {@code /api/v1/server/info}) before anything is
- * stored, then mints a random public webhook id (linked to the tenant, so the unauthenticated
- * webhook can find its schema) and a random webhook secret (encrypted at rest, shown to the tenant
- * admin so it can be pasted into BlueBubbles).
+ * BYOK activation of a tenant's BlueBubbles server. Activation proves the address and password with
+ * a real call (the server must answer {@code /api/v1/server/info}) before anything is stored, then
+ * mints a random public webhook id (linked to the tenant, so the unauthenticated webhook can find
+ * its schema) and a random webhook secret (encrypted at rest, shown to the tenant admin so it can
+ * be pasted into BlueBubbles).
  *
  * <p>What the operator does to get these values: install BlueBubbles on a Mac that stays awake and
  * signed in to Messages, set its Server Password, and give it a URL this platform can reach (LAN
@@ -74,16 +74,24 @@ public class ImessageCredentialService {
         Optional<ImessageCredential> existing = repository.findFirstByOrderByCreatedAtAsc();
         String previousWebhookId = existing.map(ImessageCredential::getWebhookId).orElse(null);
         ImessageCredential credential =
-                existing
-                        .map(
+                existing.map(
                                 c -> {
-                                    c.reactivate(webhookId, serverUrl, encryptedPassword, encryptedSecret, mode);
+                                    c.reactivate(
+                                            webhookId,
+                                            serverUrl,
+                                            encryptedPassword,
+                                            encryptedSecret,
+                                            mode);
                                     return c;
                                 })
                         .orElseGet(
                                 () ->
                                         new ImessageCredential(
-                                                webhookId, serverUrl, encryptedPassword, encryptedSecret, mode));
+                                                webhookId,
+                                                serverUrl,
+                                                encryptedPassword,
+                                                encryptedSecret,
+                                                mode));
         ImessageCredential saved = repository.save(credential);
 
         String schema = tenantSchemaResolver.resolveCurrentTenantIdentifier();
@@ -105,7 +113,9 @@ public class ImessageCredentialService {
                                 toResponse(
                                         c,
                                         c.getStatus() == ImessageCredentialStatus.ACTIVE
-                                                ? maskSecret(encryptionService.decrypt(c.getEncryptedWebhookSecret()))
+                                                ? maskSecret(
+                                                        encryptionService.decrypt(
+                                                                c.getEncryptedWebhookSecret()))
                                                 : null));
     }
 
@@ -119,7 +129,9 @@ public class ImessageCredentialService {
     @Transactional(readOnly = true)
     public String revealWebhookToken() {
         ImessageCredential credential =
-                repository.findFirstByOrderByCreatedAtAsc().orElseThrow(ImessageNotConfiguredException::new);
+                repository
+                        .findFirstByOrderByCreatedAtAsc()
+                        .orElseThrow(ImessageNotConfiguredException::new);
         return encryptionService.decrypt(credential.getEncryptedWebhookSecret());
     }
 
@@ -132,11 +144,16 @@ public class ImessageCredentialService {
                 .map(ImessageCredential::getServerUrl);
     }
 
-    /** Allow-list, group and unknown-sender policy plus the inbound mode. Needs an existing credential. */
+    /**
+     * Allow-list, group and unknown-sender policy plus the inbound mode. Needs an existing
+     * credential.
+     */
     @Transactional
     public ImessageCredentialResponse updateSettings(ImessageSettingsRequest request) {
         ImessageCredential credential =
-                repository.findFirstByOrderByCreatedAtAsc().orElseThrow(ImessageNotConfiguredException::new);
+                repository
+                        .findFirstByOrderByCreatedAtAsc()
+                        .orElseThrow(ImessageNotConfiguredException::new);
         Set<String> allowed = new LinkedHashSet<>();
         for (String raw : request.allowedSenders()) {
             if (raw == null || raw.isBlank()) {
@@ -145,7 +162,9 @@ public class ImessageCredentialService {
             String normalized = ImessageAddress.normalize(raw);
             if (normalized == null) {
                 throw new IllegalArgumentException(
-                        "Not a phone number or email address: '" + raw.strip() + "'. "
+                        "Not a phone number or email address: '"
+                                + raw.strip()
+                                + "'. "
                                 + "Use +15550100100 or name@example.com.");
             }
             allowed.add(normalized);
@@ -155,7 +174,10 @@ public class ImessageCredentialService {
                     "At most " + ImessageAddress.MAX_ALLOWED_SENDERS + " allowed senders.");
         }
         credential.updateSettings(
-                request.inboundMode(), allowed, request.allowGroups(), request.unknownSenderPolicy());
+                request.inboundMode(),
+                allowed,
+                request.allowGroups(),
+                request.unknownSenderPolicy());
         ImessageCredential saved = repository.save(credential);
         if (credential.getStatus() == ImessageCredentialStatus.ACTIVE) {
             String webhookId = credential.getWebhookId();
@@ -168,7 +190,8 @@ public class ImessageCredentialService {
                 pollingService.ifAvailable(p -> p.stopPolling(webhookId));
             }
         }
-        return toResponse(saved, maskSecret(encryptionService.decrypt(saved.getEncryptedWebhookSecret())));
+        return toResponse(
+                saved, maskSecret(encryptionService.decrypt(saved.getEncryptedWebhookSecret())));
     }
 
     /**
@@ -189,7 +212,8 @@ public class ImessageCredentialService {
                             repository.save(credential);
                             tenantResolutionService.unlink(
                                     ExternalAccountProvider.IMESSAGE, credential.getWebhookId());
-                            pollingService.ifAvailable(p -> p.stopPolling(credential.getWebhookId()));
+                            pollingService.ifAvailable(
+                                    p -> p.stopPolling(credential.getWebhookId()));
                         });
     }
 
@@ -201,7 +225,8 @@ public class ImessageCredentialService {
                         .filter(c -> c.getStatus() == ImessageCredentialStatus.ACTIVE)
                         .orElseThrow(ImessageNotConfiguredException::new);
         return new DecryptedCredential(
-                credential.getServerUrl(), encryptionService.decrypt(credential.getEncryptedPassword()));
+                credential.getServerUrl(),
+                encryptionService.decrypt(credential.getEncryptedPassword()));
     }
 
     /**
@@ -237,10 +262,15 @@ public class ImessageCredentialService {
                 .map(
                         c ->
                                 new InboundSettings(
-                                        c.allowedSenders(), c.isAllowGroups(), c.getUnknownSenderPolicy()));
+                                        c.allowedSenders(),
+                                        c.isAllowGroups(),
+                                        c.getUnknownSenderPolicy()));
     }
 
-    /** What a poller needs for one round; empty once the credential is gone, disconnected or not polling. */
+    /**
+     * What a poller needs for one round; empty once the credential is gone, disconnected or not
+     * polling.
+     */
     @Transactional(readOnly = true)
     public Optional<PollTarget> pollTarget(String webhookId) {
         return repository
@@ -267,14 +297,16 @@ public class ImessageCredentialService {
                         });
     }
 
-    private void startPollingAfterCommit(ImessageInboundMode mode, String webhookId, String schema) {
+    private void startPollingAfterCommit(
+            ImessageInboundMode mode, String webhookId, String schema) {
         if (mode != ImessageInboundMode.POLLING) {
             return;
         }
         pollingService.ifAvailable(
                 polling -> {
                     if (TransactionSynchronizationManager.isSynchronizationActive()) {
-                        // After commit: the poller reads the credential from its own thread and must see it.
+                        // After commit: the poller reads the credential from its own thread and
+                        // must see it.
                         TransactionSynchronizationManager.registerSynchronization(
                                 new TransactionSynchronization() {
                                     @Override
@@ -304,7 +336,10 @@ public class ImessageCredentialService {
                 c.getLastValidatedAt());
     }
 
-    /** Masked preview of the webhook secret: last 4 hex chars only, enough to confirm which token is configured. */
+    /**
+     * Masked preview of the webhook secret: last 4 hex chars only, enough to confirm which token is
+     * configured.
+     */
     private static String maskSecret(String secret) {
         if (secret == null || secret.isEmpty()) {
             return secret;
@@ -324,11 +359,17 @@ public class ImessageCredentialService {
     public record PollTarget(String serverUrl, String password, Long cursorMs) {
         @Override
         public String toString() {
-            return "PollTarget[serverUrl=" + serverUrl + ", password=***, cursorMs=" + cursorMs + "]";
+            return "PollTarget[serverUrl="
+                    + serverUrl
+                    + ", password=***, cursorMs="
+                    + cursorMs
+                    + "]";
         }
     }
 
-    /** The server address and password, decrypted just for one call. Never log or serialise this. */
+    /**
+     * The server address and password, decrypted just for one call. Never log or serialise this.
+     */
     public record DecryptedCredential(String serverUrl, String password) {
         @Override
         public String toString() {

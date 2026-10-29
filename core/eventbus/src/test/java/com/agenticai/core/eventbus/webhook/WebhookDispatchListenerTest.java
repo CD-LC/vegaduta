@@ -1,7 +1,7 @@
 package com.agenticai.core.eventbus.webhook;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -57,14 +57,16 @@ class WebhookDispatchListenerTest {
 
     @Test
     void onlyMatchingSubscriptionsGetADelivery() {
-        WebhookSubscription all = new WebhookSubscription("a", "https://x.invalid/1", "e",
-            Set.of("*"), "it");
-        WebhookSubscription runs = new WebhookSubscription("b", "https://x.invalid/2", "e",
-            Set.of("workflow.run.*"), "it");
-        WebhookSubscription other = new WebhookSubscription("c", "https://x.invalid/3", "e",
-            Set.of("approval.requested"), "it");
-        WebhookSubscription off = new WebhookSubscription("d", "https://x.invalid/4", "e",
-            Set.of("*"), "it");
+        WebhookSubscription all =
+                new WebhookSubscription("a", "https://x.invalid/1", "e", Set.of("*"), "it");
+        WebhookSubscription runs =
+                new WebhookSubscription(
+                        "b", "https://x.invalid/2", "e", Set.of("workflow.run.*"), "it");
+        WebhookSubscription other =
+                new WebhookSubscription(
+                        "c", "https://x.invalid/3", "e", Set.of("approval.requested"), "it");
+        WebhookSubscription off =
+                new WebhookSubscription("d", "https://x.invalid/4", "e", Set.of("*"), "it");
         off.update("d", "https://x.invalid/4", Set.of("*"), false);
         when(subscriptions.findByEnabledTrue()).thenReturn(List.of(all, runs, other, off));
 
@@ -76,7 +78,8 @@ class WebhookDispatchListenerTest {
         assertEquals("workflow.run.completed", rows.get(0).getEventType());
         assertEquals("run-1", rows.get(0).getRunId());
         // The full envelope is re-serialized: a consumer sees the same facts a Kafka consumer does.
-        assertTrue(rows.get(0).getPayloadJson().contains("\"eventType\":\"workflow.run.completed\""));
+        assertTrue(
+                rows.get(0).getPayloadJson().contains("\"eventType\":\"workflow.run.completed\""));
         assertTrue(rows.get(0).getPayloadJson().contains("\"tenantId\":\"tenant_a\""));
     }
 

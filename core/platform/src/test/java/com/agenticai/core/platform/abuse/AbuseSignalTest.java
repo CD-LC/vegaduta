@@ -10,11 +10,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The honest-absence contract of the scorer: an unavailable signal is marked
- * and excluded from the aggregate, never counted as a fabricated zero; and a
- * normalised score is clamped to 0..1 so a signal cannot vote outside its
- * weight. The tier ordering (least to most severe) is pinned too - a reordered
- * enum would silently flip every {@code compareTo} in the sweep.
+ * The honest-absence contract of the scorer: an unavailable signal is marked and excluded from the
+ * aggregate, never counted as a fabricated zero; and a normalised score is clamped to 0..1 so a
+ * signal cannot vote outside its weight. The tier ordering (least to most severe) is pinned too - a
+ * reordered enum would silently flip every {@code compareTo} in the sweep.
  */
 class AbuseSignalTest {
 
@@ -45,12 +44,14 @@ class AbuseSignalTest {
     void theRiskScoreIsAPureReadModel() {
         UUID tenant = UUID.randomUUID();
         Instant at = Instant.parse("2026-10-01T00:00:00Z");
-        List<AbuseSignal> signals = List.of(
-            AbuseSignal.of("spend-spike", 5.0, 0.8, 0.3, "5x"),
-            AbuseSignal.unavailable("geo-velocity", 0.2, "no data"));
+        List<AbuseSignal> signals =
+                List.of(
+                        AbuseSignal.of("spend-spike", 5.0, 0.8, 0.3, "5x"),
+                        AbuseSignal.unavailable("geo-velocity", 0.2, "no data"));
 
-        AbuseRiskScore score = new AbuseRiskScore(
-            tenant, "Acme", "user-1", 62.5, AbuseActionTier.THROTTLE, signals, at);
+        AbuseRiskScore score =
+                new AbuseRiskScore(
+                        tenant, "Acme", "user-1", 62.5, AbuseActionTier.THROTTLE, signals, at);
 
         assertEquals(tenant, score.tenantId());
         assertEquals("Acme", score.tenantName());

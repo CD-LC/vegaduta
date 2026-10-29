@@ -36,8 +36,7 @@ class VoiceRelayTicketServiceTest {
         service.mint("AC1", "CA2", "+15551234567");
 
         long expectedExpiry = NOW.plus(VoiceRelayTicketService.TTL).getEpochSecond();
-        verify(encryptionService)
-                .encrypt("AC1|CA2|+15551234567|" + expectedExpiry);
+        verify(encryptionService).encrypt("AC1|CA2|+15551234567|" + expectedExpiry);
     }
 
     @Test
@@ -46,17 +45,13 @@ class VoiceRelayTicketServiceTest {
 
         service.mint("AC|1", "CA2", null);
 
-        verify(encryptionService)
-                .encrypt(
-                        org.mockito.ArgumentMatchers.contains(
-                                "AC1|CA2||"));
+        verify(encryptionService).encrypt(org.mockito.ArgumentMatchers.contains("AC1|CA2||"));
     }
 
     @Test
     void verifyReturnsTheAdmissionForAValidUnexpiredTicket() {
         long future = NOW.plusSeconds(60).getEpochSecond();
-        when(encryptionService.decrypt("ticket-1"))
-                .thenReturn("AC1|CA2|+15551234567|" + future);
+        when(encryptionService.decrypt("ticket-1")).thenReturn("AC1|CA2|+15551234567|" + future);
 
         Optional<VoiceRelayTicketService.Admission> admission = service.verify("ticket-1");
 
@@ -97,8 +92,7 @@ class VoiceRelayTicketServiceTest {
 
     @Test
     void verifySwallowsDecryptionFailures() {
-        when(encryptionService.decrypt("garbage"))
-                .thenThrow(new RuntimeException("not a ticket"));
+        when(encryptionService.decrypt("garbage")).thenThrow(new RuntimeException("not a ticket"));
         assertTrue(service.verify("garbage").isEmpty());
     }
 }

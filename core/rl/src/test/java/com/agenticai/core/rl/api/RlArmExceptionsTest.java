@@ -14,7 +14,8 @@ class RlArmExceptionsTest {
 
     @Test
     void rejectedIsADistinctRuntimeExceptionWithTheOperatorsMessage() {
-        RlArmRejectedException e = new RlArmRejectedException("armConfigJson must be a JSON object");
+        RlArmRejectedException e =
+                new RlArmRejectedException("armConfigJson must be a JSON object");
 
         assertInstanceOf(RuntimeException.class, e);
         assertEquals("armConfigJson must be a JSON object", e.getMessage());

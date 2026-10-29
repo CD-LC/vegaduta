@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * iMessage's card on the Channels screen: the summary deliberately shows only the BlueBubbles
- * host (never a credential, and {@code activeServerUrl} decrypts nothing so a key mismatch can't
- * take the status grid down); the probe reports server version and helper state.
+ * iMessage's card on the Channels screen: the summary deliberately shows only the BlueBubbles host
+ * (never a credential, and {@code activeServerUrl} decrypts nothing so a key mismatch can't take
+ * the status grid down); the probe reports server version and helper state.
  */
 class ImessageChannelConnectionTest {
 
@@ -72,8 +72,7 @@ class ImessageChannelConnectionTest {
         when(apiClient.fetchServerInfo("https://bubbles.example.com", "pw"))
                 .thenReturn(new ImessageApiClient.ServerInfo(null, "macOS 15", false, false));
 
-        assertThat(connection.probe())
-                .isEqualTo("BlueBubbles (Private API helper offline)");
+        assertThat(connection.probe()).isEqualTo("BlueBubbles (Private API helper offline)");
     }
 
     @Test

@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link WebhookEventCatalog} is the documented subset of event types the API advertises for
- * subscription pickers. Two invariants keep it honest: no two rows share an event type (a
- * duplicate would render twice in the picker) and every row carries a non-empty description.
+ * subscription pickers. Two invariants keep it honest: no two rows share an event type (a duplicate
+ * would render twice in the picker) and every row carries a non-empty description.
  */
 class WebhookEventCatalogTest {
 
@@ -21,8 +21,9 @@ class WebhookEventCatalogTest {
         Set<String> seen = new HashSet<>();
         for (WebhookEventCatalog.Entry entry : WebhookEventCatalog.ENTRIES) {
             assertTrue(seen.add(entry.eventType()), "duplicate event type: " + entry.eventType());
-            assertFalse(entry.description() == null || entry.description().isBlank(),
-                "blank description for " + entry.eventType());
+            assertFalse(
+                    entry.description() == null || entry.description().isBlank(),
+                    "blank description for " + entry.eventType());
         }
         assertEquals(WebhookEventCatalog.ENTRIES.size(), seen.size());
     }

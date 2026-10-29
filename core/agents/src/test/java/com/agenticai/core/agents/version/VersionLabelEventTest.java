@@ -19,9 +19,15 @@ class VersionLabelEventTest {
         UUID entityId = UUID.randomUUID();
         UUID versionId = UUID.randomUUID();
 
-        VersionLabelEvent e = VersionLabelEvent.of(
-            VersionEntityType.AGENT, entityId, "PRODUCTION", versionId,
-            LabelEventAction.PROMOTE, "user-sub", "promoted via the console");
+        VersionLabelEvent e =
+                VersionLabelEvent.of(
+                        VersionEntityType.AGENT,
+                        entityId,
+                        "PRODUCTION",
+                        versionId,
+                        LabelEventAction.PROMOTE,
+                        "user-sub",
+                        "promoted via the console");
 
         assertEquals(VersionEntityType.AGENT, e.getEntityType());
         assertEquals(entityId, e.getEntityId());
@@ -35,9 +41,15 @@ class VersionLabelEventTest {
 
     @Test
     void workflowRowsAndEveryActionShareTheOneTable() {
-        VersionLabelEvent e = VersionLabelEvent.of(
-            VersionEntityType.WORKFLOW, UUID.randomUUID(), "STAGING", UUID.randomUUID(),
-            LabelEventAction.BACKFILL, null, null);
+        VersionLabelEvent e =
+                VersionLabelEvent.of(
+                        VersionEntityType.WORKFLOW,
+                        UUID.randomUUID(),
+                        "STAGING",
+                        UUID.randomUUID(),
+                        LabelEventAction.BACKFILL,
+                        null,
+                        null);
 
         assertEquals(VersionEntityType.WORKFLOW, e.getEntityType());
         assertEquals(LabelEventAction.BACKFILL, e.getAction());
@@ -47,9 +59,15 @@ class VersionLabelEventTest {
 
     @Test
     void anOverLongDetailIsTrimmedToTheColumn() {
-        VersionLabelEvent e = VersionLabelEvent.of(
-            VersionEntityType.AGENT, UUID.randomUUID(), "PRODUCTION", UUID.randomUUID(),
-            LabelEventAction.ROLLBACK, "u", "d".repeat(600));
+        VersionLabelEvent e =
+                VersionLabelEvent.of(
+                        VersionEntityType.AGENT,
+                        UUID.randomUUID(),
+                        "PRODUCTION",
+                        UUID.randomUUID(),
+                        LabelEventAction.ROLLBACK,
+                        "u",
+                        "d".repeat(600));
 
         assertEquals(500, e.getDetail().length());
     }

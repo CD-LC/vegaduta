@@ -3,9 +3,9 @@ package com.agenticai.core.platform.abuse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,10 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Every knob is read fresh per scoring pass into one immutable {@link
- * AbuseThresholds} snapshot: a missing row must fall back to the documented
- * conservative default (never zero, never null), and a stored value must pass
- * through verbatim. Pinned because a default drifting toward zero would turn
+ * Every knob is read fresh per scoring pass into one immutable {@link AbuseThresholds} snapshot: a
+ * missing row must fall back to the documented conservative default (never zero, never null), and a
+ * stored value must pass through verbatim. Pinned because a default drifting toward zero would turn
  * the detector into a false-positive firehose.
  */
 class AbuseConfigTest {

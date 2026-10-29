@@ -10,9 +10,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 /**
- * Where the JSON in a model reply is found: whole-document first (after the fence strip),
- * then the first balanced, string-aware {@code {...}} / {@code [...]} span that parses -
- * with the OBJECT-before-ARRAY preference {@link JsonLocator.Shape#ANY} documents.
+ * Where the JSON in a model reply is found: whole-document first (after the fence strip), then the
+ * first balanced, string-aware {@code {...}} / {@code [...]} span that parses - with the
+ * OBJECT-before-ARRAY preference {@link JsonLocator.Shape#ANY} documents.
  */
 class JsonLocatorTest {
 
@@ -31,8 +31,8 @@ class JsonLocatorTest {
 
     @Test
     void aWholeDocumentReplyIsTakenAsIsOnceFencesAreOff() {
-        Optional<JsonLocator.Located> found = JsonLocator.locate(
-            mapper, "```json\n{\"a\": 1}\n```", JsonLocator.Shape.ANY);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, "```json\n{\"a\": 1}\n```", JsonLocator.Shape.ANY);
 
         assertTrue(found.isPresent());
         assertEquals("{\"a\": 1}", found.get().text());
@@ -43,7 +43,8 @@ class JsonLocatorTest {
     void theFirstBalancedSpanInsideProseWins() {
         String reply = "Sure! Here is the answer: {\"score\": 0.9} - hope that helps.";
 
-        Optional<JsonLocator.Located> found = JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
 
         assertEquals("{\"score\": 0.9}", textOf(found));
     }
@@ -52,23 +53,29 @@ class JsonLocatorTest {
     void theShapeFilterSkipsSpansOfTheWrongKind() {
         String reply = "first an array [1, 2] then the object {\"a\": 1}";
 
-        assertEquals("{\"a\": 1}", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT)));
+        assertEquals(
+                "{\"a\": 1}", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT)));
         assertEquals("[1, 2]", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.ARRAY)));
         // ANY prefers the object over the earlier array - prose brackets are usually citations.
-        assertEquals("{\"a\": 1}", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.ANY)));
+        assertEquals(
+                "{\"a\": 1}", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.ANY)));
     }
 
     @Test
     void anyFallsBackToAnArrayWhenNoObjectExists() {
-        assertEquals("[1, 2]",
-            textOf(JsonLocator.locate(mapper, "the list is [1, 2] ok?", JsonLocator.Shape.ANY)));
+        assertEquals(
+                "[1, 2]",
+                textOf(
+                        JsonLocator.locate(
+                                mapper, "the list is [1, 2] ok?", JsonLocator.Shape.ANY)));
     }
 
     @Test
     void bracesInsideStringValuesDoNotEndTheSpanEarly() {
         String reply = "result: {\"text\": \"a } brace and a ] bracket\", \"n\": 2}";
 
-        Optional<JsonLocator.Located> found = JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
 
         assertTrue(found.isPresent());
         assertEquals("a } brace and a ] bracket", found.get().node().get("text").asText());
@@ -78,7 +85,8 @@ class JsonLocatorTest {
     void escapedQuotesInsideStringsDoNotReopenBraces() {
         String reply = "{\"q\": \"a \\\"quoted\\\" {word}\"}";
 
-        Optional<JsonLocator.Located> found = JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT);
 
         assertTrue(found.isPresent());
         assertEquals("a \"quoted\" {word}", found.get().node().get("q").asText());
@@ -88,12 +96,15 @@ class JsonLocatorTest {
     void anUnparseableCandidateIsSkippedForTheNextOne() {
         String reply = "{not json} but {\"valid\": true}";
 
-        assertEquals("{\"valid\": true}", textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT)));
+        assertEquals(
+                "{\"valid\": true}",
+                textOf(JsonLocator.locate(mapper, reply, JsonLocator.Shape.OBJECT)));
     }
 
     @Test
     void aReplyWithNoParseableJsonAtAllIsEmpty() {
-        assertTrue(JsonLocator.locate(mapper, "no json here at all", JsonLocator.Shape.ANY).isEmpty());
+        assertTrue(
+                JsonLocator.locate(mapper, "no json here at all", JsonLocator.Shape.ANY).isEmpty());
         assertTrue(JsonLocator.locate(mapper, "{unclosed", JsonLocator.Shape.OBJECT).isEmpty());
         // A valid document of the WRONG shape is still a miss.
         assertTrue(JsonLocator.locate(mapper, "[1, 2, 3]", JsonLocator.Shape.OBJECT).isEmpty());
@@ -101,7 +112,8 @@ class JsonLocatorTest {
 
     @Test
     void aScalarWholeReplyIsLocatedUnderAny() {
-        Optional<JsonLocator.Located> found = JsonLocator.locate(mapper, "42", JsonLocator.Shape.ANY);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, "42", JsonLocator.Shape.ANY);
 
         assertTrue(found.isPresent());
         assertEquals(42, found.get().node().asInt());
@@ -112,7 +124,8 @@ class JsonLocatorTest {
         // An unclosed fence whose JSON itself contains ``` inside a string value: the strip
         // truncates mid-document, so the fallback scan of the raw reply is the one that lands.
         String raw = "```json\n{\"code\": \"x```y\", \"n\": 1}";
-        Optional<JsonLocator.Located> found = JsonLocator.locate(mapper, raw, JsonLocator.Shape.OBJECT);
+        Optional<JsonLocator.Located> found =
+                JsonLocator.locate(mapper, raw, JsonLocator.Shape.OBJECT);
 
         assertTrue(found.isPresent());
         assertEquals(1, found.get().node().get("n").asInt());

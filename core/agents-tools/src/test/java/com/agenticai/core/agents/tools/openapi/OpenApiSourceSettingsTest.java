@@ -57,7 +57,8 @@ class OpenApiSourceSettingsTest {
         assertEquals(
                 OpenApiAuthType.API_KEY_HEADER,
                 OpenApiSourceSettings.parseAuthType("api_key_header"));
-        assertThrows(OpenApiToolException.class, () -> OpenApiSourceSettings.parseAuthType("kerberos"));
+        assertThrows(
+                OpenApiToolException.class, () -> OpenApiSourceSettings.parseAuthType("kerberos"));
     }
 
     @Test
@@ -71,7 +72,8 @@ class OpenApiSourceSettingsTest {
         assertEquals(
                 "https://93.184.216.34/token",
                 OpenApiSourceSettings.resolveOauth2TokenUrl(
-                        OpenApiAuthType.OAUTH2_CLIENT_CREDENTIALS, " https://93.184.216.34/token "));
+                        OpenApiAuthType.OAUTH2_CLIENT_CREDENTIALS,
+                        " https://93.184.216.34/token "));
         // A public http URL is still refused: the request carries the client secret.
         OpenApiToolException e =
                 assertThrows(
@@ -130,7 +132,9 @@ class OpenApiSourceSettingsTest {
         // Hop-by-hop / forbidden header names cannot carry the credential.
         assertThrows(
                 OpenApiToolException.class,
-                () -> OpenApiSourceSettings.resolveHeaderName(OpenApiAuthType.API_KEY_HEADER, "Host"));
+                () ->
+                        OpenApiSourceSettings.resolveHeaderName(
+                                OpenApiAuthType.API_KEY_HEADER, "Host"));
         assertThrows(
                 OpenApiToolException.class,
                 () ->
@@ -140,7 +144,8 @@ class OpenApiSourceSettingsTest {
 
     @Test
     void describeAuthNamesEachScheme() {
-        assertEquals("bearer-token auth", OpenApiSourceSettings.describeAuth(OpenApiAuthType.BEARER));
+        assertEquals(
+                "bearer-token auth", OpenApiSourceSettings.describeAuth(OpenApiAuthType.BEARER));
         assertEquals(
                 "OAuth2 client-credentials auth",
                 OpenApiSourceSettings.describeAuth(OpenApiAuthType.OAUTH2_CLIENT_CREDENTIALS));

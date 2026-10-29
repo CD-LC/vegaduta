@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Covers {@link SarvamCallLog}'s metadata-only row (capability, nullable model, outcome, latency,
- * start time - never the payload) and the {@link SarvamCallCapability} enum values the five
- * clients write.
+ * start time - never the payload) and the {@link SarvamCallCapability} enum values the five clients
+ * write.
  */
 class SarvamCallLogTest {
 
@@ -17,7 +17,12 @@ class SarvamCallLogTest {
         Instant started = Instant.parse("2026-09-01T10:15:30Z");
         SarvamCallLog log =
                 new SarvamCallLog(
-                        SarvamCallCapability.TRANSLATE, "sarvam-translate:v1", true, null, 420L, started);
+                        SarvamCallCapability.TRANSLATE,
+                        "sarvam-translate:v1",
+                        true,
+                        null,
+                        420L,
+                        started);
 
         assertThat(log.getCapability()).isEqualTo(SarvamCallCapability.TRANSLATE);
         assertThat(log.getModel()).isEqualTo("sarvam-translate:v1");

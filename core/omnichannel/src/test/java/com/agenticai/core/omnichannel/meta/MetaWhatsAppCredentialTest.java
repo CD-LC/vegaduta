@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 class MetaWhatsAppCredentialTest {
 
     private MetaWhatsAppCredential credential() {
-        return new MetaWhatsAppCredential("pn-1", "waba-1", "enc-token", "enc-secret", "+15551234567");
+        return new MetaWhatsAppCredential(
+                "pn-1", "waba-1", "enc-token", "enc-secret", "+15551234567");
     }
 
     @Test

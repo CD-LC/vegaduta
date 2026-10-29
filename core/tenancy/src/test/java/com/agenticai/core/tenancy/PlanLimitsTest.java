@@ -8,9 +8,9 @@ import com.agenticai.core.security.TenantPlan;
 import org.junit.jupiter.api.Test;
 
 /**
- * Entity coverage for {@link PlanLimits}: the package-private all-args constructor every caller
- * of {@link PlanLimitsServiceTest}'s {@code row(...)} helper already builds, plus all fifteen
- * getters including the V180 live-vision flag and the six V470 billing entitlements.
+ * Entity coverage for {@link PlanLimits}: the package-private all-args constructor every caller of
+ * {@link PlanLimitsServiceTest}'s {@code row(...)} helper already builds, plus all fifteen getters
+ * including the V180 live-vision flag and the six V470 billing entitlements.
  */
 class PlanLimitsTest {
 
@@ -59,8 +59,20 @@ class PlanLimitsTest {
         PlanLimits limits =
                 new PlanLimits(
                         TenantPlan.UNLIMITED,
-                        -1, -1, -1, -1,
-                        true, true, true, true, true, true, true, true, true, true);
+                        -1,
+                        -1,
+                        -1,
+                        -1,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true);
 
         // The -1 -> Integer.MAX_VALUE / Optional.empty() translation is
         // TenantLimitsServiceImpl's job; the entity itself stores the raw

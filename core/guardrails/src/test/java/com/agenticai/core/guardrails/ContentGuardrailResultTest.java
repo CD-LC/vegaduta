@@ -29,9 +29,11 @@ class ContentGuardrailResultTest {
     @Test
     void redactPassesWhileCarryingTheRewrittenContent() {
         ContentGuardrailResult result =
-            ContentGuardrailResult.redact(ContentGuardrailType.PII, "reach me at [redacted]");
+                ContentGuardrailResult.redact(ContentGuardrailType.PII, "reach me at [redacted]");
         assertTrue(result.isPassed());
-        assertEquals("[redacted]".replace("[redacted]", "reach me at [redacted]"), result.getRedactedContent());
+        assertEquals(
+                "[redacted]".replace("[redacted]", "reach me at [redacted]"),
+                result.getRedactedContent());
         assertEquals(ContentGuardrailType.PII, result.getGuardrailType());
         assertNull(result.getReason());
         assertEquals("PII: PASS", result.toString());
@@ -40,11 +42,15 @@ class ContentGuardrailResultTest {
     @Test
     void failCarriesReasonAndConfidence() {
         ContentGuardrailResult result =
-            ContentGuardrailResult.fail(ContentGuardrailType.JAILBREAK, "injection phrasing", 90);
+                ContentGuardrailResult.fail(
+                        ContentGuardrailType.JAILBREAK, "injection phrasing", 90);
         assertFalse(result.isPassed());
         assertEquals("injection phrasing", result.getReason());
         assertEquals(90, result.getConfidence());
-        assertNull(result.getRedactedContent(), "a block withholds the content, it does not rewrite it");
-        assertEquals("JAILBREAK: FAIL (confidence=90, reason=injection phrasing)", result.toString());
+        assertNull(
+                result.getRedactedContent(),
+                "a block withholds the content, it does not rewrite it");
+        assertEquals(
+                "JAILBREAK: FAIL (confidence=90, reason=injection phrasing)", result.toString());
     }
 }

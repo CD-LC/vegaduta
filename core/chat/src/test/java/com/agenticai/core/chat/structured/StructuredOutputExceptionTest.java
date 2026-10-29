@@ -15,7 +15,8 @@ class StructuredOutputExceptionTest {
 
     @Test
     void theTwoArgumentConstructorKeepsMessageAndRawText() {
-        StructuredOutputException e = new StructuredOutputException("no JSON found", "not json at all");
+        StructuredOutputException e =
+                new StructuredOutputException("no JSON found", "not json at all");
 
         assertEquals("no JSON found", e.getMessage());
         assertEquals("not json at all", e.rawText());

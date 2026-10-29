@@ -40,7 +40,8 @@ class ResolvedToolListTest {
 
         assertEquals(Boolean.TRUE, copy.anyMcpToolsOffered());
         // A copy of a plain list carries no answer at all.
-        assertNull(ResolvedToolList.copyOf(List.<org.springframework.ai.tool.ToolCallback>of())
-            .anyMcpToolsOffered());
+        assertNull(
+                ResolvedToolList.copyOf(List.<org.springframework.ai.tool.ToolCallback>of())
+                        .anyMcpToolsOffered());
     }
 }

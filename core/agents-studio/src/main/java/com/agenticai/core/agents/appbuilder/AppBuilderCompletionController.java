@@ -3,10 +3,9 @@ package com.agenticai.core.agents.appbuilder;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-
+import java.util.Set;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
 
 /**
  * App Builder generation routing fix (2026-08-06) - {@code POST
@@ -77,7 +74,8 @@ public class AppBuilderCompletionController {
             Validator validator,
             ObjectProvider<TenantStatusGuard> tenantStatusGuard) {
         this.completionService = completionService;
-        this.serviceAuth = new AppBuilderServiceAuth(serviceToken, allowedTenants, tenantStatusGuard);
+        this.serviceAuth =
+                new AppBuilderServiceAuth(serviceToken, allowedTenants, tenantStatusGuard);
         this.objectMapper = objectMapper;
         this.validator = validator;
     }
@@ -150,5 +148,4 @@ public class AppBuilderCompletionController {
         }
         return request;
     }
-
 }

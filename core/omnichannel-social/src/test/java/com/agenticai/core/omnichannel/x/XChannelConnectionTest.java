@@ -12,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * X's card on the Channels screen: an app whose OAuth consent never finished is
- * NEEDS_ATTENTION rather than NOT_CONNECTED, and the probe is a real access-token refresh - a
- * revoked grant fails there exactly the way the polling job would fail.
+ * X's card on the Channels screen: an app whose OAuth consent never finished is NEEDS_ATTENTION
+ * rather than NOT_CONNECTED, and the probe is a real access-token refresh - a revoked grant fails
+ * there exactly the way the polling job would fail.
  */
 class XChannelConnectionTest {
 

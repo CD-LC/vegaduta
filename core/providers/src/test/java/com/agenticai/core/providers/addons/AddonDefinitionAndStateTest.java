@@ -13,21 +13,35 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link AddonDefinition} is the file's contract (the catalog row) and {@link
- * AddonState} the stored wish + last host report. The rules pinned here:
- * null collections normalize to empty immutable lists, {@code reportedRev}
- * must match the current {@code rev} for a report to count as current (a
- * stale report about an older wish says nothing), and {@code rev} increments
- * on every change of the wish.
+ * {@link AddonDefinition} is the file's contract (the catalog row) and {@link AddonState} the
+ * stored wish + last host report. The rules pinned here: null collections normalize to empty
+ * immutable lists, {@code reportedRev} must match the current {@code rev} for a report to count as
+ * current (a stale report about an older wish says nothing), and {@code rev} increments on every
+ * change of the wish.
  */
 class AddonDefinitionAndStateTest {
 
     private static AddonDefinition definition(AddonDefinition.Availability availability) {
         return new AddonDefinition(
-            "search", "Search", "Web search", AddonDefinition.Category.SEARCH,
-            AddonDefinition.Kind.COMPOSE_PROFILE, availability, 500, 1024, false,
-            "MIT", true, null, false, "vegaduta personal --profile search",
-            "docs/addons.md#search", null, null, null, null);
+                "search",
+                "Search",
+                "Web search",
+                AddonDefinition.Category.SEARCH,
+                AddonDefinition.Kind.COMPOSE_PROFILE,
+                availability,
+                500,
+                1024,
+                false,
+                "MIT",
+                true,
+                null,
+                false,
+                "vegaduta personal --profile search",
+                "docs/addons.md#search",
+                null,
+                null,
+                null,
+                null);
     }
 
     @Test

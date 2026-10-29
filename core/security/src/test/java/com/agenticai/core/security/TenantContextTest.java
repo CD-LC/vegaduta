@@ -8,9 +8,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The raw {@link ThreadLocal} contract every other mechanism ({@link TenantScope},
- * {@code TenantContextFilter}, the tenant-aware executors) builds on: set/current/clear, the
- * {@code externalTriggerId} overload, and {@link TenantContext#hasRole}.
+ * The raw {@link ThreadLocal} contract every other mechanism ({@link TenantScope}, {@code
+ * TenantContextFilter}, the tenant-aware executors) builds on: set/current/clear, the {@code
+ * externalTriggerId} overload, and {@link TenantContext#hasRole}.
  */
 class TenantContextTest {
 
@@ -38,7 +38,8 @@ class TenantContextTest {
 
     @Test
     void hasRoleChecksMembershipExactly() {
-        TenantContext context = TenantContext.of("tenant_acme", "user-1", Set.of("tenant-admin", "user"));
+        TenantContext context =
+                TenantContext.of("tenant_acme", "user-1", Set.of("tenant-admin", "user"));
 
         assertThat(context.hasRole("tenant-admin")).isTrue();
         assertThat(context.hasRole("user")).isTrue();
@@ -57,8 +58,7 @@ class TenantContextTest {
 
     @Test
     void theFourArgFactoryCarriesTheExternalTriggerId() {
-        TenantContext context =
-                TenantContext.of("tenant_acme", "mcp-client", Set.of(), "grant-42");
+        TenantContext context = TenantContext.of("tenant_acme", "mcp-client", Set.of(), "grant-42");
 
         assertThat(context.getExternalTriggerId()).isEqualTo("grant-42");
     }

@@ -10,10 +10,10 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 /**
- * The small value types of this package: the provider-name enum and the
- * stored-string enums/constants classes whose parsing and normalization rules
- * are the contract (an unrecognized stored value must degrade to null/a
- * default, never throw - rows written by a newer or older build still load).
+ * The small value types of this package: the provider-name enum and the stored-string
+ * enums/constants classes whose parsing and normalization rules are the contract (an unrecognized
+ * stored value must degrade to null/a default, never throw - rows written by a newer or older build
+ * still load).
  */
 class ProviderValueTypesTest {
 
@@ -54,13 +54,17 @@ class ProviderValueTypesTest {
 
     @Test
     void toolRouterModeFollowsTheDetectedServerKind() {
-        assertEquals(ToolRouterMode.FORMAT,
-            ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.OLLAMA));
-        assertEquals(ToolRouterMode.FORMAT,
-            ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.LLAMA_CPP));
-        assertEquals(ToolRouterMode.REQUIRED,
-            ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.VLLM));
-        assertNull(ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.OLLAMA_WITHOUT_FORMAT));
+        assertEquals(
+                ToolRouterMode.FORMAT,
+                ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.OLLAMA));
+        assertEquals(
+                ToolRouterMode.FORMAT,
+                ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.LLAMA_CPP));
+        assertEquals(
+                ToolRouterMode.REQUIRED,
+                ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.VLLM));
+        assertNull(
+                ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.OLLAMA_WITHOUT_FORMAT));
         assertNull(ToolRouterMode.forServer(ToolCallCapabilityProbe.ServerKind.OTHER));
         assertNull(ToolRouterMode.forServer(null));
     }
@@ -83,15 +87,19 @@ class ProviderValueTypesTest {
     void authTypeNormalizeCollapsesNullAndBlankToApiKey() {
         assertEquals(PlatformHostedLlmAuthType.API_KEY, PlatformHostedLlmAuthType.normalize(null));
         assertEquals(PlatformHostedLlmAuthType.API_KEY, PlatformHostedLlmAuthType.normalize("  "));
-        assertEquals("CUSTOM_FUTURE", PlatformHostedLlmAuthType.normalize(" CUSTOM_FUTURE "),
-            "an unrecognized stored value is trimmed, not rewritten - the row still loads");
+        assertEquals(
+                "CUSTOM_FUTURE",
+                PlatformHostedLlmAuthType.normalize(" CUSTOM_FUTURE "),
+                "an unrecognized stored value is trimmed, not rewritten - the row still loads");
         assertEquals("us-central1", PlatformHostedLlmAuthType.DEFAULT_VERTEX_LOCATION);
     }
 
     @Test
     void authTypeIsVertexCoversBothVertexKindsAndNothingElse() {
         assertTrue(PlatformHostedLlmAuthType.isVertex(PlatformHostedLlmAuthType.VERTEX_ADC));
-        assertTrue(PlatformHostedLlmAuthType.isVertex(PlatformHostedLlmAuthType.VERTEX_SERVICE_ACCOUNT));
+        assertTrue(
+                PlatformHostedLlmAuthType.isVertex(
+                        PlatformHostedLlmAuthType.VERTEX_SERVICE_ACCOUNT));
         assertFalse(PlatformHostedLlmAuthType.isVertex(PlatformHostedLlmAuthType.API_KEY));
         assertFalse(PlatformHostedLlmAuthType.isVertex(null));
         assertFalse(PlatformHostedLlmAuthType.isVertex("SOMETHING_ELSE"));
@@ -118,7 +126,8 @@ class ProviderValueTypesTest {
         Instant failure = Instant.parse("2026-10-02T00:00:00Z");
         Instant paused = Instant.parse("2026-10-03T00:00:00Z");
         ProviderHealth health =
-            new ProviderHealth(ProviderHealth.REJECTED, 14, 3, 10, success, failure, "HTTP 401", paused);
+                new ProviderHealth(
+                        ProviderHealth.REJECTED, 14, 3, 10, success, failure, "HTTP 401", paused);
         assertEquals(ProviderHealth.REJECTED, health.status());
         assertEquals(14, health.windowDays());
         assertEquals(3, health.failures());

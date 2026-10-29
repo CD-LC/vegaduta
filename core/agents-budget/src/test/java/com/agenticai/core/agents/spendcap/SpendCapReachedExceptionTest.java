@@ -20,7 +20,9 @@ class SpendCapReachedExceptionTest {
     void messageNamesTheCapResetDateAndByokEscapeHatch() {
         SpendCapReachedException e =
                 new SpendCapReachedException(
-                        new BigDecimal("50"), new BigDecimal("50"), Instant.parse("2026-10-01T00:00:00Z"));
+                        new BigDecimal("50"),
+                        new BigDecimal("50"),
+                        Instant.parse("2026-10-01T00:00:00Z"));
 
         assertThat(e).isInstanceOf(TenantLimitExceededException.class);
         assertThat(e.getMessage())

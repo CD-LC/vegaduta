@@ -22,8 +22,8 @@ import org.springframework.data.domain.Pageable;
 
 /**
  * Both halves of {@link DeviceDataIngestionService}: the write side upserts/maps the device's
- * reports and heartbeats the device on every call, and the read side resolves "which device did
- * the agent mean" (explicit id, name match, or most-recently-active) and clamps page sizes.
+ * reports and heartbeats the device on every call, and the read side resolves "which device did the
+ * agent mean" (explicit id, name match, or most-recently-active) and clamps page sizes.
  */
 class DeviceDataIngestionServiceTest {
 
@@ -57,8 +57,7 @@ class DeviceDataIngestionServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(appUsageRepository.saveAll(anyList()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(smsRepository.saveAll(anyList()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(smsRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private static MobileDevice device(String name, Instant lastSeen) {
@@ -161,7 +160,10 @@ class DeviceDataIngestionServiceTest {
                 new IngestSmsRequest(
                         List.of(
                                 new IngestSmsRequest.Item(
-                                        "+15550100100", "on my way", DeviceSmsDirection.INBOUND, smsTime),
+                                        "+15550100100",
+                                        "on my way",
+                                        DeviceSmsDirection.INBOUND,
+                                        smsTime),
                                 new IngestSmsRequest.Item(
                                         "+15550100100", "ok", DeviceSmsDirection.OUTBOUND, null)));
 
@@ -241,11 +243,11 @@ class DeviceDataIngestionServiceTest {
                 .thenReturn(List.of());
         when(appUsageRepository.findByDeviceIdOrderByReceivedAtDesc(any(), any()))
                 .thenReturn(List.of());
-        when(smsRepository.findByDeviceIdOrderByReceivedAtDesc(any(), any()))
-                .thenReturn(List.of());
+        when(smsRepository.findByDeviceIdOrderByReceivedAtDesc(any(), any())).thenReturn(List.of());
 
         service.recentNotifications(deviceId, null);
-        verify(notificationRepository).findByDeviceIdOrderByReceivedAtDesc(any(), pageable.capture());
+        verify(notificationRepository)
+                .findByDeviceIdOrderByReceivedAtDesc(any(), pageable.capture());
         assertThat(pageable.getValue().getPageSize()).isEqualTo(20);
 
         service.recentAppUsage(deviceId, 500);

@@ -8,9 +8,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link AgentVersionPin}'s ThreadLocal contract: set/current/clear, {@code set(null)} as a
- * remove, and no cross-thread leakage (writers must stamp {@code null} rather than a wrong
- * version id).
+ * {@link AgentVersionPin}'s ThreadLocal contract: set/current/clear, {@code set(null)} as a remove,
+ * and no cross-thread leakage (writers must stamp {@code null} rather than a wrong version id).
  */
 class AgentVersionPinTest {
 

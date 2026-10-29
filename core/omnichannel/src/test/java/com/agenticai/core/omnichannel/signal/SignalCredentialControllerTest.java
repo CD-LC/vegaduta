@@ -29,17 +29,26 @@ class SignalCredentialControllerTest {
 
     private static SignalCredentialResponse response() {
         return new SignalCredentialResponse(
-                UUID.randomUUID(), "http://signal-cli:8080", "+4915112345678", true,
-                UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE,
-                SignalCredentialStatus.ACTIVE, Instant.now(), Instant.now());
+                UUID.randomUUID(),
+                "http://signal-cli:8080",
+                "+4915112345678",
+                true,
+                UnknownSenderPolicy.PAIR,
+                SignalGroupMode.IGNORE,
+                SignalCredentialStatus.ACTIVE,
+                Instant.now(),
+                Instant.now());
     }
 
     @Test
     void activateReturns201WithTheStoredCredentialShape() {
         SignalActivationRequest request =
                 new SignalActivationRequest(
-                        "http://signal-cli:8080", "+4915112345678", "tok",
-                        UnknownSenderPolicy.PAIR, SignalGroupMode.IGNORE);
+                        "http://signal-cli:8080",
+                        "+4915112345678",
+                        "tok",
+                        UnknownSenderPolicy.PAIR,
+                        SignalGroupMode.IGNORE);
         SignalCredentialResponse response = response();
         when(credentialService.activate(request)).thenReturn(response);
 

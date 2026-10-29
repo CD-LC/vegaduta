@@ -25,9 +25,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The dataset REST surface is a bag of records whose only behaviour is the
- * back-compatible constructor overloads - every older request shape must keep
- * building with the new fields defaulted, never reinterpreting them.
+ * The dataset REST surface is a bag of records whose only behaviour is the back-compatible
+ * constructor overloads - every older request shape must keep building with the new fields
+ * defaulted, never reinterpreting them.
  */
 class EvalDatasetDtosTest {
 
@@ -36,18 +36,16 @@ class EvalDatasetDtosTest {
 
     @Test
     void theLegacyDatasetRequestShapesDefaultTheNewFields() {
-        UpsertDatasetRequest oldest =
-            new UpsertDatasetRequest("golden", "desc", 0.8, true);
+        UpsertDatasetRequest oldest = new UpsertDatasetRequest("golden", "desc", 0.8, true);
         assertNull(oldest.autoApproveTools());
         assertNull(oldest.mode());
 
-        UpsertDatasetRequest middle =
-            new UpsertDatasetRequest("golden", "desc", 0.8, true, false);
+        UpsertDatasetRequest middle = new UpsertDatasetRequest("golden", "desc", 0.8, true, false);
         assertEquals(false, middle.autoApproveTools());
         assertNull(middle.mode(), "a request that predates named modes pins none");
 
         UpsertDatasetRequest current =
-            new UpsertDatasetRequest("golden", "desc", 0.8, true, true, "FULL");
+                new UpsertDatasetRequest("golden", "desc", 0.8, true, true, "FULL");
         assertEquals("FULL", current.mode());
         assertEquals("golden", current.name());
         assertEquals(0.8, current.passThreshold());
@@ -55,8 +53,7 @@ class EvalDatasetDtosTest {
 
     @Test
     void theLegacyRunTriggerShapeNamesNoMode() {
-        TriggerRunRequest legacy =
-            new TriggerRunRequest("judge-1", true, 3, BigDecimal.TEN);
+        TriggerRunRequest legacy = new TriggerRunRequest("judge-1", true, 3, BigDecimal.TEN);
 
         assertEquals("judge-1", legacy.judgeModel());
         assertEquals(true, legacy.strictJudge());
@@ -64,8 +61,7 @@ class EvalDatasetDtosTest {
         assertEquals(0, BigDecimal.TEN.compareTo(legacy.budgetUsd()));
         assertNull(legacy.mode());
 
-        TriggerRunRequest current =
-            new TriggerRunRequest(null, null, null, null, "QUICK");
+        TriggerRunRequest current = new TriggerRunRequest(null, null, null, null, "QUICK");
         assertEquals("QUICK", current.mode());
         assertNull(current.judgeModel());
     }
@@ -73,13 +69,14 @@ class EvalDatasetDtosTest {
     @Test
     void caseAndImportPayloadsCarryTheirFieldsVerbatim() {
         UpsertCaseRequest caseRequest =
-            new UpsertCaseRequest("hello", "hi there", List.of("search"), 2);
+                new UpsertCaseRequest("hello", "hi there", List.of("search"), 2);
         assertEquals("hello", caseRequest.userMessage());
         assertEquals(List.of("search"), caseRequest.expectedTools());
         assertEquals(2, caseRequest.position());
 
-        ImportTurnCaseRequest importRequest = new ImportTurnCaseRequest(
-            "session-1", "turn-2", "q", "a", "expected", List.of("t"));
+        ImportTurnCaseRequest importRequest =
+                new ImportTurnCaseRequest(
+                        "session-1", "turn-2", "q", "a", "expected", List.of("t"));
         assertEquals("session-1", importRequest.sessionId());
         assertEquals("turn-2", importRequest.turnRef());
         assertEquals("expected", importRequest.expectedOutput());
@@ -87,9 +84,22 @@ class EvalDatasetDtosTest {
 
     @Test
     void theDatasetResponseCarriesBothThePinAndTheEffectiveMode() {
-        DatasetResponse dataset = new DatasetResponse(
-            ID, UUID.randomUUID(), "golden", "desc", 0.7,
-            null, false, "QUICK", "FULL", 12, "hash", "creator", NOW, NOW);
+        DatasetResponse dataset =
+                new DatasetResponse(
+                        ID,
+                        UUID.randomUUID(),
+                        "golden",
+                        "desc",
+                        0.7,
+                        null,
+                        false,
+                        "QUICK",
+                        "FULL",
+                        12,
+                        "hash",
+                        "creator",
+                        NOW,
+                        NOW);
 
         assertEquals("QUICK", dataset.mode());
         assertEquals("FULL", dataset.effectiveMode());
@@ -103,8 +113,8 @@ class EvalDatasetDtosTest {
 
     @Test
     void aCaseResponseRoundTripsItsSnapshot() {
-        CaseResponse response = new CaseResponse(
-            ID, "user msg", "expected", List.of("a"), 3, NOW, NOW);
+        CaseResponse response =
+                new CaseResponse(ID, "user msg", "expected", List.of("a"), 3, NOW, NOW);
 
         assertEquals(ID, response.id());
         assertEquals("user msg", response.userMessage());
@@ -114,11 +124,39 @@ class EvalDatasetDtosTest {
 
     @Test
     void theRunResponseCarriesTheDiffFieldsAndCalibrationAsNullableHonesty() {
-        RunResponse run = new RunResponse(
-            ID, ID, ID, ID, "SUCCEEDED", "PASSED", 0.7, 0.9, 10, 9, 0, 1,
-            "judge-1", "hash", null, false, "FULL", false, 1,
-            BigDecimal.ONE, BigDecimal.ONE, null, "tester", false,
-            NOW, NOW, NOW, null, null, null, null);
+        RunResponse run =
+                new RunResponse(
+                        ID,
+                        ID,
+                        ID,
+                        ID,
+                        "SUCCEEDED",
+                        "PASSED",
+                        0.7,
+                        0.9,
+                        10,
+                        9,
+                        0,
+                        1,
+                        "judge-1",
+                        "hash",
+                        null,
+                        false,
+                        "FULL",
+                        false,
+                        1,
+                        BigDecimal.ONE,
+                        BigDecimal.ONE,
+                        null,
+                        "tester",
+                        false,
+                        NOW,
+                        NOW,
+                        NOW,
+                        null,
+                        null,
+                        null,
+                        null);
 
         assertNull(run.baselineRunId(), "no measured predecessor is absence, not zero");
         assertNull(run.baselineScore());
@@ -132,15 +170,44 @@ class EvalDatasetDtosTest {
 
     @Test
     void theRunDetailDefaultsAnEmptySimulatedToolsList() {
-        RunResponse run = new RunResponse(
-            ID, ID, ID, ID, "RUNNING", null, 0.7, null, 10, 0, 0, 0,
-            null, null, null, false, "QUICK", false, 1,
-            BigDecimal.ONE, null, null, "tester", false,
-            NOW, NOW, null, null, null, null, null);
+        RunResponse run =
+                new RunResponse(
+                        ID,
+                        ID,
+                        ID,
+                        ID,
+                        "RUNNING",
+                        null,
+                        0.7,
+                        null,
+                        10,
+                        0,
+                        0,
+                        0,
+                        null,
+                        null,
+                        null,
+                        false,
+                        "QUICK",
+                        false,
+                        1,
+                        BigDecimal.ONE,
+                        null,
+                        null,
+                        "tester",
+                        false,
+                        NOW,
+                        NOW,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         RunDetailResponse legacy = new RunDetailResponse(run, List.of());
-        assertTrue(legacy.simulatedTools().isEmpty(),
-            "the pre-simulation shape still builds with no tools reported");
+        assertTrue(
+                legacy.simulatedTools().isEmpty(),
+                "the pre-simulation shape still builds with no tools reported");
 
         RunDetailResponse detail = new RunDetailResponse(run, List.of(), List.of("send_email"));
         assertEquals(List.of("send_email"), detail.simulatedTools());
@@ -152,7 +219,7 @@ class EvalDatasetDtosTest {
         assertNull(legacy.status(), "older results carry no recorded call status");
 
         ReplayedToolCallResponse current =
-            new ReplayedToolCallResponse("tool", "in", "out", "SIMULATED");
+                new ReplayedToolCallResponse("tool", "in", "out", "SIMULATED");
         assertEquals("SIMULATED", current.status());
 
         DimensionScore score = new DimensionScore(0.8, "SCORED", "close enough");
@@ -166,11 +233,25 @@ class EvalDatasetDtosTest {
 
     @Test
     void theCaseResultResponseCarriesItsFullSnapshot() {
-        CaseResultResponse result = new CaseResultResponse(
-            ID, ID, 1, "q", "a", List.of("t"), "response",
-            List.of(new ReplayedToolCallResponse("t", "i", "o")),
-            Map.of("accuracy", new DimensionScore(0.9, "SCORED", null)),
-            0.9, true, true, "SCORED", null, NOW, "trace-1", "https://trace");
+        CaseResultResponse result =
+                new CaseResultResponse(
+                        ID,
+                        ID,
+                        1,
+                        "q",
+                        "a",
+                        List.of("t"),
+                        "response",
+                        List.of(new ReplayedToolCallResponse("t", "i", "o")),
+                        Map.of("accuracy", new DimensionScore(0.9, "SCORED", null)),
+                        0.9,
+                        true,
+                        true,
+                        "SCORED",
+                        null,
+                        NOW,
+                        "trace-1",
+                        "https://trace");
 
         assertEquals(0.9, result.overallScore());
         assertEquals(true, result.expectedToolsSatisfied());

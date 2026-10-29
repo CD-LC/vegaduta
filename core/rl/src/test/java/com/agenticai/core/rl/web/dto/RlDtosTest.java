@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * The {@code web/dto} records are the API's fixed shape: {@code PolicyArmResponse.from} and
- * {@code TurnFeedbackResponse.from} are the entity-to-wire mapping, and the rest pin the
- * component names the web dashboard and the trainer export read.
+ * The {@code web/dto} records are the API's fixed shape: {@code PolicyArmResponse.from} and {@code
+ * TurnFeedbackResponse.from} are the entity-to-wire mapping, and the rest pin the component names
+ * the web dashboard and the trainer export read.
  */
 class RlDtosTest {
 
@@ -52,8 +52,17 @@ class RlDtosTest {
     void turnFeedbackResponseMapsEveryColumn() {
         UUID id = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
-        TurnFeedback f = new TurnFeedback(agentId, "s1", "t1", FeedbackSignal.EDIT,
-            null, "fix this", "corrected answer", "alice", NOW);
+        TurnFeedback f =
+                new TurnFeedback(
+                        agentId,
+                        "s1",
+                        "t1",
+                        FeedbackSignal.EDIT,
+                        null,
+                        "fix this",
+                        "corrected answer",
+                        "alice",
+                        NOW);
         ReflectionTestUtils.setField(f, "id", id);
 
         TurnFeedbackResponse r = TurnFeedbackResponse.from(f);
@@ -71,18 +80,20 @@ class RlDtosTest {
 
     @Test
     void requestRecordsCarryTheValidatedFields() {
-        PolicyArmRequest armReq = new PolicyArmRequest("FAST", "{\"reasoningDepth\":\"FAST\"}", null);
+        PolicyArmRequest armReq =
+                new PolicyArmRequest("FAST", "{\"reasoningDepth\":\"FAST\"}", null);
         assertEquals("FAST", armReq.armKey());
         assertEquals("{\"reasoningDepth\":\"FAST\"}", armReq.armConfigJson());
         assertNull(armReq.contextBucket());
 
-        TurnFeedbackRequest fbReq = new TurnFeedbackRequest(
-            "s1", "t1", FeedbackSignal.THUMBS_UP, null, "nice", null);
+        TurnFeedbackRequest fbReq =
+                new TurnFeedbackRequest("s1", "t1", FeedbackSignal.THUMBS_UP, null, "nice", null);
         assertEquals("s1", fbReq.sessionId());
         assertEquals(FeedbackSignal.THUMBS_UP, fbReq.signal());
         assertNull(fbReq.rating());
 
-        PolicyUpdateRequest upd = new PolicyUpdateRequest(true, new BigDecimal("0.2"), BanditAlgorithm.UCB1);
+        PolicyUpdateRequest upd =
+                new PolicyUpdateRequest(true, new BigDecimal("0.2"), BanditAlgorithm.UCB1);
         assertTrue(upd.enabled());
         assertEquals(new BigDecimal("0.2"), upd.explorationRate());
         assertEquals(BanditAlgorithm.UCB1, upd.algorithm());
@@ -92,13 +103,30 @@ class RlDtosTest {
     void theSummaryResponseNestsItsDashboardSections() {
         UUID policyId = UUID.randomUUID();
         UUID armId = UUID.randomUUID();
-        RlSummaryResponse r = new RlSummaryResponse(
-            new FeedbackCounts(3, 1, 2, 1, 4, 0, 4.5, 11),
-            List.of(new RewardPoint("2026-01-01", 0.8, 5)),
-            List.of(new ArmStat("GEN_PARAMS", policyId, armId, "BALANCED", "{}", null,
-                12L, 0.6, 2.0, 1.0, true)),
-            List.of(new PolicyState("GEN_PARAMS", policyId, true,
-                new BigDecimal("0.1"), "THOMPSON")));
+        RlSummaryResponse r =
+                new RlSummaryResponse(
+                        new FeedbackCounts(3, 1, 2, 1, 4, 0, 4.5, 11),
+                        List.of(new RewardPoint("2026-01-01", 0.8, 5)),
+                        List.of(
+                                new ArmStat(
+                                        "GEN_PARAMS",
+                                        policyId,
+                                        armId,
+                                        "BALANCED",
+                                        "{}",
+                                        null,
+                                        12L,
+                                        0.6,
+                                        2.0,
+                                        1.0,
+                                        true)),
+                        List.of(
+                                new PolicyState(
+                                        "GEN_PARAMS",
+                                        policyId,
+                                        true,
+                                        new BigDecimal("0.1"),
+                                        "THOMPSON")));
 
         assertEquals(3, r.feedbackCounts().up());
         assertEquals(4.5, r.feedbackCounts().avgRating());
@@ -111,11 +139,15 @@ class RlDtosTest {
     @Test
     void thePreferenceExportCarriesBothTrainingFormats() {
         UUID agentId = UUID.randomUUID();
-        RlPreferenceExport r = new RlPreferenceExport(
-            agentId, 1, 2,
-            List.of(new DpoPair("prompt", "chosen-text", "rejected-text")),
-            List.of(new KtoSample("p", "c", true, "THUMBS_UP"),
-                    new KtoSample("p2", "c2", false, "RATING")));
+        RlPreferenceExport r =
+                new RlPreferenceExport(
+                        agentId,
+                        1,
+                        2,
+                        List.of(new DpoPair("prompt", "chosen-text", "rejected-text")),
+                        List.of(
+                                new KtoSample("p", "c", true, "THUMBS_UP"),
+                                new KtoSample("p2", "c2", false, "RATING")));
 
         assertEquals(agentId, r.agentId());
         assertEquals(1, r.dpoCount());

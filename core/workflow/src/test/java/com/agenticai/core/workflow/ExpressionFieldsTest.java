@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** {@link ExpressionFields}: the per-type field table, modes and the conditional {@code when} predicates. */
+/**
+ * {@link ExpressionFields}: the per-type field table, modes and the conditional {@code when}
+ * predicates.
+ */
 class ExpressionFieldsTest {
 
     private static ExpressionFields.Field onlyField(String type) {
@@ -56,7 +59,9 @@ class ExpressionFieldsTest {
     @Test
     void theHttpBodySkipsTheNoneBodyType() {
         List<ExpressionFields.Field> fields = ExpressionFields.of("http");
-        assertEquals(List.of("url", "body", "headers[].value", "query[].value"), ExpressionFields.paths("http"));
+        assertEquals(
+                List.of("url", "body", "headers[].value", "query[].value"),
+                ExpressionFields.paths("http"));
         assertEquals(4, fields.size());
         ExpressionFields.Field body = fields.get(1);
         assertFalse(body.appliesTo(Map.of("bodyType", "none")));
@@ -69,8 +74,7 @@ class ExpressionFieldsTest {
 
     @Test
     void perItemAndJsonTextModesLandOnTheRightTypes() {
-        ExpressionFields.Field subject =
-                ExpressionFields.of("bulk_email").get(0);
+        ExpressionFields.Field subject = ExpressionFields.of("bulk_email").get(0);
         assertEquals("subject", subject.path());
         assertEquals(ExpressionFields.Mode.PER_ITEM, subject.mode());
         assertEquals(ExpressionFields.Mode.JSON_TEXT, onlyField("tool").mode());
@@ -81,10 +85,26 @@ class ExpressionFieldsTest {
     void everyDeclaredTypeIsInTheTypeSet() {
         for (String type :
                 List.of(
-                        "agent", "condition", "code", "http", "tool", "device_control", "output",
-                        "bulk_email", "wait", "crm_lead", "set", "filter", "switch", "limit", "merge",
-                        "question_classifier", "parameter_extractor", "variable_aggregator",
-                        "document_extractor", "data_table")) {
+                        "agent",
+                        "condition",
+                        "code",
+                        "http",
+                        "tool",
+                        "device_control",
+                        "output",
+                        "bulk_email",
+                        "wait",
+                        "crm_lead",
+                        "set",
+                        "filter",
+                        "switch",
+                        "limit",
+                        "merge",
+                        "question_classifier",
+                        "parameter_extractor",
+                        "variable_aggregator",
+                        "document_extractor",
+                        "data_table")) {
             assertTrue(ExpressionFields.types().contains(type), type);
             assertFalse(ExpressionFields.of(type).isEmpty(), type);
         }

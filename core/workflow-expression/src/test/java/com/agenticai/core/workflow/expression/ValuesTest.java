@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,7 +55,9 @@ class ValuesTest {
 
     @Test
     void fromJsonMapsEveryJsonKind() throws Exception {
-        JsonNode doc = tree("{\"b\":true,\"i\":7,\"d\":1.5,\"s\":\"x\",\"a\":[1],\"o\":{\"k\":2},\"n\":null}");
+        JsonNode doc =
+                tree(
+                        "{\"b\":true,\"i\":7,\"d\":1.5,\"s\":\"x\",\"a\":[1],\"o\":{\"k\":2},\"n\":null}");
         assertEquals(Boolean.TRUE, Values.fromJson(doc.get("b")));
         assertEquals(7L, Values.fromJson(doc.get("i")));
         assertEquals(1.5d, Values.fromJson(doc.get("d")));
@@ -91,12 +92,15 @@ class ValuesTest {
         assertEquals(Boolean.TRUE, Values.normalize(Boolean.TRUE));
         assertEquals(Map.of("a", 1L), Values.normalize(Map.of("a", 1)));
         assertEquals(List.of(1L, "x"), Values.normalize(List.of(1, "x")));
-        assertEquals("plain", Values.normalize(new Object() {
-            @Override
-            public String toString() {
-                return "plain";
-            }
-        }));
+        assertEquals(
+                "plain",
+                Values.normalize(
+                        new Object() {
+                            @Override
+                            public String toString() {
+                                return "plain";
+                            }
+                        }));
     }
 
     @Test
@@ -118,7 +122,10 @@ class ValuesTest {
         assertNull(Values.parseNumber(""));
         assertNull(Values.parseNumber(null));
         assertNull(Values.parseNumber("1".repeat(41)), "overlong input is rejected before parsing");
-        assertInstanceOf(Double.class, Values.parseNumber("99999999999999999999"), "long overflow degrades to double");
+        assertInstanceOf(
+                Double.class,
+                Values.parseNumber("99999999999999999999"),
+                "long overflow degrades to double");
     }
 
     @Test
@@ -140,7 +147,8 @@ class ValuesTest {
         assertEquals("NaN", Values.numStr(Double.NaN));
         assertEquals("Infinity", Values.numStr(Double.POSITIVE_INFINITY));
         assertEquals("-Infinity", Values.numStr(Double.NEGATIVE_INFINITY));
-        assertEquals("1000000000000000000", Values.numStr(1e18), "past the long range it stays plain");
+        assertEquals(
+                "1000000000000000000", Values.numStr(1e18), "past the long range it stays plain");
     }
 
     @Test
@@ -186,7 +194,9 @@ class ValuesTest {
         assertEquals("array", Values.typeOf(List.of()));
         assertEquals("object", Values.typeOf(Map.of()));
         assertEquals("object", Values.typeOf(new Object()));
-        assertEquals("number", Values.typeOf(new Values.NodeRef(new NodeOutput("n", "L", "3", "OK", null))));
+        assertEquals(
+                "number",
+                Values.typeOf(new Values.NodeRef(new NodeOutput("n", "L", "3", "OK", null))));
     }
 
     @Test
@@ -215,7 +225,8 @@ class ValuesTest {
         assertFalse(Values.looseEquals("x", 1L));
         assertTrue(Values.looseEquals("a", "a"));
         assertFalse(Values.looseEquals(true, "true"));
-        assertTrue(Values.looseEquals(List.of(1L, Map.of("a", 2L)), List.of(1.0d, Map.of("a", 2L))));
+        assertTrue(
+                Values.looseEquals(List.of(1L, Map.of("a", 2L)), List.of(1.0d, Map.of("a", 2L))));
         assertFalse(Values.looseEquals(List.of(1L), List.of(1L, 2L)));
         assertFalse(Values.looseEquals(Map.of("a", 1L), Map.of("a", 1L, "b", 2L)));
         assertFalse(Values.looseEquals(Map.of("a", 1L), Map.of("b", 1L)));
@@ -224,7 +235,8 @@ class ValuesTest {
 
     @Test
     void containerEqualityCostsBudgetSteps() {
-        Budget tight = new Budget(Limits.defaults().withMaxSteps(0).withMaxWallNanos(10_000_000_000L));
+        Budget tight =
+                new Budget(Limits.defaults().withMaxSteps(0).withMaxWallNanos(10_000_000_000L));
         assertThrows(
                 ExpressionException.class,
                 () -> Values.looseEquals(List.of(1L), List.of(1L), tight));
@@ -259,6 +271,7 @@ class ValuesTest {
         assertTrue(Values.sortCompare("a", "b") < 0);
         assertTrue(Values.sortCompare(1L, "a") < 0, "numbers before strings");
         assertTrue(Values.sortCompare("a", List.of()) < 0, "strings before everything else");
-        assertEquals(0, Values.sortCompare(List.of(1L), Map.of()), "same-rank containers compare equal");
+        assertEquals(
+                0, Values.sortCompare(List.of(1L), Map.of()), "same-rank containers compare equal");
     }
 }

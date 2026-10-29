@@ -37,8 +37,14 @@ class BuiltInToolClassificationsTailTest {
         // Each call spends provider money and persists an artifact (DURABLE, never a blind retry),
         // but the artifact goes nowhere until forward_attachment sends it - so these are NOT
         // EGRESS and not irreversible.
-        for (String name : new String[] {"generate_image", "generate_video", "generate_document",
-                "generate_music", "speak"}) {
+        for (String name :
+                new String[] {
+                    "generate_image",
+                    "generate_video",
+                    "generate_document",
+                    "generate_music",
+                    "speak"
+                }) {
             ToolClassification c = declared().get(name);
             assertNotNull(c, name);
             assertEquals(ToolTrustTier.TENANT_SCOPED, c.trust(), name);

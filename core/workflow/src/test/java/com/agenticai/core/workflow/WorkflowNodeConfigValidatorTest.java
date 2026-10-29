@@ -33,7 +33,9 @@ class WorkflowNodeConfigValidatorTest {
     @BeforeEach
     void setUp() {
         agentService = mock(AgentService.class);
-        doThrow(new AgentNotFoundException(MISSING_AGENT)).when(agentService).requireExists(MISSING_AGENT);
+        doThrow(new AgentNotFoundException(MISSING_AGENT))
+                .when(agentService)
+                .requireExists(MISSING_AGENT);
         validator = new WorkflowNodeConfigValidator(agentService, new ObjectMapper());
         errors = new ArrayList<>();
     }
@@ -116,10 +118,7 @@ class WorkflowNodeConfigValidatorTest {
         assertTrue(errors.get(0).contains("without a name or a language"));
 
         errors.clear();
-        validate(
-                "output",
-                Map.of("channel", "whatsapp", "whatsappTemplate", half),
-                flags());
+        validate("output", Map.of("channel", "whatsapp", "whatsappTemplate", half), flags());
         assertTrue(errors.isEmpty(), "with the feature off a leftover template is ignored");
 
         errors.clear();
@@ -186,7 +185,8 @@ class WorkflowNodeConfigValidatorTest {
                 Map.of(
                         "agentId", EXISTING_AGENT.toString(),
                         "routes", List.of(Map.of("value", "a"))));
-        assertTrue(errors.stream().anyMatch(e -> e.contains("no usable routes")),
+        assertTrue(
+                errors.stream().anyMatch(e -> e.contains("no usable routes")),
                 "entries without a handle do not count");
     }
 
@@ -203,13 +203,19 @@ class WorkflowNodeConfigValidatorTest {
         errors.clear();
         validator.validate(
                 node("workflow", Map.of("targetWorkflowId", own.toString())),
-                errors, own, Set.of(), flags());
+                errors,
+                own,
+                Set.of(),
+                flags());
         assertTrue(errors.get(0).contains("same workflow"));
 
         errors.clear();
         validator.validate(
                 node("workflow", Map.of("targetWorkflowId", UUID.randomUUID().toString())),
-                errors, own, Set.of(), flags());
+                errors,
+                own,
+                Set.of(),
+                flags());
         assertTrue(errors.isEmpty());
     }
 
@@ -242,13 +248,19 @@ class WorkflowNodeConfigValidatorTest {
         assertTrue(errors.get(0).contains("not a list"));
 
         errors.clear();
-        validate("voice_menu", Map.of("prompt", "say it", "branches", List.of(Map.of("digit", "1"))));
+        validate(
+                "voice_menu",
+                Map.of("prompt", "say it", "branches", List.of(Map.of("digit", "1"))));
         assertTrue(errors.get(0).contains("missing a 'digit' or 'label'"));
 
         errors.clear();
         validate(
                 "voice_menu",
-                Map.of("prompt", "say it", "branches", List.of(Map.of("digit", "1", "label", "L"))));
+                Map.of(
+                        "prompt",
+                        "say it",
+                        "branches",
+                        List.of(Map.of("digit", "1", "label", "L"))));
         assertTrue(errors.isEmpty());
     }
 
@@ -269,8 +281,15 @@ class WorkflowNodeConfigValidatorTest {
         errors.clear();
         validate(
                 "bulk_email",
-                Map.of("subject", "s", "body", "b", "recipientsSource", "group",
-                    "groupId", UUID.randomUUID().toString()));
+                Map.of(
+                        "subject",
+                        "s",
+                        "body",
+                        "b",
+                        "recipientsSource",
+                        "group",
+                        "groupId",
+                        UUID.randomUUID().toString()));
         assertTrue(errors.isEmpty());
 
         errors.clear();
@@ -310,11 +329,17 @@ class WorkflowNodeConfigValidatorTest {
         assertTrue(errors.get(0).contains("unknown wait mode"));
 
         errors.clear();
-        validate("wait", Map.of("duration", "999999", "unit", "days"), new Flags(false, false, true, 30));
+        validate(
+                "wait",
+                Map.of("duration", "999999", "unit", "days"),
+                new Flags(false, false, true, 30));
         assertEquals(1, errors.size(), "a duration past the cap is one error");
 
         errors.clear();
-        validate("wait", Map.of("duration", "5", "unit", "minutes"), new Flags(false, false, true, 30));
+        validate(
+                "wait",
+                Map.of("duration", "5", "unit", "minutes"),
+                new Flags(false, false, true, 30));
         assertTrue(errors.isEmpty());
     }
 

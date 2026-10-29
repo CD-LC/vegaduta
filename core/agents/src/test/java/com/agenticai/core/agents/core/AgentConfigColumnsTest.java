@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link AgentConfigColumns} is the mapped superclass carrying {@link Agent}'s allow-lists,
  * modality overrides, schemas and audit actors. These pin the two opposite empty-collection
- * conventions (knowledge collections: empty = unrestricted; code-intel repos and write
- * collections: empty = deny-all), the unmodifiable getters, the null-collapsing setters, and that
- * every configuration-changing setter stamps the entity via {@code touch()}.
+ * conventions (knowledge collections: empty = unrestricted; code-intel repos and write collections:
+ * empty = deny-all), the unmodifiable getters, the null-collapsing setters, and that every
+ * configuration-changing setter stamps the entity via {@code touch()}.
  */
 class AgentConfigColumnsTest {
 
@@ -147,7 +147,9 @@ class AgentConfigColumnsTest {
 
         c.setGeneratedSchema("{\"in\":3}", "{\"out\":4}");
         assertEquals(2, c.getSchemaVersion());
-        assertEquals("{\"type\":\"object\"}", c.getResultSchemaJson(),
-            "regenerating schemas must not destroy the tenant-authored job schema");
+        assertEquals(
+                "{\"type\":\"object\"}",
+                c.getResultSchemaJson(),
+                "regenerating schemas must not destroy the tenant-authored job schema");
     }
 }

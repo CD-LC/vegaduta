@@ -328,14 +328,17 @@ class AgentTaintPolicyTest {
     void promptTimeSeedTaintsTheTurnWhicheverSideArrivesFirst() {
         AgentTaintPolicy policy = policy("enforce", "", builtInRegistry());
         AtomicInteger key = new AtomicInteger();
-        com.agenticai.core.guardrails.taint.TurnTaintSeeds seeds = new com.agenticai.core.guardrails.taint.TurnTaintSeeds();
-        seeds.mark("memory_recall"); // prompt assembly finished before tool resolution bound the key
+        com.agenticai.core.guardrails.taint.TurnTaintSeeds seeds =
+                new com.agenticai.core.guardrails.taint.TurnTaintSeeds();
+        seeds.mark(
+                "memory_recall"); // prompt assembly finished before tool resolution bound the key
         seeds.bind(source -> policy.seed(key, source));
         assertTrue(policy.turnTaint(key).isTainted());
         assertEquals(java.util.List.of("memory_recall"), policy.turnTaint(key).sources());
 
         AtomicInteger later = new AtomicInteger();
-        com.agenticai.core.guardrails.taint.TurnTaintSeeds late = new com.agenticai.core.guardrails.taint.TurnTaintSeeds();
+        com.agenticai.core.guardrails.taint.TurnTaintSeeds late =
+                new com.agenticai.core.guardrails.taint.TurnTaintSeeds();
         late.bind(source -> policy.seed(later, source));
         assertFalse(policy.turnTaint(later).isTainted());
         late.mark("memory_recall");

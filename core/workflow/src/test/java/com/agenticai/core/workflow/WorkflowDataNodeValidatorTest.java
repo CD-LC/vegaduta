@@ -13,7 +13,9 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** {@link WorkflowDataNodeValidator}: save-time checks for the eight data nodes and Switch ports. */
+/**
+ * {@link WorkflowDataNodeValidator}: save-time checks for the eight data nodes and Switch ports.
+ */
 class WorkflowDataNodeValidatorTest {
 
     private List<String> errors;
@@ -37,7 +39,16 @@ class WorkflowDataNodeValidatorTest {
 
     @Test
     void handlesKnowsTheEightDataTypesCaseInsensitively() {
-        for (String t : List.of("set", "filter", "sort", "aggregate", "limit", "dedupe", "switch", "merge")) {
+        for (String t :
+                List.of(
+                        "set",
+                        "filter",
+                        "sort",
+                        "aggregate",
+                        "limit",
+                        "dedupe",
+                        "switch",
+                        "merge")) {
             assertTrue(WorkflowDataNodeValidator.handles(t), t);
             assertTrue(WorkflowDataNodeValidator.handles(t.toUpperCase()), t);
         }
@@ -57,25 +68,31 @@ class WorkflowDataNodeValidatorTest {
         errors.clear();
         validate(
                 "set",
-                Map.of("assignments", List.of(Map.of("name", "n", "type", "number", "value", "abc"))));
+                Map.of(
+                        "assignments",
+                        List.of(Map.of("name", "n", "type", "number", "value", "abc"))));
         assertTrue(anyErrorContaining("not a number"));
 
         errors.clear();
         validate(
                 "set",
-                Map.of("assignments", List.of(Map.of("name", "n", "type", "wat", "value", "{{ x }}"))));
-        assertTrue(anyErrorContaining("unknown type"), "expression values still get their type checked");
+                Map.of(
+                        "assignments",
+                        List.of(Map.of("name", "n", "type", "wat", "value", "{{ x }}"))));
+        assertTrue(
+                anyErrorContaining("unknown type"),
+                "expression values still get their type checked");
 
         errors.clear();
-        validate(
-                "set",
-                Map.of("assignments", List.of(Map.of("name", "n", "value", "{{ x }}"))));
+        validate("set", Map.of("assignments", List.of(Map.of("name", "n", "value", "{{ x }}"))));
         assertTrue(errors.isEmpty(), "an expression value needs no literal check");
 
         errors.clear();
         validate(
                 "set",
-                Map.of("assignments", List.of(Map.of("name", "n", "type", "number", "value", "3"))));
+                Map.of(
+                        "assignments",
+                        List.of(Map.of("name", "n", "type", "number", "value", "3"))));
         assertTrue(errors.isEmpty());
     }
 
@@ -92,28 +109,42 @@ class WorkflowDataNodeValidatorTest {
         validate(
                 "filter",
                 Map.of(
-                        "conditions", List.of(Map.of("field", "a", "operator", "regex", "value", "([")),
-                        "combinator", "xor"));
+                        "conditions",
+                        List.of(Map.of("field", "a", "operator", "regex", "value", "([")),
+                        "combinator",
+                        "xor"));
         assertTrue(anyErrorContaining("invalid regex"));
         assertTrue(anyErrorContaining("invalid combinator"));
 
         errors.clear();
         validate(
                 "filter",
-                Map.of("conditions", List.of(Map.of("field", "a", "operator", "regex",
-                    "value", "x".repeat(201)))));
+                Map.of(
+                        "conditions",
+                        List.of(
+                                Map.of(
+                                        "field",
+                                        "a",
+                                        "operator",
+                                        "regex",
+                                        "value",
+                                        "x".repeat(201)))));
         assertTrue(anyErrorContaining("longer than"));
 
         errors.clear();
         validate(
                 "filter",
-                Map.of("conditions", List.of(Map.of("field", "a", "operator", "regex", "value", "{{ p }}"))));
+                Map.of(
+                        "conditions",
+                        List.of(Map.of("field", "a", "operator", "regex", "value", "{{ p }}"))));
         assertTrue(errors.isEmpty(), "a regex containing an expression is a run-time concern");
 
         errors.clear();
         validate(
                 "filter",
-                Map.of("conditions", List.of(Map.of("field", "a", "operator", "contains", "value", "x"))));
+                Map.of(
+                        "conditions",
+                        List.of(Map.of("field", "a", "operator", "contains", "value", "x"))));
         assertTrue(errors.isEmpty());
     }
 
@@ -161,7 +192,8 @@ class WorkflowDataNodeValidatorTest {
 
         errors.clear();
         validate("limit", Map.of("count", "{{ n }}"));
-        assertFalse(anyErrorContaining("whole number"), "an expression count is a run-time concern");
+        assertFalse(
+                anyErrorContaining("whole number"), "an expression count is a run-time concern");
 
         errors.clear();
         validate("limit", Map.of("count", 3, "mode", "middle"));
@@ -187,14 +219,22 @@ class WorkflowDataNodeValidatorTest {
         assertTrue(anyErrorContaining("no cases"));
 
         errors.clear();
-        validate("switch", Map.of("cases", List.of(Map.of("conditions", List.of(Map.of("value", "x"))))));
+        validate(
+                "switch",
+                Map.of("cases", List.of(Map.of("conditions", List.of(Map.of("value", "x"))))));
         assertTrue(anyErrorContaining("no name"));
 
         errors.clear();
         validate(
                 "switch",
-                Map.of("cases", List.of(Map.of("name", "default",
-                    "conditions", List.of(Map.of("value", "x"))))));
+                Map.of(
+                        "cases",
+                        List.of(
+                                Map.of(
+                                        "name",
+                                        "default",
+                                        "conditions",
+                                        List.of(Map.of("value", "x"))))));
         assertTrue(anyErrorContaining("reserved"));
 
         errors.clear();
@@ -214,15 +254,29 @@ class WorkflowDataNodeValidatorTest {
         errors.clear();
         validate(
                 "switch",
-                Map.of("cases", List.of(Map.of("name", "A", "combinator", "xor",
-                    "conditions", List.of(Map.of("value", "x"))))));
+                Map.of(
+                        "cases",
+                        List.of(
+                                Map.of(
+                                        "name",
+                                        "A",
+                                        "combinator",
+                                        "xor",
+                                        "conditions",
+                                        List.of(Map.of("value", "x"))))));
         assertTrue(anyErrorContaining("invalid combinator"));
 
         errors.clear();
         validate(
                 "switch",
-                Map.of("cases", List.of(Map.of("name", "A",
-                    "conditions", List.of(Map.of("operator", "eq", "value", "x"))))));
+                Map.of(
+                        "cases",
+                        List.of(
+                                Map.of(
+                                        "name",
+                                        "A",
+                                        "conditions",
+                                        List.of(Map.of("operator", "eq", "value", "x"))))));
         assertTrue(errors.isEmpty());
     }
 
@@ -251,9 +305,16 @@ class WorkflowDataNodeValidatorTest {
     @Test
     void graphCheckFlagsEdgesOffUnknownSwitchPorts() {
         WorkflowNodeDto sw =
-                node("switch",
-                        Map.of("cases", List.of(Map.of("name", "vip",
-                            "conditions", List.of(Map.of("value", "x"))))));
+                node(
+                        "switch",
+                        Map.of(
+                                "cases",
+                                List.of(
+                                        Map.of(
+                                                "name",
+                                                "vip",
+                                                "conditions",
+                                                List.of(Map.of("value", "x"))))));
         WorkflowNodeDto sink = new WorkflowNodeDto("sink", "set", Map.of(), Map.of("label", "S"));
 
         WorkflowGraphDto ok =

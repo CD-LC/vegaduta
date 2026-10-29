@@ -38,8 +38,7 @@ class BudgetPolicyTest {
     @Test
     void withCostRoutingCarriesProviderModelAndThreshold() {
         BudgetPolicy p =
-                BudgetPolicy.none()
-                        .withCostRouting(true, ProviderName.OPENAI, "gpt-4o-mini", 0.8);
+                BudgetPolicy.none().withCostRouting(true, ProviderName.OPENAI, "gpt-4o-mini", 0.8);
 
         assertThat(p.isCostRoutingEnabled()).isTrue();
         assertThat(p.getEconomyProviderName()).isEqualTo(ProviderName.OPENAI);

@@ -55,8 +55,8 @@ class RlDomainEntitiesTest {
     void rewardsOutsideTheUnitIntervalAreClampedBeforeUpdating() {
         PolicyArm arm = new PolicyArm(UUID.randomUUID(), "k", "{}", null);
 
-        arm.applyReward(1.5);   // clamps to 1.0
-        arm.applyReward(-0.5);  // clamps to 0.0
+        arm.applyReward(1.5); // clamps to 1.0
+        arm.applyReward(-0.5); // clamps to 0.0
 
         assertEquals(1.0 + 1.0 + 0.0, arm.getAlpha(), 1e-9);
         assertEquals(1.0 + 0.0 + 1.0, arm.getBeta(), 1e-9);
@@ -81,10 +81,11 @@ class RlDomainEntitiesTest {
     void aPolicyDefaultsToThompsonWhenNoAlgorithmIsGiven() {
         UUID agentId = UUID.randomUUID();
 
-        AgentPolicy four = new AgentPolicy(agentId, PolicyDimension.MODEL_ROUTE, true,
-            new BigDecimal("0.10"));
-        AgentPolicy five = new AgentPolicy(agentId, PolicyDimension.GEN_PARAMS, false,
-            new BigDecimal("0.25"), null);
+        AgentPolicy four =
+                new AgentPolicy(agentId, PolicyDimension.MODEL_ROUTE, true, new BigDecimal("0.10"));
+        AgentPolicy five =
+                new AgentPolicy(
+                        agentId, PolicyDimension.GEN_PARAMS, false, new BigDecimal("0.25"), null);
 
         assertEquals(BanditAlgorithm.THOMPSON, four.getAlgorithm());
         assertEquals(BanditAlgorithm.THOMPSON, five.getAlgorithm());
@@ -140,8 +141,17 @@ class RlDomainEntitiesTest {
     @Test
     void turnFeedbackCarriesTheSignalExactlyAsStored() {
         UUID agentId = UUID.randomUUID();
-        TurnFeedback f = new TurnFeedback(agentId, "s1", "t1", FeedbackSignal.RATING,
-            (short) 4, "decent", null, "alice@example.com", NOW);
+        TurnFeedback f =
+                new TurnFeedback(
+                        agentId,
+                        "s1",
+                        "t1",
+                        FeedbackSignal.RATING,
+                        (short) 4,
+                        "decent",
+                        null,
+                        "alice@example.com",
+                        NOW);
 
         assertEquals(agentId, f.getAgentId());
         assertEquals("s1", f.getSessionId());
@@ -160,8 +170,17 @@ class RlDomainEntitiesTest {
     @Test
     void aTrajectoryStepCarriesItsOrderingAndTelemetry() {
         UUID episodeId = UUID.randomUUID();
-        TrajectoryStep step = new TrajectoryStep(episodeId, 3, "tool", "tool_result",
-            "{\"out\":1}", "search", 412L, 87L, NOW);
+        TrajectoryStep step =
+                new TrajectoryStep(
+                        episodeId,
+                        3,
+                        "tool",
+                        "tool_result",
+                        "{\"out\":1}",
+                        "search",
+                        412L,
+                        87L,
+                        NOW);
 
         assertEquals(episodeId, step.getEpisodeId());
         assertEquals(3, step.getStepIndex());
@@ -180,8 +199,13 @@ class RlDomainEntitiesTest {
     @Test
     void aRewardRecordIsAnImmutableComponentOfTheComposite() {
         UUID episodeId = UUID.randomUUID();
-        RewardRecord r = new RewardRecord(episodeId, RewardSource.JUDGE,
-            new BigDecimal("0.9"), new BigDecimal("0.6"), NOW);
+        RewardRecord r =
+                new RewardRecord(
+                        episodeId,
+                        RewardSource.JUDGE,
+                        new BigDecimal("0.9"),
+                        new BigDecimal("0.6"),
+                        NOW);
 
         assertEquals(episodeId, r.getEpisodeId());
         assertEquals(RewardSource.JUDGE, r.getSource());
@@ -196,7 +220,8 @@ class RlDomainEntitiesTest {
     void anEpisodePolicyArmRecordsOneDimensionsSelection() {
         UUID episodeId = UUID.randomUUID();
         UUID armId = UUID.randomUUID();
-        EpisodePolicyArm link = new EpisodePolicyArm(episodeId, armId, PolicyDimension.REASONING_DEPTH);
+        EpisodePolicyArm link =
+                new EpisodePolicyArm(episodeId, armId, PolicyDimension.REASONING_DEPTH);
 
         assertEquals(episodeId, link.getEpisodeId());
         assertEquals(armId, link.getPolicyArmId());

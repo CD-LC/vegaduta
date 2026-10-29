@@ -54,8 +54,7 @@ class DemoConversionServiceTest {
         when(session.getId()).thenReturn(SESSION_ID);
         when(session.getTenantId()).thenReturn(DEMO_TENANT_ID);
         when(session.getConvertedTenantId()).thenReturn(null);
-        when(sessionRepository.findByTokenHash(anyString()))
-                .thenReturn(Optional.of(session));
+        when(sessionRepository.findByTokenHash(anyString())).thenReturn(Optional.of(session));
     }
 
     @Test

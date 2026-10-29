@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
  * {@link ApprovalParkProperties} ships the model-facing "waiting on a human" texts from {@code
  * /guardrails/approval-park.properties} (queue limit 5, goal capture 4000 chars). {@link
  * ApprovalParkProperties#render} fills {@code {tool}}, {@code {requestId}} and {@code
- * {parkedTool}}; the numeric setters clamp to non-negative so a typo can't make the queue
- * unbounded or negative.
+ * {parkedTool}}; the numeric setters clamp to non-negative so a typo can't make the queue unbounded
+ * or negative.
  */
 class ApprovalParkPropertiesTest {
 
@@ -38,14 +38,19 @@ class ApprovalParkPropertiesTest {
 
     @Test
     void renderFillsEveryPlaceholder() {
-        String rendered = ApprovalParkProperties.render(
-            "call {tool} waits on {requestId} behind {parkedTool}", "send_email", "req-9", "deploy");
+        String rendered =
+                ApprovalParkProperties.render(
+                        "call {tool} waits on {requestId} behind {parkedTool}",
+                        "send_email",
+                        "req-9",
+                        "deploy");
         assertEquals("call send_email waits on req-9 behind deploy", rendered);
     }
 
     @Test
     void renderLeavesTextWithoutPlaceholdersAlone() {
-        assertEquals("no placeholders", ApprovalParkProperties.render("no placeholders", "t", "r", "p"));
+        assertEquals(
+                "no placeholders", ApprovalParkProperties.render("no placeholders", "t", "r", "p"));
     }
 
     @Test

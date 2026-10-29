@@ -49,7 +49,9 @@ class A2aConsoleSurfaceTest {
         audit = mock(AuditLogService.class);
         A2aProperties properties = new A2aProperties();
         properties.setBlockingTimeout(Duration.ofSeconds(5));
-        service = new A2aTaskService(chat, new A2aTaskStore(Duration.ofHours(1), 100), audit, properties);
+        service =
+                new A2aTaskService(
+                        chat, new A2aTaskStore(Duration.ofHours(1), 100), audit, properties);
         controller = new A2aConsoleController(service, properties);
         TenantContext.set(TenantContext.of("tenant-a", "alice", Set.of()));
     }
@@ -60,7 +62,9 @@ class A2aConsoleSurfaceTest {
     }
 
     private A2aTask completedTask() throws Exception {
-        when(chat.chat(any(TurnContext.class), argThat(r -> r.agentId() != null && r.userMessage() != null)))
+        when(chat.chat(
+                        any(TurnContext.class),
+                        argThat(r -> r.agentId() != null && r.userMessage() != null)))
                 .thenReturn(Flux.just("answer"));
         A2aTask task = service.create(AGENT_ID, "ctx-1", "msg-1", "hello", ALICE);
         service.run(task, null).get(5, TimeUnit.SECONDS);
@@ -105,14 +109,20 @@ class A2aConsoleSurfaceTest {
 
     @Test
     void consoleCancelMarksTheTaskAndAudits() {
-        A2aTask task = service.create(AGENT_ID, "ctx-1", "msg-1", "hello", ALICE); // SUBMITTED, never run
+        A2aTask task =
+                service.create(AGENT_ID, "ctx-1", "msg-1", "hello", ALICE); // SUBMITTED, never run
 
         Map<String, Object> body = controller.cancel(task.id()).getBody();
 
         assertEquals("TASK_STATE_CANCELED", body.get("state"));
         assertTrue(task.isTerminal());
         verify(audit)
-                .record(anyString(), anyString(), anyString(), anyString(), any(),
+                .record(
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        any(),
                         argThat((String d) -> d.contains("console")));
     }
 

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -60,7 +59,8 @@ class SecretStoreRequestTest {
 
     @Test
     void theNameFieldCarriesTheUpperSnakeCaseConstraint() throws NoSuchFieldException {
-        Pattern pattern = SecretStoreRequest.class.getDeclaredField("name").getAnnotation(Pattern.class);
+        Pattern pattern =
+                SecretStoreRequest.class.getDeclaredField("name").getAnnotation(Pattern.class);
 
         assertThat(pattern).isNotNull();
         assertThat(pattern.regexp()).isEqualTo("^[A-Z][A-Z0-9_]{0,63}$");

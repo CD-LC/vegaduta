@@ -35,10 +35,8 @@ class MetaSocialCredentialTest {
     @Test
     void hasInstagramOnlyWhenAnAccountIdIsPresent() {
         assertTrue(credential().hasInstagram());
-        assertFalse(
-                new MetaSocialCredential("p", "n", "t", "s", null, null).hasInstagram());
-        assertFalse(
-                new MetaSocialCredential("p", "n", "t", "s", "  ", null).hasInstagram());
+        assertFalse(new MetaSocialCredential("p", "n", "t", "s", null, null).hasInstagram());
+        assertFalse(new MetaSocialCredential("p", "n", "t", "s", "  ", null).hasInstagram());
     }
 
     @Test

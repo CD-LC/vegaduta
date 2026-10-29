@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The approval-gate executor for {@code channel.teams.send}: the payload carries the two Bot
- * Framework coordinates (serviceUrl + conversationId) plus an optional replyToId; sends go out
- * with the tenant's decrypted app credentials.
+ * Framework coordinates (serviceUrl + conversationId) plus an optional replyToId; sends go out with
+ * the tenant's decrypted app credentials.
  */
 class TeamsChannelAdapterTest {
 

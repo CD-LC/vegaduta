@@ -23,7 +23,8 @@ class SignalAddressTest {
     void normalizeNumberRejectsNonE164Input() {
         for (String bad : new String[] {null, "", "5551234567", "+0123", "abc", "+1-555"}) {
             assertThrows(
-                    ChannelConfigurationException.class, () -> SignalAddress.normalizeNumber(bad),
+                    ChannelConfigurationException.class,
+                    () -> SignalAddress.normalizeNumber(bad),
                     "input: " + bad);
         }
     }
@@ -64,7 +65,10 @@ class SignalAddressTest {
     @Test
     void toRecipientEncodesAGroupIdAsSignalCliExpects() {
         String internal = "abc12345";
-        String expected = "group." + Base64.getEncoder().encodeToString(internal.getBytes(StandardCharsets.UTF_8));
+        String expected =
+                "group."
+                        + Base64.getEncoder()
+                                .encodeToString(internal.getBytes(StandardCharsets.UTF_8));
         assertEquals(expected, SignalAddress.toRecipient("group:" + internal));
     }
 

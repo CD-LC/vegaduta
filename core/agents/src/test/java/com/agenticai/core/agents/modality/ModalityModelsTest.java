@@ -12,9 +12,9 @@ import com.agenticai.core.providers.modality.VoiceModelProvider;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ModalityModels} is the embedded value object holding an agent's four per-modality
- * provider overrides. These pin the copy-on-write contract and the "a null provider clears the
- * model" rule each {@code with...} applies - the rule {@link
+ * {@link ModalityModels} is the embedded value object holding an agent's four per-modality provider
+ * overrides. These pin the copy-on-write contract and the "a null provider clears the model" rule
+ * each {@code with...} applies - the rule {@link
  * com.agenticai.core.agents.core.AgentConfigColumns}'s modality setters rely on.
  */
 class ModalityModelsTest {
@@ -41,9 +41,10 @@ class ModalityModelsTest {
         assertEquals("saaras:v3", m.getVoiceModel());
         assertNull(m.getTtsProvider());
 
-        ModalityModels more = m.withText(TextModelProvider.ANTHROPIC, "claude-opus-4-8")
-            .withVideo(VideoModelProvider.SARVAM_VIDEO, "saaras:v3")
-            .withTts(TtsModelProvider.ELEVENLABS, "eleven_multilingual_v2");
+        ModalityModels more =
+                m.withText(TextModelProvider.ANTHROPIC, "claude-opus-4-8")
+                        .withVideo(VideoModelProvider.SARVAM_VIDEO, "saaras:v3")
+                        .withTts(TtsModelProvider.ELEVENLABS, "eleven_multilingual_v2");
 
         assertNotSame(m, more);
         assertEquals(VoiceModelProvider.SARVAM, more.getVoiceModelProvider());
@@ -58,9 +59,10 @@ class ModalityModelsTest {
 
     @Test
     void aNullProviderClearsTheModel() {
-        ModalityModels m = ModalityModels.none()
-            .withVoice(VoiceModelProvider.SARVAM, "saaras:v3")
-            .withVoice(null, "still-set");
+        ModalityModels m =
+                ModalityModels.none()
+                        .withVoice(VoiceModelProvider.SARVAM, "saaras:v3")
+                        .withVoice(null, "still-set");
 
         assertNull(m.getVoiceModelProvider());
         assertNull(m.getVoiceModel());

@@ -25,9 +25,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * The window read behind the reliability report: which runs count, how the two
- * most recent reruns pair case-by-case, and when the floor is honestly ABSENT
- * (one run, or no case scored in both) rather than silently zero.
+ * The window read behind the reliability report: which runs count, how the two most recent reruns
+ * pair case-by-case, and when the floor is honestly ABSENT (one run, or no case scored in both)
+ * rather than silently zero.
  */
 class EvalNoiseFloorsTest {
 
@@ -58,16 +58,19 @@ class EvalNoiseFloorsTest {
 
     /** A SCORED result; {@code caseId} null on purpose so the key is {@code pos:<position>}. */
     private static EvalRunCaseResult scored(UUID runId, int position, double score) {
-        return EvalRunCaseResult.scored(runId, sourceCase(position), "answer", null, "{}", score, null);
+        return EvalRunCaseResult.scored(
+                runId, sourceCase(position), "answer", null, "{}", score, null);
     }
 
     private void stubRuns(List<EvalRun> runs) {
         when(runRepository.findByDatasetIdAndStatusOrderByCreatedAtDesc(
-            eq(DATASET), eq(EvalRunStatus.SUCCEEDED), any())).thenReturn(runs);
+                        eq(DATASET), eq(EvalRunStatus.SUCCEEDED), any()))
+                .thenReturn(runs);
     }
 
     private void stubScores(UUID runId, List<EvalRunCaseResult> results) {
-        when(caseResultRepository.findByRunIdOrderByPositionAscCreatedAtAsc(runId)).thenReturn(results);
+        when(caseResultRepository.findByRunIdOrderByPositionAscCreatedAtAsc(runId))
+                .thenReturn(results);
     }
 
     // ---------------------------------------------------------------- successfulRuns
@@ -108,14 +111,18 @@ class EvalNoiseFloorsTest {
     void aMeasuredFloorPairsOnlyCasesScoredInBothRuns() {
         EvalRun earlier = run(UUID.randomUUID());
         EvalRun later = run(UUID.randomUUID());
-        stubScores(earlier.getId(), List.of(
-            scored(earlier.getId(), 1, 0.5),
-            scored(earlier.getId(), 2, 0.6),
-            EvalRunCaseResult.errored(earlier.getId(), sourceCase(3), "replay broke")));
-        stubScores(later.getId(), List.of(
-            scored(later.getId(), 1, 0.7),
-            scored(later.getId(), 2, 0.5),
-            scored(later.getId(), 8, 0.9)));
+        stubScores(
+                earlier.getId(),
+                List.of(
+                        scored(earlier.getId(), 1, 0.5),
+                        scored(earlier.getId(), 2, 0.6),
+                        EvalRunCaseResult.errored(earlier.getId(), sourceCase(3), "replay broke")));
+        stubScores(
+                later.getId(),
+                List.of(
+                        scored(later.getId(), 1, 0.7),
+                        scored(later.getId(), 2, 0.5),
+                        scored(later.getId(), 8, 0.9)));
 
         List<String> warnings = new ArrayList<>();
         NoiseFloorResponse floor = floors.measure(List.of(later, earlier), warnings);
@@ -123,8 +130,10 @@ class EvalNoiseFloorsTest {
         assertNotNull(floor);
         assertEquals(earlier.getId(), floor.firstRunId());
         assertEquals(later.getId(), floor.secondRunId());
-        assertEquals(2, floor.pairedCases(),
-            "only cases SCORED in both runs pair - errored and single-sided results are dropped");
+        assertEquals(
+                2,
+                floor.pairedCases(),
+                "only cases SCORED in both runs pair - errored and single-sided results are dropped");
         assertEquals(0.15, floor.meanAbsoluteDelta(), 1e-12);
         assertEquals(0.2, floor.maxAbsoluteDelta(), 1e-12);
         assertTrue(floor.floor() >= floor.meanAbsoluteDelta());
@@ -166,8 +175,9 @@ class EvalNoiseFloorsTest {
 
         NoiseFloor floor = floors.independent(DATASET, Set.of(excludedA.getId()));
 
-        assertNotNull(floor,
-            "the two runs that remain once the compared run is excluded pair into a floor");
+        assertNotNull(
+                floor,
+                "the two runs that remain once the compared run is excluded pair into a floor");
         assertEquals(1, floor.pairedCases());
         assertEquals(0.2, floor.meanAbsoluteDelta(), 1e-12);
     }
@@ -177,8 +187,9 @@ class EvalNoiseFloorsTest {
         EvalRun only = run(UUID.randomUUID());
         stubRuns(List.of(only));
 
-        assertNull(floors.independent(DATASET, Set.of(only.getId())),
-            "excluding the only run leaves nothing to pair");
+        assertNull(
+                floors.independent(DATASET, Set.of(only.getId())),
+                "excluding the only run leaves nothing to pair");
 
         stubRuns(List.of(run(UUID.randomUUID())));
         assertNull(floors.independent(DATASET, Set.of()), "one run cannot be paired");
@@ -203,14 +214,16 @@ class EvalNoiseFloorsTest {
         // Hoisted before the stubbing: a mock call nested inside when(...)/thenReturn(...)
         // argument evaluation trips Mockito's unfinished-stubbing detection.
         UUID runId = run.getId();
-        doReturn(List.of(
-                    scored(runId, 1, 0.5),
-                    scored(runId, 2, 0.6),
-                    // UNAVAILABLE: replay fine, no judge measurement -> not a score.
-                    EvalRunCaseResult.scored(runId, sourceCase(3), "a", null, "{}", null, null),
-                    EvalRunCaseResult.errored(runId, sourceCase(4), "boom")))
-            .when(caseResultRepository)
-            .findByRunIdOrderByPositionAscCreatedAtAsc(runId);
+        doReturn(
+                        List.of(
+                                scored(runId, 1, 0.5),
+                                scored(runId, 2, 0.6),
+                                // UNAVAILABLE: replay fine, no judge measurement -> not a score.
+                                EvalRunCaseResult.scored(
+                                        runId, sourceCase(3), "a", null, "{}", null, null),
+                                EvalRunCaseResult.errored(runId, sourceCase(4), "boom")))
+                .when(caseResultRepository)
+                .findByRunIdOrderByPositionAscCreatedAtAsc(runId);
 
         assertEquals(java.util.Map.of("pos:1", 0.5, "pos:2", 0.6), floors.scoresByCase(run));
     }

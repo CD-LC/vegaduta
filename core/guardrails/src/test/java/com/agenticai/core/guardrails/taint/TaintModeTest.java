@@ -17,7 +17,10 @@ class TaintModeTest {
         assertEquals(TaintMode.OFF, TaintMode.parse("OFF"));
         assertEquals(TaintMode.OBSERVE, TaintMode.parse("Observe"));
         assertEquals(TaintMode.ENFORCE, TaintMode.parse("enforce"));
-        assertEquals(TaintMode.ENFORCE, TaintMode.parse("  ENFORCE  "), "surrounding whitespace is trimmed");
+        assertEquals(
+                TaintMode.ENFORCE,
+                TaintMode.parse("  ENFORCE  "),
+                "surrounding whitespace is trimmed");
     }
 
     @Test

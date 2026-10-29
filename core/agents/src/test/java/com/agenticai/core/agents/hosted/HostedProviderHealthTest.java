@@ -61,8 +61,9 @@ class HostedProviderHealthTest {
         health.recordFailure("groq");
         health.recordSuccess("groq", 50);
         health.recordFailure("groq");
-        assertFalse(health.isTripped("groq"),
-            "the success reset the streak, so one failure is not a streak of two");
+        assertFalse(
+                health.isTripped("groq"),
+                "the success reset the streak, so one failure is not a streak of two");
         health.recordFailure("groq");
         assertTrue(health.isTripped("groq"));
     }

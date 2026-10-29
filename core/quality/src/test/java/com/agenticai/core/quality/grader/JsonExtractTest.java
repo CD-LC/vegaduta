@@ -8,10 +8,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 
 /**
- * Models wrap JSON in prose and markdown fences; the extractor must find the
- * first balanced, parseable object/array without being confused by braces
- * inside strings or by truncated output. Pinned because every grader's
- * "what did the agent answer" step depends on it.
+ * Models wrap JSON in prose and markdown fences; the extractor must find the first balanced,
+ * parseable object/array without being confused by braces inside strings or by truncated output.
+ * Pinned because every grader's "what did the agent answer" step depends on it.
  */
 class JsonExtractTest {
 

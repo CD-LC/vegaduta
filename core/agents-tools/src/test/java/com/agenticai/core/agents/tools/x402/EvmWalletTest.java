@@ -13,6 +13,7 @@ class EvmWalletTest {
 
     /** Private key 1: a published test vector. */
     private static final String KEY_ONE = "0x" + "0".repeat(63) + "1";
+
     private static final String ADDR_ONE = "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf";
 
     @Test
@@ -37,7 +38,8 @@ class EvmWalletTest {
     @Test
     void signDigestProducesADeterministicLowSVSignatureThatRecovers() {
         EvmWallet wallet = new EvmWallet(KEY_ONE);
-        byte[] digest = EvmWallet.keccak256("transfer".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        byte[] digest =
+                EvmWallet.keccak256("transfer".getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
         String sig = wallet.signDigest(digest);
         assertEquals(132, sig.length(), "0x + 65 bytes as hex");
@@ -57,7 +59,8 @@ class EvmWalletTest {
 
     @Test
     void hexAndKeccakHelpersAgreeWithPublishedVectors() {
-        assertArrayEqualsBytes(new byte[] {0x00, 0x10, (byte) 0xff}, EvmWallet.hexToBytes("0010ff"));
+        assertArrayEqualsBytes(
+                new byte[] {0x00, 0x10, (byte) 0xff}, EvmWallet.hexToBytes("0010ff"));
         // keccak256("") = c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
         assertEquals(
                 "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",

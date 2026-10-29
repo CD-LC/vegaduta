@@ -183,11 +183,7 @@ function AdminA2aPageInner() {
               <dl className="grid gap-2 text-xs">
                 <EndpointRow label={t("jsonRpc")} path={policy.server.jsonRpcPath} method="POST" />
                 <EndpointRow label={t("restBinding")} path={policy.server.restPath} method="POST" />
-                <EndpointRow
-                  label={t("agentCard")}
-                  path={policy.server.agentCardPath}
-                  method="GET"
-                />
+                <EndpointRow label={t("agentCard")} path={policy.server.agentCardPath} method="GET" />
                 <EndpointRow label={t("platformCard")} path={policy.server.platformCardPath} method="GET" />
                 <EndpointRow label={t("jwks")} path={policy.server.jwksPath} method="GET" />
               </dl>
@@ -203,9 +199,7 @@ function AdminA2aPageInner() {
               </div>
               {policy.client.enabled ? (
                 <>
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">
-                    {t("allowedHosts")}
-                  </p>
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">{t("allowedHosts")}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {policy.client.allowedHosts.length === 0 ? (
                       <span className="text-xs text-muted-foreground">{t("noAllowedHosts")}</span>
@@ -381,21 +375,13 @@ function TaskRow({
           {t("view")}
         </Button>
         {!row.terminal && row.direction === "inbound" && (
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            disabled={cancelBusy}
-            onClick={onCancel}
-          >
+          <Button type="button" variant="destructive" size="sm" disabled={cancelBusy} onClick={onCancel}>
             {cancelBusy ? t("canceling") : t("cancel")}
           </Button>
         )}
       </div>
       <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{row.userText}</p>
-      {row.failureMessage && (
-        <p className="mt-1 text-xs text-destructive">{row.failureMessage}</p>
-      )}
+      {row.failureMessage && <p className="mt-1 text-xs text-destructive">{row.failureMessage}</p>}
     </div>
   );
 }
@@ -457,9 +443,7 @@ function TaskDetailDialog({
                 {task.reply || "—"}
               </pre>
             </div>
-            {task.failureMessage && (
-              <p className="text-destructive">{task.failureMessage}</p>
-            )}
+            {task.failureMessage && <p className="text-destructive">{task.failureMessage}</p>}
           </div>
         )}
         <AlertDialogFooter>

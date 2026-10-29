@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link GuardrailFailMode} decides what a guardrail does when its own machinery fails - closed
- * (refuse) is the default and only an explicit, case-insensitive {@code "open"} opts out of it.
- * The mode is held in a static because the turn-path classes that consult it are built with
- * {@code new}; every test restores {@link GuardrailFailMode#CLOSED} afterwards so no mode leaks
- * into another test.
+ * (refuse) is the default and only an explicit, case-insensitive {@code "open"} opts out of it. The
+ * mode is held in a static because the turn-path classes that consult it are built with {@code
+ * new}; every test restores {@link GuardrailFailMode#CLOSED} afterwards so no mode leaks into
+ * another test.
  */
 class GuardrailFailModeTest {
 

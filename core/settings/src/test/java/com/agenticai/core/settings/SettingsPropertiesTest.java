@@ -62,7 +62,8 @@ class SettingsPropertiesTest {
         assertThat(p.lockedReason("chat.retry.maxAttempts")).isEqualTo("Pinned by SRE");
         // A blank reason reads as no reason.
         p.getLockedReasons().put("chat.retry.max-attempts", "  ");
-        assertThat(p.lockedReason("chat.retry.maxAttempts")).contains("Pinned by the platform operator");
+        assertThat(p.lockedReason("chat.retry.maxAttempts"))
+                .contains("Pinned by the platform operator");
     }
 
     @Test

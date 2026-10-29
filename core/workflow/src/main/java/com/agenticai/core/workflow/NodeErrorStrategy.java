@@ -210,7 +210,7 @@ final class NodeErrorStrategy {
      */
     static boolean shouldRetry(Retry retry, RuntimeException failure) {
         if (failure instanceof TenantLimitExceededException
-            || failure instanceof NodeAttemptExecutor.NodeStepTimeoutException) {
+                || failure instanceof NodeAttemptExecutor.NodeStepTimeoutException) {
             return false;
         }
         return !retry.transientOnly() || isTransient(failure);

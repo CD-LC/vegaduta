@@ -40,7 +40,8 @@ class VegaDutaImportFormatTest {
 
     @Test
     void truncatedOnTheExportMarksTheImportedChat() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"id": "s1", "title": "Cut", "truncated": true, "createdAt": "2024-05-06T07:08:09Z",
              "messages": [{"role": "user", "content": "hi"}]}
             """;
@@ -53,7 +54,8 @@ class VegaDutaImportFormatTest {
 
     @Test
     void nonTextualAttachmentEntriesAndNonObjectMessagesAreDropped() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"id": "s2", "messages": [
               {"role": "user", "content": "see files", "attachments": ["a.txt", 7, {"x": 1}, "  ", "b.png"]},
               "not a message",
@@ -68,7 +70,8 @@ class VegaDutaImportFormatTest {
 
     @Test
     void aMessageTimestampParsesAndGarbageIsDropped() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"id": "s3", "messages": [
               {"role": "user", "content": "q", "timestamp": "2024-01-01T00:00:01Z"},
               {"role": "assistant", "content": "a", "timestamp": "not a date"}]}
@@ -81,7 +84,8 @@ class VegaDutaImportFormatTest {
 
     @Test
     void aConversationWithNoUsableMessageConvertsToNull() throws Exception {
-        String conv = """
+        String conv =
+                """
             {"id": "s4", "messages": [{"role": "tool", "content": "x"}, {"role": "user", "content": " "}]}
             """;
         assertNull(format.convert(tree(conv), "k", "vegaduta", null, collector()));

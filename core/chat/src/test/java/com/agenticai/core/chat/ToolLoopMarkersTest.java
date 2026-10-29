@@ -9,17 +9,19 @@ import org.springframework.ai.chat.messages.ToolResponseMessage;
 
 /**
  * The machine-readable markers the tool loop reads out of tool responses: detection is a content
- * match on {@code "error":"<marker>"} inside the JSON tool result, so it survives the
- * {@code {"result":...}} wrap non-object outputs get. The same strings are duplicated in
- * core/guardrails, which a separate test pins.
+ * match on {@code "error":"<marker>"} inside the JSON tool result, so it survives the {@code
+ * {"result":...}} wrap non-object outputs get. The same strings are duplicated in core/guardrails,
+ * which a separate test pins.
  */
 class ToolLoopMarkersTest {
 
     @Test
     void aResponseCarryingTheBudgetMarkerIsDetected() {
-        ToolResponseMessage message = message(
-            "{\"error\":\"" + ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED
-                + "\",\"result\":\"stop\"}");
+        ToolResponseMessage message =
+                message(
+                        "{\"error\":\""
+                                + ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED
+                                + "\",\"result\":\"stop\"}");
 
         assertTrue(ToolLoopMarkers.carriesBudgetMarker(message));
         assertFalse(ToolLoopMarkers.carriesParkedMarker(message));
@@ -27,8 +29,11 @@ class ToolLoopMarkersTest {
 
     @Test
     void aResponseCarryingTheParkedMarkerIsDetected() {
-        ToolResponseMessage message = message(
-            "{\"error\":\"" + ArgumentSanitizingToolCallingManager.APPROVAL_PARKED + "\"}");
+        ToolResponseMessage message =
+                message(
+                        "{\"error\":\""
+                                + ArgumentSanitizingToolCallingManager.APPROVAL_PARKED
+                                + "\"}");
 
         assertTrue(ToolLoopMarkers.carriesParkedMarker(message));
         assertFalse(ToolLoopMarkers.carriesBudgetMarker(message));
@@ -44,21 +49,30 @@ class ToolLoopMarkersTest {
 
     @Test
     void aMarkerInAnyOneResponseOfManyIsFound() {
-        ToolResponseMessage message = ToolResponseMessage.builder()
-            .responses(List.of(
-                new ToolResponseMessage.ToolResponse("1", "t", "{\"result\":\"ok\"}"),
-                new ToolResponseMessage.ToolResponse("2", "t",
-                    "{\"error\":\"" + ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED + "\"}")))
-            .build();
+        ToolResponseMessage message =
+                ToolResponseMessage.builder()
+                        .responses(
+                                List.of(
+                                        new ToolResponseMessage.ToolResponse(
+                                                "1", "t", "{\"result\":\"ok\"}"),
+                                        new ToolResponseMessage.ToolResponse(
+                                                "2",
+                                                "t",
+                                                "{\"error\":\""
+                                                        + ArgumentSanitizingToolCallingManager
+                                                                .TOOL_BUDGET_EXHAUSTED
+                                                        + "\"}")))
+                        .build();
 
         assertTrue(ToolLoopMarkers.carriesBudgetMarker(message));
     }
 
     @Test
     void aNullResponseDataCarriesNothing() {
-        ToolResponseMessage message = ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse("1", "t", null)))
-            .build();
+        ToolResponseMessage message =
+                ToolResponseMessage.builder()
+                        .responses(List.of(new ToolResponseMessage.ToolResponse("1", "t", null)))
+                        .build();
 
         assertFalse(ToolLoopMarkers.carriesBudgetMarker(message));
         assertFalse(ToolLoopMarkers.carriesParkedMarker(message));
@@ -75,7 +89,7 @@ class ToolLoopMarkersTest {
 
     private static ToolResponseMessage message(String data) {
         return ToolResponseMessage.builder()
-            .responses(List.of(new ToolResponseMessage.ToolResponse("id", "tool", data)))
-            .build();
+                .responses(List.of(new ToolResponseMessage.ToolResponse("id", "tool", data)))
+                .build();
     }
 }

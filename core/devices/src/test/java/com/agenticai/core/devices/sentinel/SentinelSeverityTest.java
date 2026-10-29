@@ -11,7 +11,8 @@ class SentinelSeverityTest {
     void orderingIsInfoWatchAlertCritical() {
         assertThat(SentinelSeverity.INFO.ordinal()).isLessThan(SentinelSeverity.WATCH.ordinal());
         assertThat(SentinelSeverity.WATCH.ordinal()).isLessThan(SentinelSeverity.ALERT.ordinal());
-        assertThat(SentinelSeverity.ALERT.ordinal()).isLessThan(SentinelSeverity.CRITICAL.ordinal());
+        assertThat(SentinelSeverity.ALERT.ordinal())
+                .isLessThan(SentinelSeverity.CRITICAL.ordinal());
     }
 
     @Test

@@ -34,8 +34,14 @@ class MetaSocialCredentialControllerTest {
                 new MetaSocialActivationRequest("page-1", "page-token", "secret", "ig-1");
         MetaSocialCredentialResponse response =
                 new MetaSocialCredentialResponse(
-                        UUID.randomUUID(), "page-1", "Acme", true, "acme_ig",
-                        MetaSocialCredentialStatus.ACTIVE, Instant.now(), Instant.now());
+                        UUID.randomUUID(),
+                        "page-1",
+                        "Acme",
+                        true,
+                        "acme_ig",
+                        MetaSocialCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        Instant.now());
         when(credentialService.activate(request)).thenReturn(response);
 
         ResponseEntity<MetaSocialCredentialResponse> result = controller.activate(request);
@@ -48,8 +54,14 @@ class MetaSocialCredentialControllerTest {
     void currentReturns200WhenConnectedAnd204WhenNot() {
         MetaSocialCredentialResponse response =
                 new MetaSocialCredentialResponse(
-                        UUID.randomUUID(), "page-1", "Acme", false, null,
-                        MetaSocialCredentialStatus.ACTIVE, Instant.now(), null);
+                        UUID.randomUUID(),
+                        "page-1",
+                        "Acme",
+                        false,
+                        null,
+                        MetaSocialCredentialStatus.ACTIVE,
+                        Instant.now(),
+                        null);
         when(credentialService.current()).thenReturn(Optional.of(response));
 
         ResponseEntity<MetaSocialCredentialResponse> ok = controller.current();

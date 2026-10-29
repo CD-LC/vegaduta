@@ -25,7 +25,8 @@ class BudgetTest {
 
     @Test
     void tickRejectsNegativeAndOverflowingCounts() {
-        Budget b = new Budget(Limits.defaults().withMaxSteps(100).withMaxWallNanos(10_000_000_000L));
+        Budget b =
+                new Budget(Limits.defaults().withMaxSteps(100).withMaxWallNanos(10_000_000_000L));
         assertThrows(ExpressionException.class, () -> b.tick(-1));
         assertThrows(ExpressionException.class, () -> b.tick(Integer.MAX_VALUE));
     }
@@ -47,11 +48,12 @@ class BudgetTest {
     void ioExcludesTheLookupLatencyFromTheWallBudget() {
         AtomicLong nanos = new AtomicLong(0);
         Budget b = new Budget(limitsWithClock(nanos).withMaxWallNanos(100).withMaxSteps(10));
-        String v = b.io(
-                () -> {
-                    nanos.set(10_000); // a slow context lookup
-                    return "data";
-                });
+        String v =
+                b.io(
+                        () -> {
+                            nanos.set(10_000); // a slow context lookup
+                            return "data";
+                        });
         assertEquals("data", v);
         b.checkTime(); // the lookup's latency was credited back, so we are still inside the wall
         b.tick();
@@ -65,11 +67,12 @@ class BudgetTest {
         IllegalStateException thrown =
                 assertThrows(
                         IllegalStateException.class,
-                        () -> b.io(
-                                () -> {
-                                    nanos.set(10_000);
-                                    throw boom;
-                                }));
+                        () ->
+                                b.io(
+                                        () -> {
+                                            nanos.set(10_000);
+                                            throw boom;
+                                        }));
         assertEquals("store down", thrown.getMessage());
         b.checkTime(); // the failed lookup's latency was still excluded
     }

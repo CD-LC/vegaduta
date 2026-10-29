@@ -10,15 +10,15 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * One (day, provider, model, agent, modality) grain of the {@code llm_daily_usage_rollup}
- * table: the idempotent recompute path {@link #applyAggregates} - aggregates overwrite in place,
- * the grain columns never move, and a null cost reads as an honest zero.
+ * One (day, provider, model, agent, modality) grain of the {@code llm_daily_usage_rollup} table:
+ * the idempotent recompute path {@link #applyAggregates} - aggregates overwrite in place, the grain
+ * columns never move, and a null cost reads as an honest zero.
  */
 class LlmDailyUsageRollupTest {
 
     private static LlmDailyUsageRollup row() {
         return new LlmDailyUsageRollup(
-            LocalDate.of(2026, 10, 4), "OPENAI", "gpt-4o", UUID.randomUUID(), "TEXT");
+                LocalDate.of(2026, 10, 4), "OPENAI", "gpt-4o", UUID.randomUUID(), "TEXT");
     }
 
     @Test
@@ -42,8 +42,17 @@ class LlmDailyUsageRollupTest {
         LlmDailyUsageRollup r = row();
         UUID agent = r.getAgentId();
 
-        r.applyAggregates(120, 3, 60_000, 30_000, 90_000,
-            new BigDecimal("1.234567"), 45_000, 380.0, 910.5, 17);
+        r.applyAggregates(
+                120,
+                3,
+                60_000,
+                30_000,
+                90_000,
+                new BigDecimal("1.234567"),
+                45_000,
+                380.0,
+                910.5,
+                17);
 
         assertEquals(120, r.getTotalCalls());
         assertEquals(3, r.getErrorCount());

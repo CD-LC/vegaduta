@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
 /**
- * {@link GovernanceFailOpenPolicy#allowOnBackendFailure} is the ONE decision point for "Redis
- * down -> metered or unmetered traffic". Today every Redis-backed spend/abuse control fails open;
- * this pins both the decision and the greppable marker operators search for during an outage.
+ * {@link GovernanceFailOpenPolicy#allowOnBackendFailure} is the ONE decision point for "Redis down
+ * -> metered or unmetered traffic". Today every Redis-backed spend/abuse control fails open; this
+ * pins both the decision and the greppable marker operators search for during an outage.
  */
 class GovernanceFailOpenPolicyTest {
 
@@ -45,7 +45,8 @@ class GovernanceFailOpenPolicyTest {
     void theCallerSuppliesTheLoggerSoLinesLandUnderItsOwnName() {
         Logger log = mock(Logger.class);
 
-        GovernanceFailOpenPolicy.allowOnBackendFailure("per-user-budget", new RuntimeException(), log);
+        GovernanceFailOpenPolicy.allowOnBackendFailure(
+                "per-user-budget", new RuntimeException(), log);
 
         verify(log).warn(anyString(), anyString(), any(Exception.class));
         verify(log, org.mockito.Mockito.never()).error(anyString(), any(), any());

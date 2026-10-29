@@ -14,9 +14,9 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link EdgeModelCatalog} is pure in-code data, so the useful assertions are the invariants its
  * two lists' javadocs promise: the manifest is versioned, ids are unique, every tier-1 LLM row
- * carries the fields the client selector needs, and the admin-facing {@code REGISTRY_CATALOG}
- * stays disjoint from the default manifest (a registry row duplicating a default would let an
- * admin "add" a model that is already served).
+ * carries the fields the client selector needs, and the admin-facing {@code REGISTRY_CATALOG} stays
+ * disjoint from the default manifest (a registry row duplicating a default would let an admin "add"
+ * a model that is already served).
  */
 class EdgeModelCatalogTest {
 
@@ -89,7 +89,8 @@ class EdgeModelCatalogTest {
         }
         Set<String> registryIds = new HashSet<>();
         for (EdgeModelEntry entry : EdgeModelCatalog.REGISTRY_CATALOG) {
-            assertFalse(defaultIds.contains(entry.id()),
+            assertFalse(
+                    defaultIds.contains(entry.id()),
                     "registry row duplicates a default: " + entry.id());
             assertTrue(registryIds.add(entry.id()), "duplicate registry id: " + entry.id());
             // Every registry candidate is a tier-1 WebLLM chat model - the

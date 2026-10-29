@@ -13,8 +13,13 @@ class GeneratedImageTest {
 
     private static GeneratedImage image() {
         return GeneratedImage.create(
-                "sunset.png", "image/png", "generated-images/abc.png",
-                "a sunset over the ghats", "dall-e-3", "1024x1024", "openai");
+                "sunset.png",
+                "image/png",
+                "generated-images/abc.png",
+                "a sunset over the ghats",
+                "dall-e-3",
+                "1024x1024",
+                "openai");
     }
 
     @Test

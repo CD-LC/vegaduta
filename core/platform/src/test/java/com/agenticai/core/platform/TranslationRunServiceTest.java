@@ -20,10 +20,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 
 /**
- * The on-demand dispatch never throws: an unconfigured deployment, a rejected
- * token and a surprise failure all land as a recorded {@code lastTrigger*} row
- * the console can render - a 500 with no trail is the failure mode this class
- * exists to prevent.
+ * The on-demand dispatch never throws: an unconfigured deployment, a rejected token and a surprise
+ * failure all land as a recorded {@code lastTrigger*} row the console can render - a 500 with no
+ * trail is the failure mode this class exists to prevent.
  */
 class TranslationRunServiceTest {
 
@@ -36,9 +35,13 @@ class TranslationRunServiceTest {
     @BeforeEach
     void setUp() {
         settingsService = mock(TranslationJobSettingsService.class);
-        settings = new TranslationJobSettings(
-            "0 6 * * 1", ProviderName.ANTHROPIC, "m",
-            ".github/workflows/translate-messages.yml", null);
+        settings =
+                new TranslationJobSettings(
+                        "0 6 * * 1",
+                        ProviderName.ANTHROPIC,
+                        "m",
+                        ".github/workflows/translate-messages.yml",
+                        null);
         when(settingsService.get()).thenReturn(settings);
 
         restClient = mock(RestClient.class);
@@ -55,7 +58,8 @@ class TranslationRunServiceTest {
     private TranslationRunService service(String repo, String token) {
         RestClient.Builder builder = mock(RestClient.Builder.class);
         when(builder.build()).thenReturn(restClient);
-        return new TranslationRunService(settingsService, builder, repo, token, "https://api.example");
+        return new TranslationRunService(
+                settingsService, builder, repo, token, "https://api.example");
     }
 
     // ---------------------------------------------------------------- not configured
@@ -89,8 +93,8 @@ class TranslationRunServiceTest {
         ArgumentCaptor<String> url = ArgumentCaptor.forClass(String.class);
         verify(request).uri(url.capture());
         assertEquals(
-            "https://api.example/repos/acme/widgets/actions/workflows/translate-messages.yml/dispatches",
-            url.getValue());
+                "https://api.example/repos/acme/widgets/actions/workflows/translate-messages.yml/dispatches",
+                url.getValue());
         verify(request).header("Authorization", "Bearer secret-token");
         verify(request).body("{\"ref\":\"main\"}");
 
@@ -106,11 +110,13 @@ class TranslationRunServiceTest {
 
         ArgumentCaptor<String> url = ArgumentCaptor.forClass(String.class);
         verify(request).uri(url.capture());
-        assertTrue(url.getValue().endsWith("/actions/workflows/custom-workflow.yml/dispatches"),
-            "GitHub wants the file name, not the repository-relative path: " + url.getValue());
+        assertTrue(
+                url.getValue().endsWith("/actions/workflows/custom-workflow.yml/dispatches"),
+                "GitHub wants the file name, not the repository-relative path: " + url.getValue());
     }
 
-    // ---------------------------------------------------------------- failures recorded, not thrown
+    // ---------------------------------------------------------------- failures recorded, not
+    // thrown
 
     @Test
     void a404PointsAtTheRepoAndWorkflowNameConfig() {
@@ -136,8 +142,8 @@ class TranslationRunServiceTest {
 
     @Test
     void anyOtherUpstreamStatusRecordsTheHttpLine() {
-        when(request.retrieve()).thenThrow(
-            new HttpServerErrorException(HttpStatus.BAD_GATEWAY, "bad gateway"));
+        when(request.retrieve())
+                .thenThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY, "bad gateway"));
 
         service("acme/widgets", "t").triggerNow("ops");
 

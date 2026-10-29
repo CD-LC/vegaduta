@@ -29,8 +29,9 @@ class McpToolHintsTest {
     @Test
     void readOnlyOrDestructiveHintsAlwaysBearOnRisk() {
         assertTrue(new McpToolHints(true, null, null, null).hasRiskHint());
-        assertTrue(new McpToolHints(false, null, null, null).hasRiskHint(),
-            "an explicit readOnlyHint=false is a statement too");
+        assertTrue(
+                new McpToolHints(false, null, null, null).hasRiskHint(),
+                "an explicit readOnlyHint=false is a statement too");
         assertTrue(new McpToolHints(null, true, null, null).hasRiskHint());
         assertTrue(new McpToolHints(null, false, null, null).hasRiskHint());
     }
@@ -38,10 +39,12 @@ class McpToolHintsTest {
     @Test
     void onlyAnExplicitOpenWorldTrueBearsOnRisk() {
         assertTrue(new McpToolHints(null, null, null, true).hasRiskHint());
-        assertFalse(new McpToolHints(null, null, null, false).hasRiskHint(),
-            "openWorldHint=false says the tool stays inside its domain - no risk signal");
-        assertFalse(new McpToolHints(null, null, true, null).hasRiskHint(),
-            "an idempotent hint alone says nothing about whether the tool changes anything");
+        assertFalse(
+                new McpToolHints(null, null, null, false).hasRiskHint(),
+                "openWorldHint=false says the tool stays inside its domain - no risk signal");
+        assertFalse(
+                new McpToolHints(null, null, true, null).hasRiskHint(),
+                "an idempotent hint alone says nothing about whether the tool changes anything");
     }
 
     @Test
@@ -52,7 +55,7 @@ class McpToolHintsTest {
     @Test
     void fromExtractsEveryHintField() {
         McpSchema.ToolAnnotations annotations =
-            new McpSchema.ToolAnnotations("t", true, false, true, false, null);
+                new McpSchema.ToolAnnotations("t", true, false, true, false, null);
 
         McpToolHints hints = McpToolHints.from(annotations);
 

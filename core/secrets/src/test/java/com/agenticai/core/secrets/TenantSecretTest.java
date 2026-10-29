@@ -184,7 +184,8 @@ class TenantSecretTest {
         assertThat(r.createdBy()).isEqualTo("admin@acme");
         // And the one thing it can never carry: the value itself.
         assertThat(r.getClass().getDeclaredFields())
-                .noneMatch(f -> f.getName().equals("value") || f.getName().equals("encryptedValue"));
+                .noneMatch(
+                        f -> f.getName().equals("value") || f.getName().equals("encryptedValue"));
     }
 
     @Test

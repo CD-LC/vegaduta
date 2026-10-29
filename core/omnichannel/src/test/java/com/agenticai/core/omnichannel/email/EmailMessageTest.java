@@ -46,8 +46,15 @@ class EmailMessageTest {
         String longError = "e".repeat(1200);
         EmailMessage m =
                 new EmailMessage(
-                        "run", "node", "r@x.test", longSubject, "id", "t",
-                        EmailMessage.STATUS_FAILED, longError, Instant.now());
+                        "run",
+                        "node",
+                        "r@x.test",
+                        longSubject,
+                        "id",
+                        "t",
+                        EmailMessage.STATUS_FAILED,
+                        longError,
+                        Instant.now());
         assertEquals(998, m.getSubject().length());
         assertEquals(1000, m.getError().length());
     }
@@ -56,8 +63,15 @@ class EmailMessageTest {
     void nullSubjectAndErrorStayNull() {
         EmailMessage m =
                 new EmailMessage(
-                        "run", "node", "r@x.test", null, "id", "t",
-                        EmailMessage.STATUS_SKIPPED, null, Instant.now());
+                        "run",
+                        "node",
+                        "r@x.test",
+                        null,
+                        "id",
+                        "t",
+                        EmailMessage.STATUS_SKIPPED,
+                        null,
+                        Instant.now());
         assertNull(m.getSubject());
         assertNull(m.getError());
     }

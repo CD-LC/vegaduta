@@ -8,9 +8,10 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link FollowUpProperties} loads the short-follow-up rules from {@code /chat/follow-up.properties}.
- * These pin the shipped defaults and the {@link FollowUpProperties#isShortFollowUp} boundary,
- * which is what decides whether a turn is judged on the conversation rather than on the message.
+ * {@link FollowUpProperties} loads the short-follow-up rules from {@code
+ * /chat/follow-up.properties}. These pin the shipped defaults and the {@link
+ * FollowUpProperties#isShortFollowUp} boundary, which is what decides whether a turn is judged on
+ * the conversation rather than on the message.
  */
 class FollowUpPropertiesTest {
 

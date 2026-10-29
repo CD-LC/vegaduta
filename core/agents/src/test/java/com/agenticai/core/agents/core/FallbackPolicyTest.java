@@ -37,7 +37,9 @@ class FallbackPolicyTest {
     @Test
     void aNullProviderClearsTheModelToo() {
         FallbackPolicy p =
-            FallbackPolicy.none().withFallback(ProviderName.OPENAI, "gpt-4o-mini").withFallback(null, "ignored");
+                FallbackPolicy.none()
+                        .withFallback(ProviderName.OPENAI, "gpt-4o-mini")
+                        .withFallback(null, "ignored");
 
         assertNull(p.getProviderName());
         assertNull(p.getModel());

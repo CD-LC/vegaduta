@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
- * {@link RlConfiguration} exists only to bind the three {@code rl.*} property classes - there is
- * no application-wide {@code @ConfigurationPropertiesScan}, so if a fourth class is added here
- * (or one drops off) the module silently loses its config.
+ * {@link RlConfiguration} exists only to bind the three {@code rl.*} property classes - there is no
+ * application-wide {@code @ConfigurationPropertiesScan}, so if a fourth class is added here (or one
+ * drops off) the module silently loses its config.
  */
 class RlConfigurationTest {
 
@@ -23,7 +23,10 @@ class RlConfigurationTest {
                 RlConfiguration.class.getAnnotation(EnableConfigurationProperties.class);
 
         assertEquals(
-                List.of(RlPolicyProperties.class, RlRewardProperties.class, RlFeedbackProperties.class),
+                List.of(
+                        RlPolicyProperties.class,
+                        RlRewardProperties.class,
+                        RlFeedbackProperties.class),
                 List.of(annotation.value()));
     }
 

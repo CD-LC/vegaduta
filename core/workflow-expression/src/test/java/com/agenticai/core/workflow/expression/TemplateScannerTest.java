@@ -3,9 +3,8 @@ package com.agenticai.core.workflow.expression;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.Test;
-
 import com.agenticai.core.workflow.expression.TemplateScanner.Match;
+import org.junit.jupiter.api.Test;
 
 /** {@link TemplateScanner}: span finding, quoting, nesting and the per-span size bound. */
 class TemplateScannerTest {

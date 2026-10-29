@@ -13,9 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Teams' card on the Channels screen: the summary shows the bot's app id for an ACTIVE
- * credential only, and the probe mints an Entra token (the same real call activation used to
- * prove the credential).
+ * Teams' card on the Channels screen: the summary shows the bot's app id for an ACTIVE credential
+ * only, and the probe mints an Entra token (the same real call activation used to prove the
+ * credential).
  */
 class TeamsChannelConnectionTest {
 
@@ -41,7 +41,12 @@ class TeamsChannelConnectionTest {
                 .thenReturn(
                         Optional.of(
                                 new TeamsCredentialResponse(
-                                        null, "app-123", "aad", TeamsCredentialStatus.ACTIVE, null, null)));
+                                        null,
+                                        "app-123",
+                                        "aad",
+                                        TeamsCredentialStatus.ACTIVE,
+                                        null,
+                                        null)));
 
         assertThat(connection.summary().state()).isEqualTo("CONNECTED");
         assertThat(connection.summary().detail()).isEqualTo("bot app-123");
@@ -53,7 +58,12 @@ class TeamsChannelConnectionTest {
                 .thenReturn(
                         Optional.of(
                                 new TeamsCredentialResponse(
-                                        null, "app-123", "aad", TeamsCredentialStatus.DISCONNECTED, null, null)));
+                                        null,
+                                        "app-123",
+                                        "aad",
+                                        TeamsCredentialStatus.DISCONNECTED,
+                                        null,
+                                        null)));
         assertThat(connection.summary().state()).isEqualTo("NOT_CONNECTED");
 
         when(credentialService.current()).thenReturn(Optional.empty());

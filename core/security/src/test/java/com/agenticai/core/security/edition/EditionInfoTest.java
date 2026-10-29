@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
- * {@link EditionInfo#from} is what the public status endpoint and the web console render - the
- * same code the bean conditions run, so the report can never disagree with the registered beans.
+ * {@link EditionInfo#from} is what the public status endpoint and the web console render - the same
+ * code the bean conditions run, so the report can never disagree with the registered beans.
  */
 class EditionInfoTest {
 

@@ -22,8 +22,9 @@ class RlPolicyPropertiesTest {
     void theDefaultsSeedTheDocumentedPosture() {
         RlPolicyProperties p = new RlPolicyProperties();
 
-        assertTrue(p.getModelRouteArms().isEmpty(),
-            "no platform-wide model pool: arms are created per tenant instead");
+        assertTrue(
+                p.getModelRouteArms().isEmpty(),
+                "no platform-wide model pool: arms are created per tenant instead");
         assertEquals(new BigDecimal("0.100"), p.getDefaultExplorationRate());
         assertEquals(List.of("FAST", "CAREFUL", "RIGOROUS"), p.getReasoningDepthArms());
         assertEquals(2.0, p.getUcb1ExplorationConstant());

@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 /**
- * The mutable half of Teams routing: the conversation id is the identity (and the primary key),
- * the serviceUrl just records where that conversation was last reachable and is rewritten on
- * every inbound activity.
+ * The mutable half of Teams routing: the conversation id is the identity (and the primary key), the
+ * serviceUrl just records where that conversation was last reachable and is rewritten on every
+ * inbound activity.
  */
 class TeamsConversationRouteTest {
 

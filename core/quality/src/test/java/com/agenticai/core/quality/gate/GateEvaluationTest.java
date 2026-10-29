@@ -11,11 +11,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * The gate report is the contract a blocked promote surfaces: {@code allowed}
- * is the only bit the enforcement hook reads, and everything else must be a
- * true statement about WHY. The factories - not the callers - assemble that
- * pairing, so they are what this test pins, together with the {@link
- * AgentEvalGate} row they read from.
+ * The gate report is the contract a blocked promote surfaces: {@code allowed} is the only bit the
+ * enforcement hook reads, and everything else must be a true statement about WHY. The factories -
+ * not the callers - assemble that pairing, so they are what this test pins, together with the
+ * {@link AgentEvalGate} row they read from.
  */
 class GateEvaluationTest {
 
@@ -46,7 +45,8 @@ class GateEvaluationTest {
 
     @Test
     void theSimulationLegIsOptInAndCarriesItsOwnFreshnessWindow() {
-        AgentEvalGate gate = new AgentEvalGate(AGENT, DATASET, true, null, true, 24, "admin@example.com");
+        AgentEvalGate gate =
+                new AgentEvalGate(AGENT, DATASET, true, null, true, 24, "admin@example.com");
 
         assertTrue(gate.isRequireSimulation());
         assertEquals(24, gate.getMaxSimulationAgeHours());
@@ -108,9 +108,17 @@ class GateEvaluationTest {
         UUID runId = UUID.randomUUID();
         Instant finished = Instant.parse("2026-10-01T00:00:00Z");
 
-        GateEvaluation eval = GateEvaluation.blocked(
-            gate, "Golden set", VERSION, Reason.RUN_FAILED, "the latest run failed",
-            runId, "FAILED", 0.42, finished);
+        GateEvaluation eval =
+                GateEvaluation.blocked(
+                        gate,
+                        "Golden set",
+                        VERSION,
+                        Reason.RUN_FAILED,
+                        "the latest run failed",
+                        runId,
+                        "FAILED",
+                        0.42,
+                        finished);
 
         assertFalse(eval.allowed());
         assertTrue(eval.configured());
@@ -138,13 +146,26 @@ class GateEvaluationTest {
         Instant runFinished = Instant.parse("2026-10-01T00:00:00Z");
         Instant simFinished = Instant.parse("2026-10-02T00:00:00Z");
 
-        GateEvaluation eval = GateEvaluation.blockedSimulation(
-            gate, "Golden set", VERSION, Reason.SIM_FAILED, "a persona failed",
-            runId, 0.9, runFinished, sessionId, "FAILED", simFinished);
+        GateEvaluation eval =
+                GateEvaluation.blockedSimulation(
+                        gate,
+                        "Golden set",
+                        VERSION,
+                        Reason.SIM_FAILED,
+                        "a persona failed",
+                        runId,
+                        0.9,
+                        runFinished,
+                        sessionId,
+                        "FAILED",
+                        simFinished);
 
         assertFalse(eval.allowed());
         assertEquals(Reason.SIM_FAILED, eval.reason());
-        assertEquals("PASSED", eval.verdict(), "the eval leg already passed; the sim leg is what failed");
+        assertEquals(
+                "PASSED",
+                eval.verdict(),
+                "the eval leg already passed; the sim leg is what failed");
         assertTrue(eval.simulationRequired());
         assertEquals(sessionId, eval.simulationSessionId());
         assertEquals("FAILED", eval.simulationVerdict());
@@ -157,7 +178,8 @@ class GateEvaluationTest {
         AgentEvalGate gate = enabledGate();
         UUID runId = UUID.randomUUID();
 
-        GateEvaluation eval = GateEvaluation.passed(gate, "Golden set", VERSION, runId, 0.913, null);
+        GateEvaluation eval =
+                GateEvaluation.passed(gate, "Golden set", VERSION, runId, 0.913, null);
 
         assertTrue(eval.allowed());
         assertTrue(eval.enabled());
@@ -166,8 +188,9 @@ class GateEvaluationTest {
         assertEquals(runId, eval.qualifyingRunId());
         assertTrue(eval.message().contains("Golden set"));
         assertTrue(eval.message().contains("0.913"));
-        assertFalse(eval.message().contains("simulation"),
-            "a gate without the sim leg says nothing about simulation");
+        assertFalse(
+                eval.message().contains("simulation"),
+                "a gate without the sim leg says nothing about simulation");
         assertNull(eval.simulationVerdict());
     }
 
@@ -178,8 +201,9 @@ class GateEvaluationTest {
         UUID sessionId = UUID.randomUUID();
         Instant simFinished = Instant.parse("2026-10-02T00:00:00Z");
 
-        GateEvaluation eval = GateEvaluation.passed(
-            gate, "Golden set", VERSION, runId, null, null, sessionId, simFinished);
+        GateEvaluation eval =
+                GateEvaluation.passed(
+                        gate, "Golden set", VERSION, runId, null, null, sessionId, simFinished);
 
         assertTrue(eval.allowed());
         assertTrue(eval.simulationRequired());
@@ -187,7 +211,8 @@ class GateEvaluationTest {
         assertEquals(sessionId, eval.simulationSessionId());
         assertEquals(simFinished, eval.simulationFinishedAt());
         assertTrue(eval.message().contains("simulation staging also passed"));
-        assertFalse(eval.message().contains("score"),
-            "no score, no fabricated score fragment in the message");
+        assertFalse(
+                eval.message().contains("score"),
+                "no score, no fabricated score fragment in the message");
     }
 }

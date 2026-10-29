@@ -22,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link TenantObjectStorageEraser}: best-effort deletion of every object key discoverable via a
- * DB query (avatars in {@code control_plane.app_user} plus the five {@code OBJECT_KEY_TABLES}
+ * {@link TenantObjectStorageEraser}: best-effort deletion of every object key discoverable via a DB
+ * query (avatars in {@code control_plane.app_user} plus the five {@code OBJECT_KEY_TABLES}
  * schema-scoped columns), the same-listing count twin, and the "one bad part doesn't sink
  * everything" posture on both halves.
  */
@@ -50,9 +50,7 @@ class TenantObjectStorageEraserTest {
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.createStatement()).thenReturn(statement);
         when(statement.executeQuery(anyString())).thenReturn(resultSet);
-        eraser =
-                new TenantObjectStorageEraser(
-                        dataSource, appUserRepository, fileStorageService);
+        eraser = new TenantObjectStorageEraser(dataSource, appUserRepository, fileStorageService);
         tenant = mock(Tenant.class);
         when(tenant.getName()).thenReturn("Acme");
         when(tenant.getSchemaName()).thenReturn("acme");
@@ -60,12 +58,11 @@ class TenantObjectStorageEraserTest {
 
     @Test
     void erasureDeletesEveryAppUserAvatarAndEveryDiscoveredTableKey() throws SQLException {
-        AppUser withAvatar =
-                new AppUser(null, "kc-1", "a@acme.test", UserRole.TENANT_ADMIN);
+        AppUser withAvatar = new AppUser(null, "kc-1", "a@acme.test", UserRole.TENANT_ADMIN);
         withAvatar.setAvatarUrl("avatars/user-1.png");
-        AppUser withoutAvatar =
-                new AppUser(null, "kc-2", "b@acme.test", UserRole.AGENT_BUILDER);
-        when(appUserRepository.findByTenantId(any())).thenReturn(List.of(withAvatar, withoutAvatar));
+        AppUser withoutAvatar = new AppUser(null, "kc-2", "b@acme.test", UserRole.AGENT_BUILDER);
+        when(appUserRepository.findByTenantId(any()))
+                .thenReturn(List.of(withAvatar, withoutAvatar));
         // One object-key row in the first table queried, empty everywhere
         // after (the shared mock's next() sequence is consumed in order).
         when(resultSet.next()).thenReturn(true, false);
@@ -103,20 +100,19 @@ class TenantObjectStorageEraserTest {
                 .thenThrow(new SQLException("relation does not exist"));
 
         assertDoesNotThrow(
-                () -> eraser.eraseObjectKeysFromTable(tenant, "acme", "generated_image", "object_key"));
+                () ->
+                        eraser.eraseObjectKeysFromTable(
+                                tenant, "acme", "generated_image", "object_key"));
         verify(fileStorageService, never()).delete(any());
     }
 
     @Test
     void countObjectStorageItemsSumsAvatarsAndEveryTableColumn() throws SQLException {
-        AppUser withAvatar =
-                new AppUser(null, "kc-1", "a@acme.test", UserRole.TENANT_ADMIN);
+        AppUser withAvatar = new AppUser(null, "kc-1", "a@acme.test", UserRole.TENANT_ADMIN);
         withAvatar.setAvatarUrl("avatars/user-1.png");
-        AppUser blankAvatar =
-                new AppUser(null, "kc-2", "b@acme.test", UserRole.AGENT_BUILDER);
+        AppUser blankAvatar = new AppUser(null, "kc-2", "b@acme.test", UserRole.AGENT_BUILDER);
         blankAvatar.setAvatarUrl("   ");
-        when(appUserRepository.findByTenantId(any()))
-                .thenReturn(List.of(withAvatar, blankAvatar));
+        when(appUserRepository.findByTenantId(any())).thenReturn(List.of(withAvatar, blankAvatar));
         when(resultSet.next()).thenReturn(true);
         when(resultSet.getLong(1)).thenReturn(2L);
 

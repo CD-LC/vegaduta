@@ -36,8 +36,7 @@ class XChannelAdapterTest {
     }
 
     private static ApprovalRequest request(String payloadJson) {
-        return new ApprovalRequest(
-                XChannelAdapter.ACTION_TYPE, "Send X DM", payloadJson, "user-1");
+        return new ApprovalRequest(XChannelAdapter.ACTION_TYPE, "Send X DM", payloadJson, "user-1");
     }
 
     @Test
@@ -48,8 +47,7 @@ class XChannelAdapterTest {
     @Test
     void executeMintsAFreshTokenSendsTheDmAndRecordsIt() {
         when(oauthService.currentAccessToken()).thenReturn("access-token-1");
-        when(apiClient.sendDm("access-token-1", "dm-conv-1", "hello"))
-                .thenReturn("Sent X DM.");
+        when(apiClient.sendDm("access-token-1", "dm-conv-1", "hello")).thenReturn("Sent X DM.");
 
         adapter.execute(request("{\"to\":\"dm-conv-1\",\"body\":\"hello\"}"));
 
@@ -82,8 +80,7 @@ class XChannelAdapterTest {
 
     @Test
     void anOAuthFailureAlsoWrapsAsRetryable() {
-        when(oauthService.currentAccessToken())
-                .thenThrow(new XNotConnectedException());
+        when(oauthService.currentAccessToken()).thenThrow(new XNotConnectedException());
 
         assertThatThrownBy(() -> adapter.execute(request("{\"to\":\"dm-conv-1\",\"body\":\"hi\"}")))
                 .isInstanceOf(RetryableChannelDeliveryException.class);

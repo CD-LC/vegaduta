@@ -25,10 +25,12 @@ class TrifectaEnforcementModeTest {
     @Test
     void parseAcceptsBothWireSpellingsAndEnums() {
         assertEquals(TrifectaEnforcementMode.OFF, TrifectaEnforcementMode.parse("off"));
-        assertEquals(TrifectaEnforcementMode.REQUIRE_APPROVAL,
-            TrifectaEnforcementMode.parse("require-approval"));
-        assertEquals(TrifectaEnforcementMode.REQUIRE_APPROVAL,
-            TrifectaEnforcementMode.parse("require_approval"));
+        assertEquals(
+                TrifectaEnforcementMode.REQUIRE_APPROVAL,
+                TrifectaEnforcementMode.parse("require-approval"));
+        assertEquals(
+                TrifectaEnforcementMode.REQUIRE_APPROVAL,
+                TrifectaEnforcementMode.parse("require_approval"));
         assertEquals(TrifectaEnforcementMode.BLOCK, TrifectaEnforcementMode.parse("  BLOCK  "));
         assertEquals(TrifectaEnforcementMode.WARN, TrifectaEnforcementMode.parse("Warn"));
     }

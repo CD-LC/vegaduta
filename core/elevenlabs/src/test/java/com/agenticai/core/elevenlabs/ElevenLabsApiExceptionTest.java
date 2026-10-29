@@ -32,7 +32,8 @@ class ElevenLabsApiExceptionTest {
 
     @Test
     void notConfiguredAcceptsACustomMessageForSiblingUseCases() {
-        ElevenLabsNotConfiguredException e = new ElevenLabsNotConfiguredException("clone a voice first");
+        ElevenLabsNotConfiguredException e =
+                new ElevenLabsNotConfiguredException("clone a voice first");
 
         assertThat(e.getMessage()).isEqualTo("clone a voice first");
         assertThat(e.httpStatus()).isEqualTo(400);
@@ -43,7 +44,8 @@ class ElevenLabsApiExceptionTest {
         ElevenLabsCredentialValidationException e =
                 new ElevenLabsCredentialValidationException("key rejected");
         ElevenLabsCredentialValidationException withCause =
-                new ElevenLabsCredentialValidationException("key rejected", new RuntimeException("io"));
+                new ElevenLabsCredentialValidationException(
+                        "key rejected", new RuntimeException("io"));
 
         assertThat(e.getMessage()).isEqualTo("key rejected");
         assertThat(e.httpStatus()).isEqualTo(400);

@@ -21,8 +21,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 /**
  * {@link DefaultRlTurnRecorder} is the published seam the orchestrator calls: every method must be
  * a faithful delegation to {@link TrajectoryService} / {@link RewardService} - including the
- * double-to-BigDecimal conversion on reward values and a null {@code weight} staying null (which
- * is what selects the configured default weight downstream).
+ * double-to-BigDecimal conversion on reward values and a null {@code weight} staying null (which is
+ * what selects the configured default weight downstream).
  */
 class DefaultRlTurnRecorderTest {
 
@@ -58,13 +58,20 @@ class DefaultRlTurnRecorderTest {
         UUID episodeId = UUID.randomUUID();
 
         recorder.addReward(episodeId, RewardSource.JUDGE, 0.75, null);
-        verify(reward).addRewardRecord(
-            eq(episodeId), eq(RewardSource.JUDGE), eq(BigDecimal.valueOf(0.75)), isNull());
+        verify(reward)
+                .addRewardRecord(
+                        eq(episodeId),
+                        eq(RewardSource.JUDGE),
+                        eq(BigDecimal.valueOf(0.75)),
+                        isNull());
 
         recorder.addReward(episodeId, RewardSource.COST, 0.5, 0.2);
-        verify(reward).addRewardRecord(
-            eq(episodeId), eq(RewardSource.COST), eq(BigDecimal.valueOf(0.5)),
-            eq(BigDecimal.valueOf(0.2)));
+        verify(reward)
+                .addRewardRecord(
+                        eq(episodeId),
+                        eq(RewardSource.COST),
+                        eq(BigDecimal.valueOf(0.5)),
+                        eq(BigDecimal.valueOf(0.2)));
     }
 
     @Test

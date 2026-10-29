@@ -7,8 +7,8 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 /**
- * Covers {@link DbToken}'s record guards and its deliberately token-free {@code toString} - the
- * one property that matters here is that logging a token object can never leak the credential.
+ * Covers {@link DbToken}'s record guards and its deliberately token-free {@code toString} - the one
+ * property that matters here is that logging a token object can never leak the credential.
  */
 class DbTokenTest {
 

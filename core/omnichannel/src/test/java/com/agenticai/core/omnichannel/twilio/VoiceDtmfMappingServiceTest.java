@@ -100,8 +100,7 @@ class VoiceDtmfMappingServiceTest {
     void upsertRejectsAnUnknownAgent() {
         when(agentRepository.findById(AGENT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(
-                AgentNotFoundException.class, () -> service.upsert("2", AGENT_ID, "Sales"));
+        assertThrows(AgentNotFoundException.class, () -> service.upsert("2", AGENT_ID, "Sales"));
         verify(repository, never()).save(any());
     }
 

@@ -17,7 +17,9 @@ class GraphFactTextMatcherTest {
         assertThat(GraphFactTextMatcher.factSupportsEdge("Priya works at Acme", "Priya", "Acme"))
                 .isTrue();
         // "Acme" inside "Acmecorp" is not a whole-word hit.
-        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya works at Acmecorp", "Priya", "Acme"))
+        assertThat(
+                        GraphFactTextMatcher.factSupportsEdge(
+                                "Priya works at Acmecorp", "Priya", "Acme"))
                 .isFalse();
         assertThat(GraphFactTextMatcher.factSupportsEdge("Priyanka works at Acme", "Priya", "Acme"))
                 .isFalse();
@@ -62,27 +64,33 @@ class GraphFactTextMatcherTest {
                 new GraphFactTextMatcher.ValidEdge("Raj", "MANAGES", "Priya");
 
         // The removed text names both ends of `edge`; the surviving fact does not - invalidate it.
-        assertThat(GraphFactTextMatcher.edgesOnlyThisFactSupports(
-                        List.of(edge, other), "Priya works at Acme", List.of("Raj manages Priya")))
+        assertThat(
+                        GraphFactTextMatcher.edgesOnlyThisFactSupports(
+                                List.of(edge, other),
+                                "Priya works at Acme",
+                                List.of("Raj manages Priya")))
                 .containsExactly(edge);
 
         // If the surviving fact names the same pair, the edge stays.
-        assertThat(GraphFactTextMatcher.edgesOnlyThisFactSupports(
-                        List.of(edge), "Priya works at Acme", List.of("Priya is at Acme too")))
+        assertThat(
+                        GraphFactTextMatcher.edgesOnlyThisFactSupports(
+                                List.of(edge),
+                                "Priya works at Acme",
+                                List.of("Priya is at Acme too")))
                 .isEmpty();
     }
 
     @Test
     void nullAndSparseInputsYieldNoInvalidations() {
-        GraphFactTextMatcher.ValidEdge edge =
-                new GraphFactTextMatcher.ValidEdge("A", "R", "B");
+        GraphFactTextMatcher.ValidEdge edge = new GraphFactTextMatcher.ValidEdge("A", "R", "B");
 
         assertThat(GraphFactTextMatcher.edgesOnlyThisFactSupports(null, "A R B", null)).isEmpty();
         assertThat(GraphFactTextMatcher.edgesOnlyThisFactSupports(List.of(edge), null, null))
                 .isEmpty();
         // A null edge in the list is skipped, not exploded on.
-        assertThat(GraphFactTextMatcher.edgesOnlyThisFactSupports(
-                        java.util.Arrays.asList(edge, null), "A R B", List.of()))
+        assertThat(
+                        GraphFactTextMatcher.edgesOnlyThisFactSupports(
+                                java.util.Arrays.asList(edge, null), "A R B", List.of()))
                 .containsExactly(edge);
     }
 }

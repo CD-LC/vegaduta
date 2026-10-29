@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 /**
  * Zero test coverage existed for {@link TenantStatusGuardImpl} before this - the actual access
  * control decision behind every authenticated request (via {@code TenantContextFilter}), with a
- * real documented incident behind both branches it guards (see the class's own javadoc: an
- * orphaned Keycloak login for a dropped tenant schema, and later a platform/per-tenant kill
- * switch). Covers, in priority order: the platform-wide kill switch short-circuit, per-tenant
+ * real documented incident behind both branches it guards (see the class's own javadoc: an orphaned
+ * Keycloak login for a dropped tenant schema, and later a platform/per-tenant kill switch). Covers,
+ * in priority order: the platform-wide kill switch short-circuit, per-tenant
  * ACTIVE+not-emergency-stopped, an untracked tenant's schema-existence fallback, and every
  * fail-open path this class documents (missing kill-switch row, SQLException during the schema
- * check) - a fail-open bug here silently locks out (or worse, silently admits) every request for
- * an affected tenant, exactly the kind of defect a status guard needs direct coverage for.
+ * check) - a fail-open bug here silently locks out (or worse, silently admits) every request for an
+ * affected tenant, exactly the kind of defect a status guard needs direct coverage for.
  */
 class TenantStatusGuardImplTest {
 
@@ -46,14 +46,24 @@ class TenantStatusGuardImplTest {
         // Duration.ZERO = a pass-through cache (every call runs the real
         // lookup) - keeps each case's mock stubs the only source of truth,
         // exactly the pre-cache behavior these tests were written against.
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource, Duration.ZERO);
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository, platformKillSwitchRepository, dataSource, Duration.ZERO);
         // Default: no kill-switch row at all - the common case in every test below that isn't
         // specifically exercising the kill switch itself.
-        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID)).thenReturn(Optional.empty());
+        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID))
+                .thenReturn(Optional.empty());
     }
 
     private static Tenant activeTenant() {
-        Tenant tenant = new Tenant("Acme", TenantPlan.PREMIUM, SCHEMA_NAME, "agentic-ai", AccountType.B2C, ExperienceMode.ADVANCED);
+        Tenant tenant =
+                new Tenant(
+                        "Acme",
+                        TenantPlan.PREMIUM,
+                        SCHEMA_NAME,
+                        "agentic-ai",
+                        AccountType.B2C,
+                        ExperienceMode.ADVANCED);
         tenant.markActive();
         return tenant;
     }
@@ -63,8 +73,10 @@ class TenantStatusGuardImplTest {
         setUp();
         PlatformKillSwitch killSwitch = new PlatformKillSwitch();
         killSwitch.stop("Incident #42", "platform-admin-1");
-        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID)).thenReturn(Optional.of(killSwitch));
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID))
+                .thenReturn(Optional.of(killSwitch));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertFalse(guard.isUsable(SCHEMA_NAME));
     }
@@ -74,8 +86,10 @@ class TenantStatusGuardImplTest {
         setUp();
         PlatformKillSwitch killSwitch = new PlatformKillSwitch();
         // never .stop()'d - isStopped() is false by default
-        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID)).thenReturn(Optional.of(killSwitch));
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        when(platformKillSwitchRepository.findById(PlatformKillSwitch.SINGLETON_ID))
+                .thenReturn(Optional.of(killSwitch));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
     }
@@ -84,7 +98,8 @@ class TenantStatusGuardImplTest {
     void missingKillSwitchRowFailsOpenNotBlockingEveryTenant() {
         setUp();
         // platformKillSwitchRepository.findById(...) already stubbed to Optional.empty() in setUp()
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
     }
@@ -92,7 +107,8 @@ class TenantStatusGuardImplTest {
     @Test
     void activeNonEmergencyStoppedTenantIsUsable() {
         setUp();
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
     }
@@ -111,7 +127,14 @@ class TenantStatusGuardImplTest {
     void nonActiveTenantStatusIsNotUsable() {
         setUp();
         // Fresh Tenant() defaults to PROVISIONING - never markActive()'d.
-        Tenant tenant = new Tenant("Acme", TenantPlan.FREE, SCHEMA_NAME, "agentic-ai", AccountType.B2C, ExperienceMode.ADVANCED);
+        Tenant tenant =
+                new Tenant(
+                        "Acme",
+                        TenantPlan.FREE,
+                        SCHEMA_NAME,
+                        "agentic-ai",
+                        AccountType.B2C,
+                        ExperienceMode.ADVANCED);
         when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(tenant));
 
         assertFalse(guard.isUsable(SCHEMA_NAME));
@@ -147,8 +170,14 @@ class TenantStatusGuardImplTest {
     @Test
     void aSqlExceptionFailsOpenOnlyWithTheOptOut() throws SQLException {
         setUp();
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource,
-            Duration.ZERO, new TenantMigrationFailures(), true);
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ZERO,
+                        new TenantMigrationFailures(),
+                        true);
         when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.empty());
         when(dataSource.getConnection()).thenThrow(new SQLException("connection pool exhausted"));
 
@@ -168,9 +197,16 @@ class TenantStatusGuardImplTest {
     void aSchemaWhoseMigrationFailedIsNotUsableUntilItMigratesSuccessfully() {
         setUp();
         TenantMigrationFailures failures = new TenantMigrationFailures();
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource,
-            Duration.ofMinutes(1), failures, false);
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ofMinutes(1),
+                        failures,
+                        false);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
         failures.recordFailure(SCHEMA_NAME);
@@ -185,8 +221,14 @@ class TenantStatusGuardImplTest {
     @Test
     void aPositiveTtlCachesTheTenantLookupSoTheFilterChainPaysItOnce() {
         setUp();
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource, Duration.ofMinutes(1));
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ofMinutes(1));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
         assertTrue(guard.isUsable(SCHEMA_NAME));
@@ -199,12 +241,17 @@ class TenantStatusGuardImplTest {
     @Test
     void anEvictedTenantAnswerIsReReadOnTheVeryNextCall() {
         setUp();
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource, Duration.ofMinutes(1));
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ofMinutes(1));
         Tenant stopped = activeTenant();
         stopped.emergencyStop("fraud signal");
         when(tenantRepository.findBySchemaName(SCHEMA_NAME))
-            .thenReturn(Optional.of(activeTenant()))
-            .thenReturn(Optional.of(stopped));
+                .thenReturn(Optional.of(activeTenant()))
+                .thenReturn(Optional.of(stopped));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
         com.agenticai.core.security.HotpathCaches.evictTenantStatus(SCHEMA_NAME);
@@ -218,11 +265,24 @@ class TenantStatusGuardImplTest {
     @Test
     void tenantAnswersAreIsolatedPerTenantKey() {
         setUp();
-        guard = new TenantStatusGuardImpl(tenantRepository, platformKillSwitchRepository, dataSource, Duration.ofMinutes(1));
-        Tenant stopped = new Tenant("Beta", TenantPlan.FREE, "beta", "agentic-ai", AccountType.B2C, ExperienceMode.ADVANCED);
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ofMinutes(1));
+        Tenant stopped =
+                new Tenant(
+                        "Beta",
+                        TenantPlan.FREE,
+                        "beta",
+                        "agentic-ai",
+                        AccountType.B2C,
+                        ExperienceMode.ADVANCED);
         stopped.markActive();
         stopped.emergencyStop("chargeback storm");
-        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.of(activeTenant()));
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
+                .thenReturn(Optional.of(activeTenant()));
         when(tenantRepository.findBySchemaName("beta")).thenReturn(Optional.of(stopped));
 
         assertTrue(guard.isUsable(SCHEMA_NAME));
@@ -238,7 +298,9 @@ class TenantStatusGuardImplTest {
         PreparedStatement statement = mock(PreparedStatement.class);
         ResultSet resultSet = mock(ResultSet.class);
         when(dataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?")).thenReturn(statement);
+        when(connection.prepareStatement(
+                        "SELECT 1 FROM information_schema.schemata WHERE schema_name = ?"))
+                .thenReturn(statement);
         when(statement.executeQuery()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(schemaFound);
     }

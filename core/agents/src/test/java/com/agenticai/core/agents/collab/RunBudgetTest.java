@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link RunBudget} is the per-turn USD cap shared by every delegate tool of one turn. These pin
  * the estimate (branches x average tokens at the configured blended rates), the
- * never-less-than-one-branch floor on {@code recordDelegate}, and {@code affordableBranches}'s
- * "as many as fit, at least 0" contract - the guard is a runaway stop, not billing.
+ * never-less-than-one-branch floor on {@code recordDelegate}, and {@code affordableBranches}'s "as
+ * many as fit, at least 0" contract - the guard is a runaway stop, not billing.
  */
 class RunBudgetTest {
 
@@ -38,7 +38,8 @@ class RunBudgetTest {
         assertEquals(0, b.estimateUsd(1).compareTo(new BigDecimal("0.0018")));
         assertEquals(0, b.estimateUsd(10).compareTo(new BigDecimal("0.018")));
         assertEquals(0, b.estimateUsd(0).compareTo(BigDecimal.ZERO));
-        assertEquals(0, b.estimateUsd(-3).compareTo(BigDecimal.ZERO), "negative branches cost nothing");
+        assertEquals(
+                0, b.estimateUsd(-3).compareTo(BigDecimal.ZERO), "negative branches cost nothing");
     }
 
     @Test

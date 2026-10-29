@@ -22,8 +22,7 @@ class SettingsRegistryTest {
 
     @Test
     void ofFindRequireAndAllWorkInDeclarationOrder() {
-        SettingsRegistry registry =
-                SettingsRegistry.of(definition("b.two"), definition("a.one"));
+        SettingsRegistry registry = SettingsRegistry.of(definition("b.two"), definition("a.one"));
 
         assertThat(registry.find("a.one")).isPresent();
         assertThat(registry.find("missing.key")).isEmpty();
@@ -45,8 +44,7 @@ class SettingsRegistryTest {
 
     @Test
     void aKeyDeclaredTwiceFailsConstruction() {
-        SettingsContributor contributor =
-                () -> List.of(definition("a.one"), definition("a.one"));
+        SettingsContributor contributor = () -> List.of(definition("a.one"), definition("a.one"));
 
         assertThatThrownBy(() -> new SettingsRegistry(List.of(contributor)))
                 .isInstanceOf(IllegalStateException.class)
@@ -67,7 +65,8 @@ class SettingsRegistryTest {
         assertThatThrownBy(
                         () ->
                                 SettingsRegistry.of(
-                                        definition("chat.retry"), definition("chat.retry.maxAttempts")))
+                                        definition("chat.retry"),
+                                        definition("chat.retry.maxAttempts")))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("prefix");
     }

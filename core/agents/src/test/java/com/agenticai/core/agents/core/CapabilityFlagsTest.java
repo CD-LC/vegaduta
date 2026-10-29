@@ -52,7 +52,8 @@ class CapabilityFlagsTest {
         assertTrue(CapabilityFlags.none().withSarvam(true).isSarvamEnabled());
         assertTrue(CapabilityFlags.none().withXaiServerTools(true).isXaiServerToolsEnabled());
         assertTrue(CapabilityFlags.none().withCodeWorkspace(true).isCodeWorkspaceEnabled());
-        assertTrue(CapabilityFlags.none().withShareMemoryWithTenant(true).isShareMemoryWithTenant());
+        assertTrue(
+                CapabilityFlags.none().withShareMemoryWithTenant(true).isShareMemoryWithTenant());
     }
 
     @Test

@@ -17,11 +17,16 @@ class TrifectaStatusResponseTest {
 
     @Test
     void ofFlattensTheReportAndAddsTheEnforcementFields() {
-        LethalTrifectaDetector.Report report = new LethalTrifectaDetector.Report(
-            List.of("read_file"), List.of("web_fetch"), List.of("send_email"), List.of("odd_tool"));
+        LethalTrifectaDetector.Report report =
+                new LethalTrifectaDetector.Report(
+                        List.of("read_file"),
+                        List.of("web_fetch"),
+                        List.of("send_email"),
+                        List.of("odd_tool"));
 
-        TrifectaStatusResponse response = TrifectaStatusResponse.of(
-            report, TrifectaEnforcementMode.REQUIRE_APPROVAL, true, true);
+        TrifectaStatusResponse response =
+                TrifectaStatusResponse.of(
+                        report, TrifectaEnforcementMode.REQUIRE_APPROVAL, true, true);
 
         assertEquals(List.of("read_file"), response.privateDataTools());
         assertEquals(List.of("web_fetch"), response.untrustedContentTools());
@@ -37,11 +42,12 @@ class TrifectaStatusResponseTest {
 
     @Test
     void aNonLethalReportHasNoWarning() {
-        LethalTrifectaDetector.Report report = new LethalTrifectaDetector.Report(
-            List.of("read_file"), List.of(), List.of("send_email"), List.of());
+        LethalTrifectaDetector.Report report =
+                new LethalTrifectaDetector.Report(
+                        List.of("read_file"), List.of(), List.of("send_email"), List.of());
 
-        TrifectaStatusResponse response = TrifectaStatusResponse.of(
-            report, TrifectaEnforcementMode.WARN, false, false);
+        TrifectaStatusResponse response =
+                TrifectaStatusResponse.of(report, TrifectaEnforcementMode.WARN, false, false);
 
         assertFalse(response.lethalTrifecta());
         assertNull(response.warning());

@@ -16,7 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-/** {@link TwilioCredentialController}: the thin REST surface over {@link TwilioCredentialService}. */
+/**
+ * {@link TwilioCredentialController}: the thin REST surface over {@link TwilioCredentialService}.
+ */
 class TwilioCredentialControllerTest {
 
     private TwilioCredentialService credentialService;

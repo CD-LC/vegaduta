@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code app.agent-turn.repair.*}: what the hosted agent-turn endpoint spends and says when a
- * tool call's arguments arrive unusable. Defaults ship in {@code /agent-turn/repair.properties};
- * the model-facing texts carry {@code {tool}}/{@code {reason}} placeholders filled by
- * {@link AgentTurnRepairProperties#render}.
+ * {@code app.agent-turn.repair.*}: what the hosted agent-turn endpoint spends and says when a tool
+ * call's arguments arrive unusable. Defaults ship in {@code /agent-turn/repair.properties}; the
+ * model-facing texts carry {@code {tool}}/{@code {reason}} placeholders filled by {@link
+ * AgentTurnRepairProperties#render}.
  */
 class AgentTurnRepairPropertiesTest {
 
@@ -41,7 +41,8 @@ class AgentTurnRepairPropertiesTest {
     void renderFillsBothPlaceholdersAndLeavesNoneBehind() {
         AgentTurnRepairProperties p = new AgentTurnRepairProperties();
 
-        String rendered = p.render("Call {tool} failed: {reason}.", "get_weather", "not valid JSON");
+        String rendered =
+                p.render("Call {tool} failed: {reason}.", "get_weather", "not valid JSON");
 
         assertEquals("Call get_weather failed: not valid JSON.", rendered);
     }

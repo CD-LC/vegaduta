@@ -14,10 +14,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
- * The cause-chain readers behind {@link ProviderErrorTranslator}: the two message shapes a
- * Spring AI provider client is known to encode an upstream status into, the missing-tool-callback
- * signature, the timeout type hunt, and the readable chain description - each walked to
- * {@link ProviderErrorCauses#MAX_CAUSE_DEPTH} and guarded against a self-referential cause.
+ * The cause-chain readers behind {@link ProviderErrorTranslator}: the two message shapes a Spring
+ * AI provider client is known to encode an upstream status into, the missing-tool-callback
+ * signature, the timeout type hunt, and the readable chain description - each walked to {@link
+ * ProviderErrorCauses#MAX_CAUSE_DEPTH} and guarded against a self-referential cause.
  */
 class ProviderErrorCausesTest {
 
@@ -31,8 +31,13 @@ class ProviderErrorCausesTest {
 
     @Test
     void findCauseFindsATypedFailureBuriedUnderGenericWrappers() {
-        WebClientResponseException wcre = WebClientResponseException.create(
-            500, "Server Error", HttpHeaders.EMPTY, new byte[0], StandardCharsets.UTF_8);
+        WebClientResponseException wcre =
+                WebClientResponseException.create(
+                        500,
+                        "Server Error",
+                        HttpHeaders.EMPTY,
+                        new byte[0],
+                        StandardCharsets.UTF_8);
         RuntimeException wrapped = new RuntimeException("outer", new RuntimeException("mid", wcre));
 
         assertSame(wcre, ProviderErrorCauses.findCause(wrapped, WebClientResponseException.class));
@@ -66,8 +71,9 @@ class ProviderErrorCausesTest {
 
     @Test
     void theAnthropicResponseExceptionShapeYieldsStatusAndBody() {
-        RuntimeException e = new RuntimeException(
-            "Response exception, Status: [529 Service Unavailable], Body:[{\"error\":\"overloaded\"}]");
+        RuntimeException e =
+                new RuntimeException(
+                        "Response exception, Status: [529 Service Unavailable], Body:[{\"error\":\"overloaded\"}]");
 
         ProviderErrorCauses.StatusAndBody found = ProviderErrorCauses.findStructuredStatus(e);
 
@@ -78,8 +84,11 @@ class ProviderErrorCausesTest {
     @Test
     void theSpringAiRetryMessageShapeYieldsStatusAndBody() {
         // NonTransient/TransientAiException's ENTIRE message is "<status> - <body>".
-        RuntimeException e = new RuntimeException("Failed to generate content",
-            new RuntimeException("404 - {\"error\":{\"message\":\"models/x is not found\"}}"));
+        RuntimeException e =
+                new RuntimeException(
+                        "Failed to generate content",
+                        new RuntimeException(
+                                "404 - {\"error\":{\"message\":\"models/x is not found\"}}"));
 
         ProviderErrorCauses.StatusAndBody found = ProviderErrorCauses.findStructuredStatus(e);
 
@@ -91,8 +100,7 @@ class ProviderErrorCausesTest {
     void theAnthropicShapeWinsAtTheSameChainLevel() {
         // A message matching BOTH would be odd, but RESPONSE_EXCEPTION_PATTERN is tried first
         // deliberately - the more specific of the two shapes.
-        RuntimeException e = new RuntimeException(
-            "404 - Status: [503 x], Body:[down]");
+        RuntimeException e = new RuntimeException("404 - Status: [503 x], Body:[down]");
 
         ProviderErrorCauses.StatusAndBody found = ProviderErrorCauses.findStructuredStatus(e);
 
@@ -101,14 +109,17 @@ class ProviderErrorCausesTest {
 
     @Test
     void noRecognisedShapeAnywhereInTheChainIsANullSignalNotAGuess() {
-        assertNull(ProviderErrorCauses.findStructuredStatus(new RuntimeException("connection reset")));
+        assertNull(
+                ProviderErrorCauses.findStructuredStatus(new RuntimeException("connection reset")));
         assertNull(ProviderErrorCauses.findStructuredStatus(new RuntimeException((String) null)));
         // A status buried mid-sentence is not the "<status> - <body>" shape (anchored at ^), and
         // a 4-digit prefix is not a 3-digit HTTP status either.
-        assertNull(ProviderErrorCauses.findStructuredStatus(
-            new RuntimeException("error code: 500, retry later")));
-        assertNull(ProviderErrorCauses.findStructuredStatus(
-            new RuntimeException("1234 - looks like a status but is four digits")));
+        assertNull(
+                ProviderErrorCauses.findStructuredStatus(
+                        new RuntimeException("error code: 500, retry later")));
+        assertNull(
+                ProviderErrorCauses.findStructuredStatus(
+                        new RuntimeException("1234 - looks like a status but is four digits")));
     }
 
     @Test
@@ -126,8 +137,11 @@ class ProviderErrorCausesTest {
 
     @Test
     void theMissingToolCallbackShapeNamesTheTool() {
-        RuntimeException e = new RuntimeException("outer",
-            new IllegalStateException("No ToolCallback found for tool name: get_weather"));
+        RuntimeException e =
+                new RuntimeException(
+                        "outer",
+                        new IllegalStateException(
+                                "No ToolCallback found for tool name: get_weather"));
 
         assertEquals("get_weather", ProviderErrorCauses.findMissingToolCallbackName(e));
     }
@@ -136,18 +150,24 @@ class ProviderErrorCausesTest {
     void theSameMessageOnTheWrongExceptionTypeIsNotAToolCallbackMiss() {
         // Only IllegalStateException carries this meaning - a RuntimeException saying the
         // same words is a different failure that must keep its own classification.
-        assertNull(ProviderErrorCauses.findMissingToolCallbackName(
-            new RuntimeException("No ToolCallback found for tool name: get_weather")));
-        assertNull(ProviderErrorCauses.findMissingToolCallbackName(new IllegalStateException((String) null)));
-        assertNull(ProviderErrorCauses.findMissingToolCallbackName(new IllegalStateException("other")));
+        assertNull(
+                ProviderErrorCauses.findMissingToolCallbackName(
+                        new RuntimeException("No ToolCallback found for tool name: get_weather")));
+        assertNull(
+                ProviderErrorCauses.findMissingToolCallbackName(
+                        new IllegalStateException((String) null)));
+        assertNull(
+                ProviderErrorCauses.findMissingToolCallbackName(
+                        new IllegalStateException("other")));
     }
 
     // --- findTimeoutCause ----------------------------------------------------
 
     @Test
     void recognisedTimeoutTypesAreFoundAnywhereInTheChain() {
-        assertEquals(TimeoutException.class,
-            ProviderErrorCauses.findTimeoutCause(new TimeoutException("t")).getClass());
+        assertEquals(
+                TimeoutException.class,
+                ProviderErrorCauses.findTimeoutCause(new TimeoutException("t")).getClass());
 
         SocketTimeoutException socket = new SocketTimeoutException("read");
         RuntimeException wrapped = new RuntimeException("call failed", socket);
@@ -159,10 +179,11 @@ class ProviderErrorCausesTest {
         // Spring's HttpClientErrorException-family members and Netty's timeout types are
         // matched by class NAME, not instanceof - emulate with a local type named like one.
         Throwable named = new RuntimeException("x") {
-            // anonymous class name contains no "Timeout" - use the message-less check below
-        };
+                    // anonymous class name contains no "Timeout" - use the message-less check below
+                };
         assertNull(ProviderErrorCauses.findTimeoutCause(new RuntimeException("just slow", named)));
-        assertNull(ProviderErrorCauses.findTimeoutCause(new RuntimeException("timed out in prose")));
+        assertNull(
+                ProviderErrorCauses.findTimeoutCause(new RuntimeException("timed out in prose")));
     }
 
     @Test
@@ -174,13 +195,17 @@ class ProviderErrorCausesTest {
 
     @Test
     void genericWrappersLoseTheirClassNameSoTheRealCauseIsNotHidden() {
-        RuntimeException e = new RuntimeException("Failed to generate content",
-            new IllegalStateException("the real reason"));
+        RuntimeException e =
+                new RuntimeException(
+                        "Failed to generate content", new IllegalStateException("the real reason"));
 
         String chain = ProviderErrorCauses.describeCauseChain(e);
 
         // "RuntimeException: " is noise and must be skipped; the specific type's name is kept.
-        assertTrue(chain.startsWith("Failed to generate content -> IllegalStateException: the real reason"), chain);
+        assertTrue(
+                chain.startsWith(
+                        "Failed to generate content -> IllegalStateException: the real reason"),
+                chain);
     }
 
     @Test
@@ -188,14 +213,17 @@ class ProviderErrorCausesTest {
         // The wrapper and its cause carry the SAME message (Spring AI's "Failed to generate
         // content" is not it - this is a copy-paste wrapper): the duplicate is dropped whole,
         // type name and all, leaving the first occurrence plus the genuinely new detail.
-        RuntimeException e = new RuntimeException("same",
-            new IllegalStateException("same", new IOException("different")));
+        RuntimeException e =
+                new RuntimeException(
+                        "same", new IllegalStateException("same", new IOException("different")));
 
         String chain = ProviderErrorCauses.describeCauseChain(e);
 
         assertEquals("same -> IOException: different", chain);
-        assertEquals(chain.indexOf("same"), chain.lastIndexOf("same"),
-            "the duplicated message must appear exactly once");
+        assertEquals(
+                chain.indexOf("same"),
+                chain.lastIndexOf("same"),
+                "the duplicated message must appear exactly once");
     }
 
     @Test
@@ -207,8 +235,7 @@ class ProviderErrorCausesTest {
 
     @Test
     void blankMessagesAreSkippedLikeAbsentOnes() {
-        RuntimeException e = new RuntimeException("   ",
-            new IllegalStateException("real"));
+        RuntimeException e = new RuntimeException("   ", new IllegalStateException("real"));
 
         assertEquals("IllegalStateException: real", ProviderErrorCauses.describeCauseChain(e));
     }

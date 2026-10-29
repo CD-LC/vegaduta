@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link TenantControlPlanePurger}: the 15-step control-plane cleanup - every step its own
  * auto-committed statement with the tenant's schema name bound to every placeholder, one failing
- * step never blocking the rest, and the returned failure labels honest about which tables could
- * not be cleaned.
+ * step never blocking the rest, and the returned failure labels honest about which tables could not
+ * be cleaned.
  */
 class TenantControlPlanePurgerTest {
 
@@ -79,8 +79,7 @@ class TenantControlPlanePurgerTest {
 
     @Test
     void everyStepFailingCollectsEveryLabel() throws SQLException {
-        when(connection.prepareStatement(anyString()))
-                .thenThrow(new SQLException("no such table"));
+        when(connection.prepareStatement(anyString())).thenThrow(new SQLException("no such table"));
 
         List<String> failures = purger.purgeControlPlaneRows(tenant, "acme");
 

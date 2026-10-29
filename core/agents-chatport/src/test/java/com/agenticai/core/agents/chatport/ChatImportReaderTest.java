@@ -12,8 +12,8 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ChatImportReader#read} at the container layer the parser tests reach only indirectly:
- * zip sniffing, the {@code conversations(-N)?.json} entry-name rule, the shared inflated-byte and
+ * {@link ChatImportReader#read} at the container layer the parser tests reach only indirectly: zip
+ * sniffing, the {@code conversations(-N)?.json} entry-name rule, the shared inflated-byte and
  * entry-count budgets, non-array/non-object documents, and a file that ends mid-conversation.
  */
 class ChatImportReaderTest {
@@ -23,12 +23,20 @@ class ChatImportReaderTest {
     }
 
     private static Limits limits(int maxZipEntries, long maxUncompressedBytes) {
-        return new Limits(5000, 2000, 50_000, 500_000, 20_000_000L, 20_000, maxZipEntries,
-            maxUncompressedBytes, 100);
+        return new Limits(
+                5000,
+                2000,
+                50_000,
+                500_000,
+                20_000_000L,
+                20_000,
+                maxZipEntries,
+                maxUncompressedBytes,
+                100);
     }
 
     private static final String ONE_CLAUDE =
-        "[{\"uuid\":\"z1\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"hi\"}]}]";
+            "[{\"uuid\":\"z1\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"hi\"}]}]";
 
     @Test
     void aBareJsonArrayReadsWithoutTheZipPath() throws Exception {
@@ -45,8 +53,10 @@ class ChatImportReaderTest {
         Map<String, byte[]> entries = new LinkedHashMap<>();
         entries.put("README.txt", bytes("not json"));
         entries.put("dir/Conversations.JSON", bytes(ONE_CLAUDE));
-        entries.put("conversations-2.json",
-            bytes("[{\"uuid\":\"z2\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"two\"}]}]"));
+        entries.put(
+                "conversations-2.json",
+                bytes(
+                        "[{\"uuid\":\"z2\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"two\"}]}]"));
         entries.put("conversations.json.bak", bytes(ONE_CLAUDE));
 
         ChatImportCollector c = collector(Limits.defaults());
@@ -66,9 +76,10 @@ class ChatImportReaderTest {
 
         ChatImportCollector c = collector(limits(1, 64L << 20));
 
-        ChatImportReader.LimitExceededException e = assertThrows(
-            ChatImportReader.LimitExceededException.class,
-            () -> ChatImportReader.read(ChatPortFixtures.zip(entries), c));
+        ChatImportReader.LimitExceededException e =
+                assertThrows(
+                        ChatImportReader.LimitExceededException.class,
+                        () -> ChatImportReader.read(ChatPortFixtures.zip(entries), c));
         assertTrue(e.getMessage().contains("too many files"));
     }
 
@@ -81,9 +92,10 @@ class ChatImportReaderTest {
 
         ChatImportCollector c = collector(limits(10_000, 5_000));
 
-        ChatImportReader.LimitExceededException e = assertThrows(
-            ChatImportReader.LimitExceededException.class,
-            () -> ChatImportReader.read(ChatPortFixtures.zip(entries), c));
+        ChatImportReader.LimitExceededException e =
+                assertThrows(
+                        ChatImportReader.LimitExceededException.class,
+                        () -> ChatImportReader.read(ChatPortFixtures.zip(entries), c));
         assertTrue(e.getMessage().contains("expands"));
     }
 
@@ -91,26 +103,30 @@ class ChatImportReaderTest {
     void nonContainerDocumentsAreRefusedAtTheFirstToken() {
         ChatImportCollector c = collector(Limits.defaults());
 
-        assertThrows(ChatImportReader.LimitExceededException.class,
-            () -> ChatImportReader.read(bytes("42"), c));
-        assertThrows(ChatImportReader.LimitExceededException.class,
-            () -> ChatImportReader.read(bytes("\"a string\""), c));
+        assertThrows(
+                ChatImportReader.LimitExceededException.class,
+                () -> ChatImportReader.read(bytes("42"), c));
+        assertThrows(
+                ChatImportReader.LimitExceededException.class,
+                () -> ChatImportReader.read(bytes("\"a string\""), c));
     }
 
     @Test
     void aFileEndingMidConversationIsAnIoFailure() {
         ChatImportCollector c = collector(Limits.defaults());
 
-        assertThrows(IOException.class,
-            () -> ChatImportReader.read(bytes("[{\"chat_messages\": ["), c));
+        assertThrows(
+                IOException.class, () -> ChatImportReader.read(bytes("[{\"chat_messages\": ["), c));
     }
 
     @Test
     void aSingleTopLevelConversationObjectImports() throws Exception {
         ChatImportCollector c = collector(Limits.defaults());
 
-        ChatImportReader.read(bytes(
-            "{\"uuid\":\"solo\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"hi\"}]}"), c);
+        ChatImportReader.read(
+                bytes(
+                        "{\"uuid\":\"solo\",\"chat_messages\":[{\"sender\":\"human\",\"text\":\"hi\"}]}"),
+                c);
 
         assertEquals(1, c.result().chats().size());
         assertEquals("solo", c.result().chats().get(0).key());
@@ -120,7 +136,8 @@ class ChatImportReaderTest {
     void nonObjectArrayElementsAreSkippedNotFatal() throws Exception {
         ChatImportCollector c = collector(Limits.defaults());
 
-        ChatImportReader.read(bytes("[5, \"x\", null, " + "{\"uuid\":\"ok\",\"chat_messages\":[]}" + "]"), c);
+        ChatImportReader.read(
+                bytes("[5, \"x\", null, " + "{\"uuid\":\"ok\",\"chat_messages\":[]}" + "]"), c);
 
         // Three junk elements plus one conversation with no importable messages.
         assertTrue(c.result().skipped() >= 3);
@@ -129,7 +146,8 @@ class ChatImportReaderTest {
 
     @Test
     void anEnvelopeObjectStreamsItsConversationsAndIgnoresTheRest() throws Exception {
-        String envelope = """
+        String envelope =
+                """
             {"schema": "vegaduta.chat-export", "version": 1, "exportedAt": "2026-10-05T10:00:00Z",
              "conversations": [
                {"id": "e1", "messages": [{"role": "user", "content": "hi"}]},

@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 class HostedChainOrderingTest {
 
     private static PlatformHostedLlmProvider row(String label, String model, int priority) {
-        return new PlatformHostedLlmProvider(label, "https://api.example.com", model, "enc",
-            true, priority, null, null);
+        return new PlatformHostedLlmProvider(
+                label, "https://api.example.com", model, "enc", true, priority, null, null);
     }
 
     private static HostedProviderSelection selection(PlatformHostedLlmProvider p) {
@@ -33,12 +33,15 @@ class HostedChainOrderingTest {
     @Test
     void withCostOrderingOffPriorityAloneDecides() {
         HostedChainOrdering ordering =
-            new HostedChainOrdering(new LlmPricingCatalog(), new HostedProviderHealth(3, 120, 180), false);
+                new HostedChainOrdering(
+                        new LlmPricingCatalog(), new HostedProviderHealth(3, 120, 180), false);
 
-        List<HostedProviderSelection> ordered = ordering.order(List.of(
-            selection(row("third", "claude-opus-4-8", 30)),
-            selection(row("first", "unpriced-model", 10)),
-            selection(row("second", "gemini-3.1-flash-lite", 20))));
+        List<HostedProviderSelection> ordered =
+                ordering.order(
+                        List.of(
+                                selection(row("third", "claude-opus-4-8", 30)),
+                                selection(row("first", "unpriced-model", 10)),
+                                selection(row("second", "gemini-3.1-flash-lite", 20))));
 
         assertEquals(List.of("first", "second", "third"), labels(ordered));
     }
@@ -46,15 +49,18 @@ class HostedChainOrderingTest {
     @Test
     void anUnpricedModelSortsAfterPricedOnesAndZeroCostFirst() {
         HostedChainOrdering ordering =
-            new HostedChainOrdering(new LlmPricingCatalog(), new HostedProviderHealth(3, 120, 180), true);
+                new HostedChainOrdering(
+                        new LlmPricingCatalog(), new HostedProviderHealth(3, 120, 180), true);
 
         PlatformHostedLlmProvider zeroCost = row("local", "whatever", 50);
         zeroCost.setZeroCost(true);
 
-        List<HostedProviderSelection> ordered = ordering.order(List.of(
-            selection(row("unpriced", null, 1)),
-            selection(row("priced", "claude-haiku-4-5", 2)),
-            selection(zeroCost)));
+        List<HostedProviderSelection> ordered =
+                ordering.order(
+                        List.of(
+                                selection(row("unpriced", null, 1)),
+                                selection(row("priced", "claude-haiku-4-5", 2)),
+                                selection(zeroCost)));
 
         // The zero-cost row is $0 (first); the row with no model to price (null cost) sorts after
         // every priced row via nullsLast, whatever its priority.
@@ -64,14 +70,14 @@ class HostedChainOrderingTest {
     @Test
     void aTrippedRowGoesToTheBackButIsNeverDropped() {
         HostedProviderHealth health = new HostedProviderHealth(1, 120, 180);
-        HostedChainOrdering ordering = new HostedChainOrdering(new LlmPricingCatalog(), health, false);
+        HostedChainOrdering ordering =
+                new HostedChainOrdering(new LlmPricingCatalog(), health, false);
 
         PlatformHostedLlmProvider dead = row("dead", "m1", 10);
         health.recordFailure(HostedChainOrdering.healthKey(dead));
 
-        List<HostedProviderSelection> ordered = ordering.order(List.of(
-            selection(dead),
-            selection(row("alive", "m2", 20))));
+        List<HostedProviderSelection> ordered =
+                ordering.order(List.of(selection(dead), selection(row("alive", "m2", 20))));
 
         // The tripped row would win on priority but is pushed behind the healthy one - yet it stays
         // in the chain, so a pool whose every row is dead still gets tried.
@@ -81,7 +87,8 @@ class HostedChainOrderingTest {
     @Test
     void theOnlyRowIsTriedEvenWhenTripped() {
         HostedProviderHealth health = new HostedProviderHealth(1, 120, 180);
-        HostedChainOrdering ordering = new HostedChainOrdering(new LlmPricingCatalog(), health, false);
+        HostedChainOrdering ordering =
+                new HostedChainOrdering(new LlmPricingCatalog(), health, false);
 
         PlatformHostedLlmProvider only = row("only", "m1", 10);
         health.recordFailure(HostedChainOrdering.healthKey(only));
@@ -95,7 +102,8 @@ class HostedChainOrderingTest {
     @Test
     void observedLatencyBreaksTiesAheadOfPriority() {
         HostedProviderHealth health = new HostedProviderHealth(3, 120, 180);
-        HostedChainOrdering ordering = new HostedChainOrdering(new LlmPricingCatalog(), health, true);
+        HostedChainOrdering ordering =
+                new HostedChainOrdering(new LlmPricingCatalog(), health, true);
 
         // Both unpriced and same priority: the row with a lower observed latency answers first.
         PlatformHostedLlmProvider slow = row("slow", "unpriced-a", 1);
@@ -103,7 +111,8 @@ class HostedChainOrderingTest {
         health.recordSuccess(HostedChainOrdering.healthKey(slow), 900);
         health.recordSuccess(HostedChainOrdering.healthKey(fast), 100);
 
-        List<HostedProviderSelection> ordered = ordering.order(List.of(selection(slow), selection(fast)));
+        List<HostedProviderSelection> ordered =
+                ordering.order(List.of(selection(slow), selection(fast)));
 
         assertEquals(List.of("fast", "slow"), labels(ordered));
     }

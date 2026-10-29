@@ -22,8 +22,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Covers {@link ElevenLabsCallSpeechQuota}'s adapter job: resolve the calling tenant's plan the
- * same way the TTS client does (unscoped thread = UNLIMITED internal caller), delegate the cap
- * math to {@link VoiceQuotaService} and translate its typed rejection into the kernel's {@link
+ * same way the TTS client does (unscoped thread = UNLIMITED internal caller), delegate the cap math
+ * to {@link VoiceQuotaService} and translate its typed rejection into the kernel's {@link
  * CallSpeechQuotaExceededException} so cross-provider callers catch one shape.
  */
 class ElevenLabsCallSpeechQuotaTest {

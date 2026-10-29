@@ -31,10 +31,13 @@ class PlaceholderResolverTest {
 
     @Test
     void mappedTokensAreSwappedForTheValue() {
-        WorkflowNodeDto input = node("n1", new LinkedHashMap<>(Map.of("agentId", "@placeholder:agent_1")));
+        WorkflowNodeDto input =
+                node("n1", new LinkedHashMap<>(Map.of("agentId", "@placeholder:agent_1")));
         PlaceholderResolver.Result result =
                 PlaceholderResolver.apply(
-                        List.of(input), Map.of("agent_1", "real-agent-id"), new PlaceholderRegistry());
+                        List.of(input),
+                        Map.of("agent_1", "real-agent-id"),
+                        new PlaceholderRegistry());
 
         assertThat(result.nodes().get(0).config()).containsEntry("agentId", "real-agent-id");
         assertThat(result.unresolved()).isEmpty();
@@ -107,7 +110,13 @@ class PlaceholderResolverTest {
                 List.of(
                         Map.of("name", "Authorization", "value", "@placeholder:agent_1"),
                         Map.of("name", "X-Keep", "value", "1")));
-        config.put("options", Map.of("agentId", "@placeholder:agent_1", "list", List.of("@placeholder:agent_1", "x")));
+        config.put(
+                "options",
+                Map.of(
+                        "agentId",
+                        "@placeholder:agent_1",
+                        "list",
+                        List.of("@placeholder:agent_1", "x")));
         WorkflowNodeDto input = node("n1", config);
 
         PlaceholderResolver.Result result =
@@ -144,9 +153,11 @@ class PlaceholderResolverTest {
     @Test
     void nodesWithoutConfigOrDataPassThroughUntouched() {
         WorkflowNodeDto noData = new WorkflowNodeDto("n1", "agent", Map.of(), null);
-        WorkflowNodeDto noConfig = new WorkflowNodeDto("n2", "agent", Map.of(), Map.of("label", "L"));
+        WorkflowNodeDto noConfig =
+                new WorkflowNodeDto("n2", "agent", Map.of(), Map.of("label", "L"));
         PlaceholderResolver.Result result =
-                PlaceholderResolver.apply(List.of(noData, noConfig), Map.of(), new PlaceholderRegistry());
+                PlaceholderResolver.apply(
+                        List.of(noData, noConfig), Map.of(), new PlaceholderRegistry());
         assertThat(result.nodes()).hasSize(2);
         assertThat(result.missing()).isEmpty();
         assertThat(result.nodes().get(0).data()).isNotNull();

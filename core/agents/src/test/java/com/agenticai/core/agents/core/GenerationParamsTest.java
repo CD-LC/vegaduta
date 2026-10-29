@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link GenerationParams} is the embedded value object behind {@link Agent}'s flat
- * maxTokens/temperature/topP/sampling accessors. These pin the copy-on-write contract (a
- * {@code with...} never mutates the receiver) and the null-means-provider-default shape of the
- * optional sampling controls.
+ * maxTokens/temperature/topP/sampling accessors. These pin the copy-on-write contract (a {@code
+ * with...} never mutates the receiver) and the null-means-provider-default shape of the optional
+ * sampling controls.
  */
 class GenerationParamsTest {
 
@@ -35,7 +35,7 @@ class GenerationParamsTest {
     @Test
     void withCoreKeepsTheSamplingControlsAndMutatesNothing() {
         GenerationParams p =
-            GenerationParams.of(1024, 0.7, 1.0).withSampling(40, List.of("END"), 0.5, 0.25, 9);
+                GenerationParams.of(1024, 0.7, 1.0).withSampling(40, List.of("END"), 0.5, 0.25, 9);
 
         GenerationParams changed = p.withCore(512, 0.1, 0.9);
 
@@ -69,14 +69,17 @@ class GenerationParamsTest {
 
     @Test
     void stopSequencesGetterReturnsAnImmutableCopy() {
-        GenerationParams p = GenerationParams.of(1, 0, 0).withSampling(null, List.of("X"), null, null, null);
+        GenerationParams p =
+                GenerationParams.of(1, 0, 0).withSampling(null, List.of("X"), null, null, null);
         assertThrows(UnsupportedOperationException.class, () -> p.getStopSequences().add("Y"));
     }
 
     @Test
     void equalityCoversAllFields() {
-        GenerationParams a = GenerationParams.of(10, 0.2, 0.8).withSampling(5, List.of("S"), 0.1, 0.2, 3);
-        GenerationParams b = GenerationParams.of(10, 0.2, 0.8).withSampling(5, List.of("S"), 0.1, 0.2, 3);
+        GenerationParams a =
+                GenerationParams.of(10, 0.2, 0.8).withSampling(5, List.of("S"), 0.1, 0.2, 3);
+        GenerationParams b =
+                GenerationParams.of(10, 0.2, 0.8).withSampling(5, List.of("S"), 0.1, 0.2, 3);
 
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());

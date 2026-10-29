@@ -11,19 +11,25 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link PaymentTransaction}'s state machine ({@code INITIATED ->
- * PENDING_APPROVAL -> AWAITING_PAYMENT -> CAPTURED}, with FAILED/EXPIRED off
- * to the side): each mark* method is the only legal way into its state, a
- * terminal state always clears the reconciliation {@code nextPollAt}, and
- * {@code scheduleNextPoll} counts attempts.
+ * {@link PaymentTransaction}'s state machine ({@code INITIATED -> PENDING_APPROVAL ->
+ * AWAITING_PAYMENT -> CAPTURED}, with FAILED/EXPIRED off to the side): each mark* method is the
+ * only legal way into its state, a terminal state always clears the reconciliation {@code
+ * nextPollAt}, and {@code scheduleNextPoll} counts attempts.
  */
 class PaymentTransactionStateTest {
 
     private static PaymentTransaction transaction() {
         return new PaymentTransaction(
-            UUID.randomUUID(), UUID.randomUUID(), "session-1",
-            PaymentTransactionType.UPI_COLLECT, 12_500, "shop@upi", "test purchase",
-            "books", "idem-1", Instant.parse("2026-10-06T00:00:00Z"));
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "session-1",
+                PaymentTransactionType.UPI_COLLECT,
+                12_500,
+                "shop@upi",
+                "test purchase",
+                "books",
+                "idem-1",
+                Instant.parse("2026-10-06T00:00:00Z"));
     }
 
     @Test
@@ -117,8 +123,11 @@ class PaymentTransactionStateTest {
     @Test
     void transactionTypesAreTheThreeInstrumentedMovements() {
         assertEquals(3, PaymentTransactionType.values().length);
-        assertEquals(PaymentTransactionType.PAYMENT_LINK, PaymentTransactionType.valueOf("PAYMENT_LINK"));
-        assertEquals(PaymentTransactionType.UPI_COLLECT, PaymentTransactionType.valueOf("UPI_COLLECT"));
+        assertEquals(
+                PaymentTransactionType.PAYMENT_LINK,
+                PaymentTransactionType.valueOf("PAYMENT_LINK"));
+        assertEquals(
+                PaymentTransactionType.UPI_COLLECT, PaymentTransactionType.valueOf("UPI_COLLECT"));
         assertEquals(PaymentTransactionType.PAYOUT, PaymentTransactionType.valueOf("PAYOUT"));
     }
 }

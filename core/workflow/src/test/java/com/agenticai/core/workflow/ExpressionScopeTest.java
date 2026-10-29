@@ -16,7 +16,8 @@ class ExpressionScopeTest {
 
     @Test
     void iterationCarriesTheItemsWhenTheyFit() {
-        ExpressionScope s = ExpressionScope.iteration("{\"a\":1}", 1, List.of("{\"a\":1}", "{\"b\":2}"));
+        ExpressionScope s =
+                ExpressionScope.iteration("{\"a\":1}", 1, List.of("{\"a\":1}", "{\"b\":2}"));
         assertEquals("{\"a\":1}", s.item());
         assertEquals(1, s.index());
         assertEquals(List.of("{\"a\":1}", "{\"b\":2}"), s.items());
@@ -41,7 +42,10 @@ class ExpressionScopeTest {
         assertNotNull(t.supplied());
         assertFalse(t.honoursPins(), "a step test runs the node under test for real");
         assertFalse(t.simulatesSends());
-        assertEquals(Map.of(), ExpressionScope.test(null).supplied(), "null supplied normalises to empty");
+        assertEquals(
+                Map.of(),
+                ExpressionScope.test(null).supplied(),
+                "null supplied normalises to empty");
     }
 
     @Test
@@ -88,8 +92,10 @@ class ExpressionScopeTest {
         assertEquals(0, new ExpressionScope(null, -5, null, null, null).seq());
         assertEquals(3, new ExpressionScope(null, 3, null, null, null).seq());
 
-        assertEquals("production", new ExpressionScope(null, null, null, null, null).modeOrDefault());
-        assertEquals("production", new ExpressionScope(null, null, null, "  ", null).modeOrDefault());
+        assertEquals(
+                "production", new ExpressionScope(null, null, null, null, null).modeOrDefault());
+        assertEquals(
+                "production", new ExpressionScope(null, null, null, "  ", null).modeOrDefault());
         assertEquals("draft", new ExpressionScope(null, null, null, "draft", null).modeOrDefault());
 
         assertFalse(new ExpressionScope(null, null, null, null, null).recordingSkipped());

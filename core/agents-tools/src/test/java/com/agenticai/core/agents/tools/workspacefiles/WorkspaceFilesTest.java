@@ -59,7 +59,8 @@ class WorkspaceFilesTest {
         assertTrue(files.write("deep/nested/f.txt", "again"));
         assertEquals("again", Files.readString(root.resolve("deep/nested/f.txt")));
 
-        assertThrows(IOException.class, () -> files.write("deep", "x"), "writing over a folder fails");
+        assertThrows(
+                IOException.class, () -> files.write("deep", "x"), "writing over a folder fails");
     }
 
     @Test
@@ -106,9 +107,7 @@ class WorkspaceFilesTest {
         // "docs/milk-notes.md" matches by name first; "docs/todo.txt" line 2 matches its content.
         assertEquals("docs/milk-notes.md", hits.get(0).path());
         assertEquals(0, hits.get(0).line());
-        assertTrue(
-                hits.stream()
-                        .anyMatch(h -> h.path().equals("docs/todo.txt") && h.line() == 2));
+        assertTrue(hits.stream().anyMatch(h -> h.path().equals("docs/todo.txt") && h.line() == 2));
 
         assertThrows(IOException.class, () -> files.search("", "  "));
         assertThrows(NoSuchFileException.class, () -> files.search("ghost", "milk"));

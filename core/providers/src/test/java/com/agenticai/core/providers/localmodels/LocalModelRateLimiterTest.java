@@ -10,11 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The fixed per-caller, per-minute windows on the local-models API. Every
- * test uses a unique caller id because {@link
- * com.agenticai.core.security.ratelimit.LocalRateLimitFallback} keeps its
- * counters in process-wide static state - a shared caller would leak counts
- * between tests.
+ * The fixed per-caller, per-minute windows on the local-models API. Every test uses a unique caller
+ * id because {@link com.agenticai.core.security.ratelimit.LocalRateLimitFallback} keeps its
+ * counters in process-wide static state - a shared caller would leak counts between tests.
  */
 class LocalModelRateLimiterTest {
 
@@ -38,7 +36,7 @@ class LocalModelRateLimiterTest {
         limiter.checkProbe(caller);
         limiter.checkProbe(caller);
         ResponseStatusException e =
-            assertThrows(ResponseStatusException.class, () -> limiter.checkProbe(caller));
+                assertThrows(ResponseStatusException.class, () -> limiter.checkProbe(caller));
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, e.getStatusCode());
     }
 

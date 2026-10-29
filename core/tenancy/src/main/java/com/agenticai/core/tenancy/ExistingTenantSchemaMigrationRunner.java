@@ -8,44 +8,40 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Closes a real gap found running the Playwright E2E suite: {@link
- * TenantProvisioningService} only ever ran Flyway against a tenant's schema
- * once, at signup time. Every migration added to {@code
- * classpath:db/migration/tenant} afterward (Knowledge Stage F1's V15/V16,
- * F3c's V17, and every future one) would never reach a tenant created before
- * that migration existed - the first symptom being an unrelated background
- * job throwing {@code relation "..." does not exist} against that one
+ * Closes a real gap found running the Playwright E2E suite: {@link TenantProvisioningService} only
+ * ever ran Flyway against a tenant's schema once, at signup time. Every migration added to {@code
+ * classpath:db/migration/tenant} afterward (Knowledge Stage F1's V15/V16, F3c's V17, and every
+ * future one) would never reach a tenant created before that migration existed - the first symptom
+ * being an unrelated background job throwing {@code relation "..." does not exist} against that one
  * tenant's schema, as happened here for {@code knowledge_ingestion_job}.
  *
- * <p>Runs once per application startup, migrating every {@link
- * TenantStatus#ACTIVE} tenant's schema to current via {@link
- * TenantSchemaMigrator}. Deliberately NOT using {@link TenantSchemaIterator}
- * here - that utility exists to set {@link com.agenticai.core.security.TenantContext}
- * so a *JPA repository* call gets routed to the right schema by Hibernate's
- * multi-tenancy resolver; this class talks to Flyway directly against a
- * schema name via the raw {@link javax.sql.DataSource}, no JPA/TenantContext
- * involved, so that machinery doesn't apply here.
+ * <p>Runs once per application startup, migrating every {@link TenantStatus#ACTIVE} tenant's schema
+ * to current via {@link TenantSchemaMigrator}. Deliberately NOT using {@link TenantSchemaIterator}
+ * here - that utility exists to set {@link com.agenticai.core.security.TenantContext} so a *JPA
+ * repository* call gets routed to the right schema by Hibernate's multi-tenancy resolver; this
+ * class talks to Flyway directly against a schema name via the raw {@link javax.sql.DataSource}, no
+ * JPA/TenantContext involved, so that machinery doesn't apply here.
  *
- * <p>Safe to run every single boot: {@code Flyway#migrate()} is idempotent
- * (a schema already at the latest version is a fast no-op), and one
- * tenant's migration failing is logged and does not stop the others or
- * prevent the application from starting - same "one bad tenant never blocks
- * the rest" posture {@link TenantSchemaIterator} already established for
- * scheduled jobs, applied here to startup instead.
+ * <p>Safe to run every single boot: {@code Flyway#migrate()} is idempotent (a schema already at the
+ * latest version is a fast no-op), and one tenant's migration failing is logged and does not stop
+ * the others or prevent the application from starting - same "one bad tenant never blocks the rest"
+ * posture {@link TenantSchemaIterator} already established for scheduled jobs, applied here to
+ * startup instead.
  *
- * <p>Unconditional on profiles, matching {@link TenantSchemaIterator}'s own
- * posture - {@link TenantRepository} and the {@code control_plane.tenant}
- * table it reads are always available regardless of which optional profiles
- * (security/knowledge/mcp/e2e) are active in a given run. But gated on
- * {@code app.tenancy.migrate-on-boot} (default true) because a schema
- * migration is a CONTROL-PLANE responsibility: the dedicated {@code
- * app-worker} deployable and any second API replica set it to false so
- * exactly one process shape ever migrates tenant schemas - N instances all
- * racing the same per-schema Flyway locks is how a routine rolling restart
- * turns into a boot stall.
+ * <p>Unconditional on profiles, matching {@link TenantSchemaIterator}'s own posture - {@link
+ * TenantRepository} and the {@code control_plane.tenant} table it reads are always available
+ * regardless of which optional profiles (security/knowledge/mcp/e2e) are active in a given run. But
+ * gated on {@code app.tenancy.migrate-on-boot} (default true) because a schema migration is a
+ * CONTROL-PLANE responsibility: the dedicated {@code app-worker} deployable and any second API
+ * replica set it to false so exactly one process shape ever migrates tenant schemas - N instances
+ * all racing the same per-schema Flyway locks is how a routine rolling restart turns into a boot
+ * stall.
  */
 @Component
-@ConditionalOnProperty(name = "app.tenancy.migrate-on-boot", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "app.tenancy.migrate-on-boot",
+        havingValue = "true",
+        matchIfMissing = true)
 // HIGHEST_PRECEDENCE so this runner always precedes every other
 // ApplicationRunner - most of all VersionSnapshotBackfillRunner (agents,
 // LOWEST_PRECEDENCE), which blocks in TenantMigrationGate.waitForMigrations
@@ -61,7 +57,8 @@ public class ExistingTenantSchemaMigrationRunner implements ApplicationRunner {
     private final TenantMigrationService migrationService;
     private final TenantMigrationGate gate;
 
-    public ExistingTenantSchemaMigrationRunner(TenantMigrationService migrationService, TenantMigrationGate gate) {
+    public ExistingTenantSchemaMigrationRunner(
+            TenantMigrationService migrationService, TenantMigrationGate gate) {
         this.migrationService = migrationService;
         this.gate = gate;
     }

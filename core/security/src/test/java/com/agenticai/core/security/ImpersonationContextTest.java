@@ -16,11 +16,7 @@ class ImpersonationContextTest {
 
     private static ImpersonationContext.Session session() {
         return new ImpersonationContext.Session(
-                UUID.randomUUID(),
-                "admin-kc-1",
-                "ops@vegaduta.ai",
-                "tenant_target",
-                "target-kc-9");
+                UUID.randomUUID(), "admin-kc-1", "ops@vegaduta.ai", "tenant_target", "target-kc-9");
     }
 
     @AfterEach

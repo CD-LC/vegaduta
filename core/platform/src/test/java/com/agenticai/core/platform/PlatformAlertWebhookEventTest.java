@@ -9,9 +9,9 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 /**
- * Alertmanager re-delivers a firing alert on every {@code repeat_interval};
- * the row must bump its occurrence count and move {@code lastSeenAt} rather
- * than let one incident pile up thousands of near-duplicate rows.
+ * Alertmanager re-delivers a firing alert on every {@code repeat_interval}; the row must bump its
+ * occurrence count and move {@code lastSeenAt} rather than let one incident pile up thousands of
+ * near-duplicate rows.
  */
 class PlatformAlertWebhookEventTest {
 
@@ -20,10 +20,17 @@ class PlatformAlertWebhookEventTest {
 
     private static PlatformAlertWebhookEvent firing() {
         return new PlatformAlertWebhookEvent(
-            "fp-abc", "RedisDown", "critical", AlertStatus.FIRING,
-            "redis is unreachable", "the primary cache stopped answering",
-            "{\"severity\":\"critical\"}", "{\"runbook\":\"x\"}",
-            "http://prom:9090/graph", START, null);
+                "fp-abc",
+                "RedisDown",
+                "critical",
+                AlertStatus.FIRING,
+                "redis is unreachable",
+                "the primary cache stopped answering",
+                "{\"severity\":\"critical\"}",
+                "{\"runbook\":\"x\"}",
+                "http://prom:9090/graph",
+                START,
+                null);
     }
 
     @Test
@@ -50,8 +57,7 @@ class PlatformAlertWebhookEventTest {
         PlatformAlertWebhookEvent event = firing();
         Instant firstSeen = event.getFirstSeenAt();
 
-        event.recordRedelivery(
-            AlertStatus.FIRING, "still down", "desc2", "{}", "{}", null);
+        event.recordRedelivery(AlertStatus.FIRING, "still down", "desc2", "{}", "{}", null);
 
         assertEquals(2, event.getOccurrenceCount());
         assertEquals(AlertStatus.FIRING, event.getStatus());
@@ -59,8 +65,7 @@ class PlatformAlertWebhookEventTest {
         assertEquals(firstSeen, event.getFirstSeenAt(), "first sighting never moves");
         assertTrue(!event.getLastSeenAt().isBefore(firstSeen));
 
-        event.recordRedelivery(
-            AlertStatus.RESOLVED, "recovered", "desc3", "{}", "{}", END);
+        event.recordRedelivery(AlertStatus.RESOLVED, "recovered", "desc3", "{}", "{}", END);
 
         assertEquals(3, event.getOccurrenceCount());
         assertEquals(AlertStatus.RESOLVED, event.getStatus());

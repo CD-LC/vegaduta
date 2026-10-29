@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@link ToolLedgerProperties} loads the ledger's limits and every model-facing wording from
- * {@code /chat/tool-ledger.properties}. These pin the shipped defaults, the clamping rules the
- * setters enforce (0 floor, {@link ToolLedgerSummary#MAX_FIELD_CHARS} ceiling on the field limits),
- * and that {@link #with} copies rather than mutates the shared platform object.
+ * {@link ToolLedgerProperties} loads the ledger's limits and every model-facing wording from {@code
+ * /chat/tool-ledger.properties}. These pin the shipped defaults, the clamping rules the setters
+ * enforce (0 floor, {@link ToolLedgerSummary#MAX_FIELD_CHARS} ceiling on the field limits), and
+ * that {@link #with} copies rather than mutates the shared platform object.
  */
 class ToolLedgerPropertiesTest {
 
@@ -31,8 +31,9 @@ class ToolLedgerPropertiesTest {
         assertEquals("failed", props.getStatusFailed());
         assertEquals("not run", props.getStatusNotRun());
         assertEquals("not run yet, awaiting human approval", props.getStatusAwaitingApproval());
-        assertTrue(props.getStatusReplayed().contains("replayed")
-            || props.getStatusReplayed().contains("earlier identical call"));
+        assertTrue(
+                props.getStatusReplayed().contains("replayed")
+                        || props.getStatusReplayed().contains("earlier identical call"));
         assertTrue(props.getHeader().startsWith("[Platform tool record"));
         assertTrue(props.getLine().contains("{tool}"));
         assertTrue(props.getDetail().contains("{result}"));
@@ -49,8 +50,9 @@ class ToolLedgerPropertiesTest {
         assertEquals("not run", props.statusLabel(ToolLedger.Status.NOT_RUN));
         // A simulated call (offline eval) reads as "not run" to the model, same as a skipped call.
         assertEquals("not run", props.statusLabel(ToolLedger.Status.SIMULATED));
-        assertEquals("not run yet, awaiting human approval",
-            props.statusLabel(ToolLedger.Status.AWAITING_APPROVAL));
+        assertEquals(
+                "not run yet, awaiting human approval",
+                props.statusLabel(ToolLedger.Status.AWAITING_APPROVAL));
         assertEquals(props.getStatusReplayed(), props.statusLabel(ToolLedger.Status.REPLAYED));
     }
 
@@ -67,7 +69,8 @@ class ToolLedgerPropertiesTest {
         assertEquals(0, props.getMaxArgumentChars());
         assertEquals(0, props.getMaxResultChars());
 
-        // The credential scrub never inspects past MAX_FIELD_CHARS, so a higher limit would be a lie.
+        // The credential scrub never inspects past MAX_FIELD_CHARS, so a higher limit would be a
+        // lie.
         props.setMaxArgumentChars(100_000);
         props.setMaxResultChars(100_000);
         assertEquals(ToolLedgerSummary.MAX_FIELD_CHARS, props.getMaxArgumentChars());

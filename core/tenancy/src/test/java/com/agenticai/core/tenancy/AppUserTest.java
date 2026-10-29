@@ -9,9 +9,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * Entity coverage for {@link AppUser}: constructor defaults, the mutators that also touch
- * {@code updatedAt}, and the {@code lastSeenAt} column's null-until-first-seen contract (it is
- * written only by {@code AppUserLastSeenRecorder}'s own UPDATE, never through this entity).
+ * Entity coverage for {@link AppUser}: constructor defaults, the mutators that also touch {@code
+ * updatedAt}, and the {@code lastSeenAt} column's null-until-first-seen contract (it is written
+ * only by {@code AppUserLastSeenRecorder}'s own UPDATE, never through this entity).
  */
 class AppUserTest {
 
@@ -35,7 +35,8 @@ class AppUserTest {
 
     @Test
     void setRoleUpdatesTheRoleAndRefreshesUpdatedAt() {
-        AppUser user = new AppUser(UUID.randomUUID(), "kc-1", "a@acme.test", UserRole.AGENT_BUILDER);
+        AppUser user =
+                new AppUser(UUID.randomUUID(), "kc-1", "a@acme.test", UserRole.AGENT_BUILDER);
 
         user.setRole(UserRole.DELEGATED_USER);
 
@@ -45,7 +46,8 @@ class AppUserTest {
 
     @Test
     void relinkKeycloakUserPointsTheRowAtTheCurrentAccount() {
-        AppUser user = new AppUser(UUID.randomUUID(), "kc-stale", "a@acme.test", UserRole.END_CUSTOMER);
+        AppUser user =
+                new AppUser(UUID.randomUUID(), "kc-stale", "a@acme.test", UserRole.END_CUSTOMER);
 
         user.relinkKeycloakUser("kc-current");
 

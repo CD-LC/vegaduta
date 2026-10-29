@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 /**
- * {@code app.llm.request-snapshot.*}: the display-only caps on one stored request copy for the
- * LLM request inspector. Defaults ship in {@code /chat/request-snapshot.properties}; every
- * numeric setter clamps at zero and a null truncation marker becomes empty.
+ * {@code app.llm.request-snapshot.*}: the display-only caps on one stored request copy for the LLM
+ * request inspector. Defaults ship in {@code /chat/request-snapshot.properties}; every numeric
+ * setter clamps at zero and a null truncation marker becomes empty.
  */
 class LlmRequestSnapshotPropertiesTest {
 

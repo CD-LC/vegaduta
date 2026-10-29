@@ -25,8 +25,19 @@ class AgentResourceVersionsTest {
 
     @Test
     void lastModifiedIsTheAgentsUpdatedAt() {
-        Agent agent = new Agent("n", "p", ProviderName.ANTHROPIC, "m", 1024, 0.7, 1.0,
-            true, null, ReasoningDepth.FAST, TuningMode.MANUAL);
+        Agent agent =
+                new Agent(
+                        "n",
+                        "p",
+                        ProviderName.ANTHROPIC,
+                        "m",
+                        1024,
+                        0.7,
+                        1.0,
+                        true,
+                        null,
+                        ReasoningDepth.FAST,
+                        TuningMode.MANUAL);
         AgentRepository repository = mock(AgentRepository.class);
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.of(agent));

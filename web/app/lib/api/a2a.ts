@@ -69,20 +69,16 @@ export const a2aApi = {
     if (query.agentId) params.set("agentId", query.agentId);
     if (query.limit) params.set("limit", String(query.limit));
     const qs = params.toString();
-    return apiFetch(
-      `/api/a2a/console/tasks${qs ? `?${qs}` : ""}`,
-      fresh ? { skipGetCache: true } : {}
-    ).then(toJsonQuietOn(QUIET));
+    return apiFetch(`/api/a2a/console/tasks${qs ? `?${qs}` : ""}`, fresh ? { skipGetCache: true } : {}).then(
+      toJsonQuietOn(QUIET)
+    );
   },
 
   a2aGetTask: (id: string): Promise<A2aTaskRow> =>
     apiFetch(`/api/a2a/console/tasks/${encodeURIComponent(id)}`).then(toJsonQuietOn(QUIET)),
 
   a2aCancelTask: (id: string): Promise<A2aTaskRow> =>
-    apiFetch(`/api/a2a/console/tasks/${encodeURIComponent(id)}:cancel`, { method: "POST" }).then(
-      toJson<A2aTaskRow>
-    ),
+    apiFetch(`/api/a2a/console/tasks/${encodeURIComponent(id)}:cancel`, { method: "POST" }).then(toJson<A2aTaskRow>),
 
-  a2aPolicy: (): Promise<A2aConsolePolicy> =>
-    apiFetch(`/api/a2a/console/policy`).then(toJsonQuietOn(QUIET)),
+  a2aPolicy: (): Promise<A2aConsolePolicy> => apiFetch(`/api/a2a/console/policy`).then(toJsonQuietOn(QUIET)),
 };

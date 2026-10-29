@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link DelegationTokenRecord} is the per-{@code jti} introspection row behind every minted
- * delegation JWT. It is a plain entity: these pin the accessor contract and the defaults the
- * mint path relies on (ACTIVE status, stamped timestamps, no wallet binding unless a {@code pay:*}
- * scope asked for one).
+ * delegation JWT. It is a plain entity: these pin the accessor contract and the defaults the mint
+ * path relies on (ACTIVE status, stamped timestamps, no wallet binding unless a {@code pay:*} scope
+ * asked for one).
  */
 class DelegationTokenRecordTest {
 

@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * {@link RuntimeLimits} is the one immutable value object used for the agent's overrides, the
- * tenant's defaults and the API body of both. These pin the null-means-not-set contract, the
- * {@link RuntimeSetting}-keyed {@code get}/{@code with} round trip, and {@code capToolSteps}.
+ * tenant's defaults and the API body of both. These pin the null-means-not-set contract, the {@link
+ * RuntimeSetting}-keyed {@code get}/{@code with} round trip, and {@code capToolSteps}.
  */
 class RuntimeLimitsTest {
 
@@ -59,13 +59,14 @@ class RuntimeLimitsTest {
 
     @Test
     void withCoversEverySettingAndPreservesTheRest() {
-        RuntimeLimits limits = RuntimeLimits.none()
-            .with(RuntimeSetting.TURN_TIMEOUT_SECONDS, 30)
-            .with(RuntimeSetting.TOOL_TIMEOUT_SECONDS, 5)
-            .with(RuntimeSetting.TOOL_OUTPUT_MAX_CHARS, 2000)
-            .with(RuntimeSetting.RETRIEVAL_TOP_K, 4)
-            .with(RuntimeSetting.RETRIEVAL_MIN_SCORE, 0.75)
-            .with(RuntimeSetting.CONTINUATION_PASSES, 3);
+        RuntimeLimits limits =
+                RuntimeLimits.none()
+                        .with(RuntimeSetting.TURN_TIMEOUT_SECONDS, 30)
+                        .with(RuntimeSetting.TOOL_TIMEOUT_SECONDS, 5)
+                        .with(RuntimeSetting.TOOL_OUTPUT_MAX_CHARS, 2000)
+                        .with(RuntimeSetting.RETRIEVAL_TOP_K, 4)
+                        .with(RuntimeSetting.RETRIEVAL_MIN_SCORE, 0.75)
+                        .with(RuntimeSetting.CONTINUATION_PASSES, 3);
 
         assertEquals(30, limits.getTurnTimeoutSeconds());
         assertEquals(5, limits.getToolTimeoutSeconds());

@@ -10,16 +10,13 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-
 /**
- * {@link OrchestratorService} is, in its own words, "the governance layer
- * the user asked for directly... which does the governance and ensure
- * nothing goes wrong." Every workflow save/activate/run passes through
- * {@link OrchestratorService#validate}, and every sensitive node passes
- * through {@link OrchestratorService#authorizeSensitiveNode} - a bug in
- * either is either a false-negative (a broken graph gets marked runnable
- * and fails confusingly mid-execution) or a false-positive (a legitimate
- * graph is rejected). Had zero test coverage before this suite despite
+ * {@link OrchestratorService} is, in its own words, "the governance layer the user asked for
+ * directly... which does the governance and ensure nothing goes wrong." Every workflow
+ * save/activate/run passes through {@link OrchestratorService#validate}, and every sensitive node
+ * passes through {@link OrchestratorService#authorizeSensitiveNode} - a bug in either is either a
+ * false-negative (a broken graph gets marked runnable and fails confusingly mid-execution) or a
+ * false-positive (a legitimate graph is rejected). Had zero test coverage before this suite despite
  * being the single most safety-critical class in the workflow engine.
  *
  * <p>This class covers graph shape (triggers, ids, edges, cycles, loop / parallel / fan_out arity);
@@ -38,8 +35,9 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void graphWithNoTriggerNodeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("n1", "output", Map.of("channel", "log"))), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(node("n1", "output", Map.of("channel", "log"))), List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("at least one Trigger node")));
@@ -52,24 +50,32 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
     // non-WEBHOOK channel (WEBHOOK is exempt - see validate()'s javadoc).
     @Test
     void graphWithMultipleWebhookTriggerNodesIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(List.of(trigger("t1"), trigger("t2")), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(List.of(trigger("t1"), trigger("t2")), List.of());
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
 
     @Test
     void graphWithMultipleTriggerNodesOnTheSameNonWebhookChannelIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1", "WHATSAPP"), trigger("t2", "WHATSAPP")), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1", "WHATSAPP"), trigger("t2", "WHATSAPP")), List.of());
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Multiple trigger nodes are bound to channel WHATSAPP")));
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e ->
+                                        e.contains(
+                                                "Multiple trigger nodes are bound to channel WHATSAPP")));
     }
 
     @Test
     void graphWithMultipleTriggerNodesOnDifferentNonWebhookChannelsIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1", "WHATSAPP"), trigger("t2", "SMS")), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1", "WHATSAPP"), trigger("t2", "SMS")), List.of());
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
@@ -87,15 +93,18 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
     // explicit-WEBHOOK sibling of this exact case.
     @Test
     void triggerNodeWithNoChannelConfiguredDefaultsToWebhookAndIsAccepted() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(List.of(node("t1", "trigger", Map.of())), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(List.of(node("t1", "trigger", Map.of())), List.of());
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
 
     @Test
     void triggerNodeWithInvalidChannelIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(node("t1", "trigger", Map.of("channel", "carrier_pigeon"))), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(node("t1", "trigger", Map.of("channel", "carrier_pigeon"))),
+                        List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("invalid channel value")));
@@ -110,8 +119,10 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void duplicateNodeIdsAreRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("dup"), node("dup", "output", Map.of("channel", "log"))), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("dup"), node("dup", "output", Map.of("channel", "log"))),
+                        List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("Duplicate node id")));
@@ -119,8 +130,10 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void blankNodeIdIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("", "output", Map.of("channel", "log"))), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1"), node("", "output", Map.of("channel", "log"))),
+                        List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("must have an id")));
@@ -128,8 +141,9 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void unrecognizedNodeTypeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("n2", "teleporter", Map.of())), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1"), node("n2", "teleporter", Map.of())), List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("unrecognized type")));
@@ -137,8 +151,9 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void edgeReferencingNonexistentNodeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1")), List.of(edge("e1", "t1", "does_not_exist")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1")), List.of(edge("e1", "t1", "does_not_exist")));
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("doesn't exist in this graph")));
@@ -149,12 +164,22 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
         // Two independent problems - both must be reported in one pass, not
         // just the first one found, so the canvas can flag every offending
         // node in one round trip (this class's own stated purpose).
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1", "WHATSAPP"), trigger("t2", "WHATSAPP"), node("bad", "teleporter", Map.of())), List.of());
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1", "WHATSAPP"),
+                                trigger("t2", "WHATSAPP"),
+                                node("bad", "teleporter", Map.of())),
+                        List.of());
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.size() >= 2);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("Multiple trigger nodes are bound to channel WHATSAPP")));
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e ->
+                                        e.contains(
+                                                "Multiple trigger nodes are bound to channel WHATSAPP")));
         assertTrue(errors.stream().anyMatch(e -> e.contains("unrecognized type")));
     }
 
@@ -162,10 +187,13 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void cyclicGraphIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("a", "output", Map.of("channel", "log")),
-                node("b", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "a"), edge("e2", "a", "b"), edge("e3", "b", "a")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("a", "output", Map.of("channel", "log")),
+                                node("b", "output", Map.of("channel", "log"))),
+                        List.of(edge("e1", "t1", "a"), edge("e2", "a", "b"), edge("e3", "b", "a")));
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("cycle")));
@@ -173,10 +201,13 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void acyclicLinearGraphIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("a", "output", Map.of("channel", "log")),
-                node("b", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "a"), edge("e2", "a", "b")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("a", "output", Map.of("channel", "log")),
+                                node("b", "output", Map.of("channel", "log"))),
+                        List.of(edge("e1", "t1", "a"), edge("e2", "a", "b")));
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
@@ -185,20 +216,29 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void loopNodeWithNoOutgoingEdgeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("loop1", "loop", Map.of())),
-            List.of(edge("e1", "t1", "loop1")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1"), node("loop1", "loop", Map.of())),
+                        List.of(edge("e1", "t1", "loop1")));
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("needs exactly one outgoing connection")));
+        assertTrue(
+                errors.stream().anyMatch(e -> e.contains("needs exactly one outgoing connection")));
     }
 
     @Test
     void loopNodeWithMultipleOutgoingEdgesIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("loop1", "loop", Map.of()),
-                node("a", "output", Map.of("channel", "log")), node("b", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "loop1"), edge("e2", "loop1", "a"), edge("e3", "loop1", "b")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("loop1", "loop", Map.of()),
+                                node("a", "output", Map.of("channel", "log")),
+                                node("b", "output", Map.of("channel", "log"))),
+                        List.of(
+                                edge("e1", "t1", "loop1"),
+                                edge("e2", "loop1", "a"),
+                                edge("e3", "loop1", "b")));
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("more than one outgoing connection")));
@@ -206,9 +246,13 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void loopNodeWithExactlyOneOutgoingEdgeIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("loop1", "loop", Map.of()), node("a", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "loop1"), edge("e2", "loop1", "a")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("loop1", "loop", Map.of()),
+                                node("a", "output", Map.of("channel", "log"))),
+                        List.of(edge("e1", "t1", "loop1"), edge("e2", "loop1", "a")));
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
@@ -217,17 +261,21 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void parallelNodeWithNoOutgoingEdgeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("p1", "parallel", Map.of())),
-            List.of(edge("e1", "t1", "p1")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1"), node("p1", "parallel", Map.of())),
+                        List.of(edge("e1", "t1", "p1")));
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("needs at least one outgoing connection")));
+        assertTrue(
+                errors.stream()
+                        .anyMatch(e -> e.contains("needs at least one outgoing connection")));
     }
 
     @Test
     void parallelNodeWithBranchCountWithinTheCapIsValid() {
-        List<WorkflowNodeDto> nodes = new java.util.ArrayList<>(List.of(trigger("t1"), node("p1", "parallel", Map.of())));
+        List<WorkflowNodeDto> nodes =
+                new java.util.ArrayList<>(List.of(trigger("t1"), node("p1", "parallel", Map.of())));
         List<WorkflowEdgeDto> edges = new java.util.ArrayList<>(List.of(edge("e1", "t1", "p1")));
         for (int i = 0; i < WorkflowExecutionEngine.MAX_PARALLEL_BRANCHES; i++) {
             nodes.add(node("b" + i, "output", Map.of("channel", "log")));
@@ -243,7 +291,8 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
         // Regression test: this same over-cap graph used to pass validate() clean and
         // only fail once a run actually reached WorkflowExecutionEngine's runtime check -
         // i.e. it saved and activated successfully, then failed on every subsequent run.
-        List<WorkflowNodeDto> nodes = new java.util.ArrayList<>(List.of(trigger("t1"), node("p1", "parallel", Map.of())));
+        List<WorkflowNodeDto> nodes =
+                new java.util.ArrayList<>(List.of(trigger("t1"), node("p1", "parallel", Map.of())));
         List<WorkflowEdgeDto> edges = new java.util.ArrayList<>(List.of(edge("e1", "t1", "p1")));
         int tooMany = WorkflowExecutionEngine.MAX_PARALLEL_BRANCHES + 1;
         for (int i = 0; i < tooMany; i++) {
@@ -253,8 +302,15 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
         WorkflowGraphDto graph = new WorkflowGraphDto(nodes, edges);
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains(tooMany + " branches")
-            && e.contains("more than the " + WorkflowExecutionEngine.MAX_PARALLEL_BRANCHES)));
+        assertTrue(
+                errors.stream()
+                        .anyMatch(
+                                e ->
+                                        e.contains(tooMany + " branches")
+                                                && e.contains(
+                                                        "more than the "
+                                                                + WorkflowExecutionEngine
+                                                                        .MAX_PARALLEL_BRANCHES)));
     }
 
     // --- marketing content engine shape (brief -> parallel writers -> approval) --
@@ -269,28 +325,39 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void supervisorBriefParallelWritersApprovalGraphIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(
-                trigger("t1"),
-                node("brief", "agent", Map.of("agentId", EXISTING_AGENT_ID.toString())),
-                node("fanout", "parallel", Map.of()),
-                node("long", "agent", Map.of("agentId", EXISTING_AGENT_ID.toString())),
-                node("short", "agent", Map.of("agentId", EXISTING_AGENT_ID.toString())),
-                node("visual", "agent", Map.of("agentId", EXISTING_AGENT_ID.toString())),
-                node("gate", "approval", Map.of()),
-                node("out", "output", Map.of("channel", "log"))
-            ),
-            List.of(
-                edge("e1", "t1", "brief"),
-                edge("e2", "brief", "fanout"),
-                edge("e3", "fanout", "long"),
-                edge("e4", "fanout", "short"),
-                edge("e5", "fanout", "visual"),
-                edge("e6", "long", "gate"),
-                edge("e7", "short", "gate"),
-                edge("e8", "visual", "gate"),
-                edge("e9", "gate", "out")
-            ));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node(
+                                        "brief",
+                                        "agent",
+                                        Map.of("agentId", EXISTING_AGENT_ID.toString())),
+                                node("fanout", "parallel", Map.of()),
+                                node(
+                                        "long",
+                                        "agent",
+                                        Map.of("agentId", EXISTING_AGENT_ID.toString())),
+                                node(
+                                        "short",
+                                        "agent",
+                                        Map.of("agentId", EXISTING_AGENT_ID.toString())),
+                                node(
+                                        "visual",
+                                        "agent",
+                                        Map.of("agentId", EXISTING_AGENT_ID.toString())),
+                                node("gate", "approval", Map.of()),
+                                node("out", "output", Map.of("channel", "log"))),
+                        List.of(
+                                edge("e1", "t1", "brief"),
+                                edge("e2", "brief", "fanout"),
+                                edge("e3", "fanout", "long"),
+                                edge("e4", "fanout", "short"),
+                                edge("e5", "fanout", "visual"),
+                                edge("e6", "long", "gate"),
+                                edge("e7", "short", "gate"),
+                                edge("e8", "visual", "gate"),
+                                edge("e9", "gate", "out")));
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
@@ -302,20 +369,29 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void fanOutNodeWithNoOutgoingEdgeIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("f1", "fan_out", Map.of())),
-            List.of(edge("e1", "t1", "f1")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(trigger("t1"), node("f1", "fan_out", Map.of())),
+                        List.of(edge("e1", "t1", "f1")));
 
         List<String> errors = errorsFrom(graph);
-        assertTrue(errors.stream().anyMatch(e -> e.contains("needs exactly one outgoing connection")));
+        assertTrue(
+                errors.stream().anyMatch(e -> e.contains("needs exactly one outgoing connection")));
     }
 
     @Test
     void fanOutNodeWithMultipleOutgoingEdgesIsRejected() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("f1", "fan_out", Map.of()),
-                node("a", "output", Map.of("channel", "log")), node("b", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "f1"), edge("e2", "f1", "a"), edge("e3", "f1", "b")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("f1", "fan_out", Map.of()),
+                                node("a", "output", Map.of("channel", "log")),
+                                node("b", "output", Map.of("channel", "log"))),
+                        List.of(
+                                edge("e1", "t1", "f1"),
+                                edge("e2", "f1", "a"),
+                                edge("e3", "f1", "b")));
 
         List<String> errors = errorsFrom(graph);
         assertTrue(errors.stream().anyMatch(e -> e.contains("more than one outgoing connection")));
@@ -323,9 +399,13 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
 
     @Test
     void fanOutNodeWithExactlyOneOutgoingEdgeIsValid() {
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"), node("f1", "fan_out", Map.of()), node("a", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "f1"), edge("e2", "f1", "a")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node("f1", "fan_out", Map.of()),
+                                node("a", "output", Map.of("channel", "log"))),
+                        List.of(edge("e1", "t1", "f1"), edge("e2", "f1", "a")));
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }
@@ -336,11 +416,22 @@ class OrchestratorServiceTest extends OrchestratorServiceTestBase {
         // run time exactly like loop's maxIterations (see validateNodeConfig's
         // default-case comment) - an out-of-range value degrades safely
         // instead of blocking a save.
-        WorkflowGraphDto graph = new WorkflowGraphDto(
-            List.of(trigger("t1"),
-                node("f1", "fan_out", Map.of("itemsField", "rows", "maxItems", 9999, "maxConcurrency", -3)),
-                node("a", "output", Map.of("channel", "log"))),
-            List.of(edge("e1", "t1", "f1"), edge("e2", "f1", "a")));
+        WorkflowGraphDto graph =
+                new WorkflowGraphDto(
+                        List.of(
+                                trigger("t1"),
+                                node(
+                                        "f1",
+                                        "fan_out",
+                                        Map.of(
+                                                "itemsField",
+                                                "rows",
+                                                "maxItems",
+                                                9999,
+                                                "maxConcurrency",
+                                                -3)),
+                                node("a", "output", Map.of("channel", "log"))),
+                        List.of(edge("e1", "t1", "f1"), edge("e2", "f1", "a")));
 
         assertDoesNotThrow(() -> orchestrator.validate(graph));
     }

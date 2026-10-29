@@ -74,8 +74,7 @@ class VoiceChannelControllerTest {
                 TenantLimitExceededException.class,
                 () ->
                         controller.upsertNumber(
-                                "+15551234567",
-                                new VoiceNumberAgentUpsertRequest(AGENT_ID, "x")));
+                                "+15551234567", new VoiceNumberAgentUpsertRequest(AGENT_ID, "x")));
         assertThrows(
                 TenantLimitExceededException.class,
                 () ->
