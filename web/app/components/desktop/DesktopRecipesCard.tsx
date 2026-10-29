@@ -195,11 +195,11 @@ export default function DesktopRecipesCard({
                           ? t("healthHealthy")
                           : t("healthNew")}
                     </span>
-                    <span className="ml-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
+                    <span className="ms-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
                       {r.defaultMode === "MONITOR" ? t("modeMonitor") : t("modeAuto")}
                     </span>
                     {r.agentId === null && (
-                      <span className="ml-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
+                      <span className="ms-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
                         {t("recipeScopeAll")}
                       </span>
                     )}
@@ -306,7 +306,7 @@ export default function DesktopRecipesCard({
                           </label>
                         )}
                         {detail.warnings.length > 0 && (
-                          <ul className="list-disc pl-4 text-[11px] text-muted-foreground">
+                          <ul className="list-disc ps-4 text-[11px] text-muted-foreground">
                             {detail.warnings.map((w) => (
                               <li key={w}>{w}</li>
                             ))}

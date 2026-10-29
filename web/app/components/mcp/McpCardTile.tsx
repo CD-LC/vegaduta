@@ -66,7 +66,7 @@ export default function McpCardTile({
           <Button
             type="button"
             size="sm"
-            className="relative z-10 ml-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
+            className="relative z-10 ms-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
             disabled={busy}
             onClick={() => onAddFromCatalog(entry)}
           >
@@ -82,7 +82,7 @@ export default function McpCardTile({
             type="button"
             variant="outline"
             size="sm"
-            className="relative z-10 ml-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
+            className="relative z-10 ms-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
             disabled={busy}
             onClick={() => onConnectOAuth(entry)}
           >
@@ -96,7 +96,7 @@ export default function McpCardTile({
           type="button"
           variant="outline"
           size="sm"
-          className="relative z-10 ml-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
+          className="relative z-10 ms-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
           onClick={() => onSelect(card.selKey)}
         >
           Set up <ChevronRight size={12} aria-hidden="true" />
@@ -108,7 +108,7 @@ export default function McpCardTile({
         <Button
           variant="outline"
           size="sm"
-          className="relative z-10 ml-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
+          className="relative z-10 ms-auto h-7 shrink-0 gap-1 whitespace-nowrap px-3"
           asChild
         >
           <Link href="/admin/integrations">{t("goToIntegrations")}</Link>
@@ -120,7 +120,7 @@ export default function McpCardTile({
         type="button"
         variant="ghost"
         size="sm"
-        className="relative z-10 ml-auto h-7 shrink-0 gap-1 whitespace-nowrap px-2.5 text-muted-foreground hover:text-foreground"
+        className="relative z-10 ms-auto h-7 shrink-0 gap-1 whitespace-nowrap px-2.5 text-muted-foreground hover:text-foreground"
         onClick={() => onSelect(card.selKey)}
       >
         Details <ChevronRight size={12} aria-hidden="true" />

@@ -22,14 +22,7 @@
 // concurrently, and this mirrors the same choice already made for the
 // "App Builder is not available" block in ../page.tsx.
 import { useCallback, useEffect, useState } from "react";
-import {
-  KeyRound,
-  Loader2,
-  ShieldCheck,
-  Unplug,
-  XCircle,
-  ExternalLink,
-} from "lucide-react";
+import { KeyRound, Loader2, ShieldCheck, Unplug, XCircle, ExternalLink } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -232,29 +225,36 @@ function DisconnectedForm({
   return (
     <div>
       <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-        Build and preview now run on <span className="font-medium text-foreground">your own GitHub repo</span> —
-        not on this platform. Connect a repo below and every change you ask for gets pushed to a branch and
-        opened as a pull request there. If you add a GitHub Actions workflow to that repo, build/test runs on
+        Build and preview now run on <span className="font-medium text-foreground">your own GitHub repo</span> — not on
+        this platform. Connect a repo below and every change you ask for gets pushed to a branch and opened as a pull
+        request there. If you add a GitHub Actions workflow to that repo, build/test runs on
         <span className="font-medium text-foreground"> your own Actions minutes</span>, not ours.
       </p>
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
         <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
-          <ShieldCheck aria-hidden="true" size={13} className="cat-tint" style={{ ["--cat" as string]: "var(--cat-automation)" }} />
+          <ShieldCheck
+            aria-hidden="true"
+            size={13}
+            className="cat-tint"
+            style={{ ["--cat" as string]: "var(--cat-automation)" }}
+          />
           Why we need a token, and what it can and can&apos;t do
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          This token lets the platform push a branch, open a pull request, and publish a GitHub Pages preview on
-          your behalf, on the one repo you name below — nothing else. It cannot read your other repos, delete
-          anything, or act on your account outside that repo&apos;s contents, pull requests, and Pages site. Use
-          GitHub&apos;s{" "}
-          <span className="font-medium text-foreground">fine-grained</span> token type (not a classic token),
-          scoped to exactly this repo.
+          This token lets the platform push a branch, open a pull request, and publish a GitHub Pages preview on your
+          behalf, on the one repo you name below — nothing else. It cannot read your other repos, delete anything, or
+          act on your account outside that repo&apos;s contents, pull requests, and Pages site. Use GitHub&apos;s{" "}
+          <span className="font-medium text-foreground">fine-grained</span> token type (not a classic token), scoped to
+          exactly this repo.
         </p>
       </div>
 
       <div className="mb-4">
-        <Label htmlFor="gh-repo" className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <Label
+          htmlFor="gh-repo"
+          className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
+        >
           Repository
         </Label>
         <Input
@@ -270,39 +270,44 @@ function DisconnectedForm({
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
         <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-foreground">
-          <KeyRound aria-hidden="true" size={13} className="cat-tint" style={{ ["--cat" as string]: "var(--cat-automation)" }} />
+          <KeyRound
+            aria-hidden="true"
+            size={13}
+            className="cat-tint"
+            style={{ ["--cat" as string]: "var(--cat-automation)" }}
+          />
           How to create the token — what to select on GitHub
         </div>
-        <ol className="list-decimal space-y-1 pl-4 text-xs leading-relaxed text-muted-foreground">
+        <ol className="list-decimal space-y-1 ps-4 text-xs leading-relaxed text-muted-foreground">
           <li>
             Click <span className="font-medium text-foreground">Create one on GitHub</span> below — it opens
-            GitHub&apos;s <span className="font-medium text-foreground">fine-grained</span> token page with most of
-            this pre-filled. Sign in if asked.
+            GitHub&apos;s <span className="font-medium text-foreground">fine-grained</span> token page with most of this
+            pre-filled. Sign in if asked.
           </li>
           <li>
-            <span className="font-medium text-foreground">Resource owner</span> — pick the account or organization
-            that owns the repo. If it&apos;s an org repo, the org may need to approve the token before it works.
+            <span className="font-medium text-foreground">Resource owner</span> — pick the account or organization that
+            owns the repo. If it&apos;s an org repo, the org may need to approve the token before it works.
           </li>
           <li>
             <span className="font-medium text-foreground">Repository access</span> — choose{" "}
-            <span className="font-medium text-foreground">Only select repositories</span> and pick the repo you
-            entered above. Don&apos;t leave it on &quot;All repositories&quot;.
+            <span className="font-medium text-foreground">Only select repositories</span> and pick the repo you entered
+            above. Don&apos;t leave it on &quot;All repositories&quot;.
           </li>
           <li>
             <span className="font-medium text-foreground">Permissions → Repository permissions</span> — set{" "}
             <span className="font-medium text-foreground">Contents: Read and write</span>,{" "}
             <span className="font-medium text-foreground">Pull requests: Read and write</span>, and{" "}
-            <span className="font-medium text-foreground">Pages: Read and write</span> (without Pages, the app
-            preview link 404s). Nothing else is needed — leave every other permission at its default.
+            <span className="font-medium text-foreground">Pages: Read and write</span> (without Pages, the app preview
+            link 404s). Nothing else is needed — leave every other permission at its default.
           </li>
           <li>
-            <span className="font-medium text-foreground">Expiration</span> — any value you&apos;re comfortable
-            with (30/60/90 days or custom). When it expires, reconnect here with a fresh token.
+            <span className="font-medium text-foreground">Expiration</span> — any value you&apos;re comfortable with
+            (30/60/90 days or custom). When it expires, reconnect here with a fresh token.
           </li>
           <li>
             Click <span className="font-medium text-foreground">Generate token</span> and copy it — it starts with{" "}
-            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> and is shown only once. Paste it into
-            the field below.
+            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> and is shown only once. Paste it into the
+            field below.
           </li>
         </ol>
       </div>
@@ -322,22 +327,26 @@ function DisconnectedForm({
           </a>
         </div>
         <div className="relative">
-          <KeyRound aria-hidden="true" size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <KeyRound
+            aria-hidden="true"
+            size={14}
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             id="gh-token"
             type="password"
             placeholder="github_pat_…"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            className="pl-9"
+            className="ps-9"
             autoComplete="off"
             spellCheck={false}
           />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          The link pre-fills the repo and Contents + Pull requests + Pages permissions where GitHub&apos;s page
-          supports it — double-check the scopes GitHub shows you before creating the token. The token is stored encrypted
-          and is never shown again once saved.
+          The link pre-fills the repo and Contents + Pull requests + Pages permissions where GitHub&apos;s page supports
+          it — double-check the scopes GitHub shows you before creating the token. The token is stored encrypted and is
+          never shown again once saved.
         </p>
       </div>
 
@@ -349,7 +358,11 @@ function DisconnectedForm({
       )}
 
       <Button className="mt-4" disabled={!canConnect || connecting} onClick={onConnect}>
-        {connecting ? <Loader2 aria-hidden="true" size={15} className="animate-spin" /> : <Github aria-hidden="true" size={15} />}
+        {connecting ? (
+          <Loader2 aria-hidden="true" size={15} className="animate-spin" />
+        ) : (
+          <Github aria-hidden="true" size={15} />
+        )}
         {connecting ? "Connecting…" : "Connect repository"}
       </Button>
     </div>
@@ -383,8 +396,8 @@ function ConnectedState({
       </div>
 
       <p className="mb-1 text-sm leading-relaxed text-muted-foreground">
-        Build and preview run on this repo&apos;s own GitHub Actions, not on this platform. Every change you ask
-        for pushes a branch and opens a pull request here.
+        Build and preview run on this repo&apos;s own GitHub Actions, not on this platform. Every change you ask for
+        pushes a branch and opens a pull request here.
       </p>
       {(connectedBy || connectedAt) && (
         <p className="mb-4 text-xs text-muted-foreground">
@@ -408,7 +421,11 @@ function ConnectedState({
             className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             disabled={disconnecting}
           >
-            {disconnecting ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Unplug aria-hidden="true" size={14} />}
+            {disconnecting ? (
+              <Loader2 aria-hidden="true" size={14} className="animate-spin" />
+            ) : (
+              <Unplug aria-hidden="true" size={14} />
+            )}
             Disconnect
           </Button>
         </AlertDialogTrigger>
@@ -416,9 +433,9 @@ function ConnectedState({
           <AlertDialogHeader>
             <AlertDialogTitle>Disconnect {repoFullName}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the stored access token for this repo — the platform will no longer be able to push
-              branches or open pull requests there until you reconnect. Nothing on GitHub itself (the repo, any
-              existing branches or open PRs) is deleted.
+              This removes the stored access token for this repo — the platform will no longer be able to push branches
+              or open pull requests there until you reconnect. Nothing on GitHub itself (the repo, any existing branches
+              or open PRs) is deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

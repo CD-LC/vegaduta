@@ -43,7 +43,7 @@ const BUILD_LOGS: Record<string, { steps: string[]; ship: string }> = {
       "guardrails → diff.before.merge · approval[merge]",
       "channels   → github · slack",
     ],
-    ship: '"pr-reviewer" live — call graph indexed · merge gated on you',
+    ship: '"pe-reviewer" live — call graph indexed · merge gated on you',
   },
   digest: {
     steps: [

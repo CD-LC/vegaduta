@@ -85,7 +85,7 @@ export function CoachDrawer({
         role="dialog"
         aria-modal="true"
         aria-label={t("coach.title")}
-        className="elev-raised fixed inset-y-0 right-0 z-[70] flex w-[min(26rem,100vw)] flex-col gap-4 overflow-y-auto border-l border-border p-5 shadow-xl"
+        className="elev-raised fixed inset-y-0 end-0 z-[70] flex w-[min(26rem,100vw)] flex-col gap-4 overflow-y-auto border-s border-border p-5 shadow-xl"
       >
         <div className="flex items-start justify-between gap-3">
           <div>

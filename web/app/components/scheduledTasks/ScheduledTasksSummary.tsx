@@ -67,7 +67,10 @@ export default function ScheduledTasksSummary({ tasks }: { tasks: ScheduledTask[
         />
       </ChartFrame>
 
-      <section className="min-w-0 space-y-2 rounded-lg border border-border bg-card p-4" aria-labelledby="scheduled-next-24h">
+      <section
+        className="min-w-0 space-y-2 rounded-lg border border-border bg-card p-4"
+        aria-labelledby="scheduled-next-24h"
+      >
         <h3 id="scheduled-next-24h" className="text-sm font-semibold tracking-tight text-foreground">
           {t("upcomingTitle")}
         </h3>
@@ -78,11 +81,16 @@ export default function ScheduledTasksSummary({ tasks }: { tasks: ScheduledTask[
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              {t(upcoming.runs.length === 1 ? "upcomingSentenceOne" : "upcomingSentence", { count: upcoming.runs.length })}
+              {t(upcoming.runs.length === 1 ? "upcomingSentenceOne" : "upcomingSentence", {
+                count: upcoming.runs.length,
+              })}
             </p>
             <ol className="m-0 list-none space-y-1.5 p-0" data-testid="scheduled-upcoming-list">
               {shown.map((run) => (
-                <li key={`${run.taskId}:${run.at}`} className="flex min-w-0 flex-col gap-x-3 border-l-2 border-border pl-3 text-sm sm:flex-row sm:items-baseline">
+                <li
+                  key={`${run.taskId}:${run.at}`}
+                  className="flex min-w-0 flex-col gap-x-3 border-s-2 border-border ps-3 text-sm sm:flex-row sm:items-baseline"
+                >
                   <time dateTime={run.at} className="shrink-0 text-xs tabular-nums text-muted-foreground">
                     {formatRunTime(run.at, run.timezone)}
                   </time>

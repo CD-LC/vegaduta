@@ -60,7 +60,12 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
   const items = useMemo(
     () =>
       saved
-        ? deriveChecklist({ paths, config: saved, hasStoreConfig, assets: assets.map((a) => ({ path: a.path, size: a.size })) })
+        ? deriveChecklist({
+            paths,
+            config: saved,
+            hasStoreConfig,
+            assets: assets.map((a) => ({ path: a.path, size: a.size })),
+          })
         : [],
     [paths, saved, hasStoreConfig, assets]
   );
@@ -103,7 +108,7 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
         <CardTitle className="flex items-center gap-2 text-sm">
           <Smartphone aria-hidden="true" size={16} className="text-primary" /> Store readiness
           {items.length > 0 && (
-            <span className="ml-auto text-xs font-normal text-muted-foreground">
+            <span className="ms-auto text-xs font-normal text-muted-foreground">
               {progress.done}/{progress.total} automated checks done
             </span>
           )}
@@ -151,10 +156,16 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
             <Field label="Version name" error={errs.version_name}>
               <Input value={form.version_name} onChange={set("version_name")} placeholder="1.0.0" />
             </Field>
-            <Field label={`Short description (${form.short_description.trim().length}/${STORE_LIMITS.short})`} error={errs.short_description}>
+            <Field
+              label={`Short description (${form.short_description.trim().length}/${STORE_LIMITS.short})`}
+              error={errs.short_description}
+            >
               <Input value={form.short_description} onChange={set("short_description")} />
             </Field>
-            <Field label={`Full description (${form.full_description.trim().length}/${STORE_LIMITS.full})`} error={errs.full_description}>
+            <Field
+              label={`Full description (${form.full_description.trim().length}/${STORE_LIMITS.full})`}
+              error={errs.full_description}
+            >
               <Textarea rows={6} value={form.full_description} onChange={set("full_description")} />
             </Field>
             <Button type="submit" size="sm" disabled={busy || !valid}>
@@ -162,8 +173,8 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
             </Button>
             {note && <p className="text-sm text-muted-foreground">{note}</p>}
             <p className="text-xs text-muted-foreground">
-              This commits metadata to your repository only. You upload the signed build and submit the listing
-              yourself in Play Console / App Store Connect.
+              This commits metadata to your repository only. You upload the signed build and submit the listing yourself
+              in Play Console / App Store Connect.
             </p>
           </form>
         )}

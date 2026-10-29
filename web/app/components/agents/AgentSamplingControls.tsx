@@ -99,7 +99,7 @@ export default function AgentSamplingControls({
     setState((s) => ({ ...s, [key]: "saving" }));
     setMessage(null);
     const clears = (Object.keys(patch) as (keyof AgentSamplingFields)[]).some(
-      (k) => k !== "stopSequences" && patch[k] === null && agent[k] != null,
+      (k) => k !== "stopSequences" && patch[k] === null && agent[k] != null
     );
     try {
       const updated = await api.setAgentGenerationParams(agent.id, {
@@ -136,7 +136,7 @@ export default function AgentSamplingControls({
     integer: boolean,
     current: number | null | undefined,
     reset: (v: string) => void,
-    label: string,
+    label: string
   ) {
     const parsed = parseBounded(text, min, max, integer);
     if (parsed === undefined) {
@@ -185,13 +185,13 @@ export default function AgentSamplingControls({
       <span className="inline-flex h-4 items-center text-[11px] text-muted-foreground" role="status" aria-live="polite">
         {s === "saving" && (
           <>
-            <Loader2 className="mr-1 size-3 animate-spin" aria-hidden="true" />
+            <Loader2 className="me-1 size-3 animate-spin" aria-hidden="true" />
             {t("samplingSaving")}
           </>
         )}
         {s === "saved" && (
           <>
-            <Check className="mr-1 size-3" aria-hidden="true" />
+            <Check className="me-1 size-3" aria-hidden="true" />
             {t("samplingSaved")}
           </>
         )}
@@ -210,7 +210,7 @@ export default function AgentSamplingControls({
     min: number,
     max: number,
     integer: boolean,
-    placeholder: string,
+    placeholder: string
   ) => {
     const id = `${uid}-${key}`;
     return (
@@ -272,7 +272,7 @@ export default function AgentSamplingControls({
           1,
           1000,
           true,
-          t("samplingPlaceholderDefault"),
+          t("samplingPlaceholderDefault")
         )}
         {numberField(
           "seed",
@@ -284,7 +284,7 @@ export default function AgentSamplingControls({
           -2147483648,
           2147483647,
           true,
-          t("samplingPlaceholderRandom"),
+          t("samplingPlaceholderRandom")
         )}
         {numberField(
           "frequencyPenalty",
@@ -296,7 +296,7 @@ export default function AgentSamplingControls({
           -2,
           2,
           false,
-          t("samplingPlaceholderZero"),
+          t("samplingPlaceholderZero")
         )}
         {numberField(
           "presencePenalty",
@@ -308,13 +308,16 @@ export default function AgentSamplingControls({
           -2,
           2,
           false,
-          t("samplingPlaceholderZero"),
+          t("samplingPlaceholderZero")
         )}
       </div>
 
       <div className="mt-4">
         <div className="mb-1 flex items-center justify-between gap-2">
-          <label htmlFor={`${uid}-stop`} className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <label
+            htmlFor={`${uid}-stop`}
+            className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground"
+          >
             {t("samplingStop")}
           </label>
           {status("stopSequences")}

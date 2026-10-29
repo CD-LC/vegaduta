@@ -66,11 +66,11 @@ export default function ApiKeysList({
           <Search
             size={14}
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             id="api-key-search"
-            className="pl-9"
+            className="ps-9"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -136,7 +136,13 @@ export default function ApiKeysList({
                   </TableCell>
                   <TableCell>{badge(key)}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    <Button type="button" variant="ghost" size="sm" disabled={busyIds.has(key.id)} onClick={() => onToggle(key)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={busyIds.has(key.id)}
+                      onClick={() => onToggle(key)}
+                    >
                       {key.enabled ? t("disableButton") : t("enableButton")}
                     </Button>
                     <Button

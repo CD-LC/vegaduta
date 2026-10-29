@@ -209,8 +209,16 @@ export default function WorkflowCommandPalette({
                 const isActive = idx === active;
                 return (
                   <div key={def.type} role="presentation">
-                    {showGroups && idx === 0 && <div className="wf-cmd-group" aria-hidden="true">Recent</div>}
-                    {showGroups && idx === recentCount && <div className="wf-cmd-group" aria-hidden="true">All nodes</div>}
+                    {showGroups && idx === 0 && (
+                      <div className="wf-cmd-group" aria-hidden="true">
+                        Recent
+                      </div>
+                    )}
+                    {showGroups && idx === recentCount && (
+                      <div className="wf-cmd-group" aria-hidden="true">
+                        All nodes
+                      </div>
+                    )}
                     <button
                       id={`wf-cmd-opt-${def.type}`}
                       role="option"
@@ -220,7 +228,7 @@ export default function WorkflowCommandPalette({
                       type="button"
                       onMouseEnter={() => setActive(idx)}
                       onClick={() => commit(def)}
-                      className={`flex w-full items-center gap-3 rounded-lg border-0 p-0 px-2.5 py-2 text-left shadow-none transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg border-0 p-0 px-2.5 py-2 text-start shadow-none transition-colors ${
                         isActive ? "bg-accent" : "bg-transparent hover:bg-accent/60"
                       }`}
                     >
@@ -231,13 +239,19 @@ export default function WorkflowCommandPalette({
                         <Icon size={15} className="text-white" strokeWidth={2.2} aria-hidden="true" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-foreground">{t(nodeLabelKey(def.type))}</span>
-                        <span className="block truncate text-xs text-muted-foreground">{t(nodeDescriptionKey(def.type))}</span>
+                        <span className="block truncate text-sm font-medium text-foreground">
+                          {t(nodeLabelKey(def.type))}
+                        </span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {t(nodeDescriptionKey(def.type))}
+                        </span>
                       </span>
                       <span className="shrink-0 rounded border border-border px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide text-muted-foreground">
                         {t(categoryLabelKey(def.category))}
                       </span>
-                      {isActive && <CornerDownLeft size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />}
+                      {isActive && (
+                        <CornerDownLeft size={13} className="shrink-0 text-muted-foreground" aria-hidden="true" />
+                      )}
                     </button>
                   </div>
                 );

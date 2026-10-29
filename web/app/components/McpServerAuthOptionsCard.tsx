@@ -40,7 +40,9 @@ export default function McpServerAuthOptionsCard() {
           <dt className="font-medium">
             Grant keys <Badge variant="secondary">on</Badge>
           </dt>
-          <dd className="text-muted-foreground">The simple option: create a key below and send it as a bearer token.</dd>
+          <dd className="text-muted-foreground">
+            The simple option: create a key below and send it as a bearer token.
+          </dd>
         </div>
         <div data-testid="mcp-auth-oauth">
           <dt className="font-medium">
@@ -49,12 +51,20 @@ export default function McpServerAuthOptionsCard() {
           <dd className="text-muted-foreground">
             {oauth.enabled ? (
               <>
-                Tokens issued by <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>. Each token must carry the{" "}
-                <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> claims (the grant it acts as). Metadata:{" "}
-                <code>{oauth.metadataUrl}</code>. Scopes: {oauth.scopes.map((s) => (<code key={s} className="mr-1">{s}</code>))}
+                Tokens issued by <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>. Each token must carry
+                the <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> claims (the grant it acts as).
+                Metadata: <code>{oauth.metadataUrl}</code>. Scopes:{" "}
+                {oauth.scopes.map((s) => (
+                  <code key={s} className="me-1">
+                    {s}
+                  </code>
+                ))}
               </>
             ) : (
-              <>Off. The operator enables it with <code>app.mcpserver.oauth.enabled</code>; grant keys keep working either way.</>
+              <>
+                Off. The operator enables it with <code>app.mcpserver.oauth.enabled</code>; grant keys keep working
+                either way.
+              </>
             )}
           </dd>
         </div>
@@ -63,11 +73,20 @@ export default function McpServerAuthOptionsCard() {
             Browser origins <Badge variant="outline">{origin.mode}</Badge>
           </dt>
           <dd className="text-muted-foreground">
-            {origin.mode === "off"
-              ? "Origin is not checked."
-              : origin.allowed.length > 0
-                ? <>Browsers may call from: {origin.allowed.map((o) => (<code key={o} className="mr-1">{o}</code>))}</>
-                : "No browser origin is allowed. Clients that send no Origin header (desktop apps, SDKs, curl) are unaffected."}
+            {origin.mode === "off" ? (
+              "Origin is not checked."
+            ) : origin.allowed.length > 0 ? (
+              <>
+                Browsers may call from:{" "}
+                {origin.allowed.map((o) => (
+                  <code key={o} className="me-1">
+                    {o}
+                  </code>
+                ))}
+              </>
+            ) : (
+              "No browser origin is allowed. Clients that send no Origin header (desktop apps, SDKs, curl) are unaffected."
+            )}
             {origin.mode === "report" && " Violations are logged, not blocked."}
           </dd>
         </div>

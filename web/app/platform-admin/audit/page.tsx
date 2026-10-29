@@ -171,38 +171,38 @@ function AuditSearchSection() {
             <AdminEmptyState title="No audit rows match" description="Widen the date range or clear a filter." />
           ) : (
             <AdminTableWrap>
-              <table className="w-full min-w-[56rem] text-left text-xs">
+              <table className="w-full min-w-[56rem] text-start text-xs">
                 <thead className="text-muted-foreground">
                   <tr>
-                    <th className="py-1 pr-3">Time</th>
-                    <th className="pr-3">Tenant</th>
-                    <th className="pr-3">Actor</th>
-                    <th className="pr-3">Action</th>
-                    <th className="pr-3">Target</th>
-                    <th className="pr-3">Outcome</th>
+                    <th className="py-1 pe-3">Time</th>
+                    <th className="pe-3">Tenant</th>
+                    <th className="pe-3">Actor</th>
+                    <th className="pe-3">Action</th>
+                    <th className="pe-3">Target</th>
+                    <th className="pe-3">Outcome</th>
                     <th>Detail</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pg.pageItems.map((r) => (
                     <tr key={`${r.tenantId}:${r.id}`} className="border-t border-border align-top">
-                      <td className="whitespace-nowrap py-1 pr-3">
+                      <td className="whitespace-nowrap py-1 pe-3">
                         {r.createdAt ? new Date(r.createdAt).toLocaleString() : ""}
                       </td>
-                      <td className="pr-3">
+                      <td className="pe-3">
                         <code>{r.tenantId}</code>
                       </td>
-                      <td className="max-w-[10rem] truncate pr-3" title={r.actorId || ""}>
+                      <td className="max-w-[10rem] truncate pe-3" title={r.actorId || ""}>
                         {r.actorId || "-"}
                       </td>
-                      <td className="pr-3">
+                      <td className="pe-3">
                         <code>{r.actionType}</code>
                       </td>
-                      <td className="pr-3">
+                      <td className="pe-3">
                         {r.targetType || "-"}
                         {r.targetId ? ` / ${r.targetId}` : ""}
                       </td>
-                      <td className="pr-3">
+                      <td className="pe-3">
                         <Badge
                           variant={r.outcome === "FAILURE" || r.outcome === "REJECTED" ? "destructive" : "outline"}
                         >

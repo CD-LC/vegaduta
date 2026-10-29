@@ -187,7 +187,7 @@ export function AssistantTurn({
           )
         )}
         {turn.pending && (
-          <span className="ml-0.5 inline-block h-3.5 w-px animate-pulse bg-primary align-middle" aria-hidden="true" />
+          <span className="ms-0.5 inline-block h-3.5 w-px animate-pulse bg-primary align-middle" aria-hidden="true" />
         )}
       </div>
       {!turn.pending && turn.content && (

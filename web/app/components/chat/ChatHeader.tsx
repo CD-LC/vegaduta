@@ -29,8 +29,8 @@ export default function ChatHeader({
         <span className="block truncate text-xs text-muted-foreground" title={sessionId || undefined}>
           {sessionId ? t("sessionPrefix", { sessionId }) : t("noSessionYet")}
         </span>
-        <RunCostCard agentId={agent.id} sessionId={sessionId} turnInFlight={sending} className="-ml-1.5" />
-        <ChatExportMenu agentId={agent.id} sessionId={sessionId} className="-ml-1.5" />
+        <RunCostCard agentId={agent.id} sessionId={sessionId} turnInFlight={sending} className="-ms-1.5" />
+        <ChatExportMenu agentId={agent.id} sessionId={sessionId} className="-ms-1.5" />
       </div>
       {/* "Clear context" (user ask 2026-08-07) - same newSession handler as
         the old New-session control: a null sessionId makes the next

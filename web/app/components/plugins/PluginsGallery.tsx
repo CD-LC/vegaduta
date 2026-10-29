@@ -119,10 +119,14 @@ export default function PluginsGallery({ initialCatalog }: { initialCatalog: Plu
     <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 basis-56">
-          <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            aria-hidden="true"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             type="search"
-            className="pl-8"
+            className="ps-8"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search plugins"
@@ -142,7 +146,10 @@ export default function PluginsGallery({ initialCatalog }: { initialCatalog: Plu
         />
       </div>
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground" role="status">
+        <p
+          className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground"
+          role="status"
+        >
           No plugins match your search.
         </p>
       ) : null}

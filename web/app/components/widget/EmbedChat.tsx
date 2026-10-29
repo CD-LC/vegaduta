@@ -309,7 +309,7 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
             type="button"
             onClick={() => postToHost(parentOrigin, "close")}
             aria-label="Close chat"
-            className="ml-auto inline-flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+            className="ms-auto inline-flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
           >
             <X className="size-4" />
           </button>
@@ -432,8 +432,8 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
       <div
         className={
           isVisitor
-            ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-3 py-2 text-sm text-primary-foreground"
-            : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-3 py-2 text-sm"
+            ? "max-w-[85%] rounded-2xl rounded-ee-sm bg-primary px-3 py-2 text-sm text-primary-foreground"
+            : "max-w-[85%] rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-3 py-2 text-sm"
         }
       >
         <p className="whitespace-pre-wrap break-words leading-relaxed">{bubble.text}</p>
@@ -448,7 +448,7 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
 function ThinkingBubble() {
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-3 py-2.5">
+      <div className="flex items-center gap-1.5 rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-3 py-2.5">
         {[0, 1, 2].map((i) => (
           <span
             key={i}

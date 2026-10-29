@@ -141,7 +141,10 @@ export default function RuntimeSettingsView({
       el.id = targetKey;
       el.scrollIntoView?.({ block: "center" });
       // The control itself (not the badge or history buttons that come first in the markup).
-      (el.querySelector<HTMLElement>("input:not([type='range']), textarea, [role='switch'], [role='combobox']") ?? el.querySelector<HTMLElement>("button"))?.focus({
+      (
+        el.querySelector<HTMLElement>("input:not([type='range']), textarea, [role='switch'], [role='combobox']") ??
+        el.querySelector<HTMLElement>("button")
+      )?.focus({
         preventScroll: true,
       });
       el.classList.add(...HIGHLIGHT);
@@ -195,7 +198,9 @@ export default function RuntimeSettingsView({
     }
     const failed = plan.changes.length - saved + resetFailed;
     editor.setMessage(
-      failed ? t("import.donePartial", { applied: saved + resetDone, failed }) : t("import.done", { applied: saved + resetDone })
+      failed
+        ? t("import.donePartial", { applied: saved + resetDone, failed })
+        : t("import.done", { applied: saved + resetDone })
     );
     if (failed) throw new Error("partial");
   };
@@ -241,7 +246,13 @@ export default function RuntimeSettingsView({
 
         <TabsContent value="settings" className="space-y-5">
           {loading ? (
-            <div role="status" aria-busy="true" aria-label={ui("loading")} className="space-y-3" data-testid="settings-loading">
+            <div
+              role="status"
+              aria-busy="true"
+              aria-label={ui("loading")}
+              className="space-y-3"
+              data-testid="settings-loading"
+            >
               <Skeleton className="h-10" />
               <Skeleton className="h-28" />
               <Skeleton className="h-28" />
@@ -267,7 +278,13 @@ export default function RuntimeSettingsView({
                     {t("export.button")}
                   </Button>
                   {canEdit ? (
-                    <Button type="button" variant="outline" size="sm" onClick={() => setImportOpen(true)} data-testid="import-button">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setImportOpen(true)}
+                      data-testid="import-button"
+                    >
                       <Upload aria-hidden="true" />
                       {t("import.button")}
                     </Button>
@@ -277,12 +294,19 @@ export default function RuntimeSettingsView({
 
               {scoped.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center" role="search" aria-label={ui("filters.label")}>
+                  <div
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                    role="search"
+                    aria-label={ui("filters.label")}
+                  >
                     <div className="relative sm:max-w-xs sm:flex-1">
-                      <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Search
+                        aria-hidden="true"
+                        className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                      />
                       <Input
                         type="search"
-                        className="pl-9"
+                        className="ps-9"
                         aria-label={ui("filters.search")}
                         placeholder={ui("filters.searchPlaceholder")}
                         value={search}
@@ -294,11 +318,19 @@ export default function RuntimeSettingsView({
                         aria-label={ui("filters.group")}
                         value={groupFilter}
                         onValueChange={setGroupFilter}
-                        options={[{ value: ALL, label: ui("filters.allGroups") }, ...groupIds.map((g) => ({ value: g, label: groupLabel(g) }))]}
+                        options={[
+                          { value: ALL, label: ui("filters.allGroups") },
+                          ...groupIds.map((g) => ({ value: g, label: groupLabel(g) })),
+                        ]}
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Checkbox id="runtime-changed-only" checked={changedOnly} onCheckedChange={setChangedOnly} data-testid="changed-only" />
+                      <Checkbox
+                        id="runtime-changed-only"
+                        checked={changedOnly}
+                        onCheckedChange={setChangedOnly}
+                        data-testid="changed-only"
+                      />
                       <Label htmlFor="runtime-changed-only">{t("filters.changedOnly")}</Label>
                     </div>
                     {filtered ? (
@@ -340,14 +372,18 @@ export default function RuntimeSettingsView({
                 </p>
               ) : visible.length === 0 ? (
                 <p className="text-sm text-muted-foreground" data-testid="settings-empty">
-                  {changedOnly && search.trim() === "" && groupFilter === ALL ? t("empty.noneChanged") : ui("empty.filtered")}
+                  {changedOnly && search.trim() === "" && groupFilter === ALL
+                    ? t("empty.noneChanged")
+                    : ui("empty.filtered")}
                 </p>
               ) : (
                 <div className="space-y-8">
                   {visibleGroups.map((g) => {
                     const groupEntries = visible.filter((e) => e.group === g);
                     const secure = isSecurityGroup(scoped.filter((e) => e.group === g));
-                    const overriddenKeys = groupEntries.filter((e) => isOverridden(e.key) && !effective.values[e.key]?.locked).map((e) => e.key);
+                    const overriddenKeys = groupEntries
+                      .filter((e) => isOverridden(e.key) && !effective.values[e.key]?.locked)
+                      .map((e) => e.key);
                     return (
                       <div
                         key={g}

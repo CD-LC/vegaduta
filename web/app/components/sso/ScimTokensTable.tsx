@@ -100,7 +100,13 @@ export default function ScimTokensTable() {
       >
         <div className="grid flex-1 gap-1.5">
           <Label htmlFor="scim-label">{t("scimLabel")}</Label>
-          <Input id="scim-label" value={label} maxLength={120} placeholder="Okta provisioning" onChange={(e) => setLabel(e.target.value)} />
+          <Input
+            id="scim-label"
+            value={label}
+            maxLength={120}
+            placeholder="Okta provisioning"
+            onChange={(e) => setLabel(e.target.value)}
+          />
         </div>
         <Button type="submit" disabled={minting}>
           {minting ? t("scimCreating") : t("scimCreate")}
@@ -123,7 +129,12 @@ export default function ScimTokensTable() {
           <AlertDescription>
             <p>{t("scimRevealBody")}</p>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-              <Input readOnly aria-label={t("scimTokenValue")} value={revealed.token} onFocus={(e) => e.currentTarget.select()} />
+              <Input
+                readOnly
+                aria-label={t("scimTokenValue")}
+                value={revealed.token}
+                onFocus={(e) => e.currentTarget.select()}
+              />
               <Button type="button" variant="outline" onClick={() => void copy()}>
                 {copied ? t("copied") : t("copy")}
               </Button>
@@ -168,8 +179,10 @@ export default function ScimTokensTable() {
                   <TableRow key={tok.id}>
                     <TableCell className="font-medium">{tok.label}</TableCell>
                     <TableCell className="text-muted-foreground">{fmt(tok.createdAt)}</TableCell>
-                    <TableCell className="text-muted-foreground">{tok.lastUsedAt ? fmt(tok.lastUsedAt) : t("never")}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-muted-foreground">
+                      {tok.lastUsedAt ? fmt(tok.lastUsedAt) : t("never")}
+                    </TableCell>
+                    <TableCell className="text-end">
                       <Button type="button" variant="ghost" size="sm" onClick={() => setRevoking(tok)}>
                         {t("scimRevoke")}
                       </Button>

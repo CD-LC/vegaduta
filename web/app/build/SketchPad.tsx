@@ -61,7 +61,8 @@ export default function SketchPad({
     const root = rootRef.current;
     if (!root) return;
     const target =
-      root.querySelector<HTMLElement>(`[data-sketch-note="${at}"]`) ?? root.querySelector<HTMLElement>("[data-sketch-palette]");
+      root.querySelector<HTMLElement>(`[data-sketch-note="${at}"]`) ??
+      root.querySelector<HTMLElement>("[data-sketch-palette]");
     target?.focus();
   }, [blocks]);
 
@@ -86,8 +87,7 @@ export default function SketchPad({
     [blocks, onChange]
   );
 
-  const update = (id: string, label: string) =>
-    onChange(blocks.map((b) => (b.id === id ? { ...b, label } : b)));
+  const update = (id: string, label: string) => onChange(blocks.map((b) => (b.id === id ? { ...b, label } : b)));
 
   const remove = (id: string, index: number) => {
     focusAfter.current = Math.min(index, blocks.length - 2);
@@ -122,7 +122,7 @@ export default function SketchPad({
                 }}
                 onDragEnd={() => setDraggingType(null)}
                 onClick={() => add(p.type)}
-                className="cursor-grab rounded-md border border-border bg-card px-2 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-accent/60"
+                className="cursor-grab rounded-md border border-border bg-card px-2 py-1.5 text-start text-xs text-foreground transition-colors hover:bg-accent/60"
                 title={p.hint}
               >
                 {p.type}

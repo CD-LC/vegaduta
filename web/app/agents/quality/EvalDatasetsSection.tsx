@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  FlaskConical,
-  Plus,
-  RefreshCw,
-  Sparkles,
-} from "lucide-react";
+import { FlaskConical, Plus, RefreshCw, Sparkles } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -63,7 +58,13 @@ import { useEvalDownloads } from "./evalDatasets/useEvalDownloads";
 const POLL_MS = 5000;
 
 // A new dataset pins no mode (null): its runs follow the workspace default, the full pipeline as shipped.
-const EMPTY_CREATE_DRAFT: CreateDatasetDraft = { name: "", description: "", threshold: "0.7", toolExec: null, autoApprove: false };
+const EMPTY_CREATE_DRAFT: CreateDatasetDraft = {
+  name: "",
+  description: "",
+  threshold: "0.7",
+  toolExec: null,
+  autoApprove: false,
+};
 const EMPTY_CASE_DRAFT: CaseDraft = { message: "", expected: "", tools: "" };
 const DEFAULT_RUN_OPTS: RunOptionValues = { judgeModel: "", strictJudge: false, repeats: "1", budget: "5", mode: "" };
 
@@ -510,7 +511,7 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
                     onDelete={() => deleteDataset(dataset.id)}
                   />
                   {dataset.description && (
-                    <p className="mt-1 pl-6 text-sm text-muted-foreground">{dataset.description}</p>
+                    <p className="mt-1 ps-6 text-sm text-muted-foreground">{dataset.description}</p>
                   )}
 
                   {expanded && (

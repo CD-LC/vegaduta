@@ -72,11 +72,11 @@ function IssueList({ title, tone, issues }: { title: string; tone: "error" | "wa
               <Icon size={14} strokeWidth={2} className="mt-0.5 shrink-0" style={{ color }} aria-hidden />
               <span>{i.message}</span>
             </p>
-            <p className="mt-1 pl-[22px] text-muted-foreground">
+            <p className="mt-1 ps-[22px] text-muted-foreground">
               <span className="font-medium text-foreground">How to fix: </span>
               {i.fix}
             </p>
-            <p className="mt-1 pl-[22px] text-[0.6875rem] uppercase tracking-wide text-muted-foreground">
+            <p className="mt-1 ps-[22px] text-[0.6875rem] uppercase tracking-wide text-muted-foreground">
               {i.principle}
             </p>
           </li>

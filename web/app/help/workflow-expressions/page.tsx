@@ -283,7 +283,7 @@ export default function WorkflowExpressionsHelpPage() {
               text, and one field can hold several expressions.
             </p>
             <Pre>{"Order for {{ $json.customer.name }}: total {{ sum($json.items, i => i.price * i.qty) }}"}</Pre>
-            <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <ul className="list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
               <li>
                 <span className="font-medium text-foreground">The old placeholders still work.</span>{" "}
                 <Code>{"{{input}}"}</Code> is the node&apos;s raw input and <Code>{"{{fieldName}}"}</Code> is a
@@ -325,7 +325,7 @@ export default function WorkflowExpressionsHelpPage() {
               Names starting with <Code>{"$"}</Code> are the places an expression reads from.
             </p>
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[32rem] text-left text-sm">
+              <table className="w-full min-w-[32rem] text-start text-sm">
                 <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2 font-semibold">Root</th>
@@ -356,7 +356,7 @@ export default function WorkflowExpressionsHelpPage() {
               Listed from lowest to highest precedence.
             </p>
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[32rem] text-left text-sm">
+              <table className="w-full min-w-[32rem] text-start text-sm">
                 <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2 font-semibold">Operator</th>
@@ -392,7 +392,7 @@ export default function WorkflowExpressionsHelpPage() {
                   {g.category} ({g.functions.length})
                 </SectionLabel>
                 <div className="overflow-x-auto rounded-lg border border-border">
-                  <table className="w-full min-w-[40rem] text-left text-sm">
+                  <table className="w-full min-w-[40rem] text-start text-sm">
                     <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                       <tr>
                         <th className="px-3 py-2 font-semibold">Function</th>
@@ -435,7 +435,7 @@ export default function WorkflowExpressionsHelpPage() {
               Only these node fields are evaluated. Any other field is passed through untouched, so braces typed into it
               stay as text.
             </p>
-            <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <ul className="list-disc space-y-1.5 ps-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
               {FIELDS.map((f) => (
                 <li key={f}>{f}</li>
               ))}
@@ -459,7 +459,7 @@ export default function WorkflowExpressionsHelpPage() {
             </p>
             <div className="space-y-2">
               <SectionLabel>How to use it</SectionLabel>
-              <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <ol className="list-decimal space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
                 <li>Run the step once with Test step, or open a past run. Real data comes back.</li>
                 <li>
                   Choose <span className="font-medium text-foreground">Pin output</span> on that result, or use the pin
@@ -480,7 +480,7 @@ export default function WorkflowExpressionsHelpPage() {
             </div>
             <div className="space-y-2">
               <SectionLabel>Rules worth knowing</SectionLabel>
-              <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <ul className="list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
                 <li>
                   <span className="font-medium text-foreground">Live runs ignore pins.</span> Webhooks, schedules,
                   channel messages, events, API runs and share links always run every node for real. The engine decides
@@ -551,7 +551,7 @@ export default function WorkflowExpressionsHelpPage() {
               they cannot call code, read files or reach the network.
             </p>
             <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[24rem] text-left text-sm">
+              <table className="w-full min-w-[24rem] text-start text-sm">
                 <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2 font-semibold">Limit</th>

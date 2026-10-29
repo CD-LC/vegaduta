@@ -95,7 +95,7 @@ export default function BriefWorkspace({
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Button variant="ghost" size="sm" onClick={onBack} className="-ml-2">
+        <Button variant="ghost" size="sm" onClick={onBack} className="-ms-2">
           <ArrowLeft className="size-4" aria-hidden="true" />
           {t("workspace.back")}
         </Button>
@@ -117,7 +117,7 @@ export default function BriefWorkspace({
       {warnings.length > 0 && (
         <Alert>
           <AlertDescription>
-            <ul className="list-disc space-y-0.5 pl-4">
+            <ul className="list-disc space-y-0.5 ps-4">
               {warnings.map((w, i) => (
                 <li key={i}>{w}</li>
               ))}

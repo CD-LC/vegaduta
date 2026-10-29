@@ -292,7 +292,7 @@ export default function NotificationBell() {
                       key={n.id}
                       type="button"
                       onClick={() => onRowClick(n)}
-                      className={`flex w-full items-start gap-2.5 border-b border-border/60 px-3.5 py-2.5 text-left transition-colors last:border-b-0 hover:bg-accent ${
+                      className={`flex w-full items-start gap-2.5 border-b border-border/60 px-3.5 py-2.5 text-start transition-colors last:border-b-0 hover:bg-accent ${
                         n.read ? "" : "bg-primary/[0.04]"
                       }`}
                     >

@@ -46,7 +46,7 @@ export default function MicTestPanel({
             <Button type="button" size="sm" onClick={testMicrophone} disabled={testingMicrophone} className="w-full">
               {testingMicrophone ? (
                 <>
-                  <Loader2 size={12} className="animate-spin mr-2" aria-hidden="true" />
+                  <Loader2 size={12} className="animate-spin me-2" aria-hidden="true" />
                   Testing... Speak now
                 </>
               ) : (
@@ -105,14 +105,14 @@ export default function MicTestPanel({
                   <summary className="font-medium text-destructive hover:underline">
                     Troubleshooting: {micTestResult.error}
                   </summary>
-                  <div className="mt-2 space-y-1 pl-2 border-l-2 border-destructive text-muted-foreground">
+                  <div className="mt-2 space-y-1 ps-2 border-s-2 border-destructive text-muted-foreground">
                     {micTestResult.solution && (
                       <>
                         <p>{micTestResult.solution}</p>
                         <p className="text-xs mt-2">
                           <strong>Common fixes:</strong>
                         </p>
-                        <ul className="list-disc pl-4 space-y-0.5">
+                        <ul className="list-disc ps-4 space-y-0.5">
                           <li>Grant browser microphone permission in your browser settings</li>
                           <li>Ensure no other app is using your microphone</li>
                           <li>Check OS-level microphone privacy settings</li>

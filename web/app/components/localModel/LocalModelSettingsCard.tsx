@@ -69,7 +69,9 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
       <div className="flex items-center gap-2">
         <Zap size={16} className="text-primary" aria-hidden="true" />
         <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
-        <span className="ml-auto truncate rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">{settings.servingModel}</span>
+        <span className="ms-auto truncate rounded-full border border-border px-2 py-0.5 text-[11px] text-muted-foreground">
+          {settings.servingModel}
+        </span>
       </div>
 
       <section aria-labelledby="lms-reasoning" className="space-y-1.5">
@@ -89,7 +91,9 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
               data-testid={`effort-${value}`}
               className={cn(
                 "h-8 rounded-full border px-3 text-xs transition-colors",
-                settings.reasoningEffort === value ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary/60"
+                settings.reasoningEffort === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
               )}
             >
               {t(`effort_${value}`)}
@@ -115,7 +119,9 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
               data-testid={`keep-${value}`}
               className={cn(
                 "h-8 rounded-full border px-3 text-xs transition-colors",
-                settings.keepAlive === value ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary/60"
+                settings.keepAlive === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
               )}
             >
               {t(`keep_${value}`)}
@@ -141,7 +147,9 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
               data-testid={`context-${value}`}
               className={cn(
                 "h-8 rounded-full border px-3 text-xs transition-colors",
-                (settings.contextLength ?? 0) === value ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-secondary/60"
+                (settings.contextLength ?? 0) === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
               )}
             >
               {value === 0 ? t("context_default") : t("context_n", { n: value.toLocaleString("en-US") })}
@@ -149,10 +157,16 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
           ))}
         </div>
         <p className="text-xs text-muted-foreground" data-testid="context-line">
-          {settings.loadedContext == null ? t("contextNotLoaded", { wanted: settings.wantedContext }) : t("contextLoaded", { loaded: settings.loadedContext, wanted: settings.wantedContext })}
+          {settings.loadedContext == null
+            ? t("contextNotLoaded", { wanted: settings.wantedContext })
+            : t("contextLoaded", { loaded: settings.loadedContext, wanted: settings.wantedContext })}
         </p>
         {contextShort && (
-          <p className="flex items-start gap-1.5 text-xs text-[var(--state-warning)]" role="note" data-testid="context-warning">
+          <p
+            className="flex items-start gap-1.5 text-xs text-[var(--state-warning)]"
+            role="note"
+            data-testid="context-warning"
+          >
             <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span>{t("contextShort", { wanted: settings.wantedContext.toLocaleString("en-US") })}</span>
           </p>
@@ -177,7 +191,14 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
             {error}
           </span>
         )}
-        <Button type="button" variant="ghost" size="sm" className="ml-auto h-7 text-xs" onClick={load} disabled={saving}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="ms-auto h-7 text-xs"
+          onClick={load}
+          disabled={saving}
+        >
           {t("refresh")}
         </Button>
       </div>

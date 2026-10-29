@@ -17,14 +17,14 @@ export default function OssAbout() {
           </h1>
           <p className="mb-0 mt-3 text-muted-foreground">
             <BrandName /> is an open-source, multi-tenant platform for building AI agents, wiring them into workflows
-            with human approval, grounding them in your own data, and reaching them over the channels your users
-            already use. It is self-hostable and released under the {LICENSE_NAME} license.
+            with human approval, grounding them in your own data, and reaching them over the channels your users already
+            use. It is self-hostable and released under the {LICENSE_NAME} license.
           </p>
         </header>
 
         <section>
           <h2 className="text-xl font-semibold">Technology</h2>
-          <ul className="mt-3 space-y-1 pl-5 text-sm text-muted-foreground">
+          <ul className="mt-3 space-y-1 ps-5 text-sm text-muted-foreground">
             {STACK.map((s) => (
               <li key={s.name}>
                 <strong className="text-foreground">{s.name}:</strong> {s.detail}
@@ -35,7 +35,7 @@ export default function OssAbout() {
 
         <section>
           <h2 className="text-xl font-semibold">Standards</h2>
-          <ul className="mt-3 space-y-1 pl-5 text-sm text-muted-foreground">
+          <ul className="mt-3 space-y-1 ps-5 text-sm text-muted-foreground">
             {STANDARDS.map((s) => (
               <li key={s.name}>
                 <strong className="text-foreground">{s.name}:</strong> {s.detail}
@@ -46,7 +46,7 @@ export default function OssAbout() {
 
         <section>
           <h2 className="text-xl font-semibold">Documentation and dependencies</h2>
-          <ul className="mt-3 space-y-1 pl-5 text-sm text-muted-foreground">
+          <ul className="mt-3 space-y-1 ps-5 text-sm text-muted-foreground">
             <li>
               <SmartLink href={docsHref()} className="text-primary hover:underline">
                 Documentation

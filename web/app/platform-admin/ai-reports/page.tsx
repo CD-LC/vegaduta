@@ -188,7 +188,7 @@ export default function AiReportsPage() {
                   <div key={row.id} className="space-y-2 p-3">
                     <button
                       type="button"
-                      className="flex w-full flex-wrap items-center gap-2 text-left"
+                      className="flex w-full flex-wrap items-center gap-2 text-start"
                       onClick={() => setExpanded(open ? null : row.id)}
                       aria-expanded={open}
                     >
@@ -203,7 +203,7 @@ export default function AiReportsPage() {
                         {row.appVersion ? ` ${row.appVersion}` : ""}
                         {row.onDevice ? " · on-device" : ""}
                       </span>
-                      <span className="ml-auto text-xs text-muted-foreground">{formatDateTime(row.createdAt)}</span>
+                      <span className="ms-auto text-xs text-muted-foreground">{formatDateTime(row.createdAt)}</span>
                     </button>
                     <div className="text-xs text-muted-foreground">
                       Tenant {row.tenantId || "—"} · Reporter {row.reporterId || "(deleted account)"}

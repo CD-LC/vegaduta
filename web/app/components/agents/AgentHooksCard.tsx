@@ -97,7 +97,10 @@ export default function AgentHooksCard({
   function startAdd() {
     if (!canEdit || drafts.length >= MAX_HOOKS) return;
     const draft = emptyDraft();
-    draft.id = nextFreeId(draft.action, drafts.map((d) => d.id));
+    draft.id = nextFreeId(
+      draft.action,
+      drafts.map((d) => d.id)
+    );
     setMessage(null);
     setEditing({ index: -1, draft });
   }
@@ -167,8 +170,12 @@ export default function AgentHooksCard({
     <div className="mt-6 rounded-lg border border-border bg-card p-4" data-testid="agent-hooks-card">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-foreground"><BrandText text={t("title")} /></h3>
-          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground"><BrandText text={t("subtitle")} /></p>
+          <h3 className="text-sm font-semibold text-foreground">
+            <BrandText text={t("title")} />
+          </h3>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+            <BrandText text={t("subtitle")} />
+          </p>
         </div>
         <span className="mt-0.5 shrink-0 text-xs text-muted-foreground" data-testid="agent-hooks-count">
           {t("count", { count: drafts.length, max: MAX_HOOKS })}
@@ -176,7 +183,10 @@ export default function AgentHooksCard({
       </div>
 
       {!view.enabled && (
-        <p className="mt-3 rounded-md border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground" data-testid="agent-hooks-off">
+        <p
+          className="mt-3 rounded-md border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground"
+          data-testid="agent-hooks-off"
+        >
           {t("off")}
         </p>
       )}
@@ -225,7 +235,7 @@ export default function AgentHooksCard({
                     onCheckedChange={(on) => toggleAt(i, on)}
                   />
                   <code className="text-xs text-foreground">{d.id}</code>
-                  <span className="ml-auto flex gap-1">
+                  <span className="ms-auto flex gap-1">
                     <Button
                       type="button"
                       size="sm"

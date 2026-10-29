@@ -131,7 +131,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
       {report.changes?.length > 0 && (
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Changed since approval</p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-5 text-xs">
+          <ul className="mt-1 list-disc space-y-0.5 ps-5 text-xs">
             {report.changes.map((c) => (
               <li key={c}>{c}</li>
             ))}
@@ -290,14 +290,14 @@ export default function SkillSecurityPage() {
                   key={r.skillId}
                   type="button"
                   onClick={() => setSelected(selected === r.name ? null : r.name)}
-                  className={`flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent ${
+                  className={`flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-start text-sm transition-colors hover:bg-accent ${
                     selected === r.name ? "border-primary/50 bg-accent/50" : "border-border"
                   }`}
                 >
                   <span className="min-w-0">
                     <span className="font-medium">{r.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">{reviewReasonLabel(r.reason)}</span>
-                    {!r.enabled && <span className="ml-2 text-xs text-muted-foreground">(disabled)</span>}
+                    <span className="ms-2 text-xs text-muted-foreground">{reviewReasonLabel(r.reason)}</span>
+                    {!r.enabled && <span className="ms-2 text-xs text-muted-foreground">(disabled)</span>}
                   </span>
                   <span className="flex items-center gap-2">
                     <ToneChip tone={m.tone} label={m.label} />
@@ -334,7 +334,7 @@ export default function SkillSecurityPage() {
                     key={s.name}
                     type="button"
                     onClick={() => setSelected(selected === s.name ? null : s.name)}
-                    className={`flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-left text-sm transition-colors hover:bg-accent ${
+                    className={`flex w-full flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-start text-sm transition-colors hover:bg-accent ${
                       selected === s.name ? "border-primary/50 bg-accent/50" : "border-border"
                     }`}
                   >

@@ -87,7 +87,7 @@ export function DailyChart({ series }: { series: any[] }) {
           <span className="inline-block size-2.5 rounded-sm bg-[var(--state-success)]" aria-hidden="true" /> Converted
           (registered)
         </span>
-        <span className="ml-auto font-mono">peak {fmtInt(max)}/day</span>
+        <span className="ms-auto font-mono">peak {fmtInt(max)}/day</span>
       </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
