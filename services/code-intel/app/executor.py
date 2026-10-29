@@ -279,7 +279,8 @@ def run_command(ws_path: str, command: str, timeout: int = 300,
     mode = (run_mode or SETTINGS.run_mode or "local").lower()
     env = _scrubbed_env()
     if env_overrides:
-        env.update({str(k): str(v) for k, v in env_overrides.items()})
+        env.update({str(k): str(v) for k, v in env_overrides.items()
+                if not _env_override_denied(str(k))})
     if ws_id:
         with _BUSY_LOCK:
             _BUSY_WORKSPACES.add(ws_id)
@@ -355,7 +356,8 @@ def start_process(ws_path: str, command: str, run_mode: str | None = None,
 
     env = _scrubbed_env()
     if env_overrides:
-        env.update({str(k): str(v) for k, v in env_overrides.items()})
+        env.update({str(k): str(v) for k, v in env_overrides.items()
+                if not _env_override_denied(str(k))})
     process_id = "proc-" + uuid.uuid4().hex[:12]
 
     if mode == "docker":
@@ -486,3 +488,18 @@ def process_status(process_id: str) -> dict:
             "exit_code": None, "run_mode": "e2b",
             "preview_url": record.get("preview_url"),
             "sandbox_id": record.get("sandbox_id")}
+
+
+# env_overrides merges caller env OVER the scrub; loader/injection vars must
+# never be overrideable (LD_PRELOAD & friends turn "run this command" into
+# "load this .so in the supervisor's process"). Command is already arbitrary -
+# this only closes the escalation that is NOT equivalent to the command.
+_ENV_OVERRIDE_DENIED_PREFIXES = (
+    "LD_", "DYLD_", "NODE_OPTIONS", "PYTHON", "BASH_ENV", "ENV",
+    "CDPATH", "IFS", "SHELLOPTS", "BASHOPTS", "PERL5", "RUBYLIB",
+    "GEM_", "JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS",
+)
+
+def _env_override_denied(name: str) -> bool:
+    n = name.strip().upper()
+    return any(n.startswith(p) for p in _ENV_OVERRIDE_DENIED_PREFIXES)
