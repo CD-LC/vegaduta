@@ -119,12 +119,12 @@
   "languageSwitcher": {
     "label": "Idioma",
     "resetToEnglish": "Cambiar a inglés",
-    "packTitle": "Download {label}?",
-    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
-    "packDownload": "Download",
-    "packDownloading": "Downloading…",
-    "packCancel": "Not now",
-    "packFailed": "Download failed - check the connection and try again."
+    "packTitle": "¿Descargar {label}?",
+    "packBody": "Esta instalación personal no almacena paquetes de idioma en el dispositivo hasta que los solicites. {label} ocupa aprox. {size}: una descarga única guardada en este equipo.",
+    "packDownload": "Descargar",
+    "packDownloading": "Descargando…",
+    "packCancel": "Ahora no",
+    "packFailed": "Error al descargar: comprueba la conexión e inténtalo de nuevo."
   },
   "signup": {
     "eyebrow": "Cuenta gratuita",
@@ -290,7 +290,7 @@
         "pinLabel": "PIN",
         "pinLabelDevice": "PIN para {device}",
         "pinButton": "Desbloquear",
-        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+        "pinNotEnrolled": "El PIN solo funciona en el navegador donde se configuró; este no está registrado. Inicia sesión con otro método y luego añade el PIN para este navegador en Seguridad de la cuenta."
       },
       "forgot": {
         "intro": "Solicita un enlace de restablecimiento. Se guarda en un archivo en el equipo que ejecuta esta instalación; así sabe que realmente eres tú, ya que cualquiera puede acceder a esta página.",
@@ -16659,6 +16659,12 @@
     "copied": "Copiado",
     "manageNote": "Supervisa las llamadas y publica la tarjeta en"
   },
+  "keyboard": {
+    "toggle": "Teclado en pantalla",
+    "unavailable": "No hay teclado en pantalla para este idioma",
+    "title": "Teclado en pantalla",
+    "close": "Cerrar teclado"
+  },
   "_sourceHash": {
     "nav.dashboard": "67b696468610b879",
     "nav.workflows": "e2073645cb0dbbdd",
@@ -32204,12 +32210,17 @@
     "a2aPanel.manageNote": "21aec7ac83e496c2",
     "assistant.cmdArg_export": "e3b0c44298fc1c14",
     "assistant.cmdArg_new": "e3b0c44298fc1c14",
-    "assistant.cmdArg_help": "e3b0c44298fc1c14"
-  },
-  "keyboard": {
-    "toggle": "On-screen keyboard",
-    "unavailable": "No on-screen keyboard for this language",
-    "title": "On-screen keyboard",
-    "close": "Close keyboard"
+    "assistant.cmdArg_help": "e3b0c44298fc1c14",
+    "languageSwitcher.packTitle": "a34e8480dae5ad09",
+    "languageSwitcher.packBody": "15415e326f749d83",
+    "languageSwitcher.packDownload": "d6eafe8235910042",
+    "languageSwitcher.packDownloading": "a778d3492af219c3",
+    "languageSwitcher.packCancel": "a0e63d7c7125d29a",
+    "languageSwitcher.packFailed": "148c1b9f7c8efd09",
+    "keyboard.toggle": "8dc08a0c777afebe",
+    "keyboard.unavailable": "da75a2bffe4b8daa",
+    "keyboard.title": "8dc08a0c777afebe",
+    "keyboard.close": "d8232cf4eb240844",
+    "signin.local.signin.pinNotEnrolled": "c8ac94e0c9efaa9c"
   }
 }

@@ -47,9 +47,7 @@ class A2aAgentCardApi:
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/a2a/agent-card.json"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/agent-card.json")
 
 
 class A2aConsoleApi:
@@ -65,30 +63,14 @@ class A2aConsoleApi:
         """
         return self._http.request("GET", "/api/a2a/console/policy")
 
-    def tasks(
-        self,
-        *,
-        direction: Optional[str] = None,
-        state: Optional[str] = None,
-        agent_id: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> Dict[str, Any]:
+    def tasks(self, *, direction: Optional[str] = None, state: Optional[str] = None, agent_id: Optional[str] = None, limit: Optional[int] = None) -> Dict[str, Any]:
         """Tasks.
 
         GET /api/a2a/console/tasks
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            "/api/a2a/console/tasks",
-            query={
-                "direction": direction,
-                "state": state,
-                "agentId": agent_id,
-                "limit": limit,
-            },
-        )
+        return self._http.request("GET", "/api/a2a/console/tasks", query={"direction": direction, "state": state, "agentId": agent_id, "limit": limit})
 
     def task(self, id: str) -> Dict[str, Any]:
         """Task.
@@ -99,68 +81,37 @@ class A2aConsoleApi:
         """
         return self._http.request("GET", f"/api/a2a/console/tasks/{quote_path(id)}")
 
-    def cancel(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def cancel(self, id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Cancel.
 
         POST /api/a2a/console/tasks/{id}:cancel
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/a2a/console/tasks/{quote_path(id)}:cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/a2a/console/tasks/{quote_path(id)}:cancel", headers={"Idempotency-Key": idempotency_key})
 
 
 class A2aJsonRpcApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def platform(
-        self,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def platform(self, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Platform.
 
         POST /api/a2a
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/a2a",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/a2a", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def agent_scoped(
-        self,
-        agent_id: str,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def agent_scoped(self, agent_id: str, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Agent scoped.
 
         POST /api/agents/{agentId}/a2a
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
 
 class A2aRestApi:
@@ -174,54 +125,25 @@ class A2aRestApi:
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            "/api/a2a/rest/extendedAgentCard",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", "/api/a2a/rest/extendedAgentCard", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def send_message(
-        self,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def send_message(self, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Send message.
 
         POST /api/a2a/rest/message:send
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/a2a/rest/message:send",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/a2a/rest/message:send", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def stream_message(
-        self,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def stream_message(self, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Stream message.
 
         POST /api/a2a/rest/message:stream
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/a2a/rest/message:stream",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/a2a/rest/message:stream", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
     def list_tasks(self, *, a2_a_version: Optional[str] = None) -> None:
         """List tasks.
@@ -230,33 +152,16 @@ class A2aRestApi:
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            "/api/a2a/rest/tasks",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", "/api/a2a/rest/tasks", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def get_task(
-        self,
-        id: str,
-        *,
-        history_length: Optional[int] = None,
-        a2_a_version: Optional[str] = None,
-    ) -> None:
+    def get_task(self, id: str, *, history_length: Optional[int] = None, a2_a_version: Optional[str] = None) -> None:
         """Get task.
 
         GET /api/a2a/rest/tasks/{id}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/a2a/rest/tasks/{quote_path(id)}",
-            query={"historyLength": history_length},
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/a2a/rest/tasks/{quote_path(id)}", query={"historyLength": history_length}, headers={"A2A-Version": a2_a_version}, response="void")
 
     def read_push_config(self, id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Read push config.
@@ -265,343 +170,165 @@ class A2aRestApi:
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def create_push_config(
-        self,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def create_push_config(self, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Create push config.
 
         POST /api/a2a/rest/tasks/{id}/pushNotificationConfigs
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
-    def read_push_config_3(
-        self, id: str, config_id: str, *, a2_a_version: Optional[str] = None
-    ) -> None:
+    def read_push_config_3(self, id: str, config_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Read push config.
 
         GET /api/a2a/rest/tasks/{id}/pushNotificationConfigs/{configId}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def delete_push_config(
-        self, id: str, config_id: str, *, a2_a_version: Optional[str] = None
-    ) -> None:
+    def delete_push_config(self, id: str, config_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Delete push config.
 
         DELETE /api/a2a/rest/tasks/{id}/pushNotificationConfigs/{configId}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def cancel_task(
-        self,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def cancel_task(self, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Cancel task.
 
         POST /api/a2a/rest/tasks/{id}:cancel
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/a2a/rest/tasks/{quote_path(id)}:cancel",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/a2a/rest/tasks/{quote_path(id)}:cancel", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
-    def subscribe_to_task(
-        self,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def subscribe_to_task(self, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Subscribe to task.
 
         POST /api/a2a/rest/tasks/{id}:subscribe
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/a2a/rest/tasks/{quote_path(id)}:subscribe",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/a2a/rest/tasks/{quote_path(id)}:subscribe", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
-    def extended_agent_card_2(
-        self, agent_id: str, *, a2_a_version: Optional[str] = None
-    ) -> None:
+    def extended_agent_card_2(self, agent_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Extended agent card.
 
         GET /api/agents/{agentId}/a2a/rest/extendedAgentCard
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/extendedAgentCard",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/rest/extendedAgentCard", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def send_message_2(
-        self,
-        agent_id: str,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def send_message_2(self, agent_id: str, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Send message.
 
         POST /api/agents/{agentId}/a2a/rest/message:send
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/message:send",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a/rest/message:send", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def stream_message_2(
-        self,
-        agent_id: str,
-        body: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def stream_message_2(self, agent_id: str, body: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Stream message.
 
         POST /api/agents/{agentId}/a2a/rest/message:stream
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/message:stream",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a/rest/message:stream", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def list_tasks_2(
-        self, agent_id: str, *, a2_a_version: Optional[str] = None
-    ) -> None:
+    def list_tasks_2(self, agent_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """List tasks.
 
         GET /api/agents/{agentId}/a2a/rest/tasks
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def get_task_2(
-        self,
-        agent_id: str,
-        id: str,
-        *,
-        history_length: Optional[int] = None,
-        a2_a_version: Optional[str] = None,
-    ) -> None:
+    def get_task_2(self, agent_id: str, id: str, *, history_length: Optional[int] = None, a2_a_version: Optional[str] = None) -> None:
         """Get task.
 
         GET /api/agents/{agentId}/a2a/rest/tasks/{id}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}",
-            query={"historyLength": history_length},
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}", query={"historyLength": history_length}, headers={"A2A-Version": a2_a_version}, response="void")
 
-    def read_push_config_2(
-        self, agent_id: str, id: str, *, a2_a_version: Optional[str] = None
-    ) -> None:
+    def read_push_config_2(self, agent_id: str, id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Read push config.
 
         GET /api/agents/{agentId}/a2a/rest/tasks/{id}/pushNotificationConfigs
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def create_push_config_2(
-        self,
-        agent_id: str,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def create_push_config_2(self, agent_id: str, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Create push config.
 
         POST /api/agents/{agentId}/a2a/rest/tasks/{id}/pushNotificationConfigs
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
-    def read_push_config_4(
-        self,
-        agent_id: str,
-        id: str,
-        config_id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-    ) -> None:
+    def read_push_config_4(self, agent_id: str, id: str, config_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Read push config.
 
         GET /api/agents/{agentId}/a2a/rest/tasks/{id}/pushNotificationConfigs/{configId}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def delete_push_config_2(
-        self,
-        agent_id: str,
-        id: str,
-        config_id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-    ) -> None:
+    def delete_push_config_2(self, agent_id: str, id: str, config_id: str, *, a2_a_version: Optional[str] = None) -> None:
         """Delete push config.
 
         DELETE /api/agents/{agentId}/a2a/rest/tasks/{id}/pushNotificationConfigs/{configId}
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}",
-            headers={"A2A-Version": a2_a_version},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}/pushNotificationConfigs/{quote_path(config_id)}", headers={"A2A-Version": a2_a_version}, response="void")
 
-    def cancel_task_2(
-        self,
-        agent_id: str,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def cancel_task_2(self, agent_id: str, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Cancel task.
 
         POST /api/agents/{agentId}/a2a/rest/tasks/{id}:cancel
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}:cancel",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}:cancel", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
-    def subscribe_to_task_2(
-        self,
-        agent_id: str,
-        id: str,
-        *,
-        a2_a_version: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def subscribe_to_task_2(self, agent_id: str, id: str, *, a2_a_version: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Subscribe to task.
 
         POST /api/agents/{agentId}/a2a/rest/tasks/{id}:subscribe
 
         Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}:subscribe",
-            headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/a2a/rest/tasks/{quote_path(id)}:subscribe", headers={"A2A-Version": a2_a_version, "Idempotency-Key": idempotency_key}, response="void")
 
 
 class AbuseMonitorApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def anomalies(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.AbuseAnomalyEntry]:
+    def anomalies(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AbuseAnomalyEntry]:
         """Anomalies.
 
         GET /api/platform/abuse-monitor/anomalies
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/abuse-monitor/anomalies",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/platform/abuse-monitor/anomalies", query={"limit": limit, "offset": offset})
 
     def config(self) -> m.AbuseThresholds:
         """Config.
@@ -612,20 +339,14 @@ class AbuseMonitorApi:
         """
         return self._http.request("GET", "/api/platform/abuse-monitor/config")
 
-    def scores(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.AbuseRiskScore]:
+    def scores(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AbuseRiskScore]:
         """Scores.
 
         GET /api/platform/abuse-monitor/scores
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/abuse-monitor/scores",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/platform/abuse-monitor/scores", query={"limit": limit, "offset": offset})
 
     def tenant_score(self, tenant_id: str) -> m.AbuseRiskScore:
         """Tenant score.
@@ -634,9 +355,7 @@ class AbuseMonitorApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/abuse-monitor/scores/{quote_path(tenant_id)}"
-        )
+        return self._http.request("GET", f"/api/platform/abuse-monitor/scores/{quote_path(tenant_id)}")
 
     def principal_score(self, tenant_id: str, user_id: str) -> m.AbuseRiskScore:
         """Principal score.
@@ -645,57 +364,34 @@ class AbuseMonitorApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            f"/api/platform/abuse-monitor/scores/{quote_path(tenant_id)}/{quote_path(user_id)}",
-        )
+        return self._http.request("GET", f"/api/platform/abuse-monitor/scores/{quote_path(tenant_id)}/{quote_path(user_id)}")
 
-    def clear_tenant_throttle(
-        self, tenant_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def clear_tenant_throttle(self, tenant_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Clear tenant throttle.
 
         POST /api/platform/abuse-monitor/throttle/{tenantId}/clear
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/abuse-monitor/throttle/{quote_path(tenant_id)}/clear",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/platform/abuse-monitor/throttle/{quote_path(tenant_id)}/clear", headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def clear_throttle(
-        self, tenant_id: str, user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def clear_throttle(self, tenant_id: str, user_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Clear throttle.
 
         POST /api/platform/abuse-monitor/throttle/{tenantId}/{userId}/clear
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/abuse-monitor/throttle/{quote_path(tenant_id)}/{quote_path(user_id)}/clear",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/platform/abuse-monitor/throttle/{quote_path(tenant_id)}/{quote_path(user_id)}/clear", headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def throttled(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.AbuseThrottleService_ThrottleEntry]:
+    def throttled(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AbuseThrottleService_ThrottleEntry]:
         """Throttled.
 
         GET /api/platform/abuse-monitor/throttled
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/abuse-monitor/throttled",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/platform/abuse-monitor/throttled", query={"limit": limit, "offset": offset})
 
 
 class AccountApi:
@@ -721,9 +417,7 @@ class AccountApi:
 
         POST /api/account/avatar
         """
-        return self._http.request(
-            "POST", "/api/account/avatar", body=body, body_type="multipart"
-        )
+        return self._http.request("POST", "/api/account/avatar", body=body, body_type="multipart")
 
     def set_phone_number(self, body: m.UpdatePhoneNumberRequest) -> m.AccountResponse:
         """Set phone number.
@@ -737,10 +431,7 @@ class AccountSelfDeletionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def delete_account(
-        self,
-        body: Optional[m.AccountSelfDeletionController_DeleteAccountRequest] = None,
-    ) -> Dict[str, Any]:
+    def delete_account(self, body: Optional[m.AccountSelfDeletionController_DeleteAccountRequest] = None) -> Dict[str, Any]:
         """Delete account.
 
         DELETE /api/account
@@ -759,37 +450,19 @@ class AddonApi:
         """
         return self._http.request("GET", "/api/addons")
 
-    def host_report(
-        self,
-        body: Optional[m.AddonApi_ReportRequest] = None,
-        *,
-        authorization: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AddonApi_ReportResult:
+    def host_report(self, body: Optional[m.AddonApi_ReportRequest] = None, *, authorization: Optional[str] = None, idempotency_key: Optional[str] = None) -> m.AddonApi_ReportResult:
         """Host report.
 
         POST /api/addons/host/report
         """
-        return self._http.request(
-            "POST",
-            "/api/addons/host/report",
-            headers={
-                "Authorization": authorization,
-                "Idempotency-Key": idempotency_key,
-            },
-            body=body,
-        )
+        return self._http.request("POST", "/api/addons/host/report", headers={"Authorization": authorization, "Idempotency-Key": idempotency_key}, body=body)
 
-    def host_wanted(
-        self, *, authorization: Optional[str] = None
-    ) -> m.AddonApi_HostWanted:
+    def host_wanted(self, *, authorization: Optional[str] = None) -> m.AddonApi_HostWanted:
         """Host wanted.
 
         GET /api/addons/host/wanted
         """
-        return self._http.request(
-            "GET", "/api/addons/host/wanted", headers={"Authorization": authorization}
-        )
+        return self._http.request("GET", "/api/addons/host/wanted", headers={"Authorization": authorization})
 
     def get(self, id: str) -> m.AddonApi_View:
         """Get.
@@ -798,245 +471,140 @@ class AddonApi:
         """
         return self._http.request("GET", f"/api/addons/{quote_path(id)}")
 
-    def disable(
-        self,
-        id: str,
-        *,
-        cascade: Optional[bool] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AddonApi_ChangeResult:
+    def disable(self, id: str, *, cascade: Optional[bool] = None, idempotency_key: Optional[str] = None) -> m.AddonApi_ChangeResult:
         """Disable.
 
         POST /api/addons/{id}/disable
         """
-        return self._http.request(
-            "POST",
-            f"/api/addons/{quote_path(id)}/disable",
-            query={"cascade": cascade},
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/addons/{quote_path(id)}/disable", query={"cascade": cascade}, headers={"Idempotency-Key": idempotency_key})
 
-    def enable(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AddonApi_ChangeResult:
+    def enable(self, id: str, *, idempotency_key: Optional[str] = None) -> m.AddonApi_ChangeResult:
         """Enable.
 
         POST /api/addons/{id}/enable
         """
-        return self._http.request(
-            "POST",
-            f"/api/addons/{quote_path(id)}/enable",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/addons/{quote_path(id)}/enable", headers={"Idempotency-Key": idempotency_key})
 
 
 class AdminTemplateApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def approved(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TemplateResponse]:
+    def approved(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TemplateResponse]:
         """Approved.
 
         GET /api/admin/templates/approved
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/templates/approved",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/admin/templates/approved", query={"limit": limit, "offset": offset})
 
-    def pending(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TemplateResponse]:
+    def pending(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TemplateResponse]:
         """Pending.
 
         GET /api/admin/templates/pending
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/templates/pending",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/admin/templates/pending", query={"limit": limit, "offset": offset})
 
-    def approve(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def approve(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Approve.
 
         POST /api/admin/templates/{id}/approve
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/templates/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/templates/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key})
 
-    def reject(
-        self,
-        id: str,
-        body: m.ModerationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TemplateResponse:
+    def reject(self, id: str, body: m.ModerationRequest, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Reject.
 
         POST /api/admin/templates/{id}/reject
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/templates/{quote_path(id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/admin/templates/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def unverify(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def unverify(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Unverify.
 
         POST /api/admin/templates/{id}/unverify
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/templates/{quote_path(id)}/unverify",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/templates/{quote_path(id)}/unverify", headers={"Idempotency-Key": idempotency_key})
 
-    def verify(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def verify(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Verify.
 
         POST /api/admin/templates/{id}/verify
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/templates/{quote_path(id)}/verify",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/templates/{quote_path(id)}/verify", headers={"Idempotency-Key": idempotency_key})
 
-    def withdraw(
-        self,
-        id: str,
-        body: Optional[m.ModerationRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TemplateResponse:
+    def withdraw(self, id: str, body: Optional[m.ModerationRequest] = None, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Withdraw.
 
         POST /api/admin/templates/{id}/withdraw
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/templates/{quote_path(id)}/withdraw",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/admin/templates/{quote_path(id)}/withdraw", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AgUiRunApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def run(
-        self,
-        agent_id: str,
-        body: m.RunAgentInput,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Iterator[str]:
+    def run(self, agent_id: str, body: m.RunAgentInput, *, idempotency_key: Optional[str] = None) -> Iterator[str]:
         """Run.
 
         POST /api/agents/{agentId}/agui/run
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/agui/run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/agents/{quote_path(agent_id)}/agui/run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def events(
-        self,
-        agent_id: str,
-        run_id: str,
-        *,
-        after: Optional[int] = None,
-        last_event_id: Optional[str] = None,
-    ) -> Iterator[str]:
+    def events(self, agent_id: str, run_id: str, *, after: Optional[int] = None, last_event_id: Optional[str] = None) -> Iterator[str]:
         """Events.
 
         GET /api/agents/{agentId}/agui/runs/{runId}/events
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/agui/runs/{quote_path(run_id)}/events",
-            query={"after": after},
-            headers={"Last-Event-ID": last_event_id},
-        )
+        return self._http.stream("GET", f"/api/agents/{quote_path(agent_id)}/agui/runs/{quote_path(run_id)}/events", query={"after": after}, headers={"Last-Event-ID": last_event_id})
 
     def tools(self, agent_id: str) -> List[m.AgUiRunController_AgUiTool]:
         """Tools.
 
         GET /api/agents/{agentId}/agui/tools
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/agui/tools"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/agui/tools")
 
 
 class AgentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.AgentResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentResponse]:
         """List.
 
         GET /api/agents
 
         The tenant's agents the caller can see, newest first. Pass limit (and offset) for a page with X-Total-Count and X-Has-More.
         """
-        return self._http.request(
-            "GET", "/api/agents", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/agents", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.AgentCreateRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentResponse:
+    def create(self, body: m.AgentCreateRequest, *, idempotency_key: Optional[str] = None) -> m.AgentResponse:
         """Create.
 
         POST /api/agents
 
         Create an agent. Answers 201 with the new agent. Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/agents",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/agents", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, agent_id: str) -> m.AgentResponse:
         """Get.
@@ -1054,771 +622,339 @@ class AgentApi:
 
         Delete the agent. Refused with 409 while a workflow or another agent still uses it.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}",
-            headers={"If-Match": if_match},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}", headers={"If-Match": if_match}, response="void")
 
-    def set_autonomy_tier(
-        self,
-        agent_id: str,
-        body: m.AgentAutonomyTierUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_autonomy_tier(self, agent_id: str, body: m.AgentAutonomyTierUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set autonomy tier.
 
         PATCH /api/agents/{agentId}/autonomy-tier
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/autonomy-tier",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/autonomy-tier", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
     def list_available_tools(self, agent_id: str) -> List[m.ToolDescriptor]:
         """List available tools.
 
         GET /api/agents/{agentId}/available-tools
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/available-tools"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/available-tools")
 
-    def set_biometric_consent_enabled(
-        self,
-        agent_id: str,
-        body: m.AgentBiometricConsentToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_biometric_consent_enabled(self, agent_id: str, body: m.AgentBiometricConsentToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set biometric consent enabled.
 
         PATCH /api/agents/{agentId}/biometric-consent
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/biometric-consent",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/biometric-consent", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
     def list_capabilities(self, agent_id: str) -> List[m.AgentCapabilityResponse]:
         """List capabilities.
 
         GET /api/agents/{agentId}/capabilities
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/capabilities"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/capabilities")
 
-    def set_capability_enabled(
-        self,
-        agent_id: str,
-        capability_key: str,
-        body: m.AgentCapabilityUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_capability_enabled(self, agent_id: str, capability_key: str, body: m.AgentCapabilityUpdateRequest, *, idempotency_key: Optional[str] = None) -> m.AgentResponse:
         """Set capability enabled.
 
         PATCH /api/agents/{agentId}/capabilities/{capabilityKey}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/capabilities/{quote_path(capability_key)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/capabilities/{quote_path(capability_key)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def chat(
-        self,
-        agent_id: str,
-        body: m.ChatRequest,
-        *,
-        x_resumable_stream: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> Iterator[str]:
+    def chat(self, agent_id: str, body: m.ChatRequest, *, x_resumable_stream: Optional[str] = None, idempotency_key: Optional[str] = None) -> Iterator[str]:
         """Chat.
 
         POST /api/agents/{agentId}/chat
 
         Run one chat turn and stream the reply as Server-Sent Events: each event's data is the next text chunk. Send the same sessionId to continue a conversation; the server keeps the memory. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/chat",
-            headers={
-                "X-Resumable-Stream": x_resumable_stream,
-                "Idempotency-Key": idempotency_key,
-            },
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/agents/{quote_path(agent_id)}/chat", headers={"X-Resumable-Stream": x_resumable_stream, "Idempotency-Key": idempotency_key}, body=body)
 
-    def set_code_intel_repo_access(
-        self,
-        agent_id: str,
-        body: m.AgentCodeIntelRepoAccessUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_code_intel_repo_access(self, agent_id: str, body: m.AgentCodeIntelRepoAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set code intel repo access.
 
         PATCH /api/agents/{agentId}/code-intel-repo-access
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/code-intel-repo-access",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/code-intel-repo-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_collaborators(
-        self,
-        agent_id: str,
-        body: m.AgentCollaboratorsUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_collaborators(self, agent_id: str, body: m.AgentCollaboratorsUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set collaborators.
 
         PATCH /api/agents/{agentId}/collaborators
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/collaborators",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/collaborators", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_cost_routing(
-        self,
-        agent_id: str,
-        body: m.AgentCostRoutingUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_cost_routing(self, agent_id: str, body: m.AgentCostRoutingUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set cost routing.
 
         PATCH /api/agents/{agentId}/cost-routing
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/cost-routing",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/cost-routing", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def duplicate(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentResponse:
+    def duplicate(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentResponse:
         """Duplicate.
 
         POST /api/agents/{agentId}/duplicate
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/duplicate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/duplicate", headers={"Idempotency-Key": idempotency_key})
 
-    def set_edge_routing_policy(
-        self,
-        agent_id: str,
-        body: m.AgentEdgeRoutingPolicyUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_edge_routing_policy(self, agent_id: str, body: m.AgentEdgeRoutingPolicyUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set edge routing policy.
 
         PATCH /api/agents/{agentId}/edge-routing-policy
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/edge-routing-policy",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/edge-routing-policy", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_experience_mode(
-        self,
-        agent_id: str,
-        body: m.AgentExperienceModeUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_experience_mode(self, agent_id: str, body: m.AgentExperienceModeUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set experience mode.
 
         PATCH /api/agents/{agentId}/experience-mode
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/experience-mode",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/experience-mode", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_fallback_provider(
-        self,
-        agent_id: str,
-        body: m.AgentFallbackUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_fallback_provider(self, agent_id: str, body: m.AgentFallbackUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set fallback provider.
 
         PATCH /api/agents/{agentId}/fallback
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/fallback",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/fallback", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_generation_params(
-        self,
-        agent_id: str,
-        body: m.AgentGenerationParamsUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_generation_params(self, agent_id: str, body: m.AgentGenerationParamsUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update generation params.
 
         PATCH /api/agents/{agentId}/generation-params
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/generation-params",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/generation-params", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_knowledge_access(
-        self,
-        agent_id: str,
-        body: m.AgentKnowledgeAccessUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_knowledge_access(self, agent_id: str, body: m.AgentKnowledgeAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set knowledge access.
 
         PATCH /api/agents/{agentId}/knowledge-access
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/knowledge-access",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_knowledge_base_enabled(
-        self,
-        agent_id: str,
-        body: m.AgentKnowledgeBaseToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_knowledge_base_enabled(self, agent_id: str, body: m.AgentKnowledgeBaseToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set knowledge base enabled.
 
         PATCH /api/agents/{agentId}/knowledge-base
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/knowledge-base",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-base", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_knowledge_write(
-        self,
-        agent_id: str,
-        body: m.AgentKnowledgeBaseToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentKnowledgeWriteAccessResponse:
+    def set_knowledge_write(self, agent_id: str, body: m.AgentKnowledgeBaseToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
         """Set knowledge write.
 
         PATCH /api/agents/{agentId}/knowledge-write
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/knowledge-write",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def get_knowledge_write_access(
-        self, agent_id: str
-    ) -> m.AgentKnowledgeWriteAccessResponse:
+    def get_knowledge_write_access(self, agent_id: str) -> m.AgentKnowledgeWriteAccessResponse:
         """Get knowledge write access.
 
         GET /api/agents/{agentId}/knowledge-write-access
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access")
 
-    def set_knowledge_write_access(
-        self,
-        agent_id: str,
-        body: m.AgentKnowledgeWriteAccessUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentKnowledgeWriteAccessResponse:
+    def set_knowledge_write_access(self, agent_id: str, body: m.AgentKnowledgeWriteAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
         """Set knowledge write access.
 
         PATCH /api/agents/{agentId}/knowledge-write-access
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/knowledge-write-access",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_model(
-        self,
-        agent_id: str,
-        body: m.AgentModelUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_model(self, agent_id: str, body: m.AgentModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update model.
 
         PATCH /api/agents/{agentId}/model
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/model",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/model", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_system_prompt(
-        self,
-        agent_id: str,
-        body: m.AgentPromptUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_system_prompt(self, agent_id: str, body: m.AgentPromptUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update system prompt.
 
         PATCH /api/agents/{agentId}/prompt
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/prompt",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/prompt", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
     def list_prompt_versions(self, agent_id: str) -> List[m.PromptVersionResponse]:
         """List prompt versions.
 
         GET /api/agents/{agentId}/prompt/versions
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/prompt/versions"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/prompt/versions")
 
-    def revert_to_prompt_version(
-        self, agent_id: str, version_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentResponse:
+    def revert_to_prompt_version(self, agent_id: str, version_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentResponse:
         """Revert to prompt version.
 
         POST /api/agents/{agentId}/prompt/versions/{versionId}/revert
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/prompt/versions/{quote_path(version_id)}/revert",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/prompt/versions/{quote_path(version_id)}/revert", headers={"Idempotency-Key": idempotency_key})
 
-    def set_reasoning_depth(
-        self,
-        agent_id: str,
-        body: m.AgentReasoningDepthUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_reasoning_depth(self, agent_id: str, body: m.AgentReasoningDepthUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set reasoning depth.
 
         PATCH /api/agents/{agentId}/reasoning-depth
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/reasoning-depth",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/reasoning-depth", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_response_caching_enabled(
-        self,
-        agent_id: str,
-        body: m.AgentResponseCachingToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_response_caching_enabled(self, agent_id: str, body: m.AgentResponseCachingToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set response caching enabled.
 
         PATCH /api/agents/{agentId}/response-caching
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/response-caching",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/response-caching", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_semantic_response_caching_enabled(
-        self,
-        agent_id: str,
-        body: m.AgentResponseCachingToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_semantic_response_caching_enabled(self, agent_id: str, body: m.AgentResponseCachingToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set semantic response caching enabled.
 
         PATCH /api/agents/{agentId}/semantic-response-caching
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/semantic-response-caching",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/semantic-response-caching", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_share_memory_with_tenant(
-        self,
-        agent_id: str,
-        body: m.AgentShareMemoryToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_share_memory_with_tenant(self, agent_id: str, body: m.AgentShareMemoryToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set share memory with tenant.
 
         PATCH /api/agents/{agentId}/share-memory
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/share-memory",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/share-memory", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_text_model(
-        self,
-        agent_id: str,
-        body: m.AgentTextModelUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_text_model(self, agent_id: str, body: m.AgentTextModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update text model.
 
         PATCH /api/agents/{agentId}/text-model
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/text-model",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/text-model", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def apply_tier(
-        self,
-        agent_id: str,
-        body: m.AgentTierUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def apply_tier(self, agent_id: str, body: m.AgentTierUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Apply tier.
 
         PATCH /api/agents/{agentId}/tier
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/tier",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/tier", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_tool_access(
-        self,
-        agent_id: str,
-        body: m.AgentToolAccessUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_tool_access(self, agent_id: str, body: m.AgentToolAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set tool access.
 
         PATCH /api/agents/{agentId}/tool-access
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/tool-access",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/tool-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
     def tool_access_trifecta(self, agent_id: str) -> m.TrifectaStatusResponse:
         """Tool access trifecta.
 
         GET /api/agents/{agentId}/tool-access/trifecta
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/tool-access/trifecta"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/tool-access/trifecta")
 
-    def update_tts_model(
-        self,
-        agent_id: str,
-        body: m.AgentTtsModelUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_tts_model(self, agent_id: str, body: m.AgentTtsModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update tts model.
 
         PATCH /api/agents/{agentId}/tts-model
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/tts-model",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/tts-model", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_tuning_mode(
-        self,
-        agent_id: str,
-        body: m.AgentTuningModeUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def set_tuning_mode(self, agent_id: str, body: m.AgentTuningModeUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Set tuning mode.
 
         PATCH /api/agents/{agentId}/tuning-mode
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/tuning-mode",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/tuning-mode", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_video_model(
-        self,
-        agent_id: str,
-        body: m.AgentVideoModelUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_video_model(self, agent_id: str, body: m.AgentVideoModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update video model.
 
         PATCH /api/agents/{agentId}/video-model
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/video-model",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/video-model", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def update_voice_model(
-        self,
-        agent_id: str,
-        body: m.AgentVoiceModelUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentResponse:
+    def update_voice_model(self, agent_id: str, body: m.AgentVoiceModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update voice model.
 
         PATCH /api/agents/{agentId}/voice-model
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/voice-model",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/voice-model", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
 
 class AgentChatSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def upload_chat_attachment(
-        self, agent_id: str, body: Dict[str, Any]
-    ) -> m.ChatAttachmentResponse:
+    def upload_chat_attachment(self, agent_id: str, body: Dict[str, Any]) -> m.ChatAttachmentResponse:
         """Upload chat attachment.
 
         POST /api/agents/{agentId}/chat/attachments
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/chat/attachments",
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/chat/attachments", body=body, body_type="multipart")
 
-    def cancel_chat_turn(
-        self, agent_id: str, session_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def cancel_chat_turn(self, agent_id: str, session_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Cancel chat turn.
 
         POST /api/agents/{agentId}/chat/sessions/{sessionId}/cancel
 
         Ask the in-flight chat turn of this session to stop; the turn ends on its next poll. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
-    def rewind_chat_session(
-        self,
-        agent_id: str,
-        session_id: str,
-        body: m.SessionRewindRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def rewind_chat_session(self, agent_id: str, session_id: str, body: m.SessionRewindRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Rewind chat session.
 
         POST /api/agents/{agentId}/chat/sessions/{sessionId}/rewind
 
         Truncate the session transcript to its first keepTurns entries so the conversation continues from there; no turn is re-run. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/rewind",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/chat/sessions/{quote_path(session_id)}/rewind", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def reliability(self, agent_id: str) -> m.AgentReliabilitySummary:
         """Reliability.
 
         GET /api/agents/{agentId}/reliability
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/reliability"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/reliability")
 
-    def tool_calls(
-        self, agent_id: str
-    ) -> List[m.AgentChatSessionController_ToolCallLogView]:
+    def tool_calls(self, agent_id: str) -> List[m.AgentChatSessionController_ToolCallLogView]:
         """Tool calls.
 
         GET /api/agents/{agentId}/tool-calls
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/tool-calls"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/tool-calls")
 
 
 class AgentDirectoryApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def mine(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[Dict[str, Any]]:
+    def mine(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[Dict[str, Any]]:
         """Mine.
 
         GET /api/agents/directory/mine
         """
-        return self._http.request(
-            "GET",
-            "/api/agents/directory/mine",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/agents/directory/mine", query={"limit": limit, "offset": offset})
 
-    def publish(
-        self,
-        agent_id: str,
-        body: Optional[m.AgentDirectoryController_PublishRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def publish(self, agent_id: str, body: Optional[m.AgentDirectoryController_PublishRequest] = None, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Publish.
 
         POST /api/agents/{agentId}/directory/publish
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/directory/publish",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/directory/publish", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def unpublish(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def unpublish(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Unpublish.
 
         POST /api/agents/{agentId}/directory/unpublish
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/directory/unpublish",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/directory/unpublish", headers={"Idempotency-Key": idempotency_key})
 
-    def list(
-        self,
-        *,
-        q: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> Dict[str, Any]:
+    def list(self, *, q: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> Dict[str, Any]:
         """List.
 
         GET /api/directory/agents
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/directory/agents",
-            query={"q": q, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/directory/agents", query={"q": q, "limit": limit, "offset": offset})
 
     def get(self, agent_id: str) -> Dict[str, Any]:
         """Get.
@@ -1827,53 +963,35 @@ class AgentDirectoryApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", f"/api/directory/agents/{quote_path(agent_id)}"
-        )
+        return self._http.request("GET", f"/api/directory/agents/{quote_path(agent_id)}")
 
 
 class AgentEventTriggerApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.AgentEventTriggerResponse]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentEventTriggerResponse]:
         """List.
 
         GET /api/agents/{agentId}/triggers
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/triggers",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/triggers", query={"limit": limit, "offset": offset})
 
-    def upsert(
-        self, agent_id: str, body: m.AgentEventTriggerRequest
-    ) -> m.AgentEventTriggerResponse:
+    def upsert(self, agent_id: str, body: m.AgentEventTriggerRequest) -> m.AgentEventTriggerResponse:
         """Upsert.
 
         PUT /api/agents/{agentId}/triggers
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/triggers", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/triggers", body=body)
 
     def event_types(self, agent_id: str) -> Dict[str, List[str]]:
         """Event types.
 
         GET /api/agents/{agentId}/triggers/event-types
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/triggers/event-types"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/triggers/event-types")
 
     def disable(self, agent_id: str, trigger_id: str) -> m.AgentEventTriggerResponse:
         """Disable.
@@ -1882,134 +1000,68 @@ class AgentEventTriggerApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/triggers/{quote_path(trigger_id)}",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/triggers/{quote_path(trigger_id)}")
 
 
 class AgentExperimentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.AgentExperimentDtos_ExperimentResponse]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentExperimentDtos_ExperimentResponse]:
         """List.
 
         GET /api/agents/{agentId}/experiments
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/experiments",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/experiments", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        agent_id: str,
-        body: m.AgentExperimentDtos_CreateExperimentRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentExperimentDtos_ExperimentResponse:
+    def create(self, agent_id: str, body: m.AgentExperimentDtos_CreateExperimentRequest, *, idempotency_key: Optional[str] = None) -> m.AgentExperimentDtos_ExperimentResponse:
         """Create.
 
         POST /api/agents/{agentId}/experiments
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/experiments",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/experiments", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get(
-        self, agent_id: str, experiment_id: str
-    ) -> m.AgentExperimentDtos_ExperimentResponse:
+    def get(self, agent_id: str, experiment_id: str) -> m.AgentExperimentDtos_ExperimentResponse:
         """Get.
 
         GET /api/agents/{agentId}/experiments/{experimentId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}")
 
-    def metrics(
-        self, agent_id: str, experiment_id: str
-    ) -> m.AgentExperimentDtos_ExperimentMetricsResponse:
+    def metrics(self, agent_id: str, experiment_id: str) -> m.AgentExperimentDtos_ExperimentMetricsResponse:
         """Metrics.
 
         GET /api/agents/{agentId}/experiments/{experimentId}/metrics
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/metrics",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/metrics")
 
-    def start(
-        self,
-        agent_id: str,
-        experiment_id: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentExperimentDtos_ExperimentResponse:
+    def start(self, agent_id: str, experiment_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentExperimentDtos_ExperimentResponse:
         """Start.
 
         POST /api/agents/{agentId}/experiments/{experimentId}/start
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/start",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/start", headers={"Idempotency-Key": idempotency_key})
 
-    def stop(
-        self,
-        agent_id: str,
-        experiment_id: str,
-        body: Optional[m.AgentExperimentDtos_StopExperimentRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentExperimentDtos_ExperimentResponse:
+    def stop(self, agent_id: str, experiment_id: str, body: Optional[m.AgentExperimentDtos_StopExperimentRequest] = None, *, idempotency_key: Optional[str] = None) -> m.AgentExperimentDtos_ExperimentResponse:
         """Stop.
 
         POST /api/agents/{agentId}/experiments/{experimentId}/stop
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/stop",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/experiments/{quote_path(experiment_id)}/stop", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AgentGenerationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.AgentGenerationController_AgentGenerationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def generate(self, body: m.AgentGenerationController_AgentGenerationRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Generate.
 
         POST /api/agents/generate
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/agents/generate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/agents/generate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AgentGuardrailApi:
@@ -2021,30 +1073,16 @@ class AgentGuardrailApi:
 
         GET /api/agents/{agentId}/guardrails
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/guardrails"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/guardrails")
 
-    def update_agent_guardrails(
-        self,
-        agent_id: str,
-        body: m.AgentGuardrailsRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentGuardrailsResponse:
+    def update_agent_guardrails(self, agent_id: str, body: m.AgentGuardrailsRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentGuardrailsResponse:
         """Update agent guardrails.
 
         PATCH /api/agents/{agentId}/guardrails
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/guardrails",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/guardrails", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
 
 class AgentHooksApi:
@@ -2065,9 +1103,7 @@ class AgentHooksApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/hooks", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/hooks", body=body)
 
 
 class AgentHooksDefaultsApi:
@@ -2095,230 +1131,124 @@ class AgentImportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def import_agent(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentImportDtos_ImportResponse:
+    def import_agent(self, *, idempotency_key: Optional[str] = None) -> m.AgentImportDtos_ImportResponse:
         """Import agent.
 
         POST /api/agents/import
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST", "/api/agents/import", headers={"Idempotency-Key": idempotency_key}
-        )
+        return self._http.request("POST", "/api/agents/import", headers={"Idempotency-Key": idempotency_key})
 
-    def preview(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentImportDtos_PreviewResponse:
+    def preview(self, *, idempotency_key: Optional[str] = None) -> m.AgentImportDtos_PreviewResponse:
         """Preview.
 
         POST /api/agents/import/preview
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/agents/import/preview",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/agents/import/preview", headers={"Idempotency-Key": idempotency_key})
 
 
 class AgentImprovementApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ImprovementDtos_SuggestionResponse]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ImprovementDtos_SuggestionResponse]:
         """List.
 
         GET /api/agents/{agentId}/improvements
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/improvements",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/improvements", query={"limit": limit, "offset": offset})
 
-    def generate(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> List[m.ImprovementDtos_SuggestionResponse]:
+    def generate(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> List[m.ImprovementDtos_SuggestionResponse]:
         """Generate.
 
         POST /api/agents/{agentId}/improvements/generate
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/improvements/generate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/improvements/generate", headers={"Idempotency-Key": idempotency_key})
 
     def health(self, agent_id: str) -> m.ImprovementDtos_HealthScoreResponse:
         """Health.
 
         GET /api/agents/{agentId}/improvements/health
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/improvements/health"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/improvements/health")
 
-    def accept(
-        self,
-        agent_id: str,
-        suggestion_id: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ImprovementDtos_SuggestionResponse:
+    def accept(self, agent_id: str, suggestion_id: str, *, idempotency_key: Optional[str] = None) -> m.ImprovementDtos_SuggestionResponse:
         """Accept.
 
         POST /api/agents/{agentId}/improvements/{suggestionId}/accept
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/improvements/{quote_path(suggestion_id)}/accept",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/improvements/{quote_path(suggestion_id)}/accept", headers={"Idempotency-Key": idempotency_key})
 
-    def dismiss(
-        self,
-        agent_id: str,
-        suggestion_id: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ImprovementDtos_SuggestionResponse:
+    def dismiss(self, agent_id: str, suggestion_id: str, *, idempotency_key: Optional[str] = None) -> m.ImprovementDtos_SuggestionResponse:
         """Dismiss.
 
         POST /api/agents/{agentId}/improvements/{suggestionId}/dismiss
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/improvements/{quote_path(suggestion_id)}/dismiss",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/improvements/{quote_path(suggestion_id)}/dismiss", headers={"Idempotency-Key": idempotency_key})
 
 
 class AgentJobApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_for_tenant(
-        self,
-        *,
-        status: Optional[List[str]] = None,
-        agent_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.AgentJobSummaryResponse]:
+    def list_for_tenant(self, *, status: Optional[List[str]] = None, agent_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentJobSummaryResponse]:
         """List for tenant.
 
         GET /api/agent-jobs
         """
-        return self._http.request(
-            "GET",
-            "/api/agent-jobs",
-            query={
-                "status": status,
-                "agentId": agent_id,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/agent-jobs", query={"status": status, "agentId": agent_id, "limit": limit, "offset": offset})
 
-    def list_for_agent(
-        self,
-        agent_id: str,
-        *,
-        status: Optional[List[str]] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.AgentJobSummaryResponse]:
+    def list_for_agent(self, agent_id: str, *, status: Optional[List[str]] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentJobSummaryResponse]:
         """List for agent.
 
         GET /api/agents/{agentId}/jobs
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/jobs",
-            query={"status": status, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/jobs", query={"status": status, "limit": limit, "offset": offset})
 
-    def submit(
-        self,
-        agent_id: str,
-        body: m.AgentJobStartRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentJobResponse:
+    def submit(self, agent_id: str, body: m.AgentJobStartRequest, *, idempotency_key: Optional[str] = None) -> m.AgentJobResponse:
         """Submit.
 
         POST /api/agents/{agentId}/jobs
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/jobs",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/jobs", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, agent_id: str, job_id: str) -> m.AgentJobResponse:
         """Get.
 
         GET /api/agents/{agentId}/jobs/{jobId}
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}")
 
-    def cancel(
-        self, agent_id: str, job_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentJobResponse:
+    def cancel(self, agent_id: str, job_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentJobResponse:
         """Cancel.
 
         POST /api/agents/{agentId}/jobs/{jobId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
 
 class AgentJobObservabilityApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def progress(
-        self, agent_id: str, job_id: str, *, after: Optional[str] = None
-    ) -> List[m.AgentJobProgressNoteView]:
+    def progress(self, agent_id: str, job_id: str, *, after: Optional[str] = None) -> List[m.AgentJobProgressNoteView]:
         """Progress.
 
         GET /api/agents/{agentId}/jobs/{jobId}/progress
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/progress",
-            query={"after": after},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/progress", query={"after": after})
 
-    def trace(
-        self, agent_id: str, job_id: str, *, after: Optional[str] = None
-    ) -> List[m.JobTraceEntry]:
+    def trace(self, agent_id: str, job_id: str, *, after: Optional[str] = None) -> List[m.JobTraceEntry]:
         """Trace.
 
         GET /api/agents/{agentId}/jobs/{jobId}/trace
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/trace",
-            query={"after": after},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/trace", query={"after": after})
 
     def trace_stream(self, agent_id: str, job_id: str) -> Iterator[str]:
         """Trace stream.
@@ -2327,61 +1257,40 @@ class AgentJobObservabilityApi:
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/trace/stream",
-        )
+        return self._http.stream("GET", f"/api/agents/{quote_path(agent_id)}/jobs/{quote_path(job_id)}/trace/stream")
 
-    def get_result_schema(
-        self, agent_id: str
-    ) -> m.AgentJobObservabilityController_ResultSchemaResponse:
+    def get_result_schema(self, agent_id: str) -> m.AgentJobObservabilityController_ResultSchemaResponse:
         """Get result schema.
 
         GET /api/agents/{agentId}/result-schema
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/result-schema"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/result-schema")
 
-    def set_result_schema(
-        self, agent_id: str, body: m.AgentResultSchemaRequest
-    ) -> m.AgentJobObservabilityController_ResultSchemaResponse:
+    def set_result_schema(self, agent_id: str, body: m.AgentResultSchemaRequest) -> m.AgentJobObservabilityController_ResultSchemaResponse:
         """Set result schema.
 
         PUT /api/agents/{agentId}/result-schema
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/result-schema", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/result-schema", body=body)
 
     def clear_result_schema(self, agent_id: str) -> None:
         """Clear result schema.
 
         DELETE /api/agents/{agentId}/result-schema
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/result-schema",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/result-schema", response="void")
 
 
 class AgentJobOperatorApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def counts(
-        self, *, agent_id: Optional[str] = None, window: Optional[str] = None
-    ) -> m.AgentJobCountsResponse:
+    def counts(self, *, agent_id: Optional[str] = None, window: Optional[str] = None) -> m.AgentJobCountsResponse:
         """Counts.
 
         GET /api/agent-jobs/counts
         """
-        return self._http.request(
-            "GET",
-            "/api/agent-jobs/counts",
-            query={"agentId": agent_id, "window": window},
-        )
+        return self._http.request("GET", "/api/agent-jobs/counts", query={"agentId": agent_id, "window": window})
 
 
 class AgentLabApi:
@@ -2393,49 +1302,28 @@ class AgentLabApi:
 
         GET /api/agents/{agentId}/lab/capabilities
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/lab/capabilities"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/lab/capabilities")
 
-    def start_run(
-        self,
-        agent_id: str,
-        body: m.AgentLabDtos_LabRunRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentLabDtos_LabRunResponse:
+    def start_run(self, agent_id: str, body: m.AgentLabDtos_LabRunRequest, *, idempotency_key: Optional[str] = None) -> m.AgentLabDtos_LabRunResponse:
         """Start run.
 
         POST /api/agents/{agentId}/lab/runs
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/lab/runs",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/lab/runs", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_run(self, agent_id: str, run_id: str) -> m.AgentLabDtos_LabRunResponse:
         """Get run.
 
         GET /api/agents/{agentId}/lab/runs/{runId}
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/lab/runs/{quote_path(run_id)}"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/lab/runs/{quote_path(run_id)}")
 
-    def cancel_run(
-        self, agent_id: str, run_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentLabDtos_LabCancelResponse:
+    def cancel_run(self, agent_id: str, run_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentLabDtos_LabCancelResponse:
         """Cancel run.
 
         POST /api/agents/{agentId}/lab/runs/{runId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/lab/runs/{quote_path(run_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/lab/runs/{quote_path(run_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
 
 class AgentMemoryApi:
@@ -2447,45 +1335,26 @@ class AgentMemoryApi:
 
         GET /api/agents/{agentId}/memories
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/memories",
-            query={"subjectKey": subject_key},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories", query={"subjectKey": subject_key})
 
     def forget_memory(self, agent_id: str, memory_id: str) -> None:
         """Forget memory.
 
         DELETE /api/agents/{agentId}/memories/{memoryId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}", response="void")
 
 
 class AgentPromptPreviewApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def preview(
-        self,
-        agent_id: str,
-        body: Optional[m.PromptPreviewService_Request] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PromptPreviewService_Preview:
+    def preview(self, agent_id: str, body: Optional[m.PromptPreviewService_Request] = None, *, idempotency_key: Optional[str] = None) -> m.PromptPreviewService_Preview:
         """Preview.
 
         POST /api/agents/{agentId}/prompt-preview
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/prompt-preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/prompt-preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AgentRunBudgetApi:
@@ -2497,28 +1366,14 @@ class AgentRunBudgetApi:
 
         GET /api/agents/{agentId}/run-budget
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/run-budget"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/run-budget")
 
-    def update(
-        self,
-        agent_id: str,
-        body: Any,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.AgentRunBudgetResponse:
+    def update(self, agent_id: str, body: Any, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentRunBudgetResponse:
         """Update.
 
         PATCH /api/agents/{agentId}/run-budget
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/agents/{quote_path(agent_id)}/run-budget",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/run-budget", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
 
 class AgentRuntimeLimitsApi:
@@ -2530,20 +1385,14 @@ class AgentRuntimeLimitsApi:
 
         GET /api/agents/{agentId}/runtime-limits
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/runtime-limits"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/runtime-limits")
 
-    def put(
-        self, agent_id: str, body: Optional[m.RuntimeLimits] = None
-    ) -> m.RuntimeLimitsView:
+    def put(self, agent_id: str, body: Optional[m.RuntimeLimits] = None) -> m.RuntimeLimitsView:
         """Put.
 
         PUT /api/agents/{agentId}/runtime-limits
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/runtime-limits", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/runtime-limits", body=body)
 
 
 class AgentScheduleApi:
@@ -2557,107 +1406,67 @@ class AgentScheduleApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/schedule")
 
-    def upsert(
-        self, agent_id: str, body: m.AgentScheduleRequest
-    ) -> m.AgentScheduleResponse:
+    def upsert(self, agent_id: str, body: m.AgentScheduleRequest) -> m.AgentScheduleResponse:
         """Upsert.
 
         PUT /api/agents/{agentId}/schedule
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/schedule", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/schedule", body=body)
 
-    def disable(
-        self, agent_id: str, *, remove: Optional[bool] = None
-    ) -> m.AgentScheduleResponse:
+    def disable(self, agent_id: str, *, remove: Optional[bool] = None) -> m.AgentScheduleResponse:
         """Disable.
 
         DELETE /api/agents/{agentId}/schedule
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/schedule",
-            query={"remove": remove},
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/schedule", query={"remove": remove})
 
-    def resume(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentScheduleResponse:
+    def resume(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentScheduleResponse:
         """Resume.
 
         POST /api/agents/{agentId}/schedule/resume
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/schedule/resume",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/schedule/resume", headers={"Idempotency-Key": idempotency_key})
 
-    def run_now(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentScheduleRunResponse:
+    def run_now(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentScheduleRunResponse:
         """Run now.
 
         POST /api/agents/{agentId}/schedule/run-now
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/schedule/run-now",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/schedule/run-now", headers={"Idempotency-Key": idempotency_key})
 
-    def runs(
-        self, agent_id: str, *, limit: Optional[int] = None
-    ) -> List[m.AgentScheduleRunResponse]:
+    def runs(self, agent_id: str, *, limit: Optional[int] = None) -> List[m.AgentScheduleRunResponse]:
         """Runs.
 
         GET /api/agents/{agentId}/schedule/runs
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/schedule/runs",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/schedule/runs", query={"limit": limit})
 
 
 class AgentScratchpadApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, agent_id: str, *, session: Optional[str] = None
-    ) -> m.AgentScratchpadController_ScratchpadListView:
+    def list(self, agent_id: str, *, session: Optional[str] = None) -> m.AgentScratchpadController_ScratchpadListView:
         """List.
 
         GET /api/agents/{agentId}/scratchpad
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/scratchpad",
-            query={"session": session},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad", query={"session": session})
 
-    def read(
-        self, agent_id: str, key: str, *, session: Optional[str] = None
-    ) -> m.ScratchpadNoteView:
+    def read(self, agent_id: str, key: str, *, session: Optional[str] = None) -> m.ScratchpadNoteView:
         """Read.
 
         GET /api/agents/{agentId}/scratchpad/{key}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}",
-            query={"session": session},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
 
 
 class AgentSessionLlmRequestApi:
@@ -2669,92 +1478,58 @@ class AgentSessionLlmRequestApi:
 
         GET /api/agents/{agentId}/sessions/{sessionId}/llm-requests
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-requests",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-requests")
 
 
 class AgentSessionLlmUsageApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def calls(
-        self, agent_id: str, session_id: str
-    ) -> List[m.AgentSessionLlmUsageController_SessionLlmCallEntry]:
+    def calls(self, agent_id: str, session_id: str) -> List[m.AgentSessionLlmUsageController_SessionLlmCallEntry]:
         """Calls.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/llm-usage
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-usage",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-usage")
 
     def summary(self, agent_id: str, session_id: str) -> m.RunCostTimeline_Summary:
         """Summary.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/llm-usage/summary
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-usage/summary",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/llm-usage/summary")
 
 
 class AgentSettingsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def history(
-        self,
-        agent_id: str,
-        *,
-        since: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.SettingsController_HistoryPageResponse:
+    def history(self, agent_id: str, *, since: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.SettingsController_HistoryPageResponse:
         """History.
 
         GET /api/agents/{agentId}/settings/history
 
         Every change to this agent's settings, newest first (EDITOR on the agent; an agent of another workspace is a 404). since keeps rows at or after that instant; page with limit and offset.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/settings/history",
-            query={"since": since, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/settings/history", query={"since": since, "limit": limit, "offset": offset})
 
-    def put(
-        self, agent_id: str, key: str, body: m.SettingsController_ValueRequest
-    ) -> m.SettingsController_WriteResponse:
+    def put(self, agent_id: str, key: str, body: m.SettingsController_ValueRequest) -> m.SettingsController_WriteResponse:
         """Put.
 
         PUT /api/agents/{agentId}/settings/{key}
 
         Set a runtime setting for one agent (EDITOR on the agent; a security key also needs a tenant admin). Same body and rules as the workspace PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}", body=body)
 
-    def delete(
-        self, agent_id: str, key: str, *, reason: Optional[str] = None
-    ) -> m.SettingsController_WriteResponse:
+    def delete(self, agent_id: str, key: str, *, reason: Optional[str] = None) -> m.SettingsController_WriteResponse:
         """Delete.
 
         DELETE /api/agents/{agentId}/settings/{key}
 
         Remove the agent's override so the workspace value applies again. A high or security key needs a typed reason (?reason=). Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}",
-            query={"reason": reason},
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/settings/{quote_path(key)}", query={"reason": reason})
 
 
 class AgentShareApi:
@@ -2770,53 +1545,32 @@ class AgentShareApi:
         """
         return self._http.request("GET", f"/api/share/agents/{quote_path(share_id)}")
 
-    def chat(
-        self,
-        share_id: str,
-        body: Optional[m.AgentShareController_ShareChatRequest] = None,
-    ) -> Any:
+    def chat(self, share_id: str, body: Optional[m.AgentShareController_ShareChatRequest] = None) -> Any:
         """Chat.
 
         POST /api/share/agents/{shareId}/chat
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/share/agents/{quote_path(share_id)}/chat", body=body
-        )
+        return self._http.request("POST", f"/api/share/agents/{quote_path(share_id)}/chat", body=body)
 
-    def chat_stream(
-        self,
-        share_id: str,
-        body: Optional[m.AgentShareController_ShareChatStreamRequest] = None,
-    ) -> Iterator[str]:
+    def chat_stream(self, share_id: str, body: Optional[m.AgentShareController_ShareChatStreamRequest] = None) -> Iterator[str]:
         """Chat stream.
 
         POST /api/share/agents/{shareId}/chat/stream
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.stream(
-            "POST", f"/api/share/agents/{quote_path(share_id)}/chat/stream", body=body
-        )
+        return self._http.stream("POST", f"/api/share/agents/{quote_path(share_id)}/chat/stream", body=body)
 
-    def report(
-        self,
-        share_id: str,
-        body: Optional[m.AgentShareController_ShareReportRequest] = None,
-    ) -> None:
+    def report(self, share_id: str, body: Optional[m.AgentShareController_ShareReportRequest] = None) -> None:
         """Report.
 
         POST /api/share/agents/{shareId}/report
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/share/agents/{quote_path(share_id)}/report",
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/share/agents/{quote_path(share_id)}/report", body=body, response="void")
 
 
 class AgentShareOwnerApi:
@@ -2830,49 +1584,33 @@ class AgentShareOwnerApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/share")
 
-    def create(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentShareOwnerController_ShareStatusResponse:
+    def create(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentShareOwnerController_ShareStatusResponse:
         """Create.
 
         POST /api/agents/{agentId}/share
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/share",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/share", headers={"Idempotency-Key": idempotency_key})
 
     def revoke(self, agent_id: str) -> None:
         """Revoke.
 
         DELETE /api/agents/{agentId}/share
         """
-        return self._http.request(
-            "DELETE", f"/api/agents/{quote_path(agent_id)}/share", response="void"
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/share", response="void")
 
 
 class AgentShareVisionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def start(
-        self,
-        share_id: str,
-        body: m.AgentShareVisionController_ShareVisionSessionStartRequest,
-    ) -> Any:
+    def start(self, share_id: str, body: m.AgentShareVisionController_ShareVisionSessionStartRequest) -> Any:
         """Start.
 
         POST /api/share/agents/{shareId}/vision/sessions
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/share/agents/{quote_path(share_id)}/vision/sessions",
-            body=body,
-        )
+        return self._http.request("POST", f"/api/share/agents/{quote_path(share_id)}/vision/sessions", body=body)
 
     def end(self, share_id: str, session_id: str, body: Optional[str] = None) -> Any:
         """End.
@@ -2881,11 +1619,7 @@ class AgentShareVisionApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/share/agents/{quote_path(share_id)}/vision/sessions/{quote_path(session_id)}/end",
-            body=body,
-        )
+        return self._http.request("POST", f"/api/share/agents/{quote_path(share_id)}/vision/sessions/{quote_path(session_id)}/end", body=body)
 
 
 class AgentShareVoiceApi:
@@ -2899,26 +1633,16 @@ class AgentShareVoiceApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/share/agents/{quote_path(share_id)}/voice/token", body=body
-        )
+        return self._http.request("POST", f"/api/share/agents/{quote_path(share_id)}/voice/token", body=body)
 
-    def turn(
-        self, share_id: str, body: Dict[str, Any], *, session_id: Optional[str] = None
-    ) -> Iterator[str]:
+    def turn(self, share_id: str, body: Dict[str, Any], *, session_id: Optional[str] = None) -> Iterator[str]:
         """Turn.
 
         POST /api/share/agents/{shareId}/voice/turn
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/share/agents/{quote_path(share_id)}/voice/turn",
-            query={"sessionId": session_id},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.stream("POST", f"/api/share/agents/{quote_path(share_id)}/voice/turn", query={"sessionId": session_id}, body=body, body_type="multipart")
 
 
 class AgentSpecialtyApi:
@@ -2937,234 +1661,131 @@ class AgentSpecialtyApi:
 
         GET /api/agents/{agentId}/specialties
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/specialties"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/specialties")
 
-    def put(
-        self, agent_id: str, body: m.AgentSpecialtyController_SpecialtiesRequest
-    ) -> m.AgentSpecialtyController_SpecialtiesResponse:
+    def put(self, agent_id: str, body: m.AgentSpecialtyController_SpecialtiesRequest) -> m.AgentSpecialtyController_SpecialtiesResponse:
         """Put.
 
         PUT /api/agents/{agentId}/specialties
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/specialties", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/specialties", body=body)
 
 
 class AgentTurnApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def agent_turn(
-        self, body: m.AgentTurn_Request, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentTurn_Result:
+    def agent_turn(self, body: m.AgentTurn_Request, *, idempotency_key: Optional[str] = None) -> m.AgentTurn_Result:
         """Agent turn.
 
         POST /api/completions/agent-turn
         """
-        return self._http.request(
-            "POST",
-            "/api/completions/agent-turn",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/completions/agent-turn", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AgentVersionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.AgentVersionResponse]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentVersionResponse]:
         """List.
 
         GET /api/agents/{agentId}/versions
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/versions",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/versions", query={"limit": limit, "offset": offset})
 
-    def publish(
-        self,
-        agent_id: str,
-        body: Optional[m.AgentVersionPublishRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentPublishResponse:
+    def publish(self, agent_id: str, body: Optional[m.AgentVersionPublishRequest] = None, *, idempotency_key: Optional[str] = None) -> m.AgentPublishResponse:
         """Publish.
 
         POST /api/agents/{agentId}/versions
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/versions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/versions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def diff(self, agent_id: str, *, from_: int, to: int) -> Dict[str, Any]:
         """Diff.
 
         GET /api/agents/{agentId}/versions/diff
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/versions/diff",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/versions/diff", query={"from": from_, "to": to})
 
-    def rollback(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentVersionResponse:
+    def rollback(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentVersionResponse:
         """Rollback.
 
         POST /api/agents/{agentId}/versions/rollback
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/versions/rollback",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/versions/rollback", headers={"Idempotency-Key": idempotency_key})
 
     def get(self, agent_id: str, version_id: str) -> m.AgentVersionResponse:
         """Get.
 
         GET /api/agents/{agentId}/versions/{versionId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}")
 
-    def set_label(
-        self, agent_id: str, version_id: str, body: m.AgentVersionLabelUpdateRequest
-    ) -> m.AgentVersionResponse:
+    def set_label(self, agent_id: str, version_id: str, body: m.AgentVersionLabelUpdateRequest) -> m.AgentVersionResponse:
         """Set label.
 
         PUT /api/agents/{agentId}/versions/{versionId}/label
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/label",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/label", body=body)
 
-    def promote(
-        self,
-        agent_id: str,
-        version_id: str,
-        body: m.AgentVersionPromoteRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.AgentVersionResponse:
+    def promote(self, agent_id: str, version_id: str, body: m.AgentVersionPromoteRequest, *, idempotency_key: Optional[str] = None) -> m.AgentVersionResponse:
         """Promote.
 
         POST /api/agents/{agentId}/versions/{versionId}/promote
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/promote",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/promote", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def restore(
-        self, agent_id: str, version_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentResponse:
+    def restore(self, agent_id: str, version_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentResponse:
         """Restore.
 
         POST /api/agents/{agentId}/versions/{versionId}/restore
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/restore",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/versions/{quote_path(version_id)}/restore", headers={"Idempotency-Key": idempotency_key})
 
 
 class AiContentReportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def submit(
-        self, body: m.AiContentReportRequest, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def submit(self, body: m.AiContentReportRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Submit.
 
         POST /api/ai-reports
         """
-        return self._http.request(
-            "POST",
-            "/api/ai-reports",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/ai-reports", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def list(
-        self,
-        *,
-        status: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> Dict[str, Any]:
+    def list(self, *, status: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> Dict[str, Any]:
         """List.
 
         GET /api/platform/ai-reports
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/ai-reports",
-            query={"status": status, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/platform/ai-reports", query={"status": status, "limit": limit, "offset": offset})
 
-    def review(
-        self,
-        id: str,
-        body: m.AiContentReportReviewRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def review(self, id: str, body: m.AiContentReportReviewRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Review.
 
         PATCH /api/platform/ai-reports/{id}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/platform/ai-reports/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/platform/ai-reports/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AmbientDigestApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def digest(
-        self, *, since_hours: Optional[int] = None
-    ) -> m.AmbientDigestController_AmbientDigestResponse:
+    def digest(self, *, since_hours: Optional[int] = None) -> m.AmbientDigestController_AmbientDigestResponse:
         """Digest.
 
         GET /api/ambient/digest
         """
-        return self._http.request(
-            "GET", "/api/ambient/digest", query={"sinceHours": since_hours}
-        )
+        return self._http.request("GET", "/api/ambient/digest", query={"sinceHours": since_hours})
 
 
 class ApiSpecApi:
@@ -3183,72 +1804,40 @@ class AppBuilderCompletionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate_files(
-        self,
-        body: Optional[str] = None,
-        *,
-        x_service_token: Optional[str] = None,
-        x_tenant_id: Optional[str] = None,
-    ) -> m.AppBuilderGenerateFilesResult:
+    def generate_files(self, body: Optional[str] = None, *, x_service_token: Optional[str] = None, x_tenant_id: Optional[str] = None) -> m.AppBuilderGenerateFilesResult:
         """Generate files.
 
         POST /api/internal/app-builder/generate-files
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/internal/app-builder/generate-files",
-            headers={"X-Service-Token": x_service_token, "X-Tenant-Id": x_tenant_id},
-            body=body,
-        )
+        return self._http.request("POST", "/api/internal/app-builder/generate-files", headers={"X-Service-Token": x_service_token, "X-Tenant-Id": x_tenant_id}, body=body)
 
 
 class AppBuilderImageApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate_image(
-        self,
-        body: Optional[str] = None,
-        *,
-        x_service_token: Optional[str] = None,
-        x_tenant_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def generate_image(self, body: Optional[str] = None, *, x_service_token: Optional[str] = None, x_tenant_id: Optional[str] = None) -> Dict[str, Any]:
         """Generate image.
 
         POST /api/internal/app-builder/generate-image
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/internal/app-builder/generate-image",
-            headers={"X-Service-Token": x_service_token, "X-Tenant-Id": x_tenant_id},
-            body=body,
-        )
+        return self._http.request("POST", "/api/internal/app-builder/generate-image", headers={"X-Service-Token": x_service_token, "X-Tenant-Id": x_tenant_id}, body=body)
 
 
 class ApprovalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        status: Optional[m.ApprovalStatus] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ApprovalRequestResponse]:
+    def list(self, *, status: Optional[m.ApprovalStatus] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ApprovalRequestResponse]:
         """List.
 
         GET /api/approvals
         """
-        return self._http.request(
-            "GET",
-            "/api/approvals",
-            query={"status": status, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/approvals", query={"status": status, "limit": limit, "offset": offset})
 
     def set_policy(self, action_type: str, body: m.ApprovalPolicyUpdateRequest) -> None:
         """Set policy.
@@ -3257,12 +1846,7 @@ class ApprovalApi:
 
         Requires PERM_MANAGE_APPROVALS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/approvals/policy/{quote_path(action_type)}",
-            body=body,
-            response="void",
-        )
+        return self._http.request("PUT", f"/api/approvals/policy/{quote_path(action_type)}", body=body, response="void")
 
     def get(self, id: str) -> m.ApprovalRequestResponse:
         """Get.
@@ -3271,76 +1855,40 @@ class ApprovalApi:
         """
         return self._http.request("GET", f"/api/approvals/{quote_path(id)}")
 
-    def approve(
-        self,
-        id: str,
-        body: Optional[m.ApprovalDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ApprovalRequestResponse:
+    def approve(self, id: str, body: Optional[m.ApprovalDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.ApprovalRequestResponse:
         """Approve.
 
         POST /api/approvals/{id}/approve
         """
-        return self._http.request(
-            "POST",
-            f"/api/approvals/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/approvals/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def reject(
-        self,
-        id: str,
-        body: Optional[m.ApprovalDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ApprovalRequestResponse:
+    def reject(self, id: str, body: Optional[m.ApprovalDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.ApprovalRequestResponse:
         """Reject.
 
         POST /api/approvals/{id}/reject
         """
-        return self._http.request(
-            "POST",
-            f"/api/approvals/{quote_path(id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/approvals/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AssistApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def code_edit(
-        self, body: m.AssistCodeEditRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.AssistResponse:
+    def code_edit(self, body: m.AssistCodeEditRequest, *, idempotency_key: Optional[str] = None) -> m.AssistResponse:
         """Code edit.
 
         POST /api/assist/code-edit
         """
-        return self._http.request(
-            "POST",
-            "/api/assist/code-edit",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/assist/code-edit", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def draft(
-        self, body: m.AssistRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.AssistResponse:
+    def draft(self, body: m.AssistRequest, *, idempotency_key: Optional[str] = None) -> m.AssistResponse:
         """Draft.
 
         POST /api/assist/draft
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/assist/draft",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/assist/draft", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class AtlassianOAuthApi:
@@ -3361,69 +1909,30 @@ class AtlassianOAuthApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/mcp/registry/atlassian/connection", response="void"
-        )
+        return self._http.request("DELETE", "/api/mcp/registry/atlassian/connection", response="void")
 
-    def callback(
-        self,
-        *,
-        code: Optional[str] = None,
-        state: Optional[str] = None,
-        error: Optional[str] = None,
-    ) -> None:
+    def callback(self, *, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None) -> None:
         """Callback.
 
         GET /oauth/atlassian/callback
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/oauth/atlassian/callback",
-            query={"code": code, "state": state, "error": error},
-            response="void",
-        )
+        return self._http.request("GET", "/oauth/atlassian/callback", query={"code": code, "state": state, "error": error}, response="void")
 
 
 class AuditLogApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        action_type: Optional[str] = None,
-        target_type: Optional[str] = None,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        actor: Optional[str] = None,
-        q: Optional[str] = None,
-        cursor: Optional[str] = None,
-    ) -> List[m.AuditLogEntryResponse]:
+    def list(self, *, action_type: Optional[str] = None, target_type: Optional[str] = None, from_: Optional[str] = None, to: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None, actor: Optional[str] = None, q: Optional[str] = None, cursor: Optional[str] = None) -> List[m.AuditLogEntryResponse]:
         """List.
 
         GET /api/audit-log
 
         The tenant's audit trail, newest first, filtered by actionType, targetType, actor, q and a from/to window. Without limit or offset: the newest 200. With limit: a page with X-Total-Count; follow X-Next-Cursor with cursor for deep history. Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role). Keyset paging: pass the X-Next-Cursor value of a page as cursor to get the next one; offset is ignored and X-Total-Count is not sent when cursor is given.
         """
-        return self._http.request(
-            "GET",
-            "/api/audit-log",
-            query={
-                "actionType": action_type,
-                "targetType": target_type,
-                "from": from_,
-                "to": to,
-                "limit": limit,
-                "offset": offset,
-                "actor": actor,
-                "q": q,
-                "cursor": cursor,
-            },
-        )
+        return self._http.request("GET", "/api/audit-log", query={"actionType": action_type, "targetType": target_type, "from": from_, "to": to, "limit": limit, "offset": offset, "actor": actor, "q": q, "cursor": cursor})
 
     def action_types(self) -> List[str]:
         """Action types.
@@ -3434,78 +1943,46 @@ class AuditLogApi:
         """
         return self._http.request("GET", "/api/audit-log/action-types")
 
-    def counts(
-        self,
-        *,
-        action_type: str,
-        target_id: Optional[str] = None,
-        actor_id: Optional[str] = None,
-        detail_contains: Optional[str] = None,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-    ) -> m.AuditLogCountsResponse:
+    def counts(self, *, action_type: str, target_id: Optional[str] = None, actor_id: Optional[str] = None, detail_contains: Optional[str] = None, from_: Optional[str] = None, to: Optional[str] = None) -> m.AuditLogCountsResponse:
         """Counts.
 
         GET /api/audit-log/counts
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/audit-log/counts",
-            query={
-                "actionType": action_type,
-                "targetId": target_id,
-                "actorId": actor_id,
-                "detailContains": detail_contains,
-                "from": from_,
-                "to": to,
-            },
-        )
+        return self._http.request("GET", "/api/audit-log/counts", query={"actionType": action_type, "targetId": target_id, "actorId": actor_id, "detailContains": detail_contains, "from": from_, "to": to})
 
 
 class AuditSealApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def export(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.AuditSealDtos_ExportBundle:
+    def export(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.AuditSealDtos_ExportBundle:
         """Export.
 
         GET /api/audit-log/export
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/audit-log/export", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/audit-log/export", query={"from": from_, "to": to})
 
-    def seals(
-        self, *, page: Optional[int] = None, size: Optional[int] = None
-    ) -> m.AuditSealDtos_SealPage:
+    def seals(self, *, page: Optional[int] = None, size: Optional[int] = None) -> m.AuditSealDtos_SealPage:
         """Seals.
 
         GET /api/audit-log/seals
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/audit-log/seals", query={"page": page, "size": size}
-        )
+        return self._http.request("GET", "/api/audit-log/seals", query={"page": page, "size": size})
 
-    def verify(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.AuditSealVerifier_Result:
+    def verify(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.AuditSealVerifier_Result:
         """Verify.
 
         GET /api/audit-log/verify
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/audit-log/verify", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/audit-log/verify", query={"from": from_, "to": to})
 
 
 class BillingWebhookApi:
@@ -3519,66 +1996,37 @@ class BillingWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/billing/webhook/{quote_path(gateway)}",
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/billing/webhook/{quote_path(gateway)}", body=body, response="void")
 
 
 class BriefApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        entity_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.BriefDtos_ListItem]:
+    def list(self, *, entity_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.BriefDtos_ListItem]:
         """List.
 
         GET /api/briefs
         """
-        return self._http.request(
-            "GET",
-            "/api/briefs",
-            query={"entityId": entity_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/briefs", query={"entityId": entity_id, "limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.BriefDtos_BriefRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.BriefDtos_CreateResponse:
+    def create(self, body: m.BriefDtos_BriefRequest, *, idempotency_key: Optional[str] = None) -> m.BriefDtos_CreateResponse:
         """Create.
 
         POST /api/briefs
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/briefs",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/briefs", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def plan(
-        self, body: m.PlanRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.BriefDtos_PlanResponse:
+    def plan(self, body: m.PlanRequest, *, idempotency_key: Optional[str] = None) -> m.BriefDtos_PlanResponse:
         """Plan.
 
         POST /api/briefs/plan
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/briefs/plan",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/briefs/plan", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.BriefDtos_Detail:
         """Get.
@@ -3587,9 +2035,7 @@ class BriefApi:
         """
         return self._http.request("GET", f"/api/briefs/{quote_path(id)}")
 
-    def update(
-        self, id: str, body: m.BriefDtos_BriefRequest
-    ) -> m.BriefDtos_UpdateResponse:
+    def update(self, id: str, body: m.BriefDtos_BriefRequest) -> m.BriefDtos_UpdateResponse:
         """Update.
 
         PUT /api/briefs/{id}
@@ -3598,193 +2044,106 @@ class BriefApi:
         """
         return self._http.request("PUT", f"/api/briefs/{quote_path(id)}", body=body)
 
-    def delete(
-        self,
-        id: str,
-        body: Optional[m.BriefDtos_DeleteRequest] = None,
-        *,
-        purge_entities: Optional[bool] = None,
-    ) -> None:
+    def delete(self, id: str, body: Optional[m.BriefDtos_DeleteRequest] = None, *, purge_entities: Optional[bool] = None) -> None:
         """Delete.
 
         DELETE /api/briefs/{id}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/briefs/{quote_path(id)}",
-            query={"purgeEntities": purge_entities},
-            body=body,
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/briefs/{quote_path(id)}", query={"purgeEntities": purge_entities}, body=body, response="void")
 
-    def readiness(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.BriefDtos_ReadinessResponse:
+    def readiness(self, id: str, *, idempotency_key: Optional[str] = None) -> m.BriefDtos_ReadinessResponse:
         """Readiness.
 
         POST /api/briefs/{id}/readiness
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/readiness",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/readiness", headers={"Idempotency-Key": idempotency_key})
 
 
 class BriefLifecycleApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def apply(
-        self,
-        id: str,
-        body: Optional[m.ApplyDtos_ApplyRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def apply(self, id: str, body: Optional[m.ApplyDtos_ApplyRequest] = None, *, idempotency_key: Optional[str] = None) -> Any:
         """Apply.
 
         POST /api/briefs/{id}/apply
 
         Requires both PERM_MANAGE_AGENTS and PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/apply",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/apply", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def job(self, id: str, job_id: str) -> m.ApplyDtos_ApplyResult:
         """Job.
 
         GET /api/briefs/{id}/apply/{jobId}
         """
-        return self._http.request(
-            "GET", f"/api/briefs/{quote_path(id)}/apply/{quote_path(job_id)}"
-        )
+        return self._http.request("GET", f"/api/briefs/{quote_path(id)}/apply/{quote_path(job_id)}")
 
-    def proposal(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TrustDtos_TrustProposal:
+    def proposal(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TrustDtos_TrustProposal:
         """Proposal.
 
         POST /api/briefs/{id}/trust/proposal
 
         Restricted to tenant-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/trust/proposal",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/trust/proposal", headers={"Idempotency-Key": idempotency_key})
 
-    def set_rung(
-        self, id: str, rung: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TrustDtos_TrustChange:
+    def set_rung(self, id: str, rung: str, *, idempotency_key: Optional[str] = None) -> m.TrustDtos_TrustChange:
         """Set rung.
 
         POST /api/briefs/{id}/trust/{rung}
 
         Restricted to tenant-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/trust/{quote_path(rung)}",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/trust/{quote_path(rung)}", headers={"Idempotency-Key": idempotency_key})
 
-    def tune(
-        self,
-        id: str,
-        body: m.ApplyDtos_TuneRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ApplyDtos_TuneResult:
+    def tune(self, id: str, body: m.ApplyDtos_TuneRequest, *, idempotency_key: Optional[str] = None) -> m.ApplyDtos_TuneResult:
         """Tune.
 
         POST /api/briefs/{id}/tune
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/tune",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/tune", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def versions(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.BriefDtos_VersionSummary]:
+    def versions(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.BriefDtos_VersionSummary]:
         """Versions.
 
         GET /api/briefs/{id}/versions
         """
-        return self._http.request(
-            "GET",
-            f"/api/briefs/{quote_path(id)}/versions",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/briefs/{quote_path(id)}/versions", query={"limit": limit, "offset": offset})
 
     def diff(self, id: str, *, from_: int, to: int) -> m.ApplyDtos_VersionDiff:
         """Diff.
 
         GET /api/briefs/{id}/versions/diff
         """
-        return self._http.request(
-            "GET",
-            f"/api/briefs/{quote_path(id)}/versions/diff",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", f"/api/briefs/{quote_path(id)}/versions/diff", query={"from": from_, "to": to})
 
-    def rollback(
-        self,
-        id: str,
-        version: int,
-        body: Optional[m.ApplyDtos_RollbackRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def rollback(self, id: str, version: int, body: Optional[m.ApplyDtos_RollbackRequest] = None, *, idempotency_key: Optional[str] = None) -> Any:
         """Rollback.
 
         POST /api/briefs/{id}/versions/{version}/rollback
 
         Requires both PERM_MANAGE_AGENTS and PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/versions/{quote_path(version)}/rollback",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/versions/{quote_path(version)}/rollback", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class BriefProofApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def experiment(
-        self,
-        id: str,
-        body: Optional[m.LedgerDtos_ExperimentRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LedgerDtos_ExperimentStarted:
+    def experiment(self, id: str, body: Optional[m.LedgerDtos_ExperimentRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LedgerDtos_ExperimentStarted:
         """Experiment.
 
         POST /api/briefs/{id}/experiments
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/experiments",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/experiments", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def ledger(self, id: str) -> m.LedgerDtos_Ledger:
         """Ledger.
@@ -3800,20 +2159,14 @@ class BriefProofApi:
         """
         return self._http.request("GET", f"/api/briefs/{quote_path(id)}/rehearsals")
 
-    def rehearse(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.LedgerDtos_RehearsalStarted:
+    def rehearse(self, id: str, *, idempotency_key: Optional[str] = None) -> m.LedgerDtos_RehearsalStarted:
         """Rehearse.
 
         POST /api/briefs/{id}/rehearse
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/briefs/{quote_path(id)}/rehearse",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/briefs/{quote_path(id)}/rehearse", headers={"Idempotency-Key": idempotency_key})
 
 
 class BrowserAutomationApi:
@@ -3832,149 +2185,80 @@ class BrowserProfileApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.BrowserAutomationDtos_ProfileView]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.BrowserAutomationDtos_ProfileView]:
         """List.
 
         GET /api/browser/profiles
         """
-        return self._http.request(
-            "GET", "/api/browser/profiles", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/browser/profiles", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.BrowserAutomationDtos_CreateProfileRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserAutomationDtos_ProfileView:
+    def create(self, body: m.BrowserAutomationDtos_CreateProfileRequest, *, idempotency_key: Optional[str] = None) -> m.BrowserAutomationDtos_ProfileView:
         """Create.
 
         POST /api/browser/profiles
         """
-        return self._http.request(
-            "POST",
-            "/api/browser/profiles",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/browser/profiles", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
 
         DELETE /api/browser/profiles/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/browser/profiles/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/browser/profiles/{quote_path(id)}", response="void")
 
-    def update(
-        self,
-        id: str,
-        body: m.BrowserAutomationDtos_UpdateProfileRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserAutomationDtos_ProfileView:
+    def update(self, id: str, body: m.BrowserAutomationDtos_UpdateProfileRequest, *, idempotency_key: Optional[str] = None) -> m.BrowserAutomationDtos_ProfileView:
         """Update.
 
         PATCH /api/browser/profiles/{id}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/browser/profiles/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/browser/profiles/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def attach(self, id: str, agent_id: str) -> m.BrowserAutomationDtos_ProfileView:
         """Attach.
 
         PUT /api/browser/profiles/{id}/agents/{agentId}
         """
-        return self._http.request(
-            "PUT",
-            f"/api/browser/profiles/{quote_path(id)}/agents/{quote_path(agent_id)}",
-        )
+        return self._http.request("PUT", f"/api/browser/profiles/{quote_path(id)}/agents/{quote_path(agent_id)}")
 
     def detach(self, id: str, agent_id: str) -> None:
         """Detach.
 
         DELETE /api/browser/profiles/{id}/agents/{agentId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/browser/profiles/{quote_path(id)}/agents/{quote_path(agent_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/browser/profiles/{quote_path(id)}/agents/{quote_path(agent_id)}", response="void")
 
     def clear_state(self, id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Clear state.
 
         POST /api/browser/profiles/{id}/clear-state
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/profiles/{quote_path(id)}/clear-state",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/browser/profiles/{quote_path(id)}/clear-state", headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class BrowserRecipeApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        agent_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.BrowserAutomationDtos_RecipeSummary]:
+    def list(self, *, agent_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.BrowserAutomationDtos_RecipeSummary]:
         """List.
 
         GET /api/browser/recipes
         """
-        return self._http.request(
-            "GET",
-            "/api/browser/recipes",
-            query={"agentId": agent_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/browser/recipes", query={"agentId": agent_id, "limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.BrowserAutomationDtos_CreateRecipeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserAutomationDtos_RecipeDetail:
+    def create(self, body: m.BrowserAutomationDtos_CreateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.BrowserAutomationDtos_RecipeDetail:
         """Create.
 
         POST /api/browser/recipes
         """
-        return self._http.request(
-            "POST",
-            "/api/browser/recipes",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/browser/recipes", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def from_run(
-        self,
-        body: m.BrowserAutomationDtos_RecipeFromRunRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserAutomationDtos_RecipeDetail:
+    def from_run(self, body: m.BrowserAutomationDtos_RecipeFromRunRequest, *, idempotency_key: Optional[str] = None) -> m.BrowserAutomationDtos_RecipeDetail:
         """From run.
 
         POST /api/browser/recipes/from-run
         """
-        return self._http.request(
-            "POST",
-            "/api/browser/recipes/from-run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/browser/recipes/from-run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.BrowserAutomationDtos_RecipeDetail:
         """Get.
@@ -3988,27 +2272,14 @@ class BrowserRecipeApi:
 
         DELETE /api/browser/recipes/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/browser/recipes/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/browser/recipes/{quote_path(id)}", response="void")
 
-    def update(
-        self,
-        id: str,
-        body: m.BrowserAutomationDtos_UpdateRecipeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserAutomationDtos_RecipeSummary:
+    def update(self, id: str, body: m.BrowserAutomationDtos_UpdateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.BrowserAutomationDtos_RecipeSummary:
         """Update.
 
         PATCH /api/browser/recipes/{id}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/browser/recipes/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/browser/recipes/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class BrowserTakeoverApi:
@@ -4022,162 +2293,82 @@ class BrowserTakeoverApi:
         """
         return self._http.request("GET", "/api/browser/takeover/capabilities")
 
-    def pause(
-        self,
-        body: m.BrowserTakeoverDtos_SessionRef,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BrowserTakeoverDtos_View:
+    def pause(self, body: m.BrowserTakeoverDtos_SessionRef, *, idempotency_key: Optional[str] = None) -> m.BrowserTakeoverDtos_View:
         """Pause.
 
         POST /api/browser/takeover/pause
         """
-        return self._http.request(
-            "POST",
-            "/api/browser/takeover/pause",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/browser/takeover/pause", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self, *, agent_id: str, session_id: str) -> Dict[str, Any]:
         """Status.
 
         GET /api/browser/takeover/status
         """
-        return self._http.request(
-            "GET",
-            "/api/browser/takeover/status",
-            query={"agentId": agent_id, "sessionId": session_id},
-        )
+        return self._http.request("GET", "/api/browser/takeover/status", query={"agentId": agent_id, "sessionId": session_id})
 
-    def begin(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.BrowserTakeoverDtos_Begin:
+    def begin(self, id: str, *, idempotency_key: Optional[str] = None) -> m.BrowserTakeoverDtos_Begin:
         """Begin.
 
         POST /api/browser/takeover/{id}/begin
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/takeover/{quote_path(id)}/begin",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/browser/takeover/{quote_path(id)}/begin", headers={"Idempotency-Key": idempotency_key})
 
-    def cancel(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.BrowserTakeoverDtos_View:
+    def cancel(self, id: str, *, idempotency_key: Optional[str] = None) -> m.BrowserTakeoverDtos_View:
         """Cancel.
 
         POST /api/browser/takeover/{id}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/takeover/{quote_path(id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/browser/takeover/{quote_path(id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
-    def hand_back(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.BrowserTakeoverDtos_View:
+    def hand_back(self, id: str, *, idempotency_key: Optional[str] = None) -> m.BrowserTakeoverDtos_View:
         """Hand back.
 
         POST /api/browser/takeover/{id}/hand-back
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/takeover/{quote_path(id)}/hand-back",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/browser/takeover/{quote_path(id)}/hand-back", headers={"Idempotency-Key": idempotency_key})
 
-    def input(
-        self,
-        id: str,
-        body: m.BrowserTakeoverDtos_InputEvent,
-        *,
-        x_takeover_token: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def input(self, id: str, body: m.BrowserTakeoverDtos_InputEvent, *, x_takeover_token: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Input.
 
         POST /api/browser/takeover/{id}/input
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/takeover/{quote_path(id)}/input",
-            headers={
-                "X-Takeover-Token": x_takeover_token,
-                "Idempotency-Key": idempotency_key,
-            },
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/browser/takeover/{quote_path(id)}/input", headers={"X-Takeover-Token": x_takeover_token, "Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def stream(
-        self, id: str, *, x_takeover_token: Optional[str] = None
-    ) -> Iterator[str]:
+    def stream(self, id: str, *, x_takeover_token: Optional[str] = None) -> Iterator[str]:
         """Stream.
 
         GET /api/browser/takeover/{id}/stream
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "GET",
-            f"/api/browser/takeover/{quote_path(id)}/stream",
-            headers={"X-Takeover-Token": x_takeover_token},
-        )
+        return self._http.stream("GET", f"/api/browser/takeover/{quote_path(id)}/stream", headers={"X-Takeover-Token": x_takeover_token})
 
-    def token(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.BrowserTakeoverDtos_TokenRefresh:
+    def token(self, id: str, *, idempotency_key: Optional[str] = None) -> m.BrowserTakeoverDtos_TokenRefresh:
         """Token.
 
         POST /api/browser/takeover/{id}/token
         """
-        return self._http.request(
-            "POST",
-            f"/api/browser/takeover/{quote_path(id)}/token",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/browser/takeover/{quote_path(id)}/token", headers={"Idempotency-Key": idempotency_key})
 
 
 class BudgetTopUpApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def purchase(
-        self,
-        body: m.BudgetTopUpPurchaseRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BudgetTopUpPurchaseResponse:
+    def purchase(self, body: m.BudgetTopUpPurchaseRequest, *, idempotency_key: Optional[str] = None) -> m.BudgetTopUpPurchaseResponse:
         """Purchase.
 
         POST /api/budget/top-up
         """
-        return self._http.request(
-            "POST",
-            "/api/budget/top-up",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/budget/top-up", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def confirm(
-        self,
-        body: m.BudgetTopUpConfirmRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.BudgetTopUpConfirmResponse:
+    def confirm(self, body: m.BudgetTopUpConfirmRequest, *, idempotency_key: Optional[str] = None) -> m.BudgetTopUpConfirmResponse:
         """Confirm.
 
         POST /api/budget/top-up/confirm
         """
-        return self._http.request(
-            "POST",
-            "/api/budget/top-up/confirm",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/budget/top-up/confirm", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def options(self) -> m.BudgetTopUpOptionsResponse:
         """Options.
@@ -4198,25 +2389,14 @@ class CapabilityApi:
         """
         return self._http.request("GET", "/api/capabilities")
 
-    def activate(
-        self,
-        capability: str,
-        body: m.CapabilityCredentialRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ProviderCredentialResponse:
+    def activate(self, capability: str, body: m.CapabilityCredentialRequest, *, idempotency_key: Optional[str] = None) -> m.ProviderCredentialResponse:
         """Activate.
 
         POST /api/capabilities/{capability}/credential
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/capabilities/{quote_path(capability)}/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/capabilities/{quote_path(capability)}/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self, capability: str, *, provider: Optional[str] = None) -> None:
         """Deactivate.
@@ -4225,97 +2405,60 @@ class CapabilityApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/capabilities/{quote_path(capability)}/credential",
-            query={"provider": provider},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/capabilities/{quote_path(capability)}/credential", query={"provider": provider}, response="void")
 
-    def credential_status(
-        self, capability: str, *, provider: Optional[str] = None
-    ) -> m.ProviderCredentialResponse:
+    def credential_status(self, capability: str, *, provider: Optional[str] = None) -> m.ProviderCredentialResponse:
         """Credential status.
 
         GET /api/capabilities/{capability}/credential/status
         """
-        return self._http.request(
-            "GET",
-            f"/api/capabilities/{quote_path(capability)}/credential/status",
-            query={"provider": provider},
-        )
+        return self._http.request("GET", f"/api/capabilities/{quote_path(capability)}/credential/status", query={"provider": provider})
 
     def policy(self, capability: str) -> m.CapabilityPolicyResponse:
         """Policy.
 
         GET /api/capabilities/{capability}/policy
         """
-        return self._http.request(
-            "GET", f"/api/capabilities/{quote_path(capability)}/policy"
-        )
+        return self._http.request("GET", f"/api/capabilities/{quote_path(capability)}/policy")
 
-    def update_policy(
-        self, capability: str, body: Dict[str, Any]
-    ) -> m.CapabilityPolicyResponse:
+    def update_policy(self, capability: str, body: Dict[str, Any]) -> m.CapabilityPolicyResponse:
         """Update policy.
 
         PUT /api/capabilities/{capability}/policy
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/capabilities/{quote_path(capability)}/policy", body=body
-        )
+        return self._http.request("PUT", f"/api/capabilities/{quote_path(capability)}/policy", body=body)
 
 
 class ChannelContactApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_groups(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ChannelContactController_GroupResponse]:
+    def list_groups(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ChannelContactController_GroupResponse]:
         """List groups.
 
         GET /api/channels/contact-groups
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/contact-groups",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/channels/contact-groups", query={"limit": limit, "offset": offset})
 
-    def create_group(
-        self,
-        body: m.ChannelContactController_GroupRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ChannelContactController_GroupResponse:
+    def create_group(self, body: m.ChannelContactController_GroupRequest, *, idempotency_key: Optional[str] = None) -> m.ChannelContactController_GroupResponse:
         """Create group.
 
         POST /api/channels/contact-groups
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/contact-groups",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/contact-groups", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update_group(
-        self, id: str, body: m.ChannelContactController_GroupRequest
-    ) -> m.ChannelContactController_GroupResponse:
+    def update_group(self, id: str, body: m.ChannelContactController_GroupRequest) -> m.ChannelContactController_GroupResponse:
         """Update group.
 
         PUT /api/channels/contact-groups/{id}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/channels/contact-groups/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/channels/contact-groups/{quote_path(id)}", body=body)
 
     def delete_group(self, id: str) -> None:
         """Delete group.
@@ -4324,100 +2467,50 @@ class ChannelContactApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/channels/contact-groups/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/channels/contact-groups/{quote_path(id)}", response="void")
 
-    def list(
-        self,
-        *,
-        channel: Optional[str] = None,
-        group_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ChannelContactController_ContactResponse]:
+    def list(self, *, channel: Optional[str] = None, group_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ChannelContactController_ContactResponse]:
         """List.
 
         GET /api/channels/contacts
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/contacts",
-            query={
-                "channel": channel,
-                "groupId": group_id,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/channels/contacts", query={"channel": channel, "groupId": group_id, "limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.ChannelContactController_ContactRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ChannelContactController_ContactResponse:
+    def create(self, body: m.ChannelContactController_ContactRequest, *, idempotency_key: Optional[str] = None) -> m.ChannelContactController_ContactResponse:
         """Create.
 
         POST /api/channels/contacts
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/contacts",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/contacts", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def import_file(
-        self, body: Dict[str, Any], *, channel: str, group_id: Optional[str] = None
-    ) -> m.ChannelContactService_ImportResult:
+    def import_file(self, body: Dict[str, Any], *, channel: str, group_id: Optional[str] = None) -> m.ChannelContactService_ImportResult:
         """Import file.
 
         POST /api/channels/contacts/import
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/contacts/import",
-            query={"channel": channel, "groupId": group_id},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/channels/contacts/import", query={"channel": channel, "groupId": group_id}, body=body, body_type="multipart")
 
-    def import_rows(
-        self,
-        body: m.ChannelContactController_ImportRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ChannelContactService_ImportResult:
+    def import_rows(self, body: m.ChannelContactController_ImportRequest, *, idempotency_key: Optional[str] = None) -> m.ChannelContactService_ImportResult:
         """Import rows.
 
         POST /api/channels/contacts/import-rows
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/contacts/import-rows",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/contacts/import-rows", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.ChannelContactController_ContactUpdateRequest
-    ) -> m.ChannelContactController_ContactResponse:
+    def update(self, id: str, body: m.ChannelContactController_ContactUpdateRequest) -> m.ChannelContactController_ContactResponse:
         """Update.
 
         PUT /api/channels/contacts/{id}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/channels/contacts/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/channels/contacts/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -4426,67 +2519,42 @@ class ChannelContactApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/channels/contacts/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/channels/contacts/{quote_path(id)}", response="void")
 
 
 class ChannelHealthApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def check(
-        self, key: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ChannelHealthController_ChannelHealthResponse:
+    def check(self, key: str, *, idempotency_key: Optional[str] = None) -> m.ChannelHealthController_ChannelHealthResponse:
         """Check.
 
         POST /api/channels/health/{key}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/health/{quote_path(key)}",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/channels/health/{quote_path(key)}", headers={"Idempotency-Key": idempotency_key})
 
 
 class ChannelPairingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def erase_subject(
-        self,
-        body: m.ChannelPairingController_EraseSubjectRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def erase_subject(self, body: m.ChannelPairingController_EraseSubjectRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Erase subject.
 
         POST /api/channels/pairing/erase-subject
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/pairing/erase-subject",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/channels/pairing/erase-subject", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def pending(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ChannelPairingController_PendingPairingResponse]:
+    def pending(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ChannelPairingController_PendingPairingResponse]:
         """Pending.
 
         GET /api/channels/pairing/pending
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/pairing/pending",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/channels/pairing/pending", query={"limit": limit, "offset": offset})
 
     def reject(self, session_id: str) -> None:
         """Reject.
@@ -4495,84 +2563,55 @@ class ChannelPairingApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/channels/pairing/{quote_path(session_id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/channels/pairing/{quote_path(session_id)}", response="void")
 
-    def rebind_agent(
-        self, session_id: str, body: m.ChannelPairingController_RebindAgentRequest
-    ) -> None:
+    def rebind_agent(self, session_id: str, body: m.ChannelPairingController_RebindAgentRequest) -> None:
         """Rebind agent.
 
         PUT /api/channels/pairing/{sessionId}/agent
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/channels/pairing/{quote_path(session_id)}/agent",
-            body=body,
-            response="void",
-        )
+        return self._http.request("PUT", f"/api/channels/pairing/{quote_path(session_id)}/agent", body=body, response="void")
 
-    def approve(
-        self, session_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ChannelPairingController_PendingPairingResponse:
+    def approve(self, session_id: str, *, idempotency_key: Optional[str] = None) -> m.ChannelPairingController_PendingPairingResponse:
         """Approve.
 
         POST /api/channels/pairing/{sessionId}/approve
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/pairing/{quote_path(session_id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/channels/pairing/{quote_path(session_id)}/approve", headers={"Idempotency-Key": idempotency_key})
 
-    def unpair(
-        self, session_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ChannelPairingController_PendingPairingResponse:
+    def unpair(self, session_id: str, *, idempotency_key: Optional[str] = None) -> m.ChannelPairingController_PendingPairingResponse:
         """Unpair.
 
         POST /api/channels/pairing/{sessionId}/unpair
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/pairing/{quote_path(session_id)}/unpair",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/channels/pairing/{quote_path(session_id)}/unpair", headers={"Idempotency-Key": idempotency_key})
 
 
 class ChannelRoutingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ChannelRoutingController_RoutingResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ChannelRoutingController_RoutingResponse]:
         """List.
 
         GET /api/channels/routing
         """
-        return self._http.request(
-            "GET", "/api/channels/routing", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/channels/routing", query={"limit": limit, "offset": offset})
 
-    def set(
-        self, channel: str, body: m.ChannelRoutingController_RoutingRequest
-    ) -> m.ChannelRoutingController_RoutingResponse:
+    def set(self, channel: str, body: m.ChannelRoutingController_RoutingRequest) -> m.ChannelRoutingController_RoutingResponse:
         """Set.
 
         PUT /api/channels/routing/{channel}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/channels/routing/{quote_path(channel)}", body=body
-        )
+        return self._http.request("PUT", f"/api/channels/routing/{quote_path(channel)}", body=body)
 
 
 class ChannelStatusApi:
@@ -4591,93 +2630,50 @@ class ChatBranchApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def messages(
-        self, agent_id: str, session_id: str, *, branch: Optional[str] = None
-    ) -> m.ChatBranchDtos_ActivePathResponse:
+    def messages(self, agent_id: str, session_id: str, *, branch: Optional[str] = None) -> m.ChatBranchDtos_ActivePathResponse:
         """Messages.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/messages
 
         The branch of the conversation currently shown and replayed to the model (branch=active is the only supported view). Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages",
-            query={"branch": branch},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages", query={"branch": branch})
 
-    def switch_active_leaf(
-        self, agent_id: str, session_id: str, body: m.ChatBranchDtos_SwitchLeafRequest
-    ) -> m.ChatBranchDtos_ActivePathResponse:
+    def switch_active_leaf(self, agent_id: str, session_id: str, body: m.ChatBranchDtos_SwitchLeafRequest) -> m.ChatBranchDtos_ActivePathResponse:
         """Switch active leaf.
 
         PUT /api/agents/{agentId}/sessions/{sessionId}/messages/active-leaf
 
         Switch the conversation to another branch: the server lands on the newest leaf beneath the given message. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/active-leaf",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/active-leaf", body=body)
 
-    def edit(
-        self,
-        agent_id: str,
-        session_id: str,
-        message_id: str,
-        body: m.ChatBranchDtos_EditRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Iterator[str]:
+    def edit(self, agent_id: str, session_id: str, message_id: str, body: m.ChatBranchDtos_EditRequest, *, idempotency_key: Optional[str] = None) -> Iterator[str]:
         """Edit.
 
         POST /api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/edit
 
         Replace the text of an earlier user message on a new branch and stream the new reply; the original branch is kept. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/edit",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/edit", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def regenerate(
-        self,
-        agent_id: str,
-        session_id: str,
-        message_id: str,
-        body: Optional[m.ChatBranchDtos_RegenerateRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Iterator[str]:
+    def regenerate(self, agent_id: str, session_id: str, message_id: str, body: Optional[m.ChatBranchDtos_RegenerateRequest] = None, *, idempotency_key: Optional[str] = None) -> Iterator[str]:
         """Regenerate.
 
         POST /api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/regenerate
 
         Produce another answer to the same user message and stream it; the previous answer is kept as a sibling. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/regenerate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/regenerate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def siblings(
-        self, agent_id: str, session_id: str, message_id: str
-    ) -> m.ChatBranchDtos_SiblingsResponse:
+    def siblings(self, agent_id: str, session_id: str, message_id: str) -> m.ChatBranchDtos_SiblingsResponse:
         """Siblings.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/messages/{messageId}/siblings
 
         The versions of one message, in order, with the position of this one. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Requires the APP_CHAT_BRANCHING_ENABLED feature flag (app.chat.branching.enabled); when it is off this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/siblings",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/messages/{quote_path(message_id)}/siblings")
 
 
 class ChatBranchCapabilitiesApi:
@@ -4689,49 +2685,33 @@ class ChatBranchCapabilitiesApi:
 
         GET /api/agents/{agentId}/chat-branching/capabilities
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/chat-branching/capabilities"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/chat-branching/capabilities")
 
 
 class ChatExportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def export(
-        self, agent_id: str, session_id: str, *, format: Optional[str] = None
-    ) -> bytes:
+    def export(self, agent_id: str, session_id: str, *, format: Optional[str] = None) -> bytes:
         """Export.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/export
 
         Download one chat session as a file (format=md|json|txt). Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404. Additionally requires the CHAT_EXPORT_ENABLED feature flag (app.chat-export.enabled); when it is off this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/export",
-            query={"format": format},
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/export", query={"format": format}, response="blob")
 
 
 class ChatImportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def import_json(
-        self, body: m.ChatPortDtos_JsonUpload, *, idempotency_key: Optional[str] = None
-    ) -> m.ChatPortDtos_ImportResponse:
+    def import_json(self, body: m.ChatPortDtos_JsonUpload, *, idempotency_key: Optional[str] = None) -> m.ChatPortDtos_ImportResponse:
         """Import json.
 
         POST /api/chat-import
         """
-        return self._http.request(
-            "POST",
-            "/api/chat-import",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/chat-import", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def list(self) -> List[m.ChatPortDtos_ImportedSummary]:
         """List.
@@ -4752,30 +2732,21 @@ class ChatImportApi:
 
         DELETE /api/chat-import/chats/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/chat-import/chats/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/chat-import/chats/{quote_path(id)}", response="void")
 
     def export_one(self, id: str, *, format: Optional[str] = None) -> bytes:
         """Export one.
 
         GET /api/chat-import/chats/{id}/export
         """
-        return self._http.request(
-            "GET",
-            f"/api/chat-import/chats/{quote_path(id)}/export",
-            query={"format": format},
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/chat-import/chats/{quote_path(id)}/export", query={"format": format}, response="blob")
 
     def export_all(self, *, format: Optional[str] = None) -> bytes:
         """Export all.
 
         GET /api/chat-import/export
         """
-        return self._http.request(
-            "GET", "/api/chat-import/export", query={"format": format}, response="blob"
-        )
+        return self._http.request("GET", "/api/chat-import/export", query={"format": format}, response="blob")
 
     def features(self) -> m.ChatPortDtos_Features:
         """Features.
@@ -4784,107 +2755,71 @@ class ChatImportApi:
         """
         return self._http.request("GET", "/api/chat-import/features")
 
-    def memory_candidates(
-        self,
-        body: m.ChatPortDtos_MemoryCandidatesRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MemoryImportDtos_PreviewResponse:
+    def memory_candidates(self, body: m.ChatPortDtos_MemoryCandidatesRequest, *, idempotency_key: Optional[str] = None) -> m.MemoryImportDtos_PreviewResponse:
         """Memory candidates.
 
         POST /api/chat-import/memory-candidates
         """
-        return self._http.request(
-            "POST",
-            "/api/chat-import/memory-candidates",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/chat-import/memory-candidates", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview_json(
-        self, body: m.ChatPortDtos_JsonUpload, *, idempotency_key: Optional[str] = None
-    ) -> m.ChatPortDtos_PreviewResponse:
+    def preview_json(self, body: m.ChatPortDtos_JsonUpload, *, idempotency_key: Optional[str] = None) -> m.ChatPortDtos_PreviewResponse:
         """Preview json.
 
         POST /api/chat-import/preview
         """
-        return self._http.request(
-            "POST",
-            "/api/chat-import/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/chat-import/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ChatThreadApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, before: Optional[str] = None
-    ) -> m.ChatBranchDtos_ThreadsResponse:
+    def list(self, *, limit: Optional[int] = None, before: Optional[str] = None) -> m.ChatBranchDtos_ThreadsResponse:
         """List.
 
         GET /api/chat/threads
         """
-        return self._http.request(
-            "GET", "/api/chat/threads", query={"limit": limit, "before": before}
-        )
+        return self._http.request("GET", "/api/chat/threads", query={"limit": limit, "before": before})
 
     def delete(self, agent_id: str, session_id: str) -> None:
         """Delete.
 
         DELETE /api/chat/threads/{agentId}/{sessionId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/chat/threads/{quote_path(agent_id)}/{quote_path(session_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/chat/threads/{quote_path(agent_id)}/{quote_path(session_id)}", response="void")
 
 
 class ChatTranscriptApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def transcript(
-        self, agent_id: str, session_id: str
-    ) -> m.ChatTranscriptService_Transcript:
+    def transcript(self, agent_id: str, session_id: str) -> m.ChatTranscriptService_Transcript:
         """Transcript.
 
         GET /api/agents/{agentId}/sessions/{sessionId}/transcript
 
         Reload one chat session as a structured transcript. Readable and changeable only by the caller who started the session: session memory is keyed by tenant + agent + user + client session id, so the same session id presented by any other caller resolves to nothing and answers 404.
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/transcript",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/sessions/{quote_path(session_id)}/transcript")
 
 
 class CheckoutSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None
-    ) -> List[m.CheckoutSessionController_CheckoutSessionResponse]:
+    def list(self, *, limit: Optional[int] = None) -> List[m.CheckoutSessionController_CheckoutSessionResponse]:
         """List.
 
         GET /api/tenant/checkout-sessions
         """
-        return self._http.request(
-            "GET", "/api/tenant/checkout-sessions", query={"limit": limit}
-        )
+        return self._http.request("GET", "/api/tenant/checkout-sessions", query={"limit": limit})
 
     def get(self, id: str) -> m.CheckoutSessionController_CheckoutSessionResponse:
         """Get.
 
         GET /api/tenant/checkout-sessions/{id}
         """
-        return self._http.request(
-            "GET", f"/api/tenant/checkout-sessions/{quote_path(id)}"
-        )
+        return self._http.request("GET", f"/api/tenant/checkout-sessions/{quote_path(id)}")
 
 
 class CodeIntelApi:
@@ -4898,32 +2833,19 @@ class CodeIntelApi:
         """
         return self._http.request("GET", "/api/code-intel/approvals")
 
-    def resolve_approval(
-        self,
-        approval_id: str,
-        *,
-        approved: Optional[bool] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> str:
+    def resolve_approval(self, approval_id: str, *, approved: Optional[bool] = None, idempotency_key: Optional[str] = None) -> str:
         """Resolve approval.
 
         POST /api/code-intel/approvals/{approvalId}/resolve
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/approvals/{quote_path(approval_id)}/resolve",
-            query={"approved": approved},
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/code-intel/approvals/{quote_path(approval_id)}/resolve", query={"approved": approved}, headers={"Idempotency-Key": idempotency_key})
 
     def audit(self, *, limit: Optional[int] = None) -> str:
         """Audit.
 
         GET /api/code-intel/audit
         """
-        return self._http.request(
-            "GET", "/api/code-intel/audit", query={"limit": limit}
-        )
+        return self._http.request("GET", "/api/code-intel/audit", query={"limit": limit})
 
     def health(self) -> str:
         """Health.
@@ -4932,19 +2854,12 @@ class CodeIntelApi:
         """
         return self._http.request("GET", "/api/code-intel/health")
 
-    def knowledge_query(
-        self, body: Optional[str] = None, *, idempotency_key: Optional[str] = None
-    ) -> str:
+    def knowledge_query(self, body: Optional[str] = None, *, idempotency_key: Optional[str] = None) -> str:
         """Knowledge query.
 
         POST /api/code-intel/knowledge/query
         """
-        return self._http.request(
-            "POST",
-            "/api/code-intel/knowledge/query",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/code-intel/knowledge/query", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_policy(self) -> str:
         """Get policy.
@@ -4967,297 +2882,155 @@ class CodeIntelApi:
         """
         return self._http.request("GET", "/api/code-intel/repos")
 
-    def register_repo(
-        self, body: Optional[str] = None, *, idempotency_key: Optional[str] = None
-    ) -> str:
+    def register_repo(self, body: Optional[str] = None, *, idempotency_key: Optional[str] = None) -> str:
         """Register repo.
 
         POST /api/code-intel/repos
         """
-        return self._http.request(
-            "POST",
-            "/api/code-intel/repos",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/code-intel/repos", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_repo(self, repo_id: str) -> str:
         """Delete repo.
 
         DELETE /api/code-intel/repos/{repoId}
         """
-        return self._http.request(
-            "DELETE", f"/api/code-intel/repos/{quote_path(repo_id)}"
-        )
+        return self._http.request("DELETE", f"/api/code-intel/repos/{quote_path(repo_id)}")
 
-    def agent_resolve(
-        self,
-        repo_id: str,
-        body: Optional[str] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> str:
+    def agent_resolve(self, repo_id: str, body: Optional[str] = None, *, idempotency_key: Optional[str] = None) -> str:
         """Agent resolve.
 
         POST /api/code-intel/repos/{repoId}/agent/resolve
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/agent/resolve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/agent/resolve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def graph_build(
-        self, repo_id: str, *, idempotency_key: Optional[str] = None
-    ) -> str:
+    def graph_build(self, repo_id: str, *, idempotency_key: Optional[str] = None) -> str:
         """Graph build.
 
         POST /api/code-intel/repos/{repoId}/graph/build
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/graph/build",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/build", headers={"Idempotency-Key": idempotency_key})
 
     def callees(self, repo_id: str, symbol: str) -> str:
         """Callees.
 
         GET /api/code-intel/repos/{repoId}/graph/callees/{symbol}
         """
-        return self._http.request(
-            "GET",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/graph/callees/{quote_path(symbol)}",
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/callees/{quote_path(symbol)}")
 
     def callers(self, repo_id: str, symbol: str) -> str:
         """Callers.
 
         GET /api/code-intel/repos/{repoId}/graph/callers/{symbol}
         """
-        return self._http.request(
-            "GET",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/graph/callers/{quote_path(symbol)}",
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/callers/{quote_path(symbol)}")
 
     def impact(self, repo_id: str, symbol: str, *, depth: Optional[int] = None) -> str:
         """Impact.
 
         GET /api/code-intel/repos/{repoId}/graph/impact/{symbol}
         """
-        return self._http.request(
-            "GET",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/graph/impact/{quote_path(symbol)}",
-            query={"depth": depth},
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/impact/{quote_path(symbol)}", query={"depth": depth})
 
     def graph_stats(self, repo_id: str) -> str:
         """Graph stats.
 
         GET /api/code-intel/repos/{repoId}/graph/stats
         """
-        return self._http.request(
-            "GET", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/stats"
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/graph/stats")
 
-    def index_repo(
-        self,
-        repo_id: str,
-        body: Optional[str] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> str:
+    def index_repo(self, repo_id: str, body: Optional[str] = None, *, idempotency_key: Optional[str] = None) -> str:
         """Index repo.
 
         POST /api/code-intel/repos/{repoId}/index
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/index",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/index", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def search(
-        self, repo_id: str, body: str, *, idempotency_key: Optional[str] = None
-    ) -> str:
+    def search(self, repo_id: str, body: str, *, idempotency_key: Optional[str] = None) -> str:
         """Search.
 
         POST /api/code-intel/repos/{repoId}/search
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/search",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/search", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def repo_status(self, repo_id: str) -> str:
         """Repo status.
 
         GET /api/code-intel/repos/{repoId}/status
         """
-        return self._http.request(
-            "GET", f"/api/code-intel/repos/{quote_path(repo_id)}/status"
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/status")
 
-    def create_workspace(
-        self, repo_id: str, *, idempotency_key: Optional[str] = None
-    ) -> str:
+    def create_workspace(self, repo_id: str, *, idempotency_key: Optional[str] = None) -> str:
         """Create workspace.
 
         POST /api/code-intel/repos/{repoId}/workspaces
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces", headers={"Idempotency-Key": idempotency_key})
 
     def delete_workspace(self, repo_id: str, workspace_id: str) -> str:
         """Delete workspace.
 
         DELETE /api/code-intel/repos/{repoId}/workspaces/{workspaceId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}",
-        )
+        return self._http.request("DELETE", f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}")
 
-    def apply(
-        self,
-        repo_id: str,
-        workspace_id: str,
-        body: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> str:
+    def apply(self, repo_id: str, workspace_id: str, body: str, *, idempotency_key: Optional[str] = None) -> str:
         """Apply.
 
         POST /api/code-intel/repos/{repoId}/workspaces/{workspaceId}/apply
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/apply",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/apply", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def diff_workspace(self, repo_id: str, workspace_id: str) -> str:
         """Diff workspace.
 
         GET /api/code-intel/repos/{repoId}/workspaces/{workspaceId}/diff
         """
-        return self._http.request(
-            "GET",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/diff",
-        )
+        return self._http.request("GET", f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/diff")
 
-    def run(
-        self,
-        repo_id: str,
-        workspace_id: str,
-        body: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> str:
+    def run(self, repo_id: str, workspace_id: str, body: str, *, idempotency_key: Optional[str] = None) -> str:
         """Run.
 
         POST /api/code-intel/repos/{repoId}/workspaces/{workspaceId}/run
         """
-        return self._http.request(
-            "POST",
-            f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/code-intel/repos/{quote_path(repo_id)}/workspaces/{quote_path(workspace_id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class CodeToolGenerationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.CodeToolGenerationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CodeToolGenerationResponse:
+    def generate(self, body: m.CodeToolGenerationRequest, *, idempotency_key: Optional[str] = None) -> m.CodeToolGenerationResponse:
         """Generate.
 
         POST /api/tools/code/generate
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/code/generate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/code/generate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def validate(
-        self, body: m.CodeToolValidateRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SandboxValidateResponse:
+    def validate(self, body: m.CodeToolValidateRequest, *, idempotency_key: Optional[str] = None) -> m.SandboxValidateResponse:
         """Validate.
 
         POST /api/tools/code/validate
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/code/validate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/code/validate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class CodingTaskApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.CodingTaskDtos_TaskView]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.CodingTaskDtos_TaskView]:
         """List.
 
         GET /api/coding-tasks
         """
-        return self._http.request(
-            "GET", "/api/coding-tasks", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/coding-tasks", query={"limit": limit, "offset": offset})
 
-    def start(
-        self,
-        body: Optional[Dict[str, Any]] = None,
-        *,
-        agent_id: str,
-        instruction: str,
-        test_command: str,
-        repo_url: Optional[str] = None,
-        max_steps: Optional[int] = None,
-        max_wall_seconds: Optional[int] = None,
-        max_tokens: Optional[int] = None,
-        max_fix_iterations: Optional[int] = None,
-    ) -> m.CodingTaskDtos_TaskView:
+    def start(self, body: Optional[Dict[str, Any]] = None, *, agent_id: str, instruction: str, test_command: str, repo_url: Optional[str] = None, max_steps: Optional[int] = None, max_wall_seconds: Optional[int] = None, max_tokens: Optional[int] = None, max_fix_iterations: Optional[int] = None) -> m.CodingTaskDtos_TaskView:
         """Start.
 
         POST /api/coding-tasks
         """
-        return self._http.request(
-            "POST",
-            "/api/coding-tasks",
-            query={
-                "agentId": agent_id,
-                "instruction": instruction,
-                "testCommand": test_command,
-                "repoUrl": repo_url,
-                "maxSteps": max_steps,
-                "maxWallSeconds": max_wall_seconds,
-                "maxTokens": max_tokens,
-                "maxFixIterations": max_fix_iterations,
-            },
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/coding-tasks", query={"agentId": agent_id, "instruction": instruction, "testCommand": test_command, "repoUrl": repo_url, "maxSteps": max_steps, "maxWallSeconds": max_wall_seconds, "maxTokens": max_tokens, "maxFixIterations": max_fix_iterations}, body=body, body_type="multipart")
 
     def capabilities(self) -> m.CodingTaskDtos_Capabilities:
         """Capabilities.
@@ -5273,71 +3046,40 @@ class CodingTaskApi:
         """
         return self._http.request("GET", f"/api/coding-tasks/{quote_path(task_id)}")
 
-    def approve(
-        self,
-        task_id: str,
-        body: m.CodingTaskDtos_ApproveRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CodingTaskDtos_TaskView:
+    def approve(self, task_id: str, body: m.CodingTaskDtos_ApproveRequest, *, idempotency_key: Optional[str] = None) -> m.CodingTaskDtos_TaskView:
         """Approve.
 
         POST /api/coding-tasks/{taskId}/approve
         """
-        return self._http.request(
-            "POST",
-            f"/api/coding-tasks/{quote_path(task_id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/coding-tasks/{quote_path(task_id)}/approve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def cancel(
-        self, task_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CodingTaskDtos_CancelResponse:
+    def cancel(self, task_id: str, *, idempotency_key: Optional[str] = None) -> m.CodingTaskDtos_CancelResponse:
         """Cancel.
 
         POST /api/coding-tasks/{taskId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/coding-tasks/{quote_path(task_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/coding-tasks/{quote_path(task_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
     def diff(self, task_id: str) -> m.CodingTaskDtos_DiffResponse:
         """Diff.
 
         GET /api/coding-tasks/{taskId}/diff
         """
-        return self._http.request(
-            "GET", f"/api/coding-tasks/{quote_path(task_id)}/diff"
-        )
+        return self._http.request("GET", f"/api/coding-tasks/{quote_path(task_id)}/diff")
 
-    def reject(
-        self, task_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CodingTaskDtos_TaskView:
+    def reject(self, task_id: str, *, idempotency_key: Optional[str] = None) -> m.CodingTaskDtos_TaskView:
         """Reject.
 
         POST /api/coding-tasks/{taskId}/reject
         """
-        return self._http.request(
-            "POST",
-            f"/api/coding-tasks/{quote_path(task_id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/coding-tasks/{quote_path(task_id)}/reject", headers={"Idempotency-Key": idempotency_key})
 
-    def rollback(
-        self, task_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CodingTaskDtos_TaskView:
+    def rollback(self, task_id: str, *, idempotency_key: Optional[str] = None) -> m.CodingTaskDtos_TaskView:
         """Rollback.
 
         POST /api/coding-tasks/{taskId}/rollback
         """
-        return self._http.request(
-            "POST",
-            f"/api/coding-tasks/{quote_path(task_id)}/rollback",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/coding-tasks/{quote_path(task_id)}/rollback", headers={"Idempotency-Key": idempotency_key})
 
 
 class CommerceMandateApi:
@@ -5349,70 +3091,35 @@ class CommerceMandateApi:
 
         GET /api/commerce/mandates
         """
-        return self._http.request(
-            "GET", "/api/commerce/mandates", query={"agentId": agent_id}
-        )
+        return self._http.request("GET", "/api/commerce/mandates", query={"agentId": agent_id})
 
-    def create_intent(
-        self,
-        body: m.CommerceDtos_CreateIntentRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CommerceDtos_MandateResponse:
+    def create_intent(self, body: m.CommerceDtos_CreateIntentRequest, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Create intent.
 
         POST /api/commerce/mandates/intent
         """
-        return self._http.request(
-            "POST",
-            "/api/commerce/mandates/intent",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/commerce/mandates/intent", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def authorize(
-        self, cart_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CommerceDtos_MandateResponse:
+    def authorize(self, cart_id: str, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Authorize.
 
         POST /api/commerce/mandates/{cartId}/authorize
         """
-        return self._http.request(
-            "POST",
-            f"/api/commerce/mandates/{quote_path(cart_id)}/authorize",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/commerce/mandates/{quote_path(cart_id)}/authorize", headers={"Idempotency-Key": idempotency_key})
 
-    def capture(
-        self, cart_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CommerceDtos_MandateResponse:
+    def capture(self, cart_id: str, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Capture.
 
         POST /api/commerce/mandates/{cartId}/capture
         """
-        return self._http.request(
-            "POST",
-            f"/api/commerce/mandates/{quote_path(cart_id)}/capture",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/commerce/mandates/{quote_path(cart_id)}/capture", headers={"Idempotency-Key": idempotency_key})
 
-    def refund(
-        self,
-        cart_id: str,
-        body: Optional[m.CommerceDtos_RevokeRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CommerceDtos_MandateResponse:
+    def refund(self, cart_id: str, body: Optional[m.CommerceDtos_RevokeRequest] = None, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Refund.
 
         POST /api/commerce/mandates/{cartId}/refund
         """
-        return self._http.request(
-            "POST",
-            f"/api/commerce/mandates/{quote_path(cart_id)}/refund",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/commerce/mandates/{quote_path(cart_id)}/refund", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.CommerceDtos_MandateResponse:
         """Get.
@@ -5426,113 +3133,56 @@ class CommerceMandateApi:
 
         GET /api/commerce/mandates/{id}/events
         """
-        return self._http.request(
-            "GET", f"/api/commerce/mandates/{quote_path(id)}/events"
-        )
+        return self._http.request("GET", f"/api/commerce/mandates/{quote_path(id)}/events")
 
-    def revoke(
-        self,
-        id: str,
-        body: Optional[m.CommerceDtos_RevokeRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CommerceDtos_MandateResponse:
+    def revoke(self, id: str, body: Optional[m.CommerceDtos_RevokeRequest] = None, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Revoke.
 
         POST /api/commerce/mandates/{id}/revoke
         """
-        return self._http.request(
-            "POST",
-            f"/api/commerce/mandates/{quote_path(id)}/revoke",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/commerce/mandates/{quote_path(id)}/revoke", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def create_cart(
-        self,
-        intent_id: str,
-        body: m.CommerceDtos_CreateCartRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CommerceDtos_MandateResponse:
+    def create_cart(self, intent_id: str, body: m.CommerceDtos_CreateCartRequest, *, idempotency_key: Optional[str] = None) -> m.CommerceDtos_MandateResponse:
         """Create cart.
 
         POST /api/commerce/mandates/{intentId}/cart
         """
-        return self._http.request(
-            "POST",
-            f"/api/commerce/mandates/{quote_path(intent_id)}/cart",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/commerce/mandates/{quote_path(intent_id)}/cart", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def carts(self, intent_id: str) -> List[m.CommerceDtos_MandateResponse]:
         """Carts.
 
         GET /api/commerce/mandates/{intentId}/carts
         """
-        return self._http.request(
-            "GET", f"/api/commerce/mandates/{quote_path(intent_id)}/carts"
-        )
+        return self._http.request("GET", f"/api/commerce/mandates/{quote_path(intent_id)}/carts")
 
 
 class CommunityTemplateApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        kind: Optional[m.TemplateKind] = None,
-        category: Optional[str] = None,
-        tag: Optional[str] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        size: Optional[int] = None,
-    ) -> List[m.TemplateSummary]:
+    def list(self, *, kind: Optional[m.TemplateKind] = None, category: Optional[str] = None, tag: Optional[str] = None, sort: Optional[str] = None, page: Optional[int] = None, size: Optional[int] = None) -> List[m.TemplateSummary]:
         """List.
 
         GET /api/templates
         """
-        return self._http.request(
-            "GET",
-            "/api/templates",
-            query={
-                "kind": kind,
-                "category": category,
-                "tag": tag,
-                "sort": sort,
-                "page": page,
-                "size": size,
-            },
-        )
+        return self._http.request("GET", "/api/templates", query={"kind": kind, "category": category, "tag": tag, "sort": sort, "page": page, "size": size})
 
-    def create(
-        self, body: m.TemplateCreateRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def create(self, body: m.TemplateCreateRequest, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Create.
 
         POST /api/templates
 
         Requires PERM_MANAGE_TEMPLATES (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/templates",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/templates", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def mine(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TemplateResponse]:
+    def mine(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TemplateResponse]:
         """Mine.
 
         GET /api/templates/mine
         """
-        return self._http.request(
-            "GET", "/api/templates/mine", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/templates/mine", query={"limit": limit, "offset": offset})
 
     def update(self, id: str, body: m.TemplateUpdateRequest) -> m.TemplateResponse:
         """Update.
@@ -5541,38 +3191,21 @@ class CommunityTemplateApi:
         """
         return self._http.request("PUT", f"/api/templates/{quote_path(id)}", body=body)
 
-    def import_template(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateImportResponse:
+    def import_template(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateImportResponse:
         """Import template.
 
         POST /api/templates/{id}/import
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/templates/{quote_path(id)}/import",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/templates/{quote_path(id)}/import", headers={"Idempotency-Key": idempotency_key})
 
-    def rate(
-        self,
-        id: str,
-        body: m.TemplateRatingRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TemplateSummary:
+    def rate(self, id: str, body: m.TemplateRatingRequest, *, idempotency_key: Optional[str] = None) -> m.TemplateSummary:
         """Rate.
 
         POST /api/templates/{id}/rating
         """
-        return self._http.request(
-            "POST",
-            f"/api/templates/{quote_path(id)}/rating",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/templates/{quote_path(id)}/rating", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def unrate(self, id: str) -> m.TemplateSummary:
         """Unrate.
@@ -5581,108 +3214,65 @@ class CommunityTemplateApi:
         """
         return self._http.request("DELETE", f"/api/templates/{quote_path(id)}/rating")
 
-    def submit(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def submit(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Submit.
 
         POST /api/templates/{id}/submit
 
         Requires PERM_MANAGE_TEMPLATES (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/templates/{quote_path(id)}/submit",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/templates/{quote_path(id)}/submit", headers={"Idempotency-Key": idempotency_key})
 
-    def validate(
-        self,
-        id: str,
-        *,
-        ai: Optional[bool] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TemplateReview:
+    def validate(self, id: str, *, ai: Optional[bool] = None, idempotency_key: Optional[str] = None) -> m.TemplateReview:
         """Validate.
 
         POST /api/templates/{id}/validate
         """
-        return self._http.request(
-            "POST",
-            f"/api/templates/{quote_path(id)}/validate",
-            query={"ai": ai},
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/templates/{quote_path(id)}/validate", query={"ai": ai}, headers={"Idempotency-Key": idempotency_key})
 
-    def withdraw(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateResponse:
+    def withdraw(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TemplateResponse:
         """Withdraw.
 
         POST /api/templates/{id}/withdraw
         """
-        return self._http.request(
-            "POST",
-            f"/api/templates/{quote_path(id)}/withdraw",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/templates/{quote_path(id)}/withdraw", headers={"Idempotency-Key": idempotency_key})
 
 
 class CompGrantApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def comp_grant(
-        self, body: Optional[str] = None, *, x_service_token: Optional[str] = None
-    ) -> m.CompGrantResponse:
+    def comp_grant(self, body: Optional[str] = None, *, x_service_token: Optional[str] = None) -> m.CompGrantResponse:
         """Comp grant.
 
         POST /api/tenant/comp-grant
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/comp-grant",
-            headers={"X-Service-Token": x_service_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/comp-grant", headers={"X-Service-Token": x_service_token}, body=body)
 
 
 class CustomCodeToolApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.CustomCodeToolResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.CustomCodeToolResponse]:
         """List.
 
         GET /api/tools/code
         """
-        return self._http.request(
-            "GET", "/api/tools/code", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/tools/code", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.CustomCodeToolRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.CustomCodeToolResponse:
+    def create(self, body: m.CustomCodeToolRequest, *, idempotency_key: Optional[str] = None) -> m.CustomCodeToolResponse:
         """Create.
 
         POST /api/tools/code
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/code",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/code", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.CustomCodeToolRequest
-    ) -> m.CustomCodeToolResponse:
+    def update(self, id: str, body: m.CustomCodeToolRequest) -> m.CustomCodeToolResponse:
         """Update.
 
         PUT /api/tools/code/{id}
@@ -5698,108 +3288,64 @@ class CustomCodeToolApi:
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tools/code/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tools/code/{quote_path(id)}", response="void")
 
-    def set_enabled(
-        self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None
-    ) -> m.CustomCodeToolResponse:
+    def set_enabled(self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None) -> m.CustomCodeToolResponse:
         """Set enabled.
 
         PATCH /api/tools/code/{id}/enabled
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/tools/code/{quote_path(id)}/enabled",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/tools/code/{quote_path(id)}/enabled", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def revalidate(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.CustomCodeToolResponse:
+    def revalidate(self, id: str, *, idempotency_key: Optional[str] = None) -> m.CustomCodeToolResponse:
         """Revalidate.
 
         POST /api/tools/code/{id}/revalidate
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tools/code/{quote_path(id)}/revalidate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/tools/code/{quote_path(id)}/revalidate", headers={"Idempotency-Key": idempotency_key})
 
-    def update_secrets(
-        self, id: str, body: m.CustomCodeToolSecretsRequest
-    ) -> m.CustomCodeToolResponse:
+    def update_secrets(self, id: str, body: m.CustomCodeToolSecretsRequest) -> m.CustomCodeToolResponse:
         """Update secrets.
 
         PUT /api/tools/code/{id}/secrets
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tools/code/{quote_path(id)}/secrets", body=body
-        )
+        return self._http.request("PUT", f"/api/tools/code/{quote_path(id)}/secrets", body=body)
 
-    def test(
-        self,
-        id: str,
-        body: Optional[m.CustomCodeToolTestRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, str]:
+    def test(self, id: str, body: Optional[m.CustomCodeToolTestRequest] = None, *, idempotency_key: Optional[str] = None) -> Dict[str, str]:
         """Test.
 
         POST /api/tools/code/{id}/test
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tools/code/{quote_path(id)}/test",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/tools/code/{quote_path(id)}/test", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class DataTableApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.DataTableDtos_TableView]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DataTableDtos_TableView]:
         """List.
 
         GET /api/data-tables
         """
-        return self._http.request(
-            "GET", "/api/data-tables", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/data-tables", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.DataTableDtos_CreateTableRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DataTableDtos_TableView:
+    def create(self, body: m.DataTableDtos_CreateTableRequest, *, idempotency_key: Optional[str] = None) -> m.DataTableDtos_TableView:
         """Create.
 
         POST /api/data-tables
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/data-tables",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/data-tables", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def config(self) -> m.DataTableDtos_Config:
         """Config.
@@ -5808,22 +3354,14 @@ class DataTableApi:
         """
         return self._http.request("GET", "/api/data-tables/config")
 
-    def create_from_csv(
-        self, body: Dict[str, Any], *, name: str
-    ) -> m.DataTableDtos_ImportResult:
+    def create_from_csv(self, body: Dict[str, Any], *, name: str) -> m.DataTableDtos_ImportResult:
         """Create from csv.
 
         POST /api/data-tables/import
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/data-tables/import",
-            query={"name": name},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/data-tables/import", query={"name": name}, body=body, body_type="multipart")
 
     def get(self, table: str) -> m.DataTableDtos_TableView:
         """Get.
@@ -5832,18 +3370,14 @@ class DataTableApi:
         """
         return self._http.request("GET", f"/api/data-tables/{quote_path(table)}")
 
-    def update(
-        self, table: str, body: m.DataTableDtos_UpdateTableRequest
-    ) -> m.DataTableDtos_TableView:
+    def update(self, table: str, body: m.DataTableDtos_UpdateTableRequest) -> m.DataTableDtos_TableView:
         """Update.
 
         PUT /api/data-tables/{table}
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/data-tables/{quote_path(table)}", body=body
-        )
+        return self._http.request("PUT", f"/api/data-tables/{quote_path(table)}", body=body)
 
     def delete(self, table: str) -> None:
         """Delete.
@@ -5852,44 +3386,25 @@ class DataTableApi:
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/data-tables/{quote_path(table)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/data-tables/{quote_path(table)}", response="void")
 
-    def add_column(
-        self,
-        table: str,
-        body: m.DataTableDtos_AddColumnRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DataTableDtos_TableView:
+    def add_column(self, table: str, body: m.DataTableDtos_AddColumnRequest, *, idempotency_key: Optional[str] = None) -> m.DataTableDtos_TableView:
         """Add column.
 
         POST /api/data-tables/{table}/columns
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/data-tables/{quote_path(table)}/columns",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/columns", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def alter_column(
-        self, table: str, column: str, body: m.DataTableDtos_AlterColumnRequest
-    ) -> m.DataTableDtos_TableView:
+    def alter_column(self, table: str, column: str, body: m.DataTableDtos_AlterColumnRequest) -> m.DataTableDtos_TableView:
         """Alter column.
 
         PUT /api/data-tables/{table}/columns/{column}
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/data-tables/{quote_path(table)}/columns/{quote_path(column)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/data-tables/{quote_path(table)}/columns/{quote_path(column)}", body=body)
 
     def drop_column(self, table: str, column: str) -> m.DataTableDtos_TableView:
         """Drop column.
@@ -5898,109 +3413,57 @@ class DataTableApi:
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/data-tables/{quote_path(table)}/columns/{quote_path(column)}",
-        )
+        return self._http.request("DELETE", f"/api/data-tables/{quote_path(table)}/columns/{quote_path(column)}")
 
     def export_csv(self, table: str) -> str:
         """Export csv.
 
         GET /api/data-tables/{table}/export.csv
         """
-        return self._http.request(
-            "GET", f"/api/data-tables/{quote_path(table)}/export.csv", response="text"
-        )
+        return self._http.request("GET", f"/api/data-tables/{quote_path(table)}/export.csv", response="text")
 
-    def import_csv(
-        self, table: str, body: Dict[str, Any]
-    ) -> m.DataTableDtos_ImportResult:
+    def import_csv(self, table: str, body: Dict[str, Any]) -> m.DataTableDtos_ImportResult:
         """Import csv.
 
         POST /api/data-tables/{table}/import
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/data-tables/{quote_path(table)}/import",
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/import", body=body, body_type="multipart")
 
-    def rows(
-        self,
-        table: str,
-        *,
-        filter: Optional[str] = None,
-        sort: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.DataTableDtos_RowPage:
+    def rows(self, table: str, *, filter: Optional[str] = None, sort: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.DataTableDtos_RowPage:
         """Rows.
 
         GET /api/data-tables/{table}/rows
         """
-        return self._http.request(
-            "GET",
-            f"/api/data-tables/{quote_path(table)}/rows",
-            query={"filter": filter, "sort": sort, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/data-tables/{quote_path(table)}/rows", query={"filter": filter, "sort": sort, "limit": limit, "offset": offset})
 
-    def insert_row(
-        self,
-        table: str,
-        body: m.DataTableDtos_RowRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DataTableDtos_RowView:
+    def insert_row(self, table: str, body: m.DataTableDtos_RowRequest, *, idempotency_key: Optional[str] = None) -> m.DataTableDtos_RowView:
         """Insert row.
 
         POST /api/data-tables/{table}/rows
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/data-tables/{quote_path(table)}/rows",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/rows", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def insert_rows(
-        self,
-        table: str,
-        body: m.DataTableDtos_BulkRowsRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> List[m.DataTableDtos_RowView]:
+    def insert_rows(self, table: str, body: m.DataTableDtos_BulkRowsRequest, *, idempotency_key: Optional[str] = None) -> List[m.DataTableDtos_RowView]:
         """Insert rows.
 
         POST /api/data-tables/{table}/rows/bulk
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/data-tables/{quote_path(table)}/rows/bulk",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/rows/bulk", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update_row(
-        self, table: str, row_id: str, body: m.DataTableDtos_RowRequest
-    ) -> m.DataTableDtos_RowView:
+    def update_row(self, table: str, row_id: str, body: m.DataTableDtos_RowRequest) -> m.DataTableDtos_RowView:
         """Update row.
 
         PUT /api/data-tables/{table}/rows/{rowId}
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/data-tables/{quote_path(table)}/rows/{quote_path(row_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/data-tables/{quote_path(table)}/rows/{quote_path(row_id)}", body=body)
 
     def delete_row(self, table: str, row_id: str) -> None:
         """Delete row.
@@ -6009,35 +3472,21 @@ class DataTableApi:
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/data-tables/{quote_path(table)}/rows/{quote_path(row_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/data-tables/{quote_path(table)}/rows/{quote_path(row_id)}", response="void")
 
 
 class DecisionCapabilityApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def playground(
-        self,
-        body: m.DecisionPlaygroundRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def playground(self, body: m.DecisionPlaygroundRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Playground.
 
         POST /api/capabilities/decision/playground
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/capabilities/decision/playground",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/capabilities/decision/playground", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self) -> m.DecisionStatusResponse:
         """Status.
@@ -6051,95 +3500,40 @@ class DelegationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def introspect(
-        self,
-        body: m.DelegationDtos_IntrospectRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def introspect(self, body: m.DelegationDtos_IntrospectRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Introspect.
 
         POST /api/agents/delegations/introspect
         """
-        return self._http.request(
-            "POST",
-            "/api/agents/delegations/introspect",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/agents/delegations/introspect", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.DelegationDtos_GrantResponse]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DelegationDtos_GrantResponse]:
         """List.
 
         GET /api/agents/{agentId}/delegations
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/delegations",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/delegations", query={"limit": limit, "offset": offset})
 
-    def create_grant(
-        self,
-        agent_id: str,
-        body: m.DelegationDtos_CreateGrantRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def create_grant(self, agent_id: str, body: m.DelegationDtos_CreateGrantRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Create grant.
 
         POST /api/agents/{agentId}/delegations
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/delegations",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/delegations", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def revoke(
-        self,
-        agent_id: str,
-        grant_id: str,
-        body: Optional[m.DelegationDtos_RevokeRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DelegationDtos_GrantResponse:
+    def revoke(self, agent_id: str, grant_id: str, body: Optional[m.DelegationDtos_RevokeRequest] = None, *, idempotency_key: Optional[str] = None) -> m.DelegationDtos_GrantResponse:
         """Revoke.
 
         POST /api/agents/{agentId}/delegations/{grantId}/revoke
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/delegations/{quote_path(grant_id)}/revoke",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/delegations/{quote_path(grant_id)}/revoke", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def mint(
-        self,
-        agent_id: str,
-        grant_id: str,
-        body: Optional[m.DelegationDtos_MintTokenRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DelegationDtos_MintedTokenResponse:
+    def mint(self, agent_id: str, grant_id: str, body: Optional[m.DelegationDtos_MintTokenRequest] = None, *, idempotency_key: Optional[str] = None) -> m.DelegationDtos_MintedTokenResponse:
         """Mint.
 
         POST /api/agents/{agentId}/delegations/{grantId}/tokens
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/delegations/{quote_path(grant_id)}/tokens",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/delegations/{quote_path(grant_id)}/tokens", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def manifest(self, agent_id: str) -> Dict[str, Any]:
         """Manifest.
@@ -6153,21 +3547,14 @@ class DemoChannelApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def status(
-        self, *, since: Optional[str] = None, x_demo_token: Optional[str] = None
-    ) -> Any:
+    def status(self, *, since: Optional[str] = None, x_demo_token: Optional[str] = None) -> Any:
         """Status.
 
         GET /api/demo/channels
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/demo/channels",
-            query={"since": since},
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", "/api/demo/channels", query={"since": since}, headers={"X-Demo-Token": x_demo_token})
 
     def unlink_telegram(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Unlink telegram.
@@ -6176,11 +3563,7 @@ class DemoChannelApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            "/api/demo/channels/telegram",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("DELETE", "/api/demo/channels/telegram", headers={"X-Demo-Token": x_demo_token})
 
     def pair_telegram(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Pair telegram.
@@ -6189,11 +3572,7 @@ class DemoChannelApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/channels/telegram/pair",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("POST", "/api/demo/channels/telegram/pair", headers={"X-Demo-Token": x_demo_token})
 
     def unlink_whats_app(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Unlink whats app.
@@ -6202,11 +3581,7 @@ class DemoChannelApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            "/api/demo/channels/whatsapp",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("DELETE", "/api/demo/channels/whatsapp", headers={"X-Demo-Token": x_demo_token})
 
     def pair_whats_app(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Pair whats app.
@@ -6215,11 +3590,7 @@ class DemoChannelApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/channels/whatsapp/pair",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("POST", "/api/demo/channels/whatsapp/pair", headers={"X-Demo-Token": x_demo_token})
 
     def record_whats_app_preview(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Record whats app preview.
@@ -6228,53 +3599,35 @@ class DemoChannelApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/channels/whatsapp/preview",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("POST", "/api/demo/channels/whatsapp/preview", headers={"X-Demo-Token": x_demo_token})
 
 
 class DemoChatApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def chat(
-        self,
-        body: m.DemoChatController_DemoChatRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoChatController_DemoChatResponse:
+    def chat(self, body: m.DemoChatController_DemoChatRequest, *, x_demo_token: Optional[str] = None) -> m.DemoChatController_DemoChatResponse:
         """Chat.
 
         POST /api/demo/chat
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/demo/chat", headers={"X-Demo-Token": x_demo_token}, body=body
-        )
+        return self._http.request("POST", "/api/demo/chat", headers={"X-Demo-Token": x_demo_token}, body=body)
 
 
 class DemoImageApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.DemoImageController_DemoImageRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoImageController_DemoImageResponse:
+    def generate(self, body: m.DemoImageController_DemoImageRequest, *, x_demo_token: Optional[str] = None) -> m.DemoImageController_DemoImageResponse:
         """Generate.
 
         POST /api/demo/image
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/demo/image", headers={"X-Demo-Token": x_demo_token}, body=body
-        )
+        return self._http.request("POST", "/api/demo/image", headers={"X-Demo-Token": x_demo_token}, body=body)
 
     def serve(self, id: str) -> bytes:
         """Serve.
@@ -6283,33 +3636,21 @@ class DemoImageApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", f"/api/demo/image/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/demo/image/{quote_path(id)}", response="blob")
 
 
 class DemoMagicApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def plan(
-        self,
-        body: Optional[m.DemoMagicController_MagicPlanRequest] = None,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Any:
+    def plan(self, body: Optional[m.DemoMagicController_MagicPlanRequest] = None, *, x_demo_token: Optional[str] = None) -> Any:
         """Plan.
 
         POST /api/demo/magic/plan
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/magic/plan",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/demo/magic/plan", headers={"X-Demo-Token": x_demo_token}, body=body)
 
     def run_meta(self, share_id: str) -> Any:
         """Run meta.
@@ -6320,40 +3661,23 @@ class DemoMagicApi:
         """
         return self._http.request("GET", f"/api/demo/magic/run/{quote_path(share_id)}")
 
-    def run(
-        self,
-        share_id: str,
-        body: Optional[m.DemoMagicController_MagicRunRequest] = None,
-    ) -> Any:
+    def run(self, share_id: str, body: Optional[m.DemoMagicController_MagicRunRequest] = None) -> Any:
         """Run.
 
         POST /api/demo/magic/run/{shareId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/demo/magic/run/{quote_path(share_id)}", body=body
-        )
+        return self._http.request("POST", f"/api/demo/magic/run/{quote_path(share_id)}", body=body)
 
-    def preview(
-        self,
-        workflow_id: str,
-        body: Optional[m.DemoMagicController_MagicRunRequest] = None,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Any:
+    def preview(self, workflow_id: str, body: Optional[m.DemoMagicController_MagicRunRequest] = None, *, x_demo_token: Optional[str] = None) -> Any:
         """Preview.
 
         POST /api/demo/magic/{workflowId}/preview
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/magic/{quote_path(workflow_id)}/preview",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/demo/magic/{quote_path(workflow_id)}/preview", headers={"X-Demo-Token": x_demo_token}, body=body)
 
     def publish(self, workflow_id: str, *, x_demo_token: Optional[str] = None) -> Any:
         """Publish.
@@ -6362,45 +3686,30 @@ class DemoMagicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/magic/{quote_path(workflow_id)}/publish",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("POST", f"/api/demo/magic/{quote_path(workflow_id)}/publish", headers={"X-Demo-Token": x_demo_token})
 
 
 class DemoMusicApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.DemoMusicController_DemoMusicRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoMusicController_DemoMusicResponse:
+    def generate(self, body: m.DemoMusicController_DemoMusicRequest, *, x_demo_token: Optional[str] = None) -> m.DemoMusicController_DemoMusicResponse:
         """Generate.
 
         POST /api/demo/music
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/demo/music", headers={"X-Demo-Token": x_demo_token}, body=body
-        )
+        return self._http.request("POST", "/api/demo/music", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def status(
-        self, *, x_demo_token: Optional[str] = None
-    ) -> m.DemoMusicController_DemoMusicStatus:
+    def status(self, *, x_demo_token: Optional[str] = None) -> m.DemoMusicController_DemoMusicStatus:
         """Status.
 
         GET /api/demo/music/status
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/music/status", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/music/status", headers={"X-Demo-Token": x_demo_token})
 
     def serve(self, id: str) -> bytes:
         """Serve.
@@ -6409,27 +3718,21 @@ class DemoMusicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", f"/api/demo/music/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/demo/music/{quote_path(id)}", response="blob")
 
 
 class DemoSandboxApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def get_demo_metrics(
-        self, *, days: Optional[int] = None, limit: Optional[int] = None
-    ) -> m.DemoMetricsResponse:
+    def get_demo_metrics(self, *, days: Optional[int] = None, limit: Optional[int] = None) -> m.DemoMetricsResponse:
         """Get demo metrics.
 
         GET /api/platform/demo-metrics
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/demo-metrics", query={"days": days, "limit": limit}
-        )
+        return self._http.request("GET", "/api/platform/demo-metrics", query={"days": days, "limit": limit})
 
     def get_demo_settings(self) -> m.DemoSettingsResponse:
         """Get demo settings.
@@ -6440,9 +3743,7 @@ class DemoSandboxApi:
         """
         return self._http.request("GET", "/api/platform/demo-settings")
 
-    def update_demo_settings(
-        self, body: m.DemoSettingsUpdateRequest
-    ) -> m.DemoSettingsResponse:
+    def update_demo_settings(self, body: m.DemoSettingsUpdateRequest) -> m.DemoSettingsResponse:
         """Update demo settings.
 
         PUT /api/platform/demo-settings
@@ -6465,25 +3766,14 @@ class DemoSandboxReclaimApi:
         """
         return self._http.request("GET", "/api/platform/demo-sandboxes")
 
-    def reclaim(
-        self,
-        body: m.DemoSandboxReclaimController_ReclaimRequest,
-        *,
-        x_master_key: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DemoSandboxReclaimService_ReclaimResult:
+    def reclaim(self, body: m.DemoSandboxReclaimController_ReclaimRequest, *, x_master_key: Optional[str] = None, idempotency_key: Optional[str] = None) -> m.DemoSandboxReclaimService_ReclaimResult:
         """Reclaim.
 
         POST /api/platform/demo-sandboxes/reclaim
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/demo-sandboxes/reclaim",
-            headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/demo-sandboxes/reclaim", headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key}, body=body)
 
 
 class DemoSessionApi:
@@ -6497,9 +3787,7 @@ class DemoSessionApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/history", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/history", headers={"X-Demo-Token": x_demo_token})
 
     def status(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Status.
@@ -6508,9 +3796,7 @@ class DemoSessionApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/session", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/session", headers={"X-Demo-Token": x_demo_token})
 
     def create(self, body: Optional[m.DemoSessionCreateRequest] = None) -> Any:
         """Create.
@@ -6521,24 +3807,14 @@ class DemoSessionApi:
         """
         return self._http.request("POST", "/api/demo/session", body=body)
 
-    def reset(
-        self,
-        body: Optional[m.DemoSessionCreateRequest] = None,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Any:
+    def reset(self, body: Optional[m.DemoSessionCreateRequest] = None, *, x_demo_token: Optional[str] = None) -> Any:
         """Reset.
 
         POST /api/demo/session/reset
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/session/reset",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/demo/session/reset", headers={"X-Demo-Token": x_demo_token}, body=body)
 
 
 class DemoShareApi:
@@ -6554,63 +3830,37 @@ class DemoShareApi:
         """
         return self._http.request("GET", f"/api/demo/share/{quote_path(share_id)}")
 
-    def chat(
-        self,
-        share_id: str,
-        body: Optional[m.DemoShareController_ShareChatRequest] = None,
-    ) -> Any:
+    def chat(self, share_id: str, body: Optional[m.DemoShareController_ShareChatRequest] = None) -> Any:
         """Chat.
 
         POST /api/demo/share/{shareId}/chat
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/demo/share/{quote_path(share_id)}/chat", body=body
-        )
+        return self._http.request("POST", f"/api/demo/share/{quote_path(share_id)}/chat", body=body)
 
-    def report(
-        self,
-        share_id: str,
-        body: Optional[m.DemoShareController_ShareReportRequest] = None,
-    ) -> None:
+    def report(self, share_id: str, body: Optional[m.DemoShareController_ShareReportRequest] = None) -> None:
         """Report.
 
         POST /api/demo/share/{shareId}/report
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/share/{quote_path(share_id)}/report",
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/demo/share/{quote_path(share_id)}/report", body=body, response="void")
 
 
 class DemoShareOwnerApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def event(
-        self,
-        body: Optional[m.DemoShareOwnerController_DemoEventRequest] = None,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> None:
+    def event(self, body: Optional[m.DemoShareOwnerController_DemoEventRequest] = None, *, x_demo_token: Optional[str] = None) -> None:
         """Event.
 
         POST /api/demo/session/event
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/session/event",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/demo/session/event", headers={"X-Demo-Token": x_demo_token}, body=body, response="void")
 
     def share(self, *, x_demo_token: Optional[str] = None) -> Any:
         """Share.
@@ -6619,489 +3869,270 @@ class DemoShareOwnerApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/demo/session/share", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("POST", "/api/demo/session/share", headers={"X-Demo-Token": x_demo_token})
 
 
 class DemoStudioApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_agents(
-        self, *, x_demo_token: Optional[str] = None
-    ) -> List[m.DemoStudioService_AgentView]:
+    def list_agents(self, *, x_demo_token: Optional[str] = None) -> List[m.DemoStudioService_AgentView]:
         """List agents.
 
         GET /api/demo/studio/agents
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/studio/agents", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/studio/agents", headers={"X-Demo-Token": x_demo_token})
 
-    def create_agent(
-        self,
-        body: m.DemoStudioController_AgentRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioService_AgentView:
+    def create_agent(self, body: m.DemoStudioController_AgentRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioService_AgentView:
         """Create agent.
 
         POST /api/demo/studio/agents
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/studio/agents",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/demo/studio/agents", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def get_agent(
-        self, agent_id: str, *, x_demo_token: Optional[str] = None
-    ) -> m.DemoStudioService_AgentView:
+    def get_agent(self, agent_id: str, *, x_demo_token: Optional[str] = None) -> m.DemoStudioService_AgentView:
         """Get agent.
 
         GET /api/demo/studio/agents/{agentId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", f"/api/demo/studio/agents/{quote_path(agent_id)}", headers={"X-Demo-Token": x_demo_token})
 
-    def delete_agent(
-        self, agent_id: str, *, x_demo_token: Optional[str] = None
-    ) -> None:
+    def delete_agent(self, agent_id: str, *, x_demo_token: Optional[str] = None) -> None:
         """Delete agent.
 
         DELETE /api/demo/studio/agents/{agentId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/demo/studio/agents/{quote_path(agent_id)}", headers={"X-Demo-Token": x_demo_token}, response="void")
 
-    def update_agent(
-        self,
-        agent_id: str,
-        body: m.DemoStudioController_AgentRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioService_AgentView:
+    def update_agent(self, agent_id: str, body: m.DemoStudioController_AgentRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioService_AgentView:
         """Update agent.
 
         PATCH /api/demo/studio/agents/{agentId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/demo/studio/agents/{quote_path(agent_id)}", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def list_connectors(
-        self, agent_id: str, *, x_demo_token: Optional[str] = None
-    ) -> List[m.DemoStudioConnectorService_ConnectorView]:
+    def list_connectors(self, agent_id: str, *, x_demo_token: Optional[str] = None) -> List[m.DemoStudioConnectorService_ConnectorView]:
         """List connectors.
 
         GET /api/demo/studio/agents/{agentId}/connectors
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors", headers={"X-Demo-Token": x_demo_token})
 
-    def connect(
-        self,
-        agent_id: str,
-        body: m.DemoStudioController_ConnectRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioConnectorService_ConnectorView:
+    def connect(self, agent_id: str, body: m.DemoStudioController_ConnectRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioConnectorService_ConnectorView:
         """Connect.
 
         POST /api/demo/studio/agents/{agentId}/connectors
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def disconnect(
-        self, agent_id: str, server: str, *, x_demo_token: Optional[str] = None
-    ) -> None:
+    def disconnect(self, agent_id: str, server: str, *, x_demo_token: Optional[str] = None) -> None:
         """Disconnect.
 
         DELETE /api/demo/studio/agents/{agentId}/connectors/{server}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors/{quote_path(server)}",
-            headers={"X-Demo-Token": x_demo_token},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/demo/studio/agents/{quote_path(agent_id)}/connectors/{quote_path(server)}", headers={"X-Demo-Token": x_demo_token}, response="void")
 
-    def list_documents(
-        self, agent_id: str, *, x_demo_token: Optional[str] = None
-    ) -> List[m.DemoStudioDocumentService_DocumentView]:
+    def list_documents(self, agent_id: str, *, x_demo_token: Optional[str] = None) -> List[m.DemoStudioDocumentService_DocumentView]:
         """List documents.
 
         GET /api/demo/studio/agents/{agentId}/documents
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/documents",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", f"/api/demo/studio/agents/{quote_path(agent_id)}/documents", headers={"X-Demo-Token": x_demo_token})
 
-    def upload_document(
-        self, agent_id: str, body: Dict[str, Any], *, x_demo_token: Optional[str] = None
-    ) -> m.DemoStudioDocumentService_DocumentView:
+    def upload_document(self, agent_id: str, body: Dict[str, Any], *, x_demo_token: Optional[str] = None) -> m.DemoStudioDocumentService_DocumentView:
         """Upload document.
 
         POST /api/demo/studio/agents/{agentId}/documents
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/documents",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", f"/api/demo/studio/agents/{quote_path(agent_id)}/documents", headers={"X-Demo-Token": x_demo_token}, body=body, body_type="multipart")
 
-    def upload_text(
-        self,
-        agent_id: str,
-        body: m.DemoStudioController_TextDocumentRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioDocumentService_DocumentView:
+    def upload_text(self, agent_id: str, body: m.DemoStudioController_TextDocumentRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioDocumentService_DocumentView:
         """Upload text.
 
         POST /api/demo/studio/agents/{agentId}/documents/text
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/documents/text",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/demo/studio/agents/{quote_path(agent_id)}/documents/text", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def delete_document(
-        self, agent_id: str, document_id: str, *, x_demo_token: Optional[str] = None
-    ) -> None:
+    def delete_document(self, agent_id: str, document_id: str, *, x_demo_token: Optional[str] = None) -> None:
         """Delete document.
 
         DELETE /api/demo/studio/agents/{agentId}/documents/{documentId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/documents/{quote_path(document_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/demo/studio/agents/{quote_path(agent_id)}/documents/{quote_path(document_id)}", headers={"X-Demo-Token": x_demo_token}, response="void")
 
-    def make_live(
-        self, agent_id: str, *, x_demo_token: Optional[str] = None
-    ) -> m.DemoStudioService_AgentView:
+    def make_live(self, agent_id: str, *, x_demo_token: Optional[str] = None) -> m.DemoStudioService_AgentView:
         """Make live.
 
         POST /api/demo/studio/agents/{agentId}/live
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/live",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("POST", f"/api/demo/studio/agents/{quote_path(agent_id)}/live", headers={"X-Demo-Token": x_demo_token})
 
-    def mission(
-        self,
-        agent_id: str,
-        body: m.DemoStudioController_MissionRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Iterator[str]:
+    def mission(self, agent_id: str, body: m.DemoStudioController_MissionRequest, *, x_demo_token: Optional[str] = None) -> Iterator[str]:
         """Mission.
 
         POST /api/demo/studio/agents/{agentId}/mission
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/demo/studio/agents/{quote_path(agent_id)}/mission",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/demo/studio/agents/{quote_path(agent_id)}/mission", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def search_mcp(
-        self,
-        *,
-        q: Optional[str] = None,
-        cursor: Optional[str] = None,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioConnectorService_RegistryPage:
+    def search_mcp(self, *, q: Optional[str] = None, cursor: Optional[str] = None, x_demo_token: Optional[str] = None) -> m.DemoStudioConnectorService_RegistryPage:
         """Search mcp.
 
         GET /api/demo/studio/mcp/search
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/demo/studio/mcp/search",
-            query={"q": q, "cursor": cursor},
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", "/api/demo/studio/mcp/search", query={"q": q, "cursor": cursor}, headers={"X-Demo-Token": x_demo_token})
 
-    def palette(
-        self, *, agent_id: Optional[str] = None, x_demo_token: Optional[str] = None
-    ) -> m.DemoStudioService_Palette:
+    def palette(self, *, agent_id: Optional[str] = None, x_demo_token: Optional[str] = None) -> m.DemoStudioService_Palette:
         """Palette.
 
         GET /api/demo/studio/palette
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/demo/studio/palette",
-            query={"agentId": agent_id},
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", "/api/demo/studio/palette", query={"agentId": agent_id}, headers={"X-Demo-Token": x_demo_token})
 
-    def decide(
-        self,
-        run_id: str,
-        body: m.DemoStudioController_DecisionRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def decide(self, run_id: str, body: m.DemoStudioController_DecisionRequest, *, x_demo_token: Optional[str] = None) -> Dict[str, Any]:
         """Decide.
 
         POST /api/demo/studio/runs/{runId}/decision
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/demo/studio/runs/{quote_path(run_id)}/decision",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/demo/studio/runs/{quote_path(run_id)}/decision", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def status(
-        self, *, x_demo_token: Optional[str] = None
-    ) -> m.DemoStudioController_StudioStatus:
+    def status(self, *, x_demo_token: Optional[str] = None) -> m.DemoStudioController_StudioStatus:
         """Status.
 
         GET /api/demo/studio/status
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/studio/status", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/studio/status", headers={"X-Demo-Token": x_demo_token})
 
-    def list_workflows(
-        self, *, x_demo_token: Optional[str] = None
-    ) -> List[m.DemoStudioController_WorkflowView]:
+    def list_workflows(self, *, x_demo_token: Optional[str] = None) -> List[m.DemoStudioController_WorkflowView]:
         """List workflows.
 
         GET /api/demo/studio/workflows
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/demo/studio/workflows", headers={"X-Demo-Token": x_demo_token}
-        )
+        return self._http.request("GET", "/api/demo/studio/workflows", headers={"X-Demo-Token": x_demo_token})
 
-    def create_workflow(
-        self,
-        body: m.DemoStudioController_WorkflowRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioController_WorkflowView:
+    def create_workflow(self, body: m.DemoStudioController_WorkflowRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioController_WorkflowView:
         """Create workflow.
 
         POST /api/demo/studio/workflows
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/studio/workflows",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/demo/studio/workflows", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def update_workflow(
-        self,
-        workflow_id: str,
-        body: m.DemoStudioController_WorkflowRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoStudioController_WorkflowView:
+    def update_workflow(self, workflow_id: str, body: m.DemoStudioController_WorkflowRequest, *, x_demo_token: Optional[str] = None) -> m.DemoStudioController_WorkflowView:
         """Update workflow.
 
         PUT /api/demo/studio/workflows/{workflowId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/demo/studio/workflows/{quote_path(workflow_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/demo/studio/workflows/{quote_path(workflow_id)}", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def delete_workflow(
-        self, workflow_id: str, *, x_demo_token: Optional[str] = None
-    ) -> None:
+    def delete_workflow(self, workflow_id: str, *, x_demo_token: Optional[str] = None) -> None:
         """Delete workflow.
 
         DELETE /api/demo/studio/workflows/{workflowId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/demo/studio/workflows/{quote_path(workflow_id)}",
-            headers={"X-Demo-Token": x_demo_token},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/demo/studio/workflows/{quote_path(workflow_id)}", headers={"X-Demo-Token": x_demo_token}, response="void")
 
-    def run_workflow(
-        self,
-        workflow_id: str,
-        body: Optional[m.DemoStudioController_RunRequest] = None,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> Iterator[str]:
+    def run_workflow(self, workflow_id: str, body: Optional[m.DemoStudioController_RunRequest] = None, *, x_demo_token: Optional[str] = None) -> Iterator[str]:
         """Run workflow.
 
         POST /api/demo/studio/workflows/{workflowId}/run
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/demo/studio/workflows/{quote_path(workflow_id)}/run",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.stream("POST", f"/api/demo/studio/workflows/{quote_path(workflow_id)}/run", headers={"X-Demo-Token": x_demo_token}, body=body)
 
-    def list_runs(
-        self, workflow_id: str, *, x_demo_token: Optional[str] = None
-    ) -> List[m.DemoStudioController_RunView]:
+    def list_runs(self, workflow_id: str, *, x_demo_token: Optional[str] = None) -> List[m.DemoStudioController_RunView]:
         """List runs.
 
         GET /api/demo/studio/workflows/{workflowId}/runs
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/demo/studio/workflows/{quote_path(workflow_id)}/runs",
-            headers={"X-Demo-Token": x_demo_token},
-        )
+        return self._http.request("GET", f"/api/demo/studio/workflows/{quote_path(workflow_id)}/runs", headers={"X-Demo-Token": x_demo_token})
 
 
 class DemoTelegramWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self, body: Any, *, x_telegram_bot_api_secret_token: Optional[str] = None
-    ) -> None:
+    def inbound(self, body: Any, *, x_telegram_bot_api_secret_token: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/demo/telegram
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/demo/telegram",
-            headers={
-                "X-Telegram-Bot-Api-Secret-Token": x_telegram_bot_api_secret_token
-            },
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/demo/telegram", headers={"X-Telegram-Bot-Api-Secret-Token": x_telegram_bot_api_secret_token}, body=body, response="void")
 
 
 class DemoTranscriptEmailApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def send(
-        self, body: m.DemoTranscriptEmailRequest, *, x_demo_token: Optional[str] = None
-    ) -> Any:
+    def send(self, body: m.DemoTranscriptEmailRequest, *, x_demo_token: Optional[str] = None) -> Any:
         """Send.
 
         POST /api/demo/transcript-email
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/demo/transcript-email",
-            headers={"X-Demo-Token": x_demo_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/demo/transcript-email", headers={"X-Demo-Token": x_demo_token}, body=body)
 
 
 class DemoVideoApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.DemoVideoController_DemoVideoRequest,
-        *,
-        x_demo_token: Optional[str] = None,
-    ) -> m.DemoVideoController_DemoVideoResponse:
+    def generate(self, body: m.DemoVideoController_DemoVideoRequest, *, x_demo_token: Optional[str] = None) -> m.DemoVideoController_DemoVideoResponse:
         """Generate.
 
         POST /api/demo/video
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/demo/video", headers={"X-Demo-Token": x_demo_token}, body=body
-        )
+        return self._http.request("POST", "/api/demo/video", headers={"X-Demo-Token": x_demo_token}, body=body)
 
     def serve(self, id: str) -> bytes:
         """Serve.
@@ -7110,55 +4141,30 @@ class DemoVideoApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", f"/api/demo/video/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/demo/video/{quote_path(id)}", response="blob")
 
 
 class DemoWhatsAppWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def verify(
-        self,
-        *,
-        hub_mode: Optional[str] = None,
-        hub_verify_token: Optional[str] = None,
-        hub_challenge: Optional[str] = None,
-    ) -> str:
+    def verify(self, *, hub_mode: Optional[str] = None, hub_verify_token: Optional[str] = None, hub_challenge: Optional[str] = None) -> str:
         """Verify.
 
         GET /webhook/demo/whatsapp
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/webhook/demo/whatsapp",
-            query={
-                "hub.mode": hub_mode,
-                "hub.verify_token": hub_verify_token,
-                "hub.challenge": hub_challenge,
-            },
-            response="text",
-        )
+        return self._http.request("GET", "/webhook/demo/whatsapp", query={"hub.mode": hub_mode, "hub.verify_token": hub_verify_token, "hub.challenge": hub_challenge}, response="text")
 
-    def inbound(
-        self, body: Optional[str] = None, *, x_hub_signature_256: Optional[str] = None
-    ) -> None:
+    def inbound(self, body: Optional[str] = None, *, x_hub_signature_256: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/demo/whatsapp
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/demo/whatsapp",
-            headers={"X-Hub-Signature-256": x_hub_signature_256},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/demo/whatsapp", headers={"X-Hub-Signature-256": x_hub_signature_256}, body=body, response="void")
 
 
 class DesktopMonitorApi:
@@ -7179,56 +4185,26 @@ class DesktopRecipeApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        agent_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.DesktopRecipeDtos_RecipeSummary]:
+    def list(self, *, agent_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DesktopRecipeDtos_RecipeSummary]:
         """List.
 
         GET /api/desktop/recipes
         """
-        return self._http.request(
-            "GET",
-            "/api/desktop/recipes",
-            query={"agentId": agent_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/desktop/recipes", query={"agentId": agent_id, "limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.DesktopRecipeDtos_CreateRecipeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DesktopRecipeDtos_RecipeDetail:
+    def create(self, body: m.DesktopRecipeDtos_CreateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
         """Create.
 
         POST /api/desktop/recipes
         """
-        return self._http.request(
-            "POST",
-            "/api/desktop/recipes",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/desktop/recipes", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def from_run(
-        self,
-        body: m.DesktopRecipeDtos_RecipeFromRunRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DesktopRecipeDtos_RecipeDetail:
+    def from_run(self, body: m.DesktopRecipeDtos_RecipeFromRunRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
         """From run.
 
         POST /api/desktop/recipes/from-run
         """
-        return self._http.request(
-            "POST",
-            "/api/desktop/recipes/from-run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/desktop/recipes/from-run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.DesktopRecipeDtos_RecipeDetail:
         """Get.
@@ -7242,45 +4218,21 @@ class DesktopRecipeApi:
 
         DELETE /api/desktop/recipes/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/desktop/recipes/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/desktop/recipes/{quote_path(id)}", response="void")
 
-    def update(
-        self,
-        id: str,
-        body: m.DesktopRecipeDtos_UpdateRecipeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DesktopRecipeDtos_RecipeSummary:
+    def update(self, id: str, body: m.DesktopRecipeDtos_UpdateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeSummary:
         """Update.
 
         PATCH /api/desktop/recipes/{id}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/desktop/recipes/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/desktop/recipes/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def run(
-        self,
-        id: str,
-        body: m.DesktopRecipeDtos_RunRecipeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DesktopRecipeDtos_RunRecipeResponse:
+    def run(self, id: str, body: m.DesktopRecipeDtos_RunRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RunRecipeResponse:
         """Run.
 
         POST /api/desktop/recipes/{id}/run
         """
-        return self._http.request(
-            "POST",
-            f"/api/desktop/recipes/{quote_path(id)}/run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/desktop/recipes/{quote_path(id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class DeveloperApiApi:
@@ -7296,25 +4248,14 @@ class DeveloperApiApi:
         """
         return self._http.request("GET", "/api/dev/v1/agents")
 
-    def chat(
-        self,
-        agent_id: str,
-        body: m.DeveloperApiController_ChatRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def chat(self, agent_id: str, body: m.DeveloperApiController_ChatRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Chat.
 
         POST /api/dev/v1/agents/{agentId}/chat
 
         Authenticated with a long-lived vmcp_ grant key, not a user JWT.
         """
-        return self._http.request(
-            "POST",
-            f"/api/dev/v1/agents/{quote_path(agent_id)}/chat",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/dev/v1/agents/{quote_path(agent_id)}/chat", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def list_workflows(self) -> List[m.DeveloperApiController_WorkflowSummaryDto]:
         """List workflows.
@@ -7325,25 +4266,14 @@ class DeveloperApiApi:
         """
         return self._http.request("GET", "/api/dev/v1/workflows")
 
-    def run(
-        self,
-        workflow_id: str,
-        body: Optional[m.DeveloperApiController_RunRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def run(self, workflow_id: str, body: Optional[m.DeveloperApiController_RunRequest] = None, *, idempotency_key: Optional[str] = None) -> Any:
         """Run.
 
         POST /api/dev/v1/workflows/{workflowId}/run
 
         Authenticated with a long-lived vmcp_ grant key, not a user JWT.
         """
-        return self._http.request(
-            "POST",
-            f"/api/dev/v1/workflows/{quote_path(workflow_id)}/run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/dev/v1/workflows/{quote_path(workflow_id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def run_status(self, workflow_id: str, run_id: str) -> Any:
         """Run status.
@@ -7352,57 +4282,37 @@ class DeveloperApiApi:
 
         Authenticated with a long-lived vmcp_ grant key, not a user JWT.
         """
-        return self._http.request(
-            "GET",
-            f"/api/dev/v1/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}",
-        )
+        return self._http.request("GET", f"/api/dev/v1/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}")
 
 
 class DeviceApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.DeviceResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DeviceResponse]:
         """List.
 
         GET /api/devices
         """
-        return self._http.request(
-            "GET", "/api/devices", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/devices", query={"limit": limit, "offset": offset})
 
-    def generate_pairing_code(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.PairingCodeResponse:
+    def generate_pairing_code(self, *, idempotency_key: Optional[str] = None) -> m.PairingCodeResponse:
         """Generate pairing code.
 
         POST /api/devices/pairing-code
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/pairing-code",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/devices/pairing-code", headers={"Idempotency-Key": idempotency_key})
 
-    def register(
-        self, body: m.RegisterDeviceRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.ClaimResponse:
+    def register(self, body: m.RegisterDeviceRequest, *, idempotency_key: Optional[str] = None) -> m.ClaimResponse:
         """Register.
 
         POST /api/devices/register
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/register",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/register", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def revoke(self, device_id: str) -> None:
         """Revoke.
@@ -7411,99 +4321,55 @@ class DeviceApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/devices/{quote_path(device_id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/devices/{quote_path(device_id)}", response="void")
 
-    def command_history(
-        self,
-        device_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.CommandResponse]:
+    def command_history(self, device_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.CommandResponse]:
         """Command history.
 
         GET /api/devices/{deviceId}/commands
         """
-        return self._http.request(
-            "GET",
-            f"/api/devices/{quote_path(device_id)}/commands",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/devices/{quote_path(device_id)}/commands", query={"limit": limit, "offset": offset})
 
-    def enqueue(
-        self,
-        device_id: str,
-        body: m.EnqueueCommandRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.CommandResponse:
+    def enqueue(self, device_id: str, body: m.EnqueueCommandRequest, *, idempotency_key: Optional[str] = None) -> m.CommandResponse:
         """Enqueue.
 
         POST /api/devices/{deviceId}/commands
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/devices/{quote_path(device_id)}/commands",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/devices/{quote_path(device_id)}/commands", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class DeviceDataIngestionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def app_usage(
-        self, body: m.IngestAppUsageRequest, *, x_device_token: str
-    ) -> Dict[str, Any]:
+    def app_usage(self, body: m.IngestAppUsageRequest, *, x_device_token: str) -> Dict[str, Any]:
         """App usage.
 
         POST /api/devices/app-usage
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/app-usage",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/app-usage", headers={"X-Device-Token": x_device_token}, body=body)
 
-    def notifications(
-        self, body: m.IngestNotificationsRequest, *, x_device_token: str
-    ) -> Dict[str, Any]:
+    def notifications(self, body: m.IngestNotificationsRequest, *, x_device_token: str) -> Dict[str, Any]:
         """Notifications.
 
         POST /api/devices/notifications
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/notifications",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/notifications", headers={"X-Device-Token": x_device_token}, body=body)
 
-    def screen_state(
-        self, body: m.IngestScreenStateRequest, *, x_device_token: str
-    ) -> Dict[str, Any]:
+    def screen_state(self, body: m.IngestScreenStateRequest, *, x_device_token: str) -> Dict[str, Any]:
         """Screen state.
 
         POST /api/devices/screen-state
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/screen-state",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/screen-state", headers={"X-Device-Token": x_device_token}, body=body)
 
     def sms(self, body: m.IngestSmsRequest, *, x_device_token: str) -> Dict[str, Any]:
         """Sms.
@@ -7512,38 +4378,19 @@ class DeviceDataIngestionApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/sms",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/sms", headers={"X-Device-Token": x_device_token}, body=body)
 
 
 class DeviceGatewayApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def capabilities(
-        self,
-        body: m.UpdateCapabilitiesRequest,
-        *,
-        x_device_token: str,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def capabilities(self, body: m.UpdateCapabilitiesRequest, *, x_device_token: str, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Capabilities.
 
         POST /api/devices/capabilities
         """
-        return self._http.request(
-            "POST",
-            "/api/devices/capabilities",
-            headers={
-                "X-Device-Token": x_device_token,
-                "Idempotency-Key": idempotency_key,
-            },
-            body=body,
-        )
+        return self._http.request("POST", "/api/devices/capabilities", headers={"X-Device-Token": x_device_token, "Idempotency-Key": idempotency_key}, body=body)
 
     def claim(self, body: m.ClaimRequest) -> Any:
         """Claim.
@@ -7554,21 +4401,14 @@ class DeviceGatewayApi:
         """
         return self._http.request("POST", "/api/devices/claim", body=body)
 
-    def result(
-        self, command_id: str, body: m.CommandResultRequest, *, x_device_token: str
-    ) -> m.CommandResponse:
+    def result(self, command_id: str, body: m.CommandResultRequest, *, x_device_token: str) -> m.CommandResponse:
         """Result.
 
         POST /api/devices/commands/{commandId}/result
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/devices/commands/{quote_path(command_id)}/result",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/devices/commands/{quote_path(command_id)}/result", headers={"X-Device-Token": x_device_token}, body=body)
 
     def poll(self, *, x_device_token: str) -> m.CommandResponse:
         """Poll.
@@ -7577,9 +4417,7 @@ class DeviceGatewayApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/devices/poll", headers={"X-Device-Token": x_device_token}
-        )
+        return self._http.request("POST", "/api/devices/poll", headers={"X-Device-Token": x_device_token})
 
 
 class DiscordCredentialApi:
@@ -7593,21 +4431,14 @@ class DiscordCredentialApi:
         """
         return self._http.request("GET", "/api/channels/discord/credential")
 
-    def activate(
-        self, body: m.DiscordActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.DiscordCredentialResponse:
+    def activate(self, body: m.DiscordActivationRequest, *, idempotency_key: Optional[str] = None) -> m.DiscordCredentialResponse:
         """Activate.
 
         POST /api/channels/discord/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/discord/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/discord/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -7616,9 +4447,7 @@ class DiscordCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/discord/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/discord/credential", response="void")
 
 
 class DiscordSendApi:
@@ -7632,122 +4461,70 @@ class DiscordSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/discord/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/discord/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.DiscordSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DiscordSendController_SendResult:
+    def send(self, body: m.DiscordSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.DiscordSendController_SendResult:
         """Send.
 
         POST /api/channels/discord/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/discord/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/discord/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class DiscordWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self, body: m.DiscordInboundMessage, *, x_internal_secret: Optional[str] = None
-    ) -> None:
+    def inbound(self, body: m.DiscordInboundMessage, *, x_internal_secret: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/discord
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/discord",
-            headers={"X-Internal-Secret": x_internal_secret},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/discord", headers={"X-Internal-Secret": x_internal_secret}, body=body, response="void")
 
 
 class DocumentGenerationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        page: Optional[int] = None,
-        size: Optional[int] = None,
-        search: Optional[str] = None,
-    ) -> m.Page_DocumentGenerationJobResponse:
+    def list(self, *, page: Optional[int] = None, size: Optional[int] = None, search: Optional[str] = None) -> m.Page_DocumentGenerationJobResponse:
         """List.
 
         GET /api/documentgen/documents
         """
-        return self._http.request(
-            "GET",
-            "/api/documentgen/documents",
-            query={"page": page, "size": size, "search": search},
-        )
+        return self._http.request("GET", "/api/documentgen/documents", query={"page": page, "size": size, "search": search})
 
-    def generate(
-        self,
-        body: m.DocumentGenerationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.DocumentGenerationJobResponse:
+    def generate(self, body: m.DocumentGenerationRequest, *, idempotency_key: Optional[str] = None) -> m.DocumentGenerationJobResponse:
         """Generate.
 
         POST /api/documentgen/documents
         """
-        return self._http.request(
-            "POST",
-            "/api/documentgen/documents",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/documentgen/documents", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def download(self, id: str) -> bytes:
         """Download.
 
         GET /api/documentgen/documents/{id}
         """
-        return self._http.request(
-            "GET", f"/api/documentgen/documents/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/documentgen/documents/{quote_path(id)}", response="blob")
 
 
 class E2bCredentialApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def activate(
-        self,
-        body: m.E2bCredentialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.E2bCredentialResponse:
+    def activate(self, body: m.E2bCredentialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.E2bCredentialResponse:
         """Activate.
 
         POST /api/sdlc/credential
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/sdlc/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/sdlc/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self) -> None:
         """Deactivate.
@@ -7758,18 +4535,14 @@ class E2bCredentialApi:
         """
         return self._http.request("DELETE", "/api/sdlc/credential", response="void")
 
-    def set_code_execution_template(
-        self, body: m.E2bCodeExecutionTemplateRequest
-    ) -> m.E2bCredentialResponse:
+    def set_code_execution_template(self, body: m.E2bCodeExecutionTemplateRequest) -> m.E2bCredentialResponse:
         """Set code execution template.
 
         PUT /api/sdlc/credential/code-execution-template
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/sdlc/credential/code-execution-template", body=body
-        )
+        return self._http.request("PUT", "/api/sdlc/credential/code-execution-template", body=body)
 
     def status(self) -> m.E2bCredentialResponse:
         """Status.
@@ -7783,46 +4556,28 @@ class E2bSandboxApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.SandboxSummaryResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SandboxSummaryResponse]:
         """List.
 
         GET /api/sdlc/sandbox
         """
-        return self._http.request(
-            "GET", "/api/sdlc/sandbox", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/sdlc/sandbox", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.CreateSandboxRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SandboxResponse:
+    def create(self, body: m.CreateSandboxRequest, *, idempotency_key: Optional[str] = None) -> m.SandboxResponse:
         """Create.
 
         POST /api/sdlc/sandbox
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/sdlc/sandbox",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/sdlc/sandbox", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def run_code(
-        self, body: m.RunCodeRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.RunCodeResponse:
+    def run_code(self, body: m.RunCodeRequest, *, idempotency_key: Optional[str] = None) -> m.RunCodeResponse:
         """Run code.
 
         POST /api/sdlc/sandbox/run-code
         """
-        return self._http.request(
-            "POST",
-            "/api/sdlc/sandbox/run-code",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/sdlc/sandbox/run-code", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def kill(self, sandbox_id: str) -> None:
         """Kill.
@@ -7831,30 +4586,21 @@ class E2bSandboxApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/sdlc/sandbox/{quote_path(sandbox_id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/sdlc/sandbox/{quote_path(sandbox_id)}", response="void")
 
 
 class EdgeAgentsConfigApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def get_config(
-        self, *, agent_id: Optional[str] = None, x_device_token: Optional[str] = None
-    ) -> m.EdgeAgentsConfigController_EdgeConfigResponse:
+    def get_config(self, *, agent_id: Optional[str] = None, x_device_token: Optional[str] = None) -> m.EdgeAgentsConfigController_EdgeConfigResponse:
         """Get config.
 
         GET /api/edge/config
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/edge/config",
-            query={"agentId": agent_id},
-            headers={"X-Device-Token": x_device_token},
-        )
+        return self._http.request("GET", "/api/edge/config", query={"agentId": agent_id}, headers={"X-Device-Token": x_device_token})
 
     def get_manifest(self) -> m.EdgeAgentsConfigController_EdgeModelManifest:
         """Get manifest.
@@ -7865,9 +4611,7 @@ class EdgeAgentsConfigApi:
         """
         return self._http.request("GET", "/api/edge/manifest")
 
-    def get_manifest_for_editor(
-        self,
-    ) -> m.EdgeAgentsConfigController_EdgeManifestEditorResponse:
+    def get_manifest_for_editor(self) -> m.EdgeAgentsConfigController_EdgeManifestEditorResponse:
         """Get manifest for editor.
 
         GET /api/edge/manifest/full
@@ -7890,82 +4634,44 @@ class EdgePromptBundleApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def bundle(
-        self, *, agent_id: Optional[str] = None
-    ) -> m.EdgePromptBundleController_EdgePromptBundle:
+    def bundle(self, *, agent_id: Optional[str] = None) -> m.EdgePromptBundleController_EdgePromptBundle:
         """Bundle.
 
         GET /api/edge/prompts
         """
-        return self._http.request(
-            "GET", "/api/edge/prompts", query={"agentId": agent_id}
-        )
+        return self._http.request("GET", "/api/edge/prompts", query={"agentId": agent_id})
 
 
 class EdgeRelayApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def fail(
-        self,
-        job_id: str,
-        body: m.EdgeRelayController_FailRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def fail(self, job_id: str, body: m.EdgeRelayController_FailRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Fail.
 
         POST /api/channels/edge-relay/jobs/{jobId}/fail
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/edge-relay/jobs/{quote_path(job_id)}/fail",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/channels/edge-relay/jobs/{quote_path(job_id)}/fail", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def reply(
-        self,
-        job_id: str,
-        body: m.EdgeRelayController_ReplyRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def reply(self, job_id: str, body: m.EdgeRelayController_ReplyRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Reply.
 
         POST /api/channels/edge-relay/jobs/{jobId}/reply
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/edge-relay/jobs/{quote_path(job_id)}/reply",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/channels/edge-relay/jobs/{quote_path(job_id)}/reply", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def register(
-        self,
-        body: m.EdgeRelayController_RegisterRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EdgeRelayController_RegisterResponse:
+    def register(self, body: m.EdgeRelayController_RegisterRequest, *, idempotency_key: Optional[str] = None) -> m.EdgeRelayController_RegisterResponse:
         """Register.
 
         POST /api/channels/edge-relay/register
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/edge-relay/register",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/edge-relay/register", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self) -> m.EdgeRelayController_StatusResponse:
         """Status.
@@ -7983,27 +4689,16 @@ class EdgeRelayApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/channels/edge-relay/{quote_path(relay_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/channels/edge-relay/{quote_path(relay_id)}", response="void")
 
-    def heartbeat(
-        self, relay_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def heartbeat(self, relay_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Heartbeat.
 
         POST /api/channels/edge-relay/{relayId}/heartbeat
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/channels/edge-relay/{quote_path(relay_id)}/heartbeat",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/channels/edge-relay/{quote_path(relay_id)}/heartbeat", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def next(self, relay_id: str, *, wait: Optional[int] = None) -> m.RelayJob:
         """Next.
@@ -8012,120 +4707,67 @@ class EdgeRelayApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/channels/edge-relay/{quote_path(relay_id)}/next",
-            query={"wait": wait},
-        )
+        return self._http.request("GET", f"/api/channels/edge-relay/{quote_path(relay_id)}/next", query={"wait": wait})
 
 
 class EdgeToolExecutionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_memory(
-        self,
-        *,
-        agent_id: str,
-        q: Optional[str] = None,
-        x_device_token: Optional[str] = None,
-    ) -> m.EdgeToolExecutionController_EdgeMemoryResponse:
+    def list_memory(self, *, agent_id: str, q: Optional[str] = None, x_device_token: Optional[str] = None) -> m.EdgeToolExecutionController_EdgeMemoryResponse:
         """List memory.
 
         GET /api/edge/memory
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/edge/memory",
-            query={"agentId": agent_id, "q": q},
-            headers={"X-Device-Token": x_device_token},
-        )
+        return self._http.request("GET", "/api/edge/memory", query={"agentId": agent_id, "q": q}, headers={"X-Device-Token": x_device_token})
 
-    def list_tools(
-        self, *, agent_id: str, x_device_token: Optional[str] = None
-    ) -> m.EdgeToolExecutionController_EdgeToolListResponse:
+    def list_tools(self, *, agent_id: str, x_device_token: Optional[str] = None) -> m.EdgeToolExecutionController_EdgeToolListResponse:
         """List tools.
 
         GET /api/edge/tools
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/edge/tools",
-            query={"agentId": agent_id},
-            headers={"X-Device-Token": x_device_token},
-        )
+        return self._http.request("GET", "/api/edge/tools", query={"agentId": agent_id}, headers={"X-Device-Token": x_device_token})
 
-    def execute(
-        self,
-        body: m.EdgeToolExecutionController_EdgeToolExecuteRequest,
-        *,
-        x_device_token: Optional[str] = None,
-    ) -> m.EdgeToolExecutionController_EdgeToolExecuteResponse:
+    def execute(self, body: m.EdgeToolExecutionController_EdgeToolExecuteRequest, *, x_device_token: Optional[str] = None) -> m.EdgeToolExecutionController_EdgeToolExecuteResponse:
         """Execute.
 
         POST /api/edge/tools/execute
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/edge/tools/execute",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-        )
+        return self._http.request("POST", "/api/edge/tools/execute", headers={"X-Device-Token": x_device_token}, body=body)
 
 
 class EdgeTurnTelemetryApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def report(
-        self,
-        body: m.EdgeTurnTelemetryController_EdgeTurnReportRequest,
-        *,
-        x_device_token: Optional[str] = None,
-    ) -> None:
+    def report(self, body: m.EdgeTurnTelemetryController_EdgeTurnReportRequest, *, x_device_token: Optional[str] = None) -> None:
         """Report.
 
         POST /api/edge/turns
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/api/edge/turns",
-            headers={"X-Device-Token": x_device_token},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/edge/turns", headers={"X-Device-Token": x_device_token}, body=body, response="void")
 
 
 class ElevenLabsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def activate(
-        self,
-        body: m.ElevenLabsCredentialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ElevenLabsCredentialResponse:
+    def activate(self, body: m.ElevenLabsCredentialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.ElevenLabsCredentialResponse:
         """Activate.
 
         POST /api/elevenlabs/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/elevenlabs/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/elevenlabs/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self) -> None:
         """Deactivate.
@@ -8134,9 +4776,7 @@ class ElevenLabsApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/elevenlabs/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/elevenlabs/credential", response="void")
 
     def status(self) -> m.ElevenLabsCredentialResponse:
         """Status.
@@ -8150,25 +4790,19 @@ class ElevenLabsGeneratedAudioApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ElevenLabsGeneratedAudioResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ElevenLabsGeneratedAudioResponse]:
         """List.
 
         GET /api/elevenlabs/audio
         """
-        return self._http.request(
-            "GET", "/api/elevenlabs/audio", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/elevenlabs/audio", query={"limit": limit, "offset": offset})
 
     def download(self, id: str) -> bytes:
         """Download.
 
         GET /api/elevenlabs/audio/{id}
         """
-        return self._http.request(
-            "GET", f"/api/elevenlabs/audio/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/elevenlabs/audio/{quote_path(id)}", response="blob")
 
 
 class ElevenLabsVoiceApi:
@@ -8189,13 +4823,7 @@ class ElevenLabsVoiceApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/elevenlabs/voices",
-            query={"name": name},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/elevenlabs/voices", query={"name": name}, body=body, body_type="multipart")
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -8204,9 +4832,7 @@ class ElevenLabsVoiceApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/elevenlabs/voices/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/elevenlabs/voices/{quote_path(id)}", response="void")
 
 
 class EmailCredentialApi:
@@ -8222,21 +4848,14 @@ class EmailCredentialApi:
         """
         return self._http.request("GET", "/api/channels/email/credential")
 
-    def activate(
-        self, body: m.EmailActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.EmailCredentialResponse:
+    def activate(self, body: m.EmailActivationRequest, *, idempotency_key: Optional[str] = None) -> m.EmailCredentialResponse:
         """Activate.
 
         POST /api/channels/email/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/email/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/email/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -8245,27 +4864,19 @@ class EmailCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/email/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/email/credential", response="void")
 
 
 class EmailMessageApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, run_id: str, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.EmailMessageController_EmailMessageResponse]:
+    def list(self, *, run_id: str, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.EmailMessageController_EmailMessageResponse]:
         """List.
 
         GET /api/email/messages
         """
-        return self._http.request(
-            "GET",
-            "/api/email/messages",
-            query={"runId": run_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/email/messages", query={"runId": run_id, "limit": limit, "offset": offset})
 
 
 class EmailSendApi:
@@ -8279,28 +4890,16 @@ class EmailSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/email/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/email/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.EmailSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EmailSendController_SendResult:
+    def send(self, body: m.EmailSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.EmailSendController_SendResult:
         """Send.
 
         POST /api/channels/email/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/email/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/email/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class EmailUnsubscribeApi:
@@ -8314,9 +4913,7 @@ class EmailUnsubscribeApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/public/email/unsubscribe", query={"t": t}, response="text"
-        )
+        return self._http.request("GET", "/api/public/email/unsubscribe", query={"t": t}, response="text")
 
     def unsubscribe(self, *, t: str) -> str:
         """Unsubscribe.
@@ -8325,94 +4922,54 @@ class EmailUnsubscribeApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/public/email/unsubscribe", query={"t": t}, response="text"
-        )
+        return self._http.request("POST", "/api/public/email/unsubscribe", query={"t": t}, response="text")
 
 
 class EvalCredibilityApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def seed_research(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.EvalCredibilityController_SeedResponse:
+    def seed_research(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.EvalCredibilityController_SeedResponse:
         """Seed research.
 
         POST /api/agents/{agentId}/quality/datasets/seed-research
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/seed-research",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/seed-research", headers={"Idempotency-Key": idempotency_key})
 
-    def set_grader(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        case_id: str,
-        body: m.EvalCredibilityController_SetGraderRequest,
-    ) -> m.EvalCredibilityController_GraderResponse:
+    def set_grader(self, agent_id: str, dataset_id: str, case_id: str, body: m.EvalCredibilityController_SetGraderRequest) -> m.EvalCredibilityController_GraderResponse:
         """Set grader.
 
         PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}/grader
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}/grader",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}/grader", body=body)
 
     def dataset_export_jsonl(self, agent_id: str, dataset_id: str) -> str:
         """Dataset export jsonl.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/export.jsonl
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/export.jsonl",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/export.jsonl")
 
-    def run_bundle(
-        self, agent_id: str, dataset_id: str, run_id: str
-    ) -> m.EvalRunBundle_Bundle:
+    def run_bundle(self, agent_id: str, dataset_id: str, run_id: str) -> m.EvalRunBundle_Bundle:
         """Run bundle.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/bundle
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/bundle",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/bundle")
 
     def run_export_jsonl(self, agent_id: str, dataset_id: str, run_id: str) -> str:
         """Run export jsonl.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/export.jsonl
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/export.jsonl",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/export.jsonl")
 
-    def calibrate(
-        self,
-        agent_id: str,
-        body: m.EvalCredibilityController_CalibrationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.JudgeCalibrationService_CalibrationResponse:
+    def calibrate(self, agent_id: str, body: m.EvalCredibilityController_CalibrationRequest, *, idempotency_key: Optional[str] = None) -> m.JudgeCalibrationService_CalibrationResponse:
         """Calibrate.
 
         POST /api/agents/{agentId}/quality/judge-calibration
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class EvalDatasetApi:
@@ -8424,218 +4981,105 @@ class EvalDatasetApi:
 
         GET /api/agents/{agentId}/quality/datasets
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets")
 
-    def create_dataset(
-        self,
-        agent_id: str,
-        body: m.EvalDatasetDtos_UpsertDatasetRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EvalDatasetDtos_DatasetResponse:
+    def create_dataset(self, agent_id: str, body: m.EvalDatasetDtos_UpsertDatasetRequest, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_DatasetResponse:
         """Create dataset.
 
         POST /api/agents/{agentId}/quality/datasets
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def seed_golden_dataset(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.EvalDatasetDtos_DatasetDetailResponse:
+    def seed_golden_dataset(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_DatasetDetailResponse:
         """Seed golden dataset.
 
         POST /api/agents/{agentId}/quality/datasets/seed-golden
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/seed-golden",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/seed-golden", headers={"Idempotency-Key": idempotency_key})
 
-    def get_dataset(
-        self, agent_id: str, dataset_id: str
-    ) -> m.EvalDatasetDtos_DatasetDetailResponse:
+    def get_dataset(self, agent_id: str, dataset_id: str) -> m.EvalDatasetDtos_DatasetDetailResponse:
         """Get dataset.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}")
 
-    def update_dataset(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        body: m.EvalDatasetDtos_UpsertDatasetRequest,
-    ) -> m.EvalDatasetDtos_DatasetResponse:
+    def update_dataset(self, agent_id: str, dataset_id: str, body: m.EvalDatasetDtos_UpsertDatasetRequest) -> m.EvalDatasetDtos_DatasetResponse:
         """Update dataset.
 
         PUT /api/agents/{agentId}/quality/datasets/{datasetId}
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}", body=body)
 
     def delete_dataset(self, agent_id: str, dataset_id: str) -> None:
         """Delete dataset.
 
         DELETE /api/agents/{agentId}/quality/datasets/{datasetId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}", response="void")
 
-    def add_case(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        body: m.EvalDatasetDtos_UpsertCaseRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EvalDatasetDtos_CaseResponse:
+    def add_case(self, agent_id: str, dataset_id: str, body: m.EvalDatasetDtos_UpsertCaseRequest, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_CaseResponse:
         """Add case.
 
         POST /api/agents/{agentId}/quality/datasets/{datasetId}/cases
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def import_turn_case(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        body: m.EvalDatasetDtos_ImportTurnCaseRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EvalDatasetDtos_CaseResponse:
+    def import_turn_case(self, agent_id: str, dataset_id: str, body: m.EvalDatasetDtos_ImportTurnCaseRequest, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_CaseResponse:
         """Import turn case.
 
         POST /api/agents/{agentId}/quality/datasets/{datasetId}/cases/import
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/import",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/import", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update_case(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        case_id: str,
-        body: m.EvalDatasetDtos_UpsertCaseRequest,
-    ) -> m.EvalDatasetDtos_CaseResponse:
+    def update_case(self, agent_id: str, dataset_id: str, case_id: str, body: m.EvalDatasetDtos_UpsertCaseRequest) -> m.EvalDatasetDtos_CaseResponse:
         """Update case.
 
         PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}", body=body)
 
     def delete_case(self, agent_id: str, dataset_id: str, case_id: str) -> None:
         """Delete case.
 
         DELETE /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}", response="void")
 
-    def list_runs(
-        self, agent_id: str, dataset_id: str, *, limit: Optional[int] = None
-    ) -> List[m.EvalDatasetDtos_RunResponse]:
+    def list_runs(self, agent_id: str, dataset_id: str, *, limit: Optional[int] = None) -> List[m.EvalDatasetDtos_RunResponse]:
         """List runs.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/runs
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs", query={"limit": limit})
 
-    def trigger_run(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        body: Optional[m.EvalDatasetDtos_TriggerRunRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EvalDatasetDtos_RunResponse:
+    def trigger_run(self, agent_id: str, dataset_id: str, body: Optional[m.EvalDatasetDtos_TriggerRunRequest] = None, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_RunResponse:
         """Trigger run.
 
         POST /api/agents/{agentId}/quality/datasets/{datasetId}/runs
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get_run(
-        self, agent_id: str, dataset_id: str, run_id: str
-    ) -> m.EvalDatasetDtos_RunDetailResponse:
+    def get_run(self, agent_id: str, dataset_id: str, run_id: str) -> m.EvalDatasetDtos_RunDetailResponse:
         """Get run.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}")
 
-    def cancel_run(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        run_id: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.EvalDatasetDtos_RunResponse:
+    def cancel_run(self, agent_id: str, dataset_id: str, run_id: str, *, idempotency_key: Optional[str] = None) -> m.EvalDatasetDtos_RunResponse:
         """Cancel run.
 
         POST /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
     def junit_report(self, agent_id: str, dataset_id: str, run_id: str) -> bytes:
         """Junit report.
 
         GET /api/agents/{agentId}/quality/datasets/{datasetId}/runs/{runId}/junit
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/junit",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/junit", response="blob")
 
 
 class EvalGateApi:
@@ -8647,144 +5091,75 @@ class EvalGateApi:
 
         GET /api/agents/{agentId}/quality/gate
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/gate"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/gate")
 
-    def upsert_gate(
-        self, agent_id: str, body: m.EvalGateDtos_UpsertGateRequest
-    ) -> m.EvalGateDtos_GateResponse:
+    def upsert_gate(self, agent_id: str, body: m.EvalGateDtos_UpsertGateRequest) -> m.EvalGateDtos_GateResponse:
         """Upsert gate.
 
         PUT /api/agents/{agentId}/quality/gate
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/quality/gate", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/gate", body=body)
 
     def delete_gate(self, agent_id: str) -> None:
         """Delete gate.
 
         DELETE /api/agents/{agentId}/quality/gate
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/gate",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/gate", response="void")
 
-    def check(
-        self, agent_id: str, *, version_id: str
-    ) -> m.EvalGateDtos_GateEvaluationResponse:
+    def check(self, agent_id: str, *, version_id: str) -> m.EvalGateDtos_GateEvaluationResponse:
         """Check.
 
         GET /api/agents/{agentId}/quality/gate/check
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/gate/check",
-            query={"versionId": version_id},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/gate/check", query={"versionId": version_id})
 
 
 class EvalReliabilityApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def get_reliability(
-        self, agent_id: str, *, max_runs: Optional[int] = None
-    ) -> m.ReliabilityDtos_AgentReliabilityResponse:
+    def get_reliability(self, agent_id: str, *, max_runs: Optional[int] = None) -> m.ReliabilityDtos_AgentReliabilityResponse:
         """Get reliability.
 
         GET /api/agents/{agentId}/quality/reliability
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/reliability",
-            query={"maxRuns": max_runs},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/reliability", query={"maxRuns": max_runs})
 
-    def compare_runs(
-        self,
-        agent_id: str,
-        *,
-        baseline_run_id: str,
-        variant_run_id: Optional[str] = None,
-        candidate_run_id: Optional[str] = None,
-    ) -> m.ReliabilityDtos_PairedComparisonResponse:
+    def compare_runs(self, agent_id: str, *, baseline_run_id: str, variant_run_id: Optional[str] = None, candidate_run_id: Optional[str] = None) -> m.ReliabilityDtos_PairedComparisonResponse:
         """Compare runs.
 
         GET /api/agents/{agentId}/quality/reliability/compare
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/reliability/compare",
-            query={
-                "baselineRunId": baseline_run_id,
-                "variantRunId": variant_run_id,
-                "candidateRunId": candidate_run_id,
-            },
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/reliability/compare", query={"baselineRunId": baseline_run_id, "variantRunId": variant_run_id, "candidateRunId": candidate_run_id})
 
-    def get_noise_floor(
-        self, agent_id: str, *, dataset_id: str
-    ) -> m.ReliabilityDtos_DatasetNoiseFloorResponse:
+    def get_noise_floor(self, agent_id: str, *, dataset_id: str) -> m.ReliabilityDtos_DatasetNoiseFloorResponse:
         """Get noise floor.
 
         GET /api/agents/{agentId}/quality/reliability/noise-floor
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/reliability/noise-floor",
-            query={"datasetId": dataset_id},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/reliability/noise-floor", query={"datasetId": dataset_id})
 
 
 class FaceEnrollmentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        agent_id: str,
-        collection_id: str,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.FaceEnrollmentController_FaceEnrollmentResponse]:
+    def list(self, *, agent_id: str, collection_id: str, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.FaceEnrollmentController_FaceEnrollmentResponse]:
         """List.
 
         GET /api/face-enrollments
         """
-        return self._http.request(
-            "GET",
-            "/api/face-enrollments",
-            query={
-                "agentId": agent_id,
-                "collectionId": collection_id,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/face-enrollments", query={"agentId": agent_id, "collectionId": collection_id, "limit": limit, "offset": offset})
 
-    def enroll(
-        self,
-        body: m.FaceEnrollmentController_FaceEnrollmentRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.FaceEnrollmentController_FaceEnrollmentResponse:
+    def enroll(self, body: m.FaceEnrollmentController_FaceEnrollmentRequest, *, idempotency_key: Optional[str] = None) -> m.FaceEnrollmentController_FaceEnrollmentResponse:
         """Enroll.
 
         POST /api/face-enrollments
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/face-enrollments",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/face-enrollments", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete(self, enrollment_id: str) -> None:
         """Delete.
@@ -8793,112 +5168,56 @@ class FaceEnrollmentApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/face-enrollments/{quote_path(enrollment_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/face-enrollments/{quote_path(enrollment_id)}", response="void")
 
 
 class FimCompletionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def fim(
-        self,
-        body: m.FimCompletionController_FimCompletionRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.FimCompletionController_FimCompletionResponse:
+    def fim(self, body: m.FimCompletionController_FimCompletionRequest, *, idempotency_key: Optional[str] = None) -> m.FimCompletionController_FimCompletionResponse:
         """Fim.
 
         POST /api/completions/fim
         """
-        return self._http.request(
-            "POST",
-            "/api/completions/fim",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/completions/fim", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class FleetHealthApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def health(
-        self,
-        *,
-        window_hours: Optional[int] = None,
-        max_error_rate: Optional[float] = None,
-        min_job_success_rate: Optional[float] = None,
-        eval_drift_drop: Optional[float] = None,
-        spend_spike_ratio: Optional[float] = None,
-        min_calls_for_slo: Optional[int] = None,
-        min_spend_usd: Optional[float] = None,
-    ) -> m.FleetHealthService_FleetHealthResponse:
+    def health(self, *, window_hours: Optional[int] = None, max_error_rate: Optional[float] = None, min_job_success_rate: Optional[float] = None, eval_drift_drop: Optional[float] = None, spend_spike_ratio: Optional[float] = None, min_calls_for_slo: Optional[int] = None, min_spend_usd: Optional[float] = None) -> m.FleetHealthService_FleetHealthResponse:
         """Health.
 
         GET /api/platform/fleet/health
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/fleet/health",
-            query={
-                "windowHours": window_hours,
-                "maxErrorRate": max_error_rate,
-                "minJobSuccessRate": min_job_success_rate,
-                "evalDriftDrop": eval_drift_drop,
-                "spendSpikeRatio": spend_spike_ratio,
-                "minCallsForSlo": min_calls_for_slo,
-                "minSpendUsd": min_spend_usd,
-            },
-        )
+        return self._http.request("GET", "/api/platform/fleet/health", query={"windowHours": window_hours, "maxErrorRate": max_error_rate, "minJobSuccessRate": min_job_success_rate, "evalDriftDrop": eval_drift_drop, "spendSpikeRatio": spend_spike_ratio, "minCallsForSlo": min_calls_for_slo, "minSpendUsd": min_spend_usd})
 
 
 class FraudAnalysisApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def blacklist_ip(
-        self,
-        body: m.FraudAnalysisController_BlacklistIpRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def blacklist_ip(self, body: m.FraudAnalysisController_BlacklistIpRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Blacklist ip.
 
         POST /api/internal/abuse/blacklist/ip
 
         Only available when the feature flag app.fraud-detection.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/internal/abuse/blacklist/ip",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/internal/abuse/blacklist/ip", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def blacklist_user(
-        self,
-        body: m.FraudAnalysisController_BlacklistUserRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def blacklist_user(self, body: m.FraudAnalysisController_BlacklistUserRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Blacklist user.
 
         POST /api/internal/abuse/blacklist/user
 
         Only available when the feature flag app.fraud-detection.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/internal/abuse/blacklist/user",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/internal/abuse/blacklist/user", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_abuse_status(self) -> Dict[str, Any]:
         """Get abuse status.
@@ -8909,74 +5228,52 @@ class FraudAnalysisApi:
         """
         return self._http.request("GET", "/api/internal/abuse/status")
 
-    def verify_captcha(
-        self,
-        body: m.FraudAnalysisController_HCaptchaVerifyRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def verify_captcha(self, body: m.FraudAnalysisController_HCaptchaVerifyRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Verify captcha.
 
         POST /api/internal/abuse/verify-captcha
 
         Only available when the feature flag app.fraud-detection.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/internal/abuse/verify-captcha",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/internal/abuse/verify-captcha", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class GeneratedImageApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.GeneratedImageResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.GeneratedImageResponse]:
         """List.
 
         GET /api/imagegen/images
         """
-        return self._http.request(
-            "GET", "/api/imagegen/images", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/imagegen/images", query={"limit": limit, "offset": offset})
 
     def download(self, id: str) -> bytes:
         """Download.
 
         GET /api/imagegen/images/{id}
         """
-        return self._http.request(
-            "GET", f"/api/imagegen/images/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/imagegen/images/{quote_path(id)}", response="blob")
 
 
 class GeneratedMusicApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.GeneratedMusicResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.GeneratedMusicResponse]:
         """List.
 
         GET /api/musicgen/tracks
         """
-        return self._http.request(
-            "GET", "/api/musicgen/tracks", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/musicgen/tracks", query={"limit": limit, "offset": offset})
 
     def download(self, id: str) -> bytes:
         """Download.
 
         GET /api/musicgen/tracks/{id}
         """
-        return self._http.request(
-            "GET", f"/api/musicgen/tracks/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/musicgen/tracks/{quote_path(id)}", response="blob")
 
 
 class GoogleOAuthApi:
@@ -8999,9 +5296,7 @@ class GoogleOAuthApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/google/connection", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/google/connection", response="void")
 
     def oauth_config(self) -> Dict[str, Any]:
         """Oauth config.
@@ -9022,9 +5317,7 @@ class GoogleOAuthApi:
 
         DELETE /api/channels/google/personal/connection
         """
-        return self._http.request(
-            "DELETE", "/api/channels/google/personal/connection", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/google/personal/connection", response="void")
 
     def status(self) -> m.GoogleConnectionResponse:
         """Status.
@@ -9033,68 +5326,42 @@ class GoogleOAuthApi:
         """
         return self._http.request("GET", "/api/channels/google/status")
 
-    def youtube_upload_authorize_url(
-        self,
-    ) -> m.GoogleOAuthController_AuthorizeUrlResponse:
+    def youtube_upload_authorize_url(self) -> m.GoogleOAuthController_AuthorizeUrlResponse:
         """Youtube upload authorize url.
 
         GET /api/channels/google/youtube-upload/authorize-url
         """
-        return self._http.request(
-            "GET", "/api/channels/google/youtube-upload/authorize-url"
-        )
+        return self._http.request("GET", "/api/channels/google/youtube-upload/authorize-url")
 
-    def callback(
-        self,
-        *,
-        code: Optional[str] = None,
-        state: Optional[str] = None,
-        error: Optional[str] = None,
-    ) -> None:
+    def callback(self, *, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None) -> None:
         """Callback.
 
         GET /oauth/google/callback
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/oauth/google/callback",
-            query={"code": code, "state": state, "error": error},
-            response="void",
-        )
+        return self._http.request("GET", "/oauth/google/callback", query={"code": code, "state": state, "error": error}, response="void")
 
 
 class GuardrailRuleApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.GuardrailRuleResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.GuardrailRuleResponse]:
         """List.
 
         GET /api/guardrails/rules
         """
-        return self._http.request(
-            "GET", "/api/guardrails/rules", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/guardrails/rules", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.GuardrailRuleRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.GuardrailRuleResponse:
+    def create(self, body: m.GuardrailRuleRequest, *, idempotency_key: Optional[str] = None) -> m.GuardrailRuleResponse:
         """Create.
 
         POST /api/guardrails/rules
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/guardrails/rules",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/guardrails/rules", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.GuardrailRuleResponse:
         """Get.
@@ -9110,9 +5377,7 @@ class GuardrailRuleApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/guardrails/rules/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/guardrails/rules/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -9121,9 +5386,7 @@ class GuardrailRuleApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/guardrails/rules/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/guardrails/rules/{quote_path(id)}", response="void")
 
 
 class ImessageCredentialApi:
@@ -9139,24 +5402,14 @@ class ImessageCredentialApi:
         """
         return self._http.request("GET", "/api/channels/imessage/credential")
 
-    def activate(
-        self,
-        body: m.ImessageActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ImessageCredentialResponse:
+    def activate(self, body: m.ImessageActivationRequest, *, idempotency_key: Optional[str] = None) -> m.ImessageCredentialResponse:
         """Activate.
 
         POST /api/channels/imessage/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/imessage/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/imessage/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -9165,31 +5418,23 @@ class ImessageCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/imessage/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/imessage/credential", response="void")
 
-    def update_settings(
-        self, body: m.ImessageSettingsRequest
-    ) -> m.ImessageCredentialResponse:
+    def update_settings(self, body: m.ImessageSettingsRequest) -> m.ImessageCredentialResponse:
         """Update settings.
 
         PUT /api/channels/imessage/credential/settings
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/imessage/credential/settings", body=body
-        )
+        return self._http.request("PUT", "/api/channels/imessage/credential/settings", body=body)
 
     def webhook_token(self) -> Dict[str, str]:
         """Webhook token.
 
         GET /api/channels/imessage/credential/webhook-token
         """
-        return self._http.request(
-            "GET", "/api/channels/imessage/credential/webhook-token"
-        )
+        return self._http.request("GET", "/api/channels/imessage/credential/webhook-token")
 
 
 class ImessageSendApi:
@@ -9203,56 +5448,30 @@ class ImessageSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/imessage/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/imessage/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.ImessageSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ImessageSendController_SendResult:
+    def send(self, body: m.ImessageSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.ImessageSendController_SendResult:
         """Send.
 
         POST /api/channels/imessage/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/imessage/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/imessage/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ImessageWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self,
-        webhook_id: str,
-        body: Any,
-        *,
-        token: Optional[str] = None,
-        x_imessage_webhook_token: Optional[str] = None,
-    ) -> None:
+    def inbound(self, webhook_id: str, body: Any, *, token: Optional[str] = None, x_imessage_webhook_token: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/imessage/{webhookId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/webhook/imessage/{quote_path(webhook_id)}",
-            query={"token": token},
-            headers={"X-Imessage-Webhook-Token": x_imessage_webhook_token},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/webhook/imessage/{quote_path(webhook_id)}", query={"token": token}, headers={"X-Imessage-Webhook-Token": x_imessage_webhook_token}, body=body, response="void")
 
 
 class InvoiceApi:
@@ -9268,9 +5487,7 @@ class InvoiceApi:
         """
         return self._http.request("GET", "/api/tenant/billing-profile")
 
-    def update_profile(
-        self, body: m.InvoiceController_BillingProfileBody
-    ) -> m.InvoiceController_BillingProfileBody:
+    def update_profile(self, body: m.InvoiceController_BillingProfileBody) -> m.InvoiceController_BillingProfileBody:
         """Update profile.
 
         PUT /api/tenant/billing-profile
@@ -9295,33 +5512,21 @@ class InvoiceApi:
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/tenant/invoices/{quote_path(id)}/html", response="text"
-        )
+        return self._http.request("GET", f"/api/tenant/invoices/{quote_path(id)}/html", response="text")
 
 
 class JevApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def activate(
-        self,
-        body: m.JevCredentialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.JevCredentialResponse:
+    def activate(self, body: m.JevCredentialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.JevCredentialResponse:
         """Activate.
 
         POST /api/jev/credential
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/jev/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/jev/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self) -> None:
         """Deactivate.
@@ -9339,21 +5544,14 @@ class JevApi:
         """
         return self._http.request("GET", "/api/jev/credential/status")
 
-    def playground(
-        self, body: m.JevPlaygroundRequest, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def playground(self, body: m.JevPlaygroundRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Playground.
 
         POST /api/jev/playground
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/jev/playground",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/jev/playground", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def policy(self) -> m.JevPolicyResponse:
         """Policy.
@@ -9383,81 +5581,44 @@ class JudgeCalibrationSetApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def history(
-        self,
-        agent_id: str,
-        *,
-        set_id: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> List[m.JudgeCalibrationSetController_ResultResponse]:
+    def history(self, agent_id: str, *, set_id: Optional[str] = None, limit: Optional[int] = None) -> List[m.JudgeCalibrationSetController_ResultResponse]:
         """History.
 
         GET /api/agents/{agentId}/quality/judge-calibration-history
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-history",
-            query={"setId": set_id, "limit": limit},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-history", query={"setId": set_id, "limit": limit})
 
     def list(self, agent_id: str) -> List[m.JudgeCalibrationSetController_SetResponse]:
         """List.
 
         GET /api/agents/{agentId}/quality/judge-calibration-sets
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets")
 
-    def create(
-        self,
-        agent_id: str,
-        body: m.JudgeCalibrationSetController_CreateSetRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.JudgeCalibrationSetController_SetDetailResponse:
+    def create(self, agent_id: str, body: m.JudgeCalibrationSetController_CreateSetRequest, *, idempotency_key: Optional[str] = None) -> m.JudgeCalibrationSetController_SetDetailResponse:
         """Create.
 
         POST /api/agents/{agentId}/quality/judge-calibration-sets
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get(
-        self, agent_id: str, set_id: str
-    ) -> m.JudgeCalibrationSetController_SetDetailResponse:
+    def get(self, agent_id: str, set_id: str) -> m.JudgeCalibrationSetController_SetDetailResponse:
         """Get.
 
         GET /api/agents/{agentId}/quality/judge-calibration-sets/{setId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}")
 
-    def rename(
-        self,
-        agent_id: str,
-        set_id: str,
-        body: m.JudgeCalibrationSetController_RenameSetRequest,
-    ) -> m.JudgeCalibrationSetController_SetResponse:
+    def rename(self, agent_id: str, set_id: str, body: m.JudgeCalibrationSetController_RenameSetRequest) -> m.JudgeCalibrationSetController_SetResponse:
         """Rename.
 
         PUT /api/agents/{agentId}/quality/judge-calibration-sets/{setId}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}", body=body)
 
     def delete(self, agent_id: str, set_id: str) -> None:
         """Delete.
@@ -9466,32 +5627,16 @@ class JudgeCalibrationSetApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}", response="void")
 
-    def add_items(
-        self,
-        agent_id: str,
-        set_id: str,
-        body: m.JudgeCalibrationSetController_AddItemsRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.JudgeCalibrationSetController_SetDetailResponse:
+    def add_items(self, agent_id: str, set_id: str, body: m.JudgeCalibrationSetController_AddItemsRequest, *, idempotency_key: Optional[str] = None) -> m.JudgeCalibrationSetController_SetDetailResponse:
         """Add items.
 
         POST /api/agents/{agentId}/quality/judge-calibration-sets/{setId}/items
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}/items",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}/items", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_item(self, agent_id: str, set_id: str, item_id: str) -> None:
         """Delete item.
@@ -9500,11 +5645,7 @@ class JudgeCalibrationSetApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}/items/{quote_path(item_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/judge-calibration-sets/{quote_path(set_id)}/items/{quote_path(item_id)}", response="void")
 
 
 class KnowledgeApi:
@@ -9516,29 +5657,16 @@ class KnowledgeApi:
 
         GET /api/knowledge/collections/{collectionId}/reembed
         """
-        return self._http.request(
-            "GET", f"/api/knowledge/collections/{quote_path(collection_id)}/reembed"
-        )
+        return self._http.request("GET", f"/api/knowledge/collections/{quote_path(collection_id)}/reembed")
 
-    def reembed(
-        self,
-        collection_id: str,
-        body: m.KnowledgeReembedRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.KnowledgeReembedJobResponse:
+    def reembed(self, collection_id: str, body: m.KnowledgeReembedRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeReembedJobResponse:
         """Reembed.
 
         POST /api/knowledge/collections/{collectionId}/reembed
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/knowledge/collections/{quote_path(collection_id)}/reembed",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/knowledge/collections/{quote_path(collection_id)}/reembed", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_document(self, document_id: str) -> None:
         """Delete document.
@@ -9547,77 +5675,46 @@ class KnowledgeApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/knowledge/documents/{quote_path(document_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/knowledge/documents/{quote_path(document_id)}", response="void")
 
     def download_original_file(self, document_id: str) -> bytes:
         """Download original file.
 
         GET /api/knowledge/documents/{documentId}/file
         """
-        return self._http.request(
-            "GET",
-            f"/api/knowledge/documents/{quote_path(document_id)}/file",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/knowledge/documents/{quote_path(document_id)}/file", response="blob")
 
-    def ingest(
-        self, body: m.IngestRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.IngestResponse:
+    def ingest(self, body: m.IngestRequest, *, idempotency_key: Optional[str] = None) -> m.IngestResponse:
         """Ingest.
 
         POST /api/knowledge/ingest
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/ingest",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/knowledge/ingest", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def ingest_url(
-        self, body: m.IngestUrlRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.KnowledgeUrlIngester_UrlIngestResult:
+    def ingest_url(self, body: m.IngestUrlRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeUrlIngester_UrlIngestResult:
         """Ingest url.
 
         POST /api/knowledge/ingest-url
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/ingest-url",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/knowledge/ingest-url", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def reembed_job(self, job_id: str) -> m.KnowledgeReembedJobResponse:
         """Reembed job.
 
         GET /api/knowledge/reembed-jobs/{jobId}
         """
-        return self._http.request(
-            "GET", f"/api/knowledge/reembed-jobs/{quote_path(job_id)}"
-        )
+        return self._http.request("GET", f"/api/knowledge/reembed-jobs/{quote_path(job_id)}")
 
-    def search(
-        self, body: m.SearchRequest, *, idempotency_key: Optional[str] = None
-    ) -> List[m.SearchResultResponse]:
+    def search(self, body: m.SearchRequest, *, idempotency_key: Optional[str] = None) -> List[m.SearchResultResponse]:
         """Search.
 
         POST /api/knowledge/search
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/search",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/knowledge/search", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def stats(self) -> m.KnowledgeStatsResponse:
         """Stats.
@@ -9626,142 +5723,74 @@ class KnowledgeApi:
         """
         return self._http.request("GET", "/api/knowledge/stats")
 
-    def upload(
-        self,
-        body: Dict[str, Any],
-        *,
-        chunk_size: Optional[int] = None,
-        chunk_overlap: Optional[int] = None,
-        collection_id: Optional[str] = None,
-    ) -> m.IngestResponse:
+    def upload(self, body: Dict[str, Any], *, chunk_size: Optional[int] = None, chunk_overlap: Optional[int] = None, collection_id: Optional[str] = None) -> m.IngestResponse:
         """Upload.
 
         POST /api/knowledge/upload
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/upload",
-            query={
-                "chunkSize": chunk_size,
-                "chunkOverlap": chunk_overlap,
-                "collectionId": collection_id,
-            },
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/knowledge/upload", query={"chunkSize": chunk_size, "chunkOverlap": chunk_overlap, "collectionId": collection_id}, body=body, body_type="multipart")
 
-    def upload_audio(
-        self,
-        body: Dict[str, Any],
-        *,
-        chunk_size: Optional[int] = None,
-        chunk_overlap: Optional[int] = None,
-        collection_id: Optional[str] = None,
-    ) -> m.KnowledgeIngestionJobResponse:
+    def upload_audio(self, body: Dict[str, Any], *, chunk_size: Optional[int] = None, chunk_overlap: Optional[int] = None, collection_id: Optional[str] = None) -> m.KnowledgeIngestionJobResponse:
         """Upload audio.
 
         POST /api/knowledge/upload-audio
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/upload-audio",
-            query={
-                "chunkSize": chunk_size,
-                "chunkOverlap": chunk_overlap,
-                "collectionId": collection_id,
-            },
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/knowledge/upload-audio", query={"chunkSize": chunk_size, "chunkOverlap": chunk_overlap, "collectionId": collection_id}, body=body, body_type="multipart")
 
 
 class KnowledgeCollectionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.KnowledgeCollectionResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.KnowledgeCollectionResponse]:
         """List.
 
         GET /api/knowledge/collections
         """
-        return self._http.request(
-            "GET",
-            "/api/knowledge/collections",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/knowledge/collections", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.KnowledgeCollectionCreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.KnowledgeCollectionResponse:
+    def create(self, body: m.KnowledgeCollectionCreateRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeCollectionResponse:
         """Create.
 
         POST /api/knowledge/collections
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/collections",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/knowledge/collections", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def embedding_models(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.EmbeddingModelCatalog_ModelOption]:
+    def embedding_models(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.EmbeddingModelCatalog_ModelOption]:
         """Embedding models.
 
         GET /api/knowledge/collections/embedding-models
         """
-        return self._http.request(
-            "GET",
-            "/api/knowledge/collections/embedding-models",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/knowledge/collections/embedding-models", query={"limit": limit, "offset": offset})
 
-    def text_search_configs(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TextSearchConfigCatalog_ConfigOption]:
+    def text_search_configs(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TextSearchConfigCatalog_ConfigOption]:
         """Text search configs.
 
         GET /api/knowledge/collections/text-search-configs
         """
-        return self._http.request(
-            "GET",
-            "/api/knowledge/collections/text-search-configs",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/knowledge/collections/text-search-configs", query={"limit": limit, "offset": offset})
 
     def get(self, collection_id: str) -> m.KnowledgeCollectionResponse:
         """Get.
 
         GET /api/knowledge/collections/{collectionId}
         """
-        return self._http.request(
-            "GET", f"/api/knowledge/collections/{quote_path(collection_id)}"
-        )
+        return self._http.request("GET", f"/api/knowledge/collections/{quote_path(collection_id)}")
 
-    def update(
-        self, collection_id: str, body: m.KnowledgeCollectionUpdateRequest
-    ) -> m.KnowledgeCollectionResponse:
+    def update(self, collection_id: str, body: m.KnowledgeCollectionUpdateRequest) -> m.KnowledgeCollectionResponse:
         """Update.
 
         PUT /api/knowledge/collections/{collectionId}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/knowledge/collections/{quote_path(collection_id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/knowledge/collections/{quote_path(collection_id)}", body=body)
 
     def delete(self, collection_id: str) -> None:
         """Delete.
@@ -9770,82 +5799,44 @@ class KnowledgeCollectionApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/knowledge/collections/{quote_path(collection_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/knowledge/collections/{quote_path(collection_id)}", response="void")
 
-    def documents(
-        self,
-        collection_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.KnowledgeDocumentResponse]:
+    def documents(self, collection_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.KnowledgeDocumentResponse]:
         """Documents.
 
         GET /api/knowledge/collections/{collectionId}/documents
         """
-        return self._http.request(
-            "GET",
-            f"/api/knowledge/collections/{quote_path(collection_id)}/documents",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/knowledge/collections/{quote_path(collection_id)}/documents", query={"limit": limit, "offset": offset})
 
 
 class KnowledgeConnectorApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        collection_id: str,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ConnectorResponse]:
+    def list(self, *, collection_id: str, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ConnectorResponse]:
         """List.
 
         GET /api/knowledge/connectors
         """
-        return self._http.request(
-            "GET",
-            "/api/knowledge/connectors",
-            query={"collectionId": collection_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/knowledge/connectors", query={"collectionId": collection_id, "limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.KnowledgeConnectorController_ConnectorUpsertRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ConnectorResponse:
+    def create(self, body: m.KnowledgeConnectorController_ConnectorUpsertRequest, *, idempotency_key: Optional[str] = None) -> m.ConnectorResponse:
         """Create.
 
         POST /api/knowledge/connectors
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/connectors",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/knowledge/connectors", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.KnowledgeConnectorController_ConnectorUpdateRequest
-    ) -> m.ConnectorResponse:
+    def update(self, id: str, body: m.KnowledgeConnectorController_ConnectorUpdateRequest) -> m.ConnectorResponse:
         """Update.
 
         PUT /api/knowledge/connectors/{id}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/knowledge/connectors/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/knowledge/connectors/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -9854,24 +5845,16 @@ class KnowledgeConnectorApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/knowledge/connectors/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/knowledge/connectors/{quote_path(id)}", response="void")
 
-    def sync(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.KnowledgeConnectorService_ConnectorSyncResult:
+    def sync(self, id: str, *, idempotency_key: Optional[str] = None) -> m.KnowledgeConnectorService_ConnectorSyncResult:
         """Sync.
 
         POST /api/knowledge/connectors/{id}/sync
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/knowledge/connectors/{quote_path(id)}/sync",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/knowledge/connectors/{quote_path(id)}/sync", headers={"Idempotency-Key": idempotency_key})
 
 
 class KnowledgeIngestionJobApi:
@@ -9895,107 +5878,62 @@ class KnowledgeRagSettingsApi:
 
         GET /api/knowledge/collections/{collectionId}/retrieval-settings
         """
-        return self._http.request(
-            "GET",
-            f"/api/knowledge/collections/{quote_path(collection_id)}/retrieval-settings",
-        )
+        return self._http.request("GET", f"/api/knowledge/collections/{quote_path(collection_id)}/retrieval-settings")
 
-    def update(
-        self, collection_id: str, body: m.RagDtos_RagSettingsUpdateRequest
-    ) -> m.RagDtos_RagSettingsResponse:
+    def update(self, collection_id: str, body: m.RagDtos_RagSettingsUpdateRequest) -> m.RagDtos_RagSettingsResponse:
         """Update.
 
         PUT /api/knowledge/collections/{collectionId}/retrieval-settings
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/knowledge/collections/{quote_path(collection_id)}/retrieval-settings",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/knowledge/collections/{quote_path(collection_id)}/retrieval-settings", body=body)
 
 
 class LandingEventApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def metrics(
-        self, *, days: Optional[int] = None
-    ) -> m.LandingEventController_LandingMetricsResponse:
+    def metrics(self, *, days: Optional[int] = None) -> m.LandingEventController_LandingMetricsResponse:
         """Metrics.
 
         GET /api/platform/landing-metrics
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/landing-metrics", query={"days": days}
-        )
+        return self._http.request("GET", "/api/platform/landing-metrics", query={"days": days})
 
-    def record(
-        self, body: Optional[m.LandingEventController_LandingEventRequest] = None
-    ) -> None:
+    def record(self, body: Optional[m.LandingEventController_LandingEventRequest] = None) -> None:
         """Record.
 
         POST /api/public/landing-event
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/api/public/landing-event", body=body, response="void"
-        )
+        return self._http.request("POST", "/api/public/landing-event", body=body, response="void")
 
 
 class LeadApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        stage: Optional[str] = None,
-        source: Optional[str] = None,
-        q: Optional[str] = None,
-        page: Optional[int] = None,
-        size: Optional[int] = None,
-    ) -> m.LeadController_PageResponse:
+    def list(self, *, stage: Optional[str] = None, source: Optional[str] = None, q: Optional[str] = None, page: Optional[int] = None, size: Optional[int] = None) -> m.LeadController_PageResponse:
         """List.
 
         GET /api/leads
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/leads",
-            query={
-                "stage": stage,
-                "source": source,
-                "q": q,
-                "page": page,
-                "size": size,
-            },
-        )
+        return self._http.request("GET", "/api/leads", query={"stage": stage, "source": source, "q": q, "page": page, "size": size})
 
-    def create(
-        self,
-        body: m.LeadController_LeadRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LeadController_LeadResponse:
+    def create(self, body: m.LeadController_LeadRequest, *, idempotency_key: Optional[str] = None) -> m.LeadController_LeadResponse:
         """Create.
 
         POST /api/leads
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/leads",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/leads", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def export(self) -> str:
         """Export.
@@ -10013,22 +5951,16 @@ class LeadApi:
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST", "/api/leads/import", body=body, body_type="multipart"
-        )
+        return self._http.request("POST", "/api/leads/import", body=body, body_type="multipart")
 
-    def pipeline(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.LeadService_StageTotal]:
+    def pipeline(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.LeadService_StageTotal]:
         """Pipeline.
 
         GET /api/leads/pipeline
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/leads/pipeline", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/leads/pipeline", query={"limit": limit, "offset": offset})
 
     def get(self, id: str) -> m.LeadController_LeadResponse:
         """Get.
@@ -10039,9 +5971,7 @@ class LeadApi:
         """
         return self._http.request("GET", f"/api/leads/{quote_path(id)}")
 
-    def update(
-        self, id: str, body: m.LeadController_LeadRequest
-    ) -> m.LeadController_LeadResponse:
+    def update(self, id: str, body: m.LeadController_LeadRequest) -> m.LeadController_LeadResponse:
         """Update.
 
         PUT /api/leads/{id}
@@ -10057,123 +5987,66 @@ class LeadApi:
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/leads/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/leads/{quote_path(id)}", response="void")
 
-    def activities(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.LeadController_ActivityResponse]:
+    def activities(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.LeadController_ActivityResponse]:
         """Activities.
 
         GET /api/leads/{id}/activities
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/leads/{quote_path(id)}/activities",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/leads/{quote_path(id)}/activities", query={"limit": limit, "offset": offset})
 
-    def add_activity(
-        self,
-        id: str,
-        body: m.LeadController_ActivityRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LeadController_ActivityResponse:
+    def add_activity(self, id: str, body: m.LeadController_ActivityRequest, *, idempotency_key: Optional[str] = None) -> m.LeadController_ActivityResponse:
         """Add activity.
 
         POST /api/leads/{id}/activities
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/leads/{quote_path(id)}/activities",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/leads/{quote_path(id)}/activities", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def stage(
-        self,
-        id: str,
-        body: m.LeadController_StageRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LeadController_LeadResponse:
+    def stage(self, id: str, body: m.LeadController_StageRequest, *, idempotency_key: Optional[str] = None) -> m.LeadController_LeadResponse:
         """Stage.
 
         POST /api/leads/{id}/stage
 
         Requires PERM_MANAGE_LEADS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/leads/{quote_path(id)}/stage",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/leads/{quote_path(id)}/stage", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class LearningProposalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        status: Optional[str] = None,
-        kind: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> List[m.LearningProposalView]:
+    def list(self, *, status: Optional[str] = None, kind: Optional[str] = None, limit: Optional[int] = None) -> List[m.LearningProposalView]:
         """List.
 
         GET /api/learning/proposals
 
         Only available when the feature flag app.learning.proposals.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET",
-            "/api/learning/proposals",
-            query={"status": status, "kind": kind, "limit": limit},
-        )
+        return self._http.request("GET", "/api/learning/proposals", query={"status": status, "kind": kind, "limit": limit})
 
-    def approve(
-        self,
-        id: str,
-        body: Optional[m.LearningProposalController_ApproveRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LearningProposalView:
+    def approve(self, id: str, body: Optional[m.LearningProposalController_ApproveRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LearningProposalView:
         """Approve.
 
         POST /api/learning/proposals/{id}/approve
 
         Only available when the feature flag app.learning.proposals.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/learning/proposals/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/learning/proposals/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def reject(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.LearningProposalView:
+    def reject(self, id: str, *, idempotency_key: Optional[str] = None) -> m.LearningProposalView:
         """Reject.
 
         POST /api/learning/proposals/{id}/reject
 
         Only available when the feature flag app.learning.proposals.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/learning/proposals/{quote_path(id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/learning/proposals/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key})
 
 
 class LearningReviewApi:
@@ -10194,35 +6067,23 @@ class LlmCallLogApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def recent_calls(
-        self, *, limit: Optional[int] = None, status: Optional[str] = None
-    ) -> List[m.LlmCallLogController_LlmCallLogEntry]:
+    def recent_calls(self, *, limit: Optional[int] = None, status: Optional[str] = None) -> List[m.LlmCallLogController_LlmCallLogEntry]:
         """Recent calls.
 
         GET /api/admin/llm-usage/calls
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/llm-usage/calls",
-            query={"limit": limit, "status": status},
-        )
+        return self._http.request("GET", "/api/admin/llm-usage/calls", query={"limit": limit, "status": status})
 
-    def diagnose_call(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.LlmCallLogController_LlmCallDiagnosisEntry:
+    def diagnose_call(self, id: str, *, idempotency_key: Optional[str] = None) -> m.LlmCallLogController_LlmCallDiagnosisEntry:
         """Diagnose call.
 
         POST /api/admin/llm-usage/calls/{id}/diagnose
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/llm-usage/calls/{quote_path(id)}/diagnose",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/llm-usage/calls/{quote_path(id)}/diagnose", headers={"Idempotency-Key": idempotency_key})
 
     def summary(self) -> List[m.LlmCallLogController_LlmProviderUsageSummaryEntry]:
         """Summary.
@@ -10233,18 +6094,14 @@ class LlmCallLogApi:
         """
         return self._http.request("GET", "/api/admin/llm-usage/summary")
 
-    def calls_for_task(
-        self, session_id: str
-    ) -> List[m.LlmCallLogController_LlmCallLogEntry]:
+    def calls_for_task(self, session_id: str) -> List[m.LlmCallLogController_LlmCallLogEntry]:
         """Calls for task.
 
         GET /api/admin/llm-usage/tasks/{sessionId}
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/admin/llm-usage/tasks/{quote_path(session_id)}"
-        )
+        return self._http.request("GET", f"/api/admin/llm-usage/tasks/{quote_path(session_id)}")
 
 
 class LlmGatewayContentPolicyApi:
@@ -10258,42 +6115,28 @@ class LlmGatewayContentPolicyApi:
         """
         return self._http.request("GET", "/api/tenant/llm-gateway/content-policy")
 
-    def update(
-        self, body: m.LlmGatewayContentPolicyController_ContentPolicyRequest
-    ) -> m.LlmGatewayContentPolicyController_ContentPolicyResponse:
+    def update(self, body: m.LlmGatewayContentPolicyController_ContentPolicyRequest) -> m.LlmGatewayContentPolicyController_ContentPolicyResponse:
         """Update.
 
         PUT /api/tenant/llm-gateway/content-policy
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/tenant/llm-gateway/content-policy", body=body
-        )
+        return self._http.request("PUT", "/api/tenant/llm-gateway/content-policy", body=body)
 
 
 class LocalAuthApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def change_password(
-        self,
-        body: m.LocalAuthController_ChangePasswordRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LocalAuthController_SessionResponse:
+    def change_password(self, body: m.LocalAuthController_ChangePasswordRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
         """Change password.
 
         POST /api/auth/local/change-password
 
         Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/auth/local/change-password",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/auth/local/change-password", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def config(self) -> m.LocalAuthController_ConfigResponse:
         """Config.
@@ -10304,9 +6147,7 @@ class LocalAuthApi:
         """
         return self._http.request("GET", "/api/auth/local/config")
 
-    def login(
-        self, body: m.LocalAuthController_LoginRequest
-    ) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalAuthController_LoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/login
@@ -10315,22 +6156,16 @@ class LocalAuthApi:
         """
         return self._http.request("POST", "/api/auth/local/login", body=body)
 
-    def logout(
-        self, body: Optional[m.LocalAuthController_RefreshRequest] = None
-    ) -> None:
+    def logout(self, body: Optional[m.LocalAuthController_RefreshRequest] = None) -> None:
         """Logout.
 
         POST /api/auth/local/logout
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST", "/api/auth/local/logout", body=body, response="void"
-        )
+        return self._http.request("POST", "/api/auth/local/logout", body=body, response="void")
 
-    def refresh(
-        self, body: m.LocalAuthController_RefreshRequest
-    ) -> m.LocalAuthController_SessionResponse:
+    def refresh(self, body: m.LocalAuthController_RefreshRequest) -> m.LocalAuthController_SessionResponse:
         """Refresh.
 
         POST /api/auth/local/refresh
@@ -10339,9 +6174,7 @@ class LocalAuthApi:
         """
         return self._http.request("POST", "/api/auth/local/refresh", body=body)
 
-    def reset_request(
-        self, body: Optional[m.LocalAuthController_ResetRequest] = None
-    ) -> Dict[str, str]:
+    def reset_request(self, body: Optional[m.LocalAuthController_ResetRequest] = None) -> Dict[str, str]:
         """Reset request.
 
         POST /api/auth/local/reset-request
@@ -10350,9 +6183,7 @@ class LocalAuthApi:
         """
         return self._http.request("POST", "/api/auth/local/reset-request", body=body)
 
-    def setup(
-        self, body: m.LocalAuthController_SetupRequest
-    ) -> m.LocalAuthController_SessionResponse:
+    def setup(self, body: m.LocalAuthController_SetupRequest) -> m.LocalAuthController_SessionResponse:
         """Setup.
 
         POST /api/auth/local/setup
@@ -10366,39 +6197,19 @@ class LocalModelsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def probe(
-        self,
-        body: m.LocalModelsController_TagRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LocalModelsService_ProbeResult:
+    def probe(self, body: m.LocalModelsController_TagRequest, *, idempotency_key: Optional[str] = None) -> m.LocalModelsService_ProbeResult:
         """Probe.
 
         POST /api/local-models/probe
         """
-        return self._http.request(
-            "POST",
-            "/api/local-models/probe",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/local-models/probe", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def pull(
-        self,
-        body: m.LocalModelsController_TagRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, str]:
+    def pull(self, body: m.LocalModelsController_TagRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, str]:
         """Pull.
 
         POST /api/local-models/pull
         """
-        return self._http.request(
-            "POST",
-            "/api/local-models/pull",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/local-models/pull", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def pull_status(self, job_id: str) -> m.LocalModelPullService_Status:
         """Pull status.
@@ -10421,93 +6232,54 @@ class LocalModelsApi:
         """
         return self._http.request("GET", "/api/local-models/settings")
 
-    def update_settings(
-        self, body: m.LocalModelsService_SettingsUpdate
-    ) -> m.LocalModelsService_Settings:
+    def update_settings(self, body: m.LocalModelsService_SettingsUpdate) -> m.LocalModelsService_Settings:
         """Update settings.
 
         PUT /api/local-models/settings
         """
         return self._http.request("PUT", "/api/local-models/settings", body=body)
 
-    def use(
-        self,
-        body: m.LocalModelsController_TagRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LocalModelsService_UseResult:
+    def use(self, body: m.LocalModelsController_TagRequest, *, idempotency_key: Optional[str] = None) -> m.LocalModelsService_UseResult:
         """Use.
 
         POST /api/local-models/use
         """
-        return self._http.request(
-            "POST",
-            "/api/local-models/use",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/local-models/use", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def warm(
-        self,
-        body: Optional[m.LocalModelsController_WarmRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LocalModelsService_WarmResult:
+    def warm(self, body: Optional[m.LocalModelsController_WarmRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LocalModelsService_WarmResult:
         """Warm.
 
         POST /api/local-models/warm
         """
-        return self._http.request(
-            "POST",
-            "/api/local-models/warm",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/local-models/warm", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class LocalOpenAiProbeApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def probe(
-        self, body: m.LocalOpenAiProbeRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.LocalOpenAiProbeResponse:
+    def probe(self, body: m.LocalOpenAiProbeRequest, *, idempotency_key: Optional[str] = None) -> m.LocalOpenAiProbeResponse:
         """Probe.
 
         POST /api/providers/local-openai/probe
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/providers/local-openai/probe",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/providers/local-openai/probe", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class LocalUnlockApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def enrol_device(
-        self,
-        body: m.LocalUnlockController_DeviceRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.LocalDevices_Enrolled:
+    def enrol_device(self, body: m.LocalUnlockController_DeviceRequest, *, idempotency_key: Optional[str] = None) -> m.LocalDevices_Enrolled:
         """Enrol device.
 
         POST /api/auth/local/unlock/devices
 
         Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/auth/local/unlock/devices",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/auth/local/unlock/devices", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def remove_device(self, id: str) -> None:
         """Remove device.
@@ -10516,15 +6288,9 @@ class LocalUnlockApi:
 
         Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/auth/local/unlock/devices/{quote_path(id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/auth/local/unlock/devices/{quote_path(id)}", response="void")
 
-    def login(
-        self, body: m.LocalUnlockController_UnlockLoginRequest
-    ) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalUnlockController_UnlockLoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/unlock/login
@@ -10549,35 +6315,25 @@ class LocalUnlockApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST", "/api/auth/local/unlock/passkey/login-options"
-        )
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/login-options")
 
-    def register(
-        self, body: m.LocalUnlockController_RegisterRequest
-    ) -> m.LocalUnlockController_RegisterResponse:
+    def register(self, body: m.LocalUnlockController_RegisterRequest) -> m.LocalUnlockController_RegisterResponse:
         """Register.
 
         POST /api/auth/local/unlock/passkey/register
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST", "/api/auth/local/unlock/passkey/register", body=body
-        )
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register", body=body)
 
-    def register_options(
-        self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None
-    ) -> m.LocalPasskeyService_Options:
+    def register_options(self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None) -> m.LocalPasskeyService_Options:
         """Register options.
 
         POST /api/auth/local/unlock/passkey/register-options
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST", "/api/auth/local/unlock/passkey/register-options", body=body
-        )
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register-options", body=body)
 
     def remove_passkey(self, id: str) -> None:
         """Remove passkey.
@@ -10586,30 +6342,18 @@ class LocalUnlockApi:
 
         Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/auth/local/unlock/passkeys/{quote_path(id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/auth/local/unlock/passkeys/{quote_path(id)}", response="void")
 
-    def recovery_codes(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.LocalUnlockController_CodesResponse:
+    def recovery_codes(self, *, idempotency_key: Optional[str] = None) -> m.LocalUnlockController_CodesResponse:
         """Recovery codes.
 
         POST /api/auth/local/unlock/recovery-codes
 
         Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/auth/local/unlock/recovery-codes",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/auth/local/unlock/recovery-codes", headers={"Idempotency-Key": idempotency_key})
 
-    def setup_with_pin(
-        self, body: m.LocalUnlockController_SetupPinRequest
-    ) -> m.LocalUnlockController_SetupPinResponse:
+    def setup_with_pin(self, body: m.LocalUnlockController_SetupPinRequest) -> m.LocalUnlockController_SetupPinResponse:
         """Setup with pin.
 
         POST /api/auth/local/unlock/setup/pin
@@ -10632,21 +6376,14 @@ class MatrixApi:
         """
         return self._http.request("GET", "/api/channels/matrix/credential")
 
-    def activate(
-        self, body: m.MatrixActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.MatrixCredentialResponse:
+    def activate(self, body: m.MatrixActivationRequest, *, idempotency_key: Optional[str] = None) -> m.MatrixCredentialResponse:
         """Activate.
 
         POST /api/channels/matrix/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/matrix/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/matrix/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -10655,9 +6392,7 @@ class MatrixApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/matrix/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/matrix/credential", response="void")
 
     def set_default_agent(self, body: m.SetDefaultAgentRequest) -> None:
         """Set default agent.
@@ -10666,9 +6401,7 @@ class MatrixApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/matrix/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/matrix/default-agent", body=body, response="void")
 
     def update_policy(self, body: m.MatrixPolicyRequest) -> m.MatrixCredentialResponse:
         """Update policy.
@@ -10679,24 +6412,14 @@ class MatrixApi:
         """
         return self._http.request("PUT", "/api/channels/matrix/policy", body=body)
 
-    def send(
-        self,
-        body: m.MatrixController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MatrixController_SendResult:
+    def send(self, body: m.MatrixController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.MatrixController_SendResult:
         """Send.
 
         POST /api/channels/matrix/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/matrix/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/matrix/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class McpAppsApi:
@@ -10712,25 +6435,14 @@ class McpAppsApi:
         """
         return self._http.request("GET", f"/api/mcp-apps/{quote_path(app_id)}")
 
-    def call_tool(
-        self,
-        app_id: str,
-        body: m.McpAppsController_ToolCallRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpAppsController_ToolCallResponse:
+    def call_tool(self, app_id: str, body: m.McpAppsController_ToolCallRequest, *, idempotency_key: Optional[str] = None) -> m.McpAppsController_ToolCallResponse:
         """Call tool.
 
         POST /api/mcp-apps/{appId}/tools/call
 
         Only available when the feature flag app.mcp.apps.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp-apps/{quote_path(app_id)}/tools/call",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/mcp-apps/{quote_path(app_id)}/tools/call", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class McpOAuthApi:
@@ -10753,99 +6465,55 @@ class McpOAuthApi:
         """
         return self._http.request("DELETE", "/api/mcp/oauth/remote", query={"url": url})
 
-    def authorize(
-        self,
-        body: m.McpOAuthController_AuthorizeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpOAuthController_AuthorizeResponse:
+    def authorize(self, body: m.McpOAuthController_AuthorizeRequest, *, idempotency_key: Optional[str] = None) -> m.McpOAuthController_AuthorizeResponse:
         """Authorize.
 
         POST /api/mcp/oauth/remote/authorize
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/mcp/oauth/remote/authorize",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/mcp/oauth/remote/authorize", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def status(
-        self,
-        body: m.McpOAuthController_UrlRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpOAuthController_StatusResponse:
+    def status(self, body: m.McpOAuthController_UrlRequest, *, idempotency_key: Optional[str] = None) -> m.McpOAuthController_StatusResponse:
         """Status.
 
         POST /api/mcp/oauth/remote/status
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/mcp/oauth/remote/status",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/mcp/oauth/remote/status", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def callback(
-        self,
-        *,
-        code: Optional[str] = None,
-        state: Optional[str] = None,
-        error: Optional[str] = None,
-        iss: Optional[str] = None,
-    ) -> None:
+    def callback(self, *, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None, iss: Optional[str] = None) -> None:
         """Callback.
 
         GET /oauth/mcp/remote/callback
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/oauth/mcp/remote/callback",
-            query={"code": code, "state": state, "error": error, "iss": iss},
-            response="void",
-        )
+        return self._http.request("GET", "/oauth/mcp/remote/callback", query={"code": code, "state": state, "error": error, "iss": iss}, response="void")
 
 
 class McpRegistrationTestApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def acknowledge(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpServerRegistrationResponse:
+    def acknowledge(self, id: str, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Acknowledge.
 
         POST /api/mcp/registrations/{id}/acknowledge
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/registrations/{quote_path(id)}/acknowledge",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/mcp/registrations/{quote_path(id)}/acknowledge", headers={"Idempotency-Key": idempotency_key})
 
-    def test(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpConnectionTestResult:
+    def test(self, id: str, *, idempotency_key: Optional[str] = None) -> m.McpConnectionTestResult:
         """Test.
 
         POST /api/mcp/registrations/{id}/test
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/registrations/{quote_path(id)}/test",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/mcp/registrations/{quote_path(id)}/test", headers={"Idempotency-Key": idempotency_key})
 
 
 class McpRegistryApi:
@@ -10859,24 +6527,14 @@ class McpRegistryApi:
         """
         return self._http.request("GET", "/api/mcp/registry")
 
-    def register(
-        self,
-        body: m.McpServerRegistrationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerRegistrationResponse:
+    def register(self, body: m.McpServerRegistrationRequest, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Register.
 
         POST /api/mcp/registry
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/mcp/registry",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/mcp/registry", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def catalog(self) -> List[m.McpCatalogEntry]:
         """Catalog.
@@ -10885,16 +6543,12 @@ class McpRegistryApi:
         """
         return self._http.request("GET", "/api/mcp/registry/catalog")
 
-    def search(
-        self, *, q: Optional[str] = None, cursor: Optional[str] = None
-    ) -> m.RegistrySearchResponse:
+    def search(self, *, q: Optional[str] = None, cursor: Optional[str] = None) -> m.RegistrySearchResponse:
         """Search.
 
         GET /api/mcp/registry/search
         """
-        return self._http.request(
-            "GET", "/api/mcp/registry/search", query={"q": q, "cursor": cursor}
-        )
+        return self._http.request("GET", "/api/mcp/registry/search", query={"q": q, "cursor": cursor})
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -10903,64 +6557,34 @@ class McpRegistryApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/mcp/registry/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/mcp/registry/{quote_path(id)}", response="void")
 
-    def toggle(
-        self,
-        id: str,
-        body: m.McpServerToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerRegistrationResponse:
+    def toggle(self, id: str, body: m.McpServerToggleRequest, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Toggle.
 
         PATCH /api/mcp/registry/{id}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/mcp/registry/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/mcp/registry/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def connect_now(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpServerRegistrationResponse:
+    def connect_now(self, id: str, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Connect now.
 
         POST /api/mcp/registry/{id}/connect
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/registry/{quote_path(id)}/connect",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/mcp/registry/{quote_path(id)}/connect", headers={"Idempotency-Key": idempotency_key})
 
-    def set_edge_eligible(
-        self,
-        id: str,
-        body: m.McpEdgeEligibilityRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerRegistrationResponse:
+    def set_edge_eligible(self, id: str, body: m.McpEdgeEligibilityRequest, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Set edge eligible.
 
         PATCH /api/mcp/registry/{id}/edge-eligible
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/mcp/registry/{quote_path(id)}/edge-eligible",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/mcp/registry/{quote_path(id)}/edge-eligible", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class McpRegistryReviewApi:
@@ -10976,41 +6600,23 @@ class McpRegistryReviewApi:
         """
         return self._http.request("GET", "/api/platform/mcp-review/pending")
 
-    def approve(
-        self, tenant_id: str, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpServerRegistrationResponse:
+    def approve(self, tenant_id: str, id: str, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Approve.
 
         POST /api/platform/mcp-review/{tenantId}/{id}/approve
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/mcp-review/{quote_path(tenant_id)}/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/platform/mcp-review/{quote_path(tenant_id)}/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key})
 
-    def reject(
-        self,
-        tenant_id: str,
-        id: str,
-        body: Optional[m.McpReviewDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerRegistrationResponse:
+    def reject(self, tenant_id: str, id: str, body: Optional[m.McpReviewDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.McpServerRegistrationResponse:
         """Reject.
 
         POST /api/platform/mcp-review/{tenantId}/{id}/reject
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/mcp-review/{quote_path(tenant_id)}/{quote_path(id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/platform/mcp-review/{quote_path(tenant_id)}/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class McpServerAccessApi:
@@ -11024,37 +6630,23 @@ class McpServerAccessApi:
         """
         return self._http.request("GET", "/api/mcpserver/grants")
 
-    def create(
-        self,
-        body: m.McpServerAccessGrantCreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerAccessGrantCreatedResponse:
+    def create(self, body: m.McpServerAccessGrantCreateRequest, *, idempotency_key: Optional[str] = None) -> m.McpServerAccessGrantCreatedResponse:
         """Create.
 
         POST /api/mcpserver/grants
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/mcpserver/grants",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/mcpserver/grants", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.McpServerAccessGrantUpdateRequest
-    ) -> m.McpServerAccessGrantResponse:
+    def update(self, id: str, body: m.McpServerAccessGrantUpdateRequest) -> m.McpServerAccessGrantResponse:
         """Update.
 
         PUT /api/mcpserver/grants/{id}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/mcpserver/grants/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/mcpserver/grants/{quote_path(id)}", body=body)
 
     def revoke(self, id: str) -> None:
         """Revoke.
@@ -11063,57 +6655,34 @@ class McpServerAccessApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/mcpserver/grants/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/mcpserver/grants/{quote_path(id)}", response="void")
 
-    def toggle(
-        self,
-        id: str,
-        body: m.McpServerAccessGrantToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.McpServerAccessGrantResponse:
+    def toggle(self, id: str, body: m.McpServerAccessGrantToggleRequest, *, idempotency_key: Optional[str] = None) -> m.McpServerAccessGrantResponse:
         """Toggle.
 
         PATCH /api/mcpserver/grants/{id}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/mcpserver/grants/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/mcpserver/grants/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def rotate(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpServerAccessGrantCreatedResponse:
+    def rotate(self, id: str, *, idempotency_key: Optional[str] = None) -> m.McpServerAccessGrantCreatedResponse:
         """Rotate.
 
         POST /api/mcpserver/grants/{id}/rotate
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcpserver/grants/{quote_path(id)}/rotate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/mcpserver/grants/{quote_path(id)}/rotate", headers={"Idempotency-Key": idempotency_key})
 
-    def tool_calls(
-        self, id: str
-    ) -> List[m.McpServerAccessController_McpGrantToolCallView]:
+    def tool_calls(self, id: str) -> List[m.McpServerAccessController_McpGrantToolCallView]:
         """Tool calls.
 
         GET /api/mcpserver/grants/{id}/tool-calls
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/mcpserver/grants/{quote_path(id)}/tool-calls"
-        )
+        return self._http.request("GET", f"/api/mcpserver/grants/{quote_path(id)}/tool-calls")
 
 
 class McpServerAuthOptionsApi:
@@ -11134,35 +6703,21 @@ class McpToolExposureApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def get(
-        self, kind: str, resource_id: str
-    ) -> m.McpToolExposureController_ExposureResponse:
+    def get(self, kind: str, resource_id: str) -> m.McpToolExposureController_ExposureResponse:
         """Get.
 
         GET /api/mcpserver/exposure/{kind}/{resourceId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/mcpserver/exposure/{quote_path(kind)}/{quote_path(resource_id)}",
-        )
+        return self._http.request("GET", f"/api/mcpserver/exposure/{quote_path(kind)}/{quote_path(resource_id)}")
 
-    def update(
-        self,
-        kind: str,
-        resource_id: str,
-        body: m.McpToolExposureController_ExposureUpdateRequest,
-    ) -> m.McpToolExposureController_ExposureResponse:
+    def update(self, kind: str, resource_id: str, body: m.McpToolExposureController_ExposureUpdateRequest) -> m.McpToolExposureController_ExposureResponse:
         """Update.
 
         PUT /api/mcpserver/exposure/{kind}/{resourceId}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/mcpserver/exposure/{quote_path(kind)}/{quote_path(resource_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/mcpserver/exposure/{quote_path(kind)}/{quote_path(resource_id)}", body=body)
 
 
 class McpToolPinApi:
@@ -11183,20 +6738,14 @@ class McpToolPinApi:
         """
         return self._http.request("GET", f"/api/mcp/tool-pins/{quote_path(id)}")
 
-    def approve(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.McpToolPinService_PinStatus:
+    def approve(self, id: str, *, idempotency_key: Optional[str] = None) -> m.McpToolPinService_PinStatus:
         """Approve.
 
         POST /api/mcp/tool-pins/{id}/approve
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/tool-pins/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/mcp/tool-pins/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key})
 
 
 class MeApi:
@@ -11215,22 +6764,12 @@ class MemoryImportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def import_facts(
-        self,
-        body: m.MemoryImportDtos_ImportRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MemoryImportDtos_ImportResponse:
+    def import_facts(self, body: m.MemoryImportDtos_ImportRequest, *, idempotency_key: Optional[str] = None) -> m.MemoryImportDtos_ImportResponse:
         """Import facts.
 
         POST /api/memory/import
         """
-        return self._http.request(
-            "POST",
-            "/api/memory/import",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/memory/import", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def limits(self) -> m.MemoryImportDtos_ImportLimits:
         """Limits.
@@ -11239,22 +6778,12 @@ class MemoryImportApi:
         """
         return self._http.request("GET", "/api/memory/import/limits")
 
-    def preview(
-        self,
-        body: m.MemoryImportDtos_PreviewRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MemoryImportDtos_PreviewResponse:
+    def preview(self, body: m.MemoryImportDtos_PreviewRequest, *, idempotency_key: Optional[str] = None) -> m.MemoryImportDtos_PreviewResponse:
         """Preview.
 
         POST /api/memory/import/preview
         """
-        return self._http.request(
-            "POST",
-            "/api/memory/import/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/memory/import/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class MetaEmbeddedSignupApi:
@@ -11266,28 +6795,16 @@ class MetaEmbeddedSignupApi:
 
         GET /api/channels/meta-whatsapp/embedded-signup/config
         """
-        return self._http.request(
-            "GET", "/api/channels/meta-whatsapp/embedded-signup/config"
-        )
+        return self._http.request("GET", "/api/channels/meta-whatsapp/embedded-signup/config")
 
-    def exchange(
-        self,
-        body: m.EmbeddedSignupExchangeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MetaCredentialResponse:
+    def exchange(self, body: m.EmbeddedSignupExchangeRequest, *, idempotency_key: Optional[str] = None) -> m.MetaCredentialResponse:
         """Exchange.
 
         POST /api/channels/meta-whatsapp/embedded-signup/exchange
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/meta-whatsapp/embedded-signup/exchange",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/meta-whatsapp/embedded-signup/exchange", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class MetaSocialCredentialApi:
@@ -11301,24 +6818,14 @@ class MetaSocialCredentialApi:
         """
         return self._http.request("GET", "/api/channels/meta-social/credential")
 
-    def activate(
-        self,
-        body: m.MetaSocialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MetaSocialCredentialResponse:
+    def activate(self, body: m.MetaSocialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.MetaSocialCredentialResponse:
         """Activate.
 
         POST /api/channels/meta-social/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/meta-social/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/meta-social/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -11327,9 +6834,7 @@ class MetaSocialCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/meta-social/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/meta-social/credential", response="void")
 
 
 class MetaSocialSendApi:
@@ -11343,31 +6848,16 @@ class MetaSocialSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            "/api/channels/social/instagram/default-agent",
-            body=body,
-            response="void",
-        )
+        return self._http.request("PUT", "/api/channels/social/instagram/default-agent", body=body, response="void")
 
-    def send_instagram(
-        self,
-        body: m.MetaSocialSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MetaSocialSendController_SendResult:
+    def send_instagram(self, body: m.MetaSocialSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.MetaSocialSendController_SendResult:
         """Send instagram.
 
         POST /api/channels/social/instagram/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/social/instagram/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/social/instagram/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def set_messenger_default_agent(self, body: m.SetDefaultAgentRequest) -> None:
         """Set messenger default agent.
@@ -11376,60 +6866,30 @@ class MetaSocialSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            "/api/channels/social/messenger/default-agent",
-            body=body,
-            response="void",
-        )
+        return self._http.request("PUT", "/api/channels/social/messenger/default-agent", body=body, response="void")
 
-    def send_messenger(
-        self,
-        body: m.MetaSocialSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MetaSocialSendController_SendResult:
+    def send_messenger(self, body: m.MetaSocialSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.MetaSocialSendController_SendResult:
         """Send messenger.
 
         POST /api/channels/social/messenger/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/social/messenger/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/social/messenger/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class MetaSocialWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def verify(
-        self,
-        *,
-        hub_mode: Optional[str] = None,
-        hub_verify_token: Optional[str] = None,
-        hub_challenge: Optional[str] = None,
-    ) -> str:
+    def verify(self, *, hub_mode: Optional[str] = None, hub_verify_token: Optional[str] = None, hub_challenge: Optional[str] = None) -> str:
         """Verify.
 
         GET /webhook/meta/social
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/webhook/meta/social",
-            query={
-                "hub.mode": hub_mode,
-                "hub.verify_token": hub_verify_token,
-                "hub.challenge": hub_challenge,
-            },
-            response="text",
-        )
+        return self._http.request("GET", "/webhook/meta/social", query={"hub.mode": hub_mode, "hub.verify_token": hub_verify_token, "hub.challenge": hub_challenge}, response="text")
 
     def inbound(self, body: str, *, x_hub_signature_256: Optional[str] = None) -> None:
         """Inbound.
@@ -11438,13 +6898,7 @@ class MetaSocialWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/meta/social",
-            headers={"X-Hub-Signature-256": x_hub_signature_256},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/meta/social", headers={"X-Hub-Signature-256": x_hub_signature_256}, body=body, response="void")
 
 
 class MetaWhatsAppCredentialApi:
@@ -11458,21 +6912,14 @@ class MetaWhatsAppCredentialApi:
         """
         return self._http.request("GET", "/api/channels/meta-whatsapp/credential")
 
-    def activate(
-        self, body: m.MetaActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.MetaCredentialResponse:
+    def activate(self, body: m.MetaActivationRequest, *, idempotency_key: Optional[str] = None) -> m.MetaCredentialResponse:
         """Activate.
 
         POST /api/channels/meta-whatsapp/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/meta-whatsapp/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/meta-whatsapp/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -11481,38 +6928,21 @@ class MetaWhatsAppCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/meta-whatsapp/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/meta-whatsapp/credential", response="void")
 
 
 class MetaWhatsAppWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def verify(
-        self,
-        *,
-        hub_mode: Optional[str] = None,
-        hub_verify_token: Optional[str] = None,
-        hub_challenge: Optional[str] = None,
-    ) -> str:
+    def verify(self, *, hub_mode: Optional[str] = None, hub_verify_token: Optional[str] = None, hub_challenge: Optional[str] = None) -> str:
         """Verify.
 
         GET /webhook/meta/whatsapp
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/webhook/meta/whatsapp",
-            query={
-                "hub.mode": hub_mode,
-                "hub.verify_token": hub_verify_token,
-                "hub.challenge": hub_challenge,
-            },
-            response="text",
-        )
+        return self._http.request("GET", "/webhook/meta/whatsapp", query={"hub.mode": hub_mode, "hub.verify_token": hub_verify_token, "hub.challenge": hub_challenge}, response="text")
 
     def inbound(self, body: str, *, x_hub_signature_256: Optional[str] = None) -> None:
         """Inbound.
@@ -11521,13 +6951,7 @@ class MetaWhatsAppWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/meta/whatsapp",
-            headers={"X-Hub-Signature-256": x_hub_signature_256},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/meta/whatsapp", headers={"X-Hub-Signature-256": x_hub_signature_256}, body=body, response="void")
 
 
 class MobileSentinelApi:
@@ -11543,35 +6967,19 @@ class MobileSentinelApi:
         """
         return self._http.request("GET", "/api/mobile/sentinels/admin/summary")
 
-    def events(
-        self, *, limit: Optional[int] = None, sentinel_id: Optional[str] = None
-    ) -> Dict[str, List[m.MobileSentinelService_EventView]]:
+    def events(self, *, limit: Optional[int] = None, sentinel_id: Optional[str] = None) -> Dict[str, List[m.MobileSentinelService_EventView]]:
         """Events.
 
         GET /api/mobile/sentinels/events
         """
-        return self._http.request(
-            "GET",
-            "/api/mobile/sentinels/events",
-            query={"limit": limit, "sentinelId": sentinel_id},
-        )
+        return self._http.request("GET", "/api/mobile/sentinels/events", query={"limit": limit, "sentinelId": sentinel_id})
 
-    def ingest(
-        self,
-        body: m.MobileSentinelService_IngestRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.MobileSentinelService_IngestResult:
+    def ingest(self, body: m.MobileSentinelService_IngestRequest, *, idempotency_key: Optional[str] = None) -> m.MobileSentinelService_IngestResult:
         """Ingest.
 
         POST /api/mobile/sentinels/events
         """
-        return self._http.request(
-            "POST",
-            "/api/mobile/sentinels/events",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/mobile/sentinels/events", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def erase(self) -> Dict[str, int]:
         """Erase.
@@ -11587,9 +6995,7 @@ class MobileSentinelApi:
         """
         return self._http.request("GET", "/api/mobile/sentinels/policy")
 
-    def update_policy(
-        self, body: m.MobileSentinelService_PolicyRequest
-    ) -> m.MobileSentinelService_PolicyView:
+    def update_policy(self, body: m.MobileSentinelService_PolicyRequest) -> m.MobileSentinelService_PolicyView:
         """Update policy.
 
         PUT /api/mobile/sentinels/policy
@@ -11603,125 +7009,78 @@ class ModelPricingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def pricing_2(
-        self, *, model_ids: str
-    ) -> List[m.ModelPricingController_ModelPriceEntry]:
+    def pricing_2(self, *, model_ids: str) -> List[m.ModelPricingController_ModelPriceEntry]:
         """Pricing.
 
         GET /api/model-pricing
         """
-        return self._http.request(
-            "GET", "/api/model-pricing", query={"modelIds": model_ids}
-        )
+        return self._http.request("GET", "/api/model-pricing", query={"modelIds": model_ids})
 
-    def pricing(
-        self,
-        body: m.ModelPricingController_ModelPricingRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> List[m.ModelPricingController_ModelPriceEntry]:
+    def pricing(self, body: m.ModelPricingController_ModelPricingRequest, *, idempotency_key: Optional[str] = None) -> List[m.ModelPricingController_ModelPriceEntry]:
         """Pricing.
 
         POST /api/model-pricing
         """
-        return self._http.request(
-            "POST",
-            "/api/model-pricing",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/model-pricing", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ModerationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def get_blocklists(
-        self, *, type: Optional[str] = None
-    ) -> m.ModerationController_BlocklistsResponse:
+    def get_blocklists(self, *, type: Optional[str] = None) -> m.ModerationController_BlocklistsResponse:
         """Get blocklists.
 
         GET /api/platform/moderation/blocklists
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/moderation/blocklists", query={"type": type}
-        )
+        return self._http.request("GET", "/api/platform/moderation/blocklists", query={"type": type})
 
-    def upsert_blocklist_entry(
-        self, body: m.ModerationController_BlocklistUpsertRequest
-    ) -> m.ModerationController_BlocklistEntryResponse:
+    def upsert_blocklist_entry(self, body: m.ModerationController_BlocklistUpsertRequest) -> m.ModerationController_BlocklistEntryResponse:
         """Upsert blocklist entry.
 
         PUT /api/platform/moderation/blocklists
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/moderation/blocklists", body=body
-        )
+        return self._http.request("PUT", "/api/platform/moderation/blocklists", body=body)
 
-    def get_policy_packs(
-        self, *, scope: Optional[str] = None, key: Optional[str] = None
-    ) -> m.ModerationController_PolicyPacksResponse:
+    def get_policy_packs(self, *, scope: Optional[str] = None, key: Optional[str] = None) -> m.ModerationController_PolicyPacksResponse:
         """Get policy packs.
 
         GET /api/platform/moderation/policy-packs
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/moderation/policy-packs",
-            query={"scope": scope, "key": key},
-        )
+        return self._http.request("GET", "/api/platform/moderation/policy-packs", query={"scope": scope, "key": key})
 
-    def update_policy_packs(
-        self, body: m.ModerationController_PolicyPacksUpdateRequest
-    ) -> m.ModerationController_PolicyPacksResponse:
+    def update_policy_packs(self, body: m.ModerationController_PolicyPacksUpdateRequest) -> m.ModerationController_PolicyPacksResponse:
         """Update policy packs.
 
         PUT /api/platform/moderation/policy-packs
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/moderation/policy-packs", body=body
-        )
+        return self._http.request("PUT", "/api/platform/moderation/policy-packs", body=body)
 
-    def get_review_queue(
-        self, *, status: Optional[str] = None
-    ) -> m.ModerationController_ReviewQueueResponse:
+    def get_review_queue(self, *, status: Optional[str] = None) -> m.ModerationController_ReviewQueueResponse:
         """Get review queue.
 
         GET /api/platform/moderation/review-queue
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/moderation/review-queue", query={"status": status}
-        )
+        return self._http.request("GET", "/api/platform/moderation/review-queue", query={"status": status})
 
-    def decide(
-        self,
-        id: str,
-        body: m.ModerationController_ReviewDecisionRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ModerationController_ReviewItemResponse:
+    def decide(self, id: str, body: m.ModerationController_ReviewDecisionRequest, *, idempotency_key: Optional[str] = None) -> m.ModerationController_ReviewItemResponse:
         """Decide.
 
         POST /api/platform/moderation/review-queue/{id}/decision
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/moderation/review-queue/{quote_path(id)}/decision",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/platform/moderation/review-queue/{quote_path(id)}/decision", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_thresholds(self) -> m.ModerationThresholdService_Thresholds:
         """Get thresholds.
@@ -11732,40 +7091,26 @@ class ModerationApi:
         """
         return self._http.request("GET", "/api/platform/moderation/thresholds")
 
-    def update_thresholds(
-        self, body: m.ModerationController_ThresholdsUpdateRequest
-    ) -> m.ModerationThresholdService_Thresholds:
+    def update_thresholds(self, body: m.ModerationController_ThresholdsUpdateRequest) -> m.ModerationThresholdService_Thresholds:
         """Update thresholds.
 
         PUT /api/platform/moderation/thresholds
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/moderation/thresholds", body=body
-        )
+        return self._http.request("PUT", "/api/platform/moderation/thresholds", body=body)
 
 
 class ModerationReviewApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        status: Optional[m.ModerationReviewStatus] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ModerationReviewItemResponse]:
+    def list(self, *, status: Optional[m.ModerationReviewStatus] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ModerationReviewItemResponse]:
         """List.
 
         GET /api/moderation/review
         """
-        return self._http.request(
-            "GET",
-            "/api/moderation/review",
-            query={"status": status, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/moderation/review", query={"status": status, "limit": limit, "offset": offset})
 
     def get(self, id: str) -> m.ModerationReviewItemResponse:
         """Get.
@@ -11774,86 +7119,46 @@ class ModerationReviewApi:
         """
         return self._http.request("GET", f"/api/moderation/review/{quote_path(id)}")
 
-    def approve(
-        self,
-        id: str,
-        body: Optional[m.ModerationReviewDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ModerationReviewItemResponse:
+    def approve(self, id: str, body: Optional[m.ModerationReviewDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.ModerationReviewItemResponse:
         """Approve.
 
         POST /api/moderation/review/{id}/approve
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/moderation/review/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/moderation/review/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def block(
-        self,
-        id: str,
-        body: Optional[m.ModerationReviewDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ModerationReviewItemResponse:
+    def block(self, id: str, body: Optional[m.ModerationReviewDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.ModerationReviewItemResponse:
         """Block.
 
         POST /api/moderation/review/{id}/block
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/moderation/review/{quote_path(id)}/block",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/moderation/review/{quote_path(id)}/block", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def escalate(
-        self,
-        id: str,
-        body: Optional[m.ModerationReviewDecisionRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ModerationReviewItemResponse:
+    def escalate(self, id: str, body: Optional[m.ModerationReviewDecisionRequest] = None, *, idempotency_key: Optional[str] = None) -> m.ModerationReviewItemResponse:
         """Escalate.
 
         POST /api/moderation/review/{id}/escalate
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/moderation/review/{quote_path(id)}/escalate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/moderation/review/{quote_path(id)}/escalate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class NewsletterApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def send(
-        self, body: m.NewsletterSendRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.NewsletterSendResult:
+    def send(self, body: m.NewsletterSendRequest, *, idempotency_key: Optional[str] = None) -> m.NewsletterSendResult:
         """Send.
 
         POST /api/platform/newsletter
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/newsletter",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/newsletter", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def list_recipients(self) -> List[m.NewsletterRecipient]:
         """List recipients.
@@ -11869,52 +7174,33 @@ class NorthStarApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def north_star(
-        self, *, weeks: Optional[int] = None
-    ) -> m.NorthStarDtos_NorthStarResponse:
+    def north_star(self, *, weeks: Optional[int] = None) -> m.NorthStarDtos_NorthStarResponse:
         """North star.
 
         GET /api/platform/metrics/north-star
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/metrics/north-star", query={"weeks": weeks}
-        )
+        return self._http.request("GET", "/api/platform/metrics/north-star", query={"weeks": weeks})
 
 
 class NotificationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        unread_only: Optional[bool] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.NotificationResponse]:
+    def list(self, *, unread_only: Optional[bool] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.NotificationResponse]:
         """List.
 
         GET /api/notifications
         """
-        return self._http.request(
-            "GET",
-            "/api/notifications",
-            query={"unreadOnly": unread_only, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/notifications", query={"unreadOnly": unread_only, "limit": limit, "offset": offset})
 
     def mark_all_read(self, *, idempotency_key: Optional[str] = None) -> None:
         """Mark all read.
 
         POST /api/notifications/read-all
         """
-        return self._http.request(
-            "POST",
-            "/api/notifications/read-all",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", "/api/notifications/read-all", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def unread_count(self) -> int:
         """Unread count.
@@ -11928,12 +7214,7 @@ class NotificationApi:
 
         POST /api/notifications/{id}/read
         """
-        return self._http.request(
-            "POST",
-            f"/api/notifications/{quote_path(id)}/read",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/notifications/{quote_path(id)}/read", headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class OAuthProviderApi:
@@ -11956,91 +7237,46 @@ class OAuthProviderApi:
         """
         return self._http.request("DELETE", f"/api/mcp/oauth/{quote_path(provider)}")
 
-    def attach(
-        self,
-        provider: str,
-        registration_id: str,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def attach(self, provider: str, registration_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Attach.
 
         POST /api/mcp/oauth/{provider}/attach/{registrationId}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/oauth/{quote_path(provider)}/attach/{quote_path(registration_id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/mcp/oauth/{quote_path(provider)}/attach/{quote_path(registration_id)}", headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def authorize(
-        self,
-        provider: str,
-        body: Optional[m.OAuthProviderController_AuthorizeRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.OAuthProviderController_AuthorizeResponse:
+    def authorize(self, provider: str, body: Optional[m.OAuthProviderController_AuthorizeRequest] = None, *, idempotency_key: Optional[str] = None) -> m.OAuthProviderController_AuthorizeResponse:
         """Authorize.
 
         POST /api/mcp/oauth/{provider}/authorize
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/mcp/oauth/{quote_path(provider)}/authorize",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/mcp/oauth/{quote_path(provider)}/authorize", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def callback(
-        self,
-        provider: str,
-        *,
-        code: Optional[str] = None,
-        state: Optional[str] = None,
-        error: Optional[str] = None,
-    ) -> None:
+    def callback(self, provider: str, *, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None) -> None:
         """Callback.
 
         GET /oauth/mcp/{provider}/callback
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/oauth/mcp/{quote_path(provider)}/callback",
-            query={"code": code, "state": state, "error": error},
-            response="void",
-        )
+        return self._http.request("GET", f"/oauth/mcp/{quote_path(provider)}/callback", query={"code": code, "state": state, "error": error}, response="void")
 
 
 class OcrProviderConfigApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def activate(
-        self,
-        body: m.OcrProviderActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def activate(self, body: m.OcrProviderActivationRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Activate.
 
         POST /api/knowledge/ocr-provider
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/knowledge/ocr-provider",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/knowledge/ocr-provider", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
     def deactivate(self) -> None:
         """Deactivate.
@@ -12049,9 +7285,7 @@ class OcrProviderConfigApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/knowledge/ocr-provider", response="void"
-        )
+        return self._http.request("DELETE", "/api/knowledge/ocr-provider", response="void")
 
     def status(self) -> m.OcrProviderStatusResponse:
         """Status.
@@ -12065,40 +7299,26 @@ class OnboardingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def onboard(
-        self, body: m.OnboardingRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SignupResponse:
+    def onboard(self, body: m.OnboardingRequest, *, idempotency_key: Optional[str] = None) -> m.SignupResponse:
         """Onboard.
 
         POST /api/onboarding
         """
-        return self._http.request(
-            "POST",
-            "/api/onboarding",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/onboarding", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class OpenAiCompatApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def chat_completions(
-        self, body: m.OpenAiChatRequest, *, x_session_id: Optional[str] = None
-    ) -> Any:
+    def chat_completions(self, body: m.OpenAiChatRequest, *, x_session_id: Optional[str] = None) -> Any:
         """Chat completions.
 
         POST /v1/chat/completions
 
         OpenAI-compatible surface: authenticate with a platform JWT or a vmcp_ grant key as the api_key. Only available when the feature flag app.openai-compat.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/v1/chat/completions",
-            headers={"X-Session-Id": x_session_id},
-            body=body,
-        )
+        return self._http.request("POST", "/v1/chat/completions", headers={"X-Session-Id": x_session_id}, body=body)
 
     def models(self) -> str:
         """Models.
@@ -12114,61 +7334,39 @@ class OpenApiToolSourceApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.OpenApiToolSourceResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.OpenApiToolSourceResponse]:
         """List.
 
         GET /api/tools/openapi
         """
-        return self._http.request(
-            "GET", "/api/tools/openapi", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/tools/openapi", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.OpenApiToolSourceRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.OpenApiToolSourceResponse:
+    def create(self, body: m.OpenApiToolSourceRequest, *, idempotency_key: Optional[str] = None) -> m.OpenApiToolSourceResponse:
         """Create.
 
         POST /api/tools/openapi
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/openapi",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/openapi", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview(
-        self, body: m.OpenApiPreviewRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.OpenApiPreviewResponse:
+    def preview(self, body: m.OpenApiPreviewRequest, *, idempotency_key: Optional[str] = None) -> m.OpenApiPreviewResponse:
         """Preview.
 
         POST /api/tools/openapi/preview
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/openapi/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/openapi/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.OpenApiToolSourceRequest
-    ) -> m.OpenApiToolSourceResponse:
+    def update(self, id: str, body: m.OpenApiToolSourceRequest) -> m.OpenApiToolSourceResponse:
         """Update.
 
         PUT /api/tools/openapi/{id}
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tools/openapi/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/tools/openapi/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -12177,113 +7375,64 @@ class OpenApiToolSourceApi:
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tools/openapi/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tools/openapi/{quote_path(id)}", response="void")
 
-    def set_enabled(
-        self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None
-    ) -> m.OpenApiToolSourceResponse:
+    def set_enabled(self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None) -> m.OpenApiToolSourceResponse:
         """Set enabled.
 
         PATCH /api/tools/openapi/{id}/enabled
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/tools/openapi/{quote_path(id)}/enabled",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/tools/openapi/{quote_path(id)}/enabled", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def refresh(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.OpenApiToolSourceResponse:
+    def refresh(self, id: str, *, idempotency_key: Optional[str] = None) -> m.OpenApiToolSourceResponse:
         """Refresh.
 
         POST /api/tools/openapi/{id}/refresh
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tools/openapi/{quote_path(id)}/refresh",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/tools/openapi/{quote_path(id)}/refresh", headers={"Idempotency-Key": idempotency_key})
 
-    def list_tools(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.OpenApiToolResponse]:
+    def list_tools(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.OpenApiToolResponse]:
         """List tools.
 
         GET /api/tools/openapi/{id}/tools
         """
-        return self._http.request(
-            "GET",
-            f"/api/tools/openapi/{quote_path(id)}/tools",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/tools/openapi/{quote_path(id)}/tools", query={"limit": limit, "offset": offset})
 
-    def set_tool_enabled(
-        self,
-        id: str,
-        tool_id: str,
-        body: Dict[str, bool],
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.OpenApiToolResponse:
+    def set_tool_enabled(self, id: str, tool_id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None) -> m.OpenApiToolResponse:
         """Set tool enabled.
 
         PATCH /api/tools/openapi/{id}/tools/{toolId}/enabled
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/tools/openapi/{quote_path(id)}/tools/{quote_path(tool_id)}/enabled",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/tools/openapi/{quote_path(id)}/tools/{quote_path(tool_id)}/enabled", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def test(
-        self,
-        id: str,
-        tool_id: str,
-        body: m.OpenApiToolTestRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, str]:
+    def test(self, id: str, tool_id: str, body: m.OpenApiToolTestRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, str]:
         """Test.
 
         POST /api/tools/openapi/{id}/tools/{toolId}/test
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tools/openapi/{quote_path(id)}/tools/{quote_path(tool_id)}/test",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/tools/openapi/{quote_path(id)}/tools/{quote_path(tool_id)}/test", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class OpenResponsesApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create(
-        self, body: m.OpenResponsesRequest, *, x_session_id: Optional[str] = None
-    ) -> Any:
+    def create(self, body: m.OpenResponsesRequest, *, x_session_id: Optional[str] = None) -> Any:
         """Create.
 
         POST /v1/responses
 
         OpenAI-compatible surface: authenticate with a platform JWT or a vmcp_ grant key as the api_key. Only available when the feature flag app.openai-compat.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST", "/v1/responses", headers={"X-Session-Id": x_session_id}, body=body
-        )
+        return self._http.request("POST", "/v1/responses", headers={"X-Session-Id": x_session_id}, body=body)
 
     def retrieve(self, response_id: str) -> str:
         """Retrieve.
@@ -12299,61 +7448,28 @@ class OperatorInboxApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def conversations(
-        self,
-        *,
-        channel: Optional[m.ChannelType] = None,
-        view: Optional[str] = None,
-        q: Optional[str] = None,
-        page: Optional[int] = None,
-        size: Optional[int] = None,
-    ) -> m.OperatorInboxController_ConversationPageResponse:
+    def conversations(self, *, channel: Optional[m.ChannelType] = None, view: Optional[str] = None, q: Optional[str] = None, page: Optional[int] = None, size: Optional[int] = None) -> m.OperatorInboxController_ConversationPageResponse:
         """Conversations.
 
         GET /api/handoff/conversations
         """
-        return self._http.request(
-            "GET",
-            "/api/handoff/conversations",
-            query={
-                "channel": channel,
-                "view": view,
-                "q": q,
-                "page": page,
-                "size": size,
-            },
-        )
+        return self._http.request("GET", "/api/handoff/conversations", query={"channel": channel, "view": view, "q": q, "page": page, "size": size})
 
-    def inbox(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.OperatorInboxController_InboxSessionResponse]:
+    def inbox(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.OperatorInboxController_InboxSessionResponse]:
         """Inbox.
 
         GET /api/handoff/inbox
         """
-        return self._http.request(
-            "GET", "/api/handoff/inbox", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/handoff/inbox", query={"limit": limit, "offset": offset})
 
-    def escalate(
-        self,
-        session_id: str,
-        body: m.OperatorInboxController_EscalateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def escalate(self, session_id: str, body: m.OperatorInboxController_EscalateRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Escalate.
 
         POST /api/handoff/sessions/{sessionId}/escalate
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/handoff/sessions/{quote_path(session_id)}/escalate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/handoff/sessions/{quote_path(session_id)}/escalate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def release(self, session_id: str, *, idempotency_key: Optional[str] = None) -> Any:
         """Release.
@@ -12362,55 +7478,32 @@ class OperatorInboxApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/handoff/sessions/{quote_path(session_id)}/release",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/handoff/sessions/{quote_path(session_id)}/release", headers={"Idempotency-Key": idempotency_key})
 
-    def reply(
-        self,
-        session_id: str,
-        body: m.OperatorInboxController_ReplyRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def reply(self, session_id: str, body: m.OperatorInboxController_ReplyRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Reply.
 
         POST /api/handoff/sessions/{sessionId}/reply
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/handoff/sessions/{quote_path(session_id)}/reply",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/handoff/sessions/{quote_path(session_id)}/reply", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def take_over(
-        self, session_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Any:
+    def take_over(self, session_id: str, *, idempotency_key: Optional[str] = None) -> Any:
         """Take over.
 
         POST /api/handoff/sessions/{sessionId}/take-over
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/handoff/sessions/{quote_path(session_id)}/take-over",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/handoff/sessions/{quote_path(session_id)}/take-over", headers={"Idempotency-Key": idempotency_key})
 
     def transcript(self, session_id: str) -> Any:
         """Transcript.
 
         GET /api/handoff/sessions/{sessionId}/transcript
         """
-        return self._http.request(
-            "GET", f"/api/handoff/sessions/{quote_path(session_id)}/transcript"
-        )
+        return self._http.request("GET", f"/api/handoff/sessions/{quote_path(session_id)}/transcript")
 
     def stats(self) -> m.OperatorInboxService_InboxStats:
         """Stats.
@@ -12438,63 +7531,35 @@ class PaymentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, agent_id: Optional[str] = None
-    ) -> List[m.PaymentDtos_MandateResponse]:
+    def list(self, *, agent_id: Optional[str] = None) -> List[m.PaymentDtos_MandateResponse]:
         """List.
 
         GET /api/payments/mandates
         """
-        return self._http.request(
-            "GET", "/api/payments/mandates", query={"agentId": agent_id}
-        )
+        return self._http.request("GET", "/api/payments/mandates", query={"agentId": agent_id})
 
-    def grant(
-        self,
-        body: m.PaymentDtos_CreateMandateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PaymentDtos_MandateResponse:
+    def grant(self, body: m.PaymentDtos_CreateMandateRequest, *, idempotency_key: Optional[str] = None) -> m.PaymentDtos_MandateResponse:
         """Grant.
 
         POST /api/payments/mandates
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/payments/mandates",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/payments/mandates", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview(
-        self,
-        body: m.PaymentDtos_CreateMandateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PaymentDtos_MandatePreviewResponse:
+    def preview(self, body: m.PaymentDtos_CreateMandateRequest, *, idempotency_key: Optional[str] = None) -> m.PaymentDtos_MandatePreviewResponse:
         """Preview.
 
         POST /api/payments/mandates/preview
         """
-        return self._http.request(
-            "POST",
-            "/api/payments/mandates/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/payments/mandates/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def spend_for_agent(
-        self, *, agent_id: str
-    ) -> List[m.PaymentDtos_MandateSpendResponse]:
+    def spend_for_agent(self, *, agent_id: str) -> List[m.PaymentDtos_MandateSpendResponse]:
         """Spend for agent.
 
         GET /api/payments/mandates/spend
         """
-        return self._http.request(
-            "GET", "/api/payments/mandates/spend", query={"agentId": agent_id}
-        )
+        return self._http.request("GET", "/api/payments/mandates/spend", query={"agentId": agent_id})
 
     def get(self, id: str) -> m.PaymentDtos_MandateResponse:
         """Get.
@@ -12503,57 +7568,28 @@ class PaymentApi:
         """
         return self._http.request("GET", f"/api/payments/mandates/{quote_path(id)}")
 
-    def revoke(
-        self,
-        id: str,
-        body: Optional[m.PaymentDtos_RevokeMandateRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PaymentDtos_MandateResponse:
+    def revoke(self, id: str, body: Optional[m.PaymentDtos_RevokeMandateRequest] = None, *, idempotency_key: Optional[str] = None) -> m.PaymentDtos_MandateResponse:
         """Revoke.
 
         POST /api/payments/mandates/{id}/revoke
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/payments/mandates/{quote_path(id)}/revoke",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/payments/mandates/{quote_path(id)}/revoke", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def spend(self, id: str) -> m.PaymentDtos_MandateSpendResponse:
         """Spend.
 
         GET /api/payments/mandates/{id}/spend
         """
-        return self._http.request(
-            "GET", f"/api/payments/mandates/{quote_path(id)}/spend"
-        )
+        return self._http.request("GET", f"/api/payments/mandates/{quote_path(id)}/spend")
 
-    def transactions(
-        self,
-        *,
-        agent_id: str,
-        mandate_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.PaymentDtos_TransactionResponse]:
+    def transactions(self, *, agent_id: str, mandate_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PaymentDtos_TransactionResponse]:
         """Transactions.
 
         GET /api/payments/transactions
         """
-        return self._http.request(
-            "GET",
-            "/api/payments/transactions",
-            query={
-                "agentId": agent_id,
-                "mandateId": mandate_id,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/payments/transactions", query={"agentId": agent_id, "mandateId": mandate_id, "limit": limit, "offset": offset})
 
     def transaction(self, id: str) -> m.PaymentDtos_TransactionResponse:
         """Transaction.
@@ -12567,43 +7603,23 @@ class PaymentCheckoutApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create_order(
-        self,
-        body: m.PaymentCheckoutController_CreateOrderRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PaymentCheckoutController_CreateOrderResponse:
+    def create_order(self, body: m.PaymentCheckoutController_CreateOrderRequest, *, idempotency_key: Optional[str] = None) -> m.PaymentCheckoutController_CreateOrderResponse:
         """Create order.
 
         POST /api/billing/checkout/create-order
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/billing/checkout/create-order",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/billing/checkout/create-order", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def verify_payment(
-        self,
-        body: m.PaymentCheckoutController_VerifyPaymentRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PaymentCheckoutController_VerifyPaymentResponse:
+    def verify_payment(self, body: m.PaymentCheckoutController_VerifyPaymentRequest, *, idempotency_key: Optional[str] = None) -> m.PaymentCheckoutController_VerifyPaymentResponse:
         """Verify payment.
 
         POST /api/billing/checkout/verify-payment
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/billing/checkout/verify-payment",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/billing/checkout/verify-payment", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def gateways(self) -> m.PaymentCheckoutController_GatewayListResponse:
         """Gateways.
@@ -12626,36 +7642,28 @@ class PlanLimitsApi:
         """
         return self._http.request("GET", "/api/platform/plan-limits")
 
-    def update_plan_limits(
-        self, plan: m.TenantPlan, body: m.PlanLimitsUpdateRequest
-    ) -> m.PlanLimitsResponse:
+    def update_plan_limits(self, plan: m.TenantPlan, body: m.PlanLimitsUpdateRequest) -> m.PlanLimitsResponse:
         """Update plan limits.
 
         PUT /api/platform/plan-limits/{plan}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/plan-limits/{quote_path(plan)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/plan-limits/{quote_path(plan)}", body=body)
 
 
 class PlatformApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def recent_activity(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.PlatformActivityEntry]:
+    def recent_activity(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PlatformActivityEntry]:
         """Recent activity.
 
         GET /api/platform/activity
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/activity", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/platform/activity", query={"limit": limit, "offset": offset})
 
     def get_fallback_alert_status(self) -> m.PlatformFallbackAlertStatus:
         """Get fallback alert status.
@@ -12666,18 +7674,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/alerts/fallback-status")
 
-    def update_fallback_alert_threshold(
-        self, body: m.UpdateFallbackAlertThresholdRequest
-    ) -> m.PlatformFallbackAlertStatus:
+    def update_fallback_alert_threshold(self, body: m.UpdateFallbackAlertThresholdRequest) -> m.PlatformFallbackAlertStatus:
         """Update fallback alert threshold.
 
         PUT /api/platform/alerts/fallback-threshold
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/alerts/fallback-threshold", body=body
-        )
+        return self._http.request("PUT", "/api/platform/alerts/fallback-threshold", body=body)
 
     def get_chat_generation_settings(self) -> m.ChatGenerationSettingsResponse:
         """Get chat generation settings.
@@ -12688,18 +7692,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/chat-generation-settings")
 
-    def update_chat_generation_settings(
-        self, body: m.ChatGenerationSettingsUpdateRequest
-    ) -> m.ChatGenerationSettingsResponse:
+    def update_chat_generation_settings(self, body: m.ChatGenerationSettingsUpdateRequest) -> m.ChatGenerationSettingsResponse:
         """Update chat generation settings.
 
         PUT /api/platform/chat-generation-settings
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/chat-generation-settings", body=body
-        )
+        return self._http.request("PUT", "/api/platform/chat-generation-settings", body=body)
 
     def list_feature_flags(self) -> List[m.FeatureFlagResponse]:
         """List feature flags.
@@ -12710,18 +7710,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/feature-flags")
 
-    def upsert_feature_flag(
-        self, key: str, body: m.FeatureFlagUpsertRequest
-    ) -> m.FeatureFlagResponse:
+    def upsert_feature_flag(self, key: str, body: m.FeatureFlagUpsertRequest) -> m.FeatureFlagResponse:
         """Upsert feature flag.
 
         PUT /api/platform/feature-flags/{key}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/feature-flags/{quote_path(key)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/feature-flags/{quote_path(key)}", body=body)
 
     def delete_feature_flag(self, key: str) -> None:
         """Delete feature flag.
@@ -12730,22 +7726,16 @@ class PlatformApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE", f"/api/platform/feature-flags/{quote_path(key)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/platform/feature-flags/{quote_path(key)}", response="void")
 
-    def list_feature_flag_assignments(
-        self, key: str
-    ) -> List[m.ExperimentAssignmentResponse]:
+    def list_feature_flag_assignments(self, key: str) -> List[m.ExperimentAssignmentResponse]:
         """List feature flag assignments.
 
         GET /api/platform/feature-flags/{key}/assignments
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/feature-flags/{quote_path(key)}/assignments"
-        )
+        return self._http.request("GET", f"/api/platform/feature-flags/{quote_path(key)}/assignments")
 
     def get_free_tier_quota(self) -> m.FreeTierUsageLimiterService_QuotaConfig:
         """Get free tier quota.
@@ -12756,9 +7746,7 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/free-tier-quota")
 
-    def update_free_tier_quota(
-        self, body: m.FreeTierQuotaConfigUpdateRequest
-    ) -> m.FreeTierUsageLimiterService_QuotaConfig:
+    def update_free_tier_quota(self, body: m.FreeTierQuotaConfigUpdateRequest) -> m.FreeTierUsageLimiterService_QuotaConfig:
         """Update free tier quota.
 
         PUT /api/platform/free-tier-quota
@@ -12776,31 +7764,23 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/hosted-llm-cost")
 
-    def update_hosted_llm_budget(
-        self, body: m.PlatformHostedLlmBudgetUpdateRequest
-    ) -> m.PlatformHostedLlmCostSummary:
+    def update_hosted_llm_budget(self, body: m.PlatformHostedLlmBudgetUpdateRequest) -> m.PlatformHostedLlmCostSummary:
         """Update hosted llm budget.
 
         PUT /api/platform/hosted-llm-cost/budget
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/hosted-llm-cost/budget", body=body
-        )
+        return self._http.request("PUT", "/api/platform/hosted-llm-cost/budget", body=body)
 
-    def hosted_llm_cost_by_day(
-        self, *, days: Optional[int] = None
-    ) -> List[m.PlatformHostedLlmCostDay]:
+    def hosted_llm_cost_by_day(self, *, days: Optional[int] = None) -> List[m.PlatformHostedLlmCostDay]:
         """Hosted llm cost by day.
 
         GET /api/platform/hosted-llm-cost/by-day
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/hosted-llm-cost/by-day", query={"days": days}
-        )
+        return self._http.request("GET", "/api/platform/hosted-llm-cost/by-day", query={"days": days})
 
     def list_hosted_llm_providers(self) -> List[m.PlatformHostedLlmProviderResponse]:
         """List hosted llm providers.
@@ -12811,43 +7791,23 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/hosted-llm-providers")
 
-    def create_hosted_llm_provider(
-        self,
-        body: m.PlatformHostedLlmProviderUpsertRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PlatformHostedLlmProviderResponse:
+    def create_hosted_llm_provider(self, body: m.PlatformHostedLlmProviderUpsertRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformHostedLlmProviderResponse:
         """Create hosted llm provider.
 
         POST /api/platform/hosted-llm-providers
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/hosted-llm-providers",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/hosted-llm-providers", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def discover_hosted_models(
-        self,
-        body: m.PlatformController_DiscoverHostedModelsRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PlatformController_DiscoverHostedModelsResponse:
+    def discover_hosted_models(self, body: m.PlatformController_DiscoverHostedModelsRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformController_DiscoverHostedModelsResponse:
         """Discover hosted models.
 
         POST /api/platform/hosted-llm-providers/discover-models
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/hosted-llm-providers/discover-models",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/hosted-llm-providers/discover-models", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_hosted_llm_pool_settings(self) -> m.HostedLlmPoolSettingsResponse:
         """Get hosted llm pool settings.
@@ -12858,31 +7818,23 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/hosted-llm-providers/settings")
 
-    def update_hosted_llm_pool_settings(
-        self, body: m.HostedLlmPoolSettingsUpdateRequest
-    ) -> m.HostedLlmPoolSettingsResponse:
+    def update_hosted_llm_pool_settings(self, body: m.HostedLlmPoolSettingsUpdateRequest) -> m.HostedLlmPoolSettingsResponse:
         """Update hosted llm pool settings.
 
         PUT /api/platform/hosted-llm-providers/settings
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", "/api/platform/hosted-llm-providers/settings", body=body
-        )
+        return self._http.request("PUT", "/api/platform/hosted-llm-providers/settings", body=body)
 
-    def update_hosted_llm_provider(
-        self, id: int, body: m.PlatformHostedLlmProviderUpsertRequest
-    ) -> m.PlatformHostedLlmProviderResponse:
+    def update_hosted_llm_provider(self, id: int, body: m.PlatformHostedLlmProviderUpsertRequest) -> m.PlatformHostedLlmProviderResponse:
         """Update hosted llm provider.
 
         PUT /api/platform/hosted-llm-providers/{id}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/hosted-llm-providers/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/hosted-llm-providers/{quote_path(id)}", body=body)
 
     def delete_hosted_llm_provider(self, id: int) -> None:
         """Delete hosted llm provider.
@@ -12891,24 +7843,16 @@ class PlatformApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/platform/hosted-llm-providers/{quote_path(id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/platform/hosted-llm-providers/{quote_path(id)}", response="void")
 
-    def list_issues(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.PlatformIssueSummary]:
+    def list_issues(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PlatformIssueSummary]:
         """List issues.
 
         GET /api/platform/issues
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/issues", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/platform/issues", query={"limit": limit, "offset": offset})
 
     def open_issue_count(self) -> m.PlatformObservabilityService_OpenIssueCount:
         """Open issue count.
@@ -12928,36 +7872,23 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/kill-switch")
 
-    def resume_platform(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformKillSwitchStatus:
+    def resume_platform(self, *, idempotency_key: Optional[str] = None) -> m.PlatformKillSwitchStatus:
         """Resume platform.
 
         POST /api/platform/kill-switch/resume
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/kill-switch/resume",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/platform/kill-switch/resume", headers={"Idempotency-Key": idempotency_key})
 
-    def stop_platform(
-        self, body: m.EmergencyStopRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformKillSwitchStatus:
+    def stop_platform(self, body: m.EmergencyStopRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformKillSwitchStatus:
         """Stop platform.
 
         POST /api/platform/kill-switch/stop
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/kill-switch/stop",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/kill-switch/stop", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def list_llm_tasks(self) -> List[m.PlatformLlmTaskConfigResponse]:
         """List llm tasks.
@@ -12968,18 +7899,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/llm-tasks")
 
-    def upsert_llm_task(
-        self, task: m.PlatformTask, body: m.PlatformLlmTaskUpsertRequest
-    ) -> m.PlatformLlmTaskConfigResponse:
+    def upsert_llm_task(self, task: m.PlatformTask, body: m.PlatformLlmTaskUpsertRequest) -> m.PlatformLlmTaskConfigResponse:
         """Upsert llm task.
 
         PUT /api/platform/llm-tasks/{task}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/llm-tasks/{quote_path(task)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/llm-tasks/{quote_path(task)}", body=body)
 
     def llm_usage_by_tenant(self) -> List[m.PlatformTenantLlmUsageSummary]:
         """Llm usage by tenant.
@@ -12990,20 +7917,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/llm-usage")
 
-    def refresh_model_catalog_now(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformController_ModelCatalogRefreshResult:
+    def refresh_model_catalog_now(self, *, idempotency_key: Optional[str] = None) -> m.PlatformController_ModelCatalogRefreshResult:
         """Refresh model catalog now.
 
         POST /api/platform/model-catalog/refresh-now
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/model-catalog/refresh-now",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/platform/model-catalog/refresh-now", headers={"Idempotency-Key": idempotency_key})
 
     def get_per_user_budget(self) -> m.PerUserBudgetService_BudgetConfig:
         """Get per user budget.
@@ -13014,9 +7935,7 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/per-user-budget")
 
-    def update_per_user_budget(
-        self, body: m.PerUserBudgetConfigUpdateRequest
-    ) -> m.PerUserBudgetService_BudgetConfig:
+    def update_per_user_budget(self, body: m.PerUserBudgetConfigUpdateRequest) -> m.PerUserBudgetService_BudgetConfig:
         """Update per user budget.
 
         PUT /api/platform/per-user-budget
@@ -13025,21 +7944,14 @@ class PlatformApi:
         """
         return self._http.request("PUT", "/api/platform/per-user-budget", body=body)
 
-    def grant_site_wide_unlimited_promo(
-        self, body: m.SiteWidePromoRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SiteWidePromoResult:
+    def grant_site_wide_unlimited_promo(self, body: m.SiteWidePromoRequest, *, idempotency_key: Optional[str] = None) -> m.SiteWidePromoResult:
         """Grant site wide unlimited promo.
 
         POST /api/platform/promos/unlimited-14d
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/promos/unlimited-14d",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/promos/unlimited-14d", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def list_settings(self) -> List[m.PlatformSettingResponse]:
         """List settings.
@@ -13050,18 +7962,14 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/settings")
 
-    def update_setting(
-        self, key: str, body: m.PlatformSettingUpdateRequest
-    ) -> m.PlatformSettingResponse:
+    def update_setting(self, key: str, body: m.PlatformSettingUpdateRequest) -> m.PlatformSettingResponse:
         """Update setting.
 
         PUT /api/platform/settings/{key}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/settings/{quote_path(key)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/settings/{quote_path(key)}", body=body)
 
     def get_smart_ai_budget(self) -> m.PlatformFeatureBudgetService_GlobalConfig:
         """Get smart ai budget.
@@ -13072,9 +7980,7 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/smart-ai")
 
-    def update_smart_ai_budget(
-        self, body: m.SmartAiBudgetConfigUpdateRequest
-    ) -> m.PlatformFeatureBudgetService_GlobalConfig:
+    def update_smart_ai_budget(self, body: m.SmartAiBudgetConfigUpdateRequest) -> m.PlatformFeatureBudgetService_GlobalConfig:
         """Update smart ai budget.
 
         PUT /api/platform/smart-ai
@@ -13083,31 +7989,23 @@ class PlatformApi:
         """
         return self._http.request("PUT", "/api/platform/smart-ai", body=body)
 
-    def get_smart_ai_feature(
-        self, key: str
-    ) -> m.PlatformFeatureBudgetService_FeatureConfig:
+    def get_smart_ai_feature(self, key: str) -> m.PlatformFeatureBudgetService_FeatureConfig:
         """Get smart ai feature.
 
         GET /api/platform/smart-ai/features/{key}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/smart-ai/features/{quote_path(key)}"
-        )
+        return self._http.request("GET", f"/api/platform/smart-ai/features/{quote_path(key)}")
 
-    def update_smart_ai_feature(
-        self, key: str, body: m.SmartAiFeatureConfigUpdateRequest
-    ) -> m.PlatformFeatureBudgetService_FeatureConfig:
+    def update_smart_ai_feature(self, key: str, body: m.SmartAiFeatureConfigUpdateRequest) -> m.PlatformFeatureBudgetService_FeatureConfig:
         """Update smart ai feature.
 
         PUT /api/platform/smart-ai/features/{key}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/smart-ai/features/{quote_path(key)}", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/smart-ai/features/{quote_path(key)}", body=body)
 
     def tenant_counts(self) -> m.PlatformTenantCounts:
         """Tenant counts.
@@ -13127,86 +8025,50 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/tenants")
 
-    def change_data_residency_region(
-        self, tenant_id: str, body: m.PlatformTenantDataResidencyUpdateRequest
-    ) -> m.PlatformTenantSummary:
+    def change_data_residency_region(self, tenant_id: str, body: m.PlatformTenantDataResidencyUpdateRequest) -> m.PlatformTenantSummary:
         """Change data residency region.
 
         PUT /api/platform/tenants/{tenantId}/data-residency
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/data-residency",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/platform/tenants/{quote_path(tenant_id)}/data-residency", body=body)
 
-    def emergency_resume_tenant(
-        self, tenant_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def emergency_resume_tenant(self, tenant_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Emergency resume tenant.
 
         POST /api/platform/tenants/{tenantId}/emergency-resume
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/emergency-resume",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/platform/tenants/{quote_path(tenant_id)}/emergency-resume", headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def emergency_stop_tenant(
-        self,
-        tenant_id: str,
-        body: m.EmergencyStopRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def emergency_stop_tenant(self, tenant_id: str, body: m.EmergencyStopRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Emergency stop tenant.
 
         POST /api/platform/tenants/{tenantId}/emergency-stop
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/emergency-stop",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/platform/tenants/{quote_path(tenant_id)}/emergency-stop", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
-    def change_tenant_plan(
-        self, tenant_id: str, body: m.PlatformTenantPlanUpdateRequest
-    ) -> m.PlatformTenantSummary:
+    def change_tenant_plan(self, tenant_id: str, body: m.PlatformTenantPlanUpdateRequest) -> m.PlatformTenantSummary:
         """Change tenant plan.
 
         PUT /api/platform/tenants/{tenantId}/plan
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/tenants/{quote_path(tenant_id)}/plan", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/tenants/{quote_path(tenant_id)}/plan", body=body)
 
-    def reset_tenant_usage_quota(
-        self, tenant_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def reset_tenant_usage_quota(self, tenant_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Reset tenant usage quota.
 
         POST /api/platform/tenants/{tenantId}/usage-quota/reset
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/usage-quota/reset",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/platform/tenants/{quote_path(tenant_id)}/usage-quota/reset", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def get_translation_job(self) -> m.TranslationJobSettingsResponse:
         """Get translation job.
@@ -13217,9 +8079,7 @@ class PlatformApi:
         """
         return self._http.request("GET", "/api/platform/translation-job")
 
-    def update_translation_job(
-        self, body: m.TranslationJobSettingsUpdateRequest
-    ) -> m.TranslationJobSettingsResponse:
+    def update_translation_job(self, body: m.TranslationJobSettingsUpdateRequest) -> m.TranslationJobSettingsResponse:
         """Update translation job.
 
         PUT /api/platform/translation-job
@@ -13228,137 +8088,74 @@ class PlatformApi:
         """
         return self._http.request("PUT", "/api/platform/translation-job", body=body)
 
-    def run_translation_job_now(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.TranslationJobSettingsResponse:
+    def run_translation_job_now(self, *, idempotency_key: Optional[str] = None) -> m.TranslationJobSettingsResponse:
         """Run translation job now.
 
         POST /api/platform/translation-job/run-now
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/translation-job/run-now",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/platform/translation-job/run-now", headers={"Idempotency-Key": idempotency_key})
 
 
 class PlatformAlertWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def receive(
-        self,
-        body: Optional[Dict[str, Any]] = None,
-        *,
-        authorization: Optional[str] = None,
-    ) -> Any:
+    def receive(self, body: Optional[Dict[str, Any]] = None, *, authorization: Optional[str] = None) -> Any:
         """Receive.
 
         POST /webhook/alerts/alertmanager
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/alerts/alertmanager",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("POST", "/webhook/alerts/alertmanager", headers={"Authorization": authorization}, body=body)
 
 
 class PlatformAuditSearchApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def search(
-        self,
-        *,
-        tenant_id: Optional[str] = None,
-        actor_id: Optional[str] = None,
-        action_type: Optional[str] = None,
-        target_type: Optional[str] = None,
-        outcome: Optional[str] = None,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.PlatformAuditSearchService_SearchResult:
+    def search(self, *, tenant_id: Optional[str] = None, actor_id: Optional[str] = None, action_type: Optional[str] = None, target_type: Optional[str] = None, outcome: Optional[str] = None, from_: Optional[str] = None, to: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.PlatformAuditSearchService_SearchResult:
         """Search.
 
         GET /api/platform/audit/search
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/audit/search",
-            query={
-                "tenantId": tenant_id,
-                "actorId": actor_id,
-                "actionType": action_type,
-                "targetType": target_type,
-                "outcome": outcome,
-                "from": from_,
-                "to": to,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/platform/audit/search", query={"tenantId": tenant_id, "actorId": actor_id, "actionType": action_type, "targetType": target_type, "outcome": outcome, "from": from_, "to": to, "limit": limit, "offset": offset})
 
 
 class PlatformBillingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def comp_grants(
-        self, *, limit: Optional[int] = None
-    ) -> m.PlatformBillingService_CompGrantList:
+    def comp_grants(self, *, limit: Optional[int] = None) -> m.PlatformBillingService_CompGrantList:
         """Comp grants.
 
         GET /api/platform/billing/comp-grants
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/billing/comp-grants", query={"limit": limit}
-        )
+        return self._http.request("GET", "/api/platform/billing/comp-grants", query={"limit": limit})
 
-    def invoices(
-        self, *, tenant_id: Optional[str] = None, limit: Optional[int] = None
-    ) -> m.PlatformBillingService_InvoiceList:
+    def invoices(self, *, tenant_id: Optional[str] = None, limit: Optional[int] = None) -> m.PlatformBillingService_InvoiceList:
         """Invoices.
 
         GET /api/platform/billing/invoices
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/billing/invoices",
-            query={"tenantId": tenant_id, "limit": limit},
-        )
+        return self._http.request("GET", "/api/platform/billing/invoices", query={"tenantId": tenant_id, "limit": limit})
 
-    def subscriptions(
-        self,
-        *,
-        plan: Optional[str] = None,
-        state: Optional[str] = None,
-        q: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> m.PlatformBillingService_SubscriptionList:
+    def subscriptions(self, *, plan: Optional[str] = None, state: Optional[str] = None, q: Optional[str] = None, limit: Optional[int] = None) -> m.PlatformBillingService_SubscriptionList:
         """Subscriptions.
 
         GET /api/platform/billing/subscriptions
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/billing/subscriptions",
-            query={"plan": plan, "state": state, "q": q, "limit": limit},
-        )
+        return self._http.request("GET", "/api/platform/billing/subscriptions", query={"plan": plan, "state": state, "q": q, "limit": limit})
 
     def summary(self) -> m.PlatformBillingService_BillingSummary:
         """Summary.
@@ -13383,9 +8180,7 @@ class PlatformBroadcastApi:
         """
         return self._http.request("GET", "/api/platform/announcement")
 
-    def set_announcement(
-        self, body: m.PlatformBroadcastService_AnnouncementUpdate
-    ) -> m.PlatformBroadcastService_AnnouncementState:
+    def set_announcement(self, body: m.PlatformBroadcastService_AnnouncementUpdate) -> m.PlatformBroadcastService_AnnouncementState:
         """Set announcement.
 
         PUT /api/platform/announcement
@@ -13403,24 +8198,14 @@ class PlatformBroadcastApi:
         """
         return self._http.request("GET", "/api/platform/maintenance")
 
-    def set_maintenance(
-        self,
-        body: m.PlatformBroadcastService_MaintenanceUpdate,
-        *,
-        x_master_key: Optional[str] = None,
-    ) -> m.PlatformBroadcastService_MaintenanceState:
+    def set_maintenance(self, body: m.PlatformBroadcastService_MaintenanceUpdate, *, x_master_key: Optional[str] = None) -> m.PlatformBroadcastService_MaintenanceState:
         """Set maintenance.
 
         PUT /api/platform/maintenance
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT",
-            "/api/platform/maintenance",
-            headers={"X-Master-Key": x_master_key},
-            body=body,
-        )
+        return self._http.request("PUT", "/api/platform/maintenance", headers={"X-Master-Key": x_master_key}, body=body)
 
 
 class PlatformCircuitBreakerApi:
@@ -13436,48 +8221,28 @@ class PlatformCircuitBreakerApi:
         """
         return self._http.request("GET", "/api/platform/rate-control/circuit-breakers")
 
-    def reset(
-        self,
-        body: m.PlatformCircuitBreakerController_ResetRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PlatformCircuitBreakerController_ResetResult:
+    def reset(self, body: m.PlatformCircuitBreakerController_ResetRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformCircuitBreakerController_ResetResult:
         """Reset.
 
         POST /api/platform/rate-control/circuit-breakers/reset
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/rate-control/circuit-breakers/reset",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/rate-control/circuit-breakers/reset", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class PlatformEmailSuppressionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        q: Optional[str] = None,
-        page: Optional[int] = None,
-        limit: Optional[int] = None,
-    ) -> m.PlatformEmailSuppressionService_SuppressionPage:
+    def list(self, *, q: Optional[str] = None, page: Optional[int] = None, limit: Optional[int] = None) -> m.PlatformEmailSuppressionService_SuppressionPage:
         """List.
 
         GET /api/platform/email/suppressions
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/email/suppressions",
-            query={"q": q, "page": page, "limit": limit},
-        )
+        return self._http.request("GET", "/api/platform/email/suppressions", query={"q": q, "page": page, "limit": limit})
 
     def remove(self, email: str, *, tenant_id: Optional[str] = None) -> None:
         """Remove.
@@ -13486,12 +8251,7 @@ class PlatformEmailSuppressionApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/platform/email/suppressions/{quote_path(email)}",
-            query={"tenantId": tenant_id},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/platform/email/suppressions/{quote_path(email)}", query={"tenantId": tenant_id}, response="void")
 
 
 class PlatformHealthApi:
@@ -13512,44 +8272,23 @@ class PlatformImpersonationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        active: Optional[bool] = None,
-        page: Optional[int] = None,
-        limit: Optional[int] = None,
-    ) -> m.ImpersonationService_SessionPage:
+    def list(self, *, active: Optional[bool] = None, page: Optional[int] = None, limit: Optional[int] = None) -> m.ImpersonationService_SessionPage:
         """List.
 
         GET /api/platform/impersonation
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/impersonation",
-            query={"active": active, "page": page, "limit": limit},
-        )
+        return self._http.request("GET", "/api/platform/impersonation", query={"active": active, "page": page, "limit": limit})
 
-    def start(
-        self,
-        body: m.PlatformImpersonationController_StartRequest,
-        *,
-        x_master_key: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ImpersonationService_StartedSession:
+    def start(self, body: m.PlatformImpersonationController_StartRequest, *, x_master_key: Optional[str] = None, idempotency_key: Optional[str] = None) -> m.ImpersonationService_StartedSession:
         """Start.
 
         POST /api/platform/impersonation
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/impersonation",
-            headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/platform/impersonation", headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key}, body=body)
 
     def end(self, id: str) -> None:
         """End.
@@ -13558,79 +8297,48 @@ class PlatformImpersonationApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE", f"/api/platform/impersonation/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/platform/impersonation/{quote_path(id)}", response="void")
 
 
 class PlatformIssueApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        status: Optional[m.IssueStatus] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.PlatformIssueResponse]:
+    def list(self, *, status: Optional[m.IssueStatus] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PlatformIssueResponse]:
         """List.
 
         GET /api/admin/issues
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/issues",
-            query={"status": status, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/admin/issues", query={"status": status, "limit": limit, "offset": offset})
 
-    def create_ticket(
-        self, body: m.CreateIssueTicketRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformIssueResponse:
+    def create_ticket(self, body: m.CreateIssueTicketRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformIssueResponse:
         """Create ticket.
 
         POST /api/admin/issues
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/admin/issues",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/admin/issues", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def acknowledge(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformIssueResponse:
+    def acknowledge(self, id: str, *, idempotency_key: Optional[str] = None) -> m.PlatformIssueResponse:
         """Acknowledge.
 
         POST /api/admin/issues/{id}/acknowledge
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/issues/{quote_path(id)}/acknowledge",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/issues/{quote_path(id)}/acknowledge", headers={"Idempotency-Key": idempotency_key})
 
-    def resolve(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformIssueResponse:
+    def resolve(self, id: str, *, idempotency_key: Optional[str] = None) -> m.PlatformIssueResponse:
         """Resolve.
 
         POST /api/admin/issues/{id}/resolve
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/issues/{quote_path(id)}/resolve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/issues/{quote_path(id)}/resolve", headers={"Idempotency-Key": idempotency_key})
 
 
 class PlatformOpsApi:
@@ -13646,24 +8354,14 @@ class PlatformOpsApi:
         """
         return self._http.request("GET", "/api/platform/jobs")
 
-    def run_job(
-        self,
-        id: str,
-        *,
-        x_master_key: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, bool]:
+    def run_job(self, id: str, *, x_master_key: Optional[str] = None, idempotency_key: Optional[str] = None) -> Dict[str, bool]:
         """Run job.
 
         POST /api/platform/jobs/{id}/run
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/jobs/{quote_path(id)}/run",
-            headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/platform/jobs/{quote_path(id)}/run", headers={"X-Master-Key": x_master_key, "Idempotency-Key": idempotency_key})
 
     def migrations(self) -> m.PlatformMigrationService_MigrationsResponse:
         """Migrations.
@@ -13693,167 +8391,89 @@ class PlatformPoolWarmApi:
 
         POST /api/platform-llm/warm
         """
-        return self._http.request(
-            "POST",
-            "/api/platform-llm/warm",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/platform-llm/warm", headers={"Idempotency-Key": idempotency_key})
 
 
 class PlatformSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def logout_tenant(
-        self, tenant_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, int]:
+    def logout_tenant(self, tenant_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, int]:
         """Logout tenant.
 
         POST /api/platform/tenants/{tenantId}/logout-all
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/logout-all",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/platform/tenants/{quote_path(tenant_id)}/logout-all", headers={"Idempotency-Key": idempotency_key})
 
-    def logout_user(
-        self, keycloak_user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, bool]:
+    def logout_user(self, keycloak_user_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, bool]:
         """Logout user.
 
         POST /api/platform/users/{keycloakUserId}/logout
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/users/{quote_path(keycloak_user_id)}/logout",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/platform/users/{quote_path(keycloak_user_id)}/logout", headers={"Idempotency-Key": idempotency_key})
 
 
 class PlatformSpendApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def by_day(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> m.PlatformSpendService_DayReport:
+    def by_day(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None) -> m.PlatformSpendService_DayReport:
         """By day.
 
         GET /api/platform/spend/by-day
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/by-day",
-            query={"from": from_, "to": to, "tenantId": tenant_id},
-        )
+        return self._http.request("GET", "/api/platform/spend/by-day", query={"from": from_, "to": to, "tenantId": tenant_id})
 
-    def by_model(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> m.PlatformSpendService_ModelReport:
+    def by_model(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None) -> m.PlatformSpendService_ModelReport:
         """By model.
 
         GET /api/platform/spend/by-model
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/by-model",
-            query={"from": from_, "to": to, "tenantId": tenant_id},
-        )
+        return self._http.request("GET", "/api/platform/spend/by-model", query={"from": from_, "to": to, "tenantId": tenant_id})
 
-    def by_provider(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> m.PlatformSpendService_ProviderReport:
+    def by_provider(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None) -> m.PlatformSpendService_ProviderReport:
         """By provider.
 
         GET /api/platform/spend/by-provider
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/by-provider",
-            query={"from": from_, "to": to, "tenantId": tenant_id},
-        )
+        return self._http.request("GET", "/api/platform/spend/by-provider", query={"from": from_, "to": to, "tenantId": tenant_id})
 
-    def by_tenant(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> m.PlatformSpendService_TenantReport:
+    def by_tenant(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None) -> m.PlatformSpendService_TenantReport:
         """By tenant.
 
         GET /api/platform/spend/by-tenant
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/by-tenant",
-            query={"from": from_, "to": to, "tenantId": tenant_id},
-        )
+        return self._http.request("GET", "/api/platform/spend/by-tenant", query={"from": from_, "to": to, "tenantId": tenant_id})
 
-    def export_csv(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        group_by: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> bytes:
+    def export_csv(self, *, from_: Optional[str] = None, to: Optional[str] = None, group_by: Optional[str] = None, tenant_id: Optional[str] = None) -> bytes:
         """Export csv.
 
         GET /api/platform/spend/export.csv
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/export.csv",
-            query={"from": from_, "to": to, "groupBy": group_by, "tenantId": tenant_id},
-            response="blob",
-        )
+        return self._http.request("GET", "/api/platform/spend/export.csv", query={"from": from_, "to": to, "groupBy": group_by, "tenantId": tenant_id}, response="blob")
 
-    def summary(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> m.PlatformSpendService_SummaryReport:
+    def summary(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None) -> m.PlatformSpendService_SummaryReport:
         """Summary.
 
         GET /api/platform/spend/summary
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/spend/summary",
-            query={"from": from_, "to": to, "tenantId": tenant_id},
-        )
+        return self._http.request("GET", "/api/platform/spend/summary", query={"from": from_, "to": to, "tenantId": tenant_id})
 
 
 class PlatformSpendCapApi:
@@ -13867,29 +8487,16 @@ class PlatformSpendCapApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/tenants/{quote_path(tenant_id)}/spend-cap"
-        )
+        return self._http.request("GET", f"/api/platform/tenants/{quote_path(tenant_id)}/spend-cap")
 
-    def put(
-        self,
-        tenant_id: str,
-        body: m.PlatformSpendCapController_SpendCapUpdate,
-        *,
-        x_master_key: Optional[str] = None,
-    ) -> m.SpendCapService_CapStatus:
+    def put(self, tenant_id: str, body: m.PlatformSpendCapController_SpendCapUpdate, *, x_master_key: Optional[str] = None) -> m.SpendCapService_CapStatus:
         """Put.
 
         PUT /api/platform/tenants/{tenantId}/spend-cap
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/platform/tenants/{quote_path(tenant_id)}/spend-cap",
-            headers={"X-Master-Key": x_master_key},
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/platform/tenants/{quote_path(tenant_id)}/spend-cap", headers={"X-Master-Key": x_master_key}, body=body)
 
 
 class PlatformTenantDetailApi:
@@ -13912,9 +8519,7 @@ class PlatformTenantDetailApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/tenant-detail/{quote_path(tenant_id)}"
-        )
+        return self._http.request("GET", f"/api/platform/tenant-detail/{quote_path(tenant_id)}")
 
 
 class PlatformToolCredentialApi:
@@ -13930,25 +8535,14 @@ class PlatformToolCredentialApi:
         """
         return self._http.request("GET", "/api/platform/tool-credentials")
 
-    def activate(
-        self,
-        tool_key: str,
-        body: m.PlatformToolCredentialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PlatformToolCredentialStatusResponse:
+    def activate(self, tool_key: str, body: m.PlatformToolCredentialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.PlatformToolCredentialStatusResponse:
         """Activate.
 
         POST /api/platform/tool-credentials/{toolKey}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/tool-credentials/{quote_path(tool_key)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/platform/tool-credentials/{quote_path(tool_key)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self, tool_key: str) -> None:
         """Deactivate.
@@ -13957,11 +8551,7 @@ class PlatformToolCredentialApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/platform/tool-credentials/{quote_path(tool_key)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/platform/tool-credentials/{quote_path(tool_key)}", response="void")
 
     def status(self, tool_key: str) -> m.PlatformToolCredentialStatusResponse:
         """Status.
@@ -13970,58 +8560,30 @@ class PlatformToolCredentialApi:
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", f"/api/platform/tool-credentials/{quote_path(tool_key)}/status"
-        )
+        return self._http.request("GET", f"/api/platform/tool-credentials/{quote_path(tool_key)}/status")
 
 
 class PlatformTraceApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        name: Optional[str] = None,
-        page: Optional[int] = None,
-        limit: Optional[int] = None,
-    ) -> m.PlatformTraceDtos_TraceListResponse:
+    def list(self, *, from_: Optional[str] = None, to: Optional[str] = None, tenant_id: Optional[str] = None, user_id: Optional[str] = None, name: Optional[str] = None, page: Optional[int] = None, limit: Optional[int] = None) -> m.PlatformTraceDtos_TraceListResponse:
         """List.
 
         GET /api/platform/traces
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/traces",
-            query={
-                "from": from_,
-                "to": to,
-                "tenantId": tenant_id,
-                "userId": user_id,
-                "name": name,
-                "page": page,
-                "limit": limit,
-            },
-        )
+        return self._http.request("GET", "/api/platform/traces", query={"from": from_, "to": to, "tenantId": tenant_id, "userId": user_id, "name": name, "page": page, "limit": limit})
 
-    def metrics(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.PlatformTraceDtos_TraceMetricsResponse:
+    def metrics(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.PlatformTraceDtos_TraceMetricsResponse:
         """Metrics.
 
         GET /api/platform/traces/metrics
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/traces/metrics", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/platform/traces/metrics", query={"from": from_, "to": to})
 
     def detail(self, id: str) -> m.PlatformTraceDtos_TraceDetailResponse:
         """Detail.
@@ -14037,25 +8599,14 @@ class PlatformUserApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        tenant_id: Optional[str] = None,
-        q: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.PlatformUserController_UserListResponse:
+    def list(self, *, tenant_id: Optional[str] = None, q: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.PlatformUserController_UserListResponse:
         """List.
 
         GET /api/platform/users
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET",
-            "/api/platform/users",
-            query={"tenantId": tenant_id, "q": q, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/platform/users", query={"tenantId": tenant_id, "q": q, "limit": limit, "offset": offset})
 
     def get(self, user_id: str) -> m.PlatformUserController_UserDetail:
         """Get.
@@ -14066,68 +8617,46 @@ class PlatformUserApi:
         """
         return self._http.request("GET", f"/api/platform/users/{quote_path(user_id)}")
 
-    def set_enabled(
-        self, user_id: str, body: m.PlatformUserController_EnabledRequest
-    ) -> m.PlatformUserController_UserDetail:
+    def set_enabled(self, user_id: str, body: m.PlatformUserController_EnabledRequest) -> m.PlatformUserController_UserDetail:
         """Set enabled.
 
         PUT /api/platform/users/{userId}/enabled
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/users/{quote_path(user_id)}/enabled", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/users/{quote_path(user_id)}/enabled", body=body)
 
-    def send_password_reset(
-        self, user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.PlatformUserController_ActionResult:
+    def send_password_reset(self, user_id: str, *, idempotency_key: Optional[str] = None) -> m.PlatformUserController_ActionResult:
         """Send password reset.
 
         POST /api/platform/users/{userId}/password-reset-email
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            f"/api/platform/users/{quote_path(user_id)}/password-reset-email",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/platform/users/{quote_path(user_id)}/password-reset-email", headers={"Idempotency-Key": idempotency_key})
 
-    def set_roles(
-        self, user_id: str, body: m.PlatformUserController_RolesRequest
-    ) -> m.PlatformUserController_UserDetail:
+    def set_roles(self, user_id: str, body: m.PlatformUserController_RolesRequest) -> m.PlatformUserController_UserDetail:
         """Set roles.
 
         PUT /api/platform/users/{userId}/roles
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "PUT", f"/api/platform/users/{quote_path(user_id)}/roles", body=body
-        )
+        return self._http.request("PUT", f"/api/platform/users/{quote_path(user_id)}/roles", body=body)
 
 
 class PluginArtifactApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def upload(
-        self, body: Dict[str, Any], *, plugin_id: str, version: str
-    ) -> m.PluginArtifactService_StoredArtifact:
+    def upload(self, body: Dict[str, Any], *, plugin_id: str, version: str) -> m.PluginArtifactService_StoredArtifact:
         """Upload.
 
         POST /api/platform/plugins/artifacts
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "POST",
-            "/api/platform/plugins/artifacts",
-            query={"pluginId": plugin_id, "version": version},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/platform/plugins/artifacts", query={"pluginId": plugin_id, "version": version}, body=body, body_type="multipart")
 
     def download(self, plugin_id: str, version: str, file_name: str) -> bytes:
         """Download.
@@ -14136,11 +8665,7 @@ class PluginArtifactApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/plugins/artifacts/{quote_path(plugin_id)}/{quote_path(version)}/{quote_path(file_name)}",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/plugins/artifacts/{quote_path(plugin_id)}/{quote_path(version)}/{quote_path(file_name)}", response="blob")
 
 
 class PluginCatalogApi:
@@ -14161,21 +8686,14 @@ class PrivacyApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def audit_export(
-        self, *, from_: str, to: str, format: Optional[str] = None
-    ) -> bytes:
+    def audit_export(self, *, from_: str, to: str, format: Optional[str] = None) -> bytes:
         """Audit export.
 
         GET /api/tenant/privacy/audit-export
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/privacy/audit-export",
-            query={"from": from_, "to": to, "format": format},
-            response="blob",
-        )
+        return self._http.request("GET", "/api/tenant/privacy/audit-export", query={"from": from_, "to": to, "format": format}, response="blob")
 
     def get_consent_policy(self, agent_id: str) -> m.ConsentPolicyService_Policy:
         """Get consent policy.
@@ -14184,77 +8702,43 @@ class PrivacyApi:
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/tenant/privacy/consent-policies/{quote_path(agent_id)}"
-        )
+        return self._http.request("GET", f"/api/tenant/privacy/consent-policies/{quote_path(agent_id)}")
 
-    def put_consent_policy(
-        self, agent_id: str, body: m.ConsentPolicyService_Request
-    ) -> m.ConsentPolicyService_Policy:
+    def put_consent_policy(self, agent_id: str, body: m.ConsentPolicyService_Request) -> m.ConsentPolicyService_Policy:
         """Put consent policy.
 
         PUT /api/tenant/privacy/consent-policies/{agentId}
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/tenant/privacy/consent-policies/{quote_path(agent_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/tenant/privacy/consent-policies/{quote_path(agent_id)}", body=body)
 
-    def consent_records(
-        self, *, channel: str, external_id: str
-    ) -> List[m.ConsentLedger_Entry]:
+    def consent_records(self, *, channel: str, external_id: str) -> List[m.ConsentLedger_Entry]:
         """Consent records.
 
         GET /api/tenant/privacy/consent-records
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/privacy/consent-records",
-            query={"channel": channel, "externalId": external_id},
-        )
+        return self._http.request("GET", "/api/tenant/privacy/consent-records", query={"channel": channel, "externalId": external_id})
 
-    def erase_contact(
-        self,
-        body: m.PrivacyController_ContactRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ContactPrivacyService_ErasureReport:
+    def erase_contact(self, body: m.PrivacyController_ContactRequest, *, idempotency_key: Optional[str] = None) -> m.ContactPrivacyService_ErasureReport:
         """Erase contact.
 
         POST /api/tenant/privacy/contacts/erase
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/privacy/contacts/erase",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/privacy/contacts/erase", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def export_contact(
-        self,
-        body: m.PrivacyController_ContactRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ContactPrivacyService_ExportReport:
+    def export_contact(self, body: m.PrivacyController_ContactRequest, *, idempotency_key: Optional[str] = None) -> m.ContactPrivacyService_ExportReport:
         """Export contact.
 
         POST /api/tenant/privacy/contacts/export
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/privacy/contacts/export",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/privacy/contacts/export", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def agent_purposes(self, id: str) -> List[str]:
         """Agent purposes.
@@ -14263,22 +8747,16 @@ class PrivacyApi:
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/tenant/privacy/purposes/agents/{quote_path(id)}"
-        )
+        return self._http.request("GET", f"/api/tenant/privacy/purposes/agents/{quote_path(id)}")
 
-    def put_agent_purposes(
-        self, id: str, body: m.PrivacyController_PurposesRequest
-    ) -> List[str]:
+    def put_agent_purposes(self, id: str, body: m.PrivacyController_PurposesRequest) -> List[str]:
         """Put agent purposes.
 
         PUT /api/tenant/privacy/purposes/agents/{id}
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tenant/privacy/purposes/agents/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/tenant/privacy/purposes/agents/{quote_path(id)}", body=body)
 
     def collection_purposes(self, id: str) -> List[str]:
         """Collection purposes.
@@ -14287,25 +8765,16 @@ class PrivacyApi:
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/tenant/privacy/purposes/knowledge-collections/{quote_path(id)}",
-        )
+        return self._http.request("GET", f"/api/tenant/privacy/purposes/knowledge-collections/{quote_path(id)}")
 
-    def put_collection_purposes(
-        self, id: str, body: m.PrivacyController_PurposesRequest
-    ) -> List[str]:
+    def put_collection_purposes(self, id: str, body: m.PrivacyController_PurposesRequest) -> List[str]:
         """Put collection purposes.
 
         PUT /api/tenant/privacy/purposes/knowledge-collections/{id}
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/tenant/privacy/purposes/knowledge-collections/{quote_path(id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/tenant/privacy/purposes/knowledge-collections/{quote_path(id)}", body=body)
 
     def retention_policies(self) -> List[m.RetentionPolicyService_Rule]:
         """Retention policies.
@@ -14316,18 +8785,14 @@ class PrivacyApi:
         """
         return self._http.request("GET", "/api/tenant/privacy/retention-policies")
 
-    def put_retention(
-        self, body: m.PrivacyController_RetentionRequest
-    ) -> m.RetentionPolicyService_Saved:
+    def put_retention(self, body: m.PrivacyController_RetentionRequest) -> m.RetentionPolicyService_Saved:
         """Put retention.
 
         PUT /api/tenant/privacy/retention-policies
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/tenant/privacy/retention-policies", body=body
-        )
+        return self._http.request("PUT", "/api/tenant/privacy/retention-policies", body=body)
 
 
 class ProcedureApi:
@@ -14339,30 +8804,16 @@ class ProcedureApi:
 
         GET /api/agents/{agentId}/procedures
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/procedures"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/procedures")
 
-    def attach(
-        self,
-        agent_id: str,
-        body: m.AttachProcedureRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def attach(self, agent_id: str, body: m.AttachProcedureRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Attach.
 
         POST /api/agents/{agentId}/procedures
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/procedures",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/procedures", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
     def detach(self, agent_id: str, procedure_id: str) -> None:
         """Detach.
@@ -14371,38 +8822,23 @@ class ProcedureApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/procedures/{quote_path(procedure_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/procedures/{quote_path(procedure_id)}", response="void")
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ProcedureResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ProcedureResponse]:
         """List.
 
         GET /api/procedures
         """
-        return self._http.request(
-            "GET", "/api/procedures", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/procedures", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.ProcedureRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.ProcedureResponse:
+    def create(self, body: m.ProcedureRequest, *, idempotency_key: Optional[str] = None) -> m.ProcedureResponse:
         """Create.
 
         POST /api/procedures
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/procedures",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/procedures", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.ProcedureResponse:
         """Get.
@@ -14427,87 +8863,55 @@ class ProcedureApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/procedures/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/procedures/{quote_path(id)}", response="void")
 
-    def activate(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ProcedureResponse:
+    def activate(self, id: str, *, idempotency_key: Optional[str] = None) -> m.ProcedureResponse:
         """Activate.
 
         POST /api/procedures/{id}/activate
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/procedures/{quote_path(id)}/activate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/procedures/{quote_path(id)}/activate", headers={"Idempotency-Key": idempotency_key})
 
-    def archive(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ProcedureResponse:
+    def archive(self, id: str, *, idempotency_key: Optional[str] = None) -> m.ProcedureResponse:
         """Archive.
 
         POST /api/procedures/{id}/archive
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/procedures/{quote_path(id)}/archive",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/procedures/{quote_path(id)}/archive", headers={"Idempotency-Key": idempotency_key})
 
 
 class ProductCatalogApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None
-    ) -> List[m.ProductCatalogController_ProductResponse]:
+    def list(self, *, limit: Optional[int] = None) -> List[m.ProductCatalogController_ProductResponse]:
         """List.
 
         GET /api/tenant/commerce/products
         """
-        return self._http.request(
-            "GET", "/api/tenant/commerce/products", query={"limit": limit}
-        )
+        return self._http.request("GET", "/api/tenant/commerce/products", query={"limit": limit})
 
-    def create(
-        self,
-        body: m.ProductCatalogController_ProductRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ProductCatalogController_ProductResponse:
+    def create(self, body: m.ProductCatalogController_ProductRequest, *, idempotency_key: Optional[str] = None) -> m.ProductCatalogController_ProductResponse:
         """Create.
 
         POST /api/tenant/commerce/products
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/commerce/products",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/commerce/products", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.ProductCatalogController_ProductRequest
-    ) -> m.ProductCatalogController_ProductResponse:
+    def update(self, id: str, body: m.ProductCatalogController_ProductRequest) -> m.ProductCatalogController_ProductResponse:
         """Update.
 
         PUT /api/tenant/commerce/products/{id}
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tenant/commerce/products/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/tenant/commerce/products/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -14516,9 +8920,7 @@ class ProductCatalogApi:
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tenant/commerce/products/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tenant/commerce/products/{quote_path(id)}", response="void")
 
 
 class ProductFeedApi:
@@ -14534,172 +8936,68 @@ class ProductFeedApi:
         """
         return self._http.request("GET", f"/api/commerce/feed/{quote_path(tenant_id)}")
 
-    def checkout(
-        self, tenant_id: str, body: m.ProductFeedController_FeedCheckoutRequest
-    ) -> m.ProductFeedController_FeedCheckoutResponse:
+    def checkout(self, tenant_id: str, body: m.ProductFeedController_FeedCheckoutRequest) -> m.ProductFeedController_FeedCheckoutResponse:
         """Checkout.
 
         POST /api/commerce/feed/{tenantId}/checkout
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/commerce/feed/{quote_path(tenant_id)}/checkout", body=body
-        )
+        return self._http.request("POST", f"/api/commerce/feed/{quote_path(tenant_id)}/checkout", body=body)
 
 
 class PromptAdminApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        agent_id: Optional[str] = None,
-        locale: Optional[str] = None,
-        family: Optional[str] = None,
-        q: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.PromptOverrideService_PromptView]:
+    def list(self, *, agent_id: Optional[str] = None, locale: Optional[str] = None, family: Optional[str] = None, q: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.PromptOverrideService_PromptView]:
         """List.
 
         GET /api/prompts
         """
-        return self._http.request(
-            "GET",
-            "/api/prompts",
-            query={
-                "agentId": agent_id,
-                "locale": locale,
-                "family": family,
-                "q": q,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/prompts", query={"agentId": agent_id, "locale": locale, "family": family, "q": q, "limit": limit, "offset": offset})
 
-    def get(
-        self, key: str, *, agent_id: Optional[str] = None, locale: Optional[str] = None
-    ) -> m.PromptOverrideService_PromptView:
+    def get(self, key: str, *, agent_id: Optional[str] = None, locale: Optional[str] = None) -> m.PromptOverrideService_PromptView:
         """Get.
 
         GET /api/prompts/{key}
         """
-        return self._http.request(
-            "GET",
-            f"/api/prompts/{quote_path(key)}",
-            query={"agentId": agent_id, "locale": locale},
-        )
+        return self._http.request("GET", f"/api/prompts/{quote_path(key)}", query={"agentId": agent_id, "locale": locale})
 
-    def history(
-        self,
-        key: str,
-        *,
-        scope: Optional[str] = None,
-        agent_id: Optional[str] = None,
-        locale: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> List[m.PromptHistoryEntry]:
+    def history(self, key: str, *, scope: Optional[str] = None, agent_id: Optional[str] = None, locale: Optional[str] = None, limit: Optional[int] = None) -> List[m.PromptHistoryEntry]:
         """History.
 
         GET /api/prompts/{key}/history
         """
-        return self._http.request(
-            "GET",
-            f"/api/prompts/{quote_path(key)}/history",
-            query={
-                "scope": scope,
-                "agentId": agent_id,
-                "locale": locale,
-                "limit": limit,
-            },
-        )
+        return self._http.request("GET", f"/api/prompts/{quote_path(key)}/history", query={"scope": scope, "agentId": agent_id, "locale": locale, "limit": limit})
 
-    def put(
-        self,
-        key: str,
-        scope: str,
-        body: m.PromptAdminController_OverrideRequest,
-        *,
-        agent_id: Optional[str] = None,
-        locale: Optional[str] = None,
-    ) -> m.PromptOverrideService_Applied:
+    def put(self, key: str, scope: str, body: m.PromptAdminController_OverrideRequest, *, agent_id: Optional[str] = None, locale: Optional[str] = None) -> m.PromptOverrideService_Applied:
         """Put.
 
         PUT /api/prompts/{key}/overrides/{scope}
         """
-        return self._http.request(
-            "PUT",
-            f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}",
-            query={"agentId": agent_id, "locale": locale},
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}", query={"agentId": agent_id, "locale": locale}, body=body)
 
-    def revert(
-        self,
-        key: str,
-        scope: str,
-        *,
-        agent_id: Optional[str] = None,
-        locale: Optional[str] = None,
-        reason: Optional[str] = None,
-        expected_version: Optional[int] = None,
-    ) -> m.PromptOverrideService_Applied:
+    def revert(self, key: str, scope: str, *, agent_id: Optional[str] = None, locale: Optional[str] = None, reason: Optional[str] = None, expected_version: Optional[int] = None) -> m.PromptOverrideService_Applied:
         """Revert.
 
         DELETE /api/prompts/{key}/overrides/{scope}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}",
-            query={
-                "agentId": agent_id,
-                "locale": locale,
-                "reason": reason,
-                "expectedVersion": expected_version,
-            },
-        )
+        return self._http.request("DELETE", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}", query={"agentId": agent_id, "locale": locale, "reason": reason, "expectedVersion": expected_version})
 
-    def restore(
-        self,
-        key: str,
-        scope: str,
-        body: m.PromptAdminController_RestoreRequest,
-        *,
-        agent_id: Optional[str] = None,
-        locale: Optional[str] = None,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PromptOverrideService_Applied:
+    def restore(self, key: str, scope: str, body: m.PromptAdminController_RestoreRequest, *, agent_id: Optional[str] = None, locale: Optional[str] = None, idempotency_key: Optional[str] = None) -> m.PromptOverrideService_Applied:
         """Restore.
 
         POST /api/prompts/{key}/overrides/{scope}/restore
         """
-        return self._http.request(
-            "POST",
-            f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}/restore",
-            query={"agentId": agent_id, "locale": locale},
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/prompts/{quote_path(key)}/overrides/{quote_path(scope)}/restore", query={"agentId": agent_id, "locale": locale}, headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def validate(
-        self,
-        key: str,
-        body: m.PromptAdminController_ValidateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PromptOverrideService_Validation:
+    def validate(self, key: str, body: m.PromptAdminController_ValidateRequest, *, idempotency_key: Optional[str] = None) -> m.PromptOverrideService_Validation:
         """Validate.
 
         POST /api/prompts/{key}/validate
         """
-        return self._http.request(
-            "POST",
-            f"/api/prompts/{quote_path(key)}/validate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/prompts/{quote_path(key)}/validate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class PromptDirectiveApi:
@@ -14713,80 +9011,54 @@ class PromptDirectiveApi:
         """
         return self._http.request("GET", "/api/prompt-directives")
 
-    def put_custom_instructions(
-        self, body: m.PromptDirectiveController_CustomInstructionsUpdate
-    ) -> m.PromptDirectiveAdminService_Overview:
+    def put_custom_instructions(self, body: m.PromptDirectiveController_CustomInstructionsUpdate) -> m.PromptDirectiveAdminService_Overview:
         """Put custom instructions.
 
         PUT /api/prompt-directives/custom-instructions
         """
-        return self._http.request(
-            "PUT", "/api/prompt-directives/custom-instructions", body=body
-        )
+        return self._http.request("PUT", "/api/prompt-directives/custom-instructions", body=body)
 
     def clear_custom_instructions(self) -> None:
         """Clear custom instructions.
 
         DELETE /api/prompt-directives/custom-instructions
         """
-        return self._http.request(
-            "DELETE", "/api/prompt-directives/custom-instructions", response="void"
-        )
+        return self._http.request("DELETE", "/api/prompt-directives/custom-instructions", response="void")
 
-    def put(
-        self, key: str, body: m.PromptDirectiveController_DirectiveUpdate
-    ) -> m.PromptDirectiveAdminService_Overview:
+    def put(self, key: str, body: m.PromptDirectiveController_DirectiveUpdate) -> m.PromptDirectiveAdminService_Overview:
         """Put.
 
         PUT /api/prompt-directives/{key}
         """
-        return self._http.request(
-            "PUT", f"/api/prompt-directives/{quote_path(key)}", body=body
-        )
+        return self._http.request("PUT", f"/api/prompt-directives/{quote_path(key)}", body=body)
 
     def reset(self, key: str) -> None:
         """Reset.
 
         DELETE /api/prompt-directives/{key}
         """
-        return self._http.request(
-            "DELETE", f"/api/prompt-directives/{quote_path(key)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/prompt-directives/{quote_path(key)}", response="void")
 
 
 class ProviderApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ProviderResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ProviderResponse]:
         """List.
 
         GET /api/providers
         """
-        return self._http.request(
-            "GET", "/api/providers", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/providers", query={"limit": limit, "offset": offset})
 
-    def activate(
-        self,
-        body: m.ProviderActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ProviderResponse:
+    def activate(self, body: m.ProviderActivationRequest, *, idempotency_key: Optional[str] = None) -> m.ProviderResponse:
         """Activate.
 
         POST /api/providers
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/providers",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/providers", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def availability(self) -> m.ProviderAvailabilityResponse:
         """Availability.
@@ -14816,26 +9088,14 @@ class ProviderApi:
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/providers/{quote_path(provider)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/providers/{quote_path(provider)}", response="void")
 
-    def list_models(
-        self,
-        provider: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.ProviderModelResponse]:
+    def list_models(self, provider: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ProviderModelResponse]:
         """List models.
 
         GET /api/providers/{provider}/models
         """
-        return self._http.request(
-            "GET",
-            f"/api/providers/{quote_path(provider)}/models",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/providers/{quote_path(provider)}/models", query={"limit": limit, "offset": offset})
 
 
 class PublicStatusApi:
@@ -14861,100 +9121,63 @@ class QualityApi:
 
         GET /api/agents/{agentId}/quality/config
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/config"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/config")
 
-    def get_history(
-        self, agent_id: str, *, limit: Optional[int] = None
-    ) -> m.QualityHistoryResponse:
+    def get_history(self, agent_id: str, *, limit: Optional[int] = None) -> m.QualityHistoryResponse:
         """Get history.
 
         GET /api/agents/{agentId}/quality/history
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/history",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/history", query={"limit": limit})
 
     def get_statistics(self, agent_id: str) -> m.QualityStatisticsResponse:
         """Get statistics.
 
         GET /api/agents/{agentId}/quality/statistics
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/statistics"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/statistics")
 
     def get_summary(self, agent_id: str) -> m.QualitySummaryResponse:
         """Get summary.
 
         GET /api/agents/{agentId}/quality/summary
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/summary"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/summary")
 
 
 class QuickTaskApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def run(
-        self, body: m.QuickTaskRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.QuickTaskResponse:
+    def run(self, body: m.QuickTaskRequest, *, idempotency_key: Optional[str] = None) -> m.QuickTaskResponse:
         """Run.
 
         POST /api/quick-task
         """
-        return self._http.request(
-            "POST",
-            "/api/quick-task",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/quick-task", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview(
-        self, body: m.QuickTaskPreviewRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.QuickTaskPreviewResponse:
+    def preview(self, body: m.QuickTaskPreviewRequest, *, idempotency_key: Optional[str] = None) -> m.QuickTaskPreviewResponse:
         """Preview.
 
         POST /api/quick-task/preview
         """
-        return self._http.request(
-            "POST",
-            "/api/quick-task/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/quick-task/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def recent_tasks(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.QuickTaskRunSummaryResponse]:
+    def recent_tasks(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.QuickTaskRunSummaryResponse]:
         """Recent tasks.
 
         GET /api/quick-task/recent
         """
-        return self._http.request(
-            "GET", "/api/quick-task/recent", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/quick-task/recent", query={"limit": limit, "offset": offset})
 
-    def run_stream(
-        self, body: m.QuickTaskRequest, *, idempotency_key: Optional[str] = None
-    ) -> Iterator[str]:
+    def run_stream(self, body: m.QuickTaskRequest, *, idempotency_key: Optional[str] = None) -> Iterator[str]:
         """Run stream.
 
         POST /api/quick-task/stream
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            "/api/quick-task/stream",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.stream("POST", "/api/quick-task/stream", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get_task(self, task_id: str) -> m.QuickTaskRunDetailResponse:
         """Get task.
@@ -14963,149 +9186,84 @@ class QuickTaskApi:
         """
         return self._http.request("GET", f"/api/quick-task/{quote_path(task_id)}")
 
-    def cancel_task(
-        self, task_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def cancel_task(self, task_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Cancel task.
 
         POST /api/quick-task/{taskId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/quick-task/{quote_path(task_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/quick-task/{quote_path(task_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
 
 class RagEvalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def run(
-        self,
-        collection_id: str,
-        body: m.RagDtos_RagEvalRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.RagDtos_RagEvalResponse:
+    def run(self, collection_id: str, body: m.RagDtos_RagEvalRequest, *, idempotency_key: Optional[str] = None) -> m.RagDtos_RagEvalResponse:
         """Run.
 
         POST /api/knowledge/{collectionId}/eval
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/knowledge/{quote_path(collection_id)}/eval",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/knowledge/{quote_path(collection_id)}/eval", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class RazorpayCheckoutApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def close_upi_qr(
-        self, qr_code_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.RazorpayCheckoutController_CloseUpiQrResponse:
+    def close_upi_qr(self, qr_code_id: str, *, idempotency_key: Optional[str] = None) -> m.RazorpayCheckoutController_CloseUpiQrResponse:
         """Close upi qr.
 
         POST /api/billing/checkout/close-upi-qr/{qrCodeId}
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/billing/checkout/close-upi-qr/{quote_path(qr_code_id)}",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/billing/checkout/close-upi-qr/{quote_path(qr_code_id)}", headers={"Idempotency-Key": idempotency_key})
 
-    def create_upi_collect(
-        self,
-        body: m.RazorpayCheckoutController_CreateUpiCollectRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.RazorpayCheckoutController_CreateUpiCollectResponse:
+    def create_upi_collect(self, body: m.RazorpayCheckoutController_CreateUpiCollectRequest, *, idempotency_key: Optional[str] = None) -> m.RazorpayCheckoutController_CreateUpiCollectResponse:
         """Create upi collect.
 
         POST /api/billing/checkout/create-upi-collect
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/billing/checkout/create-upi-collect",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/billing/checkout/create-upi-collect", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def create_upi_qr(
-        self,
-        body: m.RazorpayCheckoutController_CreateUpiQrRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.RazorpayCheckoutController_CreateUpiQrResponse:
+    def create_upi_qr(self, body: m.RazorpayCheckoutController_CreateUpiQrRequest, *, idempotency_key: Optional[str] = None) -> m.RazorpayCheckoutController_CreateUpiQrResponse:
         """Create upi qr.
 
         POST /api/billing/checkout/create-upi-qr
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/billing/checkout/create-upi-qr",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/billing/checkout/create-upi-qr", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class RazorpayWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def handle_webhook(
-        self,
-        body: str,
-        *,
-        x_razorpay_signature: Optional[str] = None,
-        x_razorpay_event_id: Optional[str] = None,
-    ) -> None:
+    def handle_webhook(self, body: str, *, x_razorpay_signature: Optional[str] = None, x_razorpay_event_id: Optional[str] = None) -> None:
         """Handle webhook.
 
         POST /webhook/razorpay
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/razorpay",
-            headers={
-                "X-Razorpay-Signature": x_razorpay_signature,
-                "X-Razorpay-Event-Id": x_razorpay_event_id,
-            },
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/webhook/razorpay", headers={"X-Razorpay-Signature": x_razorpay_signature, "X-Razorpay-Event-Id": x_razorpay_event_id}, body=body, response="void")
 
 
 class RealtimeVoiceSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def create_session(
-        self, body: m.RealtimeSessionRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.RealtimeSessionResponse:
+    def create_session(self, body: m.RealtimeSessionRequest, *, idempotency_key: Optional[str] = None) -> m.RealtimeSessionResponse:
         """Create session.
 
         POST /api/voice/realtime/sessions
         """
-        return self._http.request(
-            "POST",
-            "/api/voice/realtime/sessions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/voice/realtime/sessions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ReferralApi:
@@ -15119,19 +9277,12 @@ class ReferralApi:
         """
         return self._http.request("GET", "/api/tenant/referral")
 
-    def redeem(
-        self, body: m.ReferralRedeemRequest, *, idempotency_key: Optional[str] = None
-    ) -> Any:
+    def redeem(self, body: m.ReferralRedeemRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Redeem.
 
         POST /api/tenant/referral/redeem
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/referral/redeem",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/referral/redeem", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ReliabilityHealthApi:
@@ -15147,48 +9298,33 @@ class ReliabilityHealthApi:
         """
         return self._http.request("GET", "/api/platform/health/dependencies")
 
-    def slo(
-        self, *, window_hours: Optional[int] = None
-    ) -> m.ReliabilityApi_SloResponse:
+    def slo(self, *, window_hours: Optional[int] = None) -> m.ReliabilityApi_SloResponse:
         """Slo.
 
         GET /api/platform/slo
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "GET", "/api/platform/slo", query={"windowHours": window_hours}
-        )
+        return self._http.request("GET", "/api/platform/slo", query={"windowHours": window_hours})
 
 
 class ResearchRunApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.AgentJobSummaryResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.AgentJobSummaryResponse]:
         """List.
 
         GET /api/research/runs
         """
-        return self._http.request(
-            "GET", "/api/research/runs", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/research/runs", query={"limit": limit, "offset": offset})
 
-    def start(
-        self, body: m.ResearchRunStartRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentJobResponse:
+    def start(self, body: m.ResearchRunStartRequest, *, idempotency_key: Optional[str] = None) -> m.AgentJobResponse:
         """Start.
 
         POST /api/research/runs
         """
-        return self._http.request(
-            "POST",
-            "/api/research/runs",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/research/runs", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, job_id: str) -> m.AgentJobResponse:
         """Get.
@@ -15197,18 +9333,12 @@ class ResearchRunApi:
         """
         return self._http.request("GET", f"/api/research/runs/{quote_path(job_id)}")
 
-    def cancel(
-        self, job_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentJobResponse:
+    def cancel(self, job_id: str, *, idempotency_key: Optional[str] = None) -> m.AgentJobResponse:
         """Cancel.
 
         POST /api/research/runs/{jobId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/research/runs/{quote_path(job_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/research/runs/{quote_path(job_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
     def status(self) -> m.ResearchStatusResponse:
         """Status.
@@ -15222,77 +9352,41 @@ class ResolutionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.ResolutionDtos_ResolutionListResponse:
+    def list(self, *, from_: Optional[str] = None, to: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.ResolutionDtos_ResolutionListResponse:
         """List.
 
         GET /api/tenant/resolutions
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/resolutions",
-            query={"from": from_, "to": to, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/tenant/resolutions", query={"from": from_, "to": to, "limit": limit, "offset": offset})
 
-    def record(
-        self,
-        body: m.ResolutionDtos_RecordResolutionRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ResolutionDtos_ResolutionActionResponse:
+    def record(self, body: m.ResolutionDtos_RecordResolutionRequest, *, idempotency_key: Optional[str] = None) -> m.ResolutionDtos_ResolutionActionResponse:
         """Record.
 
         POST /api/tenant/resolutions
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/resolutions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/resolutions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def summary(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.ResolutionDtos_ResolutionSummaryResponse:
+    def summary(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.ResolutionDtos_ResolutionSummaryResponse:
         """Summary.
 
         GET /api/tenant/resolutions/summary
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/tenant/resolutions/summary", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/tenant/resolutions/summary", query={"from": from_, "to": to})
 
-    def dispute(
-        self,
-        id: str,
-        body: m.ResolutionDtos_DisputeRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ResolutionDtos_ResolutionActionResponse:
+    def dispute(self, id: str, body: m.ResolutionDtos_DisputeRequest, *, idempotency_key: Optional[str] = None) -> m.ResolutionDtos_ResolutionActionResponse:
         """Dispute.
 
         POST /api/tenant/resolutions/{id}/dispute
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tenant/resolutions/{quote_path(id)}/dispute",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/tenant/resolutions/{quote_path(id)}/dispute", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class ResumableChatTurnApi:
@@ -15306,34 +9400,21 @@ class ResumableChatTurnApi:
         """
         return self._http.request("GET", f"/api/chat/turns/{quote_path(turn_id)}")
 
-    def persisted_reply(
-        self, turn_id: str
-    ) -> m.ResumableTurnReplyService_PersistedReply:
+    def persisted_reply(self, turn_id: str) -> m.ResumableTurnReplyService_PersistedReply:
         """Persisted reply.
 
         GET /api/chat/turns/{turnId}/reply
         """
         return self._http.request("GET", f"/api/chat/turns/{quote_path(turn_id)}/reply")
 
-    def stream(
-        self,
-        turn_id: str,
-        *,
-        after: Optional[int] = None,
-        last_event_id: Optional[str] = None,
-    ) -> Iterator[str]:
+    def stream(self, turn_id: str, *, after: Optional[int] = None, last_event_id: Optional[str] = None) -> Iterator[str]:
         """Stream.
 
         GET /api/chat/turns/{turnId}/stream
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "GET",
-            f"/api/chat/turns/{quote_path(turn_id)}/stream",
-            query={"after": after},
-            headers={"Last-Event-ID": last_event_id},
-        )
+        return self._http.stream("GET", f"/api/chat/turns/{quote_path(turn_id)}/stream", query={"after": after}, headers={"Last-Event-ID": last_event_id})
 
 
 class RlApi:
@@ -15347,11 +9428,7 @@ class RlApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/rl/agents/{quote_path(agent_id)}/export/preferences",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/export/preferences", query={"limit": limit})
 
     def trajectories_jsonl(self, agent_id: str, *, limit: Optional[int] = None) -> str:
         """Trajectories jsonl.
@@ -15360,11 +9437,7 @@ class RlApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/rl/agents/{quote_path(agent_id)}/export/trajectories",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/export/trajectories", query={"limit": limit})
 
     def policies(self, agent_id: str) -> List[m.RlSummaryResponse_PolicyState]:
         """Policies.
@@ -15373,165 +9446,94 @@ class RlApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/rl/agents/{quote_path(agent_id)}/policies"
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/policies")
 
-    def update_policy(
-        self, agent_id: str, dimension: m.PolicyDimension, body: m.PolicyUpdateRequest
-    ) -> m.RlSummaryResponse_PolicyState:
+    def update_policy(self, agent_id: str, dimension: m.PolicyDimension, body: m.PolicyUpdateRequest) -> m.RlSummaryResponse_PolicyState:
         """Update policy.
 
         PUT /api/rl/agents/{agentId}/policies/{dimension}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}", body=body)
 
-    def arms(
-        self, agent_id: str, dimension: m.PolicyDimension
-    ) -> List[m.PolicyArmResponse]:
+    def arms(self, agent_id: str, dimension: m.PolicyDimension) -> List[m.PolicyArmResponse]:
         """Arms.
 
         GET /api/rl/agents/{agentId}/policies/{dimension}/arms
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms",
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms")
 
-    def add_arm(
-        self,
-        agent_id: str,
-        dimension: m.PolicyDimension,
-        body: m.PolicyArmRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.PolicyArmResponse:
+    def add_arm(self, agent_id: str, dimension: m.PolicyDimension, body: m.PolicyArmRequest, *, idempotency_key: Optional[str] = None) -> m.PolicyArmResponse:
         """Add arm.
 
         POST /api/rl/agents/{agentId}/policies/{dimension}/arms
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def delete_arm(
-        self, agent_id: str, dimension: m.PolicyDimension, arm_id: str
-    ) -> None:
+    def delete_arm(self, agent_id: str, dimension: m.PolicyDimension, arm_id: str) -> None:
         """Delete arm.
 
         DELETE /api/rl/agents/{agentId}/policies/{dimension}/arms/{armId}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms/{quote_path(arm_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/rl/agents/{quote_path(agent_id)}/policies/{quote_path(dimension)}/arms/{quote_path(arm_id)}", response="void")
 
-    def preferences(
-        self, agent_id: str, *, limit: Optional[int] = None
-    ) -> m.RlPreferenceExport:
+    def preferences(self, agent_id: str, *, limit: Optional[int] = None) -> m.RlPreferenceExport:
         """Preferences.
 
         GET /api/rl/agents/{agentId}/preferences
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/rl/agents/{quote_path(agent_id)}/preferences",
-            query={"limit": limit},
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/preferences", query={"limit": limit})
 
     def summary(self, agent_id: str) -> m.RlSummaryResponse:
         """Summary.
 
         GET /api/rl/agents/{agentId}/summary
         """
-        return self._http.request(
-            "GET", f"/api/rl/agents/{quote_path(agent_id)}/summary"
-        )
+        return self._http.request("GET", f"/api/rl/agents/{quote_path(agent_id)}/summary")
 
 
 class RlFeedbackApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def submit(
-        self,
-        agent_id: str,
-        body: m.TurnFeedbackRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def submit(self, agent_id: str, body: m.TurnFeedbackRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Submit.
 
         POST /api/agents/{agentId}/turns/feedback
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/turns/feedback",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/turns/feedback", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class RoiApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def agents(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        include_assumed: Optional[bool] = None,
-    ) -> m.RoiDtos_AgentRoiResponse:
+    def agents(self, *, from_: Optional[str] = None, to: Optional[str] = None, include_assumed: Optional[bool] = None) -> m.RoiDtos_AgentRoiResponse:
         """Agents.
 
         GET /api/tenant/roi/agents
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/roi/agents",
-            query={"from": from_, "to": to, "includeAssumed": include_assumed},
-        )
+        return self._http.request("GET", "/api/tenant/roi/agents", query={"from": from_, "to": to, "includeAssumed": include_assumed})
 
-    def agents_csv(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        include_assumed: Optional[bool] = None,
-    ) -> str:
+    def agents_csv(self, *, from_: Optional[str] = None, to: Optional[str] = None, include_assumed: Optional[bool] = None) -> str:
         """Agents csv.
 
         GET /api/tenant/roi/agents.csv
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/roi/agents.csv",
-            query={"from": from_, "to": to, "includeAssumed": include_assumed},
-            response="text",
-        )
+        return self._http.request("GET", "/api/tenant/roi/agents.csv", query={"from": from_, "to": to, "includeAssumed": include_assumed}, response="text")
 
     def assumption(self, agent_id: str) -> m.RoiDtos_AssumptionResponse:
         """Assumption.
@@ -15540,24 +9542,16 @@ class RoiApi:
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/tenant/roi/agents/{quote_path(agent_id)}/assumptions"
-        )
+        return self._http.request("GET", f"/api/tenant/roi/agents/{quote_path(agent_id)}/assumptions")
 
-    def set_assumption(
-        self, agent_id: str, body: m.RoiDtos_AssumptionRequest
-    ) -> m.RoiDtos_AssumptionResponse:
+    def set_assumption(self, agent_id: str, body: m.RoiDtos_AssumptionRequest) -> m.RoiDtos_AssumptionResponse:
         """Set assumption.
 
         PUT /api/tenant/roi/agents/{agentId}/assumptions
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/tenant/roi/agents/{quote_path(agent_id)}/assumptions",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/tenant/roi/agents/{quote_path(agent_id)}/assumptions", body=body)
 
     def baseline(self, agent_id: str) -> m.PilotDtos_BaselineResponse:
         """Baseline.
@@ -15566,48 +9560,25 @@ class RoiApi:
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", f"/api/tenant/roi/agents/{quote_path(agent_id)}/baseline"
-        )
+        return self._http.request("GET", f"/api/tenant/roi/agents/{quote_path(agent_id)}/baseline")
 
-    def set_baseline(
-        self, agent_id: str, body: m.PilotDtos_BaselineRequest
-    ) -> m.PilotDtos_BaselineResponse:
+    def set_baseline(self, agent_id: str, body: m.PilotDtos_BaselineRequest) -> m.PilotDtos_BaselineResponse:
         """Set baseline.
 
         PUT /api/tenant/roi/agents/{agentId}/baseline
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tenant/roi/agents/{quote_path(agent_id)}/baseline", body=body
-        )
+        return self._http.request("PUT", f"/api/tenant/roi/agents/{quote_path(agent_id)}/baseline", body=body)
 
-    def pilot_report(
-        self,
-        agent_id: str,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        include_assumed: Optional[bool] = None,
-        format: Optional[str] = None,
-    ) -> Any:
+    def pilot_report(self, agent_id: str, *, from_: Optional[str] = None, to: Optional[str] = None, include_assumed: Optional[bool] = None, format: Optional[str] = None) -> Any:
         """Pilot report.
 
         GET /api/tenant/roi/agents/{agentId}/pilot-report
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/tenant/roi/agents/{quote_path(agent_id)}/pilot-report",
-            query={
-                "from": from_,
-                "to": to,
-                "includeAssumed": include_assumed,
-                "format": format,
-            },
-        )
+        return self._http.request("GET", f"/api/tenant/roi/agents/{quote_path(agent_id)}/pilot-report", query={"from": from_, "to": to, "includeAssumed": include_assumed, "format": format})
 
     def budget(self) -> m.RoiDtos_BudgetResponse:
         """Budget.
@@ -15618,24 +9589,14 @@ class RoiApi:
         """
         return self._http.request("GET", "/api/tenant/roi/budget")
 
-    def costs(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        group_by: Optional[str] = None,
-    ) -> m.RoiDtos_CostReportResponse:
+    def costs(self, *, from_: Optional[str] = None, to: Optional[str] = None, group_by: Optional[str] = None) -> m.RoiDtos_CostReportResponse:
         """Costs.
 
         GET /api/tenant/roi/costs
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/tenant/roi/costs",
-            query={"from": from_, "to": to, "groupBy": group_by},
-        )
+        return self._http.request("GET", "/api/tenant/roi/costs", query={"from": from_, "to": to, "groupBy": group_by})
 
     def demo(self) -> m.PilotDtos_DemoStatus:
         """Demo.
@@ -15646,50 +9607,32 @@ class RoiApi:
         """
         return self._http.request("GET", "/api/tenant/roi/demo")
 
-    def mark_outcome(
-        self, body: m.RoiDtos_OutcomeRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.RoiDtos_OutcomeResponse:
+    def mark_outcome(self, body: m.RoiDtos_OutcomeRequest, *, idempotency_key: Optional[str] = None) -> m.RoiDtos_OutcomeResponse:
         """Mark outcome.
 
         POST /api/tenant/roi/outcomes
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/roi/outcomes",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/roi/outcomes", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def prices(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.RoiDtos_PriceListResponse:
+    def prices(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.RoiDtos_PriceListResponse:
         """Prices.
 
         GET /api/tenant/roi/prices
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/tenant/roi/prices", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/tenant/roi/prices", query={"from": from_, "to": to})
 
-    def set_price(
-        self, body: m.RoiDtos_PriceRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.RoiDtos_PriceResponse:
+    def set_price(self, body: m.RoiDtos_PriceRequest, *, idempotency_key: Optional[str] = None) -> m.RoiDtos_PriceResponse:
         """Set price.
 
         POST /api/tenant/roi/prices
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/roi/prices",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/roi/prices", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_price(self, id: str) -> None:
         """Delete price.
@@ -15698,9 +9641,7 @@ class RoiApi:
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tenant/roi/prices/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tenant/roi/prices/{quote_path(id)}", response="void")
 
 
 class SandboxArtifactApi:
@@ -15712,33 +9653,21 @@ class SandboxArtifactApi:
 
         GET /api/sandbox/artifacts/{id}
         """
-        return self._http.request(
-            "GET", f"/api/sandbox/artifacts/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/sandbox/artifacts/{quote_path(id)}", response="blob")
 
 
 class SarvamApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def activate(
-        self,
-        body: m.SarvamCredentialActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SarvamCredentialResponse:
+    def activate(self, body: m.SarvamCredentialActivationRequest, *, idempotency_key: Optional[str] = None) -> m.SarvamCredentialResponse:
         """Activate.
 
         POST /api/sarvam/credential
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/sarvam/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/sarvam/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def deactivate(self) -> None:
         """Deactivate.
@@ -15761,58 +9690,38 @@ class SarvamGeneratedAudioApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.SarvamGeneratedAudioResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SarvamGeneratedAudioResponse]:
         """List.
 
         GET /api/sarvam/audio
         """
-        return self._http.request(
-            "GET", "/api/sarvam/audio", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/sarvam/audio", query={"limit": limit, "offset": offset})
 
     def download(self, id: str) -> bytes:
         """Download.
 
         GET /api/sarvam/audio/{id}
         """
-        return self._http.request(
-            "GET", f"/api/sarvam/audio/{quote_path(id)}", response="blob"
-        )
+        return self._http.request("GET", f"/api/sarvam/audio/{quote_path(id)}", response="blob")
 
 
 class ScheduledTaskApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ScheduledTaskDtos_TaskResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ScheduledTaskDtos_TaskResponse]:
         """List.
 
         GET /api/scheduled-tasks
         """
-        return self._http.request(
-            "GET", "/api/scheduled-tasks", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/scheduled-tasks", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.ScheduledTaskDtos_TaskRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ScheduledTaskDtos_TaskResponse:
+    def create(self, body: m.ScheduledTaskDtos_TaskRequest, *, idempotency_key: Optional[str] = None) -> m.ScheduledTaskDtos_TaskResponse:
         """Create.
 
         POST /api/scheduled-tasks
         """
-        return self._http.request(
-            "POST",
-            "/api/scheduled-tasks",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/scheduled-tasks", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def capabilities(self) -> m.ScheduledTaskDtos_Capabilities:
         """Capabilities.
@@ -15821,22 +9730,12 @@ class ScheduledTaskApi:
         """
         return self._http.request("GET", "/api/scheduled-tasks/capabilities")
 
-    def preview(
-        self,
-        body: m.ScheduledTaskDtos_PreviewRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ScheduledTaskDtos_PreviewResponse:
+    def preview(self, body: m.ScheduledTaskDtos_PreviewRequest, *, idempotency_key: Optional[str] = None) -> m.ScheduledTaskDtos_PreviewResponse:
         """Preview.
 
         POST /api/scheduled-tasks/preview
         """
-        return self._http.request(
-            "POST",
-            "/api/scheduled-tasks/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/scheduled-tasks/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.ScheduledTaskDtos_TaskResponse:
         """Get.
@@ -15845,77 +9744,47 @@ class ScheduledTaskApi:
         """
         return self._http.request("GET", f"/api/scheduled-tasks/{quote_path(id)}")
 
-    def update(
-        self, id: str, body: m.ScheduledTaskDtos_TaskRequest
-    ) -> m.ScheduledTaskDtos_TaskResponse:
+    def update(self, id: str, body: m.ScheduledTaskDtos_TaskRequest) -> m.ScheduledTaskDtos_TaskResponse:
         """Update.
 
         PUT /api/scheduled-tasks/{id}
         """
-        return self._http.request(
-            "PUT", f"/api/scheduled-tasks/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/scheduled-tasks/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
 
         DELETE /api/scheduled-tasks/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/scheduled-tasks/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/scheduled-tasks/{quote_path(id)}", response="void")
 
-    def pause(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ScheduledTaskDtos_TaskResponse:
+    def pause(self, id: str, *, idempotency_key: Optional[str] = None) -> m.ScheduledTaskDtos_TaskResponse:
         """Pause.
 
         POST /api/scheduled-tasks/{id}/pause
         """
-        return self._http.request(
-            "POST",
-            f"/api/scheduled-tasks/{quote_path(id)}/pause",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/scheduled-tasks/{quote_path(id)}/pause", headers={"Idempotency-Key": idempotency_key})
 
-    def resume(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ScheduledTaskDtos_TaskResponse:
+    def resume(self, id: str, *, idempotency_key: Optional[str] = None) -> m.ScheduledTaskDtos_TaskResponse:
         """Resume.
 
         POST /api/scheduled-tasks/{id}/resume
         """
-        return self._http.request(
-            "POST",
-            f"/api/scheduled-tasks/{quote_path(id)}/resume",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/scheduled-tasks/{quote_path(id)}/resume", headers={"Idempotency-Key": idempotency_key})
 
-    def run_now(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ScheduledTaskDtos_RunResponse:
+    def run_now(self, id: str, *, idempotency_key: Optional[str] = None) -> m.ScheduledTaskDtos_RunResponse:
         """Run now.
 
         POST /api/scheduled-tasks/{id}/run-now
         """
-        return self._http.request(
-            "POST",
-            f"/api/scheduled-tasks/{quote_path(id)}/run-now",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/scheduled-tasks/{quote_path(id)}/run-now", headers={"Idempotency-Key": idempotency_key})
 
-    def runs(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.ScheduledTaskDtos_RunResponse]:
+    def runs(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ScheduledTaskDtos_RunResponse]:
         """Runs.
 
         GET /api/scheduled-tasks/{id}/runs
         """
-        return self._http.request(
-            "GET",
-            f"/api/scheduled-tasks/{quote_path(id)}/runs",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/scheduled-tasks/{quote_path(id)}/runs", query={"limit": limit, "offset": offset})
 
 
 class ScimProvisioningApi:
@@ -15929,25 +9798,16 @@ class ScimProvisioningApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/scim/v2/Users", headers={"Authorization": authorization}
-        )
+        return self._http.request("GET", "/scim/v2/Users", headers={"Authorization": authorization})
 
-    def create_user(
-        self, body: Dict[str, Any], *, authorization: Optional[str] = None
-    ) -> Any:
+    def create_user(self, body: Dict[str, Any], *, authorization: Optional[str] = None) -> Any:
         """Create user.
 
         POST /scim/v2/Users
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/scim/v2/Users",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("POST", "/scim/v2/Users", headers={"Authorization": authorization}, body=body)
 
     def get_user(self, id: str, *, authorization: Optional[str] = None) -> Any:
         """Get user.
@@ -15956,11 +9816,7 @@ class ScimProvisioningApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/scim/v2/Users/{quote_path(id)}",
-            headers={"Authorization": authorization},
-        )
+        return self._http.request("GET", f"/scim/v2/Users/{quote_path(id)}", headers={"Authorization": authorization})
 
     def delete_user(self, id: str, *, authorization: Optional[str] = None) -> Any:
         """Delete user.
@@ -15969,27 +9825,16 @@ class ScimProvisioningApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "DELETE",
-            f"/scim/v2/Users/{quote_path(id)}",
-            headers={"Authorization": authorization},
-        )
+        return self._http.request("DELETE", f"/scim/v2/Users/{quote_path(id)}", headers={"Authorization": authorization})
 
-    def patch_user(
-        self, id: str, body: Dict[str, Any], *, authorization: Optional[str] = None
-    ) -> Any:
+    def patch_user(self, id: str, body: Dict[str, Any], *, authorization: Optional[str] = None) -> Any:
         """Patch user.
 
         PATCH /scim/v2/Users/{id}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "PATCH",
-            f"/scim/v2/Users/{quote_path(id)}",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/scim/v2/Users/{quote_path(id)}", headers={"Authorization": authorization}, body=body)
 
 
 class SecretVaultApi:
@@ -16003,42 +9848,26 @@ class SecretVaultApi:
         """
         return self._http.request("GET", "/api/secrets")
 
-    def store(
-        self, body: m.SecretStoreRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SecretResponse:
+    def store(self, body: m.SecretStoreRequest, *, idempotency_key: Optional[str] = None) -> m.SecretResponse:
         """Store.
 
         POST /api/secrets
         """
-        return self._http.request(
-            "POST",
-            "/api/secrets",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/secrets", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete(self, id: str, *, purge: Optional[bool] = None) -> None:
         """Delete.
 
         DELETE /api/secrets/{id}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/secrets/{quote_path(id)}",
-            query={"purge": purge},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/secrets/{quote_path(id)}", query={"purge": purge}, response="void")
 
-    def update_allowed_hosts(
-        self, id: str, body: m.SecretVaultController_AllowedHostsRequest
-    ) -> m.SecretResponse:
+    def update_allowed_hosts(self, id: str, body: m.SecretVaultController_AllowedHostsRequest) -> m.SecretResponse:
         """Update allowed hosts.
 
         PUT /api/secrets/{id}/allowed-hosts
         """
-        return self._http.request(
-            "PUT", f"/api/secrets/{quote_path(id)}/allowed-hosts", body=body
-        )
+        return self._http.request("PUT", f"/api/secrets/{quote_path(id)}/allowed-hosts", body=body)
 
 
 class SessionConfigApi:
@@ -16064,153 +9893,86 @@ class SettingsApi:
         """
         return self._http.request("GET", "/api/settings/catalog")
 
-    def effective(
-        self, *, agent_id: Optional[str] = None
-    ) -> m.SettingsController_EffectiveResponse:
+    def effective(self, *, agent_id: Optional[str] = None) -> m.SettingsController_EffectiveResponse:
         """Effective.
 
         GET /api/settings/effective
         """
-        return self._http.request(
-            "GET", "/api/settings/effective", query={"agentId": agent_id}
-        )
+        return self._http.request("GET", "/api/settings/effective", query={"agentId": agent_id})
 
-    def history_all(
-        self,
-        *,
-        scope: Optional[str] = None,
-        agent_id: Optional[str] = None,
-        since: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> m.SettingsController_HistoryPageResponse:
+    def history_all(self, *, scope: Optional[str] = None, agent_id: Optional[str] = None, since: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.SettingsController_HistoryPageResponse:
         """History all.
 
         GET /api/settings/history
 
         The change history of every setting in one call, newest first. scope=all (default) is the workspace's own changes plus every agent's (tenant admin), scope=tenant the workspace's only, scope=agent every agent's (tenant admin), scope=agent with agentId one agent's (EDITOR on it). since (ISO-8601 instant) keeps rows at or after it; page with limit and offset, the body carries total and hasMore.
         """
-        return self._http.request(
-            "GET",
-            "/api/settings/history",
-            query={
-                "scope": scope,
-                "agentId": agent_id,
-                "since": since,
-                "limit": limit,
-                "offset": offset,
-            },
-        )
+        return self._http.request("GET", "/api/settings/history", query={"scope": scope, "agentId": agent_id, "since": since, "limit": limit, "offset": offset})
 
-    def put_tenant(
-        self, key: str, body: m.SettingsController_ValueRequest
-    ) -> m.SettingsController_WriteResponse:
+    def put_tenant(self, key: str, body: m.SettingsController_ValueRequest) -> m.SettingsController_WriteResponse:
         """Put tenant.
 
         PUT /api/settings/tenant/{key}
 
         Set a runtime setting for the whole workspace (tenant admin). Body {value, reason}: a high or security key needs a typed reason, and a security key can only be made stricter than the value it inherits. Answers 409 SETTING_LOCKED when the operator pinned the key (app.settings.locked) and 409 SETTING_CONFLICT when another writer changed the same key at the same moment (reload and retry).
         """
-        return self._http.request(
-            "PUT", f"/api/settings/tenant/{quote_path(key)}", body=body
-        )
+        return self._http.request("PUT", f"/api/settings/tenant/{quote_path(key)}", body=body)
 
-    def delete_tenant(
-        self, key: str, *, reason: Optional[str] = None
-    ) -> m.SettingsController_WriteResponse:
+    def delete_tenant(self, key: str, *, reason: Optional[str] = None) -> m.SettingsController_WriteResponse:
         """Delete tenant.
 
         DELETE /api/settings/tenant/{key}
 
         Remove the workspace override so the platform value applies again (tenant admin). A high or security key needs a typed reason (?reason=), like a PUT. Answers 409 SETTING_LOCKED when the key is pinned and 409 SETTING_CONFLICT when another writer changed it at the same moment.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/settings/tenant/{quote_path(key)}",
-            query={"reason": reason},
-        )
+        return self._http.request("DELETE", f"/api/settings/tenant/{quote_path(key)}", query={"reason": reason})
 
-    def history(
-        self,
-        key: str,
-        *,
-        scope: Optional[str] = None,
-        agent_id: Optional[str] = None,
-        limit: Optional[int] = None,
-    ) -> List[m.SettingHistoryEntry]:
+    def history(self, key: str, *, scope: Optional[str] = None, agent_id: Optional[str] = None, limit: Optional[int] = None) -> List[m.SettingHistoryEntry]:
         """History.
 
         GET /api/settings/{key}/history
 
         The change history of one setting, newest first. scope=tenant needs a tenant admin; scope=agent with agentId needs EDITOR on the agent. For every key at once use GET /api/settings/history.
         """
-        return self._http.request(
-            "GET",
-            f"/api/settings/{quote_path(key)}/history",
-            query={"scope": scope, "agentId": agent_id, "limit": limit},
-        )
+        return self._http.request("GET", f"/api/settings/{quote_path(key)}/history", query={"scope": scope, "agentId": agent_id, "limit": limit})
 
 
 class ShareApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, resource_kind: str, resource_id: str
-    ) -> List[m.ShareController_GrantResponse]:
+    def list(self, resource_kind: str, resource_id: str) -> List[m.ShareController_GrantResponse]:
         """List.
 
         GET /api/{resourceKind}/{resourceId}/grants
         """
-        return self._http.request(
-            "GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants"
-        )
+        return self._http.request("GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants")
 
-    def grant(
-        self,
-        resource_kind: str,
-        resource_id: str,
-        body: m.ShareController_GrantRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.ShareController_GrantResponse:
+    def grant(self, resource_kind: str, resource_id: str, body: m.ShareController_GrantRequest, *, idempotency_key: Optional[str] = None) -> m.ShareController_GrantResponse:
         """Grant.
 
         POST /api/{resourceKind}/{resourceId}/grants
         """
-        return self._http.request(
-            "POST",
-            f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def revoke(self, resource_kind: str, resource_id: str, grant_id: str) -> None:
         """Revoke.
 
         DELETE /api/{resourceKind}/{resourceId}/grants/{grantId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants/{quote_path(grant_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants/{quote_path(grant_id)}", response="void")
 
 
 class SharedWithMeApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def shared_with_me(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.SharedWithMeController_SharedResourceResponse]:
+    def shared_with_me(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SharedWithMeController_SharedResourceResponse]:
         """Shared with me.
 
         GET /api/shared-with-me
         """
-        return self._http.request(
-            "GET", "/api/shared-with-me", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/shared-with-me", query={"limit": limit, "offset": offset})
 
 
 class SignalCredentialApi:
@@ -16226,21 +9988,14 @@ class SignalCredentialApi:
         """
         return self._http.request("GET", "/api/channels/signal/credential")
 
-    def activate(
-        self, body: m.SignalActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SignalCredentialResponse:
+    def activate(self, body: m.SignalActivationRequest, *, idempotency_key: Optional[str] = None) -> m.SignalCredentialResponse:
         """Activate.
 
         POST /api/channels/signal/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/signal/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/signal/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -16249,9 +10004,7 @@ class SignalCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/signal/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/signal/credential", response="void")
 
     def update_policy(self, body: m.SignalPolicyRequest) -> m.SignalCredentialResponse:
         """Update policy.
@@ -16260,9 +10013,7 @@ class SignalCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/signal/credential/policy", body=body
-        )
+        return self._http.request("PUT", "/api/channels/signal/credential/policy", body=body)
 
 
 class SignalSendApi:
@@ -16276,28 +10027,16 @@ class SignalSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/signal/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/signal/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.SignalSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SignalSendController_SendResult:
+    def send(self, body: m.SignalSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.SignalSendController_SendResult:
         """Send.
 
         POST /api/channels/signal/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/signal/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/signal/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class SimulationApi:
@@ -16309,126 +10048,72 @@ class SimulationApi:
 
         GET /api/agents/{agentId}/quality/simulations/personas
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas")
 
-    def create_persona(
-        self,
-        agent_id: str,
-        body: m.SimulationDtos_CreatePersonaRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SimulationDtos_PersonaResponse:
+    def create_persona(self, agent_id: str, body: m.SimulationDtos_CreatePersonaRequest, *, idempotency_key: Optional[str] = None) -> m.SimulationDtos_PersonaResponse:
         """Create persona.
 
         POST /api/agents/{agentId}/quality/simulations/personas
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_persona(self, agent_id: str, key: str) -> None:
         """Delete persona.
 
         DELETE /api/agents/{agentId}/quality/simulations/personas/{key}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas/{quote_path(key)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/quality/simulations/personas/{quote_path(key)}", response="void")
 
     def get_run(self, agent_id: str, run_id: str) -> m.SimulationDtos_RunDetailResponse:
         """Get run.
 
         GET /api/agents/{agentId}/quality/simulations/runs/{runId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/runs/{quote_path(run_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/runs/{quote_path(run_id)}")
 
     def list_sessions(self, agent_id: str) -> List[m.SimulationDtos_SessionResponse]:
         """List sessions.
 
         GET /api/agents/{agentId}/quality/simulations/sessions
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions")
 
-    def create_session(
-        self,
-        agent_id: str,
-        body: m.SimulationDtos_CreateSessionRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SimulationDtos_SessionResponse:
+    def create_session(self, agent_id: str, body: m.SimulationDtos_CreateSessionRequest, *, idempotency_key: Optional[str] = None) -> m.SimulationDtos_SessionResponse:
         """Create session.
 
         POST /api/agents/{agentId}/quality/simulations/sessions
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get_session(
-        self, agent_id: str, session_id: str
-    ) -> m.SimulationDtos_SessionResponse:
+    def get_session(self, agent_id: str, session_id: str) -> m.SimulationDtos_SessionResponse:
         """Get session.
 
         GET /api/agents/{agentId}/quality/simulations/sessions/{sessionId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}")
 
-    def attack_report(
-        self, agent_id: str, session_id: str
-    ) -> m.SimulationDtos_AttackReportResponse:
+    def attack_report(self, agent_id: str, session_id: str) -> m.SimulationDtos_AttackReportResponse:
         """Attack report.
 
         GET /api/agents/{agentId}/quality/simulations/sessions/{sessionId}/attack-report
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/attack-report",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/attack-report")
 
-    def cancel_session(
-        self, agent_id: str, session_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.SimulationDtos_SessionResponse:
+    def cancel_session(self, agent_id: str, session_id: str, *, idempotency_key: Optional[str] = None) -> m.SimulationDtos_SessionResponse:
         """Cancel session.
 
         POST /api/agents/{agentId}/quality/simulations/sessions/{sessionId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
-    def list_runs(
-        self, agent_id: str, session_id: str
-    ) -> List[m.SimulationDtos_RunSummaryResponse]:
+    def list_runs(self, agent_id: str, session_id: str) -> List[m.SimulationDtos_RunSummaryResponse]:
         """List runs.
 
         GET /api/agents/{agentId}/quality/simulations/sessions/{sessionId}/runs
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/runs",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/simulations/sessions/{quote_path(session_id)}/runs")
 
 
 class SkillApi:
@@ -16442,135 +10127,71 @@ class SkillApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/skills")
 
-    def update_agent_skills(
-        self, agent_id: str, body: m.SkillController_AgentSkillsRequest
-    ) -> m.SkillController_AgentSkillsResponse:
+    def update_agent_skills(self, agent_id: str, body: m.SkillController_AgentSkillsRequest) -> m.SkillController_AgentSkillsResponse:
         """Update agent skills.
 
         PUT /api/agents/{agentId}/skills
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/skills", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/skills", body=body)
 
-    def distill_preview(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.SkillController_DistillPatternResponse]:
+    def distill_preview(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SkillController_DistillPatternResponse]:
         """Distill preview.
 
         GET /api/agents/{agentId}/skills/distill
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/skills/distill",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/skills/distill", query={"limit": limit, "offset": offset})
 
-    def distill(
-        self, agent_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.SkillController_DistillResponse:
+    def distill(self, agent_id: str, *, idempotency_key: Optional[str] = None) -> m.SkillController_DistillResponse:
         """Distill.
 
         POST /api/agents/{agentId}/skills/distill
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/skills/distill",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/skills/distill", headers={"Idempotency-Key": idempotency_key})
 
-    def list(
-        self,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        status: Optional[str] = None,
-    ) -> List[m.SkillController_SkillSummaryResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None, status: Optional[str] = None) -> List[m.SkillController_SkillSummaryResponse]:
         """List.
 
         GET /api/skills
         """
-        return self._http.request(
-            "GET",
-            "/api/skills",
-            query={"limit": limit, "offset": offset, "status": status},
-        )
+        return self._http.request("GET", "/api/skills", query={"limit": limit, "offset": offset, "status": status})
 
-    def create(
-        self,
-        body: m.SkillController_SkillWriteRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillController_SkillDetailResponse:
+    def create(self, body: m.SkillController_SkillWriteRequest, *, idempotency_key: Optional[str] = None) -> m.SkillController_SkillDetailResponse:
         """Create.
 
         POST /api/skills
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skills",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/skills", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def import_archive(
-        self, body: Dict[str, Any], *, replace: Optional[bool] = None
-    ) -> m.SkillController_ImportResponse:
+    def import_archive(self, body: Dict[str, Any], *, replace: Optional[bool] = None) -> m.SkillController_ImportResponse:
         """Import archive.
 
         POST /api/skills/import
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skills/import",
-            query={"replace": replace},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/skills/import", query={"replace": replace}, body=body, body_type="multipart")
 
-    def install_from_registry(
-        self,
-        body: m.SkillController_RegistryInstallRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillController_ImportResponse:
+    def install_from_registry(self, body: m.SkillController_RegistryInstallRequest, *, idempotency_key: Optional[str] = None) -> m.SkillController_ImportResponse:
         """Install from registry.
 
         POST /api/skills/registry/install
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skills/registry/install",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/skills/registry/install", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def search_registry(
-        self, *, q: Optional[str] = None, page: Optional[int] = None
-    ) -> m.SkillRegistryClient_SearchResult:
+    def search_registry(self, *, q: Optional[str] = None, page: Optional[int] = None) -> m.SkillRegistryClient_SearchResult:
         """Search registry.
 
         GET /api/skills/registry/search
         """
-        return self._http.request(
-            "GET", "/api/skills/registry/search", query={"q": q, "page": page}
-        )
+        return self._http.request("GET", "/api/skills/registry/search", query={"q": q, "page": page})
 
-    def update(
-        self, id: str, body: m.SkillController_SkillWriteRequest
-    ) -> m.SkillController_SkillDetailResponse:
+    def update(self, id: str, body: m.SkillController_SkillWriteRequest) -> m.SkillController_SkillDetailResponse:
         """Update.
 
         PUT /api/skills/{id}
@@ -16586,13 +10207,9 @@ class SkillApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/skills/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/skills/{quote_path(id)}", response="void")
 
-    def pending_improvement(
-        self, id: str
-    ) -> m.SkillController_PendingImprovementResponse:
+    def pending_improvement(self, id: str) -> m.SkillController_PendingImprovementResponse:
         """Pending improvement.
 
         GET /api/skills/{id}/improvement
@@ -16606,24 +10223,16 @@ class SkillApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/skills/{quote_path(id)}/improvement", response="void"
-        )
+        return self._http.request("DELETE", f"/api/skills/{quote_path(id)}/improvement", response="void")
 
-    def apply_improvement(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.SkillController_SkillDetailResponse:
+    def apply_improvement(self, id: str, *, idempotency_key: Optional[str] = None) -> m.SkillController_SkillDetailResponse:
         """Apply improvement.
 
         POST /api/skills/{id}/improvement/apply
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skills/{quote_path(id)}/improvement/apply",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/skills/{quote_path(id)}/improvement/apply", headers={"Idempotency-Key": idempotency_key})
 
     def get(self, name: str) -> m.SkillController_SkillDetailResponse:
         """Get.
@@ -16632,236 +10241,131 @@ class SkillApi:
         """
         return self._http.request("GET", f"/api/skills/{quote_path(name)}")
 
-    def set_enabled(
-        self,
-        name: str,
-        body: m.SkillController_EnabledRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def set_enabled(self, name: str, body: m.SkillController_EnabledRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Set enabled.
 
         PATCH /api/skills/{name}/enabled
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/skills/{quote_path(name)}/enabled",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("PATCH", f"/api/skills/{quote_path(name)}/enabled", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
     def export(self, name: str) -> bytes:
         """Export.
 
         GET /api/skills/{name}/export
         """
-        return self._http.request(
-            "GET", f"/api/skills/{quote_path(name)}/export", response="blob"
-        )
+        return self._http.request("GET", f"/api/skills/{quote_path(name)}/export", response="blob")
 
     def file(self, name: str, *, path: str) -> str:
         """File.
 
         GET /api/skills/{name}/file
         """
-        return self._http.request(
-            "GET",
-            f"/api/skills/{quote_path(name)}/file",
-            query={"path": path},
-            response="text",
-        )
+        return self._http.request("GET", f"/api/skills/{quote_path(name)}/file", query={"path": path}, response="text")
 
 
 class SkillLifecycleApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def set_agents(
-        self,
-        id: str,
-        body: m.SkillLifecycleController_AgentsRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillLifecycleController_AgentsResponse:
+    def set_agents(self, id: str, body: m.SkillLifecycleController_AgentsRequest, *, idempotency_key: Optional[str] = None) -> m.SkillLifecycleController_AgentsResponse:
         """Set agents.
 
         POST /api/skills/{id}/agents
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skills/{quote_path(id)}/agents",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/skills/{quote_path(id)}/agents", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def approve(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.SkillController_SkillSummaryResponse:
+    def approve(self, id: str, *, idempotency_key: Optional[str] = None) -> m.SkillController_SkillSummaryResponse:
         """Approve.
 
         POST /api/skills/{id}/approve
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skills/{quote_path(id)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/skills/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key})
 
-    def archive(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.SkillController_SkillSummaryResponse:
+    def archive(self, id: str, *, idempotency_key: Optional[str] = None) -> m.SkillController_SkillSummaryResponse:
         """Archive.
 
         POST /api/skills/{id}/archive
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skills/{quote_path(id)}/archive",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/skills/{quote_path(id)}/archive", headers={"Idempotency-Key": idempotency_key})
 
-    def reject(
-        self,
-        id: str,
-        body: Optional[m.SkillLifecycleController_RejectRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillController_SkillSummaryResponse:
+    def reject(self, id: str, body: Optional[m.SkillLifecycleController_RejectRequest] = None, *, idempotency_key: Optional[str] = None) -> m.SkillController_SkillSummaryResponse:
         """Reject.
 
         POST /api/skills/{id}/reject
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skills/{quote_path(id)}/reject",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/skills/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def versions(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.SkillLifecycleController_VersionSummary]:
+    def versions(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SkillLifecycleController_VersionSummary]:
         """Versions.
 
         GET /api/skills/{id}/versions
         """
-        return self._http.request(
-            "GET",
-            f"/api/skills/{quote_path(id)}/versions",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/skills/{quote_path(id)}/versions", query={"limit": limit, "offset": offset})
 
 
 class SkillSupplyChainApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def preview_archive(
-        self, body: Dict[str, Any]
-    ) -> m.SkillSupplyChainService_PreviewResult:
+    def preview_archive(self, body: Dict[str, Any]) -> m.SkillSupplyChainService_PreviewResult:
         """Preview archive.
 
         POST /api/skill-security/preview/archive
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skill-security/preview/archive",
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/skill-security/preview/archive", body=body, body_type="multipart")
 
-    def preview_draft(
-        self,
-        body: m.SkillSupplyChainController_DraftPreviewRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillSupplyChainService_PreviewResult:
+    def preview_draft(self, body: m.SkillSupplyChainController_DraftPreviewRequest, *, idempotency_key: Optional[str] = None) -> m.SkillSupplyChainService_PreviewResult:
         """Preview draft.
 
         POST /api/skill-security/preview/draft
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skill-security/preview/draft",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/skill-security/preview/draft", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview_registry(
-        self,
-        body: m.SkillSupplyChainController_RegistryPreviewRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillSupplyChainService_PreviewResult:
+    def preview_registry(self, body: m.SkillSupplyChainController_RegistryPreviewRequest, *, idempotency_key: Optional[str] = None) -> m.SkillSupplyChainService_PreviewResult:
         """Preview registry.
 
         POST /api/skill-security/preview/registry
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/skill-security/preview/registry",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/skill-security/preview/registry", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def reviews(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.SkillSupplyChainService_SkillReviewItem]:
+    def reviews(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.SkillSupplyChainService_SkillReviewItem]:
         """Reviews.
 
         GET /api/skill-security/reviews
         """
-        return self._http.request(
-            "GET",
-            "/api/skill-security/reviews",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/skill-security/reviews", query={"limit": limit, "offset": offset})
 
-    def approve(
-        self,
-        name: str,
-        body: Optional[m.SkillSupplyChainController_ApproveRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SkillSupplyChainService_SkillSecurityReport:
+    def approve(self, name: str, body: Optional[m.SkillSupplyChainController_ApproveRequest] = None, *, idempotency_key: Optional[str] = None) -> m.SkillSupplyChainService_SkillSecurityReport:
         """Approve.
 
         POST /api/skill-security/skills/{name}/approve
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin or platform-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/skill-security/skills/{quote_path(name)}/approve",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/skill-security/skills/{quote_path(name)}/approve", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def report(self, name: str) -> m.SkillSupplyChainService_SkillSecurityReport:
         """Report.
 
         GET /api/skill-security/skills/{name}/report
         """
-        return self._http.request(
-            "GET", f"/api/skill-security/skills/{quote_path(name)}/report"
-        )
+        return self._http.request("GET", f"/api/skill-security/skills/{quote_path(name)}/report")
 
     def summary(self) -> m.SkillSupplyChainService_SecurityOverview:
         """Summary.
@@ -16882,21 +10386,14 @@ class SlackCredentialApi:
         """
         return self._http.request("GET", "/api/channels/slack/credential")
 
-    def activate(
-        self, body: m.SlackActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.SlackCredentialResponse:
+    def activate(self, body: m.SlackActivationRequest, *, idempotency_key: Optional[str] = None) -> m.SlackCredentialResponse:
         """Activate.
 
         POST /api/channels/slack/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/slack/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/slack/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -16905,9 +10402,7 @@ class SlackCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/slack/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/slack/credential", response="void")
 
 
 class SlackSendApi:
@@ -16921,57 +10416,30 @@ class SlackSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/slack/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/slack/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.SlackSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SlackSendController_SendResult:
+    def send(self, body: m.SlackSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.SlackSendController_SendResult:
         """Send.
 
         POST /api/channels/slack/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/slack/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/slack/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class SlackWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self,
-        body: str,
-        *,
-        x_slack_request_timestamp: Optional[str] = None,
-        x_slack_signature: Optional[str] = None,
-    ) -> str:
+    def inbound(self, body: str, *, x_slack_request_timestamp: Optional[str] = None, x_slack_signature: Optional[str] = None) -> str:
         """Inbound.
 
         POST /webhook/slack
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            "/webhook/slack",
-            headers={
-                "X-Slack-Request-Timestamp": x_slack_request_timestamp,
-                "X-Slack-Signature": x_slack_signature,
-            },
-            body=body,
-            response="text",
-        )
+        return self._http.request("POST", "/webhook/slack", headers={"X-Slack-Request-Timestamp": x_slack_request_timestamp, "X-Slack-Signature": x_slack_signature}, body=body, response="text")
 
 
 class SmsChannelApi:
@@ -16985,9 +10453,7 @@ class SmsChannelApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/sms/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/sms/default-agent", body=body, response="void")
 
 
 class SocialAuthConfigApi:
@@ -17008,107 +10474,68 @@ class SpendReportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def by_agent(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> List[m.SpendReport_AgentUsage]:
+    def by_agent(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.SpendReport_AgentUsage]:
         """By agent.
 
         GET /api/admin/spend-reports/by-agent
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/admin/spend-reports/by-agent", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/by-agent", query={"from": from_, "to": to})
 
-    def by_day(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> List[m.SpendReport_DayUsage]:
+    def by_day(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.SpendReport_DayUsage]:
         """By day.
 
         GET /api/admin/spend-reports/by-day
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/admin/spend-reports/by-day", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/by-day", query={"from": from_, "to": to})
 
-    def by_modality(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> List[m.SpendReport_ModalityUsage]:
+    def by_modality(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.SpendReport_ModalityUsage]:
         """By modality.
 
         GET /api/admin/spend-reports/by-modality
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/spend-reports/by-modality",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/by-modality", query={"from": from_, "to": to})
 
-    def by_model(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> List[m.SpendReport_ModelUsage]:
+    def by_model(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.SpendReport_ModelUsage]:
         """By model.
 
         GET /api/admin/spend-reports/by-model
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/admin/spend-reports/by-model", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/by-model", query={"from": from_, "to": to})
 
-    def by_provider(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> List[m.SpendReport_ProviderUsage]:
+    def by_provider(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.SpendReport_ProviderUsage]:
         """By provider.
 
         GET /api/admin/spend-reports/by-provider
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/spend-reports/by-provider",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/by-provider", query={"from": from_, "to": to})
 
-    def export_csv(
-        self,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-        group_by: Optional[str] = None,
-    ) -> bytes:
+    def export_csv(self, *, from_: Optional[str] = None, to: Optional[str] = None, group_by: Optional[str] = None) -> bytes:
         """Export csv.
 
         GET /api/admin/spend-reports/export.csv
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            "/api/admin/spend-reports/export.csv",
-            query={"from": from_, "to": to, "groupBy": group_by},
-            response="blob",
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/export.csv", query={"from": from_, "to": to, "groupBy": group_by}, response="blob")
 
-    def summary(
-        self, *, from_: Optional[str] = None, to: Optional[str] = None
-    ) -> m.SpendReport_Summary:
+    def summary(self, *, from_: Optional[str] = None, to: Optional[str] = None) -> m.SpendReport_Summary:
         """Summary.
 
         GET /api/admin/spend-reports/summary
 
         Requires PERM_VIEW_USAGE (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/admin/spend-reports/summary", query={"from": from_, "to": to}
-        )
+        return self._http.request("GET", "/api/admin/spend-reports/summary", query={"from": from_, "to": to})
 
 
 class StdioSandboxStatusApi:
@@ -17127,38 +10554,21 @@ class StudioAppDomainApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, app_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.StudioAppDomainController_DomainView]:
+    def list(self, app_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.StudioAppDomainController_DomainView]:
         """List.
 
         GET /api/studio-apps/{appId}/domains
         """
-        return self._http.request(
-            "GET",
-            f"/api/studio-apps/{quote_path(app_id)}/domains",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/studio-apps/{quote_path(app_id)}/domains", query={"limit": limit, "offset": offset})
 
-    def add(
-        self,
-        app_id: str,
-        body: m.StudioAppDomainController_AddRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def add(self, app_id: str, body: m.StudioAppDomainController_AddRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Add.
 
         POST /api/studio-apps/{appId}/domains
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/domains",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/domains", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def remove(self, app_id: str, domain_id: str) -> None:
         """Remove.
@@ -17167,26 +10577,16 @@ class StudioAppDomainApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/studio-apps/{quote_path(app_id)}/domains/{quote_path(domain_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/studio-apps/{quote_path(app_id)}/domains/{quote_path(domain_id)}", response="void")
 
-    def verify(
-        self, app_id: str, domain_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.StudioAppDomainController_DomainView:
+    def verify(self, app_id: str, domain_id: str, *, idempotency_key: Optional[str] = None) -> m.StudioAppDomainController_DomainView:
         """Verify.
 
         POST /api/studio-apps/{appId}/domains/{domainId}/verify
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/domains/{quote_path(domain_id)}/verify",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/domains/{quote_path(domain_id)}/verify", headers={"Idempotency-Key": idempotency_key})
 
 
 class StudioAppDomainPublicApi:
@@ -17200,9 +10600,7 @@ class StudioAppDomainPublicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", "/api/public/apps/by-host", query={"host": host}
-        )
+        return self._http.request("GET", "/api/public/apps/by-host", query={"host": host})
 
     def domain_check(self, *, domain: str) -> None:
         """Domain check.
@@ -17211,12 +10609,7 @@ class StudioAppDomainPublicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/public/apps/domain-check",
-            query={"domain": domain},
-            response="void",
-        )
+        return self._http.request("GET", "/api/public/apps/domain-check", query={"domain": domain}, response="void")
 
 
 class StudioAppOwnerApi:
@@ -17230,24 +10623,14 @@ class StudioAppOwnerApi:
         """
         return self._http.request("GET", "/api/studio-apps")
 
-    def publish(
-        self,
-        body: m.StudioAppService_PublishRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def publish(self, body: m.StudioAppService_PublishRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Publish.
 
         POST /api/studio-apps/publish
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/studio-apps/publish",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/studio-apps/publish", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def detail(self, app_id: str) -> Any:
         """Detail.
@@ -17263,9 +10646,7 @@ class StudioAppOwnerApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/studio-apps/{quote_path(app_id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/studio-apps/{quote_path(app_id)}", response="void")
 
     def disable(self, app_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Disable.
@@ -17274,12 +10655,7 @@ class StudioAppOwnerApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/disable",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/disable", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def enable(self, app_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Enable.
@@ -17288,12 +10664,7 @@ class StudioAppOwnerApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/enable",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/enable", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def users(self, app_id: str) -> Any:
         """Users.
@@ -17309,43 +10680,25 @@ class StudioAppOwnerApi:
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}", response="void")
 
-    def disable_user(
-        self, app_id: str, user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def disable_user(self, app_id: str, user_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Disable user.
 
         POST /api/studio-apps/{appId}/users/{userId}/disable
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}/disable",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}/disable", headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def enable_user(
-        self, app_id: str, user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> None:
+    def enable_user(self, app_id: str, user_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Enable user.
 
         POST /api/studio-apps/{appId}/users/{userId}/enable
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}/enable",
-            headers={"Idempotency-Key": idempotency_key},
-            response="void",
-        )
+        return self._http.request("POST", f"/api/studio-apps/{quote_path(app_id)}/users/{quote_path(user_id)}/enable", headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class StudioAppPublicApi:
@@ -17361,38 +10714,23 @@ class StudioAppPublicApi:
         """
         return self._http.request("GET", f"/api/public/apps/{quote_path(slug)}")
 
-    def ai_chat(
-        self,
-        slug: str,
-        body: Optional[m.StudioAppPublicController_AiChatRequest] = None,
-        *,
-        authorization: Optional[str] = None,
-    ) -> Any:
+    def ai_chat(self, slug: str, body: Optional[m.StudioAppPublicController_AiChatRequest] = None, *, authorization: Optional[str] = None) -> Any:
         """Ai chat.
 
         POST /api/public/apps/{slug}/ai/chat
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/public/apps/{quote_path(slug)}/ai/chat",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/public/apps/{quote_path(slug)}/ai/chat", headers={"Authorization": authorization}, body=body)
 
-    def login(
-        self, slug: str, body: Optional[m.StudioAppPublicController_LoginRequest] = None
-    ) -> Any:
+    def login(self, slug: str, body: Optional[m.StudioAppPublicController_LoginRequest] = None) -> Any:
         """Login.
 
         POST /api/public/apps/{slug}/auth/login
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/public/apps/{quote_path(slug)}/auth/login", body=body
-        )
+        return self._http.request("POST", f"/api/public/apps/{quote_path(slug)}/auth/login", body=body)
 
     def logout(self, slug: str) -> None:
         """Logout.
@@ -17401,9 +10739,7 @@ class StudioAppPublicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/public/apps/{quote_path(slug)}/auth/logout", response="void"
-        )
+        return self._http.request("POST", f"/api/public/apps/{quote_path(slug)}/auth/logout", response="void")
 
     def me(self, slug: str, *, authorization: Optional[str] = None) -> Any:
         """Me.
@@ -17412,171 +10748,91 @@ class StudioAppPublicApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/public/apps/{quote_path(slug)}/auth/me",
-            headers={"Authorization": authorization},
-        )
+        return self._http.request("GET", f"/api/public/apps/{quote_path(slug)}/auth/me", headers={"Authorization": authorization})
 
-    def signup(
-        self,
-        slug: str,
-        body: Optional[m.StudioAppPublicController_SignupRequest] = None,
-    ) -> Any:
+    def signup(self, slug: str, body: Optional[m.StudioAppPublicController_SignupRequest] = None) -> Any:
         """Signup.
 
         POST /api/public/apps/{slug}/auth/signup
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/public/apps/{quote_path(slug)}/auth/signup", body=body
-        )
+        return self._http.request("POST", f"/api/public/apps/{quote_path(slug)}/auth/signup", body=body)
 
-    def call(
-        self,
-        slug: str,
-        alias: str,
-        body: Optional[m.StudioAppPublicController_CallRequest] = None,
-        *,
-        authorization: Optional[str] = None,
-    ) -> Any:
+    def call(self, slug: str, alias: str, body: Optional[m.StudioAppPublicController_CallRequest] = None, *, authorization: Optional[str] = None) -> Any:
         """Call.
 
         POST /api/public/apps/{slug}/call/{alias}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/public/apps/{quote_path(slug)}/call/{quote_path(alias)}",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/public/apps/{quote_path(slug)}/call/{quote_path(alias)}", headers={"Authorization": authorization}, body=body)
 
 
 class StudioCollabApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def comments(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.StudioCollabController_CommentView]:
+    def comments(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.StudioCollabController_CommentView]:
         """Comments.
 
         GET /api/studio-projects/{id}/comments
         """
-        return self._http.request(
-            "GET",
-            f"/api/studio-projects/{quote_path(id)}/comments",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/studio-projects/{quote_path(id)}/comments", query={"limit": limit, "offset": offset})
 
-    def comment(
-        self,
-        id: str,
-        body: m.StudioCollabController_CommentBody,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.StudioCollabController_CommentView:
+    def comment(self, id: str, body: m.StudioCollabController_CommentBody, *, idempotency_key: Optional[str] = None) -> m.StudioCollabController_CommentView:
         """Comment.
 
         POST /api/studio-projects/{id}/comments
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-projects/{quote_path(id)}/comments",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/studio-projects/{quote_path(id)}/comments", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_comment(self, id: str, comment_id: str) -> None:
         """Delete comment.
 
         DELETE /api/studio-projects/{id}/comments/{commentId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/studio-projects/{quote_path(id)}/comments/{quote_path(comment_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/studio-projects/{quote_path(id)}/comments/{quote_path(comment_id)}", response="void")
 
-    def resolve(
-        self,
-        id: str,
-        comment_id: str,
-        body: m.StudioCollabController_ResolveBody,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.StudioCollabController_CommentView:
+    def resolve(self, id: str, comment_id: str, body: m.StudioCollabController_ResolveBody, *, idempotency_key: Optional[str] = None) -> m.StudioCollabController_CommentView:
         """Resolve.
 
         PATCH /api/studio-projects/{id}/comments/{commentId}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/studio-projects/{quote_path(id)}/comments/{quote_path(comment_id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/studio-projects/{quote_path(id)}/comments/{quote_path(comment_id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def members(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.StudioCollabController_MemberView]:
+    def members(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.StudioCollabController_MemberView]:
         """Members.
 
         GET /api/studio-projects/{id}/members
         """
-        return self._http.request(
-            "GET",
-            f"/api/studio-projects/{quote_path(id)}/members",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/studio-projects/{quote_path(id)}/members", query={"limit": limit, "offset": offset})
 
-    def invite(
-        self,
-        id: str,
-        body: m.StudioCollabController_InviteBody,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.StudioCollabController_MemberView:
+    def invite(self, id: str, body: m.StudioCollabController_InviteBody, *, idempotency_key: Optional[str] = None) -> m.StudioCollabController_MemberView:
         """Invite.
 
         POST /api/studio-projects/{id}/members
         """
-        return self._http.request(
-            "POST",
-            f"/api/studio-projects/{quote_path(id)}/members",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/studio-projects/{quote_path(id)}/members", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def remove(self, id: str, subject: str) -> None:
         """Remove.
 
         DELETE /api/studio-projects/{id}/members/{subject}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/studio-projects/{quote_path(id)}/members/{quote_path(subject)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/studio-projects/{quote_path(id)}/members/{quote_path(subject)}", response="void")
 
 
 class StudioProjectApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.StudioProjectController_ProjectView]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.StudioProjectController_ProjectView]:
         """List.
 
         GET /api/studio-projects
         """
-        return self._http.request(
-            "GET", "/api/studio-projects", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/studio-projects", query={"limit": limit, "offset": offset})
 
     def detail(self, id: str) -> m.StudioProjectController_ProjectView:
         """Detail.
@@ -17585,81 +10841,51 @@ class StudioProjectApi:
         """
         return self._http.request("GET", f"/api/studio-projects/{quote_path(id)}")
 
-    def upsert(
-        self, id: str, body: m.StudioProjectController_UpsertBody
-    ) -> m.StudioProjectController_ProjectView:
+    def upsert(self, id: str, body: m.StudioProjectController_UpsertBody) -> m.StudioProjectController_ProjectView:
         """Upsert.
 
         PUT /api/studio-projects/{id}
         """
-        return self._http.request(
-            "PUT", f"/api/studio-projects/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/studio-projects/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
 
         DELETE /api/studio-projects/{id}
         """
-        return self._http.request(
-            "DELETE", f"/api/studio-projects/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/studio-projects/{quote_path(id)}", response="void")
 
 
 class StudyPlanApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TutorDtos_PlanSummary]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TutorDtos_PlanSummary]:
         """List.
 
         GET /api/tutor/plans
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "GET", "/api/tutor/plans", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/tutor/plans", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.TutorDtos_CreatePlanRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TutorDtos_PlanView:
+    def create(self, body: m.TutorDtos_CreatePlanRequest, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_PlanView:
         """Create.
 
         POST /api/tutor/plans
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/tutor/plans",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tutor/plans", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def generate(
-        self,
-        body: m.TutorDtos_GeneratePlanRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TutorDtos_PlanView:
+    def generate(self, body: m.TutorDtos_GeneratePlanRequest, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_PlanView:
         """Generate.
 
         POST /api/tutor/plans/generate
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/tutor/plans/generate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tutor/plans/generate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, id: str) -> m.TutorDtos_PlanView:
         """Get.
@@ -17677,60 +10903,34 @@ class StudyPlanApi:
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "DELETE", f"/api/tutor/plans/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tutor/plans/{quote_path(id)}", response="void")
 
-    def answer(
-        self,
-        id: str,
-        lesson_id: str,
-        body: m.TutorDtos_QuizAnswerRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TutorDtos_QuizAnswerResult:
+    def answer(self, id: str, lesson_id: str, body: m.TutorDtos_QuizAnswerRequest, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_QuizAnswerResult:
         """Answer.
 
         POST /api/tutor/plans/{id}/lessons/{lessonId}/answers
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/answers",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/answers", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def complete(
-        self, id: str, lesson_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TutorDtos_PlanView:
+    def complete(self, id: str, lesson_id: str, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_PlanView:
         """Complete.
 
         POST /api/tutor/plans/{id}/lessons/{lessonId}/complete
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/complete",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/complete", headers={"Idempotency-Key": idempotency_key})
 
-    def generate_lesson(
-        self, id: str, lesson_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TutorDtos_LessonView:
+    def generate_lesson(self, id: str, lesson_id: str, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_LessonView:
         """Generate lesson.
 
         POST /api/tutor/plans/{id}/lessons/{lessonId}/generate
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/generate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/tutor/plans/{quote_path(id)}/lessons/{quote_path(lesson_id)}/generate", headers={"Idempotency-Key": idempotency_key})
 
     def due_reviews(self) -> m.TutorDtos_DueReviews:
         """Due reviews.
@@ -17741,26 +10941,14 @@ class StudyPlanApi:
         """
         return self._http.request("GET", "/api/tutor/reviews/due")
 
-    def answer_review(
-        self,
-        plan_id: str,
-        card_id: str,
-        body: m.TutorDtos_ReviewAnswerRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TutorDtos_ReviewAnswerResult:
+    def answer_review(self, plan_id: str, card_id: str, body: m.TutorDtos_ReviewAnswerRequest, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_ReviewAnswerResult:
         """Answer review.
 
         POST /api/tutor/reviews/{planId}/{cardId}/answer
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            f"/api/tutor/reviews/{quote_path(plan_id)}/{quote_path(card_id)}/answer",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/tutor/reviews/{quote_path(plan_id)}/{quote_path(card_id)}/answer", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self) -> m.TutorDtos_TutorStatus:
         """Status.
@@ -17811,21 +10999,14 @@ class TeamsCredentialApi:
         """
         return self._http.request("GET", "/api/channels/teams/credential")
 
-    def activate(
-        self, body: m.TeamsActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.TeamsCredentialResponse:
+    def activate(self, body: m.TeamsActivationRequest, *, idempotency_key: Optional[str] = None) -> m.TeamsCredentialResponse:
         """Activate.
 
         POST /api/channels/teams/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/teams/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/teams/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -17834,9 +11015,7 @@ class TeamsCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/teams/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/teams/credential", response="void")
 
 
 class TeamsSendApi:
@@ -17850,50 +11029,30 @@ class TeamsSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/teams/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/teams/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.TeamsSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TeamsSendController_SendResult:
+    def send(self, body: m.TeamsSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.TeamsSendController_SendResult:
         """Send.
 
         POST /api/channels/teams/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/teams/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/teams/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class TeamsWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self, app_id: str, body: Any, *, authorization: Optional[str] = None
-    ) -> None:
+    def inbound(self, app_id: str, body: Any, *, authorization: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/teams/{appId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/webhook/teams/{quote_path(app_id)}",
-            headers={"Authorization": authorization},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/webhook/teams/{quote_path(app_id)}", headers={"Authorization": authorization}, body=body, response="void")
 
 
 class TelegramCredentialApi:
@@ -17909,24 +11068,14 @@ class TelegramCredentialApi:
         """
         return self._http.request("GET", "/api/channels/telegram/credential")
 
-    def activate(
-        self,
-        body: m.TelegramActivationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TelegramCredentialResponse:
+    def activate(self, body: m.TelegramActivationRequest, *, idempotency_key: Optional[str] = None) -> m.TelegramCredentialResponse:
         """Activate.
 
         POST /api/channels/telegram/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/telegram/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/telegram/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -17935,9 +11084,7 @@ class TelegramCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/telegram/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/telegram/credential", response="void")
 
 
 class TelegramSendApi:
@@ -17951,93 +11098,53 @@ class TelegramSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/telegram/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/telegram/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.TelegramSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TelegramSendController_SendResult:
+    def send(self, body: m.TelegramSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.TelegramSendController_SendResult:
         """Send.
 
         POST /api/channels/telegram/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/telegram/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/telegram/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class TelegramWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def inbound(
-        self,
-        bot_user_id: str,
-        body: Any,
-        *,
-        x_telegram_bot_api_secret_token: Optional[str] = None,
-    ) -> None:
+    def inbound(self, bot_user_id: str, body: Any, *, x_telegram_bot_api_secret_token: Optional[str] = None) -> None:
         """Inbound.
 
         POST /webhook/telegram/{botUserId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/webhook/telegram/{quote_path(bot_user_id)}",
-            headers={
-                "X-Telegram-Bot-Api-Secret-Token": x_telegram_bot_api_secret_token
-            },
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/webhook/telegram/{quote_path(bot_user_id)}", headers={"X-Telegram-Bot-Api-Secret-Token": x_telegram_bot_api_secret_token}, body=body, response="void")
 
 
 class TemplateBundleApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def import_bundle(
-        self, body: m.AgentBundle, *, idempotency_key: Optional[str] = None
-    ) -> m.TemplateImportResponse:
+    def import_bundle(self, body: m.AgentBundle, *, idempotency_key: Optional[str] = None) -> m.TemplateImportResponse:
         """Import bundle.
 
         POST /api/agent-bundles/import
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/agent-bundles/import",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/agent-bundles/import", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def preview(
-        self, body: m.AgentBundle, *, idempotency_key: Optional[str] = None
-    ) -> m.AgentBundlePreview:
+    def preview(self, body: m.AgentBundle, *, idempotency_key: Optional[str] = None) -> m.AgentBundlePreview:
         """Preview.
 
         POST /api/agent-bundles/preview
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/agent-bundles/preview",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/agent-bundles/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def export(self, agent_id: str) -> m.AgentBundle:
         """Export.
@@ -18051,34 +11158,14 @@ class TemplateGalleryApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def gallery(
-        self,
-        *,
-        kind: Optional[m.TemplateKind] = None,
-        category: Optional[str] = None,
-        tag: Optional[str] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        size: Optional[int] = None,
-    ) -> List[m.TemplateSummary]:
+    def gallery(self, *, kind: Optional[m.TemplateKind] = None, category: Optional[str] = None, tag: Optional[str] = None, sort: Optional[str] = None, page: Optional[int] = None, size: Optional[int] = None) -> List[m.TemplateSummary]:
         """Gallery.
 
         GET /api/templates/gallery
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/api/templates/gallery",
-            query={
-                "kind": kind,
-                "category": category,
-                "tag": tag,
-                "sort": sort,
-                "page": page,
-                "size": size,
-            },
-        )
+        return self._http.request("GET", "/api/templates/gallery", query={"kind": kind, "category": category, "tag": tag, "sort": sort, "page": page, "size": size})
 
     def standard(self) -> m.TemplateStandard_Guide:
         """Standard.
@@ -18098,20 +11185,14 @@ class TemplateGalleryApi:
         """
         return self._http.request("GET", f"/api/templates/gallery/{quote_path(id)}")
 
-    def ratings(
-        self, id: str, *, page: Optional[int] = None, size: Optional[int] = None
-    ) -> List[m.TemplateRatingView]:
+    def ratings(self, id: str, *, page: Optional[int] = None, size: Optional[int] = None) -> List[m.TemplateRatingView]:
         """Ratings.
 
         GET /api/templates/gallery/{id}/ratings
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/templates/gallery/{quote_path(id)}/ratings",
-            query={"page": page, "size": size},
-        )
+        return self._http.request("GET", f"/api/templates/gallery/{quote_path(id)}/ratings", query={"page": page, "size": size})
 
 
 class TenantAiModelPreferenceApi:
@@ -18125,20 +11206,14 @@ class TenantAiModelPreferenceApi:
         """
         return self._http.request("GET", "/api/tenant/ai-model-preferences")
 
-    def update(
-        self, feature_key: str, body: m.UpdateAiModelPreferenceRequest
-    ) -> List[m.AiModelPreferenceResponse]:
+    def update(self, feature_key: str, body: m.UpdateAiModelPreferenceRequest) -> List[m.AiModelPreferenceResponse]:
         """Update.
 
         PUT /api/tenant/ai-model-preferences/{featureKey}
 
         Requires PERM_MANAGE_TENANT_SETTINGS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/tenant/ai-model-preferences/{quote_path(feature_key)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/tenant/ai-model-preferences/{quote_path(feature_key)}", body=body)
 
     def clear(self, feature_key: str) -> List[m.AiModelPreferenceResponse]:
         """Clear.
@@ -18147,46 +11222,30 @@ class TenantAiModelPreferenceApi:
 
         Requires PERM_MANAGE_TENANT_SETTINGS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tenant/ai-model-preferences/{quote_path(feature_key)}"
-        )
+        return self._http.request("DELETE", f"/api/tenant/ai-model-preferences/{quote_path(feature_key)}")
 
 
 class TenantApiKeyApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.TenantApiKeyResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TenantApiKeyResponse]:
         """List.
 
         GET /api/tenant/api-keys
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET", "/api/tenant/api-keys", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/tenant/api-keys", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.TenantApiKeyCreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TenantApiKeyCreatedResponse:
+    def create(self, body: m.TenantApiKeyCreateRequest, *, idempotency_key: Optional[str] = None) -> m.TenantApiKeyCreatedResponse:
         """Create.
 
         POST /api/tenant/api-keys
 
         Mint a tenant API key (vdak_...) for server-to-server calls. The secret is in this response only; store it. The key acts with the PERM_* scopes it is given. Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/api-keys",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/api-keys", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def revoke(self, id: str) -> None:
         """Revoke.
@@ -18195,44 +11254,25 @@ class TenantApiKeyApi:
 
         Revoke the key; requests that present it are refused from now on. Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tenant/api-keys/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tenant/api-keys/{quote_path(id)}", response="void")
 
-    def toggle(
-        self,
-        id: str,
-        body: m.TenantApiKeyToggleRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TenantApiKeyResponse:
+    def toggle(self, id: str, body: m.TenantApiKeyToggleRequest, *, idempotency_key: Optional[str] = None) -> m.TenantApiKeyResponse:
         """Toggle.
 
         PATCH /api/tenant/api-keys/{id}
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/tenant/api-keys/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/tenant/api-keys/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def rotate(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.TenantApiKeyCreatedResponse:
+    def rotate(self, id: str, *, idempotency_key: Optional[str] = None) -> m.TenantApiKeyCreatedResponse:
         """Rotate.
 
         POST /api/tenant/api-keys/{id}/rotate
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/tenant/api-keys/{quote_path(id)}/rotate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/tenant/api-keys/{quote_path(id)}/rotate", headers={"Idempotency-Key": idempotency_key})
 
 
 class TenantBrandingLogoApi:
@@ -18246,11 +11286,7 @@ class TenantBrandingLogoApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            f"/api/share/branding/{quote_path(tenant_id)}/logo.{quote_path(ext)}",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/share/branding/{quote_path(tenant_id)}/logo.{quote_path(ext)}", response="blob")
 
     def upload(self, body: Dict[str, Any]) -> m.TenantSettingsResponse:
         """Upload.
@@ -18259,9 +11295,7 @@ class TenantBrandingLogoApi:
 
         Requires PERM_MANAGE_TENANT_SETTINGS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST", "/api/tenant/branding/logo", body=body, body_type="multipart"
-        )
+        return self._http.request("POST", "/api/tenant/branding/logo", body=body, body_type="multipart")
 
     def remove(self) -> m.TenantSettingsResponse:
         """Remove.
@@ -18277,25 +11311,14 @@ class TenantDataApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def delete_data(
-        self,
-        body: m.TenantDataDeletionRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def delete_data(self, body: m.TenantDataDeletionRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Delete data.
 
         POST /api/tenant/data-deletion
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/data-deletion",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", "/api/tenant/data-deletion", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
     def export_data(self, *, idempotency_key: Optional[str] = None) -> bytes:
         """Export data.
@@ -18304,12 +11327,7 @@ class TenantDataApi:
 
         Requires PERM_MANAGE_DATA_GOVERNANCE (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/data-export",
-            headers={"Idempotency-Key": idempotency_key},
-            response="blob",
-        )
+        return self._http.request("POST", "/api/tenant/data-export", headers={"Idempotency-Key": idempotency_key}, response="blob")
 
 
 class TenantDataUsageApi:
@@ -18342,42 +11360,26 @@ class TenantDeletionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def delete_tenant(
-        self,
-        tenant_id: str,
-        body: m.TenantDeletionController_DeleteTenantRequest,
-        *,
-        x_master_key: Optional[str] = None,
-    ) -> None:
+    def delete_tenant(self, tenant_id: str, body: m.TenantDeletionController_DeleteTenantRequest, *, x_master_key: Optional[str] = None) -> None:
         """Delete tenant.
 
         DELETE /api/platform/tenants/{tenantId}
 
         Restricted to platform-admin.
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/platform/tenants/{quote_path(tenant_id)}",
-            headers={"X-Master-Key": x_master_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/platform/tenants/{quote_path(tenant_id)}", headers={"X-Master-Key": x_master_key}, body=body, response="void")
 
 
 class TenantFeatureFlagApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def evaluate(
-        self, key: str
-    ) -> m.TenantFeatureFlagController_FeatureFlagEvaluationResponse:
+    def evaluate(self, key: str) -> m.TenantFeatureFlagController_FeatureFlagEvaluationResponse:
         """Evaluate.
 
         GET /api/tenant/feature-flags/{key}/evaluate
         """
-        return self._http.request(
-            "GET", f"/api/tenant/feature-flags/{quote_path(key)}/evaluate"
-        )
+        return self._http.request("GET", f"/api/tenant/feature-flags/{quote_path(key)}/evaluate")
 
 
 class TenantRuntimeLimitsApi:
@@ -18403,9 +11405,7 @@ class TenantRuntimeLimitsApi:
 
         DELETE /api/agent-runtime/limits
         """
-        return self._http.request(
-            "DELETE", "/api/agent-runtime/limits", response="void"
-        )
+        return self._http.request("DELETE", "/api/agent-runtime/limits", response="void")
 
 
 class TenantSettingsApi:
@@ -18419,9 +11419,7 @@ class TenantSettingsApi:
         """
         return self._http.request("GET", "/api/tenant/settings")
 
-    def update_experience_mode(
-        self, body: m.UpdateExperienceModeRequest
-    ) -> m.TenantSettingsResponse:
+    def update_experience_mode(self, body: m.UpdateExperienceModeRequest) -> m.TenantSettingsResponse:
         """Update experience mode.
 
         PUT /api/tenant/settings
@@ -18470,9 +11468,7 @@ class TenantSsoApi:
         """
         return self._http.request("GET", "/api/tenant/sso")
 
-    def upsert(
-        self, body: m.TenantSsoUpsertRequest
-    ) -> m.TenantSsoService_TenantSsoStatus:
+    def upsert(self, body: m.TenantSsoUpsertRequest) -> m.TenantSsoService_TenantSsoStatus:
         """Upsert.
 
         PUT /api/tenant/sso
@@ -18499,24 +11495,14 @@ class TenantSsoApi:
         """
         return self._http.request("GET", "/api/tenant/sso/scim-tokens")
 
-    def mint_token(
-        self,
-        body: Optional[Dict[str, str]] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def mint_token(self, body: Optional[Dict[str, str]] = None, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Mint token.
 
         POST /api/tenant/sso/scim-tokens
 
         Only available when the feature flag app.identity.provider=keycloak is on; otherwise this route answers 404. Requires PERM_MANAGE_TENANT_SETTINGS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/sso/scim-tokens",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/sso/scim-tokens", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def revoke_token(self, id: str) -> None:
         """Revoke token.
@@ -18525,9 +11511,7 @@ class TenantSsoApi:
 
         Only available when the feature flag app.identity.provider=keycloak is on; otherwise this route answers 404. Requires PERM_MANAGE_TENANT_SETTINGS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tenant/sso/scim-tokens/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tenant/sso/scim-tokens/{quote_path(id)}", response="void")
 
 
 class TenantSubscriptionApi:
@@ -18541,52 +11525,35 @@ class TenantSubscriptionApi:
         """
         return self._http.request("GET", "/api/tenant/subscription")
 
-    def cancel(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.TenantSubscriptionStatusResponse:
+    def cancel(self, *, idempotency_key: Optional[str] = None) -> m.TenantSubscriptionStatusResponse:
         """Cancel.
 
         POST /api/tenant/subscription/cancel
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/subscription/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/tenant/subscription/cancel", headers={"Idempotency-Key": idempotency_key})
 
 
 class TenantUpgradeApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def upgrade(
-        self, body: m.TenantUpgradeRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.TenantUpgradeResponse:
+    def upgrade(self, body: m.TenantUpgradeRequest, *, idempotency_key: Optional[str] = None) -> m.TenantUpgradeResponse:
         """Upgrade.
 
         POST /api/tenant/upgrade
 
         Requires PERM_MANAGE_BILLING (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/upgrade",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/upgrade", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def options(
-        self, *, gateway: Optional[str] = None
-    ) -> m.TenantUpgradeOptionsResponse:
+    def options(self, *, gateway: Optional[str] = None) -> m.TenantUpgradeOptionsResponse:
         """Options.
 
         GET /api/tenant/upgrade/options
         """
-        return self._http.request(
-            "GET", "/api/tenant/upgrade/options", query={"gateway": gateway}
-        )
+        return self._http.request("GET", "/api/tenant/upgrade/options", query={"gateway": gateway})
 
 
 class TenantUsageQuotaApi:
@@ -18661,9 +11628,7 @@ class ThrowingApi:
         """
         return self._http.request("GET", "/t/rate", response="void")
 
-    def validation(
-        self, body: m.ErrorResponseContractTest_ThrowingController_Body
-    ) -> None:
+    def validation(self, body: m.ErrorResponseContractTest_ThrowingController_Body) -> None:
         """Validation.
 
         POST /t/validation
@@ -18687,9 +11652,7 @@ class ToolArgPolicyApi:
 
         GET /api/agents/{agentId}/tool-policies
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/tool-policies"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/tool-policies")
 
     def put(self, agent_id: str, body: Any) -> m.ToolArgPolicyDtos_PoliciesResponse:
         """Put.
@@ -18698,9 +11661,7 @@ class ToolArgPolicyApi:
 
         Requires PERM_MANAGE_GUARDRAILS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/agents/{quote_path(agent_id)}/tool-policies", body=body
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/tool-policies", body=body)
 
 
 class ToolClassificationApi:
@@ -18724,83 +11685,49 @@ class TrajectoryEvalApi:
 
         GET /api/agents/{agentId}/quality/trajectory-eval/config
         """
-        return self._http.request(
-            "GET", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/config"
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/config")
 
-    def get_case(
-        self, agent_id: str, dataset_id: str, case_id: str
-    ) -> m.TrajectoryEvalDtos_CaseTrajectory:
+    def get_case(self, agent_id: str, dataset_id: str, case_id: str) -> m.TrajectoryEvalDtos_CaseTrajectory:
         """Get case.
 
         GET /api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/cases/{caseId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}")
 
-    def set_case(
-        self,
-        agent_id: str,
-        dataset_id: str,
-        case_id: str,
-        body: m.TrajectoryEvalDtos_SetCaseRequest,
-    ) -> m.TrajectoryEvalDtos_CaseTrajectory:
+    def set_case(self, agent_id: str, dataset_id: str, case_id: str, body: m.TrajectoryEvalDtos_SetCaseRequest) -> m.TrajectoryEvalDtos_CaseTrajectory:
         """Set case.
 
         PUT /api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/cases/{caseId}
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/cases/{quote_path(case_id)}", body=body)
 
-    def run_trajectories(
-        self, agent_id: str, dataset_id: str, run_id: str
-    ) -> m.TrajectoryEvalDtos_RunTrajectories:
+    def run_trajectories(self, agent_id: str, dataset_id: str, run_id: str) -> m.TrajectoryEvalDtos_RunTrajectories:
         """Run trajectories.
 
         GET /api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/runs/{runId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}")
 
-    def actual(
-        self, agent_id: str, dataset_id: str, run_id: str, result_id: str
-    ) -> m.TrajectoryEvalDtos_ActualTrajectory:
+    def actual(self, agent_id: str, dataset_id: str, run_id: str, result_id: str) -> m.TrajectoryEvalDtos_ActualTrajectory:
         """Actual.
 
         GET /api/agents/{agentId}/quality/trajectory-eval/datasets/{datasetId}/runs/{runId}/results/{resultId}/actual
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/results/{quote_path(result_id)}/actual",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/quality/trajectory-eval/datasets/{quote_path(dataset_id)}/runs/{quote_path(run_id)}/results/{quote_path(result_id)}/actual")
 
 
 class TrialGrantApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def claim(
-        self, body: m.TrialClaimRequest, *, idempotency_key: Optional[str] = None
-    ) -> Any:
+    def claim(self, body: m.TrialClaimRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Claim.
 
         POST /api/tenant/trial/claim
         """
-        return self._http.request(
-            "POST",
-            "/api/tenant/trial/claim",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tenant/trial/claim", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self) -> m.TrialStatusResponse:
         """Status.
@@ -18814,20 +11741,14 @@ class TurnJournalApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def by_session(
-        self, agent_id: str, *, session_id: str, limit: Optional[int] = None
-    ) -> m.TurnJournalService_SessionView:
+    def by_session(self, agent_id: str, *, session_id: str, limit: Optional[int] = None) -> m.TurnJournalService_SessionView:
         """By session.
 
         GET /api/agents/{agentId}/turn-journal
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/turn-journal",
-            query={"sessionId": session_id, "limit": limit},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/turn-journal", query={"sessionId": session_id, "limit": limit})
 
     def get(self, agent_id: str, turn_id: str) -> m.TurnJournalService_JournalView:
         """Get.
@@ -18836,34 +11757,21 @@ class TurnJournalApi:
 
         Requires PERM_VIEW_AUDIT_LOG (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/turns/{quote_path(turn_id)}/journal",
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/turns/{quote_path(turn_id)}/journal")
 
 
 class TutorAgentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def ensure(
-        self,
-        body: Optional[m.TutorDtos_TutorAgentRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.TutorDtos_TutorAgentResponse:
+    def ensure(self, body: Optional[m.TutorDtos_TutorAgentRequest] = None, *, idempotency_key: Optional[str] = None) -> m.TutorDtos_TutorAgentResponse:
         """Ensure.
 
         POST /api/tutor/agent
 
         Only available when the feature flag app.tutor.enabled=true is on; otherwise this route answers 404.
         """
-        return self._http.request(
-            "POST",
-            "/api/tutor/agent",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tutor/agent", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class TwilioCredentialApi:
@@ -18877,21 +11785,14 @@ class TwilioCredentialApi:
         """
         return self._http.request("GET", "/api/channels/twilio/credential")
 
-    def activate(
-        self, body: m.TwilioActivationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.TwilioCredentialResponse:
+    def activate(self, body: m.TwilioActivationRequest, *, idempotency_key: Optional[str] = None) -> m.TwilioCredentialResponse:
         """Activate.
 
         POST /api/channels/twilio/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/twilio/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/twilio/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -18900,9 +11801,7 @@ class TwilioCredentialApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/twilio/credential", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/twilio/credential", response="void")
 
 
 class TwilioSmsWebhookApi:
@@ -18953,9 +11852,7 @@ class TwilioVoiceWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/webhook/twilio/voice/collect", response="text"
-        )
+        return self._http.request("POST", "/webhook/twilio/voice/collect", response="text")
 
     def collect_menu_digits(self) -> str:
         """Collect menu digits.
@@ -18964,9 +11861,7 @@ class TwilioVoiceWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", "/webhook/twilio/voice/menu-collect", response="text"
-        )
+        return self._http.request("POST", "/webhook/twilio/voice/menu-collect", response="text")
 
 
 class TwilioWebhookApi:
@@ -18996,75 +11891,50 @@ class UserAdminApi:
         """
         return self._http.request("GET", "/api/admin/users")
 
-    def create(
-        self, body: m.CreateUserRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.AdminUserResponse:
+    def create(self, body: m.CreateUserRequest, *, idempotency_key: Optional[str] = None) -> m.AdminUserResponse:
         """Create.
 
         POST /api/admin/users
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/admin/users",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/admin/users", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def set_enabled(
-        self, user_id: str, body: m.SetUserEnabledRequest
-    ) -> m.AdminUserResponse:
+    def set_enabled(self, user_id: str, body: m.SetUserEnabledRequest) -> m.AdminUserResponse:
         """Set enabled.
 
         PUT /api/admin/users/{userId}/enabled
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/admin/users/{quote_path(user_id)}/enabled", body=body
-        )
+        return self._http.request("PUT", f"/api/admin/users/{quote_path(user_id)}/enabled", body=body)
 
-    def reissue_invite_link(
-        self, user_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.AdminUserResponse:
+    def reissue_invite_link(self, user_id: str, *, idempotency_key: Optional[str] = None) -> m.AdminUserResponse:
         """Reissue invite link.
 
         POST /api/admin/users/{userId}/invite-link
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/admin/users/{quote_path(user_id)}/invite-link",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/admin/users/{quote_path(user_id)}/invite-link", headers={"Idempotency-Key": idempotency_key})
 
-    def set_permissions(
-        self, user_id: str, body: m.SetUserPermissionsRequest
-    ) -> m.AdminUserResponse:
+    def set_permissions(self, user_id: str, body: m.SetUserPermissionsRequest) -> m.AdminUserResponse:
         """Set permissions.
 
         PUT /api/admin/users/{userId}/permissions
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/admin/users/{quote_path(user_id)}/permissions", body=body
-        )
+        return self._http.request("PUT", f"/api/admin/users/{quote_path(user_id)}/permissions", body=body)
 
-    def set_roles(
-        self, user_id: str, body: m.SetUserRolesRequest
-    ) -> m.AdminUserResponse:
+    def set_roles(self, user_id: str, body: m.SetUserRolesRequest) -> m.AdminUserResponse:
         """Set roles.
 
         PUT /api/admin/users/{userId}/roles
 
         Requires PERM_MANAGE_USERS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/admin/users/{quote_path(user_id)}/roles", body=body
-        )
+        return self._http.request("PUT", f"/api/admin/users/{quote_path(user_id)}/roles", body=body)
 
 
 class UserMemoryApi:
@@ -19078,34 +11948,26 @@ class UserMemoryApi:
         """
         return self._http.request("GET", "/api/memory")
 
-    def forget_all(
-        self, *, confirm: Optional[bool] = None
-    ) -> m.UserMemoryController_ForgetAllResult:
+    def forget_all(self, *, confirm: Optional[bool] = None) -> m.UserMemoryController_ForgetAllResult:
         """Forget all.
 
         DELETE /api/memory
         """
         return self._http.request("DELETE", "/api/memory", query={"confirm": confirm})
 
-    def put_block(
-        self, label: str, body: m.UserMemoryController_ContentRequest
-    ) -> m.UserMemoryController_BlockView:
+    def put_block(self, label: str, body: m.UserMemoryController_ContentRequest) -> m.UserMemoryController_BlockView:
         """Put block.
 
         PUT /api/memory/blocks/{label}
         """
-        return self._http.request(
-            "PUT", f"/api/memory/blocks/{quote_path(label)}", body=body
-        )
+        return self._http.request("PUT", f"/api/memory/blocks/{quote_path(label)}", body=body)
 
     def delete_block(self, label: str) -> None:
         """Delete block.
 
         DELETE /api/memory/blocks/{label}
         """
-        return self._http.request(
-            "DELETE", f"/api/memory/blocks/{quote_path(label)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/memory/blocks/{quote_path(label)}", response="void")
 
     def export(self) -> m.UserMemoryController_MemoryExport:
         """Export.
@@ -19114,53 +11976,26 @@ class UserMemoryApi:
         """
         return self._http.request("GET", "/api/memory/export")
 
-    def add_fact(
-        self,
-        body: m.UserMemoryController_FactCreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.UserMemoryController_FactView:
+    def add_fact(self, body: m.UserMemoryController_FactCreateRequest, *, idempotency_key: Optional[str] = None) -> m.UserMemoryController_FactView:
         """Add fact.
 
         POST /api/memory/facts
         """
-        return self._http.request(
-            "POST",
-            "/api/memory/facts",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/memory/facts", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete_fact(self, scope: str, id: str) -> None:
         """Delete fact.
 
         DELETE /api/memory/facts/{scope}/{id}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}", response="void")
 
-    def edit_fact(
-        self,
-        scope: str,
-        id: str,
-        body: m.UserMemoryController_ContentRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> None:
+    def edit_fact(self, scope: str, id: str, body: m.UserMemoryController_ContentRequest, *, idempotency_key: Optional[str] = None) -> None:
         """Edit fact.
 
         PATCH /api/memory/facts/{scope}/{id}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-            response="void",
-        )
+        return self._http.request("PATCH", f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
 
 
 class UserMemoryProvenanceApi:
@@ -19172,73 +12007,46 @@ class UserMemoryProvenanceApi:
 
         GET /api/memory/facts/{scope}/{id}/source
         """
-        return self._http.request(
-            "GET", f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}/source"
-        )
+        return self._http.request("GET", f"/api/memory/facts/{quote_path(scope)}/{quote_path(id)}/source")
 
 
 class UserToolScriptApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.UserToolScriptResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.UserToolScriptResponse]:
         """List.
 
         GET /api/tools/scripts
         """
-        return self._http.request(
-            "GET", "/api/tools/scripts", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/tools/scripts", query={"limit": limit, "offset": offset})
 
-    def create(
-        self, body: m.UserToolScriptRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.UserToolScriptResponse:
+    def create(self, body: m.UserToolScriptRequest, *, idempotency_key: Optional[str] = None) -> m.UserToolScriptResponse:
         """Create.
 
         POST /api/tools/scripts
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/scripts",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/scripts", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def test(
-        self,
-        body: m.UserToolScriptTestRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, str]:
+    def test(self, body: m.UserToolScriptTestRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, str]:
         """Test.
 
         POST /api/tools/scripts/test
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/tools/scripts/test",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/tools/scripts/test", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def update(
-        self, id: str, body: m.UserToolScriptRequest
-    ) -> m.UserToolScriptResponse:
+    def update(self, id: str, body: m.UserToolScriptRequest) -> m.UserToolScriptResponse:
         """Update.
 
         PUT /api/tools/scripts/{id}
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/tools/scripts/{quote_path(id)}", body=body
-        )
+        return self._http.request("PUT", f"/api/tools/scripts/{quote_path(id)}", body=body)
 
     def delete(self, id: str) -> None:
         """Delete.
@@ -19247,58 +12055,35 @@ class UserToolScriptApi:
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/tools/scripts/{quote_path(id)}", response="void"
-        )
+        return self._http.request("DELETE", f"/api/tools/scripts/{quote_path(id)}", response="void")
 
-    def set_enabled(
-        self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None
-    ) -> m.UserToolScriptResponse:
+    def set_enabled(self, id: str, body: Dict[str, bool], *, idempotency_key: Optional[str] = None) -> m.UserToolScriptResponse:
         """Set enabled.
 
         PATCH /api/tools/scripts/{id}/enabled
 
         Requires PERM_MANAGE_TOOLS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/tools/scripts/{quote_path(id)}/enabled",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/tools/scripts/{quote_path(id)}/enabled", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class VideoGenerationApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def generate(
-        self,
-        body: m.VideoGenerationController_VideoGenerationRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.VideoGenerationJobResponse:
+    def generate(self, body: m.VideoGenerationController_VideoGenerationRequest, *, idempotency_key: Optional[str] = None) -> m.VideoGenerationJobResponse:
         """Generate.
 
         POST /api/videogen/generate
         """
-        return self._http.request(
-            "POST",
-            "/api/videogen/generate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/videogen/generate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def list_jobs(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.VideoGenerationJobResponse]:
+    def list_jobs(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.VideoGenerationJobResponse]:
         """List jobs.
 
         GET /api/videogen/jobs
         """
-        return self._http.request(
-            "GET", "/api/videogen/jobs", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/videogen/jobs", query={"limit": limit, "offset": offset})
 
     def get_job(self, id: str) -> m.VideoGenerationJobResponse:
         """Get job.
@@ -19312,12 +12097,7 @@ class VideoGenerationApi:
 
         GET /api/videogen/videos/{id}
         """
-        return self._http.request(
-            "GET",
-            f"/api/videogen/videos/{quote_path(id)}",
-            headers={"Range": range},
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/videogen/videos/{quote_path(id)}", headers={"Range": range}, response="blob")
 
 
 class ViewAsSessionApi:
@@ -19336,129 +12116,66 @@ class VisionSessionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def start(
-        self,
-        body: m.VisionSessionController_VisionSessionStartRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.VisionSessionController_VisionSessionStartResponse:
+    def start(self, body: m.VisionSessionController_VisionSessionStartRequest, *, idempotency_key: Optional[str] = None) -> m.VisionSessionController_VisionSessionStartResponse:
         """Start.
 
         POST /api/vision/sessions
         """
-        return self._http.request(
-            "POST",
-            "/api/vision/sessions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/vision/sessions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def end(
-        self,
-        session_id: str,
-        body: Optional[str] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.VisionSessionController_VisionSessionEndResponse:
+    def end(self, session_id: str, body: Optional[str] = None, *, idempotency_key: Optional[str] = None) -> m.VisionSessionController_VisionSessionEndResponse:
         """End.
 
         POST /api/vision/sessions/{sessionId}/end
         """
-        return self._http.request(
-            "POST",
-            f"/api/vision/sessions/{quote_path(session_id)}/end",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/vision/sessions/{quote_path(session_id)}/end", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class VoiceCallApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def speak(
-        self,
-        agent_id: str,
-        body: m.SpeakRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.SpeakResponse:
+    def speak(self, agent_id: str, body: m.SpeakRequest, *, idempotency_key: Optional[str] = None) -> m.SpeakResponse:
         """Speak.
 
         POST /api/voice/agents/{agentId}/speak
         """
-        return self._http.request(
-            "POST",
-            f"/api/voice/agents/{quote_path(agent_id)}/speak",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/voice/agents/{quote_path(agent_id)}/speak", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def issue_token(
-        self,
-        agent_id: str,
-        body: Optional[m.VoiceTokenRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.VoiceTokenResponse:
+    def issue_token(self, agent_id: str, body: Optional[m.VoiceTokenRequest] = None, *, idempotency_key: Optional[str] = None) -> m.VoiceTokenResponse:
         """Issue token.
 
         POST /api/voice/agents/{agentId}/token
         """
-        return self._http.request(
-            "POST",
-            f"/api/voice/agents/{quote_path(agent_id)}/token",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/voice/agents/{quote_path(agent_id)}/token", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def turn(
-        self, agent_id: str, body: Dict[str, Any], *, session_id: Optional[str] = None
-    ) -> Iterator[str]:
+    def turn(self, agent_id: str, body: Dict[str, Any], *, session_id: Optional[str] = None) -> Iterator[str]:
         """Turn.
 
         POST /api/voice/agents/{agentId}/turn
 
         Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "POST",
-            f"/api/voice/agents/{quote_path(agent_id)}/turn",
-            query={"sessionId": session_id},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.stream("POST", f"/api/voice/agents/{quote_path(agent_id)}/turn", query={"sessionId": session_id}, body=body, body_type="multipart")
 
 
 class VoiceCallRecordingApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def start_recording(
-        self, agent_id: str, room_name: str, *, idempotency_key: Optional[str] = None
-    ) -> Any:
+    def start_recording(self, agent_id: str, room_name: str, *, idempotency_key: Optional[str] = None) -> Any:
         """Start recording.
 
         POST /api/voice/agents/{agentId}/calls/{roomName}/recording/start
         """
-        return self._http.request(
-            "POST",
-            f"/api/voice/agents/{quote_path(agent_id)}/calls/{quote_path(room_name)}/recording/start",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/voice/agents/{quote_path(agent_id)}/calls/{quote_path(room_name)}/recording/start", headers={"Idempotency-Key": idempotency_key})
 
-    def stop_recording(
-        self, agent_id: str, room_name: str, *, idempotency_key: Optional[str] = None
-    ) -> Any:
+    def stop_recording(self, agent_id: str, room_name: str, *, idempotency_key: Optional[str] = None) -> Any:
         """Stop recording.
 
         POST /api/voice/agents/{agentId}/calls/{roomName}/recording/stop
         """
-        return self._http.request(
-            "POST",
-            f"/api/voice/agents/{quote_path(agent_id)}/calls/{quote_path(room_name)}/recording/stop",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/voice/agents/{quote_path(agent_id)}/calls/{quote_path(room_name)}/recording/stop", headers={"Idempotency-Key": idempotency_key})
 
 
 class VoiceChannelApi:
@@ -19472,35 +12189,23 @@ class VoiceChannelApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/voice/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/voice/default-agent", body=body, response="void")
 
-    def list_dtmf_menu(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.VoiceDtmfMappingResponse]:
+    def list_dtmf_menu(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.VoiceDtmfMappingResponse]:
         """List dtmf menu.
 
         GET /api/channels/voice/dtmf-menu
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/voice/dtmf-menu",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/channels/voice/dtmf-menu", query={"limit": limit, "offset": offset})
 
-    def upsert_dtmf_menu_entry(
-        self, digit: str, body: m.VoiceDtmfMappingUpsertRequest
-    ) -> m.VoiceDtmfMappingResponse:
+    def upsert_dtmf_menu_entry(self, digit: str, body: m.VoiceDtmfMappingUpsertRequest) -> m.VoiceDtmfMappingResponse:
         """Upsert dtmf menu entry.
 
         PUT /api/channels/voice/dtmf-menu/{digit}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/channels/voice/dtmf-menu/{quote_path(digit)}", body=body
-        )
+        return self._http.request("PUT", f"/api/channels/voice/dtmf-menu/{quote_path(digit)}", body=body)
 
     def delete_dtmf_menu_entry(self, digit: str) -> None:
         """Delete dtmf menu entry.
@@ -19509,37 +12214,23 @@ class VoiceChannelApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/channels/voice/dtmf-menu/{quote_path(digit)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/channels/voice/dtmf-menu/{quote_path(digit)}", response="void")
 
-    def list_numbers(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.VoiceNumberAgentResponse]:
+    def list_numbers(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.VoiceNumberAgentResponse]:
         """List numbers.
 
         GET /api/channels/voice/numbers
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/voice/numbers",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/channels/voice/numbers", query={"limit": limit, "offset": offset})
 
-    def upsert_number(
-        self, number: str, body: m.VoiceNumberAgentUpsertRequest
-    ) -> m.VoiceNumberAgentResponse:
+    def upsert_number(self, number: str, body: m.VoiceNumberAgentUpsertRequest) -> m.VoiceNumberAgentResponse:
         """Upsert number.
 
         PUT /api/channels/voice/numbers/{number}
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/channels/voice/numbers/{quote_path(number)}", body=body
-        )
+        return self._http.request("PUT", f"/api/channels/voice/numbers/{quote_path(number)}", body=body)
 
     def delete_number(self, number: str) -> None:
         """Delete number.
@@ -19548,11 +12239,7 @@ class VoiceChannelApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/channels/voice/numbers/{quote_path(number)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/channels/voice/numbers/{quote_path(number)}", response="void")
 
 
 class WalletApi:
@@ -19566,24 +12253,14 @@ class WalletApi:
         """
         return self._http.request("GET", "/api/wallets", query={"agentId": agent_id})
 
-    def open(
-        self,
-        body: m.WalletDtos_OpenWalletRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WalletDtos_WalletResponse:
+    def open(self, body: m.WalletDtos_OpenWalletRequest, *, idempotency_key: Optional[str] = None) -> m.WalletDtos_WalletResponse:
         """Open.
 
         POST /api/wallets
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/wallets",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/wallets", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, wallet_id: str) -> m.WalletDtos_WalletResponse:
         """Get.
@@ -19592,42 +12269,21 @@ class WalletApi:
         """
         return self._http.request("GET", f"/api/wallets/{quote_path(wallet_id)}")
 
-    def credit(
-        self,
-        wallet_id: str,
-        body: m.WalletDtos_CreditRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WalletDtos_LedgerEntryResponse:
+    def credit(self, wallet_id: str, body: m.WalletDtos_CreditRequest, *, idempotency_key: Optional[str] = None) -> m.WalletDtos_LedgerEntryResponse:
         """Credit.
 
         POST /api/wallets/{walletId}/credit
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/wallets/{quote_path(wallet_id)}/credit",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/wallets/{quote_path(wallet_id)}/credit", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def ledger(
-        self,
-        wallet_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.WalletDtos_LedgerEntryResponse]:
+    def ledger(self, wallet_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WalletDtos_LedgerEntryResponse]:
         """Ledger.
 
         GET /api/wallets/{walletId}/ledger
         """
-        return self._http.request(
-            "GET",
-            f"/api/wallets/{quote_path(wallet_id)}/ledger",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/wallets/{quote_path(wallet_id)}/ledger", query={"limit": limit, "offset": offset})
 
 
 class WebSearchProvidersApi:
@@ -19648,48 +12304,30 @@ class WebhookSubscriptionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.WebhookSubscriptionService_SubscriptionView]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WebhookSubscriptionService_SubscriptionView]:
         """List.
 
         GET /api/webhooks
         """
-        return self._http.request(
-            "GET", "/api/webhooks", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/webhooks", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        body: m.WebhookSubscriptionController_CreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WebhookSubscriptionService_SubscriptionView:
+    def create(self, body: m.WebhookSubscriptionController_CreateRequest, *, idempotency_key: Optional[str] = None) -> m.WebhookSubscriptionService_SubscriptionView:
         """Create.
 
         POST /api/webhooks
 
         Subscribe a URL to platform events. The response carries the signing secret (whsec_...) once; verify X-VegaDuta-Signature with it. Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/webhooks",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/webhooks", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def event_types(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.WebhookEventCatalog_Entry]:
+    def event_types(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WebhookEventCatalog_Entry]:
         """Event types.
 
         GET /api/webhooks/event-types
 
         The documented event types a subscription can name; "*" and "prefix.*" also work. Delivery format: the webhooks section of this document.
         """
-        return self._http.request(
-            "GET", "/api/webhooks/event-types", query={"limit": limit, "offset": offset}
-        )
+        return self._http.request("GET", "/api/webhooks/event-types", query={"limit": limit, "offset": offset})
 
     def get(self, id: str) -> m.WebhookSubscriptionService_SubscriptionView:
         """Get.
@@ -19707,55 +12345,32 @@ class WebhookSubscriptionApi:
         """
         return self._http.request("DELETE", f"/api/webhooks/{quote_path(id)}")
 
-    def update(
-        self,
-        id: str,
-        body: m.WebhookSubscriptionController_UpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WebhookSubscriptionService_SubscriptionView:
+    def update(self, id: str, body: m.WebhookSubscriptionController_UpdateRequest, *, idempotency_key: Optional[str] = None) -> m.WebhookSubscriptionService_SubscriptionView:
         """Update.
 
         PATCH /api/webhooks/{id}
 
         Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/webhooks/{quote_path(id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/webhooks/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def deliveries(
-        self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.WebhookSubscriptionController_DeliveryView]:
+    def deliveries(self, id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WebhookSubscriptionController_DeliveryView]:
         """Deliveries.
 
         GET /api/webhooks/{id}/deliveries
 
         Recent delivery attempts with status, so a receiver can see what failed and why.
         """
-        return self._http.request(
-            "GET",
-            f"/api/webhooks/{quote_path(id)}/deliveries",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/webhooks/{quote_path(id)}/deliveries", query={"limit": limit, "offset": offset})
 
-    def rotate_secret(
-        self, id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WebhookSubscriptionService_SubscriptionView:
+    def rotate_secret(self, id: str, *, idempotency_key: Optional[str] = None) -> m.WebhookSubscriptionService_SubscriptionView:
         """Rotate secret.
 
         POST /api/webhooks/{id}/rotate-secret
 
         Issue a new signing secret; deliveries are signed with it from now on. Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/webhooks/{quote_path(id)}/rotate-secret",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/webhooks/{quote_path(id)}/rotate-secret", headers={"Idempotency-Key": idempotency_key})
 
     def test(self, id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Test.
@@ -19764,52 +12379,28 @@ class WebhookSubscriptionApi:
 
         Queue a webhook.test delivery to the subscription's URL. Requires PERM_MANAGE_INTEGRATIONS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/webhooks/{quote_path(id)}/test",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/webhooks/{quote_path(id)}/test", headers={"Idempotency-Key": idempotency_key})
 
 
 class WhatsAppPolicyApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_opt_ins(
-        self,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        active_only: Optional[bool] = None,
-    ) -> List[m.WhatsAppPolicyController_OptInListItemResponse]:
+    def list_opt_ins(self, *, limit: Optional[int] = None, offset: Optional[int] = None, active_only: Optional[bool] = None) -> List[m.WhatsAppPolicyController_OptInListItemResponse]:
         """List opt ins.
 
         GET /api/channels/whatsapp-compliance/opt-in
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/whatsapp-compliance/opt-in",
-            query={"limit": limit, "offset": offset, "activeOnly": active_only},
-        )
+        return self._http.request("GET", "/api/channels/whatsapp-compliance/opt-in", query={"limit": limit, "offset": offset, "activeOnly": active_only})
 
-    def record_opt_in(
-        self,
-        body: m.WhatsAppPolicyController_OptInRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WhatsAppPolicyController_OptInResponse:
+    def record_opt_in(self, body: m.WhatsAppPolicyController_OptInRequest, *, idempotency_key: Optional[str] = None) -> m.WhatsAppPolicyController_OptInResponse:
         """Record opt in.
 
         POST /api/channels/whatsapp-compliance/opt-in
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/whatsapp-compliance/opt-in",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/whatsapp-compliance/opt-in", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def revoke_opt_in(self, *, phone: str) -> None:
         """Revoke opt in.
@@ -19818,12 +12409,7 @@ class WhatsAppPolicyApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            "/api/channels/whatsapp-compliance/opt-in",
-            query={"phone": phone},
-            response="void",
-        )
+        return self._http.request("DELETE", "/api/channels/whatsapp-compliance/opt-in", query={"phone": phone}, response="void")
 
     def quality(self) -> m.WhatsAppPolicyController_QualityResponse:
         """Quality.
@@ -19851,28 +12437,16 @@ class WhatsAppQrApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/whatsapp-qr/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/whatsapp-qr/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.WhatsAppQrController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WhatsAppQrController_SendResult:
+    def send(self, body: m.WhatsAppQrController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.WhatsAppQrController_SendResult:
         """Send.
 
         POST /api/channels/whatsapp-qr/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/whatsapp-qr/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/whatsapp-qr/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def status(self) -> m.WhatsAppQrStatusResponse:
         """Status.
@@ -19883,20 +12457,14 @@ class WhatsAppQrApi:
         """
         return self._http.request("GET", "/api/channels/whatsapp-qr/session")
 
-    def connect(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.WhatsAppQrStatusResponse:
+    def connect(self, *, idempotency_key: Optional[str] = None) -> m.WhatsAppQrStatusResponse:
         """Connect.
 
         POST /api/channels/whatsapp-qr/session
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/whatsapp-qr/session",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/channels/whatsapp-qr/session", headers={"Idempotency-Key": idempotency_key})
 
     def disconnect(self) -> None:
         """Disconnect.
@@ -19905,61 +12473,42 @@ class WhatsAppQrApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/whatsapp-qr/session", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/whatsapp-qr/session", response="void")
 
 
 class WhatsAppSendApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def set_default_agent(
-        self, body: m.WhatsAppSendController_WhatsAppDefaultAgentRequest
-    ) -> Dict[str, Any]:
+    def set_default_agent(self, body: m.WhatsAppSendController_WhatsAppDefaultAgentRequest) -> Dict[str, Any]:
         """Set default agent.
 
         PUT /api/channels/whatsapp/default-agent
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/whatsapp/default-agent", body=body
-        )
+        return self._http.request("PUT", "/api/channels/whatsapp/default-agent", body=body)
 
-    def send(
-        self, body: m.WhatsAppSendRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.WhatsAppSendResult:
+    def send(self, body: m.WhatsAppSendRequest, *, idempotency_key: Optional[str] = None) -> m.WhatsAppSendResult:
         """Send.
 
         POST /api/channels/whatsapp/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/whatsapp/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/whatsapp/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class WhatsAppTemplateApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self, *, limit: Optional[int] = None, offset: Optional[int] = None
-    ) -> List[m.WhatsAppTemplateController_WhatsAppTemplateResponse]:
+    def list(self, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WhatsAppTemplateController_WhatsAppTemplateResponse]:
         """List.
 
         GET /api/channels/whatsapp/templates
         """
-        return self._http.request(
-            "GET",
-            "/api/channels/whatsapp/templates",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/channels/whatsapp/templates", query={"limit": limit, "offset": offset})
 
 
 class WorkflowApi:
@@ -19975,21 +12524,14 @@ class WorkflowApi:
         """
         return self._http.request("GET", "/api/workflows")
 
-    def create(
-        self, body: m.WorkflowCreateRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowResponse:
+    def create(self, body: m.WorkflowCreateRequest, *, idempotency_key: Optional[str] = None) -> m.WorkflowResponse:
         """Create.
 
         POST /api/workflows
 
         Create a workflow from a name, description and graph. Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/workflows",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/workflows", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def get(self, workflow_id: str) -> m.WorkflowResponse:
         """Get.
@@ -20000,252 +12542,129 @@ class WorkflowApi:
         """
         return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}")
 
-    def update(
-        self,
-        workflow_id: str,
-        body: m.WorkflowUpdateRequest,
-        *,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def update(self, workflow_id: str, body: m.WorkflowUpdateRequest, *, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Update.
 
         PUT /api/workflows/{workflowId}
 
         Replace the workflow's name, description, graph and status. Send If-Match with the ETag from GET to refuse the write (412) when someone else changed it first.
         """
-        return self._http.request(
-            "PUT",
-            f"/api/workflows/{quote_path(workflow_id)}",
-            headers={"If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}", headers={"If-Match": if_match}, body=body)
 
     def delete(self, workflow_id: str, *, if_match: Optional[str] = None) -> None:
         """Delete.
 
         DELETE /api/workflows/{workflowId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}",
-            headers={"If-Match": if_match},
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}", headers={"If-Match": if_match}, response="void")
 
-    def set_cost_routing(
-        self,
-        workflow_id: str,
-        body: m.WorkflowCostRoutingUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def set_cost_routing(self, workflow_id: str, body: m.WorkflowCostRoutingUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Set cost routing.
 
         PATCH /api/workflows/{workflowId}/cost-routing
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/cost-routing",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/cost-routing", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def diagram(
-        self, workflow_id: str, *, format: Optional[str] = None
-    ) -> m.WorkflowDiagramResponse:
+    def diagram(self, workflow_id: str, *, format: Optional[str] = None) -> m.WorkflowDiagramResponse:
         """Diagram.
 
         GET /api/workflows/{workflowId}/diagram
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/diagram",
-            query={"format": format},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/diagram", query={"format": format})
 
     def diagram_pdf(self, workflow_id: str) -> bytes:
         """Diagram pdf.
 
         GET /api/workflows/{workflowId}/diagram/pdf
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/diagram/pdf",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/diagram/pdf", response="blob")
 
-    def duplicate(
-        self, workflow_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowResponse:
+    def duplicate(self, workflow_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowResponse:
         """Duplicate.
 
         POST /api/workflows/{workflowId}/duplicate
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/duplicate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/duplicate", headers={"Idempotency-Key": idempotency_key})
 
-    def eval_summary(
-        self, workflow_id: str, *, days: Optional[int] = None
-    ) -> Dict[str, Any]:
+    def eval_summary(self, workflow_id: str, *, days: Optional[int] = None) -> Dict[str, Any]:
         """Eval summary.
 
         GET /api/workflows/{workflowId}/eval-summary
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/eval-summary",
-            query={"days": days},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/eval-summary", query={"days": days})
 
-    def set_execution_limits(
-        self,
-        workflow_id: str,
-        body: m.WorkflowExecutionLimitsUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def set_execution_limits(self, workflow_id: str, body: m.WorkflowExecutionLimitsUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Set execution limits.
 
         PATCH /api/workflows/{workflowId}/execution-limits
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/execution-limits",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/execution-limits", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def generate_graph(
-        self,
-        workflow_id: str,
-        body: m.GenerateGraphRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.GenerateGraphResponse:
+    def generate_graph(self, workflow_id: str, body: m.GenerateGraphRequest, *, idempotency_key: Optional[str] = None) -> m.GenerateGraphResponse:
         """Generate graph.
 
         POST /api/workflows/{workflowId}/generate-graph
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/generate-graph",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/generate-graph", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def lint(
-        self,
-        workflow_id: str,
-        body: Optional[m.WorkflowController_LintRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowLintService_LintResult:
+    def lint(self, workflow_id: str, body: Optional[m.WorkflowController_LintRequest] = None, *, idempotency_key: Optional[str] = None) -> m.WorkflowLintService_LintResult:
         """Lint.
 
         POST /api/workflows/{workflowId}/lint
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/lint",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/lint", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get_poll_trigger(
-        self, workflow_id: str, node_id: str
-    ) -> m.WorkflowPollTriggerResponse:
+    def get_poll_trigger(self, workflow_id: str, node_id: str) -> m.WorkflowPollTriggerResponse:
         """Get poll trigger.
 
         GET /api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger")
 
-    def configure_poll_trigger(
-        self, workflow_id: str, node_id: str, body: m.WorkflowPollTriggerRequest
-    ) -> m.WorkflowPollTriggerResponse:
+    def configure_poll_trigger(self, workflow_id: str, node_id: str, body: m.WorkflowPollTriggerRequest) -> m.WorkflowPollTriggerResponse:
         """Configure poll trigger.
 
         PUT /api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger", body=body)
 
-    def disable_poll_trigger(
-        self, workflow_id: str, node_id: str
-    ) -> m.WorkflowPollTriggerResponse:
+    def disable_poll_trigger(self, workflow_id: str, node_id: str) -> m.WorkflowPollTriggerResponse:
         """Disable poll trigger.
 
         DELETE /api/workflows/{workflowId}/nodes/{nodeId}/poll-trigger
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/poll-trigger")
 
-    def test_node(
-        self,
-        workflow_id: str,
-        node_id: str,
-        body: Optional[m.WorkflowNodeTestRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.NodeTraceEntry:
+    def test_node(self, workflow_id: str, node_id: str, body: Optional[m.WorkflowNodeTestRequest] = None, *, idempotency_key: Optional[str] = None) -> m.NodeTraceEntry:
         """Test node.
 
         POST /api/workflows/{workflowId}/nodes/{nodeId}/test
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/test",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/test", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def get_trigger_channel(
-        self, workflow_id: str, node_id: str
-    ) -> m.WorkflowTriggerChannelResponse:
+    def get_trigger_channel(self, workflow_id: str, node_id: str) -> m.WorkflowTriggerChannelResponse:
         """Get trigger channel.
 
         GET /api/workflows/{workflowId}/nodes/{nodeId}/trigger-channel
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/trigger-channel",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/trigger-channel")
 
-    def set_trigger_channel(
-        self, workflow_id: str, node_id: str, body: m.WorkflowTriggerChannelRequest
-    ) -> m.WorkflowTriggerChannelResponse:
+    def set_trigger_channel(self, workflow_id: str, node_id: str, body: m.WorkflowTriggerChannelRequest) -> m.WorkflowTriggerChannelResponse:
         """Set trigger channel.
 
         PUT /api/workflows/{workflowId}/nodes/{nodeId}/trigger-channel
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/trigger-channel",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/trigger-channel", body=body)
 
     def get_webhook(self, workflow_id: str, node_id: str) -> m.WorkflowWebhookResponse:
         """Get webhook.
@@ -20254,253 +12673,142 @@ class WorkflowApi:
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook")
 
-    def enable_webhook(
-        self, workflow_id: str, node_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowWebhookResponse:
+    def enable_webhook(self, workflow_id: str, node_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowWebhookResponse:
         """Enable webhook.
 
         POST /api/workflows/{workflowId}/nodes/{nodeId}/webhook
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook", headers={"Idempotency-Key": idempotency_key})
 
-    def disable_webhook(
-        self, workflow_id: str, node_id: str
-    ) -> m.WorkflowWebhookResponse:
+    def disable_webhook(self, workflow_id: str, node_id: str) -> m.WorkflowWebhookResponse:
         """Disable webhook.
 
         DELETE /api/workflows/{workflowId}/nodes/{nodeId}/webhook
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook")
 
-    def get_webhook_signature(
-        self, workflow_id: str, node_id: str
-    ) -> m.WebhookSignatureResponse:
+    def get_webhook_signature(self, workflow_id: str, node_id: str) -> m.WebhookSignatureResponse:
         """Get webhook signature.
 
         GET /api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature")
 
-    def set_webhook_signature(
-        self, workflow_id: str, node_id: str, body: m.WebhookSignatureRequest
-    ) -> m.WebhookSignatureResponse:
+    def set_webhook_signature(self, workflow_id: str, node_id: str, body: m.WebhookSignatureRequest) -> m.WebhookSignatureResponse:
         """Set webhook signature.
 
         PUT /api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature", body=body)
 
-    def clear_webhook_signature(
-        self, workflow_id: str, node_id: str
-    ) -> m.WebhookSignatureResponse:
+    def clear_webhook_signature(self, workflow_id: str, node_id: str) -> m.WebhookSignatureResponse:
         """Clear webhook signature.
 
         DELETE /api/workflows/{workflowId}/nodes/{nodeId}/webhook/signature
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/webhook/signature")
 
-    def set_reasoning_depth(
-        self,
-        workflow_id: str,
-        body: m.WorkflowReasoningDepthUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def set_reasoning_depth(self, workflow_id: str, body: m.WorkflowReasoningDepthUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Set reasoning depth.
 
         PATCH /api/workflows/{workflowId}/reasoning-depth
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/reasoning-depth",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/reasoning-depth", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def run(
-        self,
-        workflow_id: str,
-        body: Optional[m.WorkflowRunRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowRunResponse:
+    def run(self, workflow_id: str, body: Optional[m.WorkflowRunRequest] = None, *, idempotency_key: Optional[str] = None) -> m.WorkflowRunResponse:
         """Run.
 
         POST /api/workflows/{workflowId}/run
 
         Start a run. Idempotency-Key here keeps its original meaning: a repeated key answers 409 rather than replaying; use clientRunId to find the first run.
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/run",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def runs(
-        self,
-        workflow_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        cursor: Optional[str] = None,
-    ) -> List[m.WorkflowRunResponse]:
+    def runs(self, workflow_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None, cursor: Optional[str] = None) -> List[m.WorkflowRunResponse]:
         """Runs.
 
         GET /api/workflows/{workflowId}/runs
 
         Run history, newest first (startedAt, then id). Page with limit and offset, or follow X-Next-Cursor with cursor for deep history. Keyset paging: pass the X-Next-Cursor value of a page as cursor to get the next one; offset is ignored and X-Total-Count is not sent when cursor is given.
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs",
-            query={"limit": limit, "offset": offset, "cursor": cursor},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs", query={"limit": limit, "offset": offset, "cursor": cursor})
 
     def get_run(self, workflow_id: str, run_id: str) -> m.WorkflowRunResponse:
         """Get run.
 
         GET /api/workflows/{workflowId}/runs/{runId}
         """
-        return self._http.request(
-            "GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}"
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}")
 
-    def cancel_run(
-        self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowRunResponse:
+    def cancel_run(self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowRunResponse:
         """Cancel run.
 
         POST /api/workflows/{workflowId}/runs/{runId}/cancel
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/cancel",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/cancel", headers={"Idempotency-Key": idempotency_key})
 
     def download_run_output(self, workflow_id: str, run_id: str) -> bytes:
         """Download run output.
 
         GET /api/workflows/{workflowId}/runs/{runId}/download
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/download",
-            response="blob",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/download", response="blob")
 
-    def run_events(
-        self, workflow_id: str, run_id: str, *, last_event_id: Optional[str] = None
-    ) -> Iterator[str]:
+    def run_events(self, workflow_id: str, run_id: str, *, last_event_id: Optional[str] = None) -> Iterator[str]:
         """Run events.
 
         GET /api/workflows/{workflowId}/runs/{runId}/events
 
         Live run progress as Server-Sent Events named snapshot, run.*, node.* and error; each data is {seq, type, nodeId, ts, data}. Reconnect with Last-Event-ID to resume after the last seq seen. Streams the response as Server-Sent Events (text/event-stream); each event's data field carries the next chunk.
         """
-        return self._http.stream(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/events",
-            headers={"Last-Event-ID": last_event_id},
-        )
+        return self._http.stream("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/events", headers={"Last-Event-ID": last_event_id})
 
-    def run_llm_requests(
-        self,
-        workflow_id: str,
-        run_id: str,
-        *,
-        from_: Optional[str] = None,
-        to: Optional[str] = None,
-    ) -> List[m.LlmRequestSnapshot]:
+    def run_llm_requests(self, workflow_id: str, run_id: str, *, from_: Optional[str] = None, to: Optional[str] = None) -> List[m.LlmRequestSnapshot]:
         """Run llm requests.
 
         GET /api/workflows/{workflowId}/runs/{runId}/llm-requests
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/llm-requests",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/llm-requests", query={"from": from_, "to": to})
 
-    def pause_run(
-        self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowRunResponse:
+    def pause_run(self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowRunResponse:
         """Pause run.
 
         POST /api/workflows/{workflowId}/runs/{runId}/pause
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/pause",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/pause", headers={"Idempotency-Key": idempotency_key})
 
-    def resume_run(
-        self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowRunResponse:
+    def resume_run(self, workflow_id: str, run_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowRunResponse:
         """Resume run.
 
         POST /api/workflows/{workflowId}/runs/{runId}/resume
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/resume",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/resume", headers={"Idempotency-Key": idempotency_key})
 
     def get_schedule(self, workflow_id: str) -> m.WorkflowScheduleResponse:
         """Get schedule.
 
         GET /api/workflows/{workflowId}/schedule
         """
-        return self._http.request(
-            "GET", f"/api/workflows/{quote_path(workflow_id)}/schedule"
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/schedule")
 
-    def enable_schedule(
-        self, workflow_id: str, body: m.WorkflowScheduleRequest
-    ) -> m.WorkflowScheduleResponse:
+    def enable_schedule(self, workflow_id: str, body: m.WorkflowScheduleRequest) -> m.WorkflowScheduleResponse:
         """Enable schedule.
 
         PUT /api/workflows/{workflowId}/schedule
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", f"/api/workflows/{quote_path(workflow_id)}/schedule", body=body
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}/schedule", body=body)
 
     def disable_schedule(self, workflow_id: str) -> m.WorkflowScheduleResponse:
         """Disable schedule.
@@ -20509,130 +12817,61 @@ class WorkflowApi:
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", f"/api/workflows/{quote_path(workflow_id)}/schedule"
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/schedule")
 
-    def set_step_caching(
-        self,
-        workflow_id: str,
-        body: m.WorkflowStepCachingUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def set_step_caching(self, workflow_id: str, body: m.WorkflowStepCachingUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Set step caching.
 
         PATCH /api/workflows/{workflowId}/step-caching
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/step-caching",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/step-caching", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def set_tuning_mode(
-        self,
-        workflow_id: str,
-        body: m.WorkflowTuningModeUpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-        if_match: Optional[str] = None,
-    ) -> m.WorkflowResponse:
+    def set_tuning_mode(self, workflow_id: str, body: m.WorkflowTuningModeUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.WorkflowResponse:
         """Set tuning mode.
 
         PATCH /api/workflows/{workflowId}/tuning-mode
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/tuning-mode",
-            headers={"Idempotency-Key": idempotency_key, "If-Match": if_match},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/tuning-mode", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
-    def validate(
-        self, workflow_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.ValidationResult:
+    def validate(self, workflow_id: str, *, idempotency_key: Optional[str] = None) -> m.ValidationResult:
         """Validate.
 
         POST /api/workflows/{workflowId}/validate
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/validate",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/validate", headers={"Idempotency-Key": idempotency_key})
 
 
 class WorkflowCommentApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        workflow_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.WorkflowCommentService_CommentView]:
+    def list(self, workflow_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WorkflowCommentService_CommentView]:
         """List.
 
         GET /api/workflows/{workflowId}/comments
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/comments",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/comments", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        workflow_id: str,
-        body: m.WorkflowCommentService_CreateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowCommentService_CommentView:
+    def create(self, workflow_id: str, body: m.WorkflowCommentService_CreateRequest, *, idempotency_key: Optional[str] = None) -> m.WorkflowCommentService_CommentView:
         """Create.
 
         POST /api/workflows/{workflowId}/comments
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/comments",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/comments", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def delete(self, workflow_id: str, comment_id: str) -> None:
         """Delete.
 
         DELETE /api/workflows/{workflowId}/comments/{commentId}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}/comments/{quote_path(comment_id)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/comments/{quote_path(comment_id)}", response="void")
 
-    def update(
-        self,
-        workflow_id: str,
-        comment_id: str,
-        body: m.WorkflowCommentService_UpdateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowCommentService_CommentView:
+    def update(self, workflow_id: str, comment_id: str, body: m.WorkflowCommentService_UpdateRequest, *, idempotency_key: Optional[str] = None) -> m.WorkflowCommentService_CommentView:
         """Update.
 
         PATCH /api/workflows/{workflowId}/comments/{commentId}
         """
-        return self._http.request(
-            "PATCH",
-            f"/api/workflows/{quote_path(workflow_id)}/comments/{quote_path(comment_id)}",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("PATCH", f"/api/workflows/{quote_path(workflow_id)}/comments/{quote_path(comment_id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class WorkflowExportApi:
@@ -20644,9 +12883,7 @@ class WorkflowExportApi:
 
         GET /api/workflows/{workflowId}/export
         """
-        return self._http.request(
-            "GET", f"/api/workflows/{quote_path(workflow_id)}/export", response="blob"
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/export", response="blob")
 
 
 class WorkflowExpressionApi:
@@ -20660,53 +12897,26 @@ class WorkflowExpressionApi:
         """
         return self._http.request("GET", "/api/workflow-expression-functions")
 
-    def evaluate(
-        self,
-        workflow_id: str,
-        body: m.WorkflowExpressionApi_EvaluateRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowExpressionApi_EvaluateResponse:
+    def evaluate(self, workflow_id: str, body: m.WorkflowExpressionApi_EvaluateRequest, *, idempotency_key: Optional[str] = None) -> m.WorkflowExpressionApi_EvaluateResponse:
         """Evaluate.
 
         POST /api/workflows/{workflowId}/expressions/evaluate
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/expressions/evaluate",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/expressions/evaluate", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def lint(
-        self,
-        workflow_id: str,
-        body: m.WorkflowExpressionApi_LintRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowExpressionApi_LintResponse:
+    def lint(self, workflow_id: str, body: m.WorkflowExpressionApi_LintRequest, *, idempotency_key: Optional[str] = None) -> m.WorkflowExpressionApi_LintResponse:
         """Lint.
 
         POST /api/workflows/{workflowId}/expressions/lint
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/expressions/lint",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/expressions/lint", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def upstream_schema(
-        self, workflow_id: str, node_id: str
-    ) -> m.WorkflowExpressionApi_UpstreamSchemaResponse:
+    def upstream_schema(self, workflow_id: str, node_id: str) -> m.WorkflowExpressionApi_UpstreamSchemaResponse:
         """Upstream schema.
 
         GET /api/workflows/{workflowId}/nodes/{nodeId}/upstream-schema
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/upstream-schema",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/upstream-schema")
 
 
 class WorkflowFormApi:
@@ -20720,9 +12930,7 @@ class WorkflowFormApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET", f"/api/public/workflow-forms/{quote_path(token)}"
-        )
+        return self._http.request("GET", f"/api/public/workflow-forms/{quote_path(token)}")
 
     def submit(self, token: str, body: Optional[Dict[str, Any]] = None) -> Any:
         """Submit.
@@ -20731,143 +12939,82 @@ class WorkflowFormApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/public/workflow-forms/{quote_path(token)}", body=body
-        )
+        return self._http.request("POST", f"/api/public/workflow-forms/{quote_path(token)}", body=body)
 
 
 class WorkflowImportApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def import_workflow(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.PortabilityDtos_ImportResponse:
+    def import_workflow(self, *, idempotency_key: Optional[str] = None) -> m.PortabilityDtos_ImportResponse:
         """Import workflow.
 
         POST /api/workflows/import
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/workflows/import",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/workflows/import", headers={"Idempotency-Key": idempotency_key})
 
-    def preview(
-        self, *, idempotency_key: Optional[str] = None
-    ) -> m.PortabilityDtos_PreviewResponse:
+    def preview(self, *, idempotency_key: Optional[str] = None) -> m.PortabilityDtos_PreviewResponse:
         """Preview.
 
         POST /api/workflows/import/preview
 
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/workflows/import/preview",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", "/api/workflows/import/preview", headers={"Idempotency-Key": idempotency_key})
 
 
 class WorkflowInputRequestApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        *,
-        status: Optional[m.WorkflowInputRequestStatus] = None,
-        run_id: Optional[str] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.WorkflowInputRequestController_InputRequestView]:
+    def list(self, *, status: Optional[m.WorkflowInputRequestStatus] = None, run_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WorkflowInputRequestController_InputRequestView]:
         """List.
 
         GET /api/workflows/input-requests
         """
-        return self._http.request(
-            "GET",
-            "/api/workflows/input-requests",
-            query={"status": status, "runId": run_id, "limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", "/api/workflows/input-requests", query={"status": status, "runId": run_id, "limit": limit, "offset": offset})
 
     def get(self, id: str) -> m.WorkflowInputRequestController_InputRequestView:
         """Get.
 
         GET /api/workflows/input-requests/{id}
         """
-        return self._http.request(
-            "GET", f"/api/workflows/input-requests/{quote_path(id)}"
-        )
+        return self._http.request("GET", f"/api/workflows/input-requests/{quote_path(id)}")
 
-    def submit(
-        self,
-        id: str,
-        body: Optional[m.WorkflowInputRequestController_SubmitRequest] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def submit(self, id: str, body: Optional[m.WorkflowInputRequestController_SubmitRequest] = None, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Submit.
 
         POST /api/workflows/input-requests/{id}/submit
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/input-requests/{quote_path(id)}/submit",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/input-requests/{quote_path(id)}/submit", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class WorkflowPinApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def put(
-        self,
-        workflow_id: str,
-        node_id: str,
-        body: Optional[m.WorkflowPinRequest] = None,
-    ) -> m.WorkflowPinResponse:
+    def put(self, workflow_id: str, node_id: str, body: Optional[m.WorkflowPinRequest] = None) -> m.WorkflowPinResponse:
         """Put.
 
         PUT /api/workflows/{workflowId}/nodes/{nodeId}/pin
         """
-        return self._http.request(
-            "PUT",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/pin",
-            body=body,
-        )
+        return self._http.request("PUT", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/pin", body=body)
 
     def delete(self, workflow_id: str, node_id: str) -> None:
         """Delete.
 
         DELETE /api/workflows/{workflowId}/nodes/{nodeId}/pin
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/pin",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/nodes/{quote_path(node_id)}/pin", response="void")
 
-    def list(
-        self,
-        workflow_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.WorkflowPinResponse]:
+    def list(self, workflow_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WorkflowPinResponse]:
         """List.
 
         GET /api/workflows/{workflowId}/pins
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/pins",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/pins", query={"limit": limit, "offset": offset})
 
 
 class WorkflowShareApi:
@@ -20883,76 +13030,49 @@ class WorkflowShareApi:
         """
         return self._http.request("GET", f"/api/share/workflows/{quote_path(share_id)}")
 
-    def report(
-        self,
-        share_id: str,
-        body: Optional[m.WorkflowShareController_ShareReportRequest] = None,
-    ) -> None:
+    def report(self, share_id: str, body: Optional[m.WorkflowShareController_ShareReportRequest] = None) -> None:
         """Report.
 
         POST /api/share/workflows/{shareId}/report
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/share/workflows/{quote_path(share_id)}/report",
-            body=body,
-            response="void",
-        )
+        return self._http.request("POST", f"/api/share/workflows/{quote_path(share_id)}/report", body=body, response="void")
 
-    def run(
-        self,
-        share_id: str,
-        body: Optional[m.WorkflowShareController_ShareRunRequest] = None,
-    ) -> Any:
+    def run(self, share_id: str, body: Optional[m.WorkflowShareController_ShareRunRequest] = None) -> Any:
         """Run.
 
         POST /api/share/workflows/{shareId}/run
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/api/share/workflows/{quote_path(share_id)}/run", body=body
-        )
+        return self._http.request("POST", f"/api/share/workflows/{quote_path(share_id)}/run", body=body)
 
 
 class WorkflowShareOwnerApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def status(
-        self, workflow_id: str
-    ) -> m.WorkflowShareOwnerController_ShareStatusResponse:
+    def status(self, workflow_id: str) -> m.WorkflowShareOwnerController_ShareStatusResponse:
         """Status.
 
         GET /api/workflows/{workflowId}/share
         """
-        return self._http.request(
-            "GET", f"/api/workflows/{quote_path(workflow_id)}/share"
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/share")
 
-    def create(
-        self, workflow_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowShareOwnerController_ShareStatusResponse:
+    def create(self, workflow_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowShareOwnerController_ShareStatusResponse:
         """Create.
 
         POST /api/workflows/{workflowId}/share
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/share",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/share", headers={"Idempotency-Key": idempotency_key})
 
     def revoke(self, workflow_id: str) -> None:
         """Revoke.
 
         DELETE /api/workflows/{workflowId}/share
         """
-        return self._http.request(
-            "DELETE", f"/api/workflows/{quote_path(workflow_id)}/share", response="void"
-        )
+        return self._http.request("DELETE", f"/api/workflows/{quote_path(workflow_id)}/share", response="void")
 
 
 class WorkflowShareVoiceApi:
@@ -20966,134 +13086,68 @@ class WorkflowShareVoiceApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/api/share/workflows/{quote_path(share_id)}/turn",
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", f"/api/share/workflows/{quote_path(share_id)}/turn", body=body, body_type="multipart")
 
 
 class WorkflowVersionApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def diff_runs(
-        self, workflow_id: str, run_id: str, other_run_id: str
-    ) -> Dict[str, Any]:
+    def diff_runs(self, workflow_id: str, run_id: str, other_run_id: str) -> Dict[str, Any]:
         """Diff runs.
 
         GET /api/workflows/{workflowId}/runs/{runId}/diff/{otherRunId}
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/diff/{quote_path(other_run_id)}",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/diff/{quote_path(other_run_id)}")
 
-    def list(
-        self,
-        workflow_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[m.WorkflowVersionResponse]:
+    def list(self, workflow_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.WorkflowVersionResponse]:
         """List.
 
         GET /api/workflows/{workflowId}/versions
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/versions",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/versions", query={"limit": limit, "offset": offset})
 
-    def publish(
-        self,
-        workflow_id: str,
-        body: Optional[Dict[str, str]] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def publish(self, workflow_id: str, body: Optional[Dict[str, str]] = None, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Publish.
 
         POST /api/workflows/{workflowId}/versions
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/versions",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/versions", headers={"Idempotency-Key": idempotency_key}, body=body)
 
     def diff_versions(self, workflow_id: str, *, from_: int, to: int) -> Dict[str, Any]:
         """Diff versions.
 
         GET /api/workflows/{workflowId}/versions/diff
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/versions/diff",
-            query={"from": from_, "to": to},
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/versions/diff", query={"from": from_, "to": to})
 
-    def rollback(
-        self, workflow_id: str, *, idempotency_key: Optional[str] = None
-    ) -> m.WorkflowVersionResponse:
+    def rollback(self, workflow_id: str, *, idempotency_key: Optional[str] = None) -> m.WorkflowVersionResponse:
         """Rollback.
 
         POST /api/workflows/{workflowId}/versions/rollback
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/versions/rollback",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/versions/rollback", headers={"Idempotency-Key": idempotency_key})
 
     def get(self, workflow_id: str, version_number: int) -> Dict[str, Any]:
         """Get.
 
         GET /api/workflows/{workflowId}/versions/{versionNumber}
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}")
 
-    def promote(
-        self,
-        workflow_id: str,
-        version_number: int,
-        body: Optional[Dict[str, str]] = None,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.WorkflowVersionResponse:
+    def promote(self, workflow_id: str, version_number: int, body: Optional[Dict[str, str]] = None, *, idempotency_key: Optional[str] = None) -> m.WorkflowVersionResponse:
         """Promote.
 
         POST /api/workflows/{workflowId}/versions/{versionNumber}/promote
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}/promote",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}/promote", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def restore(
-        self,
-        workflow_id: str,
-        version_number: int,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def restore(self, workflow_id: str, version_number: int, *, idempotency_key: Optional[str] = None) -> Any:
         """Restore.
 
         POST /api/workflows/{workflowId}/versions/{versionNumber}/restore
         """
-        return self._http.request(
-            "POST",
-            f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}/restore",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/workflows/{quote_path(workflow_id)}/versions/{quote_path(version_number)}/restore", headers={"Idempotency-Key": idempotency_key})
 
 
 class WorkflowWaitApi:
@@ -21105,10 +13159,7 @@ class WorkflowWaitApi:
 
         GET /api/workflows/{workflowId}/runs/{runId}/wait
         """
-        return self._http.request(
-            "GET",
-            f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/wait",
-        )
+        return self._http.request("GET", f"/api/workflows/{quote_path(workflow_id)}/runs/{quote_path(run_id)}/wait")
 
 
 class WorkflowWaitWebhookApi:
@@ -21122,34 +13173,21 @@ class WorkflowWaitWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/webhook/workflow-waits/{quote_path(token)}", body=body
-        )
+        return self._http.request("POST", f"/webhook/workflow-waits/{quote_path(token)}", body=body)
 
 
 class WorkflowWebhookApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def trigger_oidc(
-        self,
-        workflow_id: str,
-        body: Optional[Dict[str, Any]] = None,
-        *,
-        authorization: Optional[str] = None,
-    ) -> Any:
+    def trigger_oidc(self, workflow_id: str, body: Optional[Dict[str, Any]] = None, *, authorization: Optional[str] = None) -> Any:
         """Trigger oidc.
 
         POST /webhook/workflows/oidc/{workflowId}
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST",
-            f"/webhook/workflows/oidc/{quote_path(workflow_id)}",
-            headers={"Authorization": authorization},
-            body=body,
-        )
+        return self._http.request("POST", f"/webhook/workflows/oidc/{quote_path(workflow_id)}", headers={"Authorization": authorization}, body=body)
 
     def trigger(self, token: str, body: Optional[str] = None) -> Any:
         """Trigger.
@@ -21158,9 +13196,7 @@ class WorkflowWebhookApi:
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "POST", f"/webhook/workflows/{quote_path(token)}", body=body
-        )
+        return self._http.request("POST", f"/webhook/workflows/{quote_path(token)}", body=body)
 
 
 class WorkspaceFolderApi:
@@ -21179,109 +13215,58 @@ class WorkspaceFolderApi:
 
         POST /api/assistant/workspace/files
         """
-        return self._http.request(
-            "POST",
-            "/api/assistant/workspace/files",
-            query={"folder": folder},
-            body=body,
-            body_type="multipart",
-        )
+        return self._http.request("POST", "/api/assistant/workspace/files", query={"folder": folder}, body=body, body_type="multipart")
 
-    def create_folder(
-        self,
-        body: m.WorkspaceFolderController_CreateFolderRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Any:
+    def create_folder(self, body: m.WorkspaceFolderController_CreateFolderRequest, *, idempotency_key: Optional[str] = None) -> Any:
         """Create folder.
 
         POST /api/assistant/workspace/folders
         """
-        return self._http.request(
-            "POST",
-            "/api/assistant/workspace/folders",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/assistant/workspace/folders", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def previews(
-        self, *, limit: Optional[int] = None
-    ) -> List[m.WorkspaceFolderController_PreviewEntry]:
+    def previews(self, *, limit: Optional[int] = None) -> List[m.WorkspaceFolderController_PreviewEntry]:
         """Previews.
 
         GET /api/assistant/workspace/previews
         """
-        return self._http.request(
-            "GET", "/api/assistant/workspace/previews", query={"limit": limit}
-        )
+        return self._http.request("GET", "/api/assistant/workspace/previews", query={"limit": limit})
 
     def stop_preview(self, port: int) -> None:
         """Stop preview.
 
         DELETE /api/assistant/workspace/previews/{port}
         """
-        return self._http.request(
-            "DELETE",
-            f"/api/assistant/workspace/previews/{quote_path(port)}",
-            response="void",
-        )
+        return self._http.request("DELETE", f"/api/assistant/workspace/previews/{quote_path(port)}", response="void")
 
 
 class X402OfferApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list(
-        self,
-        agent_id: str,
-        *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[Dict[str, Any]]:
         """List.
 
         GET /api/agents/{agentId}/x402/offers
         """
-        return self._http.request(
-            "GET",
-            f"/api/agents/{quote_path(agent_id)}/x402/offers",
-            query={"limit": limit, "offset": offset},
-        )
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/x402/offers", query={"limit": limit, "offset": offset})
 
-    def create(
-        self,
-        agent_id: str,
-        body: m.X402OfferController_CreateOfferRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    def create(self, agent_id: str, body: m.X402OfferController_CreateOfferRequest, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Create.
 
         POST /api/agents/{agentId}/x402/offers
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/x402/offers",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/x402/offers", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def disable(
-        self, agent_id: str, offer_id: str, *, idempotency_key: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def disable(self, agent_id: str, offer_id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
         """Disable.
 
         POST /api/agents/{agentId}/x402/offers/{offerId}/disable
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            f"/api/agents/{quote_path(agent_id)}/x402/offers/{quote_path(offer_id)}/disable",
-            headers={"Idempotency-Key": idempotency_key},
-        )
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/x402/offers/{quote_path(offer_id)}/disable", headers={"Idempotency-Key": idempotency_key})
 
 
 class X402ResourceApi:
@@ -21327,9 +13312,7 @@ class XoAuthApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "DELETE", "/api/channels/x/connection", response="void"
-        )
+        return self._http.request("DELETE", "/api/channels/x/connection", response="void")
 
     def current(self) -> m.XConnectionResponse:
         """Current.
@@ -21338,41 +13321,23 @@ class XoAuthApi:
         """
         return self._http.request("GET", "/api/channels/x/credential")
 
-    def register_app(
-        self, body: m.XAppRegistrationRequest, *, idempotency_key: Optional[str] = None
-    ) -> m.XConnectionResponse:
+    def register_app(self, body: m.XAppRegistrationRequest, *, idempotency_key: Optional[str] = None) -> m.XConnectionResponse:
         """Register app.
 
         POST /api/channels/x/credential
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/x/credential",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/x/credential", headers={"Idempotency-Key": idempotency_key}, body=body)
 
-    def callback(
-        self,
-        *,
-        code: Optional[str] = None,
-        state: Optional[str] = None,
-        error: Optional[str] = None,
-    ) -> None:
+    def callback(self, *, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None) -> None:
         """Callback.
 
         GET /oauth/x/callback
 
         Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler.
         """
-        return self._http.request(
-            "GET",
-            "/oauth/x/callback",
-            query={"code": code, "state": state, "error": error},
-            response="void",
-        )
+        return self._http.request("GET", "/oauth/x/callback", query={"code": code, "state": state, "error": error}, response="void")
 
 
 class XSendApi:
@@ -21386,28 +13351,16 @@ class XSendApi:
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "PUT", "/api/channels/x/default-agent", body=body, response="void"
-        )
+        return self._http.request("PUT", "/api/channels/x/default-agent", body=body, response="void")
 
-    def send(
-        self,
-        body: m.XSendController_SendRequest,
-        *,
-        idempotency_key: Optional[str] = None,
-    ) -> m.XSendController_SendResult:
+    def send(self, body: m.XSendController_SendRequest, *, idempotency_key: Optional[str] = None) -> m.XSendController_SendResult:
         """Send.
 
         POST /api/channels/x/send
 
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
-        return self._http.request(
-            "POST",
-            "/api/channels/x/send",
-            headers={"Idempotency-Key": idempotency_key},
-            body=body,
-        )
+        return self._http.request("POST", "/api/channels/x/send", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
 class VegadutaClient:
@@ -21421,9 +13374,7 @@ class VegadutaClient:
         timeout: float = 60.0,
         headers: Optional[Dict[str, str]] = None,
     ) -> None:
-        self.http = HttpClient(
-            base_url=base_url, token=token, timeout=timeout, headers=headers
-        )
+        self.http = HttpClient(base_url=base_url, token=token, timeout=timeout, headers=headers)
         self.a2a_agent_card = A2aAgentCardApi(self.http)
         self.a2a_console = A2aConsoleApi(self.http)
         self.a2a_json_rpc = A2aJsonRpcApi(self.http)
