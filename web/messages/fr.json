@@ -119,12 +119,12 @@
   "languageSwitcher": {
     "label": "Langue",
     "resetToEnglish": "Passer à l'anglais",
-    "packTitle": "Download {label}?",
-    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
-    "packDownload": "Download",
-    "packDownloading": "Downloading…",
-    "packCancel": "Not now",
-    "packFailed": "Download failed - check the connection and try again."
+    "packTitle": "Télécharger {label} ?",
+    "packBody": "Cette installation personnelle conserve les packs de langue hors de l'appareil tant que vous ne les demandez pas. {label} fait environ {size} — un téléchargement unique, stocké sur cet appareil.",
+    "packDownload": "Télécharger",
+    "packDownloading": "Téléchargement…",
+    "packCancel": "Pas maintenant",
+    "packFailed": "Échec du téléchargement — vérifiez la connexion et réessayez."
   },
   "signup": {
     "eyebrow": "Compte gratuit",
@@ -290,7 +290,7 @@
         "pinLabel": "Code PIN",
         "pinLabelDevice": "Code PIN pour {device}",
         "pinButton": "Déverrouiller",
-        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+        "pinNotEnrolled": "Un code PIN ne fonctionne que sur le navigateur où il a été configuré — celui-ci n'est pas enregistré. Connectez-vous autrement, puis ajoutez le code PIN de ce navigateur dans Sécurité du compte."
       },
       "forgot": {
         "intro": "Demandez un lien de réinitialisation. Il est enregistré dans un fichier sur la machine hôte — la preuve qu'il s'agit bien de vous, cette page étant publique.",
@@ -16659,6 +16659,12 @@
     "copied": "Copié",
     "manageNote": "Surveillez les appels et publiez la fiche sur"
   },
+  "keyboard": {
+    "toggle": "Clavier virtuel",
+    "unavailable": "Aucun clavier virtuel pour cette langue",
+    "title": "Clavier virtuel",
+    "close": "Fermer le clavier"
+  },
   "_sourceHash": {
     "landing.atlas_eyebrow": "ef47d35f51e741ea",
     "landing.atlas_title": "450deaa826227fb4",
@@ -32205,12 +32211,17 @@
     "a2aPanel.manageNote": "21aec7ac83e496c2",
     "assistant.cmdArg_export": "e3b0c44298fc1c14",
     "assistant.cmdArg_new": "e3b0c44298fc1c14",
-    "assistant.cmdArg_help": "e3b0c44298fc1c14"
-  },
-  "keyboard": {
-    "toggle": "On-screen keyboard",
-    "unavailable": "No on-screen keyboard for this language",
-    "title": "On-screen keyboard",
-    "close": "Close keyboard"
+    "assistant.cmdArg_help": "e3b0c44298fc1c14",
+    "languageSwitcher.packTitle": "a34e8480dae5ad09",
+    "languageSwitcher.packBody": "15415e326f749d83",
+    "languageSwitcher.packDownload": "d6eafe8235910042",
+    "languageSwitcher.packDownloading": "a778d3492af219c3",
+    "languageSwitcher.packCancel": "a0e63d7c7125d29a",
+    "languageSwitcher.packFailed": "148c1b9f7c8efd09",
+    "keyboard.toggle": "8dc08a0c777afebe",
+    "keyboard.unavailable": "da75a2bffe4b8daa",
+    "keyboard.title": "8dc08a0c777afebe",
+    "keyboard.close": "d8232cf4eb240844",
+    "signin.local.signin.pinNotEnrolled": "c8ac94e0c9efaa9c"
   }
 }

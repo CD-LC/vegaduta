@@ -119,12 +119,12 @@
   "languageSwitcher": {
     "label": "भाषा",
     "resetToEnglish": "अंग्रेज़ी में बदलें",
-    "packTitle": "Download {label}?",
-    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
-    "packDownload": "Download",
-    "packDownloading": "Downloading…",
-    "packCancel": "Not now",
-    "packFailed": "Download failed - check the connection and try again."
+    "packTitle": "{label} डाउनलोड करें?",
+    "packBody": "यह पर्सनल इंस्टॉल भाषा पैक को तब तक डिवाइस पर नहीं रखता जब तक आप न चाहें। {label} का आकार लगभग {size} है — एक बार का डाउनलोड, जो इसी मशीन पर सेव रहेगा।",
+    "packDownload": "डाउनलोड करें",
+    "packDownloading": "डाउनलोड हो रहा है…",
+    "packCancel": "अभी नहीं",
+    "packFailed": "डाउनलोड विफल रहा — कनेक्शन जांचें और फिर प्रयास करें।"
   },
   "signup": {
     "eyebrow": "मुफ़्त खाता",
@@ -389,7 +389,7 @@
         "pinLabel": "पिन",
         "pinLabelDevice": "{device} के लिए पिन",
         "pinButton": "अनलॉक करें",
-        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+        "pinNotEnrolled": "पिन केवल उसी ब्राउज़र में काम करता है जिसमें इसे सेट किया गया था — यह ब्राउज़र रजिस्टर्ड नहीं है। किसी अन्य तरीके से साइन इन करें, फिर खाता सुरक्षा में इस ब्राउज़र का पिन जोड़ें।"
       },
       "forgot": {
         "intro": "रीसेट लिंक का अनुरोध करें। यह इस इंस्टॉलेशन को चलाने वाले कंप्यूटर पर एक फ़ाइल में सहेजा जाता है - इससे पुष्टि होती है कि यह वास्तव में आप ही हैं, क्योंकि इस पेज तक कोई भी पहुंच सकता है।",
@@ -16659,6 +16659,12 @@
     "copied": "कॉपी किया गया",
     "manageNote": "कॉल मॉनिटर करें और कार्ड को यहाँ प्रकाशित करें:"
   },
+  "keyboard": {
+    "toggle": "ऑन-स्क्रीन कीबोर्ड",
+    "unavailable": "इस भाषा के लिए कोई ऑन-स्क्रीन कीबोर्ड उपलब्ध नहीं है",
+    "title": "ऑन-स्क्रीन कीबोर्ड",
+    "close": "कीबोर्ड बंद करें"
+  },
   "_sourceHash": {
     "landing.atlas_eyebrow": "ef47d35f51e741ea",
     "landing.atlas_title": "450deaa826227fb4",
@@ -32204,12 +32210,17 @@
     "a2aPanel.manageNote": "21aec7ac83e496c2",
     "assistant.cmdArg_export": "e3b0c44298fc1c14",
     "assistant.cmdArg_new": "e3b0c44298fc1c14",
-    "assistant.cmdArg_help": "e3b0c44298fc1c14"
-  },
-  "keyboard": {
-    "toggle": "On-screen keyboard",
-    "unavailable": "No on-screen keyboard for this language",
-    "title": "On-screen keyboard",
-    "close": "Close keyboard"
+    "assistant.cmdArg_help": "e3b0c44298fc1c14",
+    "languageSwitcher.packTitle": "a34e8480dae5ad09",
+    "languageSwitcher.packBody": "15415e326f749d83",
+    "languageSwitcher.packDownload": "d6eafe8235910042",
+    "languageSwitcher.packDownloading": "a778d3492af219c3",
+    "languageSwitcher.packCancel": "a0e63d7c7125d29a",
+    "languageSwitcher.packFailed": "148c1b9f7c8efd09",
+    "keyboard.toggle": "8dc08a0c777afebe",
+    "keyboard.unavailable": "da75a2bffe4b8daa",
+    "keyboard.title": "8dc08a0c777afebe",
+    "keyboard.close": "d8232cf4eb240844",
+    "signin.local.signin.pinNotEnrolled": "c8ac94e0c9efaa9c"
   }
 }

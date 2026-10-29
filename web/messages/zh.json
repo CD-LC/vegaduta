@@ -119,12 +119,12 @@
   "languageSwitcher": {
     "label": "语言",
     "resetToEnglish": "切换至英文",
-    "packTitle": "Download {label}?",
-    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
-    "packDownload": "Download",
-    "packDownloading": "Downloading…",
-    "packCancel": "Not now",
-    "packFailed": "Download failed - check the connection and try again."
+    "packTitle": "下载 {label}？",
+    "packBody": "此个人安装仅在需要时才下载语言包。{label} 大小约为 {size}——单次下载，保存在本机。",
+    "packDownload": "下载",
+    "packDownloading": "正在下载…",
+    "packCancel": "暂不",
+    "packFailed": "下载失败——请检查网络连接后重试。"
   },
   "signup": {
     "eyebrow": "免费账户",
@@ -290,7 +290,7 @@
         "pinLabel": "PIN 码",
         "pinLabelDevice": "{device} 的 PIN 码",
         "pinButton": "解锁",
-        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+        "pinNotEnrolled": "PIN 码仅在初次设置的浏览器中有效，当前浏览器尚未注册。请使用其他方式登录，然后在“账户安全”中添加此浏览器的 PIN 码。"
       },
       "forgot": {
         "intro": "请求重置链接。该链接会保存为此安装程序所在电脑上的一个文件——由于任何人都可以访问此页面，以此来验证确实是您本人。",
@@ -16659,6 +16659,12 @@
     "copied": "已复制",
     "manageNote": "在以下位置监控调用并发布卡片："
   },
+  "keyboard": {
+    "toggle": "屏幕键盘",
+    "unavailable": "该语言暂无屏幕键盘",
+    "title": "屏幕键盘",
+    "close": "关闭键盘"
+  },
   "_sourceHash": {
     "landing.atlas_eyebrow": "ef47d35f51e741ea",
     "landing.atlas_title": "450deaa826227fb4",
@@ -32205,12 +32211,17 @@
     "codingTasks.phase_TESTING": "6effe77ed6628990",
     "assistant.cmdArg_export": "e3b0c44298fc1c14",
     "assistant.cmdArg_new": "e3b0c44298fc1c14",
-    "assistant.cmdArg_help": "e3b0c44298fc1c14"
-  },
-  "keyboard": {
-    "toggle": "On-screen keyboard",
-    "unavailable": "No on-screen keyboard for this language",
-    "title": "On-screen keyboard",
-    "close": "Close keyboard"
+    "assistant.cmdArg_help": "e3b0c44298fc1c14",
+    "languageSwitcher.packTitle": "a34e8480dae5ad09",
+    "languageSwitcher.packBody": "15415e326f749d83",
+    "languageSwitcher.packDownload": "d6eafe8235910042",
+    "languageSwitcher.packDownloading": "a778d3492af219c3",
+    "languageSwitcher.packCancel": "a0e63d7c7125d29a",
+    "languageSwitcher.packFailed": "148c1b9f7c8efd09",
+    "keyboard.toggle": "8dc08a0c777afebe",
+    "keyboard.unavailable": "da75a2bffe4b8daa",
+    "keyboard.title": "8dc08a0c777afebe",
+    "keyboard.close": "d8232cf4eb240844",
+    "signin.local.signin.pinNotEnrolled": "c8ac94e0c9efaa9c"
   }
 }
