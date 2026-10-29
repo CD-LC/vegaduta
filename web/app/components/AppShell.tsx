@@ -258,7 +258,7 @@ function AppShellBody({
                 "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden"
               : "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden lg:hover:w-56 lg:hover:shadow-2xl"
             : "transition-transform duration-300 lg:sticky lg:w-56"
-        } ${mobileNavOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}
+        } ${mobileNavOpen ? "translate-x-0" : "max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full"}`}
         // Below lg, a closed drawer is only translated off-screen - its links
         // and buttons stayed fully focusable while invisible (a11y audit
         // follow-up). `inert` drops the whole subtree out of both the tab
