@@ -118,7 +118,13 @@
   },
   "languageSwitcher": {
     "label": "زَبان",
-    "resetToEnglish": "اَنٛگریٖزی پؠٹھ کٔرِو تَبدیٖل"
+    "resetToEnglish": "اَنٛگریٖزی پؠٹھ کٔرِو تَبدیٖل",
+    "packTitle": "Download {label}?",
+    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
+    "packDownload": "Download",
+    "packDownloading": "Downloading…",
+    "packCancel": "Not now",
+    "packFailed": "Download failed - check the connection and try again."
   },
   "signup": {
     "eyebrow": "مُفت کھاتہٕ",
@@ -283,7 +289,8 @@
         "forgotPassword": "پاسورڈ مَشیو؟",
         "pinLabel": "PIN",
         "pinLabelDevice": "{device} خٲطرٕ PIN",
-        "pinButton": "ان لاک کٔرِو"
+        "pinButton": "ان لاک کٔرِو",
+        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
       },
       "codes": {
         "continue": "جٲری تھٲوِو"
@@ -357,6 +364,15 @@
         "weak_pin": "سُہ پِن چھُ زانُن واریاہ سَہل۔ {min} پؠٹھٕ {max} تام ہِندسہٕ اِستعمال کٔرِو یِم لگاتار یا اکہِ وٹہٕ ہیٚوی نہ آسَن۔",
         "reauth_required": "تُہنٛزِ حِفاظتہٕ خٲطرٕ، یہِ تَبدیٖلی کرنہٕ باپتھ کٔرِو دۆبارٕ سائن اِن۔",
         "last_credential": "سائن اِن کرنہٕ خٲطرٕ چھُ تُہنٛد یِہَے اَکھ راستہٕ۔ گۄڈٕ ترٲوِو بیٛاکھ۔"
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
       }
     }
   },
@@ -9848,7 +9864,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "ایجَنٛٹ کؠن اوزارَن سۭتۍ چٔلاوِو",
@@ -24819,5 +24836,77 @@
     "mintFailed": "ٹوکن ہیکیو نہٕ مِنٛٹ کٔرِتھ",
     "spendLabel": "گرانٹ خَرچ",
     "spendUncapped": "وۄنؠ تام خَرچ: {spent} (بے حَد)"
+  },
+  "keyboard": {
+    "toggle": "On-screen keyboard",
+    "unavailable": "No on-screen keyboard for this language",
+    "title": "On-screen keyboard",
+    "close": "Close keyboard"
+  },
+  "adminCommerceUi": {
+    "itemTasks": "tasks"
+  },
+  "adminA2aPage": {
+    "eyebrow": "Interoperability",
+    "pageTitle": "Agent-to-agent (A2A)",
+    "pageSubtitle": "Endpoints, remote agents and live tasks for the A2A protocol surface.",
+    "featureOff": "A2A endpoints are not available on this deployment (feature off or an older core).",
+    "inboundHeading": "Inbound endpoints (peers call your agents)",
+    "jsonRpc": "JSON-RPC 2.0",
+    "restBinding": "HTTP+JSON binding",
+    "agentCard": "Per-agent card",
+    "platformCard": "Platform card",
+    "jwks": "Signing keys (JWKS)",
+    "inboundHint": "Hand a peer the JSON-RPC URL (or the platform/agent card) plus a bearer token with RUNNER access on the target agent.",
+    "outboundHeading": "Outbound: remote agents your agents may call",
+    "allowedHosts": "Allow-listed remote hosts",
+    "noAllowedHosts": "None - no remote agent is reachable.",
+    "signedCards": "Signed agent cards required",
+    "maxCallsPerTurn": "Max remote calls per turn",
+    "noCap": "No cap",
+    "maxWait": "Max wait per call",
+    "maxWaitValue": "{seconds} s",
+    "outboundOff": "Outbound calls are disabled - the a2a_call_agent tool is not offered.",
+    "outboundHint": "Set by the operator (app.a2a.client.*) - read-only here so a stolen session cannot widen egress.",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No",
+    "relatedAgentTrust": "Agent trust & directory publishing",
+    "relatedDirectory": "Public agent directory",
+    "tasksHeading": "A2A tasks",
+    "tasksLoadFailed": "Could not load A2A tasks",
+    "allAgents": "All agents",
+    "refresh": "Refresh",
+    "noTasksTitle": "No A2A tasks",
+    "noTasksHint": "Inbound calls to your agents and outbound a2a_call_agent calls appear here.",
+    "dirInbound": "Inbound",
+    "dirOutbound": "Outbound",
+    "view": "View",
+    "cancel": "Cancel",
+    "canceling": "Canceling…",
+    "cancelSuccess": "Task canceled",
+    "cancelFailed": "Could not cancel the task",
+    "detailTitle": "A2A task",
+    "detailSubtitle": "One agent turn invoked over the A2A protocol.",
+    "detailAgent": "Agent",
+    "detailContext": "Context",
+    "detailSubject": "Caller",
+    "detailCreated": "Created",
+    "detailUpdated": "Last state change",
+    "detailRequest": "Message sent to the agent",
+    "detailReply": "Agent reply",
+    "close": "Close",
+    "remoteAgent": "Remote agent"
+  },
+  "a2aPanel": {
+    "label": "Callable by other agents (A2A)",
+    "hint": "External agents reach this agent over the A2A protocol using these endpoints, with a token that has RUNNER access.",
+    "jsonRpc": "JSON-RPC 2.0 endpoint",
+    "restBinding": "HTTP+JSON message send",
+    "agentCard": "Agent card",
+    "copy": "Copy",
+    "copied": "Copied",
+    "manageNote": "Monitor calls and publish the card at"
   }
 }
