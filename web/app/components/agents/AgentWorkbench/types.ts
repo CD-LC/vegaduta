@@ -76,6 +76,11 @@ export interface WorkbenchAgent {
   videoModel: string | null;
   ttsProvider: string | null;
   ttsModel: string | null;
+  // Optional because payloads cached from before the fields existed omit
+  // them: only the workbench's "open the most recent saved agent" auto-select
+  // reads them (GET /api/agents returns rows in undefined order).
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**

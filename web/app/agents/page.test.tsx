@@ -52,6 +52,22 @@ beforeEach(() => {
 });
 afterEach(() => cleanup());
 
+describe("/agents landing", () => {
+  it("opens the workbench on a bare /agents so the most recent saved agent can be auto-selected", async () => {
+    search.value = "";
+    render(<AgentsPage />);
+    expect(await screen.findByTestId("workbench")).toBeInTheDocument();
+    expect(screen.queryByTestId("index")).toBeNull();
+  });
+
+  it("opens the index when it is explicitly requested via ?view=index", async () => {
+    search.value = "view=index";
+    render(<AgentsPage />);
+    expect(await screen.findByTestId("index")).toBeInTheDocument();
+    expect(screen.queryByTestId("workbench")).toBeNull();
+  });
+});
+
 describe("/agents deep links from the Run settings drawer", () => {
   it.each(["agent.limits", "agent.limits.maxToolSteps"])("opens the workbench on the agent for the link focused on %s", async (focus) => {
     const href = agentBehaviorHref("a1", focus);
