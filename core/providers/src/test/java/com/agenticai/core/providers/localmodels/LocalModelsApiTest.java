@@ -495,6 +495,7 @@ class LocalModelsApiTest {
                                 .content("{\"contextLength\":0}"))
                 .andExpect(status().isOk());
     }
+
     @Test
     void settingsWithNoLocalModelRowAreNotFound() throws Exception {
         mvc.perform(

@@ -67,7 +67,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | payments | vendor | 55 | agents (test), agents-tools (test), agentspi, approval, audit, billing, crypto, eventbus, json, security, tenancy | UPI mandate payments |
 | platform | kernel | 153 | admin, agents, agents-turn, audit, chat, codeintel, crypto, guardrails, json, providers, security, tenancy, workflow |  |
 | prompts | kernel | 34 | audit, json, security |  |
-| providers | kernel (hosts vendor code) | 176 | crypto, json, knowledge, settings, tenancy | kernel provider registry; LLM validators + OpenAI/sidecar modality adapters |
+| providers | kernel (hosts vendor code) | 177 | crypto, json, knowledge, settings, tenancy | kernel provider registry; LLM validators + OpenAI/sidecar modality adapters |
 | quality | kernel | 154 | chat, json, prompts, providers, reliability, security, settings, sharing, tenancy |  |
 | reliability | kernel | 1 | (none) |  |
 | rl | kernel | 52 | chat, json, security, settings |  |

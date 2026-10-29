@@ -265,7 +265,8 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         }
         // A console-made -parN runner-parallelism suffix rides along on the new variant (the tag
         // carries the setting, see LocalModelsService#parallelOf).
-        String parSuffix = tag.matches(".*-par[0-9]+$") ? tag.substring(tag.lastIndexOf("-par")) : "";
+        String parSuffix =
+                tag.matches(".*-par[0-9]+$") ? tag.substring(tag.lastIndexOf("-par")) : "";
         String base = tag.replaceAll("-ctx[0-9]+k$", "").replaceAll("-par[0-9]+$", "");
         String derived = base + "-ctx" + (wantedContext / 1024) + "k" + parSuffix;
         if (derived.equals(tag)
@@ -299,11 +300,11 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
     }
 
     /**
-     * Creates {@code derived} as {@code base} with the given Modelfile parameters: {@code
-     * POST /api/create} with {@code from}, which reuses the base model's weights (no download, no
-     * copy). {@code numParallel} is Ollama's runner-level request parallelism - a Modelfile
-     * parameter only, never a per-request option, which is exactly why the variant mechanism
-     * exists. A null/positive-less parameter is simply not set on the variant.
+     * Creates {@code derived} as {@code base} with the given Modelfile parameters: {@code POST
+     * /api/create} with {@code from}, which reuses the base model's weights (no download, no copy).
+     * {@code numParallel} is Ollama's runner-level request parallelism - a Modelfile parameter
+     * only, never a per-request option, which is exactly why the variant mechanism exists. A
+     * null/positive-less parameter is simply not set on the variant.
      *
      * @return true when Ollama reported success
      */

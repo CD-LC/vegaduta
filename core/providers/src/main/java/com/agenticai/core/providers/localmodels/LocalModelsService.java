@@ -390,7 +390,9 @@ public class LocalModelsService {
         return LocalModelVariants.contextOf(model);
     }
 
-    /** The parallelism a console-made variant carries; see {@link LocalModelVariants#parallelOf}. */
+    /**
+     * The parallelism a console-made variant carries; see {@link LocalModelVariants#parallelOf}.
+     */
     static Integer parallelOf(String model) {
         return LocalModelVariants.parallelOf(model);
     }

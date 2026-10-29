@@ -173,7 +173,8 @@ class LocalModelsRuntimeKnobsTest {
                 .thenAnswer(
                         inv -> {
                             model.set(inv.getArgument(1));
-                            return LocalModelsApiTest.poolResponse(1L, model.get(), true, "STRUCTURED");
+                            return LocalModelsApiTest.poolResponse(
+                                    1L, model.get(), true, "STRUCTURED");
                         });
 
         mvc.perform(
