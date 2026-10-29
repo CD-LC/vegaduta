@@ -275,7 +275,7 @@ final class ChatTurnDispatcher {
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
                     // V674 - the row's own stream idle-timeout, re-pointed per attempt.
-                    HostedChainLink.applyStreamIdleTimeout(context, hostedChain, turnClient);
+                    StreamIdleTimeouts.apply(context, hostedChain, turnClient);
                     ChatClient client =
                             compactionRun == null ? turnClient : compactionRun.attach(turnClient);
                     if (effectiveForceFastDepth || effReasoningDepth == ReasoningDepth.FAST) {
