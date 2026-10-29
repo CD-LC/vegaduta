@@ -118,12 +118,7 @@ function hasAssistantReply(turns: unknown): boolean {
   return turns.some((turn) => {
     if (!turn || typeof turn !== "object") return false;
     const rec = turn as Record<string, unknown>;
-    return (
-      rec.role === "assistant" &&
-      rec.pending !== true &&
-      typeof rec.content === "string" &&
-      rec.content.trim().length > 0
-    );
+    return rec.role === "assistant" && rec.pending !== true && typeof rec.content === "string" && rec.content.trim().length > 0;
   });
 }
 
@@ -338,9 +333,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
       // The describe box only mounts once the card is open - next frame.
       const go = () => {
         if (!goToGuideAnchor(action.anchor)) {
-          setAnchorMiss(
-            `We could not find that part of the page for "${step.title}". Scroll down the left column and look for it by name.`
-          );
+          setAnchorMiss(`We could not find that part of the page for "${step.title}". Scroll down the left column and look for it by name.`);
         }
       };
       if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
@@ -381,9 +374,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
   async function handleDescribe() {
     const clean = normalizeSentence(sentence);
     if (clean.length < DESCRIBE_MIN_CHARS) {
-      setDescribeError(
-        'Write a few more words first, for example: "Answer customer questions for my bakery and take cake orders."'
-      );
+      setDescribeError("Write a few more words first, for example: \"Answer customer questions for my bakery and take cake orders.\"");
       return;
     }
     setDescribeError(null);
@@ -457,12 +448,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
           </p>
         </div>
         {collapsed && upNext && (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => runAction(upNext, upNext.action)}
-            disabled={upNext.action.kind === "save" && saving}
-          >
+          <Button type="button" size="sm" onClick={() => runAction(upNext, upNext.action)} disabled={upNext.action.kind === "save" && saving}>
             {upNext.action.label}
             <ArrowRight size={13} aria-hidden="true" />
           </Button>
@@ -476,11 +462,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
           aria-controls="agent-checklist-body"
         >
           {collapsed ? "Show steps" : "Hide"}
-          <ChevronDown
-            size={13}
-            className={cn("transition-transform", !collapsed && "rotate-180")}
-            aria-hidden="true"
-          />
+          <ChevronDown size={13} className={cn("transition-transform", !collapsed && "rotate-180")} aria-hidden="true" />
         </Button>
       </div>
 
@@ -493,10 +475,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
       </div>
 
       {anchorMiss && (
-        <p
-          role="status"
-          className="mx-4 mt-3 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-foreground"
-        >
+        <p role="status" className="mx-4 mt-3 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-foreground">
           {anchorMiss}
         </p>
       )}
@@ -519,10 +498,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
               return (
                 <li
                   key={step.id}
-                  className={cn(
-                    "rounded-lg border px-3 py-2.5",
-                    isNext ? "border-primary/40 bg-primary/5" : "border-transparent"
-                  )}
+                  className={cn("rounded-lg border px-3 py-2.5", isNext ? "border-primary/40 bg-primary/5" : "border-transparent")}
                   aria-current={isNext ? "step" : undefined}
                 >
                   <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
@@ -548,9 +524,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     ) : (
                       <Button
                         type="button"
-                        variant={
-                          isNext || (step.id === "describe" && step.action.kind === "save") ? "default" : "outline"
-                        }
+                        variant={isNext || (step.id === "describe" && step.action.kind === "save") ? "default" : "outline"}
                         size="sm"
                         disabled={step.action.kind === "save" && (saving || (step.id !== "describe" && !d.done))}
                         title={
@@ -567,10 +541,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
 
                   {step.id === "describe" && showDescribeBox && (
                     <div id={GUIDE_ANCHORS.describe} className="mt-3 rounded-lg border border-border bg-background p-3">
-                      <label
-                        htmlFor="agent-guide-describe-input"
-                        className="flex items-center gap-1.5 text-xs font-semibold text-foreground"
-                      >
+                      <label htmlFor="agent-guide-describe-input" className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                         <Sparkles size={13} className="text-primary" aria-hidden="true" />
                         Describe it in one sentence
                       </label>
@@ -598,7 +569,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                         <span className="text-[0.6875rem] text-muted-foreground">
                           {drafting
                             ? "Working on it. You will get a draft either way."
-                            : 'Nothing is changed until you press "Use this". You can edit everything afterwards.'}
+                            : "Nothing is changed until you press \"Use this\". You can edit everything afterwards."}
                         </span>
                       </div>
 
@@ -610,9 +581,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                               after you press &quot;Use this&quot;.
                             </p>
                           )}
-                          <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
-                            Name
-                          </div>
+                          <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">Name</div>
                           <div className="text-sm font-medium text-foreground">{preview.draft.name}</div>
                           {typedNameKept && (
                             <p className="m-0 mt-0.5 text-[0.6875rem] text-muted-foreground">
@@ -665,9 +634,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     <dt className="text-xs font-semibold text-foreground">
                       {g.term}
                       {g.onScreen.toLowerCase() !== g.term.toLowerCase() && (
-                        <span className="ms-1.5 font-normal text-muted-foreground">
-                          shown as &quot;{g.onScreen}&quot;
-                        </span>
+                        <span className="ml-1.5 font-normal text-muted-foreground">shown as &quot;{g.onScreen}&quot;</span>
                       )}
                     </dt>
                     <dd className="m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground">
