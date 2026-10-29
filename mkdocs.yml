@@ -174,6 +174,7 @@ nav:
       - Deployment shapes and pools: deploy/DEPLOYMENT-SHAPES.md
       - Cloud portability: architecture/ADR-cloud-portability.md
       - Structural audit (2026-10-14): architecture/STRUCTURAL-AUDIT-2026-10-14.md
+      - Design-patterns review (2026-10-29): architecture/DESIGN-PATTERNS-REVIEW-2026-10-29.md
       - MCP specification alignment: architecture/mcp-spec-alignment.md
       - A2A conformance: architecture/a2a-conformance.md
       - Personal assistant surface (2026-10-17): architecture/PERSONAL-ASSISTANT-SURFACE-2026-10-17.md
