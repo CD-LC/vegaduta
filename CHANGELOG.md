@@ -8,6 +8,26 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **A first personal install is lean.** With no remembered choices (no
+  `.vegaduta-state`) `scripts/vegaduta personal`, `scripts/vegaduta.ps1 personal`
+  and the Setup app now start only Postgres, core and web (about 3 GB on disk,
+  about 2.3 GB of container limits), download no local model, and use the
+  cloud-key path: add a provider key in the console after sign-up. Valkey,
+  private web search, the connector runner, the build terminal, the Assistant
+  browser and a local model are add-ons: turn each on from the console's Add-ons
+  page or with `--valkey`, `--search`, `--profile tools`, `--profile workspace`,
+  `--browser`, `--local-ai` / `--local-model TAG` (`-LocalAi` on Windows, new).
+  The launcher and Setup print "Lean: about 3 GB. Full: about 8 GB" before they
+  pull anything, and show a model's download size and ask before pulling it.
+  **Installs that already exist are untouched**: remembered `search=`, `tools=`,
+  `browser=`, `valkey=`, local-model and cloud choices are kept, and an install
+  that never chose still gets its model on the next plain `personal`. The
+  `workspace` add-on's catalog `defaultOn` is now `false`, and Setup preselects
+  no extras. The sizes quoted are estimates from image and model sizes, not
+  measurements.
+
 ### Added
 
 - **Local model speed controls.** The local model's speed controls now include

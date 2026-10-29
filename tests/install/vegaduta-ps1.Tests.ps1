@@ -378,12 +378,23 @@ Describe 'personal -DryRun' {
     $state | Should -Match 'cloud=1'
   }
 
-  It 'plans the free local model that fits the machine when nothing else is asked' {
+  It 'a first install is lean: no local model unless one is asked for, and the sizes are said first' {
     $sb = New-Sandbox
     $r = Invoke-Launcher $sb @('personal', '-DryRun')
     $r.ExitCode | Should -Be 0 -Because $r.Text
+    $r.Text | Should -Match 'Lean install: about 3 GB'
+    $r.Text | Should -Match 'local_ai=none'
+    $r.Text | Should -Not -Match 'docker-compose\.local-ai\.yml'
+    [System.IO.File]::ReadAllText($sb.State) | Should -Match 'cloud=1'
+  }
+
+  It 'plans the free local model that fits the machine with -LocalAi, and says how big it is' {
+    $sb = New-Sandbox
+    $r = Invoke-Launcher $sb @('personal', '-DryRun', '-LocalAi')
+    $r.ExitCode | Should -Be 0 -Because $r.Text
     $r.Text | Should -Match 'local_ai=container'
     $r.Text | Should -Match 'local_model=\S+'
+    $r.Text | Should -Match 'GB to download'
     $r.Text | Should -Match 'docker-compose\.local-ai\.yml'
   }
 

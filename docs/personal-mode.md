@@ -12,9 +12,9 @@ and Lite and Full behave exactly as before.
 
 | | Personal | Lite | Full |
 |---|---|---|---|
-| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner, the Assistant's browser and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
+| Containers always on | A first install is **lean**: Postgres, core and web only. Valkey, web search (SearXNG), the connector runner, the Assistant's browser and a local model are add-ons you turn on yourself (console **Add-ons** page, or a flag) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
-| Container memory limits (sum) | about 2.5 GB for the four; 5.8 GB with web search, the connector runner and the browser (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
+| Container memory limits (sum) | about 2.3 GB for the lean install (Postgres, core, web); about 2.5 GB with Valkey; 5.8 GB with web search, the connector runner and the browser added too; a local model needs its own memory on top | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
 | Edition (`VEGADUTA_EDITION`) | `personal`: operator and business features are not loaded (see [What a personal install leaves out](#what-a-personal-install-leaves-out)) | `lite`: everything on | `full`: everything on |
 | Meant for | one person | trying it | one server, a team |
@@ -22,10 +22,15 @@ and Lite and Full behave exactly as before.
 ## Requirements
 
 - **Docker with Compose v2.24 or newer.** The launcher checks it. Docker needs about 4 GB of memory (2 GB if core
-  runs on the host with `--native-core`), and you need roughly 8 GB of free disk for images and data.
-- **A model.** Either an LLM provider key (Anthropic, OpenAI, Gemini, ...) added in the console, or a local model
-  through [Ollama](https://ollama.com/download) (see [Picking a local model](#picking-a-local-model)). A local
-  model needs its own memory on top of the stack; the launcher warns below 8 GB of host RAM.
+  runs on the host with `--native-core`). Disk: a **lean** install (the default for a first install) is about 3 GB
+  of images and data; a **full** install (a local model, web search, connector tools and the build terminal) is
+  about 8 GB. These are estimates from the image and model sizes, not measurements; see [Add-ons](#add-ons) for
+  each piece.
+- **A model.** A first install has no local model: add an LLM provider key (Anthropic, OpenAI, Gemini, ...) in the
+  console after sign-up, or opt in to a local model through [Ollama](https://ollama.com/download) with
+  `--local-ai` / `--local-model TAG` (see [Picking a local model](#picking-a-local-model)); the launcher shows
+  the download size and asks before it pulls anything. A local model needs its own memory on top of the stack; the
+  launcher warns below 8 GB of host RAM.
 - **Java 21 or newer** only for `--native-core`, which runs core on your machine's JVM instead of in a container.
 - macOS, Linux, or Windows. On Windows the container install runs through `scripts/vegaduta.ps1` (or the Setup
   app's Windows wizard, which drives it); `-NativeCore` is rejected there with a pointer to WSL2.
@@ -38,12 +43,13 @@ The easiest install is the Setup app from the [Releases](https://github.com/CD-L
 downloads the verified release, starts the stack and hands you the first-run setup link. On macOS and Windows it
 installs and starts Docker Desktop for you (on Windows it also turns on WSL2, which asks for permission once and may
 need one restart, after which Setup reopens by itself); on Linux it shows the command to install Docker. It sets up
-a free local model (see [Picking a local model](#picking-a-local-model)). When a start fails it finds the cause (a
+a free local model if you tick one (see [Picking a local model](#picking-a-local-model)). When a start fails it finds the cause (a
 busy port, a stopped Docker, a full disk, a database left by an earlier install, a missing secret), repairs what it
 can and tries again. On personal it has an **Extras** step: the
 optional add-ons (the Assistant's build terminal, private web search, document reading, the Assistant's browser and
-free local model packs) with their disk, memory and licence, the recommended ones ticked (the build terminal and web
-search), and a total against this computer's free disk, Docker memory and RAM. Shortfalls are warnings, never
+free local model packs) with their disk, memory and licence, **none ticked** (a lean install is about 3 GB; the
+full set is about 8 GB, and the step says so), and a total against this computer's free disk, Docker memory and
+RAM. Shortfalls are warnings, never
 blocks. See [Add-ons](#add-ons). The wizard also offers a language picker: the choice lands in
 `.env`'s `APP_LOCALE` and the console opens in it (all 30 console locales). The app is not yet code-signed, so
 the OS warns once: on macOS choose "Open anyway", on Windows "More info" and then "Run anyway". Details and headless flags: [`installer/README.md`](https://github.com/CD-LC/vegaduta/blob/main/installer/README.md).
@@ -92,15 +98,15 @@ It also repairs the usual reasons a start fails:
 | `./scripts/vegaduta restart` | restart core and print a fresh first-run setup link and the sign-in e-mail. Use it for a lost or expired link |
 | `./scripts/vegaduta reset-password [EMAIL]` | forgot the password. Core writes a one-time reset link to `password-reset.txt` in the auth data directory (file access proves it is your machine); the command prints it. Open it, choose a new password, done. `.\scripts\vegaduta.ps1 reset-password` on Windows |
 | `./scripts/vegaduta personal --native-core` | core on the host JVM (`-Xmx1g`, SerialGC), the rest in Docker. Saves the container's memory limit and the Docker VM overhead; logs go to `~/.vegaduta/personal/core.log` |
-| `--local-ai=host`, `--local-model TAG` | use the Ollama on this machine with that model (see below) |
-| `--cloud` | no local model (by default one is downloaded, see below); you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
-| `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. On by default for a fresh install; the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
-| `--no-tools` | leave out the MCP connector runner and its starter connectors. `--profile tools` turns it back on |
-| `--no-browser` | leave out the Assistant's browser (`browser-runner`, the `browser_*` tools and the takeover view). On by default for a fresh install; `--browser` turns it back on |
-| `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). `--valkey` turns it back on |
-| `--minimal` | the floor: `postgres` + `core` + `web` and nothing else (implies `--no-search --no-tools --no-valkey` and `--no-browser`). Every piece a flag turned off stays off until you ask for it again |
+| `--local-ai` / `--local-ai=host`, `--local-model TAG` | opt in to a local model: a container Ollama or the Ollama on this machine, with that model (see below). On a first install the launcher prints the download size and asks before pulling. `-LocalAi` / `-LocalModel TAG` on Windows |
+| `--cloud` | no local model; you add a provider key in the console. This is already what a first install does, so the flag only matters to an install that earlier chose a local model. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
+| `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. Off on a first install; `--search` turns it on and the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
+| `--no-tools` | leave out the MCP connector runner and its starter connectors (already the case on a first install). `--profile tools` turns it on |
+| `--no-browser` | leave out the Assistant's browser (`browser-runner`, the `browser_*` tools and the takeover view). Off on a first install; `--browser` turns it on |
+| `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). a first install starts without Valkey; `--valkey` turns it on |
+| `--minimal` | the floor: `postgres` + `core` + `web` and nothing else (implies `--no-search --no-tools --no-valkey` and `--no-browser`). A first install already starts here; the flag matters for an existing install that wants to go back to the floor. Every piece a flag turned off stays off until you ask for it again |
 | `--profile rag` | add the ML sidecar (document extraction for PDF and scans, sidecar embeddings, transcription) and switch core's sidecar on |
-| `--profile workspace` | add the `workspace-runner` container and the projects folder — the Assistant's build terminal (see [Build projects with the Assistant](#build-projects-with-the-assistant)). The Setup app turns this profile on by default and offers `rag` as its documents checkbox |
+| `--profile workspace` | add the `workspace-runner` container and the projects folder — the Assistant's build terminal (see [Build projects with the Assistant](#build-projects-with-the-assistant)). The Setup app offers it as a checkbox (unticked) and `rag` as its documents checkbox |
 | `--dry-run` | print the plan, change nothing |
 | `./scripts/vegaduta personal status` / `logs [core]` / `down` | inspect or stop it. `down --volumes --yes` also deletes the data |
 | `./scripts/vegaduta backup` | database dump, files and `.env`. **Keep the backup of `.env`**: `APP_ENCRYPTION_KEY` must never change |
@@ -123,13 +129,19 @@ on `127.0.0.1` for the host JVM (sidecar 8001, SearXNG 8888, Ollama 11434; overr
 
 ## What is on from the start
 
-A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) starts with three things switched on, so the
-Assistant can search the web, read a page and drive a browser the first time you ask:
+A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) is **lean**: Postgres, core and web, about 3 GB
+on disk and about 2.3 GB of container memory limits. Nothing else is switched on and no local model is downloaded;
+you add a provider key in the console after sign-up. The launcher and the Setup app print this before they pull
+anything ("Lean: about 3 GB. Full: about 8 GB (adds a local model, web search, tools, build terminal)").
 
-- **Private web search.** A SearXNG container (profile `search`, no API key, no published port, 512 MB limit) behind
+Everything below is an **add-on** you turn on when you want it, from the console's **Add-ons** page (see
+[Add-ons](#add-ons) and the [console guide](console/add-ons.md)) or with the flag shown. Together they let the
+Assistant search the web, read a page and drive a browser:
+
+- **Private web search** (`--search`). A SearXNG container (profile `search`, no API key, no published port, 512 MB limit) behind
   the built-in `web_search` tool. A Brave, Tavily, Exa or Serper key is still a platform-admin setting that a personal
   owner has no page for; search works without one.
-- **The MCP connector runner** (`mcp-stdio-runner`, profile `tools`). STDIO connector servers (`npx` or `uvx`
+- **The MCP connector runner** (`mcp-stdio-runner`, `--profile tools`). STDIO connector servers (`npx` or `uvx`
   packages) run in this container, away from core's secrets, database and Valkey, so the slim core image needs no
   Node or Python tooling. It is on its own network (`mcp-stdio-net`) shared only with core, publishes no port,
   mounts no volume (the projects folder is deliberately not visible to it), is limited to 768 MB and 8 servers at a
@@ -137,12 +149,12 @@ Assistant can search the web, read a page and drive a browser the first time you
   its own package, and that also means it can reach what this computer exposes to Docker containers: the built-in
   `fetch_web_page` tool has an address guard in core, the MCP `fetch` server has none of its own. With
   `--native-core` the runner is not used (core runs STDIO servers itself under the OS sandbox).
-- **The Assistant's own browser** (`browser-runner`, profile `browser`). A Playwright server with Chromium in its
+- **The Assistant's own browser** (`browser-runner`, `--browser`). A Playwright server with Chromium in its
   own container, so agents get the `browser_*` tools (navigate, read the page text, take a screenshot, click,
-  type) and the live takeover view out of the box. See [The Assistant's browser](#the-assistants-browser) for the
-  security model; decline a fresh install with `--no-browser` or `VEGADUTA_BROWSER=0` in `.env`.
+  type) and the live takeover view. See [The Assistant's browser](#the-assistants-browser) for the
+  security model; it is off on a fresh install, and `VEGADUTA_BROWSER=1` in `.env` turns it on at the first start.
 
-On the first start where the runner is on, core registers three **starter connectors** for the Personal workspace,
+On the first start where the runner is on (after you add it), core registers three **starter connectors** for the Personal workspace,
 each pinned to an exact version and recognised by the connector catalog as that exact spec, so none lands in the
 review queue:
 
@@ -164,27 +176,27 @@ runner deletes each server's private home when it exits, so the graph would not 
 The pinned PyPI sha256 and npm integrity values are recorded next to the versions in `McpStarterCatalog`, but `npx`
 and `uvx` resolve a version, not a hash, so the runner does not refuse a download that differs from them.
 
-**Opting out.** `--no-search` and `--no-tools` on the command line, or `VEGADUTA_SEARCH=0` / `VEGADUTA_TOOLS=0` in
-`deploy/compose/.env` or the environment (`1` forces them on). A flag beats the environment, which beats the answer
-remembered in the state file, and the choice is remembered (`search=` and `tools=` in `.vegaduta-state`). The Setup
-app passes `--no-search` itself when you untick web search. An install that **already existed** keeps what it had:
-with no remembered answer it is left alone until you pass `--search` or `--profile tools` once. Declining the
-interactive web-search question is now remembered as an explicit no. On Windows `scripts\vegaduta.ps1` takes
-`-Search` / `-NoSearch` (and `VEGADUTA_SEARCH`), remembered in `search=` like the bash launcher, but a Windows
-install does **not** get web search by default: it is off until you pass `-Search` once (the Setup app does not
-offer it on Windows yet). It adds the connector runner when you pass `-Profile tools`.
+**Turning them on or off.** `--search`, `--profile tools` and `--browser` on the command line (and `--no-search`,
+`--no-tools`, `--no-browser` to switch one off again), or `VEGADUTA_SEARCH=1` / `VEGADUTA_TOOLS=1` /
+`VEGADUTA_BROWSER=1` in `deploy/compose/.env` or the environment (`0` keeps them off). A flag beats the
+environment, which beats the answer remembered in the state file, and the choice is remembered (`search=`, `tools=`
+and `browser=` in `.vegaduta-state`; a first install writes `0` for each, so a later plain run stays lean). The
+Setup app passes the matching flag for each box you tick or untick. An install that **already existed** keeps
+exactly what it had, including add-ons the old defaults turned on: only a first install changed. On Windows
+`scripts\vegaduta.ps1` takes `-Search` / `-NoSearch` (and `VEGADUTA_SEARCH`), remembered in `search=` like the bash
+launcher, and adds the connector runner when you pass `-Profile tools`.
 
-**What it costs.** Two more images to pull on the first start (SearXNG, and the runner with Node, uv and Python)
-and about 1.3 GB more of memory limits (512 MB + 768 MB; limits, not measured use), which takes the personal budget
-from about 2.5 GB to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s and core's
+**What they cost.** Each add-on is more to pull: SearXNG and the runner (Node, uv and Python) are about 0.9 GB of
+images together and add about 1.3 GB of memory limits (512 MB + 768 MB; limits, not measured use), which takes the
+budget from about 2.5 GB (with Valkey) to about 3.8 GB. The first start takes longer; `--wait-timeout` already defaults to 900 s and core's
 health check allows a 10-minute start period (failed checks inside it do not count). None of
 this was run on a real Docker stack when it was written: the launcher plan, the compose files and the registration
 logic are tested, the containers were not started.
 
 ## Running without Valkey
 
-`./scripts/vegaduta personal --no-valkey` (or `--minimal`, or `VEGADUTA_VALKEY=0`) starts the stack without the
-Valkey container. Valkey is a cache and counters store here, never a system of record, and every Redis-backed
+A first install already starts without the Valkey container (`./scripts/vegaduta personal --valkey` adds it). To
+drop it from an install that has it: `./scripts/vegaduta personal --no-valkey` (or `--minimal`, or `VEGADUTA_VALKEY=0`). Valkey is a cache and counters store here, never a system of record, and every Redis-backed
 counter in core already degrades to a bounded in-process table (`RedisFixedWindowCounter` →
 `LocalRateLimitFallback`): rate limits, budget windows and spend counters keep working and keep failing closed
 under pressure — a full fallback table refuses new keys rather than letting traffic through uncounted. The choice
@@ -236,14 +248,17 @@ copy (a test fails if they drift).
 
 | Add-on | What it adds | On disk (about) | Switched by |
 |---|---|---|---|
-| Build terminal and projects folder | the Assistant's `local_shell` and project tools (`workspace` profile) | 1.35 GB | on by default |
-| Web search | private SearXNG (`--search`) | 377 MB | on by default for a fresh install |
+| Build terminal and projects folder | the Assistant's `local_shell` and project tools (`workspace` profile) | 1.35 GB | off on a first install; `--profile workspace` or the Add-ons page |
+| Web search | private SearXNG (`--search`) | 377 MB | off on a first install; `--search` or the Add-ons page |
 | Documents and transcription | the ML sidecar (`rag` profile): PDF and scan reading, embeddings, audio to text | 4.1 GB | profile `rag` |
 | Assistant browser | the agent's own browser (see [The Assistant's browser](#the-assistants-browser)) | about 2 GB download (3.4 GB on disk), up to 2 GB of memory while it runs | `scripts/vegaduta personal --browser` (the Setup app offers it too) |
-| Local model packs | Qwen 3.5 2B, 4B, 9B and gpt-oss 20B, sizes and memory from `deploy/models/catalog.txt` | 1.5 to 14 GB | core downloads them through Ollama |
-| Connector runner | the container STDIO MCP connectors run in (`tools` profile, see [What is on from the start](#what-is-on-from-the-start)) | 500 MB | on by default for a fresh install |
+| Local model packs | Qwen 3.5 2B, 4B, 9B and gpt-oss 20B, sizes and memory from `deploy/models/catalog.txt` | 1.5 to 14 GB | none on a first install; `--local-ai` / `--local-model TAG`, or the Add-ons page (core downloads them through Ollama) |
+| Connector runner | the container STDIO MCP connectors run in (`tools` profile, see [What is on from the start](#what-is-on-from-the-start)) | 500 MB | off on a first install; `--profile tools` or the Add-ons page |
 
-Two more are listed as **planned** and cannot be turned on: local image generation and local spoken replies. Sizes are
+**Totals.** Lean (the default for a first install: Postgres, core, web): about 3 GB. Full (a local model, web
+search, the connector runner and the build terminal): about 8 GB; the browser (+3.4 GB) and documents (+4.1 GB)
+are on top. Two more are listed as **planned** and cannot be turned on: local image generation and local spoken
+replies. Sizes are
 approximate; the documents figure is on-disk size, while the Setup app's older "about 2 GB" is a download figure.
 
 How switching works, because core runs in a container and cannot start containers:
@@ -385,11 +400,17 @@ security key) and no real browser has been used with it yet**, so expect rough e
 
 ## Picking a local model
 
-Agents need a model. Personal mode has three ways to get a free local one, all through Ollama:
+Agents need a model. A **first install has none**: it stays lean (about 3 GB), prints what a local model would
+add, and you add a cloud provider key in the console after sign-up. Personal mode has three ways to get a free
+local one instead, all through Ollama:
 
-- **At install, automatically.** With no choice made, `personal` (bash and `vegaduta.ps1` alike, so the Setup app
-  too) picks the model that fits your RAM from the shared catalog, downloads it and registers it as the free
-  platform pool, without asking. Free open-weights models: no account, key or subscription. When Ollama is missing it
+- **At install, when you ask for it.** `personal --local-ai` (container Ollama) or `--local-ai=host` (the Ollama
+  on this machine), with an optional `--local-model TAG` (`-LocalAi` / `-LocalModel TAG` in `vegaduta.ps1`; the
+  Setup app: tick a model pack), picks the model that fits your RAM from the shared catalog when you name none.
+  On a first install the launcher says how big the download is (for example "about 1.5 GB" for `qwen3.5:2b`) and
+  asks `Download it now? [Y/n]` on a terminal before it pulls anything; with no terminal (CI,
+  `VEGADUTA_ASSUME_NO=1`, `--dry-run`) it prints the size and carries on. The model is registered as the free
+  platform pool. Free open-weights models: no account, key or subscription. When Ollama is missing it
   is installed and started for you on macOS (Homebrew; the Setup app too) and Windows (`winget`, per-user, no
   administrator prompt), so the model runs natively and can use the GPU. It uses that Ollama (and pulls the
   model and the `nomic-embed-text` embedding model into it); on Linux and WSL, where Ollama's installer needs root,
@@ -399,8 +420,10 @@ Agents need a model. Personal mode has three ways to get a free local one, all t
   on the computer, Docker's memory for the container (a Docker Desktop or WSL2 VM is often much smaller than the
   machine; under WSL2 the launcher offers to give Docker 8 GB). Below 8 GB it picks the smallest catalog model and
   warns that the first reply is slow; only machines under 4 GB keep the cloud-key path. Choose another model
-  with `--local-model TAG` (`-LocalModel` on Windows), or opt out with `--cloud` (`-Cloud`), which is remembered.
-  An install that never chose gets its model on its next plain `personal`. `--local-ai=host` and `--local-ai`
+  with `--local-model TAG` (`-LocalModel` on Windows), or go back to the cloud path with `--cloud` (`-Cloud`),
+  which is remembered. A first install that chose nothing is remembered as cloud (`cloud=1`), so a later plain
+  `personal` stays lean; `--local-ai` switches it. An install that existed **before** the lean default and never
+  chose still gets a model on its next plain `personal`, as it did. `--local-ai=host` and `--local-ai`
   (container) state the source explicitly; the container is CPU-only on macOS. `VEGADUTA_ASSUME_NO=1` skips the
   pull into a host Ollama.
 - **In the console.** **Providers → Set up a local model** (`/providers/local-model`) detects your hardware (RAM,
@@ -722,7 +745,7 @@ Boot project with a REST endpoint and tests" runs for as long as it takes:
   command cannot take the computer down with it.
 - **Model.** A turn may use up to 150 tool calls in the personal profile (`GUARDRAILS_MAX_TOOL_CALLS_PER_TURN`), and core waits up to 240 s for a local
   model's first token (`LLM_HTTP_STREAM_IDLE_TIMEOUT`; 90 s elsewhere). Building a real project needs a capable model:
-  add a provider key (Anthropic, OpenAI, Gemini) for this. The 4B local default can make small edits but stalls on a
+  add a provider key (Anthropic, OpenAI, Gemini) for this. A small local model can make small edits but stalls on a
   whole project.
 
 Turn it off by starting without the profile; the folder and its files stay where they are.
@@ -731,11 +754,11 @@ Turn it off by starting without the profile; the folder and its files stay where
 
 The agent can drive its own headless Chromium (`browser_*` tools: navigate, read the page text, take a screenshot, click, type), and you can sign in to a site once in a live view of that same page; the login is saved as an encrypted profile and the agent keeps working logged in. In the personal profile the flags are already on (`BROWSER_V2_ENABLED`, `BROWSER_PROFILES_ENABLED`, `BROWSER_TAKEOVER_ENABLED`); TOTP stays off. A fresh install adds the `browser-runner` container for the Chromium: without it the slim `core` image has none, the browser tools are not offered and `GET /api/browser/automation/capabilities` answers `browserAvailable=false` with a reason, and the Assistant's Browser button says how to turn it on.
 
-Turn it off or back on (container stack):
+Turn it on or off (container stack):
 
 ```sh
-scripts/vegaduta personal --no-browser     # turn it off (fresh installs get it; the choice is remembered)
-scripts/vegaduta personal --browser        # turn it back on — PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
+scripts/vegaduta personal --browser        # turn it on (a first install does not start it; the choice is remembered) — PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
+scripts/vegaduta personal --no-browser     # turn it off again
 ```
 
 This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).

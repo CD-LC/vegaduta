@@ -1800,8 +1800,49 @@ wsl_docker_memory_assist() {
 # With nothing chosen, a personal install gets the free local model that fits this machine's
 # RAM: through an Ollama already running here, else the Ollama container (which downloads the
 # model on first start). --cloud opts out; below 4 GB of RAM the cloud-key path stays.
+# What a lean first install costs, said before anything is pulled (the numbers are the estimates in
+# docs/personal-mode.md, not measurements).
+LEAN_GB=3; FULL_GB=8
+personal_size_banner() {
+  say "Lean install: about ${LEAN_GB} GB on disk (Postgres, core, web). Full: about ${FULL_GB} GB (adds a local model, web search, connector tools, build terminal)."
+  printf '    Add the rest any time: console > Add-ons, or the opt-in flags (see: scripts/vegaduta help).\n'
+}
+
+# Download size of a catalog model in GB (column 3 of deploy/models/catalog.txt), empty when it is not listed.
+model_download_gb() {
+  [ -f "$MODELS_CATALOG" ] || return 0
+  grep -v '^#' "$MODELS_CATALOG" | awk -F'|' -v t="$1" '$1 == t { print $3; exit }'
+}
+
+# Says how big the chosen model is and, on a terminal, asks before the download starts. A "no" falls back to the
+# cloud-key path (remembered as --cloud). Never asks without a terminal, in CI, with --dry-run or with
+# VEGADUTA_ASSUME_NO=1; those just print the size.
+confirm_model_download() {
+  local tag="$1" gb a
+  [ -n "$tag" ] || return 0
+  gb="$(model_download_gb "$tag")"
+  [ -n "$gb" ] || return 0
+  say "The local model '$tag' is about ${gb} GB to download (once)."
+  [ -t 0 ] && [ -t 1 ] && [ "$DRY_RUN" != 1 ] && [ -z "${CI:-}" ] && [ "${VEGADUTA_ASSUME_NO:-0}" != 1 ] || return 0
+  printf 'Download it now? [Y/n]: '; read -r a
+  case "${a:-y}" in
+    n|N|no)
+      CLOUD=1; LOCAL_AI=""; LOCAL_MODEL=""; MODEL_CHOICE_DONE=1
+      say "Skipping the local model: add a cloud provider key in the console (or run with --local-ai later)"
+      return 1 ;;
+  esac
+  return 0
+}
+
 personal_default_model() {
   [ "$MODEL_CHOICE_DONE" = 0 ] || return 0
+  # A FRESH install with no model flag, no saved local model and none in .env stays lean: no download, the cloud-key
+  # path. --local-ai[=host] / --local-model TAG (or a model in .env) opt in; the choice is remembered like --cloud.
+  if [ "$PERSONAL_FRESH" = 1 ] && [ -z "$LOCAL_AI" ] && [ -z "$LOCAL_MODEL" ] && [ -z "$(get_env LOCAL_LLM_MODEL)" ]; then
+    CLOUD=1
+    say "No local model on a first install: add a cloud provider key in the console after sign-up (or run with --local-ai)"
+    return 0
+  fi
   # An install that uses (or could use) this machine's Ollama: start it if it is installed but not
   # running (after a restart, or its app was quit), or the model never answers.
   if [ "$LOCAL_AI" = host ] || { [ "$LOCAL_AI" = container ] && { command -v ollama >/dev/null 2>&1 || [ -d /Applications/Ollama.app ]; }; }; then
@@ -1823,6 +1864,10 @@ personal_default_model() {
   # this machine: without this the compose default (qwen3.5:4b, ~10 GB) runs on every machine.
   local explicit=0
   if [ -n "$LOCAL_AI" ]; then
+    # A first install that names its model (--local-ai --local-model TAG) still hears how big it is before it downloads.
+    if [ "$PERSONAL_FRESH" = 1 ] && [ "$LOCAL_AI" = container ] && [ -n "$LOCAL_MODEL" ]; then
+      confirm_model_download "$LOCAL_MODEL" || return 0
+    fi
     [ -z "$LOCAL_MODEL" ] && [ -z "$(get_env LOCAL_LLM_MODEL)" ] || return 0
     explicit=1
   fi
@@ -1842,6 +1887,9 @@ personal_default_model() {
     if [ "$docker_gb" -gt 0 ] && { [ "$gb" -le 0 ] || [ "$docker_gb" -lt "$gb" ]; }; then gb="$docker_gb"; fi
   fi
   [ -n "$LOCAL_MODEL" ] || LOCAL_MODEL="$(recommended_local_model "$gb")"
+  if [ "$PERSONAL_FRESH" = 1 ] && [ "$mode" != host ]; then
+    confirm_model_download "$LOCAL_MODEL" || return 0
+  fi
   if [ "$mode" = host ]; then
     LOCAL_AI=host
     say "Ollama on this machine: agents will use '$LOCAL_MODEL' (change with --local-model, opt out with --cloud)"
@@ -2138,10 +2186,11 @@ personal_sync_edition() {
   set_env VEGADUTA_EDITION personal
 }
 
-# Day-one defaults of a FRESH personal install (no state file yet): private web search (SearXNG, no API key) and
-# the MCP runner (STDIO connectors; the starter set is registered on the first start) are on unless declined.
-# Decline with --no-search / --no-tools (remembered in the state file) or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 in
-# .env or the environment (1 forces them on). A command-line flag beats the environment, which beats the
+# Day-one defaults of a FRESH personal install (no state file yet): lean. Postgres, core and web only; private web
+# search (SearXNG), the MCP connector runner, the browser and Valkey are off and stay one flag away (--search,
+# --profile tools, --browser, --valkey) or one click in the console's Add-ons page. VEGADUTA_SEARCH=1 /
+# VEGADUTA_TOOLS=1 / VEGADUTA_BROWSER=1 / VEGADUTA_VALKEY=1 in .env or the environment turn them on at first start
+# (0 keeps them off). A command-line flag beats the environment, which beats the
 # remembered answer. An install that predates these defaults keeps what it has: with no remembered answer it is
 # left as it was until --search / --profile tools asks for them.
 personal_apply_defaults() {
@@ -2162,6 +2211,13 @@ personal_apply_defaults() {
     v="${VEGADUTA_VALKEY:-$(get_env VEGADUTA_VALKEY)}"
     case "$v" in 0|off|false|no) VALKEY=0 ;; 1|on|true|yes) VALKEY=1 ;; esac
   fi
+  # A FRESH personal install is lean: Postgres, core and web only (the --minimal floor). Valkey, web search,
+  # the connector runner and the browser are add-ons, turned on later from the console's Add-ons page or with
+  # --valkey / --search / --profile tools / --browser. A remembered choice is never touched (PERSONAL_FRESH is
+  # set only when there is no state file), and an explicit flag or VEGADUTA_*=1 above still wins.
+  if [ "$PERSONAL_FRESH" = 1 ]; then
+    [ -n "$VALKEY" ] || VALKEY=0
+  fi
   # Valkey is a personal-tier choice; on lite/full it is always on and the flag has nothing to gate.
   if [ "$TIER" != personal ] && [ "$VALKEY" = 0 ]; then
     warn "--no-valkey applies to personal installs only and is ignored on $TIER"
@@ -2169,14 +2225,16 @@ personal_apply_defaults() {
   fi
   [ "$TIER" = personal ] && VALKEY="${VALKEY:-1}"
   if [ "$PERSONAL_FRESH" = 1 ]; then
-    [ -n "$SEARCH" ] || SEARCH=1
-    [ -n "$TOOLS" ] || TOOLS=1
-    [ -n "$BROWSER" ] || BROWSER=1
+    # 0, not empty: a remembered 0 is an answer, an empty value reads as "never asked" on the next run.
+    [ -n "$SEARCH" ] || SEARCH=0
+    [ -n "$TOOLS" ] || TOOLS=0
+    [ -n "$BROWSER" ] || BROWSER=0
   fi
 }
 
 personal_up() {
   TIER=personal
+  [ "$PERSONAL_FRESH" = 1 ] && personal_size_banner
   # No question: a personal install gets the local model that fits this machine
   # (host Ollama when one is running, the Docker container otherwise).
   # --cloud, --local-ai[=host] and --local-model override it.

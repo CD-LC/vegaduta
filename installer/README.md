@@ -42,8 +42,8 @@ newest published stable `vX.Y.Z` release),
 ## Extras (personal tier)
 
 The wizard's **Extras** step lists the optional add-ons with their disk, memory
-and licence, ticks the recommended set (today: the build terminal and private web search, the two things a
-fresh install turns on by itself) and totals
+and licence, ticks **nothing** (a fresh install is lean: about 3 GB, Postgres, core and web; the full set is about
+8 GB, and the step says so) and totals
 what the ticked ones cost against this computer's free disk, Docker memory and
 RAM, with a warning (never a block) when it is short. An add-on that needs
 another pulls it in and says so; unticking the needed one unticks the rest.
@@ -88,7 +88,7 @@ Planned add-ons are shown but cannot be ticked.
   `tools=1`); Setup reads both.
 - **Headless.** `--extras workspace,search` installs exactly those, `--extras
   none` none; without it a re-run keeps what is installed and a fresh install
-  gets the recommended set. `--list-extras` prints the catalog.
+  gets none (lean). `--list-extras` prints the catalog.
 
 ## Re-running on an existing install, and versions
 

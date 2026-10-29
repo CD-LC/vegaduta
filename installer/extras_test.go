@@ -296,8 +296,8 @@ func TestExtrasHTTP(t *testing.T) {
 	if code != 200 || !v.Applicable || v.Installed {
 		t.Fatalf("fresh: %d %+v", code, v)
 	}
-	if strings.Join(v.Selected, ",") != "workspace,search,tools" {
-		t.Errorf("defaultOn items and the launcher's day-one defaults must be preselected, got %v", v.Selected)
+	if len(v.Selected) != 0 {
+		t.Errorf("a fresh install is lean: nothing is preselected, got %v", v.Selected)
 	}
 	if len(v.Items) != 11 || v.Kept == "" || !strings.Contains(v.Kept, "never deleted") {
 		t.Errorf("items=%d kept=%q", len(v.Items), v.Kept)
