@@ -269,7 +269,7 @@ export default function AgentDesigner({
                 onChange={(e) => setDraft({ ...draft, mission: e.target.value })}
                 className="font-mono text-[13px] leading-relaxed"
               />
-              <div className="mt-1 text-right text-[11px] text-muted-foreground">{draft.mission.length}/4000</div>
+              <div className="mt-1 text-end text-[11px] text-muted-foreground">{draft.mission.length}/4000</div>
             </div>
           </section>
         </TabsContent>
@@ -555,15 +555,15 @@ export default function AgentDesigner({
           <div className="sticky bottom-2 z-10 flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-background/90 p-3 shadow-sm backdrop-blur">
             <Button className={TONES.violet.cta} onClick={submit} disabled={!canSave}>
               {saving ? (
-                <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin shrink-0" />
+                <Loader2 aria-hidden="true" className="me-2 h-4 w-4 animate-spin shrink-0" />
               ) : (
-                <Save aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" />
+                <Save aria-hidden="true" className="me-2 h-4 w-4 shrink-0" />
               )}
               {agent ? "Save changes" : "Create agent"}
             </Button>
             {agent && dirty && !saving && (
               <Button variant="ghost" onClick={() => setDraft(base ?? blankDraft())}>
-                <Undo2 aria-hidden="true" className="mr-1.5 h-4 w-4 shrink-0" /> Discard
+                <Undo2 aria-hidden="true" className="me-1.5 h-4 w-4 shrink-0" /> Discard
               </Button>
             )}
             {!agent && onCancelNew && (
@@ -642,7 +642,7 @@ function Meter({ icon: Icon, label, value, on }: { icon: typeof Brain; label: st
         <Icon className="h-3.5 w-3.5" />
       </span>
       <span className="text-muted-foreground">{label}</span>
-      <span className="ml-auto text-right font-medium">{value}</span>
+      <span className="ms-auto text-end font-medium">{value}</span>
     </div>
   );
 }

@@ -123,7 +123,7 @@ export default function ReportBody({
   const toc = showToc && (
     <ol className="space-y-1 text-sm">
       {outline.sections.map((s) => (
-        <li key={s.id} className={s.level === 3 ? "ml-3" : undefined}>
+        <li key={s.id} className={s.level === 3 ? "ms-3" : undefined}>
           <button
             type="button"
             onClick={() => {
@@ -131,7 +131,7 @@ export default function ReportBody({
               scrollToEl(document.getElementById(s.id));
             }}
             aria-current={active === s.id ? "location" : undefined}
-            className={`block w-full rounded px-2 py-1 text-left [overflow-wrap:anywhere] transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring ${
+            className={`block w-full rounded px-2 py-1 text-start [overflow-wrap:anywhere] transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring ${
               active === s.id ? "bg-muted font-medium text-foreground" : "text-muted-foreground"
             }`}
           >

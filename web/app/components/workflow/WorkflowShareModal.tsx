@@ -36,7 +36,7 @@ export default function WorkflowShareModal({ setShowShareModal, showShareModal, 
               <h2 className="text-lg font-semibold tracking-tight text-foreground">Share this workflow</h2>
               <button
                 type="button"
-                className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 onClick={() => setShowShareModal(false)}
                 aria-label={t("close")}
               >

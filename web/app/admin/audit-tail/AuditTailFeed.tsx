@@ -92,7 +92,7 @@ export default function AuditTailFeed({ refreshKey = 0 }: { refreshKey?: number 
           className="w-full sm:w-72"
         />
         <span className="text-xs text-muted-foreground">{t("tailFilterScope")}</span>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
             <StatusDot status={live ? "up" : "unknown"} size={6} glow={false} pulse={live} />
             {live ? t("tailLive") : page > 1 ? t("tailHistorical") : t("tailPaused")}

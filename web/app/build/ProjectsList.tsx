@@ -38,7 +38,9 @@ export default function ProjectsList({
     const q = query.trim().toLowerCase();
     const sorted = [...projects].sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
     if (!q) return sorted;
-    return sorted.filter((p) => [p.project_id, p.template_id, p.status].some((v) => (v || "").toLowerCase().includes(q)));
+    return sorted.filter((p) =>
+      [p.project_id, p.template_id, p.status].some((v) => (v || "").toLowerCase().includes(q))
+    );
   }, [projects, query]);
   const pager = usePagination(rows, 10);
 
@@ -52,10 +54,14 @@ export default function ProjectsList({
       {loaded && projects.length > 0 && (
         <>
           <div className="relative w-full sm:max-w-xs">
-            <Search size={14} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Search
+              size={14}
+              aria-hidden="true"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
             <Input
               type="search"
-              className="pl-8"
+              className="ps-8"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
@@ -75,10 +81,12 @@ export default function ProjectsList({
                       <button
                         type="button"
                         onClick={() => onOpen(p.project_id)}
-                        className="flex w-full flex-col gap-1.5 px-4 py-3 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:gap-4"
+                        className="flex w-full flex-col gap-1.5 px-4 py-3 text-start outline-none transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring sm:flex-row sm:items-center sm:gap-4"
                       >
                         <span className="min-w-0 flex-1">
-                          <span className="block truncate font-mono text-sm font-medium text-foreground">{p.project_id}</span>
+                          <span className="block truncate font-mono text-sm font-medium text-foreground">
+                            {p.project_id}
+                          </span>
                           <span className="block truncate text-xs text-muted-foreground">
                             {t("templateLine", { template: p.template_id })}
                           </span>
@@ -96,7 +104,9 @@ export default function ProjectsList({
                           )}
                           {p.status && <Badge variant="outline">{p.status}</Badge>}
                           {p.created_at && (
-                            <span className="text-xs tabular-nums text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</span>
+                            <span className="text-xs tabular-nums text-muted-foreground">
+                              {new Date(p.created_at).toLocaleDateString()}
+                            </span>
                           )}
                         </span>
                       </button>

@@ -312,12 +312,12 @@ export default function ImportMemoryCard({
                         >
                           {f.text}
                           {f.duplicateOf && (
-                            <Badge variant="secondary" className="ml-2">
+                            <Badge variant="secondary" className="ms-2">
                               {t("importDuplicate")}
                             </Badge>
                           )}
                           {f.rejectedReason && (
-                            <Badge variant="outline" className="ml-2">
+                            <Badge variant="outline" className="ms-2">
                               {t(importReasonKey(f.rejectedReason))}
                             </Badge>
                           )}
@@ -365,7 +365,7 @@ export default function ImportMemoryCard({
               </AlertDescription>
             </Alert>
             {skippedGroups.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-5 text-xs text-muted-foreground">
                 {skippedGroups.map((g) => (
                   <li key={g.reason}>
                     {t("importSkippedGroup", { count: g.count, reason: t(importReasonKey(g.reason)) })}

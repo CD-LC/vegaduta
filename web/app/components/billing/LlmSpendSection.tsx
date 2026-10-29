@@ -144,7 +144,9 @@ function csvCell(v: unknown) {
 function StatTile({ label, value, hint, testId }: { label: string; value: string; hint?: string; testId?: string }) {
   return (
     <div className="rounded-xl border border-border bg-secondary/20 px-4 py-3" data-testid={testId}>
-      <div className="font-mono text-[length:var(--fs-label)] uppercase tracking-[0.1em] text-muted-foreground">{label}</div>
+      <div className="font-mono text-[length:var(--fs-label)] uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </div>
       <div className="mt-1 font-mono text-xl font-semibold tabular-nums tracking-tight text-foreground">{value}</div>
       {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
     </div>
@@ -282,7 +284,16 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
   // CSV of the currently loaded call log (the active filter, up to
   // CALL_LOG_LIMIT rows) - built client-side from data already on screen.
   const exportCsv = useCallback(() => {
-    const header = ["started_at", "provider", "model", "status", "total_tokens", "estimated_cost_usd", "latency_ms", "error"];
+    const header = [
+      "started_at",
+      "provider",
+      "model",
+      "status",
+      "total_tokens",
+      "estimated_cost_usd",
+      "latency_ms",
+      "error",
+    ];
     const rows = calls.map((c) => [
       c.startedAt,
       displayProviderName(c.providerName),
@@ -361,9 +372,7 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
   return (
     <Card id="llm-usage" className="mb-4 scroll-mt-24 gap-0 p-6" data-testid="llm-spend-section">
       {heading}
-      <p className="mb-4 mt-1 text-[length:var(--fs-meta)] text-muted-foreground">
-        {t("sectionHint")}
-      </p>
+      <p className="mb-4 mt-1 text-[length:var(--fs-meta)] text-muted-foreground">{t("sectionHint")}</p>
 
       {error && <div className="ax-kb-error mb-3">{error}</div>}
 
@@ -407,7 +416,12 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
               hint={t("tileCallsHint", { errors: fmtInt(totals.errors), rate: totals.errorRate.toFixed(1) })}
               testId="llm-spend-tile-calls"
             />
-            <StatTile label={t("tileTokens")} value={fmtInt(totals.tokens)} hint={t("tileTokensHint")} testId="llm-spend-tile-tokens" />
+            <StatTile
+              label={t("tileTokens")}
+              value={fmtInt(totals.tokens)}
+              hint={t("tileTokensHint")}
+              testId="llm-spend-tile-tokens"
+            />
           </div>
 
           {/* Per-provider breakdown - the "outstanding balance of activated
@@ -460,9 +474,12 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                                   aria-valuemax={100}
                                   aria-valuenow={Math.round(share)}
                                 >
-                                  <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(2, share)}%` }} />
+                                  <div
+                                    className="h-full rounded-full bg-primary"
+                                    style={{ width: `${Math.max(2, share)}%` }}
+                                  />
                                 </div>
-                                <span className="w-10 text-right font-mono text-xs tabular-nums text-muted-foreground">
+                                <span className="w-10 text-end font-mono text-xs tabular-nums text-muted-foreground">
                                   {share.toFixed(0)}%
                                 </span>
                               </div>
@@ -502,7 +519,10 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                       </span>
                     </div>
                     <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-secondary">
-                      <div className="h-full rounded-full bg-primary/70" style={{ width: `${Math.min(100, Math.max(2, m.percent))}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary/70"
+                        style={{ width: `${Math.min(100, Math.max(2, m.percent))}%` }}
+                      />
                     </div>
                   </div>
                 ))}
@@ -567,10 +587,14 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                 {pageItems.map((c: LlmCallLogEntry) => (
                   <Fragment key={c.id}>
                     <TableRow className={!c.success ? "border-b-0" : undefined}>
-                      <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">{fmtTime(c.startedAt)}</TableCell>
+                      <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+                        {fmtTime(c.startedAt)}
+                      </TableCell>
                       <TableCell>
                         <div className="text-sm">{displayProviderName(c.providerName)}</div>
-                        <div className="font-mono text-[length:var(--fs-caption)] text-muted-foreground">{c.model || "—"}</div>
+                        <div className="font-mono text-[length:var(--fs-caption)] text-muted-foreground">
+                          {c.model || "—"}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span
@@ -581,16 +605,29 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                           {c.success ? t("statusOk") : t("statusError")}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-xs tabular-nums">{fmtInt(c.totalTokens)}</TableCell>
+                      <TableCell className="text-right font-mono text-xs tabular-nums">
+                        {fmtInt(c.totalTokens)}
+                      </TableCell>
                       {billing && (
-                        <TableCell className="text-right font-mono text-xs tabular-nums">{fmtUsd(c.estimatedCostUsd, 6)}</TableCell>
+                        <TableCell className="text-right font-mono text-xs tabular-nums">
+                          {fmtUsd(c.estimatedCostUsd, 6)}
+                        </TableCell>
                       )}
-                      <TableCell className="text-right font-mono text-xs tabular-nums">{fmtLatency(c.latencyMs)}</TableCell>
+                      <TableCell className="text-right font-mono text-xs tabular-nums">
+                        {fmtLatency(c.latencyMs)}
+                      </TableCell>
                     </TableRow>
                     {!c.success && c.errorMessage && (
                       <TableRow className="hover:bg-transparent">
-                        <TableCell colSpan={billing ? 6 : 5} className="pt-0" style={{ background: "color-mix(in srgb, var(--state-error) 8%, transparent)" }}>
-                          <div className="flex flex-wrap items-start justify-between gap-2 text-xs" style={{ color: "var(--state-error)" }}>
+                        <TableCell
+                          colSpan={billing ? 6 : 5}
+                          className="pt-0"
+                          style={{ background: "color-mix(in srgb, var(--state-error) 8%, transparent)" }}
+                        >
+                          <div
+                            className="flex flex-wrap items-start justify-between gap-2 text-xs"
+                            style={{ color: "var(--state-error)" }}
+                          >
                             <span className="min-w-0 flex-1 break-words">{c.errorMessage}</span>
                             <Button
                               type="button"
@@ -603,7 +640,9 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                               }}
                               data-testid={`llm-call-diagnose-${c.id}`}
                             >
-                              {diagnosingId === c.id && <Loader2 size={12} className="animate-spin" aria-hidden="true" />}
+                              {diagnosingId === c.id && (
+                                <Loader2 size={12} className="animate-spin" aria-hidden="true" />
+                              )}
                               {diagnosingId === c.id
                                 ? t("diagnosing")
                                 : diagnoses[c.id] && diagnosisOpen[c.id]
@@ -622,7 +661,9 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                                   {diagnoses[c.id].category.replace(/_/g, " ")}
                                 </span>
                                 {diagnoses[c.id].source === "AI" && (
-                                  <span className="font-mono text-[11px] text-muted-foreground">{t("diagnosisAiBadge")}</span>
+                                  <span className="font-mono text-[11px] text-muted-foreground">
+                                    {t("diagnosisAiBadge")}
+                                  </span>
                                 )}
                               </div>
                               <div className="mt-1.5 text-xs font-medium text-foreground">{diagnoses[c.id].title}</div>
@@ -634,7 +675,9 @@ export default function LlmSpendSection({ canUpgrade, onUpgrade }: LlmSpendSecti
                               )}
                               {(diagnoses[c.id].suggestedModels || []).length > 0 && (
                                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                  <span className="text-xs text-muted-foreground">{t("diagnosisSuggestedModels")}:</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {t("diagnosisSuggestedModels")}:
+                                  </span>
                                   {diagnoses[c.id].suggestedModels.map((m) => (
                                     <span
                                       key={m}

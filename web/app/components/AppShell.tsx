@@ -250,7 +250,7 @@ function AppShellBody({
         ref={navRef}
         aria-label={tNav("primaryNavAriaLabel")}
         style={{ backgroundColor: "var(--surface-card)" }}
-        className={`group/rail fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`group/rail fixed inset-y-0 start-0 z-50 flex w-56 flex-col border-e border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
           collapsibleRail
             ? hubMode
               ? // Hub mode: the rail is a permanent 64px icon lane - it no
@@ -258,7 +258,7 @@ function AppShellBody({
                 "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden"
               : "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden lg:hover:w-56 lg:hover:shadow-2xl"
             : "transition-transform duration-300 lg:sticky lg:w-56"
-        } ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+        } ${mobileNavOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}
         // Below lg, a closed drawer is only translated off-screen - its links
         // and buttons stayed fully focusable while invisible (a11y audit
         // follow-up). `inert` drops the whole subtree out of both the tab

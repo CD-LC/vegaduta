@@ -201,7 +201,7 @@
   width: 26px;
   flex-shrink: 0;
   border: none;
-  border-left: 1px solid var(--ax-border);
+  border-inline-start: 1px solid var(--ax-border);
   background: var(--ax-chip);
   color: var(--ax-dim);
   cursor: pointer;
@@ -304,7 +304,7 @@
   max-width: 42rem;
   max-height: 82vh;
   overflow-y: auto;
-  text-align: left;
+  text-align: start;
 }
 
 .ax-qt-detail-head {

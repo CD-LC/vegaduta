@@ -67,7 +67,13 @@
   },
   "languageSwitcher": {
     "label": "Idioma",
-    "resetToEnglish": "Cambiar a inglés"
+    "resetToEnglish": "Cambiar a inglés",
+    "packTitle": "Download {label}?",
+    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
+    "packDownload": "Download",
+    "packDownloading": "Downloading…",
+    "packCancel": "Not now",
+    "packFailed": "Download failed - check the connection and try again."
   },
   "signup": {
     "eyebrow": "Cuenta gratuita",

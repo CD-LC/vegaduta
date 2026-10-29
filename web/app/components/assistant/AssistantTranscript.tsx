@@ -333,7 +333,7 @@ function TurnEntry({
             </div>
           )}
           {turn.usage && (
-            <p className="asst-actions ml-auto px-1 text-[11px] text-muted-foreground">
+            <p className="asst-actions ms-auto px-1 text-[11px] text-muted-foreground">
               {formatReplyMetrics(turn.startedAt, turn.endedAt, turn.usage, t)}
             </p>
           )}

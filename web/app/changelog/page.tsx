@@ -32,10 +32,16 @@ export const metadata: Metadata = {
 };
 
 const KIND_STYLE: Record<ChangelogKind, { label: string; className: string }> = {
-  added: { label: "Added", className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" },
+  added: {
+    label: "Added",
+    className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  },
   changed: { label: "Changed", className: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300" },
   fixed: { label: "Fixed", className: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
-  security: { label: "Security", className: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300" },
+  security: {
+    label: "Security",
+    className: "border-violet-500/40 bg-violet-500/10 text-violet-700 dark:text-violet-300",
+  },
 };
 
 const jsonLd = {
@@ -67,7 +73,9 @@ export default function ChangelogPage() {
             draggable={false}
             priority
           />
-          <span><BrandName /></span>
+          <span>
+            <BrandName />
+          </span>
         </Link>
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
@@ -96,22 +104,20 @@ export default function ChangelogPage() {
           What changed on VegaDūta
         </h1>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
-          New capabilities, security hardening, fixes and notable operational changes - newest first.
-          The same list ships in the repository as <code className="font-mono text-xs">CHANGELOG.md</code>.
+          New capabilities, security hardening, fixes and notable operational changes - newest first. The same list
+          ships in the repository as <code className="font-mono text-xs">CHANGELOG.md</code>.
         </p>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 pb-20 sm:px-8">
-        <ol className="relative space-y-10 border-l border-border/60 pl-6">
+        <ol className="relative space-y-10 border-s border-border/60 ps-6">
           {CHANGELOG_ENTRIES.map((entry) => (
             <li key={`${entry.released}-${entry.title}`} className="relative">
               <span
                 aria-hidden
-                className="absolute -left-[31px] top-1.5 size-3 rounded-full border-2 border-background bg-primary"
+                className="absolute -start-[31px] top-1.5 size-3 rounded-full border-2 border-background bg-primary"
               />
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                {entry.released}
-              </p>
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">{entry.released}</p>
               <h2 className="mt-1.5 text-xl font-semibold tracking-tight">{entry.title}</h2>
               <ul className="mt-4 space-y-3">
                 {entry.items.map((item) => (

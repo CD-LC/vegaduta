@@ -22,17 +22,23 @@
 // the preview path instead of pretending.
 
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, ExternalLink, Loader2, Monitor, MonitorPlay, RefreshCw, RotateCw, Smartphone, Tablet, Wand2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ExternalLink,
+  Loader2,
+  Monitor,
+  MonitorPlay,
+  RefreshCw,
+  RotateCw,
+  Smartphone,
+  Tablet,
+  Wand2,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
 import type { AppBuilderFileWrite } from "./lib";
 import SandboxFrame from "./SandboxFrame";
 import { CODE_EXT, buildModuleGraph, buildStaticDoc, shellDoc } from "./sandboxModules";
-import {
-  PREVIEW_MESSAGE_TAG,
-  addError,
-  formatFixRequest,
-  injectReporter,
-} from "./previewReporter";
+import { PREVIEW_MESSAGE_TAG, addError, formatFixRequest, injectReporter } from "./previewReporter";
 import { loadBabel } from "../lib/babel";
 
 // ---------------------------------------------------------------------------
@@ -74,7 +80,10 @@ export default function SandboxPreview({
   fixDisabled?: boolean;
 }) {
   const [state, setState] = useState<
-    { kind: "loading" } | { kind: "ready"; srcdoc: string; notes: string[] } | { kind: "error"; message: string } | { kind: "empty" }
+    | { kind: "loading" }
+    | { kind: "ready"; srcdoc: string; notes: string[] }
+    | { kind: "error"; message: string }
+    | { kind: "empty" }
   >({ kind: "empty" });
   const blobUrls = useRef<string[]>([]);
   const [nonce, setNonce] = useState(0);
@@ -117,9 +126,7 @@ export default function SandboxPreview({
     setState({ kind: "loading" });
     (async () => {
       const map = new Map(files.map((f) => [f.path, f.content]));
-      const hasModules = [...map.keys()].some((p) =>
-        CODE_EXT.some((e) => p.endsWith(e))
-      );
+      const hasModules = [...map.keys()].some((p) => CODE_EXT.some((e) => p.endsWith(e)));
       // Pure static-html (no JS modules anywhere) renders directly.
       if (!hasModules && map.has("index.html")) {
         const built = buildStaticDoc(map, makeUrl);
@@ -138,15 +145,18 @@ export default function SandboxPreview({
       if (!graph) {
         setState({
           kind: "error",
-          message:
-            "No runnable web entry point in this project — the Pages link is the preview for this stack.",
+          message: "No runnable web entry point in this project — the Pages link is the preview for this stack.",
         });
         return;
       }
       if (!cancelled) {
         cleanup();
         blobUrls.current = graph.urls;
-        setState({ kind: "ready", srcdoc: injectReporter(shellDoc(graph.entryUrl, graph.importMap)), notes: graph.notes });
+        setState({
+          kind: "ready",
+          srcdoc: injectReporter(shellDoc(graph.entryUrl, graph.importMap)),
+          notes: graph.notes,
+        });
       }
     })().catch((e) => {
       if (!cancelled) {
@@ -168,9 +178,13 @@ export default function SandboxPreview({
         <MonitorPlay aria-hidden="true" size={14} className="text-primary" />
         <span className="text-xs font-medium text-foreground">Instant preview</span>
         <span className="text-[10px] text-muted-foreground">runs in this browser — nothing is deployed</span>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ms-auto flex items-center gap-1">
           {state.kind === "ready" && (
-            <div role="group" aria-label="Preview device" className="mr-1 flex items-center rounded-md border border-border p-0.5">
+            <div
+              role="group"
+              aria-label="Preview device"
+              className="me-1 flex items-center rounded-md border border-border p-0.5"
+            >
               {DEVICES.map(({ id, label, Icon }) => (
                 <button
                   key={id}
@@ -265,31 +279,36 @@ export default function SandboxPreview({
           <div className="flex h-full flex-col items-center justify-center gap-2 p-6 text-center">
             <p className="text-xs text-muted-foreground">{state.message}</p>
             {pagesUrl && (
-              <Button variant="outline" size="sm" onClick={() => window.open(pagesUrl, "_blank", "noopener,noreferrer")}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(pagesUrl, "_blank", "noopener,noreferrer")}
+              >
                 <ExternalLink aria-hidden="true" size={13} /> Open the Pages preview
               </Button>
             )}
           </div>
         )}
-        {state.kind === "ready" && (() => {
-          const d = DEVICES.find((x) => x.id === device)!;
-          const framed = d.w > 0;
-          const w = framed ? (landscape ? d.h : d.w) : 0;
-          const h = framed ? (landscape ? d.w : d.h) : 0;
-          return (
-            <div className={framed ? "flex min-h-full justify-center bg-muted/40 p-3" : "size-full"}>
-              <SandboxFrame
-                ref={iframeRef}
-                key={nonce}
-                html={state.srcdoc}
-                sandbox="allow-scripts"
-                className={`bg-white ${framed ? "shrink-0 rounded-2xl border border-border shadow-lg" : "size-full border-0"}`}
-                style={framed ? { width: w, maxWidth: "none", height: h } : undefined}
-                title="Instant app preview"
-              />
-            </div>
-          );
-        })()}
+        {state.kind === "ready" &&
+          (() => {
+            const d = DEVICES.find((x) => x.id === device)!;
+            const framed = d.w > 0;
+            const w = framed ? (landscape ? d.h : d.w) : 0;
+            const h = framed ? (landscape ? d.w : d.h) : 0;
+            return (
+              <div className={framed ? "flex min-h-full justify-center bg-muted/40 p-3" : "size-full"}>
+                <SandboxFrame
+                  ref={iframeRef}
+                  key={nonce}
+                  html={state.srcdoc}
+                  sandbox="allow-scripts"
+                  className={`bg-white ${framed ? "shrink-0 rounded-2xl border border-border shadow-lg" : "size-full border-0"}`}
+                  style={framed ? { width: w, maxWidth: "none", height: h } : undefined}
+                  title="Instant app preview"
+                />
+              </div>
+            );
+          })()}
       </div>
     </div>
   );

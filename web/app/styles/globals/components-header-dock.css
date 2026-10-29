@@ -417,6 +417,6 @@
      * the flex flow (position:fixed) and expands to 216px on :hover as an
      * overlay (box-shadow, not a layout push), so this margin only ever
      * needs to clear the collapsed width. */
-    margin-left: 76px;
+    margin-inline-start: 76px;
   }
 }

@@ -98,19 +98,23 @@ export default function ToolApprovalRules({ canEdit }: { canEdit: boolean }) {
                 setMessage(null);
               }}
               className={cn(
-                "rounded-lg border px-3 py-2 text-left transition-colors disabled:opacity-50",
+                "rounded-lg border px-3 py-2 text-start transition-colors disabled:opacity-50",
                 mode === m ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent"
               )}
             >
               <span className="block text-sm font-medium">{t(m === "ask" ? "rulesAskName" : "rulesNeverName")}</span>
-              <span className="mt-0.5 block text-xs text-muted-foreground">{t(m === "ask" ? "rulesAskHint" : "rulesNeverHint")}</span>
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {t(m === "ask" ? "rulesAskHint" : "rulesNeverHint")}
+              </span>
             </button>
           ))}
         </div>
         {risk && (
           <p className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="rules-risk">
             <RiskBadge risk={risk} />
-            {mode === "never" && risk !== "low" ? <span className="font-medium text-destructive">{t("rulesNeverRiskyWarn")}</span> : null}
+            {mode === "never" && risk !== "low" ? (
+              <span className="font-medium text-destructive">{t("rulesNeverRiskyWarn")}</span>
+            ) : null}
           </p>
         )}
       </div>

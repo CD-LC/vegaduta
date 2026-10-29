@@ -55,13 +55,13 @@ export default function OpenSourceBand() {
             code is being organised (secrets scrubbed, docs on record) before
             the repo flips public. */}
         <div className="mkt-reveal mt-8">
-          <div className="mkt-card mkt-card--raised mx-auto max-w-2xl overflow-hidden p-0 text-left">
+          <div className="mkt-card mkt-card--raised mx-auto max-w-2xl overflow-hidden p-0 text-start">
             <div className="flex items-center gap-2.5 border-b border-border/60 px-5 py-3.5">
               <Github className="size-4 shrink-0" aria-hidden="true" />
               <span className="mkt-small font-medium">
                 vegaduta<span className="mkt-ink-2"> / </span>vegaduta
               </span>
-              <span className="mkt-pill mkt-pill--accent mkt-badge ml-auto shrink-0">{t("oss_badgeSoon")}</span>
+              <span className="mkt-pill mkt-pill--accent mkt-badge ms-auto shrink-0">{t("oss_badgeSoon")}</span>
             </div>
             <ul className="divide-y divide-border/40 px-5 py-1 font-mono text-xs">
               {REPO_ROWS.map((row) => (
@@ -102,7 +102,7 @@ export default function OpenSourceBand() {
           )}
         </div>
         <p className="mkt-caption mkt-ink-2 mkt-reveal mt-5 text-center">
-          <FolderGit2 className="mr-1.5 inline size-3.5 align-[-2px]" aria-hidden="true" />
+          <FolderGit2 className="me-1.5 inline size-3.5 align-[-2px]" aria-hidden="true" />
           {t("oss_foot")}
         </p>
       </div>

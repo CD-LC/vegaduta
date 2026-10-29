@@ -64,7 +64,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
         setOthers(
           arr
             .filter((a: any) => a && a.id !== agent.id)
-            .map((a: any) => ({ id: String(a.id), name: String(a.name || a.id) })),
+            .map((a: any) => ({ id: String(a.id), name: String(a.name || a.id) }))
         );
       })
       .catch((e: unknown) => {
@@ -127,13 +127,13 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
       <span className="inline-flex h-4 items-center text-[11px] text-muted-foreground" role="status" aria-live="polite">
         {s === "saving" && (
           <>
-            <Loader2 className="mr-1 size-3 animate-spin" aria-hidden="true" />
+            <Loader2 className="me-1 size-3 animate-spin" aria-hidden="true" />
             Saving…
           </>
         )}
         {s === "saved" && (
           <>
-            <Check className="mr-1 size-3" aria-hidden="true" />
+            <Check className="me-1 size-3" aria-hidden="true" />
             Saved
           </>
         )}
@@ -180,7 +180,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
                 />
                 <span className="min-w-0 flex-1 text-sm font-medium text-foreground">{t.title}</span>
               </label>
-              <div className="ml-7 mt-0.5 flex items-start justify-between gap-2">
+              <div className="ms-7 mt-0.5 flex items-start justify-between gap-2">
                 <p id={`${id}-help`} className="text-[12.5px] text-muted-foreground">
                   {t.help}
                 </p>
@@ -216,7 +216,9 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
             </div>
           )}
           {others && others.length === 0 && (
-            <p className="mt-2 text-[12.5px] text-muted-foreground">You have no other agents yet. Create one to team up.</p>
+            <p className="mt-2 text-[12.5px] text-muted-foreground">
+              You have no other agents yet. Create one to team up.
+            </p>
           )}
           {others && others.length > 0 && (
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">

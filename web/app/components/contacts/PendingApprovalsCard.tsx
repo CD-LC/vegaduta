@@ -114,7 +114,7 @@ export default function PendingApprovalsCard({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-11 pr-0">
+                    <TableHead className="w-11 pe-0">
                       <input
                         ref={selectAllRef}
                         type="checkbox"
@@ -129,7 +129,7 @@ export default function PendingApprovalsCard({
                     <TableHead>{t("colSender")}</TableHead>
                     <TableHead className="w-[150px]">{t("colCode")}</TableHead>
                     <TableHead className="w-[140px]">{t("colWaiting")}</TableHead>
-                    <TableHead className="w-[220px] text-right">{t("colActions")}</TableHead>
+                    <TableHead className="w-[220px] text-end">{t("colActions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -142,7 +142,7 @@ export default function PendingApprovalsCard({
                         className={`h-14 ${isSelected ? "bg-accent/40 hover:bg-accent/50" : ""}`}
                         data-selected={isSelected || undefined}
                       >
-                        <TableCell className="pr-0">
+                        <TableCell className="pe-0">
                           <input
                             type="checkbox"
                             className="h-4 w-4 cursor-pointer align-middle"
@@ -158,7 +158,7 @@ export default function PendingApprovalsCard({
                         <TableCell className="font-mono text-sm text-foreground">{p.externalIdMasked}</TableCell>
                         <TableCell>{pendingCode(p)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{timeAgo(p.createdAt)}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-end">
                           <span className="inline-flex justify-end gap-2">{pendingActions(p, isBusy)}</span>
                         </TableCell>
                       </TableRow>
@@ -205,7 +205,7 @@ export default function PendingApprovalsCard({
                           <span className="truncate font-mono text-sm text-foreground">{p.externalIdMasked}</span>
                         </span>
                       </label>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 ps-7 text-sm text-muted-foreground">
                         <span className="inline-flex items-center gap-1.5">
                           <span className={STACK_LABEL}>{t("colCode")}</span>
                           {pendingCode(p)}

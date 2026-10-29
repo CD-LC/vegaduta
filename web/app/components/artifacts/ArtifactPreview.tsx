@@ -138,7 +138,7 @@ export default function ArtifactPreview({
     return (
       <div className="space-y-2" data-testid="artifact-csv">
         <div className="overflow-auto rounded-lg border border-border">
-          <table className="w-full border-collapse text-left text-sm">
+          <table className="w-full border-collapse text-start text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/60">
                 {head.map((cell, ci) => (

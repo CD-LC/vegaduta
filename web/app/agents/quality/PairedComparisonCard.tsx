@@ -424,7 +424,7 @@ function ComparisonResult({
           <ShieldAlert aria-hidden="true" />
           <AlertTitle>Read these before quoting the comparison</AlertTitle>
           <AlertDescription>
-            <ul className="list-disc space-y-1 pl-5">
+            <ul className="list-disc space-y-1 ps-5">
               {comparison.warnings.map((w, i) => (
                 <li key={i}>{w}</li>
               ))}

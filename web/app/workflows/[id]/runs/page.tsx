@@ -225,7 +225,7 @@ export default function WorkflowRunsPage() {
               <div key={i} className="flex items-center gap-4 px-5 py-4">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-5 w-16 rounded-full" />
-                <Skeleton className="ml-auto h-4 w-48" />
+                <Skeleton className="ms-auto h-4 w-48" />
               </div>
             ))}
           </Card>
@@ -245,11 +245,24 @@ export default function WorkflowRunsPage() {
                 className="sm:max-w-xs"
               />
               <div role="group" aria-label={tu("runsStatusFilter")} className="flex flex-wrap gap-1.5">
-                <Button type="button" size="sm" variant={statusFilter === "" ? "default" : "outline"} aria-pressed={statusFilter === ""} onClick={() => setStatusFilter("")}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={statusFilter === "" ? "default" : "outline"}
+                  aria-pressed={statusFilter === ""}
+                  onClick={() => setStatusFilter("")}
+                >
                   {tu("runsStatusAll")}
                 </Button>
                 {statuses.map(([status, count]) => (
-                  <Button key={status} type="button" size="sm" variant={statusFilter === status ? "default" : "outline"} aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}>
+                  <Button
+                    key={status}
+                    type="button"
+                    size="sm"
+                    variant={statusFilter === status ? "default" : "outline"}
+                    aria-pressed={statusFilter === status}
+                    onClick={() => setStatusFilter(status)}
+                  >
                     {status.toLowerCase()} <span className="tabular-nums">{count}</span>
                   </Button>
                 ))}
@@ -262,7 +275,10 @@ export default function WorkflowRunsPage() {
         )}
 
         {!error && runs && runs.length > 0 && filteredRuns.length === 0 && (
-          <p role="status" className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+          <p
+            role="status"
+            className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground"
+          >
             {tu("runsNoMatches")}
           </p>
         )}
@@ -289,7 +305,7 @@ export default function WorkflowRunsPage() {
                     #{run.id.slice(0, 8)}
                   </span>
                   <Badge variant={statusVariant(run.status)}>{run.status}</Badge>
-                  <span className="ml-auto min-w-0 text-right text-sm text-muted-foreground">
+                  <span className="ms-auto min-w-0 text-end text-sm text-muted-foreground">
                     {run.startedAt ? new Date(run.startedAt).toLocaleString() : t("unknownDate")}
                     {run.triggeredBy ? ` · ${run.triggeredBy}` : ""}
                   </span>

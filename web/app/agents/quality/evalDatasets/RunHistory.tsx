@@ -70,7 +70,7 @@ export default function RunHistory({
             <div className="flex flex-wrap items-center gap-3 p-3">
               <button
                 type="button"
-                className="flex items-center gap-2 bg-transparent p-0 text-left text-sm text-foreground"
+                className="flex items-center gap-2 bg-transparent p-0 text-start text-sm text-foreground"
                 onClick={() => onOpenRunDetail(run.id)}
               >
                 {runDetailId === run.id ? (
@@ -132,7 +132,7 @@ export default function RunHistory({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="ml-auto"
+                  className="ms-auto"
                   onClick={() => onCancelRun(run.id)}
                   disabled={run.cancelRequested}
                 >

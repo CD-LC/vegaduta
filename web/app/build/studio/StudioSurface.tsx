@@ -15,15 +15,36 @@
 // The optional "Android APK" hand-off is the only server path - it pushes
 // the app into the existing app-builder capacitor-app project flow.
 
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Camera, Cloud, Cpu, MousePointerClick, PlugZap, QrCode, Smartphone, Sparkles, Trash2, X, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  Cloud,
+  Cpu,
+  MousePointerClick,
+  PlugZap,
+  QrCode,
+  Smartphone,
+  Sparkles,
+  Trash2,
+  X,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { VersionDiff } from "./VersionDiff";
 import { Textarea } from "../../components/ui/textarea";
 import { Input } from "../../components/ui/input";
 import Select from "../../components/Select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../../components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 import OnDeviceSetupNudge from "../../components/edge/OnDeviceSetupNudge";
 import { EDGE_PREFS_EVENT } from "../../lib/edge/capabilities";
 import { prewarmTier0Session } from "../../lib/edge/tier0";
@@ -33,7 +54,16 @@ import { cloudRoute, deviceEngine, type CloudRoute, type DeviceEngineInfo } from
 import { withHarness } from "./runtime";
 import SandboxFrame from "../SandboxFrame";
 import { deleteRemote, mergeAll, pullRemote, scheduleSync } from "./studioSync";
-import { currentHtml, MAX_PROJECTS, loadProjects, newProject, saveNotice, saveProjectsDetailed, type SaveResult, type StudioProject } from "./store";
+import {
+  currentHtml,
+  MAX_PROJECTS,
+  loadProjects,
+  newProject,
+  saveNotice,
+  saveProjectsDetailed,
+  type SaveResult,
+  type StudioProject,
+} from "./store";
 import GalleryPanel from "../gallery/GalleryPanel";
 import { BLANK_APP, TEMPLATES, VEGADUTA_SAMPLE_APP, matchTemplate } from "./templates";
 import { useProjectSession, type WorkspaceProps } from "./useProjectSession";
@@ -46,12 +76,36 @@ import { type EnginePref, type EngineState, plannedEngine, timeAgo } from "./ses
 const ENGINE_PREF_KEY = "vd.studio.engine";
 
 const WHY = [
-  { icon: Smartphone, title: "A running app, not a code block", body: "Multi-screen apps too — describe the pages and it builds them with a working nav bar. Nothing to copy, paste or install." },
-  { icon: MousePointerClick, title: "Tap anything to change it", body: "Point at a button or heading and say what you want. Change text and colours directly, no prompt needed." },
-  { icon: Cpu, title: "AI where you want it", body: "On your own device (free, private, offline) or on a VegaDūta-hosted model in the cloud — the app can have an AI block your users call." },
-  { icon: PlugZap, title: "Wire in agents & workflows", body: "Attach any agent or workflow from the Connect tab, choose what to send and what to show — your app gains real superpowers, no code." },
-  { icon: QrCode, title: "Publish for real users", body: "One click gives your app a short link, its own sign-in for your customers and hosted AI — a product you can hand to people." },
-  { icon: Camera, title: "Real phone features", body: "Camera, Bluetooth, vibration, share sheet — ask for them and the app uses them once it's on your phone." },
+  {
+    icon: Smartphone,
+    title: "A running app, not a code block",
+    body: "Multi-screen apps too — describe the pages and it builds them with a working nav bar. Nothing to copy, paste or install.",
+  },
+  {
+    icon: MousePointerClick,
+    title: "Tap anything to change it",
+    body: "Point at a button or heading and say what you want. Change text and colours directly, no prompt needed.",
+  },
+  {
+    icon: Cpu,
+    title: "AI where you want it",
+    body: "On your own device (free, private, offline) or on a VegaDūta-hosted model in the cloud — the app can have an AI block your users call.",
+  },
+  {
+    icon: PlugZap,
+    title: "Wire in agents & workflows",
+    body: "Attach any agent or workflow from the Connect tab, choose what to send and what to show — your app gains real superpowers, no code.",
+  },
+  {
+    icon: QrCode,
+    title: "Publish for real users",
+    body: "One click gives your app a short link, its own sign-in for your customers and hosted AI — a product you can hand to people.",
+  },
+  {
+    icon: Camera,
+    title: "Real phone features",
+    body: "Camera, Bluetooth, vibration, share sheet — ask for them and the app uses them once it's on your phone.",
+  },
 ];
 
 function projectName(description: string): string {
@@ -66,7 +120,11 @@ function Notice({ text, onDismiss }: { text: string; onDismiss?: () => void }) {
     ref.current?.scrollIntoView?.({ block: "nearest" });
   }, [text]);
   return (
-    <div ref={ref} role="alert" className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-foreground">
+    <div
+      ref={ref}
+      role="alert"
+      className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-foreground"
+    >
       <AlertTriangle aria-hidden="true" size={14} className="mt-0.5 shrink-0 text-amber-600" />
       <span className="min-w-0 flex-1">{text}</span>
       {onDismiss && (
@@ -126,14 +184,18 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
   useEffect(() => {
     let live = true;
     const refresh = (): void => {
-      void deviceEngine().then((i): void => { if (live) setEngineInfo(i); });
+      void deviceEngine().then((i): void => {
+        if (live) setEngineInfo(i);
+      });
       // kickWarmup=true: warm an ALREADY-downloaded WebLLM model while the
       // person is still reading the page, so the first "Build it" doesn't
       // pay the cold engine load inside the request's own deadline. Never
       // starts a download (edgeStatus/prewarmTier1Engine's contract); the
       // studio was previously the only /build surface that left the engine
       // cold until the first request (CreateSurface already passes true).
-      void edgeStatus(true).then((st): void => { if (live) setDeviceStatus(st); });
+      void edgeStatus(true).then((st): void => {
+        if (live) setDeviceStatus(st);
+      });
       // Chrome's built-in model pays its own first-use init - same
       // fire-and-forget, never-downloads contract as prewarmTier1Engine.
       // This is the device engine on machines with no WebLLM model
@@ -141,7 +203,9 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
       // to start" timeout this page kept hitting.
       prewarmTier0Session();
     };
-    void cloudRoute({ fresh: true }).then((c): void => { if (live) setCloud(c); });
+    void cloudRoute({ fresh: true }).then((c): void => {
+      if (live) setCloud(c);
+    });
     refresh();
     window.addEventListener(EDGE_PREFS_EVENT, refresh);
     const unsub = downloadManager.subscribe((e) => {
@@ -164,17 +228,14 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
     scheduleSync(next);
   }, []);
 
-  const updateProject = useCallback(
-    (id: string, fn: (p: StudioProject) => StudioProject) => {
-      setProjects((prev) => {
-        const next = prev.map((p) => (p.id === id ? fn(p) : p));
-        lastSave.current = saveProjectsDetailed(next);
-        scheduleSync(next);
-        return next;
-      });
-    },
-    []
-  );
+  const updateProject = useCallback((id: string, fn: (p: StudioProject) => StudioProject) => {
+    setProjects((prev) => {
+      const next = prev.map((p) => (p.id === id ? fn(p) : p));
+      lastSave.current = saveProjectsDetailed(next);
+      scheduleSync(next);
+      return next;
+    });
+  }, []);
 
   const setPref = (p: EnginePref) => {
     setEnginePref(p);
@@ -187,12 +248,16 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
 
   const engine: EngineState = { device: engineInfo, deviceStatus, cloud, pref: enginePref };
   const active = projects.find((p) => p.id === activeId) || null;
-  const [pendingCreate, setPendingCreate] = useState<{ id: string; description: string; fromTemplate: boolean } | null>(null);
+  const [pendingCreate, setPendingCreate] = useState<{ id: string; description: string; fromTemplate: boolean } | null>(
+    null
+  );
 
   // At the cap the person is told - the oldest app is never dropped silently.
   const roomForAnother = (): boolean => {
     if (projects.length >= MAX_PROJECTS) {
-      setLimitWarn(`You already have ${MAX_PROJECTS} apps, the most this browser keeps. Delete one under "Your apps" to make room for a new one.`);
+      setLimitWarn(
+        `You already have ${MAX_PROJECTS} apps, the most this browser keeps. Delete one under "Your apps" to make room for a new one.`
+      );
       return false;
     }
     setLimitWarn(null);
@@ -280,10 +345,15 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
               Describe an app.
               <br />
-              <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">Hold it in your hand in a minute.</span>
+              <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
+                Hold it in your hand in a minute.
+              </span>
             </h1>
             <p className="max-w-xl text-base text-muted-foreground">
-              Say what you want — a single screen or a multi-page app, camera, Bluetooth, an AI that answers on-device or on VegaDūta-hosted models. Then wire in your agents and workflows, pick what each call sends and shows, add sign-in for your customers, and publish a real link. No code anywhere in that sentence — that&apos;s the point.
+              Say what you want — a single screen or a multi-page app, camera, Bluetooth, an AI that answers on-device
+              or on VegaDūta-hosted models. Then wire in your agents and workflows, pick what each call sends and shows,
+              add sign-in for your customers, and publish a real link. No code anywhere in that sentence — that&apos;s
+              the point.
             </p>
             <form
               className="flex flex-col gap-2 rounded-2xl border border-border bg-background/80 p-2 shadow-sm backdrop-blur"
@@ -331,7 +401,7 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
               key={t.id}
               type="button"
               onClick={() => startFromTemplate(t.id)}
-              className="group flex flex-col items-start gap-1.5 rounded-2xl border border-border bg-card p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
+              className="group flex flex-col items-start gap-1.5 rounded-2xl border border-border bg-card p-4 text-start transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md"
             >
               <span className="text-3xl transition group-hover:scale-110">{t.emoji}</span>
               <span className="text-sm font-semibold text-foreground">{t.name}</span>
@@ -371,8 +441,14 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-                <button type="button" onClick={() => setActiveId(p.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-2xl">{p.emoji}</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveId(p.id)}
+                  className="flex min-w-0 flex-1 items-center gap-3 text-start"
+                >
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-2xl">
+                    {p.emoji}
+                  </span>
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-semibold text-foreground">{p.name}</span>
                     <span className="block text-xs text-muted-foreground">
@@ -392,7 +468,9 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">Saved in this browser only. Nothing is uploaded unless you share it.</p>
+          <p className="text-xs text-muted-foreground">
+            Saved in this browser only. Nothing is uploaded unless you share it.
+          </p>
         </section>
       )}
 
@@ -444,16 +522,29 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
   );
 }
 
-
 function deviceLine(e: EngineState): { tone: "ok" | "warn" | "off"; text: string; detail: string } {
   if (e.device) {
-    return { tone: "ok", text: `${e.device.runtime} · ${e.device.modelName}`, detail: "Runs in this browser on your GPU. Free, private, works offline." };
+    return {
+      tone: "ok",
+      text: `${e.device.runtime} · ${e.device.modelName}`,
+      detail: "Runs in this browser on your GPU. Free, private, works offline.",
+    };
   }
   const st = e.deviceStatus;
   if (!st) return { tone: "off", text: "Checking…", detail: "" };
   if (st.state === "warming") return { tone: "warn", text: `WebLLM · loading ${st.modelName}`, detail: st.detail };
-  if (st.state === "needs-setup") return { tone: "warn", text: "Not set up yet", detail: "One free download of a model and your device builds apps with no cloud." };
-  if (st.state === "unsupported") return { tone: "off", text: "Not supported in this browser", detail: "Needs WebGPU. Use a recent Chrome or Edge on a laptop." };
+  if (st.state === "needs-setup")
+    return {
+      tone: "warn",
+      text: "Not set up yet",
+      detail: "One free download of a model and your device builds apps with no cloud.",
+    };
+  if (st.state === "unsupported")
+    return {
+      tone: "off",
+      text: "Not supported in this browser",
+      detail: "Needs WebGPU. Use a recent Chrome or Edge on a laptop.",
+    };
   return { tone: "off", text: "Off on this deployment", detail: st.detail };
 }
 
@@ -500,8 +591,11 @@ function EngineBadge({
   );
   if (compact) {
     return (
-      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5" title={`On device: ${dev.text}
-Cloud: ${engine.cloud?.label || "…"}`}>
+      <div
+        className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5"
+        title={`On device: ${dev.text}
+Cloud: ${engine.cloud?.label || "…"}`}
+      >
         <span className="shrink-0 text-xs text-muted-foreground">Builds with</span>
         <span className="flex min-w-0 max-w-full">{nextChip}</span>
         <span className="w-56 max-w-full shrink-0">{select}</span>
@@ -513,32 +607,34 @@ Cloud: ${engine.cloud?.label || "…"}`}>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground">Next build runs on</span>
         <span className="min-w-0 max-w-full">{nextChip}</span>
-        <span className="ml-auto">{select}</span>
+        <span className="ms-auto">{select}</span>
       </div>
       <div className="grid gap-1.5 sm:grid-cols-2">
         <div className="flex items-start gap-2 rounded-lg bg-secondary/60 p-2">
           <span className={`mt-1 size-2 shrink-0 rounded-full ${dot(dev.tone)}`} />
           <span className="min-w-0">
             <span className="block font-medium text-foreground">
-              <Cpu aria-hidden="true" size={11} className="mr-1 inline" /> On your device: {dev.text}
+              <Cpu aria-hidden="true" size={11} className="me-1 inline" /> On your device: {dev.text}
             </span>
             <span className="block text-muted-foreground">{dev.detail}</span>
           </span>
         </div>
         <div className="flex items-start gap-2 rounded-lg bg-secondary/60 p-2">
-          <span className={`mt-1 size-2 shrink-0 rounded-full ${engine.cloud && engine.cloud.kind !== "unknown" && engine.cloud.kind !== "signed-out" ? "bg-sky-500" : "bg-muted-foreground/40"}`} />
+          <span
+            className={`mt-1 size-2 shrink-0 rounded-full ${engine.cloud && engine.cloud.kind !== "unknown" && engine.cloud.kind !== "signed-out" ? "bg-sky-500" : "bg-muted-foreground/40"}`}
+          />
           <span className="min-w-0">
             <span className="block font-medium text-foreground">
-              <Cloud aria-hidden="true" size={11} className="mr-1 inline" /> Cloud: {engine.cloud?.label || "checking…"}
+              <Cloud aria-hidden="true" size={11} className="me-1 inline" /> Cloud: {engine.cloud?.label || "checking…"}
             </span>
             <span className="block text-muted-foreground">{engine.cloud?.detail || ""}</span>
           </span>
         </div>
       </div>
       <p className="leading-relaxed text-muted-foreground">
-        Leave it on Auto: the app is built on your device first (free and private — it finishes
-        warming up in the background and retries on its own if it is still starting), and the cloud
-        steps in only if the device cannot answer. Nothing you need to do.
+        Leave it on Auto: the app is built on your device first (free and private — it finishes warming up in the
+        background and retries on its own if it is still starting), and the cloud steps in only if the device cannot
+        answer. Nothing you need to do.
       </p>
     </div>
   );
@@ -558,7 +654,14 @@ function HeroPhone({ onOpen }: { onOpen: () => void }) {
       </span>
       <div className="rounded-[2.6rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl transition duration-300 group-hover:shadow-[0_28px_60px_-12px_rgba(244,82,30,0.45)]">
         <div className="relative h-[430px] overflow-hidden rounded-[2rem] bg-white lg:h-[520px]">
-          <SandboxFrame html={demo} sandbox="allow-scripts" title="" tabIndex={-1} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-[750px] w-[360px] origin-top-left scale-[0.53] border-0 lg:scale-[0.667]" />
+          <SandboxFrame
+            html={demo}
+            sandbox="allow-scripts"
+            title=""
+            tabIndex={-1}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-0 top-0 h-[750px] w-[360px] origin-top-left scale-[0.53] border-0 lg:scale-[0.667]"
+          />
           <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-gradient-to-t from-neutral-900/85 via-neutral-900/40 to-transparent pb-4 pt-10 text-[13px] font-semibold text-white">
             Tap to explore <span aria-hidden="true">→</span>
           </span>
@@ -568,15 +671,28 @@ function HeroPhone({ onOpen }: { onOpen: () => void }) {
   );
 }
 
-
 export type { EngineState, PlannedEngine } from "./sessionTypes";
 export { plannedEngine } from "./sessionTypes";
 
 function Workspace(props: WorkspaceProps) {
   const s = useProjectSession(props);
-  const { project, engine, editable, isOwner, onBack, update, setEnginePref, setPanel, diffFrom, setDiffFrom, restore, pendingAuth, finishPendingAuth } = s;
+  const {
+    project,
+    engine,
+    editable,
+    isOwner,
+    onBack,
+    update,
+    setEnginePref,
+    setPanel,
+    diffFrom,
+    setDiffFrom,
+    restore,
+    pendingAuth,
+    finishPendingAuth,
+  } = s;
   return (
-  <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       {/* Top bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
@@ -590,7 +706,7 @@ function Workspace(props: WorkspaceProps) {
           className="h-8 w-56 border-transparent bg-transparent px-1 text-base font-semibold shadow-none hover:border-border"
           aria-label="App name"
         />
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           <EngineBadge engine={engine} setPref={setEnginePref} compact />
           <Button variant="outline" size="sm" onClick={() => setPanel("share")} className="gap-1.5">
             <Smartphone aria-hidden="true" size={14} /> Put it on my phone
@@ -599,7 +715,10 @@ function Workspace(props: WorkspaceProps) {
       </div>
 
       {!editable && (
-        <p role="status" className="rounded-xl border border-border bg-secondary/60 p-2.5 text-xs text-muted-foreground">
+        <p
+          role="status"
+          className="rounded-xl border border-border bg-secondary/60 p-2.5 text-xs text-muted-foreground"
+        >
           You have <b>view-only</b> access to this app. You can try it, compare versions and comment, but not change it.
         </p>
       )}
@@ -629,4 +748,3 @@ function Workspace(props: WorkspaceProps) {
     </div>
   );
 }
-

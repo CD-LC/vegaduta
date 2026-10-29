@@ -91,7 +91,7 @@ export default function ReadinessRail({
                       <button
                         type="button"
                         onClick={() => onSelect?.(row.ref)}
-                        className="truncate border-0 bg-transparent p-0 text-left text-sm font-medium text-foreground shadow-none hover:underline"
+                        className="truncate border-0 bg-transparent p-0 text-start text-sm font-medium text-foreground shadow-none hover:underline"
                         disabled={!onSelect}
                       >
                         {row.label}

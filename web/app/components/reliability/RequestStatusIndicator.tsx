@@ -83,7 +83,8 @@ export function RequestStatusIndicator({
   const Icon = meta.icon;
   const showCancel = Boolean(onCancel) && Boolean(snapshot?.cancellable);
   const message = snapshot?.error && (state === "FAILED" || state === "TIMED_OUT") ? snapshot.error : null;
-  const showRetryHint = Boolean(snapshot) && snapshot!.attempt > 1 && snapshot!.maxAttempts > 1 && IN_FLIGHT_STATES.includes(state);
+  const showRetryHint =
+    Boolean(snapshot) && snapshot!.attempt > 1 && snapshot!.maxAttempts > 1 && IN_FLIGHT_STATES.includes(state);
 
   return (
     <div className={cn("flex min-w-0 items-center gap-2 text-sm", className)} role="status" aria-live="polite">
@@ -92,7 +93,7 @@ export function RequestStatusIndicator({
         <span className={cn("font-medium whitespace-nowrap", meta.tone)}>
           {meta.label}
           {showRetryHint && (
-            <span className="ml-1 text-xs font-normal text-muted-foreground">
+            <span className="ms-1 text-xs font-normal text-muted-foreground">
               (retry {snapshot!.attempt}/{snapshot!.maxAttempts})
             </span>
           )}

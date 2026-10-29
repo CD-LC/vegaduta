@@ -283,7 +283,7 @@ export default function Showtime({
         <Image src="/logo-mark.png" alt="" width={26} height={26} style={{ width: 26, height: "auto" }} />
         <span className="hidden text-sm font-semibold tracking-tight sm:inline">Showtime</span>
         <div
-          className="ml-2 inline-flex rounded-full border border-white/10 bg-white/5 p-0.5 text-xs"
+          className="ms-2 inline-flex rounded-full border border-white/10 bg-white/5 p-0.5 text-xs"
           role="tablist"
           aria-label="Mode"
         >
@@ -315,7 +315,7 @@ export default function Showtime({
             <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Build it live
           </button>
         </div>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ms-auto flex items-center gap-1">
           <button
             type="button"
             onClick={toggleFull}

@@ -39,7 +39,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex flex-wrap items-start justify-between gap-2 border-b border-border/50 py-2 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="min-w-0 text-right text-sm">{children}</div>
+      <div className="min-w-0 text-end text-sm">{children}</div>
     </div>
   );
 }
@@ -105,7 +105,10 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
           )}
         </Row>
         <Row label="Allowed hosts">
-          <HostList hosts={egress.allowList} empty="None set. Private and metadata addresses stay blocked either way." />
+          <HostList
+            hosts={egress.allowList}
+            empty="None set. Private and metadata addresses stay blocked either way."
+          />
         </Row>
         <Row label="Private-host exceptions">
           <HostList hosts={egress.privateHostExceptions} empty="None." />
@@ -139,9 +142,7 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
           <HostList hosts={a2aClient.allowedHosts} empty="None: no remote agent is reachable." />
         </Row>
         <Row label="Signed cards required">{a2aClient.requireSignedCard ? "Yes" : "No"}</Row>
-        <Row label="Remote calls per turn">
-          {a2aClient.maxCallsPerTurn > 0 ? a2aClient.maxCallsPerTurn : "No cap"}
-        </Row>
+        <Row label="Remote calls per turn">{a2aClient.maxCallsPerTurn > 0 ? a2aClient.maxCallsPerTurn : "No cap"}</Row>
       </SectionCard>
     </>
   );

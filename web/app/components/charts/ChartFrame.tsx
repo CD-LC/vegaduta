@@ -20,7 +20,6 @@ import PaginationControls from "../PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
-
 /** Tables longer than this scroll inside the card (about 8 visible rows). */
 const LONG_TABLE_ROWS = 12;
 /** Tables longer than this are paged (a 365-day series is 15 pages, not one endless scroll). */
@@ -139,7 +138,11 @@ export default function ChartFrame({
         <TableHeader>
           <TableRow>
             {table.columns.map((column) => (
-              <TableHead key={column.key} scope="col" className={cn("h-9 px-3", column.align === "right" && "text-right")}>
+              <TableHead
+                key={column.key}
+                scope="col"
+                className={cn("h-9 px-3", column.align === "right" && "text-end")}
+              >
                 {column.header}
               </TableHead>
             ))}
@@ -151,7 +154,7 @@ export default function ChartFrame({
               {table.columns.map((column) => (
                 <TableCell
                   key={column.key}
-                  className={cn("px-3 py-2", column.align === "right" && "text-right tabular-nums")}
+                  className={cn("px-3 py-2", column.align === "right" && "text-end tabular-nums")}
                 >
                   {row[column.key]}
                 </TableCell>

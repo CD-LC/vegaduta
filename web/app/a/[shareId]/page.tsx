@@ -269,7 +269,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
           </span>
         )}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/try">
               <span className="hidden sm:inline">Build your own — free</span>
@@ -315,8 +315,8 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
       <div
         className={
           isVisitor
-            ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground"
-            : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm"
+            ? "max-w-[85%] rounded-2xl rounded-ee-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground"
+            : "max-w-[85%] rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm"
         }
       >
         <p className="whitespace-pre-wrap leading-relaxed">{bubble.text}</p>
@@ -328,7 +328,7 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
 function ThinkingBubble() {
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-3">
+      <div className="flex items-center gap-2 rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-3">
         {[0, 1, 2].map((i) => (
           <motion.span
             key={i}

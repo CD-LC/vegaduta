@@ -81,7 +81,7 @@ export default function AutonomySection() {
                     aria-pressed={reasoningDepth === depth}
                     title={locked ? t("editLockedTooltip") : undefined}
                     className={cn(
-                      "rounded-lg border px-3 py-2 text-left transition-colors",
+                      "rounded-lg border px-3 py-2 text-start transition-colors",
                       reasoningDepth === depth
                         ? "border-primary bg-primary/10"
                         : "border-border bg-card hover:bg-accent",
@@ -138,7 +138,7 @@ export default function AutonomySection() {
                     aria-pressed={autonomyTier === tier}
                     title={locked ? t("editLockedTooltip") : undefined}
                     className={cn(
-                      "rounded-lg border px-3 py-2 text-left transition-colors",
+                      "rounded-lg border px-3 py-2 text-start transition-colors",
                       autonomyTier === tier ? "border-primary bg-primary/10" : "border-border bg-card hover:bg-accent",
                       (autonomyTierBusy || locked) && "pointer-events-none opacity-50"
                     )}

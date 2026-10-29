@@ -117,7 +117,7 @@ export default function TaskCard({
         <Zap size={13} className="text-primary" aria-hidden="true" />
         {t("taskCardTitle")}
         {task.taskId && (
-          <span className="ml-auto font-mono text-[10px] normal-case tracking-normal">{task.taskId.slice(0, 8)}</span>
+          <span className="ms-auto font-mono text-[10px] normal-case tracking-normal">{task.taskId.slice(0, 8)}</span>
         )}
       </div>
 
@@ -136,7 +136,7 @@ export default function TaskCard({
               <dt className="sr-only">{t("taskAgent")}</dt>
               <dd className="font-medium text-foreground">
                 {task.preview.agentName || t("taskAgentUnknown")}
-                {!task.agentId && <span className="ml-1 font-normal text-muted-foreground">{t("taskAutoPicked")}</span>}
+                {!task.agentId && <span className="ms-1 font-normal text-muted-foreground">{t("taskAutoPicked")}</span>}
               </dd>
               {(task.preview.providerName || task.preview.model) && (
                 <dd className="text-muted-foreground">
