@@ -107,7 +107,9 @@ function publicScheme(request) {
   const canonical = (nodeProcess.env.NEXT_PUBLIC_APP_URL || nodeProcess.env.NEXT_PUBLIC_SITE_URL || "").toLowerCase();
   if (canonical.startsWith("https:")) return "https";
   const forwarded = (request.headers.get("x-forwarded-proto") || "").split(",")[0].trim();
-  return forwarded === "https" || forwarded === "http" ? forwarded : "http";
+  if (forwarded === "https" || forwarded === "http") return forwarded;
+  // No edge header: the request's own scheme is the deployment's scheme.
+  return (request.nextUrl?.protocol || "http:").replace(/:$/, "");
 }
 
 // Hosts this deployment is known to be served on: the hosted apex/app pairs,

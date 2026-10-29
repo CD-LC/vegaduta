@@ -435,53 +435,12 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         return TenantContext.current().map(TenantContext::getTenantId).orElse("__no-tenant__");
     }
 
-    /**
-     * Reconnects every enabled dynamic registration, for every real tenant, after the app finishes
-     * starting up - NOT during bean creation. application-mcp.yml documents a real past incident
-     * where a slow/ first-run npx subprocess eagerly constructed at startup took down the entire
-     * application context; each reconnect here still runs on its own plain thread, off the Spring
-     * startup path, so the same failure mode can't recur for dynamic connections either. {@link
-     * #connect} is already fully self-guarded (try/catch Throwable -> markError), so a hung or
-     * broken registration here just ends up ERROR, never blocks its siblings or app readiness.
-     *
-     * <p>#596 fix: walks {@link TenantSchemaIterator} instead of calling {@code
-     * registryService.enabledDynamicRegistrations()} with no {@link TenantContext} set (which
-     * previously only ever saw the empty public schema). The per-tenant loop's own {@link
-     * TenantContext} is only good for the synchronous lookup - each spawned reconnect thread
-     * captures that tenant's schema explicitly and re-applies it itself before calling {@link
-     * #connect}, since a bare {@code new Thread(...)} never inherits the loop thread's context (the
-     * same "capture on a known-correct thread, re-set before any hopped-thread work" pattern used
-     * throughout this codebase for this exact class of bug).
-     */
-    @EventListener(ApplicationReadyEvent.class)
+    /** Invoked by {@link DynamicMcpSchedulers} on {@link ApplicationReadyEvent}. */
     public void reconnectEnabledOnStartup() {
         healthMonitor.reconnectEnabledOnStartup();
     }
 
-    /**
-     * Periodic liveness re-check for every currently-live dynamic connection, across every real
-     * tenant schema - the follow-up half of {@link #reconnectEnabledOnStartup} (which only ever
-     * runs once, at boot). A connection whose subprocess died hours after a successful {@link
-     * #connect} previously stayed reported as CONNECTED indefinitely, since nothing re-verified it
-     * - {@code resolveDynamicToolCallbacks} would keep happily returning tool callbacks backed by a
-     * dead client until an agent actually tried to call one and got a real failure
-     * mid-conversation, or an admin noticed and hit "try again."
-     *
-     * <p>Deliberately a lightweight real round-trip ({@code client.listTools()}, same call {@link
-     * #connect} itself uses to confirm "actually answered, not just process spawned") rather than
-     * trusting the client object's mere existence - a hung-but-not-yet-crashed subprocess is
-     * exactly the case a liveness ping needs to catch that a simple null check wouldn't. Runs
-     * sequentially per tenant/connection, same posture {@code WorkflowScheduler}'s tick already
-     * takes for its own due-workflow loop - correctness over throughput for a background job that
-     * isn't user-request-latency-sensitive.
-     *
-     * <p><b>Deliberately NOT wrapped in {@code PgAdvisoryJobLock}</b> (the scheduler-lock sweep
-     * that covered every other {@code @Scheduled} job skipped this one on purpose): the state being
-     * checked - {@code liveClients}' subprocess/HTTP clients - is per-JVM, so under multi-replica
-     * every replica must ping ITS OWN connections. Cross-replica exclusion here would leave the
-     * losing replica's dead clients reported CONNECTED forever, the exact bug this method exists to
-     * fix.
-     */
+    /** Periodic liveness re-check, scheduled by {@link DynamicMcpSchedulers}. */
     @AllowUnlockedSchedule(
             reason =
                     "Pings this JVM's own liveClients (subprocess/HTTP clients are per-JVM); see the javadoc above.")
@@ -490,30 +449,7 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         healthMonitor.healthCheckLiveConnections();
     }
 
-    /**
-     * Bounded auto-retry with backoff (2026-08-05) - sibling scheduled job to {@link
-     * #healthCheckLiveConnections}: that one re-verifies connections that ARE live, this one gives
-     * an ERROR'd registration a few automatic chances to recover on its own (a transient npm
-     * registry blip, a briefly-down upstream API) before requiring a human to notice and click "Try
-     * again". The actual schedule (5m, 15m, 1h, then a 6h steady state, giving up after {@code
-     * MAX_AUTO_RETRY_ATTEMPTS} consecutive failures) lives entirely in {@code
-     * McpServerRegistration#markError} / {@code #backoffFor} - this method only asks "who's due
-     * right now" per tenant and re-runs the exact same {@link #connect} every other path uses, so
-     * every guard (review gate, launcher allowlist, SSRF, stdio cap) still applies identically to
-     * an automatic retry.
-     *
-     * <p>Same "cheap synchronous read, then hop to a per-registration daemon thread with its own
-     * re-set TenantContext" shape as {@link #reconnectEnabledOnStartup} - a real subprocess connect
-     * can be slow, and this scheduler thread must never block on one tenant's flaky server while
-     * every other tenant's due retries wait behind it.
-     *
-     * <p><b>Deliberately NOT wrapped in {@code PgAdvisoryJobLock}</b>, same reasoning as {@link
-     * #healthCheckLiveConnections}: a successful retry's product is a per-JVM client in this
-     * replica's {@code liveClients}, which every replica needs its own copy of. The honest
-     * multi-replica cost is duplicated retry attempts (and retry-count advancement) against the
-     * same errored registration - accepted, because suppressing them would leave N-1 replicas
-     * without a connection even after recovery.
-     */
+    /** Bounded auto-retry with backoff, scheduled by {@link DynamicMcpSchedulers}. */
     @AllowUnlockedSchedule(
             reason =
                     "Each replica rebuilds its own per-JVM client after an error; the Redis ownership lease (app.mcp.registry-store=redis) already restricts the retry counter to the coordinator.")
@@ -660,9 +596,7 @@ public class DynamicMcpConnectionManager implements McpDynamicConnector {
         return stdioParamsBuilder.stdioParamsFor(config);
     }
 
-    @AllowUnlockedSchedule(
-            reason = "Cleans this host's own on-disk MCP package caches; local to the replica.")
-    @Scheduled(fixedRate = CACHE_CLEANUP_INTERVAL_MS)
+    /** Scheduled by {@link DynamicMcpSchedulers}. */
     public void cleanupOrphanedPackageCaches() {
         packageCacheJanitor.cleanupOrphanedPackageCaches();
     }
