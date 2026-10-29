@@ -62,7 +62,7 @@ class N8nConditionMappingTest {
                                 + " {'operator': {'type': 'string', 'operation': 'exists'},"
                                 + "  'leftValue': 'w'}]}}");
         N8nConditionMapping.Translation t = N8nConditionMapping.translate(ctx(params));
-        assertThat(t.expression()).isEqualTo("(!isEmpty('v')) && (w != null)");
+        assertThat(t.expression()).isEqualTo("(!isEmpty('v')) && ('w' != null)");
     }
 
     @Test

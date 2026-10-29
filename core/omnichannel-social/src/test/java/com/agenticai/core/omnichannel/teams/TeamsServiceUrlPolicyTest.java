@@ -19,7 +19,7 @@ class TeamsServiceUrlPolicyTest {
     void theDefaultListAllowsMicrosoftConnectorHosts() {
         assertThat(policy.isAllowed("https://smba.trafficmanager.net/amer/")).isTrue();
         assertThat(policy.isAllowed("https://eastus.botframework.com/v3/")).isTrue();
-        assertThat(policy.isAllowed("https://teams.microsoft.com/x")).isTrue();
+        assertThat(policy.isAllowed("https://api.teams.microsoft.com/x")).isTrue();
     }
 
     @Test

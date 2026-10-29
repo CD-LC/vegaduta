@@ -2,6 +2,7 @@ package com.agenticai.core.omnichannel.x;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -83,11 +84,11 @@ class XChannelConnectionTest {
         when(oAuthService.current()).thenReturn(Optional.empty());
         assertThat(connection.probe()).isEqualTo("connected");
 
-        when(oAuthService.currentAccessToken()).thenThrow(new XNotConfiguredException());
+        doThrow(new XNotConfiguredException()).when(oAuthService).currentAccessToken();
         assertThatThrownBy(() -> connection.probe())
                 .isInstanceOf(ChannelNotConnectedException.class);
 
-        when(oAuthService.currentAccessToken()).thenThrow(new XNotConnectedException());
+        doThrow(new XNotConnectedException()).when(oAuthService).currentAccessToken();
         assertThatThrownBy(() -> connection.probe())
                 .isInstanceOf(ChannelNotConnectedException.class);
     }
