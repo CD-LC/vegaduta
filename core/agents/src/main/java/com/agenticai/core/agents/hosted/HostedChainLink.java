@@ -243,4 +243,14 @@ public record HostedChainLink(
         }
         return null;
     }
+
+    /**
+     * Points {@code context}'s model traits at the serving row's own stream idle-timeout (V674).
+     */
+    public static void applyStreamIdleTimeout(
+            com.agenticai.core.agents.turn.TurnContext context,
+            List<HostedChainLink> chain,
+            ChatClient client) {
+        context.modelTraits().streamIdleTimeout(streamIdleTimeoutFor(chain, client));
+    }
 }

@@ -12,7 +12,6 @@ import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.cache.SemanticResponseCacheService;
-import com.agenticai.core.guardrails.GuardrailViolationException;
 import com.agenticai.core.security.TenantPlan;
 import java.time.Duration;
 import java.time.Instant;
@@ -129,18 +128,23 @@ final class ChatTurnDispatcher {
         // tried so far has had a real gap, and the cost of a false fire
         // (one reply buffered instead of streamed) is far lower than the
         // cost of a false miss (a fabricated link still reaching the user).
-        // Which turns give streaming up is app.chat.parity.fast-buffering-triggers (default: a generation
+        // Which turns give streaming up is app.chat.parity.fast-buffering-triggers (default: a
+        // generation
         // tool or an MCP tool on offer, the live-incident guard above), decided in one place.
         ChatParityProperties parity = turns.parity;
         java.util.function.BooleanSupplier outputGuardrails =
-                FastBuffering.once(() -> svc.guardrails.hasOutputGuardrails(agent, currentTenantId));
+                FastBuffering.once(
+                        () -> svc.guardrails.hasOutputGuardrails(agent, currentTenantId));
         boolean bufferForGenerationSafety =
                 FastBuffering.applies(parity, tools, anyMcpToolsOffered, outputGuardrails);
         // A held reply that the output guardrails may withhold is checked where the reply completes
         // (FastStreamTurn), so what is shown and what is stored are the same text.
-        context.reply().holdForOutputCheck(FastBuffering.holdsForOutputCheck(parity, outputGuardrails));
-        // app.chat.parity.fast-buffering-mode: FROM_FIRST_LINK streams the reply and holds only the part from the first
-        // link on; a reply the output guardrails may withhold is always held whole (it must not have been half shown).
+        context.reply()
+                .holdForOutputCheck(FastBuffering.holdsForOutputCheck(parity, outputGuardrails));
+        // app.chat.parity.fast-buffering-mode: FROM_FIRST_LINK streams the reply and holds only the
+        // part from the first
+        // link on; a reply the output guardrails may withhold is always held whole (it must not
+        // have been half shown).
         boolean holdWholeReply =
                 parity.getFastBufferingMode() == ChatParityProperties.FastBufferingMode.WHOLE_REPLY
                         || FastBuffering.holdsForOutputCheck(parity, outputGuardrails);
@@ -181,7 +185,11 @@ final class ChatTurnDispatcher {
                             }
                             return holdWholeReply
                                     ? turns.bufferAndGuardGenerationClaims(
-                                            context, fast, agentId, sessionId, fastDispatchStartedAt)
+                                            context,
+                                            fast,
+                                            agentId,
+                                            sessionId,
+                                            fastDispatchStartedAt)
                                     : turns.streamAndGuardGenerationClaims(
                                             context,
                                             fast,
@@ -190,18 +198,24 @@ final class ChatTurnDispatcher {
                                             fastDispatchStartedAt,
                                             parity.getFastHoldMarkers());
                         };
-        // A FAST stream gets the overall wall-clock ceiling too (audit F2) - see FastTurnCeiling for
+        // A FAST stream gets the overall wall-clock ceiling too (audit F2) - see FastTurnCeiling
+        // for
         // why the idle watchdog alone could not bound the turn.
         java.util.function.UnaryOperator<Flux<String>> capFastTurn =
                 fast -> FastTurnCeiling.cap(fast, turns, context, agent);
-        // A CAREFUL/RIGOROUS/PLANNED turn that hits its time limit (app.llm.http.buffered-turn-timeout, or
-        // an enclosing job deadline when that is longer) used to surface as "every model failed", and
-        // then (2026-10-18) was answered at FAST depth with its tools REMOVED - but the buffered attempt
-        // may already have run some of them, and the FAST answer was written without ever seeing what
+        // A CAREFUL/RIGOROUS/PLANNED turn that hits its time limit
+        // (app.llm.http.buffered-turn-timeout, or
+        // an enclosing job deadline when that is longer) used to surface as "every model failed",
+        // and
+        // then (2026-10-18) was answered at FAST depth with its tools REMOVED - but the buffered
+        // attempt
+        // may already have run some of them, and the FAST answer was written without ever seeing
+        // what
         // they returned, so it could claim anything about work it had not seen. Now:
         //  - a tool ran (or is still running): the turn is reported with the steps that ran, in the
         //    app.chat.resilience.depth-timeout-partial-notice wording, and is not answered again;
-        //  - no tool ran: nothing is lost by answering again at FAST depth, and the tools stay on offer
+        //  - no tool ran: nothing is lost by answering again at FAST depth, and the tools stay on
+        // offer
         //    (app.chat.resilience.retry-at-fast-when-no-tool-ran);
         // either way the trace says so, and the hosted chain wrapper sees a successful turn, so no
         // provider is marked dead for being slow.
@@ -210,10 +224,16 @@ final class ChatTurnDispatcher {
                         Flux.defer(
                                 () -> {
                                     ChatResilienceProperties resilience = turns.resilience;
-                                    TurnToolActivity.Snapshot ran = context.toolActivity().snapshot();
-                                    if (!ran.anyToolRan() && resilience.isRetryAtFastWhenNoToolRan()) {
+                                    TurnToolActivity.Snapshot ran =
+                                            context.toolActivity().snapshot();
+                                    if (!ran.anyToolRan()
+                                            && resilience.isRetryAtFastWhenNoToolRan()) {
                                         DegradedRetrySignal.flagDepthTimeout(
-                                                turns.meterRegistry(), agent, depthName, resilience, stepEvents);
+                                                turns.meterRegistry(),
+                                                agent,
+                                                depthName,
+                                                resilience,
+                                                stepEvents);
                                         // A FAST retry is a FAST stream: the same ceiling applies.
                                         return capFastTurn.apply(fastTurn.apply(client, tools));
                                     }
@@ -226,10 +246,13 @@ final class ChatTurnDispatcher {
                                             DepthTimeoutReport.text(
                                                     resilience,
                                                     depthName,
-                                                    bufferedTurns.bufferedLimit(context, fastDispatchStartedAt),
+                                                    bufferedTurns.bufferedLimit(
+                                                            context, fastDispatchStartedAt),
                                                     ran);
-                                    // Not an answer: never cached, judged or announced. It is kept in the
-                                    // conversation, so the next turn can see which steps already ran
+                                    // Not an answer: never cached, judged or announced. It is kept
+                                    // in the
+                                    // conversation, so the next turn can see which steps already
+                                    // ran
                                     // instead of running them again.
                                     context.reply().mark(TurnReplyOutcome.Kind.INTERRUPTED);
                                     try {
@@ -237,7 +260,9 @@ final class ChatTurnDispatcher {
                                                 memorySessionId,
                                                 ChatTurn.assistant(
                                                         report,
-                                                        context.toolActivity().ledger().snapshotOrNull()));
+                                                        context.toolActivity()
+                                                                .ledger()
+                                                                .snapshotOrNull()));
                                     } catch (RuntimeException persistFailure) {
                                         AgentChatService.log.warn(
                                                 "Could not persist the timeout report for agent {} session {}",
@@ -250,9 +275,7 @@ final class ChatTurnDispatcher {
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
                     // V674 - the row's own stream idle-timeout, re-pointed per attempt.
-                    context.modelTraits()
-                            .streamIdleTimeout(
-                                    HostedChainLink.streamIdleTimeoutFor(hostedChain, turnClient));
+                    HostedChainLink.applyStreamIdleTimeout(context, hostedChain, turnClient);
                     ChatClient client =
                             compactionRun == null ? turnClient : compactionRun.attach(turnClient);
                     if (effectiveForceFastDepth || effReasoningDepth == ReasoningDepth.FAST) {
@@ -286,7 +309,9 @@ final class ChatTurnDispatcher {
                                                 : Flux.error(e));
                     } else {
                         String depthName =
-                                effReasoningDepth == ReasoningDepth.RIGOROUS ? "RIGOROUS" : "CAREFUL";
+                                effReasoningDepth == ReasoningDepth.RIGOROUS
+                                        ? "RIGOROUS"
+                                        : "CAREFUL";
                         return bufferedTurns
                                 .verifyThenRespond(
                                         context,
@@ -305,7 +330,8 @@ final class ChatTurnDispatcher {
                                 .onErrorResume(
                                         e ->
                                                 DegradedRetrySignal.isTimeout(e)
-                                                        ? depthTimeoutFallback.apply(client, depthName)
+                                                        ? depthTimeoutFallback.apply(
+                                                                client, depthName)
                                                         : Flux.error(e));
                     }
                 };
@@ -361,12 +387,15 @@ final class ChatTurnDispatcher {
                                                         hostedFailovers.onRungFailure(
                                                                 svc::maybeSelfHealInvalidModelRow),
                                                         exhaustedChainSyncHeal,
-                                                        // A rung that failed after the turn ran tools is
-                                                        // not replayed on the next one (the tools would
+                                                        // A rung that failed after the turn ran
+                                                        // tools is
+                                                        // not replayed on the next one (the tools
+                                                        // would
                                                         // run again): see FailoverReplayGate.
                                                         () ->
                                                                 turns.replayBlockedBy(
-                                                                                context.toolActivity(),
+                                                                                context
+                                                                                        .toolActivity(),
                                                                                 agent,
                                                                                 "hosted-chain",
                                                                                 stepEvents)
@@ -431,8 +460,7 @@ final class ChatTurnDispatcher {
                                                                                         .reservedTokens(),
                                                                                 firstLink
                                                                                         .reservedMicroCents(),
-                                                                                context
-                                                                                        .budget());
+                                                                                context.budget());
                                                             }
                                                         })
                                         : dispatchTurn.apply(chatClient));
@@ -500,20 +528,13 @@ final class ChatTurnDispatcher {
                                     })
                             .doOnComplete(
                                     () -> {
-                                        TurnLifecycleEvents.finish(stepEvents, context.reply().snapshot());
+                                        TurnLifecycleEvents.finish(
+                                                stepEvents, context.reply().snapshot());
                                         stepEvents.runFinished(
-                                                Duration.between(runStartedAt, Instant.now()).toMillis());
+                                                Duration.between(runStartedAt, Instant.now())
+                                                        .toMillis());
                                     })
-                            .doOnError(
-                                    e -> {
-                                        GuardrailViolationException violation =
-                                                findGuardrailViolation(e);
-                                        if (violation != null) {
-                                            stepEvents.guardrail(
-                                                    violation.getToolName(),
-                                                    guardrailReason(violation));
-                                        }
-                                    });
+                            .doOnError(e -> GuardrailViolations.report(stepEvents, e));
         }
 
         // Close the RL episode once the turn's stream settles (complete / error
@@ -566,18 +587,28 @@ final class ChatTurnDispatcher {
         // same Flux untouched while its loop is off).
         result =
                 com.agenticai.core.agents.skills.TurnCompletionObservers.observe(
-                        result, agentId, sessionId, userMessage, fastDispatchStartedAt, context.tenantContext());
-        // Preferences-from-behavior loop (app.learning.preferences.enabled, off by default): hands over the
+                        result,
+                        agentId,
+                        sessionId,
+                        userMessage,
+                        fastDispatchStartedAt,
+                        context.tenantContext());
+        // Preferences-from-behavior loop (app.learning.preferences.enabled, off by default): hands
+        // over the
         // person's message only; the reply stream is not touched and nothing blocks.
         com.agenticai.core.agents.skills.PreferenceSignalGateway.observe(
                 agentId, sessionId, userMessage, context.tenantContext());
-        // A turn is stored only if it is cacheable now, not just when it began: an agent that offers
-        // tools, or a turn whose model called one, answered from live data. (Preflight already keeps
-        // such an agent out of the caches; this is the same rule at the point of writing, and the only
+        // A turn is stored only if it is cacheable now, not just when it began: an agent that
+        // offers
+        // tools, or a turn whose model called one, answered from live data. (Preflight already
+        // keeps
+        // such an agent out of the caches; this is the same rule at the point of writing, and the
+        // only
         // one a per-call extra tool or a late-resolved list could otherwise slip past.)
         ChatCachePolicy cachePolicy = turns.cachePolicy;
         boolean toolFree = tools.isEmpty() && !context.toolActivity().anyToolRan();
-        // The tenant's and the agent's opt-in (chat.cache.eligibleWithTools), read once for this turn's write decisions.
+        // The tenant's and the agent's opt-in (chat.cache.eligibleWithTools), read once for this
+        // turn's write decisions.
         boolean cacheEligibleWithTools = cachePolicy.eligibleWithTools(context.scope(), agentId);
         boolean exactPutEligible = cacheEligible && (cacheEligibleWithTools || toolFree);
         // The semantic cache has only ever stored tool-less turns, whatever the setting.
@@ -606,7 +637,8 @@ final class ChatTurnDispatcher {
                                         context.reply().kind());
                                 return;
                             }
-                            // A tool ran during this turn after all (the list offered at the start can
+                            // A tool ran during this turn after all (the list offered at the start
+                            // can
                             // be empty while a delegate call runs one): the reply is not cacheable.
                             if (!cacheEligibleWithTools && context.toolActivity().anyToolRan()) {
                                 return;
@@ -634,41 +666,4 @@ final class ChatTurnDispatcher {
                         })
                 .takeUntilOther(cancelled);
     }
-
-    /**
-     * Finds a {@link GuardrailViolationException} anywhere in {@code error}'s cause chain, for the
-     * step-event {@code guardrail} hook in {@link AgentChatService#chat}. The buffered depths run
-     * their {@code .call()} inside {@code Flux.defer} and provider-fallback wrappers, so the
-     * exception can arrive wrapped (a {@code CompletionException}, an {@code
-     * IllegalStateException}) rather than raw - same reason {@code
-     * AgentChatStreamResponder#midStreamFailureMessage} walks the chain, and the same bounded walk: a cause
-     * chain can be cyclic and this runs on a live stream's error path.
-     */
-    private static GuardrailViolationException findGuardrailViolation(Throwable error) {
-        Throwable current = error;
-        for (int depth = 0; current != null && depth < 16; depth++) {
-            if (current instanceof GuardrailViolationException violation) {
-                return violation;
-            }
-            Throwable cause = current.getCause();
-            current = cause == current ? null : cause;
-        }
-        return null;
-    }
-
-    /**
-     * The human reason behind a {@link GuardrailViolationException}, without the "Guardrail blocked
-     * output from tool 'x': " preamble its constructor prepends - the {@code guardrail} step event
-     * already carries the tool name as its own field, so repeating it inside the reason is noise
-     * for a trace UI. Falls back to the full message if the prefix ever changes.
-     */
-    private static String guardrailReason(GuardrailViolationException violation) {
-        String message = violation.getMessage();
-        if (message == null) {
-            return "";
-        }
-        String prefix = "Guardrail blocked output from tool '" + violation.getToolName() + "': ";
-        return message.startsWith(prefix) ? message.substring(prefix.length()) : message;
-    }
-
 }

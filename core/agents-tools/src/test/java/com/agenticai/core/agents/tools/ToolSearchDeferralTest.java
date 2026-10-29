@@ -141,8 +141,7 @@ class ToolSearchDeferralTest {
         highThreshold.configure(false, 50, ToolSearchDeferral.DEFAULT_ALWAYS_ON, 6);
         List<ToolCallback> small = catalog(0);
         assertSame(
-                small,
-                highThreshold.apply(small, AGENT, "s1", new RecordingWrapper(), null, true));
+                small, highThreshold.apply(small, AGENT, "s1", new RecordingWrapper(), null, true));
     }
 
     @Test

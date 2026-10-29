@@ -506,9 +506,7 @@ public class AgentToolProvider implements AgentToolPort {
                         allowDelegation,
                         mainChatTurn,
                         List.of(),
-                        mainChatTurn && turnApproval != null
-                                ? keptOnOffer(turnApproval)
-                                : Set.of(),
+                        mainChatTurn && turnApproval != null ? keptOnOffer(turnApproval) : Set.of(),
                         forceToolDeferral),
                 applyRelevanceSelection,
                 stableToolSet);
