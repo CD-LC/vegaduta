@@ -14,16 +14,7 @@ import SketchPad from "./SketchPad";
 import { composeContext, designInputFromFile, serializeSketch, revokeDesignInput } from "./designInputs";
 import { generateFilesOnDevice } from "./edgeFiles";
 import { inferSource } from "../components/PoweredByChip";
-import {
-  appendStored,
-  buildUndo,
-  canUndo,
-  loadDraft,
-  loadThread,
-  saveDraft,
-  saveThread,
-  subscribeThread,
-} from "./chatStore";
+import { appendStored, buildUndo, canUndo, loadDraft, loadThread, saveDraft, saveThread, subscribeThread } from "./chatStore";
 import { suggestionsFor } from "./suggestions";
 import { BUILD_STRINGS as S } from "./buildStrings";
 import { uploadAssets } from "./uploadAssets";
@@ -230,10 +221,7 @@ export default function ChatPane({
     const attachments = [...designInputs];
     const sketchText = serializeSketch(sketchBlocks);
     const context = composeContext(
-      [
-        ...attachments,
-        ...(sketchText ? [{ id: "sketch", kind: "sketch", label: "Wireframe", contextText: sketchText }] : []),
-      ],
+      [...attachments, ...(sketchText ? [{ id: "sketch", kind: "sketch", label: "Wireframe", contextText: sketchText }] : [])],
       (assets || []).map((a) => a.path)
     );
     const images = attachments.filter((d) => d.image).map((d) => d.image);
@@ -343,7 +331,11 @@ export default function ChatPane({
           else if (stage === "files") {
             // The applied set arrives before the build/test check - name the
             // files it touches in the busy card while the preview renders.
-            setLiveFiles(Array.isArray(evt?.files_changed) ? evt.files_changed : (evt?.files || []).map((f) => f.path));
+            setLiveFiles(
+              Array.isArray(evt?.files_changed)
+                ? evt.files_changed
+                : (evt?.files || []).map((f) => f.path)
+            );
             if (evt?.files?.length) {
               previewFilesShown = true;
               onFiles?.(evt.files);
@@ -447,10 +439,7 @@ export default function ChatPane({
   };
 
   const showChips =
-    !busy &&
-    !disabled &&
-    suggestions.length > 0 &&
-    (!instruction.trim() || suggestions.some((s) => s.prompt === instruction));
+    !busy && !disabled && suggestions.length > 0 && (!instruction.trim() || suggestions.some((s) => s.prompt === instruction));
   const iconBtn = "size-10 px-0";
 
   return (
@@ -459,7 +448,7 @@ export default function ChatPane({
         <CardTitle className="text-sm">{t("chatHeading")}</CardTitle>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col pt-0">
-        <div className="mb-3 min-h-0 flex-1 space-y-3 overflow-auto pe-1">
+        <div className="mb-3 min-h-0 flex-1 space-y-3 overflow-auto pr-1">
           {thread.length === 0 && <p className="text-sm text-muted-foreground">{t("chatEmptyText")}</p>}
           {thread.map((entry, i) =>
             entry.kind === "user" ? (
@@ -487,9 +476,9 @@ export default function ChatPane({
               <div className="flex items-center gap-2">
                 <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {busyLabel || t("generatingText")}
               </div>
-              {liveSummary && <p className="ps-5 italic">{liveSummary}</p>}
+              {liveSummary && <p className="pl-5 italic">{liveSummary}</p>}
               {liveFiles && liveFiles.length > 0 && (
-                <div className="flex max-h-20 flex-wrap gap-1 overflow-y-auto ps-5" data-testid="live-file-chips">
+                <div className="flex max-h-20 flex-wrap gap-1 overflow-y-auto pl-5" data-testid="live-file-chips">
                   {liveFiles.map((p) => (
                     <span key={p} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px]">
                       {p}
@@ -506,7 +495,11 @@ export default function ChatPane({
             SVG/Figma export, the sketch pad's wireframe). */}
         {sketchOpen && (
           <div className="mb-2 shrink-0">
-            <SketchPad blocks={sketchBlocks} onChange={setSketchBlocks} onClose={() => setSketchOpen(false)} />
+            <SketchPad
+              blocks={sketchBlocks}
+              onChange={setSketchBlocks}
+              onClose={() => setSketchOpen(false)}
+            />
           </div>
         )}
         {(designInputs.length > 0 || sketchBlocks.length > 0) && (
@@ -650,19 +643,13 @@ export default function ChatPane({
             )}
             <Button
               size="icon"
-              className={`${iconBtn} ms-auto`}
-              disabled={
-                busy || disabled || (!instruction.trim() && designInputs.length === 0 && sketchBlocks.length === 0)
-              }
+              className={`${iconBtn} ml-auto`}
+              disabled={busy || disabled || (!instruction.trim() && designInputs.length === 0 && sketchBlocks.length === 0)}
               onClick={() => void send()}
               aria-label={S.sendLabel}
               title={S.sendTitle}
             >
-              {busy ? (
-                <Loader2 aria-hidden="true" size={16} className="animate-spin" />
-              ) : (
-                <Send aria-hidden="true" size={16} />
-              )}
+              {busy ? <Loader2 aria-hidden="true" size={16} className="animate-spin" /> : <Send aria-hidden="true" size={16} />}
             </Button>
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground" role="status" aria-live="polite">
