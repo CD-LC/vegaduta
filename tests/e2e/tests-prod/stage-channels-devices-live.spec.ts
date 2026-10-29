@@ -61,7 +61,15 @@ async function clearOverlays(p: Page) {
 
 async function gotoApp(p: Page, path: string) {
   const t0 = Date.now();
-  await p.goto(`${APP}${path}`, { waitUntil: "domcontentloaded" });
+  // The goto itself can return ERR_ABORTED when the app's unauthenticated boot
+  // immediately swaps the document for the Keycloak redirect - the header wait
+  // below is the real "are we back yet" check.
+  await p.goto(`${APP}${path}`, { waitUntil: "domcontentloaded" }).catch(() => {});
+  // On this stack every full navigation pays for a complete Keycloak redirect
+  // round-trip (auth's frame-ancestors blocks the silent check-sso iframe), so the
+  // app shell can take tens of seconds to come back authenticated. Absorb that here
+  // once, before each test's own (short) visibility assertions run.
+  await p.locator("header, nav").first().waitFor({ timeout: 90_000 }).catch(() => {});
   await clearOverlays(p);
   timings[path] = Date.now() - t0;
 }
@@ -104,7 +112,9 @@ test.describe("channels-devices (stage)", () => {
     page = await ctx.newPage();
     page.on("request", (r) => {
       const a = r.headers()["authorization"];
-      if (a && r.url().startsWith(API) && !token) token = a.replace(/^Bearer /, "");
+      // This stack's web image is built with NEXT_PUBLIC_* pointing at localhost:8280, so
+      // API calls do not hit api.<domain> - accept the bearer from any /api/ request.
+      if (a && !token && (r.url().startsWith(API) || r.url().includes("/api/"))) token = a.replace(/^Bearer /, "");
     });
     await signIn(page);
     await gotoApp(page, "/jobs");
@@ -114,7 +124,9 @@ test.describe("channels-devices (stage)", () => {
     await ctx.addInitScript(SEEN_FLAGS, userId);
     const res = await ctx.request.post(`${API}/api/agents`, {
       headers: json(),
-      data: { name: `${PREFIX}agent-${RUN}`, systemPrompt: "You are a test agent.", providerName: "OLLAMA", model: "mock:latest", maxTokens: 64 },
+      // This stack has no in-cluster mock model - the platform pool (host Ollama) is what
+      // PLATFORM_HOSTED agents actually run on here ("mock:latest" 400s as unrecognized).
+      data: { name: `${PREFIX}agent-${RUN}`, systemPrompt: "You are a test agent.", providerName: "PLATFORM_HOSTED", model: "claude-sonnet-4-5", maxTokens: 64 },
     });
     expect(res.status(), "create agent").toBeLessThan(300);
     agentId = (await res.json()).id;
@@ -161,9 +173,9 @@ test.describe("channels-devices (stage)", () => {
     const keys = ["whatsapp", "telegram", "instagram", "messenger", "slack", "discord", "x", "teams", "email", "voice", "mobile-sdk"];
     const status = await (await ctx.request.get(`${API}/api/channels/status`, { headers: bearer() })).json();
     const apiKeys = (status.channels as Array<{ key: string }>).map((c) => c.key);
-    // "sms" is counted in totalCount (12) but has no tile of its own (it is configured inside the WhatsApp/Twilio panel):
-    // the header says "12 available" while 11 tiles are drawn - recorded as a low-severity UX inconsistency.
-    await expect(page.locator('[data-testid="channel-card"]')).toHaveCount(apiKeys.filter((k) => k !== "sms").length, { timeout: 15_000 });
+    // The grid draws one tile per offered channel INCLUDING sms (SmsInspector has its own
+    // tile now - ChannelGrid.tsx inserts "sms" into the tile list explicitly).
+    await expect(page.locator('[data-testid="channel-card"]')).toHaveCount(apiKeys.length, { timeout: 15_000 });
     await expect(page.getByText(`${status.liveCount} live / ${status.totalCount} available`)).toBeVisible();
     expect(keys.length).toBeGreaterThan(0);
     const headings: Record<string, RegExp> = {

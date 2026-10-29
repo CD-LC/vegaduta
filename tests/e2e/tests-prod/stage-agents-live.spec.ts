@@ -1,5 +1,6 @@
 import { test, expect, type Page, type APIRequestContext, type BrowserContext } from "@playwright/test";
 import * as fs from "fs";
+import { fixStageApiBase } from "./local-stage-fix";
 
 /**
  * Agents area against the local kind stage (mock LLM: provider OLLAMA, model mock:latest).
@@ -80,8 +81,9 @@ test.describe.serial("Agents area on the kind stage", () => {
   test.setTimeout(120_000);
 
   test.beforeAll(async ({ browser }) => {
-    ctx = await browser.newContext({ ignoreHTTPSErrors: true });
+    ctx = await browser.newContext({ ignoreHTTPSErrors: true, bypassCSP: true }); // stage fix: see local-stage-fix.ts
     page = await ctx.newPage();
+    await fixStageApiBase(page);
     page.on("console", (m) => { if (m.type() === "error") consoleErrors.push(m.text().slice(0, 240)); });
     const starts = new Map<any, number>();
     page.on("request", (r) => starts.set(r, Date.now()));
