@@ -145,11 +145,11 @@ export default function MigrationsPage() {
               <div className="relative">
                 <Search
                   size={14}
-                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
                   aria-label="Search tenants"
-                  className="h-9 w-56 pl-8"
+                  className="h-9 w-56 ps-8"
                   placeholder="Tenant, schema or id"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
@@ -173,14 +173,14 @@ export default function MigrationsPage() {
             />
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[640px] text-start text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3 font-medium">Tenant</th>
-                    <th className="py-2 pr-3 font-medium">Schema</th>
-                    <th className="py-2 pr-3 font-medium">Version</th>
-                    <th className="py-2 pr-3 font-medium">Pending</th>
-                    <th className="py-2 pr-3 font-medium">Failed</th>
+                    <th className="py-2 pe-3 font-medium">Tenant</th>
+                    <th className="py-2 pe-3 font-medium">Schema</th>
+                    <th className="py-2 pe-3 font-medium">Version</th>
+                    <th className="py-2 pe-3 font-medium">Pending</th>
+                    <th className="py-2 pe-3 font-medium">Failed</th>
                     <th className="py-2 font-medium">State</th>
                   </tr>
                 </thead>
@@ -195,11 +195,11 @@ export default function MigrationsPage() {
                         data-testid="migration-row"
                         data-state={state}
                       >
-                        <td className="py-2 pr-3 font-medium">{t.name || t.tenantId}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{t.schema}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{t.version || UNAVAILABLE}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCountOrUnavailable(t.pending)}</td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatCountOrUnavailable(t.failed)}</td>
+                        <td className="py-2 pe-3 font-medium">{t.name || t.tenantId}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{t.schema}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{t.version || UNAVAILABLE}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCountOrUnavailable(t.pending)}</td>
+                        <td className="py-2 pe-3 font-mono text-xs">{formatCountOrUnavailable(t.failed)}</td>
                         <td className="py-2">
                           <ToneChip tone={meta.tone} label={meta.label} title={t.status} />
                         </td>

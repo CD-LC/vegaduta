@@ -1,8 +1,8 @@
 /* Right-side inspector */
 .ax-tl-inspector {
   /* width comes from the grid track now (see .ax-tl-body) */
-  border-left: 1px solid var(--ax-border);
-  padding-left: 22px;
+  border-inline-start: 1px solid var(--ax-border);
+  padding-inline-start: 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -16,8 +16,8 @@
   }
 
   .ax-tl-inspector {
-    border-left: none;
-    padding-left: 0;
+    border-inline-start: none;
+    padding-inline-start: 0;
     border-top: 1px solid var(--ax-border);
     padding-top: 18px;
     position: static;
@@ -103,7 +103,7 @@
 
 .ax-tl-subtool-mode {
   color: var(--ax-dim);
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .ax-tl-subtool-mode-write {

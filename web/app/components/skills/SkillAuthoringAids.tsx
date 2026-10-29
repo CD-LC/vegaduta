@@ -40,7 +40,10 @@ export function SkillLintPanel({
   existingNames: string[];
   editingName: string | null;
 }) {
-  const issues: LintIssue[] = useMemo(() => lintSkillMd(draft, existingNames, editingName), [draft, existingNames, editingName]);
+  const issues: LintIssue[] = useMemo(
+    () => lintSkillMd(draft, existingNames, editingName),
+    [draft, existingNames, editingName]
+  );
   const errors = issues.filter((i) => i.level === "error").length;
   const warnings = issues.filter((i) => i.level === "warning").length;
   return (
@@ -52,11 +55,13 @@ export function SkillLintPanel({
           </>
         ) : errors > 0 ? (
           <>
-            <XCircle size={13} className="text-[var(--state-error)]" aria-hidden="true" /> {errors} problem{errors === 1 ? "" : "s"} the server will refuse
+            <XCircle size={13} className="text-[var(--state-error)]" aria-hidden="true" /> {errors} problem
+            {errors === 1 ? "" : "s"} the server will refuse
           </>
         ) : (
           <>
-            <AlertTriangle size={13} className="text-[var(--state-warning)]" aria-hidden="true" /> Worth a look before you save
+            <AlertTriangle size={13} className="text-[var(--state-warning)]" aria-hidden="true" /> Worth a look before
+            you save
           </>
         )}
       </p>
@@ -73,7 +78,9 @@ export function SkillLintPanel({
           })}
         </ul>
       )}
-      <p className="text-[11px] text-muted-foreground">These checks mirror the server rules. The server has the final say when you save.</p>
+      <p className="text-[11px] text-muted-foreground">
+        These checks mirror the server rules. The server has the final say when you save.
+      </p>
     </div>
   );
 }
@@ -87,15 +94,15 @@ export function SkillPromptPreview({ draft }: { draft: string }) {
       {ready ? (
         <>
           <p className="text-[11px] text-muted-foreground">
-            Every agent with this skill on carries this one line in its system prompt. The instructions load only when the agent calls
-            load_skill.
+            Every agent with this skill on carries this one line in its system prompt. The instructions load only when
+            the agent calls load_skill.
           </p>
           <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-md border border-border/60 bg-muted/40 p-2 font-mono text-xs text-foreground">
             {promptLine(p.name, p.description)}
           </pre>
           <p className="text-[11px] text-muted-foreground">
-            About {estimateTokens(promptLine(p.name, p.description))} tokens per turn in the list, about {estimateTokens(p.body).toLocaleString("en-US")}{" "}
-            tokens when loaded.
+            About {estimateTokens(promptLine(p.name, p.description))} tokens per turn in the list, about{" "}
+            {estimateTokens(p.body).toLocaleString("en-US")} tokens when loaded.
           </p>
         </>
       ) : (
@@ -112,10 +119,14 @@ export function SkillTemplatePicker({ draft, onPick }: { draft: string; onPick: 
     <div className="space-y-1.5">
       <ConfirmDialog
         open={pending !== null}
-        onOpenChange={(o) => { if (!o) setPending(null); }}
+        onOpenChange={(o) => {
+          if (!o) setPending(null);
+        }}
         title="Replace what you have typed with this template?"
         confirmLabel="Replace"
-        onConfirm={() => { if (pending !== null) onPick(pending); }}
+        onConfirm={() => {
+          if (pending !== null) onPick(pending);
+        }}
       />
       <p className="text-xs font-medium text-foreground">Start from a template</p>
       <div className="flex flex-wrap gap-1.5">
@@ -134,7 +145,9 @@ export function SkillTemplatePicker({ draft, onPick }: { draft: string; onPick: 
             }}
             className={cn(
               "rounded-full border px-2.5 py-1 text-xs shadow-none hover:bg-accent",
-              draft === t.skillMd ? "border-primary bg-accent text-accent-foreground" : "border-border bg-transparent text-foreground"
+              draft === t.skillMd
+                ? "border-primary bg-accent text-accent-foreground"
+                : "border-border bg-transparent text-foreground"
             )}
           >
             {t.title}
@@ -163,13 +176,17 @@ export function SkillFilterBar({
   return (
     <div className="space-y-2" role="search">
       <div className="relative">
-        <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Search
+          size={14}
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
         <Input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder="Search your skills by name or description"
           aria-label="Search skills"
-          className="pl-8"
+          className="ps-8"
         />
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -181,14 +198,16 @@ export function SkillFilterBar({
             onClick={() => onFilter(f.id)}
             className={cn(
               "rounded-full border px-2.5 py-1 text-xs shadow-none hover:bg-accent",
-              filter === f.id ? "border-primary bg-accent text-accent-foreground" : "border-border bg-transparent text-muted-foreground"
+              filter === f.id
+                ? "border-primary bg-accent text-accent-foreground"
+                : "border-border bg-transparent text-muted-foreground"
             )}
           >
             {f.label}
           </button>
         ))}
         {(query || filter !== "all") && (
-          <span className="ml-1 text-xs text-muted-foreground" aria-live="polite">
+          <span className="ms-1 text-xs text-muted-foreground" aria-live="polite">
             {shown} of {total}
           </span>
         )}
@@ -226,7 +245,8 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
         </p>
       ) : failed ? (
         <p className="text-xs text-muted-foreground">
-          {attachedAgentIds.length} agent{attachedAgentIds.length === 1 ? "" : "s"} picked this skill. Their names could not be loaded.
+          {attachedAgentIds.length} agent{attachedAgentIds.length === 1 ? "" : "s"} picked this skill. Their names could
+          not be loaded.
         </p>
       ) : agents === null ? (
         <p className="text-xs text-muted-foreground">Loading agents...</p>
@@ -246,7 +266,9 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-muted-foreground">Agents set to use all skills also load it whenever it is switched on.</p>
+          <p className="text-[11px] text-muted-foreground">
+            Agents set to use all skills also load it whenever it is switched on.
+          </p>
         </>
       )}
     </div>

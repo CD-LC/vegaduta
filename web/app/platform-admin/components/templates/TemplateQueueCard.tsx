@@ -130,7 +130,7 @@ export default function TemplateQueueCard({
       <button
         type="button"
         onClick={onToggleExpand}
-        className="flex w-full flex-wrap items-start justify-between gap-3 rounded-lg border-0 bg-transparent p-4 text-left shadow-none transition-colors hover:bg-accent/40"
+        className="flex w-full flex-wrap items-start justify-between gap-3 rounded-lg border-0 bg-transparent p-4 text-start shadow-none transition-colors hover:bg-accent/40"
         aria-expanded={expanded}
       >
         <div className="flex min-w-0 flex-1 items-start gap-3">

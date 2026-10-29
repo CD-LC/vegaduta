@@ -122,7 +122,7 @@ export default function ShowtimeTransport({
         <Btn label="Next chapter (→)" onClick={() => jump(index + 1)}>
           <SkipForward aria-hidden="true" className="h-4 w-4 shrink-0" />
         </Btn>
-        <span className="ml-1 font-mono text-xs tabular-nums text-zinc-400">
+        <span className="ms-1 font-mono text-xs tabular-nums text-zinc-400">
           {mmss(t)} / {mmss(total)}
         </span>
 
@@ -145,7 +145,7 @@ export default function ShowtimeTransport({
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ms-auto flex items-center gap-1">
           <button
             type="button"
             onClick={() => setSpeed((s) => SPEEDS[(SPEEDS.indexOf(s) + 1) % SPEEDS.length])}
@@ -168,7 +168,7 @@ export default function ShowtimeTransport({
           <button
             type="button"
             onClick={enterBuild}
-            className="ml-1 hidden items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-medium hover:bg-emerald-500 sm:inline-flex"
+            className="ms-1 hidden items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-medium hover:bg-emerald-500 sm:inline-flex"
           >
             <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Build it live
           </button>

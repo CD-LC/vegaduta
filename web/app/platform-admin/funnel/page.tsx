@@ -243,12 +243,12 @@ export default function FunnelPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="py-2 pr-3 font-medium">Band</th>
-                <th className="py-2 pr-3 font-medium">Reach</th>
-                <th className="py-2 pr-3 font-medium">% of views</th>
-                <th className="py-2 pr-3 font-medium">Lost here</th>
-                <th className="py-2 pr-3 font-medium">CTA clicks</th>
+              <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                <th className="py-2 pe-3 font-medium">Band</th>
+                <th className="py-2 pe-3 font-medium">Reach</th>
+                <th className="py-2 pe-3 font-medium">% of views</th>
+                <th className="py-2 pe-3 font-medium">Lost here</th>
+                <th className="py-2 pe-3 font-medium">CTA clicks</th>
                 <th className="py-2 font-medium">Engage</th>
               </tr>
             </thead>
@@ -260,7 +260,7 @@ export default function FunnelPage() {
                     key={row.section.key}
                     className={`border-b border-border/50 align-top ${worst ? "bg-destructive/5" : ""}`}
                   >
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3">
                       <div className="font-medium">{row.section.label}</div>
                       <div className="text-[11px] leading-snug text-muted-foreground">{row.section.job}</div>
                       {row.section.caveat && (
@@ -270,8 +270,8 @@ export default function FunnelPage() {
                         </div>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 font-mono tabular-nums">{fmtInt(row.reach)}</td>
-                    <td className="py-2.5 pr-3">
+                    <td className="py-2.5 pe-3 font-mono tabular-nums">{fmtInt(row.reach)}</td>
+                    <td className="py-2.5 pe-3">
                       <div className="font-mono tabular-nums">{awaitingDeploy ? "n/a" : fmtPct(row.reachPct)}</div>
                       <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-muted">
                         <div
@@ -280,7 +280,7 @@ export default function FunnelPage() {
                         />
                       </div>
                     </td>
-                    <td className="py-2.5 pr-3 font-mono tabular-nums">
+                    <td className="py-2.5 pe-3 font-mono tabular-nums">
                       {row.lostPct === null || awaitingDeploy ? (
                         <span className="text-muted-foreground">&mdash;</span>
                       ) : (
@@ -289,7 +289,7 @@ export default function FunnelPage() {
                         </span>
                       )}
                     </td>
-                    <td className="py-2.5 pr-3 font-mono tabular-nums">
+                    <td className="py-2.5 pe-3 font-mono tabular-nums">
                       {row.hasCta ? fmtInt(row.clicks) : <span className="text-muted-foreground">&mdash;</span>}
                     </td>
                     <td className="py-2.5 font-mono tabular-nums">
@@ -360,7 +360,7 @@ export default function FunnelPage() {
       </SectionCard>
 
       <SectionCard title="What this screen can and cannot tell you" icon={TrendingDown} delay={0.15}>
-        <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+        <ul className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground">
           <li>
             <strong className="text-foreground">It can tell you where attention stops.</strong> The waterfall is
             measured, per band, from real visitors.

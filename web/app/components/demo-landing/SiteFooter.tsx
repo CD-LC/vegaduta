@@ -192,7 +192,7 @@ export default function SiteFooter() {
             </span>
           </div>
           {CIN_NUMBER || DIN_NUMBER ? (
-            <div className="mt-2 text-center sm:text-left">
+            <div className="mt-2 text-center sm:text-start">
               <span>
                 {[CIN_NUMBER && `CIN: ${CIN_NUMBER}`, DIN_NUMBER && `DIN: ${DIN_NUMBER}`].filter(Boolean).join(" · ")}
               </span>
@@ -222,7 +222,7 @@ function FooterCol({ title, icon: Icon, links }: { title: string; icon: LucideIc
         {filterBillingItems(links).map((l) => (
           <li key={l.label}>
             {l.onClick ? (
-              <button type="button" onClick={l.onClick} className="text-left transition-colors hover:text-foreground">
+              <button type="button" onClick={l.onClick} className="text-start transition-colors hover:text-foreground">
                 {l.label}
               </button>
             ) : l.external ? (

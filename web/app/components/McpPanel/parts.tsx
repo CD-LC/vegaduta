@@ -160,7 +160,7 @@ export function McpCredentialGuideAlert({ name }: { name: string | null | undefi
       <HelpCircle aria-hidden="true" />
       <AlertTitle>{guide.title}</AlertTitle>
       <AlertDescription>
-        <ul className="ml-4 list-disc space-y-1">
+        <ul className="ms-4 list-disc space-y-1">
           {guide.steps.map((step: string, i: number) => (
             <li key={i}>{step}</li>
           ))}
@@ -204,7 +204,7 @@ export function ReadinessBadge({ server, compact }: { server: any; compact?: boo
       <Badge
         variant="outline"
         className={cn(
-          "ml-1.5 h-4 gap-0.5 px-1.5 text-xs font-semibold",
+          "ms-1.5 h-4 gap-0.5 px-1.5 text-xs font-semibold",
           tone === "success"
             ? TONE_SUCCESS
             : tone === "error"

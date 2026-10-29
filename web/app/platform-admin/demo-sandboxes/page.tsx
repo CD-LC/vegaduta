@@ -272,7 +272,7 @@ export default function DemoSandboxesPage() {
               <div className="space-y-1 rounded-lg border border-border p-3 text-xs">
                 <p className="font-semibold">Last reclaim: {reclaimSummary(lastResult)}</p>
                 {lastResult.failed.length > 0 && (
-                  <ul className="list-disc pl-5 text-destructive">
+                  <ul className="list-disc ps-5 text-destructive">
                     {lastResult.failed.map((f) => (
                       <li key={f.id}>
                         {f.name || f.id}: {f.error}
@@ -295,18 +295,18 @@ export default function DemoSandboxesPage() {
                 <table className="w-full text-xs">
                   <thead className="border-b border-border text-muted-foreground">
                     <tr>
-                      <th className="w-8 px-2 py-1.5 text-left">
+                      <th className="w-8 px-2 py-1.5 text-start">
                         <Checkbox
                           checked={allOnPageSelected}
                           aria-label="Select every sandbox on this page"
                           onCheckedChange={() => togglePage()}
                         />
                       </th>
-                      <th className="px-2 py-1.5 text-left font-medium">Name</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Schema</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Status</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Created</th>
-                      <th className="px-2 py-1.5 text-left font-medium">Last session</th>
+                      <th className="px-2 py-1.5 text-start font-medium">Name</th>
+                      <th className="px-2 py-1.5 text-start font-medium">Schema</th>
+                      <th className="px-2 py-1.5 text-start font-medium">Status</th>
+                      <th className="px-2 py-1.5 text-start font-medium">Created</th>
+                      <th className="px-2 py-1.5 text-start font-medium">Last session</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

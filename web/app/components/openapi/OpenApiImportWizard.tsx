@@ -173,7 +173,7 @@ export default function OpenApiImportWizard({
           <div className="rounded-lg border border-border bg-secondary/30 p-3 text-sm">
             <div className="font-medium text-foreground">
               {preview.title || sourceForm.name}
-              {preview.version ? <span className="ml-2 text-xs text-muted-foreground">v{preview.version}</span> : null}
+              {preview.version ? <span className="ms-2 text-xs text-muted-foreground">v{preview.version}</span> : null}
             </div>
             {preview.description && (
               <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{preview.description}</p>

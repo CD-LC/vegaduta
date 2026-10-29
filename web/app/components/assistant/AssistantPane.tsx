@@ -348,7 +348,7 @@ export default function AssistantPane() {
       {side === "left" ? <PanelLeft size={16} aria-hidden="true" /> : <PanelRight size={16} aria-hidden="true" />}
       {side === "right" && liveTasks > 0 && (
         <span
-          className="absolute -right-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground"
+          className="absolute -end-0.5 -top-0.5 grid size-4 place-items-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground"
           data-testid="work-badge"
         >
           {liveTasks}
@@ -406,9 +406,9 @@ export default function AssistantPane() {
       )}
       <aside
         className={cn(
-          "asst-panel-left w-64 shrink-0 border-r border-border",
+          "asst-panel-left w-64 shrink-0 border-e border-border",
           leftOpen
-            ? "absolute inset-y-0 left-0 z-20 flex flex-col shadow-lg lg:static"
+            ? "absolute inset-y-0 start-0 z-20 flex flex-col shadow-lg lg:static"
             : prefs.leftCollapsed
               ? "hidden"
               : "hidden lg:static lg:flex lg:flex-col"
@@ -638,9 +638,9 @@ export default function AssistantPane() {
 
       <aside
         className={cn(
-          "asst-panel-right w-72 shrink-0 border-l border-border",
+          "asst-panel-right w-72 shrink-0 border-s border-border",
           rightOpen
-            ? "absolute inset-y-0 right-0 z-20 flex flex-col shadow-lg xl:static"
+            ? "absolute inset-y-0 end-0 z-20 flex flex-col shadow-lg xl:static"
             : prefs.rightCollapsed
               ? "hidden"
               : "hidden xl:static xl:flex xl:flex-col"

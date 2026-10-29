@@ -53,7 +53,7 @@ function IssueLines({ label, issues }: { label: string; issues: TemplateIssue[] 
   return (
     <div>
       <p className="font-medium text-foreground">{label}</p>
-      <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground">
+      <ul className="list-disc space-y-0.5 ps-4 text-muted-foreground">
         {issues.map((i, n) => (
           <li key={`${i.code}-${n}`}>
             {i.message} <span className="uppercase tracking-wide">({i.principle})</span>

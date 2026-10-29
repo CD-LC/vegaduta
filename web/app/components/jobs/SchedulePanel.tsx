@@ -287,7 +287,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                     {t("sentinelBadge")}
                   </Badge>
                 )}
-                <div className="ml-auto flex items-center gap-2">
+                <div className="ms-auto flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={runNow} disabled={saving}>
                     <Play className="size-3.5" aria-hidden="true" /> {t("runNow")}
                   </Button>
@@ -493,7 +493,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                 {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {absent ? t("create") : schedule && !schedule.enabled ? t("saveReenable") : t("save")}
               </Button>
-              {!isAdmin && <p className="ml-auto text-xs text-muted-foreground">{t("adminOnly")}</p>}
+              {!isAdmin && <p className="ms-auto text-xs text-muted-foreground">{t("adminOnly")}</p>}
             </div>
           </Card>
 

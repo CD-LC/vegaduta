@@ -339,7 +339,7 @@ function Orrery({
               <Icon style={{ width: "5cqw", height: "5cqw" }} className={lit ? "text-white" : "text-zinc-400"} />
               {lit && !active && (
                 <span
-                  className="absolute -right-[0.4cqw] -top-[0.4cqw] flex items-center justify-center rounded-full bg-emerald-500 text-emerald-950"
+                  className="absolute -end-[0.4cqw] -top-[0.4cqw] flex items-center justify-center rounded-full bg-emerald-500 text-emerald-950"
                   style={{ width: "2.6cqw", height: "2.6cqw" }}
                 >
                   <Check aria-hidden="true" style={{ width: "1.6cqw", height: "1.6cqw" }} />

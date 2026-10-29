@@ -148,7 +148,9 @@ export default function TrajectoryExpectedEditor({
         onClick={toggle}
       >
         <Braces size={12} aria-hidden="true" /> {t("editToggle")}
-        {loaded && loaded.trajectory ? <span className="ml-1 text-foreground">({formFromSpec(loaded.trajectory).mode})</span> : null}
+        {loaded && loaded.trajectory ? (
+          <span className="ms-1 text-foreground">({formFromSpec(loaded.trajectory).mode})</span>
+        ) : null}
       </Button>
 
       {open && (
@@ -265,7 +267,13 @@ export default function TrajectoryExpectedEditor({
                   {t("save")}
                 </Button>
                 {loaded.trajectory ? (
-                  <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => void persist(null, "cleared")}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={busy}
+                    onClick={() => void persist(null, "cleared")}
+                  >
                     {t("clear")}
                   </Button>
                 ) : null}

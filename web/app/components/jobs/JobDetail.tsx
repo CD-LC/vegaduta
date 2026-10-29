@@ -158,7 +158,7 @@ export default function JobDetail({ agentId, jobId }: { agentId: string; jobId: 
           <Button
             size="sm"
             variant="outline"
-            className="ml-auto text-destructive"
+            className="ms-auto text-destructive"
             onClick={cancel}
             disabled={cancelling || job.cancelRequested}
           >
@@ -192,7 +192,13 @@ export default function JobDetail({ agentId, jobId }: { agentId: string; jobId: 
           <Meta label={t("metaCost")} value={job.costUsd != null ? `$${job.costUsd}` : "—"} />
           <Meta
             label={t("metaOrigin")}
-            value={job.origin === "SCHEDULE" ? t("originSchedule") : job.origin === "EVENT" ? t("originEvent") : t("originManual")}
+            value={
+              job.origin === "SCHEDULE"
+                ? t("originSchedule")
+                : job.origin === "EVENT"
+                  ? t("originEvent")
+                  : t("originManual")
+            }
           />
           <Meta label={t("metaRequestedBy")} value={job.requestedBy || "—"} />
         </dl>
@@ -250,9 +256,7 @@ export default function JobDetail({ agentId, jobId }: { agentId: string; jobId: 
           <ScrollText className="size-4" aria-hidden="true" /> {t("trace")}
         </p>
         {entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {job.terminal ? t("traceNone") : t("traceWaiting")}
-          </p>
+          <p className="text-sm text-muted-foreground">{job.terminal ? t("traceNone") : t("traceWaiting")}</p>
         ) : (
           <ol className="space-y-2">
             {entries.map((e, i) => (
@@ -264,10 +268,10 @@ export default function JobDetail({ agentId, jobId }: { agentId: string; jobId: 
                   <span className={e.type === "TOOL_CALL" ? "font-mono text-xs text-primary" : "text-foreground"}>
                     {e.label}
                   </span>
-                  {e.detail && <span className="ml-2 break-all text-xs text-muted-foreground">{e.detail}</span>}
-                  {e.errorMessage && <span className="ml-2 text-xs text-destructive">{e.errorMessage}</span>}
+                  {e.detail && <span className="ms-2 break-all text-xs text-muted-foreground">{e.detail}</span>}
+                  {e.errorMessage && <span className="ms-2 text-xs text-destructive">{e.errorMessage}</span>}
                   {e.durationMs != null && (
-                    <span className="ml-2 tabular-nums text-xs text-muted-foreground">{e.durationMs}ms</span>
+                    <span className="ms-2 tabular-nums text-xs text-muted-foreground">{e.durationMs}ms</span>
                   )}
                 </div>
               </li>

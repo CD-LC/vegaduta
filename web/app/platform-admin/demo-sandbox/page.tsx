@@ -325,12 +325,12 @@ export default function DemoSandboxPage() {
               <div className="-mx-2 overflow-x-auto">
                 <table className="w-full min-w-[52rem] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr className="border-b border-border text-start text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-2 py-2 font-medium">Workspace</th>
                       <th className="px-2 py-2 font-medium">Status</th>
                       <th className="px-2 py-2 font-medium">Created</th>
                       <th className="px-2 py-2 font-medium">Expires</th>
-                      <th className="px-2 py-2 text-right font-medium">Messages</th>
+                      <th className="px-2 py-2 text-end font-medium">Messages</th>
                       <th className="px-2 py-2 font-medium">Email</th>
                     </tr>
                   </thead>
@@ -350,7 +350,7 @@ export default function DemoSandboxPage() {
                         <td className="px-2 py-2 whitespace-nowrap text-xs text-muted-foreground">
                           {fmtDateTime(row.expiresAt)}
                         </td>
-                        <td className="px-2 py-2 text-right font-mono tabular-nums">{fmtInt(row.messageCount)}</td>
+                        <td className="px-2 py-2 text-end font-mono tabular-nums">{fmtInt(row.messageCount)}</td>
                         <td className="px-2 py-2 text-xs text-muted-foreground">{row.email || "—"}</td>
                       </tr>
                     ))}
@@ -384,7 +384,7 @@ export default function DemoSandboxPage() {
             <Alert className="mb-1">
               <Info />
               <AlertDescription>
-                <ul className="list-disc space-y-1 pl-4">
+                <ul className="list-disc space-y-1 ps-4">
                   {(settings?.notes ?? []).map((note: string) => (
                     <li key={note}>{note}</li>
                   ))}

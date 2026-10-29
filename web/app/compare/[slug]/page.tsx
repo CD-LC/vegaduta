@@ -64,11 +64,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 // ------------------------------------------------------------- presentation
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-      {children}
-    </h2>
-  );
+  return <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{children}</h2>;
 }
 
 function CiteLinks({ cites }: { cites?: Citation[] }) {
@@ -175,8 +171,20 @@ export default async function ComparePage({ params }: Params) {
 
       <div className="mx-auto w-full max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
         {/* Brand + breadcrumb */}
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label="VegaDūta home">
-          <Image src="/logo-mark.png" alt="" height={32} width={44} className="h-8 w-auto object-contain" style={{ height: 32, width: "auto" }} draggable={false} />
+        <Link
+          href="/"
+          className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
+          aria-label="VegaDūta home"
+        >
+          <Image
+            src="/logo-mark.png"
+            alt=""
+            height={32}
+            width={44}
+            className="h-8 w-auto object-contain"
+            style={{ height: 32, width: "auto" }}
+            draggable={false}
+          />
           <span>
             Vega<span className="text-primary">Dūta</span>
           </span>
@@ -204,9 +212,7 @@ export default async function ComparePage({ params }: Params) {
             <Scale className="size-4" aria-hidden="true" />
             Honest comparison · 2026
           </p>
-          <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            {c.h1}
-          </h1>
+          <h1 className="max-w-3xl text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">{c.h1}</h1>
           {c.intro.map((p) => (
             <p key={p.slice(0, 40)} className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               {p}
@@ -218,7 +224,7 @@ export default async function ComparePage({ params }: Params) {
         <section className="mt-10">
           <SectionLabel>Side by side</SectionLabel>
           <div className="mt-3 overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+            <table className="w-full min-w-[640px] border-collapse text-start text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
                   <th scope="col" className="w-[22%] px-4 py-3 font-semibold text-foreground">
@@ -267,8 +273,8 @@ export default async function ComparePage({ params }: Params) {
         <section className="mt-12">
           <SectionLabel>What {c.name} does better</SectionLabel>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            A comparison you can trust has to start with the other side&apos;s strengths. These are real,
-            and if they are what your project needs most, {c.name} is the better pick:
+            A comparison you can trust has to start with the other side&apos;s strengths. These are real, and if they
+            are what your project needs most, {c.name} is the better pick:
           </p>
           <ul className="mt-4 max-w-3xl space-y-2.5">
             {c.theyDoBetter.map((item) => (
@@ -283,7 +289,14 @@ export default async function ComparePage({ params }: Params) {
         {/* When to pick which */}
         <section className="mt-12 grid gap-4 sm:grid-cols-2">
           <PickList heading={`Pick ${c.name} when…`} items={c.whenToPickThem} />
-          <PickList heading={<>Pick <BrandName /> when…</>} items={c.whenToPickVega} />
+          <PickList
+            heading={
+              <>
+                Pick <BrandName /> when…
+              </>
+            }
+            items={c.whenToPickVega}
+          />
         </section>
 
         {/* Honest current-state */}
@@ -297,8 +310,7 @@ export default async function ComparePage({ params }: Params) {
             ))}
           </ul>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            For the full story on how the platform is built — and what it deliberately hasn&apos;t built
-            yet — read{" "}
+            For the full story on how the platform is built — and what it deliberately hasn&apos;t built yet — read{" "}
             <Link href="/why-vegaduta" className="text-primary underline-offset-2 hover:underline">
               why we built <BrandName /> on Java, Postgres and Keycloak
             </Link>
@@ -325,8 +337,8 @@ export default async function ComparePage({ params }: Params) {
             The fastest way to compare is to try it
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            The sandbox provisions a real tenant — build a WhatsApp-ready agent in your language, no
-            account, no card. Or browse ~90 industry recipes to see what teams actually build.
+            The sandbox provisions a real tenant — build a WhatsApp-ready agent in your language, no account, no card.
+            Or browse ~90 industry recipes to see what teams actually build.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Link
@@ -349,9 +361,8 @@ export default async function ComparePage({ params }: Params) {
         <section className="mt-12">
           <SectionLabel>Sources</SectionLabel>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-            Competitor claims on this page come from the cited vendor pages and third-party
-            research below. Where we did not check something, the table says so. {PRICE_DISCLAIMER}{" "}
-            Page last updated{" "}
+            Competitor claims on this page come from the cited vendor pages and third-party research below. Where we did
+            not check something, the table says so. {PRICE_DISCLAIMER} Page last updated{" "}
             <time dateTime={COMPARE_DATES.updated}>{COMPARE_DATES.updatedLabel}</time>.
           </p>
           <ul className="mt-3 space-y-1.5 text-sm">

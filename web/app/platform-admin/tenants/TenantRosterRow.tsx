@@ -11,7 +11,14 @@ import Select from "../components/Select";
 import { Button } from "../components/ui/button";
 import { Label } from "../components/ui/label";
 import { TENANT_STATUS_LABEL, tenantStatusTone, type PlatformTenantSummary } from "../lib/tenantRoster";
-import { formatCountOrUnavailable, formatDay, formatExact, formatRelative, formatUsdOrUnavailable, UNAVAILABLE } from "../lib/platformFormat";
+import {
+  formatCountOrUnavailable,
+  formatDay,
+  formatExact,
+  formatRelative,
+  formatUsdOrUnavailable,
+  UNAVAILABLE,
+} from "../lib/platformFormat";
 import { capTone, formatCapUsage } from "../lib/governanceFormat";
 import { CAP_TONE_CLASS, PLAN_OPTIONS, RESIDENCY_OPTIONS, STATUS_TONE_CLASS } from "./tenantOptions";
 
@@ -99,12 +106,9 @@ export function TenantRosterRow({
           <Meta label="Last activity" title={formatExact(t.lastActivityAt)}>
             {formatRelative(t.lastActivityAt)}
           </Meta>
-          <Meta
-            label="Spend (30d)"
-            title="All providers incl. BYOK (estimate). Hosted = platform-paid pool share."
-          >
+          <Meta label="Spend (30d)" title="All providers incl. BYOK (estimate). Hosted = platform-paid pool share.">
             <span className="font-mono">{formatUsdOrUnavailable(t.spend30dUsd)}</span>
-            <span className="ml-1 text-[11px] text-muted-foreground">
+            <span className="ms-1 text-[11px] text-muted-foreground">
               hosted {formatUsdOrUnavailable(t.hostedSpend30dUsd)}
             </span>
           </Meta>
@@ -129,7 +133,7 @@ export function TenantRosterRow({
               {formatCapUsage(t.spendCapUsd, t.capMonthToDateUsd)}
             </span>
             {t.capBlocked && (
-              <span className="ml-1 rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium uppercase text-destructive">
+              <span className="ms-1 rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-[10px] font-medium uppercase text-destructive">
                 Blocked
               </span>
             )}
@@ -160,11 +164,7 @@ export function TenantRosterRow({
             options={RESIDENCY_OPTIONS}
           />
         </div>
-        <Button
-          size="sm"
-          disabled={!dirty || saving}
-          onClick={onSavePlan}
-        >
+        <Button size="sm" disabled={!dirty || saving} onClick={onSavePlan}>
           {saving ? "Saving…" : "Save"}
         </Button>
         {t.emergencyStopped ? (

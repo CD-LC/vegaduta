@@ -114,7 +114,7 @@ export function WhatsAppOptInCard() {
   }
 
   return (
-    <div className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-left" data-testid="wa-optin">
+    <div className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-start" data-testid="wa-optin">
       <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("optInTitle")}</div>
       <p className="text-xs text-muted-foreground">{t("optInIntro")}</p>
 
@@ -206,7 +206,7 @@ export function WhatsAppOptInCard() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="ml-auto"
+                    className="ms-auto"
                     disabled={busy || !r.active}
                     aria-label={t("optInRevokeFor", { phone: r.phoneDigits })}
                     onClick={() => void revoke(r.phoneDigits)}

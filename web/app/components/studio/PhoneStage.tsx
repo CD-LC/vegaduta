@@ -238,7 +238,7 @@ function Brief({ job, animate }: { job: string; animate: boolean }) {
         <p className="min-h-[92px] text-[12.5px] leading-relaxed">
           {shown}
           <motion.span
-            className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 bg-violet-300"
+            className="ms-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 bg-violet-300"
             animate={{ opacity: [1, 0, 1] }}
             transition={{ duration: 0.9, repeat: Infinity }}
           />
@@ -344,7 +344,7 @@ function Docs({ name }: { name: string }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.4 }}
-        className="mt-4 rounded-2xl rounded-tl-sm bg-white/10 p-2.5 text-[11.5px] leading-relaxed"
+        className="mt-4 rounded-2xl rounded-ss-sm bg-white/10 p-2.5 text-[11.5px] leading-relaxed"
       >
         Answers now come from <b>your pages</b> - and it tells you which one.
       </motion.div>
@@ -370,7 +370,7 @@ function Run({
   return (
     <div className="flex h-full flex-col px-3 pb-10">
       <AppBar name={name} sub="working" />
-      <div className="ml-auto mt-3 max-w-[85%] rounded-2xl rounded-tr-sm bg-violet-600 p-2.5 text-[11.5px] leading-relaxed">
+      <div className="ms-auto mt-3 max-w-[85%] rounded-2xl rounded-se-sm bg-violet-600 p-2.5 text-[11.5px] leading-relaxed">
         {(mission || "Run today's job").slice(0, 110)}
       </div>
       <div className="mt-3 space-y-1.5">
@@ -405,7 +405,7 @@ function Run({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 + steps.length * 0.7 }}
-        className="mt-3 space-y-1.5 rounded-2xl rounded-tl-sm bg-white/10 p-2.5"
+        className="mt-3 space-y-1.5 rounded-2xl rounded-ss-sm bg-white/10 p-2.5"
       >
         {[95, 80, 60].map((w) => (
           <div key={w} className="h-1.5 rounded bg-white/25" style={{ width: `${w}%` }} />

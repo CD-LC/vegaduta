@@ -286,11 +286,11 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             <div className="flex flex-wrap items-center gap-2">
               {status.gate.enabled ? (
                 <Badge variant="accent">
-                  <ShieldCheck size={12} className="mr-1" aria-hidden="true" /> Enabled
+                  <ShieldCheck size={12} className="me-1" aria-hidden="true" /> Enabled
                 </Badge>
               ) : (
                 <Badge variant="secondary">
-                  <ShieldX size={12} className="mr-1" aria-hidden="true" /> Disabled
+                  <ShieldX size={12} className="me-1" aria-hidden="true" /> Disabled
                 </Badge>
               )}
               {evaluationBadge}
@@ -386,7 +386,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 </span>
               </label>
               {requireSim && (
-                <div className="space-y-1 pl-6">
+                <div className="space-y-1 ps-6">
                   <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-sim-age">
                     Simulation freshness window (hours, optional)
                   </label>

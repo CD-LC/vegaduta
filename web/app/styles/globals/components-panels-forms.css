@@ -25,22 +25,25 @@
    * and the height inline, because neither is knowable from CSS here (trigger
    * width varies by locale, and the menu sits inside a sticky header). */
   .lang-switcher-menu {
-    @apply absolute right-0 z-30 mt-1.5 max-h-72 min-w-[9.5rem] max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-xl border p-1.5 shadow-xl;
+    /* inset-inline-end is the ONLY anchor - under dir=rtl it resolves to the
+     * physical left, so the menu mirrors with the document. A physical right-0
+     * here used to fight it (both insets set, RTL resolves right, menu pinned
+     * to the LTR edge - the "Arabic menu doesn't flip" report). */
+    @apply absolute z-30 mt-1.5 max-h-72 min-w-[9.5rem] max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-xl border p-1.5 shadow-xl;
     border-color: var(--surface-border);
     background-color: var(--surface-card);
     animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
     inset-inline-end: 0;
   }
 
-  /* RTL text direction: no special menu positioning needed since the component
-   * (LanguageSwitcher.tsx) handles placement dynamically based on available space
-   * using getBoundingClientRect() measurements, accounting for the dir attribute. */
-  html[dir="rtl"] .lang-switcher-menu {
-    inset-inline-end: 0;
+  /* Personal-edition pack consent (lib/langPacks.ts): same popover chrome as
+   * the language list, a little wider so the title + size line fit. */
+  .lang-switcher-consent {
+    @apply w-60 p-1.5;
   }
 
   .lang-switcher-option {
-    @apply flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-sm;
+    @apply flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-start text-sm;
     color: var(--text-secondary);
   }
 

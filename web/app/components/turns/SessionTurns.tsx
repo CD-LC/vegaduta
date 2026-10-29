@@ -106,11 +106,25 @@ export default function SessionTurns({
       >
         <div className="space-y-1.5">
           <Label htmlFor="sess-agent-id">{t("agentIdLabel")}</Label>
-          <Input id="sess-agent-id" value={agentId} onChange={(e) => setAgentId(e.target.value)} placeholder={t("agentIdPlaceholder")} spellCheck={false} autoComplete="off" />
+          <Input
+            id="sess-agent-id"
+            value={agentId}
+            onChange={(e) => setAgentId(e.target.value)}
+            placeholder={t("agentIdPlaceholder")}
+            spellCheck={false}
+            autoComplete="off"
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="sess-session-id">{t("sessionIdLabel")}</Label>
-          <Input id="sess-session-id" value={sessionId} onChange={(e) => setSessionId(e.target.value)} placeholder={t("sessionIdPlaceholder")} spellCheck={false} autoComplete="off" />
+          <Input
+            id="sess-session-id"
+            value={sessionId}
+            onChange={(e) => setSessionId(e.target.value)}
+            placeholder={t("sessionIdPlaceholder")}
+            spellCheck={false}
+            autoComplete="off"
+          />
         </div>
         <Button type="submit" variant="outline" disabled={load.kind === "loading"}>
           <Search size={14} aria-hidden="true" /> {t("sessFind")}
@@ -130,7 +144,9 @@ export default function SessionTurns({
         </div>
       )}
 
-      {load.kind === "notFound" && <EmptyState icon={History} title={t("sessUnavailableTitle")} description={t("sessUnavailableBody")} />}
+      {load.kind === "notFound" && (
+        <EmptyState icon={History} title={t("sessUnavailableTitle")} description={t("sessUnavailableBody")} />
+      )}
 
       {load.kind === "forbidden" && (
         <Alert variant="destructive" role="alert">
@@ -171,14 +187,16 @@ export default function SessionTurns({
                 data-testid="session-turn"
                 className={`flex flex-wrap items-center gap-3 rounded-md border p-3 ${selected ? "border-primary" : "border-border"}`}
               >
-                <Badge variant={statusVariant(turn.status)}>{turn.status === "open" ? t("sessStatusOpen") : turn.status}</Badge>
+                <Badge variant={statusVariant(turn.status)}>
+                  {turn.status === "open" ? t("sessStatusOpen") : turn.status}
+                </Badge>
                 <span className="text-xs text-muted-foreground">{formatStamp(turn.startedAt, locale)}</span>
                 <span className="text-xs text-muted-foreground">{t("sessEvents", { count: turn.events })}</span>
                 <CopyTurnId turnId={turn.turnId} />
                 <Button
                   type="button"
                   size="sm"
-                  className="ml-auto"
+                  className="ms-auto"
                   variant={selected ? "default" : "outline"}
                   aria-pressed={selected}
                   onClick={() => onSelect(loaded.current?.agentId ?? agentId.trim(), turn.turnId)}

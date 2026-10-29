@@ -63,14 +63,20 @@ export default function ConsistencyResults(props: { run: LabRun; context: Consis
           // The headline holds either way, the grouping does not: say which
           // reading the groups and the entropy below are drawn from.
           <p className="text-xs text-muted-foreground">
-            {t("ccUnknownGroupsNote", { count: result.unknownPairs, shown: result.clusters.length, alt: result.altClusterCount })}
+            {t("ccUnknownGroupsNote", {
+              count: result.unknownPairs,
+              shown: result.clusters.length,
+              alt: result.altClusterCount,
+            })}
           </p>
         )}
         {conclusive && result.contradictions > 0 && (
           <p className="text-xs text-muted-foreground">{t("ccContradictionNote", { count: result.contradictions })}</p>
         )}
         {run.status !== "SUCCEEDED" && <p className="text-xs font-medium text-foreground">{t("partialResults")}</p>}
-        {context?.usedTools && !context.withTools && <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>}
+        {context?.usedTools && !context.withTools && (
+          <p className="text-xs text-muted-foreground">{t("ccToolsWarning")}</p>
+        )}
       </div>
 
       {conclusive && (
@@ -110,7 +116,7 @@ export default function ConsistencyResults(props: { run: LabRun; context: Consis
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="ml-auto"
+                        className="ms-auto"
                         aria-expanded={open}
                         onClick={() => toggleGroup(index)}
                       >
@@ -151,7 +157,9 @@ export default function ConsistencyResults(props: { run: LabRun; context: Consis
       {failed.length > 0 && (
         <ul className="space-y-1 text-xs text-destructive">
           {failed.map((cell) => (
-            <li key={cell.key}>{t("ccSampleFailed", { n: numbers.get(cell.key) ?? 0, reason: cell.errorMessage ?? "" })}</li>
+            <li key={cell.key}>
+              {t("ccSampleFailed", { n: numbers.get(cell.key) ?? 0, reason: cell.errorMessage ?? "" })}
+            </li>
           ))}
         </ul>
       )}

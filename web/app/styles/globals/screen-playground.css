@@ -102,7 +102,7 @@
 }
 
 .ax-pg-msg-meta {
-  text-align: right;
+  text-align: end;
   font-size: var(--fs-micro);
   color: var(--ax-dim);
   font-family: var(--font-mono), monospace;
@@ -171,12 +171,12 @@
 }
 
 .ax-pg-trace-ok {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--ax-green);
 }
 
 .ax-pg-trace-err {
-  margin-left: auto;
+  margin-inline-start: auto;
   color: var(--ax-red);
 }
 
@@ -198,7 +198,7 @@
   height: 15px;
   background: var(--ax-cyan);
   vertical-align: middle;
-  margin-left: 2px;
+  margin-inline-start: 2px;
   animation: axBlinkCaret 1s step-end infinite;
 }
 
@@ -366,7 +366,7 @@
   border: none;
   color: var(--ax-dim);
   cursor: pointer;
-  margin-left: 4px;
+  margin-inline-start: 4px;
 }
 
 .ax-pg-attach-preview button:hover {

@@ -348,13 +348,13 @@ export default function AcademyLearnersPage() {
           <div className="relative w-full max-w-xs">
             <Search
               size={14}
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search learner…"
-              className="pl-8"
+              className="ps-8"
             />
           </div>
           <div className="w-64">

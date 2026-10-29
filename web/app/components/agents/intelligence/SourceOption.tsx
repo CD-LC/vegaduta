@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "../../../lib/utils";
 
 const optionButtonBase =
-  "flex w-full flex-col items-start gap-0.5 rounded-md border px-2.5 py-2 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "flex w-full flex-col items-start gap-0.5 rounded-md border px-2.5 py-2 text-start text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
 export default function SourceOption({
   icon,

@@ -209,7 +209,7 @@ export default function QuickTaskHistoryList() {
     return () => {
       cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, reloadKey]);
 
   async function openTaskDetail(id: string) {
@@ -315,7 +315,7 @@ export default function QuickTaskHistoryList() {
               <TableHead className="w-[220px]">{t("colStarted")}</TableHead>
               <TableHead className="w-[130px]">{t("colStatus")}</TableHead>
               <TableHead>{t("colRequest")}</TableHead>
-              <TableHead className="w-[120px] text-right">{t("colTaskId")}</TableHead>
+              <TableHead className="w-[120px] text-end">{t("colTaskId")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -334,13 +334,13 @@ export default function QuickTaskHistoryList() {
                 <TableCell className="min-w-[16rem] max-w-[28rem] truncate text-sm text-foreground">
                   <button
                     type="button"
-                    className="max-w-full truncate text-left underline-offset-2 hover:underline"
+                    className="max-w-full truncate text-start underline-offset-2 hover:underline"
                     onClick={() => openTaskDetail(h.taskId)}
                   >
                     {h.requestMessage}
                   </button>
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                <TableCell className="text-end font-mono text-xs text-muted-foreground">
                   <button type="button" className="hover:underline" onClick={() => openTaskDetail(h.taskId)}>
                     {h.taskId.slice(0, 8)}
                   </button>
