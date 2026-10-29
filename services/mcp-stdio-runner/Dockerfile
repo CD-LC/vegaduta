@@ -18,7 +18,7 @@ ARG WITH_BROWSERS=false
 # NODE_IMAGE: the Node base. services/piece-host/Dockerfile --target runner needs
 # Node >= 22, which the default already satisfies; override it (e.g.
 # --build-arg NODE_IMAGE=node:24.21.0-trixie-slim) only with a runner rollout plan.
-ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
+ARG NODE_IMAGE=node:22.23.4-trixie-slim@sha256:2117f713a417f3aff682ac8f5bc2ebbdf1beed51f36e67ab1e0fd3866b6d2d8f
 
 # NPM_VERSION: the npm CLI bundled with the Node base carries High advisories in its own
 # dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore) that the base tag
