@@ -5,7 +5,7 @@
 #
 # Toolchains: JDK 21 (Temurin), Maven, Node 22 + npm, git, and the usual build basics. Gradle
 # projects bring their own ./gradlew; Maven projects may use ./mvnw too.
-ARG NODE_IMAGE=node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
+ARG NODE_IMAGE=node:22.23.4-trixie-slim@sha256:2117f713a417f3aff682ac8f5bc2ebbdf1beed51f36e67ab1e0fd3866b6d2d8f
 ARG JDK_IMAGE=eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964
 
 FROM ${NODE_IMAGE} AS node

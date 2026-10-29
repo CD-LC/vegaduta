@@ -1,7 +1,8 @@
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { requireUserCredentials, requireMutationOptIn, skipIfMockLlm, LLM_IS_MOCK, API_URL } from "../helpers/prod-env";
+import { requireUserCredentials, requireMutationOptIn, API_URL } from "../helpers/prod-env";
 import { signInToConsole, skipIfHostedAllowanceExhausted } from "../helpers/prod-session";
 import { getBearerToken, authHeaders, parseChatSse } from "../helpers/prod-api";
+import { fixStageApiBase, skipIfMockLlm, LLM_IS_MOCK } from "./local-stage-fix";
 
 /**
  * BEHAVIOR tests for the agent workbench, as an end user would exercise it:
@@ -17,6 +18,8 @@ import { getBearerToken, authHeaders, parseChatSse } from "../helpers/prod-api";
  */
 test.describe("Agent workbench - configuration changes are reflected in real output (live)", () => {
   test.setTimeout(4 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280 (see local-stage-fix.ts)
+
 
   let token = "";
   let template: { providerName: string; model?: string } | null = null;
@@ -26,6 +29,7 @@ test.describe("Agent workbench - configuration changes are reflected in real out
     requireUserCredentials(testInfo);
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data + burns tokens - one project only");
+    await fixStageApiBase(page);
     await signInToConsole(page);
     await page.goto("/agents", { waitUntil: "domcontentloaded" });
     await skipIfHostedAllowanceExhausted(page, testInfo);

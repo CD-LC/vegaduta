@@ -135,6 +135,15 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-29, A2A-console agent (Devin, worktree `vd-e2e-pr`): pushed
+  `test/e2e-local-suite` and opened a PR with the local-stack Playwright
+  results: spec tolerance fixes (`local-stage-fix.ts` repoints
+  `window.__ENV.NEXT_PUBLIC_API_BASE_URL` to `api.<domain>` + bypasses CSP;
+  `skipIfMockLlm`/`LLM_IS_MOCK` shim; Keycloak ERR_ABORTED/SSO latency
+  tolerance; sms tile count) plus two new specs
+  (`llm-response-quality-local`, `a2a-console-live` covering PR #282's
+  `/admin/a2a` surface) and darwin landing visual baselines. Verified on a
+  lite compose stack + `vd-e2e-proxy` nginx domain ingress.
 - 2026-10-28, A2A-console agent (Devin, worktree `vegaduta-a2a-wt`): pushed
   `feat/a2a-console-ui` and opened a PR for the A2A interoperability console
   (`/admin/a2a` task list/detail/cancel, inbound endpoints + read-only outbound
@@ -557,102 +566,6 @@ Dependabot alert, and a new-alert gate in CI. Touching: .github/workflows/,
 deploy/omnibus/Dockerfile, services/*/Dockerfile, scripts/ci/,
 core/agents-turn logging sites, services/code-intel, services/app-builder,
 core/graphmemory, core/security, core/agents-jobs, docs/marketing.
-
-### Docs: local-model wire protocol + recovery surface (Devin, 2026-10-27)
-
-local-models.md gained the missing pieces: "Option 4: bring your own local
-server" (vLLM, llama.cpp server, LM Studio, Jan, LocalAI - the LOCAL_OPENAI
-provider path, including the allowed-private-hosts gate and host.docker.internal
-guidance) and "The wire: what core sends to a local model" (the endpoint table:
-/v1/models, /api/tags, /v1/chat/completions; the per-server option fields
-num_ctx/num_batch/keep_alive/reasoning_effort/response_format/tool_choice; and
-the SSRF-guard mechanics). getting-started.md + operations/README.md gained the
-previously undocumented `scripts/vegaduta reset-password` local-account
-recovery path.
-
-### Voice: piper local TTS provider (Devin, 2026-10-27)
-
-services/voice-agent gained a third TTS backend: app/tts_piper.py wraps the
-`piper` subprocess CLI in the same one-shot ChunkedStream shape as
-tts_sarvam.py; VOICE_AGENT_TTS_PROVIDER=piper selects it (deliberately not in
-"auto"'s ordering - a local voice is a conscious quality pick). The binary is
-the MIT rhasspy/piper release tarball, fetched per-arch + sha256-pinned in the
-Dockerfile via piper_voices_download.py --binary (the piper-tts PyPI package's
->=1.3 releases are the GPL-3.0 piper1-gpl lineage, which dependency review
-rejects). Dockerfile also bakes en_US-lessac-medium (+json) sha256-verified.
-TTS selection moved to app/tts_select.py (main.py file-size ratchet). Verified:
-3 tts_piper pytest green, ruff clean on changed files, imports resolve.
-### CI: fuzz workflow -> ClusterFuzzLite (Devin, 2026-10-27)
-
-Scorecard's Fuzzing check only detects CFL/OSS-Fuzz integration, not a bare
-jazzer call, so .github/workflows/fuzz.yml now drives
-google/clusterfuzzlite/actions (sha-pinned v1). New .clusterfuzzlite/
-(project.yaml language:jvm, Dockerfile with pinned Temurin 21 + maven,
-build.sh) packages the two sanitizer targets into the canonical $OUT layout
-with jazzer launchers. Triggers/fuzz windows unchanged. Follow-ups on the
-same PR: build.sh jlinks JRE 21 into $OUT (the CFL run container ships JDK
-17 - UnsupportedClassVersionError - and jazzer_driver needs jdk.attach +
-JVM_LD_LIBRARY_PATH repointed; --cp globs expanded at run time). Dispatched
-run 40555305979: RedactionFuzzer 590,710 + ScrubberFuzzer 608,809 execs, 0
-crashes. Gate fixes: /.clusterfuzzlite added to dependabot docker dirs;
---no-install-recommends (DS-0029); scoped .trivyignore entries for the
-build-only image (DS-0002/DS-0026) and the spring-webmvc 6.2.19 CVEs whose
-fix is the Spring 7 migration (#99) - the CVE exemption is also PR'd to
-main directly as #261 since it blocks every open PR's Trivy scan.
-
-### ACTIVE CLAIM: workflow retry side-effect fix (Devin, 2026-10-27)
-
-Defect "workflow retries duplicate side effects": RetryPolicy.isRetryableNode
-excluded only `output`, so bulk_email/tool/crm_lead/device_control/media/
-sub-workflow/non-GET http nodes all got retries+1 attempts; the Temporal
-activity stub applied the run retry policy to every node type the same way.
-Touching only core/workflow: RetryPolicy now delegates to
-NodeErrorStrategy.isIrreversible (retryUnsafe opt-in), TemporalRunState picks
-a single-attempt activity stub for irreversible nodes, ToolNodeHandler claims
-(run, node, iteration+input) through WorkflowOutputDedupGuard. Extended the
-same claim (still PR #256, same worktree) to two more workflow defects:
-(1) approval/human-input/requiresApproval nodes inside loop/fan-out/parallel/
-sub-flow bodies are now rejected at save time by the new
-WorkflowApprovalPlacement (resume carries no iteration cursor, so a nested
-halt cannot resume faithfully); (2) ParallelBranchRunner now joins branches
-in completion order (fail-fast) instead of index order, and the platform/
-docs copy that claimed both engines enforce stepTimeoutSeconds is corrected
-to label the legacy engine best-effort (per-step timeout is Temporal-only;
-crashed legacy runs are reaped FAILED, not resumed). Worktree:
-/tmp/vd-retry-fix on branch fix/workflow-retry-side-effects. Please do not
-reset the shared ~/Documents checkout while this is in flight - a concurrent
-`git reset --hard` already wiped one round of these edits.
-
-### Trivy: spring-webmvc 6.2.x CVE exemptions (Devin, 2026-10-28)
-
-Newly published CVE-2026-47890 / CVE-2026-47884 (critical, spring-webmvc
-6.2.19) fail every PR's fs scan since the feed update - they are unrelated
-to any PR's diff. No 6.2.x fix exists; the only patched line is Spring
-Framework 7.0.9+ (the #99 migration). Scope-accepted to core/omnichannel +
-core/elevenlabs poms with the reason so the Trivy gate unblocks repo-wide;
-remove when #99 lands.
-
-### Scratchpad: directive + lifecycle + admin REST (Devin, 2026-10-27)
-
-Claimed: core/agents-tools scratchpad package, agents ResolvedToolList,
-agents-turn DirectiveKeys/ChatSystemPromptComposer/ChatPromptAssembler/
-PromptPreviewService/PromptDirectiveRegistry + prompts/en/directive.scratchpad.md,
-app-config application.yml scratchpad block, docs/configuration.md,
-deploy/compose/.env.example scratchpad envs.
-
-Four changes, one PR: (1) directive.scratchpad - a standing "you have a
-private scratchpad" block emitted only when the pad is reachable this turn
-(on the tool list, or offered-and-deferred behind search_tools; the fact is
-recorded on ResolvedToolList at resolution because deferral moves the tools
-off the final list); (2) scratchpad_list is size-aware (key/scope/byte_size/
-bounded preview/total_bytes, bodies via scratchpad_read); (3) full pads evict
-LRU-by-updated_at instead of failing (evict-oldest-on-cap, default on; write
-results name evicted_key + expired_removed), plus lazy TTL sweeps
-(session-note-ttl 30d, agent-note-ttl off); (4) read-only admin REST
-GET /api/agents/{agentId}/scratchpad[?session] and /{key} gated by
-AgentService.requireAccess(VIEWER) - no write/delete by design, session
-"agent"/omitted reads the long-term pad.
-<<<<<<< HEAD
 ### Dependabot lock autofix (Devin, 2026-10-28)
 
 New `.github/workflows/dependabot-autofix.yml` regenerates
