@@ -162,7 +162,7 @@ export function speechLang(lang: string | null | undefined): string {
     ta: "ta-IN",
     te: "te-IN",
     kn: "kn-IN",
-    mr: "me-IN",
+    mr: "mr-IN",
     bn: "bn-IN",
     gu: "gu-IN",
     ja: "ja-JP",
