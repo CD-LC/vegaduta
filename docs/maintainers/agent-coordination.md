@@ -728,3 +728,16 @@ real assistant turn through the configured model. Signed-in checks need
 without them. Branch `test/personal-release-smoke`; signed-out half
 verified 5/5 green on the maintainer's local personal stack (39 passed
 incl. the edition suite, 0 failed).
+
+### Workbench auto-select fix (Devin, 2026-10-29)
+
+Claimed `web/app/agents/page.tsx`,
+`web/app/components/agents/workbench/useWorkbenchBase.ts`,
+`web/app/components/agents/AgentWorkbench/types.ts`, the matching
+`page.test.tsx`/`AgentWorkbench.smoke.test.tsx`, `CHANGELOG.md` for issue
+#294 (bare `/agents` rendered the index so the workbench never mounted;
+`setAgents` also waited on `allSettled`). Opened **PR #297**
+(`fix/workbench-auto-select`, off `origin/main`) — overlaps the
+release-readiness lead's `web/app/**` claim, waits for that review.
+Verified: `npx tsc --noEmit` clean, eslint 0 errors, 47 vitest cases
+green. Worktree: /tmp/vd-fix294.
