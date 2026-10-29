@@ -75,7 +75,7 @@ export default function OnDeviceModelList({
           onClick={() => setModelOverride("auto")}
           aria-pressed={override === "auto"}
           className={cn(
-            "flex w-full items-center justify-between gap-2 rounded-md border-0 bg-transparent p-0 px-2 py-1.5 text-left text-xs shadow-none transition-colors hover:bg-secondary/60",
+            "flex w-full items-center justify-between gap-2 rounded-md border-0 bg-transparent p-0 px-2 py-1.5 text-start text-xs shadow-none transition-colors hover:bg-secondary/60",
             override === "auto" ? "bg-secondary/60 text-foreground" : "text-muted-foreground"
           )}
         >
@@ -172,7 +172,7 @@ export default function OnDeviceModelList({
                 }}
                 aria-pressed={active}
                 className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-md border-0 bg-transparent p-0 px-2 py-1.5 text-left text-xs shadow-none transition-colors hover:bg-secondary/60",
+                  "flex w-full items-center justify-between gap-2 rounded-md border-0 bg-transparent p-0 px-2 py-1.5 text-start text-xs shadow-none transition-colors hover:bg-secondary/60",
                   active ? "bg-secondary/60 text-foreground" : "text-muted-foreground",
                   live && runnableNow && "bg-primary/10 ring-1 ring-primary"
                 )}

@@ -156,7 +156,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
         <div className="relative min-w-0 flex-1">
           <Search
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
@@ -164,7 +164,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search skills: code review, pdf, testing..."
             aria-label="Search the skill registry"
-            className="pl-8"
+            className="ps-8"
           />
         </div>
         <Button type="submit" size="sm" disabled={loading}>

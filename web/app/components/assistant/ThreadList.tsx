@@ -65,18 +65,24 @@ export default function ThreadList({
       </div>
       {threads.length > 4 && (
         <div className="relative px-3 pb-2">
-          <Search size={13} className="pointer-events-none absolute left-5 top-2.5 text-muted-foreground" aria-hidden="true" />
+          <Search
+            size={13}
+            className="pointer-events-none absolute left-5 top-2.5 text-muted-foreground"
+            aria-hidden="true"
+          />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchThreads")}
             aria-label={t("searchThreads")}
-            className="h-8 pl-7 text-sm"
+            className="h-8 ps-7 text-sm"
           />
         </div>
       )}
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
-        {query.trim() && shown.length === 0 && <p className="px-2 text-xs text-muted-foreground">{t("noThreadMatches")}</p>}
+        {query.trim() && shown.length === 0 && (
+          <p className="px-2 text-xs text-muted-foreground">{t("noThreadMatches")}</p>
+        )}
         {loaded && threads.length === 0 && <p className="px-2 text-xs text-muted-foreground">{t("noThreads")}</p>}
         {groups.map((group) => (
           <section key={group.key} className="mb-3">
@@ -101,7 +107,14 @@ export default function ThreadList({
                           if (e.key === "Escape") setEditing(null);
                         }}
                       />
-                      <Button type="button" size="icon" variant="ghost" className="size-7" aria-label={t("save")} onClick={commitRename}>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="size-7"
+                        aria-label={t("save")}
+                        onClick={commitRename}
+                      >
                         <Check size={13} aria-hidden="true" />
                       </Button>
                     </li>
@@ -109,7 +122,10 @@ export default function ThreadList({
                 }
                 if (confirming === row.id) {
                   return (
-                    <li key={row.id} className="flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1.5 text-sm">
+                    <li
+                      key={row.id}
+                      className="flex items-center gap-1 rounded-md bg-destructive/10 px-2 py-1.5 text-sm"
+                    >
                       <span className="min-w-0 flex-1 truncate text-destructive">{t("deleteThreadQuestion")}</span>
                       <Button
                         type="button"
@@ -123,7 +139,13 @@ export default function ThreadList({
                       >
                         {t("delete")}
                       </Button>
-                      <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-xs" onClick={() => setConfirming(null)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 px-2 text-xs"
+                        onClick={() => setConfirming(null)}
+                      >
                         {t("cancel")}
                       </Button>
                     </li>
@@ -137,8 +159,10 @@ export default function ThreadList({
                       disabled={busy && !active}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "w-full truncate rounded-md px-2 py-1.5 pr-[4.5rem] text-left text-sm transition-colors",
-                        active ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
+                        "w-full truncate rounded-md px-2 py-1.5 pe-[4.5rem] text-start text-sm transition-colors",
+                        active
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                         "disabled:cursor-not-allowed disabled:opacity-60"
                       )}
                       title={row.title}

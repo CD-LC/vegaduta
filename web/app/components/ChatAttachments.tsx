@@ -489,7 +489,7 @@ export function AttachmentChips({
         return (
           <li
             key={att.id}
-            className="flex items-center gap-2 rounded-lg border border-border bg-secondary/50 py-1 pl-1.5 pr-2 text-xs text-muted-foreground"
+            className="flex items-center gap-2 rounded-lg border border-border bg-secondary/50 py-1 ps-1.5 pe-2 text-xs text-muted-foreground"
           >
             {att.previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element

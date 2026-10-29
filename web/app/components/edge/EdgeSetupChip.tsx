@@ -245,7 +245,7 @@ export default function EdgeSetupChip() {
         onClick={() => setModelOverride(value)}
         className={cn(
           bareButtonClass,
-          "w-full justify-between gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-secondary",
+          "w-full justify-between gap-2 rounded-md px-2 py-1.5 text-start text-xs hover:bg-secondary",
           selected ? "bg-secondary/60 text-foreground" : "text-muted-foreground"
         )}
       >
@@ -305,7 +305,7 @@ export default function EdgeSetupChip() {
           title={label}
           className={cn(
             bareButtonClass,
-            "gap-1.5 rounded-l-full py-1 pl-2.5 pr-1 hover:bg-secondary hover:text-foreground"
+            "gap-1.5 rounded-s-full py-1 ps-2.5 pe-1 hover:bg-secondary hover:text-foreground"
           )}
         >
           <Cpu size={12} aria-hidden="true" />
@@ -324,7 +324,7 @@ export default function EdgeSetupChip() {
           aria-label={t("chip.expand")}
           className={cn(
             bareButtonClass,
-            "min-h-6 min-w-6 justify-center rounded-r-full py-1 pl-1 pr-2 hover:bg-secondary hover:text-foreground"
+            "min-h-6 min-w-6 justify-center rounded-e-full py-1 ps-1 pe-2 hover:bg-secondary hover:text-foreground"
           )}
         >
           <ChevronDown size={11} className={cn("transition-transform", open && "rotate-180")} aria-hidden="true" />

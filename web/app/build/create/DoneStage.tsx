@@ -9,7 +9,6 @@ import { Badge } from "../../components/ui/badge";
 import PoweredByChip, { inferSource } from "../../components/PoweredByChip";
 import type { Blueprint } from "../../lib/build/blueprint";
 
-
 /** Stage 4: the thing is built; offer the next steps. */
 export default function DoneStage({
   bp,
@@ -30,7 +29,13 @@ export default function DoneStage({
 }) {
   const noun = bp.output === "app" ? "app" : "agent";
   return (
-    <motion.div key="done" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.25 }} className="space-y-5">
+    <motion.div
+      key="done"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-5"
+    >
       <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
         <div className="flex items-center gap-3">
           <motion.span
@@ -77,7 +82,10 @@ export default function DoneStage({
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">What next</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {bp.output === "agent" && briefId && (
-            <Link href={`/build/${briefId}`} className="group flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <Link
+              href={`/build/${briefId}`}
+              className="group flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <Play aria-hidden="true" className="size-4 text-primary" /> Open your {noun}
               </span>
@@ -85,7 +93,10 @@ export default function DoneStage({
             </Link>
           )}
           {bp.output === "agent" && bp.agent.knowledgeBase && (
-            <Link href="/knowledge" className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md">
+            <Link
+              href="/knowledge"
+              className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
+            >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <BookOpen aria-hidden="true" className="size-4 text-primary" /> Add your documents
               </span>
@@ -93,19 +104,29 @@ export default function DoneStage({
             </Link>
           )}
           {bp.output === "agent" && (
-            <Link href="/admin/channels" className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md">
+            <Link
+              href="/admin/channels"
+              className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
+            >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <MessageCircle aria-hidden="true" className="size-4 text-primary" /> Put it on a channel <Badge variant="outline">optional</Badge>
+                <MessageCircle aria-hidden="true" className="size-4 text-primary" /> Put it on a channel{" "}
+                <Badge variant="outline">optional</Badge>
               </span>
               <span className="text-xs text-muted-foreground">WhatsApp, Telegram or email - when you are ready.</span>
             </Link>
           )}
           {bp.output === "app" && projectId && (
-            <button type="button" onClick={() => onOpenApp(projectId)} className="flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-md">
+            <button
+              type="button"
+              onClick={() => onOpenApp(projectId)}
+              className="flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 text-start transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <GitBranch aria-hidden="true" className="size-4 text-primary" /> Open in Custom apps
               </span>
-              <span className="text-xs text-muted-foreground">Preview it, chat to change it, review the pull request.</span>
+              <span className="text-xs text-muted-foreground">
+                Preview it, chat to change it, review the pull request.
+              </span>
             </button>
           )}
         </div>

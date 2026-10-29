@@ -297,7 +297,7 @@ export default function ResearchRunView({ jobId }: { jobId: string }) {
           </span>
         )}
         {job.terminal && question && (
-          <Button asChild size="sm" variant="outline" className="ml-auto">
+          <Button asChild size="sm" variant="outline" className="ms-auto">
             <Link href="/research" onClick={() => setResearchPrefill(question)} title={RS.runAgainHint}>
               <RotateCcw className="size-4" aria-hidden="true" /> {RS.runAgain}
             </Link>
@@ -307,7 +307,7 @@ export default function ResearchRunView({ jobId }: { jobId: string }) {
           <Button
             size="sm"
             variant="outline"
-            className="ml-auto text-destructive"
+            className="ms-auto text-destructive"
             onClick={cancel}
             disabled={cancelling || job.cancelRequested}
           >
@@ -425,8 +425,8 @@ export default function ResearchRunView({ jobId }: { jobId: string }) {
                   <span className={e.type === "TOOL_CALL" ? "font-mono text-xs text-primary" : "text-foreground"}>
                     {e.label}
                   </span>
-                  {e.detail && <span className="ml-2 break-all text-xs text-muted-foreground">{e.detail}</span>}
-                  {e.errorMessage && <span className="ml-2 text-xs text-destructive">{e.errorMessage}</span>}
+                  {e.detail && <span className="ms-2 break-all text-xs text-muted-foreground">{e.detail}</span>}
+                  {e.errorMessage && <span className="ms-2 text-xs text-destructive">{e.errorMessage}</span>}
                 </div>
               </li>
             ))}

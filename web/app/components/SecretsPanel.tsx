@@ -248,7 +248,12 @@ export default function SecretsPanel({ secrets, onChanged }: SecretsPanelProps) 
       const live = s.status === "ACTIVE" && !s.expired;
       if (secretStatus === "active" && !live) return false;
       if (secretStatus === "inactive" && live) return false;
-      return !q || String(s.name ?? "").toLowerCase().includes(q);
+      return (
+        !q ||
+        String(s.name ?? "")
+          .toLowerCase()
+          .includes(q)
+      );
     });
   }, [secrets, secretQuery, secretStatus]);
   const secretsPagination = usePagination(filteredSecrets);
@@ -407,7 +412,7 @@ export default function SecretsPanel({ secrets, onChanged }: SecretsPanelProps) 
               aria-pressed={codeToolAccess}
               data-testid="secrets-codetool-toggle"
               className={cn(
-                "flex max-w-xl flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left",
+                "flex max-w-xl flex-col items-start gap-0.5 rounded-md px-3 py-2 text-start",
                 codeToolAccess && "border-primary bg-primary/10"
               )}
             >
@@ -443,67 +448,67 @@ export default function SecretsPanel({ secrets, onChanged }: SecretsPanelProps) 
         <EmptyState icon={KeyRound} title={t("emptyTitle")} description={t("emptyDescription")} />
       ) : (
         <>
-        {secrets.length > 6 && (
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="relative sm:max-w-xs sm:flex-1">
-              <Search
-                size={14}
-                aria-hidden="true"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <Input
-                type="search"
-                value={secretQuery}
-                onChange={(e) => setSecretQuery(e.target.value)}
-                placeholder={tl("searchSecrets")}
-                aria-label={tl("searchSecrets")}
-                className="pl-8"
-              />
+          {secrets.length > 6 && (
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="relative sm:max-w-xs sm:flex-1">
+                <Search
+                  size={14}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  type="search"
+                  value={secretQuery}
+                  onChange={(e) => setSecretQuery(e.target.value)}
+                  placeholder={tl("searchSecrets")}
+                  aria-label={tl("searchSecrets")}
+                  className="ps-8"
+                />
+              </div>
+              <div role="group" aria-label={tl("secretStatusFilter")} className="flex gap-1.5">
+                {(["all", "active", "inactive"] as const).map((v) => (
+                  <Button
+                    key={v}
+                    type="button"
+                    size="sm"
+                    variant={secretStatus === v ? "default" : "outline"}
+                    aria-pressed={secretStatus === v}
+                    onClick={() => setSecretStatus(v)}
+                  >
+                    {tl(`secretStatus_${v}`)}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <div role="group" aria-label={tl("secretStatusFilter")} className="flex gap-1.5">
-              {(["all", "active", "inactive"] as const).map((v) => (
-                <Button
-                  key={v}
-                  type="button"
-                  size="sm"
-                  variant={secretStatus === v ? "default" : "outline"}
-                  aria-pressed={secretStatus === v}
-                  onClick={() => setSecretStatus(v)}
-                >
-                  {tl(`secretStatus_${v}`)}
-                </Button>
-              ))}
-            </div>
+          )}
+          {filteredSecrets.length === 0 && (
+            <p role="status" className="mt-4 text-sm text-muted-foreground">
+              {tl("noMatch")}
+            </p>
+          )}
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {secretsPagination.pageItems.map((secret) => {
+              return (
+                <SecretCard
+                  key={secret.id}
+                  secret={secret}
+                  copied={copiedId === secret.id}
+                  editingHosts={editingHostsId === secret.id}
+                  hostsDraft={hostsDraft}
+                  setHostsDraft={setHostsDraft}
+                  hostsBusy={hostsBusy}
+                  hostsError={hostsError}
+                  onSaveHosts={() => void saveHosts(secret)}
+                  onCancelHosts={() => setEditingHostsId(null)}
+                  onCopy={() => handleCopy(secret)}
+                  onEditHosts={() => startEditHosts(secret)}
+                  onRotate={() => startRotate(secret)}
+                  onRevoke={() => setRevoking(secret)}
+                  onPurge={() => setPurging(secret)}
+                />
+              );
+            })}
           </div>
-        )}
-        {filteredSecrets.length === 0 && (
-          <p role="status" className="mt-4 text-sm text-muted-foreground">
-            {tl("noMatch")}
-          </p>
-        )}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {secretsPagination.pageItems.map((secret) => {
-            return (
-              <SecretCard
-                key={secret.id}
-                secret={secret}
-                copied={copiedId === secret.id}
-                editingHosts={editingHostsId === secret.id}
-                hostsDraft={hostsDraft}
-                setHostsDraft={setHostsDraft}
-                hostsBusy={hostsBusy}
-                hostsError={hostsError}
-                onSaveHosts={() => void saveHosts(secret)}
-                onCancelHosts={() => setEditingHostsId(null)}
-                onCopy={() => handleCopy(secret)}
-                onEditHosts={() => startEditHosts(secret)}
-                onRotate={() => startRotate(secret)}
-                onRevoke={() => setRevoking(secret)}
-                onPurge={() => setPurging(secret)}
-              />
-            );
-          })}
-        </div>
         </>
       )}
       <PaginationControls

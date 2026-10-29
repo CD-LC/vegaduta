@@ -189,6 +189,16 @@ export default function SignInPanel({
       </p>
     ) : null;
 
+  // The account has a PIN but this browser holds no device secret — the digits
+  // alone can't sign in here, and without this note the missing pad reads as
+  // "my PIN stopped working".
+  const pinHint =
+    methods.includes("pin") && !device.known ? (
+      <p className="text-xs text-muted-foreground" data-testid="local-pin-not-enrolled">
+        {t("local.signin.pinNotEnrolled")}
+      </p>
+    ) : null;
+
   const recoveryLink = canRecovery ? (
     <button type="button" className="underline" onClick={() => go("recovery")} data-testid="local-lost-device">
       {t("local.signin.lostDevice")}
@@ -345,6 +355,7 @@ export default function SignInPanel({
           {busy ? t("local.signingIn") : t("local.signInButton")}
         </Button>
         {passkeyHint}
+        {pinHint}
         {(hasAlternative || recoveryLink || forgotLink) && (
           <p className="vd-auth__switch flex flex-wrap justify-center gap-x-4 gap-y-1">
             {hasAlternative && (
@@ -409,6 +420,7 @@ export default function SignInPanel({
       )}
       {!canPin && status}
       {passkeyHint}
+      {pinHint}
       <p className="vd-auth__switch flex flex-wrap justify-center gap-x-4 gap-y-1">
         <button type="button" className="underline" onClick={() => go("password")} data-testid="local-use-password">
           {t("local.signin.usePassword")}

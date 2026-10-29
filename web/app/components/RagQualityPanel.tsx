@@ -421,7 +421,7 @@ export default function RagQualityPanel({ collectionId }: { collectionId: string
                 <p className="text-xs text-muted-foreground">{t("ciHint")}</p>
                 {evalResult.truncated && <p className="text-xs text-[var(--state-warning)]">{t("truncatedNote")}</p>}
                 {evalResult.notes.length > 0 && (
-                  <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+                  <ul className="list-disc space-y-0.5 ps-5 text-xs text-muted-foreground">
                     {evalResult.notes.map((note, i) => (
                       <li key={i}>{note}</li>
                     ))}

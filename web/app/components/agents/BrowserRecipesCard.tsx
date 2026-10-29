@@ -169,7 +169,7 @@ export default function BrowserRecipesCard({
                           : t("healthNew")}
                     </span>
                     {r.agentId === null && (
-                      <span className="ml-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
+                      <span className="ms-1 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground">
                         {t("recipeScopeAll")}
                       </span>
                     )}
@@ -241,7 +241,7 @@ export default function BrowserRecipesCard({
                           const failedEntry = !!e.errorMessage;
                           return (
                             <li key={e.id} className={failedEntry ? "text-destructive" : "text-muted-foreground"}>
-                              <span className="mr-1 inline-flex align-middle">
+                              <span className="me-1 inline-flex align-middle">
                                 {running ? (
                                   <Loader2 className="size-3 animate-spin" aria-hidden="true" />
                                 ) : failedEntry ? (

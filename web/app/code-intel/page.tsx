@@ -61,7 +61,6 @@ const TABS = [
   { id: "governance", labelKey: "tabGovernance", icon: ShieldCheck },
 ];
 
-
 export default function CodeIntelPage() {
   const t = useTranslations("codeIntel");
   const repoSelectId = useId();
@@ -99,11 +98,10 @@ export default function CodeIntelPage() {
   return (
     <AppShell title={t("title")} eyebrow={t("eyebrow")} wide>
       {error && (
-        <Alert variant="destructive" className="relative mb-5 pr-10">
+        <Alert variant="destructive" className="relative mb-5 pe-10">
           <XCircle />
           <AlertDescription>
-            {error} {t("errorDismissSuffix")}{" "}
-            {t(errorHintKey(error), { url: CODE_INTEL_URL })}
+            {error} {t("errorDismissSuffix")} {t(errorHintKey(error), { url: CODE_INTEL_URL })}
           </AlertDescription>
           <Button
             type="button"
@@ -146,7 +144,9 @@ export default function CodeIntelPage() {
             })}
           </TabsList>
           <div className="flex shrink-0 items-center gap-2">
-            <Label htmlFor={repoSelectId} className="text-xs text-muted-foreground">{t("repoLabel")}</Label>
+            <Label htmlFor={repoSelectId} className="text-xs text-muted-foreground">
+              {t("repoLabel")}
+            </Label>
             <div className="w-40">
               <Select
                 id={repoSelectId}
@@ -603,7 +603,7 @@ function KnowledgeTab({ repoId, onError }) {
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="font-mono text-xs text-primary">{p.citation}</span>
             {p.symbol && <Badge variant="secondary">{p.symbol}</Badge>}
-            <span className="ml-auto font-mono text-xs text-muted-foreground">{(p.score ?? 0).toFixed(3)}</span>
+            <span className="ms-auto font-mono text-xs text-muted-foreground">{(p.score ?? 0).toFixed(3)}</span>
           </div>
           <pre className={CODE_CLS}>{(p.content || "").split("\n").slice(0, 14).join("\n")}</pre>
         </div>

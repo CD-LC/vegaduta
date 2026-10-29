@@ -149,7 +149,7 @@ export default function ImportOverridesDialog({
                 type="file"
                 accept="application/json,.json"
                 onChange={(e) => void onFile(e)}
-                className="block w-full text-sm file:mr-3 file:rounded-md file:border file:border-border file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                className="block w-full text-sm file:me-3 file:rounded-md file:border file:border-border file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium"
                 data-testid="import-file"
               />
               {fileName ? <p className="text-xs text-muted-foreground">{fileName}</p> : null}
@@ -178,7 +178,11 @@ export default function ImportOverridesDialog({
         ) : (
           <div className="space-y-4" data-testid="import-review">
             <p className="text-sm" role="status" aria-live="polite" data-testid="import-summary">
-              {t("import.summary", { changes: plan.changes.length, unchanged: plan.unchanged.length, problems: plan.problems.length })}
+              {t("import.summary", {
+                changes: plan.changes.length,
+                unchanged: plan.unchanged.length,
+                problems: plan.problems.length,
+              })}
             </p>
 
             {plan.changes.length > 0 ? (
@@ -186,13 +190,23 @@ export default function ImportOverridesDialog({
                 <h3 id={`${errorId}-c`} className="text-sm font-semibold">
                   {t("import.changesHeading", { count: plan.changes.length })}
                 </h3>
-                <ul className="divide-y divide-border rounded-md border border-border text-sm" data-testid="import-changes">
+                <ul
+                  className="divide-y divide-border rounded-md border border-border text-sm"
+                  data-testid="import-changes"
+                >
                   {plan.changes.map((c) => (
-                    <li key={c.entry.key} className="flex flex-col gap-0.5 p-2" data-testid={`import-change-${c.entry.key}`}>
+                    <li
+                      key={c.entry.key}
+                      className="flex flex-col gap-0.5 p-2"
+                      data-testid={`import-change-${c.entry.key}`}
+                    >
                       <span className="font-medium">
                         {label(c.entry)}
                         {c.entry.risk === "security" || c.entry.risk === "high" ? (
-                          <ShieldAlert aria-label={t(`risk.${c.entry.risk}`)} className="ml-1.5 inline size-3.5 text-destructive" />
+                          <ShieldAlert
+                            aria-label={t(`risk.${c.entry.risk}`)}
+                            className="ms-1.5 inline size-3.5 text-destructive"
+                          />
                         ) : null}
                       </span>
                       <span className="text-xs">
@@ -229,11 +243,16 @@ export default function ImportOverridesDialog({
                 <h3 id={`${errorId}-r`} className="text-sm font-semibold">
                   {t("import.resetsHeading", { count: plan.resets.length })}
                 </h3>
-                <ul className="divide-y divide-border rounded-md border border-border text-sm" data-testid="import-resets">
+                <ul
+                  className="divide-y divide-border rounded-md border border-border text-sm"
+                  data-testid="import-resets"
+                >
                   {plan.resets.map((r) => (
                     <li key={r.entry.key} className="flex flex-col gap-0.5 p-2">
                       <span className="font-medium">{label(r.entry)}</span>
-                      <span className="text-xs text-muted-foreground">{t("import.resetFrom", { value: formatValue(r.entry, r.from) })}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("import.resetFrom", { value: formatValue(r.entry, r.from) })}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -246,7 +265,10 @@ export default function ImportOverridesDialog({
                   <TriangleAlert aria-hidden="true" className="size-4" />
                   {t("import.problemsHeading", { count: plan.problems.length })}
                 </h3>
-                <ul className="divide-y divide-border rounded-md border border-destructive/40 text-sm" data-testid="import-problems">
+                <ul
+                  className="divide-y divide-border rounded-md border border-destructive/40 text-sm"
+                  data-testid="import-problems"
+                >
                   {plan.problems.map((p) => (
                     <li key={p.key} className="flex flex-col gap-0.5 p-2" data-testid={`import-problem-${p.key}`}>
                       <span className="font-mono text-xs">{p.key}</span>
@@ -279,11 +301,21 @@ export default function ImportOverridesDialog({
             </Button>
           </AlertDialogCancel>
           {plan ? (
-            <Button type="button" disabled={busy || total === 0} onClick={() => void apply()} data-testid="import-apply">
+            <Button
+              type="button"
+              disabled={busy || total === 0}
+              onClick={() => void apply()}
+              data-testid="import-apply"
+            >
               {t("import.apply", { count: total })}
             </Button>
           ) : (
-            <Button type="button" disabled={text.trim() === ""} onClick={() => review(text)} data-testid="import-review-button">
+            <Button
+              type="button"
+              disabled={text.trim() === ""}
+              onClick={() => review(text)}
+              data-testid="import-review-button"
+            >
               {t("import.review")}
             </Button>
           )}

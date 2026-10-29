@@ -324,7 +324,7 @@ export default function AttackSection({
               >
                 <button
                   type="button"
-                  className="flex w-full flex-wrap items-center gap-2 px-3 py-2 text-left"
+                  className="flex w-full flex-wrap items-center gap-2 px-3 py-2 text-start"
                   aria-expanded={openRun === row.runId}
                   onClick={() => void toggleRun(row.runId)}
                 >
@@ -344,7 +344,7 @@ export default function AttackSection({
                     </Badge>
                   )}
                   <span className="text-sm font-medium text-foreground">{row.name}</span>
-                  <span className="ml-auto text-xs text-muted-foreground">View transcript</span>
+                  <span className="ms-auto text-xs text-muted-foreground">View transcript</span>
                 </button>
                 {row.reason && (
                   <p className="min-w-0 break-words px-3 pb-2 text-xs text-muted-foreground">{row.reason}</p>
@@ -371,7 +371,7 @@ export default function AttackSection({
               <ShieldAlert aria-hidden="true" />
               <AlertTitle>What to change</AlertTitle>
               <AlertDescription>
-                <ul className="w-full list-disc space-y-1 pl-4">
+                <ul className="w-full list-disc space-y-1 ps-4">
                   <li>
                     In the agent&apos;s tools, remove one of the three: reading private data, taking in outside content,
                     or sending data out.{" "}

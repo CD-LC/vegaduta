@@ -106,7 +106,7 @@ function CredentialGuide({ server }: { server: McpServer }) {
       <HelpCircle className="h-4 w-4" aria-hidden="true" />
       <AlertTitle className="text-sm font-semibold">{guide.title}</AlertTitle>
       <AlertDescription className="mt-2 space-y-1 text-xs">
-        <ul className="list-disc space-y-1 pl-4">
+        <ul className="list-disc space-y-1 ps-4">
           {guide.steps.map((step: string, i: number) => (
             <li key={i}>{step}</li>
           ))}
@@ -233,7 +233,7 @@ function CredentialEditDialog({
                       />
                       <button
                         type="button"
-                        className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-muted-foreground shadow-none hover:text-foreground"
+                        className="absolute end-3 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-muted-foreground shadow-none hover:text-foreground"
                         onClick={() => setShowValues(!showValues)}
                         aria-label={showValues ? "Hide credential value" : "Show credential value"}
                         title={showValues ? "Hide credential value" : "Show credential value"}
@@ -284,7 +284,7 @@ function CredentialEditDialog({
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-muted-foreground shadow-none hover:text-foreground"
+                    className="absolute end-3 top-1/2 -translate-y-1/2 border-0 bg-transparent p-0 text-muted-foreground shadow-none hover:text-foreground"
                     onClick={() => setShowValues(!showValues)}
                     aria-label={showValues ? "Hide credential value" : "Show credential value"}
                     title={showValues ? "Hide credential value" : "Show credential value"}

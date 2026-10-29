@@ -75,4 +75,44 @@ describe("edge/audiogen", () => {
     expect(result.handled).toBe(false);
     if (result.handled === false) expect(result.reason).toBe("model-not-ready");
   });
+
+  it("generateAudioLocally() warms the worker from a cached install instead of refusing", async () => {
+    // Same warm-up contract imagegen.ts pins: a cached install + cold worker
+    // must load from the local cache (no bytes move), not refuse as if the
+    // model were never installed.
+    process.env.NEXT_PUBLIC_EDGE_AGENTS = "1";
+    Object.defineProperty(navigator, "gpu", { value: {}, configurable: true });
+    localStorage.setItem("edge.audiogen.cached.musicgen-small", "1");
+    const listeners: Array<(e: { data: unknown }) => void> = [];
+    (globalThis as { Worker?: unknown }).Worker = class {
+      postMessage(msg: { type: string; requestId: number }) {
+        queueMicrotask(() => {
+          const data =
+            msg.type === "load"
+              ? { type: "loaded", requestId: msg.requestId }
+              : {
+                  type: "result",
+                  requestId: msg.requestId,
+                  wav: new ArrayBuffer(4),
+                  sampleRate: 32_000,
+                  durationSeconds: 1,
+                };
+          listeners.forEach((l) => l({ data }));
+        });
+      }
+      addEventListener(_: string, fn: (e: { data: unknown }) => void) {
+        listeners.push(fn);
+      }
+      terminate() {}
+    };
+    const originalCreateObjectURL = URL.createObjectURL;
+    URL.createObjectURL = (() => "blob:fake") as typeof URL.createObjectURL;
+    try {
+      const { generateAudioLocally } = await import("./audiogen");
+      const result = await generateAudioLocally("lofi beat", 8);
+      expect(result.handled).toBe(true);
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL;
+    }
+  });
 });

@@ -115,20 +115,20 @@ export function StudioStatusBar({
             ? `hands-on until ${new Date(session.editableUntil).toLocaleString()}`
             : `${session.daysRemaining} days left`}
       </div>
-      <Button size="sm" className={`ml-auto ${TONES.violet.cta}`} onClick={onTour} data-tour="tour-btn">
-        <Compass aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Take the tour
+      <Button size="sm" className={`ms-auto ${TONES.violet.cta}`} onClick={onTour} data-tour="tour-btn">
+        <Compass aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Take the tour
       </Button>
       <Button variant="outline" size="sm" onClick={onShowtime} data-tour="showtime-header">
-        <Clapperboard aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Showtime
+        <Clapperboard aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Showtime
       </Button>
       <Button variant="ghost" size="sm" onClick={onGuide}>
-        <BookOpen aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Feature guide
+        <BookOpen aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Feature guide
       </Button>
       <Button variant="outline" size="sm" onClick={onRestart} disabled={resetting}>
         {resetting ? (
-          <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin shrink-0" />
+          <Loader2 aria-hidden="true" className="me-1.5 h-3.5 w-3.5 animate-spin shrink-0" />
         ) : (
-          <RefreshCw aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+          <RefreshCw aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" />
         )}{" "}
         Restart with a new idea
       </Button>
@@ -150,7 +150,7 @@ export function StageRail({ stage, done, onStage }: { stage: Stage; done: Set<St
             onClick={() => onStage(s.id)}
             data-tour={`stage-${s.id}`}
             aria-current={active ? "step" : undefined}
-            className={`rounded-xl border p-3 text-left transition-all ${pick(STAGE_TONE[s.id], active)} ${active ? "-translate-y-0.5" : ""}`}
+            className={`rounded-xl border p-3 text-start transition-all ${pick(STAGE_TONE[s.id], active)} ${active ? "-translate-y-0.5" : ""}`}
           >
             <div className="flex items-center gap-2 text-sm font-medium">
               <span
@@ -197,12 +197,12 @@ export function NextStepNudge({
           size="sm"
           onClick={() => onStage(STAGES[STAGES.findIndex((s) => s.id === stage) + 1].id)}
         >
-          Next <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+          Next <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
         </Button>
       ) : (
         <Button size="sm" className={TONES.violet.cta} asChild>
           <Link href={signupHref}>
-            Create my workspace <ArrowRight aria-hidden="true" className="ml-1 h-3.5 w-3.5 shrink-0" />
+            Create my workspace <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
           </Link>
         </Button>
       )}
@@ -217,7 +217,7 @@ export function EmptyState({ onNew }: { onNew: () => void }) {
       <div className="font-medium">No agent yet</div>
       <p className="mb-4 text-sm text-muted-foreground">Describe a job - it takes a minute and it&apos;s real.</p>
       <Button onClick={onNew}>
-        <Plus aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> New agent
+        <Plus aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> New agent
       </Button>
     </div>
   );

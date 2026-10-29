@@ -5,16 +5,16 @@
 # /judge/constitutional) call the Anthropic API, and /train/dpo is a validated
 # stub. See README.md 'GPU-enablement path' for the optional weight-training
 # worker (TRL/VERL) that would add those heavy deps.
-fastapi==0.143.2
+fastapi==0.156.1
 # Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
 # carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
 # 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
-starlette==1.8.0
+starlette==1.9.0
 uvicorn[standard]==0.54.0
 pydantic==2.14.1
 
 # LLM client for the prompt optimizer + constitutional judge.
-anthropic==1.15.0
+anthropic==1.16.0
 
 # httpx is pulled in transitively by both anthropic and uvicorn, but pin it
 # explicitly since the optimizer/judge depend on outbound HTTP being present.

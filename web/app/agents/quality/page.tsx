@@ -222,7 +222,7 @@ function AgentQualityInner() {
             {/* Cross-page neighbours of the quality surface: Agent Lab lives
                 inside the playground overlay (/agents?agentId=..&lab=open
                 opens it) and Learning is the sibling observability route. */}
-            <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="ms-auto flex flex-wrap items-center gap-2">
               <Link
                 href={selectedAgentId ? `/agents?agentId=${selectedAgentId}&lab=open` : "/agents"}
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"

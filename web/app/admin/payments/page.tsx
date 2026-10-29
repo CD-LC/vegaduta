@@ -454,7 +454,9 @@ export default function AdminPaymentsPage() {
         )}
         {txns.error && !error && <ErrorRetry message={txns.error} onRetry={() => void txns.reload()} />}
 
-        {agentId && (dataLoading || txns.loading) && mandates.length === 0 && transactions.length === 0 && <ListSkeleton />}
+        {agentId && (dataLoading || txns.loading) && mandates.length === 0 && transactions.length === 0 && (
+          <ListSkeleton />
+        )}
 
         <Card className="mb-6 p-4">
           <div className="mb-3 flex items-center justify-between">
@@ -476,49 +478,49 @@ export default function AdminPaymentsPage() {
                   itemLabel={tu("itemMandates")}
                   className="grid gap-3"
                   renderItem={(m) => (
-                  <div key={m.id} className="rounded-lg border border-border p-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {mandateStatusBadge(m.status)}
-                      <Badge variant="outline">{m.scope}</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {t("capsRow", {
-                          perTxn: fmtPaise(m.maxPerTxnPaise),
-                          daily: fmtPaise(m.maxDailyPaise),
-                          monthly: fmtPaise(m.maxMonthlyPaise),
-                        })}
-                      </span>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {t("validityRow", { from: fmtTime(m.validFrom), until: fmtTime(m.validUntil) })}
-                      </span>
-                      {m.status === "ACTIVE" && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            setRevokeTarget(m);
-                            setRevokeReason("");
-                          }}
-                        >
-                          {t("revoke")}
-                        </Button>
+                    <div key={m.id} className="rounded-lg border border-border p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {mandateStatusBadge(m.status)}
+                        <Badge variant="outline">{m.scope}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {t("capsRow", {
+                            perTxn: fmtPaise(m.maxPerTxnPaise),
+                            daily: fmtPaise(m.maxDailyPaise),
+                            monthly: fmtPaise(m.maxMonthlyPaise),
+                          })}
+                        </span>
+                        <span className="ms-auto text-xs text-muted-foreground">
+                          {t("validityRow", { from: fmtTime(m.validFrom), until: fmtTime(m.validUntil) })}
+                        </span>
+                        {m.status === "ACTIVE" && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setRevokeTarget(m);
+                              setRevokeReason("");
+                            }}
+                          >
+                            {t("revoke")}
+                          </Button>
+                        )}
+                      </div>
+                      {m.status === "ACTIVE" && spends[m.id] && (
+                        <div className="mt-3 flex flex-wrap gap-6">
+                          <SpendMeter spend={spends[m.id]} period="daily" />
+                          <SpendMeter spend={spends[m.id]} period="monthly" />
+                        </div>
+                      )}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {t("mandateHashPrefix")} <code className="break-all font-mono">{m.canonicalHashSha256}</code>
+                      </div>
+                      {m.revokeReason && (
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          {t("revokedReasonRow", { reason: m.revokeReason })}
+                        </div>
                       )}
                     </div>
-                    {m.status === "ACTIVE" && spends[m.id] && (
-                      <div className="mt-3 flex flex-wrap gap-6">
-                        <SpendMeter spend={spends[m.id]} period="daily" />
-                        <SpendMeter spend={spends[m.id]} period="monthly" />
-                      </div>
-                    )}
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {t("mandateHashPrefix")} <code className="break-all font-mono">{m.canonicalHashSha256}</code>
-                    </div>
-                    {m.revokeReason && (
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {t("revokedReasonRow", { reason: m.revokeReason })}
-                      </div>
-                    )}
-                  </div>
                   )}
                 />
               )}

@@ -52,7 +52,7 @@ export default function SystemHealthCard({
               {systemStatus?.database?.activeConnections != null
                 ? `${systemStatus.database.activeConnections}/${systemStatus.database.maxPoolSize ?? "—"}`
                 : "—"}
-              <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{t("connsLabel")}</span>
+              <span className="ms-1.5 font-sans text-xs font-normal text-muted-foreground">{t("connsLabel")}</span>
             </span>
             {systemStatus?.database && (
               <StatusChip tone={dbChip.tone} icon={dbChip.icon}>
@@ -67,7 +67,7 @@ export default function SystemHealthCard({
           </dt>
           <dd className="m-0 font-mono text-xl font-semibold tabular-nums text-foreground">
             {systemStatus?.mcp ? `${systemStatus.mcp.enabledServers}/${systemStatus.mcp.totalServers}` : "—"}
-            <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{t("enabledLabel")}</span>
+            <span className="ms-1.5 font-sans text-xs font-normal text-muted-foreground">{t("enabledLabel")}</span>
           </dd>
         </div>
         <div className="flex flex-col gap-1.5 py-3 first:pt-0 last:pb-0">

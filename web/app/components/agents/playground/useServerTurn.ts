@@ -13,7 +13,19 @@ import type { ChatAttachment, SessionLlmCall, ToolCallEntry, TurnMetrics } from 
 
 /** The hosted send: one streamChat call with live steps, tool-call trace, per-turn usage and request X-ray. Shared by the composer, the vision-fallback button, the watch loop and "get a smarter answer". */
 export function useServerTurn(ctx: PlaygroundContext) {
-  const { agent, activeAgentIdRef, stickToBottomRef, seenRequestIdsRef, turnSeq, setTurns, sessionId, setSessionId, setSending, setError, setChatController } = ctx;
+  const {
+    agent,
+    activeAgentIdRef,
+    stickToBottomRef,
+    seenRequestIdsRef,
+    turnSeq,
+    setTurns,
+    sessionId,
+    setSessionId,
+    setSending,
+    setError,
+    setChatController,
+  } = ctx;
   // The pre-existing server send, factored out of handleSend so three callers
   // share it byte-for-byte: the normal send above, the visionFallback
   // "send to the server instead" button, and CameraPanel's watch loop (via
@@ -90,7 +102,10 @@ export function useServerTurn(ctx: PlaygroundContext) {
       ...t,
       { role: "user", content: userMessage, attachment: sentAttachment, frames: framesForHistory(sentFrames), watch },
     ]);
-    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, ref: turnRef, watch }]);
+    setTurns((t) => [
+      ...t,
+      { role: "assistant", content: "", trace: [], pending: true, ref: turnRef, watch, startedAt: Date.now() },
+    ]);
     setSending(true);
 
     // Staged camera/screen frames ride as inline attachments with their

@@ -53,6 +53,54 @@ export class A2aAgentCardApi {
   }
 }
 
+export class A2aConsoleApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Policy.
+   * `GET /api/a2a/console/policy`
+   *
+   * Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+   */
+  policy(options?: CallOptions): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "GET", path: "/api/a2a/console/policy" });
+  }
+
+  /**
+   * Tasks.
+   * `GET /api/a2a/console/tasks`
+   *
+   * Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+   */
+  tasks(options?: CallOptions<{ direction?: string; state?: string; agentId?: string; limit?: number }, HeaderParams>): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "GET", path: "/api/a2a/console/tasks" });
+  }
+
+  /**
+   * Task.
+   * `GET /api/a2a/console/tasks/{id}`
+   *
+   * Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+   */
+  task(id: string, options?: CallOptions): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "GET", path: `/api/a2a/console/tasks/${encodeURIComponent(String(id))}` });
+  }
+
+  /**
+   * Cancel.
+   * `POST /api/a2a/console/tasks/{id}:cancel`
+   *
+   * Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+   */
+  cancel(id: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "POST", path: `/api/a2a/console/tasks/${encodeURIComponent(String(id))}:cancel` });
+  }
+}
+
 export class A2aJsonRpcApi {
   private readonly http: HttpClient;
 
@@ -1648,6 +1696,30 @@ export class AgentScheduleApi {
    */
   runs(agentId: string, options?: CallOptions<{ limit?: number }, HeaderParams>): Promise<T.AgentScheduleRunResponse[]> {
     return this.http.request<T.AgentScheduleRunResponse[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/schedule/runs` });
+  }
+}
+
+export class AgentScratchpadApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/scratchpad`
+   */
+  list(agentId: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.AgentScratchpadController_ScratchpadListView> {
+    return this.http.request<T.AgentScratchpadController_ScratchpadListView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad` });
+  }
+
+  /**
+   * Read.
+   * `GET /api/agents/{agentId}/scratchpad/{key}`
+   */
+  read(agentId: string, key: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
+    return this.http.request<T.ScratchpadNoteView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad/${encodeURIComponent(String(key))}` });
   }
 }
 
@@ -15727,6 +15799,7 @@ export class XSendApi {
 export class VegadutaClient {
   readonly http: HttpClient;
   readonly a2aAgentCard: A2aAgentCardApi;
+  readonly a2aConsole: A2aConsoleApi;
   readonly a2aJsonRpc: A2aJsonRpcApi;
   readonly a2aRest: A2aRestApi;
   readonly abuseMonitor: AbuseMonitorApi;
@@ -15755,6 +15828,7 @@ export class VegadutaClient {
   readonly agentRunBudget: AgentRunBudgetApi;
   readonly agentRuntimeLimits: AgentRuntimeLimitsApi;
   readonly agentSchedule: AgentScheduleApi;
+  readonly agentScratchpad: AgentScratchpadApi;
   readonly agentSessionLlmRequest: AgentSessionLlmRequestApi;
   readonly agentSessionLlmUsage: AgentSessionLlmUsageApi;
   readonly agentSettings: AgentSettingsApi;
@@ -16066,6 +16140,7 @@ export class VegadutaClient {
   constructor(options: ClientOptions = {}) {
     this.http = new HttpClient(options);
     this.a2aAgentCard = new A2aAgentCardApi(this.http);
+    this.a2aConsole = new A2aConsoleApi(this.http);
     this.a2aJsonRpc = new A2aJsonRpcApi(this.http);
     this.a2aRest = new A2aRestApi(this.http);
     this.abuseMonitor = new AbuseMonitorApi(this.http);
@@ -16094,6 +16169,7 @@ export class VegadutaClient {
     this.agentRunBudget = new AgentRunBudgetApi(this.http);
     this.agentRuntimeLimits = new AgentRuntimeLimitsApi(this.http);
     this.agentSchedule = new AgentScheduleApi(this.http);
+    this.agentScratchpad = new AgentScratchpadApi(this.http);
     this.agentSessionLlmRequest = new AgentSessionLlmRequestApi(this.http);
     this.agentSessionLlmUsage = new AgentSessionLlmUsageApi(this.http);
     this.agentSettings = new AgentSettingsApi(this.http);

@@ -141,7 +141,7 @@ export default function SaveRunAsDesktopRecipe({
           {saved.warnings.length > 0 && (
             <div className="mt-1 text-muted-foreground">
               <div className="font-medium">{t("saveWarnings")}</div>
-              <ul className="mt-0.5 list-disc pl-4">
+              <ul className="mt-0.5 list-disc ps-4">
                 {saved.warnings.map((w) => (
                   <li key={w}>{w}</li>
                 ))}

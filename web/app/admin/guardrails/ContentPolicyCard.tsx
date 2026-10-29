@@ -124,7 +124,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                   </span>
                 </span>
               </label>
-              <div className="ml-6 flex flex-col gap-1.5">
+              <div className="ms-6 flex flex-col gap-1.5">
                 {PII_CATEGORY_FIELDS.map(({ key, label }) => (
                   <label key={key} className="flex cursor-pointer items-center gap-2 text-sm">
                     <input
@@ -159,11 +159,15 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                   </span>
                 </span>
               </label>
-              <div className="ml-6 flex flex-col gap-1.5">
+              <div className="ms-6 flex flex-col gap-1.5">
                 {(
                   [
                     ["FLAG", "Flag only", "Record it in the audit log and let the call continue."],
-                    ["BLOCK", "Block", "Reject the call before it reaches the model. A false positive loses that turn."],
+                    [
+                      "BLOCK",
+                      "Block",
+                      "Reject the call before it reaches the model. A false positive loses that turn.",
+                    ],
                   ] as [InjectionAction, string, string][]
                 ).map(([value, title, help]) => (
                   <label key={value} className="flex cursor-pointer items-start gap-2 text-sm">

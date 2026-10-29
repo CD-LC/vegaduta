@@ -87,7 +87,7 @@ export default function GridImportCard({
               </p>
             )}
             {importResult.errors.length > 0 && (
-              <ul className="mt-1 list-disc pl-5 text-xs text-muted-foreground">
+              <ul className="mt-1 list-disc ps-5 text-xs text-muted-foreground">
                 {importResult.errors.slice(0, 10).map((msg) => (
                   <li key={msg}>{msg}</li>
                 ))}

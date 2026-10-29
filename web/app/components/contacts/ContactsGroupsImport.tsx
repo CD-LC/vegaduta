@@ -231,7 +231,7 @@ export default function ContactsGroupsImport({
               ref={fileRef}
               type="file"
               accept=".xlsx,.xls,.csv,.txt"
-              className="w-full min-w-0 text-sm text-muted-foreground file:mr-3 file:rounded-full file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground"
+              className="w-full min-w-0 text-sm text-muted-foreground file:me-3 file:rounded-full file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-foreground"
               onChange={(e) => setImportFile(e.target.files?.[0] || null)}
               aria-label={t("importFileButton")}
             />
@@ -271,7 +271,7 @@ export default function ContactsGroupsImport({
                 {t("importResult", { created: String(importResult.created), updated: String(importResult.updated) })}
               </span>
               {(importResult.errors || []).length > 0 && (
-                <ul className="mt-2 list-disc pl-5 text-destructive">
+                <ul className="mt-2 list-disc ps-5 text-destructive">
                   {importResult.errors.slice(0, 5).map((e: string, i: number) => (
                     <li key={i}>{e}</li>
                   ))}

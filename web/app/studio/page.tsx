@@ -211,7 +211,7 @@ export default function StudioPage() {
           </div>
         )}
         {gallery.loaded && gallery.hasAny && (
-          <div className="mt-2 text-right">
+          <div className="mt-2 text-end">
             <Button asChild variant="link" size="sm">
               <Link href="/files">{t("galleryViewAll")}</Link>
             </Button>
@@ -278,7 +278,7 @@ export default function StudioPage() {
                   <li key={row.key} className={row.current ? "font-medium text-foreground" : "text-muted-foreground"}>
                     {t(row.key)}
                     {row.current && (
-                      <span className="ml-1.5 text-xs font-normal text-primary">{t("imageAllowanceCurrent")}</span>
+                      <span className="ms-1.5 text-xs font-normal text-primary">{t("imageAllowanceCurrent")}</span>
                     )}
                   </li>
                 ))}

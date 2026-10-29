@@ -83,7 +83,7 @@ export default function FolderPicker({
               <li key={f.name}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
+                  className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-start text-sm hover:bg-accent"
                   onClick={() => {
                     onAttach(f.name);
                     setOpen(false);
@@ -110,7 +110,8 @@ export default function FolderPicker({
             </Button>
           </form>
           <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
-            {t("folderSwitchHint")} <code className="rounded bg-secondary/60 px-1">scripts/vegaduta projects ~/my-folder</code>
+            {t("folderSwitchHint")}{" "}
+            <code className="rounded bg-secondary/60 px-1">scripts/vegaduta projects ~/my-folder</code>
           </p>
           {error && (
             <p role="alert" className="mt-1 text-xs text-destructive">

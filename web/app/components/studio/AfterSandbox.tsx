@@ -206,11 +206,11 @@ export default function AfterSandbox({
           <Button size="lg" asChild className={TONES.violet.cta}>
             <Link href={signupHref}>
               {hasAgent ? "Create my workspace" : "Create a free account"}{" "}
-              <ArrowRight aria-hidden="true" className="ml-2 h-4 w-4 shrink-0" />
+              <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" onClick={onRestart}>
-            <RefreshCw aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" />{" "}
+            <RefreshCw aria-hidden="true" className="me-2 h-4 w-4 shrink-0" />{" "}
             {hasAgent ? "Try a different idea" : "Start building"}
           </Button>
         </div>

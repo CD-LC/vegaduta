@@ -63,7 +63,8 @@ export function PlatformSettingsSection({
     let rows = settings;
     if (keyFilter) rows = rows.filter((r) => keyFilter(r.key));
     const q = search.trim().toLowerCase();
-    if (q) rows = rows.filter((r) => r.key.toLowerCase().includes(q) || (r.description || "").toLowerCase().includes(q));
+    if (q)
+      rows = rows.filter((r) => r.key.toLowerCase().includes(q) || (r.description || "").toLowerCase().includes(q));
     return rows;
   }, [settings, keyFilter, search]);
 
@@ -97,12 +98,15 @@ export function PlatformSettingsSection({
       )}
       {settings.length > 0 && (
         <div className="relative mb-1 max-w-sm">
-          <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter settings by key or description…"
-            className="pl-8"
+            className="ps-8"
           />
         </div>
       )}
@@ -131,8 +135,11 @@ export function PlatformSettingsSection({
             {row.description && <p className="mt-0.5 text-xs text-muted-foreground">{row.description}</p>}
             <div className="mt-2 flex flex-wrap items-end gap-3">
               <div className="w-full max-w-56 space-y-1.5">
-                <Label htmlFor={`setting-value-${row.key}`} className="text-xs text-muted-foreground">Value</Label>
-                <Input id={`setting-value-${row.key}`}
+                <Label htmlFor={`setting-value-${row.key}`} className="text-xs text-muted-foreground">
+                  Value
+                </Label>
+                <Input
+                  id={`setting-value-${row.key}`}
                   value={drafts[row.key] ?? row.value}
                   onChange={(e) => setDrafts((prev) => ({ ...prev, [row.key]: e.target.value }))}
                 />

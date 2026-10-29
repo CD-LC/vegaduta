@@ -117,11 +117,11 @@ export default function JobsPage() {
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 aria-label="Search jobs"
-                className="h-9 w-60 pl-8"
+                className="h-9 w-60 ps-8"
                 placeholder="Bean, method, schedule, error"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
@@ -141,14 +141,14 @@ export default function JobsPage() {
         )}
         {shown.length > 0 && (
           <AdminTableWrap>
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[760px] text-start text-sm">
               <thead className="text-xs text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="py-2 pr-3 font-medium">Job</th>
-                  <th className="py-2 pr-3 font-medium">Schedule</th>
-                  <th className="py-2 pr-3 font-medium">Last status</th>
-                  <th className="py-2 pr-3 font-medium">Last started</th>
-                  <th className="py-2 pr-3 font-medium">Duration</th>
+                  <th className="py-2 pe-3 font-medium">Job</th>
+                  <th className="py-2 pe-3 font-medium">Schedule</th>
+                  <th className="py-2 pe-3 font-medium">Last status</th>
+                  <th className="py-2 pe-3 font-medium">Last started</th>
+                  <th className="py-2 pe-3 font-medium">Duration</th>
                   <th className="py-2 font-medium">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -165,17 +165,17 @@ export default function JobsPage() {
                         data-testid="job-row"
                         data-status={j.lastStatus || "NONE"}
                       >
-                        <td className="py-2 pr-3">
+                        <td className="py-2 pe-3">
                           <div className="font-medium">{j.method}</div>
                           <div className="font-mono text-[11px] text-muted-foreground">{j.bean}</div>
                         </td>
-                        <td className="py-2 pr-3 font-mono text-xs">{j.schedule || UNAVAILABLE}</td>
-                        <td className="py-2 pr-3">
+                        <td className="py-2 pe-3 font-mono text-xs">{j.schedule || UNAVAILABLE}</td>
+                        <td className="py-2 pe-3">
                           <ToneChip tone={meta.tone} label={meta.label} />
                           {j.lastError && (
                             <button
                               type="button"
-                              className="ml-2 border-0 bg-transparent p-0 text-xs text-destructive underline underline-offset-2"
+                              className="ms-2 border-0 bg-transparent p-0 text-xs text-destructive underline underline-offset-2"
                               onClick={() => setExpanded(open ? null : j.id)}
                               aria-expanded={open}
                             >
@@ -183,11 +183,11 @@ export default function JobsPage() {
                             </button>
                           )}
                         </td>
-                        <td className="py-2 pr-3 text-xs" title={formatExact(j.lastStartedAt)}>
+                        <td className="py-2 pe-3 text-xs" title={formatExact(j.lastStartedAt)}>
                           {j.lastStartedAt ? formatRelative(j.lastStartedAt) : UNAVAILABLE}
                         </td>
-                        <td className="py-2 pr-3 font-mono text-xs">{formatDurationMs(j.lastDurationMs)}</td>
-                        <td className="py-2 text-right">
+                        <td className="py-2 pe-3 font-mono text-xs">{formatDurationMs(j.lastDurationMs)}</td>
+                        <td className="py-2 text-end">
                           {j.runNowAllowed ? (
                             <Button
                               size="sm"

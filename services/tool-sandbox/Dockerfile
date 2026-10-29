@@ -34,7 +34,7 @@ RUN set -eux; \
 # The Node runtime for the javascript/typescript languages: the same pinned
 # 22.x tag every other Node-based service uses (services/workspace-runner,
 # services/mcp-stdio-runner).
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node
 
 FROM python:3.14.8-slim-trixie@sha256:fbecd461fc72d21b2143c6eaba25143738079154a6d0ea3da3aec724f50eed4a
 
@@ -72,8 +72,15 @@ RUN set -eux; \
 # binary is copied - there is no npm and no node_modules on purpose: tenant
 # tools are single-file programs with no package ecosystem (the identifier
 # policy denies `require`/`import` of anything at all).
+# Node 26+ links libatomic on arm64 and (since 26.11) on amd64 too;
+# python:slim ships libstdc++/libgcc but not libatomic, so install it for the
+# copied binary on every arch. core/Dockerfile does the same unconditionally.
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
-RUN /usr/local/bin/node --version
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends libatomic1; \
+    rm -rf /var/lib/apt/lists/*; \
+    /usr/local/bin/node --version
 
 # Two identities, and the split is the point:
 #   `sandbox` (uid 5000) owns nothing and is unused today, reserved for running

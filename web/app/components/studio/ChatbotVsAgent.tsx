@@ -74,7 +74,7 @@ export default function ChatbotVsAgent() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="max-w-2xl rounded-2xl rounded-tl-sm bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground"
+              className="max-w-2xl rounded-2xl rounded-ss-sm bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground"
             >
               I don&apos;t have access to your invoices or payment records, so I can&apos;t tell which customers are
               overdue. Here&apos;s a template you could adapt for a payment reminder:{" "}

@@ -174,6 +174,26 @@ SARVAM_TARGET_LANGUAGE_CODE = _env("SARVAM_TARGET_LANGUAGE_CODE", "en-IN")
 SARVAM_MODEL = _env("SARVAM_MODEL", "bulbul:v3")
 SARVAM_SPEAKER = _env("SARVAM_SPEAKER", "")
 
+# --- Piper (TTS, tts_piper.py) -------------------------------------------------
+# The local, keyless TTS option: both providers above are hosted and need a
+# paid key, so without one a deployment had no working voice path at all
+# (replies fell back to browser-side speech). Piper runs a small ONNX
+# voice in a subprocess on this container's CPU - no egress, ~50-150ms per
+# sentence. VOICE_AGENT_TTS_PROVIDER=piper selects it; it is deliberately NOT
+# part of "auto"'s ordering (a local model voice is a conscious quality pick,
+# not a fallback). Voice files live under PIPER_MODEL_DIR - the image bakes
+# en_US-lessac-medium so the default works offline; PIPER_VOICE also accepts
+# an absolute/relative .onnx path to use a model outside that dir.
+PIPER_BIN = _env("PIPER_BIN", "piper")
+PIPER_MODEL_DIR = _env("PIPER_MODEL_DIR", "/opt/piper-voices")
+PIPER_VOICE = _env("PIPER_VOICE", "en_US-lessac-medium")
+# Multi-speaker voice models only; -1 = no --speaker argument at all.
+PIPER_SPEAKER_ID = _env_int("PIPER_SPEAKER_ID", -1)
+# piper voices are 16kHz (low) or 22.05kHz (medium/high); the baked default is
+# medium. Must match the actual model's sample_rate or audio plays at the
+# wrong pitch.
+PIPER_SAMPLE_RATE = _env_int("PIPER_SAMPLE_RATE", 22050)
+
 # --- TTS provider selection ---------------------------------------------------
 # "not bounded to one provider" - mirrors SpeakToolCallback's own "ElevenLabs
 # first, Sarvam otherwise" preference order (core/agents/.../audio/

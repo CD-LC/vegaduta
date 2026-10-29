@@ -38,3 +38,32 @@ misconfigurations:
       (@sha256:${*_IMAGE_DIGEST} resolved by the release workflow after
       publish); a tag-less digest ref is a stronger pin than a tagged ref -
       this check's "specify a tag" guidance is weaker than what is there.
+  - id: AVD-DS-0002
+    paths:
+      - .clusterfuzzlite/Dockerfile
+    statement: >
+      Intentional: this is the ClusterFuzzLite build container. It exists only
+      inside the fuzz CI job to compile the Jazzer targets; it is never pushed
+      to a registry and never runs a workload. The oss-fuzz-base builder
+      contract requires root for apt installs and writes to $SRC/$OUT.
+  - id: AVD-DS-0026
+    paths:
+      - .clusterfuzzlite/Dockerfile
+    statement: >
+      The image is a CI build tool, not a service: ClusterFuzzLite invokes
+      build.sh once and discards the container. There is no daemon to health
+      check.
+vulnerabilities:
+  # No paths: spring-webmvc arrives transitively from the Spring Boot 3.5.16
+  # BOM, so the scanner attributes the CVE to whichever pom resolved it -
+  # scoping to poms fails again each time a different module is flagged.
+  - id: CVE-2026-47890
+    statement: >
+      spring-webmvc 6.2.19 (Spring Boot 3.5.16 BOM) has no fix on the 6.2
+      line; the only fixed version is 7.0.9, which requires the Spring
+      Boot 4.1 / Spring Framework 7 migration tracked by PR #99. No 6.2.x
+      release ships a patch (checked Maven Central, 6.2.19 is the latest).
+  - id: CVE-2026-47884
+    statement: >
+      Same as CVE-2026-47890: spring-webmvc 6.2.19, fixed only in 7.0.9,
+      unblocks with the Spring Boot 4.1 migration (PR #99).

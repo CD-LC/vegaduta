@@ -123,7 +123,7 @@ export default function ContactBand({ signupHref }: { signupHref: string }) {
             {t("contact_ctaSignup")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
-          <p className="mkt-caption mkt-ink-2 sm:ml-1">
+          <p className="mkt-caption mkt-ink-2 sm:ms-1">
             {t("contact_orWrite")}{" "}
             <a
               href={`mailto:${CONTACT_EMAIL}`}

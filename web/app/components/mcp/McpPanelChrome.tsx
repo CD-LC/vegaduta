@@ -61,7 +61,7 @@ export function McpPanelNotices({
           <AlertTriangle aria-hidden="true" />
           <AlertTitle>{t("registerWarningsAlertTitle")}</AlertTitle>
           <AlertDescription>
-            <ul className="ml-4 list-disc space-y-1">
+            <ul className="ms-4 list-disc space-y-1">
               {registerWarnings.map((w, i) => (
                 <li key={i}>{w}</li>
               ))}
@@ -95,14 +95,14 @@ export function McpPanelNotices({
 /** The category tab strip (arrow keys move between tabs). */
 export function McpTabBar({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
   const t = useTranslations("mcpPanel");
-const tabs = [
-  { key: "all", label: t("tabAll") },
-  { key: "builtin", label: t("tabBuiltin") },
-  { key: "google", label: t("googleWorkspace") },
-  { key: "mcp", label: t("tabMcpServers") },
-  { key: "custom", label: t("tabCustom") },
-  { key: "browse", label: t("browseRegistryTab") },
-];
+  const tabs = [
+    { key: "all", label: t("tabAll") },
+    { key: "builtin", label: t("tabBuiltin") },
+    { key: "google", label: t("googleWorkspace") },
+    { key: "mcp", label: t("tabMcpServers") },
+    { key: "custom", label: t("tabCustom") },
+    { key: "browse", label: t("browseRegistryTab") },
+  ];
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab}>
       <TabsList className="h-auto flex-wrap justify-start">

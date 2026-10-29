@@ -17,9 +17,18 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
    group per branch). That is what delayed v0.1.7 by an hour.
 4. **Claim before you edit.** Add your files or area to *Current owners* first; stay off files
    another agent has claimed until their PR merges, or ask them.
-5. **Production runs published releases only.** Deploy a release's images by version
+5. **One agent per working tree.** Do not share a checkout between agents: a shared tree means
+   shared `git status` (your `git add -A` picks up another agent's half-written files), shared
+   HEAD (their `git checkout` switches the branch out from under your build), and stash pops
+   that conflict with the other agent's commits. Give yourself a worktree instead -
+   `git worktree add ../<repo>-<agent-or-area> <branch>` (or `git worktree add -b
+   <your-branch> ../<repo>-<agent-or-area> origin/main` for new work) - and do all staging,
+   committing and building inside it. When a worktree is finished, `git worktree remove` it;
+   `git worktree list` shows who has one. If you do have to touch a shared tree, never run a
+   blanket `git add -A` - stage your own paths only, and `git stash` only what is yours.
+6. **Production runs published releases only.** Deploy a release's images by version
    (`VEGADUTA_VERSION=X.Y.Z`); never images built from a branch or from `main`.
-6. **Never change `APP_ENCRYPTION_KEY`** on a deployment that has data (AGENTS.md, rule 5).
+7. **Never change `APP_ENCRYPTION_KEY`** on a deployment that has data (AGENTS.md, rule 5).
 
 ## Current owners
 
@@ -41,6 +50,9 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Search-capability-honesty agent (Devin) | local editor, worktree `vd-capfix-wt`, branch `fix/search-capability-honesty` | fixes for the incident where an agent with no configured search provider told the user it had no web access, then burned ~125k prompt tokens answering from memory: `core/agents-browser/.../web/WebSearchToolCallback` + `WebSearchProviderWiring` + `BuiltInWebTools` (a refusing `web_search` stub instead of silent absence, boot WARN on an unconfigured chain), `core/chat/` `ToolLoopTranscript`/`ToolLoopRunHooks`/`ToolLoopProperties`/`ArgumentSanitizingToolCallingManager`/`ChatPrompts` + `tool-loop.properties` + `prompts/en/toolresult.tool_budget.tokens.md` (cumulative per-run prompt-token soft stop, `app.chat.tools.maxPromptTokensPerTurn`), `core/agents-turn` `ChatContextCompaction`/`ContextCompactionProperties` (reserve headroom off the window) + `ChatTurnExecutor`/`BehaviourSettingsCatalog` (`chat.toolLoop.maxPromptTokensPerTurn`), `core/app-config/application.yml`, `web/messages/en.json` + the generated `settingsCatalog.snapshot.json`, `docs/configuration.md`, `docs/prompts.md`, `CHANGELOG.md` - **overlaps the KB/MCP agent's parallel audit work** (their `ArgumentSanitizingToolCallingManager`/`ChatTurnExecutor`/`application.yml`/`tool-loop.properties`/`docs/configuration.md`/`CHANGELOG.md` edits; see `AGENT-COORDINATION-NOTE.md` they left in the worktree - our edits sit in disjoint methods, take both on merge) and the release-readiness lead (`web/`), so the PR says so in its title and waits for their review |
 | Desktop-recipes lead (Devin, 5-agent fan-out) | local editor, worktree `vd-capfix-wt`, branch `feat/desktop-recipes` (PR #168) | "record once, replay later, monitor-or-auto" for the PERSONAL tier's `local_desktop_*` surface, mirroring browser recipes: new `desktop/` classes in `core/agents-tools` (entity `desktop_recipe` - spec/validator/recorder/replayer/service, `/api/desktop/recipes`, `run_desktop_recipe`, `/api/desktop/monitor/frame` proxy), `DesktopToolSource`/`DesktopAgentClient`/`RunBrowserRecipeToolCallback`/`BuiltInToolClassifications*` small edits, `services/desktop-agent` (`GET /frame`, `GET /capabilities`, bearer-auth on every route), `application.yml` + `.env.example` + `docs/configuration.md`, `web/app/components/desktop/**` + `web/app/lib/api/desktopRecipes.ts` + in-turn live monitor + console screen dock, `CHANGELOG.md` - feature is OFF by default, personal-tier only. V672 was adopted by the scratchpad agent, so the recipe table renumbered to a fresh version. Overlaps the release-readiness lead (`web/app/**`), so the PR says so and waits for their review |
 || OSS-integrations agent (Devin) | local editor, branch `feat/oss-integrations-docling-composio-n8n` | the three Tier-1 integrations from the 2026-10 OSS-integration review: `services/docling/**` (new FastAPI Docling adapter) + `core/knowledge` Docling routing (`DoclingConversionService`, `SidecarClient`, `KnowledgeController`, `KnowledgeUrlIngester`, `KnowledgeIngestionService`, `application-knowledge.yml`), Composio/Rube remote-MCP catalog entries (`core/mcp` `McpPlatformAndRemoteCatalog`, `web/app/components/agents/templatePrereqs.ts`, `templateAudience.ts`), n8n bridge (`examples/integrations/n8n/`, `docs/integrations/`, `mkdocs.yml`), `deploy/compose/{docker-compose,lite}*.yml` + `.env.example` + `scripts/vegaduta{,.ps1}` + `services/lock-requirements.sh`, `AGENTS.md`, `docs/configuration.md`, `CHANGELOG.md`, this file. Overlaps the release / install agent (`scripts/vegaduta`, `deploy/compose`, `.env.example`, install tests), the release-readiness lead (`web/app/**`, `docs/`), and the KB-URL-ingest agent (`core/knowledge`, `.env.example`), so the PR says so in its title and waits for their reviews |
+| A2A-console agent (Devin) | local editor, worktree `vegaduta-a2a-wt`, branch `feat/a2a-console-ui` | A2A interoperability console: `core/agents-interop/.../a2a/` (`A2aConsoleController`, `A2aTaskStore`/`A2aTaskService` listing+cancel surfaces, tests), `web/app/admin/a2a/`, `web/app/lib/api/a2a.ts`, `web/app/components/agents/A2aEndpointPanel.tsx` + `workbench/AutonomySection.tsx`, `nav/navSectionsOperate.ts`, `lib/edition.ts`, generated i18n route namespaces, `web/messages/en.json`, `CHANGELOG.md`; plus two fixes found while testing it (`deploy/compose/lite.yml` `CORE_INTERNAL_URL` for the well-known agent-card proxy, `web/app/admin/instructions/DirectiveCard.tsx` null `effectiveText` crash) - overlaps the release-readiness lead (`web/app/**`, `core/agents-interop`), the lean personal edition agent (`edition.ts`, A2A edition annotations) and the OSS-integrations agent (`lite.yml`), so the PR says so and waits for their reviews |
+| Taint & RAG propagation agent (Devin) | local worktree `/tmp/vd-taint`, branch `fix/turn-taint-retrieval` | taint propagation for auto-injected retrieval (`ChatMemoryRecall`, `ChatPromptAssembler`, `KnowledgeNodeHandler`, `Spotlight`), inbound channel seeding (`TurnContext.taint()`), `AgentToolProvider` step-counter binding |
+| i18n/RTL + language-pack agent (Devin) | local worktree `/private/tmp/vd-release-prep`, branch `fix/web-rtl-langpacks` | the Arabic-doesn't-flip report and its full audit: mechanical physical→logical utility sweep across ~450 `web/app/**` files (`scripts/rtl-sweep.mjs` kept for re-runs), raw-CSS conversion in `web/app/styles/globals/**`, a lucide icon-mirror rule in `base.css`, `LanguageSwitcher` menu anchoring + personal-edition pack consent (`web/app/lib/langPacks.ts`, `i18n-pack-sizes.generated.ts` + `scripts/i18n-pack-sizes.mjs` in prebuild), `web/messages/en.json` + `i18n-parity-baseline.json`, `global-error.tsx`, `package.json`, `CHANGELOG.md` - overlaps the release-readiness lead's `web/app/**` claim and will collide with `feat/web-list-pagination`, `feat/build-change-progress` and `fix/studio-waiting-progress` if they land first (rerun the sweep after their merges rather than hand-merging), so the PR says so in its title and waits for their review |
 
 ## What production must run
 
@@ -121,6 +133,55 @@ break the build standalone.
 ## Log
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
+
+- 2026-10-28, A2A-console agent (Devin, worktree `vegaduta-a2a-wt`): pushed
+  `feat/a2a-console-ui` and opened a PR for the A2A interoperability console
+  (`/admin/a2a` task list/detail/cancel, inbound endpoints + read-only outbound
+  policy, per-agent endpoint panel; `lite.yml` `CORE_INTERNAL_URL` and
+  `DirectiveCard` null-`effectiveText` fixes found while testing it on a local
+  lite compose stack, project `vegaduta-a2a` on ports 3200/8280/8380).
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): reviewed PR #254's
+  CI failures (piper-tts GPL-3.0 dep review rejection, main.py 691>678 file
+  ratchet, ruff) — `d51860556` resolves all three and is verified locally
+  (ruff 0.12.4 gate clean on changed files, main.py now 555, MIT binary path
+  sha256-pinned). NOTE: worktree `/private/tmp/va-fix` still has pre-fix
+  `3d6776cd7` checked out — pull before touching it further. Watching CI on
+  the new head; also re-triggered #253's flaky AgeOptionalIT run (flyway
+  history PK race, unrelated to that PR's catalog change).
+- 2026-10-28, taint & RAG propagation agent (Devin, worktree `/tmp/vd-taint`):
+  branch `fix/turn-taint-retrieval`. Fixed auto-injected retrieval and inbound
+  turn taint propagation gap: long-term memory recall now marks `recall_related_facts`
+  when stored facts enter context (leaving static user blocks clean), workflow `knowledge`
+  node spotlight-wraps output with chunk citations, downstream agent nodes detect
+  spotlight markers and mark `untrusted_input`, inbound channel entries seed
+  `TurnContext.taint()`, and `AgentToolProvider` binds `TurnContext` taint to the
+  step counter so tool gates and approval checks fire properly.
+
+- 2026-10-28, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM —
+  full re-record of Series A (episodes 00-10) on the flicker-free recorder
+  with the seeded Ledger newsroom dataset, Kokoro-82M local neural narration
+  (`academy/tools/narrate-kokoro.mjs`, new preference above edge-tts),
+  script passes rewritten to story-driven real-world newsroom framing, then
+  push `feat/academy-video-pipeline` + open the PR to main. Batch-committing
+  agent: please hold off sweeping academy/ until this lands — ping here if
+  you need to touch it first.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): ACTIVE CLAIM on
+  Series-A lessons **06-10** (`06-guardrails`, `07-memory-learning`,
+  `08-quality`, `09-operate`, `10-ship`) - scripts + lesson.md twins only.
+  Lessons 00-05 are committed (`8e670962e`). If you are the batch-committing
+  agent, sweep `academy/lessons/0[6-9]-*/` and `10-*/` like the earlier ones;
+  do not re-number.
+
+- 2026-10-27, academy author (Devin, worktree `vd-academy`): EXTENDED CLAIM —
+  Series-B deep-dive lessons for all 62 personal-edition routes, plus
+  narration upgrade to ElevenLabs (`academy/tools/narrate-elevenlabs.mjs`,
+  edge-tts stays the no-key fallback). Enterprise-only routes
+  (`/studio`, `/eval`, `/roi`, `/admin/mcp-servers`, `/admin/sso`,
+  `/admin/branding`, `/admin/payments`, `/admin/api-keys`,
+  `/admin/agent-trust`, `/admin/leads`, `/admin/commerce`,
+  `/shared-with-me`, `/directory`) are deferred until a lite/full stack
+  is installed for capture.
 
 - 2026-10-27, OSS-integrations agent (local Devin session): pushed
   `feat/oss-integrations-docling-composio-n8n` and opened a PR for the three Tier-1
@@ -495,3 +556,78 @@ Dependabot alert, and a new-alert gate in CI. Touching: .github/workflows/,
 deploy/omnibus/Dockerfile, services/*/Dockerfile, scripts/ci/,
 core/agents-turn logging sites, services/code-intel, services/app-builder,
 core/graphmemory, core/security, core/agents-jobs, docs/marketing.
+### Dependabot lock autofix (Devin, 2026-10-28)
+
+New `.github/workflows/dependabot-autofix.yml` regenerates
+`services/*/requirements.lock` on Dependabot pip pull requests (the failure
+class that hit #264) and re-dispatches ci/codeql/trivy on the new commit, since
+a `GITHUB_TOKEN` push suppresses `pull_request` runs. Docs updated in
+`docs/maintainers/dependabot-prs.md`. No overlap with claimed areas: new file
+only, no edits to `ci.yml`/`static-gates.yml`/`release.yml` or `scripts/ci`.
+### Security: public-schema refusal + fail-closed tenant guard (Devin, 2026-10-28)
+
+Completed an abandoned worktree's SEC-056 follow-up: TenantSchemaResolver no
+longer exempts the legacy 'public' schema from reserved-name refusal,
+TenantStatusGuardImpl rejects tenant_id=public before its schemaExists
+fallback and fails closed on SQL errors, and SecurityConfig requires at
+least one client-bound JWT check (azp or audience) on non-Keycloak issuers.
+Verified: tenancy+security 749 tests green, full reactor compiles.
+Worktree: /tmp/vd-taint-tenancy.
+
+### Locale-aware on-screen keyboard (Devin, 2026-10-28)
+
+Claimed: `web/app/components/keyboard/**`, `web/app/lib/keyboard/**`,
+`web/app/components/shell/TopBar.tsx` (one import + one mount line),
+`web/messages/en.json` (`keyboard` namespace), `web/package*.json`
+(simple-keyboard-layouts@3.4.273 dep), `CHANGELOG.md`. Overlaps the
+release-readiness lead's `web/app/**` claim — the PR title says so and
+waits for that review.
+
+A topbar toggle (next to LanguageSwitcher) opens a floating on-screen
+keyboard in the selected locale's script; it types into whichever
+input/textarea has focus (native value setter + bubbling `input` event so
+controlled React inputs see real typing; pointerdown is prevented so the
+board never steals focus). Layout data lazy-loads per locale from
+simple-keyboard-layouts; Devanagari-script locales share the Hindi layout,
+Kashmiri the Urdu one, Meitei the Bengali one. Locales without a mapped
+layout keep the toggle disabled rather than offering the wrong script.
+Verified: 19 new vitest cases green (incl. loading every mapped layout
+module for real), eslint + prettier + typecheck clean against
+`origin/main`. Worktree: /tmp/vd-keyboard, branch
+`feat/locale-onscreen-keyboard`.
+
+### Edge-media / playground / keyboard session (Devin, 2026-10-28)
+
+Merged **PR #276** (`fix(playground): drive the live turn clock from the
+turn's start time`, squash `7a8ec2acb`) and **PR #277** (`fix(edge): let
+cached media models warm the worker and scale the tool budget to the
+window`, squash `d2654a83`) to `main` — both had gone green on CI after
+Prettier-only fix-up pushes; approved + admin-merged from the `vegaduta`
+bot account since the PR author's own approval doesn't count and branch
+protection enforces admins. #277's squash also carries the MusicGen
+always-q4 WebGPU fix (fp32/fp16 decoders exceed the browser session
+limit), the non-f16 SD-Turbo gating, the trimmed-tool prompt notes, and
+the unenrolled-browser PIN hint.
+
+Keyboard feature: claimed `web/app/components/keyboard/**`,
+`web/app/lib/keyboard/**`, `web/app/components/shell/TopBar.tsx`,
+`web/messages/en.json`, `web/package*.json`, `CHANGELOG.md` — open as
+**PR #278** (`feat/locale-onscreen-keyboard`, off `origin/main`), waits
+for the release-readiness lead's review per the `web/app/**` overlap.
+Deployed to the maintainer's local personal stack from
+`deploy/local-everything` (worktree /tmp/vd-deploy-all).
+
+### Personal release smoke suite (Devin, 2026-10-28)
+
+Claimed `tests/e2e/tests/personal-smoke.spec.ts`,
+`tests/e2e/playwright.personal.config.ts` for the beta-release smoke:
+eight checks against a live personal stack covering the journeys a green
+unit suite cannot prove — the `/api/local-auth/config` contract, a
+rejected bad login, the rendered sign-in panel, the unenrolled-browser
+PIN hint, the edge manifest's contextWindowSize fields, the edge console
+media cards, the locale keyboard auto-open/type/close journey, and one
+real assistant turn through the configured model. Signed-in checks need
+`E2E_PERSONAL_EMAIL`/`E2E_PERSONAL_PASSWORD` and skip with a reason
+without them. Branch `test/personal-release-smoke`; signed-out half
+verified 5/5 green on the maintainer's local personal stack (39 passed
+incl. the edition suite, 0 failed).

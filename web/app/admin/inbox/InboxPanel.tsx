@@ -301,7 +301,7 @@ export default function InboxPanel({
               setPage(0);
             }}
             className={cn(
-              "rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent/40",
+              "rounded-xl border border-border bg-card p-3 text-start transition-colors hover:bg-accent/40",
               view === c.key && "border-primary/60 bg-accent/40"
             )}
           >
@@ -318,7 +318,7 @@ export default function InboxPanel({
             <div className="relative min-w-0 flex-1">
               <Search
                 size={13}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
               />
               <Input
@@ -326,7 +326,7 @@ export default function InboxPanel({
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search sender, phone or message…"
                 aria-label="Search sender, phone or message"
-                className="pl-7"
+                className="ps-7"
               />
             </div>
             <Select
@@ -404,7 +404,7 @@ export default function InboxPanel({
                     type="button"
                     onClick={() => selectConversation(s)}
                     className={cn(
-                      "w-full rounded-lg border border-border bg-card p-3 text-left transition-colors hover:bg-accent/40",
+                      "w-full rounded-lg border border-border bg-card p-3 text-start transition-colors hover:bg-accent/40",
                       s.sessionId === selectedId && "border-primary/60 bg-accent/40"
                     )}
                   >
@@ -412,7 +412,7 @@ export default function InboxPanel({
                       <StatusDot status={dotStatus(s)} />
                       <ChannelBadge channel={s.channel} />
                       <span className="truncate text-xs text-muted-foreground">{s.externalIdMasked}</span>
-                      <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
+                      <span className="ms-auto shrink-0 text-xs tabular-nums text-muted-foreground">
                         {relTime(s.lastMessageAt)}
                       </span>
                     </div>

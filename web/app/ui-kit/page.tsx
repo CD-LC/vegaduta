@@ -205,10 +205,10 @@ export default function UiKitPage() {
               <Label htmlFor="uk-email">Email</Label>
               <div className="relative">
                 <Mail
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
-                <Input id="uk-email" type="email" placeholder="you@anywhere.com" className="pl-9" />
+                <Input id="uk-email" type="email" placeholder="you@anywhere.com" className="ps-9" />
               </div>
             </div>
             <div className="space-y-2">

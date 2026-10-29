@@ -86,6 +86,14 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agents-browser</artifactId>
     </dependency>
+    <!-- The 'knowledge' node spotlight-delimits retrieved chunks with
+         guardrails.taint.Spotlight - the same untrusted-content marking a
+         guarded tool result gets. No cycle: guardrails is below workflow in
+         the reactor. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>guardrails</artifactId>
+    </dependency>
     <!-- The expression language (lexer, parser, evaluator) is a leaf library in
          core/workflow-expression; it never depends on workflow. -->
     <dependency>

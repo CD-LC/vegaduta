@@ -352,7 +352,7 @@ export default function ClipStudio() {
                     , or upload an image below.
                   </p>
                 ) : (
-                  <ul className="max-h-72 space-y-1 overflow-y-auto pr-1">
+                  <ul className="max-h-72 space-y-1 overflow-y-auto pe-1">
                     {imagePages.pageItems.map((row: any) => {
                       const selected = selectedImageId != null && String(selectedImageId) === String(row.id);
                       return (
