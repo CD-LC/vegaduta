@@ -45,7 +45,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | audit | kernel | 37 | json |  |
 | billing | kernel (hosts vendor code) | 69 | json, security | Razorpay + PhonePe gateways in billing.gateway |
 | brief | kernel | 70 | agents, agents-tools, agents-turn, approval, audit, chat, guardrails, json, knowledge, mcp, omnichannel, providers, quality, secrets, security, tenancy, workflow |  |
-| chat | kernel (hosts vendor code) | 194 | audit, json, prompts, providers, security, settings, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
+| chat | kernel (hosts vendor code) | 195 | audit, json, prompts, providers, security, settings, tenancy | 16 LLM *ChatClientFactory classes (closed ProviderName) |
 | codeintel | kernel | 23 | approval, json, security |  |
 | crypto | kernel | 7 | (none) |  |
 | crypto-kms | kernel | 4 | crypto, json, security |  |
