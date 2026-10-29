@@ -16005,5 +16005,51 @@
     "toolDeferral_default": "Server default",
     "toolDeferral_on": "On",
     "toolDeferral_off": "Off"
+  },
+  "buildDescribe": {
+    "aiWritesBlueprint": "AI reads your description and writes the blueprint",
+    "createGroupAriaLabel": "What to create",
+    "draftButton": "Draft my blueprint",
+    "drafting": "Drafting your blueprint…",
+    "edgeReady": "Private on-device drafting ready ({model})",
+    "flightPath": {
+      "hands": {
+        "step": "03 · PUT IT IN HANDS",
+        "text": "Use your agent and workflows to power an experience people can use.",
+        "title": "AI-powered app"
+      },
+      "orchestrate": {
+        "step": "02 · ORCHESTRATE",
+        "text": "Triggers, approvals and repeatable work around the agent.",
+        "title": "Workflow"
+      },
+      "start": {
+        "step": "01 · START HERE",
+        "text": "Instructions, model, knowledge, tools and guardrails.",
+        "title": "Custom agent"
+      }
+    },
+    "goalAriaLabel": "Describe what you want to build",
+    "heroBody": "Start with a custom agent - the intelligence at the center. Tune how it thinks and acts, connect a workflow, then use it to power apps, channels and customer experiences.",
+    "heroTitle": "Build the agent behind what comes next",
+    "newHereAgentTerm": "An agent",
+    "newHereP1": "is an AI worker with a job description. Unlike a chatbot it can look things up, use tools and finish a task - and it stops to ask you before anything risky.",
+    "newHereP2": "First you get a blueprint - every setting written out in plain words, all editable. New agents start “under watch” and earn more freedom as they prove themselves.",
+    "newHereP2strong": "Nothing is created until you press Build.",
+    "newHereSummary": "New here? What is an agent, and what happens next?",
+    "outputAgentHint": "The starting point - answers, researches, writes, follows up and can safely use tools.",
+    "outputAgentLabel": "A custom AI agent",
+    "outputAppHint": "A Git-backed project you own. For apps powered by agents and workflows, use the AI app studio tab.",
+    "outputAppLabel": "An app or website",
+    "placeholderAgent": "e.g. Answer customer questions about our pricing in a friendly tone, and pass refunds to me",
+    "placeholderApp": "e.g. A landing page for my bakery with a photo grid and an order form",
+    "promptStrengthLabel": "Prompt strength: {level}.",
+    "startFromIdea": "Not sure? Start from an idea",
+    "strengthAlmostThere": "almost there",
+    "strengthGood": "Good start.",
+    "strengthNeedsMore": "needs a little more",
+    "strengthStrong": "Strong prompt: it says who it is for and what it should do.",
+    "surprise": "Surprise me",
+    "typeOrPick": "Type a sentence above, or pick an idea below."
   }
 }
