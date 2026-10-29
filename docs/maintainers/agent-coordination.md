@@ -134,6 +134,15 @@ break the build standalone.
 
 Newest first. One line per push, merge, tag, release or deploy: time (UTC), agent, what.
 
+- 2026-10-29, A2A-console agent (Devin, worktree `vd-e2e-pr`): pushed
+  `test/e2e-local-suite` and opened a PR with the local-stack Playwright
+  results: spec tolerance fixes (`local-stage-fix.ts` repoints
+  `window.__ENV.NEXT_PUBLIC_API_BASE_URL` to `api.<domain>` + bypasses CSP;
+  `skipIfMockLlm`/`LLM_IS_MOCK` shim; Keycloak ERR_ABORTED/SSO latency
+  tolerance; sms tile count) plus two new specs
+  (`llm-response-quality-local`, `a2a-console-live` covering PR #282's
+  `/admin/a2a` surface) and darwin landing visual baselines. Verified on a
+  lite compose stack + `vd-e2e-proxy` nginx domain ingress.
 - 2026-10-28, A2A-console agent (Devin, worktree `vegaduta-a2a-wt`): pushed
   `feat/a2a-console-ui` and opened a PR for the A2A interoperability console
   (`/admin/a2a` task list/detail/cancel, inbound endpoints + read-only outbound
