@@ -16379,5 +16379,22 @@
     "copy": "Copy",
     "copied": "Copied",
     "manageNote": "Monitor calls and publish the card at"
+  },
+  "localModelSettings": {
+    "batchTitle": "Prompt batch size",
+    "batchHelp": "How many prompt tokens the model chews at once — larger is faster on capable hardware.",
+    "batch_default": "Server default",
+    "parallelTitle": "Requests at once",
+    "parallelHelp": "How many requests the model can serve at once — raise it if turns wait behind each other.",
+    "parallel_default": "Server default",
+    "timeoutTitle": "Turn timeout",
+    "timeoutHelp": "How long a turn may run before it is cut off.",
+    "timeout_default": "Server default",
+    "timeout_minutes": "{n} min",
+    "toolDeferralTitle": "Tool deferral",
+    "toolDeferralHelp": "Hide most tool schemas until the model searches for them — a much smaller prompt, one extra step when a tool is needed.",
+    "toolDeferral_default": "Server default",
+    "toolDeferral_on": "On",
+    "toolDeferral_off": "Off"
   }
 }
