@@ -727,3 +727,12 @@ real assistant turn through the configured model. Signed-in checks need
 without them. Branch `test/personal-release-smoke`; signed-out half
 verified 5/5 green on the maintainer's local personal stack (39 passed
 incl. the edition suite, 0 failed).
+
+### Issue #295 denied-tool turn fix (Devin, 2026-10-29)
+
+Claimed `core/chat/.../ArgumentSanitizingToolCallingManager.java`,
+`ToolLoopMarkers.java`, `UnavailableToolCallback.java` and
+`core/chat/.../ToolLoopLimitAndExceptionTranslationTest.java` on branch
+`fix/tool-denied-turn-hang` (worktree `/tmp/vd-fix295`): the
+`tool_unavailable` marker + denied-repeat hard stop that ends a turn when
+the model re-calls a name it was already told is unavailable.

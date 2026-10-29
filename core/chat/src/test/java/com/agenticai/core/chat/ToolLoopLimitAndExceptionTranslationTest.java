@@ -122,6 +122,55 @@ class ToolLoopLimitAndExceptionTranslationTest {
     }
 
     @Test
+    void aToolTheAllowListLeftOutIsAnsweredAndARepeatEndsTheLoop() {
+        // Issue #295: an agent whose tool allow-list leaves out the tool the model wants gets an
+        // "unavailable" tool-result for the first call (the model can answer without it), and a
+        // repeat of the SAME refused name ends the loop at once - it must not burn the whole
+        // maxUnknownCallsPerInvocation budget, one slow model call per round.
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        SimpleMeterRegistry meters = new SimpleMeterRegistry();
+        ToolCallingManager manager = managerWithCaps(25, 8, meters);
+
+        ToolExecutionResult first = manager.executeToolCalls(
+            new Prompt(List.of(new UserMessage("fetch the page")), optionsOffering(tool)),
+            responseCalling("fetch_web_page"));
+
+        assertFalse(first.returnDirect(), "the first denied call is answered, letting the model recover");
+        String deniedResult = lastToolResponses(first).get(0).responseData();
+        assertTrue(deniedResult.contains("\"tool_unavailable\""), deniedResult);
+        assertEquals(0, tool.calls.get(), "a never-offered tool never executes");
+
+        // The model ignores the notice and asks for the same refused name again.
+        Prompt second = new Prompt(new ArrayList<>(first.conversationHistory()), optionsOffering(tool));
+        ToolExecutionResult repeat = manager.executeToolCalls(second, responseCalling("fetch_web_page"));
+
+        assertTrue(repeat.returnDirect(), "a repeat of an already-refused name ends the loop, not another model round");
+        assertEquals(0, tool.calls.get());
+        List<ToolResponseMessage.ToolResponse> responses = lastToolResponses(repeat);
+        assertEquals(new ToolLoopProperties().getHardStopReply(), responses.get(0).responseData());
+        assertEquals(1.0, meters.counter(ArgumentSanitizingToolCallingManager.LOOP_LIMIT_METRIC,
+            "stage", "hard", "reason", "unavailable_repeat").count());
+    }
+
+    @Test
+    void aDifferentUnknownNameAfterARefusalStillGetsAnAnswer() {
+        // Only a repeat of an ALREADY-refused name ends the loop early: a different hallucinated
+        // name is new information to the model and still gets its own unavailable answer.
+        CountingTool tool = new CountingTool(TOOL, "ok");
+        ToolCallingManager manager = managerWithCaps(25, 8, new SimpleMeterRegistry());
+
+        ToolExecutionResult first = manager.executeToolCalls(
+            new Prompt(List.of(new UserMessage("fetch the page")), optionsOffering(tool)),
+            responseCalling("fetch_web_page"));
+        Prompt second = new Prompt(new ArrayList<>(first.conversationHistory()), optionsOffering(tool));
+
+        ToolExecutionResult another = manager.executeToolCalls(second, responseCalling("web_search"));
+
+        assertFalse(another.returnDirect());
+        assertTrue(lastToolResponses(another).get(0).responseData().contains("\"tool_unavailable\""));
+    }
+
+    @Test
     void aParkedTurnEndsTheLoopInsteadOfQueueingCallsForever() {
         CountingTool tool = new CountingTool(TOOL, "ok");
         SimpleMeterRegistry meters = new SimpleMeterRegistry();

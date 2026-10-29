@@ -8,6 +8,15 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Chat turns no longer linger on a denied tool call.** A model that repeated a tool name it was
+  already told is unavailable (e.g. one the agent's `allowedToolNames` allow-list leaves out) used
+  to burn the whole `max-unknown-calls-per-invocation` budget - one slow model round per retry - so
+  a turn on a local model could stream for minutes with no terminal event. The first call still gets
+  the "tool unavailable" result so the model can answer without it; a repeat of the same refused
+  name now ends the tool loop immediately with the closing reply (#295).
+
 ## [0.1.13] - 2026-10-28
 
 ### Added

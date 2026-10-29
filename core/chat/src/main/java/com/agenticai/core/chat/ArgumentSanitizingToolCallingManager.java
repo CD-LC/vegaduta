@@ -141,6 +141,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
      */
     public static final String APPROVAL_PARKED = "approval_parked";
 
+    /** Marker in an {@link UnavailableToolCallback} result; {@link #enforceLoopLimits} ends the loop on a repeat. */
+    public static final String TOOL_UNAVAILABLE = "tool_unavailable";
+
     static final String LOOP_LIMIT_METRIC = "chat.tool_loop.limit";
     static final String UNKNOWN_TOOL_METRIC = "chat.tool.unknown_calls";
     static final String ARGUMENT_REJECTED_METRIC = "chat.tool.argument_rejected";
@@ -295,6 +298,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         int unknownCalls = 0;
         boolean softStopAlreadySent = false;
         boolean parked = false;
+        Set<String> refusedNames = new LinkedHashSet<>();
         for (Message message : currentInvocation(prompt.getInstructions())) {
             if (message instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
                 priorRounds++;
@@ -306,6 +310,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 if (ToolLoopMarkers.carriesParkedMarker(toolResponses)) {
                     parked = true;
                 }
+                ToolLoopMarkers.collectUnavailableNames(toolResponses, refusedNames);
             }
         }
         int newUnknown = countUnknown(requesting.getToolCalls(), known);
@@ -313,6 +318,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             increment(UNKNOWN_TOOL_METRIC, newUnknown);
         }
         unknownCalls += newUnknown;
+        // A repeat of a name already answered tool_unavailable skips the soft stage (issue #295).
+        String refusedRepeat = ToolLoopMarkers.firstUnavailableRepeat(requesting.getToolCalls(), refusedNames);
         int round = ToolLoopRunHooks.roundsSpentBefore(prompt) + priorRounds + 1; // + earlier passes' rounds, so the cap counts the turn's total
 
         // A run may carry its own cap (the agent's tool-step ceiling decides how many rounds its backstop needs).
@@ -323,12 +330,11 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         // A parked turn (a tool call waiting on human approval) must end: post-park calls are
         // answered by the guard and consume no step budget, so without this check a model that
         // keeps calling tools loops to the round cap burning tokens on queue refusals.
-        if (!roundsExceeded && !unknownExceeded && !tokensExceeded && !parked) {
+        if (!roundsExceeded && !unknownExceeded && !tokensExceeded && !parked && refusedRepeat == null) {
             return null;
         }
         String reason =
-                parked
-                        ? "approval_parked"
+                parked ? "approval_parked" : refusedRepeat != null ? "unavailable_repeat"
                         : roundsExceeded ? "rounds" : unknownExceeded ? "unknown_tools" : "prompt_tokens";
         List<Message> history = new ArrayList<>(prompt.getInstructions());
         history.add(requesting);
@@ -341,7 +347,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
             return ToolLoopParkedClose.closeQueued(prompts, prompt, history, calls);
         }
 
-        if (!softStopAlreadySent) {
+        if (!softStopAlreadySent && refusedRepeat == null) {
             log.warn(
                 "Tool loop limit reached (reason={} round={} maxRounds={} unknownCalls={} maxUnknown={}) - "
                     + "answering {} tool call(s) with a budget-exhausted result instead of executing them",

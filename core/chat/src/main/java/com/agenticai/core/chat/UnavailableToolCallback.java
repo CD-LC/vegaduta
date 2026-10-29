@@ -133,10 +133,18 @@ public final class UnavailableToolCallback implements ToolCallback {
         // problem and was missed by that fix since it isn't wired through
         // SanitizedMcpToolCallback). message is always a fixed prose string,
         // never already JSON, so it is wrapped unconditionally.
+        // The "error" field is the machine-readable tool_unavailable marker
+        // (ArgumentSanitizingToolCallingManager#TOOL_UNAVAILABLE): the loop limiter reads it to end a
+        // turn whose model keeps re-asking for a name it was already told is unavailable. It is an
+        // additional field, not a rename - the {"result": ...} object contract the Gemini replay
+        // relies on is unchanged.
         try {
-            return JSON_MAPPER.writeValueAsString(Map.of("result", message));
+            return JSON_MAPPER.writeValueAsString(
+                    Map.of("error", ArgumentSanitizingToolCallingManager.TOOL_UNAVAILABLE,
+                            "result", message));
         } catch (Exception e) {
-            return "{\"result\":\"" + message.replace("\\", "\\\\").replace("\"", "\\\"")
+            return "{\"error\":\"" + ArgumentSanitizingToolCallingManager.TOOL_UNAVAILABLE
+                + "\",\"result\":\"" + message.replace("\\", "\\\\").replace("\"", "\\\"")
                 .replace("\n", "\\n").replace("\r", "") + "\"}";
         }
     }
