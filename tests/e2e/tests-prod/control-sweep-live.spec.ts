@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { API_URL } from "../helpers/prod-env";
 import { authHeaders, parseChatSse } from "../helpers/prod-api";
 import { setupControlSweep, NO_LEAK } from "../helpers/control-sweep";
+import { fixStageApiBase } from "./local-stage-fix";
 
 /**
  * CONTROL SWEEP - data-driven pass over every control that
@@ -29,6 +30,12 @@ import { setupControlSweep, NO_LEAK } from "../helpers/control-sweep";
 
 test.describe("Control sweep - untested agent workbench controls (live)", () => {
   test.setTimeout(4 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280
+  // Must register BEFORE setupControlSweep's beforeEach so the init script is
+  // installed before signInToConsole navigates.
+  test.beforeEach(async ({ page }) => {
+    await fixStageApiBase(page);
+  });
 
   const sweep = setupControlSweep();
   const { api, gated, newAgent, getAgent, agents } = sweep;

@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { requireUserCredentials, requireMutationOptIn } from "../helpers/prod-env";
 import { signInToConsole, skipIfHostedAllowanceExhausted, expandReasoningAutonomySection } from "../helpers/prod-session";
+import { fixStageApiBase } from "./local-stage-fix";
 
 /**
  * REAL-TENANT agent BEHAVIOR validation, not just control-click verification.
@@ -33,6 +34,7 @@ import { signInToConsole, skipIfHostedAllowanceExhausted, expandReasoningAutonom
  */
 test.describe("Agent autonomy tier - real approval-gate behavior (live production scenario)", () => {
   test.setTimeout(3 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix: console calls api.<domain>; its CSP only allows localhost:8280
 
   test("Supervised autonomy actually intercepts a tool call into the approvals queue, and Approve releases it", async ({
     page,
@@ -41,6 +43,7 @@ test.describe("Agent autonomy tier - real approval-gate behavior (live productio
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data - one project only");
 
+    await fixStageApiBase(page);
     await signInToConsole(page);
 
     // --- Make sure the filesystem tool is available to call ---

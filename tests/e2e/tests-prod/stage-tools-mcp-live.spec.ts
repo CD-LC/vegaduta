@@ -23,7 +23,9 @@ async function login(page: Page) {
   await page.locator("#password").fill(process.env.E2E_USER_PASSWORD!);
   await page.locator("#kc-login").click();
   await page.waitForURL(new RegExp(`app\\.${D.replace(/\./g, "\\.")}/`), { timeout: 45_000 });
-  await expect(page.getByText("Load Test Org").first()).toBeVisible({ timeout: 30_000 });
+  // The signed-in tenant name differs per stack ("Load Test Org" on the stage this spec was
+  // written against, "A2A Test Org" on the local lite stack) - assert the app shell instead.
+  await expect(page.locator("header, nav").first()).toBeVisible({ timeout: 30_000 });
 }
 
 test.beforeEach(async ({ page }) => {
