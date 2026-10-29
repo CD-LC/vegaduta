@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.8-slim-trixie@sha256:fbecd461fc72d21b2143c6eaba25143738079154a6d0ea3da3aec724f50eed4a
 
 WORKDIR /app
 
@@ -27,8 +27,28 @@ COPY app ./app
 # ElevenLabs TTS and the sidecar-Whisper/core-chat HTTP bridges
 # (stt_sidecar_whisper.py, llm_core_bridge.py) are pure network calls - no
 # local model weights, nothing else to bake in.
+# Bake the default Piper voice (local, keyless TTS - see app/tts_piper.py and
+# config.py's PIPER_* block). Both files are sha256-verified - the same
+# supply-chain posture as every other external fetch in this repo's images.
+# PIPER_VOICE defaults to this exact voice; other voices are still loadable at
+# runtime by placing the .onnx under PIPER_MODEL_DIR.
+#
+# The `piper` CLI is the MIT-licensed upstream rhasspy/piper release binary,
+# fetched per-arch and sha256-pinned - NOT the piper-tts PyPI package, whose
+# >=1.3 releases are the GPL-3.0 piper1-gpl lineage this repo's dependency
+# review rejects. The tarball is self-contained (binary + espeak-ng-data +
+# bundled libs); keep the piper/ dir intact so it finds its data files.
+ARG TARGETARCH
+RUN mkdir -p /opt/piper-voices
+COPY piper_voices_download.py /tmp/piper_voices_download.py
+RUN python /tmp/piper_voices_download.py en_US-lessac-medium /opt/piper-voices \
+    && python /tmp/piper_voices_download.py --binary "${TARGETARCH:-amd64}" /opt \
+    && rm /tmp/piper_voices_download.py
+ENV PIPER_MODEL_DIR=/opt/piper-voices \
+    PIPER_BIN=/opt/piper/piper
+
 RUN groupadd -r voiceagent && useradd -r -g voiceagent voiceagent \
-    && chown -R voiceagent:voiceagent /app
+    && chown -R voiceagent:voiceagent /app /opt/piper-voices
 USER voiceagent
 
 # AgentServer's own health-check HTTP server (see livekit/agents/worker.py's
@@ -44,4 +64,5 @@ EXPOSE 8081
 # LIVEKIT_API_SECRET env vars flow into via WorkerOptions, same as `core`'s
 # equivalent three vars). "dev" mode (hot-reload, verbose logs) is for local
 # iteration only - see README.md.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD python -c "import socket; socket.create_connection(('127.0.0.1', 8081), 3)" || exit 1
 CMD ["python", "-m", "app.main", "start"]

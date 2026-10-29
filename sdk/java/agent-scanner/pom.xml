@@ -6,7 +6,7 @@
   <parent>
     <groupId>io.github.cd-lc</groupId>
     <artifactId>vegaduta-agent-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
   </parent>
 
   <artifactId>vegaduta-agent-scanner</artifactId>
@@ -20,7 +20,7 @@
 
   <properties>
     <automatic.module.name>io.vegaduta.agent.scanner</automatic.module.name>
-    <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
+    <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
     <!-- The jar CliJarIT runs. Override to point it at another jar (the thin jar fails the test). -->
     <cli.jar>${project.build.directory}/${project.build.finalName}-cli.jar</cli.jar>
   </properties>

@@ -26,6 +26,7 @@ abstract class McpRegistryServiceFixture {
     protected EncryptionService encryptionService;
     protected TenantLimits tenantLimits;
     protected McpCatalogService catalogService;
+    protected McpStaticReferenceUpgrader staticReferenceUpgrader;
     protected McpRegistryService service;
 
     @BeforeEach
@@ -46,11 +47,20 @@ abstract class McpRegistryServiceFixture {
         // decrypt/merge behaviour, and none of their env values carry a
         // {{secret.X}} reference, so expansion must be a pass-through. A real
         // resolver (rather than a mock) is what proves that.
+        // The dead-static-reference upgrade's availability lookup says "static serves everything"
+        // here: the fixture's name-only registrations must keep landing as plain static
+        // references, which is what every pre-upgrade test asserted. A test that wants the
+        // upgrade builds its own upgrader with an unserving lookup (see McpRegistryServiceTest).
+        staticReferenceUpgrader = new McpStaticReferenceUpgrader(
+            repository, catalogService, new McpStdioCommandGuard(""), encryptionService,
+            new SecretReferenceResolver(mock(SecretVaultService.class)),
+            () -> (McpStaticServerAvailability) name -> true);
         service = new McpRegistryService(
             repository, encryptionService,
             new McpRemoteUrlGuard(""), new McpStdioCommandGuard(""),
             tenantLimits, catalogService,
-            new SecretReferenceResolver(mock(SecretVaultService.class)));
+            new SecretReferenceResolver(mock(SecretVaultService.class)),
+            staticReferenceUpgrader);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         // No TenantContext set for most tests - the plan-gate is a no-op
         // (same "no request context, not capped" posture as

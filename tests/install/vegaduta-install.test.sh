@@ -83,7 +83,7 @@ check "host mode uses the host overlay and no container profile" "$(has "$out" '
 echo "no terminal: nothing is asked"
 new_home
 out="$("$CLI" up --lite --build --dry-run </dev/null 2>&1)"
-check "plan is the cloud-key default" "$(has "$out" 'local_ai=none local_model=default search=0'; echo $?)" "$out"
+check "plan is the cloud-key default with the out-of-box tools" "$(has "$out" 'local_ai=none local_model=default search=1 tools=1 browser=1'; echo $?)" "$out"
 
 echo "first-run question (real terminal)"
 new_home
@@ -93,12 +93,12 @@ check "default answer picks a local model and search" "$([ -n "$(state local_ai)
 
 new_home
 out="$(python3 "$PTY" "2" "$CLI" up --lite --build --dry-run 2>&1)"
-check "choosing a cloud provider leaves no local model and no search" "$([ -z "$(state local_ai)" ] && [ -z "$(state search)" ]; echo $?)" "$out"
+check "choosing a cloud provider leaves no local model; search stays on" "$([ -z "$(state local_ai)" ] && [ "$(state search)" = 1 ]; echo $?)" "$out"
 check "choosing a cloud provider is remembered like --cloud" "$([ "$(state cloud)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 
 new_home
 out="$(python3 "$PTY" "3|qwen3:8b|n" "$CLI" up --lite --build --dry-run 2>&1)"
-check "choosing a catalog model with search declined" "$([ "$(state local_model)" = qwen3:8b ] && [ -z "$(state search)" ]; echo $?)" "$out"
+check "choosing a catalog model with search declined" "$([ "$(state local_model)" = qwen3:8b ] && [ "$(state search)" = 0 ]; echo $?)" "$out"
 
 new_home
 "$CLI" up --lite --build --cloud --dry-run >/dev/null 2>&1
@@ -180,7 +180,7 @@ if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; 
   check "the chosen compose files merge into a valid project" "$c" "$out"
   # Regression: --search on lite once left core on search-net only, so it could not reach postgres.
   nets="$("$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; print(" ".join(sorted(json.load(sys.stdin)["services"]["core"]["networks"])))')"
-  check "core keeps the default network when search is added to lite" "$([ "$nets" = "default mcp-stdio-net search-net" ]; echo $?)" "core networks: $nets"
+  check "core keeps the default network when search is added to lite" "$([ "$nets" = "browser-net default mcp-stdio-net sandbox-net search-net" ]; echo $?)" "core networks: $nets"
 else
   echo "  skip docker is not available"
 fi

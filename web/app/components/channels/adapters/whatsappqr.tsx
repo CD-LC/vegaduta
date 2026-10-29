@@ -163,7 +163,7 @@ function WhatsAppQrInspector({ ctx }: { ctx: ChannelCtx }) {
       )}
 
       {pairing && (
-        <div className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-left">
+        <div className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-start">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("whatsappQrScanTitle")}
           </div>

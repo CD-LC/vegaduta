@@ -131,19 +131,19 @@ export function DomainsPanel({ appId }: { appId: string }) {
               </span>
             </div>
             {d.status !== "VERIFIED" && (
-              <table className="mt-1.5 w-full text-left text-[11px]">
+              <table className="mt-1.5 w-full text-start text-[11px]">
                 <thead className="text-muted-foreground">
                   <tr>
-                    <th className="pr-2 font-medium">Type</th>
-                    <th className="pr-2 font-medium">Name</th>
+                    <th className="pe-2 font-medium">Type</th>
+                    <th className="pe-2 font-medium">Name</th>
                     <th className="font-medium">Value</th>
                   </tr>
                 </thead>
                 <tbody>
                   {dnsRecordRows(d).map((r) => (
                     <tr key={r.type + r.name} title={r.purpose}>
-                      <td className="pr-2 align-top font-mono">{r.type}</td>
-                      <td className="break-all pr-2 align-top font-mono">{r.name}</td>
+                      <td className="pe-2 align-top font-mono">{r.type}</td>
+                      <td className="break-all pe-2 align-top font-mono">{r.name}</td>
                       <td className="break-all align-top font-mono">{r.value}</td>
                     </tr>
                   ))}
@@ -156,10 +156,21 @@ export function DomainsPanel({ appId }: { appId: string }) {
             <div className="mt-1.5 flex gap-1.5">
               {d.status !== "VERIFIED" && (
                 <Button size="sm" onClick={() => verify(d)} disabled={busy === d.id} className="h-7 gap-1 text-[11px]">
-                  {busy === d.id ? <Loader2 aria-hidden="true" size={11} className="animate-spin" /> : <RefreshCw aria-hidden="true" size={11} />} Verify
+                  {busy === d.id ? (
+                    <Loader2 aria-hidden="true" size={11} className="animate-spin" />
+                  ) : (
+                    <RefreshCw aria-hidden="true" size={11} />
+                  )}{" "}
+                  Verify
                 </Button>
               )}
-              <Button size="sm" variant="outline" onClick={() => (d.status === "VERIFIED" ? setConfirmRemove(d) : void remove(d))} disabled={busy === d.id} className="h-7 gap-1 text-[11px]">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => (d.status === "VERIFIED" ? setConfirmRemove(d) : void remove(d))}
+                disabled={busy === d.id}
+                className="h-7 gap-1 text-[11px]"
+              >
                 <Trash2 aria-hidden="true" size={11} /> Remove
               </Button>
             </div>
@@ -171,7 +182,8 @@ export function DomainsPanel({ appId }: { appId: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove {confirmRemove?.hostname}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This domain is verified and live. Removing it stops the app answering on {confirmRemove?.hostname}; visitors to that address will get an error until you add and verify it again.
+              This domain is verified and live. Removing it stops the app answering on {confirmRemove?.hostname};
+              visitors to that address will get an error until you add and verify it again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

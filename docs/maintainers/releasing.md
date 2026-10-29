@@ -9,8 +9,13 @@ maintainer's machine.
 ## Cutting a release
 
 1. Make sure the commit you want to release is on `main` and its `CI OK` and
-   `CodeQL OK` checks are green. The workflow's `verify` job refuses any other
-   commit (it waits up to an hour for checks that are still running).
+   `CodeQL OK` checks are green — run `scripts/ci/tag-ready.sh <sha>` to check.
+   Main-push CI serializes on a concurrency group, so a commit tagged right
+   after merging can sit behind a full earlier run: the workflow's `verify`
+   job does wait for checks that are still running (up to 150 minutes), but
+   tagging an already-green commit skips that wait entirely. `prepare` also
+   refuses commits that are not ancestors of `main` and tags whose version has
+   no `CHANGELOG.md` section.
 2. Move the `## [Unreleased]` entries in `CHANGELOG.md` under
    `## [<version>] - <date>` and merge that change. The release notes are taken
    from this section; without one, GitHub generates notes from pull request
@@ -80,9 +85,12 @@ A tag with a suffix (`v0.2.0-rc.1`) is a pre-release:
 
 - only the exact version tag is pushed (`ghcr.io/<owner>/core:0.2.0-rc.1`);
   `latest` and `<major>.<minor>` keep pointing at the last stable release;
-- the GitHub Release is marked as a pre-release and is never GitHub's "latest
-  release", so `install.sh` (which downloads `releases/latest/...` unless a
-  version is given) keeps installing the last stable release;
+- the GitHub Release is marked as a pre-release, and `install.sh` resolves the
+  newest platform `vX.Y.Z` tag from the releases list (skipping `sdk-*`,
+  `pysdk-*`, `restsdk-*` and pre-releases) unless a version is given - so it
+  keeps installing the last stable platform release. This is also what stops a
+  component release (`sdk-v0.1.1` once became GitHub's "latest" and broke every
+  default install) from hijacking the resolution;
 - `helm install` without `--version` does not pick it up either.
 
 Consequently, **the first release must be a stable one** (e.g. `v0.1.0`) for

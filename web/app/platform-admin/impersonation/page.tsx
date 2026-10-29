@@ -48,16 +48,16 @@ function SessionsTable({
 }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[820px] text-left text-sm">
+      <table className="w-full min-w-[820px] text-start text-sm">
         <thead className="text-xs text-muted-foreground">
           <tr className="border-b border-border">
-            <th className="py-2 pr-3 font-medium">Viewed user</th>
-            <th className="py-2 pr-3 font-medium">Tenant</th>
-            <th className="py-2 pr-3 font-medium">Admin</th>
-            <th className="py-2 pr-3 font-medium">Reason</th>
-            <th className="py-2 pr-3 font-medium">Started</th>
-            <th className="py-2 pr-3 font-medium">{showEnd ? "Expires" : "Ended"}</th>
-            <th className="py-2 pr-3 font-medium">Requests</th>
+            <th className="py-2 pe-3 font-medium">Viewed user</th>
+            <th className="py-2 pe-3 font-medium">Tenant</th>
+            <th className="py-2 pe-3 font-medium">Admin</th>
+            <th className="py-2 pe-3 font-medium">Reason</th>
+            <th className="py-2 pe-3 font-medium">Started</th>
+            <th className="py-2 pe-3 font-medium">{showEnd ? "Expires" : "Ended"}</th>
+            <th className="py-2 pe-3 font-medium">Requests</th>
             <th className="py-2 font-medium">{showEnd ? <span className="sr-only">Actions</span> : "State"}</th>
           </tr>
         </thead>
@@ -67,8 +67,8 @@ function SessionsTable({
             const meta = STATE_META[state];
             return (
               <tr key={s.id} className="border-b border-border/60 align-top">
-                <td className="py-2 pr-3 font-mono text-xs">{s.userEmail || s.userId}</td>
-                <td className="py-2 pr-3 text-xs">
+                <td className="py-2 pe-3 font-mono text-xs">{s.userEmail || s.userId}</td>
+                <td className="py-2 pe-3 text-xs">
                   <Link
                     href={`/platform-admin/tenant-detail?id=${encodeURIComponent(s.tenantId)}`}
                     className="underline-offset-2 hover:text-primary hover:underline"
@@ -77,24 +77,24 @@ function SessionsTable({
                     {s.tenantName || s.tenantId.slice(0, 8)}
                   </Link>
                 </td>
-                <td className="py-2 pr-3 text-xs">{s.adminEmail || UNAVAILABLE}</td>
-                <td className="max-w-[280px] py-2 pr-3 text-xs">
+                <td className="py-2 pe-3 text-xs">{s.adminEmail || UNAVAILABLE}</td>
+                <td className="max-w-[280px] py-2 pe-3 text-xs">
                   <span className="line-clamp-2" title={s.reason}>
                     {s.reason}
                   </span>
                 </td>
-                <td className="py-2 pr-3 text-xs" title={formatExact(s.startedAt)}>
+                <td className="py-2 pe-3 text-xs" title={formatExact(s.startedAt)}>
                   {formatRelative(s.startedAt, now)}
                 </td>
-                <td className="py-2 pr-3 text-xs" title={formatExact(showEnd ? s.expiresAt : s.endedAt || s.expiresAt)}>
+                <td className="py-2 pe-3 text-xs" title={formatExact(showEnd ? s.expiresAt : s.endedAt || s.expiresAt)}>
                   {showEnd
                     ? formatTimeLeft(s.expiresAt, now)
                     : s.endedAt
                       ? formatRelative(s.endedAt, now)
                       : formatRelative(s.expiresAt, now)}
                 </td>
-                <td className="py-2 pr-3 font-mono text-xs">{formatCountOrUnavailable(s.requestCount)}</td>
-                <td className="py-2 text-right">
+                <td className="py-2 pe-3 font-mono text-xs">{formatCountOrUnavailable(s.requestCount)}</td>
+                <td className="py-2 text-end">
                   {showEnd && state === "active" ? (
                     <Button size="sm" variant="outline" disabled={ending != null} onClick={() => onEnd(s)}>
                       <StopCircle /> {ending === s.id ? "Ending..." : "End now"}

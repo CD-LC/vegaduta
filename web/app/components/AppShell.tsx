@@ -14,6 +14,7 @@ import AvatarUploadModal from "./AvatarUploadModal";
 import { useShellLoadingCover, RouteTransitionOverlay } from "./RouteTransition";
 import { UsageAlertBanner } from "./UsageQuota";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
+import DesktopScreenDock from "./desktop/DesktopScreenDock";
 import { useAppChrome } from "./AppChromeProvider";
 // Rail "Jump to..." box + global Cmd/Ctrl+K both open this - a hand-rolled
 // modal. Fed the SAME already-filtered `navSections` this file renders, not a
@@ -163,8 +164,15 @@ function AppShellBody({
   // hovering pointer and no active tour (every data-tour anchor lives in the
   // classic rows, which must stay mounted while a tour runs).
   const hubMode = collapsibleRail && isDesktop && isHoverCapable && !tourActive;
-  const { flyout, setFlyout, flyoutPanelRef, cancelFlyoutClose, scheduleFlyoutClose, openFlyout, openFlyoutAndFocusFirst } =
-    useHubFlyout(pathname, hubMode);
+  const {
+    flyout,
+    setFlyout,
+    flyoutPanelRef,
+    cancelFlyoutClose,
+    scheduleFlyoutClose,
+    openFlyout,
+    openFlyoutAndFocusFirst,
+  } = useHubFlyout(pathname, hubMode);
   const flyoutSection = flyout ? navSections.find((s) => s.labelKey === flyout.key) : undefined;
   const { railLabelCls, railRowCollapse } = railClasses(collapsibleRail, hubMode);
 
@@ -242,7 +250,7 @@ function AppShellBody({
         ref={navRef}
         aria-label={tNav("primaryNavAriaLabel")}
         style={{ backgroundColor: "var(--surface-card)" }}
-        className={`group/rail fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`group/rail fixed inset-y-0 start-0 z-50 flex w-56 flex-col border-e border-[var(--surface-border)] ease-out lg:top-0 lg:h-screen lg:translate-x-0 ${
           collapsibleRail
             ? hubMode
               ? // Hub mode: the rail is a permanent 64px icon lane - it no
@@ -250,7 +258,7 @@ function AppShellBody({
                 "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden"
               : "transition-[width,transform] duration-200 lg:fixed lg:w-16 lg:overflow-x-hidden lg:hover:w-56 lg:hover:shadow-2xl"
             : "transition-transform duration-300 lg:sticky lg:w-56"
-        } ${mobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}
+        } ${mobileNavOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}
         // Below lg, a closed drawer is only translated off-screen - its links
         // and buttons stayed fully focusable while invisible (a11y audit
         // follow-up). `inert` drops the whole subtree out of both the tab
@@ -412,6 +420,9 @@ function AppShellBody({
       </div>
 
       <PanelAccentAssigner />
+      {/* Persistent live-screen dock: renders nothing until the desktop feature answers,
+          and polls the screen only while the person keeps it open. */}
+      <DesktopScreenDock />
       {/* Never mounted-open for a white-labeled tenant - the rail brand has no
           way to open it (isWhiteLabel branch has no onClick), but skip
           rendering the modal entirely too so there's no path back to our own

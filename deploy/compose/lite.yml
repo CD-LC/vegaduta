@@ -15,12 +15,18 @@
 # Optional (scripts/vegaduta up --lite ...):
 #   --profile rag        adds the Python sidecar (document ingestion,
 #                        embeddings, rerank, transcription)
-#   --profile tools      mcp-stdio-runner: the container STDIO MCP servers
-#                        (npx/uvx connectors) run in, away from core's secrets
+#   --profile docling    adds the Docling document parser (services/docling):
+#                        layout-aware extraction ahead of the sidecar's /extract
 #   --profile workspace  workspace-runner: the Assistant's build terminal and
 #                        the projects folder it works in (VEGADUTA_PROJECTS_DIR)
+#
+# On by default for a FRESH lite install (opt out with --no-search / --no-tools /
+# --no-browser, or VEGADUTA_SEARCH=0 / VEGADUTA_TOOLS=0 / VEGADUTA_BROWSER=0 in .env):
+#   --profile tools      mcp-stdio-runner: the container STDIO MCP servers
+#                        (npx/uvx connectors) run in, away from core's secrets
 #   --search             SearXNG web search (docker-compose.search*.yml)
-#   --browser            the Assistant's own browser (deploy/compose/browser.yml)
+#   --browser            the Assistant's own browser (deploy/compose/browser.yml):
+#                        browser_* tools (navigate, screenshot, click, type)
 #
 # Upgrading to the full stack keeps the Postgres volume only if you reuse
 # the same COMPOSE_PROJECT_NAME; Keycloak users (dev-file) and local files do
@@ -103,7 +109,7 @@ services:
           memory: 64m
 
   valkey:
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     <<: [*restart, *logging, *nnp]
     command:
       - sh
@@ -147,6 +153,7 @@ services:
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
       PUBLIC_ADMIN_URL: ${PUBLIC_ADMIN_URL:-http://localhost:3000}
       KC_VERIFY_EMAIL: ${KC_VERIFY_EMAIL:-false}
+      KC_REGISTRATION_ALLOWED: ${KC_REGISTRATION_ALLOWED:-false}
       # Password grant on the confidential core client: off (first import only).
       # The CI overlay turns it on for the Playwright/smoke logins.
       KC_CORE_DIRECT_GRANTS: ${KC_CORE_DIRECT_GRANTS:-false}
@@ -237,6 +244,9 @@ services:
       sidecar:
         condition: service_healthy
         required: false
+      docling:
+        condition: service_healthy
+        required: false
       mcp-stdio-runner:
         condition: service_healthy
         required: false
@@ -290,6 +300,12 @@ services:
       # cloud key or a registered local Ollama for embeddings.
       APP_SIDECAR_ENABLED: ${APP_SIDECAR_ENABLED:-false}
       APP_EMBEDDINGS_PROVIDER: ${APP_EMBEDDINGS_PROVIDER:-auto}
+      # The docling container only exists under --profile docling; the CLI
+      # exports DOCLING_BASE_URL=http://docling:8002 with it. Empty here keeps
+      # core's DoclingConversionService inert (same posture as APP_SIDECAR_ENABLED
+      # above: the feature reports off instead of failing calls at a missing host).
+      DOCLING_BASE_URL: ${DOCLING_BASE_URL:-}
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:-}
       # STDIO MCP servers run in the mcp-stdio-runner container (--profile tools;
       # the CLI exports MCP_STDIO_SIDECAR_ENABLED=true). With ",mcp" in
       # LITE_SPRING_PROFILES + CORE_IMAGE_VARIANT=-full they spawn inside core
@@ -298,7 +314,18 @@ services:
       MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
       MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
       MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+      # Static MCP exposure policy (the "mcp" profile's shared servers). Agents only get
+      # stateless names on this allowlist; shared-stateful opens filesystem/memory/browsers
+      # to every tenant - single-tenant installs only (this tier IS single-tenant).
+      MCP_STATIC_STATELESS_SERVERS: ${MCP_STATIC_STATELESS_SERVERS:-sequential-thinking}
+      MCP_STATIC_SHARED_STATEFUL_ENABLED: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:-false}
       APP_MCP_STDIO_SANDBOX: ${APP_MCP_STDIO_SANDBOX:-none}
+      # Custom code tools (agent-authored Java/Python/JavaScript programs) compile and run in
+      # tool-sandbox, which rides the `tools` profile on this tier. The sandbox container holds no
+      # platform secret and sits on sandbox-net, an internal network with no route out.
+      TOOL_SANDBOX_ENABLED: ${TOOL_SANDBOX_ENABLED:-false}
+      TOOL_SANDBOX_BASE_URL: http://tool-sandbox:8095
+      TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:-}
       # Starter connectors (fetch, time, sequential-thinking) registered for every
       # workspace at start when the runner is on. A deleted or edited one is never
       # put back.
@@ -362,6 +389,7 @@ services:
     networks:
       - default
       - mcp-stdio-net
+      - sandbox-net
     volumes:
       - core-storage:/data/storage
       - core-mcp-data:/app/mcp-data
@@ -396,6 +424,9 @@ services:
     # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback.
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      # Server-side fetch base for the /.well-known/agent-card.json proxy (web/app/.well-known):
+      # NEXT_PUBLIC_API_BASE_URL is the browser-facing URL, unreachable from inside this container.
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
       NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
@@ -468,6 +499,29 @@ services:
         limits:
           memory: ${SIDECAR_MEM_LIMIT:-2g}
 
+  # -------------------------------------------------------- profile: docling
+  # Docling document parser (services/docling): layout-aware conversion to
+  # markdown for PDF/Office/image formats, ahead of the sidecar's /extract.
+  # No port is published - core reaches it over the default network only, when
+  # the CLI exports DOCLING_BASE_URL with the profile.
+  docling:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/docling:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["docling"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:?run scripts/vegaduta secrets}
+      DOCLING_AUTH_REQUIRED: "true"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCLING_MEM_LIMIT:-3g}
+
   # ---------------------------------------------------------- profile: tools
   # STDIO MCP servers (workspace-registered `npx <pkg>` / `uvx <pkg>` and the
   # starter connectors) run HERE, in their own container, away from core's
@@ -499,6 +553,44 @@ services:
           memory: ${MCP_STDIO_RUNNER_MEM_LIMIT:-768m}
           pids: 256
     networks: [mcp-stdio-net]
+
+  # Runs agent-authored custom code tools (Java, Python, JavaScript), verified and compiled inside
+  # this container. It holds no platform credential - the whole environment is the internal token
+  # and the numeric budgets - and sits on sandbox-net, an internal network shared with core alone,
+  # so there is no route to postgres, valkey or the internet from tenant code.
+  tool-sandbox:
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/tool-sandbox:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["tools"]
+    <<: [*restart, *logging]
+    environment:
+      TOOL_SANDBOX_INTERNAL_TOKEN: ${TOOL_SANDBOX_INTERNAL_TOKEN:?run scripts/vegaduta secrets}
+      TOOL_SANDBOX_MAX_CONCURRENT: ${TOOL_SANDBOX_MAX_CONCURRENT:-4}
+      TOOL_SANDBOX_MAX_TIMEOUT_MS: ${TOOL_SANDBOX_MAX_TIMEOUT_MS:-15000}
+      TOOL_SANDBOX_MAX_MEMORY_MB: ${TOOL_SANDBOX_MAX_MEMORY_MB:-512}
+      TOOL_SANDBOX_REQUIRE_PRIVILEGE_DROP: "true"
+      TOOL_SANDBOX_SECCOMP: ${TOOL_SANDBOX_SECCOMP:-false}
+    # runc shares the host kernel with tenant code. Install gVisor and set
+    # TOOL_SANDBOX_RUNTIME=runsc for a user-space kernel (doctor warns on runc).
+    runtime: ${TOOL_SANDBOX_RUNTIME:-runc}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID, KILL]
+    tmpfs:
+      - /var/sandbox/work:mode=711,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+      - /var/sandbox/cache:mode=755,uid=0,gid=0,noexec,nosuid,nodev,size=256m
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: ${TOOL_SANDBOX_MEM_LIMIT:-1g}
+          pids: 512
+    networks: [sandbox-net]
 
   # ------------------------------------------------------- profile: workspace
   # The Assistant's build terminal (services/workspace-runner): runs the
@@ -535,6 +627,79 @@ services:
           # hundred, so this is far above a real build and only stops a runaway command.
           pids: ${WORKSPACE_RUNNER_PIDS_LIMIT:-2048}
 
+  # ----------------------------------------------------------- profile: voice
+  # Self-hosted voice calling for the small multi-user tier: the same livekit +
+  # voice-agent pair docker-compose.yml's `voice` profile runs, sized for a
+  # laptop VM. The console's call button fetches its token from core (the
+  # LIVEKIT_* wiring above is already in place); without these services that
+  # token leads nowhere. `--profile voice` implies `rag` - the voice-agent
+  # transcribes through the sidecar's Whisper endpoint, and the launcher's
+  # resolve_profiles adds it.
+  livekit:
+    image: livekit/livekit-server:v1.13.10
+    profiles: ["voice"]
+    <<: [*restart, *logging, *nnp]
+    command: --config /etc/livekit.yaml
+
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}"
+      LIVEKIT_RTC_PORT_RANGE_START: ${LIVEKIT_RTC_PORT_RANGE_START:-50000}
+      LIVEKIT_RTC_PORT_RANGE_END: ${LIVEKIT_RTC_PORT_RANGE_END:-50100}
+      # Advertised ICE candidate: loopback by default (single-machine caller);
+      # set LIVEKIT_NODE_IP to the LAN IP when lite callers sit on other hosts.
+      NODE_IP: ${LIVEKIT_NODE_IP:-127.0.0.1}
+    volumes:
+      - ../livekit/livekit.local.yaml:/etc/livekit.yaml:ro
+    ports:
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7880:7880"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:7881:7881"
+      - "${LIVEKIT_BIND_ADDR:-127.0.0.1}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}:${LIVEKIT_RTC_PORT_RANGE_START:-50000}-${LIVEKIT_RTC_PORT_RANGE_END:-50100}/udp"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${LIVEKIT_MEM_LIMIT:-512m}
+
+  voice-agent:
+    # LiveKit Agents worker: STT -> core chat -> TTS. Outbound-only.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/voice-agent:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["voice"]
+    <<: [*restart, *logging, *hardened]
+    depends_on:
+      livekit:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+      sidecar:
+        condition: service_started
+    environment:
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?run scripts/vegaduta secrets}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?run scripts/vegaduta secrets}
+      LIVEKIT_URL: ws://livekit:7880
+      CORE_API_BASE_URL: http://core:8080
+      SIDECAR_BASE_URL: http://sidecar:8001
+      SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      VOICE_AGENT_TTS_PROVIDER: ${VOICE_AGENT_TTS_PROVIDER:-auto}
+      PERCEPTION_MAX_ROOMS: ${PERCEPTION_MAX_ROOMS:-4}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; socket.create_connection(('127.0.0.1', 8081), 3)\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${VOICE_AGENT_MEM_LIMIT:-1g}
+
 volumes:
   postgres-data:
   valkey-data:
@@ -550,3 +715,5 @@ volumes:
 # route to postgres or valkey.
 networks:
   mcp-stdio-net: {}
+  sandbox-net:
+    internal: true   # core <-> tool-sandbox only; tenant code has no egress

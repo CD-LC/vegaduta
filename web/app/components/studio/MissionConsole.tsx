@@ -197,7 +197,7 @@ export default function MissionConsole({
         </Badge>
         {agent.toolsOff ? (
           <Badge variant="outline" className="text-[11px]">
-            <MessageSquareOff aria-hidden="true" className="mr-1 h-3 w-3 shrink-0" /> chatbot mode
+            <MessageSquareOff aria-hidden="true" className="me-1 h-3 w-3 shrink-0" /> chatbot mode
           </Badge>
         ) : (
           agent.tools.map((t) => (
@@ -223,16 +223,16 @@ export default function MissionConsole({
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {!busy ? (
             <Button className={TONES.emerald.cta} onClick={start} disabled={!mission.trim() || readOnly || outOfBudget}>
-              <Play aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Run mission
+              <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Run mission
             </Button>
           ) : (
             <Button variant="outline" onClick={stop}>
-              <Square aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Stop
+              <Square aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Stop
             </Button>
           )}
           {current && !current.running && !agent.toolsOff && !comparing && !readOnly && !outOfBudget && (
             <Button variant="outline" onClick={runWithoutHands}>
-              <MessageSquareOff aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Same mission, no hands
+              <MessageSquareOff aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Same mission, no hands
             </Button>
           )}
           {comparing && (
@@ -243,7 +243,7 @@ export default function MissionConsole({
           )}
           {busy && timeoutSeconds ? (
             <span
-              className="ml-auto flex items-center gap-2 text-xs text-muted-foreground"
+              className="ms-auto flex items-center gap-2 text-xs text-muted-foreground"
               role="timer"
               aria-label="Time used of the run cap"
             >
@@ -256,7 +256,7 @@ export default function MissionConsole({
               {elapsed}s / {timeoutSeconds}s cap
             </span>
           ) : (
-            <span className="ml-auto text-xs text-muted-foreground">Ctrl/⌘ + Enter to run</span>
+            <span className="ms-auto text-xs text-muted-foreground">Ctrl/⌘ + Enter to run</span>
           )}
         </div>
         {outOfBudget && (
@@ -275,7 +275,7 @@ export default function MissionConsole({
                 key={s}
                 type="button"
                 onClick={() => setMission(s)}
-                className="rounded-full border border-border/60 bg-background px-3 py-1.5 text-left text-xs transition-colors hover:border-primary/60"
+                className="rounded-full border border-border/60 bg-background px-3 py-1.5 text-start text-xs transition-colors hover:border-primary/60"
               >
                 {s}
               </button>
@@ -318,7 +318,7 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
           </span>
         )}
         {!outcome.running && (
-          <span className="ml-auto text-xs text-muted-foreground">
+          <span className="ms-auto text-xs text-muted-foreground">
             {outcome.toolCalls} tool call{outcome.toolCalls === 1 ? "" : "s"}
             {outcome.ms != null ? ` · ${(outcome.ms / 1000).toFixed(1)} s` : ""}
           </span>
@@ -336,7 +336,7 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
         <div className="md:col-span-3">
           <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Answer</div>
           {outcome.answer ? (
-            <div className="whitespace-pre-wrap rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
+            <div className="whitespace-pre-wrap break-all rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
               {outcome.answer}
             </div>
           ) : outcome.running ? (

@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 import type { Learned } from "./useLearned";
 
 /** Kinds in the order the rail lists them; any other kind a newer server sends is shown after these. */
-const KIND_ORDER = ["LESSON", "PREFERENCE", "ROUTINE", "CONSOLIDATION"];
+const KIND_ORDER = ["LESSON", "PREFERENCE", "ROUTINE", "CONSOLIDATION", "DESKTOP_RECIPE"];
 
 export function groupProposals(proposals: LearningProposal[]): [string, LearningProposal[]][] {
   const kinds = [...new Set(proposals.map((p) => p.kind))].sort((a, b) => {
@@ -40,7 +40,9 @@ function ProposalRow({ proposal, learned }: { proposal: LearningProposal; learne
   const edited = editing && draft.trim() !== proposal.body ? draft.trim() : undefined;
   return (
     <li className="rounded-lg border border-border p-2.5 text-xs" data-testid={`learned-proposal-${proposal.id}`}>
-      {proposal.title && proposal.title !== proposal.body && <p className="font-medium text-foreground">{proposal.title}</p>}
+      {proposal.title && proposal.title !== proposal.body && (
+        <p className="break-words font-medium text-foreground">{proposal.title}</p>
+      )}
       {editing ? (
         <textarea
           value={draft}
@@ -52,7 +54,9 @@ function ProposalRow({ proposal, learned }: { proposal: LearningProposal; learne
       ) : (
         <p className="mt-0.5 break-words text-foreground">{proposal.body}</p>
       )}
-      <p className="mt-1 text-muted-foreground">{proposal.applicable ? t("learnedProposalHint") : t("learnedProposalNotYet")}</p>
+      <p className="mt-1 text-muted-foreground">
+        {proposal.applicable ? t("learnedProposalHint") : t("learnedProposalNotYet")}
+      </p>
       {error && (
         <p role="alert" className="mt-1 text-destructive">
           {error}
@@ -69,12 +73,25 @@ function ProposalRow({ proposal, learned }: { proposal: LearningProposal; learne
           <Check size={11} aria-hidden="true" />
           {t("learnedApprove")}
         </Button>
-        <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-xs" disabled={busy} onClick={() => void run(() => learned.rejectProposal(proposal.id))}>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-7 gap-1 px-2 text-xs"
+          disabled={busy}
+          onClick={() => void run(() => learned.rejectProposal(proposal.id))}
+        >
           <X size={11} aria-hidden="true" />
           {t("learnedReject")}
         </Button>
         {!editing && (
-          <Button type="button" size="sm" variant="outline" className="h-7 gap-1 px-2 text-xs" onClick={() => setEditing(true)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1 px-2 text-xs"
+            onClick={() => setEditing(true)}
+          >
             <Pencil size={11} aria-hidden="true" />
             {t("learnedEdit")}
           </Button>
@@ -92,7 +109,9 @@ export default function LearnedProposals({ learned }: { learned: Learned }) {
     <>
       {groupProposals(learned.proposals).map(([kind, rows]) => (
         <div key={kind} data-testid={`learned-proposals-${kind}`}>
-          <h4 className="px-1 pt-3 text-[11px] font-medium text-muted-foreground">{t(`learnedKind_${KIND_ORDER.includes(kind) ? kind : "OTHER"}`, { n: rows.length })}</h4>
+          <h4 className="px-1 pt-3 text-[11px] font-medium text-muted-foreground">
+            {t(`learnedKind_${KIND_ORDER.includes(kind) ? kind : "OTHER"}`, { n: rows.length })}
+          </h4>
           <ul className="mt-1 space-y-2">
             {rows.map((p) => (
               <ProposalRow key={p.id} proposal={p} learned={learned} />

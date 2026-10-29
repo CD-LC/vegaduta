@@ -37,7 +37,10 @@ public final class AgentChatStreamResponder {
     private final AgentChatService agentChatService;
     private final Duration stepHeartbeatInterval;
 
-    /** Whether a turn the client did not tag still gets a turn reference (rl.selection.server-turn-ref); null = no. */
+    /**
+     * Whether a turn the client did not tag still gets a turn reference
+     * (rl.selection.server-turn-ref); null = no.
+     */
     private volatile RlTurnRefPolicy rlTurnRefPolicy;
 
     public AgentChatStreamResponder(
@@ -71,6 +74,16 @@ public final class AgentChatStreamResponder {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST,
                     "sessionId may not start with 'eval:' or 'sim:'.");
+        }
+        // The sessionId is the caller's own label and lands in log lines all the way down the
+        // turn path - a legit client never needs control characters in it, and rejecting them
+        // here keeps forged newlines/ANSI out of every downstream log statement.
+        if (StringUtils.hasText(request.sessionId())
+                && !request.sessionId()
+                        .equals(request.sessionId().replaceAll("[\\p{Cntrl}]", ""))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "sessionId may not contain control characters.");
         }
         String sessionId =
                 StringUtils.hasText(request.sessionId())
@@ -139,13 +152,16 @@ public final class AgentChatStreamResponder {
                         false,
                         null,
                         null,
-                        // The run-scoped tool selection (the playground's "this run only" switches); null = none.
+                        // The run-scoped tool selection (the playground's "this run only"
+                        // switches); null = none.
                         request.toolNames());
         // ADR-0022 stage 4: this HTTP entry builds the turn context from the tenant
         // TenantContextFilter put on this request thread.
         TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
-        // Routines-from-habits loop (app.learning.routines.enabled, off by default). Observed HERE, at
-        // the console's own chat entry, and nowhere deeper: the turn dispatcher also serves job turns,
+        // Routines-from-habits loop (app.learning.routines.enabled, off by default). Observed HERE,
+        // at
+        // the console's own chat entry, and nowhere deeper: the turn dispatcher also serves job
+        // turns,
         // scheduled runs, delegation, A2A, OpenAI-compatible, AG-UI and channel traffic, none of
         // which is "a request the person typed". Returns at once while the loop is off.
         com.agenticai.core.agents.skills.RoutineObservationGateway.observe(
@@ -173,8 +189,7 @@ public final class AgentChatStreamResponder {
                                 .subscribeOn(TenantAwareSchedulers.boundedElastic())
                         : agentChatService.chat(context, turn);
         Flux<String> tokens =
-                reply
-                        .doOnNext(
+                reply.doOnNext(
                                 chunk -> {
                                     wroteToWire.set(true);
                                     emitted.append(chunk);
@@ -204,7 +219,7 @@ public final class AgentChatStreamResponder {
                                     }
                                     log.warn(
                                             "Chat stream for agent {} session {} failed"
-                                                + " mid-response after {} chars already streamed",
+                                                    + " mid-response after {} chars already streamed",
                                             agentId,
                                             sessionId,
                                             emitted.length(),
@@ -212,7 +227,12 @@ public final class AgentChatStreamResponder {
                                     // On a reactor thread: read the wording in the turn's tenant.
                                     String generic =
                                             context.scope()
-                                                    .get(() -> agentChatService.genericFailureMessage(agentId));
+                                                    .get(
+                                                            () ->
+                                                                    genericFailureMessage(
+                                                                            agentChatService
+                                                                                    .promptDirectiveSettings,
+                                                                            agentId));
                                     return Flux.just(
                                             AgentController.STREAM_ERROR_MARKER
                                                     + midStreamFailureMessage(e, generic));
@@ -274,9 +294,9 @@ public final class AgentChatStreamResponder {
     }
 
     /**
-     * Names the turn's journal record in the response ({@link TurnJournalGateway#TURN_ID_HEADER}) so the client can
-     * open the turn it just ran, or find it by the session id it already has. Only while the journal is on: an id
-     * with nothing behind it would send the client to a 404.
+     * Names the turn's journal record in the response ({@link TurnJournalGateway#TURN_ID_HEADER})
+     * so the client can open the turn it just ran, or find it by the session id it already has.
+     * Only while the journal is on: an id with nothing behind it would send the client to a 404.
      */
     private static java.util.function.Consumer<HttpHeaders> journalTurnHeader(TurnContext context) {
         return headers -> {
@@ -298,6 +318,22 @@ public final class AgentChatStreamResponder {
      */
     public static String midStreamFailureMessage(Throwable error) {
         return midStreamFailureMessage(error, null);
+    }
+
+    /**
+     * The sentence a failed reply carries when the provider gave no message of its own: the
+     * agent's, its tenant's or the platform's wording of {@code message.generic_failure}, else the
+     * shipped one. Read in the calling thread's tenant. Never null, never throws.
+     */
+    static String genericFailureMessage(PromptDirectiveSettings settings, UUID agentId) {
+        try {
+            String text =
+                    settings.forTurn(java.time.LocalDate.now(java.time.ZoneOffset.UTC), agentId)
+                            .textOrShipped(GENERIC_FAILURE_KEY);
+            return text != null ? text : defaultGenericFailureMessage();
+        } catch (RuntimeException e) {
+            return defaultGenericFailureMessage();
+        }
     }
 
     /** The shipped wording of the generic sentence ({@code message.generic_failure}). */

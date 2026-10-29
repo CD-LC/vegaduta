@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
  * screen is a second, independent, deliberately stricter-at-the-edges layer inside core, for two
  * reasons: the draft comes from an LLM whose prompt includes tenant free text (so it is
  * attacker-influenced input, not a trusted author), and a screen that fails closed means a
- * misconfigured or older sandbox service is never the only thing between that text and "valid".
- * It can only ever turn a draft INVALID - it never marks anything valid, and a pass still goes to
- * the sandbox for the real verdict.
+ * misconfigured or older sandbox service is never the only thing between that text and "valid". It
+ * can only ever turn a draft INVALID - it never marks anything valid, and a pass still goes to the
+ * sandbox for the real verdict.
  *
  * <p>Allowlist first: every import and every fully-qualified {@code java.*} reference must sit in
  * the permitted packages (Java) / permitted modules (Python); the few simple names that need no
@@ -87,8 +87,7 @@ final class GeneratedCodeScreen {
     private static final Pattern JAVA_IMPORT =
             Pattern.compile("(?m)^\\s*import\\s+(static\\s+)?([\\w.$]+)(\\.\\*)?\\s*;");
     private static final Pattern JAVA_QUALIFIED =
-            Pattern.compile(
-                    "(?<![\\w.$])((?:java|javax|jakarta|jdk|sun)\\.[\\w.$]+)");
+            Pattern.compile("(?<![\\w.$])((?:java|javax|jakarta|jdk|sun)\\.[\\w.$]+)");
     private static final Pattern JAVA_PACKAGE = Pattern.compile("(?m)^\\s*package\\s+[\\w.]+\\s*;");
     private static final Pattern JAVA_NATIVE = Pattern.compile("\\bnative\\b");
     private static final Pattern JAVA_DECLARED_TYPE =
@@ -102,11 +101,39 @@ final class GeneratedCodeScreen {
 
     private static final Set<String> PYTHON_ALLOWED_MODULES =
             Set.of(
-                    "base64", "binascii", "bisect", "calendar", "cmath", "collections", "copy",
-                    "dataclasses", "datetime", "decimal", "difflib", "enum", "fractions",
-                    "functools", "hashlib", "heapq", "hmac", "html", "itertools", "json", "math",
-                    "numbers", "operator", "random", "re", "statistics", "string", "textwrap",
-                    "time", "typing", "unicodedata", "uuid", "zoneinfo");
+                    "base64",
+                    "binascii",
+                    "bisect",
+                    "calendar",
+                    "cmath",
+                    "collections",
+                    "copy",
+                    "dataclasses",
+                    "datetime",
+                    "decimal",
+                    "difflib",
+                    "enum",
+                    "fractions",
+                    "functools",
+                    "hashlib",
+                    "heapq",
+                    "hmac",
+                    "html",
+                    "itertools",
+                    "json",
+                    "math",
+                    "numbers",
+                    "operator",
+                    "random",
+                    "re",
+                    "statistics",
+                    "string",
+                    "textwrap",
+                    "time",
+                    "typing",
+                    "unicodedata",
+                    "uuid",
+                    "zoneinfo");
 
     private static final Pattern PYTHON_IMPORT =
             Pattern.compile("(?m)^[ \\t]*import[ \\t]+([^\\n#;]+)");
@@ -128,8 +155,10 @@ final class GeneratedCodeScreen {
         List<SandboxValidationError> out = new ArrayList<>();
         if (language == CustomCodeToolLanguage.JAVA) {
             screenJava(source, out);
-        } else {
+        } else if (language == CustomCodeToolLanguage.PYTHON) {
             screenPython(source, out);
+        } else {
+            screenJs(source, out);
         }
         return out;
     }
@@ -146,25 +175,41 @@ final class GeneratedCodeScreen {
 
         Matcher pkg = JAVA_PACKAGE.matcher(code);
         if (pkg.find()) {
-            out.add(error(code, pkg.start(), "A custom tool must be in the default package - remove the `package` statement."));
+            out.add(
+                    error(
+                            code,
+                            pkg.start(),
+                            "A custom tool must be in the default package - remove the `package` statement."));
         }
         Matcher nat = JAVA_NATIVE.matcher(code);
         if (nat.find()) {
-            out.add(error(code, nat.start(), "`native` methods are not permitted in a custom tool."));
+            out.add(
+                    error(
+                            code,
+                            nat.start(),
+                            "`native` methods are not permitted in a custom tool."));
         }
 
         Matcher imp = JAVA_IMPORT.matcher(code);
         while (imp.find()) {
             String target = imp.group(2);
             if (!javaNameAllowed(target)) {
-                out.add(error(code, imp.start(), "Import of `" + target + "` is not permitted in a custom tool."));
+                out.add(
+                        error(
+                                code,
+                                imp.start(),
+                                "Import of `" + target + "` is not permitted in a custom tool."));
             }
         }
         Matcher q = JAVA_QUALIFIED.matcher(code);
         while (q.find()) {
             String name = q.group(1);
             if (!javaNameAllowed(name)) {
-                out.add(error(code, q.start(1), "`" + name + "` is not permitted in a custom tool."));
+                out.add(
+                        error(
+                                code,
+                                q.start(1),
+                                "`" + name + "` is not permitted in a custom tool."));
             }
         }
         // Names that need no import (java.lang) - checked as whole identifiers unless the
@@ -173,14 +218,26 @@ final class GeneratedCodeScreen {
             if (declared.contains(denied)) {
                 continue;
             }
-            Matcher m = Pattern.compile("(?<![\\w$.])" + Pattern.quote(denied) + "(?![\\w$])").matcher(code);
+            Matcher m =
+                    Pattern.compile("(?<![\\w$.])" + Pattern.quote(denied) + "(?![\\w$])")
+                            .matcher(code);
             if (m.find()) {
-                out.add(error(code, m.start(), "`" + denied + "` is not available in a custom tool."));
+                out.add(
+                        error(
+                                code,
+                                m.start(),
+                                "`" + denied + "` is not available in a custom tool."));
             }
         }
         Matcher mem = JAVA_MEMBER_DENIED.matcher(code);
         if (mem.find()) {
-            out.add(error(code, mem.start(), "`" + mem.group().replaceAll("\\s+", "") + "` is not permitted in a custom tool (system properties / implicit threads)."));
+            out.add(
+                    error(
+                            code,
+                            mem.start(),
+                            "`"
+                                    + mem.group().replaceAll("\\s+", "")
+                                    + "` is not permitted in a custom tool (system properties / implicit threads)."));
         }
     }
 
@@ -287,11 +344,19 @@ final class GeneratedCodeScreen {
         }
         Matcher name = PYTHON_DENIED_NAME.matcher(code);
         while (name.find()) {
-            out.add(error(code, name.start(), "`" + name.group() + "` is not available in a custom tool."));
+            out.add(
+                    error(
+                            code,
+                            name.start(),
+                            "`" + name.group() + "` is not available in a custom tool."));
         }
         Matcher priv = PYTHON_PRIVATE_ATTR.matcher(code);
         if (priv.find()) {
-            out.add(error(code, priv.start(), "Attributes starting with `_` (including dunder attributes) are not permitted in a custom tool."));
+            out.add(
+                    error(
+                            code,
+                            priv.start(),
+                            "Attributes starting with `_` (including dunder attributes) are not permitted in a custom tool."));
         }
     }
 
@@ -307,9 +372,48 @@ final class GeneratedCodeScreen {
             privatePart |= part.startsWith("_");
         }
         if (module.startsWith(".") || privatePart || !PYTHON_ALLOWED_MODULES.contains(top)) {
-            out.add(error(code, at, "Import of `" + module + "` is not permitted in a custom tool."));
+            out.add(
+                    error(
+                            code,
+                            at,
+                            "Import of `" + module + "` is not permitted in a custom tool."));
         }
     }
+
+    /**
+     * The JS/TS half, mirroring the sandbox's {@code jsvalidate.py} identifier policy. Deliberately
+     * approximate (the Java comment/string stripper covers `//`, block comments and quotes, which
+     * is enough for a pre-screen): it can only reject a draft, and the sandbox still makes the real
+     * verdict.
+     */
+    private static void screenJs(String source, List<SandboxValidationError> out) {
+        String code = stripJava(source);
+        Matcher bad = JS_DENIED.matcher(code);
+        while (bad.find()) {
+            out.add(
+                    error(
+                            code,
+                            bad.start(),
+                            "`"
+                                    + bad.group(1)
+                                    + "` is not available in a custom tool - sandboxed code has no module system, process environment or network."));
+        }
+        Matcher ctor = JS_CONSTRUCTOR_ACCESS.matcher(source);
+        if (ctor.find()) {
+            out.add(
+                    error(
+                            code,
+                            ctor.start(),
+                            "Property access to `constructor` is not permitted in a custom tool (it reaches the Function constructor)."));
+        }
+    }
+
+    private static final Pattern JS_DENIED =
+            Pattern.compile(
+                    "\\b(require|import|process|globalThis|eval|Function|fetch|WebSocket|XMLHttpRequest|navigator|WebAssembly|Worker|Deno|Bun|__proto__|__dirname|__filename)\\b");
+
+    private static final Pattern JS_CONSTRUCTOR_ACCESS =
+            Pattern.compile("(?:\\.|\\[\\s*['\"`]?)constructor\\b['\"`]?\\s*\\]?");
 
     /** Blanks comments and string literals (single, triple-quoted); keeps newlines. */
     static String stripPython(String s) {
@@ -335,7 +439,9 @@ final class GeneratedCodeScreen {
                         i += 2;
                         continue;
                     }
-                    if (isTriple ? s.startsWith(triple, i) : s.charAt(i) == c || s.charAt(i) == '\n') {
+                    if (isTriple
+                            ? s.startsWith(triple, i)
+                            : s.charAt(i) == c || s.charAt(i) == '\n') {
                         break;
                     }
                     b.append(s.charAt(i) == '\n' ? '\n' : ' ');

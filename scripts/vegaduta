@@ -4,8 +4,9 @@
 #
 #   scripts/vegaduta up [--lite|--full] [--profile NAME]... [--build] [--domain D]
 #                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--browser] [--dry-run]
-#                       (lite profiles: rag, tools, workspace; full: temporal events jobs observability
-#                       tracing voice rl code-intel builder sandbox tools browser)
+#                       (lite/personal profiles: rag, tools, workspace, voice (implies rag),
+#                       plus docling on lite; full: temporal events jobs observability tracing
+#                       voice rl code-intel builder sandbox tools browser docling)
 #   scripts/vegaduta personal [--native-core] [--build] [--local-ai[=container|host]] [--local-model TAG]
 #                       [--cloud] [--no-search] [--no-tools] [--no-valkey|--valkey] [--minimal] [--browser] [--dry-run]
 #                       (one-person laptop mode: postgres + valkey + core + web, no Keycloak; docs: deploy/compose/personal.yml)
@@ -19,6 +20,7 @@
 #   scripts/vegaduta restore DIR             (database(s) from a backup; asks first)
 #   scripts/vegaduta upgrade [--version X.Y.Z] [--no-backup]
 #   scripts/vegaduta restart [SERVICE]       (personal: restart core; prints a fresh first-run setup link)
+#   scripts/vegaduta reset-password [EMAIL]  (forgot the password; prints a one-time reset link)
 #   scripts/vegaduta make-admin USERNAME_OR_EMAIL
 #   scripts/vegaduta models [list|pull TAG|rm TAG]   (local model catalog; Ollama)
 #   scripts/vegaduta seed-demo [--tenant NAME] [--remove] [--yes]   (fictional "Example" data for the pilot report)
@@ -54,6 +56,7 @@ KEYCLOAK_DB_PASSWORD:hex16
 STORAGE_ACCESS_KEY:hex16
 STORAGE_SECRET_KEY:hex32
 SIDECAR_SHARED_SECRET:hex32
+DOCLING_SHARED_SECRET:hex32
 CODE_INTEL_INTERNAL_TOKEN:hex32
 TOOL_SANDBOX_INTERNAL_TOKEN:hex32
 MCP_STDIO_SIDECAR_SHARED_SECRET:hex32
@@ -83,7 +86,7 @@ DD_SECRET_KEY:hex32
 DD_CREDENTIAL_AES_256_KEY:hex32
 DD_DATABASE_PASSWORD:hex16
 "
-ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser"
+ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser docling"
 
 # ------------------------------------------------------------------ helpers
 if [ -t 1 ]; then C_B=$'\033[1m'; C_G=$'\033[32m'; C_Y=$'\033[33m'; C_R=$'\033[31m'; C_C=$'\033[36m'; C_0=$'\033[0m'
@@ -129,12 +132,16 @@ shipped_version() {
 
 # resolve_version: every image tag comes from VEGADUTA_VERSION (no `latest`
 # default). With --build and no version, images are built and tagged `local`.
-# X.Y.Z of the newest published (non-pre) release, or nothing when GitHub is unreachable.
+# X.Y.Z of the newest published PLATFORM release, or nothing when GitHub is
+# unreachable. /releases/latest follows whichever release was published most
+# recently - a component release (sdk-v0.1.1, ...) beats the platform's tag -
+# so the newest tag matching v<digit>.<digit>.<digit> is picked from the list.
 latest_release_version() {
-  local eff tag
-  eff="$(curl -fsSLI --proto '=https' --tlsv1.2 --max-time 20 -o /dev/null -w '%{url_effective}' \
-    "https://github.com/${VEGADUTA_REPO:-CD-LC/vegaduta}/releases/latest" 2>/dev/null)" || return 0
-  tag="${eff##*/}"
+  local body tag
+  body="$(curl -fsSL --proto '=https' --tlsv1.2 --max-time 20 \
+    -H 'Accept: application/vnd.github+json' -H 'User-Agent: vegaduta' \
+    "https://api.github.com/repos/${VEGADUTA_REPO:-CD-LC/vegaduta}/releases?per_page=30" 2>/dev/null)" || return 0
+  tag="$(printf '%s\n' "$body" | grep -oE '"tag_name"[^:]*:[[:space:]]*"v[0-9][0-9.]*"' | head -n1 | sed 's/.*"\(v[0-9][0-9.]*\)"/\1/')"
   case "$tag" in v[0-9]*) printf '%s' "${tag#v}" ;; esac
 }
 
@@ -365,15 +372,29 @@ resolve_profiles() {
   case " $PROFILES " in *" temporal "*) add_profile events ;; esac
   case " $PROFILES " in *" builder "*) add_profile code-intel ;; esac
   for p in $PROFILES; do
-    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; single-box tiers: rag workspace tools browser)" ;; esac
+    case " $ALL_PROFILES rag workspace " in *" $p "*) ;; *) die "unknown profile '$p' (valid: $ALL_PROFILES; single-box tiers: rag workspace tools browser voice docling)" ;; esac
   done
   if [ "$TIER" = personal ] || [ "$TIER" = lite ]; then
-    # personal and lite have no Kafka/Temporal: only `rag`, `workspace`, `tools` and `browser`
-    # select anything. Say so instead of silently ignoring (COMPOSE_PROFILES in a shared .env
-    # may name full-stack profiles).
+    # personal and lite have no Kafka/Temporal: only `rag`, `workspace`, `tools`, `browser` and
+    # `voice` select anything. Say so instead of silently ignoring (COMPOSE_PROFILES in a shared
+    # .env may name full-stack profiles).
     for p in $PROFILES; do
-      case "$p" in rag|workspace|tools|browser) ;; *) warn "profile '$p' is not available in $TIER mode and is ignored" ;; esac
+      case "$p" in
+        rag|workspace|tools|browser|voice) ;;
+        docling)
+          # services/docling only exists in lite.yml - there is no personal-tier
+          # docling container, so strip it rather than pass a profile that
+          # selects nothing there.
+          if [ "$TIER" = personal ]; then
+            warn "profile 'docling' is not available in $TIER mode and is ignored"
+            PROFILES="$(printf ' %s ' "$PROFILES" | sed 's/ docling / /g; s/^ *//; s/ *$//')"
+          fi ;;
+        *) warn "profile '$p' is not available in $TIER mode and is ignored" ;;
+      esac
     done
+    # Voice calling (livekit + voice-agent) needs the sidecar for Whisper STT - picking `voice`
+    # implies `rag` on both single-box tiers, the same way `builder` implies `code-intel` above.
+    case " $PROFILES " in *" voice "*) add_profile rag ;; esac
     # `tools` (the MCP runner) is a choice like web search: it lives in TOOLS and the state file, not in PROFILES,
     # so a caller that passes its own --profile list (the Setup app) cannot drop it. An explicit
     # `--profile tools` turns it on.
@@ -389,9 +410,25 @@ resolve_profiles() {
       warn "--browser needs the container core and is ignored with --native-core (a host JVM drives its own Chromium)"
       BROWSER=0
     fi
+    # A fresh lite install gets the same out-of-box tool surface as a fresh personal one:
+    # web search (SearXNG), the MCP runner (built-in STDIO servers and tenant MCP
+    # servers) and the agent's browser (screenshots, downloads, page automation).
+    # A saved choice or an install that predates the defaults (no state values)
+    # keeps what it had; --minimal / --no-* / VEGADUTA_*=0 decline.
+    if [ "$TIER" = lite ] && [ ! -f "$STATE_FILE" ]; then
+      [ -n "$SEARCH" ] || SEARCH=1
+      [ -n "$TOOLS" ] || TOOLS=1
+      [ -n "$BROWSER" ] || BROWSER=1
+    fi
     # STDIO MCP servers run in the mcp-stdio-runner container; core relays to it. A host JVM (--native-core)
     # keeps its own `os` sandbox and launchers, and does not use the runner.
     if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export MCP_STDIO_SIDECAR_ENABLED=true; fi
+    # create_custom_tool runs tenant code in tool-sandbox; the container rides the `tools` compose
+    # profile (tools_args), so enable core's client with it. The PROFILES-based export below only
+    # reaches the full tier - on single-box tiers `tools` lives in TOOLS, not PROFILES, so without
+    # this line the sandbox container starts but core keeps TOOL_SANDBOX_ENABLED=false and
+    # create_custom_tool never resolves.
+    if [ "$TOOLS" = 1 ] && [ "$NATIVE_CORE" != 1 ]; then export TOOL_SANDBOX_ENABLED=true; fi
     case " $PROFILES " in
       *" workspace "*)
         # The Assistant's build terminal: the workspace-runner container plus the projects folder,
@@ -410,6 +447,11 @@ resolve_profiles() {
     # honestly; --profile rag flips it back on.
     if [ "$TIER" = lite ]; then
       case " $PROFILES " in *" rag "*) export APP_SIDECAR_ENABLED=true ;; esac
+      # services/docling (lite.yml profile `docling`): core reads app.knowledge.docling.base-url
+      # from DOCLING_BASE_URL, and compose cannot see which profiles are active - so the CLI
+      # points core at the container here, the same mechanism WEB_SEARCH_SEARXNG_BASE_URL uses
+      # in search_args. Unset otherwise = the Docling-first route stays inert.
+      case " $PROFILES " in *" docling "*) export DOCLING_BASE_URL="${DOCLING_BASE_URL:-http://docling:8002}" ;; esac
     fi
     return 0
   fi
@@ -422,8 +464,31 @@ resolve_profiles() {
   case " $PROFILES " in *" events "*) extra=",workflow" ;; esac
   case " $PROFILES " in *" temporal "*) extra=",workflow,temporal"; export WORKFLOW_EXECUTION_ENGINE=temporal ;; esac
   [ -n "$extra" ] && [ -z "$(get_env CORE_PROFILES_EXTRA)" ] && export CORE_PROFILES_EXTRA="$extra"
+  # A fresh full install gets the same out-of-box tool surface: web search plus the
+  # `tools` and `browser` profiles (the mcp-stdio-runner-browser - built-in STDIO MCP
+  # servers, tenant MCP servers and the Playwright browser server). A saved choice
+  # or an install that predates the defaults (no state file) is left alone;
+  # --minimal / --no-tools / --no-browser / VEGADUTA_*=0 decline.
+  if [ "$TIER" = full ] && [ ! -f "$STATE_FILE" ]; then
+    [ -n "$SEARCH" ] || SEARCH=1
+    [ "${TOOLS:-1}" = 1 ] && add_profile tools
+    [ "${BROWSER:-1}" = 1 ] && add_profile browser
+  fi
   case " $PROFILES " in *" code-intel "*) export CODE_INTEL_ENABLED=true ;; esac
+  # services/docling (profile `docling`): core reads app.knowledge.docling.base-url from
+  # DOCLING_BASE_URL, and compose cannot see which profiles are active - so the CLI points
+  # core at the container here, the same mechanism WEB_SEARCH_SEARXNG_BASE_URL uses in
+  # search_args. Unset otherwise = the Docling-first route stays inert.
+  case " $PROFILES " in *" docling "*) export DOCLING_BASE_URL="${DOCLING_BASE_URL:-http://docling:8002}" ;; esac
+  # Custom code tools (create_custom_tool) run in tool-sandbox. Full: its own `sandbox`
+  # profile. Single-box tiers: it rides `tools` - "agents can write and run a tool" is part
+  # of that surface, so --no-tools declines it too. Not for a host JVM (--native-core): the
+  # sandbox lives on the internal sandbox-net, unreachable from the host - the same carve-out
+  # tools_args makes for the MCP runner.
   case " $PROFILES " in *" sandbox "*) export TOOL_SANDBOX_ENABLED=true ;; esac
+  if [ "$TIER" != full ] && [ "$NATIVE_CORE" != 1 ]; then
+    case " $PROFILES " in *" tools "*) export TOOL_SANDBOX_ENABLED=true ;; esac
+  fi
   # mcp-stdio-runner (sandbox/tools/browser): STDIO MCP servers - tenant ones
   # and the `mcp` profile's built-ins - run there, not in the slim core image.
   case " $PROFILES " in
@@ -735,6 +800,8 @@ cmd_doctor() {
     local ports p busy=""
     ports="$(hp WEB_HOST_PORT 3000) $(hp CORE_HOST_PORT 8080) $(hp KEYCLOAK_HOST_PORT 8180) $(hp POSTGRES_HOST_PORT 5432) $(hp VALKEY_HOST_PORT 6379)"
     [ "$TIER" = full ] && ports="$ports $(hp SIDECAR_HOST_PORT 8001) 8333"
+    # The docling container only publishes a port in the full stack (lite's is internal-only).
+    case " $PROFILES " in *" docling "*) [ "$TIER" = full ] && ports="$ports $(hp DOCLING_HOST_PORT 8002)" ;; esac
     case " $PROFILES " in *" temporal "*) ports="$ports 7233 8088" ;; esac
     case " $PROFILES " in *" observability "*) ports="$ports 3003 9090" ;; esac
     [ -n "$domain" ] && [ "$TIER" = full ] && ports="$ports 80 443"
@@ -941,8 +1008,8 @@ ask_search() {
   [ -z "$SEARCH" ] || return 0
   local a
   printf 'Give agents free web search (a private SearXNG container, no API key)? [Y/n]: '; read -r a
-  # A "no" on a personal install is remembered as 0: its default is on, so empty would read as "never asked".
-  case "${a:-y}" in n|N|no) if [ "$TIER" = personal ]; then SEARCH=0; fi ;; *) SEARCH=1 ;; esac
+  # A "no" is remembered as 0 on every tier whose default is on: empty would read as "never asked".
+  case "${a:-y}" in n|N|no) SEARCH=0 ;; *) SEARCH=1 ;; esac
 }
 
 choose_model_source() {
@@ -992,8 +1059,8 @@ cmd_up() {
     # What `up` would do, without Docker: the choices, the state they leave and the compose command.
     # Used by tests/install; also a safe way to see what a flag combination does.
     save_state
-    printf 'plan: tier=%s profiles=%s local_ai=%s local_model=%s search=%s\n' \
-      "$TIER" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}"
+    printf 'plan: tier=%s profiles=%s local_ai=%s local_model=%s search=%s tools=%s browser=%s\n' \
+      "$TIER" "${PROFILES:-none}" "${LOCAL_AI:-none}" "${LOCAL_MODEL:-default}" "${SEARCH:-0}" "${TOOLS:-0}" "${BROWSER:-0}"
     printf 'plan: docker compose %s up -d\n' "${COMPOSE_ARGS[*]}"
     exit 0
   fi
@@ -1051,8 +1118,11 @@ cmd_logs() {
 
 # ------------------------------------------------------------- backup/restore
 # backup [DIR]: pg_dump (custom format) of the app database and, on the full
-# stack, the Keycloak database; a tar of the uploaded-files volume; and a copy
-# of .env (APP_ENCRYPTION_KEY - without it the database backup is useless).
+# stack, the Keycloak database; dumps of the profiled auxiliary databases
+# (temporal-postgresql, langfuse-postgres) when they run; a tar of the
+# uploaded-files volume; and a copy of .env (APP_ENCRYPTION_KEY - without it
+# the database backup is useless). The auxiliary dumps are what lets a stock
+# postgres volume migrate when its image changes major between releases.
 # Everything is written owner-only (umask 077). Prints the backup directory.
 BACKUP_DIR_RESULT=""
 cmd_backup() {
@@ -1073,6 +1143,22 @@ cmd_backup() {
       || die "backup: pg_dump of the Keycloak database failed"
     ok "keycloak db   -> keycloak-db.dump"
   fi
+  # Profiled auxiliary databases (temporal, tracing). Non-fatal: they run only
+  # under their profiles, and a failed dump must not lose the app backup.
+  # POSTGRES_DB defaults to POSTGRES_USER in the stock image.
+  local aux
+  for aux in temporal-postgresql langfuse-postgres; do
+    if [ -n "$(dc ps -q "$aux" 2>/dev/null)" ]; then
+      # shellcheck disable=SC2016  # expands inside the container
+      if dc exec -T "$aux" sh -c 'pg_dump -U "$POSTGRES_USER" -d "${POSTGRES_DB:-$POSTGRES_USER}" -Fc' > "$dir/$aux.dump" \
+        && [ -s "$dir/$aux.dump" ]; then
+        ok "$aux -> $aux.dump"
+      else
+        rm -f "$dir/$aux.dump"
+        warn "backup: pg_dump of $aux failed - dump it manually before an upgrade that changes its postgres major"
+      fi
+    fi
+  done
   # Uploaded files: SeaweedFS data (full) or core's local storage (lite).
   local svc path cid img
   if [ "$TIER" = full ]; then svc=seaweedfs; path=/data; else svc=core; path=/data/storage; fi
@@ -1126,6 +1212,16 @@ cmd_restore() {
       || die "restore: pg_restore of the Keycloak database failed"
     ok "Keycloak database restored"
   fi
+  local aux
+  for aux in temporal-postgresql langfuse-postgres; do
+    if [ -s "$dir/$aux.dump" ]; then
+      dc up -d --wait "$aux"
+      # shellcheck disable=SC2016
+      dc exec -T "$aux" sh -c 'pg_restore -U "$POSTGRES_USER" -d "${POSTGRES_DB:-$POSTGRES_USER}" --clean --if-exists --no-owner --exit-on-error' < "$dir/$aux.dump" \
+        && ok "$aux database restored" \
+        || warn "$aux restore failed - replay $dir/$aux.dump manually"
+    fi
+  done
   [ -s "$dir/files.tar.gz" ] && warn "files.tar.gz is not restored automatically: extract it into the $([ "$TIER" = full ] && echo seaweedfs-data || echo core-storage) volume with the stack stopped"
   # db-roles re-adopts the restored objects for the app role on the next up.
   cmd_up
@@ -1989,6 +2085,38 @@ cmd_restart() {
   fi
 }
 
+# `reset-password [EMAIL]`: the owner forgot the password. Asks core to mint a one-time reset link,
+# which lands in password-reset.txt on this machine (file access = proof of ownership, same model
+# as the first-run link), then prints it. Works for containers and the host-JVM personal install.
+cmd_reset_password() {
+  local email="${1:-}"
+  load_state; resolve_profiles; build_compose_args
+  local api body text
+  api="${PUBLIC_API_URL:-$(get_env PUBLIC_API_URL)}"; api="${api:-http://localhost:$(env_or CORE_HOST_PORT 8080)}"
+  body='{}'
+  [ -n "$email" ] && body="{\"email\":\"$email\"}"
+  curl -fsS -X POST "$api/api/auth/local/reset-request" \
+      -H 'Content-Type: application/json' -d "$body" >/dev/null 2>&1 \
+    || die "core at $api did not answer the reset request - is it running? (scripts/vegaduta status)"
+  if [ "$NATIVE_CORE" = 1 ]; then
+    text="$(cat "${APP_AUTH_LOCAL_DATA_DIR:-${HOME:-/tmp}/.vegaduta/auth}/password-reset.txt" 2>/dev/null || true)"
+  else
+    text="$(dc exec -T core cat /data/storage/.auth/password-reset.txt 2>/dev/null || true)"
+  fi
+  local link
+  link="$(printf '%s\n' "$text" | grep -o 'https\{0,1\}://[^ ]*/login?setup=[A-Za-z0-9_-]*' | tail -n 1 || true)"
+  if [ -z "$link" ]; then
+    printf '%s\n' "$text"
+    die "no reset link in password-reset.txt - check the account e-mail and try again"
+  fi
+  cat <<EOF
+
+  Password reset link (one use):
+    $link
+  Open it in your browser, choose a new password, and you are signed in.
+EOF
+}
+
 # personal_sync_public_urls: the console and API URLs a browser uses follow the ports in .env. The copy of
 # .env.example pins PUBLIC_APP_URL / PUBLIC_API_URL to the default ports, so changing WEB_HOST_PORT or
 # CORE_HOST_PORT (the fix doctor suggests for a busy port) left the console talking to the wrong address.
@@ -2043,6 +2171,7 @@ personal_apply_defaults() {
   if [ "$PERSONAL_FRESH" = 1 ]; then
     [ -n "$SEARCH" ] || SEARCH=1
     [ -n "$TOOLS" ] || TOOLS=1
+    [ -n "$BROWSER" ] || BROWSER=1
   fi
 }
 
@@ -2169,6 +2298,7 @@ main() {
     upgrade) cmd_upgrade "$@" ;;
     make-admin) cmd_make_admin "$@" ;;
     restart) cmd_restart "$@" ;;
+    reset-password) cmd_reset_password "$@" ;;
     models|model) cmd_models "$@" ;;
     seed-demo) cmd_seed_demo "$@" ;;
     projects) cmd_projects "$@" ;;

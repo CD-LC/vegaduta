@@ -251,7 +251,7 @@ function SubscriptionsPanel() {
         >
           <span className="min-w-0">
             <span className="font-medium">{r.name}</span>
-            <span className="ml-2 text-xs text-muted-foreground">
+            <span className="ms-2 text-xs text-muted-foreground">
               <code>{r.tenantId.slice(0, 8)}</code>
             </span>
             {r.state === "COMP" && (
@@ -396,7 +396,7 @@ function InvoicesPanel() {
         >
           <span className="min-w-0">
             <span className="font-medium">{i.invoiceNumber}</span>
-            <span className="ml-2 text-xs text-muted-foreground">{i.tenantName || i.tenantId.slice(0, 8)}</span>
+            <span className="ms-2 text-xs text-muted-foreground">{i.tenantName || i.tenantId.slice(0, 8)}</span>
           </span>
           <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {i.plan && (

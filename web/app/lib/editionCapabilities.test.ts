@@ -28,7 +28,11 @@ describe("unavailableFeature", () => {
     expect(unavailableFeature("/admin/sso")?.reason).toBe("identity");
     expect(unavailableFeature("/admin/payments/mandates")?.reason).toBe("billing");
     expect(unavailableFeature("/shared-with-me")?.reason).toBe("team");
-    expect(unavailableFeature("/admin/access")?.reason).toBe("team");
+    // /admin/access and /admin/users are available on personal: they are how the
+    // owner invites teammates (issueInviteLink mints /login?setup= links - local
+    // auth has no public signup and no mail server).
+    expect(unavailableFeature("/admin/access")).toBeNull();
+    expect(unavailableFeature("/admin/users")).toBeNull();
   });
 
   it("is driven by NEXT_PUBLIC_EDITION too, with no local-auth signal", () => {

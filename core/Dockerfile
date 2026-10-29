@@ -53,7 +53,7 @@ ARG MCP_TOOLCHAIN=none
 ARG JRE=full
 
 # ---- Build stage --------------------------------------------------------
-FROM maven:3.9.16-eclipse-temurin-21@sha256:99e61abcff91a9b1333463bd8451fb18495d6eba9250ac66a338b518f8278320 AS build
+FROM maven:3.9-eclipse-temurin-26@sha256:b2c1ad85954592f9928e84327c65201f308ad9b5d8ed7d5b823717c97bf23fbb AS build
 ARG MODULE=app
 WORKDIR /build
 
@@ -171,7 +171,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends zip unzip \
 
 # ---- JRE variants (JRE=full|jlink) ----------------------------------------
 # jre-full is the unmodified temurin JRE (~230 MB of platform modules).
-FROM eclipse-temurin:21.0.12.1_1-jre-noble@sha256:35501d3f93173b420ac9001658eb68157e813316b865087e345c187fca422c4c AS jre-full
+FROM eclipse-temurin:24.0.2_12-jre-noble@sha256:b416d02335e702b0403ff280de9475a3348e29382285969c9d4e17862ce632e7 AS jre-full
 
 # jre-jlink keeps the same jre-jammy base (same glibc, CA store and packages)
 # but replaces /opt/java/openjdk with a jlink-minimal runtime - roughly half
@@ -181,7 +181,7 @@ FROM eclipse-temurin:21.0.12.1_1-jre-noble@sha256:35501d3f93173b420ac9001658eb68
 # (nested-jar reads) are the ones jdeps-style analysis misses. A missing
 # module fails loudly at JVM start; report the name and rebuild with
 # JRE=full.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
@@ -201,7 +201,11 @@ WORKDIR /app
 # without pulling in a second base image or a JVM-based check. ~1MB, cached
 # as its own layer so it never gets re-fetched by an app-source-only
 # rebuild. See Platform-Tech-Stack-Audit-2026.md P1 (infra/ops section).
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
+# libatomic1: Node 26's arm64 binary links libatomic.so.1 (the amd64 build does
+# not) - the node binary is copied out of the official image into the
+# toolchain stages below, so its shared libraries must be here rather than in
+# node-relay. Cheap (~0.2MB) and harmless on amd64, so it is unconditional.
+RUN apt-get update && apt-get install -y --no-install-recommends curl libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Non-root runtime user - defense-in-depth, no functional dependency on it.
@@ -216,8 +220,9 @@ ENV HOME=/home/agentic
 # no npm/npx/corepack, so nothing here can fetch or run an MCP package - it
 # exists solely to execute /opt/mcp-stdio-proxy/proxy.js (zero-dependency,
 # see core/mcp-stdio-proxy/framing.js). The official binary targets glibc
-# >= 2.28 and links only libc/libstdc++/libgcc_s, all present in jammy.
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-relay
+# >= 2.28 and links libc/libstdc++/libgcc_s plus, on arm64, libatomic (the
+# libatomic1 package installed above - Node 26 added that dependency).
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node-relay
 
 # The full variant also needs npm/npx. The npm CLI bundled with the Node image carries High
 # advisories in its own dependencies (brace-expansion, ip-address, picomatch, pacote, sigstore)
@@ -226,7 +231,18 @@ FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a
 # services/workspace-runner/Dockerfile (services/mcp-stdio-runner/dockerfile-npm.test.js checks that).
 FROM node-relay AS node-npm
 ARG NPM_VERSION=11.21.1
-RUN npm install -g "npm@${NPM_VERSION}" \
+# sha512 of registry.npmjs.org/npm/-/npm-${NPM_VERSION}.tgz (the published
+# dist.integrity). npm has no hash-verified global install, so the tarball is
+# fetched, verified, and laid down by hand - same layout `npm i -g npm` makes.
+ARG NPM_TGZ_SHA512=613ccbe90044257c87713bb426251ced128ca7e9b3949b65eeb18b98445a5d441e14720c73d6ad76be86f4cf42f2f0d66efe347a9a13400ccd2f6fcfb5954385
+RUN npm pack "npm@${NPM_VERSION}" --pack-destination /tmp \
+    && echo "${NPM_TGZ_SHA512}  /tmp/npm-${NPM_VERSION}.tgz" | sha512sum -c - \
+    && rm -rf /usr/local/lib/node_modules/npm \
+    && tar -xzf "/tmp/npm-${NPM_VERSION}.tgz" -C /usr/local/lib/node_modules \
+    && mv /usr/local/lib/node_modules/package /usr/local/lib/node_modules/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
+    && rm "/tmp/npm-${NPM_VERSION}.tgz" \
     && npm cache clean --force
 
 FROM runtime-base AS mcp-toolchain-none
@@ -281,7 +297,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 # the spawned server.
 # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
 # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
-ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}'
+ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome"}'
 # This RUN still executes as root (HOME=/home/agentic above only points
 # npm/npx at that directory, it doesn't change the executing uid), so npx
 # fetching the `playwright` CLI package leaves root-owned files under
@@ -307,8 +323,18 @@ ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/
 # package's own installer, guaranteeing the binary on disk always matches
 # what the pinned runtime package will ask for.
 # playwright@1.64.0-alpha-1790635538000 is exactly the version @playwright/mcp@0.0.83 depends on.
-RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium \
-    && npx --yes @playwright/mcp@0.0.83 install-browser chrome-for-testing \
+# CHROME_FOR_TESTING_VERSION: the CfT build puppeteer's `browsers install` fetches below -
+# pinned literally so the build never resolves the `stable` tag through Google's
+# last-known-good-versions.json endpoint. Bump when the release scan flags its CVEs.
+ARG CHROME_FOR_TESTING_VERSION=156.0.8078.47
+# Lockfile-pinned toolchain: mcp-toolchain/package-lock.json carries an integrity hash
+# for every package, `npm ci` verifies them, and the binaries run from its own
+# node_modules/.bin - no floating `npx pkg@ver` resolution inside the image build.
+COPY mcp-toolchain/package.json mcp-toolchain/package-lock.json /opt/mcp-toolchain/
+RUN cd /opt/mcp-toolchain \
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm ci --ignore-scripts \
+    && ./node_modules/.bin/playwright install --with-deps chromium \
+    && ./node_modules/.bin/playwright-mcp install-browser chrome-for-testing \
     # server-puppeteer pre-warm (2026-08-19 incident): unlike playwright-vision
     # above, puppeteer's package AND its browser were still fetched at runtime
     # by the first `npx -y @modelcontextprotocol/server-puppeteer` - a cold
@@ -323,7 +349,25 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # dependency - upstream deprecated, so these versions are frozen; bump
     # both together if the connection block ever changes) into
     # $HOME/.cache/puppeteer, which the chown below hands to the runtime user.
-    && npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    # PUPPETEER_SKIP_DOWNLOAD on the pre-warm: puppeteer's install.mjs postinstall
+    # downloads its OWN pinned chrome/headless-shell builds, and under npm 11's
+    # install-script gating that download can be left half-extracted on arm64
+    # (folder present, binary missing) - the later `npx puppeteer browsers
+    # install` postinstall then fails closed ("browser folder exists but the
+    # executable is missing") and kills the whole RUN. The pre-warm only needs
+    # the package tree in the npx cache; the real browser comes from the
+    # explicit `browsers install` below. The same env on THAT call skips the
+    # redundant postinstall download while still letting the install command
+    # fetch chrome@stable (verified: linux-156 landed, exit 0, on arm64).
+    # The pre-warm runs from an EMPTY cwd: server-puppeteer is also a dep of
+    # mcp-toolchain itself, so run inside /opt/mcp-toolchain npm exec resolves
+    # it locally, seeds nothing into ~/.npm/_npx, and exits 0 - the grep below
+    # then finds no package.json, dirname "" yields ".", and
+    # rm -rf "./node_modules" deletes the very tree this step copies
+    # (v0.1.13 build, arm64 leg). An isolated dir forces a real _npx install.
+    && mkdir -p /opt/npx-prewarm && cd /opt/npx-prewarm \
+    && PUPPETEER_SKIP_DOWNLOAD=1 npm exec --yes --package=@modelcontextprotocol/server-puppeteer -- node -e "process.exit(0)" \
+    && cd /opt/mcp-toolchain \
     # The pre-warm above uses the SAME unversioned spec as application-mcp.yml's runtime
     # `npx -y @modelcontextprotocol/server-puppeteer`, so npx reuses this tree (its cache
     # directory is keyed by the spec). The deprecated 2025.5.12 pins @modelcontextprotocol/sdk
@@ -332,8 +376,17 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # server only uses the sdk's Server/StdioServerTransport; basic-ftp is only reachable for
     # ftp: PAC-script URLs, through puppeteer's browser-download proxy agent (get-uri).
     && sp_dir="$(dirname "$(grep -l '"@modelcontextprotocol/server-puppeteer"' /home/agentic/.npm/_npx/*/package.json)")" \
-    && npm --prefix "$sp_dir" pkg set "overrides.@modelcontextprotocol/sdk=1.32.1" "overrides.basic-ftp=6.2.1" \
-    && npm --prefix "$sp_dir" install --no-audit --no-fund \
+    # Fail closed, not sideways: an unseeded cache must abort the build, never
+    # reach rm -rf with a "." path or ship an unpatched npx tree.
+    && case "$sp_dir" in /home/agentic/.npm/_npx/*) : ;; *) echo "server-puppeteer pre-warm did not seed /home/agentic/.npm/_npx" >&2; exit 1;; esac \
+    # Overlay the vendored lockfile tree onto the seeded entry instead of an
+    # unverified `npm install`: mcp-toolchain/package.json carries the same two
+    # overrides (sdk 1.32.1, basic-ftp 6.2.1) and its package-lock resolved them
+    # with integrity hashes. package.json stays as npx wrote it, so the
+    # runtime `npx -y @modelcontextprotocol/server-puppeteer` cache key holds.
+    && rm -rf "$sp_dir/node_modules" \
+    && cp -r node_modules "$sp_dir/node_modules" \
+    && cp package-lock.json "$sp_dir/package-lock.json" \
     # The frozen puppeteer@23.11.1 pins Chrome 131.0.6778.204, which the
     # release image scan (grype, fail on critical) rejects with fixed
     # criticals. server-puppeteer cannot take a newer puppeteer, but it does
@@ -342,18 +395,35 @@ RUN npx --yes playwright@1.64.0-alpha-1790635538000 install --with-deps chromium
     # under its own path and point the launch at it via the ENV below - the
     # value reaches the spawned server through application-mcp.yml's
     # puppeteer connection env, which resolves it from this container env.
-    # Chrome-for-Testing STABLE, resolved at build time: a pinned build goes
-    # stale within weeks and then fails the release scan again (153.0.8010.47
-    # did). `current` is a stable path for PUPPETEER_LAUNCH_OPTIONS above, and
-    # the 131 builds puppeteer@23.11.1 downloads for itself are removed so the
-    # image carries only the fixed one.
-    # puppeteer@23.11.1 is used here only for its browser installer. Its own npx tree (basic-ftp
-    # 5.x, High) is not needed afterwards, so it goes to a throwaway cache, not ~/.npm.
-    && npm_config_cache=/tmp/npx-puppeteer-install npx --yes puppeteer@23.11.1 browsers install chrome@stable \
-    && rm -rf /tmp/npx-puppeteer-install \
-    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
-    && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
-    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
+    # Chrome-for-Testing, version pinned at build time. The `stable` tag is
+    # resolved through googlechromelabs.github.io's last-known-good-versions.json -
+    # on 2026-10-26 that endpoint went down mid-release (HTTP 200, empty body)
+    # and killed every image leg resolving `chrome@stable`. A literal version
+    # skips the resolution fetch entirely (verified: downloads straight from
+    # storage.googleapis.com). The pin still needs a deliberate bump when the
+    # release scan's fixed-criticals list moves past it. `current` is a stable
+    # path for PUPPETEER_LAUNCH_OPTIONS above, and the 131 builds
+    # puppeteer@23.11.1 downloads for itself are removed so the image carries
+    # only the fixed one.
+    # The vendored lockfile tree's `browsers` CLI (puppeteer's own installer) fetches the
+    # pinned Chrome straight from storage.googleapis.com - no npx resolution, no extra cache.
+    # --path must be explicit: @puppeteer/browsers' CLI defaults the install
+    # root to the current working directory, so run from /opt/mcp-toolchain it
+    # lands in /opt/mcp-toolchain/chrome and the `current` link below finds
+    # nothing under ~/.cache/puppeteer (v0.1.13 build, arm64 leg).
+    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install --path /home/agentic/.cache/puppeteer chrome@${CHROME_FOR_TESTING_VERSION} \
+    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome/linux_arm-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux_arm-131.0.6778.204 \
+    # The version dir and inner binary dir are arch-shaped (linux-<ver>/
+    # chrome-linux64 on amd64, linux_arm-<ver>/chrome-linux-arm64 on arm64),
+    # so glob the installed chrome binary itself and link `current` at the
+    # inner dir - `current/chrome` is then the executable on BOTH arches and
+    # PUPPETEER_LAUNCH_OPTIONS stays arch-agnostic.
+    && chrome_bin="$(ls /home/agentic/.cache/puppeteer/chrome/linux*/chrome-linux*/chrome | sort -V | tail -n 1)" \
+    && ln -sfn "$(dirname "$chrome_bin")" /home/agentic/.cache/puppeteer/chrome/current \
+    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome \
+    && cd / && rm -rf /opt/mcp-toolchain \
     && chown -R agentic:agentic "$PLAYWRIGHT_BROWSERS_PATH" /home/agentic
 
 # server-puppeteer (application-mcp.yml's `puppeteer` stdio connection)

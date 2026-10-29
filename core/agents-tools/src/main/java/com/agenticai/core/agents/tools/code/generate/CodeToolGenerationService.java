@@ -106,14 +106,16 @@ public class CodeToolGenerationService {
 
         // The draft is model output steered by tenant free text: an allowlist screen runs first
         // and can only make it INVALID (the sandbox still gives the real verdict on a pass).
-        List<SandboxValidationError> screened = GeneratedCodeScreen.screen(request.language(), source);
+        List<SandboxValidationError> screened =
+                GeneratedCodeScreen.screen(request.language(), source);
         if (!screened.isEmpty()) {
             SandboxValidateResponse rejected =
                     new SandboxValidateResponse(
                             false,
                             null,
                             screened,
-                            List.of("Rejected before reaching the sandbox: the draft uses something custom tools may not."));
+                            List.of(
+                                    "Rejected before reaching the sandbox: the draft uses something custom tools may not."));
             return CodeToolGenerationResponse.from(source, request.language(), rejected);
         }
         SandboxValidateResponse verdict = validate(request.language(), request.toolName(), source);
@@ -144,7 +146,12 @@ public class CodeToolGenerationService {
     // ------------------------------------------------------------------ //
 
     private String buildSystemPrompt(CustomCodeToolLanguage language) {
-        String contract = language == CustomCodeToolLanguage.JAVA ? JAVA_CONTRACT : PYTHON_CONTRACT;
+        String contract =
+                switch (language) {
+                    case JAVA -> JAVA_CONTRACT;
+                    case PYTHON -> PYTHON_CONTRACT;
+                    case JAVASCRIPT, TYPESCRIPT -> JS_CONTRACT;
+                };
         return """
             You write ONE tenant-authored program for a sandboxed "custom code
             tool" feature in an AI agent platform. The program you write is
@@ -237,6 +244,33 @@ public class CodeToolGenerationService {
         (the builtin, not the `input` parameter) are also unavailable -
         never use them. Use `print(...)` only for the author's own test-run
         stdout, never to communicate the result - always return it.""";
+
+    private static final String JS_CONTRACT =
+            """
+        Contract (JavaScript / TypeScript): a single module that defines a
+        top-level function with the exact signature:
+
+            function run(input) {
+                ...
+            }
+
+        or `const run = (input) => ...`. TypeScript type annotations are
+        fine - the runtime strips them. `input` is a plain object parsed
+        from the tool call's JSON; return a JSON-serializable value
+        (object, array, string, number or boolean), awaited if the function
+        is `async`.
+
+        There is NO module system inside the sandbox: no `import`, no
+        `require`, no npm packages - and no `process`, `globalThis`,
+        `eval`, `Function`, `fetch`, `WebSocket`, `Worker`, `WebAssembly` or
+        property access to `constructor`. Code using any of those is
+        rejected by the sandbox's identifier policy before it ever runs.
+        The standard library is what the language itself ships: `JSON`,
+        `Math`, `Date`, `Array`/`Object`/`Map`/`Set` methods, `RegExp`,
+        `Intl`, `TextEncoder`/`TextDecoder`, `crypto.randomUUID()` - pure
+        computation only. Use `console.log(...)` only for the author's own
+        test-run stdout, never to communicate the result - always return
+        it.""";
 
     // ------------------------------------------------------------------ //
     // LLM client seam - identical to AssistService#buildChatClient /

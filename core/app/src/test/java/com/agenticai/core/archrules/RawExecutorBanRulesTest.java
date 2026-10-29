@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -73,6 +74,16 @@ class RawExecutorBanRulesTest {
                 new ClassFileImporter()
                         .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
                         .importPackages(ROOT);
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        classes = null;
     }
 
     /** What raw form a call is, or null when it is allowed. */
@@ -166,7 +177,8 @@ class RawExecutorBanRulesTest {
                                                 .startsWith(FACTORY_PACKAGE + ".TenantAware"))
                         .count();
         assertThat(factoryCalls)
-                .as("the scan must see core's executors being built by the factory, or it is vacuous")
+                .as(
+                        "the scan must see core's executors being built by the factory, or it is vacuous")
                 .isGreaterThan(50);
 
         Set<String> offenders = new TreeSet<>(sites.keySet());
@@ -193,7 +205,8 @@ class RawExecutorBanRulesTest {
                                             + message)
                             .isEmpty();
                     soft.assertThat(stale)
-                            .as("These ALLOWED entries no longer create a raw executor: delete them")
+                            .as(
+                                    "These ALLOWED entries no longer create a raw executor: delete them")
                             .isEmpty();
                 });
     }
@@ -209,20 +222,35 @@ class RawExecutorBanRulesTest {
 
         assertThat(sites).isNotNull();
         assertThat(sites)
-                .anySatisfy(s -> assertThat(s).startsWith("executorsFactory: Executors.newFixedThreadPool"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "executorsFactory: Executors.newFixedThreadPool"))
                 .anySatisfy(s -> assertThat(s).startsWith("rawThread: new Thread"))
                 .anySatisfy(s -> assertThat(s).startsWith("virtualThread: Thread.ofVirtual"))
                 .anySatisfy(s -> assertThat(s).startsWith("platformThread: Thread.ofPlatform"))
-                .anySatisfy(s -> assertThat(s).startsWith("threadPoolConstructor: new ThreadPoolExecutor"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "threadPoolConstructor: new ThreadPoolExecutor"))
                 .anySatisfy(
                         s ->
                                 assertThat(s)
                                         .startsWith(
                                                 "scheduledPoolConstructor: new"
                                                         + " ScheduledThreadPoolExecutor"))
-                .anySatisfy(s -> assertThat(s).startsWith("forkJoinCommonPool: ForkJoinPool.commonPool"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith("forkJoinCommonPool: ForkJoinPool.commonPool"))
                 .anySatisfy(s -> assertThat(s).startsWith("springPool: new ThreadPoolTaskExecutor"))
-                .anySatisfy(s -> assertThat(s).startsWith("springSimpleAsync: new SimpleAsyncTaskExecutor"))
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "springSimpleAsync: new SimpleAsyncTaskExecutor"))
                 .anySatisfy(
                         s ->
                                 assertThat(s)
@@ -235,7 +263,11 @@ class RawExecutorBanRulesTest {
                                         .startsWith(
                                                 "thenApplyAsyncWithoutExecutor:"
                                                         + " CompletableFuture.thenApplyAsync"))
-                .anySatisfy(s -> assertThat(s).startsWith("reactorSchedulers: Schedulers.boundedElastic"));
+                .anySatisfy(
+                        s ->
+                                assertThat(s)
+                                        .startsWith(
+                                                "reactorSchedulers: Schedulers.boundedElastic"));
         assertThat(sites)
                 .as("an executor argument and the factory are allowed")
                 .noneMatch(s -> s.startsWith("allowed"));

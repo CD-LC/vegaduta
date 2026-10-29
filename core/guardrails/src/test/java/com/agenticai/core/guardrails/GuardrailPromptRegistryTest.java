@@ -550,28 +550,28 @@ class GuardrailPromptRegistryTest {
         ApprovalPolicyService policy = mock(ApprovalPolicyService.class);
         when(policy.requiresApproval(anyString())).thenReturn(true);
 
-        // 1. nothing customised: the shipped text, filled in
+        // 1. nothing customised: the shipped text, filled in, wrapped in the approval_parked marker
         GuardedToolCallback shippedWording = guarded(AGENT, null, passThrough(), policy, approvalGate(), null, false, null);
-        assertThat(shippedWording.call("{}")).isEqualTo(shipped(
-                GuardrailPrompts.PARK_AWAITING, "tool", "send_invoice", "requestId", "00000000-0000-0000-0000-00000000beef"));
+        assertThat(shippedWording.call("{}")).isEqualTo(ApprovalParked.result(shipped(
+                GuardrailPrompts.PARK_AWAITING, "tool", "send_invoice", "requestId", "00000000-0000-0000-0000-00000000beef")));
 
         // 2. the old property, edited by an operator, still works
         ApprovalParkProperties edited = new ApprovalParkProperties();
         edited.setAwaitingMessage("Hold on: {tool} waits for {requestId}.");
         GuardedToolCallback viaProperty = guarded(AGENT, null, passThrough(), policy, approvalGate(), null, false, null)
                 .withApprovalParkTexts(edited);
-        assertThat(viaProperty.call("{}")).isEqualTo("Hold on: send_invoice waits for 00000000-0000-0000-0000-00000000beef.");
+        assertThat(viaProperty.call("{}")).isEqualTo(ApprovalParked.result("Hold on: send_invoice waits for 00000000-0000-0000-0000-00000000beef."));
 
         // 3. a registry override (tenant) beats the property
         override(PromptScope.TENANT, null, GuardrailPrompts.PARK_AWAITING, "Registry: {tool} / {requestId}.");
         GuardedToolCallback viaRegistry = guarded(AGENT, null, passThrough(), policy, approvalGate(), null, false, null)
                 .withApprovalParkTexts(edited);
-        assertThat(viaRegistry.call("{}")).isEqualTo("Registry: send_invoice / 00000000-0000-0000-0000-00000000beef.");
+        assertThat(viaRegistry.call("{}")).isEqualTo(ApprovalParked.result("Registry: send_invoice / 00000000-0000-0000-0000-00000000beef."));
 
         // 4. a call made after the park is answered with the queued text of the same registry
         override(PromptScope.AGENT, AGENT, GuardrailPrompts.PARK_QUEUED, "Queued {tool} behind {parkedTool} as {requestId}.");
         assertThat(viaRegistry.call("{\"again\":1}"))
-                .isEqualTo("Queued send_invoice behind send_invoice as 00000000-0000-0000-0000-00000000beef.");
+                .isEqualTo(ApprovalParked.result("Queued send_invoice behind send_invoice as 00000000-0000-0000-0000-00000000beef."));
     }
 
     @Test

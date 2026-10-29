@@ -48,9 +48,12 @@ sdk/                  First-party SDKs. typescript/ and python/ are generated RE
 web/                  Next.js console (tenant UI + public pages + platform-admin at app/platform-admin/)
 services/             sidecar (Python ML), code-intel, app-builder, tool-sandbox,
                       mcp-stdio-runner (Node), piece-host, voice-agent, rl-trainer,
-                      browser-runner, workspace-runner, whatsapp-qr, desktop-agent
+                      browser-runner, workspace-runner, whatsapp-qr, desktop-agent,
+                      docling (Docling document-conversion adapter for knowledge
+                      ingestion; compose profile `docling`, app.knowledge.docling.*)
 examples/             workflow-templates/, mcp-servers/, agent-bundles/, sdk/
 tests/e2e             Playwright suite;  tests/load  load tests;  tests/install  installer tests
+academy/              how-to video lessons (script.mjs scenes -> narrate + capture + assemble)
 deploy/compose        lite.yml, docker-compose.yml (+ *.build.yml, *.ci.yml, *.domain.yml overlays), .env.example
 deploy/helm           umbrella chart charts/vegaduta + per-service charts + vegaduta-lib library
 deploy/postgres       Postgres 16 + pgvector + Apache AGE image
@@ -140,6 +143,34 @@ Docker with Compose v2.
     smaller store; never refreeze to make a build pass. Details and commands are in the
     javadoc of `ModuleBoundaryRulesTest`; background in
     [the structural audit](docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
+14. **Test locally before you open or update a PR.** CI is the last check, not
+    the first. Before pushing or raising a PR, ALL of these:
+    - `make gates` (the pre-push hook from `make hooks` runs them automatically).
+    - The test suite of every touched component (see the Build-and-test table:
+      `mvn -B -ntp -pl <module> test`, `npm test`, the code-intel script
+      harness, `node --test`).
+    - **Any change that adds, moves, renames or re-signatures a Java class, a
+      REST endpoint, a bean or a Spring wiring piece: run the `app` module's
+      tests too.** `mvn -o -B -ntp -pl <touched-modules> install -DskipTests`
+      first (app resolves modules from `~/.m2`, not the reactor), then
+      `mvn -o -B -ntp -pl app test`. That module hosts the checks that only see
+      the assembled code: `StructureRulesTest` (package cycles, controllers
+      must not touch repositories/JPA entities), `ModuleBoundaryRulesTest`,
+      `OpenApiSpecFreshnessTest`, `UniqueBeanNamesTest`,
+      `InjectableConstructorTest`, `ShapeInjectionPointsTest`. Module tests do
+      NOT cover them - skipping this is the most common verify-only failure.
+    - When a golden or generated artifact is in play regenerate it and run the
+      test that pins it - a code change without its golden is a CI-only
+      failure. The frequent ones: `docs/api/openapi.json`
+      (`mvn -o -pl app -am test -Dtest=OpenApiSpecGeneratorTest
+      -Dopenapi.write=true`) then `node sdk/generate.mjs`, prompt-catalog md
+      files, i18n keys, `CONFIG-REFERENCE.generated.md`,
+      `docs/architecture/core-module-graph.md`, the file-size/module baselines.
+    - Anything that exempts a shared CI gate (`.trivyignore*`, allowlists,
+      baselines): verify against a FRESH scan of the whole affected surface,
+      not just the artifact paths the last run happened to flag.
+    - Compose changes get `make compose-validate`.
+    Report what you ran in the PR body.
 
 ## Conventions
 

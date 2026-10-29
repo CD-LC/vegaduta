@@ -608,6 +608,7 @@ export interface AgentJobStartRequest {
   timeoutSeconds?: number;
   resultSchemaJson?: string;
   maxToolCalls?: number;
+  maxTurns?: number;
 }
 
 export type AgentJobStatus = "QUEUED" | "RUNNING" | "AWAITING_APPROVAL" | "SUCCEEDED" | "FAILED" | "CANCELLED";
@@ -633,6 +634,15 @@ export interface AgentKnowledgeAccessUpdateRequest {
 
 export interface AgentKnowledgeBaseToggleRequest {
   enabled?: boolean;
+}
+
+export interface AgentKnowledgeWriteAccessResponse {
+  knowledgeWriteEnabled?: boolean;
+  allowedKnowledgeWriteCollectionIds?: string[];
+}
+
+export interface AgentKnowledgeWriteAccessUpdateRequest {
+  allowedKnowledgeWriteCollectionIds?: string[];
 }
 
 export interface AgentLabDtos_LabCancelResponse {
@@ -901,6 +911,12 @@ export interface AgentScheduleRunResponse {
   error?: string;
   sentinelOutcome?: string;
   sentinelOutcomeNote?: string;
+}
+
+export interface AgentScratchpadController_ScratchpadListView {
+  count?: number;
+  totalBytes?: number;
+  notes?: ScratchpadNoteView[];
 }
 
 export interface AgentSessionLlmUsageController_SessionLlmCallEntry {
@@ -2504,7 +2520,7 @@ export interface CreateUserRequest {
   initialPermissions?: string[];
 }
 
-export type CustomCodeToolLanguage = "JAVA" | "PYTHON";
+export type CustomCodeToolLanguage = "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
 
 export interface CustomCodeToolRequest {
   toolName?: string;
@@ -3113,6 +3129,110 @@ export interface DemoVideoController_DemoVideoResponse {
 }
 
 export type DependencyStatus = "UP" | "DEGRADED" | "DOWN" | "UNKNOWN";
+
+export interface DesktopRecipeDtos_CreateRecipeRequest {
+  agentId?: string;
+  name?: string;
+  description?: string;
+  defaultMode?: string;
+  spec?: DesktopRecipeSpec;
+}
+
+export interface DesktopRecipeDtos_RecipeDetail {
+  summary?: DesktopRecipeDtos_RecipeSummary;
+  spec?: DesktopRecipeSpec;
+  warnings?: string[];
+}
+
+export interface DesktopRecipeDtos_RecipeFromRunRequest {
+  agentId?: string;
+  sessionId?: string;
+  name?: string;
+  description?: string;
+  parameters?: Record<string, string>;
+  allowLiteralText?: boolean;
+  defaultMode?: string;
+}
+
+export interface DesktopRecipeDtos_RecipeSummary {
+  id?: string;
+  agentId?: string;
+  name?: string;
+  description?: string;
+  allowedApps?: string[];
+  parameters?: string[];
+  stepCount?: number;
+  runCount?: number;
+  failCount?: number;
+  lastRunAt?: string;
+  lastFailure?: string;
+  defaultMode?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DesktopRecipeDtos_RunRecipeRequest {
+  params?: Record<string, string>;
+  confirmIrreversible?: boolean;
+  fromStep?: number;
+  mode?: string;
+}
+
+export interface DesktopRecipeDtos_RunRecipeResponse {
+  recipeId?: string;
+  name?: string;
+  success?: boolean;
+  stepsRun?: number;
+  stepsTotal?: number;
+  failure?: string;
+  steps?: DesktopRecipeReplayer_StepResult[];
+}
+
+export interface DesktopRecipeDtos_UpdateRecipeRequest {
+  name?: string;
+  description?: string;
+  defaultMode?: string;
+}
+
+export interface DesktopRecipeReplayer_StepResult {
+  index?: number;
+  action?: string;
+  ok?: boolean;
+  note?: string;
+}
+
+export interface DesktopRecipeSpec {
+  version?: number;
+  allowedApps?: string[];
+  params?: DesktopRecipeSpec_ParamSpec[];
+  steps?: DesktopRecipeSpec_RecipeStep[];
+}
+
+export interface DesktopRecipeSpec_Expect {
+  elementLabel?: string;
+  appFrontmost?: string;
+}
+
+export interface DesktopRecipeSpec_ParamSpec {
+  name?: string;
+  required?: boolean;
+}
+
+export interface DesktopRecipeSpec_RecipeStep {
+  action?: string;
+  app?: string;
+  label?: string;
+  role?: string;
+  x?: number;
+  y?: number;
+  text?: string;
+  key?: string;
+  target?: string;
+  waitMs?: number;
+  expect?: DesktopRecipeSpec_Expect;
+  timeoutMs?: number;
+  irreversible?: boolean;
+}
 
 export interface DeveloperApiController_AgentSummaryDto {
   id?: string;
@@ -4174,6 +4294,13 @@ export interface IngestSmsRequest_Item {
   smsTimestamp?: string;
 }
 
+export interface IngestUrlRequest {
+  url: string;
+  chunkSize?: number;
+  chunkOverlap?: number;
+  collectionId?: string;
+}
+
 export type IntervalMethod = "WILSON_SCORE" | "PERCENTILE_BOOTSTRAP" | "HIERARCHICAL_BOOTSTRAP" | "PAIRED_BOOTSTRAP";
 
 export interface InvoiceController_BillingProfileBody {
@@ -4465,6 +4592,14 @@ export interface KnowledgeStatsResponse {
   totalDocuments?: number;
   totalChunks?: number;
   totalVectors?: number;
+}
+
+export interface KnowledgeUrlIngester_UrlIngestResult {
+  filename?: string;
+  source?: string;
+  chunkCount?: number;
+  documentId?: string;
+  document?: boolean;
 }
 
 export interface LandingEventController_LandingEventRequest {
@@ -4827,6 +4962,10 @@ export interface LocalAuthController_LoginRequest {
 
 export interface LocalAuthController_RefreshRequest {
   refreshToken: string;
+}
+
+export interface LocalAuthController_ResetRequest {
+  email?: string;
 }
 
 export interface LocalAuthController_SessionResponse {
@@ -8602,6 +8741,14 @@ export interface ScheduledTaskDtos_TaskResponse {
   ownerSubject?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ScratchpadNoteView {
+  key?: string;
+  scope?: string;
+  byteSize?: number;
+  updatedAt?: string;
+  body?: string;
 }
 
 export interface SearchRequest {

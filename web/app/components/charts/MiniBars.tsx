@@ -135,7 +135,7 @@ export default function MiniBars({
         <div className="mt-1 flex justify-between gap-2 text-xs text-muted-foreground">
           <span className="min-w-0 truncate">{bars[0].label}</span>
           {bars.length > 1 && (
-            <span className="min-w-0 truncate text-right">
+            <span className="min-w-0 truncate text-end">
               {bars[lastIndex].label}
               {partialLast && partialLabel ? ` (${partialLabel})` : ""}
             </span>
@@ -144,7 +144,11 @@ export default function MiniBars({
       )}
       {showValueLabels && (
         // Fixed-height line so the layout does not jump when a bar is hovered.
-        <p data-bar-readout="" aria-hidden="true" className="mt-1 min-h-4 truncate text-xs font-medium tabular-nums text-foreground">
+        <p
+          data-bar-readout=""
+          aria-hidden="true"
+          className="mt-1 min-h-4 truncate text-xs font-medium tabular-nums text-foreground"
+        >
           {active !== null && active <= lastIndex ? textOf(active) : ""}
         </p>
       )}

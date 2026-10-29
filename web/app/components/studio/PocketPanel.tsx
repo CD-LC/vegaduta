@@ -101,9 +101,9 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
             <div className="mt-4">
               <Button className={TONES.sky.cta} size="lg" onClick={create} disabled={busy || readOnly}>
                 {busy ? (
-                  <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin shrink-0" />
+                  <Loader2 aria-hidden="true" className="me-2 h-4 w-4 animate-spin shrink-0" />
                 ) : (
-                  <QrCode aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" />
+                  <QrCode aria-hidden="true" className="me-2 h-4 w-4 shrink-0" />
                 )}{" "}
                 Make my QR code
               </Button>
@@ -116,7 +116,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
           ) : (
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/70 p-1.5">
-                <Link2 aria-hidden="true" className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                <Link2 aria-hidden="true" className="ms-2 h-4 w-4 shrink-0 text-muted-foreground" />
                 <input
                   readOnly
                   value={shareUrl}
@@ -126,9 +126,9 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 />
                 <Button size="sm" variant="outline" onClick={copy}>
                   {copied ? (
-                    <Check aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" />
+                    <Check aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" />
                   ) : (
-                    <Copy aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" />
+                    <Copy aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" />
                   )}{" "}
                   {copied ? "Copied" : "Copy"}
                 </Button>
@@ -181,7 +181,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
           {apk && (
             <Button asChild variant={android ? "default" : "outline"} size="sm">
               <a href={apk.href} download>
-                <Download aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 shrink-0" /> Android app
+                <Download aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Android app
                 {apk.sizeMb ? ` · ${apk.sizeMb} MB` : ""}
               </a>
             </Button>

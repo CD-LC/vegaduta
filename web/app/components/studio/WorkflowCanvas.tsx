@@ -255,12 +255,12 @@ export default function WorkflowCanvas({
         ))}
         {!readOnly && workflows.length < workflowsMax && chainFromAgents(agents) && (
           <Button variant="outline" size="sm" onClick={() => startNew(chainFromAgents(agents))}>
-            <Layers aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Chain my agents
+            <Layers aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Chain my agents
           </Button>
         )}
         {!readOnly && workflows.length < workflowsMax && (
           <Button variant="outline" size="sm" onClick={() => startNew()}>
-            <Plus aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Blank
+            <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Blank
           </Button>
         )}
         {workflows.length >= workflowsMax && (
@@ -293,15 +293,15 @@ export default function WorkflowCanvas({
             />
             <Button variant="outline" size="sm" onClick={save} disabled={!dirty || saving || readOnly}>
               {saving ? (
-                <Loader2 aria-hidden="true" className="mr-1 h-3.5 w-3.5 animate-spin shrink-0" />
+                <Loader2 aria-hidden="true" className="me-1 h-3.5 w-3.5 animate-spin shrink-0" />
               ) : (
-                <Save aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" />
+                <Save aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" />
               )}{" "}
               Save
             </Button>
             {selected && !readOnly && (
               <Button variant="ghost" size="sm" onClick={remove} disabled={run.running}>
-                <Trash2 aria-hidden="true" className="mr-1 h-3.5 w-3.5 shrink-0" /> Delete
+                <Trash2 aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Delete
               </Button>
             )}
             {saveError && <span className="text-sm text-destructive">{saveError}</span>}
@@ -351,11 +351,11 @@ export default function WorkflowCanvas({
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {!run.running ? (
                 <Button onClick={execute} disabled={!canRun}>
-                  <Play aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Run workflow
+                  <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Run workflow
                 </Button>
               ) : (
                 <Button variant="outline" onClick={stop}>
-                  <Square aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Stop watching
+                  <Square aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Stop watching
                 </Button>
               )}
               {run.status && (

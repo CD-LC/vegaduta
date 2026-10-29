@@ -120,7 +120,7 @@ export default function WorkflowPlanPanel({
                 <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-foreground">
                   {i + 1}
                 </span>
-                <span className="min-w-0 text-left">{step.sentence}</span>
+                <span className="min-w-0 text-start">{step.sentence}</span>
               </>
             );
             return (
@@ -154,18 +154,20 @@ export default function WorkflowPlanPanel({
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">{t("planApprovalsBody")}</p>
           <div className="mt-1.5 flex flex-wrap gap-2">
-            {plan.insertedApprovals.filter((a) => exists(a.approvalNodeId)).map((a, i) => (
-              <Button
-                key={a.approvalNodeId}
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => onFocusNode(a.approvalNodeId)}
-                data-testid="workflow-plan-approval"
-              >
-                {t("planApprovalShow", { n: i + 1 })}
-              </Button>
-            ))}
+            {plan.insertedApprovals
+              .filter((a) => exists(a.approvalNodeId))
+              .map((a, i) => (
+                <Button
+                  key={a.approvalNodeId}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onFocusNode(a.approvalNodeId)}
+                  data-testid="workflow-plan-approval"
+                >
+                  {t("planApprovalShow", { n: i + 1 })}
+                </Button>
+              ))}
           </div>
         </div>
       )}

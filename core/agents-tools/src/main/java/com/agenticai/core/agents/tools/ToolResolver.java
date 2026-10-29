@@ -49,12 +49,17 @@ final class ToolResolver {
     private final AgentIntegrationToolResolver integrationToolResolver;
     private final ObjectProvider<PlatformIssueService> issueService;
     private final ToolSearchDeferral toolSearchDeferral;
-    // Defense-in-depth backstop behind ToolRelevanceSelector - see AgentToolSelection#capToHardLimit.
+    // Defense-in-depth backstop behind ToolRelevanceSelector - see
+    // AgentToolSelection#capToHardLimit.
     private final int hardCapPerTurn;
-    // Prompt-registry overrides of tool and parameter descriptions (tool.description.*, tool.template.*, tool.param.*).
+    // Prompt-registry overrides of tool and parameter descriptions (tool.description.*,
+    // tool.template.*, tool.param.*).
     private final ToolDescriptionResolver toolDescriptions;
 
-    /** As the wired constructor, with the shipped tool descriptions only (hand-built resolvers, tests). */
+    /**
+     * As the wired constructor, with the shipped tool descriptions only (hand-built resolvers,
+     * tests).
+     */
     ToolResolver(
             List<ToolSource> sources,
             AgentService agentService,
@@ -114,14 +119,17 @@ final class ToolResolver {
     }
 
     /**
-     * As above; {@code stableToolSet} (a turn on a model served from the person's own machine, see {@code
-     * TurnModelTraits#stableToolSet}) skips the per-message relevance trimming so the model sees the same tools on
-     * every turn and its server's prompt cache holds. The hard cap and on-demand tool loading still apply.
+     * As above; {@code stableToolSet} (a turn on a model served from the person's own machine, see
+     * {@code TurnModelTraits#stableToolSet}) skips the per-message relevance trimming so the model
+     * sees the same tools on every turn and its server's prompt cache holds. The hard cap and
+     * on-demand tool loading still apply.
      */
-    ResolvedToolList resolve(ToolResolutionContext ctx, boolean applyRelevanceSelection, boolean stableToolSet) {
+    ResolvedToolList resolve(
+            ToolResolutionContext ctx, boolean applyRelevanceSelection, boolean stableToolSet) {
         // Bound for the whole building of the list, so a tool that renders its own description
         // template when it is constructed (ToolPromptTexts.current()) answers for this agent.
-        return toolDescriptions.within(ctx.agentId(), () -> resolveList(ctx, applyRelevanceSelection, stableToolSet));
+        return toolDescriptions.within(
+                ctx.agentId(), () -> resolveList(ctx, applyRelevanceSelection, stableToolSet));
     }
 
     private ResolvedToolList resolveList(
@@ -168,9 +176,17 @@ final class ToolResolver {
         // so the skill and restore tools above are covered too; a no-op for tools without keys.
         allowed = new ArrayList<>(toolDescriptions.apply(allowed, agentId));
         boolean anyMcp = !mcpTools.isEmpty();
+        // Reachability signal for the scratchpad prompt directive, taken at the last point the
+        // whole candidate set is visible: deferral below may move these tools behind search_tools,
+        // so "on the final list" is not the same question as "reachable this turn". Recorded
+        // whether or not deferral is even on - a direct offer is covered by the directive's own
+        // offers() check either way.
+        boolean scratchpadOffered =
+                allowed.stream()
+                        .anyMatch(t -> "scratchpad_write".equals(t.getToolDefinition().name()));
         if (!applyRelevanceSelection) {
             // The caller wants the untrimmed candidate set, not the per-turn LLM-facing cap.
-            return new ResolvedToolList(allowed, anyMcp);
+            return new ResolvedToolList(allowed, anyMcp, scratchpadOffered);
         }
         // On-demand tool loading (default OFF). Only a real model call applies it: a null
         // chatClient marks a discovery/preview probe, which must keep seeing the real tools. When
@@ -191,7 +207,8 @@ final class ToolResolver {
                                                     : new AtomicInteger(0),
                                             ctx.userMessage(),
                                             ctx.chatClient(),
-                                            false));
+                                            false),
+                            ctx.chatClient());
             if (deferred != allowed) {
                 // search_tools / call_tool are added here, after the pass above.
                 return new ResolvedToolList(
@@ -200,20 +217,19 @@ final class ToolResolver {
                                 hardCapPerTurn,
                                 mcpToolNames,
                                 agentId),
-                        anyMcp);
+                        anyMcp,
+                        scratchpadOffered);
             }
         }
         List<ToolCallback> selected =
                 stableToolSet
                         ? allowed
                         : toolRelevanceSelector.select(
-                                ctx.userMessage(),
-                                allowed,
-                                alwaysRelevant(ctx),
-                                mcpToolNames);
+                                ctx.userMessage(), allowed, alwaysRelevant(ctx), mcpToolNames);
         return new ResolvedToolList(
                 AgentToolSelection.capToHardLimit(selected, hardCapPerTurn, mcpToolNames, agentId),
-                anyMcp);
+                anyMcp,
+                scratchpadOffered);
     }
 
     /**

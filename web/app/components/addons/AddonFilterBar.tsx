@@ -28,7 +28,7 @@ export default function AddonFilterBar({ filters, onChange, categories, total, t
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative min-w-0 flex-1">
           <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <Input
@@ -37,7 +37,7 @@ export default function AddonFilterBar({ filters, onChange, categories, total, t
             onChange={(e) => onChange({ ...filters, query: e.target.value })}
             placeholder={t("filter.searchPlaceholder")}
             aria-label={t("filter.searchLabel")}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
         <Select
@@ -70,7 +70,7 @@ export default function AddonFilterBar({ filters, onChange, categories, total, t
                   : "border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               )}
             >
-              {category === "all" ? t("filter.all") : text.category(category)}
+              {category === "all" ? t("filter.all") : text.category(category)}{" "}
               <span className="tabular-nums opacity-70">{count}</span>
             </button>
           );

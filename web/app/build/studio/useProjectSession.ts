@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import { useDictation } from "./dictation";
 import { canAdminister, canEdit } from "./collab";
 import { CREATE_SYSTEM, EDIT_SYSTEM, createPrompt, editPrompt, runModel, type EngineKind } from "./engine";
-import { PLAN_SYSTEM, findDuplicateDeclarations, integrationPrompt, needsPlan, parsePlan, planPrompt, repairPrompt, stepPrompt } from "./buildPlan";
+
+import { CLARIFY_SYSTEM, PLAN_SYSTEM, clarifyPrompt, findDuplicateDeclarations, integrationPrompt, needsPlan, parsePlan, parseQuestions, planPrompt, repairPrompt, shouldClarify, stepPrompt } from "./buildPlan";
 import { applyEditBlocks, dedupeSkeletonHelpers, extractEditNote, extractHtmlDocument, firstBrokenScript, looksLikeValidApp, parseEditBlocks, setScriptChecker } from "./patch";
 import { loadBabel } from "../../lib/babel";
 import { DEFAULT_ENV, HARNESS_LINES, findInSource, serializeDoc, withHarness, type PreviewEnv, type SelectedElement } from "./runtime";
@@ -85,6 +86,11 @@ export function useProjectSession({
   const lastFixRef = useRef<string | null>(null);
   const [busy, setBusy] = useState<{ label: string; started: number; engineLabel: string } | null>(null);
   const [stream, setStream] = useState("");
+
+  /** Clarify turn waiting on the owner's answers before the build starts. */
+  const [clarify, setClarify] = useState<{ questions: string[]; description: string } | null>(null);
+  /** Steps the multi-screen plan is working through, for the checklist in the busy card. */
+  const [planState, setPlanState] = useState<{ steps: string[]; current: number } | null>(null);
   // Warm the vendored Babel once so firstBrokenScript has a real parser when
   // the first edit reply arrives - looksLikeValidApp can then reject a
   // document whose <script> does not parse instead of shipping it dead.
@@ -314,10 +320,26 @@ export function useProjectSession({
   );
 
   const runCreate = useCallback(
-    async (description: string) => {
+    async (description: string, opts: { skipClarify?: boolean } = {}) => {
       const ctrl = new AbortController();
       abortRef.current = ctrl;
       const started = Date.now();
+      // A one-line idea is the builder's hardest input: the model fills every
+      // gap with guesses and the first version misses the point. One fast
+      // clarify turn asks what matters - the model says READY when nothing
+      // does, a detailed brief (>=240 chars) skips the call entirely.
+      if (!opts.skipClarify && shouldClarify(description)) {
+        setBusy({ label: "Checking your idea…", started, engineLabel: plannedEngine(engine, "cloud").label });
+        const cRes = await runModel({ system: CLARIFY_SYSTEM, user: clarifyPrompt(description), signal: ctrl.signal, prefer: "cloud", replyTokens: 160 });
+        if (ctrl.signal.aborted) return;
+        const qs = cRes.ok ? parseQuestions(cRes.text) : [];
+        if (qs.length) {
+          setBusy(null);
+          abortRef.current = null;
+          setClarify({ questions: qs, description });
+          return;
+        }
+      }
       setBusy({ label: "Writing your app…", started, engineLabel: plannedEngine(engine, enginePref === "cloud" ? "cloud" : "device").label });
       // Whole-app generation needs a big reply - only the on-device model
       // can give one (the cloud draft endpoint replies ~1k tokens), so the
@@ -379,6 +401,7 @@ export function useProjectSession({
           pushLog({ kind: "result", text: `Plan: ${steps.length} steps - ${steps.map((t, i) => `${i + 1}) ${t}`).join("  ")}`, engine: "cloud", model: planRes.modelName });
           lastHtmlRef.current = BLANK_APP;
           for (let i = 0; i < steps.length; i++) {
+            setPlanState({ steps, current: i });
             // The cloud endpoint 500s now and then, more often as the app (and so
             // the prompt) grows; one retry after a short pause saves the build.
             const runStep = () =>
@@ -403,7 +426,10 @@ export function useProjectSession({
                     : `Step ${i + 1} of ${steps.length} ("${steps[i]}") did not land after a retry; steps 1-${i} are built. Ask for it again in the box below.`,
               });
             }
-            if (!ok) return;
+            if (!ok) {
+              setPlanState(null);
+              return;
+            }
             // A step that re-declares an earlier top-level name blanks the app:
             // repair it before the next step builds on a broken script.
             const dups = findDuplicateDeclarations(lastHtmlRef.current || "");
@@ -413,15 +439,20 @@ export function useProjectSession({
                 baseHtml: lastHtmlRef.current ?? BLANK_APP,
                 failNote: `Step ${i + 1} left duplicate declarations (${dups.join(", ")}) that blank the app. Use "Fix it with AI" to repair.`,
               });
-              if (!fixed) return;
+              if (!fixed) {
+                setPlanState(null);
+                return;
+              }
             }
           }
           // Wire every screen into the router (steps only add render functions).
+          setPlanState({ steps, current: steps.length });
           const wired = await runEdit(integrationPrompt(description, steps), {
             prefer: "cloud",
             baseHtml: lastHtmlRef.current ?? BLANK_APP,
             failNote: "The screens are built but could not be wired to the tabs. Ask: \"make each tab show its own screen\".",
           });
+          setPlanState(null);
           if (!wired) return;
           // A finished build that throws on load (e.g. a function used before it
           // is defined) shows a blank phone: give the preview a moment to report
@@ -474,8 +505,8 @@ export function useProjectSession({
     }
   }, [pendingCreate, clearPendingCreate, runEdit, runCreate]);
 
-  const send = (opts: { wholePage?: boolean } = {}) => {
-    const r = request.trim();
+  const send = (opts: { wholePage?: boolean; text?: string } = {}) => {
+    const r = (opts.text ?? request).trim();
     if (!r || busy) return;
     // A whole-page rewrite is the edit models get wrong most - dozens of
     // SEARCH blocks, some of which miss. Suggest tapping the part first and
@@ -495,6 +526,17 @@ export function useProjectSession({
   };
 
   const stop = () => abortRef.current?.abort();
+
+  /** The clarify turn's card: answers fold into the brief and the build runs
+   * once, skipping the clarify leg so it cannot ask the same questions again. */
+  const answerClarify = (answers: string | null) => {
+    const c = clarify;
+    setClarify(null);
+    if (!c) return;
+    const detail = answers?.trim();
+    pushLog({ kind: "user", text: detail ? detail : "(build it as described)" });
+    void runCreate(detail ? `${c.description}\n\nWhat the owner added: ${detail}` : c.description, { skipClarify: true });
+  };
 
   const restore = (index: number) => {
     const v = project.versions[index];
@@ -566,7 +608,7 @@ export function useProjectSession({
   const elapsed = useElapsed(busy?.started ?? null);
 
   return {
-    applyData, attachConnection, attached, busy, commit, detachConnection, device, dictation, diffFrom, directEdit, editable, elapsed, engine, env, fileInputRef, finishPendingAuth, frameRef, html, inspect, isOwner, lastFixRef, log, nonce, onBack, onOpenApp, panel, pendingAuth, pickFiles, project, publishApp, pushLog, request, restore, runEdit, runtimeError, scale, scopeAsk, selected, send, setAiConfig, setAttached, setAuthMode, setDevice, setDiffFrom, setEnginePref, setEnv, setInspect, setNonce, setPanel, setRequest, setScopeAsk, setSelected, size, srcDoc, stageRef, stop, stream, syncEnv, syncInspect, undo, undoTarget, unpublishApp, update, updateConnection
+    answerClarify, applyData, attachConnection, attached, busy, clarify, commit, detachConnection, device, dictation, diffFrom, directEdit, editable, elapsed, engine, env, fileInputRef, finishPendingAuth, frameRef, html, inspect, isOwner, lastFixRef, log, nonce, onBack, onOpenApp, panel, pendingAuth, pickFiles, planState, project, publishApp, pushLog, request, restore, runEdit, runtimeError, scale, scopeAsk, selected, send, setAiConfig, setAttached, setAuthMode, setDevice, setDiffFrom, setEnginePref, setEnv, setInspect, setNonce, setPanel, setRequest, setScopeAsk, setSelected, size, srcDoc, stageRef, stop, stream, syncEnv, syncInspect, undo, undoTarget, unpublishApp, update, updateConnection
   };
 }
 

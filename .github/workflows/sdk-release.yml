@@ -21,6 +21,11 @@ name: SDK release
 # instead, add `push: tags: ["sdk-v*.*.*"]` here.
 on:
   workflow_dispatch:
+    inputs:
+      publish-deployment:
+        description: "Publish the uploaded deployment via the Central Portal API (autoPublish is off - this replaces the manual Publish click in the portal UI)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -47,7 +52,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: "17"
@@ -92,7 +97,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: "17"
@@ -115,7 +120,7 @@ jobs:
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: "dist/*.jar"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sdk-release-files
           path: dist/
@@ -129,7 +134,7 @@ jobs:
     permissions:
       contents: write # create the release and upload files
     steps:
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: sdk-release-files
           path: dist
@@ -164,7 +169,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
         with:
           distribution: temurin
           java-version: "17"
@@ -180,4 +185,57 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.SDK_GPG_PASSPHRASE }}
-        run: mvn -B -ntp -Prelease -DskipTests deploy
+        run: |
+          set -o pipefail
+          mvn -B -ntp -Prelease -DskipTests deploy 2>&1 | tee deploy-log.txt
+      # autoPublish is off on purpose - a release is a human decision. The dispatch
+      # input publish-deployment is that decision: it calls the same Portal publish
+      # endpoint the UI's Publish button does, so no portal login is needed.
+      - name: Publish the validated deployment
+        if: inputs.publish-deployment
+        working-directory: sdk/java
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          id="$(grep -oE 'deploymentId: [a-f0-9-]+' deploy-log.txt | tail -1 | awk '{print $2}')"
+          [ -n "$id" ] || { echo "::error::no deploymentId in the deploy log - the upload step reported none"; exit 1; }
+          token="$(printf '%s:%s' "$CENTRAL_USERNAME" "$CENTRAL_PASSWORD" | base64 -w0)"
+          status_of() {
+            # /api/v1/publisher/status is a POST - a GET answers 5xx.
+            # download lands on disk first, then python parses the file - keeps
+            # the downloadThenRun OpenSSF check quiet and is no weaker (the pipe
+            # only ever fed a JSON parser, never executed the payload).
+            resp="$(mktemp)"
+            curl -fsS -X POST -H "Authorization: Bearer $token" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=$1" \
+              -o "$resp"
+            python3 -c "import json; print(json.load(open('$resp')).get('deploymentState',''))"
+            rm -f "$resp"
+          }
+          state="$(status_of "$id" || echo '')"
+          echo "deployment $id starts at ${state:-unknown}"
+          case "$state" in
+            PUBLISHING|PUBLISHED) ;;
+            *)
+              # The API's error body carries the reason - keep it in the log, not just the status.
+              # -d '' so a Content-Length: 0 goes out - a bodiless POST gets 400 from
+              # the portal's edge even though the same call is valid.
+              code="$(curl -sS -o publish-resp.txt -w '%{http_code}' -X POST -d '' -H "Authorization: Bearer $token" \
+                "https://central.sonatype.com/api/v1/publisher/deployment/$id")"
+              echo "publish call: HTTP $code - $(cat publish-resp.txt 2>/dev/null || true)"
+              [ "$code" = "204" ] || [ "$code" = "200" ] || { echo "::error::publish call failed (HTTP $code)"; exit 1; }
+              ;;
+          esac
+          for i in $(seq 1 30); do
+            state="$(status_of "$id" || echo '')"
+            echo "deployment $id: $state"
+            case "$state" in
+              PUBLISHED) exit 0 ;;
+              FAILED|DROPPED) echo "::error::deployment $id ended $state"; exit 1 ;;
+            esac
+            sleep 20
+          done
+          echo "::error::deployment $id still not PUBLISHED after 10 min - check https://central.sonatype.com/publishing/deployments"
+          exit 1

@@ -5,9 +5,14 @@
 [![CI](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/CD-LC/vegaduta/badge)](https://scorecard.dev/viewer/?uri=github.com/CD-LC/vegaduta)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15985/badge)](https://www.bestpractices.dev/projects/15985)
 [![License: BSL-1.1](https://img.shields.io/badge/license-BSL--1.1-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/CD-LC/vegaduta?sort=semver)](https://github.com/CD-LC/vegaduta/releases)
 [![Helm chart](https://img.shields.io/badge/helm-oci%3A%2F%2Fghcr.io%2Fcd--lc%2Fcharts-0F1689?logo=helm)](deploy/helm/README.md)
+
+<p align="center">
+  <img src="docs/assets/vegaduta-hero.png" alt="VegaDūta" width="720" />
+</p>
 
 VegaDūta is a self-hostable agent platform: a Java 21 / Spring Boot core, one Next.js console (the tenant app, the public pages and the platform-admin area under `/platform-admin`), and twelve optional services in Python and Node. It speaks the open agent standards (MCP as client and server, A2A, AG-UI, OpenTelemetry `gen_ai` attributes), keeps every tenant in its own Postgres schema, and runs from a five-container laptop install up to a Helm deployment on Kubernetes.
 

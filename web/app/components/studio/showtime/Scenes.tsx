@@ -151,7 +151,7 @@ function DesignScene({ p }: SceneProps) {
                 className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm transition-colors ${active ? "border-violet-400 bg-violet-500/20" : used ? "border-emerald-500/30 bg-emerald-500/10 text-zinc-400" : "border-white/10 bg-white/5"}`}
               >
                 <b.icon className="h-4 w-4 text-violet-300" /> {b.label}
-                {used && <Check aria-hidden="true" className="ml-auto h-3.5 w-3.5 text-emerald-300 shrink-0" />}
+                {used && <Check aria-hidden="true" className="ms-auto h-3.5 w-3.5 text-emerald-300 shrink-0" />}
               </div>
             );
           })}
@@ -235,7 +235,7 @@ function RegistryScene({ p }: SceneProps) {
           <Search aria-hidden="true" className="h-4 w-4 text-zinc-400 shrink-0" />
           <span className={query ? "text-zinc-100" : "text-zinc-400"}>{query || "Search tools…"}</span>
           {query && p < 0.6 && <span className="h-4 w-[2px] animate-pulse bg-violet-300" />}
-          <span className="ml-auto text-[11px] text-zinc-400">
+          <span className="ms-auto text-[11px] text-zinc-400">
             {filtering > 0.5 ? "1 match · 40+ built-in, plus the MCP registry" : "40+ built-in, plus the MCP registry"}
           </span>
         </div>
@@ -349,7 +349,7 @@ function AgentScene({ p }: SceneProps) {
         >
           <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> Bound to the button{" "}
           <b>“{APP.button}”</b> →
-          <span className="ml-auto inline-flex items-center gap-1 text-emerald-300">
+          <span className="ms-auto inline-flex items-center gap-1 text-emerald-300">
             <Check className="h-4 w-4 shrink-0" aria-hidden="true" /> wired
           </span>
         </div>

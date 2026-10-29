@@ -254,7 +254,7 @@ export default function CommandPalette({ open, onOpenChange, sections }: Command
                   router.push(item.href);
                   onOpenChange(false);
                 }}
-                className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-left text-sm transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-start text-sm transition-colors"
                 style={{
                   // Active row needs a cue that clears 3:1 non-text contrast
                   // against the popover surface in both themes - a plain
@@ -271,7 +271,7 @@ export default function CommandPalette({ open, onOpenChange, sections }: Command
                 <Icon size={15} className="shrink-0" style={{ color: "var(--text-faint)" }} aria-hidden="true" />
                 <span className="truncate">{item.label}</span>
                 {item.groupLabel && (
-                  <span className="ml-auto shrink-0 truncate text-[11px]" style={{ color: "var(--text-faint)" }}>
+                  <span className="ms-auto shrink-0 truncate text-[11px]" style={{ color: "var(--text-faint)" }}>
                     {item.groupLabel}
                   </span>
                 )}

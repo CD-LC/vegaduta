@@ -70,7 +70,10 @@ database:
 realm:
   # -- Import the realm on first start.
   import: true
-  registrationAllowed: true
+  # -- Public self-sign-up. Off: anyone who can reach Keycloak can otherwise
+  # self-register and start creating agents/resources. Only enable for a hosted
+  # deployment that wants it, together with verifyEmail and a WAF/CAPTCHA.
+  registrationAllowed: false
   verifyEmail: false
   displayName: VegaDuta
   # -- Extra redirect URIs / web origins for the web client (e.g. a second domain).

@@ -1,4 +1,5 @@
-# tool-sandbox - compiles, verifies and runs tenant-authored Java/Python tools.
+# tool-sandbox - compiles, verifies and runs tenant-authored Java/Python/
+# JavaScript/TypeScript tools.
 #
 # Why this is its own image rather than something core does in-process:
 #   * core's runtime image is a JRE, so it has no `javac` and no `python3`;
@@ -13,7 +14,7 @@
 # The trusted Java side, built once at image build time. `vega-api.jar` is what
 # tenant code compiles against; `harness.jar` is the loader that invokes it and
 # is deliberately NOT on the tenant's compile classpath.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS harness
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS harness
 
 WORKDIR /build
 COPY harness/java ./java
@@ -30,7 +31,12 @@ RUN set -eux; \
 # the module allowlist in app/policy.py is checked against the stdlib that
 # actually ships. (Previously this stage was the temurin jammy image with apt's
 # python3 - 3.10 - the only 3.10 service in the repo.)
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+# The Node runtime for the javascript/typescript languages: the same pinned
+# 22.x tag every other Node-based service uses (services/workspace-runner,
+# services/mcp-stdio-runner).
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node
+
+FROM python:3.14.8-slim-trixie@sha256:fbecd461fc72d21b2143c6eaba25143738079154a6d0ea3da3aec724f50eed4a
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -61,6 +67,20 @@ RUN set -eux; \
     command -v prlimit; \
     /opt/java/openjdk/bin/java -version; \
     /opt/java/openjdk/bin/javac -version
+
+# The Node runtime tenant JavaScript/TypeScript tools run under. Only the
+# binary is copied - there is no npm and no node_modules on purpose: tenant
+# tools are single-file programs with no package ecosystem (the identifier
+# policy denies `require`/`import` of anything at all).
+# Node 26+ links libatomic on arm64 and (since 26.11) on amd64 too;
+# python:slim ships libstdc++/libgcc but not libatomic, so install it for the
+# copied binary on every arch. core/Dockerfile does the same unconditionally.
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends libatomic1; \
+    rm -rf /var/lib/apt/lists/*; \
+    /usr/local/bin/node --version
 
 # Two identities, and the split is the point:
 #   `sandbox` (uid 5000) owns nothing and is unused today, reserved for running
@@ -101,6 +121,7 @@ RUN set -eux; \
 ENV TOOL_SANDBOX_JAVAC=/opt/java/openjdk/bin/javac \
     TOOL_SANDBOX_JAVA=/opt/java/openjdk/bin/java \
     TOOL_SANDBOX_PYTHON=/usr/local/bin/python3 \
+    TOOL_SANDBOX_NODE=/usr/local/bin/node \
     TOOL_SANDBOX_HARNESS_ROOT=/opt/tool-sandbox \
     TOOL_SANDBOX_WORK_ROOT=/var/sandbox/work \
     TOOL_SANDBOX_CACHE_ROOT=/var/sandbox/cache \
@@ -117,7 +138,7 @@ EXPOSE 8095
 HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=20s \
     CMD /usr/local/bin/python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)"
 
-# Runs as root ONLY so it can drop to uid 5001 for tenant code - `setpriv`
+# trivy:ignore:DS-0002 Runs as root ONLY so it can drop to uid 5001 for tenant code - `setpriv`
 # needs CAP_SETUID/CAP_SETGID, and SIGKILLing the uid-5001 child on timeout
 # needs CAP_KILL. This is the documented exception to "every service runs
 # non-root": the compose entry and the helm chart drop every capability except

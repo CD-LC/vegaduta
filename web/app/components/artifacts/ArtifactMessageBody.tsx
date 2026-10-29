@@ -64,7 +64,7 @@ export default function ArtifactMessageBody({
                 onClick={() => onPromote(p.candidate)}
                 aria-label={t("candidateOpenLabel", { kind: kindLabel })}
                 data-testid="artifact-candidate-open"
-                className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-left text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-start text-xs font-medium text-foreground transition-colors hover:bg-accent"
               >
                 <ArtifactKindIcon kind={p.candidate.kind} className="size-4 shrink-0 text-muted-foreground" />
                 <span className="min-w-0 truncate">{t("candidateOpen")}</span>
@@ -87,7 +87,10 @@ export default function ArtifactMessageBody({
         const ref = registry.byBlock[blockKey(messageIndex, seg.blockIndex)];
         if (!ref) {
           return (
-            <p key={`a${si}`} className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+            <p
+              key={`a${si}`}
+              className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+            >
               {t("chipUnavailable", { title: a.title })}
             </p>
           );
@@ -101,8 +104,8 @@ export default function ArtifactMessageBody({
             aria-label={t("chipOpen", { title: a.title })}
             data-testid="artifact-chip"
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl border bg-card px-3 py-2.5 text-left transition-colors hover:bg-accent",
-              activeId === ref.id ? "border-primary/60" : "border-border",
+              "flex w-full items-center gap-3 rounded-xl border bg-card px-3 py-2.5 text-start transition-colors hover:bg-accent",
+              activeId === ref.id ? "border-primary/60" : "border-border"
             )}
           >
             <ArtifactKindIcon kind={a.kind} className="size-5 shrink-0 text-muted-foreground" />

@@ -115,7 +115,9 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
       {role && role !== "OWNER" && (
         <p className="rounded-lg bg-secondary/60 p-2 text-xs text-muted-foreground">
           Shared with you: <b>{roleLabel(role)}</b>.{" "}
-          {role === "VIEWER" ? "This copy is read-only." : "You can add versions; the owner manages settings and sharing."}
+          {role === "VIEWER"
+            ? "This copy is read-only."
+            : "You can add versions; the owner manages settings and sharing."}
         </p>
       )}
       {error && (
@@ -136,7 +138,12 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
               </span>
               <span className="shrink-0 text-xs text-muted-foreground">{roleLabel(m.role)}</span>
               {owner && m.role !== "OWNER" && (
-                <Button size="sm" variant="ghost" aria-label={`Remove ${m.name}`} onClick={() => void remove(m.subject)}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  aria-label={`Remove ${m.name}`}
+                  onClick={() => void remove(m.subject)}
+                >
                   <X aria-hidden="true" size={14} />
                 </Button>
               )}
@@ -170,7 +177,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
               <option value="EDITOR">Can edit</option>
             </select>
             <Button type="submit" size="sm" disabled={inviting || !email.trim()}>
-              <UserPlus aria-hidden="true" size={14} className="mr-1" /> Invite
+              <UserPlus aria-hidden="true" size={14} className="me-1" /> Invite
             </Button>
           </form>
         )}
@@ -179,10 +186,10 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <h3 className="font-medium">
-            <MessageSquare aria-hidden="true" size={14} className="mr-1 inline" /> Comments
-            {open > 0 && <span className="ml-1 text-xs text-muted-foreground">({open} open)</span>}
+            <MessageSquare aria-hidden="true" size={14} className="me-1 inline" /> Comments
+            {open > 0 && <span className="ms-1 text-xs text-muted-foreground">({open} open)</span>}
           </h3>
-          <label className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
+          <label className="ms-auto flex items-center gap-1 text-xs text-muted-foreground">
             <input type="checkbox" checked={showResolved} onChange={(e) => setShowResolved(e.target.checked)} />
             Show resolved
           </label>
@@ -194,8 +201,10 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="font-medium text-foreground">{c.authorName}</span>
                 <time dateTime={new Date(c.createdAt).toISOString()}>{new Date(c.createdAt).toLocaleString()}</time>
-                {c.versionAt && <span className="rounded bg-secondary px-1">v {new Date(c.versionAt).toLocaleTimeString()}</span>}
-                <span className="ml-auto flex gap-1">
+                {c.versionAt && (
+                  <span className="rounded bg-secondary px-1">v {new Date(c.versionAt).toLocaleTimeString()}</span>
+                )}
+                <span className="ms-auto flex gap-1">
                   <Button
                     size="sm"
                     variant="ghost"
@@ -245,7 +254,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
                 ))}
               </select>
             )}
-            <Button type="submit" size="sm" className="ml-auto" disabled={posting || !draft.trim()}>
+            <Button type="submit" size="sm" className="ms-auto" disabled={posting || !draft.trim()}>
               Comment
             </Button>
           </div>

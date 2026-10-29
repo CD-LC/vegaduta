@@ -62,11 +62,18 @@
     "railLearn": "പഠിക്കുക",
     "brandIdentityAriaLabel": "VegaDūta ബ്രാൻഡ് ഐഡൻ്റിറ്റി",
     "railRuntimeSettings": "റൺടൈം ക്രമീകരണങ്ങൾ",
-    "railControls": "ഞാൻ എവിടെ നിയന്ത്രിക്കണം...?"
+    "railControls": "ഞാൻ എവിടെ നിയന്ത്രിക്കണം...?",
+    "railA2a": "A2A activity"
   },
   "languageSwitcher": {
     "label": "ഭാഷ",
-    "resetToEnglish": "ഇംഗ്ലീഷിലേക്ക് മാറുക"
+    "resetToEnglish": "ഇംഗ്ലീഷിലേക്ക് മാറുക",
+    "packTitle": "Download {label}?",
+    "packBody": "This personal install keeps language packs off the device until you ask for them. {label} is about {size} - a one-time download, stored on this machine.",
+    "packDownload": "Download",
+    "packDownloading": "Downloading…",
+    "packCancel": "Not now",
+    "packFailed": "Download failed - check the connection and try again."
   },
   "signup": {
     "eyebrow": "സൗജന്യ അക്കൗണ്ട്",
@@ -197,7 +204,22 @@
     "newToVegaduta": "VegaDūta-യിൽ പുതിയതാണോ?",
     "startFree": "സൗജന്യമായി ആരംഭിക്കുക",
     "tryWithoutAccount": "അല്ലെങ്കിൽ അക്കൗണ്ട് ഇല്ലാതെ പരീക്ഷിക്കുക",
-    "trustLine": "സുരക്ഷിതമായ സൈൻ-ഇൻ · നിങ്ങളുടെ ഡാറ്റ നിങ്ങളുടെ വർക്ക്‌സ്‌പെയ്‌സിലും മേഖലയിലും തന്നെ തുടരും"
+    "trustLine": "സുരക്ഷിതമായ സൈൻ-ഇൻ · നിങ്ങളുടെ ഡാറ്റ നിങ്ങളുടെ വർക്ക്‌സ്‌പെയ്‌സിലും മേഖലയിലും തന്നെ തുടരും",
+    "local": {
+      "signin": {
+        "forgotPassword": "Forgot password?",
+        "pinNotEnrolled": "A PIN only works in the browser it was set up in - this one isn't enrolled. Sign in another way, then add this browser's PIN in Account security."
+      },
+      "forgot": {
+        "intro": "Request a reset link. It is saved to a file on the computer running this install - that is how it knows it is really you, since anyone can reach this page.",
+        "label": "Account e-mail",
+        "hint": "On a personal install this is usually the one account, so you can leave it blank.",
+        "button": "Request reset link",
+        "sending": "Requesting…",
+        "done": "If the account exists, a reset link was saved on this machine. Run scripts/vegaduta reset-password to see it, then open the link it prints and choose a new password.",
+        "doneWindows": "If the account exists, a reset link was saved on this machine. Run .\\scripts\\vegaduta.ps1 reset-password to see it, then open the link it prints and choose a new password."
+      }
+    }
   },
   "landingRoot": {
     "srTitle": "VegaDūta - പ്രവർത്തിക്കുന്ന ഒരു ബുദ്ധി",
@@ -890,7 +912,10 @@
     "reasonBilling": "ദാതാവിന്റെ ബില്ലിംഗ് പ്രശ്നം",
     "reasonModelNotFound": "മോഡൽ ലഭ്യമല്ല",
     "reasonProviderError": "ദാതാവിന്റെ പിശക്",
-    "reasonMalformedToolCall": "ടൂൾ കോൾ ഉപയോഗിക്കാനായില്ല"
+    "reasonMalformedToolCall": "ടൂൾ കോൾ ഉപയോഗിക്കാനായില്ല",
+    "continuationBadge": "after approval",
+    "continuationBadgeTitle": "The agent's answer after you approved (or denied) the tool call it was waiting on.",
+    "controlsToggle": "Call & controls"
   },
   "nodeDefs": {
     "triggerLabel": "ട്രിഗർ",
@@ -1579,7 +1604,12 @@
     "autonomyTierFULLY_AUTONOMOUS": "Fully autonomous",
     "autonomyTierFULLY_AUTONOMOUSHint": "Never waits for approval, and gets a higher step ceiling. It will act without asking.",
     "autonomyTierFULLY_AUTONOMOUSCost": "Never asks you: every tool call runs as soon as the agent makes it, sends and payments included.",
-    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn."
+    "autonomyQueueNote": "Approval requests land in the workspace's approvals queue, and a tool call that is waiting is not run - the agent is told so and carries on with the rest of the turn.",
+    "knowledgeWriteLabel": "Allow writing to the knowledge base (add_to_knowledge_base tool)",
+    "knowledgeWriteLoadError": "Could not load this agent's knowledge-write settings.",
+    "writableCollectionsHint": "Only checked collections can be written to. With nothing checked the agent cannot write anywhere - searching stays unaffected.",
+    "readOnlyRepoHint": "Checked repositories restrict which repos this agent’s code tools may search and analyse. Leave all unchecked to allow every registered repository.",
+    "codeIntelToolsHint": "Per-tool on/off for search, graph navigation and the analysis suite (repo map, references, implementations, call paths, dead code, API surface, hotspots) lives in the Tools section."
   },
   "nodeConfigDrawer": {
     "emptyStateHint": "കോൺഫിഗർ ചെയ്യാൻ ഒരു നോഡ് തിരഞ്ഞെടുക്കുക, അല്ലെങ്കിൽ ഇടതുവശത്തുള്ള പാലറ്റിൽ നിന്ന് പുതിയൊരെണ്ണം വലിച്ചിടുക.",
@@ -5607,7 +5637,13 @@
     "edgeSightOn": "ക്യാമറ ഈ ഉപകരണത്തിൽ വിശകലനം ചെയ്യുന്നു - ഫ്രെയിമുകൾ നിങ്ങളുടെ ബ്രൗസർ വിട്ടുപോകുന്നില്ല.",
     "edgeSightStopped": "ഉപകരണത്തിലെ ക്യാമറ വിശകലനം നിർത്തി ({reason}) - കോൾ വോയിസ്-ഓൺലി ആയി തുടരുന്നു.",
     "micDenied": "മൈക്രോഫോൺ ആക്‌സസ് നിരസിച്ചു - ഒരു കോളിന് മൈക്ക് ആവശ്യമാണ്. നിങ്ങളുടെ ബ്രൗസർ അനുമതികൾ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.",
-    "couldNotStart": "കോൾ ആരംഭിക്കാൻ കഴിഞ്ഞില്ല."
+    "couldNotStart": "കോൾ ആരംഭിക്കാൻ കഴിഞ്ഞില്ല.",
+    "sectionTitle": "Call",
+    "statusInCall": "In call",
+    "statusConnecting": "Connecting…",
+    "statusFailed": "Call failed",
+    "statusIdle": "Not in a call",
+    "callWithCameraNeedsVision": "Call + camera needs an agent whose model can see - pick a vision model or enable on-device sight."
   },
   "customCodeTools": {
     "pageTitle": "കസ്റ്റം കോഡ് ടൂളുകൾ",
@@ -5807,7 +5843,11 @@
       "builtinDetail": "നിങ്ങളുടെ ബ്രൗസറിന്റെ സ്വന്തം മോഡൽ. Chrome 127+ ഇത് സ്വയം ഡൗൺലോഡ് ചെയ്യുകയും അപ്ഡേറ്റ് ചെയ്യുകയും ചെയ്യുന്നു; ഈ ആപ്പ് ഒന്നും സംഭരിക്കുന്നില്ല.",
       "motionDetail": "നിശ്ചല ചിത്രങ്ങളെ ചലിക്കുന്ന ക്ലിപ്പുകളാക്കി മാറ്റുന്നു. Clip Studio-യിൽ ആദ്യമായി Motion+ ഉപയോഗിക്കുമ്പോൾ സ്വയമേവ ഡൗൺലോഡ് ചെയ്യും.",
       "motionNotPublished": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചിട്ടില്ല — ഉടൻ വരുന്നു",
-      "motionOpenClips": "Clip Studio തുറക്കുക"
+      "motionOpenClips": "Clip Studio തുറക്കുക",
+      "purposeImageGen": "Generates images from a text prompt, fully on-device",
+      "purposeAudioGen": "Generates short music and sound clips, fully on-device",
+      "generatedMediaTitle": "Generated on this device",
+      "generatedMediaEmpty": "Nothing generated yet — ask your assistant for an image or a sound clip once a model above is installed."
     },
     "installed": {
       "title": "ഈ ഉപകരണത്തിൽ ഇൻസ്റ്റാൾ ചെയ്തവ",
@@ -14788,7 +14828,8 @@
     "closePanel": "Close the panel",
     "conversationLabel": "Conversation",
     "copiedReply": "Copied",
-    "jumpToLatest": "Jump to the latest message"
+    "jumpToLatest": "Jump to the latest message",
+    "learnedKind_DESKTOP_RECIPE": "Desktop runs to save ({n})"
   },
   "agentLab": {
     "wtLabel": "ഏജന്റിന്റെ ടൂളുകൾ ഉപയോഗിച്ച് പ്രവർത്തിപ്പിക്കുക",
@@ -14857,6 +14898,10 @@
       "providers": {
         "label": "AI ദാതാക്കൾ",
         "description": "ബന്ധിപ്പിച്ച AI ദാതാവിന്റെ കീകളിൽ ഒന്ന് പ്രവർത്തനം നിർത്തുമ്പോൾ അവ എങ്ങനെ ഉപയോഗിക്കുന്നു."
+      },
+      "tools": {
+        "label": "Agent tools",
+        "description": "Which built-in tool helpers an agent keeps."
       }
     },
     "agent": {
@@ -15085,6 +15130,11 @@
             "description": "പഴയവ മായ്ക്കുന്നതിന് മുമ്പ് ഒരു ടേണിലെ ടൂൾ ഫലങ്ങൾ എത്ര വലുതാകാം.",
             "help": "കൂടുതൽ ഫലങ്ങൾ ദൃശ്യമാക്കാൻ ഉയർത്തുക, ദീർഘ റണ്ണുകൾ ചെറുതും വിലകുറഞ്ഞതുമായി നിലനിർത്താൻ കുറയ്ക്കുക."
           }
+        },
+        "maxPromptTokensPerTurn": {
+          "label": "Prompt-token budget per reply",
+          "description": "Total prompt tokens one reply's tool loop may send the model before it is told to stop calling tools and answer with what it has.",
+          "help": "0 means no cap. Lower it to stop a runaway tool loop that keeps resending a large context; the per-turn tool-call limit bounds rounds, this bounds their size."
         }
       }
     },
@@ -15301,6 +15351,15 @@
           "label": "ദാതാവ് കീ നിരസിച്ചതിന് ശേഷമുള്ള ഇടവേള",
           "description": "ദാതാവ് ബന്ധിപ്പിച്ച ദാതാവ് കീ നിരസിച്ചതിന് ശേഷം പശ്ചാത്തല ജോലി അത് എത്ര നേരം ഒഴിവാക്കുന്നു.",
           "help": "ഇടവേള സമയത്ത്, ഷെഡ്യൂൾ ചെയ്തതും സ്വയമേവയുള്ളതുമായ ജോലികൾ പരാജയപ്പെട്ടുകൊണ്ടിരിക്കുന്ന കീ വിളിക്കുന്നതിന് പകരം മറ്റൊരു ബന്ധിപ്പിച്ച ദാതാവിനെ ഉപയോഗിക്കുന്നു, അല്ലെങ്കിൽ കാത്തിരിക്കുന്നു. ചാറ്റ് ചെയ്യുന്ന ആളുകളെ ഒരിക്കലും തടയുന്നില്ല, അവർ എപ്പോഴും ദാതാവിന്റെ യഥാർത്ഥ പിശക് കാണുന്നു. ഇടവേള അവസാനിക്കുമ്പോൾ, കീ ശരിയാക്കിയോ എന്ന് പരിശോധിക്കാൻ ഒരു കോൾ കടത്തിവിടുന്നു. പൂജ്യം ഇടവേള ഓഫ് ആക്കുന്നു."
+        }
+      }
+    },
+    "tools": {
+      "scratchpad": {
+        "enabled": {
+          "label": "Agent scratchpad",
+          "description": "Give the agent its scratchpad tools: a persistent notepad with session-scoped working notes and a long-term pad it writes and reads itself.",
+          "help": "Turn it off to remove the four scratchpad tools (write, read, list, delete) from the agent. Notes already stored are kept but the agent can no longer reach them."
         }
       }
     }
@@ -15769,6 +15828,189 @@
     "label_delegate_parallel": "Ask several agents at once",
     "does_delegate_parallel": "Hands parts of the task to several agents and reads their answers.",
     "label_web_task": "Use a browser on a website",
-    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits."
+    "does_web_task": "Opens a browser that reads pages and can click and type on the sites it visits.",
+    "label_local_desktop_activate": "Bring an app to the front",
+    "does_local_desktop_activate": "Brings the named application to the foreground on this computer.",
+    "label_local_desktop_click": "Click on the screen",
+    "does_local_desktop_click": "Clicks a point or element on your screen.",
+    "label_local_desktop_clipboard": "Read or write the clipboard",
+    "does_local_desktop_clipboard": "Reads from or writes to the clipboard on this computer.",
+    "label_local_desktop_elements": "List on-screen controls",
+    "does_local_desktop_elements": "Lists the buttons and fields currently on screen (read-only).",
+    "label_local_desktop_key": "Press a key",
+    "does_local_desktop_key": "Presses a key or a key combination (for example Cmd+S) on this computer.",
+    "label_local_desktop_notify": "Show a desktop notification",
+    "does_local_desktop_notify": "Shows a notification on this computer.",
+    "label_local_desktop_open": "Open an app, file, or link",
+    "does_local_desktop_open": "Opens an application, a file, or a web link on this computer.",
+    "label_local_desktop_press": "Press a named control",
+    "does_local_desktop_press": "Presses a named button or menu on your screen.",
+    "label_local_desktop_screen": "Take a screenshot",
+    "does_local_desktop_screen": "Captures what is currently on your screen (read-only).",
+    "label_local_desktop_type": "Type into the frontmost app",
+    "does_local_desktop_type": "Types text into the app currently in the foreground.",
+    "label_run_desktop_recipe": "Replay a desktop recipe",
+    "does_run_desktop_recipe": "Replays a recorded run of desktop actions on this computer."
+  },
+  "localModelWizard": {
+    "firstRunServingTitle": "Your local model is running",
+    "firstRunServingBody": "Agents on this install already answer with {tag} for free, no API key. Add a cloud provider key if you ever need a bigger or different model.",
+    "firstRunServingCta": "Create an agent"
+  },
+  "browserAutomation": {
+    "watch": "Watch",
+    "watchStop": "Stop watching",
+    "watchTitle": "Replays of this recipe",
+    "watchEmpty": "No replay of this recipe is in the log yet. One appears here as soon as the agent runs it.",
+    "watchRunning": "Running…",
+    "watchDone": "Done",
+    "watchFailed": "Failed"
+  },
+  "desktopAutomation": {
+    "title": "Desktop automation",
+    "subtitle": "Replay a recorded desktop task - opening apps, clicking, typing - without asking the AI at every step.",
+    "loading": "Loading…",
+    "loadFailed": "Couldn't load desktop automation. Reload the page to try again.",
+    "actionFailed": "That didn't work. Try again.",
+    "recipesTitle": "Recorded desktop tasks",
+    "recipesHelp": "A desktop recipe replays a successful run step by step on this machine, checking each step, and stops as soon as something differs. Recipes keep placeholders only - never the values you typed.",
+    "recipesEmpty": "No desktop recipes for this agent yet. After a run that drove the desktop in the playground, choose \"Save this run as a desktop recipe\".",
+    "recipeSteps": "{count} steps",
+    "recipeScopeAll": "All agents",
+    "recipeRuns": "{runs} run(s), {fails} failed",
+    "recipeNeverRun": "Never run",
+    "recipeLastFailure": "Last failure: {reason}",
+    "healthNew": "New",
+    "healthHealthy": "Working",
+    "healthFailing": "Needs a look",
+    "deleteRecipe": "Delete",
+    "confirmDelete": "Confirm delete",
+    "runRecipe": "Run…",
+    "closeRun": "Close",
+    "runNow": "Run now",
+    "running": "Running…",
+    "needParam": "Enter a value for \"{name}\".",
+    "modeLabel": "How to run it",
+    "modeAuto": "Automatic",
+    "modeAutoHint": "Runs every step at full speed; the live monitor still shows what happened afterwards.",
+    "modeMonitor": "Monitored",
+    "modeMonitorHint": "Shows the desktop live while the steps run - use this the first few times you trust a recipe.",
+    "defaultModeLabel": "Default way to run it",
+    "confirmIrreversible": "This recipe contains steps that commit or submit something. I approve running them.",
+    "paramRequired": "(required)",
+    "runDone": "Finished - {done} of {total} steps ran.",
+    "runFailed": "The run did not complete.",
+    "runFailedAt": "Stopped: {reason}",
+    "monitorTitle": "Live monitor",
+    "monitorRunning": "The recipe is running on this machine's desktop.",
+    "monitorDown": "The live monitor is unavailable - the desktop agent may be off. The run continues either way.",
+    "monitorNoFrame": "Waiting for the first frame…",
+    "monitorFrameAlt": "Current desktop frame",
+    "monitorStep": "Step {index}: {action}",
+    "saveRun": "Save this run as a desktop recipe",
+    "saveRunTitle": "Save this run as a desktop recipe",
+    "saveRunIntro": "The desktop steps from this run are saved so they can be replayed later. Values you typed are never kept - list them below so they become parameters.",
+    "recipeName": "Recipe name",
+    "recipeNamePlaceholder": "File the weekly report",
+    "recipeDescription": "What it does (optional)",
+    "paramsTitle": "Values you gave in this run",
+    "paramsHelp": "For each value you supplied, name it. It is swapped for a placeholder and the value is discarded.",
+    "paramName": "Parameter name",
+    "paramValue": "Value used in this run",
+    "addParam": "Add a value",
+    "removeParam": "Remove",
+    "paramBadName": "Use letters, digits and underscores, starting with a letter.",
+    "paramReserved": "\"secret\" and \"totp\" are reserved names.",
+    "paramDuplicate": "Each parameter needs its own name.",
+    "paramShort": "Enter the value (at least 3 characters).",
+    "allowLiteral": "Keep any other typed text as written (only for fixed text that is not personal or secret)",
+    "saveRecipe": "Save recipe",
+    "savingRecipe": "Saving…",
+    "cancel": "Cancel",
+    "recipeSaved": "Saved \"{name}\" with {count} steps.",
+    "saveWarnings": "Check before you rely on it",
+    "needRecipeName": "Give the recipe a name.",
+    "watchLive": "Watch live",
+    "stopWatching": "Stop watching",
+    "monitorLiveTitle": "Live screen",
+    "monitorLiveRunning": "Streaming the screen - you are watching the agent work in real time.",
+    "monitorPanelTitle": "Live screen",
+    "monitorPanelHint": "You are watching the agent drive this machine in real time - each click and keystroke lands as you see it. Collapse to pause the stream.",
+    "screenDockTitle": "Screen",
+    "screenDockOpen": "Open live screen",
+    "screenDockClose": "Close live screen",
+    "screenDockPopOut": "Pop out - keeps watching the agent while this tab is minimized"
+  },
+  "keyboard": {
+    "toggle": "On-screen keyboard",
+    "unavailable": "No on-screen keyboard for this language",
+    "title": "On-screen keyboard",
+    "close": "Close keyboard"
+  },
+  "adminCommerceUi": {
+    "itemTasks": "tasks"
+  },
+  "adminA2aPage": {
+    "eyebrow": "Interoperability",
+    "pageTitle": "Agent-to-agent (A2A)",
+    "pageSubtitle": "Endpoints, remote agents and live tasks for the A2A protocol surface.",
+    "featureOff": "A2A endpoints are not available on this deployment (feature off or an older core).",
+    "inboundHeading": "Inbound endpoints (peers call your agents)",
+    "jsonRpc": "JSON-RPC 2.0",
+    "restBinding": "HTTP+JSON binding",
+    "agentCard": "Per-agent card",
+    "platformCard": "Platform card",
+    "jwks": "Signing keys (JWKS)",
+    "inboundHint": "Hand a peer the JSON-RPC URL (or the platform/agent card) plus a bearer token with RUNNER access on the target agent.",
+    "outboundHeading": "Outbound: remote agents your agents may call",
+    "allowedHosts": "Allow-listed remote hosts",
+    "noAllowedHosts": "None - no remote agent is reachable.",
+    "signedCards": "Signed agent cards required",
+    "maxCallsPerTurn": "Max remote calls per turn",
+    "noCap": "No cap",
+    "maxWait": "Max wait per call",
+    "maxWaitValue": "{seconds} s",
+    "outboundOff": "Outbound calls are disabled - the a2a_call_agent tool is not offered.",
+    "outboundHint": "Set by the operator (app.a2a.client.*) - read-only here so a stolen session cannot widen egress.",
+    "on": "On",
+    "off": "Off",
+    "yes": "Yes",
+    "no": "No",
+    "relatedAgentTrust": "Agent trust & directory publishing",
+    "relatedDirectory": "Public agent directory",
+    "tasksHeading": "A2A tasks",
+    "tasksLoadFailed": "Could not load A2A tasks",
+    "allAgents": "All agents",
+    "refresh": "Refresh",
+    "noTasksTitle": "No A2A tasks",
+    "noTasksHint": "Inbound calls to your agents and outbound a2a_call_agent calls appear here.",
+    "dirInbound": "Inbound",
+    "dirOutbound": "Outbound",
+    "view": "View",
+    "cancel": "Cancel",
+    "canceling": "Canceling…",
+    "cancelSuccess": "Task canceled",
+    "cancelFailed": "Could not cancel the task",
+    "detailTitle": "A2A task",
+    "detailSubtitle": "One agent turn invoked over the A2A protocol.",
+    "detailAgent": "Agent",
+    "detailContext": "Context",
+    "detailSubject": "Caller",
+    "detailCreated": "Created",
+    "detailUpdated": "Last state change",
+    "detailRequest": "Message sent to the agent",
+    "detailReply": "Agent reply",
+    "close": "Close",
+    "remoteAgent": "Remote agent"
+  },
+  "a2aPanel": {
+    "label": "Callable by other agents (A2A)",
+    "hint": "External agents reach this agent over the A2A protocol using these endpoints, with a token that has RUNNER access.",
+    "jsonRpc": "JSON-RPC 2.0 endpoint",
+    "restBinding": "HTTP+JSON message send",
+    "agentCard": "Agent card",
+    "copy": "Copy",
+    "copied": "Copied",
+    "manageNote": "Monitor calls and publish the card at"
   }
 }

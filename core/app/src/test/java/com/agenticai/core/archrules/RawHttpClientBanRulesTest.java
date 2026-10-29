@@ -18,15 +18,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
  * Outbound HTTP is built in ONE place, {@code com.agenticai.core.security.net} ({@code
  * SafeHttpClients}, whose connections resolve through {@code SsrfGuard}). A client built anywhere
- * else has the JVM's default resolver and proxy behaviour, so a tenant-, LLM- or
- * internet-supplied URL reaches loopback, RFC 1918 and cloud-metadata addresses and a DNS
- * rebinding answer reaches a socket.
+ * else has the JVM's default resolver and proxy behaviour, so a tenant-, LLM- or internet-supplied
+ * URL reaches loopback, RFC 1918 and cloud-metadata addresses and a DNS rebinding answer reaches a
+ * socket.
  *
  * <p>The forms this rule recognises are the raw ways to obtain a client: {@code
  * java.net.http.HttpClient.newHttpClient/newBuilder}, {@code new RestTemplate(..)}, {@code
@@ -39,10 +40,10 @@ import org.junit.jupiter.api.Test;
  * {@code SafeHttpClients} drops out of the baseline (it may only shrink). Maintenance steps are in
  * {@link ModuleBoundaryRulesTest}.
  *
- * <p>Many baselined sites call a fixed, operator-configured, trusted host (a SaaS API, the
- * sidecar, Keycloak) and need private-network reachability or the JDK client's features; those
- * are tolerated, not endorsed. Anything that fetches a URL a tenant or a model chose must use
- * {@code SafeHttpClients}.
+ * <p>Many baselined sites call a fixed, operator-configured, trusted host (a SaaS API, the sidecar,
+ * Keycloak) and need private-network reachability or the JDK client's features; those are
+ * tolerated, not endorsed. Anything that fetches a URL a tenant or a model chose must use {@code
+ * SafeHttpClients}.
  */
 class RawHttpClientBanRulesTest {
 
@@ -57,6 +58,16 @@ class RawHttpClientBanRulesTest {
                 new ClassFileImporter()
                         .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
                         .importPackages(ROOT);
+    }
+
+    /**
+     * Releases the imported class graphs. Surefire runs all of this module's tests in one JVM, so
+     * the statics of a finished test class would otherwise stay on the heap for the rest of the
+     * run, and the other ArchUnit tests import the classpath again.
+     */
+    @AfterAll
+    static void releaseImports() {
+        classes = null;
     }
 
     /** What raw form a call is, or null when it is allowed. */
@@ -107,7 +118,10 @@ class RawHttpClientBanRulesTest {
         return forms;
     }
 
-    /** Messages name the class and the form only: a line number would make every edit a "new" violation. */
+    /**
+     * Messages name the class and the form only: a line number would make every edit a "new"
+     * violation.
+     */
     private static ArchCondition<JavaClass> notBuildARawHttpClient() {
         return new ArchCondition<JavaClass>("not build a raw outbound HTTP client") {
             @Override

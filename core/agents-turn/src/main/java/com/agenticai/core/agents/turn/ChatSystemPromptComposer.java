@@ -21,17 +21,21 @@ import org.springframework.ai.tool.ToolCallback;
  * no I/O, no side effects; the caller reads the tool list, the skills/procedures blocks and the
  * recalled memory and passes them in.
  *
- * <p>Every block that comes from the prompt registry carries its {@link ResolvedPrompt} (key, scope,
- * version, source); the others (the agent's own prompt, recalled facts) carry an id only.
+ * <p>Every block that comes from the prompt registry carries its {@link ResolvedPrompt} (key,
+ * scope, version, source); the others (the agent's own prompt, recalled facts) carry an id only.
  */
 final class ChatSystemPromptComposer {
 
     private ChatSystemPromptComposer() {}
 
-    /** Which standing directives are switched on for this deployment (the {@code app.chat.directives.*} flags). */
+    /**
+     * Which standing directives are switched on for this deployment (the {@code
+     * app.chat.directives.*} flags).
+     */
     record Switches(
             boolean memoryUsage,
             boolean toolSearch,
+            boolean scratchpad,
             boolean contextCompaction,
             boolean browserV2,
             boolean artifacts,
@@ -47,7 +51,10 @@ final class ChatSystemPromptComposer {
             return new Switches(
                     svc.memoryUsageDirectiveEnabled,
                     svc.toolSearchDirectiveEnabled,
-                    svc.contextCompactionDirectiveEnabled && compaction != null && compaction.isEnabled(),
+                    svc.scratchpadDirectiveEnabled,
+                    svc.contextCompactionDirectiveEnabled
+                            && compaction != null
+                            && compaction.isEnabled(),
                     svc.browserV2DirectiveEnabled,
                     svc.artifactsDirectiveEnabled,
                     svc.artifactsDirectiveAllAgents,
@@ -65,6 +72,7 @@ final class ChatSystemPromptComposer {
             PromptDirectiveComposer composer,
             List<ToolCallback> tools,
             boolean anyMcpToolsOffered,
+            boolean scratchpadReachable,
             boolean smallModelTurn,
             Switches switches,
             UUID agentId,
@@ -72,7 +80,10 @@ final class ChatSystemPromptComposer {
             String toolRecordTrustNote,
             String recalledMemoryBlock) {}
 
-    /** One piece of text with where it came from; {@code prompt} is null for text that is not a registry key. */
+    /**
+     * One piece of text with where it came from; {@code prompt} is null for text that is not a
+     * registry key.
+     */
     record Block(String id, ResolvedPrompt prompt, String text) {}
 
     /**
@@ -88,13 +99,16 @@ final class ChatSystemPromptComposer {
     static Composed compose(Input in) {
         ResolvedDirectives pd = in.directives();
         // The skills block is built where no agent or tenant is known; its opening wording is the
-        // registry's (skills.header / skills.header.compact), so the owner's override is applied here.
+        // registry's (skills.header / skills.header.compact), so the owner's override is applied
+        // here.
         boolean compactSkills = in.smallModelTurn();
         ResolvedPrompt skillsHeader =
                 in.skillsBlock() == null || in.skillsBlock().isBlank()
                         ? null
                         : pd.resolved(
-                                compactSkills ? SkillPromptBlock.COMPACT_HEADER_KEY : SkillPromptBlock.HEADER_KEY);
+                                compactSkills
+                                        ? SkillPromptBlock.COMPACT_HEADER_KEY
+                                        : SkillPromptBlock.HEADER_KEY);
         String skillsBlock =
                 SkillPromptBlock.withHeader(
                         in.skillsBlock(),
@@ -102,11 +116,14 @@ final class ChatSystemPromptComposer {
                         compactSkills);
         // Procedures go FIRST: binding business rules outrank the skills advertisement.
         String systemPrompt =
-                withSkillsBlock(withSkillsBlock(in.basePrompt(), in.proceduresBlock()), skillsBlock);
+                withSkillsBlock(
+                        withSkillsBlock(in.basePrompt(), in.proceduresBlock()), skillsBlock);
         List<Block> system = new ArrayList<>();
         system.add(
                 new Block(
-                        in.rlPromptVariant() ? "agent.system_prompt.rl_variant" : "agent.system_prompt",
+                        in.rlPromptVariant()
+                                ? "agent.system_prompt.rl_variant"
+                                : "agent.system_prompt",
                         null,
                         in.basePrompt()));
         addNonBlank(system, "procedures", in.proceduresBlock());
@@ -117,24 +134,48 @@ final class ChatSystemPromptComposer {
         Switches sw = in.switches();
         List<Block> memory = new ArrayList<>();
         addResolved(memory, pd.resolved(PromptDirectiveRegistry.Keys.CURRENT_DATE));
-        addResolved(memory, pd.resolved(sw.memoryUsage() ? DirectiveKeys.memoryUsageKey(in.tools()) : null));
+        addResolved(
+                memory,
+                pd.resolved(sw.memoryUsage() ? DirectiveKeys.memoryUsageKey(in.tools()) : null));
         for (ResolvedPrompt r :
                 in.composer()
                         .blocks(
                                 new PromptDirectiveComposer.Context(
-                                        in.tools(), in.anyMcpToolsOffered(), in.smallModelTurn(), pd))) {
+                                        in.tools(),
+                                        in.anyMcpToolsOffered(),
+                                        in.smallModelTurn(),
+                                        pd))) {
             addResolved(memory, r);
         }
-        addResolved(memory, pd.resolved(sw.toolSearch() ? DirectiveKeys.toolSearchKey(in.tools()) : null));
+        addResolved(
+                memory,
+                pd.resolved(sw.toolSearch() ? DirectiveKeys.toolSearchKey(in.tools()) : null));
+        // Right after tool_search: deferred scratchpad tools are reachable exactly through the
+        // search/call pair that directive just taught, so the two reads as one instruction.
+        addResolved(
+                memory,
+                pd.resolved(
+                        sw.scratchpad()
+                                ? DirectiveKeys.scratchpadKey(in.scratchpadReachable())
+                                : null));
         addNonNull(memory, "hook.context_note", in.hookContextNote());
-        addResolved(memory, pd.resolved(DirectiveKeys.contextCompactionKey(sw.contextCompaction(), in.tools())));
-        addResolved(memory, pd.resolved(sw.browserV2() ? DirectiveKeys.browserV2Key(in.tools()) : null));
+        addResolved(
+                memory,
+                pd.resolved(
+                        DirectiveKeys.contextCompactionKey(sw.contextCompaction(), in.tools())));
+        addResolved(
+                memory,
+                pd.resolved(sw.browserV2() ? DirectiveKeys.browserV2Key(in.tools()) : null));
         addResolved(
                 memory,
                 pd.resolved(
                         DirectiveKeys.artifactsKey(
-                                sw.artifacts(), sw.artifactsAllAgents(), sw.artifactsAgentIds(), in.agentId())));
-        // When a replayed assistant turn carries the platform's tool record, the model is told it is
+                                sw.artifacts(),
+                                sw.artifactsAllAgents(),
+                                sw.artifactsAgentIds(),
+                                in.agentId())));
+        // When a replayed assistant turn carries the platform's tool record, the model is told it
+        // is
         // reliable (and counts as tool use in this conversation) - see ToolLedgerReplay.
         addNonNull(memory, "tool_ledger.trust_note", in.toolRecordTrustNote());
         ResolvedPrompt custom = pd.resolved(PromptDirectiveRegistry.Keys.CUSTOM_INSTRUCTIONS);
@@ -143,7 +184,8 @@ final class ChatSystemPromptComposer {
         }
         addNonNull(memory, "memory.recall", in.recalledMemoryBlock());
 
-        String memoryBlock = joinMemoryBlocks(memory.stream().map(Block::text).toArray(String[]::new));
+        String memoryBlock =
+                joinMemoryBlocks(memory.stream().map(Block::text).toArray(String[]::new));
         return new Composed(systemPrompt, memoryBlock, List.copyOf(system), List.copyOf(memory));
     }
 
@@ -153,7 +195,9 @@ final class ChatSystemPromptComposer {
         }
     }
 
-    /** A block {@code joinMemoryBlocks} would keep: any non-null text (a blank one too, as before). */
+    /**
+     * A block {@code joinMemoryBlocks} would keep: any non-null text (a blank one too, as before).
+     */
     private static void addNonNull(List<Block> out, String id, String text) {
         if (text != null) {
             out.add(new Block(id, null, text));

@@ -212,7 +212,7 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
             <div className="min-w-[160px] flex-1">
               <strong className="text-sm text-foreground">{row.tenantName}</strong>
               {row.errorCount > 0 && (
-                <Badge variant="outline" className={`ml-2 ${WARN_BADGE}`}>
+                <Badge variant="outline" className={`ms-2 ${WARN_BADGE}`}>
                   {row.errorCount} error{row.errorCount === 1 ? "" : "s"}
                 </Badge>
               )}
@@ -224,7 +224,7 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
               {row.avgLatencyMs != null ? `${Math.round(row.avgLatencyMs)}ms avg` : "no calls yet"}
             </div>
             <div className={META_CLS}>{Number(row.totalTokens || 0).toLocaleString()} tokens</div>
-            <div className="min-w-[70px] text-right font-mono text-sm text-foreground">
+            <div className="min-w-[70px] text-end font-mono text-sm text-foreground">
               {formatUsd(row.estimatedCostUsd)}
             </div>
           </div>
@@ -403,7 +403,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
                       <div className="h-4 flex-1 overflow-hidden rounded bg-secondary/40">
                         <div className="h-full rounded bg-primary/70" style={{ width: `${widthPct}%` }} />
                       </div>
-                      <div className="w-20 shrink-0 text-right font-mono text-[11px] text-foreground">
+                      <div className="w-20 shrink-0 text-end font-mono text-[11px] text-foreground">
                         {formatUsd(cost)}
                       </div>
                     </div>
@@ -430,7 +430,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
                   {row.totalCalls} call{row.totalCalls === 1 ? "" : "s"}
                 </div>
                 <div className={META_CLS}>{Number(row.totalTokens || 0).toLocaleString()} tokens</div>
-                <div className="min-w-[70px] text-right font-mono text-sm text-foreground">
+                <div className="min-w-[70px] text-end font-mono text-sm text-foreground">
                   {formatUsd(row.estimatedCostUsd)}
                 </div>
               </div>

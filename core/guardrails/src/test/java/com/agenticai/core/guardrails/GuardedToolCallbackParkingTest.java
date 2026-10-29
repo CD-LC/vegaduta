@@ -101,7 +101,9 @@ class GuardedToolCallbackParkingTest {
 
         String result = guard(tool("send_invoice", "ran")).withApprovalParkTexts(texts).call("{}");
 
-        assertEquals("custom park text for send_invoice", result);
+        assertTrue(result.contains("custom park text for send_invoice"), result);
+        assertTrue(result.contains(ApprovalParked.MARKER),
+            "a parked result carries the marker the tool loop reads to end the invocation: " + result);
     }
 
     @Test
@@ -181,6 +183,37 @@ class GuardedToolCallbackParkingTest {
             anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
         assertTrue(repeat.contains(first.getId().toString()), "points at the request already waiting: " + repeat);
         verify(invoice, never()).call(anyString());
+    }
+
+    @Test
+    void aQueueExcludedCallAfterTheParkIsRefusedWithoutAnApprovalRecord() {
+        recordingReturns(pending());
+        guard(tool("send_invoice", "ran")).call("{}");
+        ToolCallback plumbing = tool("search_tools", "matched");
+
+        String result = guard(plumbing).withQueueExcludedTools(Set.of("search_tools")).call("{\"query\":\"x\"}");
+
+        // Only the parked call filed an approval; the plumbing call was refused unrecorded so an
+        // approver never sees a request whose replay could not do anything.
+        verify(gate, times(1)).recordToolCallForApproval(
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(), anyString(), any(), any());
+        verify(plumbing, never()).call(anyString());
+        assertTrue(result.contains("NOT executed"), result);
+        assertTrue(result.contains("cannot be queued"), result);
+        assertTrue(result.contains(ApprovalParked.MARKER), result);
+    }
+
+    @Test
+    void aParkedOrQueuedResultCarriesTheMarkerTheToolLoopReadsToEndTheTurn() {
+        recordingReturns(pending(), pending());
+
+        String parked = guard(tool("send_invoice", "ran")).call("{}");
+        String queued = guard(tool("lookup", "found")).call("{\"q\":\"x\"}");
+
+        assertTrue(ApprovalParked.isParked(parked), parked);
+        assertTrue(ApprovalParked.isParked(queued), queued);
+        assertTrue(ToolResultMarker.classify(parked).orElseThrow() == ToolResultMarker.Kind.PARKED);
+        assertTrue(ToolResultMarker.isPlatformAnswer(queued));
     }
 
     @Test

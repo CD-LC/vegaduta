@@ -366,6 +366,26 @@ public class GuardedToolCallback implements ToolCallback {
     }
 
     /**
+     * Names of dispatch-plumbing tools ({@code search_tools}, {@code call_tool}, {@code
+     * restore_tool_result}) a post-park queue must NOT file approval requests for: an approval
+     * replay resolves tools by exact name without deferral, so an approved {@code call_tool}
+     * resolves to a refusal and an approved {@code search_tools} is meaningless - recording either
+     * only pollutes the approver's inbox. Excluded calls are refused without a record. Set by the
+     * module that knows the plumbing names (this one cannot see them); empty = record everything,
+     * the pre-{@code queueExcludedTools} behavior.
+     */
+    public GuardedToolCallback withQueueExcludedTools(java.util.Set<String> names) {
+        this.queueExcludedTools = names == null ? java.util.Set.of() : names;
+        return this;
+    }
+
+    private volatile java.util.Set<String> queueExcludedTools = java.util.Set.of();
+
+    private boolean queueRecords(String toolName) {
+        return !queueExcludedTools.contains(toolName);
+    }
+
+    /**
      * Where the texts this class hands the model come from (the prompt registry, {@link GuardrailPrompts}); the
      * shipped wording until set. The agent is this callback's own, the tenant is the calling thread's, so a tenant
      * or agent override applies on every path that builds the tool chain (stream, buffered, delegation, jobs, a
@@ -484,9 +504,13 @@ public class GuardedToolCallback implements ToolCallback {
     private String guardedCallBody(String toolName, String toolInput, ToolContext toolContext, String[] outcome,
         boolean[] inDelegate) {
         if (turnApprovalState().isParked()) {
-            ApprovalParking.Outcome queued = parking().queueBehindPark(toolName, toolInput);
+            // The answer carries the approval_parked marker so the tool loop ends the invocation
+            // instead of letting a non-compliant model queue calls forever - see
+            // ArgumentSanitizingToolCallingManager's parked detection in core/chat.
+            ApprovalParking.Outcome queued =
+                    parking().queueBehindPark(toolName, toolInput, queueRecords(toolName));
             outcome[0] = queued.recorded() ? OUTCOME_APPROVAL_PENDING : OUTCOME_BLOCKED;
-            return queued.modelText();
+            return ApprovalParked.result(queued.modelText());
         }
         int step = stepCounter.incrementAndGet();
         if (step > maxStepsPerTurn) {
@@ -594,7 +618,9 @@ public class GuardedToolCallback implements ToolCallback {
             if (sandbox == null || !sandbox.permits(toolName)) {
                 ApprovalParking.Outcome held = parking().park(actionType, toolName, toolInput, taint.reason());
                 outcome[0] = held.recorded() ? OUTCOME_APPROVAL_PENDING : OUTCOME_ERROR;
-                return held.modelText();
+                // The approval_parked marker lets the tool loop end the invocation if the model
+                // keeps calling tools instead of reporting the wait - see the isParked branch above.
+                return held.recorded() ? ApprovalParked.result(held.modelText()) : held.modelText();
             }
             sandbox.recordUse(toolName);
             log.info("Agent {} (session {}): '{}' needed approval and was auto-approved by the eval sandbox grant"
@@ -644,6 +670,18 @@ public class GuardedToolCallback implements ToolCallback {
         // prerequisite. See ProcedureGuardEvaluator#recordCall.
         if (procedureGuard != null) {
             procedureGuard.recordCall(sessionId, toolName);
+        }
+
+        // A result the PLATFORM authored - registered by its producer with ToolResultMarker
+        // (call_tool's "not loaded yet" hint, an MCP argument refusal, another guard's parked or
+        // withheld answer relayed through call_tool) - is not tool output and carries no untrusted
+        // bytes, so the cap, the content screen and the tenant rules below do not run on it, same
+        // as the guard's own answers above. Screening platform text once withheld exactly this kind
+        // of diagnostic as a false-positive injection and hid the model's own recovery
+        // instructions. The bypass is the REGISTERED mark only, never the wording - a tool result
+        // that merely reads like a refusal still gets screened.
+        if (ToolResultMarker.kindOf(rawOutput).isPresent()) {
+            return rawOutput;
         }
 
         // Context-budget cap, BEFORE the content-safety sanitizer below: no point running a safety

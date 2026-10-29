@@ -20,6 +20,9 @@
 #   tracing        langfuse (web+worker) + its postgres/clickhouse/valkey/S3
 #   voice          livekit + voice-agent
 #   rl             rl-trainer
+#   docling        docling document parser (services/docling): layout-aware
+#                  extraction ahead of the sidecar for PDF/Office/image formats
+#                  (the CLI exports DOCLING_BASE_URL=http://docling:8002)
 #   code-intel     code-intel + its docker-in-docker executor (CODE_INTEL_ENABLED=true)
 #   builder        app-builder (pulls in code-intel)
 #   sandbox        tool-sandbox + mcp-stdio-runner
@@ -125,6 +128,10 @@ x-core-env: &core-env
   # is encrypted with it and becomes undecryptable under a different key.
   APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:?run scripts/vegaduta secrets}
   PLATFORM_MASTER_KEY: ${PLATFORM_MASTER_KEY:-}
+  # keycloak (default) | local: single-owner accounts + sessions held by core
+  # itself (password/passkey/PIN/recovery setup on the console's own unlock
+  # screen) - set APP_AUTH_MODE=local in .env on a single-user install.
+  APP_AUTH_MODE: ${APP_AUTH_MODE:-keycloak}
   # Issuer = the PUBLIC auth URL tokens carry (Keycloak's KC_HOSTNAME below).
   # Signing keys + admin API are fetched over the internal compose name.
   KEYCLOAK_ISSUER_URI: ${PUBLIC_AUTH_URL:-http://localhost:8180}/realms/${KEYCLOAK_REALM:-agentic-ai}
@@ -161,6 +168,12 @@ x-core-env: &core-env
   STORAGE_PATH_STYLE_ACCESS: ${STORAGE_PATH_STYLE_ACCESS:-true}
   SIDECAR_BASE_URL: http://sidecar:8001
   SIDECAR_SHARED_SECRET: ${SIDECAR_SHARED_SECRET:?run scripts/vegaduta secrets}
+  # Docling-first extraction (app.knowledge.docling.*, services/docling): stays
+  # empty unless the `docling` compose profile runs - compose cannot see which
+  # profiles are active, so the CLI exports DOCLING_BASE_URL=http://docling:8002
+  # with it. Empty = core's DoclingConversionService is inert.
+  DOCLING_BASE_URL: ${DOCLING_BASE_URL:-}
+  DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:-}
   # Base profiles + whatever the enabled compose profiles need (the CLI sets
   # CORE_PROFILES_EXTRA, e.g. ",workflow,temporal"). `workflow` needs Kafka.
   # CORE_MCP_PROFILE=",mcp" turns on the static STDIO MCP built-ins
@@ -235,6 +248,11 @@ x-core-env: &core-env
   MCP_STDIO_SIDECAR_ENABLED: ${MCP_STDIO_SIDECAR_ENABLED:-false}
   MCP_STDIO_SIDECAR_URL: mcp-stdio-runner:8097
   MCP_STDIO_SIDECAR_SHARED_SECRET: ${MCP_STDIO_SIDECAR_SHARED_SECRET:-}
+  # Static MCP exposure policy: agents only get the stateless names on this
+  # allowlist; shared-stateful opens filesystem/memory/browsers to EVERY tenant
+  # (single-tenant installs only) - see docs/configuration.md.
+  MCP_STATIC_STATELESS_SERVERS: ${MCP_STATIC_STATELESS_SERVERS:-sequential-thinking}
+  MCP_STATIC_SHARED_STATEFUL_ENABLED: ${MCP_STATIC_SHARED_STATEFUL_ENABLED:-false}
   APP_BUILDER_CORE_SERVICE_TOKEN: ${APP_BUILDER_CORE_SERVICE_TOKEN:-}
   PLATFORM_ALERTS_WEBHOOK_SECRET: ${PLATFORM_ALERTS_WEBHOOK_SECRET:-}
   # Voice (profile `voice`). LIVEKIT_URL is BROWSER-facing.
@@ -336,7 +354,7 @@ services:
     # MUST stay POOL_MODE=session: schema-per-tenant sets search_path per
     # session; transaction pooling routes queries to the wrong tenant schema.
     # Only the app role is in its userlist (no superuser through the pooler).
-    image: edoburu/pgbouncer:v1.26.0-p0
+    image: edoburu/pgbouncer:v1.26.1-p0
     <<: [*restart, *logging, *nnp]
     depends_on:
       postgres:
@@ -369,7 +387,7 @@ services:
   valkey:
     # Valkey (BSD-3) — drop-in Redis-protocol replacement. The password is
     # templated into a config file at start so it never sits in argv.
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     <<: [*restart, *logging, *nnp]
     command:
       - sh
@@ -429,14 +447,22 @@ services:
     networks: [data-tier, seaweedfs-metrics]
 
   keycloak-db:
-    image: postgres:16.15-alpine
+    image: postgres:18.4-alpine
     <<: [*restart, *logging, *nnp]
     environment:
       POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
       POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?run scripts/vegaduta secrets}
       POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
     volumes:
-      - keycloak-db-data:/var/lib/postgresql/data
+      # postgres:18+ stores the cluster at /var/lib/postgresql/<major>/docker
+      # (upstream docker-library/postgres#1259) and REFUSES to start while
+      # something is mounted at the pre-18 /var/lib/postgresql/data path, so
+      # the volume mounts one level up. A volume written by postgres:16/17
+      # keeps its cluster at the volume root; the 18 image then exits with
+      # its "PostgreSQL data in /var/lib/postgresql" error until the data is
+      # migrated (dump + recreate + restore; see deploy/README.md#upgrade).
+      # Fresh installs are unaffected.
+      - keycloak-db-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -450,7 +476,7 @@ services:
 
   keycloak:
     # Same Keycloak release as deploy/helm/charts/keycloak (one version line).
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.1
     <<: [*restart, *logging, *nnp]
     # Production mode (`start`) against keycloak-db, HTTP only inside the
     # compose network / on the loopback port; TLS is terminated by Caddy in
@@ -484,6 +510,7 @@ services:
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
       PUBLIC_ADMIN_URL: ${PUBLIC_ADMIN_URL:-http://localhost:3000}
       KC_VERIFY_EMAIL: ${KC_VERIFY_EMAIL:-false}
+      KC_REGISTRATION_ALLOWED: ${KC_REGISTRATION_ALLOWED:-false}
       # Password grant on the confidential core client: off (first import only).
       # The CI overlay turns it on for the Playwright/smoke logins.
       KC_CORE_DIRECT_GRANTS: ${KC_CORE_DIRECT_GRANTS:-false}
@@ -516,7 +543,7 @@ services:
   # Idempotent; shares keycloak's network namespace so the script's
   # localhost:8080 is this realm's Keycloak.
   keycloak-reconcile:
-    image: quay.io/keycloak/keycloak:26.7.5
+    image: quay.io/keycloak/keycloak:26.8.1
     <<: [*logging, *nnp]
     restart: "no"
     network_mode: "service:keycloak"
@@ -578,6 +605,31 @@ services:
           memory: ${SIDECAR_MEM_LIMIT:-3g}
     networks: [agent-io]
 
+  docling:
+    # Docling document parser (services/docling): layout-aware conversion to
+    # markdown for PDF/Office/image formats, ahead of the sidecar's /extract.
+    # Opt-in - its model weight (several GB) is a cost only deployments that
+    # want the better parser pay. Core reaches it via DOCLING_BASE_URL above.
+    image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/docling:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
+    profiles: ["docling"]
+    <<: [*restart, *logging, *hardened]
+    environment:
+      DOCLING_SHARED_SECRET: ${DOCLING_SHARED_SECRET:?run scripts/vegaduta secrets}
+      DOCLING_AUTH_REQUIRED: "true"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${DOCLING_HOST_PORT:-8002}:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${DOCLING_MEM_LIMIT:-4g}
+    networks: [agent-io]
+
   core:
     image: ${VEGADUTA_REGISTRY:-ghcr.io/cd-lc}/core${CORE_IMAGE_VARIANT:-}:${VEGADUTA_VERSION:?set VEGADUTA_VERSION to a release (e.g. 1.2.3) or use --build; run scripts/vegaduta secrets}
     <<: [*restart, *logging, *hardened, *core-fs, *core-extra-env, *core-health]
@@ -622,6 +674,15 @@ services:
     # value as fallback, so one published image works for any domain.
     environment: &web-env
       NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+      # local = the console's own unlock screen (localauth: password/passkey/
+      # PIN/recovery); anything else = Keycloak SSO. Pair with core's
+      # APP_AUTH_MODE above - WEB_AUTH_MODE in .env, documented in .env.example.
+      NEXT_PUBLIC_AUTH_MODE: ${WEB_AUTH_MODE:-}
+      # Server-side proxy routes (local-auth unlock/setup, agent-card) fetch
+      # core from INSIDE the container, where the public host:port does not
+      # resolve - without this they hit localhost:8080 and report
+      # "The server could not be reached."
+      CORE_INTERNAL_URL: ${CORE_INTERNAL_URL:-http://core:8080}
       NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_AUTH_URL:-http://localhost:8180}
       NEXT_PUBLIC_KEYCLOAK_REALM: ${KEYCLOAK_REALM:-agentic-ai}
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: agentic-ai-web
@@ -704,14 +765,17 @@ services:
     networks: [data-tier, agent-io, observability, mcp-stdio-net]
 
   temporal-postgresql:
-    image: postgres:16.15-alpine
+    image: postgres:18.4-alpine
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     environment:
       POSTGRES_USER: ${TEMPORAL_DB_USER:-temporal}
       POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD:?run scripts/vegaduta secrets}
     volumes:
-      - temporal-db-data:/var/lib/postgresql/data
+      # See keycloak-db: postgres:18+ mounts the volume at /var/lib/postgresql;
+      # a pre-18 temporal-db-data volume must be dumped and recreated before
+      # this image starts (deploy/README.md#upgrade).
+      - temporal-db-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s
@@ -761,7 +825,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.55.0
+    image: temporalio/ui:2.56.0
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -787,7 +851,7 @@ services:
     # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
     # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
     # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
-    image: redpandadata/redpanda:v26.2.4
+    image: redpandadata/redpanda:v26.2.5
     profiles: ["events", "temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -817,7 +881,7 @@ services:
 
   # ------------------------------------------------ profile: observability
   valkey-exporter:
-    image: oliver006/redis_exporter:v1.93.0
+    image: oliver006/redis_exporter:v1.94.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -838,7 +902,7 @@ services:
     networks: [data-tier, observability]
 
   loki:
-    image: grafana/loki:3.6.17
+    image: grafana/loki:3.7.8
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command: -config.file=/etc/loki/loki-config.yaml
@@ -952,7 +1016,7 @@ services:
     # The mounted config has no env interpolation; the webhook secret (and the
     # optional SMTP block, activated only when ALERT_EMAIL_TO+ALERT_SMTP_HOST
     # are set) are templated into /tmp at start.
-    image: prom/alertmanager:v0.28.1
+    image: prom/alertmanager:v0.34.1
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -999,7 +1063,7 @@ services:
     networks: [observability]
 
   grafana:
-    image: grafana/grafana:13.2.3
+    image: grafana/grafana:13.2.4
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -1032,7 +1096,7 @@ services:
   # Self-hosted Langfuse v3 (MIT). Its own Postgres/ClickHouse/Valkey/S3 —
   # never shared with the app's data tier. Timezones MUST be UTC.
   langfuse-postgres:
-    image: postgres:17.11-alpine
+    image: postgres:18.4-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1042,7 +1106,10 @@ services:
       TZ: UTC
       PGTZ: UTC
     volumes:
-      - langfuse-postgres-data:/var/lib/postgresql/data
+      # See keycloak-db: postgres:18+ mounts the volume at /var/lib/postgresql;
+      # a pre-18 langfuse-postgres-data volume must be dumped and recreated
+      # before this image starts (deploy/README.md#upgrade).
+      - langfuse-postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s
@@ -1055,7 +1122,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.8.23.6
+    image: clickhouse/clickhouse-server:26.9.23.15
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1080,7 +1147,7 @@ services:
     networks: [observability]
 
   langfuse-valkey:
-    image: valkey/valkey:8.1.10-alpine
+    image: valkey/valkey:9.1.2-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1138,7 +1205,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.56.0
+    image: langfuse/langfuse-worker:4.66.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1194,7 +1261,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.56.0
+    image: langfuse/langfuse:4.66.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1236,7 +1303,7 @@ services:
     # Self-hosted WebRTC SFU (Apache-2.0). Media needs UDP LIVEKIT_RTC_PORT_RANGE_START-_END
     # (default 50000-50100; move it if another process on the host, e.g. adb, holds a port in it) and a
     # reachable public IP; see deploy/livekit/livekit.yaml for TURN.
-    image: livekit/livekit-server:v1.13.9
+    image: livekit/livekit-server:v1.13.10
     profiles: ["voice"]
     <<: [*restart, *logging, *nnp]
     command: --config /etc/livekit.yaml
@@ -1388,7 +1455,7 @@ services:
     # Still plaintext TCP: code-intel's docker client does not load TLS client
     # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
     # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
-    image: docker:29.9.0-dind
+    image: docker:29.9.1-dind
     profiles: ["code-intel", "builder"]
     <<: [*restart, *logging]
     privileged: true

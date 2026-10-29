@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";
-import { GEN_TEMPLATE_PRESETS, type CustomCodeToolLanguage } from "./model";
+import { GEN_TEMPLATE_PRESETS, LANGUAGE_LABELS, LANGUAGE_ORDER, type CustomCodeToolLanguage } from "./model";
 import type { ToolGeneration } from "./useToolGeneration";
 
 /** "Ask AI to generate the tool" popover. State lives in useToolGeneration. */
@@ -25,7 +25,7 @@ export default function AskAiPopover({
   return (
     <Popover open={gen.open} onOpenChange={(open: boolean) => (open ? gen.setOpen(true) : gen.reset())}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="ml-auto gap-1.5">
+        <Button type="button" variant="outline" size="sm" className="ms-auto gap-1.5">
           <Sparkles aria-hidden="true" size={13} /> {t("askAiTriggerLabel")}
         </Button>
       </PopoverTrigger>
@@ -79,7 +79,7 @@ export default function AskAiPopover({
         <div className="space-y-1.5">
           <Label>{t("languageLabel")}</Label>
           <div className="flex gap-2">
-            {(["JAVA", "PYTHON"] as CustomCodeToolLanguage[]).map((lang) => (
+            {LANGUAGE_ORDER.map((lang) => (
               <Button
                 key={lang}
                 type="button"
@@ -88,7 +88,7 @@ export default function AskAiPopover({
                 aria-pressed={language === lang}
                 onClick={() => onChooseLanguage(lang)}
               >
-                {lang === "PYTHON" ? t("languagePython") : t("languageJava")}
+                {LANGUAGE_LABELS[lang]}
               </Button>
             ))}
           </div>
@@ -122,14 +122,14 @@ export default function AskAiPopover({
               {genResult.valid ? t("askAiGeneratedValidBody") : t("askAiGeneratedInvalidBody")}
             </p>
             {genResult.errors.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-4 font-mono text-[0.6875rem] text-[var(--danger-text)]">
+              <ul className="list-disc space-y-0.5 ps-4 font-mono text-[0.6875rem] text-[var(--danger-text)]">
                 {genResult.errors.map((err, i) => (
                   <li key={i}>{err.message || JSON.stringify(err)}</li>
                 ))}
               </ul>
             )}
             {genResult.warnings.length > 0 && (
-              <ul className="list-disc space-y-0.5 pl-4 text-[0.6875rem] text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-4 text-[0.6875rem] text-muted-foreground">
                 {genResult.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
                 ))}

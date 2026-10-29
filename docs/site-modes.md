@@ -11,7 +11,7 @@ One console image serves two sets of signed-out pages. Which set depends on
 
 Pages that exist in **both** modes: `/docs` (in-app help), `/api-reference`, `/plugins`
 (plugins, apps and wearables), `/templates` and `/directory` (community galleries),
-`/integrations`, `/changelog`, `/downloads` (the latest release's Setup apps and other artifacts), `/glossary`,
+`/integrations`, `/changelog`, `/downloads` (the newest platform release's Setup apps and other artifacts), `/glossary`,
 `/contact`, `/terms`, `/privacy`, `/login`, `/signup`.
 
 ## Where every public surface links

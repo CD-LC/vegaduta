@@ -109,7 +109,7 @@ export default function AmbientDigestCard() {
         <h3 className="text-sm font-medium text-foreground">While you were away</h3>
         <span className="text-xs text-muted-foreground">last 24h</span>
         {digest.sentinelScheduleCount > 0 && (
-          <Badge variant="outline" className="ml-auto">
+          <Badge variant="outline" className="ms-auto">
             <Eye className="size-3" aria-hidden="true" /> {digest.sentinelScheduleCount} sentinel
             {digest.sentinelScheduleCount === 1 ? "" : "s"} watching
           </Badge>

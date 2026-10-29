@@ -20,7 +20,7 @@ import { isTier1ModelCached, safeLocalGet, safeLocalRemove, safeLocalSet } from 
  * fails when an upgrade forgets this line. Hard-coded rather than imported
  * because the bundle rule above forbids a static import of the package, and
  * the routing hot path must be able to read it without loading the library. */
-export const TIER1_RUNTIME_STAMP = "web-llm@0.2.85";
+export const TIER1_RUNTIME_STAMP = "web-llm@0.2.86";
 
 export const TIER1_STAMP_KEY_PREFIX = "edge.tier1.stamp.";
 export const TIER1_LOAD_FAILURE_KEY_PREFIX = "edge.tier1.loadFailure.";

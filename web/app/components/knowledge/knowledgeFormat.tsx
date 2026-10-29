@@ -2,8 +2,26 @@ import { formatBytes as formatSharedBytes } from "../../lib/format";
 
 // Synchronous formats (Stage 6 + F3a/F3b) - go through POST /upload and
 // come back with a chunk count in one request. Mirrors
-// KnowledgeController.SUPPORTED_EXTENSIONS.
-export const SYNC_EXTENSIONS = [".md", ".pdf", ".docx", ".html", ".htm", ".png", ".jpg", ".jpeg", ".webp"];
+// KnowledgeController.SUPPORTED_EXTENSIONS plus the extra types accepted
+// while the Docling converter is enabled (app.knowledge.docling.base-url):
+// when it isn't, the backend still rejects these with a clear error.
+export const SYNC_EXTENSIONS = [
+  ".md",
+  ".pdf",
+  ".docx",
+  ".html",
+  ".htm",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".pptx",
+  ".xlsx",
+  ".csv",
+  ".tiff",
+  ".tif",
+  ".bmp",
+];
 
 // Async formats (Stage F3c/F3d) - go through POST /upload-audio, return a
 // job id immediately, and need polling. Mirrors
@@ -75,11 +93,13 @@ export function extensionOf(filename: string) {
 export function fileBadge(ext: string) {
   if (ext === ".pdf")
     return { label: "PDF", color: "var(--ax-red)", bg: "color-mix(in srgb, var(--ax-red) 15%, transparent)" };
-  if (ext === ".docx")
+  if (ext === ".docx" || ext === ".pptx")
     return { label: "DOC", color: "var(--ax-cyan)", bg: "color-mix(in srgb, var(--ax-cyan) 15%, transparent)" };
+  if (ext === ".xlsx" || ext === ".csv")
+    return { label: "XLS", color: "var(--ax-green)", bg: "color-mix(in srgb, var(--ax-green) 15%, transparent)" };
   if (ext === ".md" || ext === ".html" || ext === ".htm")
     return { label: "MD", color: "var(--ax-mid)", bg: "var(--ax-panel)" };
-  if ([".png", ".jpg", ".jpeg", ".webp"].includes(ext))
+  if ([".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp"].includes(ext))
     return { label: "IMG", color: "var(--ax-amber)", bg: "color-mix(in srgb, var(--ax-amber) 15%, transparent)" };
   if ([".mp4", ".mov", ".webm"].includes(ext))
     return { label: "VID", color: "var(--ax-violet)", bg: "color-mix(in srgb, var(--ax-violet) 15%, transparent)" };

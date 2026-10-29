@@ -12,9 +12,9 @@ and Lite and Full behave exactly as before.
 
 | | Personal | Lite | Full |
 |---|---|---|---|
-| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
+| Containers always on | Postgres, Valkey, core, web, plus web search (SearXNG), the connector runner, the Assistant's browser and a local model by default (`--minimal`: just Postgres, core, web) | Postgres, Valkey, Keycloak, core, web | Lite plus PgBouncer, storage, sidecar and more |
 | Sign-in | local, one owner (core) | Keycloak | Keycloak |
-| Container memory limits (sum) | about 2.5 GB for the four; 3.8 GB with web search and the connector runner (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
+| Container memory limits (sum) | about 2.5 GB for the four; 5.8 GB with web search, the connector runner and the browser (about 2.3 GB with `--minimal`); a local model needs its own memory | more (Keycloak alone is about 768 MB) | more |
 | Billing, plans, payments | off | on unless disabled | on unless disabled |
 | Edition (`VEGADUTA_EDITION`) | `personal`: operator and business features are not loaded (see [What a personal install leaves out](#what-a-personal-install-leaves-out)) | `lite`: everything on | `full`: everything on |
 | Meant for | one person | trying it | one server, a team |
@@ -54,8 +54,8 @@ The same result from a terminal (Linux, macOS, WSL):
 curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh
 ```
 
-`install.sh` installs Personal mode unless you pass `--lite` or `--full`. It downloads the latest release tarball
-(or the one you name with `--version X.Y.Z`), verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
+`install.sh` installs Personal mode unless you pass `--lite` or `--full`. It downloads the newest platform release tarball
+(the newest `vX.Y.Z` tag in the releases list, or the one you name with `--version X.Y.Z`), verifies it (SHA256SUMS, and the Sigstore signature when `cosign` is
 installed) and runs the same `scripts/vegaduta` the Setup app calls.
 
 ## Start with one command
@@ -90,11 +90,13 @@ It also repairs the usual reasons a start fails:
 |---|---|
 | `./scripts/vegaduta personal` | start the personal stack (unchanged containers are left running) |
 | `./scripts/vegaduta restart` | restart core and print a fresh first-run setup link and the sign-in e-mail. Use it for a lost or expired link |
+| `./scripts/vegaduta reset-password [EMAIL]` | forgot the password. Core writes a one-time reset link to `password-reset.txt` in the auth data directory (file access proves it is your machine); the command prints it. Open it, choose a new password, done. `.\scripts\vegaduta.ps1 reset-password` on Windows |
 | `./scripts/vegaduta personal --native-core` | core on the host JVM (`-Xmx1g`, SerialGC), the rest in Docker. Saves the container's memory limit and the Docker VM overhead; logs go to `~/.vegaduta/personal/core.log` |
 | `--local-ai=host`, `--local-model TAG` | use the Ollama on this machine with that model (see below) |
 | `--cloud` | no local model (by default one is downloaded, see below); you will add a provider key in the console. Remembered: a later plain `personal` stays cloud. Run `personal --local-ai` or `--local-ai=host` to switch |
 | `--search` / `--no-search` | start or leave out the private SearXNG that gives agents `web_search` with no API key. On by default for a fresh install; the choice is remembered (see [What is on from the start](#what-is-on-from-the-start)) |
 | `--no-tools` | leave out the MCP connector runner and its starter connectors. `--profile tools` turns it back on |
+| `--no-browser` | leave out the Assistant's browser (`browser-runner`, the `browser_*` tools and the takeover view). On by default for a fresh install; `--browser` turns it back on |
 | `--no-valkey` | leave out the Valkey container; core's counters and caches run in its in-process fallback (see [Running without Valkey](#running-without-valkey)). `--valkey` turns it back on |
 | `--minimal` | the floor: `postgres` + `core` + `web` and nothing else (implies `--no-search --no-tools --no-valkey` and `--no-browser`). Every piece a flag turned off stays off until you ask for it again |
 | `--profile rag` | add the ML sidecar (document extraction for PDF and scans, sidecar embeddings, transcription) and switch core's sidecar on |
@@ -121,8 +123,8 @@ on `127.0.0.1` for the host JVM (sidecar 8001, SearXNG 8888, Ollama 11434; overr
 
 ## What is on from the start
 
-A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) starts with two things switched on, so the
-Assistant can search the web and read a page the first time you ask:
+A **fresh** personal install (no `deploy/compose/.vegaduta-state` yet) starts with three things switched on, so the
+Assistant can search the web, read a page and drive a browser the first time you ask:
 
 - **Private web search.** A SearXNG container (profile `search`, no API key, no published port, 512 MB limit) behind
   the built-in `web_search` tool. A Brave, Tavily, Exa or Serper key is still a platform-admin setting that a personal
@@ -135,6 +137,10 @@ Assistant can search the web and read a page the first time you ask:
   its own package, and that also means it can reach what this computer exposes to Docker containers: the built-in
   `fetch_web_page` tool has an address guard in core, the MCP `fetch` server has none of its own. With
   `--native-core` the runner is not used (core runs STDIO servers itself under the OS sandbox).
+- **The Assistant's own browser** (`browser-runner`, profile `browser`). A Playwright server with Chromium in its
+  own container, so agents get the `browser_*` tools (navigate, read the page text, take a screenshot, click,
+  type) and the live takeover view out of the box. See [The Assistant's browser](#the-assistants-browser) for the
+  security model; decline a fresh install with `--no-browser` or `VEGADUTA_BROWSER=0` in `.env`.
 
 On the first start where the runner is on, core registers three **starter connectors** for the Personal workspace,
 each pinned to an exact version and recognised by the connector catalog as that exact spec, so none lands in the
@@ -273,7 +279,11 @@ point a personal install back at Keycloak (`APP_AUTH_MODE=keycloak`).
 You can unlock the console in four ways, alone or together: a **passkey** (Touch ID, Windows Hello, a phone or a
 security key), a **PIN** on a browser you have enrolled, a **password**, and one-time **recovery codes** for the day
 the other ways are gone. The sign-in screen shows a passkey button first, a PIN pad when this browser holds a PIN,
-and asks for no e-mail address unless you choose "Use a password instead".
+and asks for no e-mail address unless you choose "Use a password instead". **Forgot the password?**
+The sign-in screen has a "Forgot password?" link: it asks core to write a one-time reset link to
+`password-reset.txt` in the auth data directory - the link is never sent over the wire, so only
+someone who can read files on this machine gets it. `./scripts/vegaduta reset-password` prints it;
+on Windows that is `.\scripts\vegaduta.ps1 reset-password`.
 
 1. **First start.** Core creates one owner and a default tenant named `Personal` through the normal sign-up path,
    with a random password nobody sees, and refuses to sign that account in until you set a real way in.
@@ -356,6 +366,15 @@ and asks for no e-mail address unless you choose "Use a password instead".
     core: sign-in is refused until the fresh setup link it prints is used, and completing it signs every login out.
     Deleting the account row does not work; the tenant would still exist and the next first-run sign-up is refused as
     a duplicate.
+12. **Sign-in on a second browser or machine.** A PIN made in one browser does not work in another — that is the
+    design, not a bug (item 4: the digits only count together with this browser's device secret, so a stolen PIN is
+    useless elsewhere). On the other browser sign in with a password, a passkey or a recovery code, then **Account
+    security → add a PIN** there; each browser gets its own binding, up to 20. The same applies after clearing a
+    browser's site data — the binding is gone and the PIN has to be added again. A passkey that works in one browser
+    but is not offered in another is the same story at the authenticator layer: device-bound passkeys stay in the
+    browser profile that made them, while synced passkeys (iCloud Keychain, Google Password Manager, 1Password,
+    Bitwarden) roam with the account you are signed in to there. For one method that works everywhere use a synced
+    passkey or the password; the PIN is the deliberate trade of convenience for device binding.
 
 Not built: one-time codes from an authenticator app (TOTP), conditional-UI passkey autofill (the passkey button is
 pressed, never prompted on page load), a passkey sign-in for Lite and Full (Keycloak has its own), and account
@@ -710,13 +729,13 @@ Turn it off by starting without the profile; the folder and its files stay where
 
 ## The Assistant's browser
 
-The agent can drive its own headless Chromium (`browser_*` tools: navigate, read the page text, take a screenshot, click, type), and you can sign in to a site once in a live view of that same page; the login is saved as an encrypted profile and the agent keeps working logged in. In the personal profile the flags are already on (`BROWSER_V2_ENABLED`, `BROWSER_PROFILES_ENABLED`, `BROWSER_TAKEOVER_ENABLED`); TOTP stays off. What the default install lacks is a Chromium: the slim `core` image has none, so the browser tools are not offered and `GET /api/browser/automation/capabilities` answers `browserAvailable=false` with a reason, and the Assistant's Browser button says how to turn it on.
+The agent can drive its own headless Chromium (`browser_*` tools: navigate, read the page text, take a screenshot, click, type), and you can sign in to a site once in a live view of that same page; the login is saved as an encrypted profile and the agent keeps working logged in. In the personal profile the flags are already on (`BROWSER_V2_ENABLED`, `BROWSER_PROFILES_ENABLED`, `BROWSER_TAKEOVER_ENABLED`); TOTP stays off. A fresh install adds the `browser-runner` container for the Chromium: without it the slim `core` image has none, the browser tools are not offered and `GET /api/browser/automation/capabilities` answers `browserAvailable=false` with a reason, and the Assistant's Browser button says how to turn it on.
 
-Turn it on (container stack):
+Turn it off or back on (container stack):
 
 ```sh
-scripts/vegaduta personal --browser        # PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
-scripts/vegaduta personal --no-browser     # turn it off again (the choice is remembered)
+scripts/vegaduta personal --no-browser     # turn it off (fresh installs get it; the choice is remembered)
+scripts/vegaduta personal --browser        # turn it back on — PowerShell: .\scripts\vegaduta.ps1 personal -Profile browser
 ```
 
 This adds one container, `browser-runner` (`services/browser-runner`, a Playwright 1.63.0 server with Chromium; about 2 GB to download, 3.4 GB on disk, a 2 GB memory limit you can change with `BROWSER_RUNNER_MEM_LIMIT`). Core stays on the slim image and attaches to it (`APP_BROWSERUSE_REMOTE_URL=ws://browser-runner:3000/`). A host JVM (`--native-core`) does not use it: install Chromium on the host and set `APP_BROWSERUSE_CHROMIUM_EXECUTABLE_PATH` instead. The older route still works and needs none of this: `CORE_IMAGE_VARIANT=-full` (the 6 GB `core-full` image with Chromium inside core; raise `CORE_MEM_LIMIT=2560m`).
@@ -761,7 +780,9 @@ to turn a group back on. Lite and Full load everything.
 | `video-demo-media` | Vertex Veo video generation and the demo image and video endpoints |
 
 Public share links for agents and workflows and hosted forms are still available; only voice on a share link is
-left out.
+left out. Even so, a share-page visitor can still talk: the call panel offers one-tap downloads of the on-device
+speech-to-text and reply-voice models onto the visitor's own device, after which hold-to-talk transcribes locally
+and only the text crosses the wire - no `voice-realtime-share` needed (see [local models](local-models.md)).
 
 **Turning one back on.** Put `APP_EDITION_FEATURES_<ID>_ENABLED=true` in `deploy/compose/core.env` (the id with `-`
 written as `_`) and restart core, for example `APP_EDITION_FEATURES_CLOUD_SPEECH_ENABLED=true` to use Sarvam or

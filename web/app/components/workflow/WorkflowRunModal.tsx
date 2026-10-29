@@ -32,7 +32,14 @@ export default function WorkflowRunModal({
 }: any) {
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocus(dialogRef, null, () => { if (!busy) setShowRunModal(false); }, { enabled: !!showRunModal });
+  useDialogFocus(
+    dialogRef,
+    null,
+    () => {
+      if (!busy) setShowRunModal(false);
+    },
+    { enabled: !!showRunModal }
+  );
 
   return (
     <>
@@ -45,7 +52,9 @@ export default function WorkflowRunModal({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={(e) => { if (e.target === e.currentTarget && !busy) setShowRunModal(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !busy) setShowRunModal(false);
+          }}
         >
           <div
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl"
@@ -58,7 +67,7 @@ export default function WorkflowRunModal({
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{t("runModalTitle")}</h2>
               <button
                 type="button"
-                className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 onClick={() => setShowRunModal(false)}
                 aria-label={t("close")}
               >
@@ -68,7 +77,10 @@ export default function WorkflowRunModal({
             <p className="mt-1.5 text-sm text-muted-foreground">{t("runModalHint")}</p>
             {/* Test run (nlflow W4/W7): sends are simulated on the server for this run. */}
             {dryRunNote && (
-              <p className="mt-2 rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground" data-testid="run-modal-dry-run-note">
+              <p
+                className="mt-2 rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground"
+                data-testid="run-modal-dry-run-note"
+              >
                 {dryRunNote}
               </p>
             )}
@@ -169,9 +181,11 @@ export default function WorkflowRunModal({
                * calls persistGraph("DRAFT") before dispatching, which on an
                * ACTIVE workflow silently reverts it to DRAFT - the topbar
                * button carries the same warning as a tooltip. */}
-              <p className="mr-auto text-xs text-muted-foreground">
+              <p className="me-auto text-xs text-muted-foreground">
                 {t("runSavesDraftHint")}
-                {pinCount > 0 ? ` ${pinCount === 1 ? t("pinRunModalHintOne") : t("pinRunModalHint", { count: pinCount })}` : ""}
+                {pinCount > 0
+                  ? ` ${pinCount === 1 ? t("pinRunModalHintOne") : t("pinRunModalHint", { count: pinCount })}`
+                  : ""}
               </p>
               <Button type="button" variant="outline" size="sm" onClick={() => setShowRunModal(false)} disabled={busy}>
                 {t("cancel")}

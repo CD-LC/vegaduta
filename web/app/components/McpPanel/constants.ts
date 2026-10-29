@@ -1,6 +1,5 @@
 import {
   HardDrive,
-  Github,
   Database,
   Search,
   MessageSquare,
@@ -13,12 +12,14 @@ import {
   Clock,
   Bug,
   BookOpen,
+  Flame,
   Mail,
   Send,
   PhoneCall,
   Calendar as CalendarIcon,
   Table as TableIcon,
 } from "lucide-react";
+import { Github } from "../lucideBrandIcons";
 
 // Maps McpCatalogEntry.iconKey (a stable string from the backend, not a URL)
 // to a brand-consistent icon - keeps the catalog free of any external asset
@@ -42,6 +43,8 @@ export const CATALOG_ICONS: Record<string, any> = {
   "list-checks": ListChecks,
   clock: Clock,
   bug: Bug,
+  book: BookOpen,
+  flame: Flame,
 };
 
 // Built-in Tools (#164) - native platform capabilities, not external MCP

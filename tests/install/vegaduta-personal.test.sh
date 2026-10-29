@@ -91,15 +91,15 @@ check "rag is accepted without a warning" "$(! has "$out" 'is not available in p
 echo "day-one defaults (fresh install)"
 new_home
 out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
-check "a fresh install plans web search and the MCP runner" "$(has "$out" 'search=1 tools=1' && has "$out" '--profile search' && has "$out" '--profile tools'; echo $?)" "$out"
+check "a fresh install plans web search, the MCP runner and the browser" "$(has "$out" 'search=1 tools=1 browser=1' && has "$out" '--profile search' && has "$out" '--profile tools' && has "$out" '--profile browser'; echo $?)" "$out"
 check "tools is a choice, not a profile: the profile list stays empty" "$(has "$out" 'profiles=none'; echo $?)" "$out"
-check "both are remembered" "$([ "$(state search)" = 1 ] && [ "$(state tools)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+check "all three are remembered" "$([ "$(state search)" = 1 ] && [ "$(state tools)" = 1 ] && [ "$(state browser)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 out="$("$CLI" personal --profile workspace --cloud --dry-run </dev/null 2>&1)"
 check "a caller that passes its own profiles (the Setup app) keeps both" "$(has "$out" 'profiles=workspace' && has "$out" 'search=1 tools=1' && has "$out" '--profile tools'; echo $?)" "$out"
 out="$("$CLI" personal --no-search --no-tools --cloud --dry-run </dev/null 2>&1)"
 check "--no-search --no-tools declines both" "$(has "$out" 'search=0 tools=0' && ! has "$out" '--profile search' && ! has "$out" '--profile tools'; echo $?)" "$out"
 out="$("$CLI" personal --cloud --dry-run </dev/null 2>&1)"
-check "the browser add-on is off unless asked for" "$(has "$out" 'browser=0' && ! has "$out" 'browser.yml' && ! has "$out" '--profile browser'; echo $?)" "$out"
+check "the browser add-on default is remembered on a plain re-run" "$(has "$out" 'browser=1' && has "$out" 'browser.yml' && has "$out" '--profile browser'; echo $?)" "$out"
 out="$("$CLI" personal --browser --cloud --dry-run </dev/null 2>&1)"
 check "--browser layers browser.yml and the browser profile" "$(has "$out" 'browser=1' && has "$out" 'browser.yml' && has "$out" '--profile browser'; echo $?)" "$out"
 check "the browser choice is remembered by a later plain run" "$([ "$(state browser)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
@@ -182,7 +182,11 @@ e=s["core"]["environment"]
 print("runner" if r else "no-runner", e["MCP_STDIO_SIDECAR_ENABLED"], "secret" if e["MCP_STDIO_SIDECAR_SHARED_SECRET"] else "no-secret", e["MCP_STDIO_SIDECAR_URL"],
       sorted(r["networks"]) if r else "-", sorted(s["core"]["networks"]), "ports" if r and r.get("ports") else "no-ports", "volumes" if r and r.get("volumes") else "no-volumes",
       r["deploy"]["resources"]["limits"]["memory"] if r else "-")')"
-  check "the runner is on only its own network, publishes nothing, mounts nothing, and core relays to it" "$([ "$runner" = "runner true secret mcp-stdio-runner:8097 ['mcp-stdio-net'] ['default', 'mcp-stdio-net', 'search-net'] no-ports no-volumes 805306368" ]; echo $?)" "runner: $runner"
+  # browser-net is core's side of the browser runner (day-one --browser default);
+  # sandbox-net is the internal link to tool-sandbox (agent-authored tools ride `tools`).
+  check "the runner is on only its own network, publishes nothing, mounts nothing, and core relays to it" "$([ "$runner" = "runner true secret mcp-stdio-runner:8097 ['mcp-stdio-net'] ['browser-net', 'default', 'mcp-stdio-net', 'sandbox-net', 'search-net'] no-ports no-volumes 805306368" ]; echo $?)" "runner: $runner"
+  sandbox="$("$CLI" compose config --format json 2>/dev/null | python3 -c 'import json,sys; s=json.load(sys.stdin)["services"]; e=s["core"]["environment"]; t=s.get("tool-sandbox"); print(e["TOOL_SANDBOX_ENABLED"], e["TOOL_SANDBOX_BASE_URL"], sorted(t["networks"]) if t else "-", t["deploy"]["resources"]["limits"]["memory"] if t else "-")')"
+  check "tool-sandbox rides the tools profile on personal, on the internal network only" "$([ "$sandbox" = "true http://tool-sandbox:8095 ['sandbox-net'] 1073741824" ]; echo $?)" "sandbox: $sandbox"
   new_home
   "$CLI" personal --build --cloud --no-tools --dry-run >/dev/null 2>&1
   runner="$("$CLI" compose config --format json 2>/dev/null | python3 -c '

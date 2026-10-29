@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
@@ -36,9 +37,11 @@ class ApprovalContinuationFactoryTest {
 
     private final HumanApprovalGateService approvals = mock(HumanApprovalGateService.class);
     private final ToolCallLogService toolLog = mock(ToolCallLogService.class);
+    private final SessionMemoryService memory = mock(SessionMemoryService.class);
     private final ApprovalContinuationProperties properties = new ApprovalContinuationProperties();
     private final ApprovalContinuationFactory factory =
-            new ApprovalContinuationFactory(new ObjectMapper(), approvals, provider(toolLog), properties);
+            new ApprovalContinuationFactory(
+                    new ObjectMapper(), approvals, provider(toolLog), provider(memory), properties);
 
     @SuppressWarnings("unchecked")
     private static <T> ObjectProvider<T> provider(T value) {
@@ -115,8 +118,14 @@ class ApprovalContinuationFactoryTest {
     }
 
     @Test
-    void anEnvelopeWithoutTheMemorySubjectIsNotContinued() {
-        assertThat(factory.build(request(envelope(GOAL, SCOPED, null)), Outcome.COMPLETED, "x")).isEmpty();
+    void anEnvelopeWithoutTheMemorySubjectFallsBackToTheTenantSubject() {
+        // The envelope's scoped memory id still verifies against the identity, so the missing
+        // subject key falls back to the recorded subject rather than dropping the continuation.
+        ApprovalContinuation c =
+                factory.build(request(envelope(GOAL, SCOPED, null)), Outcome.COMPLETED, "x").orElseThrow();
+
+        assertThat(c.subjectKey()).isEqualTo(SUBJECT);
+        assertThat(c.memorySessionId()).isEqualTo(SCOPED);
     }
 
     @Test
@@ -171,6 +180,65 @@ class ApprovalContinuationFactoryTest {
                 factory.build(request(envelope(GOAL, SCOPED, SUBJECT)), Outcome.COMPLETED, "x").orElseThrow();
 
         assertThat(c.stickyTools()).containsExactly("send_invoice");
+    }
+
+    private static String scopeOnlyEnvelope() {
+        // What a caller with no turn origin records: the call's identity + tenant context, no goal,
+        // no subjectKey, no requestedAgentId, no memorySessionId.
+        return "{\"replay\":{\"version\":1,\"toolName\":\"send_invoice\",\"agentId\":\""
+                + ROUTED_AGENT
+                + "\",\"sessionId\":\""
+                + SESSION
+                + "\",\"tenantId\":\""
+                + TENANT
+                + "\",\"subject\":\""
+                + SUBJECT
+                + "\"},\"arguments\":{\"to\":\"x\"}}";
+    }
+
+    @Test
+    void aScopeOnlyEnvelopeContinuesTheConversationItsFieldsDerive() {
+        String derived =
+                SessionMemoryService.scopedSessionId(TENANT, ROUTED_AGENT, SUBJECT, SESSION);
+        when(memory.getHistory(derived))
+                .thenReturn(
+                        List.of(
+                                ChatTurn.user("Send the invoice."),
+                                ChatTurn.assistant("On it.")));
+
+        Optional<ApprovalContinuation> built =
+                factory.build(request(scopeOnlyEnvelope()), Outcome.COMPLETED, "sent");
+
+        assertThat(built).isPresent();
+        ApprovalContinuation c = built.get();
+        // agent + subject key fall back to the routed agent / tenant subject; the goal is the
+        // conversation's last user turn.
+        assertThat(c.memorySessionId()).isEqualTo(derived);
+        assertThat(c.subjectKey()).isEqualTo(SUBJECT);
+        assertThat(c.requestedAgentId()).isEqualTo(ROUTED_AGENT);
+        assertThat(c.goal()).isEqualTo("Send the invoice.");
+    }
+
+    @Test
+    void aScopeOnlyEnvelopeForASessionWithNoHistoryDoesNotContinue() {
+        String derived =
+                SessionMemoryService.scopedSessionId(TENANT, ROUTED_AGENT, SUBJECT, SESSION);
+        when(memory.getHistory(derived)).thenReturn(List.of());
+
+        assertThat(factory.build(request(scopeOnlyEnvelope()), Outcome.COMPLETED, "sent"))
+                .isEmpty();
+    }
+
+    @Test
+    void aGoalOnAPartialEnvelopeStillRequiresTheDerivedSessionToExist() {
+        // The envelope records the goal but not the memory session id; a wrong derivation must not
+        // start a turn under a conversation that does not exist.
+        String partial = envelope(GOAL, null, SUBJECT);
+        String derived =
+                SessionMemoryService.scopedSessionId(TENANT, REQUESTED_AGENT, SUBJECT, SESSION);
+        when(memory.getHistory(derived)).thenReturn(List.of());
+
+        assertThat(factory.build(request(partial), Outcome.COMPLETED, "sent")).isEmpty();
     }
 
     @Test

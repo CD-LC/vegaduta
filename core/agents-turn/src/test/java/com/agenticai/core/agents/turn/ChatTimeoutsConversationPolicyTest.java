@@ -24,12 +24,15 @@ class ChatTimeoutsConversationPolicyTest {
         return beans.getBeanProvider(type);
     }
 
-    private static ChatTimeouts spring(ContinuationProperties continuation, FollowUpProperties followUp) {
+    private static ChatTimeouts spring(
+            ContinuationProperties continuation, FollowUpProperties followUp) {
         return new ChatTimeouts(
                 D,
                 D,
                 D,
+                D,
                 8,
+                Duration.ofSeconds(5),
                 providerOf(ChatFinishProperties.class, null),
                 providerOf(ChatResilienceProperties.class, null),
                 providerOf(LlmRetryProperties.class, null),
@@ -56,7 +59,9 @@ class ChatTimeoutsConversationPolicyTest {
     void withNoBeansTheShippedDefaultsApply() {
         ChatTimeouts timeouts = spring(null, null);
 
-        assertThat(timeouts.continuation().heuristicApplies(false)).as("a model that is not a weak tool caller").isFalse();
+        assertThat(timeouts.continuation().heuristicApplies(false))
+                .as("a model that is not a weak tool caller")
+                .isFalse();
         assertThat(timeouts.continuation().heuristicApplies(true)).isTrue();
         assertThat(timeouts.followUp().getShortMessageChars()).isEqualTo(40);
         assertThat(new ChatTimeouts(D, D, D).continuation().heuristicApplies(true)).isTrue();

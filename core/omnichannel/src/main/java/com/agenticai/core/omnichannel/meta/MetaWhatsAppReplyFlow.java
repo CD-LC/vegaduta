@@ -225,6 +225,7 @@ final class MetaWhatsAppReplyFlow {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            turnContext.taint().mark("inbound:whatsapp");
             reply =
                     relayed.isPresent()
                             ? relayed.get()

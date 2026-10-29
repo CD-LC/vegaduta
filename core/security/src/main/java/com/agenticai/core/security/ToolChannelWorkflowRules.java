@@ -118,6 +118,7 @@ final class ToolChannelWorkflowRules {
                 .requestMatchers(
                         HttpMethod.POST,
                         "/api/knowledge/ingest",
+                        "/api/knowledge/ingest-url",
                         "/api/knowledge/upload",
                         "/api/knowledge/upload-audio",
                         "/api/knowledge/collections",

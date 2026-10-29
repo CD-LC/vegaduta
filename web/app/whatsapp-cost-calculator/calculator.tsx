@@ -92,7 +92,7 @@ function SliderField({
           id={id}
           type="number"
           inputMode="numeric"
-          className="h-9 w-24 shrink-0 text-right tabular-nums"
+          className="h-9 w-24 shrink-0 text-end tabular-nums"
           min={min}
           max={max}
           step={step}
@@ -153,8 +153,7 @@ export default function WhatsAppCostCalculator() {
         <CardHeader>
           <CardTitle className="text-base">Your numbers</CardTitle>
           <CardDescription>
-            Every field is yours to set — the results below are computed from these inputs and
-            nothing else.
+            Every field is yours to set — the results below are computed from these inputs and nothing else.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -217,7 +216,7 @@ export default function WhatsAppCostCalculator() {
                   step={0.0001}
                   min={0}
                   placeholder="from rate card"
-                  className="h-9 text-right tabular-nums"
+                  className="h-9 text-end tabular-nums"
                   value={marketingRateText}
                   onChange={(e) => setMarketingRateText(e.target.value)}
                 />
@@ -233,16 +232,16 @@ export default function WhatsAppCostCalculator() {
                   step={0.001}
                   min={0}
                   placeholder="from rate card"
-                  className="h-9 text-right tabular-nums"
+                  className="h-9 text-end tabular-nums"
                   value={utilityRateText}
                   onChange={(e) => setUtilityRateText(e.target.value)}
                 />
               </div>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground" data-testid="wa-rates-note">
-              Pricing model checked against Meta&apos;s documentation on {PRICING_CHECKED_ON}: per-message,
-              by category (marketing, utility, authentication). Meta&apos;s documentation text publishes no
-              rates, so none are pre-filled. Read yours from{" "}
+              Pricing model checked against Meta&apos;s documentation on {PRICING_CHECKED_ON}: per-message, by category
+              (marketing, utility, authentication). Meta&apos;s documentation text publishes no rates, so none are
+              pre-filled. Read yours from{" "}
               <a
                 href={META_RATE_CARD_URL}
                 target="_blank"
@@ -264,107 +263,97 @@ export default function WhatsAppCostCalculator() {
             <CardContent className="space-y-2" data-testid="wa-no-rates">
               <p className="text-sm font-medium text-foreground">Check Meta&apos;s current rates</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Enter the marketing and utility rates from Meta&apos;s rate card on the left and the
-                estimate appears here. Rates last checked: not published in Meta&apos;s documentation
-                text as of {PRICING_CHECKED_ON}.
+                Enter the marketing and utility rates from Meta&apos;s rate card on the left and the estimate appears
+                here. Rates last checked: not published in Meta&apos;s documentation text as of {PRICING_CHECKED_ON}.
               </p>
             </CardContent>
           </Card>
         ) : (
           <>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Card className="gap-4">
-            <CardHeader className="gap-2">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Megaphone className="size-4" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Broadcast / human workflow
-                </CardTitle>
-              </div>
-              <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
-                {inr.format(r.costBroadcast)}
-                <span className="ml-1 text-sm font-normal text-muted-foreground">/ month</span>
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ResultRow label="Cost per resolved conversation" value={r.perConvBroadcast} precise />
-            </CardContent>
-          </Card>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Card className="gap-4">
+                <CardHeader className="gap-2">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Megaphone className="size-4" aria-hidden="true" />
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Broadcast / human workflow
+                    </CardTitle>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                    {inr.format(r.costBroadcast)}
+                    <span className="ms-1 text-sm font-normal text-muted-foreground">/ month</span>
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResultRow label="Cost per resolved conversation" value={r.perConvBroadcast} precise />
+                </CardContent>
+              </Card>
 
-          <Card className="gap-4 border-primary/40">
-            <CardHeader className="gap-2">
-              <div className="flex items-center gap-2 text-primary">
-                <Bot className="size-4" aria-hidden="true" />
-                <CardTitle className="text-sm font-medium text-primary">
-                  AI agent that answers precisely
-                </CardTitle>
-              </div>
-              <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
-                {inr.format(r.costAgent)}
-                <span className="ml-1 text-sm font-normal text-muted-foreground">/ month</span>
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ResultRow label="Cost per resolved conversation" value={r.perConvAgent} precise />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardContent className="space-y-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="text-sm font-medium text-foreground">
-                Monthly difference implied by your inputs
-              </span>
-              <span
-                className={`text-xl font-semibold tabular-nums ${
-                  r.delta >= 0 ? "text-primary" : "text-destructive"
-                }`}
-                data-testid="wa-calc-delta"
-              >
-                {r.delta >= 0 ? "−" : "+"}
-                {inr.format(Math.abs(r.delta))}
-              </span>
+              <Card className="gap-4 border-primary/40">
+                <CardHeader className="gap-2">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Bot className="size-4" aria-hidden="true" />
+                    <CardTitle className="text-sm font-medium text-primary">AI agent that answers precisely</CardTitle>
+                  </div>
+                  <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
+                    {inr.format(r.costAgent)}
+                    <span className="ms-1 text-sm font-normal text-muted-foreground">/ month</span>
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResultRow label="Cost per resolved conversation" value={r.perConvAgent} precise />
+                </CardContent>
+              </Card>
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {r.delta >= 0
-                ? "That is what the messaging bill shrinks by if — and only if — an agent really resolves conversations in the fewer messages you entered above."
-                : "With these inputs the agent side sends more messages, so it costs more. The calculator only reflects what you entered."}
-            </p>
 
-            {/* The formula, verbatim — no hidden math. */}
-            <div className="rounded-md border border-border bg-muted/30 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                The whole formula
-              </p>
-              <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
-                blended rate = {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹
-                {utilityRate} = ₹{r.blendedRate.toFixed(4)} per message
-                <br />
-                side A = {conversations.toLocaleString("en-IN")} conversations ×{" "}
-                {msgsBroadcast} msgs × blended rate = {inrPrecise.format(r.costBroadcast)}
-                <br />
-                side B = {conversations.toLocaleString("en-IN")} conversations × {msgsAgent} msgs ×
-                blended rate = {inrPrecise.format(r.costAgent)}
-                <br />
-                per resolved conversation = side ÷ conversations
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-sm font-medium text-foreground">Monthly difference implied by your inputs</span>
+                  <span
+                    className={`text-xl font-semibold tabular-nums ${
+                      r.delta >= 0 ? "text-primary" : "text-destructive"
+                    }`}
+                    data-testid="wa-calc-delta"
+                  >
+                    {r.delta >= 0 ? "−" : "+"}
+                    {inr.format(Math.abs(r.delta))}
+                  </span>
+                </div>
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {r.delta >= 0
+                    ? "That is what the messaging bill shrinks by if — and only if — an agent really resolves conversations in the fewer messages you entered above."
+                    : "With these inputs the agent side sends more messages, so it costs more. The calculator only reflects what you entered."}
+                </p>
 
+                {/* The formula, verbatim — no hidden math. */}
+                <div className="rounded-md border border-border bg-muted/30 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    The whole formula
+                  </p>
+                  <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
+                    blended rate = {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹{utilityRate} = ₹
+                    {r.blendedRate.toFixed(4)} per message
+                    <br />
+                    side A = {conversations.toLocaleString("en-IN")} conversations × {msgsBroadcast} msgs × blended rate
+                    = {inrPrecise.format(r.costBroadcast)}
+                    <br />
+                    side B = {conversations.toLocaleString("en-IN")} conversations × {msgsAgent} msgs × blended rate ={" "}
+                    {inrPrecise.format(r.costAgent)}
+                    <br />
+                    per resolved conversation = side ÷ conversations
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </>
         )}
 
         <Card className="border-primary/40 bg-primary/5">
           <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                See an agent answer for your business
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Free, no signup — a live sandbox, not a video.
-              </p>
+              <p className="text-sm font-medium text-foreground">See an agent answer for your business</p>
+              <p className="text-xs text-muted-foreground">Free, no signup — a live sandbox, not a video.</p>
             </div>
             <Button asChild>
               <Link href="/try">

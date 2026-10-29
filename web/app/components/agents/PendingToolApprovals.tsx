@@ -103,6 +103,7 @@ export default function PendingToolApprovals({
   agentId,
   sessionId,
   turnInFlight = false,
+  transcriptLen,
   className,
   autoCloseMs,
   onDecided,
@@ -112,6 +113,10 @@ export default function PendingToolApprovals({
   sessionId: string | null | undefined;
   /** True while a chat turn is streaming; the list is re-read when it ends. */
   turnInFlight?: boolean;
+  /** Length of the chat transcript. When it grows after a decision, the agent's
+   * reply IS the receipt - close any lingering "Done" cards immediately so the
+   * answer is the last thing on screen. */
+  transcriptLen?: number;
   className?: string;
   /** How long a clean "Done" card stays before closing itself (tests shorten it). */
   autoCloseMs?: number;
@@ -235,6 +240,25 @@ export default function PendingToolApprovals({
       }
     };
   }, [outcomes, autoCloseDelay, dismiss]);
+
+  // The continuation reply landing IS the receipt: the moment the transcript
+  // grows past what the decision saw, close every "Done" card at once rather
+  // than letting it trail the final answer for the auto-close window.
+  const transcriptLenAtLastDecideRef = useRef<number | null>(null);
+  useEffect(() => {
+    const decided = Object.values(outcomes).some((o) => o.kind === "done");
+    if (!decided || transcriptLen == null) return;
+    if (transcriptLenAtLastDecideRef.current == null) {
+      transcriptLenAtLastDecideRef.current = transcriptLen;
+      return;
+    }
+    if (transcriptLen > transcriptLenAtLastDecideRef.current) {
+      for (const [id, outcome] of Object.entries(outcomes)) {
+        if (outcome.kind === "done") dismiss(id);
+      }
+      transcriptLenAtLastDecideRef.current = null;
+    }
+  }, [transcriptLen, outcomes, dismiss]);
 
   // A turn just finished - the gate may have parked a call during it.
   // Falling edge only, so mounting (already covered above) does not read twice.
@@ -427,7 +451,7 @@ export default function PendingToolApprovals({
               title={t("close")}
               data-testid={`tool-approval-close-${card.id}`}
               onClick={() => dismiss(card.id)}
-              className="-mr-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="-me-1 shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <X size={14} className="size-3.5" aria-hidden="true" />
             </button>
@@ -442,7 +466,7 @@ export default function PendingToolApprovals({
         {!decided && named.label !== named.raw && (
           <details className="mt-1 text-xs text-muted-foreground" data-testid="tool-approval-raw-name">
             <summary className="cursor-pointer hover:text-foreground">{t("rawName")}</summary>
-            <code className="font-mono text-[11px]">{named.raw}</code>
+            <code className="break-all font-mono text-[11px]">{named.raw}</code>
           </details>
         )}
         {!decided && (

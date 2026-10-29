@@ -96,10 +96,22 @@ export function spendCapError(block: SpendCapBlock, status = 402): Error {
   return err;
 }
 
+// TenantContextFilter's 403 for a JWT with no tenant_id. An EXPECTED state
+// for the whole pre-onboarding window (OnboardingGate is its UI), not a
+// failure - the body used to reach the global error toast on every
+// tenant-scoped call, and its "sign out and back in" advice loops forever
+// for an account whose onboarding simply hasn't run.
+export const TENANT_MISSING_ERROR = "tenant_missing";
+const TENANT_MISSING_MESSAGE =
+  "Finish creating your organization to continue. If you already have one, sign out and back in.";
+function isTenantMissingBody(status: number, body: any): boolean {
+  return status === 403 && typeof body?.error === "string" && body.error.includes("not linked to an organization");
+}
+
 /**
  * Known guard refusals that must NOT read as a generic failure: the spend cap
- * (402) and the view-as read-only refusal (403). Returns the Error to throw, or
- * null for anything else.
+ * (402), the view-as read-only refusal (403), and the tenant-less state above
+ * (403). Returns the Error to throw, or null for anything else.
  */
 export function knownGuardError(status: number, body: any): Error | null {
   const cap = status === 402 ? parseSpendCapBody(body) : null;
@@ -109,6 +121,13 @@ export function knownGuardError(status: number, body: any): Error | null {
     err.status = status;
     err.code = READ_ONLY_ERROR;
     err.readOnly = true;
+    return err;
+  }
+  if (isTenantMissingBody(status, body)) {
+    const err: any = new Error(TENANT_MISSING_MESSAGE);
+    err.status = status;
+    err.code = TENANT_MISSING_ERROR;
+    err.tenantMissing = true;
     return err;
   }
   return null;

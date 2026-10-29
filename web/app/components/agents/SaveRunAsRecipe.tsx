@@ -96,11 +96,13 @@ export default function SaveRunAsRecipe({
     <div className="w-full max-w-[85%] text-xs" data-testid="save-run-as-recipe">
       {saved && (
         <div role="status" className="mb-1 rounded-md border border-border bg-secondary/30 px-3 py-2">
-          <div className="text-foreground">{t("recipeSaved", { name: saved.summary.name, count: saved.summary.stepCount })}</div>
+          <div className="text-foreground">
+            {t("recipeSaved", { name: saved.summary.name, count: saved.summary.stepCount })}
+          </div>
           {saved.warnings.length > 0 && (
             <div className="mt-1 text-muted-foreground">
               <div className="font-medium">{t("saveWarnings")}</div>
-              <ul className="mt-0.5 list-disc pl-4">
+              <ul className="mt-0.5 list-disc ps-4">
                 {saved.warnings.map((w) => (
                   <li key={w}>{w}</li>
                 ))}
@@ -131,7 +133,12 @@ export default function SaveRunAsRecipe({
           </label>
           <label className="block text-muted-foreground">
             {t("recipeDescription")}
-            <Input className="mt-1 h-8 text-xs" value={description} disabled={busy} onChange={(e) => setDescription(e.target.value)} />
+            <Input
+              className="mt-1 h-8 text-xs"
+              value={description}
+              disabled={busy}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </label>
 
           <div>
@@ -172,7 +179,13 @@ export default function SaveRunAsRecipe({
           </div>
 
           <label className="flex items-start gap-2 text-muted-foreground">
-            <input type="checkbox" className="mt-0.5" checked={allowLiteral} disabled={busy} onChange={(e) => setAllowLiteral(e.target.checked)} />
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={allowLiteral}
+              disabled={busy}
+              onChange={(e) => setAllowLiteral(e.target.checked)}
+            />
             <span>{t("allowLiteral")}</span>
           </label>
 

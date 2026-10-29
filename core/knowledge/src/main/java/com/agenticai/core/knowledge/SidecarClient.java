@@ -125,7 +125,9 @@ public class SidecarClient {
     // behind each value and why one global timeout would be wrong here.
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(3);
     private static final Duration QUERY_READ_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration INGEST_READ_TIMEOUT = Duration.ofMinutes(5);
+    // Package-visible (not private) so DoclingConversionService can give its own RestClient the
+    // same minutes-scale ingest read budget without duplicating the constant.
+    static final Duration INGEST_READ_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration TRANSCRIBE_READ_TIMEOUT = Duration.ofMinutes(30);
     // Live-request-thread bound for VoiceCallController#turn's synchronous
     // sidecar-Whisper fallback (2026-08-06 follow-up to the RAG audit above)
@@ -253,9 +255,9 @@ public class SidecarClient {
 
     /**
      * {@code app.sidecar.enabled} (default true). False = the deployment runs without the Python
-     * sidecar (personal profile): sidecar-only capabilities answer with a clear
-     * {@link FeatureUnavailableException} (or fail open, for rerank) instead of waiting on a
-     * connection that can never succeed. Setter-injected so every constructor is unchanged.
+     * sidecar (personal profile): sidecar-only capabilities answer with a clear {@link
+     * FeatureUnavailableException} (or fail open, for rerank) instead of waiting on a connection
+     * that can never succeed. Setter-injected so every constructor is unchanged.
      */
     private volatile boolean sidecarEnabled = true;
 
@@ -266,11 +268,13 @@ public class SidecarClient {
     }
 
     /**
-     * {@code app.embeddings.provider=auto} with no Ollama in the environment: lets an Ollama registered at
-     * run time take over from the sidecar. Setter-injected and optional, so every constructor is unchanged.
+     * {@code app.embeddings.provider=auto} with no Ollama in the environment: lets an Ollama
+     * registered at run time take over from the sidecar. Setter-injected and optional, so every
+     * constructor is unchanged.
      */
     @Autowired(required = false)
-    void setRegisteredOllamaResolver(com.agenticai.core.knowledge.embedding.RegisteredOllamaEmbeddingResolver resolver) {
+    void setRegisteredOllamaResolver(
+            com.agenticai.core.knowledge.embedding.RegisteredOllamaEmbeddingResolver resolver) {
         this.embeddings.setDynamicEmbedder(resolver::resolve);
     }
 
@@ -279,10 +283,23 @@ public class SidecarClient {
         return sidecarEnabled;
     }
 
+    /**
+     * Optional Docling-first extraction route ({@code app.knowledge.docling.base-url}). Setter
+     * injection keeps the constructor - and every test that builds this class by hand - untouched,
+     * same pattern as {@link #setSidecarEnabled}/{@link #setRegisteredOllamaResolver}.
+     */
+    private volatile DoclingConversionService doclingConversion;
+
+    @Autowired(required = false)
+    void setDoclingConversionService(DoclingConversionService service) {
+        this.doclingConversion = service;
+    }
+
     private void requireSidecar(String capability) {
         if (!sidecarEnabled) {
             throw new FeatureUnavailableException(
-                    capability + " needs the Python sidecar, which is disabled (app.sidecar.enabled=false)."
+                    capability
+                            + " needs the Python sidecar, which is disabled (app.sidecar.enabled=false)."
                             + " Start the sidecar and set app.sidecar.enabled=true to use it.");
         }
     }
@@ -351,7 +368,7 @@ public class SidecarClient {
      * to compute a {@code Content-Length} is what {@code HttpURLConnection} did too, so the large
      * base64 {@code /transcribe} and {@code /extract} bodies are not newly duplicated.
      */
-    private static RestClient buildClient(String baseUrl, Duration readTimeout) {
+    static RestClient buildClient(String baseUrl, Duration readTimeout) {
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(HTTP_CLIENT);
         requestFactory.setReadTimeout(readTimeout);
         return RestClient.builder()
@@ -443,7 +460,8 @@ public class SidecarClient {
      */
     public float[] embedQuery(String text, String embeddingModel) {
         if (embeddings.hasExternalEmbedder()) {
-            // No sidecar round trip and no boxed List<Double> detour: straight float[] to the caller.
+            // No sidecar round trip and no boxed List<Double> detour: straight float[] to the
+            // caller.
             return embeddings.embedQueryVector(text, embeddingModel, QUERY_CHUNK_SIZE);
         }
         SidecarEmbedResponse response =
@@ -488,8 +506,28 @@ public class SidecarClient {
      * identically to an absent field: fall back to Tesseract.
      */
     public String extractText(String filename, byte[] content, ActiveOcrConfig ocrConfig) {
+        DoclingConversionService docling = doclingConversion;
+        if (docling != null && docling.handles(filename)) {
+            try {
+                return docling.extract(filename, content);
+            } catch (SidecarCommunicationException e) {
+                // 4xx already became InvalidKnowledgeUploadException inside the conversion client
+                // (the file was the problem - retrying it against the sidecar would just 400 again,
+                // so it propagates). What lands here is transport/5xx failure only: fall back to
+                // the sidecar's extractor when allowed, which is also the only path left when
+                // sidecar is disabled and Docling was the configured backend.
+                if (!docling.fallbackToSidecar() || !sidecarEnabled) {
+                    throw e;
+                }
+                log.warn(
+                        "Docling extraction failed for {} - falling back to sidecar /extract: {}",
+                        filename,
+                        e.getMessage());
+            }
+        }
         if (!sidecarEnabled) {
-            // In-process fallback for the formats that need no native libraries (html, docx); PDF and
+            // In-process fallback for the formats that need no native libraries (html, docx); PDF
+            // and
             // images (OCR) answer "feature unavailable" rather than a bad-gateway error.
             return InProcessTextExtractor.extract(filename, content);
         }

@@ -33,7 +33,7 @@ function Chips<T extends string>({
 }) {
   return (
     <div role="group" aria-label={label} className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+      <span className="me-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
       {options.map((o) => {
         const on = value === o.id;
         return (

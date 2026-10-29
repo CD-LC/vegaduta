@@ -36,8 +36,9 @@ against the release's `SHA256SUMS` and starts Lite with the signed images:
 curl -fsSL https://raw.githubusercontent.com/CD-LC/vegaduta/main/install.sh | sh -s -- --lite
 ```
 
-Without `--version X.Y.Z` the installer uses GitHub's "latest release", which
-is never a pre-release. Without `--lite` it installs Personal mode instead.
+Without `--version X.Y.Z` the installer resolves the newest platform release
+from the releases list - the newest `vX.Y.Z` tag, skipping component releases
+like `sdk-*` and any pre-release. Without `--lite` it installs Personal mode instead.
 
 **From a git checkout:**
 
@@ -81,6 +82,21 @@ build or the image download.
    ```sh
    ./scripts/vegaduta make-admin you@example.com
    ```
+
+### Locked out? Recover the account
+
+If you forget the local-account password, the machine that runs the install
+can mint a one-time reset link - file access to the install counts as proof
+of ownership, the same trust model as the first-run setup link:
+
+```sh
+./scripts/vegaduta reset-password you@example.com
+```
+
+Core writes a `password-reset.txt` inside the install's storage; the command
+reads it and prints a link of the form `…/login?setup=<token>`. Open it,
+choose a new password, done. The link is single-use; ask for another the same
+way if it expires or a wrong address was used.
 
 ## 4. Add a model provider
 

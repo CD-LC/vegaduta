@@ -53,7 +53,8 @@ class LocalModelOllamaGatewayAndPullTest {
 
     @Test
     void tagsListsInstalledModelsAndKnowsTheLatestAlias() {
-        fake.tagsJson = "{\"models\":[{\"name\":\"qwen3.5:4b\"},{\"name\":\"llama3.2:latest\"},{\"model\":\"granite4.2:3b\"}]}";
+        fake.tagsJson =
+                "{\"models\":[{\"name\":\"qwen3.5:4b\"},{\"name\":\"llama3.2:latest\"},{\"model\":\"granite4.2:3b\"}]}";
 
         LocalModelOllamaGateway.Tags tags = gateway.tags();
 
@@ -77,10 +78,13 @@ class LocalModelOllamaGatewayAndPullTest {
     @Test
     void theSsrfGuardStillAppliesToTheConfiguredUrl() {
         // The default guard refuses loopback; only an operator allow-list entry lets it through.
-        LocalModelOllamaGateway refused = new LocalModelOllamaGateway(SsrfGuard.strict(), fake.baseUrl());
+        LocalModelOllamaGateway refused =
+                new LocalModelOllamaGateway(SsrfGuard.strict(), fake.baseUrl());
         try {
             assertFalse(refused.tags().reachable());
-            assertThrows(LocalModelOllamaGateway.PullException.class, () -> refused.pull("qwen3.5:4b", e -> {}));
+            assertThrows(
+                    LocalModelOllamaGateway.PullException.class,
+                    () -> refused.pull("qwen3.5:4b", e -> {}));
             assertTrue(fake.pullBodies.isEmpty(), "nothing was sent to the refused host");
         } finally {
             refused.close();
@@ -91,32 +95,44 @@ class LocalModelOllamaGatewayAndPullTest {
 
     @Test
     void aPullStreamsProgressAndStopsAtSuccess() throws Exception {
-        fake.pullLines = List.of(
-                "{\"status\":\"pulling manifest\"}",
-                "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":100,\"completed\":50}",
-                "{\"status\":\"success\"}");
+        fake.pullLines =
+                List.of(
+                        "{\"status\":\"pulling manifest\"}",
+                        "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":100,\"completed\":50}",
+                        "{\"status\":\"success\"}");
         List<String> statuses = new ArrayList<>();
 
         gateway.pull("qwen3.5:4b", e -> statuses.add(e.path("status").asText()));
 
         assertEquals(List.of("pulling manifest", "pulling aaa", "success"), statuses);
-        assertTrue(fake.pullBodies.get(0).contains("\"model\":\"qwen3.5:4b\""), fake.pullBodies.get(0));
+        assertTrue(
+                fake.pullBodies.get(0).contains("\"model\":\"qwen3.5:4b\""),
+                fake.pullBodies.get(0));
         assertTrue(fake.pullBodies.get(0).contains("\"stream\":true"));
     }
 
     @Test
     void anErrorLineAndANonSuccessStatusBecomeAPullException() {
         fake.pullLines = List.of("{\"status\":\"pulling manifest\"}", "{\"error\":\"disk full\"}");
-        var e1 = assertThrows(LocalModelOllamaGateway.PullException.class, () -> gateway.pull("a:1", x -> {}));
+        var e1 =
+                assertThrows(
+                        LocalModelOllamaGateway.PullException.class,
+                        () -> gateway.pull("a:1", x -> {}));
         assertEquals("disk full", e1.getMessage());
 
         fake.pullStatus = 404;
-        var e2 = assertThrows(LocalModelOllamaGateway.PullException.class, () -> gateway.pull("a:1", x -> {}));
+        var e2 =
+                assertThrows(
+                        LocalModelOllamaGateway.PullException.class,
+                        () -> gateway.pull("a:1", x -> {}));
         assertTrue(e2.getMessage().contains("does not exist"), e2.getMessage());
 
         fake.pullStatus = 200;
         fake.pullLines = List.of("{\"status\":\"pulling manifest\"}");
-        var e3 = assertThrows(LocalModelOllamaGateway.PullException.class, () -> gateway.pull("a:1", x -> {}));
+        var e3 =
+                assertThrows(
+                        LocalModelOllamaGateway.PullException.class,
+                        () -> gateway.pull("a:1", x -> {}));
         assertTrue(e3.getMessage().contains("closed the download"), e3.getMessage());
     }
 
@@ -124,11 +140,12 @@ class LocalModelOllamaGatewayAndPullTest {
 
     @Test
     void aJobRunsToDoneWithPercentFromTheLayerBytes() throws Exception {
-        fake.pullLines = List.of(
-                "{\"status\":\"pulling manifest\"}",
-                "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":1000,\"completed\":250}",
-                "{\"status\":\"pulling bbb\",\"digest\":\"bbb\",\"total\":1000,\"completed\":750}",
-                "{\"status\":\"success\"}");
+        fake.pullLines =
+                List.of(
+                        "{\"status\":\"pulling manifest\"}",
+                        "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":1000,\"completed\":250}",
+                        "{\"status\":\"pulling bbb\",\"digest\":\"bbb\",\"total\":1000,\"completed\":750}",
+                        "{\"status\":\"success\"}");
         CountDownLatch release = new CountDownLatch(1);
         fake.holdPull = release;
 
@@ -144,10 +161,11 @@ class LocalModelOllamaGatewayAndPullTest {
 
     @Test
     void percentIsCappedAt99UntilOllamaSaysSuccess() throws Exception {
-        fake.pullLines = List.of(
-                "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":100,\"completed\":100}",
-                "{\"status\":\"verifying sha256 digest\"}",
-                "{\"status\":\"success\"}");
+        fake.pullLines =
+                List.of(
+                        "{\"status\":\"pulling aaa\",\"digest\":\"aaa\",\"total\":100,\"completed\":100}",
+                        "{\"status\":\"verifying sha256 digest\"}",
+                        "{\"status\":\"success\"}");
         CountDownLatch release = new CountDownLatch(1);
         fake.holdPull = release;
 
@@ -206,5 +224,46 @@ class LocalModelOllamaGatewayAndPullTest {
     @Test
     void anUnknownJobIdIsEmpty() {
         assertEquals(Optional.empty(), pulls.status("nope"));
+    }
+
+    @Test
+    void aShortWindowDerivesACtxVariant() {
+        fake.loadedModelName = "qwen3.5:9b";
+        fake.loadedContextLength = 4096;
+
+        Optional<String> derived = gateway.ensureSufficientContext("qwen3.5:9b");
+
+        assertEquals(Optional.of("qwen3.5:9b-ctx32k"), derived);
+        assertEquals(1, fake.createBodies.size());
+        assertTrue(fake.createBodies.get(0).contains("\"from\":\"qwen3.5:9b\""));
+        assertTrue(fake.createBodies.get(0).contains("\"num_ctx\":32768"));
+    }
+
+    @Test
+    void aSufficientWindowIsLeftAlone() {
+        fake.loadedModelName = "qwen3.5:9b";
+        fake.loadedContextLength = 32768;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b"));
+        assertTrue(fake.createBodies.isEmpty());
+    }
+
+    @Test
+    void anAlreadyDerivedTagDoesNotLoop() {
+        // The served tag already names the wanted window but the runner still loaded 4k - deriving
+        // would produce the same tag, so it must no-op rather than re-create forever.
+        fake.loadedModelName = "qwen3.5:9b-ctx32k";
+        fake.loadedContextLength = 4096;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b-ctx32k"));
+        assertTrue(fake.createBodies.isEmpty());
+    }
+
+    @Test
+    void anUnreachablePsLeavesTheTagAlone() {
+        fake.loadedContextLength = null;
+
+        assertEquals(Optional.empty(), gateway.ensureSufficientContext("qwen3.5:9b"));
+        assertTrue(fake.createBodies.isEmpty());
     }
 }

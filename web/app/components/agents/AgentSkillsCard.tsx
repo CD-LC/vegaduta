@@ -171,7 +171,9 @@ export default function AgentSkillsCard({
     <div className="mt-6 rounded-lg border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-foreground"><BrandText text={t("title")} /></h3>
+          <h3 className="text-sm font-semibold text-foreground">
+            <BrandText text={t("title")} />
+          </h3>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
             <BrandText text={t("subtitle")} />{" "}
             <Link href="/skills" className="text-primary underline-offset-2 hover:underline">
@@ -213,7 +215,9 @@ export default function AgentSkillsCard({
                 title={locked ? editLockedTooltip : undefined}
                 className={cn(
                   "rounded-full px-3 py-1 text-xs",
-                  restricted === wantRestricted ? "border-primary bg-accent text-accent-foreground" : "text-muted-foreground"
+                  restricted === wantRestricted
+                    ? "border-primary bg-accent text-accent-foreground"
+                    : "text-muted-foreground"
                 )}
                 onClick={() => {
                   if (restricted === wantRestricted) return;
@@ -232,34 +236,39 @@ export default function AgentSkillsCard({
               {catalog.map((skill) => {
                 const sec = securityByName.get(skill.name);
                 return (
-                <li key={skill.name}>
-                  <label
-                    className={cn("flex items-start gap-2 text-xs", disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer")}
-                    title={skill.description}
-                  >
-                    <input
-                      type="checkbox"
-                      className="mt-0.5"
-                      checked={settings.allowedSkillNames.includes(skill.name)}
-                      disabled={disabled}
-                      onChange={() => toggleSkill(skill.name)}
-                    />
-                    <span className="min-w-0">
-                      <span className="font-mono text-foreground">{skill.name}</span>
-                      <span className="ml-1.5 text-muted-foreground">
-                        {skill.source === "BUILT_IN" ? t("builtIn") : t("custom")}
-                      </span>
-                      {isFlagged(sec) && (
-                        <span className="ml-1.5 inline-flex flex-wrap gap-1 align-middle">
-                          {sec.status === "NEEDS_REVIEW" && <SkillRiskBadge level="medium" label={t("statusChanged")} />}
-                          {sec.riskLevel !== "none" && sec.riskLevel !== "low" && (
-                            <SkillRiskBadge level={sec.riskLevel} label={t(riskLabelKey(sec.riskLevel))} />
-                          )}
-                        </span>
+                  <li key={skill.name}>
+                    <label
+                      className={cn(
+                        "flex items-start gap-2 text-xs",
+                        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
                       )}
-                    </span>
-                  </label>
-                </li>
+                      title={skill.description}
+                    >
+                      <input
+                        type="checkbox"
+                        className="mt-0.5"
+                        checked={settings.allowedSkillNames.includes(skill.name)}
+                        disabled={disabled}
+                        onChange={() => toggleSkill(skill.name)}
+                      />
+                      <span className="min-w-0">
+                        <span className="font-mono text-foreground">{skill.name}</span>
+                        <span className="ms-1.5 text-muted-foreground">
+                          {skill.source === "BUILT_IN" ? t("builtIn") : t("custom")}
+                        </span>
+                        {isFlagged(sec) && (
+                          <span className="ms-1.5 inline-flex flex-wrap gap-1 align-middle">
+                            {sec.status === "NEEDS_REVIEW" && (
+                              <SkillRiskBadge level="medium" label={t("statusChanged")} />
+                            )}
+                            {sec.riskLevel !== "none" && sec.riskLevel !== "low" && (
+                              <SkillRiskBadge level={sec.riskLevel} label={t(riskLabelKey(sec.riskLevel))} />
+                            )}
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  </li>
                 );
               })}
             </ul>

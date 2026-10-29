@@ -39,10 +39,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.13"
       - name: Tag must equal both manifest versions
@@ -65,7 +65,9 @@ jobs:
       - name: Type-check and build the TypeScript package
         working-directory: sdk/typescript
         run: |
-          npm ci || npm install --no-audit --no-fund
+          # npm ci only: package-lock.json carries the integrity hashes - an
+          # `npm install` fallback would resolve ranges and defeat the lock.
+          npm ci --no-audit --no-fund
           npm run typecheck
           npm run build
       - name: Run runtime and contract tests
@@ -82,46 +84,51 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-      id-token: write # Sigstore attestations
+      id-token: write # sign the provenance attestation
+      attestations: write # store it
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.13"
       - name: Typecheck, build and pack the TypeScript package
         working-directory: sdk/typescript
         run: |
           set -euo pipefail
-          npm ci || npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           # package.json says "private": true so nothing publishes it from a checkout by accident. The
           # tarball built here is what the GitHub release carries and what the npm job publishes, so
           # the flag goes before it is packed (`npm publish` refuses a private manifest, also in a tarball).
           npm pkg delete private
           npm pack  # prepack: typecheck + build, so dist/ is in the tarball
+          # List once, then grep the file: under `set -o pipefail`, `tar | grep -q` can
+          # fail on tar's SIGPIPE after grep matched and exited - a false "missing file".
+          tar -tzf vegaduta-sdk-*.tgz > tarball-files.txt
           for f in package/dist/index.js package/dist/index.d.ts package/LICENSE package/package.json; do
-            tar -tzf vegaduta-sdk-*.tgz | grep -qx "$f" || { echo "::error::the packed tarball has no $f"; exit 1; }
+            grep -qx "$f" tarball-files.txt || { echo "::error::the packed tarball has no $f"; exit 1; }
           done
           mv vegaduta-sdk-*.tgz ../.. --verbose
       - name: Build the Python package
         run: |
-          python3 -m pip install --user build
+          # hash-locked: --require-hashes verifies every wheel before it runs.
+          python3 -m pip install --user --require-hashes -r sdk/python/requirements-build.lock
           python3 -m build sdk/python --outdir dist
       - name: Checksums
         run: |
           cd dist && sha256sum *.tar.gz *.whl ../vegaduta-sdk-*.tgz > SHA256SUMS 2>/dev/null || \
           ( sha256sum *.tar.gz *.whl > SHA256SUMS && sha256sum ../vegaduta-sdk-*.tgz >> SHA256SUMS )
       - name: Attest provenance
-        uses: actions/attest-build-provenance@977bb373ede98d70efdfc65b84548be8d03c2774f4 # v3.0.0
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: |
             dist/
             vegaduta-sdk-*.tgz
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: rest-sdk-dists
           path: |
@@ -137,7 +144,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rest-sdk-dists
       - name: Create the release
@@ -146,11 +153,18 @@ jobs:
           PRERELEASE: ${{ needs.verify.outputs.prerelease }}
         run: |
           set -euo pipefail
-          args=(--generate-notes --verify-tag)
-          [ "$PRERELEASE" = "true" ] && args+=(--prerelease)
-          gh release create "$GITHUB_REF_NAME" "${args[@]}" dist/* vegaduta-sdk-*.tgz \
-            --notes-start-tag "$GITHUB_REF_NAME" || \
-          gh release upload "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz --clobber
+          flags=(--repo "$GITHUB_REPOSITORY")
+          [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+          # No checkout in this job, so no git: --verify-tag/--generate-notes make gh
+          # shell out to git and fail. Point every call at the repo explicitly.
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* vegaduta-sdk-*.tgz \
+              --title "REST client SDKs ${{ needs.verify.outputs.version }}" \
+              --notes "TypeScript (npm) and Python (PyPI) REST clients ${{ needs.verify.outputs.version }}, generated from docs/api/openapi.json. Verify with \`sha256sum -c SHA256SUMS\` and \`gh attestation verify <file> --repo $GITHUB_REPOSITORY\`." \
+              "${flags[@]}"
+          fi
 
   pypi:
     name: Publish to PyPI
@@ -162,12 +176,16 @@ jobs:
     permissions:
       id-token: write # trusted publishing
     steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      # The artifact already contains a top-level dist/ (plus the npm tarball) - download
+      # to the workspace root or the path lands at dist/dist/.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rest-sdk-dists
-          path: dist
+      # SHA256SUMS ships on the GitHub Release but is not a distribution file - twine
+      # (and the check this action runs first) rejects it in packages-dir.
+      - run: rm -f dist/SHA256SUMS
       - name: Publish to PyPI (trusted publishing)
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd790c9bec43f9625a9b9ad1e8 # v1.13.0
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
           skip-existing: true
           packages-dir: dist
@@ -186,10 +204,10 @@ jobs:
       # The tarball the build job packed, attested and attached to the GitHub release. A fresh checkout
       # has no dist/ (it is gitignored and `--ignore-scripts` skips the build), so publishing the source
       # tree would ship a package whose `main` and `types` point at files that are not there.
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: rest-sdk-dists
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
@@ -200,6 +218,10 @@ jobs:
           set -euo pipefail
           tarball="$(ls vegaduta-sdk-*.tgz)"
           case "$tarball" in *$'\n'*) echo "::error::more than one vegaduta-sdk tarball: $tarball"; exit 1 ;; esac
-          tar -tzf "$tarball" | grep -qx 'package/dist/index.js' \
+          # List once, then grep: `tar | grep -q` under pipefail can fail on tar's
+          # SIGPIPE after grep matched - a false "missing file" (same fix as the
+          # build job's check above).
+          tar -tzf "$tarball" > tarball-files.txt
+          grep -qx 'package/dist/index.js' tarball-files.txt \
             || { echo "::error::$tarball has no dist/index.js; refusing to publish an empty package"; exit 1; }
           npm publish "./$tarball" --provenance --access public

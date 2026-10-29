@@ -46,12 +46,18 @@ public class StudioAppInvokeService {
 
     private static final Logger log = LoggerFactory.getLogger(StudioAppInvokeService.class);
     private static final Duration TURN_TIMEOUT = Duration.ofSeconds(45);
-    /** Registry key of the persona of an app with no system prompt of its own ({@code prompts/en/studioapp.default_system.md}). */
+
+    /**
+     * Registry key of the persona of an app with no system prompt of its own ({@code
+     * prompts/en/studioapp.default_system.md}).
+     */
     static final String DEFAULT_AI_SYSTEM_KEY = "studioapp.default_system";
 
     private final PromptSlot prompts = new PromptSlot();
 
-    /** The prompt registry, so an owner can reword the default persona; absent = the shipped text. */
+    /**
+     * The prompt registry, so an owner can reword the default persona; absent = the shipped text.
+     */
     @Autowired(required = false)
     void setPromptResolver(PromptResolver resolver) {
         prompts.use(resolver);
@@ -156,6 +162,7 @@ public class StudioAppInvokeService {
                         .build();
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        turnContext.taint().mark("inbound:studio_app");
         String reply =
                 agentChatService
                         .chat(turnContext, chatTurn)

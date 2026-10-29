@@ -65,10 +65,7 @@ export default function AssistantPalette({ items, onClose }: { items: PaletteIte
 
   let lastGroup = "";
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[12vh]"
-      data-testid="assistant-palette"
-    >
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[12vh]" data-testid="assistant-palette">
       <button
         type="button"
         tabIndex={-1}
@@ -92,17 +89,23 @@ export default function AssistantPalette({ items, onClose }: { items: PaletteIte
             aria-label={t("palettePlaceholder")}
             className="h-11 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
-          <kbd className="rounded border border-border bg-secondary/60 px-1 font-mono text-[10px] text-muted-foreground">esc</kbd>
+          <kbd className="rounded border border-border bg-secondary/60 px-1 font-mono text-[10px] text-muted-foreground">
+            esc
+          </kbd>
         </div>
         <ul role="listbox" className="max-h-80 overflow-y-auto p-1">
-          {shown.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t("paletteEmpty")}</li>}
+          {shown.length === 0 && (
+            <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t("paletteEmpty")}</li>
+          )}
           {shown.map((item, i) => {
             const header = item.group !== lastGroup;
             lastGroup = item.group;
             return (
               <li key={item.id} role="presentation">
                 {header && (
-                  <p className="px-2 pb-1 pt-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{item.group}</p>
+                  <p className="px-2 pb-1 pt-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    {item.group}
+                  </p>
                 )}
                 <button
                   type="button"
@@ -111,7 +114,7 @@ export default function AssistantPalette({ items, onClose }: { items: PaletteIte
                   onMouseEnter={() => setCursor(i)}
                   onClick={() => choose(item)}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm",
+                    "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-start text-sm",
                     i === cursor ? "bg-secondary text-foreground" : "text-foreground/90"
                   )}
                 >

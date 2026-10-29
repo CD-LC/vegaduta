@@ -33,7 +33,13 @@ import WorkflowTour from "./WorkflowTour";
 import type { WorkflowTourStep } from "./WorkflowTour";
 import WorkflowCommandPalette from "./WorkflowCommandPalette";
 import { NODE_DEFS } from "./nodeDefs";
-import { CONNECTION_LINE_STYLE, CONNECTION_RADIUS, DEFAULT_EDGE_OPTIONS, edgeTypes, nodeTypes } from "./workflowCanvasHelpers";
+import {
+  CONNECTION_LINE_STYLE,
+  CONNECTION_RADIUS,
+  DEFAULT_EDGE_OPTIONS,
+  edgeTypes,
+  nodeTypes,
+} from "./workflowCanvasHelpers";
 import "./workflow-chrome.css";
 import { Button } from "../ui/button";
 import { IconAction } from "./StudioControls";
@@ -273,7 +279,9 @@ export default function WorkflowCanvasZone({
       <div ref={reactFlowWrapper} onDrop={onDrop} onDragOver={onDragOver} className="ax-wf-canvas-zone">
         <div className="ax-wf-canvas-title">
           {t("flowGraphTitle")}
-          {runResult ? ` · RUN #${runResult.id.slice(0, 8)} ${runLive ? t("runStatusInProgress") : runResult.status}` : ""}
+          {runResult
+            ? ` · RUN #${runResult.id.slice(0, 8)} ${runLive ? t("runStatusInProgress") : runResult.status}`
+            : ""}
           {titleExtra}
         </div>
 
@@ -372,21 +380,21 @@ export default function WorkflowCanvasZone({
           {/* Floating "+ Add node" - opens the ⌘K command palette. The fast,
               modern way to drop a node without hunting the left rail. */}
           {!readOnly && (
-          <Panel position="bottom-left">
-            <button
-              type="button"
-              onClick={() => setCmdOpen(true)}
-              title="Add a node  (⌘K / Ctrl+K)"
-              aria-label="Add a node (Ctrl+K)"
-              className="flex items-center gap-2 rounded-lg border border-border bg-popover/90 px-3 py-2 text-xs font-medium text-foreground shadow-lg backdrop-blur-md transition-colors hover:border-primary/50 hover:bg-accent"
-            >
-              <Plus size={15} className="text-primary" />
-              Add node
-              <kbd className="ml-0.5 hidden items-center gap-0.5 rounded border border-border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
-                <Command size={9} />K
-              </kbd>
-            </button>
-          </Panel>
+            <Panel position="bottom-left">
+              <button
+                type="button"
+                onClick={() => setCmdOpen(true)}
+                title="Add a node  (⌘K / Ctrl+K)"
+                aria-label="Add a node (Ctrl+K)"
+                className="flex items-center gap-2 rounded-lg border border-border bg-popover/90 px-3 py-2 text-xs font-medium text-foreground shadow-lg backdrop-blur-md transition-colors hover:border-primary/50 hover:bg-accent"
+              >
+                <Plus size={15} className="text-primary" />
+                Add node
+                <kbd className="ms-0.5 hidden items-center gap-0.5 rounded border border-border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
+                  <Command size={9} />K
+                </kbd>
+              </button>
+            </Panel>
           )}
         </ReactFlow>
 
@@ -415,7 +423,11 @@ export default function WorkflowCanvasZone({
           )}
           {!readOnly && (
             <>
-              <ToolbarButton label="Select mode (drag to box-select)" pressed={!panMode} onClick={() => setMode("select")}>
+              <ToolbarButton
+                label="Select mode (drag to box-select)"
+                pressed={!panMode}
+                onClick={() => setMode("select")}
+              >
                 <MousePointer2 size={15} />
               </ToolbarButton>
               <ToolbarButton label="Pan mode (drag to move canvas)" pressed={panMode} onClick={() => setMode("pan")}>
@@ -430,7 +442,11 @@ export default function WorkflowCanvasZone({
             </ToolbarButton>
           )}
           {!readOnly && onToggleSnap && (
-            <ToolbarButton label={`Snap to grid: ${snapToGrid ? "on" : "off"}`} pressed={snapToGrid} onClick={onToggleSnap}>
+            <ToolbarButton
+              label={`Snap to grid: ${snapToGrid ? "on" : "off"}`}
+              pressed={snapToGrid}
+              onClick={onToggleSnap}
+            >
               <Grid3x3 size={15} />
             </ToolbarButton>
           )}

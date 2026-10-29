@@ -39,6 +39,7 @@ class ApprovalParkDefaultsTest {
         assertThat(fromYml.getAwaitingMessage()).isEqualTo(codeDefaults.getAwaitingMessage());
         assertThat(fromYml.getQueuedMessage()).isEqualTo(codeDefaults.getQueuedMessage());
         assertThat(fromYml.getQueueFullMessage()).isEqualTo(codeDefaults.getQueueFullMessage());
+        assertThat(fromYml.getNotQueuedMessage()).isEqualTo(codeDefaults.getNotQueuedMessage());
         assertThat(fromYml.getRecordFailedMessage()).isEqualTo(codeDefaults.getRecordFailedMessage());
         assertThat(fromYml.getMaxQueuedCalls()).isEqualTo(codeDefaults.getMaxQueuedCalls()).isEqualTo(5);
         assertThat(fromYml.getMaxGoalChars()).isEqualTo(codeDefaults.getMaxGoalChars()).isEqualTo(4000);
@@ -49,7 +50,7 @@ class ApprovalParkDefaultsTest {
     void noDefaultTextTellsTheModelToAbandonTheTaskAndTheParkTextSaysItResumes() throws Exception {
         ApprovalParkProperties p = boundFromApplicationYml();
 
-        for (String text : List.of(p.getAwaitingMessage(), p.getQueuedMessage(), p.getQueueFullMessage())) {
+        for (String text : List.of(p.getAwaitingMessage(), p.getQueuedMessage(), p.getQueueFullMessage(), p.getNotQueuedMessage())) {
             assertThat(text).doesNotContain("STOP NOW").doesNotContainIgnoringCase("do not continue the task");
             assertThat(text).containsIgnoringCase("resumed automatically");
             assertThat(text).contains("{tool}");

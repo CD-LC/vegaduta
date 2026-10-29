@@ -19,6 +19,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       next: { label: "Create your first agent", href: "/agents" },
       learnInAcademy: true,
+      academyTopic: "/orientation",
     },
   },
   {
@@ -34,6 +35,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       next: { label: "Test in Playground", href: "/playground" },
       learnInAcademy: true,
+      academyTopic: "/agents",
     },
   },
   {
@@ -49,6 +51,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Adjust only after you can say what the change teaches the agent.",
       ],
       learnInAcademy: true,
+      academyTopic: "/memory",
     },
   },
   {
@@ -63,6 +66,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Let the eval gate decide whether a new version promotes.",
       ],
       learnInAcademy: true,
+      academyTopic: "/quality",
     },
   },
   {
@@ -80,6 +84,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       reassurance: "Nothing goes public when you save. People can only reach an agent after you connect a channel.",
       next: { label: "Test it in Playground", href: "/playground" },
       learnInAcademy: true,
+      academyTopic: "/agents",
     },
   },
   {
@@ -94,6 +99,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Press Run now to watch it work before you change anything.",
       ],
       learnInAcademy: true,
+      academyTopic: "/workflows",
     },
   },
   {
@@ -107,6 +113,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "A failed step shows its error. Fix that node on the canvas and run again.",
       ],
       learnInAcademy: true,
+      academyTopic: "/workflows",
     },
   },
   {
@@ -123,6 +130,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       reassurance: "Run now is a test run. Nothing runs by itself until you Activate the workflow.",
       learnInAcademy: true,
+      academyTopic: "/workflows",
     },
   },
   {
@@ -139,6 +147,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       reassurance: "If you have not made an agent yet, do that first. Most workflows hand work to an agent.",
       next: { label: "Browse workflow templates", href: "/workflows/templates" },
       learnInAcademy: true,
+      academyTopic: "/workflows",
     },
   },
   {
@@ -168,6 +177,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       ],
       next: { label: "Open Agents", href: "/agents" },
       learnInAcademy: true,
+      academyTopic: "/knowledge",
     },
   },
   {
@@ -182,6 +192,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Facts below are things agents saved with remember_fact. Edit or delete any of them.",
       ],
       learnInAcademy: true,
+      academyTopic: "/memory",
     },
   },
   {
@@ -192,6 +203,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
       purpose: "Get one job done without building an agent first.",
       steps: ["Describe the task in plain words.", "Run it and read the result.", "Past tasks are kept in History."],
       learnInAcademy: true,
+      academyTopic: "/scheduled",
     },
   },
   {
@@ -205,6 +217,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "A failed job shows why it failed, so you can fix the agent or workflow behind it.",
       ],
       learnInAcademy: true,
+      academyTopic: "/scheduled",
     },
   },
   {
@@ -253,6 +266,7 @@ export const WORKSPACE_GUIDE_ENTRIES: PageGuideEntry[] = [
         "Attach one to the agent that needs it from the agent's own page.",
       ],
       learnInAcademy: true,
+      academyTopic: "/memory",
     },
   },
 ];

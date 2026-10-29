@@ -251,6 +251,9 @@
     <httpcore5.version>5.4.3</httpcore5.version>
     <!-- PostgreSQL JDBC 42.7.12: GHSA-j92g-9f8w-j867 -->
     <postgresql.version>42.7.12</postgresql.version>
+    <!-- log4j-api/log4j-to-slf4j 2.26.1: GHSA-qv9r-c865-cp47 (Boot 3.5.16 manages
+         2.24.3 through spring-boot-starter-logging). -->
+    <log4j2.version>2.26.1</log4j2.version>
     <!-- Reproducible builds (JAVA-037): a fixed timestamp for every jar entry, so
          the same source always yields byte-identical jars (maven-jar-plugin and
          spring-boot-maven-plugin both honour it). Bump only when cutting a
@@ -259,20 +262,24 @@
     <!-- JaCoCo agent argLine, filled in by jacoco:prepare-agent. Must be defined
          (empty) so surefire's ${jacocoArgLine} resolves when the agent is skipped. -->
     <jacocoArgLine></jacocoArgLine>
-    <jacoco.version>0.8.13</jacoco.version>
-    <spotless.version>2.44.4</spotless.version>
+    <!-- Extra JVM options appended to every test fork's argLine; empty by
+         default. A module whose suite outgrows the JVM's default max heap (a
+         quarter of physical RAM) overrides it in its own <properties>. -->
+    <testForkJvmArgs></testForkJvmArgs>
+    <jacoco.version>0.8.15</jacoco.version>
+    <spotless.version>3.10.4</spotless.version>
     <google-java-format.version>1.25.2</google-java-format.version>
     <!-- Git ref Spotless ratchets against. CI fetches origin/main (fetch-depth 0);
          a clone without that remote can pass -Dspotless.ratchet.ref=main (or HEAD). -->
     <spotless.ratchet.ref>origin/main</spotless.ratchet.ref>
-    <archunit.version>1.4.1</archunit.version>
+    <archunit.version>1.5.1</archunit.version>
     <!-- JSpecify nullness annotations (@NullMarked/@Nullable). Compile-scope,
          annotation-only jar; the NullAway pilot in -Pstatic-analysis checks
          only packages marked @NullMarked. -->
-    <jspecify.version>1.0.0</jspecify.version>
+    <jspecify.version>1.0.1</jspecify.version>
     <!-- Google Application Default Credentials: core/providers (Vertex AI) and core/dbauth (Cloud SQL IAM login)
          must use the same one. Managed in dependencyManagement below. -->
-    <google-auth.version>1.33.0</google-auth.version>
+    <google-auth.version>1.54.0</google-auth.version>
     <webauthn4j.version>0.31.11.RELEASE</webauthn4j.version>
     <!-- Apache POI (documentgen writes DOCX/XLSX/PPTX; omnichannel reads the contacts XLSX).
          One version for both. 5.4.0 fixed the advisories that Dependabot alerts #5 and #6 list
@@ -296,7 +303,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.0</version>
       </dependency>
       <!-- Pin jackson-annotations 2.22: webauthn4j 0.31.x (passkeys, core/admin) parses with Jackson 3.2
            (tools.jackson), which calls JsonTypeInfo.Value.getWriteTypeIdForDefaultImpl(), a method added in
@@ -313,7 +320,7 @@
       <dependency>
         <groupId>at.yawk.lz4</groupId>
         <artifactId>lz4-java</artifactId>
-        <version>1.11.4</version>
+        <version>1.12.0</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.ai</groupId>
@@ -336,13 +343,26 @@
            (reproduced via WorkflowController.generateGraph's AI workflow
            generator, but this would hit any Gemini call path). Explicit
            dependencyManagement entries win regardless of tree depth, so this
-           fixes it no matter which dependency was actually "nearest". 4.12.0
-           matches the version already used in mobile-app/mobile-sdk's
-           Android modules elsewhere in this repo. -->
+           fixes it no matter which dependency was actually "nearest". -->
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
-        <version>4.12.0</version>
+        <version>5.5.0</version>
+      </dependency>
+      <!-- OkHttp 5.x: the plain "okhttp" artifact is a KMP shell with no classes
+           under Maven; okhttp-jvm carries them and is declared in core/chat.
+           Its kotlin-stdlib floor (2.1.21) is also pinned because google-genai's
+           older stdlib request would otherwise win mediation and OkHttp 5's
+           Kotlin-2.1 bytecode can hit missing stdlib members at runtime. -->
+      <dependency>
+        <groupId>com.squareup.okhttp3</groupId>
+        <artifactId>okhttp-jvm</artifactId>
+        <version>5.5.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib</artifactId>
+        <version>2.4.21</version>
       </dependency>
 
       <!-- Inter-module versions, so every module can depend on a sibling
@@ -661,7 +681,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <argLine>@{jacocoArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+          <argLine>@{jacocoArgLine} ${testForkJvmArgs} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
         </configuration>
       </plugin>
 

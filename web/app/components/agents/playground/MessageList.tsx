@@ -145,6 +145,7 @@ export function MessageList({
         agentId={agent?.id}
         sessionId={sessionId}
         turnInFlight={sending}
+        transcriptLen={turns.length}
         onDecided={(_outcome, requestId) => approvalContinuation.watch(requestId)}
         onWaitingChange={onWaitingApprovalsChange}
       />

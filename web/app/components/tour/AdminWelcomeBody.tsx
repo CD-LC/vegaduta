@@ -134,7 +134,7 @@ export default function AdminWelcomeBody({
             type="button"
             onClick={() => setInviteOpen((o) => !o)}
             aria-expanded={inviteOpen}
-            className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left"
+            className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-start"
           >
             <span className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Mail size={14} className="text-primary" aria-hidden="true" /> Invite a teammate by email now
@@ -196,7 +196,7 @@ export default function AdminWelcomeBody({
                 </Button>
                 {invited.length > 0 && (
                   <span className="text-xs text-muted-foreground">
-                    <Check size={11} className="mr-1 inline text-primary" aria-hidden="true" />
+                    <Check size={11} className="me-1 inline text-primary" aria-hidden="true" />
                     Invited: {invited.join(", ")}
                   </span>
                 )}
@@ -213,7 +213,7 @@ export default function AdminWelcomeBody({
         <Button onClick={onBuild} variant="outline" size="sm">
           Build my agent
         </Button>
-        <Button onClick={onSkip} variant="ghost" size="sm" className="ml-auto text-muted-foreground">
+        <Button onClick={onSkip} variant="ghost" size="sm" className="ms-auto text-muted-foreground">
           Skip for now
         </Button>
       </div>

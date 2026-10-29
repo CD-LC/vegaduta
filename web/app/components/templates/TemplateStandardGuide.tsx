@@ -45,7 +45,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
       <summary className="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-medium text-foreground">
         <BookOpenCheck size={15} strokeWidth={2} aria-hidden />
         Read the full template guide
-        <span className="ml-auto text-xs font-normal text-muted-foreground">what we check, and how to pass</span>
+        <span className="ms-auto text-xs font-normal text-muted-foreground">what we check, and how to pass</span>
       </summary>
       <div className="max-h-[50vh] space-y-5 overflow-y-auto border-t border-border px-4 py-4 text-sm">
         {!guide && !error && (
@@ -62,7 +62,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
 
             <section className="space-y-2">
               <h3 className="font-semibold text-foreground">How it works</h3>
-              <ol className="list-decimal space-y-1.5 pl-5 text-muted-foreground">
+              <ol className="list-decimal space-y-1.5 ps-5 text-muted-foreground">
                 {guide.steps.map((s) => (
                   <li key={s}>{s}</li>
                 ))}

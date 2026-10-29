@@ -51,7 +51,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: ${BROWSER_RUNNER_MEM_LIMIT:-2g}
+          memory: ${BROWSER_RUNNER_MEM_LIMIT:-1g}
           pids: 512
 
   # `default` is named explicitly because listing any network drops the implicit one.

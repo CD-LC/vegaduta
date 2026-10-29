@@ -33,7 +33,9 @@ export default function WorkflowDiagramModal({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="presentation"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowDiagramModal(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowDiagramModal(false);
+          }}
         >
           <div
             className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl"
@@ -46,7 +48,7 @@ export default function WorkflowDiagramModal({
               <h2 className="text-lg font-semibold tracking-tight text-foreground">{t("diagramModalTitle")}</h2>
               <button
                 type="button"
-                className="-mr-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
+                className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 onClick={() => setShowDiagramModal(false)}
                 aria-label={t("close")}
               >

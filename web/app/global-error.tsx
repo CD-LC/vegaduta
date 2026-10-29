@@ -22,7 +22,7 @@ import BrandName from "./components/BrandName";
 // only the fallback stack is honest about what actually renders.
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <html lang="en">
+    <html lang="en" dir="auto">
       <body className="ge-body">
         <style>{`
           .ge-body {
@@ -88,10 +88,10 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           {/* eslint-disable-next-line @next/next/no-img-element -- root boundary can't reach next/image's route wiring either */}
           <img className="ge-mark" src="/logo-mark-sm.webp" alt="" />
           <div className="ge-code">500</div>
-          <h1 className="ge-heading"><BrandName /> hit an unexpected error.</h1>
-          <p className="ge-sub">
-            Reload to try again. {error?.digest ? `Ref ${error.digest}.` : null}
-          </p>
+          <h1 className="ge-heading">
+            <BrandName /> hit an unexpected error.
+          </h1>
+          <p className="ge-sub">Reload to try again. {error?.digest ? `Ref ${error.digest}.` : null}</p>
           <div className="ge-actions">
             <button type="button" onClick={reset} className="ge-btn ge-btn-primary">
               <RotateCcw size={16} aria-hidden="true" />

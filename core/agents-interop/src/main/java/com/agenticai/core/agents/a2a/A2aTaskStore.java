@@ -13,11 +13,14 @@ import jakarta.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -248,7 +251,7 @@ public class A2aTaskStore {
                 continue;
             }
             try {
-                Stored existing = read(key(task.tenantId(), task.id()));
+                A2aStoredTask existing = read(key(task.tenantId(), task.id()));
                 if (existing != null && existing.terminal()) {
                     // Someone (a remote cancel, a reconcile) already ended it: honour that, never
                     // resurrect it.
@@ -319,11 +322,11 @@ public class A2aTaskStore {
      * @return true when the record was an orphan and is now FAILED.
      */
     boolean reconcileKey(String key) {
-        Stored stored = read(key);
+        A2aStoredTask stored = read(key);
         return stored != null && reconcileStored(key, stored) != stored;
     }
 
-    private Stored reconcileStored(String key, Stored stored) {
+    private A2aStoredTask reconcileStored(String key, A2aStoredTask stored) {
         if (stored.terminal() || instanceId.equals(stored.ownerInstance())) {
             return stored;
         }
@@ -335,7 +338,7 @@ public class A2aTaskStore {
         if (now - beat <= staleAfter.toMillis()) {
             return stored;
         }
-        Stored failed = stored.interrupted(instanceId, now);
+        A2aStoredTask failed = stored.interrupted(instanceId, now);
         try {
             redis.opsForValue().set(key, JSON.writeValueAsString(failed), ttl);
         } catch (RuntimeException | JsonProcessingException e) {
@@ -373,7 +376,7 @@ public class A2aTaskStore {
         String key = key(task.tenantId(), task.id());
         try {
             if (task.isTerminal()) {
-                Stored existing = read(key);
+                A2aStoredTask existing = read(key);
                 if (existing != null
                         && existing.terminal()
                         && existing.state() != task.snapshot().state()) {
@@ -384,7 +387,7 @@ public class A2aTaskStore {
                     .set(
                             key,
                             JSON.writeValueAsString(
-                                    Stored.of(task, instanceId, System.currentTimeMillis())),
+                                    A2aStoredTask.of(task, instanceId, System.currentTimeMillis())),
                             ttl);
             if (task.snapshot().state() == A2aTaskState.CANCELED) {
                 redis.convertAndSend(CANCEL_CHANNEL, key);
@@ -433,7 +436,7 @@ public class A2aTaskStore {
     private Optional<A2aTask> findRemote(String taskId, String tenantId, String subject) {
         String key = key(tenantId, taskId);
         try {
-            Stored stored = read(key);
+            A2aStoredTask stored = read(key);
             if (stored == null) {
                 return Optional.empty();
             }
@@ -456,6 +459,87 @@ public class A2aTaskStore {
     }
 
     /**
+     * Every task record this deployment still holds for {@code tenantId}: this JVM's live map plus,
+     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link
+     * A2aStoredTask#toTask()} - state/reply for reading, no live subscription). Local entries win
+     * the dedup because their view of an in-flight task is fresher than the last mirrored snapshot.
+     *
+     * <p><b>Console surface only.</b> Unlike {@link #find} this matches on tenant ALONE, not
+     * tenant+subject - the console controller re-gates callers on the manager role, which is what
+     * authorizes reading another subject's task text.
+     */
+    public List<A2aTask> listForTenant(String tenantId) {
+        List<A2aTask> out = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (A2aTask task : tasks.values()) {
+            if (Objects.equals(task.tenantId(), tenantId) && seen.add(task.id())) {
+                out.add(task);
+            }
+        }
+        if (redis == null) {
+            return out;
+        }
+        try (Cursor<String> cursor =
+                redis.scan(
+                        ScanOptions.scanOptions().match(key(tenantId, "*")).count(200).build())) {
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                A2aStoredTask stored = read(key);
+                if (stored == null
+                        || !Objects.equals(stored.tenantId(), tenantId)
+                        || !seen.add(stored.id())) {
+                    continue;
+                }
+                out.add(reconcileStored(key, stored).toTask());
+            }
+        } catch (RuntimeException e) {
+            REDIS_DOWN_LOG.warnf("A2A console task list could not scan Redis", e);
+        }
+        return out;
+    }
+
+    /**
+     * {@link #find} minus the subject check, for the console's get/cancel: the caller's manager
+     * role (enforced by the controller) stands in for task ownership. A detached record restored
+     * from Redis can still be canceled - {@link A2aTask#cancel()} on it flips the mirrored record,
+     * which is exactly the remote-cancel path {@link #honourRemoteCancel} honours on the owning
+     * replica.
+     */
+    public Optional<A2aTask> findForTenant(String taskId, String tenantId) {
+        if (taskId == null) {
+            return Optional.empty();
+        }
+        A2aTask task = tasks.get(taskId);
+        if (task != null) {
+            if (!Objects.equals(task.tenantId(), tenantId)) {
+                return Optional.empty();
+            }
+            if (redis != null) {
+                honourRemoteCancel(task);
+            }
+            task.touch();
+            return Optional.of(task);
+        }
+        if (redis == null) {
+            return Optional.empty();
+        }
+        String key = key(tenantId, taskId);
+        try {
+            A2aStoredTask stored = read(key);
+            if (stored == null || !Objects.equals(stored.tenantId(), tenantId)) {
+                return Optional.empty();
+            }
+            stored = reconcileStored(key, stored);
+            redis.expire(key, ttl);
+            return Optional.of(stored.toTask());
+        } catch (RuntimeException e) {
+            REDIS_DOWN_LOG.warnf(
+                    "A2A task {} could not be read from Redis - answering not-found", taskId, e);
+            return Optional.empty();
+        }
+    }
+
+    /**
      * A non-owner replica canceled this task in Redis; apply it here so the running turn's stream
      * is cut.
      */
@@ -464,7 +548,7 @@ public class A2aTaskStore {
             return;
         }
         try {
-            Stored stored = read(key(task.tenantId(), task.id()));
+            A2aStoredTask stored = read(key(task.tenantId(), task.id()));
             if (stored != null && stored.state() == A2aTaskState.CANCELED) {
                 task.cancel();
             }
@@ -474,13 +558,13 @@ public class A2aTaskStore {
         }
     }
 
-    private Stored read(String key) {
+    private A2aStoredTask read(String key) {
         String json = redis.opsForValue().get(key);
         if (json == null) {
             return null;
         }
         try {
-            return JSON.readValue(json, Stored.class);
+            return JSON.readValue(json, A2aStoredTask.class);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unreadable A2A task record at " + key, e);
         }
@@ -547,90 +631,6 @@ public class A2aTaskStore {
         }
         if (expired > 0) {
             log.debug("A2A task store sweep expired {} tasks", expired);
-        }
-    }
-
-    /**
-     * The serialised half of a task: everything {@link A2aTask#restore} needs, with instants as
-     * epoch millis and the agent id as a string so a plain {@link ObjectMapper} round-trips it (no
-     * JavaTime module on this path).
-     */
-    record Stored(
-            String id,
-            String contextId,
-            String agentId,
-            String tenantId,
-            String subject,
-            String userMessageId,
-            String userText,
-            String artifactId,
-            long createdAtMs,
-            A2aTaskState state,
-            long stateTimestampMs,
-            String reply,
-            String failureMessage,
-            String ownerInstance,
-            long heartbeatMs) {
-
-        static Stored of(A2aTask task, String ownerInstance, long nowMs) {
-            A2aTask.Snapshot snap = task.snapshot();
-            return new Stored(
-                    task.id(),
-                    task.contextId(),
-                    task.agentId().toString(),
-                    task.tenantId(),
-                    task.subject(),
-                    task.userMessageId(),
-                    task.userText(),
-                    task.artifactId(),
-                    task.createdAt().toEpochMilli(),
-                    snap.state(),
-                    snap.timestamp().toEpochMilli(),
-                    snap.reply(),
-                    snap.failureMessage(),
-                    ownerInstance,
-                    nowMs);
-        }
-
-        /** This record's task, failed because its owning instance is gone. */
-        Stored interrupted(String byInstance, long nowMs) {
-            return new Stored(
-                    id,
-                    contextId,
-                    agentId,
-                    tenantId,
-                    subject,
-                    userMessageId,
-                    userText,
-                    artifactId,
-                    createdAtMs,
-                    A2aTaskState.FAILED,
-                    nowMs,
-                    reply,
-                    INTERRUPTED_MESSAGE,
-                    byInstance,
-                    nowMs);
-        }
-
-        boolean terminal() {
-            return state != null && state.isTerminal();
-        }
-
-        A2aTask toTask() {
-            return A2aTask.restore(
-                    id,
-                    contextId,
-                    UUID.fromString(agentId),
-                    tenantId,
-                    subject,
-                    userMessageId,
-                    userText,
-                    artifactId,
-                    Instant.ofEpochMilli(createdAtMs),
-                    state,
-                    Instant.ofEpochMilli(stateTimestampMs),
-                    reply,
-                    failureMessage);
         }
     }
 }

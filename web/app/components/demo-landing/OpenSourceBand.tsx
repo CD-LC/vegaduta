@@ -1,14 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowRight,
-  Coffee,
-  Folder,
-  FolderGit2,
-  Github,
-  Star,
-} from "lucide-react";
+import { ArrowRight, Coffee, Folder, FolderGit2, Star } from "lucide-react";
+import { Github } from "../lucideBrandIcons";
 import { COFFEE_URL, HAS_COFFEE_LINK } from "../../lib/freeMode";
 import { useTranslations } from "../../lib/i18n";
 import { sendLandingEvent } from "./landingBeacon";
@@ -51,7 +45,9 @@ export default function OpenSourceBand() {
         <div className="mkt-head mkt-reveal">
           <p className="mkt-eyebrow">{t("oss_eyebrow")}</p>
           <h2 className="mkt-h2">{t("oss_title")}</h2>
-          <p className="mkt-section-sub mkt-ink-2"><BrandText text={t("oss_sub")} /></p>
+          <p className="mkt-section-sub mkt-ink-2">
+            <BrandText text={t("oss_sub")} />
+          </p>
         </div>
 
         {/* The repo card — a GitHub-flavoured preview of what opens here.
@@ -59,34 +55,26 @@ export default function OpenSourceBand() {
             code is being organised (secrets scrubbed, docs on record) before
             the repo flips public. */}
         <div className="mkt-reveal mt-8">
-          <div className="mkt-card mkt-card--raised mx-auto max-w-2xl overflow-hidden p-0 text-left">
+          <div className="mkt-card mkt-card--raised mx-auto max-w-2xl overflow-hidden p-0 text-start">
             <div className="flex items-center gap-2.5 border-b border-border/60 px-5 py-3.5">
               <Github className="size-4 shrink-0" aria-hidden="true" />
               <span className="mkt-small font-medium">
                 vegaduta<span className="mkt-ink-2"> / </span>vegaduta
               </span>
-              <span className="mkt-pill mkt-pill--accent mkt-badge ml-auto shrink-0">
-                {t("oss_badgeSoon")}
-              </span>
+              <span className="mkt-pill mkt-pill--accent mkt-badge ms-auto shrink-0">{t("oss_badgeSoon")}</span>
             </div>
             <ul className="divide-y divide-border/40 px-5 py-1 font-mono text-xs">
               {REPO_ROWS.map((row) => (
                 <li key={row.dir} className="flex items-center gap-2.5 py-2">
-                  <Folder
-                    className="size-3.5 shrink-0 text-muted-foreground"
-                    aria-hidden="true"
-                  />
+                  <Folder className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                   <span className="shrink-0 text-foreground">{row.dir}</span>
-                  <span className="mkt-ink-2 truncate font-sans">
-                    {t(row.commitKey)}
-                  </span>
+                  <span className="mkt-ink-2 truncate font-sans">{t(row.commitKey)}</span>
                 </li>
               ))}
             </ul>
             <div className="border-t border-border/60 bg-muted/30 px-5 py-3 font-mono text-xs">
               <p className="text-foreground/80">
-                <span className="mkt-ink-2">$</span> git clone
-                https://github.com/CD-LC/vegaduta.git
+                <span className="mkt-ink-2">$</span> git clone https://github.com/CD-LC/vegaduta.git
               </p>
               <p className="mkt-ink-2 mt-1">{t("oss_cloneNote")}</p>
             </div>
@@ -97,38 +85,24 @@ export default function OpenSourceBand() {
             deliberately aria-disabled, not a dead link: the repo URL doesn't
             exist publicly yet, so there's nothing honest to point it at. */}
         <div className="mkt-reveal mt-6 flex flex-wrap items-center justify-center gap-2">
-          <Link
-            href="/try"
-            onClick={() => sendLandingEvent("oss_try_click")}
-            className="mkt-btn mkt-btn-primary"
-          >
+          <Link href="/try" onClick={() => sendLandingEvent("oss_try_click")} className="mkt-btn mkt-btn-primary">
             {t("oss_ctaTry")}
             <ArrowRight className="size-3.5" aria-hidden="true" />
           </Link>
-          <span
-            aria-disabled="true"
-            className="mkt-btn mkt-btn-secondary cursor-not-allowed opacity-70"
-          >
+          <span aria-disabled="true" className="mkt-btn mkt-btn-secondary cursor-not-allowed opacity-70">
             <Star className="size-3.5" aria-hidden="true" />
             {t("oss_ctaStar")}
-            <span className="mkt-badge rounded-full bg-primary/10 px-2 py-0.5 text-primary">
-              {t("oss_soonTag")}
-            </span>
+            <span className="mkt-badge rounded-full bg-primary/10 px-2 py-0.5 text-primary">{t("oss_soonTag")}</span>
           </span>
           {HAS_COFFEE_LINK && (
-            <a
-              href={COFFEE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mkt-btn mkt-btn-secondary"
-            >
+            <a href={COFFEE_URL} target="_blank" rel="noopener noreferrer" className="mkt-btn mkt-btn-secondary">
               <Coffee className="size-3.5" aria-hidden="true" />
               {t("pricing_free_coffee")}
             </a>
           )}
         </div>
         <p className="mkt-caption mkt-ink-2 mkt-reveal mt-5 text-center">
-          <FolderGit2 className="mr-1.5 inline size-3.5 align-[-2px]" aria-hidden="true" />
+          <FolderGit2 className="me-1.5 inline size-3.5 align-[-2px]" aria-hidden="true" />
           {t("oss_foot")}
         </p>
       </div>

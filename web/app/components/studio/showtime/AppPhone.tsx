@@ -146,7 +146,7 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
               </div>
             ))}
             {view.answer ? (
-              <div className="rounded-2xl rounded-tl-sm border border-white/10 bg-white/10 p-3 text-[12px] leading-relaxed">
+              <div className="rounded-2xl rounded-ss-sm border border-white/10 bg-white/10 p-3 text-[12px] leading-relaxed">
                 {view.answer}
                 {view.sample && (
                   <div className="mt-1.5 text-[9px] uppercase tracking-wider text-zinc-400">Sample run</div>

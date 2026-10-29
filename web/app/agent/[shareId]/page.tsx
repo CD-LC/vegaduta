@@ -140,9 +140,9 @@ export default function SharedRealAgentPage() {
 
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6 sm:px-6">
         {phase === "loading" && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center">
-            <Loader2 className="size-6 animate-spin text-primary" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">Opening this shared agent…</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
+            <Loader2 className="size-10 animate-spin text-primary" strokeWidth={2.5} aria-hidden="true" />
+            <p className="text-sm font-medium text-foreground">Opening this shared agent…</p>
           </div>
         )}
 
@@ -278,7 +278,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
           Shared agent
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/">
               <span className="hidden sm:inline">Build your own agent</span>
@@ -313,8 +313,8 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
       <div
         className={
           isVisitor
-            ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground"
-            : "max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm"
+            ? "max-w-[85%] rounded-2xl rounded-ee-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground"
+            : "max-w-[85%] rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm"
         }
       >
         <p className="whitespace-pre-wrap leading-relaxed">{bubble.text}</p>
@@ -326,15 +326,18 @@ function ChatBubble({ bubble }: { bubble: Bubble }) {
 function ThinkingBubble() {
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-3">
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            className="size-1.5 rounded-full bg-muted-foreground"
-            animate={{ opacity: [0.25, 1, 0.25] }}
-            transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.18 }}
-          />
-        ))}
+      <div className="flex items-center gap-2.5 rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-3">
+        <Loader2 className="size-5 shrink-0 animate-spin text-primary" aria-hidden="true" />
+        <span className="flex items-center gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="size-2 rounded-full bg-foreground"
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.18 }}
+            />
+          ))}
+        </span>
       </div>
     </div>
   );

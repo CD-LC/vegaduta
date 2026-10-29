@@ -43,16 +43,16 @@ export default function WorkflowRunPanel({
               {run.approval.message} Nothing moves until you decide - that is what human-in-the-loop means in practice.
             </p>
             {run.approval.preview && (
-              <pre className="mb-3 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-background p-3 text-xs">
+              <pre className="mb-3 max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-3 text-xs">
                 {run.approval.preview}
               </pre>
             )}
             <div className="flex gap-2">
               <Button onClick={() => decide(true)} disabled={deciding}>
-                <ThumbsUp aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Approve
+                <ThumbsUp aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Approve
               </Button>
               <Button variant="outline" onClick={() => decide(false)} disabled={deciding}>
-                <ThumbsDown aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Reject
+                <ThumbsDown aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Reject
               </Button>
             </div>
           </motion.div>
@@ -69,11 +69,14 @@ export default function WorkflowRunPanel({
               if (!st || st.status === "idle") return null;
               return (
                 <div key={s.id} className="rounded-xl border border-border/60 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                    <Bot aria-hidden="true" className="h-4 w-4 shrink-0" /> {s.label}{" "}
-                    <span className="text-xs font-normal text-muted-foreground">· {agentName(s.config.agentId)}</span>
+                  <div className="mb-2 flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium">
+                    <Bot aria-hidden="true" className="h-4 w-4 shrink-0" />{" "}
+                    <span className="min-w-0 truncate">{s.label}</span>{" "}
+                    <span className="min-w-0 truncate text-xs font-normal text-muted-foreground">
+                      · {agentName(s.config.agentId)}
+                    </span>
                     {st.ms != null && (
-                      <span className="ml-auto text-xs text-muted-foreground">{(st.ms / 1000).toFixed(1)} s</span>
+                      <span className="ms-auto text-xs text-muted-foreground">{(st.ms / 1000).toFixed(1)} s</span>
                     )}
                   </div>
                   <div className="grid gap-3 md:grid-cols-5">
@@ -86,7 +89,7 @@ export default function WorkflowRunPanel({
                     </div>
                     <div className="md:col-span-3">
                       {st.output ? (
-                        <div className="whitespace-pre-wrap rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
+                        <div className="whitespace-pre-wrap break-all rounded-lg bg-muted/40 p-3 text-sm leading-relaxed">
                           {st.output}
                         </div>
                       ) : st.status === "running" ? (
@@ -104,7 +107,7 @@ export default function WorkflowRunPanel({
               <div className="mb-1 flex items-center gap-2 text-sm font-medium">
                 <Send aria-hidden="true" className="h-4 w-4 shrink-0" /> Delivered
               </div>
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">{run.output}</div>
+              <div className="whitespace-pre-wrap break-all text-sm leading-relaxed">{run.output}</div>
               <p className="mt-2 text-xs text-muted-foreground">
                 On a real account this step posts to email, WhatsApp, Telegram or Drive, on a schedule or a webhook.
               </p>

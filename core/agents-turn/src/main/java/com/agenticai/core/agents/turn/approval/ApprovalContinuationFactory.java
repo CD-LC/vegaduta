@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.turn.approval;
 
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
+import com.agenticai.core.agents.memory.ChatTurn;
+import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
@@ -46,16 +48,19 @@ public class ApprovalContinuationFactory {
     private final ObjectMapper objectMapper;
     private final HumanApprovalGateService approvals;
     private final ObjectProvider<ToolCallLogService> toolCallLog;
+    private final ObjectProvider<SessionMemoryService> sessionMemory;
     private final ApprovalContinuationProperties properties;
 
     public ApprovalContinuationFactory(
             ObjectMapper objectMapper,
             HumanApprovalGateService approvals,
             ObjectProvider<ToolCallLogService> toolCallLog,
+            ObjectProvider<SessionMemoryService> sessionMemory,
             ApprovalContinuationProperties properties) {
         this.objectMapper = objectMapper;
         this.approvals = approvals;
         this.toolCallLog = toolCallLog;
+        this.sessionMemory = sessionMemory;
         this.properties = properties;
     }
 
@@ -87,22 +92,55 @@ public class ApprovalContinuationFactory {
         String memorySessionId = text(replay, "memorySessionId");
         UUID requestedAgentId = uuid(text(replay, "requestedAgentId"));
         UUID routedAgentId = uuid(text(replay, "agentId"));
-        if (goal == null
-                || sessionId == null
-                || subjectKey == null
-                || tenantId == null
-                || subject == null
-                || memorySessionId == null
-                || requestedAgentId == null) {
+        if (sessionId == null || tenantId == null || subject == null || requestedAgentId == null && routedAgentId == null) {
             log.info(
-                    "Approval request {} ('{}') carries no goal/conversation identity in its replay envelope (recorded"
+                    "Approval request {} ('{}') carries no conversation identity in its replay envelope (recorded"
                             + " before continuations existed, or by a caller that has none): the tool is handled but the"
                             + " task is not continued",
                     request.getId(),
                     tool);
             return Optional.empty();
         }
+        // The envelope's conversation fields are filled by the guarded turn path's ToolCallOrigin.
+        // A request recorded with only the call scope (no origin - e.g. a caller without a subject
+        // key, or recorded before the origin existed) can still be continued: the scoped memory id
+        // is a pure function of the fields every request does carry, the requested agent falls back
+        // to the one the call ran as, the subject key to the tenant subject, and the goal to the
+        // conversation's last user turn. The derived session is used only when it actually has
+        // history, so a wrong derivation is refused rather than continued under.
+        if (requestedAgentId == null) {
+            requestedAgentId = routedAgentId;
+        }
+        if (subjectKey == null) {
+            subjectKey = subject;
+        }
         String derived = SessionMemoryService.scopedSessionId(tenantId, requestedAgentId, subjectKey, sessionId);
+        boolean derivedId = memorySessionId == null;
+        if (derivedId) {
+            memorySessionId = derived;
+        }
+        List<ChatTurn> history = derivedId || goal == null ? historyOf(memorySessionId) : List.of();
+        if (derivedId && history.isEmpty()) {
+            log.info(
+                    "Approval request {} ('{}'): the derived conversation id for session '{}' holds no history"
+                            + " (a caller whose subject key is not its tenant subject, or no such session): the tool"
+                            + " is handled but the task is not continued",
+                    request.getId(),
+                    tool,
+                    sessionId);
+            return Optional.empty();
+        }
+        if (goal == null) {
+            goal = lastUserMessage(history);
+        }
+        if (goal == null) {
+            log.info(
+                    "Approval request {} ('{}'): no goal on the envelope and no user turn in the conversation to"
+                            + " restate - the tool is handled but the task is not continued",
+                    request.getId(),
+                    tool);
+            return Optional.empty();
+        }
         if (!derived.equals(memorySessionId)) {
             log.warn(
                     "Approval request {}: the recorded history id does not match the one its tenant, agent, subject and"
@@ -228,6 +266,35 @@ public class ApprovalContinuationFactory {
     }
 
     /** The {@code replay} object of a tool-call request's payload, or {@code null} when it has none. */
+    /**
+     * The conversation's turns under the scoped memory id, or empty when the store is unavailable
+     * or holds none - read only when the envelope needs the session verified or its goal recovered.
+     */
+    private List<ChatTurn> historyOf(String memorySessionId) {
+        SessionMemoryService memory = sessionMemory.getIfAvailable();
+        if (memory == null || memorySessionId == null) {
+            return List.of();
+        }
+        try {
+            List<ChatTurn> turns = memory.getHistory(memorySessionId);
+            return turns == null ? List.of() : turns;
+        } catch (RuntimeException e) {
+            log.warn("Could not read session history for the continuation of approval {}", e.toString());
+            return List.of();
+        }
+    }
+
+    /** The conversation's latest user turn text - the goal a partial-envelope request can restate. */
+    private static String lastUserMessage(List<ChatTurn> history) {
+        for (int i = history.size() - 1; i >= 0; i--) {
+            ChatTurn turn = history.get(i);
+            if (turn.role() == MessageRole.USER && turn.content() != null && !turn.content().isBlank()) {
+                return turn.content();
+            }
+        }
+        return null;
+    }
+
     private JsonNode replayEnvelope(ApprovalRequest request) {
         JsonNode payload = payload(request);
         JsonNode replay = payload.path("replay");

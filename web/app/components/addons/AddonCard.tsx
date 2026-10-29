@@ -86,7 +86,9 @@ function Facts({ addon, text }: { addon: AddonView; text: AddonText }) {
         </li>
       )}
       <li>
-        <Badge variant={addon.needsGpu ? "secondary" : "outline"}>{t(addon.needsGpu ? "fact.gpuNeeded" : "fact.noGpu")}</Badge>
+        <Badge variant={addon.needsGpu ? "secondary" : "outline"}>
+          {t(addon.needsGpu ? "fact.gpuNeeded" : "fact.noGpu")}
+        </Badge>
       </li>
       {addon.license !== "" && (
         <li>
@@ -144,7 +146,17 @@ function statusDetail(addon: AddonView, bridgeConfigured: boolean, text: AddonTe
   }
 }
 
-export default function AddonCard({ addon, byId, text, hardware, bridgeConfigured, busy, mayChange, onEnable, onDisable }: AddonCardProps) {
+export default function AddonCard({
+  addon,
+  byId,
+  text,
+  hardware,
+  bridgeConfigured,
+  busy,
+  mayChange,
+  onEnable,
+  onDisable,
+}: AddonCardProps) {
   const { t } = text;
   const name = text.name(addon);
   const planned = isPlanned(addon);
@@ -195,7 +207,10 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
             aria-label={t("progressLabel", { name })}
             className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
           >
-            <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${addon.progress ?? 0}%` }} />
+            <div
+              className="h-full rounded-full bg-primary transition-[width]"
+              style={{ width: `${addon.progress ?? 0}%` }}
+            />
           </div>
           <p className="text-xs text-muted-foreground">
             {t("downloading", { percent: addon.progress ?? 0 })}
@@ -236,8 +251,7 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
           <>
             {failed && (
               <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
-                {t("action.retry")}
-                <span className="sr-only"> {name}</span>
+                {t("action.retry")} <span className="sr-only">{name}</span>
               </Button>
             )}
             <Button
@@ -246,15 +260,13 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
               disabled={busy || pulling || !mayChange}
               onClick={() => onDisable(addon)}
             >
-              {t("action.turnOff")}
-              <span className="sr-only"> {name}</span>
+              {t("action.turnOff")} <span className="sr-only">{name}</span>
             </Button>
           </>
         )}
         {!planned && !wanted && (
           <Button size="sm" disabled={busy || !addon.canEnable || !mayChange} onClick={() => onEnable(addon)}>
-            {t("action.turnOn")}
-            <span className="sr-only"> {name}</span>
+            {t("action.turnOn")} <span className="sr-only">{name}</span>
           </Button>
         )}
         {busy && <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />}
@@ -263,10 +275,9 @@ export default function AddonCard({ addon, byId, text, hardware, bridgeConfigure
             href={learn}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            className="ms-auto text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
           >
-            {t("learnMore")}
-            <span className="sr-only"> {name}</span>
+            {t("learnMore")} <span className="sr-only">{name}</span>
           </a>
         )}
       </div>

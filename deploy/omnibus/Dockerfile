@@ -7,13 +7,17 @@
 # It is assembled FROM the release's own images (never rebuilt from source),
 # so it can only be built after core, web and postgres are published - the
 # release workflow's build-omnibus/publish-omnibus jobs run in exactly that
-# order. Locally:
+# order. The inputs are pulled by DIGEST, not tag (OpenSSF Pinned-Dependencies:
+# a tag can be moved between publish and this build); release.yml resolves the
+# just-published manifest digests and passes them as build args. Locally:
 #
+#   for i in core web postgres; do docker buildx imagetools inspect \
+#     ghcr.io/cd-lc/$i:0.1.3 --format '{{.Manifest.Digest}}'; done
 #   docker build -f deploy/omnibus/Dockerfile \
-#     --build-arg VEGADUTA_VERSION=0.1.3 deploy
+#     --build-arg CORE_IMAGE_DIGEST=sha256:... deploy
 #
-# REGISTRY/VEGADUTA_VERSION select where the three input images come from;
-# point REGISTRY at a local registry to build it from your own pushes.
+# (WEB_IMAGE_DIGEST and POSTGRES_IMAGE_DIGEST likewise; default digests below
+# point at the published 0.1.12 manifests so a plain local build still works.)
 #
 #   docker run -d --name vegaduta -v vegaduta-data:/data \
 #     -p 3000:3000 -p 8080:8080 ghcr.io/<owner>/omnibus:<version>
@@ -24,29 +28,35 @@
 # losing it makes stored provider keys undecryptable; keep a /data backup).
 
 ARG REGISTRY=ghcr.io/cd-lc
-ARG VEGADUTA_VERSION=latest
+# Manifest-list digests of the three input images; the release workflow always
+# overrides them with the digests it just published. The defaults point at the
+# published 0.1.12 manifests only so a plain `docker build` still has something
+# to pull - update them when cutting a release.
+ARG CORE_IMAGE_DIGEST=f71c417044b3f9246946d41b8cd10e30a1101b500c657b8657f3e140cabb7501
+ARG WEB_IMAGE_DIGEST=a4bb585b0176c05a6f9a8db519c941e3441ce6877030b16bc43bce26110c1bab
+ARG POSTGRES_IMAGE_DIGEST=52fefb560a4a851adc105b5efaf2658e0011e552ca4f9b7ddf9804026929a4f3
 
 # jlink-minimal JRE: same module list as core/Dockerfile's JRE=jlink variant
 # (keep the two in sync). Roughly half the size of the full temurin JRE on
 # the same glibc generation.
-FROM eclipse-temurin:21.0.12.1_1-jdk-noble@sha256:107215954359f1ab0be058a247d7c64ed6e69c71c1682d471d38ef751ec8e964 AS jre-linker
+FROM eclipse-temurin:24.0.2_12-jdk-noble@sha256:dacac8e9a0df0d2bd24e702b4431132875c249930b70555ebd7ca285b5bee684 AS jre-linker
 RUN "$JAVA_HOME/bin/jlink" \
         --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.jfr,jdk.localedata,jdk.unsupported,jdk.unsupported.desktop,jdk.zipfs \
         --strip-debug --no-man-pages --no-header-files --compress=zip-6 \
         --output /jre-minimal \
     && rm -f /jre-minimal/lib/server/classes.jsa
 
-FROM node:22.23.3-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa AS node-img
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node-img
 
 # COPY --from cannot expand ARGs, so the release's own images are named stages.
-FROM ${REGISTRY}/core:${VEGADUTA_VERSION} AS core-img
-FROM ${REGISTRY}/web:${VEGADUTA_VERSION} AS web-img
+FROM ${REGISTRY}/core@sha256:${CORE_IMAGE_DIGEST} AS core-img
+FROM ${REGISTRY}/web@sha256:${WEB_IMAGE_DIGEST} AS web-img
 
 # The substrate is our own postgres image: PostgreSQL 16 on Debian trixie
 # with pgvector and Apache AGE already compiled in, plus gosu for dropping
 # privileges - everything downstream (redis-server, node, the JRE) is either
 # trixie-native or glibc-compatible.
-FROM ${REGISTRY}/postgres:${VEGADUTA_VERSION}
+FROM ${REGISTRY}/postgres@sha256:${POSTGRES_IMAGE_DIGEST}
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

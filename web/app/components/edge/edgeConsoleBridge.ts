@@ -51,10 +51,33 @@ import {
   TTS_ASSET_ID,
   TTS_MODEL_SIZE_BYTES,
 } from "../../lib/edge/audio/kokoro";
+import {
+  deleteImageGenModel as engineDeleteImageGenModel,
+  isImageGenModelCached,
+  IMAGE_GEN_ASSET_ID,
+  IMAGE_GEN_MODEL_SIZE_BYTES,
+} from "../../lib/edge/imagegen";
+import {
+  deleteAudioGenModel as engineDeleteAudioGenModel,
+  isAudioGenModelCached,
+  AUDIO_GEN_ASSET_ID,
+  AUDIO_GEN_MODEL_SIZE_BYTES,
+} from "../../lib/edge/audiogen";
 
 // Re-exported so the console keeps one import site for the vision/STT/TTS
 // asset constants.
-export { VISION_ASSET_ID, VISION_MODEL_SIZE_BYTES, STT_ASSET_ID, STT_MODEL_SIZE_BYTES, TTS_ASSET_ID, TTS_MODEL_SIZE_BYTES };
+export {
+  VISION_ASSET_ID,
+  VISION_MODEL_SIZE_BYTES,
+  STT_ASSET_ID,
+  STT_MODEL_SIZE_BYTES,
+  TTS_ASSET_ID,
+  TTS_MODEL_SIZE_BYTES,
+  IMAGE_GEN_ASSET_ID,
+  IMAGE_GEN_MODEL_SIZE_BYTES,
+  AUDIO_GEN_ASSET_ID,
+  AUDIO_GEN_MODEL_SIZE_BYTES,
+};
 
 // ---------------------------------------------------------------------------
 // Guarded localStorage (same shape as every lib/edge sibling)
@@ -139,9 +162,7 @@ export interface EdgeInUseState {
 }
 
 function toInUseState(activity: EdgeActivity): EdgeInUseState {
-  return activity.active
-    ? { active: true, modelId: activity.modelId ?? undefined }
-    : { active: false };
+  return activity.active ? { active: true, modelId: activity.modelId ?? undefined } : { active: false };
 }
 
 export function getEdgeInUse(): EdgeInUseState {
@@ -228,7 +249,26 @@ export async function deleteTtsModel(): Promise<void> {
   await engineDeleteTtsModel();
 }
 
+export function isImageGenModelInstalled(): boolean {
+  return isImageGenModelCached();
+}
+
+/** Delete the on-device image-generation model — imagegen.ts owns the teardown
+ * (live worker, its own Cache-Storage bucket, marker, chip row). Never rejects. */
+export async function deleteImageGenModel(): Promise<void> {
+  await engineDeleteImageGenModel();
+}
+
+export function isAudioGenModelInstalled(): boolean {
+  return isAudioGenModelCached();
+}
+
+/** Delete the on-device audio-generation model — audiogen.ts owns the
+ * teardown. Never rejects. */
+export async function deleteAudioGenModel(): Promise<void> {
+  await engineDeleteAudioGenModel();
+}
+
 // ---------------------------------------------------------------------------
 // Shared formatting
 // ---------------------------------------------------------------------------
-

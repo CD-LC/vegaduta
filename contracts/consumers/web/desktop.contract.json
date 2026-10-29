@@ -1,0 +1,112 @@
+{
+  "consumer": "web",
+  "provider": "core",
+  "interactions": [
+    {
+      "id": "get-api-desktop-monitor-frame",
+      "method": "GET",
+      "path": "/api/desktop/monitor/frame",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-desktop-recipes",
+      "method": "GET",
+      "path": "/api/desktop/recipes",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$[*].agentId",
+          "$[*].defaultMode",
+          "$[*].description",
+          "$[*].failCount",
+          "$[*].id",
+          "$[*].lastFailure",
+          "$[*].lastRunAt",
+          "$[*].name",
+          "$[*].runCount",
+          "$[*].stepCount"
+        ]
+      }
+    },
+    {
+      "id": "post-api-desktop-recipes",
+      "method": "POST",
+      "path": "/api/desktop/recipes",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.spec",
+          "$.summary",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "delete-api-desktop-recipes-id",
+      "method": "DELETE",
+      "path": "/api/desktop/recipes/{id}",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "get-api-desktop-recipes-id",
+      "method": "GET",
+      "path": "/api/desktop/recipes/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.spec",
+          "$.summary",
+          "$.warnings"
+        ]
+      }
+    },
+    {
+      "id": "patch-api-desktop-recipes-id",
+      "method": "PATCH",
+      "path": "/api/desktop/recipes/{id}",
+      "status": 200,
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.defaultMode",
+          "$.description",
+          "$.failCount",
+          "$.id",
+          "$.lastFailure",
+          "$.lastRunAt",
+          "$.name",
+          "$.runCount",
+          "$.stepCount"
+        ]
+      }
+    },
+    {
+      "id": "post-api-desktop-recipes-id-run",
+      "method": "POST",
+      "path": "/api/desktop/recipes/{id}/run",
+      "status": 200,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-desktop-recipes-from-run",
+      "method": "POST",
+      "path": "/api/desktop/recipes/from-run",
+      "status": 201,
+      "response": {
+        "requiredFields": [
+          "$.spec",
+          "$.summary",
+          "$.warnings"
+        ]
+      }
+    }
+  ]
+}

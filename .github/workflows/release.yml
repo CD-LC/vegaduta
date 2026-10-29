@@ -113,14 +113,37 @@ jobs:
             echo "owner=${OWNER,,}"
             echo "sha=$sha"
           } >> "$GITHUB_OUTPUT"
+      - name: Gate the tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ steps.v.outputs.sha }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          # A release ships main's content: the tagged commit must be an
+          # ancestor of main ("behind"/"identical" in compare(base...head)
+          # means HEAD is reachable from base). Tagging a side commit used
+          # to be caught only by a lucky verify timeout, after the build
+          # matrix had already spent its budget.
+          status="$(gh api "repos/${REPO}/compare/main...${SHA}" --jq .status)"
+          case "$status" in
+            behind|identical) ;;
+            *) echo "::error::tagged commit ${SHA} is not on main (compare status: ${status}). Cut the release from a merged commit."; exit 1 ;;
+          esac
+          # The release notes are generated from CHANGELOG.md's section for
+          # this version - refuse to publish an empty-notes release.
+          grep -q "^## \[${VERSION}\]" CHANGELOG.md \
+            || { echo "::error::CHANGELOG.md has no '## [${VERSION}]' section - move the Unreleased entries under it first"; exit 1; }
+          echo "tag gates passed: ${SHA} is on main, CHANGELOG has a ${VERSION} section"
 
   verify:
     name: Verify CI passed on the tagged commit
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 180
     permissions:
       checks: read # read the check runs of the tagged commit
+      actions: read # read workflow runs of the tagged commit
     steps:
       - name: Wait for CI OK and CodeQL OK
         env:
@@ -129,9 +152,11 @@ jobs:
           SHA: ${{ needs.prepare.outputs.sha }}
         run: |
           # The tag normally points at a commit on main that CI already ran on
-          # (push to main). Wait up to an hour if those runs are still going.
+          # (push to main). Main-push CI serializes on a concurrency group, so
+          # the tagged commit's own run can start only after an earlier merge's
+          # run finishes - allow two full CI runs plus queue slack (150 min).
           for check in "CI OK" "CodeQL OK"; do
-            for attempt in $(seq 1 60); do
+            for attempt in $(seq 1 150); do
               runs="$(gh api -X GET "repos/${REPO}/commits/${SHA}/check-runs" \
                 -f check_name="$check" -f filter=latest --jq '.check_runs')"
               total="$(jq 'length' <<< "$runs")"
@@ -146,10 +171,22 @@ jobs:
                 jq -r '.[] | "  \(.name): \(.conclusion)"' <<< "$runs"
                 exit 1
               fi
-              echo "$check: ${total} run(s), ${pending} pending (attempt ${attempt}/60)"
+              # Distinguish "CI run is queued/in progress" from "this commit
+              # never triggered CI at all" (a path-filtered or non-main commit):
+              # with zero workflow runs after 10 attempts there is nothing to
+              # wait for, and waiting the full window only hides the real bug.
+              if [ "$attempt" -eq 10 ]; then
+                run_count="$(gh api "repos/${REPO}/actions/runs?head_sha=${SHA}&per_page=5" --jq .total_count)"
+                if [ "$run_count" = 0 ]; then
+                  echo "::error::no workflow run exists for ${SHA} - this commit never triggered CI. Only tag commits that CI has run on (push them to main first)."
+                  exit 1
+                fi
+                echo "$check: no check run yet, but ${run_count} workflow run(s) exist on the commit - waiting"
+              fi
+              echo "$check: ${total} run(s), ${pending} pending (attempt ${attempt}/150)"
               sleep 60
             done
-            echo "::error::no completed '$check' check on ${SHA} after an hour. Only tag commits that CI has run on (push them to main first)."
+            echo "::error::no completed '$check' check on ${SHA} after 150 minutes. Only tag commits that CI has run on (push them to main first); run scripts/ci/tag-ready.sh <sha> before tagging."
             exit 1
           done
 
@@ -270,7 +307,7 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/digests"
           touch "${RUNNER_TEMP}/digests/${DIGEST#sha256:}"
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: digests_${{ matrix.image }}_${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/*
@@ -312,7 +349,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
 
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: digests_${{ matrix.image }}_*
           path: ${{ runner.temp }}/digests
@@ -385,7 +422,7 @@ jobs:
 
       - name: Upload SARIF to code scanning
         if: steps.codescan.outputs.enabled == 'true'
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           sarif_file: ${{ steps.grype-sarif.outputs.sarif }}
           category: grype-${{ matrix.image }}
@@ -410,7 +447,7 @@ jobs:
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
       - name: SBOM (syft, SPDX JSON)
-        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           image: ${{ env.IMAGE }}@${{ steps.manifest.outputs.digest }}
           format: spdx-json
@@ -452,7 +489,7 @@ jobs:
           subject-digest: ${{ steps.manifest.outputs.digest }}
           push-to-registry: true
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-${{ matrix.image }}
           path: sbom-${{ matrix.image }}.spdx.json
@@ -488,6 +525,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # The omnibus FROMs take manifest digests, not the version tag - the tag
+      # could be moved between `publish` and this build; the digest cannot.
+      - name: Resolve input image digests
+        id: inputs
+        env:
+          REG: ${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          for img in core web postgres; do
+            digest="$(docker buildx imagetools inspect "$REG/$img:$VERSION" --format '{{.Manifest.Digest}}')"
+            echo "$img -> $digest"
+            echo "${img}_image_digest=${digest#sha256:}" >> "$GITHUB_OUTPUT"
+          done
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
@@ -497,7 +548,9 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           build-args: |
             REGISTRY=${{ env.REGISTRY }}/${{ needs.prepare.outputs.owner }}
-            VEGADUTA_VERSION=${{ needs.prepare.outputs.version }}
+            CORE_IMAGE_DIGEST=${{ steps.inputs.outputs.core_image_digest }}
+            WEB_IMAGE_DIGEST=${{ steps.inputs.outputs.web_image_digest }}
+            POSTGRES_IMAGE_DIGEST=${{ steps.inputs.outputs.postgres_image_digest }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
@@ -516,7 +569,7 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/digests"
           touch "${RUNNER_TEMP}/digests/${DIGEST#sha256:}"
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: digests_omnibus_${{ matrix.arch }}
           path: ${{ runner.temp }}/digests/*
@@ -546,7 +599,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
 
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: digests_omnibus_*
           path: ${{ runner.temp }}/digests
@@ -607,7 +660,7 @@ jobs:
 
       - name: Upload SARIF to code scanning
         if: steps.codescan.outputs.enabled == 'true'
-        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
+        uses: github/codeql-action/upload-sarif@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
         with:
           sarif_file: ${{ steps.grype-sarif.outputs.sarif }}
           category: grype-omnibus
@@ -629,7 +682,7 @@ jobs:
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
       - name: SBOM (syft, SPDX JSON)
-        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
           image: ${{ env.IMAGE }}@${{ steps.manifest.outputs.digest }}
           format: spdx-json
@@ -671,7 +724,7 @@ jobs:
           subject-digest: ${{ steps.manifest.outputs.digest }}
           push-to-registry: true
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-omnibus
           path: sbom-omnibus.spdx.json
@@ -728,7 +781,7 @@ jobs:
         with:
           subject-path: dist/charts/*.tgz
 
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: helm-charts
           path: dist/charts/*.tgz
@@ -756,7 +809,7 @@ jobs:
         run: |
           cd installer
           ./package.sh darwin --version "${VERSION}"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: vegaduta-setup-dmg
           path: installer/dist/*.dmg
@@ -776,16 +829,16 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: sbom-*
           path: dist/assets
           merge-multiple: true
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: helm-charts
           path: dist/assets
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: vegaduta-setup-dmg
           path: dist/assets
@@ -915,12 +968,18 @@ jobs:
           REPO: ${{ github.repository }}
           GH_REPO: ${{ github.repository }}
         run: |
-          # The CHANGELOG section for this version, if there is one.
+          # The CHANGELOG section for this version, if there is one. Release
+          # bodies cap at 125000 bytes (HTTP 422 "body is too long"); a big
+          # release section (0.1.10 was ~126KB) would otherwise abort the
+          # draft create, so the excerpt is truncated safely below the limit.
           awk -v v="$VERSION" '
             $0 ~ "^## \\[" v "\\]" {on=1; next}
             on && /^## \[/ {exit}
             on {print}
-          ' CHANGELOG.md > notes.md
+          ' CHANGELOG.md | head -c 100000 > notes.md
+          if [ "$(wc -c < notes.md)" = "100000" ]; then
+            printf '\n\n_(section truncated - the full notes are in CHANGELOG.md in the tarball)_\n' >> notes.md
+          fi
           generate=false
           grep -q '[^[:space:]]' notes.md || generate=true
           {

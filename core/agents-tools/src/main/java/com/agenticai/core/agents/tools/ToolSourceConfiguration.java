@@ -28,19 +28,22 @@ class ToolSourceConfiguration {
     @Bean
     @Order(20)
     ToolSource knowledgeToolSource(AgentKnowledgeToolResolver knowledge) {
-        return ToolSource.ofResolver("knowledge", ToolSource.Kind.BUILT_IN, knowledge::resolveKnowledgeTools);
+        return ToolSource.ofResolver(
+                "knowledge", ToolSource.Kind.BUILT_IN, knowledge::resolveKnowledgeTools);
     }
 
     @Bean
     @Order(30)
     ToolSource codeIntelToolSource(AgentKnowledgeToolResolver knowledge) {
-        return ToolSource.ofResolver("codeIntel", ToolSource.Kind.BUILT_IN, knowledge::resolveCodeIntelTools);
+        return ToolSource.ofResolver(
+                "codeIntel", ToolSource.Kind.BUILT_IN, knowledge::resolveCodeIntelTools);
     }
 
     @Bean
     @Order(40)
     ToolSource codeWorkspaceToolSource(AgentKnowledgeToolResolver knowledge) {
-        return ToolSource.ofResolver("codeWorkspace", ToolSource.Kind.BUILT_IN, knowledge::resolveCodeWorkspaceTools);
+        return ToolSource.ofResolver(
+                "codeWorkspace", ToolSource.Kind.BUILT_IN, knowledge::resolveCodeWorkspaceTools);
     }
 
     @Bean
@@ -63,37 +66,45 @@ class ToolSourceConfiguration {
     @Bean
     @Order(60)
     ToolSource workspaceToolSource(AgentIntegrationToolResolver integration) {
-        return ToolSource.ofResolver("workspace", ToolSource.Kind.BUILT_IN, integration::resolveWorkspaceTools);
+        return ToolSource.ofResolver(
+                "workspace", ToolSource.Kind.BUILT_IN, integration::resolveWorkspaceTools);
     }
 
     @Bean
     @Order(70)
     ToolSource telegramToolSource(AgentChannelToolResolver channel) {
-        return ToolSource.ofResolver("telegram", ToolSource.Kind.BUILT_IN, channel::resolveTelegramTools);
+        return ToolSource.ofResolver(
+                "telegram", ToolSource.Kind.BUILT_IN, channel::resolveTelegramTools);
     }
 
     @Bean
     @Order(80)
     ToolSource channelControlToolSource(AgentChannelToolResolver channel) {
-        return ToolSource.ofResolver("channelControl", ToolSource.Kind.BUILT_IN, channel::resolveChannelControlTools);
+        return ToolSource.ofResolver(
+                "channelControl", ToolSource.Kind.BUILT_IN, channel::resolveChannelControlTools);
     }
 
     @Bean
     @Order(90)
     ToolSource forwardAttachmentToolSource(AgentChannelToolResolver channel) {
-        return ToolSource.ofResolver("forwardAttachment", ToolSource.Kind.BUILT_IN, channel::resolveForwardAttachmentTools);
+        return ToolSource.ofResolver(
+                "forwardAttachment",
+                ToolSource.Kind.BUILT_IN,
+                channel::resolveForwardAttachmentTools);
     }
 
     @Bean
     @Order(100)
     ToolSource humanHandoffToolSource(AgentChannelToolResolver channel) {
-        return ToolSource.ofResolver("humanHandoff", ToolSource.Kind.BUILT_IN, channel::resolveHumanHandoffTools);
+        return ToolSource.ofResolver(
+                "humanHandoff", ToolSource.Kind.BUILT_IN, channel::resolveHumanHandoffTools);
     }
 
     @Bean
     @Order(110)
     ToolSource deviceToolSource(AgentChannelToolResolver channel) {
-        return ToolSource.ofResolver("device", ToolSource.Kind.BUILT_IN, channel::resolveDeviceTools);
+        return ToolSource.ofResolver(
+                "device", ToolSource.Kind.BUILT_IN, channel::resolveDeviceTools);
     }
 
     @Bean
@@ -105,25 +116,29 @@ class ToolSourceConfiguration {
     @Bean
     @Order(130)
     ToolSource sandboxToolSource(AgentIntegrationToolResolver integration) {
-        return ToolSource.ofResolver("sandbox", ToolSource.Kind.BUILT_IN, integration::resolveE2bTools);
+        return ToolSource.ofResolver(
+                "sandbox", ToolSource.Kind.BUILT_IN, integration::resolveE2bTools);
     }
 
     @Bean
     @Order(140)
     ToolSource imageGenToolSource(AgentMediaToolResolver media) {
-        return ToolSource.ofResolver("imageGen", ToolSource.Kind.BUILT_IN, media::resolveImageGenTools);
+        return ToolSource.ofResolver(
+                "imageGen", ToolSource.Kind.BUILT_IN, media::resolveImageGenTools);
     }
 
     @Bean
     @Order(150)
     ToolSource videoGenToolSource(AgentMediaToolResolver media) {
-        return ToolSource.ofResolver("videoGen", ToolSource.Kind.BUILT_IN, media::resolveVideoGenTools);
+        return ToolSource.ofResolver(
+                "videoGen", ToolSource.Kind.BUILT_IN, media::resolveVideoGenTools);
     }
 
     @Bean
     @Order(160)
     ToolSource documentGenToolSource(AgentMediaToolResolver media) {
-        return ToolSource.ofResolver("documentGen", ToolSource.Kind.BUILT_IN, media::resolveDocumentGenTools);
+        return ToolSource.ofResolver(
+                "documentGen", ToolSource.Kind.BUILT_IN, media::resolveDocumentGenTools);
     }
 
     @Bean
@@ -135,13 +150,15 @@ class ToolSourceConfiguration {
     @Bean
     @Order(180)
     ToolSource browserUseToolSource(AgentCrewBrowserToolResolver crew) {
-        return ToolSource.ofResolver("browserUse", ToolSource.Kind.BUILT_IN, crew::resolveBrowserUseTools);
+        return ToolSource.ofResolver(
+                "browserUse", ToolSource.Kind.BUILT_IN, crew::resolveBrowserUseTools);
     }
 
     @Bean
     @Order(190)
     ToolSource browserAutomationToolSource(AgentCrewBrowserToolResolver crew) {
-        return ToolSource.ofResolver("browserAutomation", ToolSource.Kind.BUILT_IN, crew::resolveBrowserAutomationTools);
+        return ToolSource.ofResolver(
+                "browserAutomation", ToolSource.Kind.BUILT_IN, crew::resolveBrowserAutomationTools);
     }
 
     @Bean
@@ -153,7 +170,8 @@ class ToolSourceConfiguration {
     @Bean
     @Order(210)
     ToolSource musicGenToolSource(AgentMediaToolResolver media) {
-        return ToolSource.ofResolver("musicGen", ToolSource.Kind.BUILT_IN, media::resolveMusicGenTools);
+        return ToolSource.ofResolver(
+                "musicGen", ToolSource.Kind.BUILT_IN, media::resolveMusicGenTools);
     }
 
     @Bean
@@ -193,50 +211,89 @@ class ToolSourceConfiguration {
     @Bean
     @Order(240)
     ToolSource userScriptToolSource(AgentCustomToolResolver custom) {
-        return ToolSource.ofResolver("userScript", ToolSource.Kind.BUILT_IN, custom::resolveScriptTools);
+        return ToolSource.ofResolver(
+                "userScript", ToolSource.Kind.BUILT_IN, custom::resolveScriptTools);
     }
 
     @Bean
     @Order(250)
     ToolSource customCodeToolSource(AgentCustomToolResolver custom) {
-        return ToolSource.ofResolver("customCode", ToolSource.Kind.BUILT_IN, custom::resolveCustomCodeTools);
+        return ToolSource.ofResolver(
+                "customCode", ToolSource.Kind.BUILT_IN, custom::resolveCustomCodeTools);
+    }
+
+    @Bean
+    @Order(255)
+    ToolSource toolAuthoringToolSource(AgentCustomToolResolver custom) {
+        return ToolSource.ofResolver(
+                "toolAuthoring", ToolSource.Kind.BUILT_IN, custom::resolveToolAuthoringTools);
     }
 
     @Bean
     @Order(260)
     ToolSource openApiToolSource(AgentCustomToolResolver custom) {
-        return ToolSource.ofResolver("openApi", ToolSource.Kind.BUILT_IN, custom::resolveOpenApiTools);
+        return ToolSource.ofResolver(
+                "openApi", ToolSource.Kind.BUILT_IN, custom::resolveOpenApiTools);
     }
 
     @Bean
     @Order(270)
     ToolSource commerceToolSource(AgentIntegrationToolResolver integration) {
-        return ToolSource.ofResolver("commerce", ToolSource.Kind.BUILT_IN, integration::resolveCommerceTools);
+        return ToolSource.ofResolver(
+                "commerce", ToolSource.Kind.BUILT_IN, integration::resolveCommerceTools);
     }
 
     @Bean
     @Order(280)
     ToolSource dataTableToolSource(AgentDataTableToolResolver tables) {
-        return ToolSource.ofResolver("dataTable", ToolSource.Kind.BUILT_IN, tables::resolveDataTableTools);
+        return ToolSource.ofResolver(
+                "dataTable", ToolSource.Kind.BUILT_IN, tables::resolveDataTableTools);
     }
 
     @Bean
     @Order(290)
     ToolSource scheduledTaskToolSource(AgentScheduledTaskToolResolver scheduled) {
-        return ToolSource.ofResolver("scheduledTask", ToolSource.Kind.BUILT_IN, scheduled::resolveScheduledTaskTools);
+        return ToolSource.ofResolver(
+                "scheduledTask", ToolSource.Kind.BUILT_IN, scheduled::resolveScheduledTaskTools);
+    }
+
+    @Bean
+    @Order(292)
+    ToolSource backgroundJobToolSource(AgentBackgroundJobToolResolver backgroundJobs) {
+        return ToolSource.ofResolver(
+                "backgroundJob",
+                ToolSource.Kind.BUILT_IN,
+                backgroundJobs::resolveBackgroundJobTools);
     }
 
     @Bean
     @Order(295)
     ToolSource workflowDraftToolSource(AgentWorkflowDraftToolResolver workflowDrafts) {
         return ToolSource.ofResolver(
-                "workflowDraft", ToolSource.Kind.BUILT_IN, workflowDrafts::resolveWorkflowDraftTools);
+                "workflowDraft",
+                ToolSource.Kind.BUILT_IN,
+                workflowDrafts::resolveWorkflowDraftTools);
     }
 
     @Bean
     @Order(300)
     ToolSource codingTaskToolSource(AgentCodingTaskToolResolver coding) {
-        return ToolSource.ofResolver("codingTask", ToolSource.Kind.BUILT_IN, coding::resolveCodingTaskTools);
+        return ToolSource.ofResolver(
+                "codingTask", ToolSource.Kind.BUILT_IN, coding::resolveCodingTaskTools);
+    }
+
+    /**
+     * The agent scratchpad (app.tools.scratchpad.*): the agent's own notes, offered to every agent
+     * once the flag is on - there is no per-agent opt-in, and the resolver's gate already covers the
+     * service-bean-absent and disabled cases. Not in the tool-search always-on list: a note pad is
+     * an occasional tool, so it stays deferred behind search_tools rather than costing schema space
+     * on every prompt.
+     */
+    @Bean
+    @Order(305)
+    ToolSource scratchpadToolSource(AgentScratchpadToolResolver scratchpad) {
+        return ToolSource.ofResolver(
+                "scratchpad", ToolSource.Kind.BUILT_IN, scratchpad::resolveScratchpadTools);
     }
 
     /**
@@ -262,9 +319,9 @@ class ToolSourceConfiguration {
 
     /**
      * {@code restore_tool_result} for a MAIN chat turn only (the one path that opens a compaction
-     * run), guard-wrapped like every other first-party tool; empty while compaction
-     * ({@code app.context.compaction.*}, default OFF) is off or its bean is absent. Not subject to
-     * the agent allow-list, so deliberately absent from tool discovery.
+     * run), guard-wrapped like every other first-party tool; empty while compaction ({@code
+     * app.context.compaction.*}, default OFF) is off or its bean is absent. Not subject to the
+     * agent allow-list, so deliberately absent from tool discovery.
      */
     @Bean
     @Order(320)

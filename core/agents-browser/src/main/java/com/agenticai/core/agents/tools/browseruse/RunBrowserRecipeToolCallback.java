@@ -41,6 +41,14 @@ public class RunBrowserRecipeToolCallback implements ToolCallback {
 
     private final BrowserRecipeService recipes;
     private final UUID agentId;
+
+    /**
+     * The conversation's session id - the same value {@code guardAndLog} stamps on every {@code
+     * tool_call_log} row this turn writes, so it is the filter a watcher polls {@code GET
+     * /api/agents/{agentId}/tool-calls} with. Reported in the result as {@code watchSessionId}.
+     */
+    private final String sessionId;
+
     private final Function<String, BrowserPageOps> opsForTenant;
     private final Function<String, BrowserRecipeReplayer.SecretValues> secretsForSubject;
     private final BrowserRecipeReplayer replayer;
@@ -55,6 +63,7 @@ public class RunBrowserRecipeToolCallback implements ToolCallback {
         this(
                 recipes,
                 agentId,
+                sessionId,
                 tenantId -> new ManagerBrowserPageOps(manager, tenantId, agentId, sessionId),
                 subject ->
                         vault == null
@@ -71,11 +80,13 @@ public class RunBrowserRecipeToolCallback implements ToolCallback {
     RunBrowserRecipeToolCallback(
             BrowserRecipeService recipes,
             UUID agentId,
+            String sessionId,
             Function<String, BrowserPageOps> opsForTenant,
             Function<String, BrowserRecipeReplayer.SecretValues> secretsForSubject,
             BrowserRecipeReplayer replayer) {
         this.recipes = recipes;
         this.agentId = agentId;
+        this.sessionId = sessionId;
         this.opsForTenant = opsForTenant;
         this.secretsForSubject = secretsForSubject;
         this.replayer = replayer;
@@ -160,7 +171,7 @@ public class RunBrowserRecipeToolCallback implements ToolCallback {
             if (outcome.status() != BrowserRecipeReplayer.Status.NEEDS_CONFIRMATION) {
                 recipes.recordRun(recipe.getId(), outcome.success() ? null : failureLine(outcome));
             }
-            return BrowserUseToolSupport.toJson(response(recipe, outcome));
+            return BrowserUseToolSupport.toJson(response(recipe, outcome, sessionId));
         } catch (RuntimeException e) {
             // Not e.getMessage(): a vault/page failure must not be able to echo anything
             // secret-adjacent.
@@ -192,12 +203,17 @@ public class RunBrowserRecipeToolCallback implements ToolCallback {
     }
 
     private static Map<String, Object> response(
-            BrowserRecipe recipe, BrowserRecipeReplayer.Outcome o) {
+            BrowserRecipe recipe, BrowserRecipeReplayer.Outcome o, String sessionId) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("recipe", recipe.getName());
         out.put("status", o.status().name().toLowerCase(Locale.ROOT));
         out.put("stepsCompleted", o.stepsCompleted());
         out.put("totalSteps", o.totalSteps());
+        // The session id this replay's tool_call_log rows are journaled under: the console polls
+        // GET /api/agents/{agentId}/tool-calls with it for the run's feed. (The replay's inner
+        // steps run through BrowserPageOps, not tool calls, so they are not journaled per step -
+        // the feed shows this call's own row plus the session's sibling browser_* calls.)
+        out.put("watchSessionId", sessionId);
         if (o.failedStep() > 0) {
             out.put("failedStep", o.failedStep());
         }

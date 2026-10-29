@@ -1,12 +1,29 @@
 "use client";
 
-import { Check, Cloud, History, Loader2, Paperclip, MousePointerClick, Send, Square, Wrench, X, GitCompare, Mic } from "lucide-react";
+import { useState } from "react";
+import {
+  Check,
+  Cloud,
+  History,
+  Loader2,
+  Paperclip,
+  MousePointerClick,
+  Send,
+  Square,
+  Wrench,
+  X,
+  GitCompare,
+  Mic,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Textarea } from "../../components/ui/textarea";
 import { HARNESS_LINES } from "./runtime";
 import { ATTACH_ACCEPT, MAX_ATTACHMENTS } from "./attachments";
 import { fixRequest, locateRuntimeError } from "./scope";
 import { firstBrokenScript } from "./patch";
+
+import { splitThink } from "./thinking";
+import { studioSuggestions } from "./suggestions";
 import type { ProjectSession } from "./useProjectSession";
 import { SOURCE_LABEL, timeAgo } from "./sessionTypes";
 
@@ -31,18 +48,63 @@ function waitingLine(engineLabel: string, elapsed: number): string {
 
 export default function ChatPane({ s }: { s: ProjectSession }) {
   const {
-    attached, busy, dictation, editable, elapsed, fileInputRef, html, inspect, lastFixRef, log, pickFiles, project, pushLog, request, restore, runEdit, runtimeError, scopeAsk, selected, send, setAttached, setDiffFrom, setInspect, setRequest, setScopeAsk, setSelected, stop, stream, undo, undoTarget
+    answerClarify,
+    attached,
+    busy,
+    clarify,
+    dictation,
+    editable,
+    elapsed,
+    fileInputRef,
+    html,
+    inspect,
+    lastFixRef,
+    log,
+    pickFiles,
+    planState,
+    project,
+    pushLog,
+    request,
+    restore,
+    runEdit,
+    runtimeError,
+    scopeAsk,
+    selected,
+    send,
+    setAttached,
+    setDiffFrom,
+    setInspect,
+    setRequest,
+    setScopeAsk,
+    setSelected,
+    stop,
+    stream,
+    undo,
+    undoTarget,
   } = s;
+  const [clarifyText, setClarifyText] = useState("");
+  // Local engines stream <think>…reasoning…</think> - render it dimmed above
+  // the visible reply instead of as part of the message.
+  const { thinking, visible } = splitThink(stream);
+  const suggestions = studioSuggestions(html);
   return (
     <div className="order-2 flex min-h-0 flex-col gap-3 lg:order-1">
-      <fieldset disabled={!editable} className="m-0 flex min-w-0 flex-col gap-2 rounded-2xl border border-border bg-card p-3">
+      <fieldset
+        disabled={!editable}
+        className="m-0 flex min-w-0 flex-col gap-2 rounded-2xl border border-border bg-card p-3"
+      >
         {selected && (
           <div className="flex items-center gap-2 rounded-lg bg-orange-500/10 px-2 py-1.5 text-xs text-orange-700 dark:text-orange-300">
             <MousePointerClick aria-hidden="true" size={12} />
             <span className="min-w-0 flex-1 truncate">
               Targeting &lt;{selected.tag}&gt; {selected.text ? `"${selected.text.slice(0, 30)}"` : ""}
             </span>
-            <button type="button" onClick={() => setSelected(null)} aria-label="Clear target" className="rounded p-0.5 hover:bg-orange-500/20">
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              aria-label="Clear target"
+              className="rounded p-0.5 hover:bg-orange-500/20"
+            >
               <X aria-hidden="true" size={12} />
             </button>
           </div>
@@ -57,14 +119,35 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             }
           }}
           rows={3}
-          placeholder={selected ? "What should change here? e.g. make it bigger and green" : "Ask for a change, e.g. add a dark mode switch, or add a search box"}
+          placeholder={
+            selected
+              ? "What should change here? e.g. make it bigger and green"
+              : "Ask for a change, e.g. add a dark mode switch, or add a search box"
+          }
           className="resize-none"
           aria-label="Ask for a change"
         />
+        {!busy && suggestions.length > 0 && (
+          <div role="group" aria-label="Suggested next changes" className="flex gap-1.5 overflow-x-auto pb-0.5">
+            {suggestions.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => send({ text: s.prompt })}
+                className="shrink-0 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary transition hover:bg-primary/15"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
         {attached.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {attached.map((a) => (
-              <span key={a.id} className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-secondary px-2 py-1 text-[11px] text-foreground">
+              <span
+                key={a.id}
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-secondary px-2 py-1 text-[11px] text-foreground"
+              >
                 {a.kind === "image" && a.dataUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={a.dataUrl} alt="" className="size-4 rounded object-cover" />
@@ -72,7 +155,12 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                   <Paperclip aria-hidden="true" size={11} />
                 )}
                 <span className="max-w-[9rem] truncate">{a.name}</span>
-                <button type="button" aria-label={`Remove ${a.name}`} onClick={() => setAttached((l) => l.filter((x) => x.id !== a.id))} className="rounded p-0.5 hover:bg-background">
+                <button
+                  type="button"
+                  aria-label={`Remove ${a.name}`}
+                  onClick={() => setAttached((l) => l.filter((x) => x.id !== a.id))}
+                  className="rounded p-0.5 hover:bg-background"
+                >
                   <X aria-hidden="true" size={10} />
                 </button>
               </span>
@@ -142,7 +230,13 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           </p>
         )}
         <div className="flex flex-wrap gap-1.5">
-          {["Add a second screen", "Make it more colourful", "Add a camera button", "Add a file upload for my users", "Call my agent's endpoint"].map((s) => (
+          {[
+            "Add a second screen",
+            "Make it more colourful",
+            "Add a camera button",
+            "Add a file upload for my users",
+            "Call my agent's endpoint",
+          ].map((s) => (
             <button
               key={s}
               type="button"
@@ -157,15 +251,22 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
       </fieldset>
 
       {scopeAsk && !busy && (
-        <div role="alertdialog" aria-labelledby="scope-ask-title" className="flex flex-col gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-3 text-xs">
-          <p id="scope-ask-title" className="font-medium text-foreground">This changes the whole page</p>
+        <div
+          role="alertdialog"
+          aria-labelledby="scope-ask-title"
+          className="flex flex-col gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-3 text-xs"
+        >
+          <p id="scope-ask-title" className="font-medium text-foreground">
+            This changes the whole page
+          </p>
           <p className="text-muted-foreground">
-            Big all-at-once changes are harder for the AI to get right, and more of your app can shift than you meant. It is usually easier to
-            tap <span className="font-medium text-foreground">Select</span>, pick the part you want changed, and describe it - one part at a time.
+            Big all-at-once changes are harder for the AI to get right, and more of your app can shift than you meant.
+            It is usually easier to tap <span className="font-medium text-foreground">Select</span>, pick the part you
+            want changed, and describe it - one part at a time.
           </p>
           <p className="text-muted-foreground">If you wish to continue with the whole page anyway, click Yes.</p>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => send({ wholePage: true })}>
+            <Button size="sm" onClick={() => send({ wholePage: true, text: scopeAsk ?? undefined })}>
               Yes, continue
             </Button>
             <Button
@@ -183,6 +284,45 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
         </div>
       )}
 
+      {clarify && !busy && (
+        <div
+          role="alertdialog"
+          aria-labelledby="clarify-title"
+          className="flex flex-col gap-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-3 text-xs"
+        >
+          <p id="clarify-title" className="font-medium text-foreground">
+            Before I build - a few quick questions
+          </p>
+          <ul className="list-disc space-y-1 ps-5 text-muted-foreground">
+            {clarify.questions.map((q) => (
+              <li key={q}>{q}</li>
+            ))}
+          </ul>
+          <Textarea
+            value={clarifyText}
+            onChange={(e) => setClarifyText(e.target.value)}
+            rows={2}
+            placeholder="Answer any or all in one line - or just build it as described."
+            className="resize-none"
+            aria-label="Answers to the questions"
+          />
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              onClick={() => {
+                answerClarify(clarifyText || null);
+                setClarifyText("");
+              }}
+            >
+              Build it
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => answerClarify(null)}>
+              Skip - build as described
+            </Button>
+          </div>
+        </div>
+      )}
+
       {busy && (
         <div className="flex flex-col gap-2 rounded-2xl border border-primary/30 bg-primary/[0.04] p-3">
           <div className="flex items-center gap-2 text-xs font-medium text-foreground">
@@ -190,10 +330,36 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             <span className="rounded-full bg-background px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
               {busy.engineLabel}
             </span>
-            <span className="ml-auto tabular-nums text-muted-foreground">{elapsed}s</span>
+            <span className="ms-auto tabular-nums text-muted-foreground">{elapsed}s</span>
           </div>
+          {planState && (
+            <ol className="flex flex-col gap-0.5 text-[11px]">
+              {planState.steps.map((s, i) => (
+                <li
+                  key={s}
+                  className={`flex items-center gap-1.5 ${i < planState.current ? "text-emerald-600 dark:text-emerald-400" : i === planState.current ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                >
+                  {i < planState.current ? (
+                    <Check aria-hidden="true" size={11} />
+                  ) : i === planState.current ? (
+                    <Loader2 aria-hidden="true" size={11} className="animate-spin" />
+                  ) : (
+                    <span className="inline-block size-[11px] rounded-full border border-muted-foreground/40" />
+                  )}
+                  <span className="truncate">{s}</span>
+                </li>
+              ))}
+            </ol>
+          )}
           <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-neutral-950 p-2 font-mono text-[10px] leading-snug text-emerald-300">
-            {stream ? stream.slice(-1800) : waitingLine(busy.engineLabel, elapsed)}
+
+            {thinking && (
+              <span className="text-emerald-700">
+                {thinking.slice(-600)}
+                {"\n\n"}
+              </span>
+            )}
+            {stream ? visible.slice(-1800) || " " : waitingLine(busy.engineLabel, elapsed)}
           </pre>
         </div>
       )}
@@ -232,16 +398,28 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
       {log.length > 0 && (
         <div className="flex max-h-64 flex-col gap-1.5 overflow-auto rounded-2xl border border-border bg-card p-3">
           {log.map((e) => (
-            <div key={e.id} className={e.kind === "user" ? "self-end rounded-xl bg-primary px-2.5 py-1.5 text-xs text-primary-foreground" : "text-xs"}>
+            <div
+              key={e.id}
+              className={
+                e.kind === "user"
+                  ? "self-end rounded-xl bg-primary px-2.5 py-1.5 text-xs text-primary-foreground"
+                  : "text-xs"
+              }
+            >
               {e.kind === "user" ? (
                 e.text
               ) : (
                 <span className={e.kind === "error" ? "text-destructive" : "text-foreground"}>
-                  {e.kind === "result" ? <Check aria-hidden="true" size={11} className="mr-1 inline text-emerald-500" /> : null}
+                  {e.kind === "result" ? (
+                    <Check aria-hidden="true" size={11} className="me-1 inline text-emerald-500" />
+                  ) : null}
                   {e.text}
                   {e.engine && (
-                    <span className="ml-1 text-muted-foreground">
-                      · {e.engine === "device" ? `on your device${e.model ? ` (${e.model})` : ""} · free` : `cloud${e.model ? ` (${e.model})` : ""}`}
+                    <span className="ms-1 text-muted-foreground">
+                      ·{" "}
+                      {e.engine === "device"
+                        ? `on your device${e.model ? ` (${e.model})` : ""} · free`
+                        : `cloud${e.model ? ` (${e.model})` : ""}`}
                       {e.ms ? ` · ${Math.round(e.ms / 1000)}s` : ""}
                     </span>
                   )}
@@ -250,7 +428,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                       type="button"
                       disabled={!!busy}
                       onClick={() => void runEdit(e.cloudRetry!.req, { prefer: "cloud", target: e.cloudRetry!.target })}
-                      className="ml-2 inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50 dark:text-sky-300"
+                      className="ms-2 inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50 dark:text-sky-300"
                     >
                       <Cloud aria-hidden="true" size={10} /> Use the cloud for this one
                     </button>
@@ -265,15 +443,20 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
       <div className="flex flex-col gap-1 rounded-2xl border border-border bg-card p-3">
         <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-foreground">
           <History aria-hidden="true" size={13} /> Versions
-          <span className="ml-auto font-normal text-muted-foreground">{project.versions.length}</span>
+          <span className="ms-auto font-normal text-muted-foreground">{project.versions.length}</span>
         </div>
         <div className="flex max-h-56 flex-col gap-0.5 overflow-auto">
           {[...project.versions].reverse().map((v, ri) => {
             const i = project.versions.length - 1 - ri;
             const isCurrent = ri === 0;
             return (
-              <div key={v.at + "-" + i} className="group flex items-center gap-2 rounded-lg px-1.5 py-1 text-xs hover:bg-secondary">
-                <span className={`size-1.5 shrink-0 rounded-full ${isCurrent ? "bg-primary" : "bg-muted-foreground/40"}`} />
+              <div
+                key={v.at + "-" + i}
+                className="group flex items-center gap-2 rounded-lg px-1.5 py-1 text-xs hover:bg-secondary"
+              >
+                <span
+                  className={`size-1.5 shrink-0 rounded-full ${isCurrent ? "bg-primary" : "bg-muted-foreground/40"}`}
+                />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-foreground">{v.note}</span>
                   <span className="text-[10px] text-muted-foreground">
@@ -292,7 +475,11 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                       <GitCompare aria-hidden="true" size={12} />
                     </button>
                     {editable && (
-                      <button type="button" onClick={() => restore(i)} className="rounded px-1.5 py-0.5 text-[11px] text-primary transition hover:bg-primary/10 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 [@media(hover:none)]:opacity-100">
+                      <button
+                        type="button"
+                        onClick={() => restore(i)}
+                        className="rounded px-1.5 py-0.5 text-[11px] text-primary transition hover:bg-primary/10 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 [@media(hover:none)]:opacity-100"
+                      >
                         Restore
                       </button>
                     )}

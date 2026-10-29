@@ -570,7 +570,7 @@ export default function SentinelsPanel() {
                           {t("escalatedBadge")}
                         </Badge>
                       )}
-                      <span className="ml-auto text-xs text-muted-foreground">
+                      <span className="ms-auto text-xs text-muted-foreground">
                         {formatTime(ev.occurredAt || ev.receivedAt)}
                       </span>
                     </div>
@@ -580,7 +580,7 @@ export default function SentinelsPanel() {
                       <div className="mt-1.5">
                         <p
                           className={cn(
-                            "whitespace-pre-line text-sm leading-relaxed text-muted-foreground",
+                            "whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground",
                             long && !open && "line-clamp-2"
                           )}
                         >

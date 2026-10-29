@@ -154,7 +154,7 @@ function ToolButton({ tool, url }: { tool: ExternalToolDef; url: string }) {
         <Icon size={16} className="text-primary" />
         <span className="text-sm font-semibold text-foreground">{tool.label}</span>
         <span
-          className={`ml-auto size-2 rounded-full ${DOT_CLASS[reach]}`}
+          className={`ms-auto size-2 rounded-full ${DOT_CLASS[reach]}`}
           title={`Reachability: ${REACH_LABEL[reach]}`}
           aria-hidden="true"
         />

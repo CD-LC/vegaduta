@@ -26,6 +26,9 @@ sa-*.json
 # --- Agent / tool scratch ---------------------------------------------------
 .claude/
 scratchpad/
+# ...but the real Java package of the same name in core/agents-tools is source,
+# not scratch - a bare "scratchpad/" matches directories at any depth.
+!core/agents-tools/src/**/scratchpad/
 .aider*
 .cursor/
 .windsurf/
@@ -87,6 +90,8 @@ htmlcov/
 
 # --- Build and release outputs --------------------------------------------------
 /dist/
+# Academy rendered media (generated from lesson scripts - never commit)
+academy/**/dist/
 /sbom/
 *.spdx.json
 *.cdx.json
@@ -143,4 +148,6 @@ installer/vegaduta-setup-*
 sdk/python-agent/dist/
 sdk/python/dist/
 sdk/typescript/dist/
+web/node_modules/
 sdk/typescript/node_modules/
+.venv-tts/

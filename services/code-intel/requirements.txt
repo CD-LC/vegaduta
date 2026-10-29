@@ -1,20 +1,20 @@
 # code-intel microservice
-fastapi==0.142.0
+fastapi==0.156.1
 # Explicit security floor: fastapi 0.115.0 capped starlette at 0.38.x, which
 # carries 7 advisories (PYSEC-2026-161/1941/1943/2280/2281/248/249; fixed by
 # 1.3.1). fastapi 0.142 only floors starlette, so pin it here directly.
-starlette==1.7.0
+starlette==1.9.0
 uvicorn[standard]==0.54.0
-pydantic==2.13.4
-numpy==2.5.1
+pydantic==2.14.1
+numpy==2.5.4
 pyyaml==6.0.3
 
 # AST chunking + code graph for ~165 languages
 tree-sitter==0.26.0
-tree-sitter-language-pack==1.14.1
+tree-sitter-language-pack==1.22.1
 
 # Default embedder (ONNX, no torch)
-fastembed==0.8.0
+fastembed==0.9.0
 
 # auth_mode=keycloak (JWT validation against the realm JWKS)
 PyJWT[crypto]==2.15.1
@@ -30,7 +30,7 @@ docker==7.2.0
 # base SDK, not `e2b-code-interpreter` (that one layers a Jupyter-style
 # run_code() on top for Python-only rich output - this service needs
 # general command execution via `Sandbox.commands.run`, which lives here).
-e2b==2.37.0
+e2b==2.58.0
 
 # Optional:
 # sentence-transformers>=3.0   # embedder: sentence-transformers, OR

@@ -1,8 +1,27 @@
 "use client";
 
-import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronRight, Copy, Pause, Pencil, Play, Trash2, Zap } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Pause,
+  Pencil,
+  Play,
+  Trash2,
+  Zap,
+} from "lucide-react";
 import { useTranslations } from "../../lib/i18n";
-import { describeSchedule, draftFromTask, formatRunTime, statusTone, type ScheduledTask } from "../../lib/scheduledTasks";
+import {
+  describeSchedule,
+  draftFromTask,
+  formatRunTime,
+  statusTone,
+  type ScheduledTask,
+} from "../../lib/scheduledTasks";
 import ConfirmDelete from "../dataTables/ConfirmDelete";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Badge } from "../ui/badge";
@@ -52,7 +71,7 @@ function SortHead({
       <button
         type="button"
         onClick={() => onSortChange(nextSort(sort, sortKey))}
-        className="-mx-1 inline-flex items-center gap-1 rounded px-1 py-0.5 text-left font-medium outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        className="-mx-1 inline-flex items-center gap-1 rounded px-1 py-0.5 text-start font-medium outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
       >
         {children}
         <Icon size={12} aria-hidden="true" className={active ? "text-foreground" : "text-muted-foreground"} />
@@ -104,12 +123,13 @@ export default function ScheduledTasksTable({
             <SortHead sortKey="runCount" sort={sort} onSortChange={onSortChange}>
               {t("runsLabel")}
             </SortHead>
-            <TableHead className="text-right">{ts("colActions")}</TableHead>
+            <TableHead className="text-end">{ts("colActions")}</TableHead>
           </TableRow>
         </TableHeader>
         {tasks.map((task) => {
           const description = describeSchedule(draftFromTask(task));
-          const dayText = task.frequency === "weekly" ? t(`day_${description.params.day}`) : (description.params.day ?? "");
+          const dayText =
+            task.frequency === "weekly" ? t(`day_${description.params.day}`) : (description.params.day ?? "");
           const open = openRuns === task.id;
           const busy = busyId === task.id;
           return (
@@ -129,7 +149,9 @@ export default function ScheduledTasksTable({
                     )}
                   </div>
                   {agentNames.get(task.agentId) && (
-                    <p className="mt-1 text-xs text-muted-foreground">{t("agentShort", { name: agentNames.get(task.agentId) ?? "" })}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {t("agentShort", { name: agentNames.get(task.agentId) ?? "" })}
+                    </p>
                   )}
                 </TableCell>
                 <TableCell className="whitespace-normal text-sm text-foreground">
@@ -204,11 +226,23 @@ export default function ScheduledTasksTable({
                     </Alert>
                   )}
                   {task.enabled && task.consecutiveFailures > 0 && (
-                    <p className="text-xs text-destructive">{t("failuresInARow", { count: task.consecutiveFailures })}</p>
+                    <p className="text-xs text-destructive">
+                      {t("failuresInARow", { count: task.consecutiveFailures })}
+                    </p>
                   )}
                   <div>
-                    <Button type="button" size="sm" variant="ghost" aria-expanded={open} onClick={() => onToggleRuns(open ? null : task.id)}>
-                      {open ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}{" "}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-expanded={open}
+                      onClick={() => onToggleRuns(open ? null : task.id)}
+                    >
+                      {open ? (
+                        <ChevronDown size={14} aria-hidden="true" />
+                      ) : (
+                        <ChevronRight size={14} aria-hidden="true" />
+                      )}{" "}
                       {t(open ? "historyHide" : "historyShow")}
                     </Button>
                     {open && (

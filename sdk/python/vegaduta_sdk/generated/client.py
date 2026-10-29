@@ -50,6 +50,47 @@ class A2aAgentCardApi:
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/a2a/agent-card.json")
 
 
+class A2aConsoleApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def policy(self) -> Dict[str, Any]:
+        """Policy.
+
+        GET /api/a2a/console/policy
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/a2a/console/policy")
+
+    def tasks(self, *, direction: Optional[str] = None, state: Optional[str] = None, agent_id: Optional[str] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+        """Tasks.
+
+        GET /api/a2a/console/tasks
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/a2a/console/tasks", query={"direction": direction, "state": state, "agentId": agent_id, "limit": limit})
+
+    def task(self, id: str) -> Dict[str, Any]:
+        """Task.
+
+        GET /api/a2a/console/tasks/{id}
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", f"/api/a2a/console/tasks/{quote_path(id)}")
+
+    def cancel(self, id: str, *, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+        """Cancel.
+
+        POST /api/a2a/console/tasks/{id}:cancel
+
+        Only available when the feature flag app.a2a.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("POST", f"/api/a2a/console/tasks/{quote_path(id)}:cancel", headers={"Idempotency-Key": idempotency_key})
+
+
 class A2aJsonRpcApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -698,6 +739,27 @@ class AgentApi:
         PATCH /api/agents/{agentId}/knowledge-base
         """
         return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-base", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
+    def set_knowledge_write(self, agent_id: str, body: m.AgentKnowledgeBaseToggleRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write.
+
+        PATCH /api/agents/{agentId}/knowledge-write
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
+
+    def get_knowledge_write_access(self, agent_id: str) -> m.AgentKnowledgeWriteAccessResponse:
+        """Get knowledge write access.
+
+        GET /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access")
+
+    def set_knowledge_write_access(self, agent_id: str, body: m.AgentKnowledgeWriteAccessUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentKnowledgeWriteAccessResponse:
+        """Set knowledge write access.
+
+        PATCH /api/agents/{agentId}/knowledge-write-access
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/knowledge-write-access", headers={"Idempotency-Key": idempotency_key, "If-Match": if_match}, body=body)
 
     def update_model(self, agent_id: str, body: m.AgentModelUpdateRequest, *, idempotency_key: Optional[str] = None, if_match: Optional[str] = None) -> m.AgentResponse:
         """Update model.
@@ -1386,6 +1448,25 @@ class AgentScheduleApi:
         GET /api/agents/{agentId}/schedule/runs
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/schedule/runs", query={"limit": limit})
+
+
+class AgentScratchpadApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, session: Optional[str] = None) -> m.AgentScratchpadController_ScratchpadListView:
+        """List.
+
+        GET /api/agents/{agentId}/scratchpad
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad", query={"session": session})
+
+    def read(self, agent_id: str, key: str, *, session: Optional[str] = None) -> m.ScratchpadNoteView:
+        """Read.
+
+        GET /api/agents/{agentId}/scratchpad/{key}
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
 
 
 class AgentSessionLlmRequestApi:
@@ -4086,6 +4167,74 @@ class DemoWhatsAppWebhookApi:
         return self._http.request("POST", "/webhook/demo/whatsapp", headers={"X-Hub-Signature-256": x_hub_signature_256}, body=body, response="void")
 
 
+class DesktopMonitorApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def frame(self) -> Any:
+        """Frame.
+
+        GET /api/desktop/monitor/frame
+
+        Only available when the feature flag app.assistant.desktop.monitor.enabled=true is on; otherwise this route answers 404.
+        """
+        return self._http.request("GET", "/api/desktop/monitor/frame")
+
+
+class DesktopRecipeApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, agent_id: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DesktopRecipeDtos_RecipeSummary]:
+        """List.
+
+        GET /api/desktop/recipes
+        """
+        return self._http.request("GET", "/api/desktop/recipes", query={"agentId": agent_id, "limit": limit, "offset": offset})
+
+    def create(self, body: m.DesktopRecipeDtos_CreateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
+        """Create.
+
+        POST /api/desktop/recipes
+        """
+        return self._http.request("POST", "/api/desktop/recipes", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def from_run(self, body: m.DesktopRecipeDtos_RecipeFromRunRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeDetail:
+        """From run.
+
+        POST /api/desktop/recipes/from-run
+        """
+        return self._http.request("POST", "/api/desktop/recipes/from-run", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def get(self, id: str) -> m.DesktopRecipeDtos_RecipeDetail:
+        """Get.
+
+        GET /api/desktop/recipes/{id}
+        """
+        return self._http.request("GET", f"/api/desktop/recipes/{quote_path(id)}")
+
+    def delete(self, id: str) -> None:
+        """Delete.
+
+        DELETE /api/desktop/recipes/{id}
+        """
+        return self._http.request("DELETE", f"/api/desktop/recipes/{quote_path(id)}", response="void")
+
+    def update(self, id: str, body: m.DesktopRecipeDtos_UpdateRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RecipeSummary:
+        """Update.
+
+        PATCH /api/desktop/recipes/{id}
+        """
+        return self._http.request("PATCH", f"/api/desktop/recipes/{quote_path(id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def run(self, id: str, body: m.DesktopRecipeDtos_RunRecipeRequest, *, idempotency_key: Optional[str] = None) -> m.DesktopRecipeDtos_RunRecipeResponse:
+        """Run.
+
+        POST /api/desktop/recipes/{id}/run
+        """
+        return self._http.request("POST", f"/api/desktop/recipes/{quote_path(id)}/run", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+
 class DeveloperApiApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -5537,6 +5686,15 @@ class KnowledgeApi:
         """
         return self._http.request("POST", "/api/knowledge/ingest", headers={"Idempotency-Key": idempotency_key}, body=body)
 
+    def ingest_url(self, body: m.IngestUrlRequest, *, idempotency_key: Optional[str] = None) -> m.KnowledgeUrlIngester_UrlIngestResult:
+        """Ingest url.
+
+        POST /api/knowledge/ingest-url
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", "/api/knowledge/ingest-url", headers={"Idempotency-Key": idempotency_key}, body=body)
+
     def reembed_job(self, job_id: str) -> m.KnowledgeReembedJobResponse:
         """Reembed job.
 
@@ -5978,45 +6136,54 @@ class LocalAuthApi:
 
         GET /api/auth/local/config
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
         return self._http.request("GET", "/api/auth/local/config")
 
-    def login(self, body: m.LocalAuthController_LoginRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalAuthController_LoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/login
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/login", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/login", body=body)
 
-    def logout(self, body: Optional[m.LocalAuthController_RefreshRequest] = None, *, idempotency_key: Optional[str] = None) -> None:
+    def logout(self, body: Optional[m.LocalAuthController_RefreshRequest] = None) -> None:
         """Logout.
 
         POST /api/auth/local/logout
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/logout", headers={"Idempotency-Key": idempotency_key}, body=body, response="void")
+        return self._http.request("POST", "/api/auth/local/logout", body=body, response="void")
 
-    def refresh(self, body: m.LocalAuthController_RefreshRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def refresh(self, body: m.LocalAuthController_RefreshRequest) -> m.LocalAuthController_SessionResponse:
         """Refresh.
 
         POST /api/auth/local/refresh
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/refresh", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/refresh", body=body)
 
-    def setup(self, body: m.LocalAuthController_SetupRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def reset_request(self, body: Optional[m.LocalAuthController_ResetRequest] = None) -> Dict[str, str]:
+        """Reset request.
+
+        POST /api/auth/local/reset-request
+
+        Ask for a password reset on a personal install. The one-time reset link is never returned here: core writes it to password-reset.txt in the install's auth data directory (scripts/vegaduta reset-password prints it), so only someone with access to the machine itself can use it. The answer is the same for an unknown e-mail - it reveals nothing about the account. A blank e-mail resolves to the install's only account. Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        """
+        return self._http.request("POST", "/api/auth/local/reset-request", body=body)
+
+    def setup(self, body: m.LocalAuthController_SetupRequest) -> m.LocalAuthController_SessionResponse:
         """Setup.
 
         POST /api/auth/local/setup
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/setup", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/setup", body=body)
 
 
 class LocalModelsApi:
@@ -6116,14 +6283,14 @@ class LocalUnlockApi:
         """
         return self._http.request("DELETE", f"/api/auth/local/unlock/devices/{quote_path(id)}", response="void")
 
-    def login(self, body: m.LocalUnlockController_UnlockLoginRequest, *, idempotency_key: Optional[str] = None) -> m.LocalAuthController_SessionResponse:
+    def login(self, body: m.LocalUnlockController_UnlockLoginRequest) -> m.LocalAuthController_SessionResponse:
         """Login.
 
         POST /api/auth/local/unlock/login
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/login", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/login", body=body)
 
     def methods(self) -> m.LocalUnlockService_Methods:
         """Methods.
@@ -6134,32 +6301,32 @@ class LocalUnlockApi:
         """
         return self._http.request("GET", "/api/auth/local/unlock/methods")
 
-    def login_options(self, *, idempotency_key: Optional[str] = None) -> m.LocalPasskeyService_Options:
+    def login_options(self) -> m.LocalPasskeyService_Options:
         """Login options.
 
         POST /api/auth/local/unlock/passkey/login-options
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/login-options", headers={"Idempotency-Key": idempotency_key})
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/login-options")
 
-    def register(self, body: m.LocalUnlockController_RegisterRequest, *, idempotency_key: Optional[str] = None) -> m.LocalUnlockController_RegisterResponse:
+    def register(self, body: m.LocalUnlockController_RegisterRequest) -> m.LocalUnlockController_RegisterResponse:
         """Register.
 
         POST /api/auth/local/unlock/passkey/register
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/register", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register", body=body)
 
-    def register_options(self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None, *, idempotency_key: Optional[str] = None) -> m.LocalPasskeyService_Options:
+    def register_options(self, body: Optional[m.LocalUnlockController_RegisterOptionsRequest] = None) -> m.LocalPasskeyService_Options:
         """Register options.
 
         POST /api/auth/local/unlock/passkey/register-options
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/passkey/register-options", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/passkey/register-options", body=body)
 
     def remove_passkey(self, id: str) -> None:
         """Remove passkey.
@@ -6179,14 +6346,14 @@ class LocalUnlockApi:
         """
         return self._http.request("POST", "/api/auth/local/unlock/recovery-codes", headers={"Idempotency-Key": idempotency_key})
 
-    def setup_with_pin(self, body: m.LocalUnlockController_SetupPinRequest, *, idempotency_key: Optional[str] = None) -> m.LocalUnlockController_SetupPinResponse:
+    def setup_with_pin(self, body: m.LocalUnlockController_SetupPinRequest) -> m.LocalUnlockController_SetupPinResponse:
         """Setup with pin.
 
         POST /api/auth/local/unlock/setup/pin
 
-        Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
+        Public route: no bearer token is required at the gateway. Webhook, device and pairing endpoints verify their own credential (signature, device token or code) inside the handler. Only available when the feature flag app.auth.mode=local is on; otherwise this route answers 404.
         """
-        return self._http.request("POST", "/api/auth/local/unlock/setup/pin", headers={"Idempotency-Key": idempotency_key}, body=body)
+        return self._http.request("POST", "/api/auth/local/unlock/setup/pin", body=body)
 
 
 class MatrixApi:
@@ -13202,6 +13369,7 @@ class VegadutaClient:
     ) -> None:
         self.http = HttpClient(base_url=base_url, token=token, timeout=timeout, headers=headers)
         self.a2a_agent_card = A2aAgentCardApi(self.http)
+        self.a2a_console = A2aConsoleApi(self.http)
         self.a2a_json_rpc = A2aJsonRpcApi(self.http)
         self.a2a_rest = A2aRestApi(self.http)
         self.abuse_monitor = AbuseMonitorApi(self.http)
@@ -13230,6 +13398,7 @@ class VegadutaClient:
         self.agent_run_budget = AgentRunBudgetApi(self.http)
         self.agent_runtime_limits = AgentRuntimeLimitsApi(self.http)
         self.agent_schedule = AgentScheduleApi(self.http)
+        self.agent_scratchpad = AgentScratchpadApi(self.http)
         self.agent_session_llm_request = AgentSessionLlmRequestApi(self.http)
         self.agent_session_llm_usage = AgentSessionLlmUsageApi(self.http)
         self.agent_settings = AgentSettingsApi(self.http)
@@ -13297,6 +13466,8 @@ class VegadutaClient:
         self.demo_transcript_email = DemoTranscriptEmailApi(self.http)
         self.demo_video = DemoVideoApi(self.http)
         self.demo_whats_app_webhook = DemoWhatsAppWebhookApi(self.http)
+        self.desktop_monitor = DesktopMonitorApi(self.http)
+        self.desktop_recipe = DesktopRecipeApi(self.http)
         self.developer_api = DeveloperApiApi(self.http)
         self.device = DeviceApi(self.http)
         self.device_data_ingestion = DeviceDataIngestionApi(self.http)

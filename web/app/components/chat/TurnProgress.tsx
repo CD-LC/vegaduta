@@ -65,13 +65,17 @@ export default function TurnProgress({
         <span className="min-w-0 truncate font-medium text-foreground">{phaseLabel(state, t)}</span>
         {elapsed && <span className="shrink-0 tabular-nums">· {elapsed}</span>}
         {!compact && onCancel && (
-          <Button type="button" variant="ghost" size="sm" className="ml-auto h-6 px-2 text-xs" onClick={onCancel}>
+          <Button type="button" variant="ghost" size="sm" className="ms-auto h-6 px-2 text-xs" onClick={onCancel}>
             {t("cancel")}
           </Button>
         )}
       </div>
       {thought && (
-        <p className="mt-0.5 truncate text-[11px] italic text-muted-foreground/80" title={state.thinking} data-testid="turn-thinking">
+        <p
+          className="mt-0.5 truncate text-[11px] italic text-muted-foreground/80"
+          title={state.thinking}
+          data-testid="turn-thinking"
+        >
           {thought}
         </p>
       )}
@@ -92,7 +96,10 @@ const TOOL_KEYS: Record<string, string> = {
   recall_related_facts: "toolMemory",
 };
 
-export function phaseLabel(state: TurnProgressState, t: (key: string, vars?: Record<string, unknown>) => string): string {
+export function phaseLabel(
+  state: TurnProgressState,
+  t: (key: string, vars?: Record<string, unknown>) => string
+): string {
   if (state.phase === "tool") {
     const key = state.tool ? TOOL_KEYS[state.tool] : undefined;
     if (key) return t(key);

@@ -75,43 +75,45 @@ JAVA_DENIED_PREFIXES: tuple[str, ...] = (
 # Exact class denials inside otherwise-allowed packages. java.lang.System is
 # the single most important entry here: it is the door to getenv, getProperty,
 # exit, load/loadLibrary, and the raw in/out/err streams.
-JAVA_DENIED_CLASSES: frozenset[str] = frozenset({
-    "java.lang.System",
-    "java.lang.Runtime",
-    "java.lang.Process",
-    "java.lang.ProcessBuilder",
-    "java.lang.ProcessHandle",
-    "java.lang.Thread",
-    "java.lang.ThreadGroup",
-    "java.lang.ThreadLocal",
-    "java.lang.InheritableThreadLocal",
-    "java.lang.Class",
-    "java.lang.ClassLoader",
-    "java.lang.ClassValue",
-    "java.lang.Compiler",
-    "java.lang.SecurityManager",
-    "java.lang.Module",
-    "java.lang.ModuleLayer",
-    "java.lang.Package",
-    "java.lang.StackWalker",
-    "java.lang.Shutdown",
-    "java.util.ServiceLoader",
-    "java.util.Timer",
-    "java.util.TimerTask",
-    # Both take a File/OutputStream in some overload; denying them outright is
-    # simpler to reason about than relying on the descriptor check to catch it.
-    "java.util.Scanner",
-    "java.util.Formatter",
-    "java.util.PropertyPermission",
-    # ResourceBundle.getBundle(name) loads and instantiates a class (or reads a
-    # classpath resource) BY NAME through the caller's class loader - the same
-    # string-to-code door as Class.forName. getBundle is inherited, so a
-    # PropertyResourceBundle.getBundle(...) call site names the subclass as the
-    # Methodref owner; all three are denied.
-    "java.util.ResourceBundle",
-    "java.util.ListResourceBundle",
-    "java.util.PropertyResourceBundle",
-})
+JAVA_DENIED_CLASSES: frozenset[str] = frozenset(
+    {
+        "java.lang.System",
+        "java.lang.Runtime",
+        "java.lang.Process",
+        "java.lang.ProcessBuilder",
+        "java.lang.ProcessHandle",
+        "java.lang.Thread",
+        "java.lang.ThreadGroup",
+        "java.lang.ThreadLocal",
+        "java.lang.InheritableThreadLocal",
+        "java.lang.Class",
+        "java.lang.ClassLoader",
+        "java.lang.ClassValue",
+        "java.lang.Compiler",
+        "java.lang.SecurityManager",
+        "java.lang.Module",
+        "java.lang.ModuleLayer",
+        "java.lang.Package",
+        "java.lang.StackWalker",
+        "java.lang.Shutdown",
+        "java.util.ServiceLoader",
+        "java.util.Timer",
+        "java.util.TimerTask",
+        # Both take a File/OutputStream in some overload; denying them outright is
+        # simpler to reason about than relying on the descriptor check to catch it.
+        "java.util.Scanner",
+        "java.util.Formatter",
+        "java.util.PropertyPermission",
+        # ResourceBundle.getBundle(name) loads and instantiates a class (or reads a
+        # classpath resource) BY NAME through the caller's class loader - the same
+        # string-to-code door as Class.forName. getBundle is inherited, so a
+        # PropertyResourceBundle.getBundle(...) call site names the subclass as the
+        # Methodref owner; all three are denied.
+        "java.util.ResourceBundle",
+        "java.util.ListResourceBundle",
+        "java.util.PropertyResourceBundle",
+    }
+)
 
 # Individual members denied inside otherwise-allowed classes.
 #
@@ -119,11 +121,13 @@ JAVA_DENIED_CLASSES: frozenset[str] = frozenset({
 #     PROPERTY by name: System is denied for exactly that reason (java.home,
 #     user.dir, java.vm.name ...), and these three are the same read behind a
 #     different class. Parsing (parseInt, valueOf, ...) is unaffected.
-JAVA_DENIED_MEMBERS: frozenset[tuple[str, str]] = frozenset({
-    ("java.lang.Boolean", "getBoolean"),
-    ("java.lang.Integer", "getInteger"),
-    ("java.lang.Long", "getLong"),
-})
+JAVA_DENIED_MEMBERS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("java.lang.Boolean", "getBoolean"),
+        ("java.lang.Integer", "getInteger"),
+        ("java.lang.Long", "getLong"),
+    }
+)
 
 # Member NAMES denied on any java.* owner. Parallel streams and the Arrays
 # parallel* helpers run on the common ForkJoinPool, i.e. they start threads
@@ -131,23 +135,25 @@ JAVA_DENIED_MEMBERS: frozenset[tuple[str, str]] = frozenset({
 # would quietly contradict "a custom tool runs single-threaded". The sequential
 # forms (stream(), Arrays.sort, ...) are unaffected. A tool's OWN method that
 # happens to be called `parallel` is fine (own classes are checked first).
-JAVA_DENIED_MEMBER_NAMES: frozenset[str] = frozenset({
-    "parallel",
-    "parallelStream",
-    "parallelSort",
-    "parallelPrefix",
-    "parallelSetAll",
-})
+JAVA_DENIED_MEMBER_NAMES: frozenset[str] = frozenset(
+    {
+        "parallel",
+        "parallelStream",
+        "parallelSort",
+        "parallelPrefix",
+        "parallelSetAll",
+    }
+)
 
 # Packages a tool may freely use: pure computation, collections, text, time and
 # math. Nothing here can perform I/O of any kind on its own.
 JAVA_ALLOWED_PREFIXES: tuple[str, ...] = (
-    "java.lang.",       # minus JAVA_DENIED_CLASSES / prefixes above
-    "java.util.",       # minus the sub-packages denied above
+    "java.lang.",  # minus JAVA_DENIED_CLASSES / prefixes above
+    "java.util.",  # minus the sub-packages denied above
     "java.math.",
     "java.time.",
     "java.text.",
-    "vega.",            # the tiny trusted helper API this service ships
+    "vega.",  # the tiny trusted helper API this service ships
 )
 
 # The compiler-generated bootstrap methods. A lambda, a `+` on non-constant
@@ -156,15 +162,17 @@ JAVA_ALLOWED_PREFIXES: tuple[str, ...] = (
 # (owner, method) pair - rather than the class - is what stops
 # `MethodHandles.lookup().findStatic(...)` from being used to reach a denied
 # class by name at runtime.
-JAVA_ALLOWED_BOOTSTRAPS: frozenset[tuple[str, str]] = frozenset({
-    ("java.lang.invoke.LambdaMetafactory", "metafactory"),
-    ("java.lang.invoke.LambdaMetafactory", "altMetafactory"),
-    ("java.lang.invoke.StringConcatFactory", "makeConcat"),
-    ("java.lang.invoke.StringConcatFactory", "makeConcatWithConstants"),
-    ("java.lang.runtime.ObjectMethods", "bootstrap"),
-    ("java.lang.runtime.SwitchBootstraps", "typeSwitch"),
-    ("java.lang.runtime.SwitchBootstraps", "enumSwitch"),
-})
+JAVA_ALLOWED_BOOTSTRAPS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("java.lang.invoke.LambdaMetafactory", "metafactory"),
+        ("java.lang.invoke.LambdaMetafactory", "altMetafactory"),
+        ("java.lang.invoke.StringConcatFactory", "makeConcat"),
+        ("java.lang.invoke.StringConcatFactory", "makeConcatWithConstants"),
+        ("java.lang.runtime.ObjectMethods", "bootstrap"),
+        ("java.lang.runtime.SwitchBootstraps", "typeSwitch"),
+        ("java.lang.runtime.SwitchBootstraps", "enumSwitch"),
+    }
+)
 
 # Types that a class file may *name* - in a descriptor, or as a bare
 # CONSTANT_Class entry - but may never invoke a method on or read a field of.
@@ -182,22 +190,24 @@ JAVA_ALLOWED_BOOTSTRAPS: frozenset[tuple[str, str]] = frozenset({
 #     allowlisted method whose descriptor returns one. A tool can therefore
 #     hold a Class object, and it is inert: every method on it lives behind a
 #     Methodref owned by java.lang.Class, which is strictly denied.
-JAVA_DESCRIPTOR_ONLY: frozenset[str] = frozenset({
-    "java.lang.Class",
-    "java.lang.invoke.LambdaMetafactory",
-    "java.lang.invoke.StringConcatFactory",
-    "java.lang.invoke.MethodHandles",
-    "java.lang.invoke.MethodHandles$Lookup",
-    "java.lang.invoke.MethodHandle",
-    "java.lang.invoke.MethodType",
-    "java.lang.invoke.CallSite",
-    "java.lang.invoke.TypeDescriptor",
-    "java.lang.invoke.TypeDescriptor$OfField",
-    "java.lang.invoke.TypeDescriptor$OfMethod",
-    "java.lang.invoke.VarHandle",
-    "java.lang.runtime.ObjectMethods",
-    "java.lang.runtime.SwitchBootstraps",
-})
+JAVA_DESCRIPTOR_ONLY: frozenset[str] = frozenset(
+    {
+        "java.lang.Class",
+        "java.lang.invoke.LambdaMetafactory",
+        "java.lang.invoke.StringConcatFactory",
+        "java.lang.invoke.MethodHandles",
+        "java.lang.invoke.MethodHandles$Lookup",
+        "java.lang.invoke.MethodHandle",
+        "java.lang.invoke.MethodType",
+        "java.lang.invoke.CallSite",
+        "java.lang.invoke.TypeDescriptor",
+        "java.lang.invoke.TypeDescriptor$OfField",
+        "java.lang.invoke.TypeDescriptor$OfMethod",
+        "java.lang.invoke.VarHandle",
+        "java.lang.runtime.ObjectMethods",
+        "java.lang.runtime.SwitchBootstraps",
+    }
+)
 
 # Surfaced to the user in the editor's help text.
 JAVA_ENTRYPOINT_HINT = (
@@ -279,74 +289,78 @@ def java_member_allowed(owner: str, member: str, own_classes: frozenset[str] = f
 # whatever IT imported - `uuid.os`, `random._os`, `typing.sys` - and that is a
 # plain, dunder-free attribute access the AST check cannot tell apart from
 # `uuid.uuid4`.
-PYTHON_ALLOWED_MODULES: frozenset[str] = frozenset({
-    "base64",
-    "binascii",
-    "bisect",
-    "calendar",
-    "cmath",
-    "collections",
-    "copy",
-    "dataclasses",
-    "datetime",
-    "decimal",
-    "difflib",
-    "enum",
-    "fractions",
-    "functools",
-    "hashlib",
-    "heapq",
-    "hmac",
-    "html",
-    "itertools",
-    "json",
-    "math",
-    "numbers",
-    "operator",
-    "random",
-    "re",
-    "statistics",
-    "string",
-    "textwrap",
-    "time",
-    "typing",
-    "unicodedata",
-    "uuid",
-    "zoneinfo",
-})
+PYTHON_ALLOWED_MODULES: frozenset[str] = frozenset(
+    {
+        "base64",
+        "binascii",
+        "bisect",
+        "calendar",
+        "cmath",
+        "collections",
+        "copy",
+        "dataclasses",
+        "datetime",
+        "decimal",
+        "difflib",
+        "enum",
+        "fractions",
+        "functools",
+        "hashlib",
+        "heapq",
+        "hmac",
+        "html",
+        "itertools",
+        "json",
+        "math",
+        "numbers",
+        "operator",
+        "random",
+        "re",
+        "statistics",
+        "string",
+        "textwrap",
+        "time",
+        "typing",
+        "unicodedata",
+        "uuid",
+        "zoneinfo",
+    }
+)
 
 # Builtins removed from the tool's namespace. `getattr`/`setattr` are here for
 # a specific reason: the AST check below rejects literal dunder attribute
 # access (`x.__class__`), but `getattr(x, "__cl" + "ass__")` would slip past a
 # purely syntactic check, and `__class__.__bases__[0].__subclasses__()` is the
 # classic route from any object to every loaded class.
-PYTHON_DENIED_BUILTINS: frozenset[str] = frozenset({
-    "__import__",
-    "breakpoint",
-    "compile",
-    "delattr",
-    "dir",
-    "eval",
-    "exec",
-    "exit",
-    "getattr",
-    "globals",
-    "help",
-    # NOTE: `input` is deliberately NOT listed, even though the builtin is
-    # unavailable. It is the parameter name in the `run(input)` contract, so
-    # flagging the name syntactically would reject every tool that reads its
-    # own argument. The builtin is removed a different way - it is simply
-    # absent from PYTHON_ALLOWED_BUILTINS, so at runtime the only `input` in
-    # scope is the parameter.
-    "locals",
-    "memoryview",
-    "object",
-    "open",
-    "quit",
-    "setattr",
-    "super",
-    "vars",
-})
+PYTHON_DENIED_BUILTINS: frozenset[str] = frozenset(
+    {
+        "__import__",
+        "breakpoint",
+        "compile",
+        "delattr",
+        "dir",
+        "eval",
+        "exec",
+        "exit",
+        "getattr",
+        "globals",
+        "help",
+        # NOTE: `input` is deliberately NOT listed, even though the builtin is
+        # unavailable. It is the parameter name in the `run(input)` contract, so
+        # flagging the name syntactically would reject every tool that reads its
+        # own argument. The builtin is removed a different way - it is simply
+        # absent from PYTHON_ALLOWED_BUILTINS, so at runtime the only `input` in
+        # scope is the parameter.
+        "locals",
+        "memoryview",
+        "object",
+        "open",
+        "quit",
+        "setattr",
+        "super",
+        "vars",
+    }
+)
 
 # Attribute names rejected on ANY receiver, and as the imported name in a
 # `from X import name` statement. Checking the attribute name regardless of
@@ -368,32 +382,59 @@ PYTHON_DENIED_BUILTINS: frozenset[str] = frozenset({
 #   * generator / coroutine / frame / traceback / code internals - the classic
 #     `gen.gi_frame.f_back.f_globals` walk out of the tool's namespace into the
 #     trusted harness frame, whose globals hold the real `os` and __import__.
-PYTHON_DENIED_ATTRIBUTES: frozenset[str] = frozenset({
-    "attrgetter",
-    "methodcaller",
-    "get_type_hints",
-    "ForwardRef",
-    "Formatter",
-    "mro",
-    "gi_frame", "gi_code", "gi_yieldfrom", "gi_running", "gi_suspended",
-    "cr_frame", "cr_code", "cr_await", "cr_origin", "cr_running", "cr_suspended",
-    "ag_frame", "ag_code", "ag_await", "ag_running",
-    "f_back", "f_builtins", "f_code", "f_globals", "f_locals", "f_trace", "f_lasti",
-    "tb_frame", "tb_next", "tb_lasti",
-    "co_code", "co_consts", "co_names", "co_varnames",
-})
+PYTHON_DENIED_ATTRIBUTES: frozenset[str] = frozenset(
+    {
+        "attrgetter",
+        "methodcaller",
+        "get_type_hints",
+        "ForwardRef",
+        "Formatter",
+        "mro",
+        "gi_frame",
+        "gi_code",
+        "gi_yieldfrom",
+        "gi_running",
+        "gi_suspended",
+        "cr_frame",
+        "cr_code",
+        "cr_await",
+        "cr_origin",
+        "cr_running",
+        "cr_suspended",
+        "ag_frame",
+        "ag_code",
+        "ag_await",
+        "ag_running",
+        "f_back",
+        "f_builtins",
+        "f_code",
+        "f_globals",
+        "f_locals",
+        "f_trace",
+        "f_lasti",
+        "tb_frame",
+        "tb_next",
+        "tb_lasti",
+        "co_code",
+        "co_consts",
+        "co_names",
+        "co_varnames",
+    }
+)
 
 # Dunder-shaped string literals that pyvalidate's dunder-literal check still
 # permits, because they are idiomatic and inert (`if __name__ == "__main__":`).
 PYTHON_PERMITTED_DUNDER_STRINGS: frozenset[str] = frozenset({"__main__"})
 
 # Names that must never appear at all, in any position.
-PYTHON_DENIED_NAMES: frozenset[str] = frozenset({
-    "__builtins__",
-    "__loader__",
-    "__spec__",
-    "__import__",
-})
+PYTHON_DENIED_NAMES: frozenset[str] = frozenset(
+    {
+        "__builtins__",
+        "__loader__",
+        "__spec__",
+        "__import__",
+    }
+)
 
 PYTHON_ENTRYPOINT_HINT = (
     "Your program must define a top-level function `run(input)` that takes a "
@@ -409,16 +450,122 @@ PYTHON_ENTRYPOINT_HINT = (
 # `vars`, `dir`, `globals`, `locals`, `getattr` and `setattr` are denied by
 # name above and are likewise absent here.
 PYTHON_ALLOWED_BUILTINS: tuple[str, ...] = (
-    "abs", "all", "any", "ascii", "bin", "bool", "bytearray", "bytes",
-    "callable", "chr", "complex", "dict", "divmod", "enumerate", "filter",
-    "float", "format", "frozenset", "hash", "hex", "int", "isinstance",
-    "issubclass", "iter", "len", "list", "map", "max", "min", "next", "oct",
-    "ord", "pow", "print", "range", "repr", "reversed", "round", "set",
-    "slice", "sorted", "str", "sum", "tuple", "zip",
+    "abs",
+    "all",
+    "any",
+    "ascii",
+    "bin",
+    "bool",
+    "bytearray",
+    "bytes",
+    "callable",
+    "chr",
+    "complex",
+    "dict",
+    "divmod",
+    "enumerate",
+    "filter",
+    "float",
+    "format",
+    "frozenset",
+    "hash",
+    "hex",
+    "int",
+    "isinstance",
+    "issubclass",
+    "iter",
+    "len",
+    "list",
+    "map",
+    "max",
+    "min",
+    "next",
+    "oct",
+    "ord",
+    "pow",
+    "print",
+    "range",
+    "repr",
+    "reversed",
+    "round",
+    "set",
+    "slice",
+    "sorted",
+    "str",
+    "sum",
+    "tuple",
+    "zip",
     # Exceptions a tool may legitimately raise or catch.
-    "ArithmeticError", "AssertionError", "AttributeError", "Exception",
-    "IndexError", "KeyError", "LookupError", "NotImplementedError",
-    "OverflowError", "RuntimeError", "StopIteration", "TypeError",
-    "ValueError", "ZeroDivisionError",
-    "True", "False", "None",
+    "ArithmeticError",
+    "AssertionError",
+    "AttributeError",
+    "Exception",
+    "IndexError",
+    "KeyError",
+    "LookupError",
+    "NotImplementedError",
+    "OverflowError",
+    "RuntimeError",
+    "StopIteration",
+    "TypeError",
+    "ValueError",
+    "ZeroDivisionError",
+    "True",
+    "False",
+    "None",
+)
+
+# --------------------------------------------------------------------------
+# JavaScript / TypeScript
+# --------------------------------------------------------------------------
+
+# JS has no bytecode verifier: the compile step is `node --check` (syntax) and
+# the static layer is the identifier scan in jsvalidate.py. The runtime layer
+# is Node's permission model (`--experimental-permission`, which makes fs,
+# child_process, worker threads, native addons and wasi calls throw) plus the
+# same OS containment every language gets. As with Python, the OS containment
+# and the empty credential surface are the real boundary; this policy is the
+# first layer.
+#
+# Identifier tokens that must never appear in tenant source, checked after
+# strings and comments are blanked out. `process` and `require` would hand the
+# code the runtime's environment and the module system; `import` covers both
+# `import ... from` and dynamic `import()`; `Function`/`eval` are the eval
+# family; the network names are denied statically even though the sandbox
+# network has no route out (defence in depth: a member reachable on
+# sandbox-net is still only core's authenticated surface).
+JS_DENIED_IDENTIFIERS: frozenset[str] = frozenset(
+    {
+        "require",
+        "import",
+        "process",
+        "globalThis",
+        "eval",
+        "Function",
+        "fetch",
+        "WebSocket",
+        "XMLHttpRequest",
+        "navigator",
+        "WebAssembly",
+        "Worker",
+        "Deno",
+        "Bun",
+        "__proto__",
+        "__dirname",
+        "__filename",
+    }
+)
+
+# Escape paths the identifier list cannot name: `x.constructor` reaches the
+# Function constructor (`{}.constructor.constructor`), so property access to
+# `constructor` - dotted, bracketed or quoted - is denied wherever it appears
+# (including inside string literals, which is why this pattern is run against
+# the RAW source: a `["constructor"]` computed access hides in a string the
+# token scan cannot see). A class declaring `constructor() {}` does not match:
+# the name there follows `{` or `;`, never `.`/`[`.
+JS_DENIED_ACCESS_RE: str = r"""(?:\.|\[\s*['"`]?)constructor\b['"`]?\s*\]?"""
+
+JS_ENTRYPOINT_HINT = (
+    "Your program must define a top-level `function run(input)` (or "
+    "`const run = (input) => ...`) that returns a JSON-serializable value."
 )

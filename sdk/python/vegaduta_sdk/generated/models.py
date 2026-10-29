@@ -41,7 +41,7 @@ ComparisonVerdict = Literal["VARIANT_BETTER", "BASELINE_BETTER", "CANNOT_TELL", 
 
 ConsentLedger_Decision = Literal["PROMPTED", "GRANTED", "DECLINED", "WITHDRAWN"]
 
-CustomCodeToolLanguage = Literal["JAVA", "PYTHON"]
+CustomCodeToolLanguage = Literal["JAVA", "PYTHON", "JAVASCRIPT", "TYPESCRIPT"]
 
 CustomCodeToolStatus = Literal["DRAFT", "VALIDATED", "REJECTED"]
 
@@ -913,6 +913,7 @@ class AgentJobStartRequest(_AgentJobStartRequestRequired, total=False):
     timeoutSeconds: int
     resultSchemaJson: str
     maxToolCalls: int
+    maxTurns: int
 
 
 class AgentJobSummaryResponse(TypedDict, total=False):
@@ -936,6 +937,15 @@ class AgentKnowledgeAccessUpdateRequest(TypedDict, total=False):
 
 class AgentKnowledgeBaseToggleRequest(TypedDict, total=False):
     enabled: bool
+
+
+class AgentKnowledgeWriteAccessResponse(TypedDict, total=False):
+    knowledgeWriteEnabled: bool
+    allowedKnowledgeWriteCollectionIds: List[str]
+
+
+class AgentKnowledgeWriteAccessUpdateRequest(TypedDict, total=False):
+    allowedKnowledgeWriteCollectionIds: List[str]
 
 
 class AgentLabDtos_LabCancelResponse(TypedDict, total=False):
@@ -1207,6 +1217,12 @@ class AgentScheduleRunResponse(TypedDict, total=False):
     error: str
     sentinelOutcome: str
     sentinelOutcomeNote: str
+
+
+class AgentScratchpadController_ScratchpadListView(TypedDict, total=False):
+    count: int
+    totalBytes: int
+    notes: List[ScratchpadNoteView]
 
 
 class AgentSessionLlmUsageController_SessionLlmCallEntry(TypedDict, total=False):
@@ -3429,6 +3445,110 @@ class DemoVideoController_DemoVideoResponse(TypedDict, total=False):
     message: str
 
 
+class DesktopRecipeDtos_CreateRecipeRequest(TypedDict, total=False):
+    agentId: str
+    name: str
+    description: str
+    defaultMode: str
+    spec: DesktopRecipeSpec
+
+
+class DesktopRecipeDtos_RecipeDetail(TypedDict, total=False):
+    summary: DesktopRecipeDtos_RecipeSummary
+    spec: DesktopRecipeSpec
+    warnings: List[str]
+
+
+class DesktopRecipeDtos_RecipeFromRunRequest(TypedDict, total=False):
+    agentId: str
+    sessionId: str
+    name: str
+    description: str
+    parameters: Dict[str, str]
+    allowLiteralText: bool
+    defaultMode: str
+
+
+class DesktopRecipeDtos_RecipeSummary(TypedDict, total=False):
+    id: str
+    agentId: str
+    name: str
+    description: str
+    allowedApps: List[str]
+    parameters: List[str]
+    stepCount: int
+    runCount: int
+    failCount: int
+    lastRunAt: str
+    lastFailure: str
+    defaultMode: str
+    createdAt: str
+    updatedAt: str
+
+
+class DesktopRecipeDtos_RunRecipeRequest(TypedDict, total=False):
+    params: Dict[str, str]
+    confirmIrreversible: bool
+    fromStep: int
+    mode: str
+
+
+class DesktopRecipeDtos_RunRecipeResponse(TypedDict, total=False):
+    recipeId: str
+    name: str
+    success: bool
+    stepsRun: int
+    stepsTotal: int
+    failure: str
+    steps: List[DesktopRecipeReplayer_StepResult]
+
+
+class DesktopRecipeDtos_UpdateRecipeRequest(TypedDict, total=False):
+    name: str
+    description: str
+    defaultMode: str
+
+
+class DesktopRecipeReplayer_StepResult(TypedDict, total=False):
+    index: int
+    action: str
+    ok: bool
+    note: str
+
+
+class DesktopRecipeSpec(TypedDict, total=False):
+    version: int
+    allowedApps: List[str]
+    params: List[DesktopRecipeSpec_ParamSpec]
+    steps: List[DesktopRecipeSpec_RecipeStep]
+
+
+class DesktopRecipeSpec_Expect(TypedDict, total=False):
+    elementLabel: str
+    appFrontmost: str
+
+
+class DesktopRecipeSpec_ParamSpec(TypedDict, total=False):
+    name: str
+    required: bool
+
+
+class DesktopRecipeSpec_RecipeStep(TypedDict, total=False):
+    action: str
+    app: str
+    label: str
+    role: str
+    x: int
+    y: int
+    text: str
+    key: str
+    target: str
+    waitMs: int
+    expect: DesktopRecipeSpec_Expect
+    timeoutMs: int
+    irreversible: bool
+
+
 class DeveloperApiController_AgentSummaryDto(TypedDict, total=False):
     id: str
     name: str
@@ -4477,6 +4597,16 @@ class IngestSmsRequest_Item(_IngestSmsRequest_ItemRequired, total=False):
     smsTimestamp: str
 
 
+class _IngestUrlRequestRequired(TypedDict):
+    url: str
+
+
+class IngestUrlRequest(_IngestUrlRequestRequired, total=False):
+    chunkSize: int
+    chunkOverlap: int
+    collectionId: str
+
+
 class InvoiceController_BillingProfileBody(TypedDict, total=False):
     gstin: str
     billingName: str
@@ -4756,6 +4886,14 @@ class KnowledgeStatsResponse(TypedDict, total=False):
     totalDocuments: int
     totalChunks: int
     totalVectors: int
+
+
+class KnowledgeUrlIngester_UrlIngestResult(TypedDict, total=False):
+    filename: str
+    source: str
+    chunkCount: int
+    documentId: str
+    document: bool
 
 
 class LandingEventController_LandingEventRequest(TypedDict, total=False):
@@ -5117,6 +5255,10 @@ class LocalAuthController_LoginRequest(_LocalAuthController_LoginRequestRequired
 
 class LocalAuthController_RefreshRequest(TypedDict):
     refreshToken: str
+
+
+class LocalAuthController_ResetRequest(TypedDict, total=False):
+    email: str
 
 
 class LocalAuthController_SessionResponse(TypedDict, total=False):
@@ -8864,6 +9006,14 @@ class ScheduledTaskDtos_TaskResponse(TypedDict, total=False):
     ownerSubject: str
     createdAt: str
     updatedAt: str
+
+
+class ScratchpadNoteView(TypedDict, total=False):
+    key: str
+    scope: str
+    byteSize: int
+    updatedAt: str
+    body: str
 
 
 class _SearchRequestRequired(TypedDict):

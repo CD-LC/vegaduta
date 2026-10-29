@@ -18,8 +18,8 @@ import {
   Table as TableIcon,
   AtSign,
   KeyRound,
-  Youtube,
 } from "lucide-react";
+import { Youtube } from "./lucideBrandIcons";
 import { useTranslations } from "../lib/i18n";
 import { errorMessage } from "../lib/errors";
 
@@ -110,7 +110,12 @@ export default function GoogleIntegrationPanel() {
   const t = useTranslations("googleIntegrationPanel");
 
   const [connection, setConnection] = useState(null);
-  const [oauthConfig, setOauthConfig] = useState<{ configured: boolean; redirectUri: string; mode?: string; problem?: string } | null>(null);
+  const [oauthConfig, setOauthConfig] = useState<{
+    configured: boolean;
+    redirectUri: string;
+    mode?: string;
+    problem?: string;
+  } | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);

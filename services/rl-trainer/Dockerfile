@@ -1,5 +1,5 @@
 # Pinned patch + Debian release, identical across every Python service image.
-FROM python:3.12.15-slim-trixie@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
+FROM python:3.14.8-slim-trixie@sha256:fbecd461fc72d21b2143c6eaba25143738079154a6d0ea3da3aec724f50eed4a
 
 # No system packages needed: this is an LLM-driven service (no git, no OCR
 # binary, no CUDA). Deliberately torch-free - see requirements.txt / README.
@@ -28,4 +28,5 @@ USER 10001:10001
 EXPOSE 8095
 # Single worker: matches the other sidecars' posture. The optimizer/judge are
 # stateless LLM calls, so scale by running more replicas, not more workers.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8095/health', timeout=3)" || exit 1
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8095", "--workers", "1"]

@@ -29,7 +29,7 @@ export default function ToolCallPreview({ item }: { item: ApprovalRequestItem })
   return (
     <div className="grid gap-3" data-testid="tool-call-preview">
       <div className="flex flex-wrap items-center gap-2">
-        <code className="rounded-md bg-muted px-2 py-0.5 font-mono text-sm" data-testid="tool-call-name">
+        <code className="break-all rounded-md bg-muted px-2 py-0.5 font-mono text-sm" data-testid="tool-call-name">
           {tool}
         </code>
         <RiskBadge risk={requestRisk(item)} />

@@ -145,8 +145,11 @@ export const EDITION_ROUTES: readonly EditionRoute[] = [
   rail("/shared-with-me", "railShared", "team", "users"),
   rail("/admin/agent-trust", "railAgentTrust", "team", "users"),
   rail("/admin/api-keys", "railApiKeys", "team", "key"),
-  rail("/admin/access", "railAccess", "team", "users"),
-  rail("/admin/users", "railAccess", "team", "users"),
+  // /admin/access and /admin/users (its redirect target) stay AVAILABLE on personal:
+  // local auth has no public signup - POST /api/signup is closed by design on a
+  // single-owner install - so teammates join through the owner's invite links
+  // (issueInviteLink mints /login?setup=... links; there is no mail server).
+
   // billing: app.edition.billing-enabled is false. /admin/billing and /features are also redirected
   // by the billing switch (lib/billing-flag.ts), which answers first, so the proxy does not 404 them.
   row("/admin/billing", "railBill", "billing", "card", { rail: false, deny: false }),
@@ -160,6 +163,9 @@ export const EDITION_ROUTES: readonly EditionRoute[] = [
   rail("/admin/leads", "railLeads", "hosted", "building"),
   rail("/admin/branding", "railBrand", "hosted", "building"),
   rail("/admin/mcp-servers", "railMcp", "hosted", "network"),
+  // core/agents-interop (A2A_DIRECTORY edition feature) is off on personal - no
+  // a2a endpoints exist to manage, so the console page would 404 everything.
+  rail("/admin/a2a", "railA2a", "hosted", "network"),
   // Folded into /assistant on a personal install (the agent picker, "In background" and "Quick task"):
   // the page redirects there, so only the rail has to stop listing them as separate destinations.
   row("/playground", null, "hosted", "building", { gate: false, deny: false, redirectTo: "/assistant" }),
