@@ -13,6 +13,13 @@ const EFFORTS: ReasoningEffort[] = ["none", "low", "medium", "high", "default"];
 const KEEP_ALIVES = ["5m", "30m", "2h", "-1"] as const;
 // 0 = the server default; the others are made on demand as a variant of the model (no download).
 const CONTEXTS = [0, 8192, 16384, 32768] as const;
+// null = the server default; the others are Ollama num_batch values.
+const NUM_BATCHES: readonly (number | null)[] = [null, 256, 512, 1024];
+// null = the server default; the others are Ollama num_parallel values.
+const NUM_PARALLELS: readonly (number | null)[] = [null, 1, 2, 4];
+// null = the server default; the others are per-turn timeouts in milliseconds (whole minutes).
+const RESPONSE_TIMEOUTS: readonly (number | null)[] = [null, 60000, 120000, 180000, 300000];
+const TOOL_DEFERRALS = ["default", "on", "off"] as const;
 
 /**
  * "Speed and behaviour" of the install's own local model: whether it thinks before answering, how
@@ -39,7 +46,15 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
   }, []);
   useEffect(load, [load]);
 
-  async function save(update: { reasoningEffort?: ReasoningEffort; keepAlive?: string; contextLength?: number }) {
+  async function save(update: {
+    reasoningEffort?: ReasoningEffort;
+    keepAlive?: string;
+    contextLength?: number;
+    numBatch?: number | null;
+    numParallel?: number | null;
+    responseTimeoutMs?: number | null;
+    toolDeferral?: boolean | null;
+  }) {
     setSaving(true);
     setSaved(false);
     setError(null);
@@ -171,6 +186,120 @@ export default function LocalModelSettingsCard({ className }: { className?: stri
             <span>{t("contextShort", { wanted: settings.wantedContext.toLocaleString("en-US") })}</span>
           </p>
         )}
+      </section>
+
+      <section aria-labelledby="lms-batch" className="space-y-1.5">
+        <h3 id="lms-batch" className="text-xs font-medium text-foreground">
+          {t("batchTitle")}
+        </h3>
+        <p className="text-xs text-muted-foreground">{t("batchHelp")}</p>
+        <div role="radiogroup" aria-labelledby="lms-batch" className="flex flex-wrap gap-1.5">
+          {NUM_BATCHES.map((value) => (
+            <button
+              key={String(value)}
+              type="button"
+              role="radio"
+              aria-checked={(settings.numBatch ?? null) === value}
+              disabled={saving}
+              onClick={() => void save({ numBatch: value })}
+              data-testid={`batch-${value ?? "default"}`}
+              className={cn(
+                "h-8 rounded-full border px-3 text-xs transition-colors",
+                (settings.numBatch ?? null) === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
+              )}
+            >
+              {value == null ? t("batch_default") : value.toLocaleString("en-US")}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="lms-parallel" className="space-y-1.5">
+        <h3 id="lms-parallel" className="text-xs font-medium text-foreground">
+          {t("parallelTitle")}
+        </h3>
+        <p className="text-xs text-muted-foreground">{t("parallelHelp")}</p>
+        <div role="radiogroup" aria-labelledby="lms-parallel" className="flex flex-wrap gap-1.5">
+          {NUM_PARALLELS.map((value) => (
+            <button
+              key={String(value)}
+              type="button"
+              role="radio"
+              aria-checked={(settings.numParallel ?? null) === value}
+              disabled={saving}
+              onClick={() => void save({ numParallel: value })}
+              data-testid={`parallel-${value ?? "default"}`}
+              className={cn(
+                "h-8 rounded-full border px-3 text-xs transition-colors",
+                (settings.numParallel ?? null) === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
+              )}
+            >
+              {value == null ? t("parallel_default") : value.toLocaleString("en-US")}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="lms-timeout" className="space-y-1.5">
+        <h3 id="lms-timeout" className="text-xs font-medium text-foreground">
+          {t("timeoutTitle")}
+        </h3>
+        <p className="text-xs text-muted-foreground">{t("timeoutHelp")}</p>
+        <div role="radiogroup" aria-labelledby="lms-timeout" className="flex flex-wrap gap-1.5">
+          {RESPONSE_TIMEOUTS.map((value) => (
+            <button
+              key={String(value)}
+              type="button"
+              role="radio"
+              aria-checked={(settings.responseTimeoutMs ?? null) === value}
+              disabled={saving}
+              onClick={() => void save({ responseTimeoutMs: value })}
+              data-testid={`timeout-${value ?? "default"}`}
+              className={cn(
+                "h-8 rounded-full border px-3 text-xs transition-colors",
+                (settings.responseTimeoutMs ?? null) === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
+              )}
+            >
+              {value == null ? t("timeout_default") : t("timeout_minutes", { n: value / 60000 })}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="lms-tooldeferral" className="space-y-1.5">
+        <h3 id="lms-tooldeferral" className="text-xs font-medium text-foreground">
+          {t("toolDeferralTitle")}
+        </h3>
+        <p className="text-xs text-muted-foreground">{t("toolDeferralHelp")}</p>
+        <div role="radiogroup" aria-labelledby="lms-tooldeferral" className="flex flex-wrap gap-1.5">
+          {TOOL_DEFERRALS.map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={
+                (settings.toolDeferral == null ? "default" : settings.toolDeferral ? "on" : "off") === value
+              }
+              disabled={saving}
+              onClick={() => void save({ toolDeferral: value === "on" ? true : value === "off" ? false : null })}
+              data-testid={`tooldeferral-${value}`}
+              className={cn(
+                "h-8 rounded-full border px-3 text-xs transition-colors",
+                (settings.toolDeferral == null ? "default" : settings.toolDeferral ? "on" : "off") === value
+                  ? "border-primary bg-primary/10 text-foreground"
+                  : "border-border text-muted-foreground hover:bg-secondary/60"
+              )}
+            >
+              {t(`toolDeferral_${value}`)}
+            </button>
+          ))}
+        </div>
       </section>
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground" aria-live="polite">

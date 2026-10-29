@@ -105,13 +105,28 @@ export interface LocalModelSettings {
   loadedContext: number | null;
   /** The context core asks for on every chat. */
   wantedContext: number;
+  /** Ollama num_batch: prompt tokens processed per pass; null/undefined = the server default. */
+  numBatch?: number | null;
+  /** Ollama num_parallel: requests the model serves at once; null/undefined = the server default. */
+  numParallel?: number | null;
+  /** Per-model turn timeout in milliseconds; null/undefined = the server default. */
+  responseTimeoutMs?: number | null;
+  /** Tool deferral (schemas hidden behind search_tools); null/undefined = the server default. */
+  toolDeferral?: boolean | null;
 }
 
 export const localModelsApi = {
   getLocalModelSettings: () =>
     apiFetch(`/api/local-models/settings`, { skipGetCache: true }).then(toJson<LocalModelSettings>),
-  saveLocalModelSettings: (update: { reasoningEffort?: ReasoningEffort; keepAlive?: string; contextLength?: number }) =>
-    apiFetch(`/api/local-models/settings`, { method: "PUT", ...jsonBody(update) }).then(toJson<LocalModelSettings>),
+  saveLocalModelSettings: (update: {
+    reasoningEffort?: ReasoningEffort;
+    keepAlive?: string;
+    contextLength?: number;
+    numBatch?: number | null;
+    numParallel?: number | null;
+    responseTimeoutMs?: number | null;
+    toolDeferral?: boolean | null;
+  }) => apiFetch(`/api/local-models/settings`, { method: "PUT", ...jsonBody(update) }).then(toJson<LocalModelSettings>),
   /** Loads the local model into memory ahead of the first chat (no tag = the pool row's model). */
   warmLocalModel: (tag?: string) =>
     apiFetch(`/api/local-models/warm`, { method: "POST", ...jsonBody({ tag: tag || undefined }) }).then(
