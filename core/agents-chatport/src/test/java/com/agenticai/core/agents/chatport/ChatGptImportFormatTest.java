@@ -109,7 +109,7 @@ class ChatGptImportFormatTest {
                     "content": {"content_type": "text", "parts": ["tool call, not chat"]}}},
                 "n3": {"id": "n3", "parent": "n2", "children": [],
                   "message": {"author": {"role": "assistant"}, "recipient": "all",
-                    "content": {"content_type": "text", "parts": ["sure"]}}}}]
+                    "content": {"content_type": "text", "parts": ["sure"]}}}}}]
             """;
         ParsedChat chat = format.convert(tree(conv).get(0), "k", "chatgpt", "mm", collector());
 
