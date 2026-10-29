@@ -297,7 +297,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
 # the spawned server.
 # Single-quoted on purpose: ENV drops unquoted double quotes, which left this value as
 # `{executablePath:...}` (invalid JSON, "Failed to parse PUPPETEER_LAUNCH_OPTIONS").
-ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome"}'
+ENV PUPPETEER_LAUNCH_OPTIONS='{"executablePath":"/home/agentic/.cache/puppeteer/chrome/current/chrome"}'
 # This RUN still executes as root (HOME=/home/agentic above only points
 # npm/npx at that directory, it doesn't change the executing uid), so npx
 # fetching the `playwright` CLI package leaves root-owned files under
@@ -407,10 +407,22 @@ RUN cd /opt/mcp-toolchain \
     # only the fixed one.
     # The vendored lockfile tree's `browsers` CLI (puppeteer's own installer) fetches the
     # pinned Chrome straight from storage.googleapis.com - no npx resolution, no extra cache.
-    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install chrome@${CHROME_FOR_TESTING_VERSION} \
-    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
-    && ln -sfn "$(ls -d /home/agentic/.cache/puppeteer/chrome/linux-* | sort -V | tail -n 1)" /home/agentic/.cache/puppeteer/chrome/current \
-    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome-linux64/chrome \
+    # --path must be explicit: @puppeteer/browsers' CLI defaults the install
+    # root to the current working directory, so run from /opt/mcp-toolchain it
+    # lands in /opt/mcp-toolchain/chrome and the `current` link below finds
+    # nothing under ~/.cache/puppeteer (v0.1.13 build, arm64 leg).
+    && PUPPETEER_SKIP_DOWNLOAD=1 ./node_modules/.bin/browsers install --path /home/agentic/.cache/puppeteer chrome@${CHROME_FOR_TESTING_VERSION} \
+    && rm -rf /home/agentic/.cache/puppeteer/chrome/linux-131.0.6778.204 /home/agentic/.cache/puppeteer/chrome/linux_arm-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux-131.0.6778.204 \
+        /home/agentic/.cache/puppeteer/chrome-headless-shell/linux_arm-131.0.6778.204 \
+    # The version dir and inner binary dir are arch-shaped (linux-<ver>/
+    # chrome-linux64 on amd64, linux_arm-<ver>/chrome-linux-arm64 on arm64),
+    # so glob the installed chrome binary itself and link `current` at the
+    # inner dir - `current/chrome` is then the executable on BOTH arches and
+    # PUPPETEER_LAUNCH_OPTIONS stays arch-agnostic.
+    && chrome_bin="$(ls /home/agentic/.cache/puppeteer/chrome/linux*/chrome-linux*/chrome | sort -V | tail -n 1)" \
+    && ln -sfn "$(dirname "$chrome_bin")" /home/agentic/.cache/puppeteer/chrome/current \
+    && test -x /home/agentic/.cache/puppeteer/chrome/current/chrome \
     && cd / && rm -rf /opt/mcp-toolchain \
     && chown -R agentic:agentic "$PLAYWRIGHT_BROWSERS_PATH" /home/agentic
 
