@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.hosted;
 
 import com.agenticai.core.agents.budget.TurnReservationGuards;
+import java.util.List;
 import org.springframework.ai.chat.client.ChatClient;
 
 /**
@@ -56,8 +57,26 @@ public record HostedChainLink(
     com.agenticai.core.providers.ToolCallGrade toolCallGrade,
     // The row is this install's own local model server (HostedLlmChatClientFactory#isLocalOllamaRow). A local
     // server keeps one prompt cache, so the turn keeps its tool set stable (app.chat.local-model.stable-tools).
-    boolean localModel
+    boolean localModel,
+    // V674 - the row's stream idle-timeout override (PlatformHostedLlmProvider#getResponseTimeoutMs);
+    // null = app.llm.http.stream-idle-timeout. A slow local model needs longer than a hosted API's 90 s.
+    java.time.Duration streamIdleTimeout,
+    // V674 - the row's tool-deferral override (PlatformHostedLlmProvider#getToolDeferral): TRUE
+    // forces on-demand tool loading (search_tools/call_tool) on this row's turns regardless of
+    // app.tools.search.enabled; null/false = the configured default.
+    Boolean toolDeferral
 ) {
+
+    /** Pre-runtime-knobs shape (no idle-timeout or tool-deferral), kept for existing call sites. */
+    public HostedChainLink(
+        ChatClient client, String healthKey, String label, String model, int priority,
+        long reservedTokens, long reservedMicroCents, TurnReservationGuards guards,
+        com.agenticai.core.chat.SamplingOptions sampling, boolean smallModel,
+        com.agenticai.core.providers.ToolCallGrade toolCallGrade, boolean localModel
+    ) {
+        this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents,
+                guards, sampling, smallModel, toolCallGrade, localModel, null, null);
+    }
 
     /** Pre-local-flag shape, kept so every existing call site still compiles. */
     public HostedChainLink(
@@ -111,5 +130,24 @@ public record HostedChainLink(
         long reservedTokens, long reservedMicroCents
     ) {
         this(client, healthKey, label, model, priority, reservedTokens, reservedMicroCents, null);
+    }
+
+    /**
+     * The stream idle-timeout of the link whose client {@code client} is (V674): the serving row's
+     * own {@code responseTimeoutMs}, or null for a BYOK client or a row that leaves the platform
+     * {@code app.llm.http.stream-idle-timeout}. Matched by client identity, the same way {@code
+     * TurnLifecycleEvents.HostedChain#modelOf} names a failed rung.
+     */
+    public static java.time.Duration streamIdleTimeoutFor(
+            List<HostedChainLink> chain, ChatClient client) {
+        if (chain == null || client == null) {
+            return null;
+        }
+        for (HostedChainLink link : chain) {
+            if (link.client() == client) {
+                return link.streamIdleTimeout();
+            }
+        }
+        return null;
     }
 }

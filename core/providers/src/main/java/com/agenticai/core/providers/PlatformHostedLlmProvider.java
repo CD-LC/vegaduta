@@ -183,6 +183,21 @@ public class PlatformHostedLlmProvider {
     @Column(name = "keep_alive", length = 16)
     private String keepAlive;
 
+    // V674 - console-editable local model behaviour; null = the server/configured default.
+    // num_batch: tokens per prompt step (llama.cpp n_batch), a per-request option.
+    @Column(name = "num_batch")
+    private Integer numBatch;
+
+    // num_parallel is deliberately NOT a column: like -ctxNk it lives in the tag ({base}-parN).
+
+    // response_timeout_ms: this row's stream idle-timeout override.
+    @Column(name = "response_timeout_ms")
+    private Long responseTimeoutMs;
+
+    // tool_deferral: true forces search_tools/call_tool on this row's turns.
+    @Column(name = "tool_deferral")
+    private Boolean toolDeferral;
+
     protected PlatformHostedLlmProvider() {
         // JPA
     }
@@ -519,6 +534,30 @@ public class PlatformHostedLlmProvider {
 
     public void setKeepAlive(String keepAlive) {
         this.keepAlive = keepAlive;
+    }
+
+    public Integer getNumBatch() {
+        return numBatch;
+    }
+
+    public void setNumBatch(Integer numBatch) {
+        this.numBatch = numBatch;
+    }
+
+    public Long getResponseTimeoutMs() {
+        return responseTimeoutMs;
+    }
+
+    public void setResponseTimeoutMs(Long responseTimeoutMs) {
+        this.responseTimeoutMs = responseTimeoutMs;
+    }
+
+    public Boolean getToolDeferral() {
+        return toolDeferral;
+    }
+
+    public void setToolDeferral(Boolean toolDeferral) {
+        this.toolDeferral = toolDeferral;
     }
 
     /**

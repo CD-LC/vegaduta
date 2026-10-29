@@ -123,6 +123,29 @@ class ToolSearchDeferralTest {
     }
 
     @Test
+    void aForcedCallDefersEvenWhenTheGlobalFlagIsOff() {
+        // V674 - the serving row's own tool-deferral switch: forced overrides the disabled master
+        // switch, but the threshold still applies.
+        ToolSearchDeferral deferral = new ToolSearchDeferral();
+        deferral.configure(false, 3, ToolSearchDeferral.DEFAULT_ALWAYS_ON, 6);
+        List<ToolCallback> tools = catalog(50);
+        RecordingWrapper wrapper = new RecordingWrapper();
+
+        List<ToolCallback> offered = deferral.apply(tools, AGENT, "s1", wrapper, null, true);
+        org.junit.jupiter.api.Assertions.assertNotSame(tools, offered);
+        assertTrue(names(offered).contains("search_tools"));
+        assertTrue(names(offered).contains("call_tool"));
+
+        // Forced still honours the threshold: at or under it the list is untouched.
+        ToolSearchDeferral highThreshold = new ToolSearchDeferral();
+        highThreshold.configure(false, 50, ToolSearchDeferral.DEFAULT_ALWAYS_ON, 6);
+        List<ToolCallback> small = catalog(0);
+        assertSame(
+                small,
+                highThreshold.apply(small, AGENT, "s1", new RecordingWrapper(), null, true));
+    }
+
+    @Test
     void atOrUnderTheThresholdTheListIsReturnedUntouched() {
         List<ToolCallback> tools = catalog(0); // 4 tools
         RecordingWrapper wrapper = new RecordingWrapper();

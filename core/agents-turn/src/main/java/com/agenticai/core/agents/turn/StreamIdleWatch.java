@@ -35,6 +35,27 @@ final class StreamIdleWatch {
      * @param activity the turn's tool activity; also the clock the decision is made on
      * @param scheduler where the timers run ({@code Schedulers.parallel()} in production)
      */
+    /**
+     * As {@link #apply}, with the serving row's own idle-timeout (V674): {@code context}'s model
+     * traits carry the row's {@code responseTimeoutMs} (set per attempt by {@code dispatchTurn}),
+     * which replaces the platform {@code idle} for this stream only. Null/absent = the platform
+     * value.
+     */
+    static <T> Flux<T> apply(
+            Flux<T> source, Duration idle, Duration toolCeiling, TurnToolActivity activity,
+            TurnContext context, Scheduler scheduler) {
+        Duration override =
+                context == null || context.modelTraits() == null
+                        ? null
+                        : context.modelTraits().streamIdleTimeout();
+        return apply(
+                source,
+                override != null && override.compareTo(Duration.ZERO) > 0 ? override : idle,
+                toolCeiling,
+                activity,
+                scheduler);
+    }
+
     static <T> Flux<T> apply(
             Flux<T> source, Duration idle, Duration toolCeiling, TurnToolActivity activity, Scheduler scheduler) {
         // Chained on the given stream itself (no wrapping Flux.defer), so a caller that decorated the

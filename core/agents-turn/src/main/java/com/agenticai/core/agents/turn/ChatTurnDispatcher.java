@@ -249,6 +249,10 @@ final class ChatTurnDispatcher {
                                 });
         Function<ChatClient, Flux<String>> dispatchTurn =
                 turnClient -> {
+                    // V674 - the row's own stream idle-timeout, re-pointed per attempt.
+                    context.modelTraits()
+                            .streamIdleTimeout(
+                                    HostedChainLink.streamIdleTimeoutFor(hostedChain, turnClient));
                     ChatClient client =
                             compactionRun == null ? turnClient : compactionRun.attach(turnClient);
                     if (effectiveForceFastDepth || effReasoningDepth == ReasoningDepth.FAST) {
@@ -580,10 +584,6 @@ final class ChatTurnDispatcher {
         boolean semanticPutEligible =
                 semanticEligible && tools.isEmpty() && (cacheEligibleWithTools || toolFree);
         String cacheConversationKey = turn.cacheConversationKey();
-        System.err.println(
-                "DBG cacheEligible=" + cacheEligible + " semanticEligible=" + semanticEligible
-                        + " ewt=" + cacheEligibleWithTools + " toolFree=" + toolFree
-                        + " toolsEmpty=" + tools.isEmpty() + " ran=" + context.toolActivity().anyToolRan());
         Flux<Long> cancelled =
                 chatTurnCancelService.watchForCancellation(requestedAgentId, memorySessionId);
         if (!exactPutEligible && !semanticPutEligible) {
