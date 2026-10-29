@@ -1,6 +1,5 @@
 import type { EdgeRoutingPolicy } from "../../../lib/edge/agentPolicy";
 
-
 // ---- Wire types (noImplicitAny pass) ---------------------------------
 // api.ts's agent/provider/collection endpoints are still untyped
 // (apiFetch().then(toJson) resolves to any), so the shapes this screen

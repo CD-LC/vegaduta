@@ -23,7 +23,9 @@ vi.mock("../lib/api", () => ({
     listCollections: vi.fn(async () => []),
   },
 }));
-vi.mock("../components/AppShell", () => ({ default: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
+vi.mock("../components/AppShell", () => ({
+  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}));
 vi.mock("../components/ax/PageHeader", () => ({ default: ({ title }: { title: string }) => <h1>{title}</h1> }));
 vi.mock("../components/setup/SetupLinks", () => ({ SetupHint: (): null => null }));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: vi.fn() }));
@@ -34,7 +36,13 @@ vi.mock("../components/agents/AgentWorkbench", () => ({
   },
 }));
 vi.mock("../components/agents/AgentsIndex", () => ({
-  default: ({ agents, agentHref }: { agents: Array<{ id: string; name: string }>; agentHref: (id: string) => string }) => (
+  default: ({
+    agents,
+    agentHref,
+  }: {
+    agents: Array<{ id: string; name: string }>;
+    agentHref: (id: string) => string;
+  }) => (
     <ul data-testid="index">
       {agents.map((a) => (
         <li key={a.id}>
@@ -69,19 +77,24 @@ describe("/agents landing", () => {
 });
 
 describe("/agents deep links from the Run settings drawer", () => {
-  it.each(["agent.limits", "agent.limits.maxToolSteps"])("opens the workbench on the agent for the link focused on %s", async (focus) => {
-    const href = agentBehaviorHref("a1", focus);
-    search.value = href.slice(href.indexOf("?") + 1);
-    render(<AgentsPage />);
-    expect(await screen.findByTestId("workbench")).toHaveTextContent("a1");
-    expect(screen.queryByTestId("index")).toBeNull();
-  });
+  it.each(["agent.limits", "agent.limits.maxToolSteps"])(
+    "opens the workbench on the agent for the link focused on %s",
+    async (focus) => {
+      const href = agentBehaviorHref("a1", focus);
+      search.value = href.slice(href.indexOf("?") + 1);
+      render(<AgentsPage />);
+      expect(await screen.findByTestId("workbench")).toHaveTextContent("a1");
+      expect(screen.queryByTestId("index")).toBeNull();
+    }
+  );
 
   it("without an agent, asks which one and carries section and focus into each agent's link", async () => {
     search.value = "section=behavior&focus=agent.limits.maxToolSteps";
     render(<AgentsPage />);
     expect(await screen.findByTestId("agents-pick-for-behavior")).toBeInTheDocument();
     const link = await screen.findByRole("link", { name: "Mailer" });
-    await waitFor(() => expect(link.getAttribute("href")).toBe("/agents?agentId=a1&section=behavior&focus=agent.limits.maxToolSteps"));
+    await waitFor(() =>
+      expect(link.getAttribute("href")).toBe("/agents?agentId=a1&section=behavior&focus=agent.limits.maxToolSteps")
+    );
   });
 });
