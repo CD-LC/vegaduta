@@ -142,8 +142,8 @@ class PersonalStarterConnectorsTest {
         assertThat(order.value()).isLessThan(org.springframework.core.Ordered.LOWEST_PRECEDENCE);
 
         java.lang.reflect.Method reconnect =
-                com.agenticai.core.agents.tools.DynamicMcpConnectionManager.class.getMethod(
-                        "reconnectEnabledOnStartup");
+                Class.forName("com.agenticai.core.agents.tools.DynamicMcpSchedulers")
+                        .getDeclaredMethod("reconnectEnabledOnStartup");
         assertThat(reconnect.getAnnotation(org.springframework.core.annotation.Order.class)).isNull();
         assertThat(reconnect.getAnnotation(org.springframework.context.event.EventListener.class)).isNotNull();
     }
