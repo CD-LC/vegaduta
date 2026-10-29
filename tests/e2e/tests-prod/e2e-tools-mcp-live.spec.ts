@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext } from "@playwright/test";
 import { API_URL, requireUserCredentials, requireMutationOptIn } from "../helpers/prod-env";
 import { signInToConsole } from "../helpers/prod-session";
-import { getBearerToken, authHeaders } from "../helpers/prod-api";
+import { authHeaders } from "../helpers/prod-api";
 
 /**
  * MCP server registry contract: register / list / connection-test / acknowledge / delete (SE-43).
@@ -35,8 +35,18 @@ test.describe("MCP registry API (e2e-tools-mcp-)", () => {
     requireUserCredentials(testInfo);
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data - one project only");
+    // helpers/prod-api.getBearerToken only watches requests to api.<domain> - this stack's web
+    // image calls the API at localhost:8280 instead, so capture the bearer off any /api/ request.
+    page.on("request", (r) => {
+      const a = r.headers()["authorization"];
+      if (!token && a && r.url().includes("/api/")) token = a.replace(/^bearer /i, "");
+    });
     await signInToConsole(page);
-    token = await getBearerToken(page);
+    const deadline = Date.now() + 30_000;
+    while (!token && Date.now() < deadline) await page.waitForTimeout(250);
+    if (!token) {
+      throw new Error("no Authorization header seen on any /api/ request after sign-in");
+    }
   });
 
   test.afterEach(async ({ page }) => {
@@ -63,6 +73,7 @@ test.describe("MCP registry API (e2e-tools-mcp-)", () => {
     const res = await request.post(`${API_URL}/api/mcp/registry`, {
       headers: { ...authHeaders(token), "Content-Type": "application/json" },
       data: { name, type: "STREAMABLE_HTTP", description: "e2e registry contract", enabled: false, url: "https://mcp.e2e-tools.invalid/mcp" },
+      timeout: 90_000, // registration can exceed the 20s default request timeout on a loaded stack
     });
     // The remote-URL guard may refuse the host outright; both outcomes are valid, a 5xx is not.
     expect(res.status(), `register answered ${res.status()}: ${(await res.text()).slice(0, 200)}`).toBeLessThan(500);

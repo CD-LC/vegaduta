@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { requireUserCredentials, requireMutationOptIn } from "../helpers/prod-env";
 import { signInToConsole, skipIfHostedAllowanceExhausted } from "../helpers/prod-session";
+import { fixStageApiBase } from "./local-stage-fix";
 
 /**
  * REAL-TENANT, real-model, real-tool-call scenario against production.
@@ -54,12 +55,14 @@ import { signInToConsole, skipIfHostedAllowanceExhausted } from "../helpers/prod
 
 test.describe("Agent workbench - real tool execution (live production scenario)", () => {
   test.setTimeout(5 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix
 
   test("a freshly created agent auto-selects and completes a real fetch_web_page tool call", async ({ page }, testInfo) => {
     requireUserCredentials(testInfo);
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data - one project only");
 
+    await fixStageApiBase(page);
     await signInToConsole(page);
     await page.goto("/agents", { waitUntil: "domcontentloaded" });
     await skipIfHostedAllowanceExhausted(page, testInfo);
@@ -135,12 +138,14 @@ test.describe("Agent workbench - real tool execution (live production scenario)"
 
 test.describe("Workflow - real multi-node run against a live agent (live production scenario)", () => {
   test.setTimeout(3 * 60 * 1000);
+  test.use({ bypassCSP: true }); // stage fix
 
   test("an existing Trigger -> Agent -> Output workflow completes a real run", async ({ page }, testInfo) => {
     requireUserCredentials(testInfo);
     requireMutationOptIn(testInfo);
     testInfo.skip(testInfo.project.name !== "chromium", "writes real data - one project only");
 
+    await fixStageApiBase(page);
     await signInToConsole(page);
     await page.goto("/workflows", { waitUntil: "domcontentloaded" });
     await skipIfHostedAllowanceExhausted(page, testInfo);

@@ -40,7 +40,7 @@ services:
     build:
       context: ../../services/mcp-stdio-runner
       args:
-        NODE_IMAGE: ${PIECE_HOST_NODE_IMAGE:-node:24.21.0-trixie-slim}
+        NODE_IMAGE: ${PIECE_HOST_NODE_IMAGE:-node:24.22.1-trixie-slim}
 
   mcp-stdio-runner:
     image: vegaduta-mcp-stdio-runner-pieces:local
