@@ -311,7 +311,7 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         if (requesting == null) {
             return null;
         }
-        Set<String> known = knownToolNames(prompt);
+        Set<String> known = ToolCallSanitizeHelpers.knownToolNames(prompt);
 
         int priorRounds = 0;
         int unknownCalls = 0;
@@ -559,7 +559,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         for (Message message : history) {
             if (message instanceof AssistantMessage assistantMessage
                     && assistantMessage.hasToolCalls()) {
-                sanitized.add(sanitizeAssistantMessage(assistantMessage, objectMapper));
+                sanitized.add(
+                        ToolCallSanitizeHelpers.sanitizeAssistantMessage(
+                                assistantMessage, objectMapper));
             } else {
                 sanitized.add(message);
             }
@@ -592,11 +594,12 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
         if (!(prompt.getOptions() instanceof ToolCallingChatOptions options)) {
             return prompt;
         }
-        Set<String> known = knownToolNames(prompt);
+        Set<String> known = ToolCallSanitizeHelpers.knownToolNames(prompt);
 
         List<ToolCallback> fallbacks = new ArrayList<>();
         Set<String> alreadyAdded = new LinkedHashSet<>();
-        for (AssistantMessage.ToolCall toolCall : requestedToolCalls(chatResponse)) {
+        for (AssistantMessage.ToolCall toolCall :
+                ToolCallSanitizeHelpers.requestedToolCalls(chatResponse)) {
             String name = toolCall.name();
             if (name == null || name.isBlank() || known.contains(name) || !alreadyAdded.add(name)) {
                 continue;
