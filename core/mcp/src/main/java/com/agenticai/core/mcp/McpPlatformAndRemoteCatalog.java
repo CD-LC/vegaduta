@@ -305,5 +305,76 @@ final class McpPlatformAndRemoteCatalog {
                             null,
                             "https://rube.app/mcp",
                             false,
-                            true));
+                            true),
+                    // Hindsight (https://github.com/vectorize-io/hindsight, MIT): a learning
+                    // agent-memory server - world facts, experiences, consolidated
+                    // observations and mental models, grouped into per-topic "banks". It is
+                    // a remote streamable-HTTP endpoint like the Atlassian/Rube entries
+                    // above, except self-hosted: run it beside the platform with
+                    // `--profile hindsight` in deploy/compose/docker-compose.yml (or the
+                    // upstream `docker run ghcr.io/vectorize-io/hindsight:latest`), then
+                    // register ONE server per memory bank because the bank id is part of
+                    // the URL path: http://hindsight:8888/mcp/<bank_id>/. The dynamicUrl
+                    // below uses `default` as the example bank - the tenant replaces that
+                    // segment with their bank name when connecting, so this entry is
+                    // advisory (ready:false, no credential: a local Hindsight has no auth
+                    // of its own; keep it off the public network). Consolidation needs an
+                    // LLM inside Hindsight itself (HINDSIGHT_API_LLM_* env, 25+ providers
+                    // including OpenAI-compatible endpoints like the `freellmapi` profile).
+                    new McpCatalogEntry(
+                            "hindsight",
+                            "hindsight",
+                            McpServerType.STREAMABLE_HTTP,
+                            "Hindsight self-hosted agent memory: retain, recall and reflect tools over per-topic memory banks (world facts, experiences, observations, mental models) that learn across runs. One registered server per bank - replace `default` in the URL with your bank id.",
+                            "brain",
+                            "https://hindsight.vectorize.io/developer/mcp-server",
+                            false,
+                            List.of(),
+                            """
+            # Self-hosted streamable-HTTP endpoint - no static stdio YAML block.
+            # Start it with `--profile hindsight` (deploy/compose/docker-compose.yml),
+            # then register one remote MCP server per memory bank:
+            #   url:  http://hindsight:8888/mcp/<bank_id>/
+            # Compose DNS name `hindsight` works because core and hindsight share the
+            # agent-io network; use your own URL for an external Hindsight.
+            """,
+                            null,
+                            null,
+                            "http://hindsight:8888/mcp/default/",
+                            false,
+                            false),
+                    // context-mode (https://github.com/mksglu/context-mode): an MCP server
+                    // that compresses agent context (its README claims up to ~98% token
+                    // reduction) by routing session/tool output through its ctx_* tools.
+                    // LICENSE NOTE: it is Elastic License 2.0, not a permissive license -
+                    // ELv2 forbids offering the software as a hosted/managed service, so
+                    // nothing from it is vendored or redistributed here; this entry only
+                    // points at the user's own `npx -y context-mode` install, which is a
+                    // plain package download like the github/brave-search npx entries.
+                    // Deployments that ARE a hosted offering should get their own
+                    // licensing sign-off before connecting it. STDIO: it is a Node MCP
+                    // server run via npx, so it needs the mcp-stdio-runner (profiles
+                    // tools/browser/sandbox) or a core-full image - hence ready:false.
+                    new McpCatalogEntry(
+                            "context-mode",
+                            "context-mode",
+                            McpServerType.STDIO,
+                            "Context-mode context compression (Elastic License 2.0 - not vendored): ctx_* tools that keep large outputs out of the prompt window. Runs as the user's own `npx -y context-mode` STDIO server; needs the mcp-stdio-runner or a core-full image.",
+                            "compress",
+                            "https://github.com/mksglu/context-mode",
+                            false,
+                            List.of(),
+                            """
+            spring:
+              ai:
+                mcp:
+                  client:
+                    stdio:
+                      connections:
+                        context-mode:
+                          command: npx
+                          args: ["-y", "context-mode"]
+            """,
+                            "npx",
+                            List.of("-y", "context-mode")));
 }

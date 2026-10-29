@@ -10,6 +10,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Trending open-source integrations.** Four minimal-effort integrations:
+  a `freellmapi` Compose profile running FreeLLMAPI (MIT) — an
+  OpenAI-compatible `/v1` gateway over ~34 free LLM providers for zero-key
+  agent models via a `LOCAL_OPENAI` provider row; a `hindsight` Compose
+  profile plus MCP catalog entry for Hindsight (MIT) learning agent memory
+  (`http://hindsight:8888/mcp/<bank_id>/`); a `context-mode` MCP catalog
+  entry (Elastic License 2.0 — not vendored, points at the user's own
+  `npx -y context-mode` install); and four vendored built-in agent skills —
+  Cloudflare's `security-audit` (MIT) and HeyGen's `hyperframes`,
+  `hyperframes-cli` and `media-use` (Apache-2.0). Attribution in `NOTICE`.
+
 - **Local model speed controls.** The local model's speed controls now include
   the prompt batch size (Ollama `num_batch`), how many requests the model
   serves at once (`num_parallel`), a per-turn timeout, and tool deferral
