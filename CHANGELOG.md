@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **Security-review hardening (2026-10-29).** (1) `deploy/compose/backups/` snapshots are no longer committable (`.gitignore` covers the directory, `*.dump` and `files.tar.gz`); the three already-committed snapshots contain live install secrets and must be rotated - see the release note. (2) The internal app-builder endpoints now bound the caller-chosen `X-Tenant-Id`: reserved schemas are refused, `APP_BUILDER_ALLOWED_TENANTS` (`app.app-builder.allowed-tenants`) scopes which tenants the static service token may act for, and a `TenantStatusGuard` check rejects unknown/stopped tenants. (3) `POST /webhook/workflows/oidc/{workflowId}` now requires the workflow to have a WEBHOOK trigger node configured for OAUTH2 - a `workflow-trigger` role token no longer runs every ACTIVE workflow. (4) Delegation tokens honour the tenant-status guard and system-schema check (a stopped tenant's tokens stop working). (5) `remember_fact`/`remember_shared_fact` writes pass the knowledge write screen (injection phrases and credentials are refused). (6) Channel pairing codes use `SecureRandom`. (7) Remote MCP response bodies are capped at `APP_MCP_MAX_RESPONSE_BYTES` (default 32 MiB) at the transport, closing the heap-exhaustion path. (8) iMessage credential reads carry a masked webhook token; the full value is only in the activate response and `GET /api/channels/imessage/credential/webhook-token`. (9) x402: payment reservations carry a status (the internal scheme previously could not settle) and a REJECTED record no longer folds into a served resource on replay. (10) `X-Forwarded-Proto` can no longer downgrade an https-canonical deployment's redirects or the refresh cookie's `Secure` flag. (11) Twilio activation errors are scrubbed of submitted credential values before being returned.
+
 ### Fixed
 
 - **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.
@@ -57,6 +61,16 @@ Release notes on GitHub are generated from the section for each version.
   commit is release-ready before tagging (`docs/maintainers/releasing.md`).
 
 ### Added
+
+- **A2A interoperability console (`/admin/a2a`) and per-agent endpoint panel.**
+  The A2A protocol bindings deliberately answer ListTasks as unsupported, so
+  the console is served by a new manager-gated surface
+  (`/api/a2a/console/**`): a tenant-wide task list in both directions
+  (inbound calls into this workspace's agents plus outbound `a2a_call_agent`
+  bookkeeping), full task detail, cancel for in-flight inbound turns, the
+  deployment's inbound endpoints (JSON-RPC, HTTP+JSON, agent card, JWKS) and
+  a read-only view of the operator's outbound remote-agent allow-list. The
+  agent workbench also shows each agent's A2A endpoints and card URL.
 
 - **Docling-first document conversion for knowledge ingestion.** The new
   `services/docling` FastAPI adapter wraps IBM's Docling parser behind the

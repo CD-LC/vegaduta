@@ -15,6 +15,11 @@ deploy/compose/.vegaduta-state
 deploy/compose/.vegaduta-addons.json
 deploy/compose/core.env
 deploy/compose/google-oauth.env
+# scripts/vegaduta backup snapshots hold live secrets (env, no dot/extension),
+# database dumps and file archives - never commit them.
+deploy/compose/backups/
+*.dump
+files.tar.gz
 *.pem
 *.key
 !**/src/test/**/*.pem
