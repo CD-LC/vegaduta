@@ -45,7 +45,7 @@ class CompGrantControllerTest {
         compGrantService = mock(CompGrantService.class);
         ObjectMapper objectMapper = new ObjectMapper();
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        controller = new CompGrantController(compGrantService, VALID_TOKEN, objectMapper, validator);
+        controller = new CompGrantController(compGrantService, VALID_TOKEN, "", objectMapper, validator);
     }
 
     @Test
@@ -141,7 +141,7 @@ class CompGrantControllerTest {
     @Test
     void noConfiguredServiceTokenFailsClosedRegardlessOfBody() {
         CompGrantController noSecretController = new CompGrantController(
-            compGrantService, "", new ObjectMapper(), Validation.buildDefaultValidatorFactory().getValidator());
+            compGrantService, "", "", new ObjectMapper(), Validation.buildDefaultValidatorFactory().getValidator());
 
         assertThrows(
             CompGrantTokenMissingException.class,

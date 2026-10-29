@@ -42,12 +42,14 @@ class WorkflowWebhookControllerOidcTest {
 
     private WorkflowService workflowService;
     private JwtDecoder jwtDecoder;
+    private WorkflowTriggerNodeService triggerNodeService;
     private WorkflowWebhookController controller;
 
     @BeforeEach
     void setUp() {
         workflowService = mock(WorkflowService.class);
         jwtDecoder = mock(JwtDecoder.class);
+        triggerNodeService = mock(WorkflowTriggerNodeService.class);
         @SuppressWarnings("unchecked")
         ObjectProvider<JwtDecoder> jwtDecoderProvider = mock(ObjectProvider.class);
         when(jwtDecoderProvider.getIfAvailable()).thenReturn(jwtDecoder);
@@ -56,15 +58,30 @@ class WorkflowWebhookControllerOidcTest {
         controller = new WorkflowWebhookController(
             mock(TenantResolutionService.class),
             definitionRepositoryWithActiveWorkflow(),
-            mock(WorkflowTriggerNodeService.class),
+            triggerNodeService,
             workflowService,
             new ObjectMapper(),
             jwtDecoderProvider,
             mock(InboundMessageDedupService.class)
         );
 
+        // Default: the target workflow HAS a WEBHOOK trigger node configured
+        // for OAUTH2, so only the role/tenant checks stand between the caller
+        // and a run (the per-test case below overrides this to prove the
+        // gate refuses a workflow without one).
+        stubOauth2TriggerNode();
+
         when(workflowService.run(any(), any(), anyString(), anyString()))
             .thenReturn(mock(WorkflowRunResponse.class));
+    }
+
+    private void stubOauth2TriggerNode() {
+        com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode node =
+            mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
+        when(node.getChannel())
+            .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
+        when(node.getWebhookAuthMode()).thenReturn("OAUTH2");
+        when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of(node));
     }
 
     private WorkflowDefinitionRepository definitionRepositoryWithActiveWorkflow() {
@@ -115,6 +132,33 @@ class WorkflowWebhookControllerOidcTest {
             controller.triggerOidc(WORKFLOW_ID, "Bearer entra:t", Map.of());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(workflowService).run(eq(WORKFLOW_ID), any(), anyString(), anyString());
+    }
+
+    @Test
+    void noOauth2TriggerNodeIsForbidden() {
+        // A workflow with no WEBHOOK+OAUTH2 trigger node must not run for a
+        // bare workflow-trigger role token - the role is tenant-wide.
+        when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of());
+
+        ResponseEntity<?> response =
+            controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(workflowService, never()).run(any(), any(), anyString(), anyString());
+    }
+
+    @Test
+    void sharedSecretOnlyTriggerNodeIsForbidden() {
+        com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode node =
+            mock(com.agenticai.core.omnichannel.trigger.WorkflowTriggerNode.class);
+        when(node.getChannel())
+            .thenReturn(com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel.WEBHOOK);
+        when(node.getWebhookAuthMode()).thenReturn("SHARED_SECRET");
+        when(triggerNodeService.triggerNodesFor(WORKFLOW_ID)).thenReturn(List.of(node));
+
+        ResponseEntity<?> response =
+            controller.triggerOidc(WORKFLOW_ID, "Bearer keycloak:t", Map.of());
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(workflowService, never()).run(any(), any(), anyString(), anyString());
     }
 
     @Test
