@@ -95,6 +95,8 @@ htmlcov/
 
 # --- Build and release outputs --------------------------------------------------
 /dist/
+# Academy rendered media (generated from lesson scripts - never commit)
+academy/**/dist/
 /sbom/
 *.spdx.json
 *.cdx.json
@@ -153,3 +155,4 @@ sdk/python/dist/
 sdk/typescript/dist/
 web/node_modules/
 sdk/typescript/node_modules/
+.venv-tts/

@@ -53,11 +53,21 @@ export default function EffectiveBehaviorCard({
 
   const facts = useMemo<Fact[]>(() => {
     const out: Fact[] = [];
-    const settingFact = (id: string, label: string, key: string, render?: (e: SettingCatalogEntry, v: unknown) => string) => {
+    const settingFact = (
+      id: string,
+      label: string,
+      key: string,
+      render?: (e: SettingCatalogEntry, v: unknown) => string
+    ) => {
       const entry = byKey[key];
       const eff = values[key];
       if (!entry || !eff) return;
-      out.push({ id, label, settingKey: key, value: render ? render(entry, eff.value) : text.formatValue(entry, eff.value) });
+      out.push({
+        id,
+        label,
+        settingKey: key,
+        value: render ? render(entry, eff.value) : text.formatValue(entry, eff.value),
+      });
     };
     settingFact("steps", t("summary.facts.steps"), BEHAVIOR_KEYS.maxSteps);
     settingFact("turnTimeout", t("summary.facts.turnTimeout"), BEHAVIOR_KEYS.turnTimeout);
@@ -68,7 +78,12 @@ export default function EffectiveBehaviorCard({
       const tier = autonomyTier ? t(`summary.tier.${autonomyTier}`) : "";
       const entry = byKey[BEHAVIOR_KEYS.approvalContinuation];
       const eff = values[BEHAVIOR_KEYS.approvalContinuation];
-      const after = entry && eff ? (eff.value === true || eff.value === "true" ? t("summary.approvalResumes") : t("summary.approvalStops")) : "";
+      const after =
+        entry && eff
+          ? eff.value === true || eff.value === "true"
+            ? t("summary.approvalResumes")
+            : t("summary.approvalStops")
+          : "";
       out.push({
         id: "approvals",
         label: t("summary.facts.approvals"),
@@ -106,7 +121,13 @@ export default function EffectiveBehaviorCard({
       <p className="mt-1 text-xs text-muted-foreground">{t("summary.subtitle")}</p>
 
       {status === "loading" ? (
-        <div role="status" aria-busy="true" aria-label={t("summary.loading")} className="mt-3 grid gap-2 sm:grid-cols-2" data-testid="summary-loading">
+        <div
+          role="status"
+          aria-busy="true"
+          aria-label={t("summary.loading")}
+          className="mt-3 grid gap-2 sm:grid-cols-2"
+          data-testid="summary-loading"
+        >
           <Skeleton className="h-14" />
           <Skeleton className="h-14" />
           <Skeleton className="h-14" />
@@ -135,7 +156,11 @@ export default function EffectiveBehaviorCard({
                 <dt className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                   {f.label}
                   {f.settingKey && values[f.settingKey] ? (
-                    <SourceBadge source={values[f.settingKey].source} scope="agent" locked={values[f.settingKey].locked} />
+                    <SourceBadge
+                      source={values[f.settingKey].source}
+                      scope="agent"
+                      locked={values[f.settingKey].locked}
+                    />
                   ) : null}
                 </dt>
                 <dd className="mt-1 break-words text-sm font-semibold text-foreground">{f.value}</dd>
@@ -144,13 +169,17 @@ export default function EffectiveBehaviorCard({
           </dl>
 
           <p className="mt-3 text-xs text-muted-foreground" data-testid="summary-overrides">
-            {overrides.length === 0 ? t("summary.overrides.none") : t("summary.overrides.some", { count: overrides.length })}
+            {overrides.length === 0
+              ? t("summary.overrides.none")
+              : t("summary.overrides.some", { count: overrides.length })}
           </p>
 
           {lines.length > 0 ? (
             <div className="mt-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("impact.title")}</h4>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-sm" data-testid="impact-list">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("impact.title")}
+              </h4>
+              <ul className="mt-1 list-disc space-y-1 ps-5 text-sm" data-testid="impact-list">
                 {lines.map((l) => (
                   <li key={l.id} data-testid={`impact-${l.id}`}>
                     {t(l.messageKey, l.params)}

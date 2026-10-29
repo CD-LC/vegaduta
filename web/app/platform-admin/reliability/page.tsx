@@ -295,7 +295,11 @@ export default function ReliabilityPage() {
         )}
 
         {depsLoading && !deps && (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" data-testid="deps-loading">
+          <div
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            aria-busy="true"
+            data-testid="deps-loading"
+          >
             {Array.from({ length: 6 }).map((_, i) => (
               <Skeleton key={i} className="h-28" />
             ))}
@@ -359,7 +363,11 @@ export default function ReliabilityPage() {
         )}
 
         {sloLoading && !slo && (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" data-testid="slo-loading">
+          <div
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            aria-busy="true"
+            data-testid="slo-loading"
+          >
             {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-36" />
             ))}
@@ -368,7 +376,10 @@ export default function ReliabilityPage() {
 
         {slo && (
           <>
-            <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" data-testid="slo-scope">
+            <div
+              className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+              data-testid="slo-scope"
+            >
               <span className="rounded-full border border-border px-2 py-0.5">
                 {slo.scope === "platform"
                   ? `All replicas combined (${slo.replicas})`
@@ -441,19 +452,19 @@ export default function ReliabilityPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[360px] text-sm" data-testid="providers-table">
                       <thead>
-                        <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                          <th className="py-2 pr-3 font-medium">Provider</th>
-                          <th className="py-2 pr-3 font-medium">Calls</th>
-                          <th className="py-2 pr-3 font-medium">Errors</th>
+                        <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                          <th className="py-2 pe-3 font-medium">Provider</th>
+                          <th className="py-2 pe-3 font-medium">Calls</th>
+                          <th className="py-2 pe-3 font-medium">Errors</th>
                           <th className="py-2 font-medium">Error rate</th>
                         </tr>
                       </thead>
                       <tbody>
                         {slo.llmProviders.map((p) => (
                           <tr key={p.provider} className="border-b border-border/50">
-                            <td className="py-2 pr-3 font-medium">{p.provider}</td>
-                            <td className="py-2 pr-3 font-mono tabular-nums">{fmtCount(p.calls)}</td>
-                            <td className="py-2 pr-3 font-mono tabular-nums">{fmtCount(p.errors)}</td>
+                            <td className="py-2 pe-3 font-medium">{p.provider}</td>
+                            <td className="py-2 pe-3 font-mono tabular-nums">{fmtCount(p.calls)}</td>
+                            <td className="py-2 pe-3 font-mono tabular-nums">{fmtCount(p.errors)}</td>
                             <td className="py-2 font-mono tabular-nums">{fmtPct(p.errorRate, 1)}</td>
                           </tr>
                         ))}
@@ -483,7 +494,7 @@ export default function ReliabilityPage() {
             <div key={g.title} className="mb-4 last:mb-0">
               <h3 className="mb-1 text-xs font-medium text-foreground">{g.title}</h3>
               <ul
-                className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground"
+                className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground"
                 data-testid="notes-list"
               >
                 {g.notes.map((n, i) => (

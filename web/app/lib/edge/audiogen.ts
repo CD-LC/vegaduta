@@ -5,7 +5,7 @@
 // imagegen.ts / whisper.ts / kokoro.ts:
 //
 //   - edgeAudioGenAvailable() answers capability WITHOUT downloading anything.
-//   - ensureAudioGenModel() is the ONLY entry that may start the ~1.8 GB
+//   - ensureAudioGenModel() is the ONLY entry that may start the ~1.1 GB
 //     acquisition, called from an explicit user gesture behind
 //     EDGE_BRANDING.audioGenDownloadDetails consent copy (E-0b rule 2).
 //   - generateAudioLocally() NEVER throws; without a ready model it answers
@@ -19,9 +19,12 @@ import { addMediaArtifact, type MediaArtifact } from "./mediaRegistry";
 import type { AudioGenWorkerRequest, AudioGenWorkerResponse } from "./audiogenWorker";
 
 export const AUDIO_GEN_ASSET_ID = "edge-audiogen-musicgen";
-/** MusicGen-small ONNX is ~1.8 GB fp32 (fp16 on the WebGPU path). Honest number
- * for the consent copy and storage-headroom check. */
-export const AUDIO_GEN_MODEL_SIZE_BYTES = 1_800_000_000;
+/** MusicGen-small ONNX per runtime path: ~1.13 GB fp16 (WebGPU + shader-f16),
+ * ~570 MB q4 (WebGPU without it), ~600 MB q8 (wasm). The fp32 files are NOT
+ * usable in a browser — the 1.7 GB decoder alone can't session-create in the
+ * 4 GB wasm heap. Largest real path is fp16; honest number for the consent
+ * copy and storage-headroom check. */
+export const AUDIO_GEN_MODEL_SIZE_BYTES = 1_200_000_000;
 const AUDIO_GEN_CACHED_KEY = "edge.audiogen.cached.musicgen-small";
 const GENERATE_TIMEOUT_MS = 300_000;
 const LOAD_IDLE_TIMEOUT_MS = 300_000;
@@ -70,7 +73,7 @@ export function isAudioGenModelCached(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Audio gen runs on wasm too, but ~1.8 GB of weights plus a wasm inference loop
+ * Audio gen runs on wasm too, but ~600 MB of weights plus a wasm inference loop
  * on an 4GB laptop is a worse answer than honest refusal. Gate on WebGPU OR on
  * the honest "8GB+ device" path - either way it's a device question, not a
  * network one.
@@ -253,9 +256,10 @@ function runLoad(): Promise<void> {
     );
     if (response.type !== "loaded") {
       const detail = response.type === "error" ? response.detail : "unexpected worker reply";
+      const label = alreadyCached ? "Could not start on-device audio generation" : "Download failed";
       downloadManager.reportExternalProgress(AUDIO_GEN_ASSET_ID, EDGE_BRANDING.audioGenModelDisplayName, {
         state: "error",
-        error: alreadyCached ? "Could not start on-device audio generation" : "Download failed",
+        error: detail ? `${label}: ${String(detail).slice(0, 160)}` : label,
       });
       throw new Error(detail || "on-device audio generation setup failed");
     }
@@ -294,12 +298,26 @@ export async function generateAudioLocally(prompt: string, durationSeconds?: num
   if (!trimmed) return { handled: false, reason: "empty-prompt" };
   if (trimmed.length > MAX_PROMPT_CHARS) return { handled: false, reason: "prompt-too-long" };
   if (!(await edgeAudioGenAvailable())) return { handled: false, reason: "unsupported" };
-  if (!workerModelLoaded) {
+  // No side-effect downloads: generation only proceeds when the model is live
+  // in the worker or was fully installed on this device before (a cache-hit
+  // warm-up, not an acquisition) - same contract vision.ts's analyzeFramesLocally
+  // already follows.
+  if (!workerModelLoaded && !isAudioGenModelCached()) {
     return { handled: false, reason: "model-not-ready" };
   }
 
   const requestId = nextRequestId++;
   const run = generateChain.then(async (): Promise<AudioGenResult> => {
+    if (!workerModelLoaded) {
+      // Warm-up from the local cache (marker checked above): the weights are
+      // already on this device, so runLoad moves no bytes and the no-download
+      // consent rule is not implicated.
+      try {
+        await runLoad();
+      } catch {
+        return { handled: false, reason: "warmup-failed" };
+      }
+    }
     const response = await request(
       { type: "generate", requestId, prompt: trimmed, durationSeconds },
       GENERATE_TIMEOUT_MS,

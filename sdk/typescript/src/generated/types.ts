@@ -913,6 +913,12 @@ export interface AgentScheduleRunResponse {
   sentinelOutcomeNote?: string;
 }
 
+export interface AgentScratchpadController_ScratchpadListView {
+  count?: number;
+  totalBytes?: number;
+  notes?: ScratchpadNoteView[];
+}
+
 export interface AgentSessionLlmUsageController_SessionLlmCallEntry {
   id?: string;
   providerName?: ProviderName;
@@ -8735,6 +8741,14 @@ export interface ScheduledTaskDtos_TaskResponse {
   ownerSubject?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface ScratchpadNoteView {
+  key?: string;
+  scope?: string;
+  byteSize?: number;
+  updatedAt?: string;
+  body?: string;
 }
 
 export interface SearchRequest {

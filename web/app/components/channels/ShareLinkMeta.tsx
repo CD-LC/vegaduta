@@ -75,7 +75,7 @@ export function ShareLinkMeta({ status }: { status: ShareStatusLike }) {
       <p>{t("shareViewers", { count: String(status.viewerCount || 0) })}</p>
       {status.reportCount > 0 && (
         <p className="text-[var(--state-warning)]" data-testid="share-reports">
-          <Flag size={10} className="mr-1 inline" aria-hidden="true" />
+          <Flag size={10} className="me-1 inline" aria-hidden="true" />
           {t("shareReports", { count: String(status.reportCount), limit: String(SHARE_REPORT_LIMIT) })}
         </p>
       )}
@@ -87,7 +87,8 @@ export function ShareLinkMeta({ status }: { status: ShareStatusLike }) {
 export function ShareEndNotice({ reason }: { reason: ShareEndReason }) {
   const t = useTranslations("channelsUsageMcp");
   if (!reason) return null;
-  const key = reason === "reports" ? "shareEndedReports" : reason === "expired" ? "shareEndedExpired" : "shareEndedOther";
+  const key =
+    reason === "reports" ? "shareEndedReports" : reason === "expired" ? "shareEndedExpired" : "shareEndedOther";
   return (
     <p
       role="status"

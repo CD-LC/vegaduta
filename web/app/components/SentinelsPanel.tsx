@@ -570,7 +570,7 @@ export default function SentinelsPanel() {
                           {t("escalatedBadge")}
                         </Badge>
                       )}
-                      <span className="ml-auto text-xs text-muted-foreground">
+                      <span className="ms-auto text-xs text-muted-foreground">
                         {formatTime(ev.occurredAt || ev.receivedAt)}
                       </span>
                     </div>

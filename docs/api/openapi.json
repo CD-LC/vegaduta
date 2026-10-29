@@ -120,6 +120,9 @@
       "name": "AgentSchedule"
     },
     {
+      "name": "AgentScratchpad"
+    },
+    {
       "name": "AgentSessionLlmRequest"
     },
     {
@@ -16556,6 +16559,140 @@
                   "items": {
                     "$ref": "#/components/schemas/AgentScheduleRunResponse"
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/scratchpad": {
+      "get": {
+        "tags": [
+          "AgentScratchpad"
+        ],
+        "summary": "List",
+        "operationId": "AgentScratchpadController_list",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "session",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentScratchpadController_ScratchpadListView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{agentId}/scratchpad/{key}": {
+      "get": {
+        "tags": [
+          "AgentScratchpad"
+        ],
+        "summary": "Read",
+        "operationId": "AgentScratchpadController_read",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "session",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScratchpadNoteView"
                 }
               }
             }
@@ -93273,6 +93410,31 @@
           }
         }
       },
+      "AgentScratchpadController_ScratchpadListView": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "totalBytes": {
+            "type": "integer",
+            "format": "int64",
+            "default": 0
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScratchpadNoteView"
+            }
+          }
+        },
+        "required": [
+          "count",
+          "totalBytes"
+        ]
+      },
       "AgentSessionLlmUsageController_SessionLlmCallEntry": {
         "type": "object",
         "properties": {
@@ -119710,6 +119872,32 @@
           "enabled",
           "consecutiveFailures",
           "runCount"
+        ]
+      },
+      "ScratchpadNoteView": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "byteSize"
         ]
       },
       "SearchRequest": {

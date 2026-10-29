@@ -127,7 +127,7 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
       const items = Array.isArray(p.items) ? p.items.filter((i): i is string => typeof i === "string") : [];
       const Tag = p.ordered ? "ol" : "ul";
       return (
-        <Tag className={`text-sm text-foreground ${p.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-5`}>
+        <Tag className={`text-sm text-foreground ${p.ordered ? "list-decimal" : "list-disc"} space-y-1 ps-5`}>
           {items.map((i, k) => (
             <li key={k} className="break-words">
               {i}
@@ -145,7 +145,7 @@ function Node({ node, onAction }: { node: UiNode; onAction: GenerativeUiActionHa
             <thead>
               <tr className="border-b border-border bg-muted/40">
                 {cols.map((c, i) => (
-                  <th key={i} className="px-3 py-2 text-left font-medium text-foreground">
+                  <th key={i} className="px-3 py-2 text-start font-medium text-foreground">
                     {c}
                   </th>
                 ))}

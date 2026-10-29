@@ -117,7 +117,7 @@ export function ImessageInspector({ ctx }: { ctx: ChannelCtx }) {
             <p className="m-0 text-muted-foreground">{ti("honestyBody")}</p>
           </div>
         </div>
-        <ol className="m-0 list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
+        <ol className="m-0 list-decimal space-y-1 ps-5 text-xs text-muted-foreground">
           <li>{ti("step1")}</li>
           <li>{ti("step2")}</li>
           <li>{ti("step3")}</li>
@@ -319,7 +319,12 @@ function AccessCard({
         />
       </div>
       <div className="flex items-center gap-2">
-        <Checkbox id="imessage-groups" checked={groups} onCheckedChange={setGroups} aria-label={ti("allowGroupsLabel")} />
+        <Checkbox
+          id="imessage-groups"
+          checked={groups}
+          onCheckedChange={setGroups}
+          aria-label={ti("allowGroupsLabel")}
+        />
         <Label htmlFor="imessage-groups" className="text-xs text-foreground">
           {ti("allowGroupsLabel")}
         </Label>

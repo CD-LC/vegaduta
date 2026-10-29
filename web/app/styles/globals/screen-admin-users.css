@@ -302,12 +302,12 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .ax-pager-size-label {
   color: var(--ax-dim);
-  margin-right: 2px;
+  margin-inline-end: 2px;
 }
 
 .ax-pager-size-btn {
@@ -380,6 +380,6 @@
     text-align: center;
   }
   .ax-pager-size {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 }

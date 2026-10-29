@@ -70,7 +70,10 @@ export function WhatsAppBindingCard({
   const savedAgent = savedAgentId ? agents.find((a) => a.id === savedAgentId) : undefined;
 
   return (
-    <div className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-left" data-testid="wa-binding">
+    <div
+      className="w-full space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-start"
+      data-testid="wa-binding"
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t("inboundRoutingTitle")}
@@ -138,7 +141,7 @@ export function WhatsAppBindingCard({
           <div className="font-medium">{t("waOpenEndedTitle")}</div>
           <p>{t("waOpenEndedBody")}</p>
           {warning.length > 0 && (
-            <ul className="list-disc pl-4">
+            <ul className="list-disc ps-4">
               {warning.map((r) => (
                 <li key={r}>{r}</li>
               ))}
@@ -180,7 +183,10 @@ export function WhatsAppQualityCard({ t }: { t: (key: string) => string }) {
   if (!quality) return null;
   const tone = qualityTone(quality.rating);
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs" data-testid="wa-quality">
+    <div
+      className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-muted/40 p-3 text-xs"
+      data-testid="wa-quality"
+    >
       <span className="font-semibold uppercase tracking-wide text-muted-foreground">{t("waQualityTitle")}</span>
       <Badge variant={tone === "good" ? "secondary" : "outline"} className="font-mono text-[10px]">
         {quality.rating || t("waQualityUnknown")}

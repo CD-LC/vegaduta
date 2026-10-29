@@ -180,7 +180,7 @@ export default function RunGraphPanel({
             {t("graphLive")}
           </span>
         )}
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           {cancelTurn}
           <Button type="button" variant="outline" size="sm" onClick={() => setView("compare")}>
             <GitCompare aria-hidden="true" />

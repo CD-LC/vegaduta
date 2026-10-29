@@ -50,11 +50,18 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
       <div className="flex flex-wrap items-center gap-2">
         <FileJson className="size-4 text-muted-foreground" aria-hidden />
         <span className="text-xs font-medium text-foreground">Blueprint as JSON</span>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ms-auto flex items-center gap-1.5">
           <Button type="button" size="sm" variant="outline" onClick={() => void copy()}>
             <ClipboardCopy aria-hidden="true" className="size-3.5" /> Copy as JSON
           </Button>
-          <Button type="button" size="sm" variant="outline" aria-expanded={open} aria-controls={`${uid}-import`} onClick={() => setOpen((o) => !o)}>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            aria-expanded={open}
+            aria-controls={`${uid}-import`}
+            onClick={() => setOpen((o) => !o)}
+          >
             <Upload aria-hidden="true" className="size-3.5" /> Import JSON
           </Button>
         </div>

@@ -28,7 +28,7 @@ function AccordionTrigger({ className, children, ...props }: ComponentProps<type
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "flex flex-1 cursor-pointer items-center justify-between gap-4 py-5 text-left text-base font-medium outline-none transition-all " +
+          "flex flex-1 cursor-pointer items-center justify-between gap-4 py-5 text-start text-base font-medium outline-none transition-all " +
             "hover:text-primary focus-visible:ring-[3px] focus-visible:ring-ring " +
             "[&[data-state=open]>svg]:rotate-180",
           className

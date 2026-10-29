@@ -228,7 +228,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               width so that measurement stays correct regardless of which
               locale is active, without ever showing overflowing content. */}
           {showInlineLinks && (
-            <div className="ml-2 flex items-center gap-0.5 whitespace-nowrap text-xs text-muted-foreground">
+            <div className="ms-2 flex items-center gap-0.5 whitespace-nowrap text-xs text-muted-foreground">
               {NAV_LINK_ITEMS.map((item) => {
                 const cls = item.iconOnly ? `${NAV_LINK_CLS} inline-flex items-center justify-center` : NAV_LINK_CLS;
                 const content = item.iconOnly ? (
@@ -280,7 +280,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               </span>
             ))}
           </div>
-          <div ref={navActionsRef} className="ml-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
+          <div ref={navActionsRef} className="ms-auto flex min-w-0 shrink-0 items-center gap-1.5 sm:gap-3">
             {/* Academy pill — always visible (incl. mobile). Was "Academy ·
                 learn free" spelled out at >=640px (verbose enough to be
                 part of the 217px nav-links overflow at 1280px, measured

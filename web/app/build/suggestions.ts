@@ -24,7 +24,8 @@ const ALL: (Suggestion & { when?: (ctx: Ctx) => boolean })[] = [
   {
     id: "contact-form",
     label: "Add a contact form",
-    prompt: "Add a contact form (name, email, message) with validation, a clear success message, and accessible labels.",
+    prompt:
+      "Add a contact form (name, email, message) with validation, a clear success message, and accessible labels.",
     when: (c) => !c.has(/contact/i),
   },
   {
@@ -92,7 +93,9 @@ export function parseDiff(
   diff: string,
   maxLines = 400
 ): { lines: { kind: DiffLineKind; text: string }[]; truncated: boolean } {
-  const raw = String(diff || "").replace(/\r\n/g, "\n").split("\n");
+  const raw = String(diff || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
   if (raw.length && raw[raw.length - 1] === "") raw.pop();
   const truncated = raw.length > maxLines;
   const lines = raw.slice(0, maxLines).map((text) => {
@@ -114,7 +117,9 @@ export function parseDiff(
  */
 export function diffFileStats(diff: string): { path: string; adds: number; dels: number }[] {
   const out: { path: string; adds: number; dels: number }[] = [];
-  const raw = String(diff || "").replace(/\r\n/g, "\n").split("\n");
+  const raw = String(diff || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
   let cur: { path: string; adds: number; dels: number } | null = null;
   const push = () => {
     if (cur && cur.path) out.push(cur);
@@ -141,7 +146,9 @@ export function diffFileStats(diff: string): { path: string; adds: number; dels:
 
 /** Web Speech API language tag from <html lang>. Hindi dictates as hi-IN. */
 export function speechLang(lang: string | null | undefined): string {
-  const l = String(lang || "").trim().replace("_", "-");
+  const l = String(lang || "")
+    .trim()
+    .replace("_", "-");
   if (!l) return "en-US";
   if (l.includes("-")) return l;
   const base = l.toLowerCase();
@@ -155,7 +162,7 @@ export function speechLang(lang: string | null | undefined): string {
     ta: "ta-IN",
     te: "te-IN",
     kn: "kn-IN",
-    mr: "mr-IN",
+    mr: "me-IN",
     bn: "bn-IN",
     gu: "gu-IN",
     ja: "ja-JP",

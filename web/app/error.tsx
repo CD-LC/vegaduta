@@ -28,12 +28,15 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="mb-6 flex justify-center">
           <Logo size={30} />
         </div>
-        <div className="std-screen__code" aria-hidden="true">500</div>
+        <div className="std-screen__code" aria-hidden="true">
+          500
+        </div>
         <h1>Something went wrong on this screen.</h1>
         <p>
-          Your data is safe. Try again, or head back home. {error.digest ? <span className="mkt-mono">Ref {error.digest}</span> : null}
+          Your data is safe. Try again, or head back home.{" "}
+          {error.digest ? <span className="mkt-mono">Ref {error.digest}</span> : null}
         </p>
-        <details className="mt-4 text-left text-xs text-muted-foreground" data-testid="route-error-details">
+        <details className="mt-4 text-start text-xs text-muted-foreground" data-testid="route-error-details">
           <summary className="cursor-pointer">Technical details</summary>
           <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words font-mono">
             {error.message}

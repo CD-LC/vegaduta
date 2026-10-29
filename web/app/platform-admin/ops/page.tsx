@@ -85,7 +85,7 @@ function HubCard({
         <CardContent className="flex h-full flex-col gap-2 p-4">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Icon size={14} className="text-primary" /> {title}
-            <ArrowRight size={13} className="ml-auto opacity-0 transition-opacity group-hover:opacity-100" />
+            <ArrowRight size={13} className="ms-auto opacity-0 transition-opacity group-hover:opacity-100" />
           </div>
           <div className="flex-1 text-sm">{children}</div>
         </CardContent>
@@ -311,24 +311,24 @@ export default function OpsHubPage() {
               <GitCommit size={14} /> Deployed versions
             </h2>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[560px] text-start text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3 font-medium">Service</th>
-                    <th className="py-2 pr-3 font-medium">Version</th>
-                    <th className="py-2 pr-3 font-medium">Git SHA</th>
-                    <th className="py-2 pr-3 font-medium">Built</th>
+                    <th className="py-2 pe-3 font-medium">Service</th>
+                    <th className="py-2 pe-3 font-medium">Version</th>
+                    <th className="py-2 pe-3 font-medium">Git SHA</th>
+                    <th className="py-2 pe-3 font-medium">Built</th>
                     <th className="py-2 font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-border/60">
-                    <td className="py-2 pr-3 font-medium">web-admin (this console)</td>
-                    <td className="py-2 pr-3 font-mono text-xs">—</td>
-                    <td className="py-2 pr-3 font-mono text-xs" title={OWN_SHA || undefined}>
+                    <td className="py-2 pe-3 font-medium">web-admin (this console)</td>
+                    <td className="py-2 pe-3 font-mono text-xs">—</td>
+                    <td className="py-2 pe-3 font-mono text-xs" title={OWN_SHA || undefined}>
                       {OWN_SHA ? shortSha(OWN_SHA) : "not stamped"}
                     </td>
-                    <td className="py-2 pr-3 text-xs">—</td>
+                    <td className="py-2 pe-3 text-xs">—</td>
                     <td className="py-2">
                       <ToneChip tone="ok" label="Serving you" />
                     </td>
@@ -338,12 +338,12 @@ export default function OpsHubPage() {
                       const m = serviceStatusMeta(s.status);
                       return (
                         <tr key={s.name} className="border-b border-border/60" data-testid="version-row">
-                          <td className="py-2 pr-3 font-medium">{s.name}</td>
-                          <td className="py-2 pr-3 font-mono text-xs">{versionLabel(s)}</td>
-                          <td className="py-2 pr-3 font-mono text-xs" title={s.gitSha || undefined}>
+                          <td className="py-2 pe-3 font-medium">{s.name}</td>
+                          <td className="py-2 pe-3 font-mono text-xs">{versionLabel(s)}</td>
+                          <td className="py-2 pe-3 font-mono text-xs" title={s.gitSha || undefined}>
                             {shortSha(s.gitSha)}
                           </td>
-                          <td className="py-2 pr-3 text-xs">{s.buildTime ? formatRelative(s.buildTime) : "—"}</td>
+                          <td className="py-2 pe-3 text-xs">{s.buildTime ? formatRelative(s.buildTime) : "—"}</td>
                           <td className="py-2">
                             <ToneChip tone={m.tone} label={m.label} />
                           </td>

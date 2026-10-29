@@ -146,7 +146,7 @@ public class TwilioSmsWebhookController {
                                 () -> {
                                     log.warn(
                                             "No tenant link found for Twilio AccountSid ***{}"
-                                                + " (inbound SMS) - falling back to the {} schema.",
+                                                    + " (inbound SMS) - falling back to the {} schema.",
                                             lastFour(accountSid),
                                             TenantSchemaResolver.DEFAULT_SCHEMA);
                                     return TenantSchemaResolver.DEFAULT_SCHEMA;
@@ -278,6 +278,7 @@ public class TwilioSmsWebhookController {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            turnContext.taint().mark("inbound:twilio_sms");
             reply =
                     relayed.isPresent()
                             ? relayed.get()

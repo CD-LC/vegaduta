@@ -10,14 +10,20 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /**
- * Owner scoping and TTL behavior of the in-memory task store - the two
- * properties {@link A2aTaskStore}'s javadoc promises despite (and because of)
- * the store being per-JVM.
+ * Owner scoping and TTL behavior of the in-memory task store - the two properties {@link
+ * A2aTaskStore}'s javadoc promises despite (and because of) the store being per-JVM.
  */
 class A2aTaskStoreTest {
 
     private static A2aTask task(String tenant, String subject) {
-        return new A2aTask(UUID.randomUUID().toString(), "ctx", UUID.randomUUID(), tenant, subject, "m1", "hi");
+        return new A2aTask(
+                UUID.randomUUID().toString(),
+                "ctx",
+                UUID.randomUUID(),
+                tenant,
+                subject,
+                "m1",
+                "hi");
     }
 
     @Test
@@ -62,7 +68,10 @@ class A2aTaskStoreTest {
 
         assertEquals(0, store.size());
         assertTrue(finished.isTerminal());
-        assertEquals(A2aTaskState.CANCELED, stuck.snapshot().state(), "an orphaned turn is cut, not just forgotten");
+        assertEquals(
+                A2aTaskState.CANCELED,
+                stuck.snapshot().state(),
+                "an orphaned turn is cut, not just forgotten");
     }
 
     @Test
@@ -126,6 +135,8 @@ class A2aTaskStoreTest {
         store.sweep(Instant.now());
 
         assertEquals(2, store.size());
-        assertTrue(store.find(inFlight.id(), "t", "s").isPresent(), "in-flight is never evicted for capacity");
+        assertTrue(
+                store.find(inFlight.id(), "t", "s").isPresent(),
+                "in-flight is never evicted for capacity");
     }
 }

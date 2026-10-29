@@ -3,7 +3,7 @@
 // Runs MusicGen-small (text-to-audio) entirely in the page via transformers.js -
 // the same runtime whisperWorker.ts and visionWorker.ts already carry, device:
 // "webgpu" where available and wasm otherwise. The model is Xenova/musicgen-small
-// (~1.8 GB fp32; the fp16 WebGPU path is the honest one on a laptop).
+// (~700 MB fp16 / ~570 MB q4; fp16 needs an adapter with shader-f16).
 //
 // Output is encoded as a 16-bit PCM WAV ArrayBuffer here in the worker so the
 // main thread only ever receives bytes - callers never touch the raw Float32
@@ -80,10 +80,34 @@ async function ensureAssets(requestId: number): Promise<LoadedAssets> {
         // Progress is best-effort.
       }
     };
-    const hasWebGpu = !!workerScope.navigator?.gpu;
+    // Device + dtype follow the adapter, not just the API's presence: fp16
+    // kernels need the adapter's "shader-f16" feature (SwiftShader and some
+    // older/integrated adapters lack it — transformers.js refuses the load
+    // outright). Without it the fp32 variant is NOT the fallback: MusicGen's
+    // fp32 decoder alone is ~1.7 GB, which ONNX Runtime can't session-create
+    // inside the browser's 4 GB wasm heap (protobuf parse + initializer
+    // copies) — observed live as "Can't create a session". q4 is the supported
+    // WebGPU-quantized path (~570 MB total via MatMulNBits); only a missing
+    // adapter drops to wasm+q8.
+    let device: "webgpu" | "wasm" = "wasm";
+    let dtype: "fp16" | "q4" | "q8" = "q8";
+    const gpu = workerScope.navigator?.gpu;
+    if (gpu) {
+      try {
+        const adapter = await (
+          gpu as { requestAdapter?: () => Promise<{ features?: { has?: (f: string) => boolean } } | null> }
+        ).requestAdapter?.();
+        if (adapter) {
+          device = "webgpu";
+          dtype = adapter.features?.has?.("shader-f16") === true ? "fp16" : "q4";
+        }
+      } catch {
+        // Adapter request failed — stay on the wasm path.
+      }
+    }
     const generator = await tf.pipeline("text-to-audio", MODEL_ID, {
-      device: hasWebGpu ? "webgpu" : "wasm",
-      dtype: hasWebGpu ? "fp16" : "q8",
+      device,
+      dtype,
       progress_callback,
     });
     assets = { generator };

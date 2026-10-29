@@ -1699,6 +1699,30 @@ export class AgentScheduleApi {
   }
 }
 
+export class AgentScratchpadApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/scratchpad`
+   */
+  list(agentId: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.AgentScratchpadController_ScratchpadListView> {
+    return this.http.request<T.AgentScratchpadController_ScratchpadListView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad` });
+  }
+
+  /**
+   * Read.
+   * `GET /api/agents/{agentId}/scratchpad/{key}`
+   */
+  read(agentId: string, key: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
+    return this.http.request<T.ScratchpadNoteView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad/${encodeURIComponent(String(key))}` });
+  }
+}
+
 export class AgentSessionLlmRequestApi {
   private readonly http: HttpClient;
 
@@ -15812,6 +15836,7 @@ export class VegadutaClient {
   readonly agentRunBudget: AgentRunBudgetApi;
   readonly agentRuntimeLimits: AgentRuntimeLimitsApi;
   readonly agentSchedule: AgentScheduleApi;
+  readonly agentScratchpad: AgentScratchpadApi;
   readonly agentSessionLlmRequest: AgentSessionLlmRequestApi;
   readonly agentSessionLlmUsage: AgentSessionLlmUsageApi;
   readonly agentSettings: AgentSettingsApi;
@@ -16152,6 +16177,7 @@ export class VegadutaClient {
     this.agentRunBudget = new AgentRunBudgetApi(this.http);
     this.agentRuntimeLimits = new AgentRuntimeLimitsApi(this.http);
     this.agentSchedule = new AgentScheduleApi(this.http);
+    this.agentScratchpad = new AgentScratchpadApi(this.http);
     this.agentSessionLlmRequest = new AgentSessionLlmRequestApi(this.http);
     this.agentSessionLlmUsage = new AgentSessionLlmUsageApi(this.http);
     this.agentSettings = new AgentSettingsApi(this.http);

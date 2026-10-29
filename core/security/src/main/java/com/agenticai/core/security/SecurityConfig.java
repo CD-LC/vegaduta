@@ -6,24 +6,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authorization.AuthorizationDecision;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -33,7 +29,11 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
@@ -81,9 +81,6 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @EnableMethodSecurity
 @Profile("!insecure")
 public class SecurityConfig {
-
-    private static final org.slf4j.Logger log =
-            org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
 
     // Read lazily in jwtDecoder(), not through @Value fields: in app.auth.mode=local there is no
     // Keycloak, these properties are unset (or, with the `security` profile, hold a placeholder
@@ -142,22 +139,12 @@ public class SecurityConfig {
     private String requiredAudience = "";
 
     /**
-     * Opt-out for {@link #checkTokenAcceptanceConfig}: set true to run a non-Keycloak issuer with
-     * neither an azp allowlist nor a required audience (any token the issuer mints is accepted).
-     * Env: {@code APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE}.
-     */
-    @Value("${app.security.jwt.allow-unrestricted-audience:false}")
-    private boolean allowUnrestrictedAudience;
-
-    /**
-     * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles,
-     * tenant and (optionally) scopes live in the token. The defaults reproduce
-     * the Keycloak layout EXACTLY ({@code realm_access.roles}, {@code
-     * tenant_id}, no scope mapping), so an unconfigured deployment is
-     * unchanged; point {@code issuer-uri} at Auth0/Entra/Okta and set these to
-     * that provider's claim names. See application-security.yml's
-     * {@code app.security.oidc} block. Env: {@code OIDC_ROLES_CLAIM_PATH},
-     * {@code OIDC_TENANT_CLAIM}, {@code OIDC_SCOPES_CLAIM}.
+     * Generic-OIDC claim mapping ({@link OidcClaimMapping}) - where roles, tenant and (optionally)
+     * scopes live in the token. The defaults reproduce the Keycloak layout EXACTLY ({@code
+     * realm_access.roles}, {@code tenant_id}, no scope mapping), so an unconfigured deployment is
+     * unchanged; point {@code issuer-uri} at Auth0/Entra/Okta and set these to that provider's
+     * claim names. See application-security.yml's {@code app.security.oidc} block. Env: {@code
+     * OIDC_ROLES_CLAIM_PATH}, {@code OIDC_TENANT_CLAIM}, {@code OIDC_SCOPES_CLAIM}.
      */
     @Value("${app.security.oidc.roles-claim-path:realm_access.roles}")
     private String rolesClaimPath;
@@ -169,45 +156,12 @@ public class SecurityConfig {
     private String scopesClaim;
 
     /**
-     * The mapping every claim-reading component below shares - built here once
-     * so the role converter, the tenant filter, the view-as synthetic token
-     * and the denial auditor can never disagree about which claim is which.
+     * The mapping every claim-reading component below shares - built here once so the role
+     * converter, the tenant filter, the view-as synthetic token and the denial auditor can never
+     * disagree about which claim is which.
      */
     private OidcClaimMapping claimMapping() {
         return new OidcClaimMapping(rolesClaimPath, tenantClaim, scopesClaim);
-    }
-
-    /**
-     * A shared multi-client issuer (Auth0, Entra, Okta, a Keycloak realm that is not the bundled
-     * one) signs tokens for every application in it, so signature plus issuer prove nothing about
-     * who the token was minted for. For an issuer that is not the bundled Keycloak (whose issuer
-     * path contains {@code /realms/}) with BOTH the azp allowlist and the required audience empty,
-     * fail startup rather than accept every token the issuer mints. Keycloak defaults are
-     * unchanged (the azp allowlist is non-empty by default).
-     *
-     * @throws IllegalStateException unless {@code allowUnrestricted} is set, in which case an ERROR
-     *     is logged instead
-     */
-    static void checkTokenAcceptanceConfig(
-            String issuerUri, String allowedAzp, String audience, boolean allowUnrestricted) {
-        boolean bundledKeycloak = issuerUri != null && issuerUri.contains("/realms/");
-        boolean noAzp = allowedAzp == null || allowedAzp.isBlank();
-        boolean noAud = audience == null || audience.isBlank();
-        if (bundledKeycloak || !noAzp || !noAud) {
-            return;
-        }
-        String message =
-                "JWT issuer '" + issuerUri + "' is not the bundled Keycloak and both"
-                        + " app.keycloak.allowed-azp and app.security.jwt.required-audience are"
-                        + " empty, so every token this issuer signs for ANY application would be"
-                        + " accepted. Set APP_SECURITY_JWT_REQUIRED_AUDIENCE (preferred) or"
-                        + " APP_KEYCLOAK_ALLOWED_AZP, or set"
-                        + " APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE=true to accept this risk.";
-        if (allowUnrestricted) {
-            log.error("{} (continuing: app.security.jwt.allow-unrestricted-audience=true)", message);
-            return;
-        }
-        throw new IllegalStateException(message);
     }
 
     /**
@@ -255,6 +209,31 @@ public class SecurityConfig {
         };
     }
 
+    /**
+     * SEC-056 follow-up: a generic-OIDC issuer (Auth0/Entra/Okta) with BOTH client-bound checks
+     * empty validates neither {@code azp} nor {@code aud} - the only way such a token was even
+     * accepted before was the documented emergency lever of emptying the Keycloak-specific azp
+     * allow-list. Keycloak issuers always contain {@code /realms/} (the lever stays available
+     * there); any other issuer must configure at least one of the two checks or the boot refuses to
+     * start.
+     */
+    static void requireClientCheckForNonKeycloakIssuer(
+            String issuerUri, String allowedAuthorizedParties, String requiredAudience) {
+        boolean keycloakStyleIssuer = issuerUri != null && issuerUri.contains("/realms/");
+        if (!keycloakStyleIssuer
+                && isBlank(allowedAuthorizedParties)
+                && isBlank(requiredAudience)) {
+            throw new IllegalStateException(
+                    "issuer-uri '"
+                            + issuerUri
+                            + "' is not a Keycloak /realms/ issuer, but both"
+                            + " app.keycloak.allowed-azp (APP_KEYCLOAK_ALLOWED_AZP) and"
+                            + " app.security.jwt.required-audience (APP_SECURITY_JWT_REQUIRED_AUDIENCE)"
+                            + " are empty - a generic-OIDC deployment must configure at least one of"
+                            + " them, or no token is checked against the client it was issued to.");
+        }
+    }
+
     private static java.util.Set<String> csvToSet(String csv) {
         java.util.Set<String> out = new java.util.LinkedHashSet<>();
         if (csv == null) {
@@ -268,6 +247,10 @@ public class SecurityConfig {
         return out;
     }
 
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
     /**
      * Mirrors the controller's own switch; when false, /v1/** stays a plain authenticated 404 and
      * vmcp_ keys get no special handling.
@@ -277,13 +260,14 @@ public class SecurityConfig {
 
     /**
      * The Keycloak / generic-OIDC decoder. Absent only when {@code app.auth.mode=local}, where
-     * {@link com.agenticai.core.security.localauth.LocalAuthSecurityConfig} supplies the decoder for
-     * locally issued tokens; the default (property unset or {@code keycloak}) is unchanged.
+     * {@link com.agenticai.core.security.localauth.LocalAuthSecurityConfig} supplies the decoder
+     * for locally issued tokens; the default (property unset or {@code keycloak}) is unchanged.
      */
     @Bean
     @ConditionalOnProperty(name = "app.auth.mode", havingValue = "keycloak", matchIfMissing = true)
     public JwtDecoder jwtDecoder() {
-        String issuerUri = environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri", "");
+        String issuerUri =
+                environment.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri", "");
         String jwkSetUri = environment.getProperty("app.keycloak.jwk-set-uri", "");
         if (issuerUri.isBlank() || jwkSetUri.isBlank()) {
             throw new IllegalStateException(
@@ -291,8 +275,15 @@ public class SecurityConfig {
                             + " (KEYCLOAK_ISSUER_URI) and app.keycloak.jwk-set-uri"
                             + " (KEYCLOAK_JWK_SET_URI); set them, or use app.auth.mode=local");
         }
-        checkTokenAcceptanceConfig(
-                issuerUri, allowedAuthorizedParties, requiredAudience, allowUnrestrictedAudience);
+        // SEC-056 follow-up (2026-10-27): a generic-OIDC issuer (Auth0/Entra/Okta) never carries
+        // Keycloak's azp semantics, so the operator's only way to make tokens pass was to empty the
+        // azp allow-list (the documented emergency lever) - and with the audience check also off by
+        // default, such a deployment validated NEITHER azp NOR audience. Keycloak issuers always
+        // contain "/realms/", so that path keeps the lever; any other issuer must configure at
+        // least one of the two client-bound checks, or the boot refuses to start rather than
+        // silently accepting any token from the realm.
+        requireClientCheckForNonKeycloakIssuer(
+                issuerUri, allowedAuthorizedParties, requiredAudience);
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
         java.util.LinkedHashSet<String> acceptedIssuers = new java.util.LinkedHashSet<>();
@@ -412,7 +403,10 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain mcpServerFilterChain(HttpSecurity http) throws Exception {
         // The RFC 9728 well-known document is public by design (app.mcpserver.oauth.enabled).
-        http.securityMatcher("/mcp/**", "/api/dev/**", "/.well-known/oauth-protected-resource/**",
+        http.securityMatcher(
+                        "/mcp/**",
+                        "/api/dev/**",
+                        "/.well-known/oauth-protected-resource/**",
                         "/.well-known/oauth-protected-resource")
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
@@ -450,7 +444,7 @@ public class SecurityConfig {
                                                 csp ->
                                                         csp.policyDirectives(
                                                                 "default-src 'none';"
-                                                                    + " frame-ancestors 'none'"))
+                                                                        + " frame-ancestors 'none'"))
                                         .referrerPolicy(
                                                 referrer ->
                                                         referrer.policy(
@@ -608,7 +602,7 @@ public class SecurityConfig {
                 response.getWriter()
                         .write(
                                 "{\"error\":{\"message\":\"Incorrect API key provided.\","
-                                    + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
+                                        + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
                 return;
             }
             delegate.commence(request, response, ex);
@@ -619,8 +613,8 @@ public class SecurityConfig {
     /**
      * SE-80: the stock bearer entry point answers 401 with an empty body while every other error
      * carries a problem+json document. Adds one (fixed text: nothing about why the token failed
-     * leaks; the {@code WWW-Authenticate} header the delegate set still carries the RFC 6750 detail).
-     * Skipped when the response is already committed or has a body.
+     * leaks; the {@code WWW-Authenticate} header the delegate set still carries the RFC 6750
+     * detail). Skipped when the response is already committed or has a body.
      */
     static void writeUnauthorizedProblem(
             jakarta.servlet.http.HttpServletRequest request,
@@ -629,15 +623,21 @@ public class SecurityConfig {
         if (response.isCommitted()) {
             return;
         }
-        String path = request.getRequestURI() == null ? "" : request.getRequestURI().replace("\\", "").replace("\"", "");
+        String path =
+                request.getRequestURI() == null
+                        ? ""
+                        : request.getRequestURI().replace("\\", "").replace("\"", "");
         response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter()
                 .write(
                         "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\","
                                 + "\"status\":401,\"detail\":\"Authentication is required to access this resource.\","
-                                + "\"instance\":\"" + path + "\",\"timestamp\":\""
-                                + java.time.Instant.now() + "\","
+                                + "\"instance\":\""
+                                + path
+                                + "\",\"timestamp\":\""
+                                + java.time.Instant.now()
+                                + "\","
                                 + "\"error\":\"Authentication is required to access this resource.\"}");
     }
 

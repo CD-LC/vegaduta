@@ -89,7 +89,7 @@ export default function SharePanel({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="ml-auto border-0 bg-transparent p-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              className="ms-auto border-0 bg-transparent p-0 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("share_close")}
             </button>

@@ -174,19 +174,19 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
       <div className="relative" data-tour="mcp-search">
         <Search
           aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground shrink-0"
+          className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground shrink-0"
         />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search the MCP registry - weather, github, maps…"
-          className="pl-9"
+          className="ps-9"
           aria-label="Search the MCP registry"
         />
         {searching && (
           <Loader2
             aria-hidden="true"
-            className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground shrink-0"
+            className="absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground shrink-0"
           />
         )}
       </div>

@@ -348,11 +348,11 @@ export default function PlatformUsersPage() {
               type="button"
               onClick={() => setSelected(selected === u.id ? null : u.id)}
               aria-expanded={selected === u.id}
-              className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-lg border-0 bg-transparent p-3 text-left hover:bg-accent"
+              className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 rounded-lg border-0 bg-transparent p-3 text-start hover:bg-accent"
             >
               <span className="min-w-0">
                 <span className="font-medium">{u.username}</span>
-                <span className="ml-2 text-xs text-muted-foreground">{u.email}</span>
+                <span className="ms-2 text-xs text-muted-foreground">{u.email}</span>
                 <span className="mt-0.5 block text-[11px] text-muted-foreground">
                   Created <span title={formatExact(u.createdAt)}>{formatDay(u.createdAt)}</span> · Last seen{" "}
                   <span title={formatExact(u.lastSeenAt)}>
@@ -369,7 +369,7 @@ export default function PlatformUsersPage() {
                 {!u.enabled && <Badge variant="destructive">Suspended</Badge>}
               </span>
             </button>
-            <div className="flex items-center gap-2 pr-3">
+            <div className="flex items-center gap-2 pe-3">
               {u.tenantId && (
                 <Button
                   type="button"

@@ -20,7 +20,7 @@ function ToolList({ label, names }: { label: string; names: string[] }) {
     <div className="text-xs">
       <span className="font-medium">{label}:</span>{" "}
       {names.map((n) => (
-        <code key={n} className="mr-1 rounded bg-muted px-1 py-0.5">
+        <code key={n} className="me-1 rounded bg-muted px-1 py-0.5">
           {n}
         </code>
       ))}

@@ -1450,6 +1450,25 @@ class AgentScheduleApi:
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/schedule/runs", query={"limit": limit})
 
 
+class AgentScratchpadApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, session: Optional[str] = None) -> m.AgentScratchpadController_ScratchpadListView:
+        """List.
+
+        GET /api/agents/{agentId}/scratchpad
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad", query={"session": session})
+
+    def read(self, agent_id: str, key: str, *, session: Optional[str] = None) -> m.ScratchpadNoteView:
+        """Read.
+
+        GET /api/agents/{agentId}/scratchpad/{key}
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
+
+
 class AgentSessionLlmRequestApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13386,6 +13405,7 @@ class VegadutaClient:
         self.agent_run_budget = AgentRunBudgetApi(self.http)
         self.agent_runtime_limits = AgentRuntimeLimitsApi(self.http)
         self.agent_schedule = AgentScheduleApi(self.http)
+        self.agent_scratchpad = AgentScratchpadApi(self.http)
         self.agent_session_llm_request = AgentSessionLlmRequestApi(self.http)
         self.agent_session_llm_usage = AgentSessionLlmUsageApi(self.http)
         self.agent_settings = AgentSettingsApi(self.http)

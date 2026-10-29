@@ -1,7 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, BarChart3, Braces, Download, Loader2, Plus, Settings2, Trash2, Upload } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  Braces,
+  Download,
+  Loader2,
+  Plus,
+  Settings2,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { api, triggerBrowserDownload } from "../../lib/api";
 import { toast } from "../../lib/toastBus";
 import { useTranslations } from "../../lib/i18n";
@@ -50,7 +61,6 @@ const DEFAULT_PAGE_SIZE = 50;
 // "Export this view" pages through the rows endpoint at its ceiling and stops where the server's own export does.
 const EXPORT_PAGE = 1000;
 const EXPORT_MAX_ROWS = 50_000;
-
 
 type Props = {
   table: DataTableSummary;
@@ -125,7 +135,6 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
 
   // ---- table-level actions
 
-
   const removeTable = async () => {
     try {
       await api.deleteDataTable(table.id);
@@ -168,7 +177,6 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
       setExportingView(false);
     }
   };
-
 
   // ---- column actions (handlers never reject: errors were already shown)
 
@@ -295,7 +303,6 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
 
   // ---- filter editing
 
-
   const applyFilters = () => {
     setApplied(activeFilters(draftFilters));
     setOffset(0);
@@ -308,7 +315,6 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
   };
 
   // ---- rendering
-
 
   const info = page ? pageInfo(page.offset, page.limit, page.total, page.items.length) : null;
   const percent = usagePercent(table.rowCount, config.maxRowsPerTable);
@@ -498,7 +504,7 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
                           <ArrowDown size={12} aria-hidden="true" />
                         ))}
                     </button>
-                    <Badge variant="outline" className="ml-2 normal-case tracking-normal">
+                    <Badge variant="outline" className="ms-2 normal-case tracking-normal">
                       {t(`type_${c.type}`)}
                     </Badge>
                   </TableHead>
@@ -520,7 +526,14 @@ export default function DataTableGrid({ table, config, onChanged, onDeleted, rea
                 <TableRow key={row.id}>
                   {columns.map((c) => (
                     <TableCell key={c.name} className="max-w-[22rem] align-top">
-                      <GridCell row={row} col={c} editing={editing} readOnly={readOnly} setEdit={setEdit} commitEdit={commitEdit} />
+                      <GridCell
+                        row={row}
+                        col={c}
+                        editing={editing}
+                        readOnly={readOnly}
+                        setEdit={setEdit}
+                        commitEdit={commitEdit}
+                      />
                     </TableCell>
                   ))}
                   <TableCell>

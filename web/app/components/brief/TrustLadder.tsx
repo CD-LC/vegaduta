@@ -221,7 +221,7 @@ export default function TrustLadder({
               <h5 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {t("trust.willChange")}
               </h5>
-              <ul className="list-disc space-y-1 pl-4">
+              <ul className="list-disc space-y-1 ps-4">
                 {view.effects.map((d, i) => (
                   <li key={i} className="text-sm text-foreground">
                     {d}

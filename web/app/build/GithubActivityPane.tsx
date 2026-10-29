@@ -32,37 +32,38 @@ export default function GithubActivityPane({ project, githubStatus }) {
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          Build and preview run on your own GitHub repo and Actions minutes — not on this platform. Apps with
-          a buildable web output get a free GitHub Pages preview on every push to the app-builder branch.
+          Build and preview run on your own GitHub repo and Actions minutes — not on this platform. Apps with a
+          buildable web output get a free GitHub Pages preview on every push to the app-builder branch.
         </p>
 
         <details className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">
           <summary className="cursor-pointer font-medium text-foreground">
             How the preview works — and what to do when it 404s
           </summary>
-          <ol className="mt-2 list-decimal space-y-1.5 pl-4">
+          <ol className="mt-2 list-decimal space-y-1.5 ps-4">
             <li>
               Every change you ask for is committed to the{" "}
-              <code className="rounded bg-muted px-1 py-0.5">app-builder/&lt;project&gt;</code> branch. The
-              repo&apos;s own Actions workflow builds the app and deploys it to{" "}
+              <code className="rounded bg-muted px-1 py-0.5">app-builder/&lt;project&gt;</code> branch. The repo&apos;s
+              own Actions workflow builds the app and deploys it to{" "}
               <span className="font-medium text-foreground">GitHub Pages</span> — the link below.
             </li>
             <li>
-              The first deploy takes a minute or two — the link <span className="font-medium text-foreground">404s
-              until that run finishes</span>. Watch it under the repo&apos;s{" "}
-              <span className="font-medium text-foreground">Actions → pages</span> job.
+              The first deploy takes a minute or two — the link{" "}
+              <span className="font-medium text-foreground">404s until that run finishes</span>. Watch it under the
+              repo&apos;s <span className="font-medium text-foreground">Actions → pages</span> job.
             </li>
             <li>
-              Still 404 after that? Pages isn&apos;t enabled on the repo (the connected token can&apos;t switch it
-              on itself). Fix once: repo <span className="font-medium text-foreground">Settings → Pages → Source:
-              GitHub Actions</span>, then <span className="font-medium text-foreground">Actions → the failed run →
-              Re-run failed jobs</span>. Or disconnect and reconnect here with a token that also has{" "}
-              <span className="font-medium text-foreground">Pages: Read and write</span> — we&apos;ll enable it for
-              you automatically.
+              Still 404 after that? Pages isn&apos;t enabled on the repo (the connected token can&apos;t switch it on
+              itself). Fix once: repo{" "}
+              <span className="font-medium text-foreground">Settings → Pages → Source: GitHub Actions</span>, then{" "}
+              <span className="font-medium text-foreground">Actions → the failed run → Re-run failed jobs</span>. Or
+              disconnect and reconnect here with a token that also has{" "}
+              <span className="font-medium text-foreground">Pages: Read and write</span> — we&apos;ll enable it for you
+              automatically.
             </li>
             <li>
-              Only pushes to the app-builder branch publish the preview — commits elsewhere don&apos;t touch it.
-              Merging or closing the PR does not affect the preview either.
+              Only pushes to the app-builder branch publish the preview — commits elsewhere don&apos;t touch it. Merging
+              or closing the PR does not affect the preview either.
             </li>
           </ol>
         </details>
@@ -80,8 +81,8 @@ export default function GithubActivityPane({ project, githubStatus }) {
           </div>
         ) : !activity ? (
           <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Connected to <span className="font-mono text-foreground">{githubStatus.repo_full_name}</span>. Ask
-            for a change in the chat and it will push a branch and open a pull request here.
+            Connected to <span className="font-mono text-foreground">{githubStatus.repo_full_name}</span>. Ask for a
+            change in the chat and it will push a branch and open a pull request here.
           </div>
         ) : (
           <div className="space-y-3">

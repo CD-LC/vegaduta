@@ -95,7 +95,7 @@ function MeterRow({
         </span>
         <span className="font-mono text-sm tabular-nums text-foreground">
           {t("usedOf", { used: used.toLocaleString(), limit: limit.toLocaleString() })}
-          <span className="ml-2 text-xs text-muted-foreground">{t("percentUsed", { percent })}</span>
+          <span className="ms-2 text-xs text-muted-foreground">{t("percentUsed", { percent })}</span>
         </span>
       </div>
       <div

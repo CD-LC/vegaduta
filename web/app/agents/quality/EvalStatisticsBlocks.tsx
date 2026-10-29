@@ -12,7 +12,19 @@ import { Section, StatCard } from "../../components/ax/page-kit";
 import PaginationControls from "../../components/PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 import type { CaseReliabilityResponse, DatasetNoiseFloorResponse, DatasetReliabilityResponse } from "../../lib/api";
-import { caseMeanScoreEstimate, casePassEstimate, caseUnscoredRollouts, formatEstimate, formatValue, intervalToEstimate, isCaseFlaky, metric, metricEstimate, orEmptyEstimate, type IntervalEstimate } from "./evalStatisticsApi";
+import {
+  caseMeanScoreEstimate,
+  casePassEstimate,
+  caseUnscoredRollouts,
+  formatEstimate,
+  formatValue,
+  intervalToEstimate,
+  isCaseFlaky,
+  metric,
+  metricEstimate,
+  orEmptyEstimate,
+  type IntervalEstimate,
+} from "./evalStatisticsApi";
 import { FlakyBadge, ScoreWithInterval, UnreplicatedBadge } from "./ScoreWithInterval";
 
 /** The `[lo–hi], n=k` tail of a formatted estimate, for StatCard's `sub` slot
@@ -42,7 +54,7 @@ export function WarningsList({ warnings }: { warnings: string[] }) {
       <ShieldAlert aria-hidden="true" />
       <AlertTitle>Read these before quoting the numbers</AlertTitle>
       <AlertDescription>
-        <ul className="list-disc space-y-1 pl-5">
+        <ul className="list-disc space-y-1 ps-5">
           {warnings.map((w, i) => (
             <li key={i}>{w}</li>
           ))}
@@ -292,7 +304,7 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
             console will not assume the floor is zero on your behalf.
           </p>
           {(floor?.warnings || []).length > 0 && (
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-xs">
+            <ul className="mt-2 list-disc space-y-1 ps-5 text-xs">
               {(floor?.warnings || []).map((w, i) => (
                 <li key={i}>{w}</li>
               ))}

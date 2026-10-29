@@ -55,7 +55,7 @@ export default function PaginationControls({
           ? `${start}–${end} of ${totalItems} ${itemLabel}`
           : `${start}–${end} ${itemLabel}${hasMore ? " (more available)" : ""}`}
         {showCap && (
-          <span className="ml-2 text-[var(--warning-text)]" role="status">
+          <span className="ms-2 text-[var(--warning-text)]" role="status">
             Showing the first {capped}. Narrow the filters to see more.
           </span>
         )}

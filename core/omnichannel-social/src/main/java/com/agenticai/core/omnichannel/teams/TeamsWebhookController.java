@@ -264,6 +264,7 @@ public class TeamsWebhookController {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            turnContext.taint().mark("inbound:teams");
             reply =
                     agentChatService
                             .chat(turnContext, chatTurn)

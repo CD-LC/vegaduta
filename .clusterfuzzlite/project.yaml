@@ -1,0 +1,7 @@
+# ClusterFuzzLite project metadata - jvm maps to Jazzer (the same engine the
+# direct .github/workflows/fuzz.yml run used before this wrapper existed).
+language: jvm
+sanitizers:
+  - address
+fuzzing_engines:
+  - libfuzzer

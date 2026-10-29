@@ -309,7 +309,7 @@
   background: rgba(79, 227, 227, 0.05);
   border: 1px solid rgba(79, 227, 227, 0.22);
   border-radius: 13px;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   display: flex;
   flex-direction: column;

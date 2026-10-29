@@ -183,7 +183,7 @@ export default function TranscriptionProviderOptions({
         {getStatusBadge(p.id)}
         {getNeedsSetupBadge(p)}
         {isFreePlan && p.isPremium && (
-          <span className="state-pill ml-auto" style={{ ["--state" as any]: "var(--state-warning)" } as any}>
+          <span className="state-pill ms-auto" style={{ ["--state" as any]: "var(--state-warning)" } as any}>
             Premium
           </span>
         )}

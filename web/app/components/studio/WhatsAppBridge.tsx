@@ -91,7 +91,7 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
               Your live agent answers you in WhatsApp.
             </p>
             <Button size="sm" onClick={onGetCode} disabled={busy}>
-              {busy ? <Loader2 aria-hidden="true" className="mr-2 h-3.5 w-3.5 animate-spin shrink-0" /> : null}
+              {busy ? <Loader2 aria-hidden="true" className="me-2 h-3.5 w-3.5 animate-spin shrink-0" /> : null}
               Get code
             </Button>
           </div>
@@ -116,7 +116,7 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
               </p>
               <Button asChild size="sm" variant="outline">
                 <a href={link} target="_blank" rel="noopener noreferrer">
-                  Open WhatsApp <ExternalLink aria-hidden="true" className="ml-2 h-3.5 w-3.5 shrink-0" />
+                  Open WhatsApp <ExternalLink aria-hidden="true" className="ms-2 h-3.5 w-3.5 shrink-0" />
                 </a>
               </Button>
               <p className="flex items-center gap-2 text-xs text-muted-foreground">

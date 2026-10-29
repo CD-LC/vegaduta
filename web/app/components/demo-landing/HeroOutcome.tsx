@@ -281,7 +281,7 @@ export default function HeroOutcome() {
     <div data-testid="hero-outcome">
       <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-14">
         {/* ---------------- Text column ---------------- */}
-        <div className="text-left">
+        <div className="text-start">
           {/* Tagline pill — the platform's promise, not a pricing claim, so it
               reads true in both builds (2026-10-09; replaced the "free for 3
               months" eyebrow). Free mode adds the four ways to power it. */}
@@ -438,7 +438,7 @@ export default function HeroOutcome() {
               <span className="size-2 rounded-full" style={{ background: "var(--mkt-line-strong)" }} />
             </span>
             <span className="mkt-ui-label mkt-ink-3 truncate">vegaduta · {t("h2_termTitle")}</span>
-            <span className="mkt-pill ml-auto shrink-0">{t("h2_termSimLabel")}</span>
+            <span className="mkt-pill ms-auto shrink-0">{t("h2_termSimLabel")}</span>
           </div>
           <BuildConsole
             workloadId={persona}
@@ -456,7 +456,7 @@ export default function HeroOutcome() {
             <button
               type="button"
               onClick={openDialog}
-              className="mkt-link ml-auto inline-flex shrink-0 items-center gap-1.5 border-0 bg-transparent p-0 font-medium shadow-none"
+              className="mkt-link ms-auto inline-flex shrink-0 items-center gap-1.5 border-0 bg-transparent p-0 font-medium shadow-none"
               data-testid="hero-video-open"
             >
               <Play className="size-3.5" aria-hidden="true" />

@@ -377,7 +377,7 @@ export default function TryStudio() {
             <p className="mb-4 text-sm text-muted-foreground">{unavailable}</p>
             <div className="flex gap-2">
               <Button onClick={() => window.location.reload()}>
-                <RefreshCw aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Try again
+                <RefreshCw aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Try again
               </Button>
               <Button variant="outline" asChild>
                 <Link href="/signup">Create a free account instead</Link>

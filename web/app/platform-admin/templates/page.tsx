@@ -144,13 +144,13 @@ function PendingQueueTab() {
             <div className="relative max-w-sm">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search title, submitter, tenant…"
-                className="pl-8"
+                className="ps-8"
               />
             </div>
             {filtered.length === 0 && (

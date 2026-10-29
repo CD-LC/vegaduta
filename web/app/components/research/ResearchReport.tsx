@@ -133,7 +133,7 @@ export default function ResearchReport({ job, noToolCalls = false }: { job: any;
               {t("unansweredHeading")}
             </p>
             <p className="text-xs text-muted-foreground">{t("unansweredNote")}</p>
-            <ul className="ml-5 list-disc space-y-1 text-sm text-foreground">
+            <ul className="ms-5 list-disc space-y-1 text-sm text-foreground">
               {result.unanswered.map((u, i) => (
                 <li key={i}>{u}</li>
               ))}
@@ -167,7 +167,7 @@ export default function ResearchReport({ job, noToolCalls = false }: { job: any;
                 <Link
                   href="/research"
                   onClick={() => setResearchPrefill(f.prompt)}
-                  className="inline-flex max-w-full rounded-full border border-border px-3 py-1.5 text-left text-sm text-foreground hover:bg-muted [overflow-wrap:anywhere]"
+                  className="inline-flex max-w-full rounded-full border border-border px-3 py-1.5 text-start text-sm text-foreground hover:bg-muted [overflow-wrap:anywhere]"
                 >
                   {f.label}
                 </Link>

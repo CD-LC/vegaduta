@@ -75,14 +75,19 @@ export default function InvoicesCard({
               type="button"
               onClick={() => inv.id && onOpenInvoice(inv.id)}
               title={t("invoiceOpenHint")}
-              className={`flex w-full cursor-pointer items-center gap-3 bg-transparent px-1 py-2.5 text-left text-[0.8rem] text-foreground outline-none hover:bg-accent/40 focus-visible:ring-[3px] focus-visible:ring-ring ${
+              className={`flex w-full cursor-pointer items-center gap-3 bg-transparent px-1 py-2.5 text-start text-[0.8rem] text-foreground outline-none hover:bg-accent/40 focus-visible:ring-[3px] focus-visible:ring-ring ${
                 i === 0 ? "" : "border-t border-border"
               }`}
             >
               <span className="whitespace-nowrap font-mono text-muted-foreground">{invoiceDate(inv)}</span>
               <span className="min-w-0 truncate font-mono">{invoiceNumber(inv)}</span>
-              <span className="ml-auto whitespace-nowrap font-mono">{invoiceAmount(inv)}</span>
-              <ArrowTopRightOnSquareIcon aria-hidden="true" width={13} height={13} className="shrink-0 text-muted-foreground" />
+              <span className="ms-auto whitespace-nowrap font-mono">{invoiceAmount(inv)}</span>
+              <ArrowTopRightOnSquareIcon
+                aria-hidden="true"
+                width={13}
+                height={13}
+                className="shrink-0 text-muted-foreground"
+              />
             </button>
           ))}
           <PaginationControls

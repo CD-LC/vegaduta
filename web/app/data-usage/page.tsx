@@ -86,12 +86,10 @@ function SystemCard({ system }: { system: TenantDataUsageSystem }) {
             </div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{system.role}</p>
           </div>
-          <div className="flex shrink-0 flex-col items-end gap-1 text-right">
+          <div className="flex shrink-0 flex-col items-end gap-1 text-end">
             <span className="flex items-center gap-1.5">
               <StatusDot status={isActive ? "up" : "pending"} />
-              <span className="text-xs font-medium text-foreground">
-                {isActive ? "Active" : "Built, not yet live"}
-              </span>
+              <span className="text-xs font-medium text-foreground">{isActive ? "Active" : "Built, not yet live"}</span>
             </span>
             {/* Direct instruction: don't hide or downplay "available, not yet
              * engaged" (Temporal) behind a vague "coming soon" - state it as
@@ -212,8 +210,8 @@ export default function DataUsagePage() {
             <CardContent>
               <h3 className="text-sm font-semibold text-foreground">Export or delete your workspace&apos;s data</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                You can download everything listed above as a single export, or permanently delete your
-                entire workspace.
+                You can download everything listed above as a single export, or permanently delete your entire
+                workspace.
               </p>
               {canManageData ? (
                 <Link
@@ -225,8 +223,7 @@ export default function DataUsagePage() {
                 </Link>
               ) : (
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Data export and workspace deletion are managed by your workspace admin, under Platform
-                  Maintenance.
+                  Data export and workspace deletion are managed by your workspace admin, under Platform Maintenance.
                 </p>
               )}
             </CardContent>

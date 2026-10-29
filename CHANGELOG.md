@@ -41,6 +41,107 @@ Release notes on GitHub are generated from the section for each version.
   failures store the exception type and a bounded, redacted message instead of
   raw text; `ApprovalStore.update` documents the compare-and-set requirement for
   multi-process use.
+## [0.1.13] - 2026-10-28
+
+### Added
+
+- **Agent scratchpad: discoverability, lifecycle and an operator view.** The
+  four `scratchpad_*` tools are deferred (behind `search_tools`), so a model
+  that never searched for tools never learned the notepad existed. A new
+  standing directive (`directive.scratchpad`, kill-switch
+  `app.chat.directives.scratchpad.enabled`) now tells the turn "you have a
+  private scratchpad - persist plans and large extractions there" on exactly
+  the turns where the pad is reachable: on the tool list outright, or offered
+  and deferred behind `search_tools`. `scratchpad_list` results are
+  size-aware - key, scope, `byte_size`, a bounded preview and `total_bytes`,
+  bodies still fetched via `scratchpad_read` - and `scratchpad_write` to a
+  full pad now evicts the least-recently-updated note instead of failing
+  (`app.tools.scratchpad.evict-oldest-on-cap`, default on; the tool result
+  names the dropped key). Session-pad notes age out lazily on writes
+  (`app.tools.scratchpad.session-note-ttl`, default `30d`; the agent
+  long-term pad never expires unless `agent-note-ttl` is set). Operators get a
+  read-only REST window, `GET /api/agents/{agentId}/scratchpad[?session=...]`
+  and `GET .../scratchpad/{key}` (VIEWER access; `session=agent` or omitted
+  reads the long-term pad).
+
+- **On-screen keyboard follows the selected language.** A keyboard toggle in
+  the topbar (next to the language switcher) opens a floating board in the
+  current locale's script — Arabic, Devanagari, Bengali, Punjabi, Kannada,
+  Malayalam, Odia, Telugu, Sindhi, Urdu, Chinese, Japanese, and the European
+  layouts — and types into whichever input has focus, so chat, search, and
+  forms all work without wiring. Layout data (`simple-keyboard-layouts`)
+  lazy-loads per locale so pages never pay for scripts they don't use;
+  Devanagari-script locales share the Hindi layout and Kashmiri the Urdu one.
+  Locales with no matching layout keep the toggle disabled rather than
+  offering a board in the wrong script.
+
+- **A2A console: `admin/a2a` and per-agent endpoint panels.** Tenant
+  managers get a console view of agent-to-agent traffic that the A2A protocol
+  itself will not list (the spec's `tasks/list` answers
+  UnsupportedOperationError): inbound "who called my agents" and outbound
+  "which remote agents did my agents call" rows with direction, state,
+  subject, timings and a bounded reply preview; a detail view with the full
+  record; cancel for in-flight inbound turns (an outbound cancel only
+  annotates local bookkeeping - the remote task stays authoritative); and a
+  read-only policy panel with the operator-set outbound allow-list and this
+  deployment's JSON-RPC, HTTP+JSON, agent card and JWKS endpoints. Each
+  agent's page also carries an `A2aEndpointPanel` with that agent's own
+  endpoints. The surface is manager-gated
+  (`PERM_MANAGE_AGENTS` / tenant-admin / platform-admin), cross-tenant task
+  ids answer 404, and it is off on personal installs
+  (`EditionFeature.A2A_DIRECTORY`).
+
+### Fixed
+
+- **Release image builds no longer die on `tool-sandbox` (amd64) or `core-full` (arm64).**
+  Node 26.11's amd64 binary gained a `libatomic` link that was previously
+  arm64-only while the Dockerfile only installed it for aarch64, and
+  core-full's server-puppeteer `npx` pre-warm resolved the package from the
+  local toolchain tree instead of seeding `~/.npm/_npx`, leaving the patched
+  overlay nothing to copy.
+
+
+- **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload, on bigger-window models, and on adapters without `shader-f16`.** Three wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. The tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools. And MusicGen hard-required fp16 weights on the WebGPU path, so adapters without the `shader-f16` feature failed every load with a bare "Download failed" — the worker now always takes the model's q4 weights on WebGPU — fp32 and fp16 both fail session creation inside the browser's wasm heap (the fp16 decoder alone is ~850 MB, fp32 ~1.7 GB), while q4 is the supported WebGPU-quantized path at ~570 MB and needs no shader-f16; wasm+q8 stays the no-WebGPU path, while the image tool and its Edge-console card gate honestly on fp16 support since SD-Turbo ships fp16-only weights. Load failures also surface the worker's real error detail in the download chip instead of "Download failed" alone. Finally, models whose context window still can't afford a tool's schema now get a system-prompt note naming the omitted tools with an explicit "calls will be refused — do not substitute a different tool" instruction, so a request like "generate an image" no longer gets silently improvised into `generate_document` with a PNG type; if the model calls a trimmed name anyway, the refusal now says the schema didn't fit this model's prompt budget (and that a bigger-window model offers it) instead of the wrong "this device cannot run it".
+
+- **Personal sign-in explains why the PIN pad is absent on an unenrolled browser.** A PIN is deliberately per-browser (the digits only count together with that browser's device secret), but on a second browser the sign-in screen silently showed no pad — it read as "my PIN stopped working". When the account has a PIN and this browser isn't enrolled, the screen now says so and points at signing in another way and adding this browser in Account security; `docs/personal-mode.md` gained a matching "second browser or machine" entry.
+
+- **Auto-injected retrieval and inbound channel turns now propagate taint to tool gates.**
+  Previously, only explicit `UNTRUSTED_EXTERNAL` tool calls (such as `fetch_web_page` or
+  `search_knowledge_base`) marked a turn as tainted. Auto-injected context bypassed the taint gate:
+  - `ChatPromptAssembler` now marks the turn tainted with `recall_related_facts` whenever
+    long-term memory recall injects stored (private or tenant-shared) facts into the prompt,
+    while owner-authored static blocks (persona/profile/notes) remain clean.
+  - The workflow `knowledge` node now wraps retrieved context with `Spotlight.wrap` delimiters
+    and per-chunk source citations rather than raw string concatenation. Downstream agent nodes
+    detecting spotlight-delimited input are marked tainted with `untrusted_input`.
+  - Inbound non-owner entry points across omnichannel adapters (WhatsApp, Telegram, Twilio,
+    Signal, Matrix, Email, Discord, Slack, Teams, X, MCP, and Studio App) now mark `TurnContext.taint()`
+    with `inbound:<channel>`.
+  - `TurnContext` now carries its own `TurnTaint` record, and `AgentToolProvider` binds it to
+    the turn's step counter during tool resolution, ensuring tool guards and taint gates evaluate
+    sink permissions against auto-injected and inbound taint.
+- **Workflow retries no longer duplicate irreversible side effects.** The
+  legacy retry path only excluded `output` nodes, so `bulk_email`, `tool`,
+  `crm_lead`, `device_control`, `media`, sub-workflow and non-GET `http`
+  nodes were each attempted up to three times by default — a retry could
+  double a send, lead or device action when the first attempt had already
+  reached the wire. `RetryPolicy` now shares `NodeErrorStrategy`'s
+  irreversible-type list (including on the Temporal engine, which dispatches
+  those nodes on a single-attempt activity stub), GET/HEAD/OPTIONS calls
+  stay retryable, and a node can still opt back in with
+  `"retryUnsafe": true`. Tool node calls are additionally claimed through
+  the output dedup guard keyed on (run, node, loop index + resolved input),
+  so a replayed attempt is suppressed instead of re-invoking the tool.
+- **`tenant_id=public` claims can no longer route into the legacy shared
+  schema.** A JWT or API key asserting the `public` tenant used to pass the
+  schema-exists fallback (Postgres always has `public`) and land tenant
+  queries in the shared schema. `TenantSchemaResolver` now refuses it like
+  any reserved name, `TenantStatusGuardImpl` rejects it explicitly, and its
+  SQL-error path fails closed instead of open. Deployments on a non-Keycloak
+  OIDC issuer must also configure `app.keycloak.allowed-azp` or
+  `app.security.jwt.required-audience`, or the boot refuses to start rather
+  than accept tokens with no client-bound check.
+
 - **`add_to_knowledge_base` could be relevance-trimmed from a turn while its
   search siblings stayed.** The write tool was missing from both standing-
   capability lists (`ALWAYS_RELEVANT_TOOL_NAMES` and the tool-search always-on
@@ -49,6 +150,25 @@ Release notes on GitHub are generated from the section for each version.
   the read tools on a crowded or small-model turn and report "I can only search
   collections". The write/read pairing is now asserted in
   `AgentToolProviderCapTest`.
+- **Workflow approval gates are refused inside loop, fan-out, parallel and
+  sub-flow bodies.** A human-decision halt (approval node, human-input node,
+  or `requiresApproval` on a body node) parks the run with a resume envelope
+  carrying the node id and input but no iteration cursor, so a resumed loop
+  would run only the halted item and drop the rest, and sub-flow body nodes
+  are not in the main graph's node table at all. `WorkflowApprovalPlacement`
+  now rejects these placements at save time (the same rule
+  `WorkflowWaitPlacement` already applied to Wait nodes) until the resume
+  payload grows an iteration cursor.
+- **Parallel branches fail fast.** `ParallelBranchRunner` joined branches in
+  index order, so a failure in the last branch surfaced only after every
+  slower earlier branch had finished. It now joins in completion order and
+  returns on the first failure.
+- **Execution-engine copy is honest about the legacy engine.** The platform
+  pages and configuration docs previously claimed both engines read the same
+  per-workflow value. Retry counts and the step ceiling do apply on both, but
+  `stepTimeoutSeconds` is enforced only by the durable Temporal engine; the
+  default in-process engine is now labelled best-effort (no per-step timeout,
+  crashed runs are reaped `FAILED` rather than resumed).
 - **Release workflow gates the tag before spending a build matrix.** `prepare`
   now refuses tags on commits that are not ancestors of `main` and versions
   with no `CHANGELOG.md` section (the release notes generate from it), instead
@@ -59,9 +179,39 @@ Release notes on GitHub are generated from the section for each version.
   at all instead of polling an hour for a check that will never exist. New
   pre-flight for humans: `scripts/ci/tag-ready.sh <sha>` reports whether a
   commit is release-ready before tagging (`docs/maintainers/releasing.md`).
+- **A tenant-less sign-in no longer pops "sign out and back in" on every API
+  call.** Core's 403 "account not linked to an organization" is a normal
+  pre-onboarding state (OnboardingGate owns that UI), but it reached the
+  global error toast - and its advice loops forever for an account whose
+  organization was never created. `toJson` now classifies it as a guard state
+  (`tenant_missing`) that throws for callers without raising the popup. Also
+  documented that non-localhost browser access requires HTTPS: the realm
+  marks session cookies `Secure`, so plain-`http://` LAN/hostname installs
+  silently drop them and the sign-in form loops.
+- **RTL locales now mirror the whole console, not just the text.** Arabic,
+  Urdu, Kashmiri and Sindhi already set `<html dir="rtl">`, but a large part
+  of the UI was written in physical terms: the language menu anchored
+  `right-0` and stayed on the LTR edge, drawers and side panels pinned to
+  physical `left-0`/`right-0` while their borders kept pointing inward on
+  the wrong side, search-input icons sat over the text the logical padding
+  opened, and sticky first table columns pinned the wrong edge. The audit
+  converted roughly 450 files to logical properties (`ps-`/`pe-`, `ms-`/`me-`,
+  `text-start`, `border-s`/`border-e`, logical corner radii, `start-`/`end-`
+  anchors where the anchor is leading-edge, `ltr:`/`rtl:` transform pairs on
+  slide-in drawers), one CSS rule mirrors the directional lucide icons
+  (arrows/chevrons; transport and media glyphs intentionally unmirrored),
+  and `global-error` now renders a direction-aware `<html>` as well.
 
 ### Added
 
+- **Piper: a local, keyless TTS provider for the voice agent.** Until now
+  every voice reply needed a paid hosted key (ElevenLabs preferred, Sarvam
+  fallback); a deployment with neither fell back to browser-side speech.
+  `VOICE_AGENT_TTS_PROVIDER=piper` runs `piper-tts` in the worker via
+  `app/tts_piper.py` - no API key, no egress. The image bakes the
+  `en_US-lessac-medium` voice (sha256-verified at build); `PIPER_VOICE` /
+  `PIPER_MODEL_DIR` / `PIPER_SPEAKER_ID` / `PIPER_SAMPLE_RATE` tune it, and
+  `services/voice-agent/piper_voices_download.py` fetches additional voices.
 - **A2A interoperability console (`/admin/a2a`) and per-agent endpoint panel.**
   The A2A protocol bindings deliberately answer ListTasks as unsupported, so
   the console is served by a new manager-gated surface
@@ -93,10 +243,23 @@ Release notes on GitHub are generated from the section for each version.
   importable VegaDūta workflow template (HTTP node -> n8n webhook), an
   importable n8n workflow (HTTP Request -> platform agent), and a README
   covering both directions.
+- **Academy: scriptable how-to video pipeline.** `academy/` holds lessons
+  authored as machine-readable scripts (narration text + Playwright
+  actions per scene); `academy/tools/` narrates them with edge-tts and
+  assembles captioned mp4s with ffmpeg, and `tests/e2e/video/` records the
+  console footage. A UI change means re-running a script, not re-shooting
+  a video. Curriculum index: `academy/lessons/INDEX.md`.
 - **Knowledge upload UI offers the Docling-extended formats.** The console's
   upload picker now lists `.pptx`/`.xlsx`/`.csv`/`.tiff`/`.tif`/`.bmp`
   alongside the existing types (PPT/XLS badges); a deployment without the
   `docling` profile still rejects them server-side with a clear error.
+- **Personal installs keep language packs off the device until asked.**
+  Picking a non-English language on a personal install no longer silently
+  fetches its ~0.6 MB catalog: the language menu first shows a consent card
+  naming the pack size, downloads it on approval (failure stays in the menu
+  with a retry instead of half-applying the locale), and remembers the grant
+  in localStorage so a restart never re-asks. Lite/full/hosted editions are
+  unchanged — they already treat every catalog as present.
 
 ## [0.1.12] - 2026-10-26
 

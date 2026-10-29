@@ -31,7 +31,7 @@ export default function DirectiveCard({
   const t = useTranslations("promptDirectives");
   const [open, setOpen] = useState(false);
   const [enabled, setEnabled] = useState(directive.enabled);
-  const [text, setText] = useState(directive.effectiveText);
+  const [text, setText] = useState(directive.effectiveText ?? "");
   const [ack, setAck] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -39,11 +39,11 @@ export default function DirectiveCard({
   // Resync when the server copy changes (after a save, reset or reload).
   useEffect(() => {
     setEnabled(directive.enabled);
-    setText(directive.effectiveText);
+    setText(directive.effectiveText ?? "");
     setAck(false);
   }, [directive.enabled, directive.effectiveText]);
 
-  const dirty = enabled !== directive.enabled || text !== directive.effectiveText;
+  const dirty = enabled !== directive.enabled || text !== (directive.effectiveText ?? "");
   const needsAck = directive.securityCritical && dirty;
   const tooLong = text.length > MAX_DIRECTIVE_CHARS;
   const busy = status === "saving";

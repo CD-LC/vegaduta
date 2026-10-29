@@ -54,7 +54,7 @@
 
 .ax-help-toc-label {
   margin: 0 0 8px;
-  padding-left: 10px;
+  padding-inline-start: 10px;
   font-size: var(--fs-label);
   font-weight: 600;
   letter-spacing: 0.08em;

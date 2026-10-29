@@ -49,10 +49,10 @@ export default function WorkflowRunPanel({
             )}
             <div className="flex gap-2">
               <Button onClick={() => decide(true)} disabled={deciding}>
-                <ThumbsUp aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Approve
+                <ThumbsUp aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Approve
               </Button>
               <Button variant="outline" onClick={() => decide(false)} disabled={deciding}>
-                <ThumbsDown aria-hidden="true" className="mr-2 h-4 w-4 shrink-0" /> Reject
+                <ThumbsDown aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Reject
               </Button>
             </div>
           </motion.div>
@@ -76,7 +76,7 @@ export default function WorkflowRunPanel({
                       · {agentName(s.config.agentId)}
                     </span>
                     {st.ms != null && (
-                      <span className="ml-auto text-xs text-muted-foreground">{(st.ms / 1000).toFixed(1)} s</span>
+                      <span className="ms-auto text-xs text-muted-foreground">{(st.ms / 1000).toFixed(1)} s</span>
                     )}
                   </div>
                   <div className="grid gap-3 md:grid-cols-5">

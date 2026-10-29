@@ -90,13 +90,25 @@ function Select({
       }
       return;
     }
-    if (k === "ArrowDown") { e.preventDefault(); setActive((a) => step(a, 1)); }
-    else if (k === "ArrowUp") { e.preventDefault(); setActive((a) => step(a, -1)); }
-    else if (k === "Home") { e.preventDefault(); setActive(edge(1)); }
-    else if (k === "End") { e.preventDefault(); setActive(edge(-1)); }
-    else if (k === "Enter" || k === " ") { e.preventDefault(); choose(active); }
-    else if (k === "Escape") { e.preventDefault(); setOpen(false); }
-    else if (k === "Tab") setOpen(false);
+    if (k === "ArrowDown") {
+      e.preventDefault();
+      setActive((a) => step(a, 1));
+    } else if (k === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => step(a, -1));
+    } else if (k === "Home") {
+      e.preventDefault();
+      setActive(edge(1));
+    } else if (k === "End") {
+      e.preventDefault();
+      setActive(edge(-1));
+    } else if (k === "Enter" || k === " ") {
+      e.preventDefault();
+      choose(active);
+    } else if (k === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+    } else if (k === "Tab") setOpen(false);
     else if (k.length === 1 && !e.ctrlKey && !e.metaKey) {
       const now = Date.now();
       typed.current.text = (now - typed.current.at > 600 ? "" : typed.current.text) + k.toLowerCase();
@@ -120,12 +132,14 @@ function Select({
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onKeyDown}
         className={cn(
-          "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-control bg-secondary/40 px-3 py-2 text-left text-sm text-foreground shadow-sm outline-none transition-[color,box-shadow]",
+          "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-control bg-secondary/40 px-3 py-2 text-start text-sm text-foreground shadow-sm outline-none transition-[color,box-shadow]",
           "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50"
         )}
         {...aria}
       >
-        <span className={cn("truncate", !selected && "text-muted-foreground")}>{selected ? selected.label : placeholder}</span>
+        <span className={cn("truncate", !selected && "text-muted-foreground")}>
+          {selected ? selected.label : placeholder}
+        </span>
         <ChevronDown aria-hidden="true" className="size-4 shrink-0 opacity-60" />
       </button>
       {name ? <input type="hidden" name={name} value={value ?? ""} /> : null}

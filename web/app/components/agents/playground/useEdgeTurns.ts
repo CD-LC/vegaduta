@@ -15,7 +15,22 @@ import type { EdgeSendResult, ToolCallEntry } from "./types";
 
 /** The on-device sends: a plain text turn through the tier router (tier 0/1) and staged camera/screen frames through the local vision model. Both withdraw their optimistic turns and report why when they cannot answer. */
 export function useEdgeTurns(ctx: PlaygroundContext) {
-  const { agent, activeAgentIdRef, stickToBottomRef, setTurns, setSending, setError, setVisionFallback, setEdgePhase, setEdgeWarmingPercent, edgeAbortControllerRef, lastEdgeModelRef, askToFallback, matchRecognizedFace, withRecognizedName } = ctx;
+  const {
+    agent,
+    activeAgentIdRef,
+    stickToBottomRef,
+    setTurns,
+    setSending,
+    setError,
+    setVisionFallback,
+    setEdgePhase,
+    setEdgeWarmingPercent,
+    edgeAbortControllerRef,
+    lastEdgeModelRef,
+    askToFallback,
+    matchRecognizedFace,
+    withRecognizedName,
+  } = ctx;
   // Try to answer a plain text turn on-device (Tier 0,
   // Chrome built-in model) via the tier router. Returns {handled:true} only
   // when the turn was fully handled locally; ANY other outcome (router
@@ -37,7 +52,10 @@ export function useEdgeTurns(ctx: PlaygroundContext) {
     // edgeAttempt: true - the ONLY signal the render below uses to decide
     // whether this pending turn shows the real edgePhase state machine
     // (warming/generating) instead of the generic hosted "thinking" label.
-    setTurns((t) => [...t, { role: "assistant", content: "", trace: [], pending: true, edgeAttempt: true }]);
+    setTurns((t) => [
+      ...t,
+      { role: "assistant", content: "", trace: [], pending: true, edgeAttempt: true, startedAt: Date.now() },
+    ]);
     setSending(true);
     setEdgePhase("checking");
     lastEdgeModelRef.current = null;
@@ -243,7 +261,15 @@ export function useEdgeTurns(ctx: PlaygroundContext) {
     // on-device turn never reached the server (same rule as sendViaEdge).
     setTurns((t) => [
       ...t,
-      { role: "assistant", content: "", trace: [], pending: true, onDevice: true, rescuedFromServer: !!rescueFrom },
+      {
+        role: "assistant",
+        content: "",
+        trace: [],
+        pending: true,
+        onDevice: true,
+        rescuedFromServer: !!rescueFrom,
+        startedAt: Date.now(),
+      },
     ]);
     setSending(true);
     try {

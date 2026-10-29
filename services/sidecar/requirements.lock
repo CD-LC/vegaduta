@@ -278,9 +278,9 @@ ctranslate2==4.8.2 \
     --hash=sha256:f6f0b576c247984d3fc299a372ccc9319b668d6d25b0539f3c861beba15d0504 \
     --hash=sha256:fedda669421a57f8164568ee86ea265727016988d310fcc2e24ca30e9ec457cd
     # via faster-whisper
-fastapi==0.151.0 \
-    --hash=sha256:498923b00b193654c839ec613dd84d1b0f98f8c20a5371e4f41100c522f114b9 \
-    --hash=sha256:f5bd74323048882837f422b6592b11f84dda1754defc4545a4c570cfa19a7a41
+fastapi==0.156.1 \
+    --hash=sha256:0422f86554a11df52f0b80c34e5ba2f1d415cd0bca0c0910fdd37df80d4b534a \
+    --hash=sha256:9da53b0b8b2fd79e260da101dab73a0d6ce6b5e539bef515e5fc0e8abecc76e8
     # via -r sidecar/requirements.txt
 faster-whisper==1.2.1 \
     --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7

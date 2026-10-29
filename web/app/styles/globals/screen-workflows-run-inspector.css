@@ -356,7 +356,7 @@
 }
 
 .ax-wf-history-time {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: var(--fs-micro);
   color: var(--ax-dim);
   flex-shrink: 0;
@@ -368,7 +368,7 @@
  * classes at full page width - /workflows/[id]/runs (history list) and
  * /workflows/[id]/runs/[runId] (run detail, .ax-wf-run-meta's started/
  * finished timestamps). Both rows are non-wrapping flexboxes with a
- * margin-left:auto-pushed trailing element (history's id+status+time; run
+ * margin-inline-start:auto-pushed trailing element (history's id+status+time; run
  * detail's dot·label / timestamp·timestamp pairs) - fine at desktop widths,
  * but a phone-locale timestamp plus " · triggeredBy" easily exceeds a
  * 360-390px viewport's remaining space once the leading run-id/dot already
@@ -383,7 +383,7 @@
     row-gap: 4px;
   }
   .ax-wf-history-time {
-    margin-left: 0;
+    margin-inline-start: 0;
     flex-basis: 100%;
   }
   .ax-wf-run-meta {

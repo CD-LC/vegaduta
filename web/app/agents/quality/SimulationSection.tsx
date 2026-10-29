@@ -328,7 +328,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                   <span className="min-w-0">
                     <span className="font-medium text-foreground">{p.name}</span>
                     {p.builtIn && (
-                      <Badge variant="secondary" className="ml-2">
+                      <Badge variant="secondary" className="ms-2">
                         built-in
                       </Badge>
                     )}
@@ -339,7 +339,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                       <AlertDialogTrigger asChild>
                         <button
                           type="button"
-                          className="ml-auto text-muted-foreground hover:text-destructive"
+                          className="ms-auto text-muted-foreground hover:text-destructive"
                           title="Delete this custom persona"
                           aria-label="Delete persona"
                           onClick={(e) => e.preventDefault()}
@@ -416,7 +416,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
               <CardContent className="py-3">
                 <button
                   type="button"
-                  className="flex w-full items-center gap-2 text-left"
+                  className="flex w-full items-center gap-2 text-start"
                   onClick={() => void toggleSession(s.id)}
                 >
                   {expandedSession === s.id ? (
@@ -429,7 +429,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                   <span className="text-sm text-foreground">
                     {s.personaKeys.length} persona{s.personaKeys.length === 1 ? "" : "s"} · {s.maxTurns} turns max
                   </span>
-                  <span className="ml-auto text-xs text-muted-foreground">
+                  <span className="ms-auto text-xs text-muted-foreground">
                     {new Date(s.createdAt).toLocaleString()}
                   </span>
                 </button>
@@ -449,7 +449,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                         <div key={r.id} className="rounded-md border border-border">
                           <button
                             type="button"
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-start"
                             onClick={() => void toggleRun(r.id)}
                           >
                             {openRun === r.id ? (
@@ -465,7 +465,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                                 {TERMINATION_LABEL[r.termination] || r.termination}
                               </span>
                             )}
-                            <span className="ml-auto text-xs text-muted-foreground">
+                            <span className="ms-auto text-xs text-muted-foreground">
                               {r.turnCount} turns{r.costUsd != null ? ` · $${r.costUsd}` : ""}
                             </span>
                           </button>

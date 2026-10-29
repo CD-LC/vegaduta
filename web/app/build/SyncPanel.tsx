@@ -114,7 +114,11 @@ export default function SyncPanel({ project, onError }: Props) {
             <GitMerge aria-hidden="true" size={14} /> Sync with {status?.base_branch || "base"}
           </span>
           <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label="Refresh sync status">
-            {loading ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <RefreshCw aria-hidden="true" size={14} />}
+            {loading ? (
+              <Loader2 aria-hidden="true" size={14} className="animate-spin" />
+            ) : (
+              <RefreshCw aria-hidden="true" size={14} />
+            )}
           </Button>
         </CardTitle>
       </CardHeader>
@@ -136,19 +140,27 @@ export default function SyncPanel({ project, onError }: Props) {
 
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={pull} disabled={pulling || !status?.can_pull}>
-            {pulling ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <GitMerge aria-hidden="true" size={14} />} Pull {status?.base_branch || "base"} into
-            branch
+            {pulling ? (
+              <Loader2 aria-hidden="true" size={14} className="animate-spin" />
+            ) : (
+              <GitMerge aria-hidden="true" size={14} />
+            )}{" "}
+            Pull {status?.base_branch || "base"} into branch
           </Button>
           {status && !status.can_pull && <span className="text-xs text-muted-foreground">Nothing to pull.</span>}
         </div>
 
         {conflicts && (
-          <div className="rounded-lg border border-border bg-muted/30 p-3 text-xs" role="alert" data-testid="sync-conflicts">
+          <div
+            className="rounded-lg border border-border bg-muted/30 p-3 text-xs"
+            role="alert"
+            data-testid="sync-conflicts"
+          >
             <p className="mb-2 font-medium text-foreground">
               Merge conflict - nothing was changed. Resolve these files on GitHub, then pull again.
             </p>
             {conflicts.length ? (
-              <ul className="list-disc space-y-0.5 pl-5 font-mono text-muted-foreground">
+              <ul className="list-disc space-y-0.5 ps-5 font-mono text-muted-foreground">
                 {conflicts.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
