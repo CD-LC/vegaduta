@@ -1537,6 +1537,42 @@ class ApprovalRequestResponse(TypedDict, total=False):
     executionResult: str
 
 
+class ApprovalTraceView(TypedDict, total=False):
+    requestId: str
+    actionType: str
+    status: str
+    createdAt: str
+    requestedBy: str
+    decidedBy: str
+    decidedAt: str
+    rejectionReason: str
+    executionResult: str
+    executionError: str
+    retryCount: int
+    conversation: ApprovalTraceView_Conversation
+    windowEnd: str
+    callsTruncated: bool
+    calls: List[ApprovalTraceView_Call]
+    traceNote: str
+
+
+class ApprovalTraceView_Call(TypedDict, total=False):
+    id: str
+    toolName: str
+    startedAt: str
+    completedAt: str
+    outcome: str
+    inputSummary: str
+    outputSummary: str
+    errorMessage: str
+
+
+class ApprovalTraceView_Conversation(TypedDict, total=False):
+    agentId: str
+    sessionId: str
+    goal: str
+
+
 class AssistCodeEditRequest(TypedDict):
     system: str
     prompt: str

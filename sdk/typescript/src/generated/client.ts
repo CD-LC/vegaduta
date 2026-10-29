@@ -2213,6 +2213,22 @@ export class ApprovalApi {
   }
 }
 
+export class ApprovalTraceApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Get.
+   * `GET /api/approval-traces/{requestId}`
+   */
+  get(requestId: string, options?: CallOptions): Promise<T.ApprovalTraceView> {
+    return this.http.request<T.ApprovalTraceView>({ ...options, method: "GET", path: `/api/approval-traces/${encodeURIComponent(String(requestId))}` });
+  }
+}
+
 export class AssistApi {
   private readonly http: HttpClient;
 
@@ -15853,6 +15869,7 @@ export class VegadutaClient {
   readonly appBuilderCompletion: AppBuilderCompletionApi;
   readonly appBuilderImage: AppBuilderImageApi;
   readonly approval: ApprovalApi;
+  readonly approvalTrace: ApprovalTraceApi;
   readonly assist: AssistApi;
   readonly atlassianOAuth: AtlassianOAuthApi;
   readonly auditLog: AuditLogApi;
@@ -16194,6 +16211,7 @@ export class VegadutaClient {
     this.appBuilderCompletion = new AppBuilderCompletionApi(this.http);
     this.appBuilderImage = new AppBuilderImageApi(this.http);
     this.approval = new ApprovalApi(this.http);
+    this.approvalTrace = new ApprovalTraceApi(this.http);
     this.assist = new AssistApi(this.http);
     this.atlassianOAuth = new AtlassianOAuthApi(this.http);
     this.auditLog = new AuditLogApi(this.http);

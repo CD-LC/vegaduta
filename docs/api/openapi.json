@@ -171,6 +171,9 @@
       "name": "Approval"
     },
     {
+      "name": "ApprovalTrace"
+    },
+    {
       "name": "Assist"
     },
     {
@@ -20680,6 +20683,61 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/approval-traces/{requestId}": {
+      "get": {
+        "tags": [
+          "ApprovalTrace"
+        ],
+        "summary": "Get",
+        "operationId": "ApprovalTraceController_get",
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalTraceView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -94374,6 +94432,120 @@
           "EXECUTION_FAILED",
           "DEAD_LETTERED"
         ]
+      },
+      "ApprovalTraceView": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actionType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "requestedBy": {
+            "type": "string"
+          },
+          "decidedBy": {
+            "type": "string"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rejectionReason": {
+            "type": "string"
+          },
+          "executionResult": {
+            "type": "string"
+          },
+          "executionError": {
+            "type": "string"
+          },
+          "retryCount": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/ApprovalTraceView_Conversation"
+          },
+          "windowEnd": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "callsTruncated": {
+            "type": "boolean",
+            "default": false
+          },
+          "calls": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprovalTraceView_Call"
+            }
+          },
+          "traceNote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "retryCount",
+          "callsTruncated"
+        ]
+      },
+      "ApprovalTraceView_Call": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toolName": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "type": "string"
+          },
+          "inputSummary": {
+            "type": "string"
+          },
+          "outputSummary": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprovalTraceView_Conversation": {
+        "type": "object",
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          }
+        }
       },
       "AssistCodeEditRequest": {
         "type": "object",

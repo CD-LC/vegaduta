@@ -14,6 +14,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Approval trace.** `GET /api/approval-traces/{requestId}` (viewer access to the request's agent) and a "What the agent executed after this decision" section on the approval detail show the decision, the conversation it belongs to and the agent's tool calls in that conversation from the decision on (sanitized, shortened inputs; 30-minute window, matched by conversation and time). Nothing new is stored, so approvals decided before this are covered too; a request that did not come from an agent turn says so.
+
 - **Per-model runtime knobs on the local model.** Providers → Local model →
   "Speed and behaviour" now saves four more switches on the serving row
   (`GET`/`PUT /api/local-models/settings`, migration V674), replacing the
