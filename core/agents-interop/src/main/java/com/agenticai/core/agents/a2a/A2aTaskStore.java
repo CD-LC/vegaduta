@@ -13,11 +13,14 @@ import jakarta.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -443,6 +446,86 @@ public class A2aTaskStore {
                         "A2A task {} requested by a non-owner (same tenant: {}) - answering not-found",
                         LogSafe.clean(taskId),
                         Objects.equals(stored.tenantId(), tenantId));
+                return Optional.empty();
+            }
+            stored = reconcileStored(key, stored);
+            redis.expire(key, ttl);
+            return Optional.of(stored.toTask());
+        } catch (RuntimeException e) {
+            REDIS_DOWN_LOG.warnf(
+                    "A2A task {} could not be read from Redis - answering not-found", taskId, e);
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Every task record this deployment still holds for {@code tenantId}: this JVM's live map plus,
+     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link Stored#toTask()} -
+     * state/reply for reading, no live subscription). Local entries win the dedup because their
+     * view of an in-flight task is fresher than the last mirrored snapshot.
+     *
+     * <p><b>Console surface only.</b> Unlike {@link #find} this matches on tenant ALONE, not
+     * tenant+subject - the console controller re-gates callers on the manager role, which is what
+     * authorizes reading another subject's task text.
+     */
+    public List<A2aTask> listForTenant(String tenantId) {
+        List<A2aTask> out = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (A2aTask task : tasks.values()) {
+            if (Objects.equals(task.tenantId(), tenantId) && seen.add(task.id())) {
+                out.add(task);
+            }
+        }
+        if (redis == null) {
+            return out;
+        }
+        try (Cursor<String> cursor =
+                redis.scan(
+                        ScanOptions.scanOptions().match(key(tenantId, "*")).count(200).build())) {
+            while (cursor.hasNext()) {
+                String key = cursor.next();
+                Stored stored = read(key);
+                if (stored == null
+                        || !Objects.equals(stored.tenantId(), tenantId)
+                        || !seen.add(stored.id())) {
+                    continue;
+                }
+                out.add(reconcileStored(key, stored).toTask());
+            }
+        } catch (RuntimeException e) {
+            REDIS_DOWN_LOG.warnf("A2A console task list could not scan Redis", e);
+        }
+        return out;
+    }
+
+    /**
+     * {@link #find} minus the subject check, for the console's get/cancel: the caller's manager
+     * role (enforced by the controller) stands in for task ownership. A detached record restored
+     * from Redis can still be canceled - {@link A2aTask#cancel()} on it flips the mirrored record, which is
+     * exactly the remote-cancel path {@link #honourRemoteCancel} honours on the owning replica.
+     */
+    public Optional<A2aTask> findForTenant(String taskId, String tenantId) {
+        if (taskId == null) {
+            return Optional.empty();
+        }
+        A2aTask task = tasks.get(taskId);
+        if (task != null) {
+            if (!Objects.equals(task.tenantId(), tenantId)) {
+                return Optional.empty();
+            }
+            if (redis != null) {
+                honourRemoteCancel(task);
+            }
+            task.touch();
+            return Optional.of(task);
+        }
+        if (redis == null) {
+            return Optional.empty();
+        }
+        String key = key(tenantId, taskId);
+        try {
+            Stored stored = read(key);
+            if (stored == null || !Objects.equals(stored.tenantId(), tenantId)) {
                 return Optional.empty();
             }
             stored = reconcileStored(key, stored);

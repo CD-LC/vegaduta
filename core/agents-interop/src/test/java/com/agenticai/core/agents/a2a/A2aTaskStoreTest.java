@@ -78,6 +78,37 @@ class A2aTaskStoreTest {
     }
 
     @Test
+    void listForTenantCrossesSubjectsButNeverTenants() {
+        A2aTaskStore store = new A2aTaskStore(Duration.ofHours(1), 100);
+        A2aTask alice = task("tenant_a", "alice");
+        A2aTask bob = task("tenant_a", "bob");
+        A2aTask otherTenant = task("tenant_b", "alice");
+        A2aTask outbound = task("tenant_a", "carol");
+        store.put(alice);
+        store.put(bob);
+        store.put(otherTenant);
+        store.put(outbound);
+
+        assertEquals(3, store.listForTenant("tenant_a").size());
+        assertEquals(1, store.listForTenant("tenant_b").size());
+        assertTrue(store.listForTenant("tenant_c").isEmpty());
+    }
+
+    @Test
+    void findForTenantIgnoresTheSubjectButStillScopesTheTenant() {
+        A2aTaskStore store = new A2aTaskStore(Duration.ofHours(1), 100);
+        A2aTask task = task("tenant_a", "alice");
+        store.put(task);
+
+        // Any subject in the right tenant sees the record (console manager role);
+        // a manager in another tenant gets the same answer as a made-up id.
+        assertTrue(store.findForTenant(task.id(), "tenant_a").isPresent());
+        assertTrue(store.findForTenant(task.id(), "tenant_b").isEmpty());
+        assertTrue(store.findForTenant(null, "tenant_a").isEmpty());
+        assertTrue(store.findForTenant("nope", "tenant_a").isEmpty());
+    }
+
+    @Test
     void overCapacityEvictsOldestTerminalTasksButNeverInFlightOnes() {
         A2aTaskStore store = new A2aTaskStore(Duration.ofHours(1), 2);
         A2aTask done1 = task("t", "s");
