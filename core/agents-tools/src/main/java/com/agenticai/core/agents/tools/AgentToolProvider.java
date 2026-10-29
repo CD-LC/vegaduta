@@ -219,6 +219,7 @@ public class AgentToolProvider implements AgentToolPort {
                 chatClient,
                 emitter,
                 effectiveDepth,
+                false,
                 false);
     }
 
@@ -235,7 +236,8 @@ public class AgentToolProvider implements AgentToolPort {
             ChatClient chatClient,
             AgentStepEventEmitter emitter,
             ReasoningDepth effectiveDepth,
-            boolean stableToolSet) {
+            boolean stableToolSet,
+            boolean forceToolDeferral) {
         if (emitter == null || !emitter.isEnabled()) {
             return resolveToolsFor(
                     agentId,
@@ -247,7 +249,8 @@ public class AgentToolProvider implements AgentToolPort {
                     true,
                     effectiveDepth,
                     true,
-                    stableToolSet);
+                    stableToolSet,
+                    forceToolDeferral);
         }
         AgentToolGuard.STEP_EVENT_SCOPE.set(emitter);
         try {
@@ -261,7 +264,8 @@ public class AgentToolProvider implements AgentToolPort {
                     true,
                     effectiveDepth,
                     true,
-                    stableToolSet);
+                    stableToolSet,
+                    forceToolDeferral);
         } finally {
             // remove(), not set(null): resolution can run on a pooled/virtual
             // carrier thread, and a stale emitter left behind here would attach
@@ -296,6 +300,12 @@ public class AgentToolProvider implements AgentToolPort {
                 context != null
                         && context.modelTraits() != null
                         && context.modelTraits().stableToolSet();
+        // The serving row's own tool-deferral switch (V674): a slow local model's turns hide most
+        // of the catalog behind search_tools/call_tool even when app.tools.search.enabled is off.
+        boolean forceToolDeferral =
+                context != null
+                        && context.modelTraits() != null
+                        && context.modelTraits().toolDeferral();
         java.util.function.Supplier<List<ToolCallback>> resolve =
                 () ->
                         resolveToolsFor(
@@ -306,7 +316,8 @@ public class AgentToolProvider implements AgentToolPort {
                                 chatClient,
                                 emitter,
                                 effectiveDepth,
-                                stableToolSet);
+                                stableToolSet,
+                                forceToolDeferral);
         if (context == null) {
             return resolve.get();
         }
@@ -438,6 +449,7 @@ public class AgentToolProvider implements AgentToolPort {
                 applyRelevanceSelection,
                 effectiveDepth,
                 mainChatTurn,
+                false,
                 false);
     }
 
@@ -451,7 +463,8 @@ public class AgentToolProvider implements AgentToolPort {
             boolean applyRelevanceSelection,
             ReasoningDepth effectiveDepth,
             boolean mainChatTurn,
-            boolean stableToolSet) {
+            boolean stableToolSet,
+            boolean forceToolDeferral) {
         AtomicInteger stepCounter = new AtomicInteger(0);
         turnRunBudgets.bindAgent(stepCounter, agentId);
         // Untrusted-content taint (app.agents.taint.mode): when this resolution runs for a chat
@@ -497,7 +510,8 @@ public class AgentToolProvider implements AgentToolPort {
                         List.of(),
                         mainChatTurn && turnApproval != null
                                 ? keptOnOffer(turnApproval)
-                                : Set.of()),
+                                : Set.of(),
+                        forceToolDeferral),
                 applyRelevanceSelection,
                 stableToolSet);
     }

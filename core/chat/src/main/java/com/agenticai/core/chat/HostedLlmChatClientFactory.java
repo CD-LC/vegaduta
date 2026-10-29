@@ -93,6 +93,12 @@ public class HostedLlmChatClientFactory {
     @Value("${app.llm.ollama.num-ctx:32768}")
     private int ollamaNumCtx = 32768;
 
+    // llama.cpp's n_batch, sent as the per-request num_batch when a local row asks for it or the
+    // operator configured one (see OllamaAgentChatClientFactory's numBatch comment). 0 = the
+    // server default.
+    @Value("${app.llm.ollama.num-batch:0}")
+    private int ollamaNumBatch = 0;
+
     /** How long a local model stays loaded after a request (Ollama keep_alive); see OllamaKeepAlive. */
     @Value("${app.local-models.keep-alive:30m}")
     private String localModelsKeepAlive = "30m";
@@ -254,7 +260,13 @@ public class HostedLlmChatClientFactory {
         }
         OpenAiChatOptions options = optionsBuilder.build();
         if (localOllama) {
-            Map<String, Object> extra = localOllamaExtraBody(ollamaNumCtx, provider.getKeepAlive(), localModelsKeepAlive);
+            Map<String, Object> extra =
+                    localOllamaExtraBody(
+                            ollamaNumCtx,
+                            provider.getKeepAlive(),
+                            localModelsKeepAlive,
+                            provider.getNumBatch(),
+                            ollamaNumBatch);
             if (!extra.isEmpty()) {
                 options.setExtraBody(extra);
             }
@@ -329,9 +341,29 @@ public class HostedLlmChatClientFactory {
      * prompt read. Package-private for tests.
      */
     static Map<String, Object> localOllamaExtraBody(int numCtx, String rowKeepAlive, String defaultKeepAlive) {
+        return localOllamaExtraBody(numCtx, rowKeepAlive, defaultKeepAlive, null, 0);
+    }
+
+    /**
+     * As {@link #localOllamaExtraBody(int, String, String)}, adding the {@code num_batch} request
+     * option: the row's own batch size (Providers -> Local model -> "Speed and behaviour"), else
+     * {@code app.llm.ollama.num-batch}. llama.cpp's n_batch is the tokens evaluated per
+     * prompt-processing step - a larger batch parallelises the several-thousand-token fixed
+     * prefix of an agent prompt far better on the host GPU. 0/null = the server default.
+     */
+    static Map<String, Object> localOllamaExtraBody(
+            int numCtx, String rowKeepAlive, String defaultKeepAlive, Integer rowNumBatch, int defaultNumBatch) {
         Map<String, Object> extra = new java.util.LinkedHashMap<>();
+        int batch = rowNumBatch != null ? rowNumBatch : defaultNumBatch;
+        Map<String, Object> options = new java.util.LinkedHashMap<>();
         if (numCtx > 0) {
-            extra.put("options", Map.of("num_ctx", numCtx));
+            options.put("num_ctx", numCtx);
+        }
+        if (batch > 0) {
+            options.put("num_batch", batch);
+        }
+        if (!options.isEmpty()) {
+            extra.put("options", java.util.Collections.unmodifiableMap(options));
         }
         Object keepAlive = com.agenticai.core.providers.localmodels.OllamaKeepAlive.jsonValue(
                 rowKeepAlive != null && !rowKeepAlive.isBlank() ? rowKeepAlive : defaultKeepAlive);

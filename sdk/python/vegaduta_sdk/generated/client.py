@@ -5429,6 +5429,13 @@ class ImessageCredentialApi:
         """
         return self._http.request("PUT", "/api/channels/imessage/credential/settings", body=body)
 
+    def webhook_token(self) -> Dict[str, str]:
+        """Webhook token.
+
+        GET /api/channels/imessage/credential/webhook-token
+        """
+        return self._http.request("GET", "/api/channels/imessage/credential/webhook-token")
+
 
 class ImessageSendApi:
     def __init__(self, http: HttpClient) -> None:

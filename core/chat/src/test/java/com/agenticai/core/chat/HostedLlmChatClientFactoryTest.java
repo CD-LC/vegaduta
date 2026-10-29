@@ -172,4 +172,23 @@ class HostedLlmChatClientFactoryTest {
     void noKeepAliveConfiguredSendsNone() {
         org.junit.jupiter.api.Assertions.assertTrue(HostedLlmChatClientFactory.localOllamaExtraBody(0, " ", "").isEmpty());
     }
+
+    @Test
+    void theRowsOwnNumBatchRidesIntoTheRequestOptions() {
+        // Row override wins over the configured default; 0/null leaves the server default.
+        java.util.Map<String, Object> extra =
+                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", 2048, 0);
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.Map.of("num_ctx", 32768, "num_batch", 2048), extra.get("options"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.Map.of("num_ctx", 32768, "num_batch", 1024),
+                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", null, 1024)
+                        .get("options"));
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.util.Map.of("num_ctx", 32768),
+                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", null, 0)
+                        .get("options"));
+    }
 }

@@ -5043,12 +5043,20 @@ export interface LocalModelsService_Settings {
   contextLength?: number;
   loadedContext?: number;
   wantedContext?: number;
+  numBatch?: number;
+  numParallel?: number;
+  responseTimeoutMs?: number;
+  toolDeferral?: boolean;
 }
 
 export interface LocalModelsService_SettingsUpdate {
   reasoningEffort?: string;
   keepAlive?: string;
   contextLength?: number;
+  numBatch?: number;
+  numParallel?: number;
+  responseTimeoutMs?: number;
+  toolDeferral?: boolean;
 }
 
 export interface LocalModelsService_UseResult {

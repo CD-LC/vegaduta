@@ -5336,12 +5336,20 @@ class LocalModelsService_Settings(TypedDict, total=False):
     contextLength: int
     loadedContext: int
     wantedContext: int
+    numBatch: int
+    numParallel: int
+    responseTimeoutMs: int
+    toolDeferral: bool
 
 
 class LocalModelsService_SettingsUpdate(TypedDict, total=False):
     reasoningEffort: str
     keepAlive: str
     contextLength: int
+    numBatch: int
+    numParallel: int
+    responseTimeoutMs: int
+    toolDeferral: bool
 
 
 class LocalModelsService_UseResult(TypedDict, total=False):

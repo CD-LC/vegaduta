@@ -656,9 +656,19 @@ final class ChatTurnExecutor {
      * times a tool.
      */
     Flux<String> idleTimeout(Flux<String> stream, TurnToolActivity activity) {
+        return idleTimeout(stream, activity, null);
+    }
+
+    /**
+     * As above, with the serving row's own idle-timeout (V674): {@code idleOverride} replaces
+     * {@code app.llm.http.stream-idle-timeout} for this stream only; null = the platform value.
+     */
+    Flux<String> idleTimeout(Flux<String> stream, TurnToolActivity activity, Duration idleOverride) {
         return StreamIdleWatch.apply(
                 stream,
-                streamIdleTimeout,
+                idleOverride != null && !idleOverride.isNegative() && !idleOverride.isZero()
+                        ? idleOverride
+                        : streamIdleTimeout,
                 resilience.getToolIdleCeiling(),
                 activity,
                 com.agenticai.core.security.concurrent.TenantAwareSchedulers.parallel());

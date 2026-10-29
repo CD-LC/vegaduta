@@ -183,6 +183,28 @@ public class PlatformHostedLlmProvider {
     @Column(name = "keep_alive", length = 16)
     private String keepAlive;
 
+    // V674 - more console-editable local model behaviour; null = the server/configured default.
+    // num_batch: tokens evaluated per prompt-processing step (llama.cpp n_batch; a larger batch
+    // parallelises prompt eval on the host GPU). Sent as the per-request Ollama option.
+    @Column(name = "num_batch")
+    private Integer numBatch;
+
+    // num_parallel is deliberately NOT a column: like the -ctx{N}k context window it is persisted
+    // in the model tag itself ({base}-par{N}), because it is applied by deriving a variant through
+    // /api/create - see LocalModelsService#parallelOf.
+
+    // response_timeout_ms: how long this model may stay silent mid-stream before the turn is
+    // declared idle (overrides app.llm.http.stream-idle-timeout for turns this row serves; a slow
+    // local model needs longer than a hosted API's 90 s). Null = the configured default.
+    @Column(name = "response_timeout_ms")
+    private Long responseTimeoutMs;
+
+    // tool_deferral: true forces on-demand tool loading (search_tools/call_tool) for turns this
+    // row serves regardless of app.tools.search.enabled - a slow model should not re-read every
+    // tool schema on every turn. Null/false = the configured default.
+    @Column(name = "tool_deferral")
+    private Boolean toolDeferral;
+
     protected PlatformHostedLlmProvider() {
         // JPA
     }
@@ -519,6 +541,33 @@ public class PlatformHostedLlmProvider {
 
     public void setKeepAlive(String keepAlive) {
         this.keepAlive = keepAlive;
+    }
+
+    /** V674 - the per-request {@code num_batch} override, or null for the server default. */
+    public Integer getNumBatch() {
+        return numBatch;
+    }
+
+    public void setNumBatch(Integer numBatch) {
+        this.numBatch = numBatch;
+    }
+
+    /** V674 - the stream idle-timeout override (ms) for turns this row serves, or null. */
+    public Long getResponseTimeoutMs() {
+        return responseTimeoutMs;
+    }
+
+    public void setResponseTimeoutMs(Long responseTimeoutMs) {
+        this.responseTimeoutMs = responseTimeoutMs;
+    }
+
+    /** V674 - true forces on-demand tool loading on this row's turns, null = the default. */
+    public Boolean getToolDeferral() {
+        return toolDeferral;
+    }
+
+    public void setToolDeferral(Boolean toolDeferral) {
+        this.toolDeferral = toolDeferral;
     }
 
     /**

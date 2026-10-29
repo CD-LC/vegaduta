@@ -263,9 +263,17 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
         if (loaded.isEmpty() || loaded.get() >= wantedContext) {
             return Optional.empty();
         }
-        String base = tag.replaceAll("-ctx[0-9]+k$", "");
-        String derived = base + "-ctx" + (wantedContext / 1024) + "k";
-        if (derived.equals(tag) || !createWithContext(base, derived, wantedContext)) {
+        // A console-made -parN runner-parallelism suffix rides along on the new variant (the tag
+        // carries the setting, see LocalModelsService#parallelOf).
+        String parSuffix = tag.matches(".*-par[0-9]+$") ? tag.substring(tag.lastIndexOf("-par")) : "";
+        String base = tag.replaceAll("-ctx[0-9]+k$", "").replaceAll("-par[0-9]+$", "");
+        String derived = base + "-ctx" + (wantedContext / 1024) + "k" + parSuffix;
+        if (derived.equals(tag)
+                || !createVariant(
+                        base,
+                        derived,
+                        wantedContext,
+                        parSuffix.isEmpty() ? null : Integer.valueOf(parSuffix.substring(4)))) {
             return Optional.empty();
         }
         log.info(
@@ -287,6 +295,19 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
      * @return true when Ollama reported success
      */
     public boolean createWithContext(String base, String derived, int numCtx) {
+        return createVariant(base, derived, numCtx, null);
+    }
+
+    /**
+     * Creates {@code derived} as {@code base} with the given Modelfile parameters: {@code
+     * POST /api/create} with {@code from}, which reuses the base model's weights (no download, no
+     * copy). {@code numParallel} is Ollama's runner-level request parallelism - a Modelfile
+     * parameter only, never a per-request option, which is exactly why the variant mechanism
+     * exists. A null/positive-less parameter is simply not set on the variant.
+     *
+     * @return true when Ollama reported success
+     */
+    public boolean createVariant(String base, String derived, Integer numCtx, Integer numParallel) {
         Optional<String> url = allowedBase();
         if (url.isEmpty()) {
             return false;
@@ -296,7 +317,13 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                         .put("model", derived)
                         .put("from", base)
                         .put("stream", false);
-        body.putObject("parameters").put("num_ctx", numCtx);
+        ObjectNode parameters = body.putObject("parameters");
+        if (numCtx != null && numCtx > 0) {
+            parameters.put("num_ctx", numCtx);
+        }
+        if (numParallel != null && numParallel > 0) {
+            parameters.put("num_parallel", numParallel);
+        }
         try {
             JsonNode reply =
                     pull.post()
@@ -307,10 +334,11 @@ public class LocalModelOllamaGateway implements com.agenticai.core.providers.Loc
                             .body(JsonNode.class);
             boolean ok = reply != null && "success".equalsIgnoreCase(reply.path("status").asText());
             log.info(
-                    "Local model '{}' created from '{}' with a {}-token context: {}",
+                    "Local model '{}' created from '{}' (num_ctx {}, num_parallel {}): {}",
                     derived,
                     base,
                     numCtx,
+                    numParallel,
                     ok ? "ok" : "refused");
             return ok;
         } catch (RuntimeException e) {

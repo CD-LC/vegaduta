@@ -8,6 +8,22 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Per-model runtime knobs on the local model.** Providers → Local model →
+  "Speed and behaviour" now saves four more switches on the serving row
+  (`GET`/`PUT /api/local-models/settings`, migration V674), replacing the
+  env-only knobs a personal install could only change by editing `.env` and
+  restarting: `numBatch` (Ollama `num_batch`, the per-request prompt-eval
+  batch size; `app.llm.ollama.num-batch` stays the default), `numParallel`
+  (Ollama `num_parallel`, applied by deriving a `{model}-parN` variant through
+  `/api/create` - the same weights-sharing mechanism the `-ctxNk` context
+  variants use), `responseTimeoutMs` (this model's stream idle-timeout,
+  overriding `app.llm.http.stream-idle-timeout` for its own turns only), and
+  `toolDeferral` (forces `search_tools`/`call_tool` on-demand tool loading
+  for this model's turns regardless of `app.tools.search.enabled`). Every
+  field is nullable: unset means the server or configured default.
+
 ## [0.1.13] - 2026-10-28
 
 ### Added

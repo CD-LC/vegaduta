@@ -6423,6 +6423,14 @@ export class ImessageCredentialApi {
   updateSettings(body: T.ImessageSettingsRequest, options?: CallOptions): Promise<T.ImessageCredentialResponse> {
     return this.http.request<T.ImessageCredentialResponse>({ ...options, method: "PUT", path: "/api/channels/imessage/credential/settings", body });
   }
+
+  /**
+   * Webhook token.
+   * `GET /api/channels/imessage/credential/webhook-token`
+   */
+  webhookToken(options?: CallOptions): Promise<Record<string, string>> {
+    return this.http.request<Record<string, string>>({ ...options, method: "GET", path: "/api/channels/imessage/credential/webhook-token" });
+  }
 }
 
 export class ImessageSendApi {

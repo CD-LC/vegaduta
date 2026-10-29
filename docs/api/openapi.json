@@ -28850,6 +28850,47 @@
         ]
       }
     },
+    "/api/channels/imessage/credential/webhook-token": {
+      "get": {
+        "tags": [
+          "ImessageCredential"
+        ],
+        "summary": "Webhook token",
+        "operationId": "ImessageCredentialController_webhookToken",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
     "/api/channels/imessage/default-agent": {
       "put": {
         "tags": [
@@ -107193,6 +107234,21 @@
             "type": "integer",
             "format": "int32",
             "default": 0
+          },
+          "numBatch": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numParallel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "responseTimeoutMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "toolDeferral": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -107211,6 +107267,21 @@
           "contextLength": {
             "type": "integer",
             "format": "int32"
+          },
+          "numBatch": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "numParallel": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "responseTimeoutMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "toolDeferral": {
+            "type": "boolean"
           }
         }
       },

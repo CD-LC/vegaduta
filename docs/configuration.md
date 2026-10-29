@@ -1144,6 +1144,12 @@ lean on (the notes say which).
 | `app.chat.local-model.providers` | `APP_CHAT_LOCAL_MODEL_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers that are servers on the person's machine |
 | `app.providers.small-model-max-billions` | `APP_PROVIDERS_SMALL_MODEL_MAX_BILLIONS` | `8.0` | a pool row whose model has this many billions of parameters or fewer runs in small-model mode unless its "Small-model mode" control says otherwise; negative = never by size |
 
+The serving row's own console settings (Providers → Local model → "Speed and behaviour",
+`PUT /api/local-models/settings`) can also override, for that model's turns only:
+`numBatch` over `app.llm.ollama.num-batch`, `responseTimeoutMs` over
+`app.llm.http.stream-idle-timeout`, and `toolDeferral` over `app.tools.search.enabled`
+(see [local-models.md](local-models.md#response-speed)).
+
 **Turn limits** (`app.chat.limits.*`, `app.chat.semantic-cache.*`, and additions to `app.chat.parity.*` and `app.chat.resilience.*`)
 
 | Property | Environment variable | Default | Effect |

@@ -18,6 +18,10 @@ public final class TurnModelTraits {
 
     private volatile boolean stableToolSet;
 
+    private volatile boolean toolDeferral;
+
+    private volatile java.time.Duration streamIdleTimeout;
+
     /** True for a model whose tool-less reply may be an announced step it never took. */
     public boolean weakToolCaller() {
         return weakToolCaller;
@@ -39,5 +43,33 @@ public final class TurnModelTraits {
 
     public void stableToolSet(boolean stable) {
         this.stableToolSet = stable;
+    }
+
+    /**
+     * True when this turn's model forces on-demand tool loading (the local model's {@code
+     * toolDeferral} row setting, V674), regardless of {@code app.tools.search.enabled} - a model
+     * that re-reads its prompt at a few hundred tokens a second should not carry every tool
+     * schema on every turn.
+     */
+    public boolean toolDeferral() {
+        return toolDeferral;
+    }
+
+    public void toolDeferral(boolean deferral) {
+        this.toolDeferral = deferral;
+    }
+
+    /**
+     * The model's own stream idle-timeout (the local model's {@code responseTimeoutMs} row
+     * setting, V674), or null for {@code app.llm.http.stream-idle-timeout}. Set per attempt - a
+     * hosted-chain failover re-points it at the next link's row, so each model's own patience
+     * applies to its own stream.
+     */
+    public java.time.Duration streamIdleTimeout() {
+        return streamIdleTimeout;
+    }
+
+    public void streamIdleTimeout(java.time.Duration timeout) {
+        this.streamIdleTimeout = timeout;
     }
 }
