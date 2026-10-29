@@ -69,7 +69,8 @@ export default function AdminAgentTrustPage() {
 
   useEffect(() => {
     if (!allowed) return;
-    api.listAgents()
+    api
+      .listAgents()
       .then((rows: any) => {
         const list = Array.isArray(rows) ? rows : [];
         setAgents(list);
@@ -80,32 +81,34 @@ export default function AdminAgentTrustPage() {
         setError(e?.message || tu("agentsLoadFailed"));
       })
       .finally(() => setLoaded(true));
-    api.myDirectoryEntries()
+    api
+      .myDirectoryEntries()
       .then((rows) => setDirEntries(Array.isArray(rows) ? rows : []))
       .catch(() => setDirEntries([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed]);
 
-  const loadForAgent = useCallback(async (id: string) => {
-    if (!id) return;
-    setError(null);
-    setDataLoading(true);
-    try {
-      const [grantRows, walletRows] = await Promise.all([
-        api.listDelegationGrants(id),
-        api.listWallets(id),
-      ]);
-      setGrants(Array.isArray(grantRows) ? grantRows : []);
-      setWallets(Array.isArray(walletRows) ? walletRows : []);
-    } catch (e: any) {
-      setError(e?.message || t("loadFailed"));
-    } finally {
-      setDataLoading(false);
-    }
-  }, [t]);
+  const loadForAgent = useCallback(
+    async (id: string) => {
+      if (!id) return;
+      setError(null);
+      setDataLoading(true);
+      try {
+        const [grantRows, walletRows] = await Promise.all([api.listDelegationGrants(id), api.listWallets(id)]);
+        setGrants(Array.isArray(grantRows) ? grantRows : []);
+        setWallets(Array.isArray(walletRows) ? walletRows : []);
+      } catch (e: any) {
+        setError(e?.message || t("loadFailed"));
+      } finally {
+        setDataLoading(false);
+      }
+    },
+    [t]
+  );
 
   const refreshDirectory = useCallback(() => {
-    api.myDirectoryEntries()
+    api
+      .myDirectoryEntries()
       .then((rows) => setDirEntries(Array.isArray(rows) ? rows : []))
       .catch(() => {});
   }, []);
@@ -134,10 +137,7 @@ export default function AdminAgentTrustPage() {
   return (
     <AppShell eyebrow={tg("eyebrow")}>
       <>
-        <PageHeader
-          title={t("pageTitle")}
-          subtitle={t("pageSubtitle")}
-        />
+        <PageHeader title={t("pageTitle")} subtitle={t("pageSubtitle")} />
 
         <div className="mb-5 max-w-md">
           <Label htmlFor="trust-agent">{t("agentPickerLabel")}</Label>
@@ -161,7 +161,9 @@ export default function AdminAgentTrustPage() {
           </Link>
         </p>
 
-        {error && <ErrorRetry message={error} onRetry={() => (agentId ? loadForAgent(agentId) : window.location.reload())} />}
+        {error && (
+          <ErrorRetry message={error} onRetry={() => (agentId ? loadForAgent(agentId) : window.location.reload())} />
+        )}
 
         {agentId && dataLoading && grants.length === 0 && <ListSkeleton />}
 
@@ -170,9 +172,7 @@ export default function AdminAgentTrustPage() {
         <Card className="mt-6 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold">{t("grantsHeading")}</h2>
-            {agentId && (
-              <GrantWizard agentId={agentId} wallets={wallets} onGranted={() => loadForAgent(agentId)} />
-            )}
+            {agentId && <GrantWizard agentId={agentId} wallets={wallets} onGranted={() => loadForAgent(agentId)} />}
           </div>
           {grants.length === 0 ? (
             <EmptyState title={t("noGrantsTitle")} description={t("noGrantsHint")} />
@@ -189,51 +189,56 @@ export default function AdminAgentTrustPage() {
                   itemLabel={tu("itemGrants")}
                   className="grid gap-3"
                   renderItem={(g) => (
-                  <div key={g.id} className="rounded-lg border border-border p-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      {statusBadge(g.status)}
-                      <span className="font-mono text-xs">{g.audience}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {g.scopes.map((s) => (
-                          <Badge key={s} variant="outline" className="mr-1">{s}</Badge>
-                        ))}
-                      </span>
-                      <span className="ml-auto text-xs text-muted-foreground">
-                        {t("grantExpiryRow", { exp: fmtTime(g.expiresAt) })}
-                      </span>
-                      {g.status === "ACTIVE" && (
-                        <>
-                          <MintTokenPanel agentId={agentId} grant={g} />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => { setRevokeTarget(g); setRevokeReason(""); }}
-                          >
-                            {t("revoke")}
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                    {(g.spendCapMinor != null || g.walletId) && (
-                      <div className="mt-3 flex flex-wrap items-center gap-6">
-                        <SpendBar spent={g.spentMinor} cap={g.spendCapMinor} />
-                        {g.walletId && (
-                          <span className="text-xs text-muted-foreground">
-                            {t("walletRow")} <code className="font-mono">{g.walletId.slice(0, 8)}…</code>
-                          </span>
+                    <div key={g.id} className="rounded-lg border border-border p-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {statusBadge(g.status)}
+                        <span className="font-mono text-xs">{g.audience}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {g.scopes.map((s) => (
+                            <Badge key={s} variant="outline" className="me-1">
+                              {s}
+                            </Badge>
+                          ))}
+                        </span>
+                        <span className="ms-auto text-xs text-muted-foreground">
+                          {t("grantExpiryRow", { exp: fmtTime(g.expiresAt) })}
+                        </span>
+                        {g.status === "ACTIVE" && (
+                          <>
+                            <MintTokenPanel agentId={agentId} grant={g} />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setRevokeTarget(g);
+                                setRevokeReason("");
+                              }}
+                            >
+                              {t("revoke")}
+                            </Button>
+                          </>
                         )}
                       </div>
-                    )}
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {t("delegatedBy", { user: g.grantedBy })} · ttl {g.maxTokenTtlSeconds}s
-                    </div>
-                    {g.revokeReason && (
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        {t("revokedReasonRow", { reason: g.revokeReason })}
+                      {(g.spendCapMinor != null || g.walletId) && (
+                        <div className="mt-3 flex flex-wrap items-center gap-6">
+                          <SpendBar spent={g.spentMinor} cap={g.spendCapMinor} />
+                          {g.walletId && (
+                            <span className="text-xs text-muted-foreground">
+                              {t("walletRow")} <code className="font-mono">{g.walletId.slice(0, 8)}…</code>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {t("delegatedBy", { user: g.grantedBy })} · ttl {g.maxTokenTtlSeconds}s
                       </div>
-                    )}
-                  </div>
+                      {g.revokeReason && (
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          {t("revokedReasonRow", { reason: g.revokeReason })}
+                        </div>
+                      )}
+                    </div>
                   )}
                 />
               )}

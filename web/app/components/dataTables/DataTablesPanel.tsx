@@ -292,7 +292,7 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
             <Search
               size={14}
               aria-hidden="true"
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <Input
               type="search"
@@ -300,7 +300,7 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
               onChange={(e) => setTableQuery(e.target.value)}
               placeholder={tl("searchTables")}
               aria-label={tl("searchTables")}
-              className="pl-8"
+              className="ps-8"
             />
           </div>
         )}
@@ -325,7 +325,7 @@ export default function DataTablesPanel({ onLoaded }: { onLoaded?: () => void })
                   type="button"
                   aria-current={x.id === selectedId ? "true" : undefined}
                   onClick={() => setSelectedId(x.id)}
-                  className={`flex w-full flex-col items-start gap-0.5 rounded-md border px-3 py-2 text-left transition-colors ${
+                  className={`flex w-full flex-col items-start gap-0.5 rounded-md border px-3 py-2 text-start transition-colors ${
                     x.id === selectedId ? "border-primary bg-accent" : "border-border bg-card hover:bg-muted/40"
                   }`}
                 >

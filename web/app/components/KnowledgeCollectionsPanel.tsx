@@ -106,7 +106,13 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
   const [collectionQuery, setCollectionQuery] = useState("");
   const filteredCollections = useMemo(() => {
     const q = collectionQuery.trim().toLowerCase();
-    return q ? collections.filter((c: any) => String(c.name ?? "").toLowerCase().includes(q)) : collections;
+    return q
+      ? collections.filter((c: any) =>
+          String(c.name ?? "")
+            .toLowerCase()
+            .includes(q)
+        )
+      : collections;
   }, [collections, collectionQuery]);
   const collectionsPagination = usePagination(filteredCollections);
 
@@ -266,7 +272,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
           <Search
             size={14}
             aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="search"
@@ -274,7 +280,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
             onChange={(e) => setCollectionQuery(e.target.value)}
             placeholder={tl("searchCollections")}
             aria-label={tl("searchCollections")}
-            className="pl-8"
+            className="ps-8"
           />
         </div>
       )}
@@ -344,14 +350,14 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
                 type="button"
                 onClick={() => onSelect?.(c.id)}
                 aria-current={selectedId === c.id ? "true" : undefined}
-                className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                className="flex min-w-0 flex-1 items-center gap-2.5 text-start"
               >
                 <span
                   className="size-2 shrink-0 rounded-full"
                   style={{ background: DOT_COLORS[i % DOT_COLORS.length] }}
                 />
                 <span className="truncate text-sm font-medium text-foreground">{c.name}</span>
-                <span className="ml-auto shrink-0 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                <span className="ms-auto shrink-0 whitespace-nowrap text-xs text-muted-foreground tabular-nums">
                   {c.isDefault
                     ? t("defaultTag")
                     : t("fileCountTag", { count: c.fileCount ?? 0, plural: c.fileCount === 1 ? "" : "s" })}

@@ -102,10 +102,7 @@ function MiniChart({
   const padTop = 14;
   const padBottom = 6;
   const values = useMemo(() => weeks.map(pick), [weeks, pick]);
-  const geo = useMemo(
-    () => chartGeometry(values, { width, height, padTop, padBottom, fixedMax }),
-    [values, fixedMax]
-  );
+  const geo = useMemo(() => chartGeometry(values, { width, height, padTop, padBottom, fixedMax }), [values, fixedMax]);
   const barW = Math.max(3, Math.min(18, geo.slot * 0.6));
   const baseline = height - padBottom;
   const hiddenCount = values.filter((v) => v == null).length;
@@ -260,7 +257,11 @@ export default function NorthStarPage() {
       )}
 
       {loading && !data && (
-        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" data-testid="north-star-loading">
+        <div
+          className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          aria-busy="true"
+          data-testid="north-star-loading"
+        >
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-36" />
           ))}
@@ -286,8 +287,8 @@ export default function NorthStarPage() {
               <div className="text-sm font-medium">No agent runs recorded in this window yet</div>
               <p className="mx-auto mt-1 max-w-xl text-xs text-muted-foreground">
                 Nothing has completed an agent job or Quick Task in the last {weeks} weeks across{" "}
-                {data.coverage.tenantsScanned} scanned tenants. The notes below say which metrics cannot be measured
-                at all.
+                {data.coverage.tenantsScanned} scanned tenants. The notes below say which metrics cannot be measured at
+                all.
               </p>
             </div>
           )}
@@ -352,8 +353,22 @@ export default function NorthStarPage() {
               icon={Star}
             >
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <MiniChart testId="chart-wau" title="Weekly active users" weeks={data.weeks} pick={pickWau} kind="bar" fmt={fmtCount} />
-                <MiniChart testId="chart-runs" title="Agent runs" weeks={data.weeks} pick={pickRuns} kind="bar" fmt={fmtCount} />
+                <MiniChart
+                  testId="chart-wau"
+                  title="Weekly active users"
+                  weeks={data.weeks}
+                  pick={pickWau}
+                  kind="bar"
+                  fmt={fmtCount}
+                />
+                <MiniChart
+                  testId="chart-runs"
+                  title="Agent runs"
+                  weeks={data.weeks}
+                  pick={pickRuns}
+                  kind="bar"
+                  fmt={fmtCount}
+                />
                 <MiniChart
                   testId="chart-success"
                   title="Run success rate"
@@ -377,39 +392,48 @@ export default function NorthStarPage() {
           )}
 
           {active && (
-            <SectionCard title="Weekly detail" subtitle="The exact figures behind the charts." icon={CalendarDays} delay={0.05}>
+            <SectionCard
+              title="Weekly detail"
+              subtitle="The exact figures behind the charts."
+              icon={CalendarDays}
+              delay={0.05}
+            >
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-sm" data-testid="weekly-table">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Week of</th>
-                      <th className="py-2 pr-3 font-medium">Active users</th>
-                      <th className="py-2 pr-3 font-medium">Runs</th>
-                      <th className="py-2 pr-3 font-medium">Success</th>
-                      <th className="py-2 pr-3 font-medium">No human present</th>
-                      <th className="py-2 pr-3 font-medium">Interactive</th>
-                      <th className="py-2 pr-3 font-medium">Scheduled</th>
-                      <th className="py-2 pr-3 font-medium">Triggered</th>
+                    <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                      <th className="py-2 pe-3 font-medium">Week of</th>
+                      <th className="py-2 pe-3 font-medium">Active users</th>
+                      <th className="py-2 pe-3 font-medium">Runs</th>
+                      <th className="py-2 pe-3 font-medium">Success</th>
+                      <th className="py-2 pe-3 font-medium">No human present</th>
+                      <th className="py-2 pe-3 font-medium">Interactive</th>
+                      <th className="py-2 pe-3 font-medium">Scheduled</th>
+                      <th className="py-2 pe-3 font-medium">Triggered</th>
                       <th className="py-2 font-medium">Channel</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[...data.weeks].reverse().map((w) => (
                       <tr key={w.weekStart} className="border-b border-border/50">
-                        <td className="py-2 pr-3 font-medium">
+                        <td className="py-2 pe-3 font-medium">
                           {weekLabel(w.weekStart)}
                           {w.partial && (
-                            <Badge variant="outline" className="ml-2 text-[10px]">
+                            <Badge variant="outline" className="ms-2 text-[10px]">
                               in progress
                             </Badge>
                           )}
                         </td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(w.wau, w.suppressed)}</td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(w.runs, w.suppressed)}</td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(w.successRate, w.suppressed, fmtPct)}</td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(w.scheduledShare, w.suppressed, fmtPct)}</td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">{cellText(w.wau, w.suppressed)}</td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">{cellText(w.runs, w.suppressed)}</td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">
+                          {cellText(w.successRate, w.suppressed, fmtPct)}
+                        </td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">
+                          {cellText(w.scheduledShare, w.suppressed, fmtPct)}
+                        </td>
                         {(["INTERACTIVE", "SCHEDULED", "TRIGGERED", "CHANNEL"] as const).map((k) => (
-                          <td key={k} className="py-2 pr-3 font-mono tabular-nums last:pr-0">
+                          <td key={k} className="py-2 pe-3 font-mono tabular-nums last:pe-0">
                             {cellText(w.runsByKind ? w.runsByKind[k] : null, w.suppressed)}
                           </td>
                         ))}
@@ -430,20 +454,22 @@ export default function NorthStarPage() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[480px] text-sm" data-testid="cohort-table">
                 <thead>
-                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                    <th className="py-2 pr-3 font-medium">Signup week</th>
-                    <th className="py-2 pr-3 font-medium">Signed up</th>
-                    <th className="py-2 pr-3 font-medium">Reached a first run</th>
+                  <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                    <th className="py-2 pe-3 font-medium">Signup week</th>
+                    <th className="py-2 pe-3 font-medium">Signed up</th>
+                    <th className="py-2 pe-3 font-medium">Reached a first run</th>
                     <th className="py-2 font-medium">Median time</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[...data.timeToFirstRunCohorts].reverse().map((c) => (
                     <tr key={c.weekStart} className="border-b border-border/50">
-                      <td className="py-2 pr-3 font-medium">{weekLabel(c.weekStart)}</td>
-                      <td className="py-2 pr-3 font-mono tabular-nums">{cellText(c.signups, c.suppressed)}</td>
-                      <td className="py-2 pr-3 font-mono tabular-nums">{cellText(c.activated, c.suppressed)}</td>
-                      <td className="py-2 font-mono tabular-nums">{cellText(c.medianMinutes, c.suppressed, fmtMinutes)}</td>
+                      <td className="py-2 pe-3 font-medium">{weekLabel(c.weekStart)}</td>
+                      <td className="py-2 pe-3 font-mono tabular-nums">{cellText(c.signups, c.suppressed)}</td>
+                      <td className="py-2 pe-3 font-mono tabular-nums">{cellText(c.activated, c.suppressed)}</td>
+                      <td className="py-2 font-mono tabular-nums">
+                        {cellText(c.medianMinutes, c.suppressed, fmtMinutes)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -465,17 +491,17 @@ export default function NorthStarPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[320px] text-sm" data-testid="channel-table">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Channel</th>
-                      <th className="py-2 pr-3 font-medium">Runs</th>
+                    <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                      <th className="py-2 pe-3 font-medium">Channel</th>
+                      <th className="py-2 pe-3 font-medium">Runs</th>
                       <th className="py-2 font-medium">Success</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.channels.map((c) => (
                       <tr key={c.channel} className="border-b border-border/50">
-                        <td className="py-2 pr-3 font-medium">{c.channel}</td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(c.runs, c.suppressed)}</td>
+                        <td className="py-2 pe-3 font-medium">{c.channel}</td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">{cellText(c.runs, c.suppressed)}</td>
                         <td className="py-2 font-mono tabular-nums">{cellText(c.successRate, c.suppressed, fmtPct)}</td>
                       </tr>
                     ))}
@@ -495,17 +521,17 @@ export default function NorthStarPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[320px] text-sm" data-testid="passk-table">
                   <thead>
-                    <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                      <th className="py-2 pr-3 font-medium">Repetitions (k)</th>
-                      <th className="py-2 pr-3 font-medium">Cases</th>
+                    <tr className="border-b border-border text-start text-xs text-muted-foreground">
+                      <th className="py-2 pe-3 font-medium">Repetitions (k)</th>
+                      <th className="py-2 pe-3 font-medium">Cases</th>
                       <th className="py-2 font-medium">pass^k</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.passK.byK.map((g) => (
                       <tr key={g.k} className="border-b border-border/50">
-                        <td className="py-2 pr-3 font-medium">{g.k}</td>
-                        <td className="py-2 pr-3 font-mono tabular-nums">{cellText(g.cases, g.suppressed)}</td>
+                        <td className="py-2 pe-3 font-medium">{g.k}</td>
+                        <td className="py-2 pe-3 font-mono tabular-nums">{cellText(g.cases, g.suppressed)}</td>
                         <td className="py-2 font-mono tabular-nums">{cellText(g.passPowK, g.suppressed, fmtPct)}</td>
                       </tr>
                     ))}
@@ -524,7 +550,10 @@ export default function NorthStarPage() {
             {data.notes.length === 0 ? (
               <p className="text-sm text-muted-foreground">No caveats for this window.</p>
             ) : (
-              <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground" data-testid="notes-list">
+              <ul
+                className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground"
+                data-testid="notes-list"
+              >
                 {data.notes.map((n, i) => (
                   <li key={i}>{n}</li>
                 ))}

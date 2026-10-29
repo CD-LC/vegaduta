@@ -305,7 +305,7 @@ function TelegramCard({
               ? t("channel_messagesOverTelegramPlural", { count: messageCount, plural: messageCount === 1 ? "" : "s" })
               : t("channel_sendBotMessage")}
           </span>
-          <Button size="sm" variant="ghost" className="ml-auto text-xs text-muted-foreground" onClick={onDisconnect}>
+          <Button size="sm" variant="ghost" className="ms-auto text-xs text-muted-foreground" onClick={onDisconnect}>
             <Unplug aria-hidden="true" className="size-3.5" />
             {t("channel_disconnect")}
           </Button>
@@ -448,8 +448,8 @@ function MirrorFeed({ messages }: { messages: ChannelMessage[] }) {
             <div
               className={
                 m.direction === "IN"
-                  ? "max-w-[85%] rounded-xl rounded-br-sm bg-primary/20 px-3 py-1.5 text-xs text-foreground"
-                  : "max-w-[85%] rounded-xl rounded-bl-sm border border-border/60 bg-card/70 px-3 py-1.5 text-xs"
+                  ? "max-w-[85%] rounded-xl rounded-ee-sm bg-primary/20 px-3 py-1.5 text-xs text-foreground"
+                  : "max-w-[85%] rounded-xl rounded-es-sm border border-border/60 bg-card/70 px-3 py-1.5 text-xs"
               }
             >
               <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
@@ -561,8 +561,8 @@ function WhatsAppPreviewCard({
               <div
                 className={
                   b.role === "user"
-                    ? "max-w-[85%] rounded-xl rounded-br-sm bg-emerald-700/50 px-3 py-1.5 text-xs text-foreground"
-                    : "max-w-[85%] rounded-xl rounded-bl-sm border border-border/60 bg-card/80 px-3 py-1.5 text-xs"
+                    ? "max-w-[85%] rounded-xl rounded-ee-sm bg-emerald-700/50 px-3 py-1.5 text-xs text-foreground"
+                    : "max-w-[85%] rounded-xl rounded-es-sm border border-border/60 bg-card/80 px-3 py-1.5 text-xs"
                 }
               >
                 {b.simulated && (
@@ -572,14 +572,14 @@ function WhatsAppPreviewCard({
                 )}
                 <p className="whitespace-pre-wrap leading-relaxed">{b.text}</p>
                 {b.role === "user" && (
-                  <CheckCheck aria-hidden="true" className="mt-0.5 ml-auto block size-3 text-emerald-400" />
+                  <CheckCheck aria-hidden="true" className="mt-0.5 ms-auto block size-3 text-emerald-400" />
                 )}
               </div>
             </div>
           ))}
           {sending && (
             <div className="flex justify-start">
-              <div className="rounded-xl rounded-bl-sm border border-border/60 bg-card/80 px-3 py-2">
+              <div className="rounded-xl rounded-es-sm border border-border/60 bg-card/80 px-3 py-2">
                 <Loader2 aria-hidden="true" className="size-3 animate-spin text-muted-foreground" />
               </div>
             </div>

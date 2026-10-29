@@ -61,7 +61,7 @@
   .wf-validate-list {
     @apply my-3 flex flex-col gap-1.5 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-bg)] p-3 text-sm text-[var(--danger-text)];
     list-style: disc;
-    padding-left: 2rem;
+    padding-inline-start: 2rem;
   }
 
   .wf-modal-label {

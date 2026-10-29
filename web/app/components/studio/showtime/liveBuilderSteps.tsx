@@ -94,7 +94,7 @@ export function RegistryStep({
               disabled={!t.available}
               onClick={() => onToggle(t.name)}
               aria-pressed={on}
-              className={`rounded-2xl border p-3.5 text-left transition-colors ${on ? "border-emerald-400 bg-emerald-500/15" : t.available ? "border-white/10 bg-white/5 hover:border-violet-400/60" : "border-white/5 bg-white/[0.02] opacity-50"}`}
+              className={`rounded-2xl border p-3.5 text-start transition-colors ${on ? "border-emerald-400 bg-emerald-500/15" : t.available ? "border-white/10 bg-white/5 hover:border-violet-400/60" : "border-white/5 bg-white/[0.02] opacity-50"}`}
             >
               <div className="flex items-center gap-2 text-sm font-medium">
                 {t.name === "web_search" ? (
@@ -104,7 +104,7 @@ export function RegistryStep({
                 )}{" "}
                 {t.label}
                 <span
-                  className={`ml-auto rounded-full px-2 py-0.5 text-[10px] ${on ? "bg-emerald-500/30 text-emerald-100" : "bg-white/10 text-zinc-300"}`}
+                  className={`ms-auto rounded-full px-2 py-0.5 text-[10px] ${on ? "bg-emerald-500/30 text-emerald-100" : "bg-white/10 text-zinc-300"}`}
                 >
                   {!t.available ? "not here" : on ? "attached ✓" : "attach"}
                 </span>
@@ -206,7 +206,7 @@ export function ShipStep({
           </div>
           <div className="min-w-0 flex-1 space-y-2 text-sm">
             <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 p-1.5">
-              <Link2 aria-hidden="true" className="ml-1.5 h-4 w-4 shrink-0 text-zinc-400" />
+              <Link2 aria-hidden="true" className="ms-1.5 h-4 w-4 shrink-0 text-zinc-400" />
               <input
                 readOnly
                 value={shareUrl}

@@ -43,7 +43,7 @@ export default function FactsToolbar({
       <div className="relative min-w-0 flex-1 basis-56">
         <Search
           size={14}
-          className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
           aria-hidden="true"
         />
         <Input
@@ -52,7 +52,7 @@ export default function FactsToolbar({
           onChange={(e) => onChange({ ...filter, query: e.target.value })}
           placeholder={t("searchPlaceholder")}
           aria-label={t("searchPlaceholder")}
-          className="pl-8"
+          className="ps-8"
         />
       </div>
       <div className="min-w-[9.5rem] flex-1 sm:w-44 sm:flex-none">

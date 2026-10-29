@@ -53,10 +53,10 @@ function isoDay(d: Date): string {
 const n = (v: number | null | undefined) => (v ?? 0).toLocaleString();
 
 function Th({ children, right }: { children: any; right?: boolean }) {
-  return <th className={`px-2 py-1.5 font-medium ${right ? "text-right" : "text-left"}`}>{children}</th>;
+  return <th className={`px-2 py-1.5 font-medium ${right ? "text-end" : "text-start"}`}>{children}</th>;
 }
 function Td({ children, right }: { children: any; right?: boolean }) {
-  return <td className={`px-2 py-1.5 ${right ? "text-right tabular-nums" : ""}`}>{children}</td>;
+  return <td className={`px-2 py-1.5 ${right ? "text-end tabular-nums" : ""}`}>{children}</td>;
 }
 
 function Table({ head, children }: { head: any; children: any }) {

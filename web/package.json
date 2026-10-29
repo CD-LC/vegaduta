@@ -6,7 +6,7 @@
   "scripts": {
     "predev": "node scripts/vendor-webllm.mjs && node scripts/vendor-kokoro.mjs && node scripts/vendor-babel.mjs",
     "dev": "next dev -p 3000",
-    "prebuild": "node scripts/i18n-route-namespaces.mjs && node scripts/vendor-webllm.mjs && node scripts/vendor-kokoro.mjs && node scripts/vendor-babel.mjs",
+    "prebuild": "node scripts/i18n-route-namespaces.mjs && node scripts/i18n-pack-sizes.mjs && node scripts/vendor-webllm.mjs && node scripts/vendor-kokoro.mjs && node scripts/vendor-babel.mjs",
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "eslint .",

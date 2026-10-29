@@ -166,15 +166,18 @@ export function PerUserBudgetSection() {
     >
       <InfoNote>
         Dollars (not tokens) because voice/image aren&rsquo;t token-priced. Video generation is excluded from the
-        included budget - it&rsquo;s always pay-per-use. Per-modality sub-caps are a <strong>percentage of the daily
-        amount above</strong> (e.g. 50 = that modality alone can spend up to half the daily budget), not a separate
-        dollar figure - each is an independent gate, so several modalities at 100% can each spend the full amount.
-        Leave a sub-cap blank to let that modality draw on the shared amount without its own independent gate.
+        included budget - it&rsquo;s always pay-per-use. Per-modality sub-caps are a{" "}
+        <strong>percentage of the daily amount above</strong> (e.g. 50 = that modality alone can spend up to half the
+        daily budget), not a separate dollar figure - each is an independent gate, so several modalities at 100% can
+        each spend the full amount. Leave a sub-cap blank to let that modality draw on the shared amount without its own
+        independent gate.
       </InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-40 space-y-1.5">
-          <Label htmlFor="budget-amount-usd" className="text-xs text-muted-foreground">Amount (USD)</Label>
+          <Label htmlFor="budget-amount-usd" className="text-xs text-muted-foreground">
+            Amount (USD)
+          </Label>
           <Input
             id="budget-amount-usd"
             type="number"
@@ -187,7 +190,9 @@ export function PerUserBudgetSection() {
           {fieldErrors.amountUsd && <p className="text-xs text-destructive">{fieldErrors.amountUsd}</p>}
         </div>
         <div className="w-56 space-y-1.5">
-          <Label htmlFor="budget-window" className="text-xs text-muted-foreground">Window</Label>
+          <Label htmlFor="budget-window" className="text-xs text-muted-foreground">
+            Window
+          </Label>
           <Select
             id="budget-window"
             value={draft.windowSeconds}
@@ -203,7 +208,9 @@ export function PerUserBudgetSection() {
       <div className="flex flex-wrap items-end gap-3">
         {["text", "image", "voice"].map((m) => (
           <div key={m} className="w-32 space-y-1.5">
-            <Label htmlFor={`budget-subcap-${m}`} className="text-xs capitalize text-muted-foreground">{m}</Label>
+            <Label htmlFor={`budget-subcap-${m}`} className="text-xs capitalize text-muted-foreground">
+              {m}
+            </Label>
             <div className="relative">
               <Input
                 id={`budget-subcap-${m}`}
@@ -214,7 +221,7 @@ export function PerUserBudgetSection() {
                 placeholder="no cap"
                 value={draft[m]}
                 onChange={(e) => setDraft((d: any) => ({ ...d, [m]: e.target.value }))}
-                className="pr-6"
+                className="pe-6"
                 aria-invalid={!!fieldErrors[m]}
               />
               <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-xs text-muted-foreground">
@@ -315,10 +322,8 @@ export function FreeTierQuotaSection() {
     );
   }
 
-  const effectiveUnlimited =
-    Number(draft.monthlyTokenLimit || 0) * Number(draft.unlimitedMultiplier || 0);
-  const effectivePremium =
-    Number(draft.monthlyTokenLimit || 0) * Number(draft.premiumMultiplier || 0);
+  const effectiveUnlimited = Number(draft.monthlyTokenLimit || 0) * Number(draft.unlimitedMultiplier || 0);
+  const effectivePremium = Number(draft.monthlyTokenLimit || 0) * Number(draft.premiumMultiplier || 0);
 
   return (
     <SectionCard
@@ -327,16 +332,18 @@ export function FreeTierQuotaSection() {
       icon={Gauge}
     >
       <InfoNote>
-        This is the cap behind &ldquo;monthly token limit reached&rdquo;. FREE tenants use the base
-        value directly; PREMIUM and UNLIMITED multiply it. To give one specific tenant a clean slate on their
-        current window without changing these limits, use &ldquo;Reset usage&rdquo; on that tenant&rsquo;s row in
-        Tenants &amp; Users instead.
+        This is the cap behind &ldquo;monthly token limit reached&rdquo;. FREE tenants use the base value directly;
+        PREMIUM and UNLIMITED multiply it. To give one specific tenant a clean slate on their current window without
+        changing these limits, use &ldquo;Reset usage&rdquo; on that tenant&rsquo;s row in Tenants &amp; Users instead.
       </InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-56 space-y-1.5">
-          <Label htmlFor="budget-monthly-token-limit" className="text-xs text-muted-foreground">Monthly token limit (FREE base, per 30 days)</Label>
-          <Input id="budget-monthly-token-limit"
+          <Label htmlFor="budget-monthly-token-limit" className="text-xs text-muted-foreground">
+            Monthly token limit (FREE base, per 30 days)
+          </Label>
+          <Input
+            id="budget-monthly-token-limit"
             type="number"
             min="1"
             value={draft.monthlyTokenLimit}
@@ -344,8 +351,11 @@ export function FreeTierQuotaSection() {
           />
         </div>
         <div className="w-36 space-y-1.5">
-          <Label htmlFor="budget-premium-multiplier" className="text-xs text-muted-foreground">Premium multiplier</Label>
-          <Input id="budget-premium-multiplier"
+          <Label htmlFor="budget-premium-multiplier" className="text-xs text-muted-foreground">
+            Premium multiplier
+          </Label>
+          <Input
+            id="budget-premium-multiplier"
             type="number"
             min="1"
             step="1"
@@ -354,8 +364,11 @@ export function FreeTierQuotaSection() {
           />
         </div>
         <div className="w-36 space-y-1.5">
-          <Label htmlFor="budget-unlimited-multiplier" className="text-xs text-muted-foreground">Unlimited multiplier</Label>
-          <Input id="budget-unlimited-multiplier"
+          <Label htmlFor="budget-unlimited-multiplier" className="text-xs text-muted-foreground">
+            Unlimited multiplier
+          </Label>
+          <Input
+            id="budget-unlimited-multiplier"
             type="number"
             min="1"
             step="1"
@@ -485,7 +498,9 @@ export function ChatGenerationSection() {
     >
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-64 space-y-1.5">
-          <Label htmlFor="chatgen-reasoning-effort" className="text-xs text-muted-foreground">Gemini thinking effort</Label>
+          <Label htmlFor="chatgen-reasoning-effort" className="text-xs text-muted-foreground">
+            Gemini thinking effort
+          </Label>
           <Select
             id="chatgen-reasoning-effort"
             value={draft.geminiReasoningEffort}
@@ -498,8 +513,11 @@ export function ChatGenerationSection() {
           </p>
         </div>
         <div className="w-44 space-y-1.5">
-          <Label htmlFor="budget-history-max-turns" className="text-xs text-muted-foreground">History window (turns)</Label>
-          <Input id="budget-history-max-turns"
+          <Label htmlFor="budget-history-max-turns" className="text-xs text-muted-foreground">
+            History window (turns)
+          </Label>
+          <Input
+            id="budget-history-max-turns"
             type="number"
             min="1"
             max="400"
@@ -509,8 +527,11 @@ export function ChatGenerationSection() {
           />
         </div>
         <div className="w-44 space-y-1.5">
-          <Label htmlFor="budget-history-max-chars" className="text-xs text-muted-foreground">History window (max characters)</Label>
-          <Input id="budget-history-max-chars"
+          <Label htmlFor="budget-history-max-chars" className="text-xs text-muted-foreground">
+            History window (max characters)
+          </Label>
+          <Input
+            id="budget-history-max-chars"
             type="number"
             min="1000"
             max="200000"

@@ -214,7 +214,7 @@
   min-width: 0;
   color: inherit;
   font-size: inherit;
-  text-align: left;
+  text-align: start;
 }
 
 .ax-wf-canvas-title {

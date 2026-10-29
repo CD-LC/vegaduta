@@ -195,7 +195,7 @@ export default function SharedWorkflowPage() {
 
               {!running && resultText && (
                 <div className="flex justify-end">
-                  <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground">
+                  <div className="max-w-[85%] rounded-2xl rounded-ee-sm bg-primary px-4 py-2.5 text-sm text-primary-foreground">
                     <p className="whitespace-pre-wrap leading-relaxed">
                       {lastSource === "voice" ? "Voice input" : lastInput}
                     </p>
@@ -207,7 +207,7 @@ export default function SharedWorkflowPage() {
 
               {resultText && !running && (
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm">
+                  <div className="max-w-[85%] rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-2.5 text-sm">
                     <p className="whitespace-pre-wrap leading-relaxed">{resultText}</p>
                   </div>
                 </div>
@@ -302,7 +302,7 @@ function ViewerHeader({ info }: { info: SharedWorkflowInfo | null }) {
           Shared workflow
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/">
               <span className="hidden sm:inline">Build your own workflow</span>
@@ -318,7 +318,7 @@ function ViewerHeader({ info }: { info: SharedWorkflowInfo | null }) {
 function ThinkingBubble() {
   return (
     <div className="flex justify-start">
-      <div className="flex items-center gap-2 rounded-2xl rounded-bl-sm border border-border/60 bg-card/70 px-4 py-3">
+      <div className="flex items-center gap-2 rounded-2xl rounded-es-sm border border-border/60 bg-card/70 px-4 py-3">
         {[0, 1, 2].map((i) => (
           <motion.span
             key={i}

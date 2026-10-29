@@ -142,7 +142,9 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
             onKeyDown={onKeyDown}
             className="max-h-[90dvh] w-full max-w-md overflow-auto rounded-xl border border-border bg-background p-4 shadow-lg"
           >
-            <h3 id={titleId} className="mb-3 text-sm font-semibold">Generate an image</h3>
+            <h3 id={titleId} className="mb-3 text-sm font-semibold">
+              Generate an image
+            </h3>
             <div className="mb-3 flex flex-wrap gap-2">
               {IMAGE_KINDS.map((k) => (
                 <button
@@ -211,7 +213,7 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
               <Button size="sm" onClick={() => void generate()} disabled={busy}>
                 {busy ? (
                   <>
-                    <Loader2 aria-hidden="true" size={12} className="mr-1 animate-spin" /> Generating…
+                    <Loader2 aria-hidden="true" size={12} className="me-1 animate-spin" /> Generating…
                   </>
                 ) : result ? (
                   "Generate another"

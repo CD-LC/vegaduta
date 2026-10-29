@@ -20,7 +20,7 @@ export default function ReopenHint({ t, onDismiss }: { t: Translate; onDismiss: 
       <div
         role="status"
         data-testid="tour-reopen-hint"
-        className="pointer-events-auto flex max-w-[28rem] items-center gap-2 rounded-full border border-border bg-card py-1.5 pl-4 pr-1.5 text-[13px] text-card-foreground shadow-[var(--shadow-modal)]"
+        className="pointer-events-auto flex max-w-[28rem] items-center gap-2 rounded-full border border-border bg-card py-1.5 ps-4 pe-1.5 text-[13px] text-card-foreground shadow-[var(--shadow-modal)]"
       >
         <span>{optionalTourCopy(t, "reopenHint")}</span>
         <Button

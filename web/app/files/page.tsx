@@ -370,13 +370,13 @@ export default function FilesPage() {
                     <Search
                       size={14}
                       aria-hidden="true"
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     />
                     <Input
                       type="text"
                       placeholder={t("searchPlaceholder")}
                       aria-label={t("searchLabel")}
-                      className="pl-8"
+                      className="ps-8"
                       value={searchText}
                       onChange={(e) => setSearchText(e.target.value)}
                     />

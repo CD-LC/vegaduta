@@ -147,7 +147,7 @@ export default function TraceView({
           make.
         </div>
       )}
-      <ol className="relative space-y-2 border-l border-border/60 pl-4">
+      <ol className="relative space-y-2 border-s border-border/60 ps-4">
         <AnimatePresence initial={false}>
           {rows.map((row) => (
             <motion.li
@@ -157,7 +157,7 @@ export default function TraceView({
               transition={{ duration: 0.18 }}
               className="relative"
             >
-              <span className="absolute -left-[21px] top-2 h-2.5 w-2.5 rounded-full bg-primary/70" aria-hidden />
+              <span className="absolute -start-[21px] top-2 h-2.5 w-2.5 rounded-full bg-primary/70" aria-hidden />
               {row.kind === "plan" && (
                 <div className="rounded-lg bg-muted/50 p-3 text-sm">
                   <div className="mb-1 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -176,12 +176,12 @@ export default function TraceView({
                     </span>
                     <code className="rounded bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">{row.tool}</code>
                     {row.ms != null && (
-                      <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <span className="ms-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock aria-hidden="true" className="h-3 w-3 shrink-0" /> {row.ms} ms
                       </span>
                     )}
                     {row.ms == null && !row.error && (
-                      <span className="ml-auto text-xs text-muted-foreground animate-pulse">running…</span>
+                      <span className="ms-auto text-xs text-muted-foreground animate-pulse">running…</span>
                     )}
                   </div>
                   <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-2 text-xs text-muted-foreground">

@@ -191,7 +191,7 @@ export default function TroubleshootPage() {
         subtitle={t("subtitle")}
         actions={
           <Button variant="outline" size="sm" onClick={() => void run()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="me-2 h-4 w-4" />
             {t("recheck")}
           </Button>
         }
@@ -219,7 +219,7 @@ export default function TroubleshootPage() {
                   {c.key === "model" && c.state === "fail" && rec && (
                     <div className="mt-2">
                       <Button size="sm" disabled={pulling} onClick={() => void pull(rec.recommended.tag)}>
-                        <Download className="mr-2 h-4 w-4" />
+                        <Download className="me-2 h-4 w-4" />
                         {pulling
                           ? t("pulling", { pct: pullPct ?? 0 })
                           : t("pullModel", { tag: rec.recommended.tag, gb: rec.recommended.downloadGb })}
@@ -250,7 +250,7 @@ export default function TroubleshootPage() {
                     disabled={!rec || !rec.ollama.reachable || modelCheck?.state !== "ok" || probe?.state === "run"}
                     onClick={() => void testTools()}
                   >
-                    {probe?.state === "run" ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {probe?.state === "run" ? <RefreshCw className="me-2 h-4 w-4 animate-spin" /> : null}
                     {t("testTools")}
                   </Button>
                 </div>
@@ -305,17 +305,17 @@ export default function TroubleshootPage() {
                           <p className="truncate text-sm font-medium">
                             {m.tag}
                             {isRec && (
-                              <span className="ml-2 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
+                              <span className="ms-2 rounded bg-primary/10 px-1.5 py-0.5 text-[11px] text-primary">
                                 {t("recommended")}
                               </span>
                             )}
                             {installed && (
-                              <span className="ml-2 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] text-emerald-600">
+                              <span className="ms-2 rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] text-emerald-600">
                                 {t("installed")}
                               </span>
                             )}
                             {m.tag === rec.servingModel && (
-                              <span className="ml-2 rounded bg-primary px-1.5 py-0.5 text-[11px] text-primary-foreground">
+                              <span className="ms-2 rounded bg-primary px-1.5 py-0.5 text-[11px] text-primary-foreground">
                                 {t("inUse")}
                               </span>
                             )}
@@ -332,7 +332,7 @@ export default function TroubleshootPage() {
                             title={t("useHint")}
                             onClick={() => void switchToModel(m.tag)}
                           >
-                            {using === m.tag ? <RefreshCw className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+                            {using === m.tag ? <RefreshCw className="me-1.5 h-3.5 w-3.5 animate-spin" /> : null}
                             {t("use")}
                           </Button>
                         )}

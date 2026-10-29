@@ -17,7 +17,7 @@
    * condensed 8-destination IA (HOME/AGENTS/FLOWS/TASK/KNOW/TOOLS/CHAN/
    * ADMIN) instead of the previous 15-link grouped nav, matching the
    * reference AXON Dashboard.dc.html exactly. `position:fixed` (not part of
-   * the flex flow) so .app-main's own `margin-left: 74px` is the only other
+   * the flex flow) so .app-main's own `margin-inline-start: 74px` is the only other
    * change needed to make room for it. */
   /* AXON Pro screens' rail is a hover-expanding flyout (76px collapsed,
    * 216px on hover, revealing each item's full label + badge) rather than a
@@ -27,7 +27,7 @@
   .ax-rail {
     @apply fixed left-0 top-0 z-30 flex h-screen w-[76px] flex-col items-center gap-1 overflow-hidden py-4;
     /* backdrop-blur-md removed - background is now a solid opaque surface (see --ax-rail), so there is nothing left for the blur to soften */
-    border-right: 1px solid var(--ax-border2);
+    border-inline-end: 1px solid var(--ax-border2);
     background: var(--ax-rail);
     transition:
       width 0.32s cubic-bezier(0.34, 1.1, 0.4, 1),
@@ -97,7 +97,7 @@
   .ax-rail-link {
     @apply relative flex h-[46px] shrink-0 items-center gap-0 rounded-[13px] no-underline transition-colors;
     width: 100%;
-    padding-right: 12px;
+    padding-inline-end: 12px;
     color: var(--ax-mid);
     z-index: 1;
   }
@@ -244,9 +244,9 @@
     text-decoration: underline;
     text-decoration-color: rgba(79, 227, 227, 0.55);
     text-underline-offset: 3px;
-    padding-left: 0.15rem;
-    border-left: 1px solid var(--ax-border2);
-    margin-left: 0.1rem;
+    padding-inline-start: 0.15rem;
+    border-inline-start: 1px solid var(--ax-border2);
+    margin-inline-start: 0.1rem;
   }
 
   .ax-search {

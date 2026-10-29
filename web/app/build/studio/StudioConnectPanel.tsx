@@ -134,7 +134,10 @@ export default function ConnectPanel({
                 const cxn = connections.find((c) => c.kind === kind && c.id === it.id);
                 const on = !!cxn;
                 return (
-                  <div key={key} className="rounded-xl border border-border bg-card transition hover:border-primary/40 hover:shadow-md">
+                  <div
+                    key={key}
+                    className="rounded-xl border border-border bg-card transition hover:border-primary/40 hover:shadow-md"
+                  >
                     <div className="flex items-center gap-2.5 px-3 py-2.5">
                       <span
                         className={`grid size-9 shrink-0 place-items-center rounded-lg ${
@@ -181,13 +184,23 @@ export default function ConnectPanel({
                           onClick={() => void attach(kind, it)}
                           className="flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-orange-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition hover:shadow-md hover:brightness-105 disabled:opacity-50"
                         >
-                          {working === key ? <Loader2 aria-hidden="true" size={11} className="animate-spin" /> : <Link2 aria-hidden="true" size={11} />} Connect
+                          {working === key ? (
+                            <Loader2 aria-hidden="true" size={11} className="animate-spin" />
+                          ) : (
+                            <Link2 aria-hidden="true" size={11} />
+                          )}{" "}
+                          Connect
                         </button>
                       )}
                     </div>
                     {cxn && editing === key && (
                       <div className="border-t border-border">
-                        <ConnectionEditor c={cxn} published={published} onConfigure={(id, patch) => onConfigure(kind, id, patch)} onError={onError} />
+                        <ConnectionEditor
+                          c={cxn}
+                          published={published}
+                          onConfigure={(id, patch) => onConfigure(kind, id, patch)}
+                          onError={onError}
+                        />
                       </div>
                     )}
                   </div>
@@ -232,19 +245,24 @@ export default function ConnectPanel({
           <Rocket aria-hidden="true" size={15} />
         </span>
         <p className="text-xs leading-snug text-muted-foreground">
-          <span className="font-bold text-foreground">Connect real superpowers.</span> Agents decide, workflows do multi-step jobs - no code, no API keys.
+          <span className="font-bold text-foreground">Connect real superpowers.</span> Agents decide, workflows do
+          multi-step jobs - no code, no API keys.
         </p>
       </div>
 
       <div>
         <label className="relative block">
-          <Search aria-hidden="true" size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            aria-hidden="true"
+            size={14}
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             value={query}
             onChange={(e) => onQuery(e.target.value)}
             placeholder="Search agents and workflows…"
             aria-label="Search agents and workflows"
-            className="w-full rounded-xl border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-xl border border-border bg-background py-2 ps-9 pe-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
           />
         </label>
         <div className="mt-2 flex gap-2">
@@ -263,28 +281,42 @@ export default function ConnectPanel({
       <details open={authMode !== "off"} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
           Sign-in for your users
-          <span className="text-[11px] font-normal normal-case text-muted-foreground">{authMode === "off" ? "Off" : authMode === "optional" ? "Optional" : "Required"}</span>
+          <span className="text-[11px] font-normal normal-case text-muted-foreground">
+            {authMode === "off" ? "Off" : authMode === "optional" ? "Optional" : "Required"}
+          </span>
         </summary>
         <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">
           Your app&apos;s users are <em>your</em> customers - they sign in to this app only, never your team&apos;s
-          console, and they don&apos;t use a seat. The sign-in screen is drawn by the trusted host page, never
-          inside the app.
+          console, and they don&apos;t use a seat. The sign-in screen is drawn by the trusted host page, never inside
+          the app.
         </p>
         <div className="flex flex-col gap-1.5">
           {(
             [
               ["off", "No sign-in", "Anyone with the link can use the app."],
-              ["optional", "The app decides", "Ask for sign-in where you put it - a screen, a button, or a gated connection."],
+              [
+                "optional",
+                "The app decides",
+                "Ask for sign-in where you put it - a screen, a button, or a gated connection.",
+              ],
               ["required", "Sign in to open", "The link asks people to sign in before the app loads."],
             ] as [StudioAuthMode, string, string][]
           ).map(([m, label, hint]) => (
             <label
               key={m}
               className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-2.5 transition ${
-                authMode === m ? "border-primary/50 bg-primary/5" : "border-border hover:border-primary/30 hover:bg-accent/50"
+                authMode === m
+                  ? "border-primary/50 bg-primary/5"
+                  : "border-border hover:border-primary/30 hover:bg-accent/50"
               }`}
             >
-              <input type="radio" name="app-auth" checked={authMode === m} onChange={() => onSetAuthMode(m)} className="mt-0.5 accent-primary" />
+              <input
+                type="radio"
+                name="app-auth"
+                checked={authMode === m}
+                onChange={() => onSetAuthMode(m)}
+                className="mt-0.5 accent-primary"
+              />
               <span>
                 <span className="block text-xs font-medium text-foreground">{label}</span>
                 <span className="block text-[11px] text-muted-foreground">{hint}</span>
@@ -302,7 +334,9 @@ export default function ConnectPanel({
       <details open={!!ai?.enabled} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
           AI inside the app
-          <span className="text-[11px] font-normal normal-case text-muted-foreground">{ai?.enabled ? "On" : "Off"}</span>
+          <span className="text-[11px] font-normal normal-case text-muted-foreground">
+            {ai?.enabled ? "On" : "Off"}
+          </span>
         </summary>
         <label
           className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-2.5 transition ${
@@ -326,7 +360,9 @@ export default function ConnectPanel({
         </label>
         {ai?.enabled && (
           <div className="mt-2">
-            <p className="mb-1 text-[11px] text-muted-foreground">What it should be (system prompt - users never see it):</p>
+            <p className="mb-1 text-[11px] text-muted-foreground">
+              What it should be (system prompt - users never see it):
+            </p>
             <textarea
               value={ai.systemPrompt || ""}
               onChange={(e) => onSetAi({ enabled: true, systemPrompt: e.target.value })}
@@ -367,7 +403,12 @@ function ConnectionEditor({
       onError("The call name must start with a letter and use only lowercase letters, digits, - and _.");
       return;
     }
-    onConfigure(c.id, { alias, requestTemplate: template || undefined, responsePath: responsePath || undefined, requiresAuth });
+    onConfigure(c.id, {
+      alias,
+      requestTemplate: template || undefined,
+      responsePath: responsePath || undefined,
+      requiresAuth,
+    });
   };
 
   // Test goes through the live public SHARE endpoint (always up while the
@@ -384,10 +425,13 @@ function ConnectionEditor({
       );
       const j = await res.json().catch((): null => null);
       const raw =
-        typeof j?.reply === "string" && j.reply ? j.reply
-        : typeof j?.resultText === "string" && j.resultText ? j.resultText
-        : typeof j?.errorMessage === "string" ? j.errorMessage
-        : `HTTP ${res.status}`;
+        typeof j?.reply === "string" && j.reply
+          ? j.reply
+          : typeof j?.resultText === "string" && j.resultText
+            ? j.resultText
+            : typeof j?.errorMessage === "string"
+              ? j.errorMessage
+              : `HTTP ${res.status}`;
       setTestResult(extractResponsePath(responsePath, wf ? "resultText" : "reply", raw));
     } catch {
       setTestResult("Couldn't reach the API.");
@@ -407,7 +451,9 @@ function ConnectionEditor({
           </p>
         </div>
         <div>
-          <p className="mb-1 text-[11px] text-muted-foreground">What to send (optional - blank sends the input as-is):</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">
+            What to send (optional - blank sends the input as-is):
+          </p>
           <textarea
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
@@ -441,8 +487,19 @@ function ConnectionEditor({
           </p>
         )}
         <div className="flex items-center gap-1.5">
-          <Input value={testInput} onChange={(e) => setTestInput(e.target.value)} placeholder="Try it…" className="h-7 flex-1 text-xs" />
-          <Button size="sm" variant="outline" onClick={() => void test()} disabled={testing} className="h-7 gap-1 text-[11px]">
+          <Input
+            value={testInput}
+            onChange={(e) => setTestInput(e.target.value)}
+            placeholder="Try it…"
+            className="h-7 flex-1 text-xs"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => void test()}
+            disabled={testing}
+            className="h-7 gap-1 text-[11px]"
+          >
             {testing ? <Loader2 aria-hidden="true" size={11} className="animate-spin" /> : null} Test
           </Button>
           <Button size="sm" onClick={save} className="h-7 text-[11px]">

@@ -437,11 +437,11 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
                   >
                     {x.kind === "tool" &&
                       (x.done ? (
-                        <Check aria-hidden="true" className="mr-1 inline h-3.5 w-3.5 text-emerald-300 shrink-0" />
+                        <Check aria-hidden="true" className="me-1 inline h-3.5 w-3.5 text-emerald-300 shrink-0" />
                       ) : (
                         <Loader2
                           aria-hidden="true"
-                          className="mr-1 inline h-3.5 w-3.5 animate-spin text-emerald-300 shrink-0"
+                          className="me-1 inline h-3.5 w-3.5 animate-spin text-emerald-300 shrink-0"
                         />
                       ))}
                     {x.text}

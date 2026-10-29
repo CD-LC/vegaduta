@@ -72,7 +72,10 @@ export default function FlowExplainer({
   const wide = !vertical;
 
   return (
-    <details open={defaultOpen || undefined} className={cn("group/flow min-w-0 rounded-lg border border-border bg-card/40", className)}>
+    <details
+      open={defaultOpen || undefined}
+      className={cn("group/flow min-w-0 rounded-lg border border-border bg-card/40", className)}
+    >
       <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground [&::-webkit-details-marker]:hidden">
         <ChevronRight
           aria-hidden="true"
@@ -99,24 +102,30 @@ export default function FlowExplainer({
                   {!last && (
                     <span
                       data-flow-connector=""
-                      className={cn(
-                        "my-1 w-px flex-1 bg-border",
-                        wide && "@2xl:mx-1 @2xl:my-0 @2xl:h-px @2xl:w-auto"
-                      )}
+                      className={cn("my-1 w-px flex-1 bg-border", wide && "@2xl:mx-1 @2xl:my-0 @2xl:h-px @2xl:w-auto")}
                     />
                   )}
                 </div>
-                <div className={cn("min-w-0 flex-1 pb-4", last && "pb-0", wide && "@2xl:pb-0 @2xl:pr-4")}>
+                <div className={cn("min-w-0 flex-1 pb-4", last && "pb-0", wide && "@2xl:pb-0 @2xl:pe-4")}>
                   <p className="pt-1 text-sm font-medium leading-snug text-foreground">{step.title}</p>
-                  {step.description && <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{step.description}</p>}
+                  {step.description && (
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{step.description}</p>
+                  )}
                   {step.outcomes && step.outcomes.length > 0 && (
                     <ul className="m-0 mt-2 list-none space-y-1.5 p-0">
                       {step.outcomes.map((outcome) => (
-                        <li key={outcome.key ?? outcome.label} data-flow-outcome="" className="flex min-w-0 items-start gap-2 text-xs">
+                        <li
+                          key={outcome.key ?? outcome.label}
+                          data-flow-outcome=""
+                          className="flex min-w-0 items-start gap-2 text-xs"
+                        >
                           <span
                             aria-hidden="true"
-                            className="mt-1 inline-block h-2 w-3 shrink-0 rounded-sm border-l-2"
-                            style={{ borderColor: stateColor(outcome.state), background: `color-mix(in srgb, ${stateColor(outcome.state)} 22%, transparent)` }}
+                            className="mt-1 inline-block h-2 w-3 shrink-0 rounded-sm border-s-2"
+                            style={{
+                              borderColor: stateColor(outcome.state),
+                              background: `color-mix(in srgb, ${stateColor(outcome.state)} 22%, transparent)`,
+                            }}
                           />
                           <span className="min-w-0 leading-relaxed text-muted-foreground">
                             <span className="font-semibold text-foreground">{outcome.label}</span>

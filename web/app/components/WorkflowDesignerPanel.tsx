@@ -285,7 +285,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
           <Search
             aria-hidden="true"
             size={15}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             type="text"
@@ -293,7 +293,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
             aria-label={t("searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9"
+            className="ps-9"
           />
         </div>
 
@@ -442,7 +442,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                 <TableHead className="w-28">{t("colStatus")}</TableHead>
                 <TableHead className="hidden w-40 md:table-cell">{t("colStructure")}</TableHead>
                 <TableHead className="hidden w-40 lg:table-cell">{t("colUpdated")}</TableHead>
-                <TableHead className={portable ? "w-52 text-right" : "w-40 text-right"}>{t("colActions")}</TableHead>
+                <TableHead className={portable ? "w-52 text-end" : "w-40 text-end"}>{t("colActions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

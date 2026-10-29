@@ -75,7 +75,7 @@ export default function LandingFaq() {
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
                   aria-controls={`landing-faq-a${i}`}
-                  className="flex w-full items-center justify-between gap-4 border-0 bg-transparent px-5 py-4 text-left"
+                  className="flex w-full items-center justify-between gap-4 border-0 bg-transparent px-5 py-4 text-start"
                 >
                   <span className="mkt-body font-medium text-foreground">{q}</span>
                   <ChevronDown

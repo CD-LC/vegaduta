@@ -152,7 +152,7 @@ export default function SupportTicketCard({
           {submitting ? t("submittingButton") : t("submitTicketButton")}
         </Button>
         <Button type="button" variant="outline" size="sm" className="mb-0 rounded-full" onClick={copyDiagnostics}>
-          <ClipboardDocumentIcon width={13} height={13} className="mr-1" aria-hidden="true" />
+          <ClipboardDocumentIcon width={13} height={13} className="me-1" aria-hidden="true" />
           {t("copyDiagnosticsButton")}
         </Button>
         {lastTicketId && (

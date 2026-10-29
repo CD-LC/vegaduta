@@ -135,7 +135,7 @@ function NestedObject({ value, depth = 0 }: { value: any; depth?: number }) {
     const entries = Object.entries(value);
     if (entries.length === 0) return <span className="text-muted-foreground">(empty)</span>;
     return (
-      <div className={depth > 0 ? "space-y-1 border-l border-border/70 pl-3" : "space-y-1"}>
+      <div className={depth > 0 ? "space-y-1 border-s border-border/70 ps-3" : "space-y-1"}>
         {entries.map(([k, v]) => (
           <div key={k} className="text-xs">
             <span className="text-muted-foreground">{humanizeKey(k)}: </span>

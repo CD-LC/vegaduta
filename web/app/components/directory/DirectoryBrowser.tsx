@@ -57,9 +57,12 @@ export default function DirectoryBrowser({
     const id = ++latestRequest.current;
     setBusy(true);
     try {
-      const res = await fetch(`${API_BASE}/api/directory/agents?limit=${size}${pageNo > 1 ? `&offset=${(pageNo - 1) * size}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`, {
-        headers: { Accept: "application/json" },
-      });
+      const res = await fetch(
+        `${API_BASE}/api/directory/agents?limit=${size}${pageNo > 1 ? `&offset=${(pageNo - 1) * size}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`,
+        {
+          headers: { Accept: "application/json" },
+        }
+      );
       if (!res.ok) throw new Error(String(res.status));
       const body = (await res.json()) as DirectoryPage;
       if (id !== latestRequest.current) return;
@@ -181,7 +184,7 @@ export default function DirectoryBrowser({
             >
               <button
                 type="button"
-                className="flex w-full items-start gap-3 rounded-md text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex w-full items-start gap-3 rounded-md text-start outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 onClick={() => toggleDetail(e.agentId)}
                 aria-expanded={isOpen}
               >
