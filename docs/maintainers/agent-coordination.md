@@ -737,7 +737,6 @@ without them. Branch `test/personal-release-smoke`; signed-out half
 verified 5/5 green on the maintainer's local personal stack (39 passed
 incl. the edition suite, 0 failed).
 
-<<<<<<< HEAD
 ### Issue #295 denied-tool turn fix (Devin, 2026-10-29)
 
 Claimed `core/chat/.../ArgumentSanitizingToolCallingManager.java`,
