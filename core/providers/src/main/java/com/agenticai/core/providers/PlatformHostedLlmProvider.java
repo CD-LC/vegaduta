@@ -560,22 +560,13 @@ public class PlatformHostedLlmProvider {
         this.toolDeferral = toolDeferral;
     }
 
-    /**
-     * Code default of {@code app.providers.small-model-max-billions}: models at or below this many
-     * billions of parameters run in small-model mode unless the row says otherwise.
-     */
+    /** Code default of {@code app.providers.small-model-max-billions} (billions of parameters). */
     public static final double SMALL_MODEL_MAX_BILLIONS = 8.0;
 
-    /**
-     * The configured limit (SmallModelThresholdConfiguration sets it at start-up); the code default
-     * until then.
-     */
+    /** The configured limit (set at start-up by SmallModelThresholdConfiguration). */
     private static volatile double smallModelMaxBillions = SMALL_MODEL_MAX_BILLIONS;
 
-    /**
-     * Sets the size limit of small-model mode ({@code app.providers.small-model-max-billions});
-     * negative = never by size.
-     */
+    /** Sets the small-model size limit; negative = never by size. */
     public static void useSmallModelMaxBillions(double maxBillions) {
         smallModelMaxBillions = maxBillions;
     }

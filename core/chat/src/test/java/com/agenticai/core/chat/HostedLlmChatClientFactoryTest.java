@@ -154,8 +154,7 @@ class HostedLlmChatClientFactoryTest {
 
     @Test
     void aLocalOllamaRowAsksTheServerToKeepTheModelLoaded() {
-        java.util.Map<String, Object> extra =
-                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "-1", null, 0);
+        java.util.Map<String, Object> extra = LocalOllamaExtraBody.of(32768, null, "-1", null, 0);
         org.junit.jupiter.api.Assertions.assertEquals(
                 java.util.Map.of("num_ctx", 32768), extra.get("options"));
         // A number, not the string "-1": Ollama answers 400 to a duration without a unit.
@@ -165,36 +164,30 @@ class HostedLlmChatClientFactoryTest {
     @Test
     void theRowsOwnKeepAliveWinsAndADurationStaysText() {
         org.junit.jupiter.api.Assertions.assertEquals(
-                "2h",
-                HostedLlmChatClientFactory.localOllamaExtraBody(0, "2h", "-1", null, 0)
-                        .get("keep_alive"));
+                "2h", LocalOllamaExtraBody.of(0, "2h", "-1", null, 0).get("keep_alive"));
         org.junit.jupiter.api.Assertions.assertFalse(
-                HostedLlmChatClientFactory.localOllamaExtraBody(0, "2h", "-1", null, 0)
-                        .containsKey("options"));
+                LocalOllamaExtraBody.of(0, "2h", "-1", null, 0).containsKey("options"));
     }
 
     @Test
     void noKeepAliveConfiguredSendsNone() {
         org.junit.jupiter.api.Assertions.assertTrue(
-                HostedLlmChatClientFactory.localOllamaExtraBody(0, " ", "", null, 0).isEmpty());
+                LocalOllamaExtraBody.of(0, " ", "", null, 0).isEmpty());
     }
 
     @Test
     void theRowsOwnNumBatchRidesIntoTheRequestOptions() {
         // Row override wins over the configured default; 0/null leaves the server default.
-        java.util.Map<String, Object> extra =
-                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", 2048, 0);
+        java.util.Map<String, Object> extra = LocalOllamaExtraBody.of(32768, null, "", 2048, 0);
         org.junit.jupiter.api.Assertions.assertEquals(
                 java.util.Map.of("num_ctx", 32768, "num_batch", 2048), extra.get("options"));
 
         org.junit.jupiter.api.Assertions.assertEquals(
                 java.util.Map.of("num_ctx", 32768, "num_batch", 1024),
-                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", null, 1024)
-                        .get("options"));
+                LocalOllamaExtraBody.of(32768, null, "", null, 1024).get("options"));
 
         org.junit.jupiter.api.Assertions.assertEquals(
                 java.util.Map.of("num_ctx", 32768),
-                HostedLlmChatClientFactory.localOllamaExtraBody(32768, null, "", null, 0)
-                        .get("options"));
+                LocalOllamaExtraBody.of(32768, null, "", null, 0).get("options"));
     }
 }

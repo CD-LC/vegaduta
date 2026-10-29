@@ -263,7 +263,7 @@ public class HostedLlmChatClientFactory {
         OpenAiChatOptions options = optionsBuilder.build();
         if (localOllama) {
             Map<String, Object> extra =
-                    localOllamaExtraBody(
+                    LocalOllamaExtraBody.of(
                             ollamaNumCtx,
                             provider.getKeepAlive(),
                             localModelsKeepAlive,
@@ -340,40 +340,6 @@ public class HostedLlmChatClientFactory {
                         ? provider.getReasoningEffort()
                         : ollamaReasoningEffort;
         return value == null || value.isBlank() ? null : value.trim();
-    }
-
-    /**
-     * The Ollama-only fields of a local row's request: the context window, the per-request {@code
-     * num_batch} (row override, else {@code app.llm.ollama.num-batch}) and how long the model stays
-     * loaded (row keep-alive, else {@code app.local-models.keep-alive}).
-     */
-    static Map<String, Object> localOllamaExtraBody(
-            int numCtx,
-            String rowKeepAlive,
-            String defaultKeepAlive,
-            Integer rowNumBatch,
-            int defaultNumBatch) {
-        Map<String, Object> extra = new java.util.LinkedHashMap<>();
-        int batch = rowNumBatch != null ? rowNumBatch : defaultNumBatch;
-        Map<String, Object> options = new java.util.LinkedHashMap<>();
-        if (numCtx > 0) {
-            options.put("num_ctx", numCtx);
-        }
-        if (batch > 0) {
-            options.put("num_batch", batch);
-        }
-        if (!options.isEmpty()) {
-            extra.put("options", java.util.Collections.unmodifiableMap(options));
-        }
-        Object keepAlive =
-                com.agenticai.core.providers.localmodels.OllamaKeepAlive.jsonValue(
-                        rowKeepAlive != null && !rowKeepAlive.isBlank()
-                                ? rowKeepAlive
-                                : defaultKeepAlive);
-        if (keepAlive != null) {
-            extra.put("keep_alive", keepAlive);
-        }
-        return extra;
     }
 
     /** True when a pool row carries no usable API key, so no Authorization header is sent. */
