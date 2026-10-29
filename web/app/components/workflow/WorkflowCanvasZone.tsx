@@ -43,6 +43,7 @@ import {
 import "./workflow-chrome.css";
 import { Button } from "../ui/button";
 import { IconAction } from "./StudioControls";
+import { useTranslations } from "../../lib/i18n";
 
 const SNAP_GRID: [number, number] = [10, 10];
 const FIT_OPTIONS: FitViewOptions = { maxZoom: 1, padding: 0.3 };
@@ -118,6 +119,7 @@ const SHORTCUTS: Array<{ label: string; keys: string[] }> = [
 ];
 
 function ShortcutsSheet({ onClose }: { onClose: () => void }) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -142,14 +144,14 @@ function ShortcutsSheet({ onClose }: { onClose: () => void }) {
         ref={ref}
         role="dialog"
         aria-modal="true"
-        aria-label="Keyboard shortcuts"
+        aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s1")}
         className="wf-shortcuts"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
       >
         <div className="wf-shortcuts-head">
-          <span>Keyboard shortcuts</span>
-          <button type="button" className="wf-tb-btn" aria-label="Close shortcuts" onClick={onClose}>
+          <span>{tHC("hcComponentsWorkflowWorkflowCanvasZone.s1")}</span>
+          <button type="button" className="wf-tb-btn" aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s15")} onClick={onClose}>
             <X size={14} />
           </button>
         </div>
@@ -260,6 +262,7 @@ export default function WorkflowCanvasZone({
   overlay,
   titleExtra,
 }: WorkflowCanvasZoneProps) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
   // "select": drag draws a marquee, pan via middle/right button or Space.
   // "pan": plain drag pans the canvas.
   const [mode, setMode] = useState<"select" | "pan">("select");
@@ -286,7 +289,7 @@ export default function WorkflowCanvasZone({
         </div>
 
         <ReactFlow
-          aria-label="Workflow canvas"
+          aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s14")}
           nodes={displayNodes}
           edges={displayEdges}
           onNodesChange={onNodesChange}
@@ -358,8 +361,8 @@ export default function WorkflowCanvasZone({
                 <button
                   type="button"
                   onClick={() => setCmdOpen(true)}
-                  title="Add a node"
-                  aria-label="Add a node (Ctrl+K)"
+                  title={tHC("hcComponentsWorkflowWorkflowCanvasZone.s13")}
+                  aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s11")}
                   className="inline-flex items-center gap-1 rounded-md border-0 bg-transparent p-0 font-semibold text-foreground shadow-none transition-colors hover:text-primary"
                 >
                   <kbd className="inline-flex items-center gap-0.5 rounded border border-border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px]">
@@ -384,12 +387,12 @@ export default function WorkflowCanvasZone({
               <button
                 type="button"
                 onClick={() => setCmdOpen(true)}
-                title="Add a node  (⌘K / Ctrl+K)"
-                aria-label="Add a node (Ctrl+K)"
+                title={tHC("hcComponentsWorkflowWorkflowCanvasZone.s12")}
+                aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s11")}
                 className="flex items-center gap-2 rounded-lg border border-border bg-popover/90 px-3 py-2 text-xs font-medium text-foreground shadow-lg backdrop-blur-md transition-colors hover:border-primary/50 hover:bg-accent"
               >
                 <Plus size={15} className="text-primary" />
-                Add node
+                {tHC("hcComponentsWorkflowWorkflowCanvasZone.s10")}
                 <kbd className="ms-0.5 hidden items-center gap-0.5 rounded border border-border bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline-flex">
                   <Command size={9} />K
                 </kbd>
@@ -402,7 +405,7 @@ export default function WorkflowCanvasZone({
          * @xyflow/react's own zoomIn/zoomOut/fitView; the percentage comes
          * from the canvas's onMove viewport event, never a fabricated number.
          * Optional actions render only when the parent supplies a handler. */}
-        <div className="wf-toolbar" role="toolbar" aria-label="Canvas tools">
+        <div className="wf-toolbar" role="toolbar" aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s9")}>
           {onToggleRuns && (
             <>
               <Button
@@ -424,20 +427,20 @@ export default function WorkflowCanvasZone({
           {!readOnly && (
             <>
               <ToolbarButton
-                label="Select mode (drag to box-select)"
+                label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s8")}
                 pressed={!panMode}
                 onClick={() => setMode("select")}
               >
                 <MousePointer2 size={15} />
               </ToolbarButton>
-              <ToolbarButton label="Pan mode (drag to move canvas)" pressed={panMode} onClick={() => setMode("pan")}>
+              <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s7")} pressed={panMode} onClick={() => setMode("pan")}>
                 <Hand size={15} />
               </ToolbarButton>
             </>
           )}
           {!readOnly && (onAutoLayout || onToggleSnap) && <span className="wf-toolbar-sep" aria-hidden="true" />}
           {!readOnly && onAutoLayout && (
-            <ToolbarButton label="Tidy layout (Shift+L)" onClick={onAutoLayout}>
+            <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s6")} onClick={onAutoLayout}>
               <LayoutGrid size={15} />
             </ToolbarButton>
           )}
@@ -452,17 +455,17 @@ export default function WorkflowCanvasZone({
           )}
           {hasEdit && <span className="wf-toolbar-sep" aria-hidden="true" />}
           {hasEdit && onCopy && (
-            <ToolbarButton label="Copy selection (Ctrl+C)" onClick={onCopy}>
+            <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s5")} onClick={onCopy}>
               <Copy size={15} />
             </ToolbarButton>
           )}
           {hasEdit && onPaste && (
-            <ToolbarButton label="Paste (Ctrl+V)" onClick={onPaste}>
+            <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s4")} onClick={onPaste}>
               <ClipboardPaste size={15} />
             </ToolbarButton>
           )}
           {hasEdit && onDuplicate && (
-            <ToolbarButton label="Duplicate selection (Ctrl+D)" onClick={onDuplicate}>
+            <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s3")} onClick={onDuplicate}>
               <CopyPlus size={15} />
             </ToolbarButton>
           )}
@@ -470,7 +473,7 @@ export default function WorkflowCanvasZone({
           <ToolbarButton label={t("zoomOutTooltip")} onClick={() => zoomOut()}>
             <Minus size={15} />
           </ToolbarButton>
-          <span className="wf-tb-readout" role="status" aria-label="Zoom level">
+          <span className="wf-tb-readout" role="status" aria-label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s2")}>
             {zoomPct}%
           </span>
           <ToolbarButton label={t("zoomInTooltip")} onClick={() => zoomIn()}>
@@ -482,7 +485,7 @@ export default function WorkflowCanvasZone({
           {onToggleShortcuts && (
             <>
               <span className="wf-toolbar-sep" aria-hidden="true" />
-              <ToolbarButton label="Keyboard shortcuts" pressed={showShortcuts} onClick={onToggleShortcuts}>
+              <ToolbarButton label={tHC("hcComponentsWorkflowWorkflowCanvasZone.s1")} pressed={showShortcuts} onClick={onToggleShortcuts}>
                 <Keyboard size={15} />
               </ToolbarButton>
             </>

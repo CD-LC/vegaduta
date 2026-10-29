@@ -20,6 +20,7 @@ export default function OnDeviceUtilities({
   utilityAvailable: Record<UtilityKind, boolean | null>;
   utilityBusy: Record<UtilityKind, boolean>;
 }) {
+    const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceUtilities");
   const t = useTranslations("edgeIntelligence");
   return (
     <div className="mt-2.5 border-t border-border pt-2.5">
@@ -28,7 +29,7 @@ export default function OnDeviceUtilities({
       </div>
       {!reasoningModelReady && (
         <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-          These work together with a text model above — download one so on-device replies can actually use them.
+          {tHC("hcComponentsAgentsIntelligenceOnDeviceUtilities.s1")}
         </p>
       )}
       <div className="space-y-1">

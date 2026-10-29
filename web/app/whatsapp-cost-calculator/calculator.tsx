@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { META_RATE_CARD_URL, PRICING_CHECKED_ON, parseRate } from "./pricing-facts";
+import { useTranslations } from "../lib/i18n";
 
 // ---------------------------------------------------------------------------
 // WhatsApp Business API cost calculator — the interactive half of
@@ -117,6 +118,7 @@ function ResultRow({ label, value, precise }: { label: string; value: number; pr
 }
 
 export default function WhatsAppCostCalculator() {
+    const tHC = useTranslations("hcWhatsappcostcalculatorCalculator");
   // Volume + behaviour inputs. Every value here is a starting point, not a
   // claim — the user owns both sides of the comparison.
   const [conversations, setConversations] = useState(1000);
@@ -151,15 +153,15 @@ export default function WhatsAppCostCalculator() {
       {/* ------------------------------------------------------------ Inputs */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Your numbers</CardTitle>
+          <CardTitle className="text-base">{tHC("hcWhatsappcostcalculatorCalculator.s30")}</CardTitle>
           <CardDescription>
-            Every field is yours to set — the results below are computed from these inputs and nothing else.
+            {tHC("hcWhatsappcostcalculatorCalculator.s29")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <SliderField
             id="wa-conversations"
-            label="Customer conversations per month"
+            label={tHC("hcWhatsappcostcalculatorCalculator.s28")}
             value={conversations}
             onChange={setConversations}
             min={0}
@@ -168,7 +170,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-msgs-broadcast"
-            label="Messages per conversation — broadcast / human workflow"
+            label={tHC("hcWhatsappcostcalculatorCalculator.s27")}
             hint="Business-sent messages it typically takes to resolve one customer today: the blast, the follow-ups, the back-and-forth."
             value={msgsBroadcast}
             onChange={setMsgsBroadcast}
@@ -179,7 +181,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-msgs-agent"
-            label="Messages per conversation — AI agent"
+            label={tHC("hcWhatsappcostcalculatorCalculator.s26")}
             hint="What you expect an agent that answers precisely to need. The default is only a starting point — set it to whatever you believe."
             value={msgsAgent}
             onChange={setMsgsAgent}
@@ -190,7 +192,7 @@ export default function WhatsAppCostCalculator() {
           />
           <SliderField
             id="wa-marketing-pct"
-            label="Marketing share of messages"
+            label={tHC("hcWhatsappcostcalculatorCalculator.s25")}
             hint="Marketing templates bill at the high rate; the remainder is priced at the utility/authentication rate."
             value={marketingPct}
             onChange={setMarketingPct}
@@ -202,7 +204,7 @@ export default function WhatsAppCostCalculator() {
 
           <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              Per-message rates (₹) — copy from Meta&apos;s rate card
+              {tHC("hcWhatsappcostcalculatorCalculator.s24")}
             </p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -215,7 +217,7 @@ export default function WhatsAppCostCalculator() {
                   inputMode="decimal"
                   step={0.0001}
                   min={0}
-                  placeholder="from rate card"
+                  placeholder={tHC("hcWhatsappcostcalculatorCalculator.s22")}
                   className="h-9 text-end tabular-nums"
                   value={marketingRateText}
                   onChange={(e) => setMarketingRateText(e.target.value)}
@@ -223,7 +225,7 @@ export default function WhatsAppCostCalculator() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="wa-rate-utility" className="text-xs">
-                  Utility / authentication
+                  {tHC("hcWhatsappcostcalculatorCalculator.s23")}
                 </Label>
                 <Input
                   id="wa-rate-utility"
@@ -231,7 +233,7 @@ export default function WhatsAppCostCalculator() {
                   inputMode="decimal"
                   step={0.001}
                   min={0}
-                  placeholder="from rate card"
+                  placeholder={tHC("hcWhatsappcostcalculatorCalculator.s22")}
                   className="h-9 text-end tabular-nums"
                   value={utilityRateText}
                   onChange={(e) => setUtilityRateText(e.target.value)}
@@ -239,18 +241,16 @@ export default function WhatsAppCostCalculator() {
               </div>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground" data-testid="wa-rates-note">
-              Pricing model checked against Meta&apos;s documentation on {PRICING_CHECKED_ON}: per-message, by category
-              (marketing, utility, authentication). Meta&apos;s documentation text publishes no rates, so none are
-              pre-filled. Read yours from{" "}
+              {tHC("hcWhatsappcostcalculatorCalculator.s21")} {PRICING_CHECKED_ON}{tHC("hcWhatsappcostcalculatorCalculator.s20")}{" "}
               <a
                 href={META_RATE_CARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Meta&apos;s rate card
+                {tHC("hcWhatsappcostcalculatorCalculator.s19")}
               </a>{" "}
-              (pick your market and currency) and type them here.
+              {tHC("hcWhatsappcostcalculatorCalculator.s18")}
             </p>
           </div>
         </CardContent>
@@ -261,10 +261,9 @@ export default function WhatsAppCostCalculator() {
         {r === null ? (
           <Card>
             <CardContent className="space-y-2" data-testid="wa-no-rates">
-              <p className="text-sm font-medium text-foreground">Check Meta&apos;s current rates</p>
+              <p className="text-sm font-medium text-foreground">{tHC("hcWhatsappcostcalculatorCalculator.s17")}</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Enter the marketing and utility rates from Meta&apos;s rate card on the left and the estimate appears
-                here. Rates last checked: not published in Meta&apos;s documentation text as of {PRICING_CHECKED_ON}.
+                {tHC("hcWhatsappcostcalculatorCalculator.s16")} {PRICING_CHECKED_ON}.
               </p>
             </CardContent>
           </Card>
@@ -276,7 +275,7 @@ export default function WhatsAppCostCalculator() {
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Megaphone className="size-4" aria-hidden="true" />
                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Broadcast / human workflow
+                      {tHC("hcWhatsappcostcalculatorCalculator.s15")}
                     </CardTitle>
                   </div>
                   <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
@@ -285,7 +284,7 @@ export default function WhatsAppCostCalculator() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <ResultRow label="Cost per resolved conversation" value={r.perConvBroadcast} precise />
+                  <ResultRow label={tHC("hcWhatsappcostcalculatorCalculator.s13")} value={r.perConvBroadcast} precise />
                 </CardContent>
               </Card>
 
@@ -293,7 +292,7 @@ export default function WhatsAppCostCalculator() {
                 <CardHeader className="gap-2">
                   <div className="flex items-center gap-2 text-primary">
                     <Bot className="size-4" aria-hidden="true" />
-                    <CardTitle className="text-sm font-medium text-primary">AI agent that answers precisely</CardTitle>
+                    <CardTitle className="text-sm font-medium text-primary">{tHC("hcWhatsappcostcalculatorCalculator.s14")}</CardTitle>
                   </div>
                   <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
                     {inr.format(r.costAgent)}
@@ -301,7 +300,7 @@ export default function WhatsAppCostCalculator() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <ResultRow label="Cost per resolved conversation" value={r.perConvAgent} precise />
+                  <ResultRow label={tHC("hcWhatsappcostcalculatorCalculator.s13")} value={r.perConvAgent} precise />
                 </CardContent>
               </Card>
             </div>
@@ -309,7 +308,7 @@ export default function WhatsAppCostCalculator() {
             <Card>
               <CardContent className="space-y-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-sm font-medium text-foreground">Monthly difference implied by your inputs</span>
+                  <span className="text-sm font-medium text-foreground">{tHC("hcWhatsappcostcalculatorCalculator.s12")}</span>
                   <span
                     className={`text-xl font-semibold tabular-nums ${
                       r.delta >= 0 ? "text-primary" : "text-destructive"
@@ -329,19 +328,18 @@ export default function WhatsAppCostCalculator() {
                 {/* The formula, verbatim — no hidden math. */}
                 <div className="rounded-md border border-border bg-muted/30 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                    The whole formula
+                    {tHC("hcWhatsappcostcalculatorCalculator.s11")}
                   </p>
                   <p className="mt-2 font-mono text-xs leading-relaxed text-muted-foreground">
-                    blended rate = {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹{utilityRate} = ₹
-                    {r.blendedRate.toFixed(4)} per message
+                    {tHC("hcWhatsappcostcalculatorCalculator.s10")} {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹{utilityRate} = ₹
+                    {r.blendedRate.toFixed(4)} {tHC("hcWhatsappcostcalculatorCalculator.s9")}
                     <br />
-                    side A = {conversations.toLocaleString("en-IN")} conversations × {msgsBroadcast} msgs × blended rate
-                    = {inrPrecise.format(r.costBroadcast)}
+                    {tHC("hcWhatsappcostcalculatorCalculator.s8")} {conversations.toLocaleString("en-IN")} {tHC("hcWhatsappcostcalculatorCalculator.s6")} {msgsBroadcast} {tHC("hcWhatsappcostcalculatorCalculator.s5")} {inrPrecise.format(r.costBroadcast)}
                     <br />
-                    side B = {conversations.toLocaleString("en-IN")} conversations × {msgsAgent} msgs × blended rate ={" "}
+                    {tHC("hcWhatsappcostcalculatorCalculator.s7")} {conversations.toLocaleString("en-IN")} {tHC("hcWhatsappcostcalculatorCalculator.s6")} {msgsAgent} {tHC("hcWhatsappcostcalculatorCalculator.s5")}{" "}
                     {inrPrecise.format(r.costAgent)}
                     <br />
-                    per resolved conversation = side ÷ conversations
+                    {tHC("hcWhatsappcostcalculatorCalculator.s4")}
                   </p>
                 </div>
               </CardContent>
@@ -352,12 +350,12 @@ export default function WhatsAppCostCalculator() {
         <Card className="border-primary/40 bg-primary/5">
           <CardContent className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">See an agent answer for your business</p>
-              <p className="text-xs text-muted-foreground">Free, no signup — a live sandbox, not a video.</p>
+              <p className="text-sm font-medium text-foreground">{tHC("hcWhatsappcostcalculatorCalculator.s3")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("hcWhatsappcostcalculatorCalculator.s2")}</p>
             </div>
             <Button asChild>
               <Link href="/try">
-                Try it now <ArrowRight className="size-4" aria-hidden="true" />
+                {tHC("hcWhatsappcostcalculatorCalculator.s1")} <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </Button>
           </CardContent>

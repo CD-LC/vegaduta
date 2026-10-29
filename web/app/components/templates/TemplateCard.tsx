@@ -6,6 +6,7 @@ import { Card, CardContent } from "../ui/card";
 import CategoryChip from "./CategoryChip";
 import { categoryMeta, kindMeta } from "./categories";
 import type { CommunityTemplateSummary } from "../../lib/api";
+import { useTranslations } from "../../lib/i18n";
 
 // One gallery card. Category chip (icon + tint) + title + summary + the real
 // import count from the API. Deliberately shows NO configuration (system
@@ -15,6 +16,7 @@ import type { CommunityTemplateSummary } from "../../lib/api";
 // Honesty rule: the ONLY number asserted here is `importCount`, which is real
 // API data. Nothing else claims a count, rating or testimonial.
 export default function TemplateCard({ template }: { template: CommunityTemplateSummary }) {
+    const tHC = useTranslations("hcComponentsTemplatesTemplateCard");
   const cat = categoryMeta(template.category);
   const kind = kindMeta(template.kind);
   const KindIcon = kind.icon;
@@ -63,7 +65,7 @@ export default function TemplateCard({ template }: { template: CommunityTemplate
                 {count.toLocaleString()} {count === 1 ? "import" : "imports"}
               </span>
             ) : (
-              <span>No imports yet</span>
+              <span>{tHC("hcComponentsTemplatesTemplateCard.s1")}</span>
             )}
           </div>
         </Link>

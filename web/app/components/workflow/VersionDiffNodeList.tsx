@@ -8,6 +8,7 @@ import { useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ChevronRight, Crosshair, Minus, Pencil, Plus } from "lucide-react";
 import { groupFields, type DiffChangedNode, type DiffNodeBrief } from "./versionDiff";
 import { ChangeTable, shortId } from "./VersionDiffCells";
+import { useTranslations } from "../../lib/i18n";
 
 export type RowKind = "changed" | "added" | "removed";
 export type NodeRow = { kind: RowKind; node: DiffNodeBrief; changed: DiffChangedNode | null };
@@ -29,6 +30,7 @@ type VersionDiffNodeListProps = {
 };
 
 export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, expanded, toggle, onFocusNode }: VersionDiffNodeListProps) {
+    const tHC = useTranslations("hcComponentsWorkflowVersionDiffNodeList");
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   function moveTo(i: number) {
@@ -134,7 +136,7 @@ export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, e
                   type="button"
                   className="wf-vdiff-icon"
                   aria-label={`Show ${label} on canvas`}
-                  title="Show on canvas"
+                  title={tHC("hcComponentsWorkflowVersionDiffNodeList.s1")}
                   onClick={() => onFocusNode(row.node.id)}
                 >
                   <Crosshair size={12} aria-hidden="true" />

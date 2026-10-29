@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, Sparkles, Rocket, ArrowRight, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { useTranslations } from "../lib/i18n";
 
 // Post-upgrade "celebration" overlay (#celebration). Shown once, right after a
 // tenant's plan upgrade is CONFIRMED, as a full-screen modal with a tasteful
@@ -198,6 +199,7 @@ export default function UpgradeCelebration({
   plan: string;
   onDismiss: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsUpgradeCelebration");
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
@@ -315,13 +317,13 @@ export default function UpgradeCelebration({
             </motion.div>
 
             <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs font-medium uppercase tracking-[0.18em] text-primary">
-              <Sparkles aria-hidden="true" size={13} /> Upgrade complete
+              <Sparkles aria-hidden="true" size={13} /> {tHC("hcComponentsUpgradeCelebration.s5")}
             </p>
             <h2 className="mt-2 text-balance text-center text-2xl font-semibold tracking-tight sm:text-[1.7rem]">
-              Congratulations — you&apos;re on {info.name}!
+              {tHC("hcComponentsUpgradeCelebration.s4")} {info.name}!
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-              {info.tagline} Here&apos;s what your workspace can do now.
+              {info.tagline} {tHC("hcComponentsUpgradeCelebration.s3")}
             </p>
 
             <ul className="mt-6 flex list-none flex-col gap-2.5 p-0">
@@ -343,10 +345,10 @@ export default function UpgradeCelebration({
 
             <div className="mt-7 flex flex-col gap-2.5">
               <Button type="button" className="w-full" onClick={goToDashboard}>
-                Go to dashboard <ArrowRight aria-hidden="true" size={15} />
+                {tHC("hcComponentsUpgradeCelebration.s2")} <ArrowRight aria-hidden="true" size={15} />
               </Button>
               <Button type="button" variant="ghost" className="w-full text-muted-foreground" onClick={onDismiss}>
-                Stay on billing
+                {tHC("hcComponentsUpgradeCelebration.s1")}
               </Button>
             </div>
           </motion.div>

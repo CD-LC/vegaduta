@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import { X } from "lucide-react";
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from "@xyflow/react";
+import { useTranslations } from "../../lib/i18n";
 
 // Custom edge renderer for every workflow-canvas edge - registered for the
 // "smoothstep" type DEFAULT_EDGE_OPTIONS already stamps on each edge (see
@@ -34,6 +35,7 @@ export default function DeletableEdge({
   interactionWidth,
   selected,
 }: EdgeProps) {
+    const tHC = useTranslations("hcComponentsWorkflowDeletableEdge");
   const onDelete = useContext(WorkflowEdgeDeleteContext);
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -67,8 +69,8 @@ export default function DeletableEdge({
               e.stopPropagation();
               onDelete(id);
             }}
-            aria-label="Delete connection"
-            title="Delete connection"
+            aria-label={tHC("hcComponentsWorkflowDeletableEdge.s1")}
+            title={tHC("hcComponentsWorkflowDeletableEdge.s1")}
           >
             <X size={12} strokeWidth={2.5} aria-hidden="true" />
           </button>

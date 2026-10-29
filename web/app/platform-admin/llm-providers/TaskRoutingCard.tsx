@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { TONE_BOX } from "../components/admin/AdminKit";
 import { PROVIDER_OPTIONS, TASK_INFO, withCurrentValue, type LlmTaskDraft } from "./constants";
+import { useTranslations } from "../../lib/i18n";
 
 // LLM task-routing card, extracted from page.tsx. State and handlers stay in
 // the page; this component is presentation only.
@@ -37,6 +38,7 @@ export default function TaskRoutingCard({
   routingModelSummary,
   loadingRoutingModelProviders,
 }: TaskRoutingCardProps) {
+    const tHC = useTranslations("hcPlatformadminLlmprovidersTaskRoutingCard");
   return (
     <>
       {/* (a) LLM Task Routing */}
@@ -49,11 +51,10 @@ export default function TaskRoutingCard({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <KeyRound size={16} className="text-primary" /> LLM Task Routing
+              <KeyRound size={16} className="text-primary" /> {tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s6")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              Strictly internal, system-level tasks this platform itself uses an LLM for - not a tenant-facing default
-              provider picker.
+              {tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s5")}
             </p>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -95,7 +96,7 @@ export default function TaskRoutingCard({
                           value={draft.providerName}
                           onChange={(e) => updateDraft(taskKey, { providerName: e.target.value })}
                           options={PROVIDER_OPTIONS}
-                          placeholder="Select a provider…"
+                          placeholder={tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s4")}
                         />
                       </div>
                       <div className="w-56 space-y-1.5">
@@ -120,13 +121,13 @@ export default function TaskRoutingCard({
                         )}
                       </div>
                       <div className="w-56 space-y-1.5">
-                        <Label htmlFor={`task-apikey-${taskKey}`} className="text-xs text-muted-foreground">New API key</Label>
+                        <Label htmlFor={`task-apikey-${taskKey}`} className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s3")}</Label>
                         <Input
                           id={`task-apikey-${taskKey}`}
                           type="password"
                           value={draft.apiKey}
                           onChange={(e) => updateDraft(taskKey, { apiKey: e.target.value })}
-                          placeholder="Leave blank to keep the current key"
+                          placeholder={tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s2")}
                           autoComplete="new-password"
                         />
                       </div>
@@ -136,7 +137,7 @@ export default function TaskRoutingCard({
                     </div>
                     {row?.lastValidatedAt && (
                       <div className="mt-2 font-mono text-xs text-muted-foreground">
-                        Last validated {new Date(row.lastValidatedAt).toLocaleString()}
+                        {tHC("hcPlatformadminLlmprovidersTaskRoutingCard.s1")} {new Date(row.lastValidatedAt).toLocaleString()}
                       </div>
                     )}
                   </motion.div>

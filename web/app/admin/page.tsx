@@ -41,6 +41,7 @@ import { CardHeading, CardLink, Eyebrow, StatTile } from "./_overview/ui";
  * cards below.
  */
 export default function AdminOverviewPage() {
+    const tHC = useTranslations("hcAdminPage");
   const t = useTranslations("adminOverview");
   const router = useRouter();
   const { isAdmin } = useAuth();
@@ -164,7 +165,7 @@ export default function AdminOverviewPage() {
                     href="/help#getting-started"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    Learn how it works
+                    {tHC("hcAdminPage.s3")}
                   </Link>
                 </div>
               </div>
@@ -295,10 +296,10 @@ export default function AdminOverviewPage() {
               <CardHeading>
                 <span className="inline-flex items-center gap-2">
                   <Activity aria-hidden="true" className="size-4 text-muted-foreground" />
-                  Live audit tail
+                  {tHC("hcAdminPage.s2")}
                 </span>
               </CardHeading>
-              <CardLink href="/admin/audit-tail">View full</CardLink>
+              <CardLink href="/admin/audit-tail">{tHC("hcAdminPage.s1")}</CardLink>
             </div>
             <AdminEventTail />
             <div className="flex items-center gap-3 border-t border-border px-5 py-3">

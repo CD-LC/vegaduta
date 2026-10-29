@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { fetchChannels, type DemoSession } from "../try/demoClient";
 import { studio, type StudioAgent } from "./studioClient";
+import { useTranslations } from "../../lib/i18n";
 
 const ChannelBridge = nextDynamic(() => import("../try/ChannelBridge"));
 const PocketPanel = nextDynamic(() => import("./PocketPanel"));
@@ -42,6 +43,7 @@ export default function DeployPanel({
   onTurnSpent,
   onShareUrl,
 }: Props) {
+    const tHC = useTranslations("hcComponentsStudioDeployPanel");
   const [switching, setSwitching] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The messenger bridge is only shown when the deployment has a REAL
@@ -78,10 +80,10 @@ export default function DeployPanel({
     <div className="space-y-6">
       <section>
         <div className="mb-1 flex items-center gap-2 text-sm font-medium">
-          <Radio aria-hidden="true" className="h-4 w-4 shrink-0" /> Which agent answers the outside world
+          <Radio aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioDeployPanel.s7")}
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          The QR code, the link and the Telegram bridge talk to one agent at a time. Pick it.
+          {tHC("hcComponentsStudioDeployPanel.s6")}
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {agents.map((a) => (
@@ -140,15 +142,14 @@ export default function DeployPanel({
       <WhatsAppBridge token={token} session={session} />
 
       <section className="rounded-2xl border border-primary/30 bg-primary/5 p-5">
-        <div className="mb-1 text-base font-semibold">Keep all of this</div>
+        <div className="mb-1 text-base font-semibold">{tHC("hcComponentsStudioDeployPanel.s5")}</div>
         <p className="mb-3 text-sm text-muted-foreground">
-          Create a free account and {mine.length === 1 ? "the agent" : `all ${mine.length} agents`} you designed here{" "}
-          {mine.length === 1 ? "is" : "are"} copied into your own workspace on the spot - same missions, same tools,
-          same rules. Then connect WhatsApp, schedules, email and your documents.
+          {tHC("hcComponentsStudioDeployPanel.s4")} {mine.length === 1 ? "the agent" : `all ${mine.length} agents`} {tHC("hcComponentsStudioDeployPanel.s3")}{" "}
+          {mine.length === 1 ? "is" : "are"} {tHC("hcComponentsStudioDeployPanel.s2")}
         </p>
         <Button asChild>
           <Link href={signupHref}>
-            Create my workspace <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
+            {tHC("hcComponentsStudioDeployPanel.s1")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
           </Link>
         </Button>
       </section>

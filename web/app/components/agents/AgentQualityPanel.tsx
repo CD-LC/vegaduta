@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Section, StatCard, EmptyState } from "../ax/page-kit";
 import { UpgradeLock } from "../ui/upgrade-lock";
 import JudgeSamplingNote from "./JudgeSamplingNote";
+import { useTranslations } from "../../lib/i18n";
 
 // EvaluationType.name() -> display name, mirroring EvaluationType.getDisplayName()
 // (core/quality) since the summary/config endpoints echo the enum name, not the
@@ -59,6 +60,7 @@ export default function AgentQualityPanel({
   /** Where the "Test against attacks" link goes; omitted = no link (the attack test is not available). */
   attackTestHref?: string;
 }) {
+    const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
   const [config, setConfig] = useState<QualityConfigResponse | null>(null);
   const [summary, setSummary] = useState<QualitySummaryResponse | null>(null);
   const [statistics, setStatistics] = useState<QualityStatisticsResponse | null>(null);
@@ -127,25 +129,24 @@ export default function AgentQualityPanel({
     return (
       <EmptyState
         icon={Gauge}
-        title="Select an agent"
+        title={tHC("hcComponentsAgentsAgentQualityPanel.s22")}
         description="Pick an agent to see how its responses are scoring on the evaluation dimensions your plan has enabled."
       />
     );
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading quality data…</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("hcComponentsAgentsAgentQualityPanel.s21")}</p>;
   }
 
   if (locked) {
     return (
       <Alert>
         <Lock />
-        <AlertTitle>Agent quality evaluations are a Premium feature</AlertTitle>
+        <AlertTitle>{tHC("hcComponentsAgentsAgentQualityPanel.s20")}</AlertTitle>
         <AlertDescription>
           <p>
-            Upgrade your plan to see this agent&apos;s real-time eval scores — helpfulness, accuracy, tone, length,
-            relevance and safety — scored on every turn, plus history and aggregated statistics.
+            {tHC("hcComponentsAgentsAgentQualityPanel.s19")}
           </p>
           <UpgradeLock
             reason="Agent quality evaluations (scores, history, statistics) are a Premium feature - upgrade to view them."
@@ -153,7 +154,7 @@ export default function AgentQualityPanel({
             className="mt-3"
           >
             <Badge variant="secondary" className="cursor-not-allowed gap-1.5 opacity-80">
-              <Sparkles size={11} /> Preview locked
+              <Sparkles size={11} /> {tHC("hcComponentsAgentsAgentQualityPanel.s18")}
             </Badge>
           </UpgradeLock>
         </AlertDescription>
@@ -165,10 +166,9 @@ export default function AgentQualityPanel({
     return (
       <Alert>
         <Gauge />
-        <AlertTitle>Live quality scoring isn&apos;t on this deployment yet</AlertTitle>
+        <AlertTitle>{tHC("hcComponentsAgentsAgentQualityPanel.s17")}</AlertTitle>
         <AlertDescription>
-          The running core predates the quality-scoring endpoints. The dataset, gate, simulation and
-          statistics sections below still render wherever their endpoints exist.
+          {tHC("hcComponentsAgentsAgentQualityPanel.s16")}
         </AlertDescription>
       </Alert>
     );
@@ -189,16 +189,16 @@ export default function AgentQualityPanel({
       {!hasData && (
         <Alert>
           <Gauge />
-          <AlertTitle>No evaluation data yet</AlertTitle>
+          <AlertTitle>{tHC("hcComponentsAgentsAgentQualityPanel.s15")}</AlertTitle>
           <AlertDescription>
-            <p>As this agent responds to real turns, its evaluation scores will start filling in here.</p>
+            <p>{tHC("hcComponentsAgentsAgentQualityPanel.s14")}</p>
           </AlertDescription>
         </Alert>
       )}
 
       {/* Overview stat row — l22-8 teaches this whole surface. */}
       <Section
-        title="Quality overview"
+        title={tHC("hcComponentsAgentsAgentQualityPanel.s13")}
         description="Aggregated across every recorded evaluation for this agent."
         actions={
           <>
@@ -208,33 +208,33 @@ export default function AgentQualityPanel({
                 data-testid="quality-attack-link"
                 className="text-xs font-medium text-muted-foreground underline hover:text-foreground"
               >
-                Test against attacks
+                {tHC("hcComponentsAgentsAgentQualityPanel.s12")}
               </a>
             )}
           </>
         }
       >
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard label="Average score" value={pct(statistics?.averageQualityScore ?? null)} icon={Award} accent />
-          <StatCard label="Evaluations logged" value={statistics?.totalEvaluations ?? 0} icon={CheckCircle2} />
-          <StatCard label="Latest score" value={summary ? pct(summary.overallScore) : "—"} icon={TrendingUp} />
-          <StatCard label="Plan tier" value={config?.planTier || "—"} icon={ShieldCheck} />
+          <StatCard label={tHC("hcComponentsAgentsAgentQualityPanel.s11")} value={pct(statistics?.averageQualityScore ?? null)} icon={Award} accent />
+          <StatCard label={tHC("hcComponentsAgentsAgentQualityPanel.s10")} value={statistics?.totalEvaluations ?? 0} icon={CheckCircle2} />
+          <StatCard label={tHC("hcComponentsAgentsAgentQualityPanel.s9")} value={summary ? pct(summary.overallScore) : "—"} icon={TrendingUp} />
+          <StatCard label={tHC("hcComponentsAgentsAgentQualityPanel.s8")} value={config?.planTier || "—"} icon={ShieldCheck} />
         </div>
       </Section>
 
       {/* Score trend */}
-      <Section title="Score trend" description="Overall quality score across recent turns.">
+      <Section title={tHC("hcComponentsAgentsAgentQualityPanel.s7")} description="Overall quality score across recent turns.">
         <Card className="gap-0 p-5">
           {history && history.overallScores.length > 0 ? (
             <QualityTrend history={history} />
           ) : (
-            <p className="py-6 text-center text-sm text-muted-foreground">No score history yet.</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">{tHC("hcComponentsAgentsAgentQualityPanel.s6")}</p>
           )}
         </Card>
       </Section>
 
       {/* Per-dimension scores from the latest evaluated turn */}
-      <Section title="Latest scores by dimension" description="From the most recent evaluated turn.">
+      <Section title={tHC("hcComponentsAgentsAgentQualityPanel.s5")} description="From the most recent evaluated turn.">
         {scoreEntries.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {scoreEntries.map(([type, score]) => (
@@ -256,12 +256,12 @@ export default function AgentQualityPanel({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No per-dimension scores recorded yet.</p>
+          <p className="text-sm text-muted-foreground">{tHC("hcComponentsAgentsAgentQualityPanel.s4")}</p>
         )}
       </Section>
 
       {/* Which dimensions this plan tier runs */}
-      <Section title="Enabled evaluations" description="Which dimensions run on this agent, based on your plan tier.">
+      <Section title={tHC("hcComponentsAgentsAgentQualityPanel.s3")} description="Which dimensions run on this agent, based on your plan tier.">
         <div className="flex flex-wrap gap-2">
           {enabledTypes.length > 0 ? (
             enabledTypes.map((type) => (
@@ -270,7 +270,7 @@ export default function AgentQualityPanel({
               </Badge>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">No evaluation types configured.</p>
+            <p className="text-sm text-muted-foreground">{tHC("hcComponentsAgentsAgentQualityPanel.s2")}</p>
           )}
         </div>
       </Section>
@@ -286,6 +286,7 @@ export default function AgentQualityPanel({
  * via currentColor so it reads correctly in light and dark.
  */
 function QualityTrend({ history }: { history: QualityHistoryResponse }) {
+    const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
   const values = history.overallScores.map((v) => Number(v) || 0);
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
@@ -307,7 +308,7 @@ function QualityTrend({ history }: { history: QualityHistoryResponse }) {
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
           <div className="text-2xl font-semibold tabular-nums text-foreground">{pct(latest)}</div>
-          <div className="text-xs text-muted-foreground">latest overall score</div>
+          <div className="text-xs text-muted-foreground">{tHC("hcComponentsAgentsAgentQualityPanel.s1")}</div>
         </div>
         <div
           className="flex items-center gap-1 text-xs font-medium tabular-nums"

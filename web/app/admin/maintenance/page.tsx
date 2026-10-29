@@ -95,6 +95,7 @@ const PLATFORM_CHECKS = ALL_PLATFORM_CHECKS.filter((p) => channelOffered(p.key))
 // explicit boundary is this one page file, not the translation catalog.
 
 export default function PlatformMaintenancePage() {
+    const tHC = useTranslations("hcAdminMaintenancePage");
   const t = useTranslations("adminMaintenancePage");
   const router = useRouter();
   const { isAdmin, hasPermission } = useAuth();
@@ -255,7 +256,7 @@ export default function PlatformMaintenancePage() {
             Approvals
           </TabsTrigger>
           <TabsTrigger value="data-privacy" className="flex-none">
-            Data &amp; Privacy
+            {tHC("hcAdminMaintenancePage.s1")}
           </TabsTrigger>
         </TabsList>
 

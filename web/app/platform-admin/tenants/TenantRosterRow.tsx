@@ -21,6 +21,7 @@ import {
 } from "../lib/platformFormat";
 import { capTone, formatCapUsage } from "../lib/governanceFormat";
 import { CAP_TONE_CLASS, PLAN_OPTIONS, RESIDENCY_OPTIONS, STATUS_TONE_CLASS } from "./tenantOptions";
+import { useTranslations } from "../../lib/i18n";
 
 function Meta({ label, children, title }: { label: string; children: any; title?: string }) {
   return (
@@ -60,6 +61,7 @@ export function TenantRosterRow({
   onResetUsage: () => void;
   onDelete: () => void;
 }) {
+    const tHC = useTranslations("hcPlatformadminTenantsTenantRosterRow");
   const dirty = draftPlan && draftPlan !== t.plan;
   return (
     <motion.div
@@ -74,7 +76,7 @@ export function TenantRosterRow({
           <Link
             href={`/platform-admin/tenant-detail?id=${encodeURIComponent(t.tenantId)}`}
             className="hover:text-primary hover:underline hover:underline-offset-2"
-            title="Open tenant detail"
+            title={tHC("hcPlatformadminTenantsTenantRosterRow.s13")}
           >
             {t.name}
           </Link>
@@ -87,7 +89,7 @@ export function TenantRosterRow({
           </span>
           {t.emergencyStopped && (
             <span className="rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-destructive">
-              Sign-in disabled
+              {tHC("hcPlatformadminTenantsTenantRosterRow.s12")}
             </span>
           )}
         </div>
@@ -103,21 +105,21 @@ export function TenantRosterRow({
           <Meta label="Created" title={formatExact(t.createdAt)}>
             {formatDay(t.createdAt)}
           </Meta>
-          <Meta label="Last activity" title={formatExact(t.lastActivityAt)}>
+          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s11")} title={formatExact(t.lastActivityAt)}>
             {formatRelative(t.lastActivityAt)}
           </Meta>
-          <Meta label="Spend (30d)" title="All providers incl. BYOK (estimate). Hosted = platform-paid pool share.">
+          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s10")} title={tHC("hcPlatformadminTenantsTenantRosterRow.s9")}>
             <span className="font-mono">{formatUsdOrUnavailable(t.spend30dUsd)}</span>
             <span className="ms-1 text-[11px] text-muted-foreground">
               hosted {formatUsdOrUnavailable(t.hostedSpend30dUsd)}
             </span>
           </Meta>
-          <Meta label="LLM calls (30d)">
+          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s8")}>
             <span className="font-mono">{formatCountOrUnavailable(t.llmCalls30d)}</span>
           </Meta>
           <Meta
-            label="Spend cap (month)"
-            title="Hosted-pool spend this calendar month (UTC) against the tenant's monthly cap. BYOK is not counted."
+            label={tHC("hcPlatformadminTenantsTenantRosterRow.s7")}
+            title={tHC("hcPlatformadminTenantsTenantRosterRow.s6")}
           >
             <span
               className={`font-mono ${
@@ -173,7 +175,7 @@ export function TenantRosterRow({
             size="sm"
             disabled={resuming}
             onClick={onResume}
-            title="Let this tenant's users sign in again"
+            title={tHC("hcPlatformadminTenantsTenantRosterRow.s5")}
           >
             <ShieldCheck size={13} /> {resuming ? "Enabling…" : "Enable login"}
           </Button>
@@ -182,9 +184,9 @@ export function TenantRosterRow({
             variant="outline"
             size="sm"
             onClick={onStop}
-            title="Block every sign-in and API call from this tenant's users - reversible"
+            title={tHC("hcPlatformadminTenantsTenantRosterRow.s4")}
           >
-            <ShieldOff size={13} /> Disable login
+            <ShieldOff size={13} /> {tHC("hcPlatformadminTenantsTenantRosterRow.s3")}
           </Button>
         )}
         <Button
@@ -192,7 +194,7 @@ export function TenantRosterRow({
           size="sm"
           disabled={resettingUsage}
           onClick={onResetUsage}
-          title="Clear this tenant's daily and monthly free-tier usage counters (message + token) back to zero - the limit itself is unchanged"
+          title={tHC("hcPlatformadminTenantsTenantRosterRow.s2")}
         >
           <Gauge size={13} /> {resettingUsage ? "Resetting…" : "Reset usage"}
         </Button>
@@ -200,7 +202,7 @@ export function TenantRosterRow({
           variant="destructive"
           size="sm"
           onClick={onDelete}
-          title="Permanently delete this tenant's entire data - irreversible, master key required"
+          title={tHC("hcPlatformadminTenantsTenantRosterRow.s1")}
         >
           <Trash2 size={13} /> Delete
         </Button>

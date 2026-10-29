@@ -7,6 +7,7 @@ import { Ban, EyeOff, Lock, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import type { GuardrailRule } from "./guardrailRules";
+import { useTranslations } from "../../lib/i18n";
 
 export function GuardrailRuleRow({
   rule,
@@ -33,6 +34,7 @@ export function GuardrailRuleRow({
   onDelete: () => void;
   onCancelDelete: () => void;
 }) {
+    const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleRow");
   return (
     <div
       data-testid={`guardrail-rule-${rule.id}`}
@@ -54,7 +56,7 @@ export function GuardrailRuleRow({
           </Badge>
           {!editable && (
             <Badge variant="outline">
-              <Lock aria-hidden="true" /> Platform default
+              <Lock aria-hidden="true" /> {tHC("hcAdminGuardrailsGuardrailRuleRow.s2")}
             </Badge>
           )}
           {!rule.enabled && <Badge variant="outline">Off</Badge>}
@@ -92,7 +94,7 @@ export function GuardrailRuleRow({
           {isConfirming ? (
             <>
               <Button type="button" size="sm" variant="destructive" disabled={busy} onClick={onDelete}>
-                Confirm delete
+                {tHC("hcAdminGuardrailsGuardrailRuleRow.s1")}
               </Button>
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onCancelDelete}>
                 Cancel

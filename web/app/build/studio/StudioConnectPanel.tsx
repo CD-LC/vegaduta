@@ -8,6 +8,7 @@ import { Input } from "../../components/ui/input";
 import { type StudioAiConfig, type StudioAuthMode, type StudioConnection } from "./store";
 import { aliasOf, extractResponsePath, renderConnectionTemplate } from "./payload";
 import { api, API_BASE } from "../../lib/api";
+import { useTranslations } from "../../lib/i18n";
 
 interface ConnectableItem {
   id: string;
@@ -41,6 +42,7 @@ export default function ConnectPanel({
   onSetAi: (cfg: StudioAiConfig | null) => void;
   onError: (message: string) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioStudioConnectPanel");
   const [agents, setAgents] = useState<ConnectableItem[] | null>(null);
   const [workflows, setWorkflows] = useState<ConnectableItem[] | null>(null);
   const [working, setWorking] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export default function ConnectPanel({
           )}
         </div>
         {items === null ? (
-          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">Loading…</p>
+          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s25")}</p>
         ) : total === 0 ? (
           <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">
             {q
@@ -164,7 +166,7 @@ export default function ConnectPanel({
                             type="button"
                             onClick={() => setEditing(editing === key ? null : key)}
                             className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-foreground transition hover:border-primary/40 hover:bg-accent"
-                            title="What it sends, what the app shows, who can call it"
+                            title={tHC("hcBuildStudioStudioConnectPanel.s24")}
                           >
                             Configure
                           </button>
@@ -172,7 +174,7 @@ export default function ConnectPanel({
                             type="button"
                             onClick={() => onDetach(kind, it.id)}
                             className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-700 transition hover:bg-destructive/10 hover:text-destructive dark:text-emerald-300"
-                            title="Remove from the app"
+                            title={tHC("hcBuildStudioStudioConnectPanel.s23")}
                           >
                             <Check aria-hidden="true" size={11} /> Connected
                           </button>
@@ -245,8 +247,7 @@ export default function ConnectPanel({
           <Rocket aria-hidden="true" size={15} />
         </span>
         <p className="text-xs leading-snug text-muted-foreground">
-          <span className="font-bold text-foreground">Connect real superpowers.</span> Agents decide, workflows do
-          multi-step jobs - no code, no API keys.
+          <span className="font-bold text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s22")}</span> {tHC("hcBuildStudioStudioConnectPanel.s21")}
         </p>
       </div>
 
@@ -260,8 +261,8 @@ export default function ConnectPanel({
           <input
             value={query}
             onChange={(e) => onQuery(e.target.value)}
-            placeholder="Search agents and workflows…"
-            aria-label="Search agents and workflows"
+            placeholder={tHC("hcBuildStudioStudioConnectPanel.s20")}
+            aria-label={tHC("hcBuildStudioStudioConnectPanel.s19")}
             className="w-full rounded-xl border border-border bg-background py-2 ps-9 pe-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
           />
         </label>
@@ -280,15 +281,13 @@ export default function ConnectPanel({
 
       <details open={authMode !== "off"} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
-          Sign-in for your users
+          {tHC("hcBuildStudioStudioConnectPanel.s18")}
           <span className="text-[11px] font-normal normal-case text-muted-foreground">
             {authMode === "off" ? "Off" : authMode === "optional" ? "Optional" : "Required"}
           </span>
         </summary>
         <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">
-          Your app&apos;s users are <em>your</em> customers - they sign in to this app only, never your team&apos;s
-          console, and they don&apos;t use a seat. The sign-in screen is drawn by the trusted host page, never inside
-          the app.
+          {tHC("hcBuildStudioStudioConnectPanel.s17")} <em>your</em> {tHC("hcBuildStudioStudioConnectPanel.s16")}
         </p>
         <div className="flex flex-col gap-1.5">
           {(
@@ -326,14 +325,14 @@ export default function ConnectPanel({
         </div>
         {authMode !== "off" && !published && (
           <p className="mt-2 rounded-lg bg-amber-500/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
-            Sign-in turns on when you publish (Share tab → Publish).
+            {tHC("hcBuildStudioStudioConnectPanel.s15")}
           </p>
         )}
       </details>
 
       <details open={!!ai?.enabled} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
-          AI inside the app
+          {tHC("hcBuildStudioStudioConnectPanel.s14")}
           <span className="text-[11px] font-normal normal-case text-muted-foreground">
             {ai?.enabled ? "On" : "Off"}
           </span>
@@ -350,24 +349,22 @@ export default function ConnectPanel({
             className="mt-0.5 accent-primary"
           />
           <span>
-            <span className="block text-xs font-medium text-foreground">Add an AI block</span>
+            <span className="block text-xs font-medium text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s13")}</span>
             <span className="block text-[11px] leading-relaxed text-muted-foreground">
-              The app can call <code className="text-foreground">await vd.ai.chat(&quot;…&quot;)</code> - answered by a
-              VegaDūta-hosted model on your plan&apos;s quota once published, or on the viewer&apos;s own device in
-              preview. No API keys for you or your users to handle.
+              {tHC("hcBuildStudioStudioConnectPanel.s12")} <code className="text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s11")}</code> {tHC("hcBuildStudioStudioConnectPanel.s10")}
             </span>
           </span>
         </label>
         {ai?.enabled && (
           <div className="mt-2">
             <p className="mb-1 text-[11px] text-muted-foreground">
-              What it should be (system prompt - users never see it):
+              {tHC("hcBuildStudioStudioConnectPanel.s9")}
             </p>
             <textarea
               value={ai.systemPrompt || ""}
               onChange={(e) => onSetAi({ enabled: true, systemPrompt: e.target.value })}
               rows={2}
-              placeholder="e.g. You are a friendly recipe coach inside a meal-planning app."
+              placeholder={tHC("hcBuildStudioStudioConnectPanel.s8")}
               className="w-full resize-none rounded-xl border border-border bg-background p-2.5 text-xs text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -390,6 +387,7 @@ function ConnectionEditor({
   onConfigure: (id: string, patch: Partial<StudioConnection>) => void;
   onError: (message: string) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioStudioConnectPanel");
   const [alias, setAlias] = useState(c.alias || aliasOf(c.name));
   const [template, setTemplate] = useState(c.requestTemplate || "");
   const [responsePath, setResponsePath] = useState(c.responsePath || "");
@@ -444,15 +442,15 @@ function ConnectionEditor({
     <div className="border-t border-border/70 px-2.5 py-2">
       <div className="flex flex-col gap-2">
         <div>
-          <p className="mb-1 text-[11px] text-muted-foreground">Call name - how the app reaches it:</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s7")}</p>
           <Input value={alias} onChange={(e) => setAlias(e.target.value)} className="h-7 font-mono text-[11px]" />
           <p className="mt-1 text-[10px] text-muted-foreground">
-            Then tell the AI: &quot;when X happens, call {alias || "it"} and show the answer&quot;.
+            {tHC("hcBuildStudioStudioConnectPanel.s6")} {alias || "it"} {tHC("hcBuildStudioStudioConnectPanel.s5")}
           </p>
         </div>
         <div>
           <p className="mb-1 text-[11px] text-muted-foreground">
-            What to send (optional - blank sends the input as-is):
+            {tHC("hcBuildStudioStudioConnectPanel.s4")}
           </p>
           <textarea
             value={template}
@@ -469,7 +467,7 @@ function ConnectionEditor({
           </p>
         </div>
         <div>
-          <p className="mb-1 text-[11px] text-muted-foreground">Show this part of the response (optional):</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s3")}</p>
           <Input
             value={responsePath}
             onChange={(e) => setResponsePath(e.target.value)}
@@ -479,11 +477,11 @@ function ConnectionEditor({
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
           <input type="checkbox" checked={requiresAuth} onChange={(e) => setRequiresAuth(e.target.checked)} />
-          Only signed-in app users can call this
+          {tHC("hcBuildStudioStudioConnectPanel.s2")}
         </label>
         {!published && requiresAuth && (
           <p className="rounded-md bg-amber-500/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
-            Takes effect once the app is published.
+            {tHC("hcBuildStudioStudioConnectPanel.s1")}
           </p>
         )}
         <div className="flex items-center gap-1.5">

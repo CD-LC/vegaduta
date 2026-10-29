@@ -40,6 +40,7 @@ import SandboxFrame from "./SandboxFrame";
 import { CODE_EXT, buildModuleGraph, buildStaticDoc, shellDoc } from "./sandboxModules";
 import { PREVIEW_MESSAGE_TAG, addError, formatFixRequest, injectReporter } from "./previewReporter";
 import { loadBabel } from "../lib/babel";
+import { useTranslations } from "../lib/i18n";
 
 // ---------------------------------------------------------------------------
 // module graph (pure parts live in sandboxModules.ts)
@@ -79,6 +80,7 @@ export default function SandboxPreview({
   onFix?: (instruction: string) => void;
   fixDisabled?: boolean;
 }) {
+    const tHC = useTranslations("hcBuildSandboxPreview");
   const [state, setState] = useState<
     | { kind: "loading" }
     | { kind: "ready"; srcdoc: string; notes: string[] }
@@ -176,13 +178,13 @@ export default function SandboxPreview({
     <div className="flex h-full min-h-[320px] flex-col gap-2">
       <div className="flex items-center gap-2">
         <MonitorPlay aria-hidden="true" size={14} className="text-primary" />
-        <span className="text-xs font-medium text-foreground">Instant preview</span>
-        <span className="text-[10px] text-muted-foreground">runs in this browser — nothing is deployed</span>
+        <span className="text-xs font-medium text-foreground">{tHC("hcBuildSandboxPreview.s14")}</span>
+        <span className="text-[10px] text-muted-foreground">{tHC("hcBuildSandboxPreview.s13")}</span>
         <div className="ms-auto flex items-center gap-1">
           {state.kind === "ready" && (
             <div
               role="group"
-              aria-label="Preview device"
+              aria-label={tHC("hcBuildSandboxPreview.s12")}
               className="me-1 flex items-center rounded-md border border-border p-0.5"
             >
               {DEVICES.map(({ id, label, Icon }) => (
@@ -204,7 +206,7 @@ export default function SandboxPreview({
                 <button
                   type="button"
                   title="Rotate"
-                  aria-label="Rotate device"
+                  aria-label={tHC("hcBuildSandboxPreview.s11")}
                   aria-pressed={landscape}
                   onClick={() => setLandscape((v) => !v)}
                   className="inline-flex size-6 items-center justify-center rounded text-muted-foreground hover:text-foreground"
@@ -215,7 +217,7 @@ export default function SandboxPreview({
             </div>
           )}
           {files && files.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label="Reload preview">
+            <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label={tHC("hcBuildSandboxPreview.s10")}>
               <RefreshCw aria-hidden="true" size={12} />
             </Button>
           )}
@@ -224,7 +226,7 @@ export default function SandboxPreview({
               href={pagesUrl}
               target="_blank"
               rel="noopener noreferrer"
-              title="Deployed GitHub Pages preview — 404s until the repo's pages job has deployed; see the Build on GitHub pane for fixes"
+              title={tHC("hcBuildSandboxPreview.s9")}
               className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
             >
               Pages <ExternalLink aria-hidden="true" size={10} />
@@ -240,7 +242,7 @@ export default function SandboxPreview({
           <AlertTriangle aria-hidden="true" size={14} className="mt-0.5 shrink-0 text-destructive" />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-foreground">
-              The preview hit {runtimeErrors.length} runtime error{runtimeErrors.length > 1 ? "s" : ""}
+              {tHC("hcBuildSandboxPreview.s8")} {runtimeErrors.length} {tHC("hcBuildSandboxPreview.s7")}{runtimeErrors.length > 1 ? "s" : ""}
             </p>
             <p className="truncate text-muted-foreground" title={runtimeErrors.join("\n")}>
               {runtimeErrors[0]}
@@ -253,26 +255,26 @@ export default function SandboxPreview({
               disabled={fixDisabled}
               onClick={() => onFix(formatFixRequest(runtimeErrors))}
             >
-              <Wand2 aria-hidden="true" size={12} /> Fix with AI
+              <Wand2 aria-hidden="true" size={12} /> {tHC("hcBuildSandboxPreview.s6")}
             </Button>
           )}
         </div>
       )}
       {state.kind === "ready" && state.notes.length > 0 && (
         <p className="text-[11px] leading-snug text-muted-foreground" title={state.notes.join(" ")}>
-          Preview note: {state.notes[0]}
+          {tHC("hcBuildSandboxPreview.s5")} {state.notes[0]}
           {state.notes.length > 1 ? ` (+${state.notes.length - 1} more)` : ""}
         </p>
       )}
       <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-border bg-card">
         {state.kind === "empty" && (
           <div className="flex h-full items-center justify-center p-6 text-center text-xs text-muted-foreground">
-            Ask for something in the chat — the preview appears here the moment the files are written.
+            {tHC("hcBuildSandboxPreview.s4")}
           </div>
         )}
         {state.kind === "loading" && (
           <div className="flex h-full items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Loader2 aria-hidden="true" size={14} className="animate-spin" /> Rendering preview…
+            <Loader2 aria-hidden="true" size={14} className="animate-spin" /> {tHC("hcBuildSandboxPreview.s3")}
           </div>
         )}
         {state.kind === "error" && (
@@ -284,7 +286,7 @@ export default function SandboxPreview({
                 size="sm"
                 onClick={() => window.open(pagesUrl, "_blank", "noopener,noreferrer")}
               >
-                <ExternalLink aria-hidden="true" size={13} /> Open the Pages preview
+                <ExternalLink aria-hidden="true" size={13} /> {tHC("hcBuildSandboxPreview.s2")}
               </Button>
             )}
           </div>
@@ -304,7 +306,7 @@ export default function SandboxPreview({
                   sandbox="allow-scripts"
                   className={`bg-white ${framed ? "shrink-0 rounded-2xl border border-border shadow-lg" : "size-full border-0"}`}
                   style={framed ? { width: w, maxWidth: "none", height: h } : undefined}
-                  title="Instant app preview"
+                  title={tHC("hcBuildSandboxPreview.s1")}
                 />
               </div>
             );

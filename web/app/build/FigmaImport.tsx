@@ -12,6 +12,7 @@ import { Input } from "../components/ui/input";
 import { appBuilder } from "./lib";
 import type { DesignInput } from "./designInputs";
 import { designInputFromFigma, validateFigmaUrl } from "./figmaInput";
+import { useTranslations } from "../lib/i18n";
 
 interface Props {
   projectId: string;
@@ -23,6 +24,7 @@ interface Props {
 const FOCUSABLE = "input, button, a[href], textarea, select, [tabindex]:not([tabindex='-1'])";
 
 export default function FigmaImport({ projectId, disabled, onImported, onError }: Props) {
+    const tHC = useTranslations("hcBuildFigmaImport");
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [token, setToken] = useState("");
@@ -99,8 +101,8 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
         variant="ghost"
         size="sm"
         className="h-7 w-9 px-0"
-        title="Import a Figma frame as design context"
-        aria-label="Import a Figma frame as design context"
+        title={tHC("hcBuildFigmaImport.s7")}
+        aria-label={tHC("hcBuildFigmaImport.s7")}
         aria-haspopup="dialog"
         disabled={disabled}
         onClick={() => setOpen(true)}
@@ -129,15 +131,14 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
             }}
           >
             <h3 id={`${uid}-title`} className="text-sm font-semibold">
-              Import from Figma
+              {tHC("hcBuildFigmaImport.s6")}
             </h3>
             <p id={`${uid}-desc`} className="text-xs text-muted-foreground">
-              Paste a frame link (right-click a frame, Copy link to selection) and a Figma personal
-              access token with file read access. The token is sent once over TLS and is never stored.
+              {tHC("hcBuildFigmaImport.s5")}
             </p>
             <div className="space-y-1">
               <label htmlFor={`${uid}-url`} className="text-xs font-medium text-foreground">
-                Frame link
+                {tHC("hcBuildFigmaImport.s4")}
               </label>
               <Input
                 id={`${uid}-url`}
@@ -151,12 +152,12 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
             </div>
             <div className="space-y-1">
               <label htmlFor={`${uid}-token`} className="text-xs font-medium text-foreground">
-                Personal access token
+                {tHC("hcBuildFigmaImport.s3")}
               </label>
               <Input
                 id={`${uid}-token`}
                 type="password"
-                placeholder="Figma personal access token"
+                placeholder={tHC("hcBuildFigmaImport.s2")}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 autoComplete="off"
@@ -168,7 +169,7 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              No token? Export the frame as PNG or SVG and attach it instead.
+              {tHC("hcBuildFigmaImport.s1")}
             </p>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={close}>

@@ -9,6 +9,7 @@ import { Ban, CircleCheck, CircleDashed, CircleX, Hand, LoaderCircle, Pause, Ski
 import type { AwaitReason } from "./runModel";
 import { formatCostUsd, formatDuration } from "./runModel";
 import { formatClock, intFmt, statusText, type Bar, type Lane, type Tone } from "./runRecorderView";
+import { useTranslations } from "../../lib/i18n";
 
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -149,6 +150,7 @@ type RecorderTipProps = {
 
 /** Hover/focus tooltip for one visit bar, floated above it (below near the viewport top). */
 export function RecorderTip({ bar: hoverBar, hover }: RecorderTipProps) {
+    const tHC = useTranslations("hcComponentsWorkflowRunRecorderParts");
   return (
     <div
       className="rfr-tip"
@@ -172,8 +174,8 @@ export function RecorderTip({ bar: hoverBar, hover }: RecorderTipProps) {
         {hoverBar.costUsd !== null ? ` · ${formatCostUsd(hoverBar.costUsd)}` : ""}
       </div>
       {hoverBar.summary && <div className="rfr-tip-sum">{hoverBar.summary}</div>}
-      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">Placement estimated - no timestamps</div>}
-      {hoverBar.critical && <div className="rfr-tip-crit">On the critical path</div>}
+      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">{tHC("hcComponentsWorkflowRunRecorderParts.s2")}</div>}
+      {hoverBar.critical && <div className="rfr-tip-crit">{tHC("hcComponentsWorkflowRunRecorderParts.s1")}</div>}
     </div>
   );
 }

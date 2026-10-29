@@ -12,6 +12,7 @@ import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { safeHref } from "../lib/safeLink";
+import { useTranslations } from "../../lib/i18n";
 
 // Platform-wide MCP visibility for admins - previously nothing here at all
 // (web-admin had a Voice & Tool Credentials page but no MCP equivalent).
@@ -39,18 +40,20 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 function ReadyBadge({ ready }: { ready?: boolean }) {
+    const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
   return ready ? (
     <Badge variant="outline" className="gap-1 text-[var(--success-text)]">
       <CheckCircle2 size={12} /> Ready
     </Badge>
   ) : (
     <Badge variant="secondary" className="gap-1">
-      <CircleDashed size={12} /> Setup required
+      <CircleDashed size={12} /> {tHC("hcPlatformadminMcpcatalogPage.s11")}
     </Badge>
   );
 }
 
 export default function McpCatalogPage() {
+    const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
   const [tab, setTab] = useState("catalog");
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,7 +116,7 @@ export default function McpCatalogPage() {
 
   return (
     <AdminShell
-      title="MCP Catalog"
+      title={tHC("hcPlatformadminMcpcatalogPage.s10")}
       actions={
         <Button
           variant="outline"
@@ -128,12 +131,10 @@ export default function McpCatalogPage() {
       }
     >
       <p className="mb-4 text-sm text-muted-foreground">
-        Read-only view of the MCP (Model Context Protocol) servers every tenant can browse and connect from Tools → MCP
-        Servers. The curated catalog below is a fixed list defined in code (not editable from here); the registry search
-        tab is a live lookup over the public MCP Registry, same as tenants see.
+        {tHC("hcPlatformadminMcpcatalogPage.s9")}
       </p>
 
-      <div className="mb-4 flex items-center gap-1 border-b border-border" role="tablist" aria-label="MCP catalog view">
+      <div className="mb-4 flex items-center gap-1 border-b border-border" role="tablist" aria-label={tHC("hcPlatformadminMcpcatalogPage.s8")}>
         <button
           type="button"
           id="mcp-catalog-tab-catalog"
@@ -148,7 +149,7 @@ export default function McpCatalogPage() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          Curated catalog ({catalog.length})
+          {tHC("hcPlatformadminMcpcatalogPage.s7")}{catalog.length})
         </button>
         <button
           type="button"
@@ -164,7 +165,7 @@ export default function McpCatalogPage() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          Registry search
+          {tHC("hcPlatformadminMcpcatalogPage.s6")}
         </button>
       </div>
 
@@ -188,7 +189,7 @@ export default function McpCatalogPage() {
                   <TypeBadge type={entry.type} />
                   {entry.requiredEnvVars?.length > 0 && (
                     <Badge variant="secondary" className="text-[10px]">
-                      {entry.requiredEnvVars.length} required var{entry.requiredEnvVars.length === 1 ? "" : "s"}
+                      {entry.requiredEnvVars.length} {tHC("hcPlatformadminMcpcatalogPage.s5")}{entry.requiredEnvVars.length === 1 ? "" : "s"}
                     </Badge>
                   )}
                 </div>
@@ -208,7 +209,7 @@ export default function McpCatalogPage() {
             </Card>
           ))}
           {!loading && catalog.length === 0 && (
-            <p className="col-span-full py-8 text-center text-sm text-muted-foreground">The catalog is empty.</p>
+            <p className="col-span-full py-8 text-center text-sm text-muted-foreground">{tHC("hcPlatformadminMcpcatalogPage.s4")}</p>
           )}
           <div className="col-span-full">
             <PaginationControls
@@ -228,7 +229,7 @@ export default function McpCatalogPage() {
         <div id="mcp-catalog-panel-search" role="tabpanel" aria-labelledby="mcp-catalog-tab-search">
           <form onSubmit={runSearch} className="mb-4 flex max-w-md items-center gap-2">
             <Input
-              placeholder="Search the public MCP Registry..."
+              placeholder={tHC("hcPlatformadminMcpcatalogPage.s3")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -244,7 +245,7 @@ export default function McpCatalogPage() {
                     <CardTitle className="text-base">{s.displayName || s.name}</CardTitle>
                     {!s.runnable && (
                       <Badge variant="destructive" title={s.notRunnableReason || ""}>
-                        Not runnable
+                        {tHC("hcPlatformadminMcpcatalogPage.s2")}
                       </Badge>
                     )}
                   </div>
@@ -287,7 +288,7 @@ export default function McpCatalogPage() {
             </p>
           )}
           {!searchResults && (
-            <p className="py-8 text-center text-sm text-muted-foreground">Search the public MCP Registry above.</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{tHC("hcPlatformadminMcpcatalogPage.s1")}</p>
           )}
         </div>
       )}

@@ -36,6 +36,7 @@ import { INDUSTRY_INDEX, TOTAL_CATEGORIES, TOTAL_RECIPES, type IndustryMeta } fr
 import { loadIndustry } from "./recipes-registry";
 import { LEGEND_ORDER, NODE_DESC, PATTERN_GUIDE, PRINCIPLES } from "./recipes-guide-content";
 import { RecipeCard } from "./RecipeCard";
+import { useTranslations } from "../../lib/i18n";
 
 // (2026-07-25) AppShell import removed: this route was made PUBLIC (see
 // PUBLIC_ROUTES in lib/auth.ts — the Academy's Industry Gauntlet deep-links
@@ -81,6 +82,7 @@ function StatTile({ icon: Icon, value, label }: { icon: LucideIcon; value: numbe
 const INDUSTRY_PAGE_SIZE = 12;
 
 export default function WorkflowRecipesClient() {
+    const tHC = useTranslations("hcHelpWorkflowrecipesWorkflowRecipesClient");
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const searching = q.length > 0;
@@ -167,37 +169,36 @@ export default function WorkflowRecipesClient() {
             <div className="space-y-2.5">
               <div className="inline-flex items-center gap-1.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                 <Workflow className="size-3.5" aria-hidden="true" />
-                Guide · Enterprise playbook
+                {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s37")}
               </div>
               <h1 className="max-w-3xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Industry workflow recipes
+                {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s36")}
               </h1>
               <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Real, buildable automations for every industry — each one maps 1:1 to <BrandName />
-                &apos;s workflow nodes, channels and connectors, with the guardrails, budgets and human approvals that
-                make them safe to run in production.
+                {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s35")} <BrandName />
+                {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s34")}
               </p>
             </div>
 
             {/* Stat tiles */}
             <div className="grid grid-cols-2 gap-3 sm:max-w-2xl lg:grid-cols-4">
               <StatTile icon={Boxes} value={stats.industries} label="Industries" />
-              <StatTile icon={Workflow} value={stats.recipes} label="Workflow recipes" />
-              <StatTile icon={Network} value={stats.patterns} label="Multi-agent patterns" />
-              <StatTile icon={Layers} value={stats.blocks} label="Building blocks" />
+              <StatTile icon={Workflow} value={stats.recipes} label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s33")} />
+              <StatTile icon={Network} value={stats.patterns} label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s32")} />
+              <StatTile icon={Layers} value={stats.blocks} label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s31")} />
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <Button asChild>
                 <Link href="/workflows">
-                  Open the Workflow designer
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s30")}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
               <Button asChild variant="outline">
                 <a href="#multi-agent-patterns">
                   <Network className="size-4" aria-hidden="true" />
-                  Advanced multi-agent patterns
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s11")}
                 </a>
               </Button>
             </div>
@@ -219,15 +220,15 @@ export default function WorkflowRecipesClient() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search industries, use-cases or scenarios…"
-                aria-label="Search workflow recipes"
+                placeholder={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s29")}
+                aria-label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s28")}
                 className="ps-9 pe-9"
               />
               {searching && (
                 <button
                   type="button"
                   onClick={() => setQuery("")}
-                  aria-label="Clear search"
+                  aria-label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s6")}
                   className="absolute end-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
                 >
                   <X className="size-3.5" aria-hidden="true" />
@@ -238,12 +239,12 @@ export default function WorkflowRecipesClient() {
               {searching ? (
                 <span className="tabular-nums">
                   <span className="font-semibold text-foreground">{filtered.length}</span> of {stats.industries}{" "}
-                  industries · <span className="font-semibold text-foreground">{matchedRecipes}</span> recipes
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s27")} <span className="font-semibold text-foreground">{matchedRecipes}</span> recipes
                 </span>
               ) : (
                 <Badge variant="secondary" className="gap-1.5">
                   <ListChecks className="size-3" aria-hidden="true" />
-                  {stats.recipes} recipes across {stats.industries} industries
+                  {stats.recipes} {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s26")} {stats.industries} industries
                 </Badge>
               )}
             </div>
@@ -252,13 +253,13 @@ export default function WorkflowRecipesClient() {
 
         <div className="grid gap-10 lg:grid-cols-[210px_minmax(0,1fr)]">
           {/* Sticky rail (wide screens) */}
-          <nav aria-label="On this page" className="hidden lg:block">
+          <nav aria-label={tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s25")} className="hidden lg:block">
             <div className="sticky space-y-1" style={{ top: "calc(var(--pub-nav-h) + 64px)" }}>
               <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Industries
               </span>
               {filtered.length === 0 ? (
-                <p className="px-3 py-1.5 text-sm text-muted-foreground">No matches.</p>
+                <p className="px-3 py-1.5 text-sm text-muted-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s24")}</p>
               ) : (
                 filtered.map((ind) => (
                   <a
@@ -297,13 +298,10 @@ export default function WorkflowRecipesClient() {
               <>
                 {/* How to read a recipe — the legend of building blocks */}
                 <section className="mb-12 scroll-mt-32 pb-12">
-                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">How to read a recipe</h2>
+                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s23")}</h2>
                   <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
-                    Every recipe is one workflow: <strong className="font-semibold text-foreground">a Trigger</strong>{" "}
-                    starts it, a chain of <strong className="font-semibold text-foreground">nodes</strong> does the
-                    work, and an <strong className="font-semibold text-foreground">Output</strong> delivers the result
-                    on a real channel. Hover any block below to see what it does — each one is a node you can drop into
-                    the Workflow designer:
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s22")} <strong className="font-semibold text-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s21")}</strong>{" "}
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s20")} <strong className="font-semibold text-foreground">nodes</strong> {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s19")} <strong className="font-semibold text-foreground">Output</strong> {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s18")}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {LEGEND_ORDER.map((kind) => {
@@ -328,10 +326,9 @@ export default function WorkflowRecipesClient() {
 
                   <Alert className="mt-6 border-primary/25 bg-primary/5">
                     <UserCheck className="text-primary" aria-hidden="true" />
-                    <AlertTitle>The Approval node is the human-in-the-loop control</AlertTitle>
+                    <AlertTitle>{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s17")}</AlertTitle>
                     <AlertDescription>
-                      It pauses the run until a person signs off, so nothing consequential — money, legal, clinical or
-                      data-changing — ever happens unattended. Agents propose and prepare; a human decides.
+                      {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s16")}
                     </AlertDescription>
                   </Alert>
                 </section>
@@ -340,10 +337,9 @@ export default function WorkflowRecipesClient() {
 
                 {/* Design principles — the enterprise "why" every recipe follows */}
                 <section className="mb-12 scroll-mt-32 pb-12">
-                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">Design principles</h2>
+                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s15")}</h2>
                   <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
-                    Every recipe below holds to the same tenets — the ones a reviewer would hold any production agentic
-                    workflow to. They are what make these safe to run and cheap to scale, not just clever demos.
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s14")}
                   </p>
                   <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {PRINCIPLES.map((p) => {
@@ -370,26 +366,24 @@ export default function WorkflowRecipesClient() {
                 {/* Which pattern should I use? — a decision reference, as a table */}
                 <section className="mb-12 scroll-mt-32 pb-12">
                   <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">
-                    Which pattern should I use?
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s13")}
                   </h2>
                   <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
-                    Match the situation to the orchestration pattern — and don&apos;t over-build. One good agent beats
-                    five mediocre ones; reach for routing, parallelism or reflection only when the job actually needs
-                    it. The featured{" "}
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s12")}{" "}
                     <a
                       href="#multi-agent-patterns"
                       className="font-medium text-primary underline-offset-4 hover:underline"
                     >
-                      Advanced multi-agent patterns
+                      {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s11")}
                     </a>{" "}
-                    section builds each of these out in full.
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s10")}
                   </p>
                   <div className="mt-5 overflow-hidden rounded-xl border border-border">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-secondary/40 hover:bg-secondary/40">
                           <TableHead className="w-2/5">If you&apos;re…</TableHead>
-                          <TableHead>Use this pattern</TableHead>
+                          <TableHead>{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s9")}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -413,13 +407,13 @@ export default function WorkflowRecipesClient() {
               <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
                 <Search className="size-6 text-muted-foreground" aria-hidden="true" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">No recipes match “{query}”.</p>
+                  <p className="text-sm font-medium text-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s8")}{query}”.</p>
                   <p className="text-sm text-muted-foreground">
-                    Try a broader term — an industry, a channel, or a use-case.
+                    {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s7")}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setQuery("")}>
-                  Clear search
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s6")}
                 </Button>
               </div>
             ) : (
@@ -484,7 +478,7 @@ export default function WorkflowRecipesClient() {
                             aria-label={`Open the dedicated page: AI agent workflows for ${ind.name}`}
                             className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
                           >
-                            Open the dedicated page
+                            {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s5")}
                             <ArrowRight className="size-3" aria-hidden="true" />
                           </Link>
                         </div>
@@ -536,7 +530,7 @@ export default function WorkflowRecipesClient() {
                       onClick={() => setVisibleCount((c) => c + INDUSTRY_PAGE_SIZE)}
                       data-testid="recipes-show-more"
                     >
-                      Show more ({hiddenCount})
+                      {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s4")}{hiddenCount})
                     </Button>
                   </div>
                 )}
@@ -546,15 +540,14 @@ export default function WorkflowRecipesClient() {
             {/* Footer CTA */}
             <div className="mt-16 flex flex-col items-start gap-4 rounded-xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold tracking-tight text-foreground">Ready to build one?</h3>
+                <h3 className="text-base font-semibold tracking-tight text-foreground">{tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s3")}</h3>
                 <p className="max-w-[52ch] text-sm leading-relaxed text-muted-foreground">
-                  Every recipe above drops straight into the visual Workflow designer — start from a Trigger and wire up
-                  the nodes.
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s2")}
                 </p>
               </div>
               <Button asChild className="shrink-0">
                 <Link href="/workflows">
-                  Build this in the Workflow designer
+                  {tHC("hcHelpWorkflowrecipesWorkflowRecipesClient.s1")}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>

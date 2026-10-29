@@ -14,6 +14,7 @@ import { timeAgo, SectionCard, SwitchToggle } from "./common";
 import { useSectionData } from "./observability";
 import TemplateReasonDialog from "../templates/TemplateReasonDialog";
 import { useConfirm } from "../admin/ConfirmDialog";
+import { useTranslations } from "../../../lib/i18n";
 
 // Platform-level emergency + bulk-action controls, all backed by live
 // /api/platform/** endpoints (PlatformController + TenantEmergencyControlService
@@ -25,6 +26,7 @@ import { useConfirm } from "../admin/ConfirmDialog";
 
 // ── Platform-wide kill switch ───────────────────────────────────────────────
 export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
   const askConfirm = useConfirm();
   const { data: status, error, loading, refresh } = useSectionData<any>(() => api.getKillSwitchStatus(), null, pollMs);
   const [stopOpen, setStopOpen] = useState(false);
@@ -62,14 +64,14 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
   return (
     <SectionCard
-      title="Platform kill switch"
+      title={tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s15")}
       subtitle="Instantly rejects every authenticated tenant request and every channel webhook chat - reversible, audited, and platform-admin sessions stay exempt so you can always get back in here to resume"
       icon={Power}
       delay={delay}
       actions={
         stopped ? (
           <Badge variant="outline" className="border-destructive/40 bg-destructive/10 text-destructive">
-            PLATFORM STOPPED
+            {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s14")}
           </Badge>
         ) : (
           <Badge
@@ -87,16 +89,16 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s13")}</p>
       ) : (
         <div className="space-y-3">
           {stopped && (
             <Alert variant="destructive">
               <AlertOctagon />
               <AlertDescription>
-                The platform was stopped {timeAgo(status?.stoppedAt)}
+                {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s12")} {timeAgo(status?.stoppedAt)}
                 {status?.updatedBy ? ` by ${status.updatedBy}` : ""}
-                {status?.reason ? ` — "${status.reason}"` : ""}. Every tenant request is rejected until resumed.
+                {status?.reason ? ` — "${status.reason}"` : ""}{tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s11")}
               </AlertDescription>
             </Alert>
           )}
@@ -117,7 +119,7 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
               </Button>
             ) : (
               <Button variant="destructive" size="sm" onClick={() => setStopOpen(true)} disabled={busy}>
-                <Power size={14} /> Stop platform
+                <Power size={14} /> {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s10")}
               </Button>
             )}
           </div>
@@ -126,7 +128,7 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
       <TemplateReasonDialog
         open={stopOpen}
-        title="Stop the entire platform?"
+        title={tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s9")}
         description="Every tenant's sign-ins, API calls and channel webhooks will be rejected immediately. Platform-admin sessions (this console) are exempt so you can resume from this same card. A reason is required - it goes into the audit log."
         confirmLabel="Stop platform"
         submitting={busy}
@@ -144,6 +146,7 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
 // tenants already on UNLIMITED are skipped. sendEmail is a deliberate second
 // opt-in, matching the backend's own split of "grant" vs "mail everyone".
 export function SiteWidePromoSection({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
   const askConfirm = useConfirm();
   const [days, setDays] = useState("14");
   const [reason, setReason] = useState("");
@@ -191,7 +194,7 @@ export function SiteWidePromoSection({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Site-wide promo"
+      title={tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s8")}
       subtitle="One-time bulk grant of UNLIMITED to every active tenant, auto-reverting when the window ends. Idempotent - tenants already on UNLIMITED are skipped."
       icon={Gift}
       delay={delay}
@@ -199,7 +202,7 @@ export function SiteWidePromoSection({ delay }: { delay?: number }) {
       <div className="grid gap-3 sm:grid-cols-[8rem_1fr]">
         <div className="space-y-1.5">
           <Label htmlFor="promo-days" className="text-xs text-muted-foreground">
-            Duration (days)
+            {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s7")}
           </Label>
           <Input
             id="promo-days"
@@ -214,13 +217,13 @@ export function SiteWidePromoSection({ delay }: { delay?: number }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="promo-reason" className="text-xs text-muted-foreground">
-            Reason (audited)
+            {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s6")}
           </Label>
           <Input
             id="promo-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="e.g. Launch-week promo for all active tenants"
+            placeholder={tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s5")}
             aria-invalid={!!promoFieldErrors.reason}
           />
           {promoFieldErrors.reason && <p className="text-xs text-destructive">{promoFieldErrors.reason}</p>}
@@ -228,9 +231,9 @@ export function SiteWidePromoSection({ delay }: { delay?: number }) {
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <SwitchToggle on={sendEmail} onClick={() => setSendEmail((v) => !v)} label="Email tenant admins" />
+          <SwitchToggle on={sendEmail} onClick={() => setSendEmail((v) => !v)} label={tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s4")} />
           <span className="inline-flex items-center gap-1">
-            <Send size={12} /> Also email every tenant admin about the grant
+            <Send size={12} /> {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s3")}
           </span>
         </label>
         <Button size="sm" onClick={handleGrant} disabled={busy}>
@@ -248,10 +251,10 @@ export function SiteWidePromoSection({ delay }: { delay?: number }) {
           >
             <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
               <CheckCircle2 size={15} className="text-[var(--state-success)]" />
-              Granted to {result.grantedTenants?.length ?? 0} tenant{result.grantedTenants?.length === 1 ? "" : "s"}
+              {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s2")} {result.grantedTenants?.length ?? 0} tenant{result.grantedTenants?.length === 1 ? "" : "s"}
               {result.skippedAlreadyUnlimitedTenantIds?.length > 0 && (
                 <span className="text-xs font-normal text-muted-foreground">
-                  ({result.skippedAlreadyUnlimitedTenantIds.length} already UNLIMITED - skipped)
+                  ({result.skippedAlreadyUnlimitedTenantIds.length} {tHC("hcPlatformadminComponentsSectionsPlatformcontrols.s1")}
                 </span>
               )}
             </div>

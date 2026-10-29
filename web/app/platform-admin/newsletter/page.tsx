@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Newsletter / news broadcast - platform-admin writes a subject + HTML body
 // once, picks which tenants (or leaves everything selected for "all"), and
@@ -28,6 +29,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 // which selected rows will actually be reached.
 
 export default function NewsletterPage() {
+    const tHC = useTranslations("hcPlatformadminNewsletterPage");
   const askConfirm = useConfirm();
   const [recipients, setRecipients] = useState([]);
   const [recipientsError, setRecipientsError] = useState(null);
@@ -137,15 +139,13 @@ export default function NewsletterPage() {
     <AdminShell
       title="Newsletter"
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={loadingRecipients} title="Refresh tenant list">
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loadingRecipients} title={tHC("hcPlatformadminNewsletterPage.s18")}>
           <RefreshCw size={14} className={loadingRecipients ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
       <PageHint>
-        Broadcast a message to tenant admins. Only tenants that opted in to platform news (<code>news_opt_in</code>, set
-        at signup) are actually mailed - opted-out or unreachable tenants below are shown so you can see why
-        they&rsquo;d be skipped, even if selected.
+        {tHC("hcPlatformadminNewsletterPage.s17")}<code>news_opt_in</code>{tHC("hcPlatformadminNewsletterPage.s16")}
       </PageHint>
 
       <form onSubmit={handleSend}>
@@ -160,7 +160,7 @@ export default function NewsletterPage() {
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Megaphone size={16} className="text-primary" /> Compose
               </CardTitle>
-              <p className="text-xs text-muted-foreground">Subject and body - body accepts HTML.</p>
+              <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminNewsletterPage.s15")}</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1.5">
@@ -171,37 +171,36 @@ export default function NewsletterPage() {
                   id="newsletter-subject"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder="e.g. New in VegaDūta this month"
+                  placeholder={tHC("hcPlatformadminNewsletterPage.s14")}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="newsletter-body" className="text-xs text-muted-foreground">
-                  Body (HTML)
+                  {tHC("hcPlatformadminNewsletterPage.s13")}
                 </Label>
                 <Textarea
                   id="newsletter-body"
                   rows={10}
                   value={bodyHtml}
                   onChange={(e) => setBodyHtml(e.target.value)}
-                  placeholder="<p>Hi there - here's what's new...</p>"
+                  placeholder={tHC("hcPlatformadminNewsletterPage.s12")}
                   className="font-mono text-xs"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="newsletter-body-text" className="text-xs text-muted-foreground">
-                  Plain-text body (optional)
+                  {tHC("hcPlatformadminNewsletterPage.s11")}
                 </Label>
                 <Textarea
                   id="newsletter-body-text"
                   rows={6}
                   value={bodyText}
                   onChange={(e) => setBodyText(e.target.value)}
-                  placeholder="Leave blank to derive the text/plain part from the HTML above."
+                  placeholder={tHC("hcPlatformadminNewsletterPage.s10")}
                   className="font-mono text-xs"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Sent as the text/plain half of a multipart/alternative email. A hand-written version reads better in
-                  text-only clients than the automatic tag-stripped one.
+                  {tHC("hcPlatformadminNewsletterPage.s9")}
                 </p>
               </div>
             </CardContent>
@@ -221,8 +220,8 @@ export default function NewsletterPage() {
                   <Users2 size={16} className="text-primary" /> Recipients
                 </CardTitle>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {selectedOptedInCount} of {optedInCount} opted-in tenant{optedInCount === 1 ? "" : "s"} selected ·{" "}
-                  {recipients.length} active tenant{recipients.length === 1 ? "" : "s"} total
+                  {selectedOptedInCount} of {optedInCount} {tHC("hcPlatformadminNewsletterPage.s8")}{optedInCount === 1 ? "" : "s"} {tHC("hcPlatformadminNewsletterPage.s7")}{" "}
+                  {recipients.length} {tHC("hcPlatformadminNewsletterPage.s6")}{recipients.length === 1 ? "" : "s"} total
                 </p>
               </div>
               <Button
@@ -245,7 +244,7 @@ export default function NewsletterPage() {
 
               {recipients.length > 0 && (
                 <Input
-                  aria-label="Search tenants"
+                  aria-label={tHC("hcPlatformadminNewsletterPage.s5")}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => {
@@ -254,13 +253,13 @@ export default function NewsletterPage() {
                     // send flow instead of just... filtering.
                     if (e.key === "Enter") e.preventDefault();
                   }}
-                  placeholder="Search tenants…"
+                  placeholder={tHC("hcPlatformadminNewsletterPage.s4")}
                   className="max-w-xs"
                 />
               )}
 
               {!loadingRecipients && filteredRecipients.length === 0 && !recipientsError && (
-                <p className="text-xs text-muted-foreground">No active tenants match.</p>
+                <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminNewsletterPage.s3")}</p>
               )}
 
               <div className="max-h-96 space-y-1.5 overflow-y-auto">
@@ -281,7 +280,7 @@ export default function NewsletterPage() {
                           variant="outline"
                           className="shrink-0 border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
                         >
-                          <Mail size={11} /> opted in
+                          <Mail size={11} /> {tHC("hcPlatformadminNewsletterPage.s2")}
                         </Badge>
                       ) : (
                         <Badge
@@ -325,7 +324,7 @@ export default function NewsletterPage() {
                   : "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
               }
             >
-              Last send: {lastResult.sent} sent, {lastResult.skipped} skipped
+              {tHC("hcPlatformadminNewsletterPage.s1")} {lastResult.sent} sent, {lastResult.skipped} skipped
             </Badge>
           )}
         </div>

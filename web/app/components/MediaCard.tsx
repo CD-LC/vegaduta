@@ -6,6 +6,7 @@ import { api, triggerBrowserDownload } from "../lib/api";
 import { getFileTypeIcon } from "../lib/fileIcons";
 import RichText from "./RichText";
 import { Button } from "./ui/button";
+import { useTranslations } from "../lib/i18n";
 
 // ---------------------------------------------------------------------------
 // STOPGAP NOTICE (artifact-download Phase 1, 2026-07-29):
@@ -451,6 +452,7 @@ export default function MediaCard({
  * the copy says that plainly instead.
  */
 function UnverifiedMediaNotice({ kind }: { kind: MediaKind }) {
+    const tHC = useTranslations("hcComponentsMediaCard");
   const Icon = KIND_ICON[kind];
   const label = KIND_LABEL[kind];
   return (
@@ -464,7 +466,7 @@ function UnverifiedMediaNotice({ kind }: { kind: MediaKind }) {
       </div>
       <div className="flex items-center gap-2 p-2 text-xs text-destructive">
         <AlertTriangle aria-hidden="true" size={13} />
-        The agent described this but never actually generated it - nothing was produced.
+        {tHC("hcComponentsMediaCard.s1")}
       </div>
     </div>
   );

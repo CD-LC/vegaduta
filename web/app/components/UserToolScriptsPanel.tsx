@@ -50,6 +50,7 @@ interface UserToolScript {
 }
 
 export default function UserToolScriptsPanel() {
+    const tHC = useTranslations("hcComponentsUserToolScriptsPanel");
   const t = useTranslations("userToolScriptsPanel");
   const [scripts, setScripts] = useState<UserToolScript[]>([]);
   const [loading, setLoading] = useState(true);
@@ -336,7 +337,7 @@ export default function UserToolScriptsPanel() {
               </div>
             </div>
             <p id="uts-tool-name-help" className="text-xs text-muted-foreground">
-              The tool name is what an agent calls, so keep it short and stable. The display name is what people see.
+              {tHC("hcComponentsUserToolScriptsPanel.s1")}
             </p>
             <div className="space-y-1">
               <Label htmlFor={descriptionId}>{t("descriptionLabel")}</Label>

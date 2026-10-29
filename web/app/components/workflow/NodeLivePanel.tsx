@@ -3,6 +3,7 @@
 import { memo, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronRight, Loader2, Maximize2, Wrench, X } from "lucide-react";
 import "./node-live.css";
+import { useTranslations } from "../../lib/i18n";
 
 // Live "agent thinking" strip rendered inside an agent/supervisor node card.
 // The parent re-renders on every node.token frame, so everything here is
@@ -98,6 +99,7 @@ function StatusIcon({ status }: { status: NodeLiveToolStatus }) {
 }
 
 const ExpandedDetail = memo(function ExpandedDetail({ call }: { call: NodeLiveToolCall }) {
+    const tHC = useTranslations("hcComponentsWorkflowNodeLivePanel");
   // Serialised only while expanded; memo keys on the args reference.
   const argsText = useMemo(() => capText(stringifyArgs(call.args), EXPANDED_ARGS_CAP), [call.args]);
   const result = call.error ?? call.preview ?? "";
@@ -117,7 +119,7 @@ const ExpandedDetail = memo(function ExpandedDetail({ call }: { call: NodeLiveTo
           </pre>
         </>
       )}
-      {!argsText && !result && <div className="nlp-detail-empty">No arguments or output yet.</div>}
+      {!argsText && !result && <div className="nlp-detail-empty">{tHC("hcComponentsWorkflowNodeLivePanel.s5")}</div>}
     </div>
   );
 });
@@ -167,6 +169,7 @@ const ToolRow = memo(function ToolRow({ call, expanded, onToggle }: ToolRowProps
 });
 
 function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen }: NodeLivePanelProps) {
+    const tHC = useTranslations("hcComponentsWorkflowNodeLivePanel");
   const calls = toolCalls ?? [];
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
   const [showAll, setShowAll] = useState(false);
@@ -229,14 +232,14 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
           ) : (
             "Tool calls"
           )}
-          {capped && <span className="nlp-capped" title="Live preview limit reached; the full output is in the step inspector">preview capped</span>}
+          {capped && <span className="nlp-capped" title={tHC("hcComponentsWorkflowNodeLivePanel.s4")}>{tHC("hcComponentsWorkflowNodeLivePanel.s3")}</span>}
         </span>
         {onOpen && (
           <button
             type="button"
             className="nlp-open nodrag"
-            aria-label="Open step details"
-            title="Open step details"
+            aria-label={tHC("hcComponentsWorkflowNodeLivePanel.s2")}
+            title={tHC("hcComponentsWorkflowNodeLivePanel.s2")}
             onClick={(e) => {
               e.stopPropagation();
               onOpen();
@@ -248,7 +251,7 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
       </div>
 
       {(hasText || streaming) && (
-        <div className="nlp-stream" aria-live="off" aria-label="Streamed agent output">
+        <div className="nlp-stream" aria-live="off" aria-label={tHC("hcComponentsWorkflowNodeLivePanel.s1")}>
           <div className="nlp-stream-inner">
             <span className="nlp-text">{hasText ? tail : ""}</span>
             {streaming && !capped && <span className="nlp-caret" aria-hidden="true" />}

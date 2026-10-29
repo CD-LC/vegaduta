@@ -23,6 +23,7 @@ import type {
   WorkflowTemplateConfig,
   WorkflowTemplateNode,
 } from "../../templates/types";
+import { useTranslations } from "../../../lib/i18n";
 
 // THE core of the moderation job: render a submission's full config so a
 // human can actually judge it, never a raw JSON blob (docs/
@@ -107,9 +108,10 @@ function KeyValueGrid({ pairs }: { pairs: Array<[string, any]> }) {
 // key: value lines rather than a JSON dump, so a nested workflow-node config
 // still reads as data, not code.
 function NestedObject({ value, depth = 0 }: { value: any; depth?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   if (value === null || value === undefined) return <span className="text-muted-foreground">—</span>;
   if (Array.isArray(value)) {
-    if (value.length === 0) return <span className="text-muted-foreground">(empty list)</span>;
+    if (value.length === 0) return <span className="text-muted-foreground">{tHC("hcPlatformadminComponentsTemplatesConfigViewer.s11")}</span>;
     if (value.every((v) => typeof v !== "object" || v === null)) {
       return (
         <div className="flex flex-wrap gap-1">
@@ -155,6 +157,7 @@ function NestedObject({ value, depth = 0 }: { value: any; depth?: number }) {
 }
 
 function AgentConfigView({ config }: { config: AgentTemplateConfig }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const modelPairs: Array<[string, any]> = [
     ["Provider", config.providerName],
     ["Model", config.model],
@@ -178,23 +181,23 @@ function AgentConfigView({ config }: { config: AgentTemplateConfig }) {
 
   return (
     <div className="space-y-3">
-      <Section title="System prompt" icon={MessageSquareText}>
+      <Section title={tHC("hcPlatformadminComponentsTemplatesConfigViewer.s10")} icon={MessageSquareText}>
         {config.systemPrompt ? (
           <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-secondary/30 p-3 font-mono text-xs leading-relaxed text-foreground">
             {config.systemPrompt}
           </pre>
         ) : (
           <div className="flex items-center gap-2 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-xs text-[var(--warning-text)]">
-            <AlertTriangle size={13} /> No system prompt in this snapshot.
+            <AlertTriangle size={13} /> {tHC("hcPlatformadminComponentsTemplatesConfigViewer.s9")}
           </div>
         )}
       </Section>
 
-      <Section title="Model &amp; provider" icon={Cpu}>
+      <Section title={tHC("hcPlatformadminComponentsTemplatesConfigViewer.s8")} icon={Cpu}>
         <KeyValueGrid pairs={modelPairs} />
       </Section>
 
-      <Section title="Tools &amp; MCP access" icon={Wrench}>
+      <Section title={tHC("hcPlatformadminComponentsTemplatesConfigViewer.s7")} icon={Wrench}>
         <ChipList
           items={config.allowedToolNames}
           tone="warn"
@@ -207,7 +210,7 @@ function AgentConfigView({ config }: { config: AgentTemplateConfig }) {
       </Section>
 
       {config.knowledgeCollections && config.knowledgeCollections.length > 0 && (
-        <Section title="Knowledge collections" icon={BookOpen}>
+        <Section title={tHC("hcPlatformadminComponentsTemplatesConfigViewer.s6")} icon={BookOpen}>
           <div className="space-y-1.5">
             {config.knowledgeCollections.map((kc, i) => (
               <div key={i} className="rounded-md border border-border bg-secondary/20 px-3 py-1.5 text-xs">
@@ -249,6 +252,7 @@ function NodeCard({ node }: { node: WorkflowTemplateNode }) {
 }
 
 function WorkflowConfigView({ config }: { config: WorkflowTemplateConfig }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const nodes = config.graph?.nodes || [];
   const edges = config.graph?.edges || [];
   const labelOf = (id: string) => nodes.find((n) => n.id === id)?.data?.label || id;
@@ -265,7 +269,7 @@ function WorkflowConfigView({ config }: { config: WorkflowTemplateConfig }) {
       <Section title={`Steps (${nodes.length})`} icon={Workflow}>
         {nodes.length === 0 ? (
           <div className="flex items-center gap-2 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-xs text-[var(--warning-text)]">
-            <AlertTriangle size={13} /> No workflow graph in this snapshot.
+            <AlertTriangle size={13} /> {tHC("hcPlatformadminComponentsTemplatesConfigViewer.s5")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -294,12 +298,13 @@ function WorkflowConfigView({ config }: { config: WorkflowTemplateConfig }) {
 }
 
 export default function ConfigViewer({ kind, config }: { kind: TemplateKind | string; config?: TemplateConfig }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const [rawOpen, setRawOpen] = useState(false);
 
   if (!config || Object.keys(config).length === 0) {
     return (
       <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
-        <AlertTriangle size={14} /> No config data was returned for this submission - do not approve without it.
+        <AlertTriangle size={14} /> {tHC("hcPlatformadminComponentsTemplatesConfigViewer.s4")}
       </div>
     );
   }
@@ -310,7 +315,7 @@ export default function ConfigViewer({ kind, config }: { kind: TemplateKind | st
       {kind === "WORKFLOW" && <WorkflowConfigView config={config as WorkflowTemplateConfig} />}
       {kind !== "AGENT" && kind !== "WORKFLOW" && (
         <div className="flex items-center gap-2 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-xs text-[var(--warning-text)]">
-          <AlertTriangle size={13} /> Unrecognized template kind &ldquo;{String(kind)}&rdquo; - showing raw data only.
+          <AlertTriangle size={13} /> {tHC("hcPlatformadminComponentsTemplatesConfigViewer.s3")}{String(kind)}{tHC("hcPlatformadminComponentsTemplatesConfigViewer.s2")}
         </div>
       )}
 
@@ -321,7 +326,7 @@ export default function ConfigViewer({ kind, config }: { kind: TemplateKind | st
       >
         {rawOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
         <Code2 size={13} />
-        Raw JSON (audit view)
+        {tHC("hcPlatformadminComponentsTemplatesConfigViewer.s1")}
       </button>
       {rawOpen && (
         <pre className="max-h-96 overflow-auto rounded-md border border-border bg-secondary/30 p-3 font-mono text-[11px] leading-relaxed text-foreground">

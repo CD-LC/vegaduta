@@ -9,8 +9,10 @@ import { ToolsGrid } from "../AgentWorkbench/ToolsGrid";
 import { GUIDE_ANCHORS } from "../guide/agentChecklist";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function ToolsSection() {
+    const tHC = useTranslations("hcComponentsAgentsWorkbenchToolsSection");
   const {
     t,
     isDraft,
@@ -109,7 +111,7 @@ export default function ToolsSection() {
 
         {!isDraft && effectiveMode(selectedAgent) === "SIMPLE" && (
           <p className={SUB_TEXT}>
-            {t("toolsAutoSelectLiveHint")} The grid below is read-only while Auto-select is on.
+            {t("toolsAutoSelectLiveHint")} {tHC("hcComponentsAgentsWorkbenchToolsSection.s1")}
           </p>
         )}
 

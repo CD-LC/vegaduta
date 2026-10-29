@@ -46,6 +46,7 @@ export function TriggerNodeConfig({
   config: WorkflowNodeConfig;
   setConfig: (patch: Partial<WorkflowNodeConfig>) => void;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowNodeConfigFormsTriggerForm");
   const t = useTranslations("nodeConfigDrawer");
   const tExtra = useTranslations("nodeConfigExtra");
   const [channelBusy, setChannelBusy] = useState(false);
@@ -213,7 +214,7 @@ export function TriggerNodeConfig({
             <p className="ax-wf-empty">
               POST {`${API_BASE}${oidcTriggerPath}`}
               {t("oauthHintWithAn")}
-              <code>Authorization: Bearer &lt;keycloak-jwt&gt;</code>
+              <code>{tHC("hcComponentsWorkflowNodeConfigFormsTriggerForm.s1")}</code>
               {t("oauthHintHeaderPeriod")}
               <code>workflow-trigger</code>
               {t("oauthHintRealmRoleSuffix")}

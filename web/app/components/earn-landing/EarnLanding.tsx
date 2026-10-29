@@ -90,6 +90,7 @@ const STACK = [
 ];
 
 export default function EarnLanding() {
+    const tHC = useTranslations("hcComponentsEarnlandingEarnLanding");
   const t = useTranslations("landing");
 
   return (
@@ -331,7 +332,7 @@ export default function EarnLanding() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
             >
-              Florida Tech · 2026 <ExternalLink className="size-3" />
+              {tHC("hcComponentsEarnlandingEarnLanding.s1")} <ExternalLink className="size-3" />
             </a>
           </p>
         </div>

@@ -52,6 +52,7 @@ export function ProjectView({
   onProjectsChanged,
   githubStatus,
 }) {
+    const tHC = useTranslations("hcBuildProjectView");
   const t = useTranslations("appBuilder");
   const [tab, setTab] = useState("preview");
   // The project's file set: fetched once on open, then merged with every
@@ -143,10 +144,10 @@ export function ProjectView({
             variant="outline"
             size="sm"
             disabled={!fileSet?.length}
-            title="Download every project file as a .zip"
+            title={tHC("hcBuildProjectView.s2")}
             onClick={() => downloadZip(project.project_id, fileSet || [])}
           >
-            <Download aria-hidden="true" size={13} /> Download .zip
+            <Download aria-hidden="true" size={13} /> {tHC("hcBuildProjectView.s1")}
           </Button>
           {ephemeral && (
             <>

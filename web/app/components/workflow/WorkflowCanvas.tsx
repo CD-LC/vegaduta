@@ -36,6 +36,7 @@ import { useWorkflowCanvasController } from "./canvas/useWorkflowCanvasControlle
 import DescribeBar from "./canvas/DescribeBar";
 import EditLockNotice from "./canvas/EditLockNotice";
 import "./canvas/canvas-diff.css";
+import { useTranslations } from "../../lib/i18n";
 
 // Run decoration (interned overlays, edge labels) lives in runOverlay.ts and
 // ./canvas/useCanvasDisplay.ts; module constants in ./canvas/constants.ts.
@@ -64,6 +65,7 @@ function CanvasInner({
   onBack: any;
   focusMode?: any;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvas");
   const c = useWorkflowCanvasController({ workflowId, focusMode });
   const {
     workflow, setWorkflow, error, busy, t, tAw, tDescribe, tNodeDefs, canManageWorkflows, reactFlowWrapper,
@@ -304,7 +306,7 @@ function CanvasInner({
                             letterSpacing: "normal",
                           }}
                         >
-                          <span className="sr-only">Last 30 days: </span>
+                          <span className="sr-only">{tHC("hcComponentsWorkflowWorkflowCanvas.s1")} </span>
                           <EvalBadge stats={workflowEvalStats} compact />
                         </span>
                       ) : null

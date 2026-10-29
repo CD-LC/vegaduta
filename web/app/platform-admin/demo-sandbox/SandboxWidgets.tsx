@@ -10,6 +10,7 @@ import { Label } from "../components/ui/label";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { fmtInt } from "./sandboxFormat";
+import { useTranslations } from "../../lib/i18n";
 
 export function StatTile({
   label,
@@ -58,6 +59,7 @@ export function StatusBadge({ status }: { status: string }) {
 // scaled to the container's width by the `w-full` class, so it stays readable
 // on a phone without any resize listener or layout measurement.
 export function DailyChart({ series }: { series: any[] }) {
+    const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
   const width = 760;
   const height = 170;
   const padBottom = 22;
@@ -69,7 +71,7 @@ export function DailyChart({ series }: { series: any[] }) {
   );
 
   if (!series.length) {
-    return <p className="text-sm text-muted-foreground">No days in range.</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminDemosandboxSandboxWidgets.s4")}</p>;
   }
 
   const slot = width / series.length;
@@ -81,11 +83,10 @@ export function DailyChart({ series }: { series: any[] }) {
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-primary" aria-hidden="true" /> Sandboxes created
+          <span className="inline-block size-2.5 rounded-sm bg-primary" aria-hidden="true" /> {tHC("hcPlatformadminDemosandboxSandboxWidgets.s3")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-[var(--state-success)]" aria-hidden="true" /> Converted
-          (registered)
+          <span className="inline-block size-2.5 rounded-sm bg-[var(--state-success)]" aria-hidden="true" /> {tHC("hcPlatformadminDemosandboxSandboxWidgets.s2")}
         </span>
         <span className="ms-auto font-mono">peak {fmtInt(max)}/day</span>
       </div>
@@ -208,6 +209,7 @@ export function NumberField({
   settingKey?: string;
   fallback?: any;
 }) {
+    const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
   return (
     <div className="rounded-lg border border-border p-3">
       <Label className="text-sm font-medium text-foreground">{label}</Label>
@@ -221,7 +223,7 @@ export function NumberField({
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
         {settingKey && <code className="font-mono text-[11px] text-muted-foreground/70">{settingKey}</code>}
         {fallback !== undefined && fallback !== null && (
-          <span className="text-[11px] text-muted-foreground/70">code fallback {String(fallback)}</span>
+          <span className="text-[11px] text-muted-foreground/70">{tHC("hcPlatformadminDemosandboxSandboxWidgets.s1")} {String(fallback)}</span>
         )}
       </div>
     </div>

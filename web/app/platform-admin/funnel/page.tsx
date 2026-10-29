@@ -10,6 +10,7 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { SECTIONS, UNATTRIBUTED_CLICKS, RETIRED_EVENTS } from "./sections";
+import { useTranslations } from "../../lib/i18n";
 
 // Landing funnel - the read-out for LandingEventController's counters.
 //
@@ -48,6 +49,7 @@ function fmtInt(v: number | undefined) {
 }
 
 export default function FunnelPage() {
+    const tHC = useTranslations("hcPlatformadminFunnelPage");
   const [days, setDays] = useState(14);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -133,7 +135,7 @@ export default function FunnelPage() {
 
   return (
     <AdminShell
-      title="Landing Funnel"
+      title={tHC("hcPlatformadminFunnelPage.s39")}
       actions={
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
@@ -160,12 +162,8 @@ export default function FunnelPage() {
       }
     >
       <PageHint>
-        Where attention actually stops on the public landing page. Every figure is a real Redis counter from{" "}
-        <code className="font-mono text-xs">LandingEventController</code> &mdash; no sampling, no estimation, no
-        third-party script, and nothing stored about any visitor beyond <code className="font-mono text-xs">+1</code> on
-        an event name. <strong>Reach</strong> means a visitor scrolled to that band and held it on screen for a
-        continuous second; <strong>engage</strong> is that band&rsquo;s own CTA clicks divided by its reach &mdash; so
-        it measures the band on the people who actually saw it, which a raw click count never could.
+        {tHC("hcPlatformadminFunnelPage.s38")}{" "}
+        <code className="font-mono text-xs">LandingEventController</code> {tHC("hcPlatformadminFunnelPage.s37")} <code className="font-mono text-xs">+1</code> {tHC("hcPlatformadminFunnelPage.s36")} <strong>Reach</strong> {tHC("hcPlatformadminFunnelPage.s35")} <strong>engage</strong> {tHC("hcPlatformadminFunnelPage.s34")}
       </PageHint>
 
       {error && (
@@ -177,11 +175,9 @@ export default function FunnelPage() {
       {awaitingDeploy && (
         <Alert className="mb-5">
           <AlertDescription>
-            <strong>No section-reach data yet &mdash; this is not a 100% bounce rate.</strong> There are {fmtInt(views)}{" "}
-            landing views in this window but zero <code className="font-mono text-xs">sec_*</code> events, which means
-            the instrumented web build has not reached this environment yet. Merged is not deployed. The waterfall below
-            will stay empty, and must not be read as visitor behaviour, until a web image containing{" "}
-            <code className="font-mono text-xs">SectionReach.tsx</code> is live and has taken traffic.
+            <strong>{tHC("hcPlatformadminFunnelPage.s33")}</strong> {tHC("hcPlatformadminFunnelPage.s32")} {fmtInt(views)}{" "}
+            {tHC("hcPlatformadminFunnelPage.s31")} <code className="font-mono text-xs">sec_*</code> {tHC("hcPlatformadminFunnelPage.s30")}{" "}
+            <code className="font-mono text-xs">SectionReach.tsx</code> {tHC("hcPlatformadminFunnelPage.s29")}
           </AlertDescription>
         </Alert>
       )}
@@ -189,40 +185,38 @@ export default function FunnelPage() {
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Landing views</div>
+            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s28")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-primary">{fmtInt(views)}</div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              The denominator for every rate here. Counted once per <em>browser session</em>, not per person &mdash; one
-              visitor on a phone and a laptop is two. There is no visitor id in this system by design, so this is the
-              closest honest proxy for &ldquo;unique visitors&rdquo; and should not be quoted as anything stronger.
+              {tHC("hcPlatformadminFunnelPage.s27")} <em>{tHC("hcPlatformadminFunnelPage.s26")}</em>{tHC("hcPlatformadminFunnelPage.s25")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Reached pricing</div>
+            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s24")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_pricing ?? 0, views))}
             </div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Share of visitors who got far enough down the page to see what it costs.
+              {tHC("hcPlatformadminFunnelPage.s23")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Reached the closing CTA</div>
+            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s22")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_closing ?? 0, views))}
             </div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              Share who read the whole page. The final ask can only work on these.
+              {tHC("hcPlatformadminFunnelPage.s21")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">Biggest single drop</div>
+            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s20")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-destructive">
               {biggestDrop ? fmtPct(biggestDrop.lostPct) : "n/a"}
             </div>
@@ -236,7 +230,7 @@ export default function FunnelPage() {
       </div>
 
       <SectionCard
-        title="Scroll waterfall"
+        title={tHC("hcPlatformadminFunnelPage.s19")}
         subtitle="Bands in page order. Reach can only fall as you go down - a rise would mean an instrumentation bug."
         icon={Eye}
       >
@@ -246,9 +240,9 @@ export default function FunnelPage() {
               <tr className="border-b border-border text-start text-xs text-muted-foreground">
                 <th className="py-2 pe-3 font-medium">Band</th>
                 <th className="py-2 pe-3 font-medium">Reach</th>
-                <th className="py-2 pe-3 font-medium">% of views</th>
-                <th className="py-2 pe-3 font-medium">Lost here</th>
-                <th className="py-2 pe-3 font-medium">CTA clicks</th>
+                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s18")}</th>
+                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s17")}</th>
+                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s16")}</th>
                 <th className="py-2 font-medium">Engage</th>
               </tr>
             </thead>
@@ -294,7 +288,7 @@ export default function FunnelPage() {
                     </td>
                     <td className="py-2.5 font-mono tabular-nums">
                       {!row.hasCta ? (
-                        <span className="text-muted-foreground" title="This band has no call to action.">
+                        <span className="text-muted-foreground" title={tHC("hcPlatformadminFunnelPage.s15")}>
                           &mdash;
                         </span>
                       ) : awaitingDeploy ? (
@@ -312,7 +306,7 @@ export default function FunnelPage() {
       </SectionCard>
 
       <SectionCard
-        title="Page-level clicks"
+        title={tHC("hcPlatformadminFunnelPage.s14")}
         subtitle="Reachable from any scroll position, so they belong to no single band and get no engage rate."
         icon={MousePointerClick}
         delay={0.05}
@@ -323,7 +317,7 @@ export default function FunnelPage() {
               <div className="text-xs text-muted-foreground">{c.label}</div>
               <div className="font-mono text-lg font-semibold tabular-nums">{fmtInt(totals[c.event])}</div>
               <div className="text-[11px] text-muted-foreground">
-                {fmtPct(pct(totals[c.event] ?? 0, views))} of views
+                {fmtPct(pct(totals[c.event] ?? 0, views))} {tHC("hcPlatformadminFunnelPage.s13")}
               </div>
             </div>
           ))}
@@ -331,15 +325,13 @@ export default function FunnelPage() {
       </SectionCard>
 
       <SectionCard
-        title="Retired counters"
+        title={tHC("hcPlatformadminFunnelPage.s12")}
         subtitle="Whitelisted server-side, but no mounted component can fire them any more."
         icon={Archive}
         delay={0.1}
       >
         <p className="mb-3 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          These belong to bands removed in the 2026-08-14 content-reduction pass. They are shown apart from the
-          waterfall on purpose: rendered inline they would read as a band that converts nobody, when the truth is that
-          no code fires them. Historical counts stay real until the 90-day TTL rolls them off.
+          {tHC("hcPlatformadminFunnelPage.s11")}
         </p>
         <div className="flex flex-wrap gap-4">
           {RETIRED_EVENTS.map((r) => (
@@ -359,26 +351,20 @@ export default function FunnelPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title="What this screen can and cannot tell you" icon={TrendingDown} delay={0.15}>
+      <SectionCard title={tHC("hcPlatformadminFunnelPage.s10")} icon={TrendingDown} delay={0.15}>
         <ul className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            <strong className="text-foreground">It can tell you where attention stops.</strong> The waterfall is
-            measured, per band, from real visitors.
+            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s9")}</strong> {tHC("hcPlatformadminFunnelPage.s8")}
           </li>
           <li>
-            <strong className="text-foreground">It cannot tell you why.</strong> There is no visitor id, no session
-            replay and no path data in this system &mdash; deliberately. A drop between two bands says the second band
-            did not hold people; it does not say which word lost them. Any explanation, including one written by a
-            model, is a hypothesis until a copy test or a real customer conversation settles it.
+            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s7")}</strong> {tHC("hcPlatformadminFunnelPage.s6")}
           </li>
           <li>
-            <strong className="text-foreground">Reach is per browser session, not per person.</strong> Rates here are
-            directionally sound and should not be quoted as unique-human conversion.
+            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s5")}</strong> {tHC("hcPlatformadminFunnelPage.s4")}
           </li>
           <li>
-            A band whose reach is high and engage is low has a <em>copy</em> problem. A band whose reach is low has a{" "}
-            <em>position</em> problem, and rewriting its copy cannot fix it. Telling those two apart is the entire
-            reason this screen exists.
+            {tHC("hcPlatformadminFunnelPage.s3")} <em>copy</em> {tHC("hcPlatformadminFunnelPage.s2")}{" "}
+            <em>position</em> {tHC("hcPlatformadminFunnelPage.s1")}
           </li>
         </ul>
       </SectionCard>

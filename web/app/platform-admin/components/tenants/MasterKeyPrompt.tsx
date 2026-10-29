@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useDialogFocus } from "../../lib/useDialogFocus";
+import { useTranslations } from "../../../lib/i18n";
 
 // Platform-admin "delete tenant completely" control - the master-key unlock
 // step. Entered once per browser session (the caller holds the value in
@@ -30,6 +31,7 @@ export default function MasterKeyPrompt({
   onCancel: () => void;
   onSubmit: (key: string) => void;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTenantsMasterKeyPrompt");
   const [value, setValue] = useState("");
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -87,7 +89,7 @@ export default function MasterKeyPrompt({
               <div className="flex items-center gap-2">
                 <KeyRound size={16} className="text-primary" />
                 <h2 id="master-key-prompt-title" className="text-sm font-semibold text-foreground">
-                  Enter master key
+                  {tHC("hcPlatformadminComponentsTenantsMasterKeyPrompt.s2")}
                 </h2>
               </div>
               <button
@@ -108,7 +110,7 @@ export default function MasterKeyPrompt({
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="master-key-input" className="text-xs text-muted-foreground">
-                Master key
+                {tHC("hcPlatformadminComponentsTenantsMasterKeyPrompt.s1")}
               </Label>
               <Input
                 id="master-key-input"

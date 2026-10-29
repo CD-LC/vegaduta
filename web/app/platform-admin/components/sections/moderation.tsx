@@ -13,6 +13,7 @@ import { Select } from "../../../components/ui/select";
 import PaginationControls from "../PaginationControls";
 import { usePagination } from "../../lib/usePagination";
 import { SectionCard, SwitchToggle, timeAgo } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Safety & Moderation admin surface - backed by ModerationController
 // (/api/platform/moderation/**), which reads and writes the SAME
@@ -63,6 +64,7 @@ function LoadState({ loading, error, onRetry }: { loading: boolean; error: strin
 // ------------------------------------------------------------ policy packs
 
 export function PolicyPacksPanel({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [scope, setScope] = useState("GLOBAL");
   const [key, setKey] = useState("FREE");
   const scopeKey = scope === "GLOBAL" ? "" : key.trim();
@@ -87,14 +89,14 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Policy packs"
+      title={tHC("hcPlatformadminComponentsSectionsModeration.s31")}
       subtitle="Deterministic blocklist packs, toggled per platform default, plan, or tenant."
       icon={ShieldCheck}
       delay={delay}
       actions={
         <div className="flex flex-wrap items-center gap-2">
           <Select
-            aria-label="Policy scope"
+            aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s30")}
             className="w-44"
             value={scope}
             onValueChange={(v) => {
@@ -118,9 +120,9 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
           )}
           {scope === "TENANT" && (
             <Input
-              aria-label="Tenant id"
+              aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s29")}
               className="h-9 w-64"
-              placeholder="Tenant id (uuid)"
+              placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s28")}
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
@@ -130,7 +132,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
       {scope === "TENANT" && !scopeKey && (
-        <p className="text-xs text-muted-foreground">Enter a tenant id to view its packs.</p>
+        <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s27")}</p>
       )}
       {!loading &&
         !error &&
@@ -139,9 +141,9 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 {pack.displayName}
-                {!pack.available && <Badge variant="destructive">Held for legal review</Badge>}
+                {!pack.available && <Badge variant="destructive">{tHC("hcPlatformadminComponentsSectionsModeration.s26")}</Badge>}
                 {pack.available && pack.scopeOfEffectiveValue && pack.scopeOfEffectiveValue !== scope && (
-                  <Badge variant="outline">inherited from {String(pack.scopeOfEffectiveValue).toLowerCase()}</Badge>
+                  <Badge variant="outline">{tHC("hcPlatformadminComponentsSectionsModeration.s25")} {String(pack.scopeOfEffectiveValue).toLowerCase()}</Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{pack.description}</p>
@@ -150,7 +152,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
               )}
               {pack.updatedBy && (
                 <p className="text-[11px] text-muted-foreground/80">
-                  Last changed by {pack.updatedBy} {timeAgo(pack.updatedAt)}
+                  {tHC("hcPlatformadminComponentsSectionsModeration.s24")} {pack.updatedBy} {timeAgo(pack.updatedAt)}
                 </p>
               )}
             </div>
@@ -169,6 +171,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
 // -------------------------------------------------------------- thresholds
 
 export function ThresholdsPanel({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationThresholds());
   const [draft, setDraft] = useState<any>(null);
   const [saving, setSaving] = useState(false);
@@ -223,7 +226,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Guardrail thresholds"
+      title={tHC("hcPlatformadminComponentsSectionsModeration.s23")}
       subtitle="Master switch, external classifier, and per-pack confidence bands (0-100)."
       icon={ScanLine}
       delay={delay}
@@ -240,24 +243,24 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
             <label className="flex items-center gap-2 text-sm">
               <SwitchToggle
                 on={draft.moderationEnabled}
-                label="Moderation enabled"
+                label={tHC("hcPlatformadminComponentsSectionsModeration.s22")}
                 onClick={() => setDraft({ ...draft, moderationEnabled: !draft.moderationEnabled })}
               />
-              Moderation engine on
+              {tHC("hcPlatformadminComponentsSectionsModeration.s21")}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <SwitchToggle
                 on={draft.externalClassifierEnabled}
-                label="External classifier enabled"
+                label={tHC("hcPlatformadminComponentsSectionsModeration.s20")}
                 onClick={() => setDraft({ ...draft, externalClassifierEnabled: !draft.externalClassifierEnabled })}
               />
-              External safety classifier
+              {tHC("hcPlatformadminComponentsSectionsModeration.s19")}
             </label>
           </div>
           {!draft.moderationEnabled && (
             <Alert>
               <AlertDescription>
-                Moderation is off: no pack is enforced for any tenant until it is switched back on.
+                {tHC("hcPlatformadminComponentsSectionsModeration.s18")}
               </AlertDescription>
             </Alert>
           )}
@@ -274,10 +277,10 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
                     label={`${id} semantic layer`}
                     onClick={() => setPack(id, { semanticEnabled: !p.semanticEnabled })}
                   />
-                  LLM judge
+                  {tHC("hcPlatformadminComponentsSectionsModeration.s17")}
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  Review at
+                  {tHC("hcPlatformadminComponentsSectionsModeration.s16")}
                   <Input
                     type="number"
                     min={0}
@@ -288,7 +291,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
                   />
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  Block at
+                  {tHC("hcPlatformadminComponentsSectionsModeration.s15")}
                   <Input
                     type="number"
                     min={0}
@@ -312,6 +315,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
 const QUEUE_STATUSES = ["PENDING", "ESCALATED", "APPROVED", "BLOCKED", "ALL"];
 
 export function ReviewQueuePanel({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [status, setStatus] = useState("PENDING");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationReviewQueue(status), [status]);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -340,7 +344,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Review queue"
+      title={tHC("hcPlatformadminComponentsSectionsModeration.s14")}
       subtitle={
         data ? `${data.pendingCount} pending across all tenants` : "Flagged content awaiting a trust & safety decision."
       }
@@ -349,13 +353,13 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
       actions={
         <div className="flex items-center gap-2">
           <Select
-            aria-label="Queue status"
+            aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s13")}
             className="w-40"
             value={status}
             onValueChange={setStatus}
             options={QUEUE_STATUSES.map((s) => ({ value: s, label: s.charAt(0) + s.slice(1).toLowerCase() }))}
           />
-          <Button size="icon" variant="outline" aria-label="Refresh queue" onClick={refresh}>
+          <Button size="icon" variant="outline" aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s12")} onClick={refresh}>
             <RefreshCw />
           </Button>
         </div>
@@ -363,7 +367,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
       {!loading && !error && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">Nothing in this view.</p>
+        <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s11")}</p>
       )}
       {pg.pageItems.map((item) => (
         <div key={item.id} className="space-y-2 rounded-lg border border-border p-3">
@@ -384,9 +388,9 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
           {item.status === "PENDING" || item.status === "ESCALATED" ? (
             <div className="flex flex-wrap items-center gap-2">
               <Input
-                aria-label="Reviewer note"
+                aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s10")}
                 className="h-8 min-w-48 flex-1"
-                placeholder="Note (optional, audited)"
+                placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s9")}
                 value={notes[item.id] || ""}
                 onChange={(e) => setNotes({ ...notes, [item.id]: e.target.value })}
               />
@@ -409,7 +413,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Decided by {item.reviewedBy || "unknown"} {timeAgo(item.reviewedAt)}
+              {tHC("hcPlatformadminComponentsSectionsModeration.s8")} {item.reviewedBy || "unknown"} {timeAgo(item.reviewedAt)}
               {item.reviewNotes ? ` - ${item.reviewNotes}` : ""}
             </p>
           )}
@@ -433,6 +437,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
 const BLOCKLIST_TYPES = ["USER", "PHONE", "DOMAIN", "REGION"];
 
 export function BlocklistsPanel({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [type, setType] = useState("");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationBlocklists(type), [type]);
   const [newType, setNewType] = useState("DOMAIN");
@@ -471,13 +476,13 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Blocklists & sanctions"
+      title={tHC("hcPlatformadminComponentsSectionsModeration.s7")}
       subtitle="Users, phone numbers, domains and regions refused on inbound. Unblocking keeps the row for audit."
       icon={Ban}
       delay={delay}
       actions={
         <Select
-          aria-label="Blocklist type filter"
+          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s6")}
           className="w-44"
           value={type}
           onValueChange={setType}
@@ -490,14 +495,14 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
     >
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border p-3">
         <Select
-          aria-label="New entry type"
+          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s5")}
           className="w-40"
           value={newType}
           onValueChange={setNewType}
           options={BLOCKLIST_TYPES.map((t) => ({ value: t, label: t }))}
         />
         <Input
-          aria-label="Value to block"
+          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s4")}
           className="h-9 min-w-48 flex-1"
           placeholder={
             newType === "REGION" ? "ISO country code, e.g. KP" : newType === "PHONE" ? "+919999999999" : "value"
@@ -508,7 +513,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
         <Input
           aria-label="Reason"
           className="h-9 min-w-48 flex-1"
-          placeholder="Reason (audited)"
+          placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s3")}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
@@ -517,7 +522,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
         </Button>
       </div>
       <LoadState loading={loading} error={error} onRetry={refresh} />
-      {!loading && !error && entries.length === 0 && <p className="text-sm text-muted-foreground">No entries.</p>}
+      {!loading && !error && entries.length === 0 && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s2")}</p>}
       {pg.pageItems.map((e) => (
         <div key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
           <div className="min-w-0 space-y-0.5">
@@ -527,7 +532,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
               {!e.active && <Badge variant="outline">unblocked</Badge>}
             </div>
             <p className="text-xs text-muted-foreground">
-              {e.reason || "No reason recorded"} · added by {e.createdBy || "unknown"} {timeAgo(e.createdAt)}
+              {e.reason || "No reason recorded"} {tHC("hcPlatformadminComponentsSectionsModeration.s1")} {e.createdBy || "unknown"} {timeAgo(e.createdAt)}
             </p>
           </div>
           <SwitchToggle

@@ -62,6 +62,7 @@ import { isResumable, newRunState, runAgent } from "../../lib/agentkit/loop";
 import { clearRun, loadRun, saveRun } from "../../lib/agentkit/persist";
 import type { AgentRunState, ApprovalDecision, ApprovalRequest } from "../../lib/agentkit/types";
 import ContextMeter from "./ContextMeter";
+import { useTranslations } from "../../lib/i18n";
 
 type ModelGate =
   | { kind: "checking" }
@@ -71,6 +72,7 @@ type ModelGate =
 const MAX_EVICTIONS_SHOWN = 14;
 
 export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null }) {
+    const tHC = useTranslations("hcComponentsAgentkitAgentTaskPanel");
   const [gate, setGate] = useState<ModelGate>({ kind: "checking" });
   const [task, setTask] = useState("");
   const [run, setRun] = useState<AgentRunState | null>(null);
@@ -417,7 +419,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
                 the reason is a missing model rather than the feature being off. */}
             {gate.reason === "no-model" && (
               <Link href="/edge" className="underline underline-offset-2">
-                Open VegaDūta Edge
+                {tHC("hcComponentsAgentkitAgentTaskPanel.s4")}
               </Link>
             )}{" "}
             {/* No use re-checking a deployment-level switch. */}
@@ -435,7 +437,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
         )}
         {repo && gate.kind === "ready" && !running && (
           <span className="text-xs text-muted-foreground">
-            On-device model ready: {gate.modelId} · {gate.contextWindow.toLocaleString()}-token window
+            {tHC("hcComponentsAgentkitAgentTaskPanel.s3")} {gate.modelId} · {gate.contextWindow.toLocaleString()}{tHC("hcComponentsAgentkitAgentTaskPanel.s2")}
           </span>
         )}
         {running && (
@@ -536,7 +538,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
                     {item.status === "done" ? (
                       <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-primary" aria-label="done" />
                     ) : item.status === "doing" ? (
-                      <CircleDot size={14} className="mt-0.5 shrink-0 text-primary" aria-label="in progress" />
+                      <CircleDot size={14} className="mt-0.5 shrink-0 text-primary" aria-label={tHC("hcComponentsAgentkitAgentTaskPanel.s1")} />
                     ) : (
                       <Circle size={14} className="mt-0.5 shrink-0 text-muted-foreground" aria-label="to do" />
                     )}

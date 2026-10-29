@@ -81,6 +81,7 @@ export function validateSso(f: Form, secretAlreadySet: boolean): string | null {
 }
 
 export default function SsoConnectionForm() {
+    const tHC = useTranslations("hcComponentsSsoSsoConnectionForm");
   const t = useTranslations("privacySso");
   const [status, setStatus] = useState<SsoStatusDto | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -241,8 +242,8 @@ export default function SsoConnectionForm() {
               value={form.providerType}
               onChange={(e) => set("providerType", e.target.value as SsoProviderType)}
             >
-              <option value="OIDC">OpenID Connect (OIDC)</option>
-              <option value="SAML">SAML 2.0</option>
+              <option value="OIDC">{tHC("hcComponentsSsoSsoConnectionForm.s2")}</option>
+              <option value="SAML">{tHC("hcComponentsSsoSsoConnectionForm.s1")}</option>
             </select>
           </div>
           {text("displayName", t("ssoDisplayName"), { placeholder: "Acme SSO" })}

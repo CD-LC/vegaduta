@@ -25,6 +25,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import type { DemoSession } from "../try/demoClient";
 import { STAGE_TONE, TONES, pick } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // Presentational pieces of the /try studio (TryStudio owns all state): the site
 // header, the studio's status bar, the four-stage rail, the next-step nudge and
@@ -41,6 +42,7 @@ export const STAGES: { id: Stage; label: string; icon: typeof PenTool; blurb: st
 
 /** Brand + a way out: the winged emblem beside the wordmark always links home. */
 export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
+    const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <header
       className="mb-8 flex items-center justify-between gap-3 border-b border-border/50 pb-3"
@@ -48,7 +50,7 @@ export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
     >
       <Link
         href="/"
-        aria-label="VegaDūta - home"
+        aria-label={tHC("hcComponentsStudioStudioPanels.s11")}
         className="inline-flex items-center rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
       >
         <Logo size={34} />
@@ -70,7 +72,7 @@ export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
           href={signupHref}
           className={`inline-flex items-center rounded-lg px-3.5 py-1.5 text-sm font-medium ${TONES.violet.cta}`}
         >
-          Create free account
+          {tHC("hcComponentsStudioStudioPanels.s10")}
         </Link>
       </nav>
     </header>
@@ -95,12 +97,13 @@ export function StudioStatusBar({
   onGuide: () => void;
   onRestart: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm backdrop-blur">
       <div className="flex items-center gap-2 font-medium">
-        <Users aria-hidden="true" className="h-4 w-4 shrink-0" /> Your studio
+        <Users aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s9")}
         <Badge variant="outline" className="text-[11px]">
-          demo tenant · yours to reset
+          {tHC("hcComponentsStudioStudioPanels.s8")}
         </Badge>
       </div>
       <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -116,13 +119,13 @@ export function StudioStatusBar({
             : `${session.daysRemaining} days left`}
       </div>
       <Button size="sm" className={`ms-auto ${TONES.violet.cta}`} onClick={onTour} data-tour="tour-btn">
-        <Compass aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Take the tour
+        <Compass aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s7")}
       </Button>
       <Button variant="outline" size="sm" onClick={onShowtime} data-tour="showtime-header">
         <Clapperboard aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Showtime
       </Button>
       <Button variant="ghost" size="sm" onClick={onGuide}>
-        <BookOpen aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Feature guide
+        <BookOpen aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s6")}
       </Button>
       <Button variant="outline" size="sm" onClick={onRestart} disabled={resetting}>
         {resetting ? (
@@ -130,7 +133,7 @@ export function StudioStatusBar({
         ) : (
           <RefreshCw aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" />
         )}{" "}
-        Restart with a new idea
+        {tHC("hcComponentsStudioStudioPanels.s5")}
       </Button>
     </div>
   );
@@ -180,6 +183,7 @@ export function NextStepNudge({
   signupHref: string;
   onStage: (s: Stage) => void;
 }) {
+    const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 p-4 text-sm">
       <span className="text-muted-foreground">
@@ -202,7 +206,7 @@ export function NextStepNudge({
       ) : (
         <Button size="sm" className={TONES.violet.cta} asChild>
           <Link href={signupHref}>
-            Create my workspace <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
+            {tHC("hcComponentsStudioStudioPanels.s4")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
           </Link>
         </Button>
       )}
@@ -211,13 +215,14 @@ export function NextStepNudge({
 }
 
 export function EmptyState({ onNew }: { onNew: () => void }) {
+    const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="rounded-xl border border-dashed border-border/70 p-8 text-center">
       <Bot aria-hidden="true" className="mx-auto mb-2 h-8 w-8 text-muted-foreground shrink-0" />
-      <div className="font-medium">No agent yet</div>
-      <p className="mb-4 text-sm text-muted-foreground">Describe a job - it takes a minute and it&apos;s real.</p>
+      <div className="font-medium">{tHC("hcComponentsStudioStudioPanels.s3")}</div>
+      <p className="mb-4 text-sm text-muted-foreground">{tHC("hcComponentsStudioStudioPanels.s2")}</p>
       <Button onClick={onNew}>
-        <Plus aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> New agent
+        <Plus aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s1")}
       </Button>
     </div>
   );

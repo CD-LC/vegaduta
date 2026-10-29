@@ -37,6 +37,7 @@ const REPO_ROWS: ReadonlyArray<{ dir: string; commitKey: string }> = [
 ];
 
 export default function OpenSourceBand() {
+    const tHC = useTranslations("hcComponentsDemolandingOpenSourceBand");
   const t = useTranslations("landing");
 
   return (
@@ -74,7 +75,7 @@ export default function OpenSourceBand() {
             </ul>
             <div className="border-t border-border/60 bg-muted/30 px-5 py-3 font-mono text-xs">
               <p className="text-foreground/80">
-                <span className="mkt-ink-2">$</span> git clone https://github.com/CD-LC/vegaduta.git
+                <span className="mkt-ink-2">$</span> {tHC("hcComponentsDemolandingOpenSourceBand.s1")}
               </p>
               <p className="mkt-ink-2 mt-1">{t("oss_cloneNote")}</p>
             </div>

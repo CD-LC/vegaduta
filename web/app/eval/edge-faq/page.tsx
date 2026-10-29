@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { runFaqEval, type FaqEvalCase, type FaqEvalReport } from "../../lib/edge/faqEval";
 import { EDGE_OPT_IN_KEY, EDGE_ROUTING_PREF_KEY } from "../../lib/edge/capabilities";
+import { useTranslations } from "../../lib/i18n";
 
 declare global {
   interface Window {
@@ -32,6 +33,7 @@ declare global {
  * immediately; otherwise a Start button is shown for manual runs.
  */
 export default function EdgeFaqEvalPage() {
+    const tHC = useTranslations("hcEvalEdgefaqPage");
   const [status, setStatus] = useState("idle");
   const [progress, setProgress] = useState("");
   const [report, setReport] = useState<FaqEvalReport | null>(null);
@@ -84,7 +86,7 @@ export default function EdgeFaqEvalPage() {
 
   return (
     <main style={{ padding: 24, fontFamily: "monospace" }}>
-      <h1>Edge FAQ eval</h1>
+      <h1>{tHC("hcEvalEdgefaqPage.s1")}</h1>
       <p data-testid="eval-status" id="eval-status">{status}</p>
       <p id="eval-progress">{progress}</p>
       {!report && (

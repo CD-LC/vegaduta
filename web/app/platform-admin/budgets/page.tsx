@@ -6,6 +6,7 @@ import AdminShell from "../components/AdminShell";
 import { PageHint, SectionCard, InfoNote } from "../components/sections/common";
 import { PerUserBudgetSection, FreeTierQuotaSection, ChatGenerationSection } from "../components/sections/budgets";
 import { SmartAiSection } from "../components/sections/smart-ai";
+import { useTranslations } from "../../lib/i18n";
 
 // Budgets & Limits §3.3 / §4 - the per-principal dollar budget subsystem.
 // Global defaults are wired to GET/PUT /api/platform/per-user-budget (with a
@@ -13,11 +14,11 @@ import { SmartAiSection } from "../components/sections/smart-ai";
 // editor (linked below, GET/PUT /api/platform/plan-limits). Per-tenant/user
 // overrides do not exist in core and are not shown.
 export default function BudgetsLimitsPage() {
+    const tHC = useTranslations("hcPlatformadminBudgetsPage");
   return (
-    <AdminShell title="Budgets & Limits">
+    <AdminShell title={tHC("hcPlatformadminBudgetsPage.s7")}>
       <PageHint>
-        A per-principal dollar budget over a configurable window, decremented by every modality&rsquo;s real cost.
-        The global default is scaled by the tenant&rsquo;s plan.
+        {tHC("hcPlatformadminBudgetsPage.s6")}
       </PageHint>
 
       <PerUserBudgetSection />
@@ -28,24 +29,21 @@ export default function BudgetsLimitsPage() {
 
       <SmartAiSection delay={0.03} />
 
-      <SectionCard title="Per-plan limits" icon={CreditCard} delay={0.06}>
+      <SectionCard title={tHC("hcPlatformadminBudgetsPage.s5")} icon={CreditCard} delay={0.06}>
         <p className="text-xs text-muted-foreground">
-          Per-tier caps (max users / agents / workflows / KB collections, BYOK, WhatsApp, white-label) are live today in
-          the Plan Limits editor on Tenants &amp; Users, backed by{" "}
-          <code className="font-mono">GET/PUT /api/platform/plan-limits</code>.
+          {tHC("hcPlatformadminBudgetsPage.s4")}{" "}
+          <code className="font-mono">{tHC("hcPlatformadminBudgetsPage.s3")}</code>.
         </p>
         <Link
           href="/platform-admin/tenants"
           className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
-          Open Plan Limits editor <ChevronRight size={13} />
+          {tHC("hcPlatformadminBudgetsPage.s2")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
 
       <InfoNote>
-        Per-plan dollar budgets are a multiplier on the global default above (Premium and Unlimited scale it; the
-        multipliers are deployment config, not editable here). Per-tenant / per-user budget overrides do not exist in core,
-        so none are offered. Tenant users can already buy a top-up when their budget is exhausted.
+        {tHC("hcPlatformadminBudgetsPage.s1")}
       </InfoNote>
     </AdminShell>
   );

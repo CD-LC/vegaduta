@@ -42,7 +42,9 @@ const RAISED = "var(--mkt-surface-raised)";
 const INK3 = "var(--mkt-ink-3)";
 
 /* A phone with a WhatsApp-style exchange: question in, priced answer out. */
-const WhatsAppArt: Art = ({ className }) => (
+const WhatsAppArt: Art = ({ className }) => {
+  const tHC = useTranslations("hcComponentsDemolandingOutcomesBand");
+  return (
   <svg viewBox="0 0 320 200" className={className} role="img" aria-hidden="true">
     <defs>
       <linearGradient id="oc-g1" x1="0" y1="0" x2="1" y2="1">
@@ -67,7 +69,7 @@ const WhatsAppArt: Art = ({ className }) => (
     <rect x="114" y="111" width="80" height="4" rx="2" fill={INK3} />
     <rect x="114" y="120" width="52" height="4" rx="2" fill={INK3} />
     <rect x="114" y="131" width="44" height="9" rx="4.5" fill={ACC} />
-    <text x="136" y="138" fontSize="6.5" fill="#fff" textAnchor="middle" fontFamily="ui-sans-serif, system-ui">Pay via UPI</text>
+    <text x="136" y="138" fontSize="6.5" fill="#fff" textAnchor="middle" fontFamily="ui-sans-serif, system-ui">{tHC("hcComponentsDemolandingOutcomesBand.s1")}</text>
     {/* typing dots */}
     <circle cx="116" cy="164" r="3" fill={ACC} />
     <circle cx="126" cy="164" r="3" fill={ACC} opacity="0.6" />
@@ -83,7 +85,8 @@ const WhatsAppArt: Art = ({ className }) => (
     <circle cx="26" cy="131" r="3" fill={WARM} />
     <rect x="34" y="129" width="40" height="4" rx="2" fill={INK3} />
   </svg>
-);
+  );
+};
 
 /* A live call: waveform, transcript lines, a language chip. */
 const VoiceArt: Art = ({ className }) => (

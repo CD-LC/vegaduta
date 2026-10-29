@@ -14,8 +14,10 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { SwitchToggle } from "../components/sections/common";
 import { LIMIT_NUMBER_FIELDS, LIMIT_TOGGLE_FIELDS, PLAN_OPTIONS } from "./tenantOptions";
+import { useTranslations } from "../../lib/i18n";
 
 export function PlanLimitsCard() {
+    const tHC = useTranslations("hcPlatformadminTenantsPlanLimitsCard");
   const [planLimits, setPlanLimits] = useState<Record<string, Record<string, any>>>({});
   const [draftLimits, setDraftLimits] = useState<Record<string, Record<string, any>>>({});
   const [limitsLoading, setLimitsLoading] = useState(true);
@@ -78,10 +80,10 @@ export function PlanLimitsCard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Sliders size={16} className="text-primary" /> Plan Limits
+            <Sliders size={16} className="text-primary" /> {tHC("hcPlatformadminTenantsPlanLimitsCard.s5")}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Per-plan caps and feature gates applied to every tenant on that plan
+            {tHC("hcPlatformadminTenantsPlanLimitsCard.s4")}
           </p>
         </CardHeader>
         <CardContent>
@@ -90,9 +92,9 @@ export function PlanLimitsCard() {
               {limitsError}
             </div>
           )}
-          {limitsLoading && !limitsError && <p className="text-sm text-muted-foreground">Loading plan limits…</p>}
+          {limitsLoading && !limitsError && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s3")}</p>}
           {!limitsLoading && !limitsError && Object.keys(draftLimits).length === 0 && (
-            <p className="text-sm text-muted-foreground">No plan limit rows returned.</p>
+            <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s2")}</p>
           )}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -118,7 +120,7 @@ export function PlanLimitsCard() {
                           handleLimitFieldChange(plan, f.key, e.target.value === "" ? "" : Number(e.target.value))
                         }
                       />
-                      <span className="text-[11px] text-muted-foreground">-1 = no cap</span>
+                      <span className="text-[11px] text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s1")}</span>
                     </div>
                   ))}
 

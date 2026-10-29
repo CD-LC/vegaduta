@@ -15,11 +15,12 @@ export default function PendingAndChannelsRow({
   pendingApprovals: PendingApproval[];
   platforms: { key: PlatformKey; label: string; connected: boolean | null }[];
 }) {
+    const tHC = useTranslations("hcAdminOverviewPendingAndChannelsRow");
   const t = useTranslations("adminOverview");
   return (
     <div className="defer-offscreen grid min-w-0 gap-4 lg:grid-cols-[3fr_2fr]">
       <Card className="gap-4 p-5" data-testid="admin-pending-approvals">
-        <CardHeading action={<CardLink href="/admin/maintenance">Review all</CardLink>}>
+        <CardHeading action={<CardLink href="/admin/maintenance">{tHC("hcAdminOverviewPendingAndChannelsRow.s1")}</CardLink>}>
           {t("pendingApprovalsHeading")}
         </CardHeading>
         {/* Bounded to 5 rows; the max-height is a defensive cap so a

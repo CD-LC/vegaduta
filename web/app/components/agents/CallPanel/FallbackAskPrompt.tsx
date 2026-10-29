@@ -2,6 +2,7 @@
 
 import type { MutableRefObject } from "react";
 import { Button } from "../../ui/button";
+import { useTranslations } from "../../../lib/i18n";
 
 
 interface FallbackAskPromptProps {
@@ -10,6 +11,7 @@ interface FallbackAskPromptProps {
 }
 
 export default function FallbackAskPrompt({ pendingFallbackAsk, fallbackAskResolverRef }: FallbackAskPromptProps) {
+    const tHC = useTranslations("hcComponentsAgentsCallPanelFallbackAskPrompt");
   return (
     <>
       {/* "ask" fallback policy: the inline confirm/cancel prompt
@@ -26,7 +28,7 @@ export default function FallbackAskPrompt({ pendingFallbackAsk, fallbackAskResol
               variant="outline"
               onClick={() => fallbackAskResolverRef.current?.(true)}
             >
-              Send to server
+              {tHC("hcComponentsAgentsCallPanelFallbackAskPrompt.s1")}
             </Button>
             <Button
               type="button"

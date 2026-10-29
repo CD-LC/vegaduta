@@ -8,6 +8,7 @@ import { createShare } from "../try/demoClient";
 import { qrPath, QR_QUIET } from "../../lib/qr";
 import { getMobileApkDownload } from "../../lib/mobileApp";
 import { TONES } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // "Scan it. It's on your phone." The share link the demo backend already mints
 // (POST /api/demo/session/share -> /a/<id>) shown the way it should be shown on
@@ -30,6 +31,7 @@ type Props = {
 };
 
 export default function PocketPanel({ token, agentName, readOnly, signupHref, onShareUrl }: Props) {
+    const tHC = useTranslations("hcComponentsStudioPocketPanel");
   const apk = getMobileApkDownload();
   const [busy, setBusy] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
           <div
             className={`mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide ${TONES.sky.text}`}
           >
-            <Smartphone aria-hidden="true" className="h-4 w-4 shrink-0" /> Step 6 - in your pocket
+            <Smartphone aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioPocketPanel.s14")}
           </div>
           <h3 className="text-2xl font-semibold tracking-tight">
             {agentName
@@ -93,8 +95,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
               : "Put your agent on a phone."}
           </h3>
           <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">
-            Make the link, point your phone camera at the code, and chat with the agent you just built - no app, no
-            account on the phone.
+            {tHC("hcComponentsStudioPocketPanel.s13")}
           </p>
 
           {!shareUrl ? (
@@ -105,12 +106,11 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 ) : (
                   <QrCode aria-hidden="true" className="me-2 h-4 w-4 shrink-0" />
                 )}{" "}
-                Make my QR code
+                {tHC("hcComponentsStudioPocketPanel.s12")}
               </Button>
               {message && <p className="mt-2 text-sm text-destructive">{message}</p>}
               <p className="mt-2 max-w-md text-xs text-muted-foreground">
-                Anyone with the link can talk to it - up to 5 people, on the same free limits - and it goes away with
-                this sandbox.
+                {tHC("hcComponentsStudioPocketPanel.s11")}
               </p>
             </div>
           ) : (
@@ -121,7 +121,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                   readOnly
                   value={shareUrl}
                   onFocus={(e) => e.currentTarget.select()}
-                  aria-label="Share link"
+                  aria-label={tHC("hcComponentsStudioPocketPanel.s10")}
                   className="min-w-0 flex-1 bg-transparent px-1 text-sm outline-none"
                 />
                 <Button size="sm" variant="outline" onClick={copy}>
@@ -134,7 +134,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Up to 5 people can chat with it. Send it to a friend and watch it answer someone who is not you.
+                {tHC("hcComponentsStudioPocketPanel.s9")}
               </p>
             </div>
           )}
@@ -153,14 +153,14 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
                 className="h-[196px] w-[196px]"
                 role="img"
-                aria-label="QR code that opens your agent on a phone"
+                aria-label={tHC("hcComponentsStudioPocketPanel.s8")}
               >
                 <path d={qr.d} fill="#09090b" />
               </svg>
             ) : (
               <div className="flex h-[196px] w-[196px] flex-col items-center justify-center gap-2 text-center text-xs text-zinc-500">
                 <QrCode aria-hidden="true" className="h-10 w-10 text-zinc-300 shrink-0" />
-                Your code appears here
+                {tHC("hcComponentsStudioPocketPanel.s7")}
               </div>
             )}
           </motion.div>
@@ -173,32 +173,30 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
             {android ? "You are on Android - take it with you." : "Want it as an app?"}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            The VegaDūta Android app chats with your agents, runs workflows and takes your approvals. Create the free
-            account from this page, sign in on the app, and the agent you built is in your workspace.
+            {tHC("hcComponentsStudioPocketPanel.s6")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {apk && (
             <Button asChild variant={android ? "default" : "outline"} size="sm">
               <a href={apk.href} download>
-                <Download aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Android app
+                <Download aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioPocketPanel.s5")}
                 {apk.sizeMb ? ` · ${apk.sizeMb} MB` : ""}
               </a>
             </Button>
           )}
           <Button asChild size="sm" className={TONES.violet.cta}>
-            <a href={signupHref}>Create the account</a>
+            <a href={signupHref}>{tHC("hcComponentsStudioPocketPanel.s4")}</a>
           </Button>
         </div>
       </div>
       {apk && (
         <p className="border-t border-border/40 px-5 py-2 text-[10.5px] text-muted-foreground sm:px-7">
-          Direct APK download{apk.version ? `, version ${apk.version}` : ""} - Android asks you to allow installs from
-          your browser.
+          {tHC("hcComponentsStudioPocketPanel.s3")}{apk.version ? `, version ${apk.version}` : ""} {tHC("hcComponentsStudioPocketPanel.s2")}
           {apk.sha256 && (
             <>
               {" "}
-              Checksum (SHA-256): <span className="break-all font-mono">{apk.sha256}</span>
+              {tHC("hcComponentsStudioPocketPanel.s1")} <span className="break-all font-mono">{apk.sha256}</span>
             </>
           )}
         </p>

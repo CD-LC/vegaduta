@@ -25,6 +25,7 @@ import {
   type AttackReport,
   type AttackScenarioResult,
 } from "./attackReport";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * "Attack my agent" (trust T7): one button that runs every built-in indirect
@@ -74,6 +75,7 @@ export default function AttackSection({
   /** Tells the page whether the section is showing, so it can hide links that point at it. */
   onAvailabilityChange?: (available: boolean) => void;
 }) {
+    const tHC = useTranslations("hcAgentsQualityAttackSection");
   // null = not known yet / not supported; [] = supported route but no attack scenarios.
   const [attackKeys, setAttackKeys] = useState<string[] | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -249,7 +251,7 @@ export default function AttackSection({
 
   return (
     <Section
-      title="Attack my agent"
+      title={tHC("hcAgentsQualityAttackSection.s13")}
       description="Hands this agent a poisoned email, web page, tool description and document - each with instructions hidden inside - and checks whether it obeys them. Tools stay disabled, so nothing real is sent."
     >
       <Card>
@@ -257,7 +259,7 @@ export default function AttackSection({
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1">
               <label htmlFor="attack-budget" className="text-xs font-medium text-muted-foreground">
-                Budget per scenario (USD)
+                {tHC("hcAgentsQualityAttackSection.s12")}
               </label>
               <Input
                 id="attack-budget"
@@ -284,19 +286,17 @@ export default function AttackSection({
               </Button>
             )}
             <span className="text-xs text-muted-foreground">
-              {scenarioCount} scenario{scenarioCount === 1 ? "" : "s"}, up to {ATTACK_MAX_TURNS} turns each. Each
-              scenario stops when it reaches the budget.
+              {scenarioCount} scenario{scenarioCount === 1 ? "" : "s"}, up to {ATTACK_MAX_TURNS} {tHC("hcAgentsQualityAttackSection.s11")}
             </span>
           </div>
           {budgetUsd == null && (
             <p className="text-xs text-destructive" role="alert">
-              Enter a budget greater than 0.
+              {tHC("hcAgentsQualityAttackSection.s10")}
             </p>
           )}
           {startFailed && !report && (
             <p className="text-xs text-destructive" role="alert" data-testid="attack-start-failed">
-              The attack was started, but its result could not be loaded. It may still be running - reload this page to
-              see it before starting another one.
+              {tHC("hcAgentsQualityAttackSection.s9")}
             </p>
           )}
         </CardContent>
@@ -338,13 +338,13 @@ export default function AttackSection({
                     <Badge
                       variant="outline"
                       data-testid={`attack-deterministic-${row.key}`}
-                      title="Confirmed by an exact check for the planted code, not by a judge model"
+                      title={tHC("hcAgentsQualityAttackSection.s8")}
                     >
-                      Exact match
+                      {tHC("hcAgentsQualityAttackSection.s7")}
                     </Badge>
                   )}
                   <span className="text-sm font-medium text-foreground">{row.name}</span>
-                  <span className="ms-auto text-xs text-muted-foreground">View transcript</span>
+                  <span className="ms-auto text-xs text-muted-foreground">{tHC("hcAgentsQualityAttackSection.s6")}</span>
                 </button>
                 {row.reason && (
                   <p className="min-w-0 break-words px-3 pb-2 text-xs text-muted-foreground">{row.reason}</p>
@@ -369,23 +369,22 @@ export default function AttackSection({
           {compromised && (
             <Alert variant="warning" data-testid="attack-fixes">
               <ShieldAlert aria-hidden="true" />
-              <AlertTitle>What to change</AlertTitle>
+              <AlertTitle>{tHC("hcAgentsQualityAttackSection.s5")}</AlertTitle>
               <AlertDescription>
                 <ul className="w-full list-disc space-y-1 ps-4">
                   <li>
-                    In the agent&apos;s tools, remove one of the three: reading private data, taking in outside content,
-                    or sending data out.{" "}
+                    {tHC("hcAgentsQualityAttackSection.s4")}{" "}
                     <Link
                       className="underline"
                       data-testid="attack-fix-workbench"
                       href={`/agents?agentId=${encodeURIComponent(agentId)}`}
                     >
-                      Open the agent
+                      {tHC("hcAgentsQualityAttackSection.s3")}
                     </Link>
                   </li>
-                  <li>Or set its Autonomy to Supervised, so a person approves every tool call.</li>
+                  <li>{tHC("hcAgentsQualityAttackSection.s2")}</li>
                   <li>
-                    Check which content guardrails are on.{" "}
+                    {tHC("hcAgentsQualityAttackSection.s1")}{" "}
                     <Link className="underline" data-testid="attack-fix-guardrails" href="/admin/guardrails">
                       Guardrails
                     </Link>

@@ -24,6 +24,7 @@ import type { ReactNode } from "react";
 import type { Context } from "react";
 import { AuthContext } from "../../components/AuthProvider";
 import DashboardHome from "../../components/dashboard/DashboardHome";
+import { useTranslations } from "../../lib/i18n";
 
 // AuthContext is createContext(null) in AuthProvider.tsx (untyped value); the
 // real provider hands out this exact shape (see its return statement).
@@ -46,6 +47,7 @@ const previewAuth = {
 };
 
 function PreviewPill() {
+    const tHC = useTranslations("hcUikitDashboardpreviewPage");
   return (
     <div
       role="status"
@@ -68,7 +70,7 @@ function PreviewPill() {
         fontFamily: "ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      Preview — sample data, no backend
+      {tHC("hcUikitDashboardpreviewPage.s1")}
     </div>
   );
 }

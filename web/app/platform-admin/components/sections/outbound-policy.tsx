@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Skeleton } from "../ui/skeleton";
 import { SectionCard } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Read-only view of the operator-set outbound limits, backed by
 // OutboundPolicyController (GET /api/platform/security/outbound-policy). These
@@ -45,6 +46,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export function OutboundPolicyPanel({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsOutboundpolicy");
   const [data, setData] = useState<OutboundPolicy | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,21 +67,21 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
   }, [load]);
 
   const refresh = (
-    <Button size="sm" variant="outline" onClick={() => void load()} aria-label="Refresh outbound policy">
+    <Button size="sm" variant="outline" onClick={() => void load()} aria-label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s14")}>
       <RefreshCw size={14} />
     </Button>
   );
 
   if (loading && !data) {
     return (
-      <SectionCard title="Outbound and agent-to-agent policy" icon={Globe2} delay={delay}>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s13")} icon={Globe2} delay={delay}>
         <Skeleton className="h-16 w-full" />
       </SectionCard>
     );
   }
   if (error || !data) {
     return (
-      <SectionCard title="Outbound and agent-to-agent policy" icon={Globe2} delay={delay} actions={refresh}>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s13")} icon={Globe2} delay={delay} actions={refresh}>
         <Alert variant="destructive">
           <AlertDescription>{error || "No data."}</AlertDescription>
         </Alert>
@@ -91,7 +93,7 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
   return (
     <>
       <SectionCard
-        title="Outbound allow-list"
+        title={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s12")}
         subtitle="Which hosts tenant-configured URLs (BYOK models, OpenAPI tools, web fetch, MCP servers, webhooks) may reach. Set APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST."
         icon={Globe2}
         delay={delay}
@@ -99,32 +101,32 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
       >
         <Row label="Mode">
           {egress.restricted ? (
-            <Badge>Restricted to the list below</Badge>
+            <Badge>{tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s11")}</Badge>
           ) : (
-            <Badge variant="secondary">Any public host (no list set)</Badge>
+            <Badge variant="secondary">{tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s10")}</Badge>
           )}
         </Row>
-        <Row label="Allowed hosts">
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s9")}>
           <HostList
             hosts={egress.allowList}
             empty="None set. Private and metadata addresses stay blocked either way."
           />
         </Row>
-        <Row label="Private-host exceptions">
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s8")}>
           <HostList hosts={egress.privateHostExceptions} empty="None." />
         </Row>
         <p className="pt-1 text-xs text-muted-foreground">
-          Platform-wide: the list applies to every agent. A per-agent list is not available yet.
+          {tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s7")}
         </p>
       </SectionCard>
 
       <SectionCard
-        title="Agent-to-agent (A2A)"
+        title={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s6")}
         subtitle="Inbound endpoints other agents call, and the outbound client your agents use to call them."
         icon={Network}
         delay={delay}
       >
-        <Row label="Inbound server">
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s5")}>
           <Badge variant={a2aServer.enabled ? "default" : "secondary"}>{a2aServer.enabled ? "On" : "Off"}</Badge>
         </Row>
         {a2aServer.enabled && (
@@ -135,14 +137,14 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
             </div>
           </Row>
         )}
-        <Row label="Outbound client">
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s4")}>
           <Badge variant={a2aClient.enabled ? "default" : "secondary"}>{a2aClient.enabled ? "On" : "Off"}</Badge>
         </Row>
-        <Row label="Allowed remote hosts">
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s3")}>
           <HostList hosts={a2aClient.allowedHosts} empty="None: no remote agent is reachable." />
         </Row>
-        <Row label="Signed cards required">{a2aClient.requireSignedCard ? "Yes" : "No"}</Row>
-        <Row label="Remote calls per turn">{a2aClient.maxCallsPerTurn > 0 ? a2aClient.maxCallsPerTurn : "No cap"}</Row>
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s2")}>{a2aClient.requireSignedCard ? "Yes" : "No"}</Row>
+        <Row label={tHC("hcPlatformadminComponentsSectionsOutboundpolicy.s1")}>{a2aClient.maxCallsPerTurn > 0 ? a2aClient.maxCallsPerTurn : "No cap"}</Row>
       </SectionCard>
     </>
   );

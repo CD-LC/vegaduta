@@ -25,6 +25,7 @@ import { PhoneFit } from "./PhoneFit";
 import { TONE } from "./dayTone";
 import DayPhone from "./DayPhone";
 import Finale from "./DayFinale";
+import { useTranslations } from "../../../lib/i18n";
 
 // The stage of "An Impossible Day": an orrery of agents around a sleeping owner,
 // a 24-hour ring with a sun/moon on it, and the phone that shows what the outside
@@ -124,6 +125,7 @@ function Orrery({
   litAgents: Set<AgentId>;
   finale: boolean;
 }) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
   const tone = ev ? TONE[ev.phone.tone] : TONE.violet;
 
   // Packets
@@ -395,7 +397,7 @@ function Orrery({
           }}
         >
           <div className="mb-[0.6cqw] uppercase tracking-wider text-zinc-400" style={{ fontSize: "max(8px,1.1cqw)" }}>
-            {DAY_AGENTS.find((a) => a.id === ev.agent)?.name} · working
+            {DAY_AGENTS.find((a) => a.id === ev.agent)?.name} {tHC("hcComponentsStudioShowtimeDayStage.s3")}
           </div>
           <ul className="space-y-[0.5cqw]">
             {ev.tools.map((t, i) => {
@@ -444,6 +446,7 @@ function Orrery({
 }
 
 function Counters({ stats }: { stats: ReturnType<typeof statsAt> }) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
   const items = [
     { l: "messages", v: stats.msgs, c: "" },
     { l: "tool calls", v: stats.tools, c: "" },
@@ -454,9 +457,9 @@ function Counters({ stats }: { stats: ReturnType<typeof statsAt> }) {
   return (
     <div
       className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-xl border border-white/10 bg-black/40 px-3 py-1.5 text-xs backdrop-blur"
-      aria-label="Sample day counters"
+      aria-label={tHC("hcComponentsStudioShowtimeDayStage.s2")}
     >
-      <span className="text-[10px] uppercase tracking-wider text-zinc-400">Sample day · so far</span>
+      <span className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeDayStage.s1")}</span>
       {items.map((i) => (
         <span key={i.l} className={`tabular-nums ${i.c || "text-zinc-300"}`}>
           <b className="text-sm">{i.v}</b> <span className="text-zinc-400">{i.l}</span>

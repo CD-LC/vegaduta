@@ -22,6 +22,7 @@ import {
   voiceoverOptionValue,
   type VoiceoverChoice,
 } from "../../lib/voice/voiceover";
+import { useTranslations } from "../../lib/i18n";
 
 export default function ShareVoiceoverRow({
   repliesMuted,
@@ -30,6 +31,7 @@ export default function ShareVoiceoverRow({
   repliesMuted: boolean;
   onToggleRepliesMuted: () => void;
 }) {
+    const tHC = useTranslations("hcAgentShareIdShareVoiceoverRow");
   // Hydrate the persisted pick + voice lists after mount (localStorage and
   // speechSynthesis.getVoices() are not safe in the pre-rendered HTML).
   const [voiceover, setVoiceover] = useState<VoiceoverChoice>({ kind: "auto" });
@@ -78,7 +80,7 @@ export default function ShareVoiceoverRow({
     <div className="flex items-center gap-2">
       <div className="min-w-0 flex-1">
         <Select
-          aria-label="Reply voice"
+          aria-label={tHC("hcAgentShareIdShareVoiceoverRow.s1")}
           value={voiceoverValue}
           options={options}
           searchable={options.length > 12}

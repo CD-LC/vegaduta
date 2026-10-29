@@ -22,6 +22,7 @@ import type { AppView } from "./AppPhone";
 import BrandName from "../../BrandName";
 import { usePath, Cursor, Panel, type SceneProps } from "./sceneKit";
 import { FlowScene, RunScene, ShipScene } from "./ScenesRun";
+import { useTranslations } from "../../../lib/i18n";
 
 // Trailer scenes. Every scene is a pure function of p (0..1 within its act):
 // no timers, no state, so scrubbing and pausing are free and exact.
@@ -82,6 +83,7 @@ export function phoneViewFor(id: ActId, p: number): AppView {
 }
 // ---------------------------------------------------------------------- scenes
 function OpenScene({ p }: SceneProps) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const a = ease(seg(p, 0.05, 0.3));
   const b = ease(seg(p, 0.3, 0.55));
   const c = ease(seg(p, 0.6, 0.85));
@@ -94,21 +96,20 @@ function OpenScene({ p }: SceneProps) {
         className="mt-5 max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl"
         style={{ opacity: a, transform: `translateY(${(1 - a) * 24}px)` }}
       >
-        One afternoon.
+        {tHC("hcComponentsStudioShowtimeScenes.s14")}
         <br />
         <span
           className="bg-gradient-to-r from-emerald-300 via-teal-300 to-sky-300 bg-clip-text text-transparent"
           style={{ opacity: b }}
         >
-          One phone. One job.
+          {tHC("hcComponentsStudioShowtimeScenes.s13")}
         </span>
       </h2>
       <p
         className="mt-6 max-w-xl text-lg text-zinc-300"
         style={{ opacity: c, transform: `translateY(${(1 - c) * 12}px)` }}
       >
-        A farmer who needs to know which day to sell. Watch it become an app, an agent, a workflow - and a phone in his
-        pocket.
+        {tHC("hcComponentsStudioShowtimeScenes.s12")}
       </p>
     </div>
   );
@@ -122,6 +123,7 @@ const BLOCKS = [
 ];
 
 function DesignScene({ p }: SceneProps) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const cur = usePath(
     [
       { t: 0, x: 60, y: 90 },
@@ -138,7 +140,7 @@ function DesignScene({ p }: SceneProps) {
     p
   );
   return (
-    <Panel title="App studio · Mandi Buddy" icon={Smartphone}>
+    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s11")} icon={Smartphone}>
       <div className="grid h-full grid-cols-[150px_1fr] gap-4">
         <div className="space-y-2">
           <div className="text-[10px] uppercase tracking-wider text-zinc-400">Blocks</div>
@@ -161,7 +163,7 @@ function DesignScene({ p }: SceneProps) {
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-sm text-zinc-400"
             style={{ opacity: 1 - seg(p, 0.06, 0.2) }}
           >
-            Drop blocks on the phone →
+            {tHC("hcComponentsStudioShowtimeScenes.s10")}
           </div>
           <div
             className="absolute inset-x-6 top-6 space-y-2 text-xs text-zinc-400"
@@ -175,19 +177,19 @@ function DesignScene({ p }: SceneProps) {
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
               style={{ opacity: seg(p, 0.42, 0.5) }}
             >
-              Field · <span className="text-zinc-200">Your crop</span>
+              Field · <span className="text-zinc-200">{tHC("hcComponentsStudioShowtimeScenes.s9")}</span>
             </div>
             <div
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
               style={{ opacity: seg(p, 0.66, 0.74) }}
             >
-              Button · <span className="text-zinc-200">{typed(APP.button, seg(p, 0.66, 0.78))}</span>
+              {tHC("hcComponentsStudioShowtimeScenes.s8")} <span className="text-zinc-200">{typed(APP.button, seg(p, 0.66, 0.78))}</span>
             </div>
             <div
               className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-emerald-200"
               style={{ opacity: seg(p, 0.86, 0.95) }}
             >
-              Works offline once opened · installable
+              {tHC("hcComponentsStudioShowtimeScenes.s7")}
             </div>
           </div>
         </div>
@@ -210,6 +212,7 @@ const TILE_ICON: Record<string, typeof Globe> = {
 };
 
 function RegistryScene({ p }: SceneProps) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const query = typed("web", seg(p, 0.12, 0.3));
   const filtering = seg(p, 0.3, 0.42);
   const attached = seg(p, 0.66, 0.78);
@@ -229,7 +232,7 @@ function RegistryScene({ p }: SceneProps) {
     p
   );
   return (
-    <Panel title="Tool registry · already enabled on the platform" icon={Search}>
+    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s6")} icon={Search}>
       <div className="flex h-full flex-col gap-3">
         <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2.5 text-sm">
           <Search aria-hidden="true" className="h-4 w-4 text-zinc-400 shrink-0" />
@@ -265,7 +268,7 @@ function RegistryScene({ p }: SceneProps) {
                   >
                     {attached > 0.3 ? (
                       <>
-                        <Check aria-hidden="true" className="h-3 w-3 shrink-0" /> Attached to Mandi analyst
+                        <Check aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioShowtimeScenes.s5")}
                       </>
                     ) : (
                       "Attach to agent"
@@ -277,8 +280,7 @@ function RegistryScene({ p }: SceneProps) {
           })}
         </div>
         <div className="flex items-center gap-2 text-[11px] text-zinc-400" style={{ opacity: seg(p, 0.8, 0.92) }}>
-          <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-300 shrink-0" /> Page reading and code execution
-          attached the same way - three tools, nothing installed.
+          <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-300 shrink-0" /> {tHC("hcComponentsStudioShowtimeScenes.s4")}
         </div>
       </div>
       <Cursor {...cur} />
@@ -287,6 +289,7 @@ function RegistryScene({ p }: SceneProps) {
 }
 
 function AgentScene({ p }: SceneProps) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const mission = typed(AGENT.mission, seg(p, 0.08, 0.55));
   const tools = [
     { id: "web_search", label: "Search the web", icon: Globe },
@@ -294,7 +297,7 @@ function AgentScene({ p }: SceneProps) {
     { id: "run_code", label: "Run code", icon: Code2 },
   ];
   return (
-    <Panel title="Agent · Mandi analyst" icon={Bot}>
+    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s3")} icon={Bot}>
       <div className="flex h-full flex-col gap-4">
         <div className="flex items-center gap-3">
           <span
@@ -305,7 +308,7 @@ function AgentScene({ p }: SceneProps) {
           </span>
           <div>
             <div className="text-lg font-semibold">{AGENT.name}</div>
-            <div className="text-xs text-emerald-300">ready for work</div>
+            <div className="text-xs text-emerald-300">{tHC("hcComponentsStudioShowtimeScenes.s2")}</div>
           </div>
         </div>
         <div>
@@ -347,7 +350,7 @@ function AgentScene({ p }: SceneProps) {
           className="mt-auto flex items-center gap-2 rounded-xl border border-violet-400/40 bg-violet-500/15 px-3.5 py-2.5 text-sm"
           style={{ opacity: seg(p, 0.72, 0.85) }}
         >
-          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> Bound to the button{" "}
+          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> {tHC("hcComponentsStudioShowtimeScenes.s1")}{" "}
           <b>“{APP.button}”</b> →
           <span className="ms-auto inline-flex items-center gap-1 text-emerald-300">
             <Check className="h-4 w-4 shrink-0" aria-hidden="true" /> wired

@@ -17,6 +17,7 @@ import {
   type AppBuilderExternalEdits,
   type AppBuilderSyncStatus,
 } from "./syncLogic";
+import { useTranslations } from "../lib/i18n";
 
 const TONE: Record<string, string> = {
   ok: "var(--state-success)",
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function SyncPanel({ project, onError }: Props) {
+    const tHC = useTranslations("hcBuildSyncPanel");
   const id = project?.project_id;
   const hasBranch = !!project?.github?.branch;
   const [status, setStatus] = useState<AppBuilderSyncStatus | null>(null);
@@ -111,9 +113,9 @@ export default function SyncPanel({ project, onError }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-2">
-            <GitMerge aria-hidden="true" size={14} /> Sync with {status?.base_branch || "base"}
+            <GitMerge aria-hidden="true" size={14} /> {tHC("hcBuildSyncPanel.s7")} {status?.base_branch || "base"}
           </span>
-          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label="Refresh sync status">
+          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label={tHC("hcBuildSyncPanel.s6")}>
             {loading ? (
               <Loader2 aria-hidden="true" size={14} className="animate-spin" />
             ) : (
@@ -129,7 +131,7 @@ export default function SyncPanel({ project, onError }: Props) {
               <span className="state-dot" /> {c.label}
             </span>
           ))}
-          {!status && !loading && <span className="text-xs text-muted-foreground">Status unavailable.</span>}
+          {!status && !loading && <span className="text-xs text-muted-foreground">{tHC("hcBuildSyncPanel.s5")}</span>}
         </div>
 
         {extLine && (
@@ -145,9 +147,9 @@ export default function SyncPanel({ project, onError }: Props) {
             ) : (
               <GitMerge aria-hidden="true" size={14} />
             )}{" "}
-            Pull {status?.base_branch || "base"} into branch
+            Pull {status?.base_branch || "base"} {tHC("hcBuildSyncPanel.s4")}
           </Button>
-          {status && !status.can_pull && <span className="text-xs text-muted-foreground">Nothing to pull.</span>}
+          {status && !status.can_pull && <span className="text-xs text-muted-foreground">{tHC("hcBuildSyncPanel.s3")}</span>}
         </div>
 
         {conflicts && (
@@ -157,7 +159,7 @@ export default function SyncPanel({ project, onError }: Props) {
             data-testid="sync-conflicts"
           >
             <p className="mb-2 font-medium text-foreground">
-              Merge conflict - nothing was changed. Resolve these files on GitHub, then pull again.
+              {tHC("hcBuildSyncPanel.s2")}
             </p>
             {conflicts.length ? (
               <ul className="list-disc space-y-0.5 ps-5 font-mono text-muted-foreground">
@@ -166,7 +168,7 @@ export default function SyncPanel({ project, onError }: Props) {
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground">GitHub did not say which files conflict.</p>
+              <p className="text-muted-foreground">{tHC("hcBuildSyncPanel.s1")}</p>
             )}
           </div>
         )}

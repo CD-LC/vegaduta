@@ -22,6 +22,7 @@ import {
   remixPrompt,
   type TemplateBundle,
 } from "./galleryHelpers";
+import { useTranslations } from "../../lib/i18n";
 
 export interface GalleryProject {
   id: string;
@@ -88,6 +89,7 @@ function download(filename: string, text: string): void {
 }
 
 export default function GalleryPanel({ onUseStudio, onPickServer, projects = [], items = GALLERY }: Props) {
+    const tHC = useTranslations("hcBuildGalleryGalleryPanel");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<GalleryCategory | "All">("All");
   const [kind, setKind] = useState<"all" | "studio" | "server">("all");
@@ -122,11 +124,11 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
   };
 
   return (
-    <section className="flex flex-col gap-4" aria-label="Template gallery">
+    <section className="flex flex-col gap-4" aria-label={tHC("hcBuildGalleryGalleryPanel.s13")}>
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Template gallery</h2>
-          <p className="text-xs text-muted-foreground">Ready-made starting points. Pick one, then make it yours.</p>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildGalleryGalleryPanel.s13")}</h2>
+          <p className="text-xs text-muted-foreground">{tHC("hcBuildGalleryGalleryPanel.s12")}</p>
         </div>
         <div className="relative w-full sm:w-64">
           <Search
@@ -137,9 +139,9 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
           <Input
             value={query}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-            placeholder="Search: menu, quiz, booking..."
+            placeholder={tHC("hcBuildGalleryGalleryPanel.s11")}
             className="ps-8"
-            aria-label="Search templates"
+            aria-label={tHC("hcBuildGalleryGalleryPanel.s10")}
           />
         </div>
       </div>
@@ -159,7 +161,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
         <Select
           value={kind}
           onValueChange={(v) => setKind(v as "all" | "studio" | "server")}
-          aria-label="Template type"
+          aria-label={tHC("hcBuildGalleryGalleryPanel.s9")}
           className="ms-auto w-44"
           options={[
             { value: "all", label: "All types" },
@@ -171,7 +173,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
 
       {shown.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          No templates match. Try a different word.
+          {tHC("hcBuildGalleryGalleryPanel.s8")}
         </p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -211,10 +213,10 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
                       })
                     }
                   >
-                    Use this template
+                    {tHC("hcBuildGalleryGalleryPanel.s7")}
                   </Button>
                   <div className="flex flex-wrap items-center gap-1" role="group" aria-label={`Make ${t.name} yours`}>
-                    <span className="text-[11px] text-muted-foreground">Make it yours:</span>
+                    <span className="text-[11px] text-muted-foreground">{tHC("hcBuildGalleryGalleryPanel.s6")}</span>
                     {REMIX_TARGETS.map((r) => (
                       <button
                         key={r.id}
@@ -238,7 +240,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
                 </>
               ) : onPickServer ? (
                 <Button size="sm" variant="outline" onClick={() => onPickServer(t.templateId)}>
-                  Start project
+                  {tHC("hcBuildGalleryGalleryPanel.s5")}
                 </Button>
               ) : null}
             </div>
@@ -247,7 +249,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
       )}
 
       <div className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4">
-        <p className="text-sm font-semibold text-foreground">Share your own template</p>
+        <p className="text-sm font-semibold text-foreground">{tHC("hcBuildGalleryGalleryPanel.s4")}</p>
         <p className="text-xs text-muted-foreground">
           Export one of your apps as a template file, or import a file someone sent you. Saved data is never included.
         </p>
@@ -255,7 +257,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
           <Select
             value={exportId}
             onValueChange={setExportId}
-            aria-label="App to export"
+            aria-label={tHC("hcBuildGalleryGalleryPanel.s3")}
             className="w-56"
             disabled={projects.length === 0}
             placeholder={projects.length ? "Choose an app..." : "No apps yet"}
@@ -265,7 +267,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
             <Download aria-hidden="true" size={14} /> Export
           </Button>
           <Button size="sm" variant="outline" className="gap-1.5" onClick={() => fileRef.current?.click()}>
-            <Upload aria-hidden="true" size={14} /> Import file
+            <Upload aria-hidden="true" size={14} /> {tHC("hcBuildGalleryGalleryPanel.s2")}
           </Button>
           <input
             ref={fileRef}
@@ -273,7 +275,7 @@ export default function GalleryPanel({ onUseStudio, onPickServer, projects = [],
             accept="application/json,.json"
             className="hidden"
             onChange={(e) => void onFile(e.target.files?.[0])}
-            aria-label="Import template file"
+            aria-label={tHC("hcBuildGalleryGalleryPanel.s1")}
           />
         </div>
         {msg && (

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { ENTITY_FACTS } from "../../lib/platform-facts";
+import { useTranslations } from "../../lib/i18n";
 
 export default function LeadForm() {
+    const tHC = useTranslations("hcComponentsEnterpriselandingLeadForm");
   const [formData, setFormData] = useState({
     company: "",
     contact: "",
@@ -60,23 +62,23 @@ export default function LeadForm() {
     <section id="contact-form" className="enterprise-form-section">
       <div className="enterprise-form-container">
         <div className="enterprise-form-header">
-          <h2>Get Started Today</h2>
+          <h2>{tHC("hcComponentsEnterpriselandingLeadForm.s19")}</h2>
           <p>
-            Our team will review your requirements and reach out within 24 hours.
+            {tHC("hcComponentsEnterpriselandingLeadForm.s18")}
           </p>
         </div>
 
         {submitted && (
           <div className="enterprise-form-success" role="status">
             <div className="enterprise-success-icon">✓</div>
-            <h3>Almost there</h3>
-            <p>Your mail app should have opened with the details filled in - send that email and we&apos;ll get back to you.</p>
+            <h3>{tHC("hcComponentsEnterpriselandingLeadForm.s17")}</h3>
+            <p>{tHC("hcComponentsEnterpriselandingLeadForm.s16")}</p>
             <button
               type="button"
               className="enterprise-form-submit"
               onClick={() => setSubmitted(false)}
             >
-              Send another message
+              {tHC("hcComponentsEnterpriselandingLeadForm.s15")}
             </button>
           </div>
         )}
@@ -85,7 +87,7 @@ export default function LeadForm() {
           <form className="enterprise-form" onSubmit={handleSubmit}>
             <div className="enterprise-form-grid">
               <div className="enterprise-form-group">
-                <label htmlFor="company">Company Name *</label>
+                <label htmlFor="company">{tHC("hcComponentsEnterpriselandingLeadForm.s14")}</label>
                 <input
                   id="company"
                   name="company"
@@ -94,12 +96,12 @@ export default function LeadForm() {
                   autoComplete="organization"
                   value={formData.company}
                   onChange={handleChange}
-                  placeholder="Your company"
+                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s13")}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="contact">Your Name *</label>
+                <label htmlFor="contact">{tHC("hcComponentsEnterpriselandingLeadForm.s12")}</label>
                 <input
                   id="contact"
                   name="contact"
@@ -108,12 +110,12 @@ export default function LeadForm() {
                   autoComplete="name"
                   value={formData.contact}
                   onChange={handleChange}
-                  placeholder="Full name"
+                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s11")}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="email">Work Email *</label>
+                <label htmlFor="email">{tHC("hcComponentsEnterpriselandingLeadForm.s10")}</label>
                 <input
                   id="email"
                   name="email"
@@ -127,7 +129,7 @@ export default function LeadForm() {
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="phone">Phone (Optional)</label>
+                <label htmlFor="phone">{tHC("hcComponentsEnterpriselandingLeadForm.s9")}</label>
                 <input
                   id="phone"
                   name="phone"
@@ -141,30 +143,30 @@ export default function LeadForm() {
               </div>
 
               <div className="enterprise-form-group enterprise-form-full">
-                <label htmlFor="useCase">What&apos;s your use case? *</label>
+                <label htmlFor="useCase">{tHC("hcComponentsEnterpriselandingLeadForm.s8")}</label>
                 <textarea
                   id="useCase"
                   name="useCase"
                   required
                   value={formData.useCase}
                   onChange={handleChange}
-                  placeholder="E.g., automate customer support, streamline internal workflows, build custom AI agent for sales..."
+                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s7")}
                   rows={4}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="timeline">Implementation Timeline *</label>
+                <label htmlFor="timeline">{tHC("hcComponentsEnterpriselandingLeadForm.s6")}</label>
                 <select
                   id="timeline"
                   name="timeline"
                   value={formData.timeline}
                   onChange={handleChange}
                 >
-                  <option value="urgent">Urgent (1-2 weeks)</option>
-                  <option value="1-3 months">Soon (1-3 months)</option>
-                  <option value="3-6 months">Medium term (3-6 months)</option>
-                  <option value="exploring">Still exploring</option>
+                  <option value="urgent">{tHC("hcComponentsEnterpriselandingLeadForm.s5")}</option>
+                  <option value="1-3 months">{tHC("hcComponentsEnterpriselandingLeadForm.s4")}</option>
+                  <option value="3-6 months">{tHC("hcComponentsEnterpriselandingLeadForm.s3")}</option>
+                  <option value="exploring">{tHC("hcComponentsEnterpriselandingLeadForm.s2")}</option>
                 </select>
               </div>
             </div>
@@ -184,7 +186,7 @@ export default function LeadForm() {
             </button>
 
             <p className="enterprise-form-privacy">
-              We respect your privacy. No spam, ever.
+              {tHC("hcComponentsEnterpriselandingLeadForm.s1")}
             </p>
           </form>
         )}

@@ -13,6 +13,7 @@ import { sendSharedWorkflowVoiceTurn } from "./api";
 import { speakReply } from "../../lib/voice/speakReply";
 import { plainSpokenExcerpt } from "../../lib/voice/voiceOutput";
 import { stopAllSpeech, unlockAudioElement, unlockWebSpeech } from "../../lib/voice/voicePlayers";
+import { useTranslations } from "../../lib/i18n";
 
 // Push-to-talk for the public workflow-share surface: hold to record, release
 // to run the workflow ONCE and hear the result. This is NOT a live LiveKit
@@ -46,6 +47,7 @@ export default function WorkflowVoicePanel({
   shareId: string;
   onResult: (resultText: string) => void;
 }) {
+    const tHC = useTranslations("hcWorkflowShareIdWorkflowVoicePanel");
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -209,7 +211,7 @@ export default function WorkflowVoicePanel({
     <div className="flex flex-col items-center gap-2 py-1">
       <button
         type="button"
-        aria-label="Hold to speak"
+        aria-label={tHC("hcWorkflowShareIdWorkflowVoicePanel.s1")}
         onMouseDown={startPushToTalk}
         onMouseUp={stopPushToTalk}
         onMouseLeave={() => {

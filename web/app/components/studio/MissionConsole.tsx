@@ -9,6 +9,7 @@ import TraceView from "./TraceView";
 import { runMission, studio, type StudioAgent, type StudioEvent } from "./studioClient";
 import { MISSION_PRESETS, toolLabel } from "./studioContent";
 import { TONES } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // "Run a mission": one real agent turn, with the trace beside the answer.
 // The "same mission, no hands" comparison is the page's single strongest
@@ -67,6 +68,7 @@ export default function MissionConsole({
   prefill,
   timeoutSeconds,
 }: Props) {
+    const tHC = useTranslations("hcComponentsStudioMissionConsole");
   const [elapsed, setElapsed] = useState(0);
   const [mission, setMission] = useState("");
   const [current, setCurrent] = useState<MissionOutcome | null>(null);
@@ -197,7 +199,7 @@ export default function MissionConsole({
         </Badge>
         {agent.toolsOff ? (
           <Badge variant="outline" className="text-[11px]">
-            <MessageSquareOff aria-hidden="true" className="me-1 h-3 w-3 shrink-0" /> chatbot mode
+            <MessageSquareOff aria-hidden="true" className="me-1 h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s17")}
           </Badge>
         ) : (
           agent.tools.map((t) => (
@@ -214,7 +216,7 @@ export default function MissionConsole({
           rows={3}
           maxLength={2000}
           disabled={readOnly || outOfBudget}
-          placeholder="Give it a job. Be specific - a real task, not a greeting."
+          placeholder={tHC("hcComponentsStudioMissionConsole.s16")}
           onChange={(e) => setMission(e.target.value)}
           onKeyDown={(e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void start();
@@ -223,7 +225,7 @@ export default function MissionConsole({
         <div className="mt-2 flex flex-wrap items-center gap-2">
           {!busy ? (
             <Button className={TONES.emerald.cta} onClick={start} disabled={!mission.trim() || readOnly || outOfBudget}>
-              <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Run mission
+              <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s15")}
             </Button>
           ) : (
             <Button variant="outline" onClick={stop}>
@@ -232,20 +234,19 @@ export default function MissionConsole({
           )}
           {current && !current.running && !agent.toolsOff && !comparing && !readOnly && !outOfBudget && (
             <Button variant="outline" onClick={runWithoutHands}>
-              <MessageSquareOff aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Same mission, no hands
+              <MessageSquareOff aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s9")}
             </Button>
           )}
           {comparing && (
             <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 aria-hidden="true" className="h-3.5 w-3.5 animate-spin shrink-0" /> Tools switched off, running
-              again…
+              <Loader2 aria-hidden="true" className="h-3.5 w-3.5 animate-spin shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s14")}
             </span>
           )}
           {busy && timeoutSeconds ? (
             <span
               className="ms-auto flex items-center gap-2 text-xs text-muted-foreground"
               role="timer"
-              aria-label="Time used of the run cap"
+              aria-label={tHC("hcComponentsStudioMissionConsole.s13")}
             >
               <span className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
                 <span
@@ -256,18 +257,18 @@ export default function MissionConsole({
               {elapsed}s / {timeoutSeconds}s cap
             </span>
           ) : (
-            <span className="ms-auto text-xs text-muted-foreground">Ctrl/⌘ + Enter to run</span>
+            <span className="ms-auto text-xs text-muted-foreground">{tHC("hcComponentsStudioMissionConsole.s12")}</span>
           )}
         </div>
         {outOfBudget && (
-          <p className="mt-2 text-sm text-muted-foreground">Runs are paused for this sandbox right now.</p>
+          <p className="mt-2 text-sm text-muted-foreground">{tHC("hcComponentsStudioMissionConsole.s11")}</p>
         )}
       </div>
 
       {!current && (
         <div>
           <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <Lightbulb aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Try one of these
+            <Lightbulb aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s10")}
           </div>
           <div className="flex flex-wrap gap-2">
             {samples.map((s) => (
@@ -287,19 +288,18 @@ export default function MissionConsole({
       {current && (
         <div className={`grid gap-4 ${compare ? "lg:grid-cols-2" : ""}`}>
           <OutcomeCard outcome={current} title={agent.toolsOff ? "Chatbot mode" : "With hands"} accent />
-          {compare && <OutcomeCard outcome={compare} title="Same mission, no hands" />}
+          {compare && <OutcomeCard outcome={compare} title={tHC("hcComponentsStudioMissionConsole.s9")} />}
         </div>
       )}
 
       {current && compare && !current.running && !compare.running && (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
           <div className="mb-1 flex items-center gap-2 font-medium">
-            <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" /> That is the whole difference.
+            <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioMissionConsole.s8")}
           </div>
           <p className="text-muted-foreground">
-            Same model, same mission, same instructions. Left: {current.toolCalls} real tool call
-            {current.toolCalls === 1 ? "" : "s"} - it went and checked. Right: none - it could only recall and guess. An
-            agent is a model with hands, a plan, and rules about when to use them.
+            {tHC("hcComponentsStudioMissionConsole.s7")} {current.toolCalls} {tHC("hcComponentsStudioMissionConsole.s6")}
+            {current.toolCalls === 1 ? "" : "s"} {tHC("hcComponentsStudioMissionConsole.s5")}
           </p>
         </div>
       )}
@@ -308,6 +308,7 @@ export default function MissionConsole({
 }
 
 function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; title: string; accent?: boolean }) {
+    const tHC = useTranslations("hcComponentsStudioMissionConsole");
   return (
     <div className={`rounded-xl border p-4 ${accent ? "border-primary/40" : "border-border/60"}`}>
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -319,14 +320,14 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
         )}
         {!outcome.running && (
           <span className="ms-auto text-xs text-muted-foreground">
-            {outcome.toolCalls} tool call{outcome.toolCalls === 1 ? "" : "s"}
+            {outcome.toolCalls} {tHC("hcComponentsStudioMissionConsole.s4")}{outcome.toolCalls === 1 ? "" : "s"}
             {outcome.ms != null ? ` · ${(outcome.ms / 1000).toFixed(1)} s` : ""}
           </span>
         )}
       </div>
       <div className="grid gap-4 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">What it did</div>
+          <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("hcComponentsStudioMissionConsole.s3")}</div>
           <TraceView
             events={outcome.events}
             running={outcome.running}
@@ -340,10 +341,10 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
               {outcome.answer}
             </div>
           ) : outcome.running ? (
-            <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground animate-pulse">Composing…</div>
+            <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground animate-pulse">{tHC("hcComponentsStudioMissionConsole.s2")}</div>
           ) : (
             <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">
-              No answer came back this time.
+              {tHC("hcComponentsStudioMissionConsole.s1")}
             </div>
           )}
         </div>

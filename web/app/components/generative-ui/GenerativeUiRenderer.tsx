@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import type { UiNode, UiSpec } from "./schema";
 import SafeModelImage from "../SafeModelImage";
 import ApiCallPanel from "./ApiCallPanel";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Renders a validated {@link UiSpec} (see schema.ts for the contract) as real
@@ -44,9 +45,10 @@ const TONE: Record<string, string> = {
 };
 
 function Unsupported({ type }: { type: string }) {
+    const tHC = useTranslations("hcComponentsGenerativeuiGenerativeUiRenderer");
   return (
     <div className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-      Unsupported UI element: {type}
+      {tHC("hcComponentsGenerativeuiGenerativeUiRenderer.s2")} {type}
     </div>
   );
 }
@@ -389,6 +391,7 @@ export function GenerativeUiRenderer({
   onAction?: GenerativeUiActionHandler;
   errors?: string[];
 }) {
+    const tHC = useTranslations("hcComponentsGenerativeuiGenerativeUiRenderer");
   const [fired, setFired] = useState(false);
   const handle = useCallback<GenerativeUiActionHandler>(
     (action, values) => {
@@ -400,7 +403,7 @@ export function GenerativeUiRenderer({
   return (
     <div className="generative-ui rounded-xl border border-border bg-background/60 p-3">
       {errors && errors.length > 0 && (
-        <p className="mb-2 text-xs text-muted-foreground">Some elements were adjusted for safety ({errors.length}).</p>
+        <p className="mb-2 text-xs text-muted-foreground">{tHC("hcComponentsGenerativeuiGenerativeUiRenderer.s1")}{errors.length}).</p>
       )}
       <Node node={spec.root} onAction={handle} />
       {fired && <p className="mt-2 text-xs text-muted-foreground">Sent.</p>}

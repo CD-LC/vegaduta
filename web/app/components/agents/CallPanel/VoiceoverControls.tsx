@@ -44,6 +44,7 @@ import {
 import { defaultModelFor, useModalityCatalogData } from "../useModalityCatalog";
 import TextToSpeechProviderSelector from "../TextToSpeechProviderSelector";
 import type { CallPanelAgent } from "../call/callContext";
+import { useTranslations } from "../../../lib/i18n";
 
 export interface CallVoicePick {
   voiceId: string;
@@ -66,6 +67,7 @@ export default function VoiceoverControls({
   callVoice,
   onCallVoiceChange,
 }: VoiceoverControlsProps) {
+    const tHC = useTranslations("hcComponentsAgentsCallPanelVoiceoverControls");
   // Hydrate the persisted pick after mount (localStorage is not SSR-safe for
   // every consumer of this panel; the effect also re-reads so a pick made on
   // another surface is reflected on next mount).
@@ -205,7 +207,7 @@ export default function VoiceoverControls({
     <div className="space-y-1.5 rounded-lg border border-border/60 bg-secondary/20 p-2" data-voiceover-controls>
       <div className="flex items-center gap-2">
         <span className="shrink-0 text-xs text-muted-foreground" id="voiceover-pick-label">
-          Reply voice
+          {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s3")}
         </span>
         <div className="min-w-0 flex-1">
           <Select
@@ -231,7 +233,7 @@ export default function VoiceoverControls({
       {callVoices && callVoices.length > 0 && (
         <div className="flex items-center gap-2">
           <span className="shrink-0 text-xs text-muted-foreground" id="call-voice-pick-label">
-            Call voice
+            {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s2")}
           </span>
           <div className="min-w-0 flex-1">
             <Select
@@ -254,7 +256,7 @@ export default function VoiceoverControls({
         {!ttsEditing ? (
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-muted-foreground">
-              Agent voice:{" "}
+              {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s1")}{" "}
               {shownTts.provider ? `${shownTts.provider}${shownTts.model ? ` · ${shownTts.model}` : ""}` : "Platform default"}
             </span>
             <Button

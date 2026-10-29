@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useDialogFocus } from "../../lib/useDialogFocus";
+import { useTranslations } from "../../../lib/i18n";
 
 // Platform-admin "delete tenant completely" control - the type-the-name-to-
 // confirm step, modeled on TemplateReasonDialog's chrome (portal + escape/
@@ -31,6 +32,7 @@ export default function DeleteTenantDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTenantsDeleteTenantDialog");
   const [typed, setTyped] = useState("");
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -99,18 +101,18 @@ export default function DeleteTenantDialog({
             </div>
 
             <p className="mt-2 text-xs text-muted-foreground">
-              This is irreversible. It permanently deletes, everywhere:
+              {tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s6")}
             </p>
             <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
-              <li>Every agent, workflow, and chat/knowledge/graph-memory record (the Postgres schema)</li>
-              <li>Every uploaded/generated file: knowledge documents, generated images, voice recordings/audio</li>
-              <li>The tenant&rsquo;s code-intel index, if code-intel is enabled</li>
-              <li>Usage/quota counters and every Keycloak user account for this tenant</li>
+              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s5")}</li>
+              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s4")}</li>
+              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s3")}</li>
+              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s2")}</li>
             </ul>
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="delete-tenant-confirm-input" className="text-xs text-muted-foreground">
-                Type <span className="font-mono font-semibold text-foreground">{tenantName}</span> to confirm
+                Type <span className="font-mono font-semibold text-foreground">{tenantName}</span> {tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s1")}
               </Label>
               <Input
                 id="delete-tenant-confirm-input"

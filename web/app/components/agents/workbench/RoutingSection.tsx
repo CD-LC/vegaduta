@@ -10,8 +10,10 @@ import { Button } from "../../ui/button";
 import IntelligenceSourceControl from "../IntelligenceSourceControl";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function RoutingSection() {
+    const tHC = useTranslations("hcComponentsAgentsWorkbenchRoutingSection");
   const {
     deviceRoutingSummary,
     edgeBrowser,
@@ -50,7 +52,7 @@ export default function RoutingSection() {
       {true && (
         <WorkbenchSection
           icon={<Cpu size={13} />}
-          label="Device & routing"
+          label={tHC("hcComponentsAgentsWorkbenchRoutingSection.s8")}
           cat="var(--cat-automation)"
           actions={<WorkbenchSection.Summary>{deviceRoutingSummary}</WorkbenchSection.Summary>}
         >
@@ -60,16 +62,15 @@ export default function RoutingSection() {
                 aria-disabled="true"
                 className="m-0 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground"
               >
-                Edge AI is not enabled in this build, so on-device routing and the routing policy below are read-only.
-                Set NEXT_PUBLIC_EDGE_AGENTS=1 and rebuild the web app to turn them on.
+                {tHC("hcComponentsAgentsWorkbenchRoutingSection.s7")}
               </p>
             )}
             <p className="m-0 text-[11px] text-muted-foreground">
-              Browser support:{" "}
+              {tHC("hcComponentsAgentsWorkbenchRoutingSection.s6")}{" "}
               {edgeBrowser
                 ? `WebGPU ${edgeBrowser.webgpu ? "available" : "not available"}, WebAssembly ${edgeBrowser.wasm ? "available" : "not available"}`
                 : "checking…"}
-              . Chat on this workspace is served by{" "}
+              {tHC("hcComponentsAgentsWorkbenchRoutingSection.s5")}{" "}
               {onPlatformLlm ? poolLabel("the shared platform pool", "the local model (Ollama) on this machine") : "your own provider key"}.
             </p>
             {/* "What drives this agent's intelligence" 3-way
@@ -137,23 +138,19 @@ export default function RoutingSection() {
                   htmlFor="agent-edge-routing-policy-select"
                   className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
                 >
-                  Agent routing policy
+                  {tHC("hcComponentsAgentsWorkbenchRoutingSection.s4")}
                 </label>
                 {isDraft ? (
                   <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    Save the agent first to set its routing policy.
+                    {tHC("hcComponentsAgentsWorkbenchRoutingSection.s3")}
                   </p>
                 ) : !edgeEnabled() ? (
                   <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    Edge AI is not enabled in this build.
+                    {tHC("hcComponentsAgentsWorkbenchRoutingSection.s2")}
                   </p>
                 ) : null}
                 <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-                  Overrides the selection above for this agent only. The setting is saved with the agent, so every
-                  browser that opens it reads the same value, but it is the browser that applies it: the server does not
-                  check it. Applies to chat in this browser. Workflows, channels and scheduled runs always use the
-                  server model. Edge only makes this browser refuse a chat turn instead of sending it to the server
-                  model; Hosted only makes this browser skip the on-device model.
+                  {tHC("hcComponentsAgentsWorkbenchRoutingSection.s1")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Select

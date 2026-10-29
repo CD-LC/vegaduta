@@ -18,6 +18,7 @@ import { Button } from "../ui/button";
 import { PLATFORM_FACTS } from "../../lib/platform-facts";
 import PhoneStage, { type PhoneScene } from "./PhoneStage";
 import { TONES, type Tone } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // The whole journey, explained, one scroll. The phone on the left is sticky and
 // changes scene as each chapter reaches the middle of the screen, so the words
@@ -128,6 +129,7 @@ const CHAPTERS: Chapter[] = [
 ];
 
 export default function FlightPlan({ onStart, onShowtime }: { onStart: () => void; onShowtime: () => void }) {
+    const tHC = useTranslations("hcComponentsStudioFlightPlan");
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLElement | null)[]>([]);
 
@@ -156,14 +158,14 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
     <section aria-labelledby="flight-title" className="mt-24">
       <div className="max-w-2xl">
         <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
-          <Compass aria-hidden="true" className="h-4 w-4 shrink-0" /> The flight plan
+          <Compass aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioFlightPlan.s11")}
         </div>
         <h2 id="flight-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          From an empty page to a phone in your hand. Six moves.
+          {tHC("hcComponentsStudioFlightPlan.s10")}
         </h2>
         <p className="mt-3 text-muted-foreground">
-          Everything marked <Badge2 kind="here" /> you can do in this page, right now. Everything marked{" "}
-          <Badge2 kind="workspace" /> is what a free workspace adds - said plainly, so nothing here surprises you later.
+          {tHC("hcComponentsStudioFlightPlan.s9")} <Badge2 kind="here" /> {tHC("hcComponentsStudioFlightPlan.s8")}{" "}
+          <Badge2 kind="workspace" /> {tHC("hcComponentsStudioFlightPlan.s7")}
         </p>
       </div>
 
@@ -216,7 +218,7 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
                 </ul>
                 {/* On phones there is no sticky phone: show the scene as a compact chip instead of hiding the picture entirely. */}
                 <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground lg:hidden">
-                  <Radio aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> On your phone this looks like:{" "}
+                  <Radio aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioFlightPlan.s6")}{" "}
                   <b className="text-foreground">{sceneName(c.scene)}</b>
                 </div>
               </li>
@@ -228,13 +230,13 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
       <div className="mt-12 flex flex-wrap items-center gap-3 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
         <ShieldCheck aria-hidden="true" className="h-5 w-5 text-violet-600 dark:text-violet-300 shrink-0" />
         <span className="flex-1 text-sm">
-          Six moves, and the first four take minutes. Start with the job - the rest follows.
+          {tHC("hcComponentsStudioFlightPlan.s5")}
         </span>
         <Button variant="outline" onClick={onShowtime}>
-          Watch it as a film
+          {tHC("hcComponentsStudioFlightPlan.s4")}
         </Button>
         <Button className={TONES.violet.cta} onClick={onStart}>
-          Do it for real <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
+          {tHC("hcComponentsStudioFlightPlan.s3")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
         </Button>
       </div>
     </section>
@@ -254,13 +256,14 @@ function sceneName(s: PhoneScene): string {
 }
 
 function Badge2({ kind }: { kind: "here" | "workspace" }) {
+    const tHC = useTranslations("hcComponentsStudioFlightPlan");
   return kind === "here" ? (
     <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
-      Do it here
+      {tHC("hcComponentsStudioFlightPlan.s2")}
     </span>
   ) : (
     <span className="inline-flex shrink-0 items-center rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-700 dark:text-violet-300">
-      In a workspace
+      {tHC("hcComponentsStudioFlightPlan.s1")}
     </span>
   );
 }

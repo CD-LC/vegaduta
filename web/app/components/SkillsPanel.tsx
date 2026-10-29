@@ -57,6 +57,7 @@ export default function SkillsPanel({
   skills: SkillSummary[];
   onChanged: () => Promise<unknown> | void;
 }) {
+    const tHC = useTranslations("hcComponentsSkillsPanel");
   const t = useTranslations("skillsPage");
   const { hasPermission } = useAuth();
   const canManageSkills = hasPermission("MANAGE_AGENTS");
@@ -442,7 +443,7 @@ export default function SkillsPanel({
           <h2 className="mb-1 text-sm font-semibold text-foreground">{t("builtInHeading")}</h2>
           <p className="mb-2 text-xs text-muted-foreground">{t("builtInSubtitle")}</p>
           {builtIn.length === 0 && filtering && (
-            <p className="mb-2 text-sm text-muted-foreground">No built-in skills match this search.</p>
+            <p className="mb-2 text-sm text-muted-foreground">{tHC("hcComponentsSkillsPanel.s1")}</p>
           )}
           <ul className="space-y-2">{builtInPagination.pageItems.map(row)}</ul>
           <PaginationControls

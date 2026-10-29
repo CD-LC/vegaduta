@@ -2,6 +2,7 @@
 
 import type { ComponentProps, ReactNode } from "react";
 import { CollapsibleSection } from "../AgentWorkbench/CollapsibleSection";
+import { useTranslations } from "../../../lib/i18n";
 
 /**
  * Screen 3 - Agents + Playground (design_handoff_axon/design_files/
@@ -50,13 +51,14 @@ function SectionSummary({ children }: { children: ReactNode }) {
 // Placeholder for a saved-agent-only section on an unsaved draft: the header
 // always renders (nothing is silently omitted), the body says why it is inert.
 function SavedOnlyStub({ icon, label, cat, what }: { icon: ReactNode; label: string; cat: string; what: string }) {
+    const tHC = useTranslations("hcComponentsAgentsWorkbenchWorkbenchSection");
   return (
-    <CollapsibleSection icon={icon} label={label} cat={cat} actions={<SectionSummary>Save first</SectionSummary>}>
+    <CollapsibleSection icon={icon} label={label} cat={cat} actions={<SectionSummary>{tHC("hcComponentsAgentsWorkbenchWorkbenchSection.s2")}</SectionSummary>}>
       <p
         aria-disabled="true"
         className="m-0 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground opacity-80"
       >
-        Save the agent first - {what}
+        {tHC("hcComponentsAgentsWorkbenchWorkbenchSection.s1")} {what}
       </p>
     </CollapsibleSection>
   );

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { SkillSummary } from "../../lib/api";
 import { Card, CardContent } from "../ui/card";
+import { useTranslations } from "../../lib/i18n";
 
 type Starter = { skill: string; title: string; blurb: string; prompt: string; icon: LucideIcon };
 
@@ -101,17 +102,17 @@ export function playgroundHref(prompt: string): string {
 }
 
 export default function SkillStarters({ skills }: { skills: SkillSummary[] }) {
+    const tHC = useTranslations("hcComponentsSkillsSkillStarters");
   const starters = startersFor(skills);
   if (starters.length === 0) return null;
   return (
     <section aria-labelledby="skill-starters-heading" className="mb-8 space-y-3">
       <div>
         <h2 id="skill-starters-heading" className="text-lg font-semibold text-foreground">
-          Things to try
+          {tHC("hcComponentsSkillsSkillStarters.s2")}
         </h2>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          Open the Playground with a ready-made prompt that names the skill, so the agent you pick loads it. Pick an agent that is allowed
-          to use skills (Agents &gt; Skills); nothing is sent until you press Send.
+          {tHC("hcComponentsSkillsSkillStarters.s1")}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

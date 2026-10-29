@@ -13,6 +13,7 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { formatUsd, timeAgo, SectionCard } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Self-contained, prop-light observability sections lifted out of the old
 // single-page /observability screen so they can be reused across the new IA:
@@ -101,6 +102,7 @@ function OutcomeBadge({ outcome }: { outcome: any }) {
 
 // ── Issues (fingerprinted platform issues portal) ───────────────────────────
 export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: issues,
     error,
@@ -129,9 +131,9 @@ export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: numb
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
       ) : issues.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">No issues reported across any active tenant.</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s23")}</p>
       ) : (
         <AnimatePresence initial={false}>
           {pg.pageItems.map((issue) => (
@@ -157,8 +159,7 @@ export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: numb
                   {issue.occurrenceCount > 1 && <Badge variant="secondary">&times;{issue.occurrenceCount}</Badge>}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  <span className="font-mono">{issue.tenantName}</span> · first seen {timeAgo(issue.firstSeenAt)} · last
-                  seen {timeAgo(issue.lastSeenAt)}
+                  <span className="font-mono">{issue.tenantName}</span> {tHC("hcPlatformadminComponentsSectionsObservability.s22")} {timeAgo(issue.firstSeenAt)} {tHC("hcPlatformadminComponentsSectionsObservability.s21")} {timeAgo(issue.lastSeenAt)}
                 </p>
               </div>
             </motion.div>
@@ -180,6 +181,7 @@ export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: numb
 
 // ── LLM usage / cost per tenant ─────────────────────────────────────────────
 export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: rows,
     error,
@@ -189,7 +191,7 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
 
   return (
     <SectionCard
-      title="LLM usage & cost by tenant"
+      title={tHC("hcPlatformadminComponentsSectionsObservability.s20")}
       subtitle="Durable per-tenant LLM call volume, tokens, latency and estimated spend (blends every provider a tenant uses)"
       icon={Zap}
       delay={delay}
@@ -200,9 +202,9 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
       ) : rows.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">No LLM usage recorded across any active tenant.</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s19")}</p>
       ) : (
         pg.pageItems.map((row) => (
           <div
@@ -251,6 +253,7 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
 // PlatformHostedLlmCostSummary's javadoc. The budget line is admin-set (no
 // fabricated default) via PlatformObservabilityService#updateHostedLlmBudget.
 export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: hostedCost,
     error,
@@ -304,7 +307,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
   return (
     <SectionCard
-      title="Hosted LLM cost (FREE tier)"
+      title={tHC("hcPlatformadminComponentsSectionsObservability.s18")}
       subtitle="PLATFORM_HOSTED-only totals - what FREE-tier traffic actually costs the platform, separate from tenants' own BYOK spend"
       icon={CircleDollarSign}
       delay={delay}
@@ -315,7 +318,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
       ) : (
         <>
           <div className="mb-3 flex flex-wrap gap-3">
@@ -335,7 +338,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
           {/* Remaining balance / budget editor */}
           <div className="mb-3 flex flex-wrap items-end justify-between gap-4 rounded-lg border border-border px-4 py-3">
             <div>
-              <div className="text-xs text-muted-foreground">Remaining balance</div>
+              <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s17")}</div>
               {hasBudget ? (
                 <div className="mt-1 flex items-center gap-2">
                   <span
@@ -346,18 +349,18 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
                   <span className="text-xs text-muted-foreground">of {formatUsd(hostedCost.budgetUsd)} budget</span>
                   {overBudget && (
                     <Badge variant="outline" className={WARN_BADGE}>
-                      Over budget
+                      {tHC("hcPlatformadminComponentsSectionsObservability.s16")}
                     </Badge>
                   )}
                 </div>
               ) : (
-                <div className="mt-1 text-sm text-muted-foreground">No platform budget configured yet.</div>
+                <div className="mt-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s15")}</div>
               )}
             </div>
             <div className="flex items-end gap-2">
               <div className="space-y-1.5">
                 <Label htmlFor="hosted-budget-input" className="text-xs text-muted-foreground">
-                  All-time budget (USD)
+                  {tHC("hcPlatformadminComponentsSectionsObservability.s14")}
                 </Label>
                 <Input
                   id="hosted-budget-input"
@@ -382,16 +385,16 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
           {/* Day-by-day trend */}
           <div className="mb-3 rounded-lg border border-border px-4 py-3">
-            <div className="mb-2 text-xs font-medium text-muted-foreground">Last 30 days</div>
+            <div className="mb-2 text-xs font-medium text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s13")}</div>
             {trendError && (
               <Alert variant="destructive">
                 <AlertDescription>{trendError}</AlertDescription>
               </Alert>
             )}
             {trendLoading ? (
-              <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+              <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
             ) : !byDay || byDay.length === 0 ? (
-              <p className="py-1 text-sm text-muted-foreground">No hosted-pool cost recorded in the last 30 days.</p>
+              <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s12")}</p>
             ) : (
               <div className="space-y-1">
                 {byDay.map((d: any) => {
@@ -415,7 +418,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
           {hostedCost?.totalCalls === 0 ? (
             <p className="py-1 text-sm text-muted-foreground">
-              No PLATFORM_HOSTED calls yet - FREE-tier tenants haven&rsquo;t used the hosted pool so far.
+              {tHC("hcPlatformadminComponentsSectionsObservability.s11")}
             </p>
           ) : (
             (hostedCost?.byTenant || []).map((row: any) => (
@@ -444,6 +447,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
 // ── Activity / audit feed ───────────────────────────────────────────────────
 export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: activity,
     error,
@@ -453,7 +457,7 @@ export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: nu
 
   return (
     <SectionCard
-      title="Audit log"
+      title={tHC("hcPlatformadminComponentsSectionsObservability.s10")}
       subtitle="Actor / action / resource / outcome across every active tenant (AuditLogService), merged and capped for one readable feed"
       icon={Activity}
       delay={delay}
@@ -464,9 +468,9 @@ export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: nu
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
       ) : activity.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">No activity recorded across any active tenant.</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s9")}</p>
       ) : (
         <AnimatePresence initial={false}>
           {pg.pageItems.map((entry) => (
@@ -513,6 +517,7 @@ export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: nu
 
 // ── Provider-fallback alert status + threshold editor ───────────────────────
 export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: fallbackStatus,
     error,
@@ -545,7 +550,7 @@ export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: nu
 
   return (
     <SectionCard
-      title="Provider-fallback anomaly signal"
+      title={tHC("hcPlatformadminComponentsSectionsObservability.s8")}
       subtitle="Fleet-wide lifetime provider-fallback totals vs. a configurable alert threshold (an early spend/reliability anomaly signal)"
       icon={Siren}
       delay={delay}
@@ -559,23 +564,22 @@ export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: nu
         <Alert variant="destructive">
           <AlertOctagon />
           <AlertDescription>
-            Fleet-wide provider-fallback failures ({fallbackStatus.totalFallbackFailures}) have crossed the alert
-            threshold ({fallbackStatus.threshold}). {fallbackStatus.tenantBreakdown?.length || 0} tenant
-            {fallbackStatus.tenantBreakdown?.length === 1 ? "" : "s"} affected.
+            {tHC("hcPlatformadminComponentsSectionsObservability.s7")}{fallbackStatus.totalFallbackFailures}{tHC("hcPlatformadminComponentsSectionsObservability.s6")}{fallbackStatus.threshold}). {fallbackStatus.tenantBreakdown?.length || 0} tenant
+            {fallbackStatus.tenantBreakdown?.length === 1 ? "" : "s"} {tHC("hcPlatformadminComponentsSectionsObservability.s5")}
           </AlertDescription>
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s4")}</p>
       ) : (
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <div className="text-xs text-muted-foreground">Provider fallbacks (all-time)</div>
+            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsObservability.s3")}</div>
             <div className="mt-1 flex items-center gap-2 font-mono text-xl font-semibold text-foreground">
               {fallbackStatus ? fallbackStatus.totalFallbackTriggered : "-"} triggered
               {fallbackStatus && fallbackStatus.totalFallbackFailures > 0 && (
                 <Badge variant="outline" className={WARN_BADGE}>
-                  {fallbackStatus.totalFallbackFailures} also failed
+                  {fallbackStatus.totalFallbackFailures} {tHC("hcPlatformadminComponentsSectionsObservability.s2")}
                 </Badge>
               )}
             </div>
@@ -583,7 +587,7 @@ export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: nu
           <div className="flex items-end gap-2">
             <div className="space-y-1.5">
               <Label htmlFor="fallback-threshold-input" className="text-xs text-muted-foreground">
-                Alert threshold (fallback failures)
+                {tHC("hcPlatformadminComponentsSectionsObservability.s1")}
               </Label>
               <Input
                 id="fallback-threshold-input"

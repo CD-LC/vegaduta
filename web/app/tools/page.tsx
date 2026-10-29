@@ -40,6 +40,7 @@ import CoachButton from "../components/brief/CoachDrawer";
  * fetched once here and passed down rather than duplicated.
  */
 export default function ToolsPage() {
+    const tHC = useTranslations("hcToolsPage");
   const t = useTranslations("toolsPage");
   const tOpenApi = useTranslations("openApiTools");
   const tOAuth = useTranslations("mcpOAuth");
@@ -175,12 +176,12 @@ export default function ToolsPage() {
             // Suppress the counter rather than print a wrong one - see the
             // loadFailed comment above.
             <>
-              Connect the tools and services your agents are allowed to call.{" "}
-              <span className="text-muted-foreground">Tool status unavailable right now.</span>
+              {tHC("hcToolsPage.s7")}{" "}
+              <span className="text-muted-foreground">{tHC("hcToolsPage.s8")}</span>
             </>
           ) : (
             <>
-              Connect the tools and services your agents are allowed to call.{" "}
+              {tHC("hcToolsPage.s7")}{" "}
               <span className="whitespace-nowrap">
                 <span className="font-medium text-foreground tabular-nums">{enabledCount}</span> {t("enabledSuffix")}{" "}
                 <span className="tabular-nums">/ {totalCount}</span> {t("availableSuffix")}
@@ -211,7 +212,7 @@ export default function ToolsPage() {
              * replace it. */}
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools/servers">
-                <ListChecks size={14} aria-hidden="true" /> Enabled servers
+                <ListChecks size={14} aria-hidden="true" /> {tHC("hcToolsPage.s6")}
               </Link>
             </Button>
             <CoachButton />
@@ -268,14 +269,13 @@ export default function ToolsPage() {
       {loadFailed && (
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>Couldn&apos;t load your MCP servers</AlertTitle>
+          <AlertTitle>{tHC("hcToolsPage.s5")}</AlertTitle>
           <AlertDescription>
             <p>
-              The request for this workspace&apos;s connected servers failed. Anything you had enabled is still enabled
-              — we just can&apos;t show it right now.
+              {tHC("hcToolsPage.s4")}
             </p>
             <Button variant="outline" size="sm" className="mt-2" onClick={refresh}>
-              Try again
+              {tHC("hcToolsPage.s3")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -306,10 +306,10 @@ export default function ToolsPage() {
             Classification
           </TabsTrigger>
           <TabsTrigger value="custom-code" className="flex-none gap-1.5 px-3 py-1.5">
-            Custom Code
+            {tHC("hcToolsPage.s2")}
           </TabsTrigger>
           <TabsTrigger value="openapi" className="flex-none gap-1.5 px-3 py-1.5">
-            OpenAPI Sources
+            {tHC("hcToolsPage.s1")}
           </TabsTrigger>
         </TabsList>
 

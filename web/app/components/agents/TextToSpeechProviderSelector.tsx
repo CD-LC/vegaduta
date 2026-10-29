@@ -3,6 +3,7 @@
 import { Speaker } from "lucide-react";
 import TranscriptionProviderOptions from "./TranscriptionProviderOptions";
 import { useModalityCatalog } from "./useModalityCatalog";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * TTS provider selector - output-side twin of VoiceProviderSelector (which
@@ -40,6 +41,7 @@ export default function TextToSpeechProviderSelector({
   onEdit,
   isBusy = false,
 }: TextToSpeechProviderSelectorProps) {
+    const tHC = useTranslations("hcComponentsAgentsTextToSpeechProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("textToSpeech", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's TTS providers",
@@ -49,18 +51,15 @@ export default function TextToSpeechProviderSelector({
     <TranscriptionProviderOptions
       providers={providers}
       icon={Speaker}
-      label="Voice Provider (Text-to-Speech)"
+      label={tHC("hcComponentsAgentsTextToSpeechProviderSelector.s5")}
       tooltipContent={
         <>
-          Pick which text-to-speech backend synthesizes this agent&apos;s voice replies, or leave
-          the platform default fallback. Options marked &quot;Needs setup&quot; need a credential on
-          the Providers page first.
+          {tHC("hcComponentsAgentsTextToSpeechProviderSelector.s4")}
         </>
       }
       freePlanWarningText={
         <>
-          TTS provider selection is a <strong>Premium feature</strong>. Your agents use the
-          platform default fallback.
+          {tHC("hcComponentsAgentsTextToSpeechProviderSelector.s3")} <strong>{tHC("hcComponentsAgentsTextToSpeechProviderSelector.s2")}</strong>{tHC("hcComponentsAgentsTextToSpeechProviderSelector.s1")}
         </>
       }
       editorLockedTitle="TTS provider selection is a Premium feature"

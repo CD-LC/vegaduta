@@ -5,6 +5,7 @@ import Select from "../Select";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { DOC_SORTS, DOC_STATUS_GROUPS, type DocSort, type DocStatusGroup } from "./knowledgeDocs";
+import { useTranslations } from "../../lib/i18n";
 
 /** The file table's name filter, sort picker and status-group chips. */
 export default function KnowledgeDocumentFilters({
@@ -24,6 +25,7 @@ export default function KnowledgeDocumentFilters({
   setDocGroup: (group: DocStatusGroup) => void;
   docCounts: Record<string, number>;
 }) {
+    const tHC = useTranslations("hcComponentsKnowledgeKnowledgeDocumentFilters");
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -37,19 +39,19 @@ export default function KnowledgeDocumentFilters({
             type="search"
             value={docQuery}
             onChange={(e) => setDocQuery(e.target.value)}
-            placeholder="Filter files by name"
-            aria-label="Filter files by name"
+            placeholder={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s3")}
+            aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s3")}
             className="h-8 ps-9"
           />
         </div>
         <Select
-          aria-label="Sort files"
+          aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s2")}
           value={docSort}
           onChange={(e) => setDocSort(e.target.value as DocSort)}
           options={DOC_SORTS}
         />
       </div>
-      <div role="group" aria-label="Filter files by status" className="mb-3 flex flex-wrap gap-1.5">
+      <div role="group" aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s1")} className="mb-3 flex flex-wrap gap-1.5">
         {DOC_STATUS_GROUPS.filter((g) => g.id === "all" || docCounts[g.id] > 0).map((g) => (
           <Button
             key={g.id}

@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
+import { useTranslations } from "../../lib/i18n";
 
 // First-party IDE/browser plugin distribution (VS Code / JetBrains / Chrome).
 // What consumers see is the public marketplace page (web's /plugins) backed by
@@ -51,6 +52,7 @@ function formatSize(bytes: number): string {
 }
 
 export default function PluginsPage() {
+    const tHC = useTranslations("hcPlatformadminPluginsPage");
   const [catalog, setCatalog] = useState<PluginCatalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,11 +150,11 @@ export default function PluginsPage() {
 
   return (
     <AdminShell
-      title="IDE & Browser Plugins"
+      title={tHC("hcPlatformadminPluginsPage.s25")}
       eyebrow="Distribution"
       actions={
         <div className="flex items-center gap-2 flex-wrap">
-          {catalog && <Badge variant="outline">catalog v{catalog.version}</Badge>}
+          {catalog && <Badge variant="outline">{tHC("hcPlatformadminPluginsPage.s24")}{catalog.version}</Badge>}
           <Button variant="outline" size="sm" onClick={refresh} disabled={loading || uploading}>
             <RefreshCw size={14} aria-hidden /> Refresh
           </Button>
@@ -160,12 +162,9 @@ export default function PluginsPage() {
       }
     >
       <PageHint>
-        Publishes the first-party plugin builds (VS Code <code>.vsix</code>, JetBrains{" "}
-        <code>.zip</code>, Chrome <code>.zip</code>/<code>.crx</code>) served on the public{" "}
-        <code>/plugins</code> marketplace page. Uploading computes the SHA-256 and size server-side,
-        then this screen merges them into the <code>plugins.catalog</code> setting. Structural edits
-        (new pluginId, removing an entry, rewriting descriptions) are a raw JSON edit of that
-        setting on the settings screen.
+        {tHC("hcPlatformadminPluginsPage.s23")} <code>.vsix</code>{tHC("hcPlatformadminPluginsPage.s22")}{" "}
+        <code>.zip</code>{tHC("hcPlatformadminPluginsPage.s21")} <code>.zip</code>/<code>.crx</code>{tHC("hcPlatformadminPluginsPage.s20")}{" "}
+        <code>/plugins</code> {tHC("hcPlatformadminPluginsPage.s19")} <code>plugins.catalog</code> {tHC("hcPlatformadminPluginsPage.s18")}
       </PageHint>
 
       {error && (
@@ -177,7 +176,7 @@ export default function PluginsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm flex items-center gap-2">
-            <Puzzle size={16} className="text-primary" aria-hidden /> Publish a build
+            <Puzzle size={16} className="text-primary" aria-hidden /> {tHC("hcPlatformadminPluginsPage.s17")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -197,14 +196,14 @@ export default function PluginsPage() {
                 <Label htmlFor="plugin-publish-version" className="text-xs text-muted-foreground">Version</Label>
                 <Input
                   id="plugin-publish-version"
-                  placeholder="e.g. 1.0.0"
+                  placeholder={tHC("hcPlatformadminPluginsPage.s16")}
                   value={version}
                   onChange={(e) => setVersion(e.target.value)}
                   disabled={uploading}
                 />
               </div>
               <div className="w-72 max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-artifact" className="text-xs text-muted-foreground">Artifact (.vsix / .zip / .crx)</Label>
+                <Label htmlFor="plugin-publish-artifact" className="text-xs text-muted-foreground">{tHC("hcPlatformadminPluginsPage.s15")}</Label>
                 <Input
                   id="plugin-publish-artifact"
                   key={fileInputKey}
@@ -217,11 +216,11 @@ export default function PluginsPage() {
             </div>
             <div className="flex flex-wrap items-end gap-3">
               <div className="w-[28rem] max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-notes" className="text-xs text-muted-foreground">Release notes (optional - blank keeps existing)</Label>
+                <Label htmlFor="plugin-publish-notes" className="text-xs text-muted-foreground">{tHC("hcPlatformadminPluginsPage.s14")}</Label>
                 <Textarea
                   id="plugin-publish-notes"
                   rows={2}
-                  placeholder="What changed in this build"
+                  placeholder={tHC("hcPlatformadminPluginsPage.s13")}
                   value={releaseNotes}
                   onChange={(e) => setReleaseNotes(e.target.value)}
                   disabled={uploading}
@@ -229,7 +228,7 @@ export default function PluginsPage() {
               </div>
               <div className="w-96 max-w-full space-y-1.5">
                 <Label htmlFor="plugin-publish-store-url" className="text-xs text-muted-foreground">
-                  Official store URL (optional - blank keeps existing)
+                  {tHC("hcPlatformadminPluginsPage.s12")}
                 </Label>
                 <Input
                   id="plugin-publish-store-url"
@@ -245,12 +244,11 @@ export default function PluginsPage() {
               <p className="text-xs text-muted-foreground">
                 {selectedEntry.artifact && selectedEntry.latestVersion ? (
                   <>
-                    Currently published: v{selectedEntry.latestVersion} —{" "}
-                    {selectedEntry.artifact.fileName} ({formatSize(selectedEntry.artifact.sizeBytes)}).
-                    Re-uploading the same version overwrites that build.
+                    {tHC("hcPlatformadminPluginsPage.s11")}{selectedEntry.latestVersion} —{" "}
+                    {selectedEntry.artifact.fileName} ({formatSize(selectedEntry.artifact.sizeBytes)}{tHC("hcPlatformadminPluginsPage.s10")}
                   </>
                 ) : (
-                  <>No build published yet - the public page shows this plugin as “coming soon”.</>
+                  <>{tHC("hcPlatformadminPluginsPage.s9")}</>
                 )}
               </p>
             )}
@@ -267,7 +265,7 @@ export default function PluginsPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {loading ? (
-            <div className="text-sm text-muted-foreground">Loading catalog…</div>
+            <div className="text-sm text-muted-foreground">{tHC("hcPlatformadminPluginsPage.s8")}</div>
           ) : (
             (catalog?.plugins || []).map((p) => (
               <div key={p.id} className="flex items-start justify-between gap-4 rounded-md border p-3">
@@ -277,10 +275,10 @@ export default function PluginsPage() {
                     {p.latestVersion ? (
                       <Badge variant="outline">v{p.latestVersion}</Badge>
                     ) : (
-                      <Badge variant="secondary">no build yet</Badge>
+                      <Badge variant="secondary">{tHC("hcPlatformadminPluginsPage.s7")}</Badge>
                     )}
                     {p.artifact && <Badge variant="outline">{formatSize(p.artifact.sizeBytes)}</Badge>}
-                    {p.externalStoreUrl && <Badge variant="secondary">store listed</Badge>}
+                    {p.externalStoreUrl && <Badge variant="secondary">{tHC("hcPlatformadminPluginsPage.s6")}</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 font-mono break-all">{p.id}</p>
                   {p.artifact && p.latestVersion && (
@@ -303,13 +301,12 @@ export default function PluginsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Catalog JSON</CardTitle>
+          <CardTitle className="text-base">{tHC("hcPlatformadminPluginsPage.s5")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-2">
-            Exactly what <code>GET /api/plugins/catalog</code> serves clients right now. To edit
-            fields this screen doesn&apos;t cover, save this JSON (adjusted) as the{" "}
-            <code>plugins.catalog</code> setting on the settings screen.
+            {tHC("hcPlatformadminPluginsPage.s4")} <code>{tHC("hcPlatformadminPluginsPage.s3")}</code> {tHC("hcPlatformadminPluginsPage.s2")}{" "}
+            <code>plugins.catalog</code> {tHC("hcPlatformadminPluginsPage.s1")}
           </p>
           <pre className="overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs leading-relaxed">
             {loading ? "Loading…" : JSON.stringify(catalog, null, 2)}

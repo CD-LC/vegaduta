@@ -15,6 +15,7 @@ import {
   type CommentPerson,
 } from "./comments";
 import { initials, type MentionPerson } from "./commentCardShared";
+import { useTranslations } from "../../lib/i18n";
 
 export interface CommentComposerProps {
   people?: MentionPerson[];
@@ -47,6 +48,7 @@ export function CommentComposer({
   people = [], initialText = "", initialMentions = [], placeholder = "Write a comment…", submitLabel = "Comment",
   label, busy = false, autoFocus = false, onSubmit, onCancel, keepOnSubmit = false,
 }: CommentComposerProps) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentComposer");
   const uid = useId();
   const listId = `${uid}-people`;
   const hintId = `${uid}-hint`;
@@ -198,7 +200,7 @@ export function CommentComposer({
           onKeyDown={onKeyDown}
         />
         {pickerOpen && (
-          <ul id={listId} className="wfc-picker" role="listbox" aria-label="People to mention">
+          <ul id={listId} className="wfc-picker" role="listbox" aria-label={tHC("hcComponentsWorkflowCommentComposer.s3")}>
             {matches.map((p, i) => (
               <li
                 key={p.id}
@@ -228,10 +230,10 @@ export function CommentComposer({
             <>
               {canMention && (
                 <span className="wfc-hint-item">
-                  <AtSign size={11} aria-hidden="true" /> to mention
+                  <AtSign size={11} aria-hidden="true" /> {tHC("hcComponentsWorkflowCommentComposer.s2")}
                 </span>
               )}
-              <span className="wfc-hint-item wfc-keys">Ctrl+Enter to send</span>
+              <span className="wfc-hint-item wfc-keys">{tHC("hcComponentsWorkflowCommentComposer.s1")}</span>
             </>
           )}
         </span>

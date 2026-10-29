@@ -43,6 +43,7 @@ export function GrantWizard({
   wallets: AgentWallet[];
   onGranted: () => void;
 }) {
+    const tHC = useTranslations("hcAdminAgenttrustGrantWizard");
   const t = useTranslations("adminAgentTrustPage");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<GrantForm>(EMPTY_GRANT);
@@ -106,7 +107,7 @@ export function GrantWizard({
           <Input
             id="grant-audience"
             value={form.audience}
-            placeholder="x402://my-offer or vegaduta-api"
+            placeholder={tHC("hcAdminAgenttrustGrantWizard.s2")}
             onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldAudienceHint")}</p>
@@ -116,7 +117,7 @@ export function GrantWizard({
           <Input
             id="grant-scopes"
             value={form.scopes}
-            placeholder="read:data, pay:x402"
+            placeholder={tHC("hcAdminAgenttrustGrantWizard.s1")}
             onChange={(e) => setForm((f) => ({ ...f, scopes: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldScopesHint")}</p>

@@ -8,6 +8,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Input } from "../../components/ui/input";
 import { type SelectedElement } from "./runtime";
 import { FONT_CHOICES, THEME_PRESETS, contrastRatio, readTheme, writeTheme, type ThemeTokens } from "./theme";
+import { useTranslations } from "../../lib/i18n";
 
 function rgbToHex(c: string): string {
   const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -16,6 +17,7 @@ function rgbToHex(c: string): string {
 }
 
 export function DesignPanel({ html, onChange }: { html: string; onChange: (next: string, note: string) => void }) {
+    const tHC = useTranslations("hcBuildStudioStudioDesignPanels");
   const theme = readTheme(html);
   // Colour pickers fire on every drag step - preview locally, commit on release.
   const [draft, setDraft] = useState<Partial<ThemeTokens>>({});
@@ -31,7 +33,7 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
     <div className="flex flex-col gap-4">
       {!theme && (
         <p className="rounded-lg bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
-          This app has no design tokens yet. Changing anything here adds them.
+          {tHC("hcBuildStudioStudioDesignPanels.s13")}
         </p>
       )}
       <div>
@@ -86,16 +88,16 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
       </div>
       {Object.keys(draft).length > 0 && (
         <Button size="sm" onClick={() => commitTokens(draft, "Colours")}>
-          Apply colours
+          {tHC("hcBuildStudioStudioDesignPanels.s12")}
         </Button>
       )}
       {ratio !== null && ratio < 4.5 && (
         <p className="text-xs text-amber-600 dark:text-amber-400">
-          Text vs background contrast is {ratio.toFixed(1)}:1. Aim for 4.5:1 or more so it&apos;s readable in sunlight.
+          {tHC("hcBuildStudioStudioDesignPanels.s11")} {ratio.toFixed(1)}{tHC("hcBuildStudioStudioDesignPanels.s10")}
         </p>
       )}
       <label className="flex flex-col gap-1 text-xs text-foreground">
-        Corner roundness · {radiusPx}px
+        {tHC("hcBuildStudioStudioDesignPanels.s9")} {radiusPx}px
         <input
           type="range"
           min={0}
@@ -125,7 +127,7 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
         </div>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        Design changes are instant and free. No AI is involved, so the layout never shifts.
+        {tHC("hcBuildStudioStudioDesignPanels.s8")}
       </p>
     </div>
   );
@@ -149,6 +151,7 @@ export function ElementPanel({
   /** Keep the host's snapshot of the element current after a direct edit. */
   onSelectedChange: (patch: Partial<SelectedElement>) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioStudioDesignPanels");
   const [text, setText] = useState("");
   const [ask, setAsk] = useState("");
   // Reset the drafts when a DIFFERENT element is picked - not when a direct
@@ -164,9 +167,9 @@ export function ElementPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <MousePointerClick aria-hidden="true" size={22} className="text-primary" />
-        <p className="text-sm text-foreground">Tap any part of your app to change it</p>
+        <p className="text-sm text-foreground">{tHC("hcBuildStudioStudioDesignPanels.s7")}</p>
         <Button size="sm" variant="outline" onClick={onStartSelect}>
-          Start selecting
+          {tHC("hcBuildStudioStudioDesignPanels.s6")}
         </Button>
       </div>
     );
@@ -229,7 +232,7 @@ export function ElementPanel({
                 }}
                 className="size-7 cursor-pointer rounded border-0 bg-transparent p-0"
               />
-              Text colour
+              {tHC("hcBuildStudioStudioDesignPanels.s5")}
             </label>
             <label className="flex items-center gap-2 rounded-lg border border-border p-1.5 text-xs text-foreground">
               <input
@@ -283,20 +286,20 @@ export function ElementPanel({
         </>
       ) : (
         <p className="rounded-lg bg-secondary p-2 text-xs text-muted-foreground">
-          The app&apos;s code draws this part while it runs, so it can only be changed by asking the AI below.
+          {tHC("hcBuildStudioStudioDesignPanels.s4")}
         </p>
       )}
       <div className="flex flex-col gap-1.5 border-t border-border pt-3">
-        <p className="text-xs font-medium text-foreground">Ask the AI about this element</p>
+        <p className="text-xs font-medium text-foreground">{tHC("hcBuildStudioStudioDesignPanels.s3")}</p>
         <Textarea
           value={ask}
           onChange={(e) => setAsk(e.target.value)}
           rows={2}
           className="resize-none text-sm"
-          placeholder="e.g. turn this into a card with an icon"
+          placeholder={tHC("hcBuildStudioStudioDesignPanels.s2")}
         />
         <Button size="sm" disabled={!ask.trim() || busy} onClick={() => onAsk(ask.trim())} className="gap-1.5">
-          <Sparkles aria-hidden="true" size={13} /> Change it
+          <Sparkles aria-hidden="true" size={13} /> {tHC("hcBuildStudioStudioDesignPanels.s1")}
         </Button>
       </div>
     </div>

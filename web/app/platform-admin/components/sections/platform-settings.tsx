@@ -13,6 +13,7 @@ import { Label } from "../ui/label";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { SectionCard } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Generic platform_setting editor - the same row editor that used to live on
 // the Abuse & Rate Control page, extracted so it can serve two audiences:
@@ -33,6 +34,7 @@ export function PlatformSettingsSection({
   keyFilter?: (key: string) => boolean;
   delay?: number;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformsettings");
   const [settings, setSettings] = useState<any[]>([]);
   const [settingsError, setSettingsError] = useState<any>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -105,7 +107,7 @@ export function PlatformSettingsSection({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter settings by key or description…"
+            placeholder={tHC("hcPlatformadminComponentsSectionsPlatformsettings.s2")}
             className="ps-8"
           />
         </div>
@@ -154,7 +156,7 @@ export function PlatformSettingsSection({
             </div>
             {row.updatedAt && (
               <div className="mt-2 font-mono text-xs text-muted-foreground">
-                Last updated {new Date(row.updatedAt).toLocaleString()}
+                {tHC("hcPlatformadminComponentsSectionsPlatformsettings.s1")} {new Date(row.updatedAt).toLocaleString()}
                 {row.updatedBy ? ` by ${row.updatedBy}` : ""}
               </div>
             )}
