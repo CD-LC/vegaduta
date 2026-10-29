@@ -234,19 +234,11 @@ public class SecurityConfig {
         }
     }
 
-    /**
-     * Same gate as {@link #requireClientCheckForNonKeycloakIssuer} behind an explicit opt-out:
-     * {@code allowNoClientCheck} is the documented emergency lever for generic-OIDC issuers that
-     * deliberately run with neither {@code azp} nor {@code aud} enforcement.
-     */
+    /** {@link #requireClientCheckForNonKeycloakIssuer} behind an explicit opt-out lever. */
     static void checkTokenAcceptanceConfig(
-            String issuerUri,
-            String allowedAuthorizedParties,
-            String requiredAudience,
-            boolean allowNoClientCheck) {
+            String issuerUri, String azp, String audience, boolean allowNoClientCheck) {
         if (!allowNoClientCheck) {
-            requireClientCheckForNonKeycloakIssuer(
-                    issuerUri, allowedAuthorizedParties, requiredAudience);
+            requireClientCheckForNonKeycloakIssuer(issuerUri, azp, audience);
         }
     }
 
