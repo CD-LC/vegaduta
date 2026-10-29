@@ -60,6 +60,13 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Release images moved off KEV-listed Node binaries.** Every image that
+  embeds Node shipped binaries vulnerable to CVE-2026-111497 (Critical, KEV,
+  EPSS 88%) and the publish-time grype gate refused them. Node pins bumped to
+  the fixed release on each line in use: 26.11.1 → 26.12.1 (core, web,
+  omnibus, tool-sandbox, http-gateway example), 22.23.3 → 22.23.4
+  (mcp-stdio-runner, workspace-runner, whatsapp-qr), and the piece-host
+  compose default 24.21.0 → 24.22.1.
 - **Release image builds no longer die on `tool-sandbox` (amd64) or `core-full` (arm64).**
   Node 26.11's amd64 binary gained a `libatomic` link that was previously
   arm64-only while the Dockerfile only installed it for aarch64, and
