@@ -41,6 +41,20 @@ Release notes on GitHub are generated from the section for each version.
   failures store the exception type and a bounded, redacted message instead of
   raw text; `ApprovalStore.update` documents the compare-and-set requirement for
   multi-process use.
+- **`/agents` auto-selects the most recent saved agent again.** The agents
+  index had become the bare-`/agents` landing, so the workbench's agent
+  switcher and per-agent sections never mounted for tenants with saved
+  agents, and the workbench itself could sit in the draft/no-selection state
+  until the slowest of three parallel fetches (providers, agents,
+  collections) resolved. `/agents` now opens the workbench directly — it
+  auto-selects the agent with the latest `updatedAt` as soon as the agents
+  list returns (each of the three reads now stores its result independently
+  instead of after `allSettled`), or shows the deterministic first-run draft
+  for a tenant with none. The index remains available at
+  `/agents?view=index` via the workbench's "All agents" button, and
+  `?section=`/`?focus=` deep links without a chosen agent still land on the
+  "pick an agent" index.
+
 ## [0.1.13] - 2026-10-28
 
 ### Added
