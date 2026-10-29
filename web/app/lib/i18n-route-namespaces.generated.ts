@@ -45,6 +45,21 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "valueReceipt"
   ],
+  "/admin/a2a": [
+    "adminA2aPage",
+    "adminAgentTrustPage",
+    "adminCommerceUi",
+    "auditNotifications",
+    "brandIdentityModal",
+    "controls",
+    "desktopAutomation",
+    "edge",
+    "featureUnavailable",
+    "localCode",
+    "nav",
+    "pageGuide",
+    "systemStatusPanel"
+  ],
   "/admin/access": [
     "adminAccessPage",
     "adminUsersPanel",
@@ -413,6 +428,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent"
   ],
   "/agents": [
+    "a2aPanel",
     "agentBehavior",
     "agentGlance",
     "agentHooks",
@@ -1537,6 +1553,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "turnProgress"
   ],
   "/ui-kit/console-preview/agents": [
+    "a2aPanel",
     "agentBehavior",
     "agentGlance",
     "agentHooks",
