@@ -5,8 +5,10 @@
 
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
 import { Section } from "../../../components/ax/page-kit";
+import { useTranslations } from "../../../lib/i18n";
 
 export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired" | "plan-locked" }) {
+    const tHC = useTranslations("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable");
   if (reason === "client-not-wired") {
     // The backend surface exists; the shared API client does not expose it
     // yet (api.ts is owned by a concurrent workstream — see
@@ -14,15 +16,13 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
     // instead of rendering a dead UI.
     return (
       <Section
-        title="Eval datasets & regression runs"
+        title={tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s3")}
         description="Golden test cases replayed against this agent and scored by the quality judges, run over run."
       >
         <Alert>
-          <AlertTitle>Almost there — API client wiring pending</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s5")}</AlertTitle>
           <AlertDescription>
-            The backend for eval datasets is live, but the shared API client (app/lib/api.ts) doesn&apos;t expose its
-            endpoints yet — that file is owned by concurrent work in flight. This panel activates automatically once the
-            client methods land; see evalDatasetsApi.ts for the exact contract.
+            {tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s4")}
           </AlertDescription>
         </Alert>
       </Section>
@@ -31,13 +31,12 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
   // Same inline entitlement posture as AgentQualityPanel's 403 branch.
   return (
     <Section
-      title="Eval datasets & regression runs"
+      title={tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s3")}
     >
       <Alert>
-        <AlertTitle>Premium feature</AlertTitle>
+        <AlertTitle>{tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s2")}</AlertTitle>
         <AlertDescription>
-          Eval datasets and regression runs are available on Premium plans, alongside the full quality-evaluation
-          suite above.
+          {tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s1")}
         </AlertDescription>
       </Alert>
     </Section>

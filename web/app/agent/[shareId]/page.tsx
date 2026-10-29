@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/button";
 import { usePageReady } from "../../components/RouteTransition";
 import { fetchSharedAgent, reportSharedAgent, sendSharedChat, type ShareErrorCode, type SharedAgentInfo } from "./api";
 import ShareCallPanel from "./ShareCallPanel";
+import { useTranslations } from "../../lib/i18n";
 
 // /agent/<shareId> - the public viewer for a REAL, registered tenant's own
 // shared agent ("even registered consumers should be able to share their
@@ -67,6 +68,7 @@ function newId(): string {
 }
 
 export default function SharedRealAgentPage() {
+    const tHC = useTranslations("hcAgentShareIdPage");
   usePageReady(true);
   const params = useParams();
   const rawId = params?.shareId;
@@ -142,7 +144,7 @@ export default function SharedRealAgentPage() {
         {phase === "loading" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
             <Loader2 className="size-10 animate-spin text-primary" strokeWidth={2.5} aria-hidden="true" />
-            <p className="text-sm font-medium text-foreground">Opening this shared agent…</p>
+            <p className="text-sm font-medium text-foreground">{tHC("hcAgentShareIdPage.s16")}</p>
           </div>
         )}
 
@@ -162,13 +164,12 @@ export default function SharedRealAgentPage() {
                 // agent answering on X's behalf") but carries the tenant's
                 // name, not this platform's.
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.agentName}</span> is an AI agent answering on behalf of{" "}
+                  <span className="text-foreground">{info.agentName}</span> {tHC("hcAgentShareIdPage.s15")}{" "}
                   <span className="text-foreground">{info.brandDisplayName || "its owner"}</span>.
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.agentName}</span> is a real AI agent, built and shared by its
-                  owner on <BrandName />. It&apos;s answering on their behalf.
+                  <span className="text-foreground">{info.agentName}</span> {tHC("hcAgentShareIdPage.s14")} <BrandName />{tHC("hcAgentShareIdPage.s13")}
                 </p>
               )}
             </div>
@@ -180,7 +181,7 @@ export default function SharedRealAgentPage() {
             >
               {bubbles.length === 0 && (
                 <p className="py-10 text-center text-sm text-muted-foreground">
-                  Say hello — ask {info.agentName} anything.
+                  {tHC("hcAgentShareIdPage.s12")} {info.agentName} {tHC("hcAgentShareIdPage.s11")}
                 </p>
               )}
               {bubbles.map((b) => (
@@ -239,6 +240,7 @@ export default function SharedRealAgentPage() {
 }
 
 function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
+    const tHC = useTranslations("hcAgentShareIdPage");
   if (isWhiteLabeled(info)) {
     // The owning tenant's brand instead of VegaDūta's - a static lockup, not
     // a link (the only "home" this header could link to is VegaDūta's, which
@@ -257,7 +259,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
             <Sparkles className="size-3" aria-hidden="true" />
-            AI agent
+            {tHC("hcAgentShareIdPage.s10")}
           </span>
         </div>
       </header>
@@ -266,7 +268,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label="VegaDūta home">
+        <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcAgentShareIdPage.s9")}>
           <img src="/logo-mark.png" alt="" className="h-7 w-auto shrink-0 object-contain" />
           <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
             Vega<span className="text-primary">Dūta</span>
@@ -275,14 +277,14 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <Sparkles className="size-3" aria-hidden="true" />
-          Shared agent
+          {tHC("hcAgentShareIdPage.s8")}
         </span>
 
         <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/">
-              <span className="hidden sm:inline">Build your own agent</span>
-              <span className="sm:hidden">Build yours</span>
+              <span className="hidden sm:inline">{tHC("hcAgentShareIdPage.s6")}</span>
+              <span className="sm:hidden">{tHC("hcAgentShareIdPage.s7")}</span>
             </Link>
           </Button>
         </div>
@@ -344,6 +346,7 @@ function ThinkingBubble() {
 }
 
 function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLabeled: boolean }) {
+    const tHC = useTranslations("hcAgentShareIdPage");
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-border/70 bg-card/50 px-4 py-5 text-center">
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
@@ -351,7 +354,7 @@ function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLa
       {!whiteLabeled && (
         <Button asChild size="sm">
           <Link href="/">
-            Build your own agent
+            {tHC("hcAgentShareIdPage.s6")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>
@@ -361,6 +364,7 @@ function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLa
 }
 
 function BlockedScreen({ code }: { code: ShareErrorCode }) {
+    const tHC = useTranslations("hcAgentShareIdPage");
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -373,7 +377,7 @@ function BlockedScreen({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild>
         <Link href="/">
-          Build your own agent
+          {tHC("hcAgentShareIdPage.s6")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -389,6 +393,7 @@ const REPORT_REASONS = [
 ];
 
 function ReportPanel({ shareId }: { shareId: string }) {
+    const tHC = useTranslations("hcAgentShareIdPage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -409,7 +414,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
     <div className="flex flex-col items-center gap-2 py-1">
       {done ? (
         <p className="text-xs text-muted-foreground" role="status">
-          Thanks — your report has been logged and this agent will be reviewed.
+          {tHC("hcAgentShareIdPage.s5")}
         </p>
       ) : !open ? (
         <button
@@ -418,7 +423,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
           className="inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           <Flag className="size-3" aria-hidden="true" />
-          Report this agent
+          {tHC("hcAgentShareIdPage.s4")}
         </button>
       ) : (
         <AnimatePresence>
@@ -427,7 +432,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
           >
-            <p className="text-xs text-muted-foreground">What&apos;s wrong with this agent?</p>
+            <p className="text-xs text-muted-foreground">{tHC("hcAgentShareIdPage.s3")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {REPORT_REASONS.map((r) => (
                 <button
@@ -456,6 +461,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
 }
 
 function ViewerFooter() {
+    const tHC = useTranslations("hcAgentShareIdPage");
   return (
     <footer className="border-t border-border/60 bg-background/80">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-1.5 px-4 py-4 text-center sm:px-6">
@@ -463,7 +469,7 @@ function ViewerFooter() {
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
         >
-          Built with <BrandName /> — create your own agent
+          {tHC("hcAgentShareIdPage.s2")} <BrandName /> {tHC("hcAgentShareIdPage.s1")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>

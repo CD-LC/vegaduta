@@ -3,6 +3,7 @@
 import { Loader2, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { Button } from "../../ui/button";
 import type { MicTestResult } from "./useMicTest";
+import { useTranslations } from "../../../lib/i18n";
 
 interface MicTestPanelProps {
   showMicTest: boolean;
@@ -23,20 +24,21 @@ export default function MicTestPanel({
   setShowMicTest,
   setMicTestResult,
 }: MicTestPanelProps) {
+    const tHC = useTranslations("hcComponentsAgentsCallPanelMicTestPanel");
   return (
     <>
       {/* Microphone Test Panel */}
       {showMicTest && (
         <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium">Microphone Diagnostic</span>
+            <span className="text-xs font-medium">{tHC("hcComponentsAgentsCallPanelMicTestPanel.s14")}</span>
             <Button
               type="button"
               size="sm"
               variant="ghost"
               onClick={() => setShowMicTest(false)}
               className="h-auto p-1"
-              aria-label="Close microphone diagnostic"
+              aria-label={tHC("hcComponentsAgentsCallPanelMicTestPanel.s13")}
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </Button>
@@ -47,7 +49,7 @@ export default function MicTestPanel({
               {testingMicrophone ? (
                 <>
                   <Loader2 size={12} className="animate-spin me-2" aria-hidden="true" />
-                  Testing... Speak now
+                  {tHC("hcComponentsAgentsCallPanelMicTestPanel.s12")}
                 </>
               ) : (
                 "Start Microphone Test"
@@ -75,7 +77,7 @@ export default function MicTestPanel({
 
               {testingMicrophone === false && audioLevel > 0 && (
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground">Current audio level:</div>
+                  <div className="text-xs text-muted-foreground">{tHC("hcComponentsAgentsCallPanelMicTestPanel.s11")}</div>
                   {/* .state-meter inherits its hue from --state, so the mic
                       level uses the same good/warn/idle scale as everything
                       else on the screen. Its track height is the utility's own
@@ -110,13 +112,13 @@ export default function MicTestPanel({
                       <>
                         <p>{micTestResult.solution}</p>
                         <p className="text-xs mt-2">
-                          <strong>Common fixes:</strong>
+                          <strong>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s10")}</strong>
                         </p>
                         <ul className="list-disc ps-4 space-y-0.5">
-                          <li>Grant browser microphone permission in your browser settings</li>
-                          <li>Ensure no other app is using your microphone</li>
-                          <li>Check OS-level microphone privacy settings</li>
-                          <li>Restart your browser if microphone was recently disabled</li>
+                          <li>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s9")}</li>
+                          <li>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s8")}</li>
+                          <li>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s7")}</li>
+                          <li>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s6")}</li>
                           <li>
                             See{" "}
                             <a
@@ -125,7 +127,7 @@ export default function MicTestPanel({
                               rel="noopener noreferrer"
                               className="underline text-primary hover:text-primary/80"
                             >
-                              MDN getUserMedia docs
+                              {tHC("hcComponentsAgentsCallPanelMicTestPanel.s5")}
                             </a>
                           </li>
                         </ul>
@@ -136,9 +138,9 @@ export default function MicTestPanel({
               )}
 
               <div className="text-xs text-muted-foreground space-y-1">
-                <div>Audio format: {micTestResult.mimeType}</div>
-                <div>Data captured: {(micTestResult.audioSize / 1024).toFixed(1)} KB</div>
-                <div>Peak level: {micTestResult.maxLevel}%</div>
+                <div>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s4")} {micTestResult.mimeType}</div>
+                <div>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s3")} {(micTestResult.audioSize / 1024).toFixed(1)} KB</div>
+                <div>{tHC("hcComponentsAgentsCallPanelMicTestPanel.s2")} {micTestResult.maxLevel}%</div>
               </div>
 
               <Button
@@ -148,7 +150,7 @@ export default function MicTestPanel({
                 onClick={() => setMicTestResult(null)}
                 className="w-full"
               >
-                Run Test Again
+                {tHC("hcComponentsAgentsCallPanelMicTestPanel.s1")}
               </Button>
             </div>
           )}

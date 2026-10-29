@@ -39,6 +39,7 @@ import {
   type ToolClassificationListResponse,
   type ToolClassificationRow,
 } from "./toolClassification";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Tool classification registry — the console surface for build-agenda item 3
@@ -106,6 +107,7 @@ export interface ToolClassificationPanelProps {
  *  policy lets this agent call it. Overstating that would be the one
  *  misreading that gets somebody hurt. */
 function StatusCell({ row }: { row: ToolClassificationRow }) {
+    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   if (isUnclassified(row)) {
     return (
       <div className="space-y-1">
@@ -119,7 +121,7 @@ function StatusCell({ row }: { row: ToolClassificationRow }) {
       variant="state"
       state={SEVERITY_STATE_TOKEN.safe}
       className="gap-1.5"
-      title="All three axes are declared for this tool. Whether a given agent may call it is still decided by that agent's own tool list and your approval policy."
+      title={tHC("hcComponentsToolsToolClassificationPanel.s15")}
     >
       <ShieldCheck aria-hidden="true" />
       Classified
@@ -128,6 +130,7 @@ function StatusCell({ row }: { row: ToolClassificationRow }) {
 }
 
 function ToolCell({ row }: { row: ToolClassificationRow }) {
+    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   const origin = originLabel(row.origin);
   const name = row.displayName || row.toolName;
   return (
@@ -152,7 +155,7 @@ function ToolCell({ row }: { row: ToolClassificationRow }) {
             <span aria-hidden="true">·</span>
             <span
               className="inline-flex items-center gap-1"
-              title="The permission or OAuth scope this tool needs before it can run."
+              title={tHC("hcComponentsToolsToolClassificationPanel.s14")}
             >
               <KeyRound className="size-3" aria-hidden="true" />
               <span className="font-mono">{row.requiredScope}</span>
@@ -165,6 +168,7 @@ function ToolCell({ row }: { row: ToolClassificationRow }) {
 }
 
 export default function ToolClassificationPanel({ query = "", load, className }: ToolClassificationPanelProps) {
+    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   const [rows, setRows] = useState<ToolClassificationRow[]>([]);
   const [enforced, setEnforced] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -263,7 +267,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
     <div id="tool-classification" className="scroll-mt-24">
       <Section
         className={className}
-        title="Tool risk classification"
+        title={tHC("hcComponentsToolsToolClassificationPanel.s13")}
         description="What every tool an agent can call is declared to be — where its answers come from, what it is allowed to touch, and whether running it twice is safe. A tool nobody has classified is blocked."
         actions={
           <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
@@ -282,14 +286,13 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         {error && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>Couldn&apos;t load tool classifications</AlertTitle>
+            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s12")}</AlertTitle>
             <AlertDescription>
               <p>
-                {error} Nothing has changed about which tools are allowed — we just can&apos;t show their classification
-                right now. Treat this table as out of date until it loads.
+                {error} {tHC("hcComponentsToolsToolClassificationPanel.s11")}
               </p>
               <Button variant="outline" size="sm" className="mt-2 w-fit" onClick={() => void refresh()}>
-                Try again
+                {tHC("hcComponentsToolsToolClassificationPanel.s10")}
               </Button>
             </AlertDescription>
           </Alert>
@@ -301,10 +304,9 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         {enforced === false && (
           <Alert variant="warning">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>Classification isn&apos;t being enforced yet on this deployment</AlertTitle>
+            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s9")}</AlertTitle>
             <AlertDescription>
-              Tools are being classified and shown here, but an unclassified tool is not yet refused at call time. Until
-              enforcement is switched on, treat the blocked label below as a warning rather than a guarantee.
+              {tHC("hcComponentsToolsToolClassificationPanel.s8")}
             </AlertDescription>
           </Alert>
         )}
@@ -316,8 +318,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
           <Alert variant="warning">
             <Ban aria-hidden="true" />
             <AlertTitle>
-              {blockedCount} tool{blockedCount === 1 ? "" : "s"} {blockedCount === 1 ? "is" : "are"} blocked until
-              classified
+              {blockedCount} tool{blockedCount === 1 ? "" : "s"} {blockedCount === 1 ? "is" : "are"} {tHC("hcComponentsToolsToolClassificationPanel.s7")}
             </AlertTitle>
             <AlertDescription>
               {/* Do not promise a refusal the deployment isn't making. When the
@@ -349,17 +350,15 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         ) : unsupported ? (
           <Alert variant="info">
             <Info aria-hidden="true" />
-            <AlertTitle>Tool classification isn&apos;t available on this deployment yet</AlertTitle>
+            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s6")}</AlertTitle>
             <AlertDescription>
-              This workspace&apos;s core doesn&apos;t expose the tool classification registry, so there is nothing to
-              show — no tool has been classified here, and none is being reported as blocked. The reference below
-              describes the labels this table will use once the registry is live.
+              {tHC("hcComponentsToolsToolClassificationPanel.s5")}
             </AlertDescription>
           </Alert>
         ) : loadFailedNoRows ? null : rows.length === 0 ? (
           <EmptyState
             icon={ShieldQuestion}
-            title="No tools reported"
+            title={tHC("hcComponentsToolsToolClassificationPanel.s4")}
             description="The classification registry answered, but it has no tools for this workspace yet. Connect an MCP server or add a custom code tool and its classification will appear here."
           />
         ) : (
@@ -415,11 +414,11 @@ export default function ToolClassificationPanel({ query = "", load, className }:
                         <InfoTip text={AXIS_QUESTIONS.trust} />
                       </TableHead>
                       <TableHead>
-                        Can touch
+                        {tHC("hcComponentsToolsToolClassificationPanel.s3")}
                         <InfoTip text={AXIS_QUESTIONS.sensitivity} />
                       </TableHead>
                       <TableHead>
-                        Retry safety
+                        {tHC("hcComponentsToolsToolClassificationPanel.s2")}
                         <InfoTip text={AXIS_QUESTIONS.determinism} />
                       </TableHead>
                     </TableRow>
@@ -428,7 +427,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
                     {visibleRows.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                          No tool matches this filter{query.trim() ? " and search" : ""}.
+                          {tHC("hcComponentsToolsToolClassificationPanel.s1")}{query.trim() ? " and search" : ""}.
                         </TableCell>
                       </TableRow>
                     ) : (

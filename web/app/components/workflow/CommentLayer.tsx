@@ -72,6 +72,7 @@ import {
 } from "./comments";
 import { listWorkflowComments } from "../../lib/api/workflows";
 import "./comments.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type ScreenPoint = { x: number; y: number };
 export type PinTarget = CommentAnchor | string;
@@ -285,6 +286,7 @@ export default function CommentLayer({
   currentUserId, currentUserName, mode = "view", onPlaced, onCancelPlace, newThread = null, onNewThreadDone,
   panelOpen = false, onPanelOpenChange, nodeLabel, onFocusTarget, showResolvedPins = true,
 }: CommentLayerProps) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentLayer");
   const layerRef = useRef<HTMLDivElement>(null);
   const numbers = useMemo(() => threadNumbers(threads), [threads]);
   const pins = useMemo(() => canvasPins(threads), [threads]);
@@ -341,7 +343,7 @@ export default function CommentLayer({
       data-panel-open={panelOpen || undefined}
       data-mode={mode}
       tabIndex={-1}
-      aria-label="Canvas comments"
+      aria-label={tHC("hcComponentsWorkflowCommentLayer.s6")}
     >
       {pins.map(({ thread, number, anchor }) => {
         if (thread.resolved && !showResolvedPins && thread.id !== openThreadId) return null;
@@ -469,6 +471,7 @@ function AnchoredNew({ point, ...rest }: AnchoredNewProps) {
 function PlaceSurface({
   layerRef, onPlaced, onCancel,
 }: { layerRef: RefObject<HTMLDivElement | null>; onPlaced?: (x: number, y: number) => void; onCancel?: () => void }) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentLayer");
   const ref = useRef<HTMLDivElement>(null);
   const hintId = useId();
   useEffect(() => {
@@ -486,7 +489,7 @@ function PlaceSurface({
       className="wfc-place"
       role="button"
       tabIndex={0}
-      aria-label="Place a comment"
+      aria-label={tHC("hcComponentsWorkflowCommentLayer.s5")}
       aria-describedby={hintId}
       onClick={(e) => onPlaced?.(e.clientX, e.clientY)}
       onKeyDown={(e) => {
@@ -501,7 +504,7 @@ function PlaceSurface({
       }}
     >
       <span id={hintId} className="wfc-place-hint">
-        Click where the comment goes · Enter for the centre · Esc to cancel
+        {tHC("hcComponentsWorkflowCommentLayer.s4")}
       </span>
     </div>
   );
@@ -519,6 +522,7 @@ function CommentsPanel({
   onPick: (t: CommentView) => void;
   onClose: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentLayer");
   const uid = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -580,7 +584,7 @@ function CommentsPanel({
           <strong id={`${uid}-t`}>Comments</strong>
           <span className="wfc-sub">{openCount} open</span>
         </div>
-        <button type="button" className="wfc-icon" aria-label="Close comments" onClick={onClose}>
+        <button type="button" className="wfc-icon" aria-label={tHC("hcComponentsWorkflowCommentLayer.s3")} onClick={onClose}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>
@@ -643,11 +647,11 @@ function CommentsPanel({
                       <span className="wfc-row-time">{relativeTime(last.createdAt, now)}</span>
                     </span>
                     <span className="wfc-row-body">
-                      {t.deleted ? <em>Deleted comment</em> : <><strong>{personLabel(t.author)}:</strong> {t.body}</>}
+                      {t.deleted ? <em>{tHC("hcComponentsWorkflowCommentLayer.s2")}</em> : <><strong>{personLabel(t.author)}:</strong> {t.body}</>}
                     </span>
                     <span className="wfc-row-meta">
                       {replies > 0 && `${replies} ${replies === 1 ? "reply" : "replies"}`}
-                      {t.orphaned && <span className="wfc-row-tag">Step removed</span>}
+                      {t.orphaned && <span className="wfc-row-tag">{tHC("hcComponentsWorkflowCommentLayer.s1")}</span>}
                       {t.resolved && <span className="wfc-row-tag" data-tone="ok">Resolved</span>}
                     </span>
                   </span>

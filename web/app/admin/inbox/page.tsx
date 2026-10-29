@@ -6,6 +6,7 @@ import AppShell from "../../components/AppShell";
 import { usePageReady } from "../../components/RouteTransition";
 import PageHeader from "../../components/ax/PageHeader";
 import InboxPanel from "./InboxPanel";
+import { useTranslations } from "../../lib/i18n";
 
 // Operator inbox (live human handoff, backend V214; rebuilt 2026-09-23
 // into the full conversations operations page) - same thin-page/fat-panel
@@ -19,6 +20,7 @@ import InboxPanel from "./InboxPanel";
 // web/messages/en.json and components/AppShell.tsx are other workstreams'
 // files - see InboxPanel's header comment and the coordination log entry.
 export default function AdminInboxPage() {
+    const tHC = useTranslations("hcAdminInboxPage");
   // MANAGE_CHANNELS scope (granular RBAC, 2026-09-23) - the human-handoff
   // inbox is channel operations, same backend permission as the channel
   // pairing/contact surfaces it feeds.
@@ -50,7 +52,7 @@ export default function AdminInboxPage() {
         title="Inbox"
         subtitle={
           <span className="tabular-nums">
-            <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> waiting for a human{" "}
+            <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> {tHC("hcAdminInboxPage.s1")}{" "}
             <span className="text-muted-foreground">/</span> {held ?? "—"} human-held
           </span>
         }

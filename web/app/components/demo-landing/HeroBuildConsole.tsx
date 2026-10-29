@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "../../lib/i18n";
 
 // The landing hero's build console (split out of HeroOutcome.tsx): the
 // per-workload build logs and the component that types and streams them.
@@ -101,6 +102,7 @@ export default function BuildConsole({
   runLabel: string;
   onRunSpec: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsDemolandingHeroBuildConsole");
   const spec = BUILD_LOGS[workloadId] ?? BUILD_LOGS.support;
   const total = spec.steps.length + 1; // +1 lands the ship line
   // Start empty even under reduced motion — the effect below fills the whole
@@ -150,7 +152,7 @@ export default function BuildConsole({
           to prevent. */}
       <div aria-hidden="true">
         <p className="mkt-term__line">
-          <span className="mkt-term__ps">❯</span> <span className="mkt-term__cmd">vegaduta run --brief</span>{" "}
+          <span className="mkt-term__ps">❯</span> <span className="mkt-term__cmd">{tHC("hcComponentsDemolandingHeroBuildConsole.s1")}</span>{" "}
           <span className="mkt-term__arg">&ldquo;{brief.slice(0, typed)}&rdquo;</span>
           {!done && <span className="mkt-term__cursor" />}
         </p>

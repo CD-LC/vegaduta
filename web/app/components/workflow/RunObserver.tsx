@@ -34,6 +34,7 @@ import type { RunObserver } from "./useRunObserver";
 import { NODE_WIDTH } from "./canvasOps";
 import { useReducedMotionSafe } from "../../lib/useReducedMotionSafe";
 import "./run-observer.css";
+import { useTranslations } from "../../lib/i18n";
 
 const NODE_HEIGHT_GUESS = 96;
 // Mirrors run-inspector.css: below 640px the step inspector is a sheet over
@@ -165,6 +166,7 @@ export function ObserveBanner({
   /** Live stream open for the run on screen (vs. polling). */
   streaming?: boolean;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowRunObserver");
   const { model, selectedRunId, selectedRaw, compareRunId, runs, flightNumbers, following, selectedLive } = obs;
   const num = selectedRunId ? flightNumbers[selectedRunId] : undefined;
   const status = parseRunStatus(selectedRaw?.status);
@@ -186,7 +188,7 @@ export function ObserveBanner({
   };
 
   return (
-    <div className="rob-banner" role="region" aria-label="Run being viewed" data-tone={selectedLive ? "live" : status}>
+    <div className="rob-banner" role="region" aria-label={tHC("hcComponentsWorkflowRunObserver.s9")} data-tone={selectedLive ? "live" : status}>
       <span className="rob-banner-state">
         <Icon size={14} aria-hidden="true" className={selectedLive ? "rob-live-icon" : undefined} />
         <span className="rob-banner-title" ref={titleRef} tabIndex={-1}>
@@ -207,13 +209,13 @@ export function ObserveBanner({
           {model && <span className="rob-mono">{formatDuration(model.totalMs)}</span>}
           {model?.run.workflowVersion != null && <span className="rob-mono">v{model.run.workflowVersion}</span>}
           {liveCostUsd != null && Number.isFinite(liveCostUsd) && (
-            <span className="rob-mono" title="Cost so far, metered by the platform">
-              <span className="rob-sr">Cost so far </span>
+            <span className="rob-mono" title={tHC("hcComponentsWorkflowRunObserver.s8")}>
+              <span className="rob-sr">{tHC("hcComponentsWorkflowRunObserver.s7")} </span>
               {formatCostUsd(liveCostUsd)}
             </span>
           )}
           {selectedLive && streaming && (
-            <span className="rob-mono" title="Streaming live from the server">
+            <span className="rob-mono" title={tHC("hcComponentsWorkflowRunObserver.s6")}>
               streaming
             </span>
           )}
@@ -228,9 +230,9 @@ export function ObserveBanner({
               {formatDuration(Math.abs(delta))} {delta < 0 ? "faster" : "slower"}
             </strong>
           ) : delta != null ? (
-            <strong> same pace</strong>
+            <strong> {tHC("hcComponentsWorkflowRunObserver.s5")}</strong>
           ) : null}
-          <button type="button" className="rob-icon-btn" aria-label="Stop comparing" onClick={() => obs.toggleCompare(compareRunId as string)}>
+          <button type="button" className="rob-icon-btn" aria-label={tHC("hcComponentsWorkflowRunObserver.s4")} onClick={() => obs.toggleCompare(compareRunId as string)}>
             <X size={12} aria-hidden="true" />
           </button>
         </span>
@@ -246,11 +248,11 @@ export function ObserveBanner({
       )}
       {selectedLive && !following && (
         <button type="button" className="rob-btn" onClick={jumpToLive}>
-          <Radio size={13} aria-hidden="true" /> Jump to live
+          <Radio size={13} aria-hidden="true" /> {tHC("hcComponentsWorkflowRunObserver.s3")}
         </button>
       )}
       <button type="button" className="rob-btn rob-btn-primary" onClick={backToEdit}>
-        <Pencil size={13} aria-hidden="true" /> Back to editing
+        <Pencil size={13} aria-hidden="true" /> {tHC("hcComponentsWorkflowRunObserver.s2")}
       </button>
     </div>
   );
@@ -277,6 +279,7 @@ export function RunStory({
   position: number;
   onPick: (line: NarrationLine) => void;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowRunObserver");
   const [open, setOpen] = useState(false);
   const bodyId = useId();
   // The line being "read" is the latest one the playhead has passed, so the
@@ -291,7 +294,7 @@ export function RunStory({
     <section className="rob-story" data-open={open ? "true" : "false"}>
       <button type="button" className="rob-story-head" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen((o) => !o)}>
         <BookOpen size={14} aria-hidden="true" />
-        <span className="rob-story-title">Run story</span>
+        <span className="rob-story-title">{tHC("hcComponentsWorkflowRunObserver.s1")}</span>
         {!open && preview && <span className="rob-story-preview">{preview.text}</span>}
         <ChevronDown size={14} aria-hidden="true" className="rob-story-chev" />
       </button>

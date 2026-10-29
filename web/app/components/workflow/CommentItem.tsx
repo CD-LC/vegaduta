@@ -7,6 +7,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { isEdited, mentionLabels, personLabel, relativeTime, splitMentions, type CommentPerson, type CommentView } from "./comments";
 import { fullTime, initials, type MentionPerson } from "./commentCardShared";
 import { CommentComposer } from "./CommentComposer";
+import { useTranslations } from "../../lib/i18n";
 
 interface CommentItemProps {
   comment: CommentView;
@@ -44,6 +45,7 @@ function mentionVariants(list: CommentPerson[], byId: Map<string, MentionPerson>
 export default function CommentItem({
   comment: c, isRoot, now, people, peopleById, editing, busy, onEdit, onCancelEdit, onSaveEdit, onDelete,
 }: CommentItemProps) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentItem");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const author = c.author.displayName ? c.author : { id: c.author.id, displayName: peopleById.get(c.author.id)?.displayName ?? null };
   const who = personLabel(author);
@@ -87,7 +89,7 @@ export default function CommentItem({
 
       {editing ? (
         <CommentComposer
-          label="Edit comment"
+          label={tHC("hcComponentsWorkflowCommentItem.s3")}
           people={people}
           initialText={c.body ?? ""}
           initialMentions={mentions}
@@ -111,8 +113,8 @@ export default function CommentItem({
       )}
 
       {confirmDelete && (
-        <div className="wfc-confirm" role="group" aria-label="Confirm delete">
-          <span>Delete this comment?</span>
+        <div className="wfc-confirm" role="group" aria-label={tHC("hcComponentsWorkflowCommentItem.s2")}>
+          <span>{tHC("hcComponentsWorkflowCommentItem.s1")}</span>
           <button
             type="button"
             className="wfc-btn"

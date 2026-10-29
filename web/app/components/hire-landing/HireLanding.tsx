@@ -43,6 +43,7 @@ import BrandText from "../BrandText";
 // ALWAYS, never the V monogram"): the nav logo is /logo-mark.png + wordmark
 // instead of the mockup's V logomark.
 export default function HireLanding() {
+    const tHC = useTranslations("hcComponentsHirelandingHireLanding");
   const t = useTranslations("hire");
   const authedHint = useAuthedHint();
   const [biz, setBiz] = useState<BizKey | null>(null);
@@ -89,7 +90,7 @@ export default function HireLanding() {
               sign-in link to a session they already hold. */}
           {authedHint ? (
             <Link className="btn btn-ghost" href="/" style={{ padding: "7px 16px", fontSize: 14 }}>
-              Open console
+              {tHC("hcComponentsHirelandingHireLanding.s1")}
             </Link>
           ) : (
             <Link className="btn btn-ghost" href="/login" style={{ padding: "7px 16px", fontSize: 14 }}>

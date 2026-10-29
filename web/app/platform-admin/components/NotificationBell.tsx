@@ -8,6 +8,7 @@ import { api, API_BASE } from "../lib/api";
 import { timeAgo } from "./sections/common";
 import { getPublicEnv } from "../lib/env";
 import { firstPartyOrigins, resolveSafeLink } from "../lib/safeLink";
+import { useTranslations } from "../../lib/i18n";
 
 // Header notification bell (workflow: "notification bells + diagnostic
 // explainer" - this piece is just the bell). Reuses the SAME tenant-scoped
@@ -125,6 +126,7 @@ function tenantConsoleBase() {
 }
 
 export default function NotificationBell() {
+    const tHC = useTranslations("hcPlatformadminComponentsNotificationBell");
   const router = useRouter();
   const wrapRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -272,15 +274,15 @@ export default function NotificationBell() {
                 className="flex items-center gap-1 rounded border-0 bg-transparent p-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <CheckCheck size={12} />
-                Mark all read
+                {tHC("hcPlatformadminComponentsNotificationBell.s3")}
               </button>
             </div>
 
             <div className="max-h-96 overflow-y-auto">
-              {loading && <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">Loading…</div>}
+              {loading && <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsNotificationBell.s2")}</div>}
 
               {!loading && items.length === 0 && (
-                <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">You&apos;re all caught up.</div>
+                <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsNotificationBell.s1")}</div>
               )}
 
               {!loading &&

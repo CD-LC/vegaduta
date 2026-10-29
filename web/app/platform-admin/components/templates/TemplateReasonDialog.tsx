@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { useDialogFocus } from "../../lib/useDialogFocus";
+import { useTranslations } from "../../../lib/i18n";
 
 // Reason confirmation modal, shared by Reject (reason REQUIRED - server-
 // enforced, confirmed against the real backend 2026-07-30) and Withdraw
@@ -38,6 +39,7 @@ export default function TemplateReasonDialog({
   onCancel: () => void;
   onConfirm: (reason: string) => void;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateReasonDialog");
   const [reason, setReason] = useState("");
   const [mounted, setMounted] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -119,7 +121,7 @@ export default function TemplateReasonDialog({
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="template-reason-input" className="text-xs text-muted-foreground">
-                Reason (shown to the submitter){required ? " *" : " - optional"}
+                {tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s3")}{required ? " *" : " - optional"}
               </Label>
               <Textarea
                 id="template-reason-input"
@@ -127,10 +129,10 @@ export default function TemplateReasonDialog({
                 onChange={(e: any) => setReason(e.target.value)}
                 onBlur={() => setTouched(true)}
                 rows={4}
-                placeholder="Explain why, in enough detail the submitter can act on it…"
+                placeholder={tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s2")}
                 aria-invalid={showError}
               />
-              {showError && <p className="text-xs text-destructive">A reason is required - it can&rsquo;t be blank.</p>}
+              {showError && <p className="text-xs text-destructive">{tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s1")}</p>}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">

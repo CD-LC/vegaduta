@@ -51,6 +51,7 @@ import { authorLabel, ChangeTable, shortId, ValueCell, versionOptionLabel } from
 import VersionDiffNodeList, { type NodeRow } from "./VersionDiffNodeList";
 import { Select } from "../ui/select";
 import "./version-diff.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type VersionDiffPanelProps = {
   workflowId: string;
@@ -79,6 +80,7 @@ type DiffState =
 export default function VersionDiffPanel({
   workflowId, currentVersion, onFocusNode, onDecorations, nodeLabel, personLabel, canvasDirty = false, onClose,
 }: VersionDiffPanelProps) {
+    const tHC = useTranslations("hcComponentsWorkflowVersionDiffPanel");
   const uid = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [versions, setVersions] = useState<VersionsState>({ kind: "loading" });
@@ -246,14 +248,14 @@ export default function VersionDiffPanel({
     body = (
       <p className="wf-vdiff-note">
         <Loader2 size={12} className="wf-vdiff-spin" aria-hidden="true" />
-        Loading versions…
+        {tHC("hcComponentsWorkflowVersionDiffPanel.s11")}
       </p>
     );
   } else if (versions.kind === "unavailable") {
     body = (
       <p className="wf-vdiff-note">
         <Info size={12} aria-hidden="true" />
-        Version history is unavailable here.
+        {tHC("hcComponentsWorkflowVersionDiffPanel.s10")}
       </p>
     );
   } else if (versions.kind === "error") {
@@ -281,9 +283,9 @@ export default function VersionDiffPanel({
       <div className="wf-vdiff-head">
         <div className="wf-vdiff-title">
           <GitCompare size={14} aria-hidden="true" />
-          <strong id={titleId}>Compare versions</strong>
+          <strong id={titleId}>{tHC("hcComponentsWorkflowVersionDiffPanel.s9")}</strong>
         </div>
-        <button type="button" className="wf-vdiff-icon" aria-label="Close version compare" onClick={onClose}>
+        <button type="button" className="wf-vdiff-icon" aria-label={tHC("hcComponentsWorkflowVersionDiffPanel.s8")} onClick={onClose}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>
@@ -300,7 +302,7 @@ export default function VersionDiffPanel({
                 options={versionOptions}
               />
             </label>
-            <button type="button" className="wf-vdiff-icon" aria-label="Swap from and to versions" onClick={swap}>
+            <button type="button" className="wf-vdiff-icon" aria-label={tHC("hcComponentsWorkflowVersionDiffPanel.s7")} onClick={swap}>
               <ArrowLeftRight size={13} aria-hidden="true" />
             </button>
             <label htmlFor={toId} className="wf-vdiff-pick">
@@ -318,19 +320,19 @@ export default function VersionDiffPanel({
             {from != null && from === to && (
               <p className="wf-vdiff-note">
                 <Info size={12} aria-hidden="true" />
-                Pick two different versions.
+                {tHC("hcComponentsWorkflowVersionDiffPanel.s6")}
               </p>
             )}
             {diffState.kind === "loading" && (
               <p className="wf-vdiff-note">
                 <Loader2 size={12} className="wf-vdiff-spin" aria-hidden="true" />
-                Comparing…
+                {tHC("hcComponentsWorkflowVersionDiffPanel.s5")}
               </p>
             )}
             {diffState.kind === "unavailable" && (
               <p className="wf-vdiff-note">
                 <Info size={12} aria-hidden="true" />
-                Version compare is unavailable here.
+                {tHC("hcComponentsWorkflowVersionDiffPanel.s4")}
               </p>
             )}
             {diffState.kind === "error" && (
@@ -378,7 +380,7 @@ export default function VersionDiffPanel({
                   ~{summary.nodesChanged} changed
                 </li>
                 <li className="wf-vdiff-chip">
-                  Connections +{summary.edgesAdded} / −{summary.edgesRemoved}
+                  {tHC("hcComponentsWorkflowVersionDiffPanel.s3")}{summary.edgesAdded} / −{summary.edgesRemoved}
                 </li>
               </ul>
 
@@ -404,7 +406,7 @@ export default function VersionDiffPanel({
                 </>
               )}
 
-              {summary.total === 0 && <p className="wf-vdiff-empty">These versions are identical.</p>}
+              {summary.total === 0 && <p className="wf-vdiff-empty">{tHC("hcComponentsWorkflowVersionDiffPanel.s2")}</p>}
 
               {summary.workflowChanges > 0 && (
                 <section className="wf-vdiff-sec" aria-labelledby={`${uid}-wf`}>
@@ -417,7 +419,7 @@ export default function VersionDiffPanel({
                         <span className="wf-vdiff-k">Name</span>
                         <ValueCell value={diff.from?.workflowName ?? null} segs={null} side="before" />
                         <span aria-hidden="true"> → </span>
-                        <span className="wf-vdiff-sr"> changed to </span>
+                        <span className="wf-vdiff-sr"> {tHC("hcComponentsWorkflowVersionDiffPanel.s1")} </span>
                         <ValueCell value={diff.to?.workflowName ?? null} segs={null} side="after" />
                       </li>
                     )}
@@ -426,7 +428,7 @@ export default function VersionDiffPanel({
                         <span className="wf-vdiff-k">Status</span>
                         {prettyStatus(diff.from?.status)}
                         <span aria-hidden="true"> → </span>
-                        <span className="wf-vdiff-sr"> changed to </span>
+                        <span className="wf-vdiff-sr"> {tHC("hcComponentsWorkflowVersionDiffPanel.s1")} </span>
                         {prettyStatus(diff.to?.status)}
                       </li>
                     )}

@@ -13,6 +13,7 @@ import { Badge } from "../components/ui/badge";
 import { Card } from "../components/ui/card";
 import { useAuth } from "../components/AuthProvider";
 import { errorMessage } from "../lib/errors";
+import { useTranslations } from "../lib/i18n";
 
 // Tenant-facing "Plans & Features" comparison (direct request: "display all
 // the features available for the unlimited user, disabled for the free user").
@@ -213,6 +214,7 @@ function cellValue(feature: Feature, planKey: string, settings: TenantSettings |
 }
 
 function BoolCell({ on }: { on: FeatureValue }) {
+    const tHC = useTranslations("hcFeaturesPage");
   return on ? (
     <span
       role="img"
@@ -227,7 +229,7 @@ function BoolCell({ on }: { on: FeatureValue }) {
       role="img"
       className="inline-flex h-6 w-6 items-center justify-center rounded-full"
       style={{ background: "var(--ax-track)", color: "var(--text-faint)" }}
-      aria-label="Not included"
+      aria-label={tHC("hcFeaturesPage.s9")}
     >
       <Minus className="size-3.5" aria-hidden="true" />
     </span>
@@ -255,6 +257,7 @@ function FeatureCell({ feature, planKey, settings, currentPlan }: FeatureCellPro
 }
 
 export default function FeaturesPage() {
+    const tHC = useTranslations("hcFeaturesPage");
   // /features is also reachable by a logged-out visitor and by crawlers (see
   // AuthProvider's ANONYMOUS_RENDER_ROUTES) - only a signed-in tenant has
   // settings to fetch, so skip the call entirely rather than firing an
@@ -291,21 +294,21 @@ export default function FeaturesPage() {
   return (
     <AppShell eyebrow="Plans">
       <PageHeader
-        title="Plans & features"
+        title={tHC("hcFeaturesPage.s8")}
         subtitle="Everything each plan unlocks. Your current plan is highlighted — its column reflects your workspace's live entitlements."
         actions={
           isAuthed ? (
             canUpgrade ? (
               <Button type="button" style={{ marginBottom: 0 }} onClick={() => setUpgradeOpen(true)}>
                 <ArrowUpRight width={14} height={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-                Upgrade plan
+                {tHC("hcFeaturesPage.s7")}
               </Button>
             ) : null
           ) : (
             <Button type="button" style={{ marginBottom: 0 }} asChild>
               <Link href="/signup">
                 <ArrowUpRight width={14} height={14} style={{ marginRight: 4, verticalAlign: -2 }} />
-                Get started free
+                {tHC("hcFeaturesPage.s6")}
               </Link>
             </Button>
           )
@@ -328,7 +331,7 @@ export default function FeaturesPage() {
             <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
               {isAuthed ? (
                 <>
-                  You&apos;re on the{" "}
+                  {tHC("hcFeaturesPage.s5")}{" "}
                   <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{currentPlanLabel}</span> plan.
                 </>
               ) : (
@@ -338,8 +341,7 @@ export default function FeaturesPage() {
           </div>
           {isAuthed && canUpgrade ? (
             <span className="text-sm text-muted-foreground" style={{ fontSize: "0.8rem" }}>
-              Rows marked <Minus width={12} height={12} style={{ display: "inline", verticalAlign: -2 }} /> aren&apos;t
-              available on your plan yet.
+              {tHC("hcFeaturesPage.s4")} <Minus width={12} height={12} style={{ display: "inline", verticalAlign: -2 }} /> {tHC("hcFeaturesPage.s3")}
             </span>
           ) : isAuthed ? (
             <Badge
@@ -347,7 +349,7 @@ export default function FeaturesPage() {
               className="border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
               style={{ fontSize: "0.75rem" }}
             >
-              Everything unlocked
+              {tHC("hcFeaturesPage.s2")}
             </Badge>
           ) : null}
         </div>
@@ -399,7 +401,7 @@ export default function FeaturesPage() {
                             className="border-[var(--accent-200)] bg-transparent text-[var(--accent-700)]"
                             style={{ fontSize: "0.75rem", marginTop: 2 }}
                           >
-                            Your plan
+                            {tHC("hcFeaturesPage.s1")}
                           </Badge>
                         )}
                       </div>

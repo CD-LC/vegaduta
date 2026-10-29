@@ -6,6 +6,7 @@ import { Label } from "../../../ui/label";
 import { TEXTAREA_CLASS } from "../shared";
 
 export default function ApprovalForm({ config, setConfig }: NodeFormProps) {
+    const tHC = useTranslations("hcComponentsWorkflowNodeConfigFormsApprovalForm");
   const t = useTranslations("nodeConfigDrawer");
   return (
     <>
@@ -25,7 +26,7 @@ export default function ApprovalForm({ config, setConfig }: NodeFormProps) {
                   <p className="ax-wf-empty">{t("approvalMessageHint")}</p>
                 </div>
                 <div className="field">
-                  <Label>Ask the approver for (one field per line)</Label>
+                  <Label>{tHC("hcComponentsWorkflowNodeConfigFormsApprovalForm.s2")}</Label>
                   <textarea
                     rows={3}
                     className={TEXTAREA_CLASS}
@@ -41,7 +42,7 @@ export default function ApprovalForm({ config, setConfig }: NodeFormProps) {
                     }
                   />
                   <p className="ax-wf-empty">
-                    Optional. The approver fills these in when approving; the answers are passed to the next step.
+                    {tHC("hcComponentsWorkflowNodeConfigFormsApprovalForm.s1")}
                   </p>
                 </div>
                 <label

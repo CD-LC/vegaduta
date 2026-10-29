@@ -33,6 +33,7 @@ export function TurnMetricsRow({
   /** Re-ask the exact same user message through the hosted path. */
   onResendHosted: (userMessage: string) => void;
 }) {
+    const tHC = useTranslations("hcComponentsAgentsPlaygroundTurnMetricsRow");
   const t = useTranslations("agentPlayground");
   const i = index;
   return (
@@ -51,7 +52,7 @@ export function TurnMetricsRow({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            Wall-clock time for this reply, measured in your browser around the whole turn.
+                            {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s5")}
                           </TooltipContent>
                         </Tooltip>
                         <Separator orientation="vertical" className="data-[orientation=vertical]:h-3" />
@@ -64,7 +65,7 @@ export function TurnMetricsRow({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            Tool calls this reply actually made, counted from the live tool-call log.
+                            {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s4")}
                           </TooltipContent>
                         </Tooltip>
                         {/* Per-turn LLM usage (real rows off the session's
@@ -134,12 +135,11 @@ export function TurnMetricsRow({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-                                Downgraded to built-in
+                                {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s3")}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              The most-capable on-device model failed for this turn, so Chrome&apos;s built-in model
-                              answered instead. {turn.metrics.edgeDowngradeDetail}
+                              {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s2")} {turn.metrics.edgeDowngradeDetail}
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -179,7 +179,7 @@ export function TurnMetricsRow({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-                                Platform — {edgeFallbackShortLabel(turn.metrics.edgeFallbackReason)}
+                                {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s1")} {edgeFallbackShortLabel(turn.metrics.edgeFallbackReason)}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>{edgeFallbackLabel(turn.metrics.edgeFallbackReason)}</TooltipContent>

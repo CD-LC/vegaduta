@@ -48,6 +48,7 @@ import { useShareVoiceSetup } from "./useShareVoiceSetup";
 import { stopAllSpeech, unlockAudioElement, unlockWebSpeech, webSpeechPresent } from "../../lib/voice/voicePlayers";
 import { evaluateCallPreflight, type PreflightActionKind } from "../../lib/voice/callPreflight";
 import type { Room } from "livekit-client";
+import { useTranslations } from "../../lib/i18n";
 
 // Same floors CallPanel.tsx uses, same reasoning: a quick tap-and-release
 // can land before the encoder has buffered a real frame, and a bare
@@ -86,6 +87,7 @@ export default function ShareCallPanel({
   agentName: string;
   supportsImageInput: boolean;
 }) {
+    const tHC = useTranslations("hcAgentShareIdShareCallPanel");
   const [mode, setMode] = useState<"idle" | "push-to-talk" | "call">("idle");
   const [recording, setRecording] = useState(false);
   const [stage, setStage] = useState<CallStage>("idle");
@@ -489,7 +491,7 @@ export default function ShareCallPanel({
         {callStatus === "connected" ? (
           <Button type="button" size="lg" variant="destructive" onClick={endCall} className="gap-2 rounded-full px-5">
             <PhoneOff className="size-4" aria-hidden="true" />
-            End call
+            {tHC("hcAgentShareIdShareCallPanel.s1")}
           </Button>
         ) : (
           <Button

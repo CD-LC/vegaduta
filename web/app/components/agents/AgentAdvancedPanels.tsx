@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
+import { useTranslations } from "../../lib/i18n";
 
 // Five per-agent opt-ins that already had backend endpoints but no UI:
 //   response caching            PATCH /api/agents/{id}/response-caching           {enabled}
@@ -42,6 +43,7 @@ interface ToggleSpec {
 }
 
 export default function AgentAdvancedPanels({ agent, disabled, disabledReason, onSaved }: AgentAdvancedPanelsProps) {
+    const tHC = useTranslations("hcComponentsAgentsAgentAdvancedPanels");
   const uid = useId();
   const [state, setState] = useState<Record<string, SaveState>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -137,7 +139,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
             Saved
           </>
         )}
-        {s === "error" && <span className="text-destructive">Not saved</span>}
+        {s === "error" && <span className="text-destructive">{tHC("hcComponentsAgentsAgentAdvancedPanels.s6")}</span>}
       </span>
     );
   };
@@ -154,11 +156,11 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
 
   return (
     <section
-      aria-label="Memory, caching and teamwork"
+      aria-label={tHC("hcComponentsAgentsAgentAdvancedPanels.s5")}
       data-testid="agent-advanced-panels"
       className={disabled ? "opacity-70" : ""}
     >
-      <p className="text-[12.5px] text-muted-foreground">Each switch saves as soon as you change it.</p>
+      <p className="text-[12.5px] text-muted-foreground">{tHC("hcComponentsAgentsAgentAdvancedPanels.s4")}</p>
       {disabled && disabledReason && <p className="mt-2 text-[12.5px] text-muted-foreground">{disabledReason}</p>}
 
       <div className="mt-3 flex flex-col gap-2">
@@ -199,15 +201,14 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
           <legend className="px-1 text-sm font-medium text-foreground">Collaborators</legend>
           <div className="flex items-start justify-between gap-2">
             <p className="text-[12.5px] text-muted-foreground">
-              Pick other agents this one may hand parts of a task to, like a team of specialists. Leave all unticked to
-              work alone.
+              {tHC("hcComponentsAgentsAgentAdvancedPanels.s3")}
             </p>
             {status("collaborators")}
           </div>
           {others === null && !othersError && (
             <div className="mt-2 flex items-center gap-2 text-[12.5px] text-muted-foreground">
               <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-              Loading agents…
+              {tHC("hcComponentsAgentsAgentAdvancedPanels.s2")}
             </div>
           )}
           {othersError && (
@@ -217,7 +218,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
           )}
           {others && others.length === 0 && (
             <p className="mt-2 text-[12.5px] text-muted-foreground">
-              You have no other agents yet. Create one to team up.
+              {tHC("hcComponentsAgentsAgentAdvancedPanels.s1")}
             </p>
           )}
           {others && others.length > 0 && (

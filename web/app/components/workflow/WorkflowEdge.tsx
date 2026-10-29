@@ -5,6 +5,7 @@ import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type Edge, type EdgePro
 import { WorkflowEdgeDeleteContext } from "./DeletableEdge";
 import "./workflow-edges.css";
 import "./run-overlay.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type EdgeRunState = "pending" | "flowing" | "done" | "failed" | "skipped" | "awaiting-approval";
 
@@ -77,6 +78,7 @@ function WorkflowEdgeImpl({
   selected,
   data,
 }: EdgeProps<WorkflowEdgeType>) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowEdge");
   const onDelete = useContext(WorkflowEdgeDeleteContext);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -161,15 +163,15 @@ function WorkflowEdgeImpl({
             ))}
           {!text && paused && (
             <span className="wf-edge-pill" role="status">
-              <span aria-hidden="true">{PAUSE_GLYPH}</span> Awaiting approval
+              <span aria-hidden="true">{PAUSE_GLYPH}</span> {tHC("hcComponentsWorkflowWorkflowEdge.s4")}
             </span>
           )}
           {showTools && data?.onInsert && (
             <button
               type="button"
               className="wf-edge-btn"
-              aria-label="Insert node on this connection"
-              title="Insert node"
+              aria-label={tHC("hcComponentsWorkflowWorkflowEdge.s3")}
+              title={tHC("hcComponentsWorkflowWorkflowEdge.s2")}
               onClick={(e) => {
                 e.stopPropagation();
                 data.onInsert?.(id, { x: labelX, y: labelY });
@@ -182,8 +184,8 @@ function WorkflowEdgeImpl({
             <button
               type="button"
               className="wf-edge-btn wf-edge-btn-delete"
-              aria-label="Delete connection"
-              title="Delete connection"
+              aria-label={tHC("hcComponentsWorkflowWorkflowEdge.s1")}
+              title={tHC("hcComponentsWorkflowWorkflowEdge.s1")}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(id);

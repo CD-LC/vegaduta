@@ -9,6 +9,7 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import Select from "../Select";
 import { SectionCard, ComingSoon, InfoNote } from "./common";
+import { useTranslations } from "../../../lib/i18n";
 
 // Budgets & Limits §3.3/§4 - the per-principal DOLLAR budget over a
 // configurable window, decremented by every modality's real cost. Backend:
@@ -48,6 +49,7 @@ function windowLabel(seconds: number) {
 }
 
 export function PerUserBudgetSection() {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [budget, setBudget] = useState<any>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -139,17 +141,17 @@ export function PerUserBudgetSection() {
 
   if (loading) {
     return (
-      <SectionCard title="Global default budget" icon={Wallet}>
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s22")} icon={Wallet}>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsBudgets.s8")}</p>
       </SectionCard>
     );
   }
 
   if (unavailable) {
     return (
-      <SectionCard title="Global default budget" icon={Wallet}>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s22")} icon={Wallet}>
         <ComingSoon
-          title="Per-user dollar budget"
+          title={tHC("hcPlatformadminComponentsSectionsBudgets.s23")}
           description="A per-principal dollar budget over a configurable window, decremented by every modality's real cost (text / image / voice; video is always pay-per-use). Configure the amount, window, and per-modality sub-caps here once the backend lands."
           roadmap="Roadmap P1 (core-3): PerUserBudgetService + PlatformSetting-backed runtime config. Precedence: per-user → per-tenant → per-plan → global default."
           endpoints={["GET /api/platform/per-user-budget", "PUT /api/platform/per-user-budget"]}
@@ -160,23 +162,19 @@ export function PerUserBudgetSection() {
 
   return (
     <SectionCard
-      title="Global default budget"
+      title={tHC("hcPlatformadminComponentsSectionsBudgets.s22")}
       subtitle="Per-user dollar cap over a configurable window - changes apply on the next request, no restart."
       icon={Wallet}
     >
       <InfoNote>
-        Dollars (not tokens) because voice/image aren&rsquo;t token-priced. Video generation is excluded from the
-        included budget - it&rsquo;s always pay-per-use. Per-modality sub-caps are a{" "}
-        <strong>percentage of the daily amount above</strong> (e.g. 50 = that modality alone can spend up to half the
-        daily budget), not a separate dollar figure - each is an independent gate, so several modalities at 100% can
-        each spend the full amount. Leave a sub-cap blank to let that modality draw on the shared amount without its own
-        independent gate.
+        {tHC("hcPlatformadminComponentsSectionsBudgets.s21")}{" "}
+        <strong>{tHC("hcPlatformadminComponentsSectionsBudgets.s20")}</strong> {tHC("hcPlatformadminComponentsSectionsBudgets.s19")}
       </InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-40 space-y-1.5">
           <Label htmlFor="budget-amount-usd" className="text-xs text-muted-foreground">
-            Amount (USD)
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s18")}
           </Label>
           <Input
             id="budget-amount-usd"
@@ -203,7 +201,7 @@ export function PerUserBudgetSection() {
       </div>
 
       <div className="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Per-modality sub-caps (% of daily budget, optional)
+        {tHC("hcPlatformadminComponentsSectionsBudgets.s17")}
       </div>
       <div className="flex flex-wrap items-end gap-3">
         {["text", "image", "voice"].map((m) => (
@@ -238,7 +236,7 @@ export function PerUserBudgetSection() {
           {saving ? "Saving…" : "Save budget"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          Current: ${Number(budget?.dailyUsd ?? 0).toFixed(2)} / {windowLabel(budget?.windowSeconds ?? 86400)}
+          {tHC("hcPlatformadminComponentsSectionsBudgets.s16")}{Number(budget?.dailyUsd ?? 0).toFixed(2)} / {windowLabel(budget?.windowSeconds ?? 86400)}
         </span>
       </div>
     </SectionCard>
@@ -255,6 +253,7 @@ export function PerUserBudgetSection() {
 // 2026-09-26); PREMIUM/UNLIMITED multiply it (default 400,000 x 3 =
 // 1,200,000/30 days).
 export function FreeTierQuotaSection() {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [, setQuota] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -306,15 +305,15 @@ export function FreeTierQuotaSection() {
 
   if (loading) {
     return (
-      <SectionCard title="Platform token quota" icon={Gauge}>
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s15")} icon={Gauge}>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsBudgets.s8")}</p>
       </SectionCard>
     );
   }
 
   if (loadError) {
     return (
-      <SectionCard title="Platform token quota" icon={Gauge}>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s15")} icon={Gauge}>
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {loadError}
         </div>
@@ -327,20 +326,18 @@ export function FreeTierQuotaSection() {
 
   return (
     <SectionCard
-      title="Platform token quota"
+      title={tHC("hcPlatformadminComponentsSectionsBudgets.s15")}
       subtitle="Token cap on the platform-hosted LLM pool, per rolling 30 days - independent from the dollar budget above. Changes apply on the next request, no restart."
       icon={Gauge}
     >
       <InfoNote>
-        This is the cap behind &ldquo;monthly token limit reached&rdquo;. FREE tenants use the base value directly;
-        PREMIUM and UNLIMITED multiply it. To give one specific tenant a clean slate on their current window without
-        changing these limits, use &ldquo;Reset usage&rdquo; on that tenant&rsquo;s row in Tenants &amp; Users instead.
+        {tHC("hcPlatformadminComponentsSectionsBudgets.s14")}
       </InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-56 space-y-1.5">
           <Label htmlFor="budget-monthly-token-limit" className="text-xs text-muted-foreground">
-            Monthly token limit (FREE base, per 30 days)
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s13")}
           </Label>
           <Input
             id="budget-monthly-token-limit"
@@ -352,7 +349,7 @@ export function FreeTierQuotaSection() {
         </div>
         <div className="w-36 space-y-1.5">
           <Label htmlFor="budget-premium-multiplier" className="text-xs text-muted-foreground">
-            Premium multiplier
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s12")}
           </Label>
           <Input
             id="budget-premium-multiplier"
@@ -365,7 +362,7 @@ export function FreeTierQuotaSection() {
         </div>
         <div className="w-36 space-y-1.5">
           <Label htmlFor="budget-unlimited-multiplier" className="text-xs text-muted-foreground">
-            Unlimited multiplier
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s11")}
           </Label>
           <Input
             id="budget-unlimited-multiplier"
@@ -383,7 +380,7 @@ export function FreeTierQuotaSection() {
           {saving ? "Saving…" : "Save quota"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          Effective per 30 days: Premium {effectivePremium.toLocaleString()} tokens · Unlimited{" "}
+          {tHC("hcPlatformadminComponentsSectionsBudgets.s10")} {effectivePremium.toLocaleString()} {tHC("hcPlatformadminComponentsSectionsBudgets.s9")}{" "}
           {effectiveUnlimited.toLocaleString()} tokens
         </span>
       </div>
@@ -412,6 +409,7 @@ const REASONING_EFFORTS = [
 ];
 
 export function ChatGenerationSection() {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -474,15 +472,15 @@ export function ChatGenerationSection() {
 
   if (loading) {
     return (
-      <SectionCard title="Chat generation defaults" icon={MessagesSquare}>
-        <p className="py-1 text-sm text-muted-foreground">Loading…</p>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s7")} icon={MessagesSquare}>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsBudgets.s8")}</p>
       </SectionCard>
     );
   }
 
   if (loadError) {
     return (
-      <SectionCard title="Chat generation defaults" icon={MessagesSquare}>
+      <SectionCard title={tHC("hcPlatformadminComponentsSectionsBudgets.s7")} icon={MessagesSquare}>
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {loadError}
         </div>
@@ -492,14 +490,14 @@ export function ChatGenerationSection() {
 
   return (
     <SectionCard
-      title="Chat generation defaults"
+      title={tHC("hcPlatformadminComponentsSectionsBudgets.s7")}
       subtitle="Per-turn generation cost levers for the hosted chat path - independent from the spend caps above. Changes apply on the next request, no restart."
       icon={MessagesSquare}
     >
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-64 space-y-1.5">
           <Label htmlFor="chatgen-reasoning-effort" className="text-xs text-muted-foreground">
-            Gemini thinking effort
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s6")}
           </Label>
           <Select
             id="chatgen-reasoning-effort"
@@ -508,13 +506,12 @@ export function ChatGenerationSection() {
             options={REASONING_EFFORTS}
           />
           <p className="text-xs text-muted-foreground">
-            Reasoning budget for hosted-pool Gemini 2.5+ models - thinking tokens are billed as output;
-            &lsquo;low&rsquo; balances quality and cost
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s5")}
           </p>
         </div>
         <div className="w-44 space-y-1.5">
           <Label htmlFor="budget-history-max-turns" className="text-xs text-muted-foreground">
-            History window (turns)
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s4")}
           </Label>
           <Input
             id="budget-history-max-turns"
@@ -528,7 +525,7 @@ export function ChatGenerationSection() {
         </div>
         <div className="w-44 space-y-1.5">
           <Label htmlFor="budget-history-max-chars" className="text-xs text-muted-foreground">
-            History window (max characters)
+            {tHC("hcPlatformadminComponentsSectionsBudgets.s3")}
           </Label>
           <Input
             id="budget-history-max-chars"
@@ -542,7 +539,7 @@ export function ChatGenerationSection() {
         </div>
       </div>
       <p className="mt-1.5 text-xs text-muted-foreground">
-        How much prior conversation is replayed to the model each turn - the main lever on per-turn token cost
+        {tHC("hcPlatformadminComponentsSectionsBudgets.s2")}
       </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -550,7 +547,7 @@ export function ChatGenerationSection() {
           {saving ? "Saving…" : "Save defaults"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          Current: {settings?.geminiReasoningEffort ?? "low"} effort · {Number(settings?.historyMaxTurns ?? 40)} turns ·{" "}
+          Current: {settings?.geminiReasoningEffort ?? "low"} {tHC("hcPlatformadminComponentsSectionsBudgets.s1")} {Number(settings?.historyMaxTurns ?? 40)} turns ·{" "}
           {Number(settings?.historyMaxChars ?? 32000).toLocaleString()} chars
         </span>
       </div>

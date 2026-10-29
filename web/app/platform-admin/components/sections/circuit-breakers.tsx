@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Skeleton } from "../ui/skeleton";
 import { SectionCard, InfoNote } from "./common";
 import { useConfirm } from "../admin/ConfirmDialog";
+import { useTranslations } from "../../../lib/i18n";
 
 // Tool circuit breaker (ToolCircuitBreakerService): per (tenant, tool) it trips
 // after N consecutive failures and short-circuits that tool for a cooldown.
@@ -18,6 +19,7 @@ import { useConfirm } from "../admin/ConfirmDialog";
 // a still-broken tool simply trips again. Thresholds are boot-time config, so
 // they are shown read-only rather than as editable fields.
 export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsCircuitbreakers");
   const askConfirm = useConfirm();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title="Tool circuit breakers"
+      title={tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s8")}
       subtitle="Live state per tenant and tool - open circuits and failure streaks in progress"
       icon={CircuitBoard}
       delay={delay}
@@ -84,12 +86,11 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
       {loading && !data && <Skeleton className="h-16 w-full" />}
       {cfg && (
         <p className="text-xs text-muted-foreground">
-          Trips after <b>{cfg.failureThreshold}</b> consecutive failures within <b>{cfg.windowMinutes} min</b>, then
-          blocks the tool for <b>{cfg.cooldownMinutes} min</b>. These are deployment settings (read-only here).
+          {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s7")} <b>{cfg.failureThreshold}</b> {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s6")} <b>{cfg.windowMinutes} min</b>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s5")} <b>{cfg.cooldownMinutes} min</b>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s4")}
         </p>
       )}
       {data && entries.length === 0 && (
-        <p className="text-sm text-muted-foreground">No open circuits and no failure streaks right now.</p>
+        <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s3")}</p>
       )}
       {entries.map((e) => {
         const id = `${e.tenantId}:${e.tool}`;
@@ -111,7 +112,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
               </p>
               {e.open && e.lastError && (
                 <p className="mt-1 truncate text-xs text-muted-foreground" title={e.lastError}>
-                  last error: <code>{e.lastError}</code>
+                  {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s2")} <code>{e.lastError}</code>
                 </p>
               )}
             </div>
@@ -121,7 +122,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
           </div>
         );
       })}
-      {data?.truncated && <InfoNote>Showing the first 500 entries only.</InfoNote>}
+      {data?.truncated && <InfoNote>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s1")}</InfoNote>}
     </SectionCard>
   );
 }

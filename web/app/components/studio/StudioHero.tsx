@@ -9,6 +9,7 @@ import { JOB_PLACEHOLDERS } from "./topicDraft";
 import { TONES } from "./studioTheme";
 import { PhoneReel } from "./PhoneStage";
 import ChatbotVsAgent from "./ChatbotVsAgent";
+import { useTranslations } from "../../lib/i18n";
 
 // The opening. One promise - say a job, hold the agent in your hand - and the
 // smallest possible first step: a text box that already IS the first question
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Props) {
+    const tHC = useTranslations("hcComponentsStudioStudioHero");
   const [text, setText] = useState("");
   const [ph, setPh] = useState(0);
   useEffect(() => {
@@ -53,20 +55,17 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs text-violet-700 dark:text-violet-300"
           >
-            <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> No signup · no card · real agents, real
-            tools
+            <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s11")}
           </motion.div>
           <h1 id="hero-title" className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-            Say the job.
+            {tHC("hcComponentsStudioStudioHero.s10")}
             <br />
             <span className="bg-gradient-to-r from-violet-600 via-indigo-500 to-sky-500 bg-clip-text text-transparent">
-              Hold the agent in your hand.
+              {tHC("hcComponentsStudioStudioHero.s9")}
             </span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            A chatbot answers. An <b className="text-foreground">agent gets it done</b> - it reads your documents, uses
-            real tools, stops to ask you before anything that matters, and shows up on your phone. Build one right now,
-            from an empty page, in the next few minutes.
+            {tHC("hcComponentsStudioStudioHero.s8")} <b className="text-foreground">{tHC("hcComponentsStudioStudioHero.s7")}</b> {tHC("hcComponentsStudioStudioHero.s6")}
           </p>
 
           <form onSubmit={submit} className="mt-7 max-w-xl" data-tour="hero-launch">
@@ -74,7 +73,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
               htmlFor="hero-job"
               className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
-              What should your agent get done?
+              {tHC("hcComponentsStudioStudioHero.s5")}
             </label>
             <div className="flex flex-col gap-2 rounded-2xl border border-violet-500/30 bg-background/70 p-2 shadow-lg shadow-violet-500/10 backdrop-blur sm:flex-row">
               <input
@@ -86,7 +85,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
                 className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2.5 text-base outline-none placeholder:text-muted-foreground"
               />
               <Button type="submit" size="lg" className={TONES.violet.cta} disabled={phase === "unavailable"}>
-                <Sparkles aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> Build it{" "}
+                <Sparkles aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s4")}{" "}
                 <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
               </Button>
             </div>
@@ -97,8 +96,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
                 </>
               ) : (
                 <>
-                  <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Nothing is pre-built. Unlimited runs
-                  under fair use, on the platform&apos;s lowest-cost model - judge the mechanics here, not the ceiling.
+                  <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s3")}
                 </>
               )}
             </div>
@@ -114,9 +112,9 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
               <Clapperboard aria-hidden="true" className="h-5 w-5 shrink-0" />
             </span>
             <span>
-              <span className="block text-sm font-semibold">Watch “An Impossible Day” - full screen</span>
+              <span className="block text-sm font-semibold">{tHC("hcComponentsStudioStudioHero.s2")}</span>
               <span className="block text-xs text-muted-foreground">
-                24 hours, one sleeping shop owner, eight agents. Then build your own - live.
+                {tHC("hcComponentsStudioStudioHero.s1")}
               </span>
             </span>
           </button>

@@ -21,23 +21,24 @@ import { usePageReady } from "../../components/RouteTransition";
 import GithubConnectCard from "../components/GithubConnectCard";
 import { Button } from "../../components/ui/button";
 import { APP_BUILDER_URL, APP_BUILDER_CONFIGURED } from "../lib";
+import { useTranslations } from "../../lib/i18n";
 
 export default function ConnectGithubPage() {
+    const tHC = useTranslations("hcBuildGithubPage");
   const [loaded, setLoaded] = useState(false);
   useEffect(() => setLoaded(true), []);
   usePageReady(loaded);
 
   if (!APP_BUILDER_CONFIGURED) {
     return (
-      <AppShell title="Connect GitHub" eyebrow="App Builder" wide>
+      <AppShell title={tHC("hcBuildGithubPage.s3")} eyebrow="App Builder" wide>
         <div className="mx-auto max-w-xl py-16 text-center">
           <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
             <Sparkles aria-hidden="true" size={22} />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">App Builder is not available on this deployment</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildGithubPage.s5")}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            The app-builder service is an optional add-on and is not running here yet. There is nothing to connect
-            GitHub to.
+            {tHC("hcBuildGithubPage.s4")}
           </p>
         </div>
       </AppShell>
@@ -45,20 +46,18 @@ export default function ConnectGithubPage() {
   }
 
   return (
-    <AppShell title="Connect GitHub" eyebrow="App Builder" wide>
+    <AppShell title={tHC("hcBuildGithubPage.s3")} eyebrow="App Builder" wide>
       <div className="mx-auto max-w-2xl py-2">
         <Button asChild variant="ghost" size="sm" className="mb-4 -ms-2 text-muted-foreground">
           <Link href="/build">
-            <ArrowLeft aria-hidden="true" size={14} /> Back to App Builder
+            <ArrowLeft aria-hidden="true" size={14} /> {tHC("hcBuildGithubPage.s2")}
           </Link>
         </Button>
 
         <GithubConnectCard />
 
         <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-          Nothing here talks to a preview container we run — that infrastructure is being retired. Once a repo is
-          connected, go back to App Builder and keep chatting with the assistant; each change opens or updates a pull
-          request on {APP_BUILDER_URL ? "your connected repo" : "GitHub"}.
+          {tHC("hcBuildGithubPage.s1")} {APP_BUILDER_URL ? "your connected repo" : "GitHub"}.
         </p>
       </div>
     </AppShell>

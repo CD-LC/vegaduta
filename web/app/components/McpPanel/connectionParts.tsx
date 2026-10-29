@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { Alert, AlertTitle, AlertDescription } from "../ui/alert";
 import { PHASE_LABELS, splitConnectionError, usageStatusOf } from "./helpers";
 import { HintBox } from "./parts";
+import { useTranslations } from "../../lib/i18n";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ---------------------------------------------------------------------------
@@ -33,6 +34,7 @@ let ackEndpointSupported: boolean | null = null;
 // reading like a stack-trace dump. Short single-line details still render
 // directly - a disclosure hiding twelve words would just be friction.
 export function ConnectionErrorBlock({ server, label }: { server: any; label: string }) {
+    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   const { detail, hint } = splitConnectionError(server);
   if (!detail && !hint) return null;
   const shortDetail = detail && detail.length <= 110 && !detail.includes("\n");
@@ -43,7 +45,7 @@ export function ConnectionErrorBlock({ server, label }: { server: any; label: st
       {detail && shortDetail && <p className="text-sm text-destructive">{detail}</p>}
       {detail && !shortDetail && (
         <details className="text-xs">
-          <summary className="cursor-pointer text-muted-foreground">Show technical details</summary>
+          <summary className="cursor-pointer text-muted-foreground">{tHC("hcComponentsMcpPanelConnectionParts.s4")}</summary>
           {/* Real code-block surface (background + border), not just red text
            * floating on the panel background - the thing the product owner
            * flagged as "reads like a raw stack trace" was this block having
@@ -66,12 +68,13 @@ export function ConnectionErrorBlock({ server, label }: { server: any; label: st
 // this degrades cleanly against an older core / a core that never lands the
 // field on this exact response shape.
 export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: any; busy: boolean }) {
+    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   if (!fix || typeof fix.command !== "string" || !fix.command.trim()) return null;
   const argsText = Array.isArray(fix.args) ? fix.args.join(" ") : "";
   return (
     <Alert variant="warning" className="mt-3">
       <Wrench aria-hidden="true" />
-      <AlertTitle>Suggested fix</AlertTitle>
+      <AlertTitle>{tHC("hcComponentsMcpPanelConnectionParts.s3")}</AlertTitle>
       <AlertDescription>
         {fix.reason && <p>{fix.reason}</p>}
         <code className="block w-full break-words rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/10">
@@ -82,8 +85,7 @@ export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: a
           {busy ? "Applying fix…" : "Apply suggested fix"}
         </Button>
         <p className="text-xs text-muted-foreground">
-          This re-registers the server with the corrected command. Any credentials it needs may have to be re-entered
-          afterward via Enable.
+          {tHC("hcComponentsMcpPanelConnectionParts.s2")}
         </p>
       </AlertDescription>
     </Alert>
@@ -189,6 +191,7 @@ export function TestConnectionSection({
 // gates agents on usageStatus (field present) and only until a 404 proves
 // the acknowledge endpoint isn't there yet.
 export function AcknowledgeControl({ server, onRefresh }: { server: any; onRefresh: any }) {
+    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   const [busy, setBusy] = useState(false);
   const [ackError, setAckError] = useState<string | null>(null);
   const [supported, setSupported] = useState<boolean | null>(ackEndpointSupported);
@@ -231,7 +234,7 @@ export function AcknowledgeControl({ server, onRefresh }: { server: any; onRefre
         {busy ? "Marking as trusted…" : "Use anyway (I trust this server)"}
       </Button>
       <p className="mt-1.5 text-xs text-muted-foreground">
-        Deliberate override: agents will use this server without a passing connection test.
+        {tHC("hcComponentsMcpPanelConnectionParts.s1")}
       </p>
       {ackError && <p className="mt-1.5 text-xs text-destructive">{ackError}</p>}
     </div>

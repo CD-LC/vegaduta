@@ -31,6 +31,7 @@ import {
 } from "../lib/adminApi/spend";
 import { AdminErrorState, AdminTableWrap } from "../components/admin/AdminKit";
 import { Select } from "../../components/ui/select";
+import { useTranslations } from "../../lib/i18n";
 
 // Spend & Reports - platform-wide, from PlatformSpendController.
 // TWO different money figures are shown side by side and never blended:
@@ -73,7 +74,8 @@ function Table({ head, children }: { head: any; children: any }) {
 }
 
 function Empty() {
-  return <p className="py-3 text-xs text-muted-foreground">No LLM usage recorded in this date range.</p>;
+    const tHC = useTranslations("hcPlatformadminSpendPage");
+  return <p className="py-3 text-xs text-muted-foreground">{tHC("hcPlatformadminSpendPage.s17")}</p>;
 }
 
 function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -106,6 +108,7 @@ function CoverageNote({ meta }: { meta: SpendMeta | undefined }) {
 }
 
 export default function SpendReportsPage() {
+    const tHC = useTranslations("hcPlatformadminSpendPage");
   const today = useMemo(() => new Date(), []);
   const [from, setFrom] = useState(isoDay(new Date(today.getTime() - 29 * 86400000)));
   const [to, setTo] = useState(isoDay(today));
@@ -207,12 +210,9 @@ export default function SpendReportsPage() {
   );
 
   return (
-    <AdminShell title="Spend & Reports">
+    <AdminShell title={tHC("hcPlatformadminSpendPage.s16")}>
       <PageHint>
-        Platform-wide LLM spend across every active tenant. Two different figures are shown and never blended:
-        &ldquo;All providers&rdquo; is the estimated cost of every recorded call including tenants&rsquo; own BYOK keys
-        (usage, not what the platform paid); &ldquo;Hosted pool&rdquo; is the platform-paid PLATFORM_HOSTED provider
-        only. Both are estimates from stored per-call figures, not provider invoices.
+        {tHC("hcPlatformadminSpendPage.s15")}
       </PageHint>
 
       <SectionCard
@@ -267,18 +267,18 @@ export default function SpendReportsPage() {
           hosted && (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Tile
-                label="All providers - est. cost"
+                label={tHC("hcPlatformadminSpendPage.s14")}
                 value={formatUsd(all.estimatedCostUsd)}
                 sub="incl. tenants' BYOK keys"
               />
               <Tile
-                label="Hosted pool - est. cost"
+                label={tHC("hcPlatformadminSpendPage.s13")}
                 value={formatUsd(hosted.estimatedCostUsd)}
                 sub="platform-paid (PLATFORM_HOSTED)"
               />
-              <Tile label="Calls (all providers)" value={n(all.totalCalls)} sub={`${n(all.errorCount)} errors`} />
+              <Tile label={tHC("hcPlatformadminSpendPage.s12")} value={n(all.totalCalls)} sub={`${n(all.errorCount)} errors`} />
               <Tile
-                label="Tokens (all providers)"
+                label={tHC("hcPlatformadminSpendPage.s11")}
                 value={n(all.totalTokens)}
                 sub={all.avgLatencyMs == null ? undefined : `avg latency ${Math.round(all.avgLatencyMs)} ms`}
               />
@@ -287,13 +287,11 @@ export default function SpendReportsPage() {
         )}
         <div className="pt-2">{exportButtons}</div>
         <InfoNote>
-          CSV files are fetched with your session token and saved from the browser. The by-model view covers all
-          providers only (the rollup cannot filter it to the hosted pool). Latency percentiles are not shown because
-          they cannot be merged across tenants truthfully.
+          {tHC("hcPlatformadminSpendPage.s10")}
         </InfoNote>
       </SectionCard>
 
-      <SectionCard title="By tenant" subtitle="Ordered by all-provider estimated cost" delay={0.03}>
+      <SectionCard title={tHC("hcPlatformadminSpendPage.s9")} subtitle="Ordered by all-provider estimated cost" delay={0.03}>
         {tenants.length === 0 ? (
           <Empty />
         ) : (
@@ -304,8 +302,8 @@ export default function SpendReportsPage() {
                   <Th>Tenant</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>All providers (est.)</Th>
-                  <Th right>Hosted pool (est.)</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s7")}</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s5")}</Th>
                 </>
               }
             >
@@ -340,12 +338,12 @@ export default function SpendReportsPage() {
             <Table
               head={
                 <>
-                  <Th>Date (UTC)</Th>
+                  <Th>{tHC("hcPlatformadminSpendPage.s8")}</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>All providers (est.)</Th>
-                  <Th right>Hosted calls</Th>
-                  <Th right>Hosted pool (est.)</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s7")}</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s6")}</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s5")}</Th>
                 </>
               }
             >
@@ -374,7 +372,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <SectionCard
-        title="By provider"
+        title={tHC("hcPlatformadminSpendPage.s4")}
         subtitle="The PLATFORM_HOSTED row is the platform's own outlay; the rest is tenant BYOK usage"
         delay={0.09}
       >
@@ -388,7 +386,7 @@ export default function SpendReportsPage() {
                 <Th right>Calls</Th>
                 <Th right>Errors</Th>
                 <Th right>Tokens</Th>
-                <Th right>Est. cost</Th>
+                <Th right>{tHC("hcPlatformadminSpendPage.s2")}</Th>
               </>
             }
           >
@@ -409,7 +407,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <SectionCard
-        title="By model (all providers)"
+        title={tHC("hcPlatformadminSpendPage.s3")}
         subtitle={
           modelTotal > models.length
             ? `Top ${models.length} of ${modelTotal} models by estimated cost`
@@ -428,7 +426,7 @@ export default function SpendReportsPage() {
                   <Th>Modality</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>Est. cost</Th>
+                  <Th right>{tHC("hcPlatformadminSpendPage.s2")}</Th>
                 </>
               }
             >
@@ -456,8 +454,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <PageHint>
-        <strong>All-time</strong> live views below - they ignore both the date range and the tenant selector above, and
-        always cover every tenant since records began.
+        <strong>All-time</strong> {tHC("hcPlatformadminSpendPage.s1")}
       </PageHint>
       <LlmUsageSection pollMs={10000} delay={0} />
       <HostedCostSection pollMs={10000} delay={0.03} />

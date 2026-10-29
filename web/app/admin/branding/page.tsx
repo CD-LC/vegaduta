@@ -56,6 +56,7 @@ interface TenantSettings {
 }
 
 function AdminBrandingInner() {
+    const tHC = useTranslations("hcAdminBrandingPage");
   const tg = useTranslations("f2GapsAdmin");
   // MANAGE_TENANT_SETTINGS scope (granular RBAC, 2026-09-23) - was blanket
   // isAdmin; branding/settings is its own delegatable scope now.
@@ -192,14 +193,14 @@ function AdminBrandingInner() {
     <AppShell eyebrow="Branding">
       <PageHeader
         eyebrow="White-label"
-        title="Your brand"
+        title={tHC("hcAdminBrandingPage.s19")}
         subtitle="Replace the VegaDūta name and mark with your own on the pages your customers see — shared agents, shared workflows and the embeddable chat widget."
       />
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          Loading your branding…
+          {tHC("hcAdminBrandingPage.s18")}
         </div>
       )}
 
@@ -218,15 +219,14 @@ function AdminBrandingInner() {
         // why any values already stored are still shown below.
         <Alert className="mb-6">
           <Sparkles className="size-4" aria-hidden="true" />
-          <AlertTitle>White-labelling is on the Unlimited plan</AlertTitle>
+          <AlertTitle>{tHC("hcAdminBrandingPage.s17")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-3">
             <span>
-              Your current plan{settings?.plan ? ` (${settings.plan})` : ""} shows VegaDūta branding on shared pages.
-              Upgrade to use your own name and logo there instead.
+              {tHC("hcAdminBrandingPage.s16")}{settings?.plan ? ` (${settings.plan})` : ""} {tHC("hcAdminBrandingPage.s15")}
             </span>
             {isBillingEnabled() && (
               <Button asChild size="sm">
-                <Link href="/admin/billing">See plans</Link>
+                <Link href="/admin/billing">{tHC("hcAdminBrandingPage.s14")}</Link>
               </Button>
             )}
           </AlertDescription>
@@ -238,7 +238,7 @@ function AdminBrandingInner() {
           {error && (
             <Alert variant="destructive">
               <TriangleAlert className="size-4" aria-hidden="true" />
-              <AlertTitle>That didn&apos;t work</AlertTitle>
+              <AlertTitle>{tHC("hcAdminBrandingPage.s13")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -253,8 +253,7 @@ function AdminBrandingInner() {
             <CardHeader>
               <CardTitle>Logo</CardTitle>
               <CardDescription>
-                PNG, JPEG or WebP, up to 2MB. Shown at about 28px tall, so a wide mark on a transparent background
-                reads best. Replacing it updates every shared page immediately.
+                {tHC("hcAdminBrandingPage.s12")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -277,9 +276,9 @@ function AdminBrandingInner() {
                     // three existing render sites for this exact URL (both
                     // share pages and the widget) all use a plain <img> too.
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt="Your current logo" className="max-h-16 max-w-36 object-contain" />
+                    <img src={logoUrl} alt={tHC("hcAdminBrandingPage.s11")} className="max-h-16 max-w-36 object-contain" />
                   ) : (
-                    <span className="px-2 text-center text-xs text-muted-foreground">No logo set</span>
+                    <span className="px-2 text-center text-xs text-muted-foreground">{tHC("hcAdminBrandingPage.s10")}</span>
                   )}
                 </div>
 
@@ -287,7 +286,7 @@ function AdminBrandingInner() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    aria-label="Upload logo image"
+                    aria-label={tHC("hcAdminBrandingPage.s9")}
                     accept={ACCEPTED_TYPES.join(",")}
                     className="sr-only"
                     onChange={(e) => void onPickFile(e.target.files?.[0])}
@@ -327,8 +326,7 @@ function AdminBrandingInner() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Uploaded logos are served from your VegaDūta API over https, so they work on any shared page
-                    without you hosting anything.
+                    {tHC("hcAdminBrandingPage.s8")}
                   </p>
                 </div>
               </div>
@@ -337,14 +335,13 @@ function AdminBrandingInner() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Brand name</CardTitle>
+              <CardTitle>{tHC("hcAdminBrandingPage.s7")}</CardTitle>
               <CardDescription>
-                Shown next to your logo on shared pages, and used as the page title when a link is unfurled. Leave it
-                empty to show nothing but the logo.
+                {tHC("hcAdminBrandingPage.s6")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <Label htmlFor="brand-display-name">Display name</Label>
+              <Label htmlFor="brand-display-name">{tHC("hcAdminBrandingPage.s5")}</Label>
               <Input
                 id="brand-display-name"
                 value={displayName}
@@ -372,14 +369,13 @@ function AdminBrandingInner() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Use a logo you already host</CardTitle>
+              <CardTitle>{tHC("hcAdminBrandingPage.s4")}</CardTitle>
               <CardDescription>
-                Optional. If your logo is already on your own CDN, point at it here instead of uploading. Must be an
-                absolute https URL — uploading a file above overwrites whatever is set here.
+                {tHC("hcAdminBrandingPage.s3")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <Label htmlFor="brand-logo-url">Logo URL</Label>
+              <Label htmlFor="brand-logo-url">{tHC("hcAdminBrandingPage.s2")}</Label>
               <Input
                 id="brand-logo-url"
                 value={logoUrlDraft}
@@ -399,7 +395,7 @@ function AdminBrandingInner() {
                   upgradeReason="White-labelling is included on the Unlimited plan."
                 >
                   {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                  Save URL
+                  {tHC("hcAdminBrandingPage.s1")}
                 </Button>
               </div>
             </CardContent>

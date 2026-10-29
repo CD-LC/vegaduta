@@ -43,6 +43,7 @@ export default function RunHistory({
   /** The tools the sandbox simulated in the open run (from its detail); empty for a quick run or when none was. */
   simulatedTools?: string[];
 }) {
+    const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunHistory");
   const t = useTranslations("evalControls");
   // The turn records OK, FAILED, NOT_RUN, AWAITING_APPROVAL, REPLAYED or SIMULATED; an unknown value is shown as it came.
   const toolStatusLabel = (status: string): string => {
@@ -58,10 +59,10 @@ export default function RunHistory({
   };
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-foreground">Run history</h3>
+      <h3 className="text-sm font-semibold text-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s9")}</h3>
       {loaded && runs.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No runs yet — hit Run to replay every case and score it against the pass bar.
+          {tHC("hcAgentsQualityEvalDatasetsRunHistory.s8")}
         </p>
       )}
       <div className="space-y-2">
@@ -92,7 +93,7 @@ export default function RunHistory({
               {run.judgeModel && <span className="text-xs text-muted-foreground">judge: {run.judgeModel}</span>}
               <JudgeTrustBadge info={run.judgeCalibration} />
               {(run.repeats ?? 1) > 1 && <span className="text-xs text-muted-foreground">×{run.repeats} reps</span>}
-              {run.strictJudge && <span className="text-xs text-muted-foreground">strict judge</span>}
+              {run.strictJudge && <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s7")}</span>}
               {run.mode && (
                 <Badge
                   variant={run.mode === "FULL" ? "accent" : "outline"}
@@ -114,7 +115,7 @@ export default function RunHistory({
                     variant="ghost"
                     size="sm"
                     onClick={() => onDownloadJunit(run.id)}
-                    title="Download JUnit XML (CI report)"
+                    title={tHC("hcAgentsQualityEvalDatasetsRunHistory.s6")}
                   >
                     <Download size={13} aria-hidden="true" />
                   </Button>
@@ -122,7 +123,7 @@ export default function RunHistory({
                     variant="ghost"
                     size="sm"
                     onClick={() => onDownloadRunJsonl(run.id)}
-                    title="Download run as JSONL (prompt/optimizer input)"
+                    title={tHC("hcAgentsQualityEvalDatasetsRunHistory.s5")}
                   >
                     <Braces size={13} aria-hidden="true" />
                   </Button>
@@ -146,7 +147,7 @@ export default function RunHistory({
 
             {runDetailId === run.id && (
               <div className="space-y-2 border-t border-border p-3">
-                {caseResults === null && <p className="text-sm text-muted-foreground">Loading case results…</p>}
+                {caseResults === null && <p className="text-sm text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s4")}</p>}
                 {simulatedTools.length > 0 && (
                   <p className="text-xs text-muted-foreground" data-testid="run-simulated-tools">
                     {t("runSimulatedTools", { tools: simulatedTools.join(", ") })}
@@ -165,14 +166,14 @@ export default function RunHistory({
                       {r.status === "ERROR" ? (
                         <Badge variant="destructive">Error</Badge>
                       ) : r.status === "UNAVAILABLE" ? (
-                        <Badge variant="secondary">Not scored</Badge>
+                        <Badge variant="secondary">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s3")}</Badge>
                       ) : (
                         <Badge variant="outline">{pct(r.overallScore)}</Badge>
                       )}
-                      {r.expectedToolsSatisfied === false && <Badge variant="destructive">tools missing</Badge>}
+                      {r.expectedToolsSatisfied === false && <Badge variant="destructive">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s2")}</Badge>}
                       {r.expectedToolsSatisfied === true && (
                         <Badge variant="state" state="var(--state-success)">
-                          tools ok
+                          {tHC("hcAgentsQualityEvalDatasetsRunHistory.s1")}
                         </Badge>
                       )}
                       {traceLink(r.langfuseTraceUrl)}

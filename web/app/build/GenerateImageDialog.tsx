@@ -20,6 +20,7 @@ import {
   validateImageRequest,
   type ImageKind,
 } from "./imagePrompt";
+import { useTranslations } from "../lib/i18n";
 
 interface Props {
   disabled?: boolean;
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp, disabled }: Props) {
+    const tHC = useTranslations("hcBuildGenerateImageDialog");
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -119,7 +121,7 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
         disabled={disabled}
         onClick={() => setOpen(true)}
       >
-        <Sparkles aria-hidden="true" size={12} /> Generate image
+        <Sparkles aria-hidden="true" size={12} /> {tHC("hcBuildGenerateImageDialog.s7")}
       </Button>
       {open && (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- backdrop click dismisses; the dialog has its own close button
@@ -143,7 +145,7 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
             className="max-h-[90dvh] w-full max-w-md overflow-auto rounded-xl border border-border bg-background p-4 shadow-lg"
           >
             <h3 id={titleId} className="mb-3 text-sm font-semibold">
-              Generate an image
+              {tHC("hcBuildGenerateImageDialog.s6")}
             </h3>
             <div className="mb-3 flex flex-wrap gap-2">
               {IMAGE_KINDS.map((k) => (
@@ -168,10 +170,10 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
               ref={promptRef}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. a friendly fox for a bakery called Crumb"
+              placeholder={tHC("hcBuildGenerateImageDialog.s5")}
               rows={3}
               disabled={busy}
-              aria-label="Image description"
+              aria-label={tHC("hcBuildGenerateImageDialog.s4")}
             />
             <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
               <label htmlFor="gen-image-size">Size</label>
@@ -191,7 +193,7 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
             )}
             {result && (
               <p className="mt-2 text-xs text-foreground">
-                Saved as <code>{result.path}</code>.
+                {tHC("hcBuildGenerateImageDialog.s3")} <code>{result.path}</code>.
               </p>
             )}
             <div className="mt-3 flex justify-end gap-2">
@@ -207,13 +209,13 @@ export default function GenerateImageDialog({ projectId, onGenerated, onUseInApp
                     close();
                   }}
                 >
-                  Use in app
+                  {tHC("hcBuildGenerateImageDialog.s2")}
                 </Button>
               )}
               <Button size="sm" onClick={() => void generate()} disabled={busy}>
                 {busy ? (
                   <>
-                    <Loader2 aria-hidden="true" size={12} className="me-1 animate-spin" /> Generating…
+                    <Loader2 aria-hidden="true" size={12} className="me-1 animate-spin" /> {tHC("hcBuildGenerateImageDialog.s1")}
                   </>
                 ) : result ? (
                   "Generate another"

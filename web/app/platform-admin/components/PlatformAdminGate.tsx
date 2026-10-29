@@ -7,6 +7,7 @@ import { auth } from "../../lib/auth";
 import { isPersonalEdition, isPersonalPlatformAdminAllowed } from "../../lib/edition";
 import Logo from "./Logo";
 import NotFound from "../not-found";
+import { useTranslations } from "../../lib/i18n";
 
 // Platform-admin access gate for the merged console (2026 merge of the
 // standalone web-admin app into web/app/platform-admin).
@@ -49,6 +50,7 @@ export function useAuth(): PlatformAdminAuth {
 }
 
 export default function PlatformAdminGate({ children }: { children: ReactNode }) {
+    const tHC = useTranslations("hcPlatformadminComponentsPlatformAdminGate");
   // web's root AuthProvider only mounts children once Keycloak init has
   // resolved "ready" on a non-public route, so by the time this renders the
   // session is real. A null context is unreachable in practice (anonymous
@@ -73,7 +75,7 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
         <div className="auth-card" style={{ textAlign: "center" }}>
           <Logo size={48} />
           <p className="muted" style={{ marginTop: "1rem" }}>
-            Signing you in…
+            {tHC("hcPlatformadminComponentsPlatformAdminGate.s5")}
           </p>
         </div>
       </main>
@@ -92,14 +94,12 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
       <main className="auth-shell">
         <div className="auth-card" style={{ textAlign: "center", maxWidth: "440px" }}>
           <Logo size={48} />
-          <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>Access restricted</h1>
+          <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>{tHC("hcPlatformadminComponentsPlatformAdminGate.s4")}</h1>
           <p className="muted" style={{ marginTop: "0.5rem" }}>
-            You&apos;re signed in as <strong>{ctx.username}</strong>, but this account doesn&apos;t hold the
-            platform-admin role this section requires. Ask an existing platform admin to grant it to you in Keycloak, or
-            sign in with a different account.
+            {tHC("hcPlatformadminComponentsPlatformAdminGate.s3")} <strong>{ctx.username}</strong>{tHC("hcPlatformadminComponentsPlatformAdminGate.s2")}
           </p>
           <button type="button" className="cross-link" style={{ marginTop: "1rem" }} onClick={() => auth.logout()}>
-            Sign out
+            {tHC("hcPlatformadminComponentsPlatformAdminGate.s1")}
           </button>
         </div>
       </main>

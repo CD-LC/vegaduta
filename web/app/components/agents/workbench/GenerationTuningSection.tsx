@@ -14,8 +14,10 @@ import ModelInfoCard, { modelOptionLabel } from "../ModelInfoCard";
 import { useWorkbench } from "./context";
 import { BEHAVIOR_ANCHORS } from "../AgentWorkbench/behaviorModel";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function GenerationTuningSection() {
+    const tHC = useTranslations("hcComponentsAgentsWorkbenchGenerationTuningSection");
   const {
     tuningSummary,
     isDraft,
@@ -77,7 +79,7 @@ export default function GenerationTuningSection() {
       <WorkbenchSection
         anchorId={BEHAVIOR_ANCHORS.generation}
         icon={<Gauge size={13} />}
-        label="Generation tuning"
+        label={tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s3")}
         cat="var(--cat-comms)"
         actions={<WorkbenchSection.Summary>{tuningSummary}</WorkbenchSection.Summary>}
       >
@@ -149,7 +151,7 @@ export default function GenerationTuningSection() {
           <>
             {tuningMode === "SIMPLE" && (
               <p className="mb-2 text-[11px] text-muted-foreground">
-                Simple mode: the sliders show the auto-tuned preset and are read-only. Switch to Manual to change them.
+                {tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s2")}
               </p>
             )}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -206,8 +208,7 @@ export default function GenerationTuningSection() {
                 aria-disabled="true"
                 className="mt-4 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground opacity-80"
               >
-                Save the agent first - top-K, stop sequences, frequency/presence penalty and seed are set on a saved
-                agent.
+                {tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s1")}
               </p>
             ) : (
               <div className="mt-4">

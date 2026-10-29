@@ -6,6 +6,7 @@ import { PageHint, SectionCard, InfoNote } from "../components/sections/common";
 import { SystemStatusSection } from "../components/sections/health";
 import { ExternalToolsSection } from "../components/sections/external-tools";
 import { IssuesSection, LlmUsageSection, ActivitySection } from "../components/sections/observability";
+import { useTranslations } from "../../lib/i18n";
 
 // Diagnostics & Observability §10 - the single pane where an admin diagnoses
 // everything without hunting across tools. Fully built this pass since its spec
@@ -17,22 +18,20 @@ import { IssuesSection, LlmUsageSection, ActivitySection } from "../components/s
 // Phase B (iframe-embedded Grafana/Langfuse behind a scoped token) is the
 // documented follow-up and intentionally not attempted here.
 export default function DiagnosticsPage() {
+    const tHC = useTranslations("hcPlatformadminDiagnosticsPage");
   return (
-    <AdminShell title="Diagnostics & Observability">
+    <AdminShell title={tHC("hcPlatformadminDiagnosticsPage.s4")}>
       <PageHint>
-        One portal to diagnose everything - deep links to the external monitoring stack, plus native panels for the data
-        core already exposes in-app. No hunting across tools.
+        {tHC("hcPlatformadminDiagnosticsPage.s3")}
       </PageHint>
 
       <ExternalToolsSection delay={0} />
 
       <InfoNote>
-        The panels below render data core exposes directly - no external tool needed. External dashboards
-        (Grafana/Prometheus/Langfuse/Temporal) open in a new tab above; embedding them inline behind a scoped token is a
-        planned Phase B.
+        {tHC("hcPlatformadminDiagnosticsPage.s2")}
       </InfoNote>
 
-      <SectionCard title="System status" icon={HeartPulse} delay={0.03}>
+      <SectionCard title={tHC("hcPlatformadminDiagnosticsPage.s1")} icon={HeartPulse} delay={0.03}>
         <SystemStatusSection pollMs={15000} hideHeader />
       </SectionCard>
 

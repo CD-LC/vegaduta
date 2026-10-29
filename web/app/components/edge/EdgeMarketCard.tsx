@@ -76,6 +76,7 @@ export default function MarketCard({
    * optional vision/voice download must not offer it. Omitted = not shown. */
   onUseHosted?: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsEdgeEdgeMarketCard");
   const t = useTranslations("edge");
   const [switchedToHosted, setSwitchedToHosted] = useState(false);
   // 2026-09-19: typed failure → a sentence and, where this card can perform
@@ -217,7 +218,7 @@ export default function MarketCard({
           </div>
           {onUseHosted && switchedToHosted && (
             <p className="mt-1 leading-relaxed text-muted-foreground" role="status">
-              Switched to the hosted model. You can change it back with the mode setting at the top of this page.
+              {tHC("hcComponentsEdgeEdgeMarketCard.s1")}
             </p>
           )}
         </div>

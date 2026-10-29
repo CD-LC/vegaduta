@@ -27,6 +27,7 @@ export default function RailFooter({
   collapsibleRail: boolean;
   onOpenAvatar: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsShellRailFooter");
   const tNav = useTranslations("nav");
   const { username, firstName, logout } = useAuth();
   const { avatarBlobUrl } = useAppChrome();
@@ -45,8 +46,8 @@ export default function RailFooter({
           <button
             type="button"
             onClick={() => onOpenAvatar()}
-            title="Update profile picture"
-            aria-label="Update profile picture"
+            title={tHC("hcComponentsShellRailFooter.s1")}
+            aria-label={tHC("hcComponentsShellRailFooter.s1")}
             className="group/avatar flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-primary/15 p-0 text-xs font-semibold text-primary shadow-none transition-opacity hover:opacity-80"
           >
             {avatarBlobUrl ? (

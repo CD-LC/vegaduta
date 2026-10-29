@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useAuthedHint } from "../../lib/hooks/useAuthedHint";
 import BrandName from "../../components/BrandName";
+import { useTranslations } from "../../lib/i18n";
 
 // Shared public-surface nav for /help/workflow-recipes and its per-industry
 // pages (/help/workflow-recipes/[industry]) - both are PUBLIC_ROUTES (see
@@ -21,6 +22,7 @@ import BrandName from "../../components/BrandName";
 // decision): a signed-in visitor gets a highlighted "Back to console" and no
 // "Start free"; a logged-out visitor gets the acquisition pair.
 export default function PublicWorkflowNav() {
+    const tHC = useTranslations("hcHelpWorkflowrecipesPublicWorkflowNav");
   const authedHint = useAuthedHint();
 
   return (
@@ -45,17 +47,17 @@ export default function PublicWorkflowNav() {
         {authedHint ? (
           <Button asChild size="sm">
             <Link href="/help">
-              Back to console
+              {tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s3")}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </Button>
         ) : (
           <>
             <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-              <Link href="/help">Open the console</Link>
+              <Link href="/help">{tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s2")}</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href="/signup">Start free</Link>
+              <Link href="/signup">{tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s1")}</Link>
             </Button>
           </>
         )}

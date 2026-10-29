@@ -17,6 +17,7 @@ import {
   Radio,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { useTranslations } from "../../lib/i18n";
 
 // The "why": what an agent is, what it is for, and - the part that matters most
 // on this page - the handful of dials that make it precise. Plain claims only:
@@ -93,61 +94,60 @@ const DIALS: { icon: typeof Brain; name: string; where: string; controls: string
   ];
 
 export default function WhyAgentic() {
+    const tHC = useTranslations("hcComponentsStudioWhyAgentic");
   return (
     <section aria-labelledby="why-agentic" className="space-y-6 rounded-2xl border border-border/60 bg-muted/20 p-5">
       <div>
         <h3 id="why-agentic" className="text-lg font-semibold tracking-tight">
-          Why agentic AI - and what it&apos;s for
+          {tHC("hcComponentsStudioWhyAgentic.s19")}
         </h3>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          A chatbot answers a question. An agent is given a goal, decides which steps to take, uses tools to take them,
-          checks its own work, and stops to ask you when it matters. The difference is not a smarter model - it is a
-          model with hands, memory and rules.
+          {tHC("hcComponentsStudioWhyAgentic.s18")}
         </p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-border/60 bg-background/70 p-4">
           <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
-            <MessageSquareOff aria-hidden="true" className="h-4 w-4 shrink-0" /> A chatbot
+            <MessageSquareOff aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioWhyAgentic.s17")}
           </div>
           <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>Answers from what it remembers - it can&apos;t check.</li>
-            <li>One turn at a time; you do the follow-through.</li>
-            <li>Same answer style whether the stakes are low or high.</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s16")}</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s15")}</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s14")}</li>
           </ul>
         </div>
         <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
           <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
-            <Bot aria-hidden="true" className="h-4 w-4 shrink-0" /> An agent
+            <Bot aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioWhyAgentic.s13")}
           </div>
           <ul className="space-y-1 text-sm text-muted-foreground">
-            <li>Looks things up, reads your documents, calls tools - and shows each call.</li>
-            <li>Works through several steps toward a goal on its own.</li>
-            <li>You set how careful it is, what it may touch, and when it must ask.</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s12")}</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s11")}</li>
+            <li>{tHC("hcComponentsStudioWhyAgentic.s10")}</li>
           </ul>
         </div>
       </div>
 
       <div>
         <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Where it earns its keep
+          {tHC("hcComponentsStudioWhyAgentic.s9")}
         </div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <Use icon={Repeat} title="Repetitive lookups" body="The same research or check, every day, with sources." />
+          <Use icon={Repeat} title={tHC("hcComponentsStudioWhyAgentic.s8")} body="The same research or check, every day, with sources." />
           <Use
             icon={ScanSearch}
-            title="Reading for you"
+            title={tHC("hcComponentsStudioWhyAgentic.s7")}
             body="Contracts, policies, manuals - answers with the line they came from."
           />
           <Use
             icon={Workflow}
-            title="Multi-step jobs"
+            title={tHC("hcComponentsStudioWhyAgentic.s6")}
             body="Research, then draft, then wait for your approval, then send."
           />
           <Use
             icon={Radio}
-            title="Always-on replies"
+            title={tHC("hcComponentsStudioWhyAgentic.s5")}
             body="Customer messages answered from your facts, escalated when unsure."
           />
         </div>
@@ -155,10 +155,10 @@ export default function WhyAgentic() {
 
       <div>
         <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          How you keep it precise - eight dials
+          {tHC("hcComponentsStudioWhyAgentic.s4")}
         </div>
         <p className="mb-2 text-sm text-muted-foreground">
-          Every one is a real control in the studio. Open any to see what it does and when to turn it.
+          {tHC("hcComponentsStudioWhyAgentic.s3")}
         </p>
         <Accordion type="single" collapsible className="rounded-xl border border-border/60 bg-background/70 px-3">
           {DIALS.map((d) => {
@@ -177,10 +177,10 @@ export default function WhyAgentic() {
                       <b className="font-medium text-foreground">Controls:</b> {d.controls}
                     </p>
                     <p>
-                      <b className="font-medium text-foreground">Turn it up:</b> {d.turnUp}
+                      <b className="font-medium text-foreground">{tHC("hcComponentsStudioWhyAgentic.s2")}</b> {d.turnUp}
                     </p>
                     <p>
-                      <b className="font-medium text-foreground">Turn it down:</b> {d.turnDown}
+                      <b className="font-medium text-foreground">{tHC("hcComponentsStudioWhyAgentic.s1")}</b> {d.turnDown}
                     </p>
                   </div>
                 </AccordionContent>

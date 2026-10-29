@@ -12,6 +12,7 @@ import {
   type SharedAgentInfo,
 } from "../../agent/[shareId]/api";
 import { isHostMessage, postToHost } from "./embedProtocol";
+import { useTranslations } from "../../lib/i18n";
 
 // The chat surface rendered INSIDE the widget iframe (/a/embed/<shareId>).
 //
@@ -125,6 +126,7 @@ function accentForeground(accent: string): string {
 }
 
 export default function EmbedChat({ shareId, accent, greeting, title, theme, parentOrigin }: EmbedChatProps) {
+    const tHC = useTranslations("hcComponentsWidgetEmbedChat");
   const [phase, setPhase] = useState<"loading" | "ready" | "blocked">("loading");
   const [info, setInfo] = useState<SharedAgentInfo | null>(null);
   const [blockedCode, setBlockedCode] = useState<ShareErrorCode>("unavailable");
@@ -308,7 +310,7 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
           <button
             type="button"
             onClick={() => postToHost(parentOrigin, "close")}
-            aria-label="Close chat"
+            aria-label={tHC("hcComponentsWidgetEmbedChat.s8")}
             className="ms-auto inline-flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
           >
             <X className="size-4" />
@@ -319,7 +321,7 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
       {phase === "loading" && (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
           <Loader2 className="size-5 animate-spin text-primary" />
-          <p className="text-xs text-muted-foreground">Opening this chat…</p>
+          <p className="text-xs text-muted-foreground">{tHC("hcComponentsWidgetEmbedChat.s7")}</p>
         </div>
       )}
 
@@ -340,13 +342,12 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
             <p className="text-[11px] leading-snug text-muted-foreground">
               {whiteLabeled ? (
                 <>
-                  <span className="text-foreground">{info.agentName}</span> is an AI agent answering on behalf of{" "}
+                  <span className="text-foreground">{info.agentName}</span> {tHC("hcComponentsWidgetEmbedChat.s6")}{" "}
                   <span className="text-foreground">{info.brandDisplayName || "its owner"}</span>.
                 </>
               ) : (
                 <>
-                  <span className="text-foreground">{info.agentName}</span> is an AI agent, built and shared by its
-                  owner on <BrandName />.
+                  <span className="text-foreground">{info.agentName}</span> {tHC("hcComponentsWidgetEmbedChat.s5")} <BrandName />.
                 </>
               )}
             </p>
@@ -355,7 +356,7 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
             {bubbles.length === 0 && (
               <p className="py-8 text-center text-xs text-muted-foreground">
-                Say hello — ask {info.agentName} anything.
+                {tHC("hcComponentsWidgetEmbedChat.s4")} {info.agentName} {tHC("hcComponentsWidgetEmbedChat.s3")}
               </p>
             )}
             {bubbles.map((b) => (
@@ -407,7 +408,7 @@ export default function EmbedChat({ shareId, accent, greeting, title, theme, par
             rel="noopener noreferrer"
             className="truncate text-[10px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            Built with <BrandName />
+            {tHC("hcComponentsWidgetEmbedChat.s2")} <BrandName />
           </a>
         )}
       </footer>
@@ -471,6 +472,7 @@ const REPORT_REASONS = [
 /** Compact report affordance - same reasons and same fire-and-thank flow as
  *  the full-page viewer's ReportPanel, collapsed to footer scale. */
 function ReportControl({ shareId }: { shareId: string }) {
+    const tHC = useTranslations("hcComponentsWidgetEmbedChat");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -490,7 +492,7 @@ function ReportControl({ shareId }: { shareId: string }) {
   if (done) {
     return (
       <p className="text-[10px] text-muted-foreground" role="status">
-        Thanks — this agent will be reviewed.
+        {tHC("hcComponentsWidgetEmbedChat.s1")}
       </p>
     );
   }

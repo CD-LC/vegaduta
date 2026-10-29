@@ -10,6 +10,7 @@ import { Input } from "../../components/ui/input";
 import Select from "../../components/Select";
 import { inboxApi, type ConversationSummary } from "./inboxApi";
 import { fullTime } from "./inboxFormat";
+import { useTranslations } from "../../lib/i18n";
 
 export interface AgentOption {
   id: string;
@@ -50,17 +51,18 @@ export function InboxDetailsPane({
   /** The rejected sender's session is gone: close the thread. */
   onRejected: () => void;
 }) {
+    const tHC = useTranslations("hcAdminInboxInboxDetailsPane");
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-sm">
       <div>
-        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Routed to</p>
+        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("hcAdminInboxInboxDetailsPane.s13")}</p>
         <div className="flex items-center gap-2">
           <Select
             className="select-inline min-w-0 flex-1"
             value={reassignId}
             onChange={(e) => onReassignIdChange(e.target.value)}
             options={agents.map((a) => ({ value: a.id, label: a.name }))}
-            placeholder="Pick an agent"
+            placeholder={tHC("hcAdminInboxInboxDetailsPane.s12")}
           />
           <Button
             type="button"
@@ -77,7 +79,7 @@ export function InboxDetailsPane({
           </Button>
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Re-points this one conversation only — the channel default still applies to future senders.
+          {tHC("hcAdminInboxInboxDetailsPane.s11")}
         </p>
       </div>
 
@@ -87,8 +89,8 @@ export function InboxDetailsPane({
           <Input
             value={escalateReason}
             onChange={(e) => onEscalateReasonChange(e.target.value)}
-            placeholder="Why does this need a human?"
-            aria-label="Why does this need a human?"
+            placeholder={tHC("hcAdminInboxInboxDetailsPane.s10")}
+            aria-label={tHC("hcAdminInboxInboxDetailsPane.s10")}
             className="mb-2"
           />
           <Button
@@ -104,7 +106,7 @@ export function InboxDetailsPane({
               )
             }
           >
-            <Flag size={13} /> Flag for a human
+            <Flag size={13} /> {tHC("hcAdminInboxInboxDetailsPane.s9")}
           </Button>
         </div>
       )}
@@ -114,7 +116,7 @@ export function InboxDetailsPane({
         {!selected.paired ? (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Sender hasn&apos;t been approved yet — their messages are held until you approve. Pairing code:{" "}
+              {tHC("hcAdminInboxInboxDetailsPane.s8")}{" "}
               <code className="rounded bg-muted px-1 py-0.5 text-foreground">{selected.pairingCode ?? "—"}</code>
             </p>
             <div className="flex items-center gap-2">
@@ -146,7 +148,7 @@ export function InboxDetailsPane({
                       );
                     }}
                   >
-                    Confirm delete
+                    {tHC("hcAdminInboxInboxDetailsPane.s7")}
                   </Button>
                   <Button type="button" size="sm" variant="ghost" onClick={() => onConfirmRejectChange(false)}>
                     Cancel
@@ -161,7 +163,7 @@ export function InboxDetailsPane({
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Approved sender — messages route to the agent normally.</p>
+            <p className="text-xs text-muted-foreground">{tHC("hcAdminInboxInboxDetailsPane.s6")}</p>
             {confirmUnpair ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -180,7 +182,7 @@ export function InboxDetailsPane({
                     );
                   }}
                 >
-                  Confirm unmap
+                  {tHC("hcAdminInboxInboxDetailsPane.s5")}
                 </Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => onConfirmUnpairChange(false)}>
                   Cancel
@@ -188,7 +190,7 @@ export function InboxDetailsPane({
               </div>
             ) : (
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onConfirmUnpairChange(true)}>
-                <Unlink size={13} /> Unmap conversation
+                <Unlink size={13} /> {tHC("hcAdminInboxInboxDetailsPane.s4")}
               </Button>
             )}
           </div>
@@ -204,16 +206,16 @@ export function InboxDetailsPane({
           </div>
           {selected.resolvedPhoneMasked && selected.resolvedPhoneMasked !== "***" && (
             <div className="flex justify-between gap-2">
-              <dt>Resolved phone</dt>
+              <dt>{tHC("hcAdminInboxInboxDetailsPane.s3")}</dt>
               <dd className="font-mono text-foreground">{selected.resolvedPhoneMasked}</dd>
             </div>
           )}
           <div className="flex justify-between gap-2">
-            <dt>First contact</dt>
+            <dt>{tHC("hcAdminInboxInboxDetailsPane.s2")}</dt>
             <dd className="tabular-nums text-foreground">{fullTime(selected.createdAt)}</dd>
           </div>
           <div className="flex justify-between gap-2">
-            <dt>Last activity</dt>
+            <dt>{tHC("hcAdminInboxInboxDetailsPane.s1")}</dt>
             <dd className="tabular-nums text-foreground">{fullTime(selected.lastMessageAt)}</dd>
           </div>
           {selected.escalatedAt && (

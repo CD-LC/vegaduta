@@ -23,6 +23,7 @@ import {
   validateStoreForm,
   type StoreConfig,
 } from "./storeChecklist";
+import { useTranslations } from "../lib/i18n";
 
 interface Props {
   project: { project_id: string; template_id: string };
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export default function StoreReadiness({ project, assets, onError }: Props) {
+    const tHC = useTranslations("hcBuildStoreReadiness");
   const [paths, setPaths] = useState<string[]>([]);
   const [hasStoreConfig, setHasStoreConfig] = useState(false);
   const [saved, setSaved] = useState<StoreConfig | null>(null);
@@ -106,10 +108,10 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Smartphone aria-hidden="true" size={16} className="text-primary" /> Store readiness
+          <Smartphone aria-hidden="true" size={16} className="text-primary" /> {tHC("hcBuildStoreReadiness.s8")}
           {items.length > 0 && (
             <span className="ms-auto text-xs font-normal text-muted-foreground">
-              {progress.done}/{progress.total} automated checks done
+              {progress.done}/{progress.total} {tHC("hcBuildStoreReadiness.s7")}
             </span>
           )}
         </CardTitle>
@@ -121,13 +123,13 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
           </div>
         )}
 
-        <ul className="mb-6 space-y-2" aria-label="Store checklist">
+        <ul className="mb-6 space-y-2" aria-label={tHC("hcBuildStoreReadiness.s6")}>
           {items.map((it) => (
             <li key={it.id} className="flex items-start gap-2 text-sm">
               {it.state === "done" ? (
                 <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" aria-label="done" />
               ) : it.state === "manual" ? (
-                <Hand size={16} className="mt-0.5 shrink-0 text-amber-500" aria-label="you do this" />
+                <Hand size={16} className="mt-0.5 shrink-0 text-amber-500" aria-label={tHC("hcBuildStoreReadiness.s5")} />
               ) : (
                 <Circle size={16} className="mt-0.5 shrink-0 text-muted-foreground" aria-label="to do" />
               )}
@@ -150,10 +152,10 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
             <Field label={`App name (max ${STORE_LIMITS.title})`} error={errs.app_name}>
               <Input value={form.app_name} onChange={set("app_name")} maxLength={200} />
             </Field>
-            <Field label="Package id" error={errs.package_id}>
+            <Field label={tHC("hcBuildStoreReadiness.s4")} error={errs.package_id}>
               <Input value={form.package_id} onChange={set("package_id")} placeholder="com.acme.myapp" />
             </Field>
-            <Field label="Version name" error={errs.version_name}>
+            <Field label={tHC("hcBuildStoreReadiness.s3")} error={errs.version_name}>
               <Input value={form.version_name} onChange={set("version_name")} placeholder="1.0.0" />
             </Field>
             <Field
@@ -169,12 +171,11 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
               <Textarea rows={6} value={form.full_description} onChange={set("full_description")} />
             </Field>
             <Button type="submit" size="sm" disabled={busy || !valid}>
-              {busy && <Loader2 aria-hidden="true" size={15} className="animate-spin" />} Save store listing
+              {busy && <Loader2 aria-hidden="true" size={15} className="animate-spin" />} {tHC("hcBuildStoreReadiness.s2")}
             </Button>
             {note && <p className="text-sm text-muted-foreground">{note}</p>}
             <p className="text-xs text-muted-foreground">
-              This commits metadata to your repository only. You upload the signed build and submit the listing yourself
-              in Play Console / App Store Connect.
+              {tHC("hcBuildStoreReadiness.s1")}
             </p>
           </form>
         )}

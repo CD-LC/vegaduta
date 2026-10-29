@@ -27,6 +27,7 @@ export default function SkillViewerToolbar({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsSkillsSkillViewerToolbar");
   const t = useTranslations("skillsPage");
   return (
     <>
@@ -39,7 +40,7 @@ export default function SkillViewerToolbar({
           size="sm"
           variant="outline"
           disabled={busy}
-          title="Download this text as a plain file"
+          title={tHC("hcComponentsSkillsSkillViewerToolbar.s2")}
           onClick={onDownloadText}
         >
           <FileText aria-hidden="true" size={14} /> {filePath === null ? "SKILL.md" : "File"}
@@ -49,7 +50,7 @@ export default function SkillViewerToolbar({
             size="sm"
             variant="outline"
             disabled={busy}
-            title="Start a new custom skill from a copy of this one"
+            title={tHC("hcComponentsSkillsSkillViewerToolbar.s1")}
             onClick={onDuplicate}
           >
             <Copy aria-hidden="true" size={14} /> {detail.source === "BUILT_IN" ? "Customize" : "Duplicate"}

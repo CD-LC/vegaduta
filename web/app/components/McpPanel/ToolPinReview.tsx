@@ -7,6 +7,7 @@ import type { McpToolPinStatus } from "../../lib/api/mcpToolPins";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { useTranslations } from "../../lib/i18n";
 
 /** What the current mode means for the people reading the card. */
 export function pinModeNote(mode: McpToolPinStatus["mode"]): string {
@@ -35,6 +36,7 @@ function ToolList({ label, names }: { label: string; names: string[] }) {
  * unavailable, so a deployment without changes sees an unchanged page.
  */
 export default function ToolPinReview({ onChanged }: { onChanged?: () => void }) {
+    const tHC = useTranslations("hcComponentsMcpPanelToolPinReview");
   const [items, setItems] = useState<McpToolPinStatus[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,11 +72,10 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
   return (
     <Alert variant="destructive" className="mb-4" data-testid="mcp-tool-pin-review">
       <ShieldAlert className="h-4 w-4" />
-      <AlertTitle>Tool definitions changed — review before trusting</AlertTitle>
+      <AlertTitle>{tHC("hcComponentsMcpPanelToolPinReview.s3")}</AlertTitle>
       <AlertDescription>
         <p className="mb-3 text-sm">
-          These servers changed what their tools are or say since you last accepted them. A changed description can
-          change how an agent behaves, so read it before approving.
+          {tHC("hcComponentsMcpPanelToolPinReview.s2")}
         </p>
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
@@ -99,8 +100,7 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
                 onClick={() => void approve(item)}
                 data-testid={`mcp-tool-pin-approve-${item.name}`}
               >
-                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Approve new tool
-                list
+                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} {tHC("hcComponentsMcpPanelToolPinReview.s1")}
               </Button>
             </li>
           ))}

@@ -40,6 +40,7 @@ import { AdminEmptyState, AdminErrorState, AdminFilterBar } from "../components/
 import { PLAN_OPTIONS, RESIDENCY_OPTIONS, SORT_OPTIONS } from "./tenantOptions";
 import { PlanLimitsCard } from "./PlanLimitsCard";
 import { TenantRosterRow } from "./TenantRosterRow";
+import { useTranslations } from "../../lib/i18n";
 
 // Tenants & Users (PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §3.9) - the tenant
 // lifecycle hub: the cross-tenant roster with a super-admin plan-tier override,
@@ -48,6 +49,7 @@ import { TenantRosterRow } from "./TenantRosterRow";
 // standalone Subscription Plans screen; endpoints/behaviour are unchanged.
 
 export default function TenantsUsersPage() {
+    const tHC = useTranslations("hcPlatformadminTenantsPage");
   const askConfirm = useConfirm();
   const [tenants, setTenants] = useState<PlatformTenantSummary[]>([]);
   const [tenantCounts, setTenantCounts] = useState(null);
@@ -277,9 +279,9 @@ export default function TenantsUsersPage() {
 
   return (
     <AdminShell
-      title="Tenants & Users"
+      title={tHC("hcPlatformadminTenantsPage.s14")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title="Refresh tenants">
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("hcPlatformadminTenantsPage.s13")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
@@ -290,9 +292,7 @@ export default function TenantsUsersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        Tenant lifecycle - the cross-tenant roster with a super-admin plan-tier override, per-plan limits, and A/B
-        feature flags. A plan change here is a super-admin override; it does not create or change a Razorpay
-        subscription, so a tenant already paying through checkout keeps its own billing state untouched.
+        {tHC("hcPlatformadminTenantsPage.s12")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </motion.p>
 
@@ -304,16 +304,15 @@ export default function TenantsUsersPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <CreditCard size={16} className="text-primary" /> Tenant Roster & Plans
+              <CreditCard size={16} className="text-primary" /> {tHC("hcPlatformadminTenantsPage.s11")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              {tenants.length} registered tenant{tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} active) -
-              spend and LLM calls are trailing 30 days, all providers incl. BYOK (estimates); &ldquo;{UNAVAILABLE}
-              &rdquo; means core could not measure it
+              {tenants.length} {tHC("hcPlatformadminTenantsPage.s10")}{tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} {tHC("hcPlatformadminTenantsPage.s9")}{UNAVAILABLE}
+              {tHC("hcPlatformadminTenantsPage.s8")}
             </p>
             {tenantCounts && (
               <p className="text-xs text-muted-foreground">
-                Demo sandboxes (anonymous /try, not listed or counted here): {demoSandboxSummary(tenantCounts)} -{" "}
+                {tHC("hcPlatformadminTenantsPage.s7")} {demoSandboxSummary(tenantCounts)} -{" "}
                 <Link
                   href="/platform-admin/demo-sandbox"
                   className="underline underline-offset-2 hover:text-foreground"
@@ -325,7 +324,7 @@ export default function TenantsUsersPage() {
                   href="/platform-admin/demo-sandboxes"
                   className="underline underline-offset-2 hover:text-foreground"
                 >
-                  reclaim legacy sandboxes
+                  {tHC("hcPlatformadminTenantsPage.s6")}
                 </Link>
               </p>
             )}
@@ -333,7 +332,7 @@ export default function TenantsUsersPage() {
           <CardContent className="space-y-2">
             {tenantsError && <AdminErrorState message={tenantsError} onRetry={() => void refresh()} />}
             {tenants.length > 0 && (
-              <AdminFilterBar label="Tenant filters" className="mb-1">
+              <AdminFilterBar label={tHC("hcPlatformadminTenantsPage.s5")} className="mb-1">
                 <div className="relative w-full max-w-sm">
                   <Search
                     size={14}
@@ -342,7 +341,7 @@ export default function TenantsUsersPage() {
                   <Input
                     value={tenantSearch}
                     onChange={(e) => setTenantSearch(e.target.value)}
-                    placeholder="Search by name or owner email…"
+                    placeholder={tHC("hcPlatformadminTenantsPage.s4")}
                     className="ps-8"
                   />
                 </div>
@@ -359,7 +358,7 @@ export default function TenantsUsersPage() {
                 </div>
                 <div className="w-full space-y-1.5 sm:w-44">
                   <Label htmlFor="tenant-filter-cap" className="text-xs text-muted-foreground">
-                    Spend cap
+                    {tHC("hcPlatformadminTenantsPage.s3")}
                   </Label>
                   <Select
                     id="tenant-filter-cap"
@@ -396,11 +395,11 @@ export default function TenantsUsersPage() {
               </AdminFilterBar>
             )}
             {tenants.length === 0 && !tenantsError && (
-              <AdminEmptyState title="No tenants found" description="Tenants appear here once they sign up." />
+              <AdminEmptyState title={tHC("hcPlatformadminTenantsPage.s2")} description="Tenants appear here once they sign up." />
             )}
             {tenants.length > 0 && filteredTenants.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                No tenants match the current search, status and spend-cap filters.
+                {tHC("hcPlatformadminTenantsPage.s1")}
               </p>
             )}
 

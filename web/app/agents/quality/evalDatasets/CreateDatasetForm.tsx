@@ -5,6 +5,7 @@ import { Card, CardContent } from "../../../components/ui/card";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import DatasetModeControls from "./DatasetModeControls";
+import { useTranslations } from "../../../lib/i18n";
 
 export interface CreateDatasetDraft {
   name: string;
@@ -35,6 +36,7 @@ export default function CreateDatasetForm({
   onCancel: () => void;
   onCreate: () => void;
 }) {
+    const tHC = useTranslations("hcAgentsQualityEvalDatasetsCreateDatasetForm");
   return (
     <Card>
       <CardContent className="space-y-3 pt-4">
@@ -47,12 +49,12 @@ export default function CreateDatasetForm({
               id="eval-dataset-new-name"
               value={draft.name}
               onChange={(e) => onChange({ name: e.target.value })}
-              placeholder="e.g. Billing FAQ regression set"
+              placeholder={tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s4")}
             />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-dataset-new-threshold">
-              Pass threshold (0–1)
+              {tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s3")}
             </label>
             <Input
               id="eval-dataset-new-threshold"
@@ -71,7 +73,7 @@ export default function CreateDatasetForm({
             rows={2}
             value={draft.description}
             onChange={(e) => onChange({ description: e.target.value })}
-            placeholder="What this dataset protects against regressing"
+            placeholder={tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s2")}
           />
         </div>
         <DatasetModeControls
@@ -86,7 +88,7 @@ export default function CreateDatasetForm({
             Cancel
           </Button>
           <Button size="sm" onClick={onCreate} disabled={busy || !draft.name.trim()}>
-            Create dataset
+            {tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s1")}
           </Button>
         </div>
       </CardContent>

@@ -60,6 +60,7 @@ import { useNow, useReturnFocus, type MentionPerson, type ThreadsUpdater } from 
 import { CommentComposer } from "./CommentComposer";
 import CommentItem from "./CommentItem";
 import "./comments.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type { MentionPerson, MutationPhase, ThreadsUpdater } from "./commentCardShared";
 export { CommentComposer, type CommentComposerProps } from "./CommentComposer";
@@ -90,6 +91,7 @@ export default function CommentThread({
   workflowId, thread, number, people = [], currentUserId, currentUserName, onThreadsChange, onClose,
   nodeLabel, onFocusNode, autoFocus = false, onFocusFallback, className, style, anchored = false,
 }: CommentThreadProps) {
+    const tHC = useTranslations("hcComponentsWorkflowCommentThread");
   const uid = useId();
   const titleId = `${uid}-title`;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -302,7 +304,7 @@ export default function CommentThread({
               {thread.resolved ? "Reopen" : "Resolve"}
             </button>
           )}
-          <button type="button" className="wfc-icon" aria-label="Close comment thread" onClick={onClose}>
+          <button type="button" className="wfc-icon" aria-label={tHC("hcComponentsWorkflowCommentThread.s3")} onClick={onClose}>
             <X size={14} aria-hidden="true" />
           </button>
         </div>
@@ -311,7 +313,7 @@ export default function CommentThread({
       {thread.orphaned && (
         <p className="wfc-banner" data-tone="warn">
           <CircleDot size={12} aria-hidden="true" />
-          This step was removed. The thread is kept for reference.
+          {tHC("hcComponentsWorkflowCommentThread.s2")}
         </p>
       )}
       {thread.resolved && (
@@ -324,7 +326,7 @@ export default function CommentThread({
 
       <div className="wfc-scroll">
         {rootGone ? (
-          <p className="wfc-deleted">This thread was deleted.</p>
+          <p className="wfc-deleted">{tHC("hcComponentsWorkflowCommentThread.s1")}</p>
         ) : (
           <ol className="wfc-list" ref={listRef}>
             {all.map((c) => (

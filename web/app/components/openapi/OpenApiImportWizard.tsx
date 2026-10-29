@@ -52,6 +52,7 @@ export default function OpenApiImportWizard({
   step: "source" | "review";
   toggleKey: (key: string) => void;
 }) {
+    const tHC = useTranslations("hcComponentsOpenapiOpenApiImportWizard");
   const t = useTranslations("openApiTools");
   return (
     <Card className="gap-4 p-6">
@@ -97,7 +98,7 @@ export default function OpenApiImportWizard({
                 aria-describedby="oas-name-help"
               />
               <p id="oas-name-help" className="text-xs text-muted-foreground">
-                How this API shows up in your tools list, for example “Store API”.
+                {tHC("hcComponentsOpenapiOpenApiImportWizard.s1")}
               </p>
             </div>
             <div className="space-y-1.5">

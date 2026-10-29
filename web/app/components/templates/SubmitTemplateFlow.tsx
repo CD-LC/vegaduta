@@ -23,6 +23,7 @@ import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import TemplateStandardGuide from "./TemplateStandardGuide";
 import TemplateReviewPanel from "./TemplateReviewPanel";
 import TemplateRequirementsPanel from "./TemplateRequirementsPanel";
+import { useTranslations } from "../../lib/i18n";
 
 // What the last check (or a rejected submit) told us. One shape for both so the panel renders either.
 interface CheckResult {
@@ -65,6 +66,7 @@ interface SubmitTemplateFlowProps {
 }
 
 function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: SubmitTemplateFlowProps) {
+    const tHC = useTranslations("hcComponentsTemplatesSubmitTemplateFlow");
   const [sources, setSources] = useState<Pickable[] | null>(null);
   const [sourcesError, setSourcesError] = useState<string | null>(null);
   const [sourceId, setSourceId] = useState<string>(presetSource?.id ?? "");
@@ -243,13 +245,13 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Share as template"
+        aria-label={tHC("hcComponentsTemplatesSubmitTemplateFlow.s13")}
         className="elev-raised w-full max-w-xl rounded-2xl p-6 shadow-xl"
       >
         <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-foreground">Share as template</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Let other VegaDūta members start from your setup.</p>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("hcComponentsTemplatesSubmitTemplateFlow.s13")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{tHC("hcComponentsTemplatesSubmitTemplateFlow.s12")}</p>
           </div>
           <button
             type="button"
@@ -272,8 +274,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
         >
           <Info size={16} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
-            Submitted templates are checked automatically, reviewed by an AI, and then approved by our team before they
-            appear publicly.
+            {tHC("hcComponentsTemplatesSubmitTemplateFlow.s11")}
           </span>
         </div>
 
@@ -297,10 +298,10 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
             </div>
           ) : (
             <div className="space-y-1.5">
-              <Label htmlFor="tpl-source">Which agent or workflow?</Label>
+              <Label htmlFor="tpl-source">{tHC("hcComponentsTemplatesSubmitTemplateFlow.s10")}</Label>
               {sources === null && !sourcesError ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Loading your agents and workflows…
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("hcComponentsTemplatesSubmitTemplateFlow.s9")}
                 </div>
               ) : sourcesError ? (
                 <p className="text-sm" style={{ color: "var(--state-error)" }}>
@@ -308,13 +309,13 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
                 </p>
               ) : sources && sources.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  You don&apos;t have any agents or workflows to share yet. Create one first, then come back.
+                  {tHC("hcComponentsTemplatesSubmitTemplateFlow.s8")}
                 </p>
               ) : (
                 <Select
                   id="tpl-source"
                   value={selectedSource ? `${selectedSource.kind}:${selectedSource.id}` : ""}
-                  placeholder="Select one…"
+                  placeholder={tHC("hcComponentsTemplatesSubmitTemplateFlow.s7")}
                   onValueChange={(v) => {
                     const [k, ...rest] = v.split(":");
                     setSourceKind(k as CommunityTemplateKind);
@@ -336,7 +337,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
               value={title}
               maxLength={80}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Kirana order-taking assistant"
+              placeholder={tHC("hcComponentsTemplatesSubmitTemplateFlow.s6")}
             />
           </div>
 
@@ -348,7 +349,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
               maxLength={280}
               rows={3}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder="One or two sentences on what this does and who it's for."
+              placeholder={tHC("hcComponentsTemplatesSubmitTemplateFlow.s5")}
             />
             <p className="text-end text-[0.6875rem] text-muted-foreground">{summary.length}/280</p>
           </div>
@@ -369,7 +370,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
                 id="tpl-tags"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="comma, separated"
+                placeholder={tHC("hcComponentsTemplatesSubmitTemplateFlow.s4")}
               />
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1">
@@ -400,15 +401,15 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
           </Button>
           <Button variant="outline" onClick={handleCheck} disabled={busy !== null || !canSubmit}>
             {busy === "check" ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
-            Check against the standard
+            {tHC("hcComponentsTemplatesSubmitTemplateFlow.s3")}
           </Button>
           <Button variant="outline" onClick={() => handleSubmit("draft")} disabled={busy !== null || !canSubmit}>
             {busy === "draft" ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
-            Save draft
+            {tHC("hcComponentsTemplatesSubmitTemplateFlow.s2")}
           </Button>
           <Button onClick={() => handleSubmit("submit")} disabled={busy !== null || !canSubmit}>
             {busy === "submit" ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
-            Submit for review
+            {tHC("hcComponentsTemplatesSubmitTemplateFlow.s1")}
           </Button>
         </div>
       </div>

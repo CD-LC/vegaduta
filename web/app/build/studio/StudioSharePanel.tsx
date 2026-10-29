@@ -9,20 +9,22 @@ import { DomainsPanel } from "./DomainsPanel";
 import { appBuilder, APP_BUILDER_CONFIGURED, newProjectId } from "../lib";
 import { QR_MAX_URL, downloadHtml, qrSvg, shareUrl } from "./share";
 import { titleOf, type StudioPublish } from "./store";
+import { useTranslations } from "../../lib/i18n";
 
 const GITHUB_ERROR = /github|git|repo(sitory)?|installation|409/i;
 
 /** Shows WHY a publish failed; GitHub-shaped failures get the fix, not just the symptom. */
 function PublishError({ message, className = "" }: { message: string; className?: string }) {
+    const tHC = useTranslations("hcBuildStudioStudioSharePanel");
   const github = GITHUB_ERROR.test(message);
   return (
     <div role="alert" className={`flex flex-col gap-1 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-[11px] ${className}`}>
-      <p className="font-medium text-destructive">Publish failed</p>
+      <p className="font-medium text-destructive">{tHC("hcBuildStudioStudioSharePanel.s18")}</p>
       {github ? (
         <p className="text-muted-foreground">
-          Your GitHub isn&apos;t connected yet. Connect it first, then publish again.{" "}
+          {tHC("hcBuildStudioStudioSharePanel.s17")}{" "}
           <Link href="/build/github" className="font-medium text-primary underline underline-offset-2">
-            Open the GitHub connection page
+            {tHC("hcBuildStudioStudioSharePanel.s16")}
           </Link>
         </p>
       ) : null}
@@ -51,6 +53,7 @@ export default function SharePanel({
   onError: (message: string) => void;
   onOpenApp?: (projectId: string) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioStudioSharePanel");
   const [url, setUrl] = useState<string | null>(null);
   const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -163,17 +166,16 @@ export default function SharePanel({
           live sign-in, hosted AI, per-app end users. */}
       <fieldset disabled={!canPublish} className="m-0 min-w-0 rounded-xl border border-border bg-accent/30 p-3">
         <legend className="sr-only">Publish</legend>
-        <p className="text-sm font-semibold text-foreground">Publish it</p>
-        {!canPublish && <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-300">Only the app&apos;s owner can publish it.</p>}
+        <p className="text-sm font-semibold text-foreground">{tHC("hcBuildStudioStudioSharePanel.s15")}</p>
+        {!canPublish && <p className="mt-0.5 text-[11px] text-amber-700 dark:text-amber-300">{tHC("hcBuildStudioStudioSharePanel.s14")}</p>}
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-          A short link anyone can open - with working sign-in for your users, hosted AI and your wired
-          agents/workflows behind it. Republish any time to push the latest version to the same link.
+          {tHC("hcBuildStudioStudioSharePanel.s13")}
         </p>
         {publish?.slug ? (
           <div className="mt-2 flex flex-col gap-2">
             {publish.offlineAt ? (
               <p className="rounded-md bg-amber-500/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
-                Offline right now - the link 404s. Publish again to bring the same link back.
+                {tHC("hcBuildStudioStudioSharePanel.s12")}
               </p>
             ) : (
               <div className="flex items-center gap-1.5">
@@ -192,7 +194,7 @@ export default function SharePanel({
               </Button>
               {!publish.offlineAt && (
                 <Button size="sm" variant="outline" onClick={doUnpublish} disabled={pubState === "working"} className="h-7 text-[11px]">
-                  Take offline
+                  {tHC("hcBuildStudioStudioSharePanel.s11")}
                 </Button>
               )}
             </div>
@@ -201,7 +203,7 @@ export default function SharePanel({
         ) : (
           <div className="mt-2">
             <Button size="sm" onClick={doPublish} disabled={pubState === "working"} className="gap-1.5">
-              {pubState === "working" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <Share2 aria-hidden="true" size={13} />} Publish this app
+              {pubState === "working" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <Share2 aria-hidden="true" size={13} />} {tHC("hcBuildStudioStudioSharePanel.s10")}
             </Button>
             {pubState === "error" && <PublishError message={pubError} className="mt-1.5" />}
           </div>
@@ -211,16 +213,16 @@ export default function SharePanel({
       {canPublish && publish?.appId && !publish.offlineAt && <DomainsPanel appId={publish.appId} />}
 
       <div>
-        <p className="text-sm font-semibold text-foreground">Put it on your phone</p>
+        <p className="text-sm font-semibold text-foreground">{tHC("hcBuildStudioStudioSharePanel.s9")}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Or send the self-contained link - the whole app travels inside it, nothing is uploaded. On the phone, choose &quot;Add to Home Screen&quot; to keep it as an app.
+          {tHC("hcBuildStudioStudioSharePanel.s8")}
         </p>
       </div>
       <div className="flex justify-center">
         {url === null ? (
           <Loader2 aria-hidden="true" size={18} className="my-10 animate-spin text-muted-foreground" />
         ) : fits && qr ? (
-          <div className="rounded-xl bg-white p-2" style={{ width: 200 }} dangerouslySetInnerHTML={{ __html: qr }} aria-label="QR code for the app link" />
+          <div className="rounded-xl bg-white p-2" style={{ width: 200 }} dangerouslySetInnerHTML={{ __html: qr }} aria-label={tHC("hcBuildStudioStudioSharePanel.s7")} />
         ) : (
           <p className="rounded-lg bg-secondary p-3 text-xs text-muted-foreground">
             {fits ? "QR code unavailable right now." : "This app is too big for a QR code, so send the link to your phone instead."}
@@ -242,29 +244,29 @@ export default function SharePanel({
           </Button>
         )}
         <Button size="sm" variant="outline" onClick={() => downloadHtml(html, name)} className="gap-1.5">
-          <Download aria-hidden="true" size={13} /> .html file
+          <Download aria-hidden="true" size={13} /> {tHC("hcBuildStudioStudioSharePanel.s6")}
         </Button>
         {url && (
           <Button asChild size="sm" variant="ghost" className="col-span-2 gap-1.5">
             <a href={url} target="_blank" rel="noopener noreferrer">
-              <Smartphone aria-hidden="true" size={13} /> Open full screen
+              <Smartphone aria-hidden="true" size={13} /> {tHC("hcBuildStudioStudioSharePanel.s5")}
             </a>
           </Button>
         )}
       </div>
       {APP_BUILDER_CONFIGURED && (
         <div className="flex flex-col gap-2 border-t border-border pt-3">
-          <p className="text-sm font-semibold text-foreground">Make an Android app (APK)</p>
+          <p className="text-sm font-semibold text-foreground">{tHC("hcBuildStudioStudioSharePanel.s4")}</p>
           <p className="text-xs text-muted-foreground">
-            Pushes this app into a Capacitor project in your GitHub. The repository&apos;s Actions then build an installable APK.
+            {tHC("hcBuildStudioStudioSharePanel.s3")}
           </p>
           {apk.state === "done" ? (
             <Button size="sm" onClick={() => apk.projectId && onOpenApp?.(apk.projectId)}>
-              Open the project
+              {tHC("hcBuildStudioStudioSharePanel.s2")}
             </Button>
           ) : (
             <Button size="sm" variant="outline" onClick={buildApk} disabled={apk.state === "working"} className="gap-1.5">
-              {apk.state === "working" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <Smartphone aria-hidden="true" size={13} />} Build Android app
+              {apk.state === "working" ? <Loader2 aria-hidden="true" size={13} className="animate-spin" /> : <Smartphone aria-hidden="true" size={13} />} {tHC("hcBuildStudioStudioSharePanel.s1")}
             </Button>
           )}
           {apk.state === "error" && <PublishError message={apk.message || "The build failed."} />}

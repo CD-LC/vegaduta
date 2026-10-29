@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuthedHint } from "../lib/hooks/useAuthedHint";
+import { useTranslations } from "../lib/i18n";
 
 // Auth-aware CTA cluster for PUBLIC pages (the ones outside AuthProvider's
 // Keycloak lifecycle — /docs, /billing, /status, /changelog, /api-reference,
@@ -30,12 +31,13 @@ export default function PublicAuthCtas({
   size?: "sm" | "default" | "lg";
   variant?: "default" | "outline" | "ghost";
 }) {
+    const tHC = useTranslations("hcComponentsPublicAuthCtas");
   const authed = useAuthedHint();
   if (authed) {
     return (
       <Button asChild size={size} variant={variant}>
         <Link href="/">
-          Open console <ArrowRight className="size-4" aria-hidden="true" />
+          {tHC("hcComponentsPublicAuthCtas.s1")} <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
     );

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "lucide-react";
 import { useDialogFocus } from "../lib/useDialogFocus";
+import { useTranslations } from "../../lib/i18n";
 
 // Ported from web/app/components/BrandIdentityModal.js - see that file's
 // header comment for the full story on how this was extracted verbatim from
@@ -24,6 +25,7 @@ import { useDialogFocus } from "../lib/useDialogFocus";
 // brand-asset literals rather than mapped to theme tokens (A13; this file
 // is exempt from the design-tokens/no-hex-literal lint rule by name).
 export default function BrandIdentityModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const tHC = useTranslations("hcPlatformadminComponentsBrandIdentityModal");
   const [mounted, setMounted] = useState(false);
   const starsRef = useRef(null);
   const sparksRef = useRef(null);
@@ -172,7 +174,7 @@ export default function BrandIdentityModal({ open, onClose }: { open: boolean; o
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label="VegaDūta brand identity"
+          aria-label={tHC("hcPlatformadminComponentsBrandIdentityModal.s1")}
         >
           <motion.div
             ref={dialogRef}

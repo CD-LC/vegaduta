@@ -39,6 +39,7 @@ export default function ChatPane({
   fileSet,
   disabled,
 }: any) {
+    const tHC = useTranslations("hcBuildChatPane");
   const t = useTranslations("appBuilder");
   const pid = project.project_id;
   // The thread and the unsent draft survive a surface-tab switch / reload
@@ -656,7 +657,7 @@ export default function ChatPane({
             {listening
               ? "Listening… speak your request."
               : voiceNote || (
-                  <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line · / to focus</span>
+                  <span className="hidden sm:inline">{tHC("hcBuildChatPane.s1")}</span>
                 )}
           </p>
         </div>

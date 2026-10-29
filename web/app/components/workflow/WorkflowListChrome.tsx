@@ -5,6 +5,7 @@ import Select from "../Select";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { WORKFLOW_SORTS, type WorkflowSort } from "./workflowList";
+import { useTranslations } from "../../lib/i18n";
 
 /** The workflow list's stat tiles (total, active, capacity). */
 export function WorkflowStatTiles({
@@ -50,9 +51,10 @@ export function WorkflowListFilters({
   sort: WorkflowSort;
   setSort: (sort: WorkflowSort) => void;
 }) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowListChrome");
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-1.5">
+      <div role="group" aria-label={tHC("hcComponentsWorkflowWorkflowListChrome.s2")} className="flex flex-wrap gap-1.5">
         <Button
           type="button"
           size="sm"
@@ -78,7 +80,7 @@ export function WorkflowListFilters({
         ))}
       </div>
       <Select
-        aria-label="Sort workflows"
+        aria-label={tHC("hcComponentsWorkflowWorkflowListChrome.s1")}
         value={sort}
         onChange={(e) => setSort(e.target.value as WorkflowSort)}
         options={WORKFLOW_SORTS}

@@ -41,6 +41,7 @@ export function DatasetCardHeader({
   onExportJsonl: () => void;
   onDelete: () => void;
 }) {
+    const tHC = useTranslations("hcAgentsQualityEvalDatasetsDatasetCardHeader");
   const t = useTranslations("evalControls");
   // What a run of this dataset does right now when nobody names a mode: its pin, else the workspace default.
   const mode = effectiveModeOf(dataset);
@@ -62,7 +63,7 @@ export function DatasetCardHeader({
         {t(mode === "FULL" ? "badgeFull" : "badgeQuick")}
       </Badge>
       {mode === "FULL" && dataset.autoApproveTools && (
-        <Badge variant="outline" title="Tool calls that would wait for a person are approved by the eval sandbox">
+        <Badge variant="outline" title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s5")}>
           auto-approve
         </Badge>
       )}
@@ -74,7 +75,7 @@ export function DatasetCardHeader({
           variant="outline"
           size="sm"
           onClick={onToggleRunOptions}
-          title="Judge model, repeats and budget for the next run"
+          title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s4")}
         >
           <Settings2 size={14} aria-hidden="true" />
         </Button>
@@ -83,7 +84,7 @@ export function DatasetCardHeader({
           size="sm"
           onClick={onExportJsonl}
           disabled={dataset.caseCount === 0}
-          title="Download the dataset's live cases as JSONL (optimizer input)"
+          title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s3")}
           aria-label={`Export dataset ${dataset.name} as JSONL`}
         >
           <Braces size={14} aria-hidden="true" />
@@ -96,9 +97,9 @@ export function DatasetCardHeader({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete dataset &quot;{dataset.name}&quot;?</AlertDialogTitle>
+              <AlertDialogTitle>{tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s2")}{dataset.name}&quot;?</AlertDialogTitle>
               <AlertDialogDescription>
-                This permanently deletes the dataset and all of its cases. This cannot be undone.
+                {tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s1")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

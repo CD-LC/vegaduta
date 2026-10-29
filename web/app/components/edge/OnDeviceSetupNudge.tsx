@@ -46,6 +46,7 @@ import {
   describeDownloadFailure,
   type EdgeDownloadFailureDescription,
 } from "../../lib/edge/resilience/failures";
+import { useTranslations } from "../../lib/i18n";
 
 /** localStorage — "1" once the person dismissed this nudge. The /edge
  * marketplace and the setup chip remain the way back in. */
@@ -80,6 +81,7 @@ type Phase =
   | { kind: "error"; caps: EdgeCapabilities; model: ManifestModel; failure: EdgeDownloadFailureDescription };
 
 export default function OnDeviceSetupNudge({ className }: { className?: string }) {
+    const tHC = useTranslations("hcComponentsEdgeOnDeviceSetupNudge");
   // edgeEnabled() is a build-time constant — stable across renders, so the
   // hooks below always run in the same order.
   const enabled = edgeEnabled();
@@ -255,7 +257,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             <button
               type="button"
               onClick={dismiss}
-              aria-label="Dismiss on-device setup"
+              aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
               className="flex size-6 shrink-0 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
             >
               <X size={12} aria-hidden="true" />
@@ -285,12 +287,12 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             {" — "}
             {EDGE_BRANDING.readyToEnableBody}{" "}
             <span className="whitespace-nowrap text-foreground/80">
-              One-time {formatSize(model.sizeBytes)} download.
+              One-time {formatSize(model.sizeBytes)} {tHC("hcComponentsEdgeOnDeviceSetupNudge.s5")}
             </span>
             {saveData && (
               <span className="text-[var(--state-warning)]">
                 {" "}
-                You&apos;re on data saver — it&apos;s a large download.
+                {tHC("hcComponentsEdgeOnDeviceSetupNudge.s4")}
               </span>
             )}
           </p>
@@ -304,7 +306,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
               <button
                 type="button"
                 onClick={dismiss}
-                aria-label="Dismiss on-device setup"
+                aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
                 className="flex size-6 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
               >
                 <X size={12} aria-hidden="true" />
@@ -323,7 +325,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
         <span className="font-medium text-foreground">Downloading {phase.model.displayName}</span>
         {" · "}
         <span className="tabular-nums">{phase.pct}%</span>
-        {" — "}replies switch to your device automatically when it finishes. You can keep chatting.
+        {" — "}{tHC("hcComponentsEdgeOnDeviceSetupNudge.s3")}
       </span>,
       false
     );
@@ -332,7 +334,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
   if (phase.kind === "done") {
     return shell(
       <span>
-        <span className="font-medium text-foreground">{EDGE_BRANDING.name} is ready.</span> {EDGE_BRANDING.promise}
+        <span className="font-medium text-foreground">{EDGE_BRANDING.name} {tHC("hcComponentsEdgeOnDeviceSetupNudge.s2")}</span> {EDGE_BRANDING.promise}
       </span>,
       false
     );
@@ -375,7 +377,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             <button
               type="button"
               onClick={dismiss}
-              aria-label="Dismiss on-device setup"
+              aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
               className="flex size-6 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
             >
               <X size={12} aria-hidden="true" />

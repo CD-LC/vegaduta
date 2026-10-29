@@ -147,6 +147,7 @@ function CredentialEditDialog({
   onCancel: () => void;
   isBusy: boolean;
 }) {
+    const tHC = useTranslations("hcToolsCredentialsPage");
   const guide = credentialGuideFor(server.name);
   const knownFields: McpCredentialGuideField[] = guide?.fields || [];
   const hasKnownFields = knownFields.length > 0;
@@ -188,7 +189,7 @@ function CredentialEditDialog({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center justify-between gap-3">
-            <AlertDialogTitle>Edit credentials</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("hcToolsCredentialsPage.s14")}</AlertDialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -299,8 +300,8 @@ function CredentialEditDialog({
                     className="text-muted-foreground hover:text-destructive"
                     disabled={isBusy}
                     onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))}
-                    aria-label="Remove credential"
-                    title="Remove credential"
+                    aria-label={tHC("hcToolsCredentialsPage.s16")}
+                    title={tHC("hcToolsCredentialsPage.s16")}
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </Button>
@@ -346,6 +347,7 @@ function CredentialEditDialog({
 }
 
 function StaticServerCard({ server }: { server: McpServer }) {
+    const tHC = useTranslations("hcToolsCredentialsPage");
   return (
     <Card>
       <CardContent className="pt-6">
@@ -362,8 +364,7 @@ function StaticServerCard({ server }: { server: McpServer }) {
             </div>
             {server.description && <p className="mt-1 text-xs text-muted-foreground">{server.description}</p>}
             <p className="mt-2 text-xs text-muted-foreground">
-              Wired at deployment time via server configuration, not a per-workspace credential — there&apos;s nothing
-              to edit here.
+              {tHC("hcToolsCredentialsPage.s15")}
             </p>
           </div>
         </div>
@@ -381,6 +382,7 @@ function ServerCredentialCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+    const tHC = useTranslations("hcToolsCredentialsPage");
   const statusColor =
     server.usageStatus === "READY" || server.usageStatus === "ACKNOWLEDGED"
       ? "text-[var(--state-success)]"
@@ -418,7 +420,7 @@ function ServerCredentialCard({
         {server.dynamic && (
           <div className="mt-4 flex gap-2">
             <Button variant="outline" size="sm" onClick={onEdit} className="gap-1">
-              <Pencil size={14} aria-hidden="true" /> Edit credentials
+              <Pencil size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s14")}
             </Button>
             <Button
               variant="outline"
@@ -426,7 +428,7 @@ function ServerCredentialCard({
               onClick={onDelete}
               className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 size={14} aria-hidden="true" /> Clear credentials
+              <Trash2 size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s13")}
             </Button>
           </div>
         )}
@@ -436,6 +438,7 @@ function ServerCredentialCard({
 }
 
 export default function CredentialsPage() {
+    const tHC = useTranslations("hcToolsCredentialsPage");
   const t = useTranslations("toolsPage");
   const [servers, setServers] = useState<McpServer[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -529,18 +532,18 @@ export default function CredentialsPage() {
   return (
     <AppShell eyebrow={t("pageEyebrow")}>
       <PageHeader
-        title="MCP Server Credentials"
+        title={tHC("hcToolsCredentialsPage.s12")}
         subtitle="Manage API keys and tokens for your connected MCP servers"
         actions={
           <>
             <Button variant="ghost" size="sm" className="gap-1" asChild>
               <Link href="/help/docs#tools" target="_blank" rel="noopener noreferrer">
-                <HelpCircle size={14} aria-hidden="true" /> How credentials work
+                <HelpCircle size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s11")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="gap-1" asChild>
               <Link href="/tools/servers">
-                <ArrowLeft size={14} aria-hidden="true" /> Back to servers
+                <ArrowLeft size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s10")}
               </Link>
             </Button>
           </>
@@ -550,21 +553,21 @@ export default function CredentialsPage() {
       {servers.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <Lock size={32} className="mb-3 text-muted-foreground" aria-hidden="true" />
-          <h3 className="font-semibold">No MCP servers configured</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Add an MCP server to manage its credentials.</p>
+          <h3 className="font-semibold">{tHC("hcToolsCredentialsPage.s9")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{tHC("hcToolsCredentialsPage.s8")}</p>
           <Button className="mt-4" size="sm" asChild>
             <Link href="/tools">
-              <Plus size={14} aria-hidden="true" /> Add MCP server
+              <Plus size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s7")}
             </Link>
           </Button>
         </div>
       ) : (
         <div className="space-y-8">
-          <Section title="Servers with credentials" className="space-y-4">
+          <Section title={tHC("hcToolsCredentialsPage.s6")} className="space-y-4">
             {dynamicServers.length === 0 ? (
               <Alert>
                 <AlertDescription>
-                  No credentials to manage — your enabled servers below are built-in and need none.
+                  {tHC("hcToolsCredentialsPage.s5")}
                 </AlertDescription>
               </Alert>
             ) : (
@@ -590,7 +593,7 @@ export default function CredentialsPage() {
 
           {staticServers.length > 0 && (
             <Section
-              title="Built-in servers"
+              title={tHC("hcToolsCredentialsPage.s4")}
               description="Shared platform-wide and wired at deployment via an env var on the server — not a per-workspace credential, so there's nothing to edit here."
               className="space-y-3"
             >
@@ -625,12 +628,10 @@ export default function CredentialsPage() {
       <AlertDialog open={!!deletingServer} onOpenChange={(open: boolean) => !open && setDeletingServer(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear credentials for {deletingServer?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("hcToolsCredentialsPage.s3")} {deletingServer?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the stored{" "}
-              {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"} for this server.
-              The server itself stays registered and enabled — it just won&apos;t have credentials until you add new
-              ones.
+              {tHC("hcToolsCredentialsPage.s2")}{" "}
+              {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"} {tHC("hcToolsCredentialsPage.s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

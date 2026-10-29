@@ -25,6 +25,7 @@ import { splitThink } from "./thinking";
 import { studioSuggestions } from "./suggestions";
 import type { ProjectSession } from "./useProjectSession";
 import { SOURCE_LABEL, timeAgo } from "./sessionTypes";
+import { useTranslations } from "../../lib/i18n";
 
 /** Left column: the conversation with the builder, the request box, attachments and the version history. */
 /** What the live-output box shows before the model's first word arrives.
@@ -46,6 +47,7 @@ function waitingLine(engineLabel: string, elapsed: number): string {
 }
 
 export default function ChatPane({ s }: { s: ProjectSession }) {
+    const tHC = useTranslations("hcBuildStudioChatPane");
   const {
     answerClarify,
     attached,
@@ -96,12 +98,12 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           <div className="flex items-center gap-2 rounded-lg bg-orange-500/10 px-2 py-1.5 text-xs text-orange-700 dark:text-orange-300">
             <MousePointerClick aria-hidden="true" size={12} />
             <span className="min-w-0 flex-1 truncate">
-              Targeting &lt;{selected.tag}&gt; {selected.text ? `"${selected.text.slice(0, 30)}"` : ""}
+              {tHC("hcBuildStudioChatPane.s25")}{selected.tag}&gt; {selected.text ? `"${selected.text.slice(0, 30)}"` : ""}
             </span>
             <button
               type="button"
               onClick={() => setSelected(null)}
-              aria-label="Clear target"
+              aria-label={tHC("hcBuildStudioChatPane.s24")}
               className="rounded p-0.5 hover:bg-orange-500/20"
             >
               <X aria-hidden="true" size={12} />
@@ -124,10 +126,10 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
               : "Ask for a change, e.g. add a dark mode switch, or add a search box"
           }
           className="resize-none"
-          aria-label="Ask for a change"
+          aria-label={tHC("hcBuildStudioChatPane.s23")}
         />
         {!busy && suggestions.length > 0 && (
-          <div role="group" aria-label="Suggested next changes" className="flex gap-1.5 overflow-x-auto pb-0.5">
+          <div role="group" aria-label={tHC("hcBuildStudioChatPane.s22")} className="flex gap-1.5 overflow-x-auto pb-0.5">
             {suggestions.map((s) => (
               <button
                 key={s.label}
@@ -173,7 +175,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           accept={ATTACH_ACCEPT}
           className="hidden"
           onChange={(e) => void pickFiles(e.target.files)}
-          aria-label="Attach a file"
+          aria-label={tHC("hcBuildStudioChatPane.s19")}
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
@@ -183,7 +185,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
               aria-pressed={inspect}
               onClick={() => setInspect((v) => !v)}
               className="gap-1.5"
-              title="Tap an element in the preview to target it"
+              title={tHC("hcBuildStudioChatPane.s21")}
             >
               <MousePointerClick aria-hidden="true" size={13} /> {inspect ? "Tap an element…" : "Select"}
             </Button>
@@ -193,8 +195,8 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
               onClick={() => fileInputRef.current?.click()}
               disabled={!!busy || attached.length >= MAX_ATTACHMENTS}
               className="gap-1.5"
-              title="Attach an image or a data file (csv, json, txt) for the AI to use"
-              aria-label="Attach a file"
+              title={tHC("hcBuildStudioChatPane.s20")}
+              aria-label={tHC("hcBuildStudioChatPane.s19")}
             >
               <Paperclip aria-hidden="true" size={13} /> Attach
             </Button>
@@ -206,7 +208,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                 disabled={!!busy}
                 aria-pressed={dictation.listening}
                 className="gap-1.5"
-                title="Dictate your request (your browser's speech service transcribes it)"
+                title={tHC("hcBuildStudioChatPane.s18")}
                 aria-label={dictation.listening ? "Stop dictation" : "Dictate your request"}
               >
                 <Mic aria-hidden="true" size={13} /> {dictation.listening ? "Listening…" : "Dictate"}
@@ -219,7 +221,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             </Button>
           ) : (
             <Button size="sm" onClick={() => send()} disabled={!request.trim()} className="gap-1.5">
-              <Send aria-hidden="true" size={13} /> Change it
+              <Send aria-hidden="true" size={13} /> {tHC("hcBuildStudioChatPane.s17")}
             </Button>
           )}
         </div>
@@ -256,17 +258,15 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           className="flex flex-col gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/[0.06] p-3 text-xs"
         >
           <p id="scope-ask-title" className="font-medium text-foreground">
-            This changes the whole page
+            {tHC("hcBuildStudioChatPane.s16")}
           </p>
           <p className="text-muted-foreground">
-            Big all-at-once changes are harder for the AI to get right, and more of your app can shift than you meant.
-            It is usually easier to tap <span className="font-medium text-foreground">Select</span>, pick the part you
-            want changed, and describe it - one part at a time.
+            {tHC("hcBuildStudioChatPane.s15")} <span className="font-medium text-foreground">Select</span>{tHC("hcBuildStudioChatPane.s14")}
           </p>
-          <p className="text-muted-foreground">If you wish to continue with the whole page anyway, click Yes.</p>
+          <p className="text-muted-foreground">{tHC("hcBuildStudioChatPane.s13")}</p>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={() => send({ wholePage: true, text: scopeAsk ?? undefined })}>
-              Yes, continue
+              {tHC("hcBuildStudioChatPane.s12")}
             </Button>
             <Button
               size="sm"
@@ -277,7 +277,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                 setInspect(true);
               }}
             >
-              <MousePointerClick aria-hidden="true" size={12} /> Select a part instead
+              <MousePointerClick aria-hidden="true" size={12} /> {tHC("hcBuildStudioChatPane.s11")}
             </Button>
           </div>
         </div>
@@ -290,7 +290,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
           className="flex flex-col gap-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-3 text-xs"
         >
           <p id="clarify-title" className="font-medium text-foreground">
-            Before I build - a few quick questions
+            {tHC("hcBuildStudioChatPane.s10")}
           </p>
           <ul className="list-disc space-y-1 ps-5 text-muted-foreground">
             {clarify.questions.map((q) => (
@@ -301,9 +301,9 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
             value={clarifyText}
             onChange={(e) => setClarifyText(e.target.value)}
             rows={2}
-            placeholder="Answer any or all in one line - or just build it as described."
+            placeholder={tHC("hcBuildStudioChatPane.s9")}
             className="resize-none"
-            aria-label="Answers to the questions"
+            aria-label={tHC("hcBuildStudioChatPane.s8")}
           />
           <div className="flex flex-wrap gap-2">
             <Button
@@ -313,10 +313,10 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                 setClarifyText("");
               }}
             >
-              Build it
+              {tHC("hcBuildStudioChatPane.s7")}
             </Button>
             <Button size="sm" variant="outline" onClick={() => answerClarify(null)}>
-              Skip - build as described
+              {tHC("hcBuildStudioChatPane.s6")}
             </Button>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
 
       {runtimeError && !busy && (
         <div className="flex flex-col gap-2 rounded-2xl border border-destructive/40 bg-destructive/5 p-3 text-xs">
-          <p className="font-medium text-destructive">The app hit an error</p>
+          <p className="font-medium text-destructive">{tHC("hcBuildStudioChatPane.s5")}</p>
           <p className="break-words font-mono text-[11px] text-muted-foreground">{runtimeError.message}</p>
           <div className="flex gap-2">
             <Button
@@ -382,11 +382,11 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                 void runEdit(fixRequest(runtimeError, where, repeated, broken));
               }}
             >
-              <Wrench aria-hidden="true" size={12} /> Fix it with AI
+              <Wrench aria-hidden="true" size={12} /> {tHC("hcBuildStudioChatPane.s4")}
             </Button>
             {undoTarget() >= 0 && (
               <Button size="sm" variant="ghost" onClick={undo}>
-                Undo last change
+                {tHC("hcBuildStudioChatPane.s3")}
               </Button>
             )}
           </div>
@@ -428,7 +428,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                       onClick={() => void runEdit(e.cloudRetry!.req, { prefer: "cloud", target: e.cloudRetry!.target })}
                       className="ms-2 inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 font-medium text-sky-700 transition hover:bg-sky-500/20 disabled:opacity-50 dark:text-sky-300"
                     >
-                      <Cloud aria-hidden="true" size={10} /> Use the cloud for this one
+                      <Cloud aria-hidden="true" size={10} /> {tHC("hcBuildStudioChatPane.s2")}
                     </button>
                   )}
                 </span>
@@ -467,7 +467,7 @@ export default function ChatPane({ s }: { s: ProjectSession }) {
                       type="button"
                       onClick={() => setDiffFrom(i)}
                       aria-label={`Compare "${v.note}" with the current version`}
-                      title="Compare with the current version"
+                      title={tHC("hcBuildStudioChatPane.s1")}
                       className="rounded p-1 text-muted-foreground transition hover:bg-secondary hover:text-foreground sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 [@media(hover:none)]:opacity-100"
                     >
                       <GitCompare aria-hidden="true" size={12} />

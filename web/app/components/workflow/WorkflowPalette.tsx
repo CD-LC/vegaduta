@@ -9,6 +9,7 @@ import type { NodeDefTranslator } from "./useNodeDefTranslations";
 import "./workflow-chrome.css";
 import { Input } from "../ui/input";
 import { workflowNodeOffered } from "../../lib/personalInstall";
+import { useTranslations } from "../../lib/i18n";
 
 export interface WorkflowPaletteProps {
   addNodeByClick: (type: string) => void;
@@ -23,6 +24,7 @@ export default function WorkflowPalette({
   setPaletteOpen,
   tNodeDefs,
 }: WorkflowPaletteProps) {
+    const tHC = useTranslations("hcComponentsWorkflowWorkflowPalette");
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
@@ -65,14 +67,14 @@ export default function WorkflowPalette({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search nodes…"
-            aria-label="Search nodes"
+            placeholder={tHC("hcComponentsWorkflowWorkflowPalette.s4")}
+            aria-label={tHC("hcComponentsWorkflowWorkflowPalette.s3")}
             className="h-8 text-xs"
           />
         </div>
         {visibleByCategory.length === 0 && (
           <div className="px-1 py-4 text-xs text-muted-foreground" role="status">
-            No nodes match &ldquo;{query}&rdquo;.
+            {tHC("hcComponentsWorkflowWorkflowPalette.s2")}{query}&rdquo;.
           </div>
         )}
         {visibleByCategory.map(({ category, defs }) => {
@@ -130,7 +132,7 @@ export default function WorkflowPalette({
         })}
         <div className="mt-4 border-t border-border px-1 pt-3">
           <SetupGuideCard
-            title="Setup guide"
+            title={tHC("hcComponentsWorkflowWorkflowPalette.s1")}
             steps={["providers", "tools", "mcp", "secrets", "knowledge", "channels"]}
             newTab
           />

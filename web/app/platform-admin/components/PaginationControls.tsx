@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PAGE_SIZE_OPTIONS } from "../lib/usePagination";
 import { Button } from "./ui/button";
+import { useTranslations } from "../../lib/i18n";
 
 // Shared page-size + prev/next control for every web-admin list wired to
 // usePagination(). shadcn/token-styled (no i18n — this app uses plain strings),
@@ -37,6 +38,7 @@ export default function PaginationControls({
   onPageSizeChange: (size: number) => void;
   itemLabel?: string;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsPaginationControls");
   const totalKnown = typeof totalItems === "number";
   if (totalKnown && totalItems === 0) return null;
   if (!totalKnown && (pageItemCount ?? 1) === 0 && page <= 1) return null;
@@ -56,7 +58,7 @@ export default function PaginationControls({
           : `${start}–${end} ${itemLabel}${hasMore ? " (more available)" : ""}`}
         {showCap && (
           <span className="ms-2 text-[var(--warning-text)]" role="status">
-            Showing the first {capped}. Narrow the filters to see more.
+            {tHC("hcPlatformadminComponentsPaginationControls.s4")} {capped}{tHC("hcPlatformadminComponentsPaginationControls.s3")}
           </span>
         )}
       </span>
@@ -88,7 +90,7 @@ export default function PaginationControls({
               className="size-7"
               disabled={loading || page <= 1}
               onClick={() => onPageChange(page - 1)}
-              aria-label="Previous page"
+              aria-label={tHC("hcPlatformadminComponentsPaginationControls.s2")}
             >
               <ChevronLeft size={14} />
             </Button>
@@ -99,7 +101,7 @@ export default function PaginationControls({
               className="size-7"
               disabled={loading || atEnd}
               onClick={() => onPageChange(page + 1)}
-              aria-label="Next page"
+              aria-label={tHC("hcPlatformadminComponentsPaginationControls.s1")}
             >
               <ChevronRight size={14} />
             </Button>

@@ -13,6 +13,7 @@ import {
   orEmptyEstimate,
   type IntervalEstimate,
 } from "./evalStatisticsApi";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * The presentational atoms for honest scores — the pieces that make the rule
@@ -56,12 +57,13 @@ import {
  * measurement on any screen that uses these atoms.
  */
 export function UnreplicatedBadge({ className }: { className?: string }) {
+    const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
   return (
     <Badge
       variant="state"
       state="var(--state-warning)"
       className={cn("gap-1", className)}
-      title="This score comes from a single run. One run is not a measurement — it carries no interval and cannot be compared against another number."
+      title={tHC("hcAgentsQualityScoreWithInterval.s5")}
     >
       <AlertTriangle size={11} aria-hidden="true" /> unreplicated
     </Badge>
@@ -138,6 +140,7 @@ export function ScoreWithInterval({
   hideUnreplicatedBadge = false,
   className,
 }: ScoreWithIntervalProps) {
+    const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
   const e = orEmptyEstimate(estimate);
   const hasValue = e.value !== null && e.value !== undefined;
   const withInterval = hasInterval(e);
@@ -173,18 +176,18 @@ export function ScoreWithInterval({
         {(e.rollouts || 0) > 0 && (
           <span
             className="font-mono text-xs tabular-nums text-muted-foreground"
-            title="Independent rollouts behind this estimate — not assertions, not cases, not judges."
+            title={tHC("hcAgentsQualityScoreWithInterval.s4")}
           >
             n={e.rollouts}
           </span>
         )}
-        {!hasValue && <span className="text-xs text-muted-foreground">not measured</span>}
+        {!hasValue && <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityScoreWithInterval.s3")}</span>}
         {hasValue && !withInterval && !unreplicated && (
           <span
             className="text-xs text-muted-foreground"
-            title="The backend returned a point estimate without an interval for this figure."
+            title={tHC("hcAgentsQualityScoreWithInterval.s2")}
           >
-            no interval
+            {tHC("hcAgentsQualityScoreWithInterval.s1")}
           </span>
         )}
         {unreplicated && !hideUnreplicatedBadge && <UnreplicatedBadge />}

@@ -5,12 +5,14 @@ import { Infinity as InfinityIcon, Timer, Fingerprint, Gauge, PauseCircle, Route
 import { Badge } from "../ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import type { StudioStatus } from "./studioClient";
+import { useTranslations } from "../../lib/i18n";
 
 // The gateways, made visible. Unlimited is only believable when the limits that
 // DO exist are on the page: how fast, how long, how many at once - and the
 // address the visitor is being held to.
 
 export default function FairUseBar({ status }: { status: StudioStatus | null }) {
+    const tHC = useTranslations("hcComponentsStudioFairUseBar");
   const [cool, setCool] = useState(0);
   const coolFromServer = status?.fairUse?.coolingSeconds ?? 0;
 
@@ -25,7 +27,7 @@ export default function FairUseBar({ status }: { status: StudioStatus | null }) 
   return (
     <div className="flex flex-wrap items-center gap-1.5 text-xs">
       <Chip icon={InfinityIcon} tip="No message allowance. What limits you is speed, not a lifetime count.">
-        unlimited missions
+        {tHC("hcComponentsStudioFairUseBar.s4")}
       </Chip>
       {f && (
         <Chip icon={Gauge} tip="A burst limit per sandbox, per network and per day keeps the studio open for everyone.">
@@ -34,12 +36,12 @@ export default function FairUseBar({ status }: { status: StudioStatus | null }) 
       )}
       {status?.missionTimeoutSeconds ? (
         <Chip icon={Timer} tip="Every agent turn is stopped at this wall-clock limit, tools included.">
-          {status.missionTimeoutSeconds}s per run
+          {status.missionTimeoutSeconds}{tHC("hcComponentsStudioFairUseBar.s3")}
         </Chip>
       ) : null}
       {status?.workflowTimeoutMinutes ? (
         <Chip icon={Route} tip="A whole workflow, including the time you take to approve, is stopped at this limit.">
-          {status.workflowTimeoutMinutes} min per workflow
+          {status.workflowTimeoutMinutes} {tHC("hcComponentsStudioFairUseBar.s2")}
         </Chip>
       ) : null}
       {status?.clientIp ? (
@@ -52,7 +54,7 @@ export default function FairUseBar({ status }: { status: StudioStatus | null }) 
       ) : null}
       {cool > 0 && (
         <Badge variant="destructive" className="gap-1" role="status">
-          <PauseCircle aria-hidden="true" /> paused - {cool >= 60 ? `${Math.ceil(cool / 60)} min` : `${cool}s`} left
+          <PauseCircle aria-hidden="true" /> {tHC("hcComponentsStudioFairUseBar.s1")} {cool >= 60 ? `${Math.ceil(cool / 60)} min` : `${cool}s`} left
         </Badge>
       )}
     </div>

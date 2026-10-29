@@ -41,6 +41,7 @@ export default function CustomServerForm({
   noteRegisterResponse: (res: any, baseMessage: string) => string;
   scheduleAutoTestRefresh: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsMcpCustomServerForm");
   const t = useTranslations("mcpPanel");
   const [name, setName] = useState("");
   const [type, setType] = useState("STDIO");
@@ -145,7 +146,7 @@ export default function CustomServerForm({
               required
             />
             <p id="mcp-server-name-help" className="text-xs text-muted-foreground">
-              The name agents and teammates will see for this server.
+              {tHC("hcComponentsMcpCustomServerForm.s5")}
             </p>
           </div>
           <Select
@@ -179,15 +180,13 @@ export default function CustomServerForm({
         {type !== "STDIO" && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-muted-foreground">
-              Leave URL blank to just register a name-reference to something already wired in{" "}
-              <code>application-mcp.yml</code>. Fill it in to connect this remote server live, scoped to your
-              organization. Header credentials (e.g. Authorization: Bearer &lt;token&gt;) are added in the enable step;
-              they are encrypted at rest and sent only to this server.
+              {tHC("hcComponentsMcpCustomServerForm.s4")}{" "}
+              <code>application-mcp.yml</code>{tHC("hcComponentsMcpCustomServerForm.s3")}
               {type === "SSE" && " SSE is deprecated in the MCP spec: prefer STREAMABLE_HTTP."}
             </p>
             <Input
               type="text"
-              placeholder="URL (e.g. https://mcp.example.com/mcp)"
+              placeholder={tHC("hcComponentsMcpCustomServerForm.s2")}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
@@ -199,8 +198,7 @@ export default function CustomServerForm({
             <p className="text-xs text-muted-foreground">
               {t("optionalCommandNotePrefix")}
               <code>application-mcp.yml</code>
-              {t("optionalCommandNoteSuffix")} Environment entries below are what the server process needs (API keys
-              etc.) — they&apos;re encrypted at rest and sent only to this server.
+              {t("optionalCommandNoteSuffix")} {tHC("hcComponentsMcpCustomServerForm.s1")}
             </p>
             <Input
               type="text"

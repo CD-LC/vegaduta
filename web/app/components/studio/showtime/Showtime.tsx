@@ -14,6 +14,7 @@ import { pledgeAccepted, rememberPledge } from "../StudioPledge";
 import ShowtimeTransport from "./ShowtimeTransport";
 import EndCard from "./ShowtimeEndCard";
 import LiveConsent from "./LiveConsent";
+import { useTranslations } from "../../../lib/i18n";
 
 // Showtime: the platform as a film you can drive. Full screen, dark, one phone,
 // one job. Two modes on the same stage:
@@ -86,6 +87,7 @@ export default function Showtime({
   onLaunch,
   clientIp,
 }: Props) {
+    const tHC = useTranslations("hcComponentsStudioShowtimeShowtime");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -251,7 +253,7 @@ export default function Showtime({
     <div
       ref={rootRef}
       role="region"
-      aria-label="Showtime - the platform in full screen"
+      aria-label={tHC("hcComponentsStudioShowtimeShowtime.s10")}
       className="fixed inset-0 z-[90] flex flex-col overflow-hidden bg-zinc-950 text-zinc-100"
     >
       <style>{`
@@ -294,7 +296,7 @@ export default function Showtime({
             onClick={() => setMode("day")}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 ${mode === "day" ? "bg-violet-600 text-white" : "bg-transparent text-zinc-400 hover:text-zinc-100"}`}
           >
-            <Moon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> An impossible day
+            <Moon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeShowtime.s9")}
           </button>
           <button
             type="button"
@@ -303,7 +305,7 @@ export default function Showtime({
             onClick={() => setMode("watch")}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 ${mode === "watch" ? "bg-sky-600 text-white" : "bg-transparent text-zinc-400 hover:text-zinc-100"}`}
           >
-            <Clapperboard aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> How it&apos;s built
+            <Clapperboard aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeShowtime.s8")}
           </button>
           <button
             type="button"
@@ -312,7 +314,7 @@ export default function Showtime({
             onClick={enterBuild}
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 ${mode === "build" ? "bg-emerald-600 text-white" : "bg-transparent text-zinc-400 hover:text-zinc-100"}`}
           >
-            <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Build it live
+            <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeShowtime.s7")}
           </button>
         </div>
         <div className="ms-auto flex items-center gap-1">
@@ -320,7 +322,7 @@ export default function Showtime({
             type="button"
             onClick={toggleFull}
             aria-label={full ? "Exit full screen" : "Full screen"}
-            title="Full screen (F)"
+            title={tHC("hcComponentsStudioShowtimeShowtime.s6")}
             className="rounded-lg bg-transparent p-2 text-zinc-300 hover:bg-white/10"
           >
             {full ? (
@@ -332,8 +334,8 @@ export default function Showtime({
           <button
             type="button"
             onClick={close}
-            aria-label="Close (Esc)"
-            title="Close (Esc)"
+            aria-label={tHC("hcComponentsStudioShowtimeShowtime.s5")}
+            title={tHC("hcComponentsStudioShowtimeShowtime.s5")}
             className="rounded-lg bg-transparent p-2 text-zinc-300 hover:bg-white/10"
           >
             <X aria-hidden="true" className="h-5 w-5 shrink-0" />
@@ -390,13 +392,13 @@ export default function Showtime({
                     onClick={() => onLaunch(act.build!)}
                     className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-violet-400/40 bg-violet-500/15 px-3 py-1.5 text-xs font-medium text-violet-100 hover:bg-violet-500/25"
                   >
-                    <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Build this one yourself{" "}
+                    <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeShowtime.s4")}{" "}
                     <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
                   </button>
                 )}
               </div>
               <div className="hidden rounded-2xl border border-white/10 bg-black/40 px-4 py-3 backdrop-blur lg:block">
-                <div className="mb-1 text-[11px] uppercase tracking-wider text-zinc-400">Under the hood</div>
+                <div className="mb-1 text-[11px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeShowtime.s3")}</div>
                 <ul className="space-y-1 text-xs">
                   {act.explain.map((e) => (
                     <li key={e.feature} className="flex gap-2">
@@ -426,14 +428,14 @@ export default function Showtime({
           <div className="mx-auto mt-16 flex max-w-md flex-col items-center gap-3 text-center text-zinc-400">
             <Loader2 aria-hidden="true" className="h-6 w-6 animate-spin shrink-0" />
             <p>
-              The live studio is still opening a clean space for you. One moment - or watch the film while you wait.
+              {tHC("hcComponentsStudioShowtimeShowtime.s2")}
             </p>
             <button
               type="button"
               onClick={() => setMode("day")}
               className="rounded-xl border border-white/15 bg-transparent px-4 py-2 text-sm text-zinc-200 hover:bg-white/5"
             >
-              Back to the film
+              {tHC("hcComponentsStudioShowtimeShowtime.s1")}
             </button>
           </div>
         )}

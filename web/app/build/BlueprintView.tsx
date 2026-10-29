@@ -31,6 +31,7 @@ import {
   type Level,
   type OutputKind,
 } from "../lib/build/blueprint";
+import { useTranslations } from "../lib/i18n";
 
 const SOURCE_META: Record<FieldSource, { label: string; icon: typeof User; tone: string }> = {
   default: { label: "Safe default", icon: Lock, tone: "text-muted-foreground" },
@@ -55,11 +56,12 @@ export function LevelPicker({
   output?: OutputKind;
   onChange: (l: Level) => void;
 }) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   return (
     // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group
     <div
       role="radiogroup"
-      aria-label="How much detail to show"
+      aria-label={tHC("hcBuildBlueprintView.s7")}
       onKeyDown={radioGroupKeyDown}
       className="inline-flex flex-wrap rounded-xl border border-border bg-card p-1"
     >
@@ -104,6 +106,7 @@ function SourceTag({ source }: { source: FieldSource }) {
 }
 
 function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onChange: (next: Blueprint) => void }) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   const c = spec.control;
   const value = spec.read(bp);
   const write = (v: string | number | boolean) => spec.write && onChange(spec.write(bp, v));
@@ -113,7 +116,7 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
         {value}
         {spec.href && (
           <Link href={spec.href} className="ms-2 text-xs text-primary underline-offset-2 hover:underline">
-            Change later
+            {tHC("hcBuildBlueprintView.s6")}
           </Link>
         )}
       </span>
@@ -298,6 +301,7 @@ const KIND_STYLE: Record<FlowKind, string> = {
 const ADDABLE: FlowKind[] = ["agent", "branch", "approval", "action"];
 
 export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: Blueprint) => void }) {
+    const tHC = useTranslations("hcBuildBlueprintView");
   const wf = bp.workflow;
   return (
     <section className="rounded-xl border border-border bg-card p-4">
@@ -305,14 +309,14 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <div>
           <h3 className="text-sm font-semibold text-foreground">Workflow</h3>
           <p className="text-xs text-muted-foreground">
-            A repeatable path around the agent - triggers, decisions and human approvals.
+            {tHC("hcBuildBlueprintView.s5")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Switch
             checked={!!wf}
             onCheckedChange={(v) => onChange(withWorkflow(bp, v))}
-            aria-label="Build a workflow too"
+            aria-label={tHC("hcBuildBlueprintView.s4")}
           />
           <span className="text-sm text-foreground">{wf ? "Build one" : "Agent only"}</span>
         </div>
@@ -322,7 +326,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <>
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <SourceTag source={bp.sources["workflow.steps"] ?? "default"} />
-            <span>Named &ldquo;{wf.name}&rdquo;. The AI lays out the canvas from these steps when you build.</span>
+            <span>Named &ldquo;{wf.name}{tHC("hcBuildBlueprintView.s3")}</span>
           </div>
           <ol className="mt-3">
             {wf.steps.map((s, i) => (
@@ -390,7 +394,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
             ))}
           </ol>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Add a step:</span>
+            <span className="text-xs text-muted-foreground">{tHC("hcBuildBlueprintView.s2")}</span>
             {ADDABLE.map((k) => (
               <button
                 key={k}
@@ -407,7 +411,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
       {!wf && (
         <p className="mt-3 text-xs text-muted-foreground">
           <Sparkles aria-hidden="true" size={11} className="me-1 inline text-primary" />
-          Turn this on when the job has steps, decisions or needs a person to approve something before it goes out.
+          {tHC("hcBuildBlueprintView.s1")}
         </p>
       )}
     </section>

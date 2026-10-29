@@ -4,6 +4,7 @@ import { useCallback, useRef, type CSSProperties, type KeyboardEvent } from "rea
 import { EyeOff, Flame, TriangleAlert, Route, Ghost, type LucideIcon } from "lucide-react";
 import { CANVAS_LENSES, RUNS_WINDOWS, type CanvasLens, type LensLegend, type RunsWindow } from "./lensStyles";
 import "./canvas-lens.css";
+import { useTranslations } from "../../lib/i18n";
 
 const LENS_META: Record<CanvasLens, { label: string; hint: string; Icon: LucideIcon }> = {
   none: { label: "Design", hint: "No lens: the canvas as designed", Icon: EyeOff },
@@ -70,6 +71,7 @@ export default function CanvasLensBar({
   loadedRuns,
   className,
 }: CanvasLensBarProps) {
+    const tHC = useTranslations("hcComponentsWorkflowCanvasLensBar");
   const lensReason = useCallback(
     (l: CanvasLens): string | undefined => (l === "none" ? undefined : disabledReason ?? lensDisabledReasons?.[l]),
     [disabledReason, lensDisabledReasons],
@@ -85,7 +87,7 @@ export default function CanvasLensBar({
     <div className={["wfx-lensbar", className].filter(Boolean).join(" ")} data-lens={lens}>
       <div className="wfx-lensbar-row">
         {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group */}
-        <div className="wfx-lensbar-seg" role="radiogroup" aria-label="Canvas lens" onKeyDown={lensGroup.onKeyDown}>
+        <div className="wfx-lensbar-seg" role="radiogroup" aria-label={tHC("hcComponentsWorkflowCanvasLensBar.s2")} onKeyDown={lensGroup.onKeyDown}>
           {CANVAS_LENSES.map((l, i) => {
             const { label, hint, Icon } = LENS_META[l];
             const checked = l === lens;
@@ -119,7 +121,7 @@ export default function CanvasLensBar({
             <div
               className="wfx-lensbar-window"
               role="radiogroup"
-              aria-label="Runs to analyse"
+              aria-label={tHC("hcComponentsWorkflowCanvasLensBar.s1")}
               onKeyDown={winGroup.onKeyDown}
             >
               <span className="wfx-lensbar-window-label" aria-hidden="true">Last</span>

@@ -62,6 +62,7 @@ export default function InboxPanel({
   // route-transition cover, or a failed first fetch would hold it forever.
   onCountsChange?: (waiting: number | null, held: number | null) => void;
 }) {
+    const tHC = useTranslations("hcAdminInboxInboxPanel");
   const tg = useTranslations("f2GapsAdmin");
   const [stats, setStats] = useState<InboxStats | null>(null);
   const [items, setItems] = useState<ConversationSummary[]>([]);
@@ -248,11 +249,10 @@ export default function InboxPanel({
   if (notWired) {
     return (
       <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
-        <p className="font-medium">The operator inbox backend is live, but the console client isn&apos;t wired yet.</p>
+        <p className="font-medium">{tHC("hcAdminInboxInboxPanel.s10")}</p>
         <p className="mt-1 text-muted-foreground">
-          The shared API client (<code>web/app/lib/api.ts</code>) is missing the handoff methods this page calls — see{" "}
-          <code>web/app/admin/inbox/inboxApi.ts</code> for the exact list. This page goes fully live the moment they
-          land.
+          {tHC("hcAdminInboxInboxPanel.s9")}<code>web/app/lib/api.ts</code>{tHC("hcAdminInboxInboxPanel.s8")}{" "}
+          <code>web/app/admin/inbox/inboxApi.ts</code> {tHC("hcAdminInboxInboxPanel.s7")}
         </p>
       </div>
     );
@@ -324,8 +324,8 @@ export default function InboxPanel({
               <Input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search sender, phone or message…"
-                aria-label="Search sender, phone or message"
+                placeholder={tHC("hcAdminInboxInboxPanel.s6")}
+                aria-label={tHC("hcAdminInboxInboxPanel.s5")}
                 className="ps-7"
               />
             </div>
@@ -379,7 +379,7 @@ export default function InboxPanel({
 
           {loadFailed && (
             <div className="mb-3 flex items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-              <span>Couldn&apos;t load conversations — this does not mean it&apos;s empty.</span>
+              <span>{tHC("hcAdminInboxInboxPanel.s4")}</span>
               <Button type="button" size="sm" onClick={() => refreshAll()}>
                 Retry
               </Button>
@@ -389,7 +389,7 @@ export default function InboxPanel({
           {loaded && !loadFailed && items.length === 0 ? (
             <EmptyState
               icon={Headset}
-              title="No conversations match"
+              title={tHC("hcAdminInboxInboxPanel.s3")}
               description={
                 view === "all" && !channel && !appliedQ
                   ? "Nothing has arrived on any channel yet — inbound messages across WhatsApp, Telegram, email and the rest land here."
@@ -466,7 +466,7 @@ export default function InboxPanel({
           {!selected ? (
             <EmptyState
               icon={MessageSquare}
-              title="Pick a conversation"
+              title={tHC("hcAdminInboxInboxPanel.s2")}
               description="Select a conversation to read its full two-way transcript, take it over, and reply as a human."
             />
           ) : (
@@ -494,7 +494,7 @@ export default function InboxPanel({
         <div className="hidden min-w-0 xl:block">
           {detailsPane ?? (
             <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
-              Select a conversation to see routing, pairing and escalation controls.
+              {tHC("hcAdminInboxInboxPanel.s1")}
             </div>
           )}
         </div>

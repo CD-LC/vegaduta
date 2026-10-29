@@ -278,6 +278,7 @@ function TelegramCard({
   onConnect: () => void;
   onDisconnect: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsTryChannelBridge");
   const t = useTranslations("try");
   if (expired) {
     return (
@@ -346,11 +347,11 @@ function TelegramCard({
                 <QrCode
                   value={deepLink}
                   px={104}
-                  label="QR code that opens the Telegram bot with your pairing code"
+                  label={tHC("hcComponentsTryChannelBridge.s2")}
                   className="shrink-0 rounded-md"
                 />
                 <p className="text-xs text-muted-foreground">
-                  On a computer? Scan this with your phone camera and Telegram opens with your code filled in.
+                  {tHC("hcComponentsTryChannelBridge.s1")}
                 </p>
               </div>
             )}

@@ -12,6 +12,7 @@ import { resolveEvalApi } from "./evalDatasetsApi";
 import { isEvalStatsFeatureUnsupported, isPlanGate, markEvalStatsUnsupportedIf, resolveEvalStatsApi } from "./evalStatisticsApi";
 import PairedComparisonCard from "./PairedComparisonCard";
 import { DatasetReliabilityBlock, NoiseFloorCard, WarningsList } from "./EvalStatisticsBlocks";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Honest eval statistics for one agent — the repeat-aware half of the quality
@@ -73,6 +74,7 @@ import { DatasetReliabilityBlock, NoiseFloorCard, WarningsList } from "./EvalSta
 type SelectChangeEvent = { target: { value: string } };
 
 export default function EvalStatisticsSection({ agentId }: { agentId: string | null }) {
+    const tHC = useTranslations("hcAgentsQualityEvalStatisticsSection");
   // Both resolvers are stable per bundle — memo once. The run LISTING
   // contract is reused from evalDatasetsApi rather than redeclared, so there
   // is one definition of "how do I list runs" in this folder.
@@ -217,24 +219,22 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (!statsApi || !evalApi) {
     return (
       <Section
-        title="Honest eval statistics"
+        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
         description={sectionDescription}
       >
         <Alert>
           <Info aria-hidden="true" />
-          <AlertTitle>Almost there — API client wiring pending</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s18")}</AlertTitle>
           <AlertDescription>
             <p>
-              This build of the console does not carry the eval-statistics client methods yet (
+              {tHC("hcAgentsQualityEvalStatisticsSection.s17")}
               <span className="font-mono text-xs">getEvalReliability</span>,{" "}
               <span className="font-mono text-xs">getDatasetNoiseFloor</span>,{" "}
               <span className="font-mono text-xs">compareEvalRunsPaired</span> in{" "}
-              <span className="font-mono text-xs">app/lib/api/quality.ts</span>). This section activates automatically
-              once they land.
+              <span className="font-mono text-xs">app/lib/api/quality.ts</span>{tHC("hcAgentsQualityEvalStatisticsSection.s16")}
             </p>
             <p className="mt-2">
-              Nothing is rendered in the meantime on purpose. A placeholder number here would be indistinguishable from
-              a real one, which is the precise failure this surface exists to prevent.
+              {tHC("hcAgentsQualityEvalStatisticsSection.s15")}
             </p>
           </AlertDescription>
         </Alert>
@@ -246,15 +246,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (locked) {
     return (
       <Section
-        title="Honest eval statistics"
+        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
         description={sectionDescription}
       >
         <Alert>
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>Eval statistics are a Premium feature</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s14")}</AlertTitle>
           <AlertDescription>
-            Repeat-aware scoring, confidence intervals, pass^k reliability and paired A/B comparison sit behind the same
-            Premium plan gate as the quality-evaluation suite above.
+            {tHC("hcAgentsQualityEvalStatisticsSection.s13")}
           </AlertDescription>
         </Alert>
       </Section>
@@ -266,12 +265,12 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (statsHidden && floorHidden && compareHidden) {
     return (
       <Section
-        title="Honest eval statistics"
+        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
         description={sectionDescription}
       >
         <EmptyState
           icon={Sigma}
-          title="Eval statistics aren't available on this deployment yet"
+          title={tHC("hcAgentsQualityEvalStatisticsSection.s12")}
           description="The repeat-aware statistics endpoints (reliability, noise floor, paired comparison) aren't mounted on the core this console is talking to. Nothing is wrong with your agent — this console simply has nothing honest to show until that ships."
         />
       </Section>
@@ -283,15 +282,15 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
 
   return (
     <Section
-      title="Honest eval statistics"
+      title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
       description={sectionDescription}
     >
       <div className="space-y-8">
         {statsHidden ? null : reportFailed ? (
           <Alert variant="destructive">
-            <AlertTitle>Couldn&apos;t load reliability statistics</AlertTitle>
+            <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s10")}</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
-              This is a load failure, not an absence of data.
+              {tHC("hcAgentsQualityEvalStatisticsSection.s9")}
               <Button variant="outline" size="sm" onClick={loadReport}>
                 Retry
               </Button>
@@ -304,7 +303,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
         ) : datasets.length === 0 ? (
           <EmptyState
             icon={FlaskConical}
-            title="No replicated runs to measure yet"
+            title={tHC("hcAgentsQualityEvalStatisticsSection.s8")}
             description="Reliability statistics are computed over an agent's completed eval runs. Run a dataset from the section above — twice is better than once, because a single run is still only one observation."
           />
         ) : (
@@ -327,7 +326,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
                     label: `${d.datasetName} (${d.caseCount} case${d.caseCount === 1 ? "" : "s"})`,
                   }))}
                   searchable
-                  placeholder="Select a dataset"
+                  placeholder={tHC("hcAgentsQualityEvalStatisticsSection.s7")}
                 />
               </div>
               <Button variant="outline" size="sm" onClick={loadReport} disabled={reportLoading}>
@@ -354,14 +353,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
             {/* --------------------------------------------------------- */}
             {!floorHidden && datasetId && (
               <Section
-                title="This dataset's noise floor"
+                title={tHC("hcAgentsQualityEvalStatisticsSection.s6")}
                 description="Two runs of the UNCHANGED configuration, compared pairwise. Any “improvement” smaller than this is not one."
               >
                 {floorFailed ? (
                   <Alert variant="destructive">
-                    <AlertTitle>Couldn&apos;t load the noise floor</AlertTitle>
+                    <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s5")}</AlertTitle>
                     <AlertDescription className="flex flex-wrap items-center gap-3">
-                      This is a load failure — it does not mean the floor is zero.
+                      {tHC("hcAgentsQualityEvalStatisticsSection.s4")}
                       <Button variant="outline" size="sm" onClick={loadFloor}>
                         Retry
                       </Button>
@@ -378,14 +377,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
             {/* --------------------------------------------------------- */}
             {!compareHidden && datasetId && (
               <Section
-                title="Paired A/B comparison"
+                title={tHC("hcAgentsQualityEvalStatisticsSection.s3")}
                 description="Same cases, same order, compared pair by pair — with an interval, so this can legitimately come back “we cannot tell”."
               >
                 {runsFailed && (
                   <Alert variant="destructive">
-                    <AlertTitle>Couldn&apos;t load run history</AlertTitle>
+                    <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s2")}</AlertTitle>
                     <AlertDescription className="flex flex-wrap items-center gap-3">
-                      This is a load failure, not an empty history.
+                      {tHC("hcAgentsQualityEvalStatisticsSection.s1")}
                       <Button variant="outline" size="sm" onClick={loadRuns}>
                         Retry
                       </Button>

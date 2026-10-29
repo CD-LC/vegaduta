@@ -16,6 +16,7 @@ import { formatTimeLeft, impersonationState } from "../lib/governanceFormat";
 import { UNAVAILABLE, formatCountOrUnavailable, formatExact, formatRelative } from "../lib/platformFormat";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminErrorState, AdminEmptyState } from "../components/admin/AdminKit";
+import { useTranslations } from "../../lib/i18n";
 
 // Read-only "view as" sessions (GET/DELETE /api/platform/impersonation).
 // Sessions are started from Platform Users or Tenant Detail ("View as
@@ -46,12 +47,13 @@ function SessionsTable({
   ending: string | null;
   onEnd: (s: ImpersonationSession) => void;
 }) {
+    const tHC = useTranslations("hcPlatformadminImpersonationPage");
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[820px] text-start text-sm">
         <thead className="text-xs text-muted-foreground">
           <tr className="border-b border-border">
-            <th className="py-2 pe-3 font-medium">Viewed user</th>
+            <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminImpersonationPage.s7")}</th>
             <th className="py-2 pe-3 font-medium">Tenant</th>
             <th className="py-2 pe-3 font-medium">Admin</th>
             <th className="py-2 pe-3 font-medium">Reason</th>
@@ -113,6 +115,7 @@ function SessionsTable({
 }
 
 export default function ImpersonationPage() {
+    const tHC = useTranslations("hcPlatformadminImpersonationPage");
   const askConfirm = useConfirm();
   const [active, setActive] = useState<ImpersonationPage | null>(null);
   const [activeError, setActiveError] = useState<string | null>(null);
@@ -187,16 +190,15 @@ export default function ImpersonationPage() {
   return (
     <AdminShell title="Impersonation">
       <PageHint>
-        Read-only &quot;view as&quot; sessions. Start one from{" "}
+        {tHC("hcPlatformadminImpersonationPage.s6")}{" "}
         <Link href="/platform-admin/users" className="underline underline-offset-2">
-          Platform Users
+          {tHC("hcPlatformadminImpersonationPage.s5")}
         </Link>{" "}
-        or a tenant&apos;s detail page. Each lasts 30 minutes, refuses every change, and is recorded with its reason in
-        the tenant&apos;s own audit log.
+        {tHC("hcPlatformadminImpersonationPage.s4")}
       </PageHint>
 
       <SectionCard
-        title="Active sessions"
+        title={tHC("hcPlatformadminImpersonationPage.s3")}
         icon={Eye}
         subtitle={active ? `${activeItems.length} active` : undefined}
         actions={
@@ -217,7 +219,7 @@ export default function ImpersonationPage() {
         {activeError && <AdminErrorState className="mb-4" message={activeError} onRetry={() => void loadActive()} />}
         {!active && !activeError && <Skeleton className="h-20 w-full" />}
         {active && activeItems.length === 0 && (
-          <AdminEmptyState icon={Eye} title="No active sessions" description="No one is viewing as a user right now." />
+          <AdminEmptyState icon={Eye} title={tHC("hcPlatformadminImpersonationPage.s2")} description="No one is viewing as a user right now." />
         )}
         {activeItems.length > 0 && (
           <SessionsTable items={activeItems} now={now} showEnd ending={ending} onEnd={(s) => void end(s)} />
@@ -233,7 +235,7 @@ export default function ImpersonationPage() {
       >
         {historyError && <AdminErrorState className="mb-4" message={historyError} onRetry={() => void loadHistory()} />}
         {!history && !historyError && <Skeleton className="h-32 w-full" />}
-        {history && historyItems.length === 0 && <AdminEmptyState icon={History} title="No past sessions" />}
+        {history && historyItems.length === 0 && <AdminEmptyState icon={History} title={tHC("hcPlatformadminImpersonationPage.s1")} />}
         {historyItems.length > 0 && (
           <SessionsTable items={historyItems} now={now} showEnd={false} ending={null} onEnd={() => {}} />
         )}

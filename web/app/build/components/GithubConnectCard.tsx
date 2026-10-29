@@ -42,6 +42,7 @@ import {
 import { buttonVariants } from "../../components/ui/button";
 import { Github } from "../../components/lucideBrandIcons";
 import { appBuilder, type AppBuilderGithubStatus } from "../lib";
+import { useTranslations } from "../../lib/i18n";
 
 const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
 
@@ -79,6 +80,7 @@ export interface GithubConnectCardProps {
 }
 
 export default function GithubConnectCard({ onStatusChange }: GithubConnectCardProps) {
+    const tHC = useTranslations("hcBuildComponentsGithubConnectCard");
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<AppBuilderGithubStatus | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -160,13 +162,13 @@ export default function GithubConnectCard({ onStatusChange }: GithubConnectCardP
           <span className="cat-chip cat-chip-sm" style={{ ["--cat" as string]: "var(--cat-automation)" }}>
             <Github aria-hidden="true" size={13} />
           </span>
-          Connect GitHub
+          {tHC("hcBuildComponentsGithubConnectCard.s35")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
-            <Loader2 aria-hidden="true" size={15} className="animate-spin" /> Checking connection…
+            <Loader2 aria-hidden="true" size={15} className="animate-spin" /> {tHC("hcBuildComponentsGithubConnectCard.s34")}
           </div>
         ) : status?.connected ? (
           <ConnectedState
@@ -222,13 +224,12 @@ function DisconnectedForm({
   connectError: string | null;
   onConnect: () => void;
 }) {
+    const tHC = useTranslations("hcBuildComponentsGithubConnectCard");
   return (
     <div>
       <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-        Build and preview now run on <span className="font-medium text-foreground">your own GitHub repo</span> — not on
-        this platform. Connect a repo below and every change you ask for gets pushed to a branch and opened as a pull
-        request there. If you add a GitHub Actions workflow to that repo, build/test runs on
-        <span className="font-medium text-foreground"> your own Actions minutes</span>, not ours.
+        {tHC("hcBuildComponentsGithubConnectCard.s33")} <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s32")}</span> {tHC("hcBuildComponentsGithubConnectCard.s31")}
+        <span className="font-medium text-foreground"> {tHC("hcBuildComponentsGithubConnectCard.s30")}</span>{tHC("hcBuildComponentsGithubConnectCard.s29")}
       </p>
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
@@ -239,14 +240,11 @@ function DisconnectedForm({
             className="cat-tint"
             style={{ ["--cat" as string]: "var(--cat-automation)" }}
           />
-          Why we need a token, and what it can and can&apos;t do
+          {tHC("hcBuildComponentsGithubConnectCard.s28")}
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          This token lets the platform push a branch, open a pull request, and publish a GitHub Pages preview on your
-          behalf, on the one repo you name below — nothing else. It cannot read your other repos, delete anything, or
-          act on your account outside that repo&apos;s contents, pull requests, and Pages site. Use GitHub&apos;s{" "}
-          <span className="font-medium text-foreground">fine-grained</span> token type (not a classic token), scoped to
-          exactly this repo.
+          {tHC("hcBuildComponentsGithubConnectCard.s27")}{" "}
+          <span className="font-medium text-foreground">fine-grained</span> {tHC("hcBuildComponentsGithubConnectCard.s26")}
         </p>
       </div>
 
@@ -265,7 +263,7 @@ function DisconnectedForm({
           autoComplete="off"
           spellCheck={false}
         />
-        <p className="mt-1 text-xs text-muted-foreground">e.g. acme-inc/storefront</p>
+        <p className="mt-1 text-xs text-muted-foreground">{tHC("hcBuildComponentsGithubConnectCard.s25")}</p>
       </div>
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
@@ -276,38 +274,31 @@ function DisconnectedForm({
             className="cat-tint"
             style={{ ["--cat" as string]: "var(--cat-automation)" }}
           />
-          How to create the token — what to select on GitHub
+          {tHC("hcBuildComponentsGithubConnectCard.s24")}
         </div>
         <ol className="list-decimal space-y-1 ps-4 text-xs leading-relaxed text-muted-foreground">
           <li>
-            Click <span className="font-medium text-foreground">Create one on GitHub</span> below — it opens
-            GitHub&apos;s <span className="font-medium text-foreground">fine-grained</span> token page with most of this
-            pre-filled. Sign in if asked.
+            Click <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s5")}</span> {tHC("hcBuildComponentsGithubConnectCard.s23")} <span className="font-medium text-foreground">fine-grained</span> {tHC("hcBuildComponentsGithubConnectCard.s22")}
           </li>
           <li>
-            <span className="font-medium text-foreground">Resource owner</span> — pick the account or organization that
-            owns the repo. If it&apos;s an org repo, the org may need to approve the token before it works.
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s21")}</span> {tHC("hcBuildComponentsGithubConnectCard.s20")}
           </li>
           <li>
-            <span className="font-medium text-foreground">Repository access</span> — choose{" "}
-            <span className="font-medium text-foreground">Only select repositories</span> and pick the repo you entered
-            above. Don&apos;t leave it on &quot;All repositories&quot;.
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s19")}</span> {tHC("hcBuildComponentsGithubConnectCard.s18")}{" "}
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s17")}</span> {tHC("hcBuildComponentsGithubConnectCard.s16")}
           </li>
           <li>
-            <span className="font-medium text-foreground">Permissions → Repository permissions</span> — set{" "}
-            <span className="font-medium text-foreground">Contents: Read and write</span>,{" "}
-            <span className="font-medium text-foreground">Pull requests: Read and write</span>, and{" "}
-            <span className="font-medium text-foreground">Pages: Read and write</span> (without Pages, the app preview
-            link 404s). Nothing else is needed — leave every other permission at its default.
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s15")}</span> — set{" "}
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s14")}</span>,{" "}
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s13")}</span>, and{" "}
+            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s12")}</span> {tHC("hcBuildComponentsGithubConnectCard.s11")}
           </li>
           <li>
-            <span className="font-medium text-foreground">Expiration</span> — any value you&apos;re comfortable with
-            (30/60/90 days or custom). When it expires, reconnect here with a fresh token.
+            <span className="font-medium text-foreground">Expiration</span> {tHC("hcBuildComponentsGithubConnectCard.s10")}
           </li>
           <li>
-            Click <span className="font-medium text-foreground">Generate token</span> and copy it — it starts with{" "}
-            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> and is shown only once. Paste it into the
-            field below.
+            Click <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s9")}</span> {tHC("hcBuildComponentsGithubConnectCard.s8")}{" "}
+            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> {tHC("hcBuildComponentsGithubConnectCard.s7")}
           </li>
         </ol>
       </div>
@@ -315,7 +306,7 @@ function DisconnectedForm({
       <div className="mb-2">
         <div className="mb-1.5 flex items-center justify-between">
           <Label htmlFor="gh-token" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Personal access token
+            {tHC("hcBuildComponentsGithubConnectCard.s6")}
           </Label>
           <a
             href={buildGithubPatUrl(repoFullName)}
@@ -323,7 +314,7 @@ function DisconnectedForm({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
           >
-            Create one on GitHub <ExternalLink aria-hidden="true" size={11} />
+            {tHC("hcBuildComponentsGithubConnectCard.s5")} <ExternalLink aria-hidden="true" size={11} />
           </a>
         </div>
         <div className="relative">
@@ -335,7 +326,7 @@ function DisconnectedForm({
           <Input
             id="gh-token"
             type="password"
-            placeholder="github_pat_…"
+            placeholder={tHC("hcBuildComponentsGithubConnectCard.s4")}
             value={token}
             onChange={(e) => setToken(e.target.value)}
             className="ps-9"
@@ -344,9 +335,7 @@ function DisconnectedForm({
           />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          The link pre-fills the repo and Contents + Pull requests + Pages permissions where GitHub&apos;s page supports
-          it — double-check the scopes GitHub shows you before creating the token. The token is stored encrypted and is
-          never shown again once saved.
+          {tHC("hcBuildComponentsGithubConnectCard.s3")}
         </p>
       </div>
 
@@ -386,6 +375,7 @@ function ConnectedState({
   disconnectError: string | null;
   onDisconnect: () => void;
 }) {
+    const tHC = useTranslations("hcBuildComponentsGithubConnectCard");
   return (
     <div>
       <div className="mb-4 flex items-center gap-2">
@@ -396,8 +386,7 @@ function ConnectedState({
       </div>
 
       <p className="mb-1 text-sm leading-relaxed text-muted-foreground">
-        Build and preview run on this repo&apos;s own GitHub Actions, not on this platform. Every change you ask for
-        pushes a branch and opens a pull request here.
+        {tHC("hcBuildComponentsGithubConnectCard.s2")}
       </p>
       {(connectedBy || connectedAt) && (
         <p className="mb-4 text-xs text-muted-foreground">
@@ -433,9 +422,7 @@ function ConnectedState({
           <AlertDialogHeader>
             <AlertDialogTitle>Disconnect {repoFullName}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the stored access token for this repo — the platform will no longer be able to push branches
-              or open pull requests there until you reconnect. Nothing on GitHub itself (the repo, any existing branches
-              or open PRs) is deleted.
+              {tHC("hcBuildComponentsGithubConnectCard.s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

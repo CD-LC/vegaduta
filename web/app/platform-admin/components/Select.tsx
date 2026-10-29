@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, ty
 import { createPortal } from "react-dom";
 import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "../../lib/i18n";
 
 // Straight copy of web/app/components/Select.js (self-contained - only
 // depends on motion/lucide-react and the .select-* CSS classes already in
@@ -41,6 +42,7 @@ export default function Select({
   searchable = false,
   allowCustom = false,
 }: SelectProps) {
+    const tHC = useTranslations("hcPlatformadminComponentsSelect");
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
@@ -216,13 +218,13 @@ export default function Select({
                 type="text"
                 className="select-search"
                 placeholder="Search…"
-                aria-label="Search options"
+                aria-label={tHC("hcPlatformadminComponentsSelect.s2")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
               />
             )}
-            {visibleOptions.length === 0 && <div className="select-empty">No options</div>}
+            {visibleOptions.length === 0 && <div className="select-empty">{tHC("hcPlatformadminComponentsSelect.s1")}</div>}
             {visibleOptions.map((o, idx) => (
               <motion.button
                 type="button"

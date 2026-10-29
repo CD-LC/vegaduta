@@ -14,6 +14,7 @@ import { usePagination } from "../../lib/usePagination";
 import PaginationControls from "../PaginationControls";
 import { SwitchToggle } from "./common";
 import { useConfirm } from "../admin/ConfirmDialog";
+import { useTranslations } from "../../../lib/i18n";
 
 // A/B Testing & Feature Flags - Master Roadmap 2026 item #13 (§B). Lifted out
 // of the old Ecosystem Maintenance monolith into its own component so it can be
@@ -24,6 +25,7 @@ import { useConfirm } from "../admin/ConfirmDialog";
 // edit/delete flags, drill into "who got which variant" per flag.
 
 function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loading: boolean }) {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -34,9 +36,9 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
 
   const { page, pageSize, pageItems, totalPages, totalItems, setPage, setPageSize } = usePagination(filtered);
 
-  if (loading) return <p className="text-xs text-muted-foreground">Loading assignments…</p>;
+  if (loading) return <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsFeatureflags.s14")}</p>;
   if (assignments.length === 0)
-    return <p className="text-xs text-muted-foreground">No tenant has been bucketed for this flag yet.</p>;
+    return <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsFeatureflags.s13")}</p>;
 
   return (
     <div className="space-y-2">
@@ -44,12 +46,12 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search tenant ID…"
+          placeholder={tHC("hcPlatformadminComponentsSectionsFeatureflags.s12")}
           className="h-8 max-w-xs text-xs"
         />
       )}
       {pageItems.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No tenant matches &quot;{query}&quot;.</p>
+        <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsFeatureflags.s11")}{query}&quot;.</p>
       ) : (
         pageItems.map((a) => (
           <div key={a.tenantId} className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
@@ -75,6 +77,7 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
 }
 
 export function FeatureFlagsSection() {
+    const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
   const askConfirm = useConfirm();
   const [featureFlags, setFeatureFlags] = useState<any[]>([]);
   const [featureFlagsError, setFeatureFlagsError] = useState<any>(null);
@@ -257,12 +260,10 @@ export function FeatureFlagsSection() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <FlaskConical size={16} className="text-primary" /> A/B Testing &amp; Feature Flags
+            <FlaskConical size={16} className="text-primary" /> {tHC("hcPlatformadminComponentsSectionsFeatureflags.s10")}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Deterministic, hash-bucketed rollout - each tenant is stickily assigned &quot;treatment&quot; or
-            &quot;control&quot; per flag based on rollout %. Assigned variants are tagged on that tenant&apos;s LLM call
-            logs.
+            {tHC("hcPlatformadminComponentsSectionsFeatureflags.s9")}
           </p>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -272,14 +273,14 @@ export function FeatureFlagsSection() {
             </Alert>
           )}
           {featureFlags.length === 0 && !featureFlagsError && (
-            <p className="text-sm text-muted-foreground">No feature flags defined yet.</p>
+            <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsFeatureflags.s8")}</p>
           )}
 
           {featureFlags.length > 10 && (
             <Input
               value={flagsQuery}
               onChange={(e) => setFlagsQuery(e.target.value)}
-              placeholder="Search flags…"
+              placeholder={tHC("hcPlatformadminComponentsSectionsFeatureflags.s7")}
               className="max-w-xs"
             />
           )}
@@ -312,7 +313,7 @@ export function FeatureFlagsSection() {
                       size="sm"
                       onClick={() => handleDeleteFeatureFlag(row.key)}
                       disabled={deletingFlagKey === row.key}
-                      title="Delete flag"
+                      title={tHC("hcPlatformadminComponentsSectionsFeatureflags.s6")}
                     >
                       <Trash2 size={13} />
                       {deletingFlagKey === row.key ? "Deleting…" : "Delete"}
@@ -341,7 +342,7 @@ export function FeatureFlagsSection() {
                     </div>
                     <div className="w-28 space-y-1.5">
                       <Label htmlFor={`flag-rollout-${row.key}`} className="text-xs text-muted-foreground">
-                        Rollout %
+                        {tHC("hcPlatformadminComponentsSectionsFeatureflags.s1")}
                       </Label>
                       <Input
                         id={`flag-rollout-${row.key}`}
@@ -372,7 +373,7 @@ export function FeatureFlagsSection() {
 
                   {row.updatedAt && (
                     <div className="mt-2 font-mono text-xs text-muted-foreground">
-                      Last updated {new Date(row.updatedAt).toLocaleString()}
+                      {tHC("hcPlatformadminComponentsSectionsFeatureflags.s5")} {new Date(row.updatedAt).toLocaleString()}
                       {row.updatedBy ? ` by ${row.updatedBy}` : ""}
                     </div>
                   )}
@@ -411,11 +412,11 @@ export function FeatureFlagsSection() {
           >
             <div className="w-48 space-y-1.5">
               <Label htmlFor="flag-new-key" className="text-xs text-muted-foreground">
-                New flag key
+                {tHC("hcPlatformadminComponentsSectionsFeatureflags.s4")}
               </Label>
               <Input
                 id="flag-new-key"
-                placeholder="e.g. new-onboarding-flow"
+                placeholder={tHC("hcPlatformadminComponentsSectionsFeatureflags.s3")}
                 value={newFlagDraft.key}
                 onChange={(e) => setNewFlagDraft((prev) => ({ ...prev, key: e.target.value }))}
               />
@@ -433,14 +434,14 @@ export function FeatureFlagsSection() {
             <div className="flex items-center gap-2">
               <SwitchToggle
                 on={newFlagDraft.enabled}
-                label="Enable new flag"
+                label={tHC("hcPlatformadminComponentsSectionsFeatureflags.s2")}
                 onClick={() => setNewFlagDraft((prev) => ({ ...prev, enabled: !prev.enabled }))}
               />
               <span className="text-xs text-muted-foreground">Enabled</span>
             </div>
             <div className="w-24 space-y-1.5">
               <Label htmlFor="flag-new-rollout" className="text-xs text-muted-foreground">
-                Rollout %
+                {tHC("hcPlatformadminComponentsSectionsFeatureflags.s1")}
               </Label>
               <Input
                 id="flag-new-rollout"

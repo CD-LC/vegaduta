@@ -8,6 +8,7 @@ import { api } from "../lib/api";
 import { toast } from "../lib/toastBus";
 import { Button } from "./ui/button";
 import { useDialogFocus } from "../lib/hooks/useDialogFocus";
+import { useTranslations } from "../lib/i18n";
 
 // Square crop viewport (CSS px) the person drags/zooms the picture inside -
 // matches the circular avatar it will end up rendered as everywhere else in
@@ -307,6 +308,7 @@ function AvatarCropDialog({
   onConfirm: () => void;
   uploading: boolean;
 }) {
+    const tHC = useTranslations("hcComponentsAvatarUploadModal");
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   useDialogFocus(dialogRef, closeBtnRef, onClose);
@@ -321,7 +323,7 @@ function AvatarCropDialog({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Update profile picture"
+      aria-label={tHC("hcComponentsAvatarUploadModal.s5")}
     >
       <motion.div
         ref={dialogRef}
@@ -333,7 +335,7 @@ function AvatarCropDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold tracking-tight">Update profile picture</h2>
+          <h2 className="text-base font-semibold tracking-tight">{tHC("hcComponentsAvatarUploadModal.s5")}</h2>
           <button
             ref={closeBtnRef}
             type="button"
@@ -351,10 +353,10 @@ function AvatarCropDialog({
               <Upload aria-hidden="true" size={22} />
             </div>
             <p className="text-center text-sm text-muted-foreground">
-              Choose a photo to use as your profile picture. You&apos;ll be able to crop it before saving.
+              {tHC("hcComponentsAvatarUploadModal.s4")}
             </p>
             <Button type="button" onClick={() => fileInputRef.current?.click()}>
-              Choose photo
+              {tHC("hcComponentsAvatarUploadModal.s3")}
             </Button>
             <input
               ref={fileInputRef}
@@ -396,11 +398,11 @@ function AvatarCropDialog({
               />
             </div>
 
-            <p className="text-center text-xs text-muted-foreground">Drag to reposition, use the slider to zoom.</p>
+            <p className="text-center text-xs text-muted-foreground">{tHC("hcComponentsAvatarUploadModal.s2")}</p>
 
             <div className="flex w-full items-center justify-between gap-2 pt-1">
               <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                Choose another
+                {tHC("hcComponentsAvatarUploadModal.s1")}
               </Button>
               <input
                 ref={fileInputRef}

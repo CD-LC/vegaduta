@@ -244,6 +244,7 @@ function GraphTab({ repoId, onError }) {
 /* Execute & rework                                                   */
 
 function ExecTab({ repoId, onError }) {
+    const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [ws, setWs] = useState(null);
   const [command, setCommand] = useState("");
@@ -317,9 +318,7 @@ function ExecTab({ repoId, onError }) {
   return (
     <div>
       <div className={INFO_CLS}>
-        <b className="font-medium text-foreground">Rework loop:</b> create an isolated workspace → run tests/build → if
-        it fails, edit the file → run again → repeat → view the final diff. The real checkout is never touched.
-        (Requires code-intel started with
+        <b className="font-medium text-foreground">{tHC("hcCodeintelPage.s18")}</b> {tHC("hcCodeintelPage.s17")}
         <code className="mx-1 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px]">
           CODE_INTEL_ALLOW_EXEC=true
         </code>
@@ -339,7 +338,7 @@ function ExecTab({ repoId, onError }) {
           <div className="mb-4 flex gap-2">
             <Input
               className="flex-1 font-mono"
-              placeholder="mvn -q test   |   npm test   |   pytest -q"
+              placeholder={tHC("hcCodeintelPage.s7")}
               value={command}
               onChange={(e) => setCommand(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && command && run()}
@@ -378,17 +377,17 @@ function ExecTab({ repoId, onError }) {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Apply a fix</CardTitle>
+                <CardTitle className="text-sm">{tHC("hcCodeintelPage.s16")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Field label="File path (repo-relative)">
+                <Field label={tHC("hcCodeintelPage.s15")}>
                   <Input
                     placeholder="src/main/java/.../Foo.java"
                     value={fixPath}
                     onChange={(e) => setFixPath(e.target.value)}
                   />
                 </Field>
-                <Field label="Full new file content">
+                <Field label={tHC("hcCodeintelPage.s14")}>
                   <Textarea
                     className="min-h-40 font-mono text-xs"
                     value={fixContent}
@@ -404,7 +403,7 @@ function ExecTab({ repoId, onError }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Final patch</CardTitle>
+                <CardTitle className="text-sm">{tHC("hcCodeintelPage.s13")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button variant="secondary" size="sm" onClick={showDiff}>
@@ -426,6 +425,7 @@ function ExecTab({ repoId, onError }) {
 /* Autonomous resolve (SDLC agent)                                    */
 
 function AgentResolvePanel({ repoId, onError }) {
+    const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [goal, setGoal] = useState("");
   const [testCommand, setTestCommand] = useState("");
@@ -451,33 +451,31 @@ function AgentResolvePanel({ repoId, onError }) {
     <Card className="mt-5">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Sparkles size={16} className="text-primary" /> Autonomous resolve (SDLC agent)
+          <Sparkles size={16} className="text-primary" /> {tHC("hcCodeintelPage.s12")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          Give it a goal and a command that proves success — it drives its own create-workspace → run → (fail) → fix →
-          run → (pass) → diff loop, unattended, up to the iteration cap below. Same guardrail policy and audit trail as
-          the manual loop above.
+          {tHC("hcCodeintelPage.s11")}
         </p>
-        <Field label="Goal (issue / bug / change request)">
+        <Field label={tHC("hcCodeintelPage.s10")}>
           <Textarea
             className="min-h-[70px]"
-            placeholder="Fix the flaky retry logic in ChargeService so mvn test passes reliably"
+            placeholder={tHC("hcCodeintelPage.s9")}
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Test command (proves success)">
+          <Field label={tHC("hcCodeintelPage.s8")}>
             <Input
               className="font-mono"
-              placeholder="mvn -q test   |   npm test   |   pytest -q"
+              placeholder={tHC("hcCodeintelPage.s7")}
               value={testCommand}
               onChange={(e) => setTestCommand(e.target.value)}
             />
           </Field>
-          <Field label="Max iterations">
+          <Field label={tHC("hcCodeintelPage.s6")}>
             <Input
               type="number"
               min={1}
@@ -539,7 +537,7 @@ function AgentResolvePanel({ repoId, onError }) {
             />
             {result.diff && (
               <>
-                <div className="mt-2.5 text-xs font-semibold text-foreground">Final diff</div>
+                <div className="mt-2.5 text-xs font-semibold text-foreground">{tHC("hcCodeintelPage.s5")}</div>
                 <pre className={`${CODE_CLS} mt-1 max-h-80`}>{result.diff}</pre>
               </>
             )}
@@ -554,6 +552,7 @@ function AgentResolvePanel({ repoId, onError }) {
 /* Ask the Code (knowledge bridge, grounded + cited)                  */
 
 function KnowledgeTab({ repoId, onError }) {
+    const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [q, setQ] = useState("");
   const [result, setResult] = useState(null);
@@ -576,14 +575,12 @@ function KnowledgeTab({ repoId, onError }) {
   return (
     <div>
       <div className={INFO_CLS}>
-        <b className="font-medium text-foreground">Grounded answers only.</b> Every result is a real passage from your
-        indexed code with a citation (repo / path / lines). Nothing is generated without a source — if there&apos;s no
-        match, you get an empty result, never a guess.
+        <b className="font-medium text-foreground">{tHC("hcCodeintelPage.s4")}</b> {tHC("hcCodeintelPage.s3")}
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
           className="min-w-0 flex-1"
-          placeholder="How does tenant isolation work? Where is retry logic?"
+          placeholder={tHC("hcCodeintelPage.s2")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && run()}
@@ -595,7 +592,7 @@ function KnowledgeTab({ repoId, onError }) {
       </div>
       {result && !result.grounded && (
         <p className="text-sm text-muted-foreground">
-          No grounded passages found — index a repo, or rephrase. (No answer is fabricated.)
+          {tHC("hcCodeintelPage.s1")}
         </p>
       )}
       {passagesPagination.pageItems.map((p, i) => (

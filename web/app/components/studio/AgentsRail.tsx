@@ -6,6 +6,7 @@ import { Badge } from "../ui/badge";
 import type { StudioAgent } from "./studioClient";
 import { LaunchChecklist, type LaunchProgress } from "./Conversion";
 import { pick } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // The /try studio's left rail: the visitor's own agents (select / delete), the
 // "New agent" launcher button, the sandbox cap note and the launch checklist.
@@ -35,6 +36,7 @@ export default function AgentsRail({
   onDelete: (agent: StudioAgent) => void;
   onNew: () => void;
 }) {
+    const tHC = useTranslations("hcComponentsStudioAgentsRail");
   const agentButton = (a: StudioAgent) => (
     <div
       key={a.id}
@@ -70,7 +72,7 @@ export default function AgentsRail({
   return (
     <aside className="space-y-2" data-tour="agents-rail">
       <div className="flex items-center justify-between">
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Your agents</div>
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("hcComponentsStudioAgentsRail.s5")}</div>
         <span className="text-[11px] text-muted-foreground">
           {mine.length}
           {maxAgents !== null ? `/${maxAgents}` : ""}
@@ -79,17 +81,17 @@ export default function AgentsRail({
       {mine.map(agentButton)}
       {mine.length === 0 && (
         <p className="rounded-xl border border-dashed border-border/60 p-3 text-xs text-muted-foreground">
-          None yet. Describe a job on the right and one appears here.
+          {tHC("hcComponentsStudioAgentsRail.s4")}
         </p>
       )}
       {!readOnly && (
         <Button variant="outline" size="sm" className="w-full" disabled={atCap} onClick={onNew}>
-          <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> New agent
+          <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentsRail.s3")}
         </Button>
       )}
       {atCap && (
         <p className="text-[11px] text-muted-foreground">
-          Sandbox full - delete one or create a free account for more.
+          {tHC("hcComponentsStudioAgentsRail.s2")}
         </p>
       )}
 
@@ -98,7 +100,7 @@ export default function AgentsRail({
       </div>
 
       <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
-        Your sandbox is yours. Restart it any time and start from a different idea - nothing carries over.
+        {tHC("hcComponentsStudioAgentsRail.s1")}
       </p>
     </aside>
   );

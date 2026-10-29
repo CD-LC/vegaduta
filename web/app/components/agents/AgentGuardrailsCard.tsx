@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
 import { useAuth } from "../AuthProvider";
 import { UpgradeLock } from "../ui/upgrade-lock";
+import { useTranslations } from "../../lib/i18n";
 
 // Per-agent content guardrails — the picker for GET/PATCH
 // /api/agents/{id}/guardrails.
@@ -84,6 +85,7 @@ export default function AgentGuardrailsCard({
   locked: boolean;
   editLockedTooltip?: string;
 }) {
+    const tHC = useTranslations("hcComponentsAgentsAgentGuardrailsCard");
   const [data, setData] = useState<GuardrailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -143,12 +145,12 @@ export default function AgentGuardrailsCard({
 
   return (
     <div className="mb-4">
-      <div className="mb-1 text-xs text-muted-foreground">Content guardrails</div>
+      <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsAgentGuardrailsCard.s5")}</div>
 
       {loading && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          Loading guardrails…
+          {tHC("hcComponentsAgentsAgentGuardrailsCard.s4")}
         </div>
       )}
 
@@ -158,7 +160,7 @@ export default function AgentGuardrailsCard({
         <>
           {!canManage && (
             <p className="mb-2 text-xs text-muted-foreground" data-testid="agent-guardrails-read-only">
-              Read-only: changing an agent&apos;s guardrails needs the guardrails permission. Ask a workspace admin.
+              {tHC("hcComponentsAgentsAgentGuardrailsCard.s3")}
             </p>
           )}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -206,13 +208,11 @@ export default function AgentGuardrailsCard({
           </div>
 
           <p className="mt-2 text-xs text-muted-foreground">
-            Off by default. A blocked message is refused before the agent ever sees it; a blocked reply is withheld and
-            replaced with a short notice — except on the Fast reasoning depth, where the answer has already been
-            streamed to the reader, so violations are recorded but not withheld. Workspace-wide patterns live on the{" "}
+            {tHC("hcComponentsAgentsAgentGuardrailsCard.s2")}{" "}
             <Link href="/admin/guardrails" className="underline underline-offset-2">
               Guardrails
             </Link>{" "}
-            screen and always apply to tool results, whatever is ticked here.
+            {tHC("hcComponentsAgentsAgentGuardrailsCard.s1")}
           </p>
         </>
       )}

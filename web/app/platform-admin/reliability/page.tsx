@@ -35,6 +35,7 @@ import {
   type IconName,
   type Tone,
 } from "./format";
+import { useTranslations } from "../../lib/i18n";
 
 // Reliability & SLOs - what is up, and how well it has been working.
 //
@@ -143,6 +144,7 @@ function latencyLines(l: LatencySlo): string[] {
 }
 
 export default function ReliabilityPage() {
+    const tHC = useTranslations("hcPlatformadminReliabilityPage");
   const [hours, setHours] = useState(24);
   const [deps, setDeps] = useState<DependenciesResponse | null>(null);
   const [depsError, setDepsError] = useState<string | null>(null);
@@ -241,10 +243,10 @@ export default function ReliabilityPage() {
 
   return (
     <AdminShell
-      title="Reliability & SLOs"
+      title={tHC("hcPlatformadminReliabilityPage.s16")}
       actions={
         <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label="SLO window">
+          <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label={tHC("hcPlatformadminReliabilityPage.s15")}>
             {WINDOWS_HOURS.map((h) => (
               <button
                 key={h}
@@ -268,11 +270,8 @@ export default function ReliabilityPage() {
       }
     >
       <PageHint>
-        Whether the platform&rsquo;s dependencies are answering right now, and how well the API has been serving over a
-        window. Dependencies are probed live (each probe has a hard timeout; the server reuses a reading for a short
-        time, so refreshing does not hammer anything). SLO figures are measured from the platform&rsquo;s own counters;
-        anything that cannot be measured is shown as n/a and explained at the bottom. Refreshes every{" "}
-        {REFRESH_MS / 1000} s while this tab is visible
+        {tHC("hcPlatformadminReliabilityPage.s14")}{" "}
+        {REFRESH_MS / 1000} {tHC("hcPlatformadminReliabilityPage.s13")}
         <span aria-live="polite">{fetchedAt ? `; last updated ${new Date(fetchedAt).toLocaleTimeString()}` : ""}</span>.
       </PageHint>
 
@@ -288,7 +287,7 @@ export default function ReliabilityPage() {
               {depsError}
               {deps ? " Showing the last reading below." : ""}{" "}
               <button type="button" className="underline" onClick={() => void loadDeps()}>
-                Try again
+                {tHC("hcPlatformadminReliabilityPage.s9")}
               </button>
             </AlertDescription>
           </Alert>
@@ -320,12 +319,12 @@ export default function ReliabilityPage() {
               <span className="text-xs">{overallSummary(deps.dependencies)}</span>
             </div>
             <p className="mb-4 text-[11px] text-muted-foreground">
-              Probed {timeAgo(deps.generatedAt)}; the server reuses a reading for up to {deps.cacheTtlSeconds} s.
+              Probed {timeAgo(deps.generatedAt)}{tHC("hcPlatformadminReliabilityPage.s12")} {deps.cacheTtlSeconds} s.
             </p>
 
             {deps.dependencies.length === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="deps-empty">
-                No dependency readings are available on this replica right now.
+                {tHC("hcPlatformadminReliabilityPage.s11")}
               </p>
             ) : (
               groups.map((g) => (
@@ -345,7 +344,7 @@ export default function ReliabilityPage() {
 
       {/* ------------------------------------------------------------------- SLOs */}
       <SectionCard
-        title="Service-level objectives"
+        title={tHC("hcPlatformadminReliabilityPage.s10")}
         subtitle={`Measured over the last ${windowLabel(hours)}. Burn rate 1.00x means errors arrive exactly as fast as the objective allows.`}
         icon={Gauge}
         delay={0.05}
@@ -356,7 +355,7 @@ export default function ReliabilityPage() {
               {sloError}
               {slo ? " Showing the last reading below." : ""}{" "}
               <button type="button" className="underline" onClick={() => void loadSlo(hours)}>
-                Try again
+                {tHC("hcPlatformadminReliabilityPage.s9")}
               </button>
             </AlertDescription>
           </Alert>
@@ -386,14 +385,13 @@ export default function ReliabilityPage() {
                   : "This replica only: not every replica"}
               </span>
               <span className="rounded-full border border-border px-2 py-0.5">
-                Samples span {fmtDuration(slo.coveredSeconds)} of {windowLabel(slo.windowHours)}
+                {tHC("hcPlatformadminReliabilityPage.s8")} {fmtDuration(slo.coveredSeconds)} of {windowLabel(slo.windowHours)}
               </span>
             </div>
 
             {slo.replicas === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="slo-empty">
-                No samples cover this window yet. Counters are sampled from the moment a replica starts, so check back
-                in a minute.
+                {tHC("hcPlatformadminReliabilityPage.s7")}
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="slo-tiles">
@@ -424,7 +422,7 @@ export default function ReliabilityPage() {
                 ))}
                 <SloTile
                   testId="tile-jobs"
-                  label="Agent job success"
+                  label={tHC("hcPlatformadminReliabilityPage.s6")}
                   value={fmtPct(slo.jobs?.successRate, 1)}
                   lines={
                     slo.jobs
@@ -437,16 +435,16 @@ export default function ReliabilityPage() {
 
             {slo.latency.length === 0 && slo.replicas > 0 && (
               <p className="mt-3 text-xs text-muted-foreground" data-testid="slo-no-latency">
-                No latency percentiles are available for this window; the notes below say why.
+                {tHC("hcPlatformadminReliabilityPage.s5")}
               </p>
             )}
 
             {slo.replicas > 0 && (
               <div className="mt-5">
-                <h3 className="mb-2 text-xs font-medium text-muted-foreground">LLM provider error rate</h3>
+                <h3 className="mb-2 text-xs font-medium text-muted-foreground">{tHC("hcPlatformadminReliabilityPage.s4")}</h3>
                 {slo.llmProviders.length === 0 ? (
                   <p className="text-sm text-muted-foreground" data-testid="providers-empty">
-                    No LLM calls were recorded in this window.
+                    {tHC("hcPlatformadminReliabilityPage.s3")}
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
@@ -456,7 +454,7 @@ export default function ReliabilityPage() {
                           <th className="py-2 pe-3 font-medium">Provider</th>
                           <th className="py-2 pe-3 font-medium">Calls</th>
                           <th className="py-2 pe-3 font-medium">Errors</th>
-                          <th className="py-2 font-medium">Error rate</th>
+                          <th className="py-2 font-medium">{tHC("hcPlatformadminReliabilityPage.s2")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -480,7 +478,7 @@ export default function ReliabilityPage() {
 
       {/* ------------------------------------------------------------------ Notes */}
       <SectionCard
-        title="What this screen cannot tell you"
+        title={tHC("hcPlatformadminReliabilityPage.s1")}
         subtitle="Every gap, estimate and limit of the readings above, in plain words."
         icon={Info}
         delay={0.1}

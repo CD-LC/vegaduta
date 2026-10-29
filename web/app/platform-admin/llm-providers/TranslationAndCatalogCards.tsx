@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "../components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { TONE_BOX } from "../components/admin/AdminKit";
 import { PROVIDER_OPTIONS, withCurrentValue, type TranslationJobDraft } from "./constants";
+import { useTranslations } from "../../lib/i18n";
 
 // Translation-job reference settings + provider model catalog cards, extracted
 // from page.tsx. State and handlers stay in the page; this is presentation.
@@ -49,6 +50,7 @@ export default function TranslationAndCatalogCards({
   handleRefreshModelCatalogNow,
   lastModelCatalogRefresh,
 }: TranslationAndCatalogCardsProps) {
+    const tHC = useTranslations("hcPlatformadminLlmprovidersTranslationAndCatalogCards");
   return (
     <>
       {/* (b) Translation Job Reference Settings */}
@@ -60,19 +62,15 @@ export default function TranslationAndCatalogCards({
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Translation Job Reference Settings</CardTitle>
-            <p className="text-xs text-muted-foreground">Weekly i18n refresh, owned by a GitHub Actions workflow</p>
+            <CardTitle className="text-sm">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s19")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s18")}</p>
           </CardHeader>
           <CardContent className="space-y-3">
             <Alert>
               <Info />
               <AlertDescription>
-                The weekly translation refresh is owned by the GitHub Actions workflow at the path shown below, running
-                on its own cron schedule with its own repository secrets. The fields in this form (schedule/provider/
-                model/notes) are <strong>reference only</strong> - saving them does not change the workflow itself, and
-                editing the workflow directly in GitHub doesn&apos;t update these fields automatically. The{" "}
-                <strong>Run now</strong> button below is the one control on this form with a real effect: it dispatches
-                that workflow immediately instead of waiting for Monday.
+                {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s17")} <strong>{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s16")}</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s15")}{" "}
+                <strong>Run now</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s14")}
               </AlertDescription>
             </Alert>
 
@@ -97,7 +95,7 @@ export default function TranslationAndCatalogCards({
                   }
                   title={translationJob.lastTriggerMessage || ""}
                 >
-                  Last run: {translationJob.lastTriggerStatus} - {new Date(translationJob.lastTriggeredAt).toLocaleString()}
+                  {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s13")} {translationJob.lastTriggerStatus} - {new Date(translationJob.lastTriggeredAt).toLocaleString()}
                   {translationJob.lastTriggeredBy ? ` (by ${translationJob.lastTriggeredBy})` : ""}
                 </Badge>
               )}
@@ -110,11 +108,11 @@ export default function TranslationAndCatalogCards({
               <form onSubmit={handleSaveTranslationJob} className="space-y-3">
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="w-64 max-w-full space-y-1.5">
-                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">Cron schedule (display)</Label>
+                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s12")}</Label>
                     <Input id="translation-cron"
                       value={translationDraft.cronScheduleDisplay}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, cronScheduleDisplay: e.target.value }))}
-                      placeholder="e.g. Every Monday, 06:00 UTC"
+                      placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s11")}
                     />
                   </div>
                   <div className="w-48 max-w-full space-y-1.5">
@@ -124,7 +122,7 @@ export default function TranslationAndCatalogCards({
                       value={translationDraft.providerName}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, providerName: e.target.value }))}
                       options={PROVIDER_OPTIONS}
-                      placeholder="Select a provider…"
+                      placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s10")}
                     />
                   </div>
                   <div className="w-56 max-w-full space-y-1.5">
@@ -148,7 +146,7 @@ export default function TranslationAndCatalogCards({
                     )}
                   </div>
                   <div className="min-w-64 flex-1 space-y-1.5">
-                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">Workflow path hint</Label>
+                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s9")}</Label>
                     <Input id="translation-workflow-path"
                       value={translationDraft.workflowPathHint}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, workflowPathHint: e.target.value }))}
@@ -162,7 +160,7 @@ export default function TranslationAndCatalogCards({
                     rows={3}
                     value={translationDraft.notes}
                     onChange={(e) => setTranslationDraft((d) => ({ ...d, notes: e.target.value }))}
-                    placeholder="Anything future admins should know about this workflow's repo secrets/config."
+                    placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s8")}
                   />
                 </div>
                 <div className="flex items-center gap-3">
@@ -171,7 +169,7 @@ export default function TranslationAndCatalogCards({
                   </Button>
                   {translationJob?.updatedAt && (
                     <span className="text-xs text-muted-foreground">
-                      Last updated {new Date(translationJob.updatedAt).toLocaleString()}
+                      {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s7")} {new Date(translationJob.updatedAt).toLocaleString()}
                       {translationJob.updatedBy ? ` by ${translationJob.updatedBy}` : ""}
                     </span>
                   )}
@@ -191,18 +189,14 @@ export default function TranslationAndCatalogCards({
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Provider Model Catalog</CardTitle>
-            <p className="text-xs text-muted-foreground">Backs every provider&apos;s model dropdown on the Agents page</p>
+            <CardTitle className="text-sm">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s6")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s5")}</p>
           </CardHeader>
           <CardContent className="space-y-3">
             <Alert>
               <Info />
               <AlertDescription>
-                Runs daily at 03:00 UTC. OpenRouter is pulled live from its public model list; Anthropic/Gemini/Grok/
-                Meta/Sarvam are refreshed from a hand-maintained seed list (their real model endpoints require a BYOK key
-                this platform-wide job doesn&apos;t have). After hand-editing that seed list in code, or if
-                OpenRouter&apos;s live catalog just changed, use <strong>Refresh now</strong> instead of waiting for the
-                next 03:00 UTC run.
+                {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s4")} <strong>{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s3")}</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s2")}
               </AlertDescription>
             </Alert>
 
@@ -213,7 +207,7 @@ export default function TranslationAndCatalogCards({
               </Button>
               {lastModelCatalogRefresh && (
                 <Badge variant="outline" className={TONE_BOX.ok}>
-                  Last refreshed: {new Date(lastModelCatalogRefresh).toLocaleString()}
+                  {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s1")} {new Date(lastModelCatalogRefresh).toLocaleString()}
                 </Badge>
               )}
             </div>

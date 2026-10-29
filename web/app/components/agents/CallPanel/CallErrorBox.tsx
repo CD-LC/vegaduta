@@ -1,3 +1,4 @@
+import { useTranslations } from "../../../lib/i18n";
 "use client";
 
 
@@ -9,6 +10,7 @@ interface CallErrorBoxProps {
 }
 
 export default function CallErrorBox({ callError, pipelineError, setShowMicTest }: CallErrorBoxProps) {
+    const tHC = useTranslations("hcComponentsAgentsCallPanelCallErrorBox");
   return (
     <>
       {(callError || pipelineError) && (
@@ -19,7 +21,7 @@ export default function CallErrorBox({ callError, pipelineError, setShowMicTest 
               onClick={() => setShowMicTest(true)}
               className="text-primary hover:underline font-medium text-xs"
             >
-              Run microphone test →
+              {tHC("hcComponentsAgentsCallPanelCallErrorBox.s1")}
             </button>
           )}
         </div>

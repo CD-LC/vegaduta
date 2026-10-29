@@ -14,6 +14,7 @@ import { channelOffered } from "../../lib/edition";
 import { cn } from "../../lib/utils";
 import { inboxApi, type ConversationSummary, type HandoffTranscriptMessage } from "./inboxApi";
 import { ChannelBadge, authorLabel, dotStatus, stateLabel } from "./inboxFormat";
+import { useTranslations } from "../../lib/i18n";
 
 export function InboxThread({
   selected,
@@ -48,6 +49,7 @@ export function InboxThread({
   onBack: () => void;
   detailsPane: ReactNode;
 }) {
+    const tHC = useTranslations("hcAdminInboxInboxThread");
   return (
     <div className="flex h-full flex-col rounded-xl border border-border bg-card">
       <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
@@ -57,8 +59,8 @@ export function InboxThread({
           size="icon"
           className="bg-transparent lg:hidden"
           onClick={onBack}
-          title="Back to the list"
-          aria-label="Back to the list"
+          title={tHC("hcAdminInboxInboxThread.s13")}
+          aria-label={tHC("hcAdminInboxInboxThread.s13")}
         >
           <ArrowLeft size={15} aria-hidden="true" />
         </Button>
@@ -72,7 +74,7 @@ export function InboxThread({
           // Slack sessions are keyed by CHANNEL id, not by person
           // (SlackWebhookController's documented design) - a takeover
           // holds the whole channel/DM, worth saying out loud.
-          <span className="text-[11px] text-muted-foreground">(takes over the whole Slack channel)</span>
+          <span className="text-[11px] text-muted-foreground">{tHC("hcAdminInboxInboxThread.s12")}</span>
         )}
         <div className="ms-auto flex items-center gap-2">
           <Button
@@ -81,7 +83,7 @@ export function InboxThread({
             size="sm"
             className="bg-transparent xl:hidden"
             onClick={onToggleDetails}
-            title="Details & actions"
+            title={tHC("hcAdminInboxInboxThread.s11")}
           >
             <PanelRight size={14} />
           </Button>
@@ -98,7 +100,7 @@ export function InboxThread({
                   )
                 }
               >
-                <Headset size={13} /> Take over
+                <Headset size={13} /> {tHC("hcAdminInboxInboxThread.s10")}
               </Button>
             ) : (
               <Button
@@ -112,7 +114,7 @@ export function InboxThread({
                   )
                 }
               >
-                <Undo2 size={13} /> Hand back to agent
+                <Undo2 size={13} /> {tHC("hcAdminInboxInboxThread.s9")}
               </Button>
             ))}
         </div>
@@ -120,28 +122,27 @@ export function InboxThread({
 
       {selected.handoffState === "HUMAN" && (
         <div className="border-b border-border bg-accent/30 px-3 py-2 text-xs text-muted-foreground">
-          The agent (and any channel workflow trigger) is silenced on this conversation until you hand it back. New
-          customer messages still arrive below.
+          {tHC("hcAdminInboxInboxThread.s8")}
         </div>
       )}
       {!selected.paired && (
         <div className="flex items-center gap-2 border-b border-border bg-amber-500/10 px-3 py-2 text-xs text-muted-foreground">
           <ShieldCheck size={13} className="shrink-0" />
-          Awaiting pairing approval — the sender&apos;s messages are held. Approve or reject in the details pane.
+          {tHC("hcAdminInboxInboxThread.s7")}
         </div>
       )}
 
       <div className="flex-1 space-y-2 overflow-y-auto p-3" style={{ minHeight: 240, maxHeight: 480 }}>
         {transcriptFailed && (
           <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-            <span>Couldn&apos;t load the transcript — this does not mean it&apos;s empty.</span>
+            <span>{tHC("hcAdminInboxInboxThread.s6")}</span>
             <Button type="button" size="sm" onClick={onRetryTranscript}>
               Retry
             </Button>
           </div>
         )}
         {!transcriptFailed && transcript.length === 0 && (
-          <p className="text-sm text-muted-foreground">No logged messages yet for this conversation.</p>
+          <p className="text-sm text-muted-foreground">{tHC("hcAdminInboxInboxThread.s5")}</p>
         )}
         {transcript.map((m) => (
           <div key={m.id} className={cn("flex", m.direction === "OUTBOUND" ? "justify-end" : "justify-start")}>
@@ -159,8 +160,7 @@ export function InboxThread({
           </div>
         ))}
         <p className="pt-1 text-[10px] text-muted-foreground">
-          Full two-way transcript — customer messages, agent replies and operator replies. Agent replies sent before
-          outbound logging landed are absent.
+          {tHC("hcAdminInboxInboxThread.s4")}
         </p>
         <div ref={transcriptEndRef} />
       </div>
@@ -168,7 +168,7 @@ export function InboxThread({
       <div className="border-t border-border p-3">
         {selected.channel === "VOICE" ? (
           <p className="text-xs text-muted-foreground">
-            Voice conversations are live calls, not message threads — there&apos;s nothing to type back.
+            {tHC("hcAdminInboxInboxThread.s3")}
           </p>
         ) : (
           <>
@@ -182,7 +182,7 @@ export function InboxThread({
                     ? "Reply as a human operator…"
                     : "Take the conversation over to reply — that's what silences the agent."
               }
-              aria-label="Reply as a human operator"
+              aria-label={tHC("hcAdminInboxInboxThread.s2")}
               disabled={!selected.paired || selected.handoffState !== "HUMAN" || busy}
               rows={3}
             />
@@ -193,7 +193,7 @@ export function InboxThread({
                 onClick={sendReply}
                 disabled={!selected.paired || selected.handoffState !== "HUMAN" || busy || !draft.trim()}
               >
-                <Send size={13} /> Send reply
+                <Send size={13} /> {tHC("hcAdminInboxInboxThread.s1")}
               </Button>
             </div>
           </>

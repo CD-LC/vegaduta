@@ -21,6 +21,7 @@ import {
   type EvalStatisticsApi,
 } from "./evalStatisticsApi";
 import { GapIntervalBar, ScoreWithInterval } from "./ScoreWithInterval";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Paired A/B comparison of two eval runs — the one control on this screen
@@ -90,6 +91,7 @@ export default function PairedComparisonCard({
   measuredNoiseFloor,
   onUnsupported,
 }: PairedComparisonCardProps) {
+    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
   // Only completed runs are offered. Newest-first, so index 0 is the natural
   // candidate and index 1 the natural baseline — the comparison a human
   // almost always wants is "did my last change help".
@@ -175,11 +177,9 @@ export default function PairedComparisonCard({
           <div className="flex items-start gap-3">
             <ArrowLeftRight size={16} className="mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">Paired A/B needs two completed runs</p>
+              <p className="text-sm font-medium text-foreground">{tHC("hcAgentsQualityPairedComparisonCard.s30")}</p>
               <p className="text-sm text-muted-foreground">
-                This dataset has {comparable.length === 0 ? "no" : "one"} completed run. Run it again after a prompt,
-                model or tool change and the two runs can be compared case by case — with an interval, so the comparison
-                can come back &ldquo;we cannot tell&rdquo; instead of picking a winner.
+                {tHC("hcAgentsQualityPairedComparisonCard.s29")} {comparable.length === 0 ? "no" : "one"} {tHC("hcAgentsQualityPairedComparisonCard.s28")}
               </p>
             </div>
           </div>
@@ -195,7 +195,7 @@ export default function PairedComparisonCard({
         <div className="grid gap-3 lg:grid-cols-[1fr_auto_1fr_auto] lg:items-end">
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="paired-baseline-run">
-              Baseline (A)
+              {tHC("hcAgentsQualityPairedComparisonCard.s27")}
             </label>
             <Select
               id="paired-baseline-run"
@@ -207,21 +207,21 @@ export default function PairedComparisonCard({
               }}
               options={runOptions}
               searchable
-              placeholder="Select the baseline run"
+              placeholder={tHC("hcAgentsQualityPairedComparisonCard.s26")}
             />
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={swap}
-            title="Swap baseline and candidate — the gap's sign flips, the verdict should not."
+            title={tHC("hcAgentsQualityPairedComparisonCard.s25")}
             className="lg:mb-0.5"
           >
             <ArrowLeftRight size={14} aria-hidden="true" /> Swap
           </Button>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="paired-candidate-run">
-              Candidate (B)
+              {tHC("hcAgentsQualityPairedComparisonCard.s24")}
             </label>
             <Select
               id="paired-candidate-run"
@@ -233,7 +233,7 @@ export default function PairedComparisonCard({
               }}
               options={runOptions}
               searchable
-              placeholder="Select the candidate run"
+              placeholder={tHC("hcAgentsQualityPairedComparisonCard.s23")}
             />
           </div>
           <Button
@@ -248,26 +248,25 @@ export default function PairedComparisonCard({
 
         {effectiveBaseline === effectiveCandidate && (
           <p className="text-xs text-muted-foreground">
-            Pick two different runs. Comparing a run against itself measures the harness, not the agent.
+            {tHC("hcAgentsQualityPairedComparisonCard.s22")}
           </p>
         )}
 
         {locked && (
           <Alert>
             <ShieldAlert aria-hidden="true" />
-            <AlertTitle>Paired comparison is a Premium feature</AlertTitle>
+            <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s21")}</AlertTitle>
             <AlertDescription>
-              The eval-statistics endpoints sit behind the same Premium plan gate as the rest of the quality suite
-              above.
+              {tHC("hcAgentsQualityPairedComparisonCard.s20")}
             </AlertDescription>
           </Alert>
         )}
 
         {failed && (
           <Alert variant="destructive">
-            <AlertTitle>Couldn&apos;t compute the comparison</AlertTitle>
+            <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s19")}</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
-              This is a load failure, not a result of &ldquo;no difference&rdquo;.
+              {tHC("hcAgentsQualityPairedComparisonCard.s18")}
               <Button variant="outline" size="sm" onClick={compare}>
                 Retry
               </Button>
@@ -277,7 +276,7 @@ export default function PairedComparisonCard({
 
         {!comparison && !loading && !failed && !locked && (
           <p className="text-sm text-muted-foreground">
-            Pick two completed runs and hit Compare. The result is a signed, paired gap with an interval — not a winner.
+            {tHC("hcAgentsQualityPairedComparisonCard.s17")}
           </p>
         )}
 
@@ -298,17 +297,18 @@ export default function PairedComparisonCard({
 // ---------------------------------------------------------------------------
 
 function verdictBadge(reading: ComparisonReading) {
+    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
   if (reading.state === "CANDIDATE_BETTER") {
     return (
       <Badge variant="state" state="var(--state-success)" className="gap-1.5">
-        <TrendingUp size={11} aria-hidden="true" /> Candidate is better
+        <TrendingUp size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s16")}
       </Badge>
     );
   }
   if (reading.state === "BASELINE_BETTER") {
     return (
       <Badge variant="state" state="var(--state-error)" className="gap-1.5">
-        <TrendingDown size={11} aria-hidden="true" /> Candidate regressed
+        <TrendingDown size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s15")}
       </Badge>
     );
   }
@@ -327,7 +327,7 @@ function verdictBadge(reading: ComparisonReading) {
   }
   return (
     <Badge variant="outline" className="gap-1.5">
-      <CircleHelp size={11} aria-hidden="true" /> Not enough data to tell
+      <CircleHelp size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s14")}
     </Badge>
   );
 }
@@ -341,6 +341,7 @@ function ComparisonResult({
   reading: ComparisonReading;
   floorWasSubstituted: boolean;
 }) {
+    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
   const gap = orEmptyEstimate(gapEstimate(comparison));
   const undecided = reading.state === "INDISTINGUISHABLE" || reading.state === "INSUFFICIENT_DATA";
 
@@ -358,7 +359,7 @@ function ComparisonResult({
           )}
         </span>
         <span className="text-xs text-muted-foreground">
-          {comparison.pairedCases} paired case{comparison.pairedCases === 1 ? "" : "s"}
+          {comparison.pairedCases} {tHC("hcAgentsQualityPairedComparisonCard.s13")}{comparison.pairedCases === 1 ? "" : "s"}
         </span>
         {comparison.unreplicated && (
           <Badge variant="state" state="var(--state-warning)" className="gap-1.5">
@@ -374,24 +375,22 @@ function ComparisonResult({
       <GapIntervalBar estimate={gap} noiseFloor={comparison.noiseFloorTested} />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <PairedCount label="Candidate won" count={comparison.casesVariantBetter} total={comparison.pairedCases} />
+        <PairedCount label={tHC("hcAgentsQualityPairedComparisonCard.s12")} count={comparison.casesVariantBetter} total={comparison.pairedCases} />
         <PairedCount label="Tied" count={comparison.casesTied} total={comparison.pairedCases} />
-        <PairedCount label="Candidate lost" count={comparison.casesBaselineBetter} total={comparison.pairedCases} />
+        <PairedCount label={tHC("hcAgentsQualityPairedComparisonCard.s11")} count={comparison.casesBaselineBetter} total={comparison.pairedCases} />
       </div>
 
       {comparison.noiseFloorTested === null || comparison.noiseFloorTested === undefined ? (
         <Alert variant="warning">
           <Info aria-hidden="true" />
-          <AlertTitle>No noise floor measured for this dataset yet</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s10")}</AlertTitle>
           <AlertDescription>
-            Without a floor, the only check applied to this gap is whether its interval contains zero. A gap can clear
-            zero and still be smaller than this dataset&apos;s own run-to-run variance. Run the unchanged configuration
-            twice to measure the floor before acting on a small difference.
+            {tHC("hcAgentsQualityPairedComparisonCard.s9")}
           </AlertDescription>
         </Alert>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Checked against a noise floor of {formatValue(comparison.noiseFloorTested)}
+          {tHC("hcAgentsQualityPairedComparisonCard.s8")} {formatValue(comparison.noiseFloorTested)}
           {floorWasSubstituted
             ? " (taken from this dataset's noise-floor measurement; the comparison response did not carry one)"
             : ""}
@@ -401,8 +400,8 @@ function ComparisonResult({
 
       {comparison.signTestPValue !== null && comparison.signTestPValue !== undefined && (
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
-          sign test p={Number(comparison.signTestPValue).toPrecision(3)} over{" "}
-          {comparison.casesVariantBetter + comparison.casesBaselineBetter} discordant case
+          {tHC("hcAgentsQualityPairedComparisonCard.s7")}{Number(comparison.signTestPValue).toPrecision(3)} over{" "}
+          {comparison.casesVariantBetter + comparison.casesBaselineBetter} {tHC("hcAgentsQualityPairedComparisonCard.s6")}
           {comparison.casesVariantBetter + comparison.casesBaselineBetter === 1 ? "" : "s"}
         </p>
       )}
@@ -410,11 +409,9 @@ function ComparisonResult({
       {reading.downgradedFromServerVerdict && (
         <Alert variant="warning">
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>The backend called a winner; this console did not</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s5")}</AlertTitle>
           <AlertDescription>
-            The comparison endpoint returned <span className="font-mono">{comparison.verdict}</span>, but the gap it
-            returned alongside it does not support a direction. The console shows the weaker claim on purpose. Worth
-            reporting — the two should agree.
+            {tHC("hcAgentsQualityPairedComparisonCard.s4")} <span className="font-mono">{comparison.verdict}</span>{tHC("hcAgentsQualityPairedComparisonCard.s3")}
           </AlertDescription>
         </Alert>
       )}
@@ -422,7 +419,7 @@ function ComparisonResult({
       {(comparison.warnings || []).length > 0 && (
         <Alert variant="warning">
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>Read these before quoting the comparison</AlertTitle>
+          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s2")}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc space-y-1 ps-5">
               {comparison.warnings.map((w, i) => (
@@ -434,7 +431,7 @@ function ComparisonResult({
       )}
 
       <div className="border-t border-border pt-3">
-        <ScoreWithInterval estimate={gap} label="Signed paired gap (candidate − baseline)" size="sm" />
+        <ScoreWithInterval estimate={gap} label={tHC("hcAgentsQualityPairedComparisonCard.s1")} size="sm" />
       </div>
     </div>
   );

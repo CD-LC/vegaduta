@@ -9,6 +9,7 @@ import { ArrowRight, Clock, Flag, Info, Loader2, Send, Sparkles } from "lucide-r
 import { Button } from "../../components/ui/button";
 import { usePageReady } from "../../components/RouteTransition";
 import { fetchSharedAgent, reportSharedAgent, sendSharedChat, type ShareErrorCode, type SharedAgentInfo } from "./api";
+import { useTranslations } from "../../lib/i18n";
 
 // /a/<shareId> — the public viewer for a shared sandbox agent.
 //
@@ -87,6 +88,7 @@ function newId(): string {
 }
 
 export default function SharedAgentPage() {
+    const tHC = useTranslations("hcAShareIdPage");
   usePageReady(true);
   const params = useParams();
   const rawId = params?.shareId;
@@ -166,7 +168,7 @@ export default function SharedAgentPage() {
         {phase === "loading" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center">
             <Loader2 className="size-6 animate-spin text-primary" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">Opening this shared agent…</p>
+            <p className="text-sm text-muted-foreground">{tHC("hcAShareIdPage.s17")}</p>
           </div>
         )}
 
@@ -185,10 +187,9 @@ export default function SharedAgentPage() {
             <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
               <Info className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <p className="text-xs text-muted-foreground">
-                <span className="text-foreground">{info.agentName}</span> is a demo agent someone built in the{" "}
+                <span className="text-foreground">{info.agentName}</span> {tHC("hcAShareIdPage.s16")}{" "}
                 <BrandName /> sandbox
-                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}. It answers on its builder&apos;s
-                behalf, within free demo limits, until the sandbox expires.
+                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}{tHC("hcAShareIdPage.s15")}
               </p>
             </div>
 
@@ -199,7 +200,7 @@ export default function SharedAgentPage() {
             >
               {bubbles.length === 0 && (
                 <p className="py-10 text-center text-sm text-muted-foreground">
-                  Say hello — ask {info.agentName} about prices, timings, anything a customer would.
+                  {tHC("hcAShareIdPage.s14")} {info.agentName} {tHC("hcAShareIdPage.s13")}
                 </p>
               )}
               {bubbles.map((b) => (
@@ -246,11 +247,12 @@ export default function SharedAgentPage() {
 }
 
 function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
+    const tHC = useTranslations("hcAShareIdPage");
   const expiryLabel = expiresLine(info?.expiresAt || null);
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label="VegaDūta home">
+        <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcAShareIdPage.s12")}>
           <img src="/logo-mark.png" alt="" className="h-7 w-auto shrink-0 object-contain" />
           <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
             Vega<span className="text-primary">Dūta</span>
@@ -259,7 +261,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <Sparkles className="size-3" aria-hidden="true" />
-          Shared agent
+          {tHC("hcAShareIdPage.s11")}
         </span>
 
         {expiryLabel && (
@@ -272,8 +274,8 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
         <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/try">
-              <span className="hidden sm:inline">Build your own — free</span>
-              <span className="sm:hidden">Build yours</span>
+              <span className="hidden sm:inline">{tHC("hcAShareIdPage.s10")}</span>
+              <span className="sm:hidden">{tHC("hcAShareIdPage.s9")}</span>
             </Link>
           </Button>
         </div>
@@ -345,12 +347,13 @@ function ThinkingBubble() {
 /** A blocking code, mid-conversation: the thread stays, the composer becomes
  *  the labelled state plus the only next step that actually works. */
 function BlockedComposer({ code }: { code: ShareErrorCode }) {
+    const tHC = useTranslations("hcAShareIdPage");
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-border/70 bg-card/50 px-4 py-5 text-center">
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild size="sm">
         <Link href="/try">
-          Build your own free agent
+          {tHC("hcAShareIdPage.s8")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -361,6 +364,7 @@ function BlockedComposer({ code }: { code: ShareErrorCode }) {
 /** The page-level dead end (link expired/capped/unreachable before anything
  *  loaded). Same no-error-iconography posture as /try's Unavailable. */
 function BlockedScreen({ code }: { code: ShareErrorCode }) {
+    const tHC = useTranslations("hcAShareIdPage");
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -373,7 +377,7 @@ function BlockedScreen({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild>
         <Link href="/try">
-          Build your own free agent — no signup
+          {tHC("hcAShareIdPage.s7")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -392,6 +396,7 @@ const REPORT_REASONS = [
  *  picker. One tap files it; the thank-you renders regardless of transport
  *  outcome — a safety report is never bounced back to the reporter to retry. */
 function ReportPanel({ shareId }: { shareId: string }) {
+    const tHC = useTranslations("hcAShareIdPage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -412,7 +417,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
     <div className="flex flex-col items-center gap-2 py-1">
       {done ? (
         <p className="text-xs text-muted-foreground" role="status">
-          Thanks — your report has been logged and this agent will be reviewed.
+          {tHC("hcAShareIdPage.s6")}
         </p>
       ) : !open ? (
         <button
@@ -421,7 +426,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
           className="inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           <Flag className="size-3" aria-hidden="true" />
-          Report this agent
+          {tHC("hcAShareIdPage.s5")}
         </button>
       ) : (
         <AnimatePresence>
@@ -430,7 +435,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
           >
-            <p className="text-xs text-muted-foreground">What&apos;s wrong with this agent?</p>
+            <p className="text-xs text-muted-foreground">{tHC("hcAShareIdPage.s4")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {REPORT_REASONS.map((r) => (
                 <button
@@ -461,6 +466,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
 /** The persistent provenance + conversion line. Every visitor to a shared
  *  page is a prospect who just watched the product work. */
 function ViewerFooter() {
+    const tHC = useTranslations("hcAShareIdPage");
   return (
     <footer className="border-t border-border/60 bg-background/80">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-1.5 px-4 py-4 text-center sm:px-6">
@@ -468,11 +474,11 @@ function ViewerFooter() {
           href="/try"
           className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
         >
-          Built with <BrandName /> — create yours free
+          {tHC("hcAShareIdPage.s3")} <BrandName /> {tHC("hcAShareIdPage.s2")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
         <p className="text-[11px] text-muted-foreground">
-          No signup, no card — a working AI agent for your business in minutes.
+          {tHC("hcAShareIdPage.s1")}
         </p>
       </div>
     </footer>

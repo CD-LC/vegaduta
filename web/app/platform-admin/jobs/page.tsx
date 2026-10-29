@@ -18,6 +18,7 @@ import { failedJobCount, filterJobs, formatDurationMs, jobStatusMeta, sortJobs }
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminEmptyState, AdminErrorState, AdminTableWrap } from "../components/admin/AdminKit";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Every @Scheduled job core runs (GET /api/platform/jobs), with its last run as
 // recorded by core. Failed jobs sort first. "Run now" is offered only where
@@ -25,6 +26,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 // for confirmation - it starts the job on the replica that answers.
 
 export default function JobsPage() {
+    const tHC = useTranslations("hcPlatformadminJobsPage");
   const askConfirm = useConfirm();
   const [jobs, setJobs] = useState<ScheduledJob[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +94,7 @@ export default function JobsPage() {
 
   return (
     <AdminShell
-      title="Scheduled jobs"
+      title={tHC("hcPlatformadminJobsPage.s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : undefined} /> Refresh
@@ -100,8 +102,7 @@ export default function JobsPage() {
       }
     >
       <PageHint>
-        Every scheduled job in core with its last run. Failed jobs are listed first. Run now is only offered for jobs
-        core marks as safe to trigger by hand, and needs the master key.
+        {tHC("hcPlatformadminJobsPage.s8")}
       </PageHint>
 
       <SectionCard
@@ -120,16 +121,16 @@ export default function JobsPage() {
                 className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
-                aria-label="Search jobs"
+                aria-label={tHC("hcPlatformadminJobsPage.s7")}
                 className="h-9 w-60 ps-8"
-                placeholder="Bean, method, schedule, error"
+                placeholder={tHC("hcPlatformadminJobsPage.s6")}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-1.5 text-xs">
               <Checkbox checked={onlyFailed} onCheckedChange={(v) => setOnlyFailed(v)} id="jobs-failed-only" />
-              <label htmlFor="jobs-failed-only">Failed only</label>
+              <label htmlFor="jobs-failed-only">{tHC("hcPlatformadminJobsPage.s5")}</label>
             </div>
           </div>
         }
@@ -146,8 +147,8 @@ export default function JobsPage() {
                 <tr className="border-b border-border">
                   <th className="py-2 pe-3 font-medium">Job</th>
                   <th className="py-2 pe-3 font-medium">Schedule</th>
-                  <th className="py-2 pe-3 font-medium">Last status</th>
-                  <th className="py-2 pe-3 font-medium">Last started</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminJobsPage.s4")}</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminJobsPage.s3")}</th>
                   <th className="py-2 pe-3 font-medium">Duration</th>
                   <th className="py-2 font-medium">
                     <span className="sr-only">Actions</span>
@@ -200,9 +201,9 @@ export default function JobsPage() {
                           ) : (
                             <span
                               className="text-[11px] text-muted-foreground"
-                              title="Core does not allow this job to be triggered by hand."
+                              title={tHC("hcPlatformadminJobsPage.s2")}
                             >
-                              schedule only
+                              {tHC("hcPlatformadminJobsPage.s1")}
                             </span>
                           )}
                         </td>

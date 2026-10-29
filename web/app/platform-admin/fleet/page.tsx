@@ -16,6 +16,7 @@ import { tenantDetailApi } from "../lib/adminApi/tenantDetail";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminErrorState, AdminTableWrap } from "../components/admin/AdminKit";
 import { Select } from "../../components/ui/select";
+import { useTranslations } from "../../lib/i18n";
 
 // The fleet supervisor: every agent in every tenant, one row each, sorted so
 // the agents needing an operator surface first. SLOs are the server's
@@ -48,6 +49,7 @@ function money(x: number | null | undefined): string {
 }
 
 export default function FleetHealthPage() {
+    const tHC = useTranslations("hcPlatformadminFleetPage");
   const askConfirm = useConfirm();
   const [data, setData] = useState<FleetHealthResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -134,12 +136,10 @@ export default function FleetHealthPage() {
   const pg = usePagination(rows, 25);
 
   return (
-    <AdminShell title="Fleet health">
+    <AdminShell title={tHC("hcPlatformadminFleetPage.s16")}>
       <PageHint>
-        Every agent in every active tenant, scored against SLOs: windowed error rate, finished-job success, eval-score
-        drift between the latest two runs, and spend against its 7-day baseline. A row with no traffic reports{" "}
-        <em>no verdict</em>, not a fabricated 100%. Escalation is the tenant emergency stop - reversible, audited, and
-        enforced at the request filter.
+        {tHC("hcPlatformadminFleetPage.s15")}{" "}
+        <em>{tHC("hcPlatformadminFleetPage.s14")}</em>{tHC("hcPlatformadminFleetPage.s13")}
       </PageHint>
 
       <SectionCard
@@ -160,7 +160,7 @@ export default function FleetHealthPage() {
                 setSlo((s) => ({ ...s, windowHours }));
                 setSloDraft((s) => ({ ...s, windowHours }));
               }}
-              aria-label="Traffic window"
+              aria-label={tHC("hcPlatformadminFleetPage.s12")}
               options={[
                 { value: "1", label: "Last hour" },
                 { value: "24", label: "Last 24h" },
@@ -231,7 +231,7 @@ export default function FleetHealthPage() {
                   setShowSloPanel(false);
                 }}
               >
-                Apply thresholds
+                {tHC("hcPlatformadminFleetPage.s11")}
               </Button>
             </div>
           </div>
@@ -239,12 +239,12 @@ export default function FleetHealthPage() {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <input
             className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            placeholder="Filter by agent or tenant"
+            placeholder={tHC("hcPlatformadminFleetPage.s10")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label="Filter agents"
+            aria-label={tHC("hcPlatformadminFleetPage.s9")}
           />
-          <div className="flex items-center gap-1" role="group" aria-label="Filter by health">
+          <div className="flex items-center gap-1" role="group" aria-label={tHC("hcPlatformadminFleetPage.s8")}>
             {(["ALL", "BREACH", "WARN", "STOPPED", "OK"] as const).map((h) => (
               <button
                 key={h}
@@ -263,8 +263,7 @@ export default function FleetHealthPage() {
           </div>
           {data && data.unavailableTenants.length > 0 && (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-              <TriangleAlert size={13} /> Unreadable tenants: {data.unavailableTenants.join(", ")} - their agents are
-              absent below, not reported healthy.
+              <TriangleAlert size={13} /> {tHC("hcPlatformadminFleetPage.s7")} {data.unavailableTenants.join(", ")} {tHC("hcPlatformadminFleetPage.s6")}
             </span>
           )}
         </div>
@@ -281,12 +280,12 @@ export default function FleetHealthPage() {
                   <th className="py-2 pe-3 font-semibold">Agent</th>
                   <th className="py-2 pe-3 font-semibold">Tenant</th>
                   <th className="py-2 pe-3 font-semibold text-end">Calls</th>
-                  <th className="py-2 pe-3 font-semibold text-end">Error rate</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("hcPlatformadminFleetPage.s5")}</th>
                   <th className="py-2 pe-3 font-semibold text-end">Spend</th>
                   <th className="py-2 pe-3 font-semibold text-end">Jobs OK</th>
                   <th className="py-2 pe-3 font-semibold text-end">Eval</th>
                   <th className="py-2 pe-3 font-semibold">Alerts</th>
-                  <th className="py-2 pe-3 font-semibold text-end">Last activity</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("hcPlatformadminFleetPage.s4")}</th>
                   <th className="py-2 font-semibold text-end">Escalate</th>
                 </tr>
               </thead>
@@ -387,7 +386,7 @@ export default function FleetHealthPage() {
                 {rows.length === 0 && (
                   <tr>
                     <td colSpan={11} className="py-8 text-center text-muted-foreground">
-                      No agents match this filter.
+                      {tHC("hcPlatformadminFleetPage.s3")}
                     </td>
                   </tr>
                 )}
@@ -407,11 +406,8 @@ export default function FleetHealthPage() {
       </SectionCard>
 
       <InfoNote>
-        SLOs are request parameters tuned from the SLOs panel above (server defaults: error rate &le;10% with &ge;5
-        calls, job success &ge;90%, eval drop &gt;0.05 between the latest two runs, spend &gt;3x the daily baseline and
-        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}&ge;&#36;1). Per-agent
-        SLO config and routed paging are follow-ups. Emergency stop acts on the whole tenant, not the one agent; the
-        platform-wide kill switch lives on Platform Settings.
+        {tHC("hcPlatformadminFleetPage.s2")}
+        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}{tHC("hcPlatformadminFleetPage.s1")}
       </InfoNote>
     </AdminShell>
   );

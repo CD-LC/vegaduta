@@ -23,6 +23,7 @@ import TemplateReasonDialog from "./TemplateReasonDialog";
 import { toast } from "../../lib/toastBus";
 import type { CommunityTemplate, TemplateSummary } from "../../templates/types";
 import { useConfirm } from "../admin/ConfirmDialog";
+import { useTranslations } from "../../../lib/i18n";
 
 function timeAgo(iso?: string): string {
   if (!iso) return "—";
@@ -67,6 +68,7 @@ export default function TemplateQueueCard({
   onReject?: (reason: string) => Promise<void>;
   onWithdraw?: (reason: string) => Promise<void>;
 }) {
+    const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateQueueCard");
   const askConfirm = useConfirm();
   // TemplateSummary (published) has none of these - only the pending
   // CommunityTemplate detail does. Narrowed once here so the rest of the
@@ -197,8 +199,7 @@ export default function TemplateQueueCard({
             </>
           ) : (
             <p className="rounded-md border border-border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
-              Full config isn&rsquo;t included in this admin-approved summary (TemplateSummary) - it was already
-              reviewed in full at approval time.
+              {tHC("hcPlatformadminComponentsTemplatesTemplateQueueCard.s1")}
             </p>
           )}
 

@@ -201,6 +201,7 @@ function withEmail(href: string, email: string): string {
 }
 
 export default function HeroOutcome() {
+    const tHC = useTranslations("hcComponentsDemolandingHeroOutcome");
   const t = useTranslations("landing");
   const router = useRouter();
   const journey = useJourney();
@@ -437,7 +438,7 @@ export default function HeroOutcome() {
               <span className="size-2 rounded-full" style={{ background: "var(--mkt-line-strong)" }} />
               <span className="size-2 rounded-full" style={{ background: "var(--mkt-line-strong)" }} />
             </span>
-            <span className="mkt-ui-label mkt-ink-3 truncate">vegaduta · {t("h2_termTitle")}</span>
+            <span className="mkt-ui-label mkt-ink-3 truncate">{tHC("hcComponentsDemolandingHeroOutcome.s1")} {t("h2_termTitle")}</span>
             <span className="mkt-pill ms-auto shrink-0">{t("h2_termSimLabel")}</span>
           </div>
           <BuildConsole

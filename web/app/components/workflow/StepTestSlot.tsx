@@ -11,6 +11,7 @@ import { FlaskConical } from "lucide-react";
 import StepTestPanel, { type StepTestUpstream } from "./StepTestPanel";
 import { upstreamIds } from "./stepTest";
 import { Button } from "../ui/button";
+import { useTranslations } from "../../lib/i18n";
 
 type SlotNode = { id: string; type?: string; data?: { label?: string; config?: object | null } };
 type SlotEdge = { source: string; target: string };
@@ -32,6 +33,7 @@ export type StepTestContextValue = {
 export const StepTestContext = createContext<StepTestContextValue | null>(null);
 
 export default function StepTestSlot({ nodeId }: { nodeId: string }) {
+    const tHC = useTranslations("hcComponentsWorkflowStepTestSlot");
   const ctx = useContext(StepTestContext);
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
@@ -107,7 +109,7 @@ export default function StepTestSlot({ nodeId }: { nodeId: string }) {
           }}
         >
           <FlaskConical size={14} aria-hidden="true" />
-          Run this step
+          {tHC("hcComponentsWorkflowStepTestSlot.s1")}
         </Button>
       )}
     </div>

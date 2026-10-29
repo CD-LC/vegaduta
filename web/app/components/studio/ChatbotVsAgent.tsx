@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Bot, Check, FileText, MessageSquare, ShieldCheck, Send } from "lucide-react";
+import { useTranslations } from "../../lib/i18n";
 
 // Same request, two very different mornings. An illustration (and labelled as
 // one): the point is the SHAPE of the difference - one answers, the other
@@ -36,20 +37,21 @@ const AGENT_STEPS = [
 ];
 
 export default function ChatbotVsAgent() {
+    const tHC = useTranslations("hcComponentsStudioChatbotVsAgent");
   const [mode, setMode] = useState<"bot" | "agent">("agent");
   return (
     <div className="mt-16 rounded-3xl border border-border/60 bg-background/60 p-5 backdrop-blur sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Same question. Two very different answers.
+            {tHC("hcComponentsStudioChatbotVsAgent.s7")}
           </div>
           <div className="mt-1 max-w-2xl text-lg font-medium">&ldquo;{REQUEST}&rdquo;</div>
         </div>
         <div
           className="inline-flex rounded-full border border-border/60 p-1 text-sm"
           role="tablist"
-          aria-label="Chatbot or agent"
+          aria-label={tHC("hcComponentsStudioChatbotVsAgent.s6")}
         >
           {(["bot", "agent"] as const).map((m) => (
             <button
@@ -76,11 +78,9 @@ export default function ChatbotVsAgent() {
               exit={{ opacity: 0 }}
               className="max-w-2xl rounded-2xl rounded-ss-sm bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground"
             >
-              I don&apos;t have access to your invoices or payment records, so I can&apos;t tell which customers are
-              overdue. Here&apos;s a template you could adapt for a payment reminder:{" "}
-              <i>&ldquo;Dear [Name], this is a friendly reminder that invoice [#] is now overdue…&rdquo;</i> You may
-              want to check your accounting software and send these yourself.
-              <div className="mt-3 text-xs">Result: a paragraph. The work is still yours.</div>
+              {tHC("hcComponentsStudioChatbotVsAgent.s5")}{" "}
+              <i>{tHC("hcComponentsStudioChatbotVsAgent.s4")}</i> {tHC("hcComponentsStudioChatbotVsAgent.s3")}
+              <div className="mt-3 text-xs">{tHC("hcComponentsStudioChatbotVsAgent.s2")}</div>
             </motion.div>
           ) : (
             <motion.ol
@@ -106,8 +106,7 @@ export default function ChatbotVsAgent() {
                 </motion.li>
               ))}
               <li className="max-w-2xl pt-1 text-xs text-muted-foreground">
-                Result: the job done, and you decided the one thing that mattered. (Illustration - the studio below does
-                each of these steps for real.)
+                {tHC("hcComponentsStudioChatbotVsAgent.s1")}
               </li>
             </motion.ol>
           )}

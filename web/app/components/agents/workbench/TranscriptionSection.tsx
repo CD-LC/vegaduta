@@ -8,8 +8,10 @@ import VideoProviderSelector from "../VideoProviderSelector";
 import VoiceProviderSelector from "../VoiceProviderSelector";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function TranscriptionSection() {
+    const tHC = useTranslations("hcComponentsAgentsWorkbenchTranscriptionSection");
   const {
     isDraft,
     transcriptionSummary,
@@ -173,7 +175,7 @@ export default function TranscriptionSection() {
             {ttsModelEditing && (
               <div className="rounded-lg border border-border bg-card p-3">
                 <div className="mb-3">
-                  <div className="mb-1 text-xs text-muted-foreground">For voice replies</div>
+                  <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchTranscriptionSection.s3")}</div>
                   <TextToSpeechProviderSelector
                     value={ttsModelDraft.ttsProvider}
                     onChange={(provider, model) => {
@@ -205,7 +207,7 @@ export default function TranscriptionSection() {
             {voiceModelEditing && (
               <div className="rounded-lg border border-border bg-card p-3">
                 <div className="mb-3">
-                  <div className="mb-1 text-xs text-muted-foreground">For voice calls</div>
+                  <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchTranscriptionSection.s2")}</div>
                   <VoiceProviderSelector
                     value={voiceModelDraft.voiceModelProvider}
                     onChange={(provider, model) => {
@@ -237,7 +239,7 @@ export default function TranscriptionSection() {
             {videoModelEditing && (
               <div className="rounded-lg border border-border bg-card p-3">
                 <div className="mb-3">
-                  <div className="mb-1 text-xs text-muted-foreground">For video calls</div>
+                  <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchTranscriptionSection.s1")}</div>
                   <VideoProviderSelector
                     value={videoModelDraft.videoModelProvider}
                     onChange={(provider, model) => {

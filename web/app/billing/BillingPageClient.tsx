@@ -127,6 +127,7 @@ const FREE_MODE_FEATURE_KEYS = [
 // cannot export. Unchanged otherwise — TIERS stays the single source of
 // truth both the rendered cards and the server-side JSON-LD read from.
 export default function BillingPageClient({ forcePaid = false }: { forcePaid?: boolean } = {}) {
+    const tHC = useTranslations("hcBillingBillingPageClient");
   const t = useTranslations("billing");
   const { isIndia } = useRegion();
   // The currency prices are shown in: detected from the region, overridable with the switch below (locale
@@ -271,7 +272,7 @@ export default function BillingPageClient({ forcePaid = false }: { forcePaid?: b
           <div className="mx-auto mt-6 flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-1.5 text-center text-xs font-medium text-primary">
             <IndianRupee className="size-3.5 flex-shrink-0" aria-hidden="true" />
             <span>
-              Pay with UPI &amp; cards via Razorpay · ₹ pricing · console in 22 Indian languages · WhatsApp-first
+              {tHC("hcBillingBillingPageClient.s1")}
             </span>
           </div>
         )}
