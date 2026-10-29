@@ -15,11 +15,15 @@ public class TenantMigrationRetryJob {
 
     private final TenantMigrationService migrationService;
     private final TenantMigrationFailures failures;
+    private final PgAdvisoryJobLock jobLock;
 
     public TenantMigrationRetryJob(
-            TenantMigrationService migrationService, TenantMigrationFailures failures) {
+            TenantMigrationService migrationService,
+            TenantMigrationFailures failures,
+            PgAdvisoryJobLock jobLock) {
         this.migrationService = migrationService;
         this.failures = failures;
+        this.jobLock = jobLock;
     }
 
     @Scheduled(
@@ -29,6 +33,6 @@ public class TenantMigrationRetryJob {
         if (failures.snapshot().isEmpty()) {
             return;
         }
-        migrationService.retryFailed();
+        jobLock.tryRunExclusive("tenant-migration-retry", migrationService::retryFailed);
     }
 }
