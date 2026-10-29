@@ -46,7 +46,7 @@ RUN "$JAVA_HOME/bin/jlink" \
         --output /jre-minimal \
     && rm -f /jre-minimal/lib/server/classes.jsa
 
-FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS node-img
+FROM node:26.12.1-trixie-slim@sha256:94816674c62774da0d099a947bf4613b9e1972a2733abd0d0cd80e795f8411d0 AS node-img
 
 # COPY --from cannot expand ARGs, so the release's own images are named stages.
 FROM ${REGISTRY}/core@sha256:${CORE_IMAGE_DIGEST} AS core-img

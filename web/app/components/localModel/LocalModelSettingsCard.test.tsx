@@ -9,11 +9,20 @@ vi.mock("../../lib/i18n", () => {
       (dict[ns]?.[key] ?? `${ns}.${key}`).replace(/\{(\w+)\}/g, (_, k: string) => String(vars?.[k] ?? `{${k}}`)),
   };
 });
-vi.mock("../../lib/api/localModels", () => ({ localModelsApi: { getLocalModelSettings: vi.fn(), saveLocalModelSettings: vi.fn() } }));
+vi.mock("../../lib/api/localModels", () => ({
+  localModelsApi: { getLocalModelSettings: vi.fn(), saveLocalModelSettings: vi.fn() },
+}));
 import { localModelsApi } from "../../lib/api/localModels";
 import LocalModelSettingsCard from "./LocalModelSettingsCard";
 
-const base = { servingModel: "qwen3.5:4b", reasoningEffort: "none", keepAlive: "30m", contextLength: null as number | null, loadedContext: 16384, wantedContext: 16384 } as const;
+const base = {
+  servingModel: "qwen3.5:4b",
+  reasoningEffort: "none",
+  keepAlive: "30m",
+  contextLength: null as number | null,
+  loadedContext: 16384,
+  wantedContext: 16384,
+} as const;
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -42,7 +51,11 @@ describe("LocalModelSettingsCard", () => {
 
   it("warns when the runner loaded fewer tokens than asked for, and a click makes a bigger window", async () => {
     vi.mocked(localModelsApi.getLocalModelSettings).mockResolvedValue({ ...base, loadedContext: 4096 });
-    vi.mocked(localModelsApi.saveLocalModelSettings).mockResolvedValue({ ...base, contextLength: 16384, loadedContext: 16384 });
+    vi.mocked(localModelsApi.saveLocalModelSettings).mockResolvedValue({
+      ...base,
+      contextLength: 16384,
+      loadedContext: 16384,
+    });
     render(<LocalModelSettingsCard />);
     await waitFor(() => screen.getByTestId("context-warning"));
     expect(screen.getByTestId("context-warning")).toHaveTextContent("Choose a context window above");
@@ -52,6 +65,38 @@ describe("LocalModelSettingsCard", () => {
     await waitFor(() => expect(localModelsApi.saveLocalModelSettings).toHaveBeenCalledWith({ contextLength: 16384 }));
     await waitFor(() => expect(screen.getByTestId("context-16384")).toHaveAttribute("aria-checked", "true"));
     expect(screen.queryByTestId("context-warning")).toBeNull();
+  });
+
+  it("shows the batch/parallel/timeout/tool-deferral knobs and saves each one", async () => {
+    vi.mocked(localModelsApi.getLocalModelSettings).mockResolvedValue({
+      ...base,
+      numBatch: 512,
+      numParallel: null,
+      responseTimeoutMs: 120000,
+      toolDeferral: true,
+    });
+    vi.mocked(localModelsApi.saveLocalModelSettings).mockImplementation(async (update) => ({ ...base, ...update }));
+    render(<LocalModelSettingsCard />);
+    await waitFor(() => screen.getByTestId("batch-512"));
+    expect(screen.getByTestId("batch-512")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("parallel-default")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("timeout-120000")).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("timeout-120000")).toHaveTextContent("2 min");
+    expect(screen.getByTestId("tooldeferral-on")).toHaveAttribute("aria-checked", "true");
+
+    fireEvent.click(screen.getByTestId("batch-1024"));
+    await waitFor(() => expect(localModelsApi.saveLocalModelSettings).toHaveBeenCalledWith({ numBatch: 1024 }));
+    await waitFor(() => expect(screen.getByTestId("parallel-4")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("parallel-4"));
+    await waitFor(() => expect(localModelsApi.saveLocalModelSettings).toHaveBeenCalledWith({ numParallel: 4 }));
+    await waitFor(() => expect(screen.getByTestId("timeout-default")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("timeout-default"));
+    await waitFor(() =>
+      expect(localModelsApi.saveLocalModelSettings).toHaveBeenCalledWith({ responseTimeoutMs: null })
+    );
+    await waitFor(() => expect(screen.getByTestId("tooldeferral-off")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("tooldeferral-off"));
+    await waitFor(() => expect(localModelsApi.saveLocalModelSettings).toHaveBeenCalledWith({ toolDeferral: false }));
   });
 
   it("renders nothing when there is no local model, and says when a save fails", async () => {

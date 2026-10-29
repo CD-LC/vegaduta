@@ -23,6 +23,13 @@ Release notes on GitHub are generated from the section for each version.
   `toolDeferral` (forces `search_tools`/`call_tool` on-demand tool loading
   for this model's turns regardless of `app.tools.search.enabled`). Every
   field is nullable: unset means the server or configured default.
+- **Local model speed controls.** The local model's speed controls now include
+  the prompt batch size (Ollama `num_batch`), how many requests the model
+  serves at once (`num_parallel`), a per-turn timeout, and tool deferral
+  (hiding tool schemas behind `search_tools` for a much smaller prompt) —
+  each with a "server default" choice, alongside thinking effort, keep-alive
+  and the context window.
+
 ### Fixed
 
 - **`/agents` auto-selects the most recent saved agent again.** The agents
@@ -91,13 +98,19 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Fixed
 
+- **Release images moved off KEV-listed Node binaries.** Every image that
+  embeds Node shipped binaries vulnerable to CVE-2026-111497 (Critical, KEV,
+  EPSS 88%) and the publish-time grype gate refused them. Node pins bumped to
+  the fixed release on each line in use: 26.11.1 → 26.12.1 (core, web,
+  omnibus, tool-sandbox, http-gateway example), 22.23.3 → 22.23.4
+  (mcp-stdio-runner, workspace-runner, whatsapp-qr), and the piece-host
+  compose default 24.21.0 → 24.22.1.
 - **Release image builds no longer die on `tool-sandbox` (amd64) or `core-full` (arm64).**
   Node 26.11's amd64 binary gained a `libatomic` link that was previously
   arm64-only while the Dockerfile only installed it for aarch64, and
   core-full's server-puppeteer `npx` pre-warm resolved the package from the
   local toolchain tree instead of seeding `~/.npm/_npx`, leaving the patched
   overlay nothing to copy.
-
 
 - **On-device media generation (`local_generate_image` / `local_generate_audio`) works after a reload, on bigger-window models, and on adapters without `shader-f16`.** Three wiring gaps left the tools dead: a model installed in a previous page session left the "cached" marker set but the worker cold, and the tools refused as if it were never installed — the facade now warms the worker from the local cache (a cache hit, not an acquisition, so the no-download consent rule is untouched), the same contract the vision model already follows. The tool-advertisement budget was a flat 3,200 chars for every model, which always trimmed the media tools out of the system prompt — it now scales with the session's context window (`toolAdvertisementBudgetFor`), so models that can afford the schema block are actually offered the tools. And MusicGen hard-required fp16 weights on the WebGPU path, so adapters without the `shader-f16` feature failed every load with a bare "Download failed" — the worker now always takes the model's q4 weights on WebGPU — fp32 and fp16 both fail session creation inside the browser's wasm heap (the fp16 decoder alone is ~850 MB, fp32 ~1.7 GB), while q4 is the supported WebGPU-quantized path at ~570 MB and needs no shader-f16; wasm+q8 stays the no-WebGPU path, while the image tool and its Edge-console card gate honestly on fp16 support since SD-Turbo ships fp16-only weights. Load failures also surface the worker's real error detail in the download chip instead of "Download failed" alone. Finally, models whose context window still can't afford a tool's schema now get a system-prompt note naming the omitted tools with an explicit "calls will be refused — do not substitute a different tool" instruction, so a request like "generate an image" no longer gets silently improvised into `generate_document` with a PNG type; if the model calls a trimmed name anyway, the refusal now says the schema didn't fit this model's prompt budget (and that a bigger-window model offers it) instead of the wrong "this device cannot run it".
 
@@ -310,6 +323,7 @@ Release notes on GitHub are generated from the section for each version.
 ## [0.1.11] - 2026-10-26
 
 - Shared-agent voice works without server speech services: the public share page's call panel now offers one-tap downloads of the on-device models (whisper speech-to-text ~45 MB + kokoro voice ~90 MB) on the visitor's device. With whisper installed, hold-to-talk transcribes locally and only the text crosses the wire (the shared chat endpoint), so talking works even when the platform's STT, TTS and LiveKit legs are all down; any miss falls back to the server voice turn as before. Loading indicators on the share page were strengthened (larger spinner + clearer thinking bubble).
+
 ### Added
 
 - **`docs/api/openapi.json` now shows the real security of the local-auth routes.** The generator only mirrored the main security chain, so every `/api/auth/local/*` route claimed `bearerAuth` - including the anonymous `login`, `setup`, `refresh`, `config` and `unlock` sign-in routes. The spec now matches `LocalAuthSecurityConfig`: only `change-password` and the unlock-management routes require a session; the rest are public (and no longer claim an `Idempotency-Key` that anonymous calls never replay-protected).
@@ -352,8 +366,7 @@ Release notes on GitHub are generated from the section for each version.
   download), and report into a session media gallery in the Edge console where the
   person can preview and download artifacts.
 - **Windows support in `desktop-agent`** (`services/desktop-agent`): `win32`
-  hosts previously fell through to the Linux path and every action answered
-  501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
+  hosts previously fell through to the Linux path and every action answered 501. Input now goes through user32 `SendInput`/`mouse_event` via an inline C#
   interop class, screen capture and monitor frames through
   `System.Drawing.CopyFromScreen`, and the clipboard through
   `Get/Set-Clipboard` - all via the bundled Windows PowerShell, no external
@@ -372,7 +385,6 @@ Release notes on GitHub are generated from the section for each version.
 
 - Personal install footprint: default memory ceilings tightened (tool-sandbox 1g to 512m, sidecar 2g to 1536m, browser-runner 2g to 1g; all stay env-overridable) and the sidecar build gained `SIDECAR_BAKE_EXTRA_MODELS=false` to slim a local image by ~550MB.
 
-
 ### Added
 
 - **Desktop tools are always offered when enabled**: `local_desktop_*` (and `run_desktop_recipe`) join the always-relevant tool set and the small-model intent table gets a desktop family — a request like "play minesweeper" or "open Notes" shares no word with `local_desktop_click`, and a relevance-trimmed turn hid the whole capability (the model then correctly answered "I have no desktop tools"). Only applies where the desktop sidecar is already opted in.
@@ -387,7 +399,7 @@ Release notes on GitHub are generated from the section for each version.
   pipeline - a PDF/DOCX/HTML/Markdown file gets a document row, dedup and text extraction,
   plain text lands as a fetched note. `POST /api/knowledge/ingest-url` is the same flow for
   the UI/API. Knowledge write is now configurable per agent: `PATCH
-  /api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
+/api/agents/{id}/knowledge-write` opts in, `GET`/`PATCH /knowledge-write-access` manages
   the deny-by-default writable-collection grant list, and the agent workbench shows both
   under Knowledge collections.
 - **Enabling a built-in MCP server that can't be served connects a per-tenant copy.** A
@@ -510,7 +522,6 @@ Release notes on GitHub are generated from the section for each version.
   now derived from the ceiling this turn actually enforces plus its grace; an explicit
   `app.chat.tools.max-rounds-per-invocation` still wins.
 
-
 - **`web_search` no longer vanishes silently when no provider is configured.** The tool was
   omitted from the payload unless a search provider was set up, so a misconfigured deployment
   made the model correctly conclude it had no web access and answer research requests from stale
@@ -555,7 +566,6 @@ Release notes on GitHub are generated from the section for each version.
   (capped by `APP_AGENT_JOBS_MAX_TURNS_CAP`, default 8) controls how many turns it
   may use. Opt-in per agent via the tool allow-list.
 
-
 ### Changed
 
 - Fresh personal, lite and full installs now start the out-of-box tool surface by
@@ -566,7 +576,6 @@ Release notes on GitHub are generated from the section for each version.
   install with `--no-search` / `--no-tools` / `--no-browser` or the matching
   `VEGADUTA_*=0` env var; `--minimal` still drops all of them. A remembered
   choice and installs that predate the defaults are left unchanged.
-
 
 ### Security
 
@@ -852,6 +861,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Downloads page shows the brand name correctly.** Headings use the `BrandName` wordmark (orange "Dūta") instead of plain text.
 
 ## [0.1.4] - 2026-10-19
+
 ### Changed
 
 - **License: Business Source License 1.1.** The platform (everything outside `sdk/`) is now under BSL-1.1: free for any use except offering the software itself to third parties as a competing hosted service, and each version converts to Apache-2.0 four years after its release. The `sdk/` directory stays Apache-2.0 so clients embed anywhere. Versions already released under Apache-2.0 remain under Apache-2.0.
@@ -946,7 +956,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Personal: continuation passes and background calls keep the tenant.** The tool-result continuation in the fast stream turn runs inside the captured tenant scope, so `llm_call_log` and `rl_episode` rows are written instead of failing with a missing-schema error.
 - **Personal: WhatsApp QR says what is wrong.** With no bridge configured the receiver stops instead of polling forever and the channel shows "WhatsApp bridge not configured"; the overlay passes `APP_WHATSAPPQR_BRIDGE_URL` and `APP_WHATSAPPQR_BRIDGE_SECRET` to core.
 - **Personal: share pages and A2A discovery reach core inside Docker.** The share-page layouts and the `/.well-known/agent-card.json` proxy fell back to `http://localhost:8080`, which inside the web container is the web container itself; both now prefer `CORE_INTERNAL_URL` (compose already sets it to `http://core:8080`).
-- **Setup preflight no longer fails on ports the running install owns.** Ports published by this stack's own containers are reported as in use *by VegaDūta* instead of blocking a re-run, matching what `doctor` already does.
+- **Setup preflight no longer fails on ports the running install owns.** Ports published by this stack's own containers are reported as in use _by VegaDūta_ instead of blocking a re-run, matching what `doctor` already does.
 - **Setup: the wizard finds a Docker CLI it did not put on PATH.** A Finder-launched app gets a minimal PATH and Docker Desktop links its CLI under `~/.docker/bin` first (the `/usr/local/bin` symlink appears only after the app's privileged first run), so a fresh install with a running engine still reported "docker command not found". The wizard now appends `~/.docker/bin` to its PATH for itself and every child process.
 - **Setup: a failed `brew install docker-desktop` says how to recover.** Stale root-owned files from an older Docker install make brew stop on a sudo prompt it cannot answer; the wizard now prints the cleanup command and the manual install link instead of a bare failure.
 - **Personal: host RAM and accelerator are persisted.** `HOST_RAM_GB`/`HOST_ACCELERATOR` were only exported for the `personal` run that computed them; a restart or doctor from another shell silently reported `0`. Both are now written to `.env` (and documented in `.env.example`).
@@ -1339,7 +1349,7 @@ Release notes on GitHub are generated from the section for each version.
   phase-1 Keycloak image to 26.7. Operator notes: **Langfuse** - a fresh
   install needs nothing; an existing v3 install must first upgrade ClickHouse
   to >= 25.12 while still on Langfuse v3 (`docker compose up -d
-  langfuse-clickhouse` with the new tag), then start v4, which migrates its
+langfuse-clickhouse` with the new tag), then start v4, which migrates its
   schema automatically and backfills history in the background (the worker's
   new healthcheck reports 503 while event propagation is stuck). Core's OTLP
   export is the v4-native ingestion path. **Prometheus 3** keeps the flags and
