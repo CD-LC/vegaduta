@@ -474,8 +474,8 @@ Describe 'personal: the closing lines of a real (not dry) start' {
   # A search `if` inserted between the local-model `if` and its `else` attached the hint to the search
   # switch: printed with a local model and search off, missing with no local model and search on.
   It 'local AI <ai>, web search <search>: <what>' -ForEach @(
-    @{ ai = 'on';  search = 'on';  flags = @('-Search');            model = $true;  web = $true;  hint = $false; what = 'model and search lines, no hint' }
-    @{ ai = 'on';  search = 'off'; flags = @('-NoSearch');          model = $true;  web = $false; hint = $false; what = 'model line only, no hint' }
+    @{ ai = 'on';  search = 'on';  flags = @('-LocalAi', '-Search');   model = $true;  web = $true;  hint = $false; what = 'model and search lines, no hint' }
+    @{ ai = 'on';  search = 'off'; flags = @('-LocalAi', '-NoSearch'); model = $true;  web = $false; hint = $false; what = 'model line only, no hint' }
     @{ ai = 'off'; search = 'on';  flags = @('-Cloud', '-Search');  model = $false; web = $true;  hint = $true;  what = 'search line and the hint' }
     @{ ai = 'off'; search = 'off'; flags = @('-Cloud', '-NoSearch'); model = $false; web = $false; hint = $true;  what = 'the hint only' }
   ) {
