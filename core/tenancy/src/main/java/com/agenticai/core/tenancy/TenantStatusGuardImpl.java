@@ -3,7 +3,6 @@ package com.agenticai.core.tenancy;
 import com.agenticai.core.security.HotpathCaches;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.TtlCache;
-import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +11,7 @@ import java.time.Duration;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,12 +53,34 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
     private final DataSource dataSource;
     private final TtlCache<Boolean> tenantUsable;
     private final TtlCache<Boolean> platformUsable;
+    private final TenantMigrationFailures migrationFailures;
+    private final boolean failOpenOnSchemaCheckError;
 
     public TenantStatusGuardImpl(
             TenantRepository tenantRepository,
             PlatformKillSwitchRepository platformKillSwitchRepository,
             DataSource dataSource,
-            @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl) {
+            Duration statusCacheTtl) {
+        this(
+                tenantRepository,
+                platformKillSwitchRepository,
+                dataSource,
+                statusCacheTtl,
+                new TenantMigrationFailures(),
+                false);
+    }
+
+    @Autowired
+    public TenantStatusGuardImpl(
+            TenantRepository tenantRepository,
+            PlatformKillSwitchRepository platformKillSwitchRepository,
+            DataSource dataSource,
+            @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl,
+            TenantMigrationFailures migrationFailures,
+            @Value("${app.tenant.status-fail-open-on-schema-check-error:false}")
+                    boolean failOpenOnSchemaCheckError) {
+        this.migrationFailures = migrationFailures;
+        this.failOpenOnSchemaCheckError = failOpenOnSchemaCheckError;
         this.tenantRepository = tenantRepository;
         this.platformKillSwitchRepository = platformKillSwitchRepository;
         this.dataSource = dataSource;
@@ -92,6 +114,12 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         if (platformStopped) {
             return false;
         }
+        // A schema whose startup migration failed is stale: refuse it until a later migration
+        // succeeds. Checked outside the TTL cache (an in-memory set lookup), so the moment a retry
+        // clears the mark the tenant is served again with no eviction needed.
+        if (migrationFailures.hasFailed(tenantId)) {
+            return false;
+        }
         return tenantUsable.get(TtlCache.key(tenantId, "usable"), () -> computeUsable(tenantId));
     }
 
@@ -100,14 +128,12 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
      * wraps, never rewrites, the decision.
      */
     private boolean computeUsable(String tenantId) {
-        // A JWT (or API key) with tenant_id=public must never route to the legacy schema: the
-        // token path is not provisioning, which refuses that name. The schemaExists fallback below
-        // would return true (Postgres always has "public"), silently routing a signed-but-invalid
-        // claim into the shared schema - rejected here, explicitly.
-        if (SchemaNameSanitizer.DEFAULT_SCHEMA.equals(tenantId)) {
+        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+        // reach another tenant's schema.
+        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
             log.warn(
-                    "Rejected tenant id '{}' - the legacy schema is not a usable tenant.",
-                    LogSafe.clean(tenantId));
+                    "Rejecting a tenant claim that is not a canonical schema name (sanitised form differs)");
             return false;
         }
         return tenantRepository
@@ -120,11 +146,9 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
     }
 
     /**
-     * Fail-CLOSED on any SQL error: a connectivity blip makes this tenant look unusable for the
-     * cache TTL, and the next request re-checks - far safer than the pre-2026-10-27 always-true
-     * fallback, which let a transient blip route every untracked-tenant request into a schema
-     * lookup that then failed anyway ("relation does not exist"), or worse, into the wrong schema
-     * for the duration of the blip.
+     * Fails CLOSED on any SQL error (logged, false) unless {@code
+     * app.tenant.status-fail-open-on-schema-check-error=true} restores the earlier fail-open
+     * behaviour. A denial is cached for the status TTL (10s by default) like any other answer.
      */
     private boolean schemaExists(String schemaName) {
         try (Connection connection = dataSource.getConnection();
@@ -137,10 +161,13 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
             }
         } catch (SQLException e) {
             log.warn(
-                    "Could not verify schema existence for untracked tenant '{}' - refusing the request (fail closed)",
-                    LogSafe.clean(schemaName),
+                    "Could not verify schema existence for untracked tenant '{}' - {}",
+                    schemaName,
+                    failOpenOnSchemaCheckError
+                            ? "allowing the request through (fail-open opt-in)"
+                            : "refusing the request (fail-closed)",
                     e);
-            return false;
+            return failOpenOnSchemaCheckError;
         }
     }
 }

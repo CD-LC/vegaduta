@@ -9,7 +9,7 @@
 // an HttpOnly, SameSite=Strict cookie scoped to this path, and hands the browser only the
 // short-lived access token. Core's own API stays token-in-body so any other client (CLI, SDK)
 // uses it directly.
-import { publicApiBase } from "./env";
+import { getPublicEnv, publicApiBase } from "./env";
 
 export const REFRESH_COOKIE = "vd_local_rt";
 export const COOKIE_PATH = "/api/local-auth";
@@ -78,8 +78,15 @@ export function refreshCookie(value: string, maxAgeSeconds: number, secure: bool
   return attrs.join("; ");
 }
 
-/** True when the browser reached us over HTTPS (directly or through a TLS-terminating proxy). */
+/**
+ * True when the browser reached us over HTTPS (directly or through a TLS-terminating proxy).
+ * When the deployment's canonical site URL is https the answer is always true: the refresh
+ * cookie's Secure flag must not be removable by a client-settable X-Forwarded-Proto: http -
+ * a caller that reaches the origin directly can set that header itself.
+ */
 export function isSecureRequest(request: Request): boolean {
+  const canonical = (getPublicEnv("NEXT_PUBLIC_SITE_URL") || "").toLowerCase();
+  if (canonical.startsWith("https:")) return true;
   const proto = request.headers.get("x-forwarded-proto");
   if (proto) return proto.split(",")[0].trim() === "https";
   return new URL(request.url).protocol === "https:";

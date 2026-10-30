@@ -1,6 +1,7 @@
 package com.agenticai.core.omnichannel.imessage;
 
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,16 @@ public class ImessageCredentialController {
                 .current()
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /**
+     * The full webhook token, on explicit request only - the credential read carries a masked
+     * preview so the inbound-webhook secret does not ride every GET. Same auth surface as the
+     * credential itself (tenant-scoped, authenticated).
+     */
+    @GetMapping("/webhook-token")
+    public Map<String, String> webhookToken() {
+        return Map.of("webhookToken", credentialService.revealWebhookToken());
     }
 
     /** Sender allow-list, groups, unknown-sender policy and inbound mode. */

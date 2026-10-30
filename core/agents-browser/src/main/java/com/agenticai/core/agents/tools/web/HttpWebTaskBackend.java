@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.web;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.net.SsrfGuard;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -68,13 +69,40 @@ public class HttpWebTaskBackend implements WebTaskBackend {
         this.http = http;
     }
 
+    /**
+     * startUrl is model-controlled: the provider's browser would fetch whatever it names, and a
+     * self-hosted provider inside the deployment's network could be steered at internal or
+     * cloud-metadata addresses. Scheme-check AND resolve through SsrfGuard - the host must be
+     * public (or an operator-approved private host) before the URL is forwarded. The provider
+     * remains the fetch boundary for the page's own subresources.
+     */
+    private static String checkedStartUrl(String startUrl) {
+        URI uri = URI.create(startUrl.trim());
+        String scheme = uri.getScheme();
+        if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+            throw new IllegalArgumentException(
+                    "web_task startUrl must be http or https, got: " + startUrl);
+        }
+        String host = uri.getHost();
+        if (host == null || host.isBlank()) {
+            throw new IllegalArgumentException("web_task startUrl has no host: " + startUrl);
+        }
+        try {
+            SsrfGuard.defaultGuard().dnsResolver().resolve(host);
+        } catch (java.net.UnknownHostException e) {
+            throw new IllegalArgumentException(
+                    "web_task startUrl host is not permitted: " + host, e);
+        }
+        return startUrl.trim();
+    }
+
     @Override
     public WebTaskResult run(WebTaskRequest request) throws WebTaskException {
         int timeout = Math.min(Math.max(request.timeoutSeconds(), 5), MAX_TIMEOUT_SECONDS);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("task", request.task());
         if (StringUtils.hasText(request.startUrl())) {
-            body.put("startUrl", request.startUrl());
+            body.put("startUrl", checkedStartUrl(request.startUrl()));
         }
         if (request.maxSteps() != null) {
             body.put("maxSteps", request.maxSteps());

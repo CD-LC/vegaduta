@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.CookieHandler;
 import java.net.ProxySelector;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandler;
@@ -18,9 +16,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -29,15 +25,12 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSession;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.ProtocolVersion;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.net.URIBuilder;
 
@@ -75,20 +68,34 @@ import org.apache.hc.core5.net.URIBuilder;
  */
 public final class GuardedJdkHttpClient extends HttpClient {
 
+    /**
+     * The response body grew past the client's {@code maxResponseBytes} cap. An {@link IOException}
+     * so callers that already handle transport errors need no new catch clause; the connection is
+     * aborted, not drained.
+     */
+    public static final class ResponseSizeExceededException extends IOException {
+        public ResponseSizeExceededException(long limit) {
+            super("response body exceeded the " + limit + "-byte cap for this client");
+        }
+    }
+
     private final CloseableHttpClient delegate;
     private final Duration connectTimeout;
     private final Redirect redirectPolicy;
     private final Executor executor;
+    private final long maxResponseBytes;
 
     private GuardedJdkHttpClient(
             CloseableHttpClient delegate,
             Duration connectTimeout,
             Redirect redirectPolicy,
-            Executor executor) {
+            Executor executor,
+            long maxResponseBytes) {
         this.delegate = delegate;
         this.connectTimeout = connectTimeout;
         this.redirectPolicy = redirectPolicy;
         this.executor = executor;
+        this.maxResponseBytes = maxResponseBytes;
     }
 
     /**
@@ -115,11 +122,28 @@ public final class GuardedJdkHttpClient extends HttpClient {
             Duration responseTimeout,
             boolean followRedirects,
             Executor executor) {
+        return create(guard, connectTimeout, responseTimeout, followRedirects, executor, 0L);
+    }
+
+    /**
+     * Same, plus a per-response body byte cap ({@code <= 0} means unlimited): a peer that streams
+     * past the cap fails the body future with {@link ResponseSizeExceededException} instead of
+     * growing the heap - the ceiling {@code ToolOutputProperties}' post-receipt truncation cannot
+     * provide because the bytes are already materialised by then.
+     */
+    public static GuardedJdkHttpClient create(
+            SsrfGuard guard,
+            Duration connectTimeout,
+            Duration responseTimeout,
+            boolean followRedirects,
+            Executor executor,
+            long maxResponseBytes) {
         return new GuardedJdkHttpClient(
                 SafeHttpClients.create(guard, connectTimeout, responseTimeout, followRedirects),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                executor);
+                executor,
+                maxResponseBytes);
     }
 
     /**
@@ -135,7 +159,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
                         lazyGuardResolver(), connectTimeout, responseTimeout, followRedirects),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"));
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"),
+                0L);
     }
 
     /**
@@ -149,6 +174,18 @@ public final class GuardedJdkHttpClient extends HttpClient {
             boolean followRedirects,
             int maxPerRoute,
             int maxTotal) {
+        return defaults(
+                connectTimeout, responseTimeout, followRedirects, maxPerRoute, maxTotal, 0L);
+    }
+
+    /** {@link #defaults(Duration, Duration, boolean, int, int)} plus a per-response byte cap. */
+    public static GuardedJdkHttpClient defaults(
+            Duration connectTimeout,
+            Duration responseTimeout,
+            boolean followRedirects,
+            int maxPerRoute,
+            int maxTotal,
+            long maxResponseBytes) {
         return new GuardedJdkHttpClient(
                 SafeHttpClients.create(
                         lazyGuardResolver(),
@@ -160,7 +197,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
                         null),
                 connectTimeout,
                 followRedirects ? Redirect.NORMAL : Redirect.NEVER,
-                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"));
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("guarded-http-"),
+                maxResponseBytes);
     }
 
     /**
@@ -193,7 +231,8 @@ public final class GuardedJdkHttpClient extends HttpClient {
         // The feeder owns the response lifecycle once it starts; if subscribing or
         // the body future fails before/while the feeder runs, we close it here or
         // the feeder does.
-        FlowExchange<T> exchange = new FlowExchange<>(request, response, bodyHandler);
+        FlowExchange<T> exchange =
+                new FlowExchange<>(request, response, bodyHandler, maxResponseBytes);
         try {
             T body = exchange.awaitBody();
             if (!exchange.streaming()) {
@@ -245,8 +284,14 @@ public final class GuardedJdkHttpClient extends HttpClient {
         private final CompletableFuture<Void> fed = new CompletableFuture<>();
         private final CompletableFuture<T> bodyFuture;
         private final Demand demand = new Demand();
+        private final long maxResponseBytes;
 
-        FlowExchange(HttpRequest request, ClassicHttpResponse response, BodyHandler<T> handler) {
+        FlowExchange(
+                HttpRequest request,
+                ClassicHttpResponse response,
+                BodyHandler<T> handler,
+                long maxResponseBytes) {
+            this.maxResponseBytes = maxResponseBytes;
             this.response = response;
             this.info = new ResponseInfoImpl(response);
             this.subscriber = handler.apply(info);
@@ -329,6 +374,7 @@ public final class GuardedJdkHttpClient extends HttpClient {
             try (InputStream in =
                     entity == null ? InputStream.nullInputStream() : entity.getContent()) {
                 byte[] buf = new byte[16 * 1024];
+                long delivered = 0;
                 while (true) {
                     // Demand is measured in onNext items, not bytes - one item per chunk.
                     if (!demand.await()) {
@@ -337,6 +383,15 @@ public final class GuardedJdkHttpClient extends HttpClient {
                     int n = in.read(buf);
                     if (n < 0) {
                         subscriber.onComplete();
+                        return;
+                    }
+                    delivered += n;
+                    if (maxResponseBytes > 0 && delivered > maxResponseBytes) {
+                        // Oversized body: fail the subscriber and ABORT the
+                        // connection (a plain close drains the rest of the
+                        // body first - the very bytes we are capping).
+                        subscriber.onError(new ResponseSizeExceededException(maxResponseBytes));
+                        abortQuietly();
                         return;
                     }
                     // Copy: buf is reused; a subscriber may retain the buffer past onNext.
@@ -499,91 +554,6 @@ public final class GuardedJdkHttpClient extends HttpClient {
     }
 
     // ---------------------------------------------------------- response conversion
-
-    private static final class ResponseInfoImpl implements ResponseInfo {
-        private final int status;
-        private final HttpHeaders headers;
-        private final Version version;
-
-        ResponseInfoImpl(ClassicHttpResponse response) {
-            this.status = response.getCode();
-            Map<String, List<String>> map = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-            for (Header h : response.getHeaders()) {
-                map.computeIfAbsent(h.getName().toLowerCase(Locale.ROOT), k -> new ArrayList<>())
-                        .add(h.getValue());
-            }
-            this.headers = HttpHeaders.of(map, (k, v) -> true);
-            ProtocolVersion pv = response.getVersion();
-            this.version = pv != null && pv.getMajor() >= 2 ? Version.HTTP_2 : Version.HTTP_1_1;
-        }
-
-        @Override
-        public int statusCode() {
-            return status;
-        }
-
-        @Override
-        public HttpHeaders headers() {
-            return headers;
-        }
-
-        @Override
-        public Version version() {
-            return version;
-        }
-    }
-
-    private static final class HttpResponseImpl<T> implements HttpResponse<T> {
-        private final HttpRequest request;
-        private final ResponseInfo info;
-        private final T body;
-
-        HttpResponseImpl(HttpRequest request, ResponseInfo info, T body) {
-            this.request = request;
-            this.info = info;
-            this.body = body;
-        }
-
-        @Override
-        public int statusCode() {
-            return info.statusCode();
-        }
-
-        @Override
-        public HttpRequest request() {
-            return request;
-        }
-
-        @Override
-        public Optional<HttpResponse<T>> previousResponse() {
-            return Optional.empty();
-        }
-
-        @Override
-        public HttpHeaders headers() {
-            return info.headers();
-        }
-
-        @Override
-        public T body() {
-            return body;
-        }
-
-        @Override
-        public Optional<SSLSession> sslSession() {
-            return Optional.empty();
-        }
-
-        @Override
-        public URI uri() {
-            return request.uri();
-        }
-
-        @Override
-        public Version version() {
-            return info.version();
-        }
-    }
 
     // ---------------------------------------------------------- HttpClient abstract members
 

@@ -1870,6 +1870,18 @@ class ApprovalApi:
         return self._http.request("POST", f"/api/approvals/{quote_path(id)}/reject", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
+class ApprovalTraceApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def get(self, request_id: str) -> m.ApprovalTraceView:
+        """Get.
+
+        GET /api/approval-traces/{requestId}
+        """
+        return self._http.request("GET", f"/api/approval-traces/{quote_path(request_id)}")
+
+
 class AssistApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -5428,6 +5440,13 @@ class ImessageCredentialApi:
         Requires PERM_MANAGE_CHANNELS (or the tenant-admin role).
         """
         return self._http.request("PUT", "/api/channels/imessage/credential/settings", body=body)
+
+    def webhook_token(self) -> Dict[str, str]:
+        """Webhook token.
+
+        GET /api/channels/imessage/credential/webhook-token
+        """
+        return self._http.request("GET", "/api/channels/imessage/credential/webhook-token")
 
 
 class ImessageSendApi:
@@ -13415,6 +13434,7 @@ class VegadutaClient:
         self.app_builder_completion = AppBuilderCompletionApi(self.http)
         self.app_builder_image = AppBuilderImageApi(self.http)
         self.approval = ApprovalApi(self.http)
+        self.approval_trace = ApprovalTraceApi(self.http)
         self.assist = AssistApi(self.http)
         self.atlassian_o_auth = AtlassianOAuthApi(self.http)
         self.audit_log = AuditLogApi(self.http)

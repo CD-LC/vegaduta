@@ -8,8 +8,27 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- **Security-review hardening (2026-10-29).** (1) `deploy/compose/backups/` snapshots are no longer committable (`.gitignore` covers the directory, `*.dump` and `files.tar.gz`); the three already-committed snapshots contain live install secrets and must be rotated - see the release note. (2) The internal app-builder endpoints now bound the caller-chosen `X-Tenant-Id`: reserved schemas are refused, `APP_BUILDER_ALLOWED_TENANTS` (`app.app-builder.allowed-tenants`) scopes which tenants the static service token may act for, and a `TenantStatusGuard` check rejects unknown/stopped tenants. (3) `POST /webhook/workflows/oidc/{workflowId}` now requires the workflow to have a WEBHOOK trigger node configured for OAUTH2 - a `workflow-trigger` role token no longer runs every ACTIVE workflow. (4) Delegation tokens honour the tenant-status guard and system-schema check (a stopped tenant's tokens stop working). (5) `remember_fact`/`remember_shared_fact` writes pass the knowledge write screen (injection phrases and credentials are refused). (6) Channel pairing codes use `SecureRandom`. (7) Remote MCP response bodies are capped at `APP_MCP_MAX_RESPONSE_BYTES` (default 32 MiB) at the transport, closing the heap-exhaustion path. (8) iMessage credential reads carry a masked webhook token; the full value is only in the activate response and `GET /api/channels/imessage/credential/webhook-token`. (9) x402: payment reservations carry a status (the internal scheme previously could not settle) and a REJECTED record no longer folds into a served resource on replay. (10) `X-Forwarded-Proto` can no longer downgrade an https-canonical deployment's redirects or the refresh cookie's `Secure` flag. (11) Twilio activation errors are scrubbed of submitted credential values before being returned.
+
 ### Added
 
+- **Approval trace.** `GET /api/approval-traces/{requestId}` (viewer access to the request's agent) and a "What the agent executed after this decision" section on the approval detail show the decision, the conversation it belongs to and the agent's tool calls in that conversation from the decision on (sanitized, shortened inputs; 30-minute window, matched by conversation and time). Nothing new is stored, so approvals decided before this are covered too; a request that did not come from an agent turn says so.
+
+- **Per-model runtime knobs on the local model.** Providers → Local model →
+  "Speed and behaviour" now saves four more switches on the serving row
+  (`GET`/`PUT /api/local-models/settings`, migration V674), replacing the
+  env-only knobs a personal install could only change by editing `.env` and
+  restarting: `numBatch` (Ollama `num_batch`, the per-request prompt-eval
+  batch size; `app.llm.ollama.num-batch` stays the default), `numParallel`
+  (Ollama `num_parallel`, applied by deriving a `{model}-parN` variant through
+  `/api/create` - the same weights-sharing mechanism the `-ctxNk` context
+  variants use), `responseTimeoutMs` (this model's stream idle-timeout,
+  overriding `app.llm.http.stream-idle-timeout` for its own turns only), and
+  `toolDeferral` (forces `search_tools`/`call_tool` on-demand tool loading
+  for this model's turns regardless of `app.tools.search.enabled`). Every
+  field is nullable: unset means the server or configured default.
 - **Local model speed controls.** The local model's speed controls now include
   the prompt batch size (Ollama `num_batch`), how many requests the model
   serves at once (`num_parallel`), a per-turn timeout, and tool deferral
@@ -17,8 +36,42 @@ Release notes on GitHub are generated from the section for each version.
   each with a "server default" choice, alongside thinking effort, keep-alive
   and the context window.
 
+
 ### Fixed
 
+- **Workflow step timeout no longer breaks slow nodes.** The workflow-level `stepTimeoutSeconds` (default 30 in every existing row, never enforced before) now bounds only fast node types (`http`, `condition`); agent, supervisor, sub-workflow, tool, code and other long-running nodes get a 600 s floor (`-Dvegaduta.workflow.longRunningStepTimeoutSeconds`, 0 = no limit). A node's own `timeoutSeconds` (1..3600) overrides both. A timed-out attempt is never retried, because its worker may still be running.
+- **Workflow engine: duplicate side effects on retry, unenforced step timeout,
+  approvals inside loop bodies.** (1) The default retry path no longer retries
+  irreversible nodes (`bulk_email`, `tool`, `crm_lead`, `device_control`,
+  `media`, sub-`workflow`, non-GET `http`) unless the node sets
+  `retryUnsafe=true`, matching the per-node error strategy. (2) Saving a graph
+  whose loop, fan-out or sub-flow body is an `approval` / `human_input` node or
+  has `requiresApproval=true` is now rejected (a paused run cannot resume at the
+  right iteration); the "needs exactly one Trigger node" message now says "at
+  least one" (several triggers were always allowed). (3) `stepTimeoutSeconds` is
+  now enforced per node attempt by the in-process engine (the attempt is
+  interrupted and fails), parallel branches are cancelled when a sibling fails,
+  and the parallel join is bounded.
+- **Untrusted-content taint now covers auto-injected memory recall and the workflow `knowledge` node.** A non-empty recalled-facts block injected into the prompt marks the turn tainted (source `memory_recall`; sinks need approval in enforce mode, recorded in observe mode) via `TurnTaintSeeds`, bound to the turn's taint key when tools are resolved. The `knowledge` workflow node wraps retrieved chunks in the untrusted-data spotlight with numbered source citations, skips with a clear result on an invalid `collectionId`, and clamps `topK` to 1..20.
+- **Tenant isolation hardening.** A JWT or API-key tenant claim naming the `public` (or a reserved) schema is rejected with 403 instead of running tenant queries in the legacy schema (webhook paths that set `public` deliberately are unchanged); the tenant status guard now fails closed on a schema-check SQL error (`app.tenant.status-fail-open-on-schema-check-error=true` restores the old behavior) and rejects claims the schema-name sanitizer would rewrite; tenants whose startup schema migration failed get 403 until a background retry (`app.tenancy.migrate-retry-interval`) migrates them; a non-Keycloak JWT issuer with neither an azp allowlist nor a required audience now fails startup (`app.security.jwt.allow-unrestricted-audience=true` opts out).
+
+- **Python Agent SDK: audit-chain ordering, truncation anchors and approval
+  defaults.** `evidence_bundle` (and `verify(sort_by_seq=True)`) verify in
+  `chain.seq` order, so a concurrently written log stored out of order is no
+  longer reported broken (Java parity). `verify`/`evidence_bundle` take optional
+  `expected_first_seq`/`expected_first_prev`/`expected_last_seq`/
+  `expected_head_hash` anchors to detect prefix/suffix deletion, and the bundle
+  exposes `head_hash`/`last_seq`. `ApprovalGate` now defaults to
+  `FourEyesAuthorizer` (opt out with `authorizer=allow_any`); resumption
+  failures store the exception type and a bounded, redacted message instead of
+  raw text; `ApprovalStore.update` documents the compare-and-set requirement for
+  multi-process use.
+- **Chat turns no longer linger on a denied tool call.** A model that repeated a tool name it was
+  already told is unavailable (e.g. one the agent's `allowedToolNames` allow-list leaves out) used
+  to burn the whole `max-unknown-calls-per-invocation` budget - one slow model round per retry - so
+  a turn on a local model could stream for minutes with no terminal event. The first call still gets
+  the "tool unavailable" result so the model can answer without it; a repeat of the same refused
+  name now ends the tool loop immediately with the closing reply (#295).
 - **`/agents` auto-selects the most recent saved agent again.** The agents
   index had become the bare-`/agents` landing, so the workbench's agent
   switcher and per-agent sections never mounted for tenants with saved
@@ -219,6 +272,7 @@ Release notes on GitHub are generated from the section for each version.
   deployment's inbound endpoints (JSON-RPC, HTTP+JSON, agent card, JWKS) and
   a read-only view of the operator's outbound remote-agent allow-list. The
   agent workbench also shows each agent's A2A endpoints and card URL.
+
 - **Docling-first document conversion for knowledge ingestion.** The new
   `services/docling` FastAPI adapter wraps IBM's Docling parser behind the
   sidecar's exact `/extract` contract (`X-Internal-Token` auth, `DOCLING_*`

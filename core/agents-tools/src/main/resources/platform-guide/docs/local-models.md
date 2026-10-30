@@ -307,6 +307,17 @@ your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do n
 | `app.llm.ollama.reasoning-effort` | `none` | `low`, `medium` or `high` turn thinking on: better on hard questions, much later first word |
 | `LOCAL_LLM_NUM_CTX` | by Docker memory | a smaller window saves memory on a small machine |
 
+**Per-model runtime knobs.** The "Speed and behaviour" card saves these on the model's serving row
+(`PUT /api/local-models/settings`), so they change at runtime with no restart and apply to this
+model's turns only; each is nullable, and unset means the server or the configured default:
+
+| Field | Effect |
+|---|---|
+| `numBatch` | sent as Ollama's `num_batch` on every request - tokens evaluated per prompt-processing step. A larger batch (e.g. `2048`, kept `<=` the context) parallelises the multi-thousand-token fixed prefix eval that dominates turn latency on a local model. `app.llm.ollama.num-batch` stays the default for a row that has not chosen |
+| `numParallel` | Ollama's runner-level `num_parallel` (1, 2 or 4). It is not a per-request option, so it is applied by deriving a `{model}-parN` variant through `/api/create`, the same weights-sharing mechanism the `-ctxNk` context variants use, and the tag carries the setting |
+| `responseTimeoutMs` | how long this model may stay silent before its stream is declared idle - overrides `app.llm.http.stream-idle-timeout` (90 s, tuned for hosted APIs) for this row's turns only. Raise it on a laptop CPU whose first token takes minutes |
+| `toolDeferral` | `true` forces `search_tools`/`call_tool` on-demand tool loading on this model's turns even when `app.tools.search.enabled` is off - a model that reads its prompt at a few hundred tokens a second should not re-read every tool schema each turn |
+
 ### Tool calls from small models
 
 Small and free models often write a tool call as text instead of sending it

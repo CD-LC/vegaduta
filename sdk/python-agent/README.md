@@ -107,7 +107,7 @@ gate.reject(other.id, "cfo", "not this quarter")
 | Risk map | `risk_map(module)` | the scan-before-you-integrate report: unclassified tools, approval coverage, lethal-trifecta, ASI exposure, 0-100 score |
 | Notify | `slack_message(req)`, `teams_message(req)` | approval payloads for chat review; the HTTP transport is your port |
 | Reconcile | `interrupted_keys(journal)` | effects that began but never recorded — the "did the payment run?" check |
-| Approvals+ | `FourEyesAuthorizer`, `allowed_deciders`, `sign_receipt`/`verify_receipt` | two-person rule and signed decision receipts |
+| Approvals+ | `FourEyesAuthorizer` (the default), `allow_any`, `allowed_deciders`, `sign_receipt`/`verify_receipt` | two-person rule and signed decision receipts |
 | Async | `Governance.wrap_async` / `tool.acall(...)` | same pipeline around `async def` tools |
 
 ## LangChain
@@ -159,6 +159,18 @@ g = Governance(approval_gate=ApprovalGate(SqliteApprovalStore("agent.db")),
 report = verify_audit_chain(sink.events())           # intact or the break point
 bundle = evidence_bundle(sink.events(run_id), run_id).to_markdown()
 ```
+
+Verification notes: `evidence_bundle` verifies in `chain.seq` order (concurrent
+writers can store events out of order; use `verify_audit_chain(..., sort_by_seq=True)`
+for a raw walk). A log alone cannot show that its first or last events were
+deleted: record `bundle.head_hash` / `bundle.last_seq` outside the log and pass
+them back as `expected_head_hash` / `expected_last_seq` (and
+`expected_first_seq` / `expected_first_prev` for the start).
+
+Approvals are four-eyes by default: the requesting principal cannot decide their
+own request. Opt out explicitly with `ApprovalGate(authorizer=allow_any)`. A
+custom `ApprovalStore` shared by several processes must make `update`
+compare-and-set on status, or an approval can run twice.
 
 `sign_receipt`/`verify_receipt` do the same for an approval decision: a signed
 record of who approved what, verifiable later. HMAC is in the box; plug in

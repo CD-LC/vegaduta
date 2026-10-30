@@ -183,6 +183,21 @@ public class PlatformHostedLlmProvider {
     @Column(name = "keep_alive", length = 16)
     private String keepAlive;
 
+    // V674 - console-editable local model behaviour; null = the server/configured default.
+    // num_batch: tokens per prompt step (llama.cpp n_batch), a per-request option.
+    @Column(name = "num_batch")
+    private Integer numBatch;
+
+    // num_parallel is deliberately NOT a column: like -ctxNk it lives in the tag ({base}-parN).
+
+    // response_timeout_ms: this row's stream idle-timeout override.
+    @Column(name = "response_timeout_ms")
+    private Long responseTimeoutMs;
+
+    // tool_deferral: true forces search_tools/call_tool on this row's turns.
+    @Column(name = "tool_deferral")
+    private Boolean toolDeferral;
+
     protected PlatformHostedLlmProvider() {
         // JPA
     }
@@ -521,16 +536,37 @@ public class PlatformHostedLlmProvider {
         this.keepAlive = keepAlive;
     }
 
-    /**
-     * Code default of {@code app.providers.small-model-max-billions}: models at or below this many billions of
-     * parameters run in small-model mode unless the row says otherwise.
-     */
+    public Integer getNumBatch() {
+        return numBatch;
+    }
+
+    public void setNumBatch(Integer numBatch) {
+        this.numBatch = numBatch;
+    }
+
+    public Long getResponseTimeoutMs() {
+        return responseTimeoutMs;
+    }
+
+    public void setResponseTimeoutMs(Long responseTimeoutMs) {
+        this.responseTimeoutMs = responseTimeoutMs;
+    }
+
+    public Boolean getToolDeferral() {
+        return toolDeferral;
+    }
+
+    public void setToolDeferral(Boolean toolDeferral) {
+        this.toolDeferral = toolDeferral;
+    }
+
+    /** Code default of {@code app.providers.small-model-max-billions} (billions of parameters). */
     public static final double SMALL_MODEL_MAX_BILLIONS = 8.0;
 
-    /** The configured limit (SmallModelThresholdConfiguration sets it at start-up); the code default until then. */
+    /** The configured limit (set at start-up by SmallModelThresholdConfiguration). */
     private static volatile double smallModelMaxBillions = SMALL_MODEL_MAX_BILLIONS;
 
-    /** Sets the size limit of small-model mode ({@code app.providers.small-model-max-billions}); negative = never by size. */
+    /** Sets the small-model size limit; negative = never by size. */
     public static void useSmallModelMaxBillions(double maxBillions) {
         smallModelMaxBillions = maxBillions;
     }
@@ -556,10 +592,10 @@ public class PlatformHostedLlmProvider {
 
     /**
      * The size this row is treated as: the measured value, unless the model tag names a size that
-     * disagrees with it by more than half - then the tag wins. A measurement belongs to the model it
-     * was taken on; a row repointed from {@code qwen3.5:9b} to {@code qwen3.5:4b} by a path that
-     * did not re-measure (seen 2026-10-18: the 4B model kept 9.7B, ran RIGOROUS depth and timed
-     * out every turn) must not keep the old model's settings. Null when neither source knows.
+     * disagrees with it by more than half - then the tag wins. A measurement belongs to the model
+     * it was taken on; a row repointed from {@code qwen3.5:9b} to {@code qwen3.5:4b} by a path that
+     * did not re-measure (seen 2026-10-18: the 4B model kept 9.7B, ran RIGOROUS depth and timed out
+     * every turn) must not keep the old model's settings. Null when neither source knows.
      */
     public Double effectiveParameterBillions() {
         Double tagged = parameterBillionsFromTag(model);
@@ -573,7 +609,9 @@ public class PlatformHostedLlmProvider {
     }
 
     private static final java.util.regex.Pattern TAG_SIZE =
-            java.util.regex.Pattern.compile("(?<![0-9.])([0-9]{1,3}(?:\\.[0-9])?)b(?![a-z0-9])", java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Pattern.compile(
+                    "(?<![0-9.])([0-9]{1,3}(?:\\.[0-9])?)b(?![a-z0-9])",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
 
     /** "qwen3.5:4b" -> 4.0, "llama-3.1-8b-instant" -> 8.0, "gemini-2.0-flash-lite" -> null. */
     public static Double parameterBillionsFromTag(String modelTag) {

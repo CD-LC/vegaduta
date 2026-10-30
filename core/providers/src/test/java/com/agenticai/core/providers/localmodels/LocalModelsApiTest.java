@@ -382,7 +382,7 @@ class LocalModelsApiTest {
 
     // --- POST /use ---
 
-    private static PlatformHostedLlmProviderResponse poolResponse(
+    static PlatformHostedLlmProviderResponse poolResponse(
             Long id, String model, boolean enabled, String grade) {
         return new PlatformHostedLlmProviderResponse(
                 id,
@@ -411,7 +411,7 @@ class LocalModelsApiTest {
                 false);
     }
 
-    private static PlatformHostedLlmProvider poolRow(Long id, String baseUrl) {
+    static PlatformHostedLlmProvider poolRow(Long id, String baseUrl) {
         PlatformHostedLlmProvider row = mock(PlatformHostedLlmProvider.class);
         when(row.getId()).thenReturn(id);
         when(row.getBaseUrl()).thenReturn(baseUrl);
