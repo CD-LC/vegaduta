@@ -55,6 +55,8 @@ merge, tag, release or deploy, and add a line to the log at the bottom when you 
 | Trending-integrations agent (Devin) | cloud session, branch `devin/1793293703-oss-integrations` (pushed to fork `vegaduta/vegaduta` — the Devin GitHub App cannot write `CD-LC/vegaduta`) | the five trending-repo integrations: `deploy/compose/docker-compose.yml` + `.env.example` (`freellmapi` + `hindsight` profiles), `core/mcp/.../McpPlatformAndRemoteCatalog` (`hindsight`, `context-mode` entries), `web/app/components/McpPanel/constants.ts` icon, vendored skills under `core/agents-turn/.../skills/{security-audit,hyperframes,hyperframes-cli,media-use}/`, `scripts/vegaduta{,.ps1}` profile lists, `NOTICE`, `LICENSES/README.md`, `docs/{local-models,configuration,integrations/hindsight}.md`, `mkdocs.yml`, `CHANGELOG.md` — overlaps the release/install agent (`deploy/compose`, `.env.example`, launchers) and release-readiness lead (`web/app/**`, docs), so the PR says so in its title and waits for their reviews |
 | Workbench auto-select fix agent (Devin) | local worktree `/tmp/vd-fix294`, branch `fix/workbench-auto-select` | issue #294: `web/app/agents/page.tsx` (bare `/agents` mounts the workbench again, progressive per-fetch state updates, `?view=index`), `web/app/components/agents/workbench/useWorkbenchBase.ts` (timestamp-ordered auto-select), `web/app/components/agents/AgentWorkbench/types.ts` (createdAt/updatedAt), the matching `page.test.tsx`/`AgentWorkbench.smoke.test.tsx`, `CHANGELOG.md` - overlaps the release-readiness lead's `web/app/**` claim, so the PR says so in its title and waits for their review |
 | i18n/RTL + language-pack agent (Devin) | local worktree `/private/tmp/vd-release-prep`, branch `fix/web-rtl-langpacks` | the Arabic-doesn't-flip report and its full audit: mechanical physical→logical utility sweep across ~450 `web/app/**` files (`scripts/rtl-sweep.mjs` kept for re-runs), raw-CSS conversion in `web/app/styles/globals/**`, a lucide icon-mirror rule in `base.css`, `LanguageSwitcher` menu anchoring + personal-edition pack consent (`web/app/lib/langPacks.ts`, `i18n-pack-sizes.generated.ts` + `scripts/i18n-pack-sizes.mjs` in prebuild), `web/messages/en.json` + `i18n-parity-baseline.json`, `global-error.tsx`, `package.json`, `CHANGELOG.md` - overlaps the release-readiness lead's `web/app/**` claim and will collide with `feat/web-list-pagination`, `feat/build-change-progress` and `fix/studio-waiting-progress` if they land first (rerun the sweep after their merges rather than hand-merging), so the PR says so in its title and waits for their review |
+| Database docs agent (Claude Code) | local session, branch `docs/database-schema` (worktree `/private/tmp/vd-dbdocs`) | `docs/architecture/database.md` and `docs/architecture/database-reference.md` (new), and one nav entry pair in `mkdocs.yml` under Architecture. Docs only: no code, no migrations. Overlaps the OSS-integrations agent only if it also edits `mkdocs.yml` (the nav lines are adjacent to its docs entries) |
+
 
 ## What production must run
 
@@ -772,3 +774,13 @@ compare link. Verified without Maven/JDK 21 (not on this VM): the
 built-in skill contract and `SkillScanner` rules replicated in Python
 over the vendored files, `docker-compose.yml` yaml-parsed; Java changes
 follow existing `McpCatalogEntry` arg shapes and rely on CI.
+
+### Database docs (Claude Code, 2026-10-30)
+
+Opened a docs-only PR (`docs/database-schema`, off `origin/main`) adding
+`docs/architecture/database.md` (narrative: schemas, tenant routing, Flyway,
+pgvector, table groups) and `docs/architecture/database-reference.md`
+(generated column reference for all 290 tables, from a running lite stack
+with tenant Flyway head 674). Two nav entries in `mkdocs.yml`. No code and
+no migrations changed. Verified: `scripts/ci/docs-link-check.sh` reports 0
+broken links. Worktree: /private/tmp/vd-dbdocs.
