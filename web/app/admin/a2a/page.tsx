@@ -242,14 +242,14 @@ function AdminA2aPageInner() {
           {" · "}
           <Link href="/directory" className="text-primary underline" target="_blank">
             {t("relatedDirectory")}
-            <ExternalLink className="ms-1 inline size-3" aria-hidden="true" />
+            <ExternalLink className="ml-1 inline size-3" aria-hidden="true" />
           </Link>
         </p>
 
         <Card className="p-4">
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <h2 className="text-sm font-semibold">{t("tasksHeading")}</h2>
-            <div className="ms-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
               <div className="w-52">
                 <Select
                   id="a2a-agent-filter"
@@ -319,8 +319,8 @@ function EndpointRow({ label, path, method }: { label: string; path: string; met
   return (
     <div className="flex items-baseline justify-between gap-2">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="truncate text-end font-mono text-foreground" title={`${API_BASE}${path}`}>
-        <span className="me-1.5 text-muted-foreground">{method}</span>
+      <dd className="truncate text-right font-mono text-foreground" title={`${API_BASE}${path}`}>
+        <span className="mr-1.5 text-muted-foreground">{method}</span>
         {path}
       </dd>
     </div>
@@ -359,7 +359,7 @@ function TaskRow({
     <div className="rounded-lg border border-border p-3">
       <div className="flex flex-wrap items-center gap-2">
         <Badge variant={row.direction === "inbound" ? "default" : "secondary"}>
-          <DirectionIcon className="me-1 size-3" aria-hidden="true" />
+          <DirectionIcon className="mr-1 size-3" aria-hidden="true" />
           {t(row.direction === "inbound" ? "dirInbound" : "dirOutbound")}
         </Badge>
         <Badge variant={stateVariant(row.state)}>{row.state.replace("TASK_STATE_", "")}</Badge>
@@ -370,7 +370,7 @@ function TaskRow({
           {row.contextId.slice(0, 8)}…
         </span>
         {row.subject && <span className="text-xs text-muted-foreground">{row.subject}</span>}
-        <span className="ms-auto text-xs text-muted-foreground">{fmtTime(row.createdAt)}</span>
+        <span className="ml-auto text-xs text-muted-foreground">{fmtTime(row.createdAt)}</span>
         <Button type="button" variant="outline" size="sm" onClick={onOpen}>
           {t("view")}
         </Button>

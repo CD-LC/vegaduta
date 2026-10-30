@@ -176,11 +176,32 @@ function WebhookCard({ credential }: { credential: ImessageCredential }) {
   const ti = useTranslations("channelsImessage");
   const [reveal, setReveal] = useState(false);
   const [copied, setCopied] = useState(false);
+  // The credential read carries a masked token ("••••xxxx"); only the activate response and the
+  // explicit reveal call return the full one, so lazily fetch it the first time it's needed.
+  const [revealedToken, setRevealedToken] = useState<string | null>(
+    credential.webhookToken.startsWith("••••") ? null : credential.webhookToken
+  );
   const base = `${publicBase()}${credential.webhookPath}`;
-  const shown = `${base}?token=${reveal ? credential.webhookToken : "••••••••"}`;
-  const full = `${base}?token=${credential.webhookToken}`;
-  function copy() {
-    navigator.clipboard?.writeText(full).then(
+  const shown = `${base}?token=${reveal && revealedToken ? revealedToken : "••••••••"}`;
+  async function ensureToken(): Promise<string | null> {
+    if (revealedToken) return revealedToken;
+    try {
+      const r = await api.revealImessageWebhookToken();
+      const token = typeof r?.webhookToken === "string" ? r.webhookToken : null;
+      if (token) setRevealedToken(token);
+      return token;
+    } catch {
+      return null;
+    }
+  }
+  async function toggleReveal() {
+    if (!reveal && !(await ensureToken())) return;
+    setReveal((v) => !v);
+  }
+  async function copy() {
+    const token = await ensureToken();
+    if (!token) return;
+    navigator.clipboard?.writeText(`${base}?token=${token}`).then(
       () => {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
@@ -205,7 +226,7 @@ function WebhookCard({ credential }: { credential: ImessageCredential }) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setReveal((v) => !v)}
+              onClick={toggleReveal}
               aria-label={reveal ? ti("hideSecret") : ti("showSecret")}
             >
               {reveal ? <EyeOff size={14} aria-hidden="true" /> : <Eye size={14} aria-hidden="true" />}

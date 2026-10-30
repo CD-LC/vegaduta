@@ -1,0 +1,638 @@
+{
+  "config": {
+    "argv": [
+      "/opt/homebrew/Cellar/node/26.10.0_2/bin/node",
+      "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/node_modules/.bin/playwright",
+      "test",
+      "-c",
+      "playwright.stage.local.config.ts",
+      "tests-prod/e2e-tools-mcp-live.spec.ts",
+      "--project=chromium",
+      "--workers=1"
+    ],
+    "configFile": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/playwright.stage.local.config.ts",
+    "rootDir": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 150000
+      },
+      {
+        "outputDir": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "mobile-chrome",
+        "name": "mobile-chrome",
+        "testDir": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 150000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "stage-results-E.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "e2e-tools-mcp-live.spec.ts",
+      "file": "e2e-tools-mcp-live.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "MCP registry API (e2e-tools-mcp-)",
+          "file": "e2e-tools-mcp-live.spec.ts",
+          "line": 30,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a registration without a name is rejected with a 4xx, not a 5xx",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 46591,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 23,
+                          "line": 233
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 23,
+                            "line": 233
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n\n   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T04:43:57.349Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 23,
+                        "line": 233
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 56846,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 23,
+                          "line": 233
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 23,
+                            "line": 233
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n\n   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-10-29T04:44:49.313Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-a83de-jected-with-a-4xx-not-a-5xx-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 23,
+                        "line": 233
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5e430b9bf9a1c94a7b6e-aba536780fe59be1fef6",
+              "file": "e2e-tools-mcp-live.spec.ts",
+              "line": 52,
+              "column": 7
+            },
+            {
+              "title": "register (disabled) -> listed -> connection test answers -> delete removes it",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 64514,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 23,
+                          "line": 233
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 23,
+                            "line": 233
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n\n   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T04:45:53.251Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 23,
+                        "line": 233
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 190939,
+                      "error": {
+                        "message": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)",
+                        "stack": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\n    at getBearerToken (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts:57:9)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:39:13",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                          "column": 9,
+                          "line": 57
+                        },
+                        "snippet": "   at ../helpers/prod-api.ts:57\n\n  55 |     await page.waitForTimeout(250);\n  56 |   }\n> 57 |   throw new Error(\n     |         ^\n  58 |     `no Authorization header was seen on any request to ${API_URL} after sign-in - the session is not ` +\n  59 |       \"authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\"\n  60 |   );"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                            "column": 9,
+                            "line": 57
+                          },
+                          "message": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\n\n   at ../helpers/prod-api.ts:57\n\n  55 |     await page.waitForTimeout(250);\n  56 |   }\n> 57 |   throw new Error(\n     |         ^\n  58 |     `no Authorization header was seen on any request to ${API_URL} after sign-in - the session is not ` +\n  59 |       \"authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\"\n  60 |   );\n    at getBearerToken (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts:57:9)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:39:13"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-10-29T04:47:01.452Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-49740-answers---delete-removes-it-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                        "column": 9,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5e430b9bf9a1c94a7b6e-a4993cc732ec255a3d65",
+              "file": "e2e-tools-mcp-live.spec.ts",
+              "line": 61,
+              "column": 7
+            },
+            {
+              "title": "a STDIO registration with a command that is not allow-listed never becomes a connected server",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 144444,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 23,
+                          "line": 233
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 23,
+                            "line": 233
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\n\n   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T04:51:29.700Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 23,
+                        "line": 233
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 190353,
+                      "error": {
+                        "message": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)",
+                        "stack": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\n    at getBearerToken (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts:57:9)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:39:13",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                          "column": 9,
+                          "line": 57
+                        },
+                        "snippet": "   at ../helpers/prod-api.ts:57\n\n  55 |     await page.waitForTimeout(250);\n  56 |   }\n> 57 |   throw new Error(\n     |         ^\n  58 |     `no Authorization header was seen on any request to ${API_URL} after sign-in - the session is not ` +\n  59 |       \"authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\"\n  60 |   );"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                            "column": 9,
+                            "line": 57
+                          },
+                          "message": "Error: no Authorization header was seen on any request to http://api.127.0.0.1.nip.io after sign-in - the session is not authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\n\n   at ../helpers/prod-api.ts:57\n\n  55 |     await page.waitForTimeout(250);\n  56 |   }\n> 57 |   throw new Error(\n     |         ^\n  58 |     `no Authorization header was seen on any request to ${API_URL} after sign-in - the session is not ` +\n  59 |       \"authenticated or the console made no API call (tokens are memory-only, so there is nothing in storage to read)\"\n  60 |   );\n    at getBearerToken (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts:57:9)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:39:13"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-10-29T04:53:58.487Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium-retry1/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-bdbe6--becomes-a-connected-server-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-api.ts",
+                        "column": 9,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5e430b9bf9a1c94a7b6e-0f623206b45aa8371939",
+              "file": "e2e-tools-mcp-live.spec.ts",
+              "line": 101,
+              "column": 7
+            },
+            {
+              "title": "acknowledge and test on an unknown registration id fail cleanly, never with a 5xx",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 140965,
+                      "error": {
+                        "message": "TimeoutError: page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://app.127.0.0.1.nip.io/login\", waiting until \"domcontentloaded\"\u001b[22m\n",
+                        "stack": "TimeoutError: page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://app.127.0.0.1.nip.io/login\", waiting until \"domcontentloaded\"\u001b[22m\n\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:192:14)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:11\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 14,
+                          "line": 192
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:192\n\n  190 | async function beginSignIn(page: Page, email: string) {\n  191 |   const continueBtn = page.getByRole(\"button\", { name: /continue to secure/i });\n> 192 |   await page.goto(`${APP_URL}/login`, { waitUntil: \"domcontentloaded\" });\n      |              ^\n  193 |\n  194 |   const first = await Promise.race([\n  195 |     page.waitForURL(AUTH_HOST_RE, { timeout: 20_000 }).then(() => \"auth\" as const),"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 14,
+                            "line": 192
+                          },
+                          "message": "TimeoutError: page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://app.127.0.0.1.nip.io/login\", waiting until \"domcontentloaded\"\u001b[22m\n\n\n   at ../helpers/prod-session.ts:192\n\n  190 | async function beginSignIn(page: Page, email: string) {\n  191 |   const continueBtn = page.getByRole(\"button\", { name: /continue to secure/i });\n> 192 |   await page.goto(`${APP_URL}/login`, { waitUntil: \"domcontentloaded\" });\n      |              ^\n  193 |\n  194 |   const first = await Promise.race([\n  195 |     page.waitForURL(AUTH_HOST_RE, { timeout: 20_000 }).then(() => \"auth\" as const),\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:192:14)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:11\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-10-29T04:58:41.426Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 14,
+                        "line": 192
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 116128,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"submit\" data-slot=\"button\" data-testid=\"login-landing-button\" class=\"inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-6 text-base w-full\">Continue to secure sign-in</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"submit\" data-slot=\"button\" data-testid=\"login-landing-button\" class=\"inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-6 text-base w-full\">Continue to secure sign-in</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5",
+                        "location": {
+                          "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                          "column": 23,
+                          "line": 233
+                        },
+                        "snippet": "   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                            "column": 23,
+                            "line": 233
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /continue to secure/i })\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"submit\" data-slot=\"button\" data-testid=\"login-landing-button\" class=\"inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium outline-none transition-all focus-visible:ring-[3px] focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-4 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-6 text-base w-full\">Continue to secure sign-in</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n\u001b[2m    - done scrolling\u001b[22m\n\u001b[2m    - performing click action\u001b[22m\n\u001b[2m    - click action done\u001b[22m\n\u001b[2m    - waiting for scheduled navigations to finish\u001b[22m\n\n\n   at ../helpers/prod-session.ts:233\n\n  231 |       continue;\n  232 |     }\n> 233 |     await continueBtn.click();\n      |                       ^\n  234 |     const left = await page\n  235 |       .waitForURL(AUTH_HOST_RE, { timeout: 10_000 })\n  236 |       .then(() => true)\n    at submitEmailStep (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:233:23)\n    at beginSignIn (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:200:5)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:148:5\n    at withLoginLock (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-auth-state.ts:66:12)\n    at signInToConsole (/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts:143:3)\n    at /Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/tests-prod/e2e-tools-mcp-live.spec.ts:38:5"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-10-29T05:01:22.409Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium-retry1/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/test-results-stage-E/e2e-tools-mcp-live-MCP-reg-daa62-il-cleanly-never-with-a-5xx-chromium-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/Users/mroads/Documents/GitHub/CD-LC/vegaduta/tests/e2e/helpers/prod-session.ts",
+                        "column": 23,
+                        "line": 233
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "5e430b9bf9a1c94a7b6e-1568b35d2a9759a9f234",
+              "file": "e2e-tools-mcp-live.spec.ts",
+              "line": 123,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-29T04:43:54.278Z",
+    "duration": 1182174.186,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

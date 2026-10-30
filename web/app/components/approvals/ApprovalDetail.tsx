@@ -10,6 +10,7 @@ import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useTranslations } from "../../lib/i18n";
 import ApprovalStatusBadge from "./ApprovalStatusBadge";
+import ApprovalTracePanel from "./ApprovalTracePanel";
 import ApprovalContinuationPanel from "./ApprovalContinuationPanel";
 import ExpiryCountdown from "./ExpiryCountdown";
 import ToolCallPreview, { argsTooLongToReview } from "./ToolCallPreview";
@@ -250,6 +251,12 @@ export default function ApprovalDetail({
         {toolCall && item.status !== "PENDING" && (
           <Section label={q("continuationLabel")}>
             <ApprovalContinuationPanel item={item} />
+          </Section>
+        )}
+
+        {item.status !== "PENDING" && (
+          <Section label={t("traceLabel")}>
+            <ApprovalTracePanel item={item} />
           </Section>
         )}
 

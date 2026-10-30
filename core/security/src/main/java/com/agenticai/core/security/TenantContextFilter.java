@@ -62,8 +62,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     /**
      * @param tenantClaim the JWT claim carrying the tenant/schema id - {@code
-     *     app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank
-     *     falls back to the Keycloak default {@code tenant_id}.
+     *     app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank falls back to the
+     *     Keycloak default {@code tenant_id}.
      */
     public TenantContextFilter(
             Optional<TenantStatusGuard> tenantStatusGuard,
@@ -135,13 +135,13 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (tenantMissing && !hasPlatformAdminAuthority(jwtAuth) && !onboardingPath) {
                     log.warn(
                             "Rejected {} {} - authenticated JWT for subject '{}' carries no"
-                                + " '{}' claim and no ROLE_platform-admin authority. The"
-                                + " identity-provider user is missing the attribute mapped to the"
-                                + " tenant claim (Keycloak: repair with"
-                                + " scripts/keycloak/check-tenant-claim.ps1), or the token predates"
-                                + " that attribute and the caller needs to log out and back in for"
-                                + " a fresh one. Returning 403 instead of letting every"
-                                + " tenant-scoped controller fail with a raw 500.",
+                                    + " '{}' claim and no ROLE_platform-admin authority. The"
+                                    + " identity-provider user is missing the attribute mapped to the"
+                                    + " tenant claim (Keycloak: repair with"
+                                    + " scripts/keycloak/check-tenant-claim.ps1), or the token predates"
+                                    + " that attribute and the caller needs to log out and back in for"
+                                    + " a fresh one. Returning 403 instead of letting every"
+                                    + " tenant-scoped controller fail with a raw 500.",
                             request.getMethod(),
                             LogMasking.path(request.getRequestURI()),
                             jwt.getSubject(),
@@ -203,14 +203,23 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (jwt.getSubject() != null) {
                     MDC.put("userId", jwt.getSubject());
                 }
+                if (!tenantMissing && isSystemSchemaClaim(tenantId)) {
+                    log.warn(
+                            "Rejected {} {} - tenant claim '{}' names the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            tenantId.replaceAll("[\\r\\n]", " "));
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
                 if (!tenantMissing
                         && tenantStatusGuard.isPresent()
                         && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
                             "Rejected {} {} - tenant '{}' resolved from the JWT is not usable"
-                                + " (provisioning never completed, or was rolled back). Returning"
-                                + " 403 instead of letting every downstream schema-scoped query"
-                                + " fail with 'relation does not exist'.",
+                                    + " (provisioning never completed, or was rolled back). Returning"
+                                    + " 403 instead of letting every downstream schema-scoped query"
+                                    + " fail with 'relation does not exist'.",
                             request.getMethod(),
                             LogMasking.path(request.getRequestURI()),
                             tenantId);
@@ -233,7 +242,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 String tenantId = apiKeyAuth.getTenantId();
                 String subject = apiKeyAuth.getPrincipal().toString();
                 TenantContext.set(
-                        TenantContext.of(tenantId, subject,
+                        TenantContext.of(
+                                tenantId,
+                                subject,
                                 apiKeyAuth.getAuthorities().stream()
                                         .map(GrantedAuthority::getAuthority)
                                         .collect(Collectors.toUnmodifiableSet())));
@@ -241,8 +252,16 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     MDC.put("tenantId", tenantId);
                 }
                 MDC.put("userId", subject);
-                if (tenantStatusGuard.isPresent()
-                        && !tenantStatusGuard.get().isUsable(tenantId)) {
+                if (tenantId != null && isSystemSchemaClaim(tenantId)) {
+                    log.warn(
+                            "Rejected {} {} - API key '{}' resolved the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            subject);
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
+                if (tenantStatusGuard.isPresent() && !tenantStatusGuard.get().isUsable(tenantId)) {
                     log.warn(
                             "Rejected {} {} - API key '{}' resolved tenant '{}' which is not usable.",
                             request.getMethod(),
@@ -270,6 +289,34 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     MDC.put("tenantId", delegated.getTenantId());
                 }
                 MDC.put("userId", delegated.getPrincipal().toString());
+                // Same enforcement as the JWT/API-key branches: a delegation
+                // token minted before a tenant was emergency-stopped or
+                // suspended must not keep acting until token expiry, and a
+                // system-schema claim is never a tenant. The claim itself is
+                // not forgeable (Ed25519-signed by DelegationTokenService) -
+                // this closes the kill-switch gap, not a spoofing one.
+                String delegatedTenantId = delegated.getTenantId();
+                if (delegatedTenantId != null && isSystemSchemaClaim(delegatedTenantId)) {
+                    log.warn(
+                            "Rejected {} {} - delegation token '{}' names the default/system schema.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti());
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
+                if (delegatedTenantId != null
+                        && tenantStatusGuard.isPresent()
+                        && !tenantStatusGuard.get().isUsable(delegatedTenantId)) {
+                    log.warn(
+                            "Rejected {} {} - delegation token '{}' resolved tenant '{}' which is not usable.",
+                            request.getMethod(),
+                            LogMasking.path(request.getRequestURI()),
+                            delegated.getJti(),
+                            delegatedTenantId);
+                    reject(response, TENANT_UNUSABLE_BODY, request);
+                    return;
+                }
             } else if (authentication != null
                     && !(authentication instanceof AnonymousAuthenticationToken)) {
                 // (Anonymous callers of permitAll endpoints - the web app's
@@ -289,9 +336,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 // instanceof alone doesn't surface anywhere else.
                 log.warn(
                         "TenantContextFilter saw a non-JWT Authentication ({}) for {} {} -"
-                            + " TenantContext will be empty for this request, and any tenant-scoped"
-                            + " code downstream (UserAdminController, Hibernate's schema resolver,"
-                            + " etc.) will fail. Authorities: {}",
+                                + " TenantContext will be empty for this request, and any tenant-scoped"
+                                + " code downstream (UserAdminController, Hibernate's schema resolver,"
+                                + " etc.) will fail. Authorities: {}",
                         authentication.getClass().getName(),
                         request.getMethod(),
                         LogMasking.path(request.getRequestURI()),
@@ -324,6 +371,24 @@ public class TenantContextFilter extends OncePerRequestFilter {
         } catch (RuntimeException e) {
             log.debug("Last-seen recording failed for subject '{}' - ignored", subject, e);
         }
+    }
+
+    /**
+     * A JWT / API-key tenant claim that is (case-insensitively, after trimming) the legacy {@code
+     * public} schema or a reserved platform schema is never a tenant: it would run tenant queries
+     * in the shared legacy schema. Webhook paths that set {@code public} deliberately build their
+     * {@link TenantContext} directly and never pass through this filter.
+     */
+    public static boolean isSystemSchemaClaim(String tenantId) {
+        if (tenantId == null) {
+            return false;
+        }
+        String n = tenantId.trim().toLowerCase(java.util.Locale.ROOT);
+        return "public".equals(n)
+                || "control_plane".equals(n)
+                || "information_schema".equals(n)
+                || "ag_catalog".equals(n)
+                || n.startsWith("pg_");
     }
 
     private static boolean hasPlatformAdminAuthority(JwtAuthenticationToken jwtAuth) {

@@ -251,7 +251,7 @@ public class A2aTaskStore {
                 continue;
             }
             try {
-                A2aStoredTask existing = read(key(task.tenantId(), task.id()));
+                Stored existing = read(key(task.tenantId(), task.id()));
                 if (existing != null && existing.terminal()) {
                     // Someone (a remote cancel, a reconcile) already ended it: honour that, never
                     // resurrect it.
@@ -322,11 +322,11 @@ public class A2aTaskStore {
      * @return true when the record was an orphan and is now FAILED.
      */
     boolean reconcileKey(String key) {
-        A2aStoredTask stored = read(key);
+        Stored stored = read(key);
         return stored != null && reconcileStored(key, stored) != stored;
     }
 
-    private A2aStoredTask reconcileStored(String key, A2aStoredTask stored) {
+    private Stored reconcileStored(String key, Stored stored) {
         if (stored.terminal() || instanceId.equals(stored.ownerInstance())) {
             return stored;
         }
@@ -338,7 +338,7 @@ public class A2aTaskStore {
         if (now - beat <= staleAfter.toMillis()) {
             return stored;
         }
-        A2aStoredTask failed = stored.interrupted(instanceId, now);
+        Stored failed = stored.interrupted(instanceId, now);
         try {
             redis.opsForValue().set(key, JSON.writeValueAsString(failed), ttl);
         } catch (RuntimeException | JsonProcessingException e) {
@@ -376,7 +376,7 @@ public class A2aTaskStore {
         String key = key(task.tenantId(), task.id());
         try {
             if (task.isTerminal()) {
-                A2aStoredTask existing = read(key);
+                Stored existing = read(key);
                 if (existing != null
                         && existing.terminal()
                         && existing.state() != task.snapshot().state()) {
@@ -387,7 +387,7 @@ public class A2aTaskStore {
                     .set(
                             key,
                             JSON.writeValueAsString(
-                                    A2aStoredTask.of(task, instanceId, System.currentTimeMillis())),
+                                    Stored.of(task, instanceId, System.currentTimeMillis())),
                             ttl);
             if (task.snapshot().state() == A2aTaskState.CANCELED) {
                 redis.convertAndSend(CANCEL_CHANNEL, key);
@@ -436,7 +436,7 @@ public class A2aTaskStore {
     private Optional<A2aTask> findRemote(String taskId, String tenantId, String subject) {
         String key = key(tenantId, taskId);
         try {
-            A2aStoredTask stored = read(key);
+            Stored stored = read(key);
             if (stored == null) {
                 return Optional.empty();
             }
@@ -460,9 +460,9 @@ public class A2aTaskStore {
 
     /**
      * Every task record this deployment still holds for {@code tenantId}: this JVM's live map plus,
-     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link
-     * A2aStoredTask#toTask()} - state/reply for reading, no live subscription). Local entries win
-     * the dedup because their view of an in-flight task is fresher than the last mirrored snapshot.
+     * in {@code redis} mode, detached snapshots other replicas mirrored ({@link Stored#toTask()} -
+     * state/reply for reading, no live subscription). Local entries win the dedup because their
+     * view of an in-flight task is fresher than the last mirrored snapshot.
      *
      * <p><b>Console surface only.</b> Unlike {@link #find} this matches on tenant ALONE, not
      * tenant+subject - the console controller re-gates callers on the manager role, which is what
@@ -484,7 +484,7 @@ public class A2aTaskStore {
                         ScanOptions.scanOptions().match(key(tenantId, "*")).count(200).build())) {
             while (cursor.hasNext()) {
                 String key = cursor.next();
-                A2aStoredTask stored = read(key);
+                Stored stored = read(key);
                 if (stored == null
                         || !Objects.equals(stored.tenantId(), tenantId)
                         || !seen.add(stored.id())) {
@@ -525,7 +525,7 @@ public class A2aTaskStore {
         }
         String key = key(tenantId, taskId);
         try {
-            A2aStoredTask stored = read(key);
+            Stored stored = read(key);
             if (stored == null || !Objects.equals(stored.tenantId(), tenantId)) {
                 return Optional.empty();
             }
@@ -548,7 +548,7 @@ public class A2aTaskStore {
             return;
         }
         try {
-            A2aStoredTask stored = read(key(task.tenantId(), task.id()));
+            Stored stored = read(key(task.tenantId(), task.id()));
             if (stored != null && stored.state() == A2aTaskState.CANCELED) {
                 task.cancel();
             }
@@ -558,13 +558,13 @@ public class A2aTaskStore {
         }
     }
 
-    private A2aStoredTask read(String key) {
+    private Stored read(String key) {
         String json = redis.opsForValue().get(key);
         if (json == null) {
             return null;
         }
         try {
-            return JSON.readValue(json, A2aStoredTask.class);
+            return JSON.readValue(json, Stored.class);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Unreadable A2A task record at " + key, e);
         }

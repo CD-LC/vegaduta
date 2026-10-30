@@ -25,11 +25,10 @@ import org.junit.jupiter.api.Test;
  * real documented incident behind both branches it guards (see the class's own javadoc: an orphaned
  * Keycloak login for a dropped tenant schema, and later a platform/per-tenant kill switch). Covers,
  * in priority order: the platform-wide kill switch short-circuit, per-tenant
- * ACTIVE+not-emergency-stopped, an untracked tenant's schema-existence fallback, the legacy
- * "public" schema never being a usable tenant, and every fail path this class documents (missing
- * kill-switch row fails open; the schema check fails CLOSED; "public" is rejected before any
- * lookup) - a fail-open bug here silently locks out (or worse, silently admits) every request for
- * an affected tenant, exactly the kind of defect a status guard needs direct coverage for.
+ * ACTIVE+not-emergency-stopped, an untracked tenant's schema-existence fallback, and every
+ * fail-open path this class documents (missing kill-switch row, SQLException during the schema
+ * check) - a fail-open bug here silently locks out (or worse, silently admits) every request for an
+ * affected tenant, exactly the kind of defect a status guard needs direct coverage for.
  */
 class TenantStatusGuardImplTest {
 
@@ -169,17 +168,51 @@ class TenantStatusGuardImplTest {
     }
 
     @Test
-    void theLegacyPublicSchemaIsNeverAUsableTenant() {
+    void aSqlExceptionFailsOpenOnlyWithTheOptOut() throws SQLException {
         setUp();
-        // A validly signed token with tenant_id=public must NOT route to the legacy schema: the
-        // schemaExists fallback would return true (Postgres always has "public"). The guard
-        // rejects it before any lookup - even if a (broken) tenant row were to exist for it.
-        when(tenantRepository.findBySchemaName(SchemaNameSanitizer.DEFAULT_SCHEMA))
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ZERO,
+                        new TenantMigrationFailures(),
+                        true);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME)).thenReturn(Optional.empty());
+        when(dataSource.getConnection()).thenThrow(new SQLException("connection pool exhausted"));
+
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+    }
+
+    @Test
+    void aClaimWhoseSanitisedFormDiffersIsRejectedEvenIfThatSchemaExists() throws SQLException {
+        setUp();
+        when(tenantRepository.findBySchemaName("Acme-Co")).thenReturn(Optional.empty());
+        stubSchemaExistsQuery(true); // "acme_co" exists: the lossy collision
+
+        assertFalse(guard.isUsable("Acme-Co"));
+    }
+
+    @Test
+    void aSchemaWhoseMigrationFailedIsNotUsableUntilItMigratesSuccessfully() {
+        setUp();
+        TenantMigrationFailures failures = new TenantMigrationFailures();
+        guard =
+                new TenantStatusGuardImpl(
+                        tenantRepository,
+                        platformKillSwitchRepository,
+                        dataSource,
+                        Duration.ofMinutes(1),
+                        failures,
+                        false);
+        when(tenantRepository.findBySchemaName(SCHEMA_NAME))
                 .thenReturn(Optional.of(activeTenant()));
 
-        assertFalse(guard.isUsable(SchemaNameSanitizer.DEFAULT_SCHEMA));
-        verify(tenantRepository, org.mockito.Mockito.never())
-                .findBySchemaName(SchemaNameSanitizer.DEFAULT_SCHEMA);
+        assertTrue(guard.isUsable(SCHEMA_NAME));
+        failures.recordFailure(SCHEMA_NAME);
+        assertFalse(guard.isUsable(SCHEMA_NAME));
+        failures.recordSuccess(SCHEMA_NAME);
+        assertTrue(guard.isUsable(SCHEMA_NAME));
     }
 
     // --- the per-request caching itself (the reason this class has a TTL at

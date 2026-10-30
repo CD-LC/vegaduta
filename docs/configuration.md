@@ -1144,6 +1144,12 @@ lean on (the notes say which).
 | `app.chat.local-model.providers` | `APP_CHAT_LOCAL_MODEL_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers that are servers on the person's machine |
 | `app.providers.small-model-max-billions` | `APP_PROVIDERS_SMALL_MODEL_MAX_BILLIONS` | `8.0` | a pool row whose model has this many billions of parameters or fewer runs in small-model mode unless its "Small-model mode" control says otherwise; negative = never by size |
 
+The serving row's own console settings (Providers → Local model → "Speed and behaviour",
+`PUT /api/local-models/settings`) can also override, for that model's turns only:
+`numBatch` over `app.llm.ollama.num-batch`, `responseTimeoutMs` over
+`app.llm.http.stream-idle-timeout`, and `toolDeferral` over `app.tools.search.enabled`
+(see [local-models.md](local-models.md#response-speed)).
+
 **Turn limits** (`app.chat.limits.*`, `app.chat.semantic-cache.*`, and additions to `app.chat.parity.*` and `app.chat.resilience.*`)
 
 | Property | Environment variable | Default | Effect |
@@ -1391,6 +1397,9 @@ to `core.env` or the Helm `core.env` map when you need them.
 | `app.security.outbound.egress-allow-list` | `APP_SECURITY_OUTBOUND_EGRESS_ALLOW_LIST` | empty (any public host); comma-separated `host` or `*.suffix`. When set, tenant-configured outbound calls (BYOK, OpenAPI, MCP URLs, web fetch, webhooks) may reach only these hosts; the private-address checks still apply and `allowed-private-hosts` entries are exempt. Platform-wide, not per agent |
 | `app.tenancy.fail-on-missing-context` | `APP_TENANCY_FAIL_ON_MISSING_CONTEXT` | `true`; `false` restores the shared-schema fallback (logged) |
 | `app.security.jwt.required-audience` | `APP_SECURITY_JWT_REQUIRED_AUDIENCE` | empty (off); needs a Keycloak audience mapper first |
+| `app.security.jwt.allow-unrestricted-audience` | `APP_SECURITY_JWT_ALLOW_UNRESTRICTED_AUDIENCE` | `false`. A non-Keycloak issuer (no `/realms/` in the issuer URI) with both `app.keycloak.allowed-azp` and `app.security.jwt.required-audience` empty fails startup; `true` downgrades that to an ERROR log |
+| `app.tenant.status-fail-open-on-schema-check-error` | `APP_TENANT_STATUS_FAIL_OPEN_ON_SCHEMA_CHECK_ERROR` | `false`: a SQL error while checking an untracked tenant's schema refuses the request; `true` restores fail-open |
+| `app.tenancy.migrate-retry-interval` | `APP_TENANCY_MIGRATE_RETRY_INTERVAL` | `60s`: how often tenant schemas whose startup migration failed are retried; until one succeeds the tenant gets 403 |
 | `app.oauth.state.require-browser-cookie` | `APP_OAUTH_STATE_REQUIRE_BROWSER_COOKIE` | `false` |
 | `app.agent.share.visitor-token-secret` | `APP_AGENT_SHARE_VISITOR_TOKEN_SECRET` | empty: derived from `APP_ENCRYPTION_KEY` |
 | `app.storage.local.legacy-unprefixed-fallback` | `APP_STORAGE_LOCAL_LEGACY_UNPREFIXED_FALLBACK` | `false` |
@@ -1507,6 +1516,8 @@ mode is unchanged when this is left at `keycloak`. Needs the `security` profile 
 | `app.auth.local.data-dir` | `${user.home}/.vegaduta/auth` | signing keys (`signing-keys.json`, file `0600`, directory `0700`) and the one-time `first-run-setup.txt`. Keep it on a persistent volume: losing the key signs everyone out. One core process per directory. `personal.yml` sets `APP_AUTH_LOCAL_DATA_DIR=/data/storage/.auth` |
 | `app.auth.local.issuer` / `.audience` | `https://auth.local.vegaduta.invalid` / `vegaduta-api` | `iss` and `aud` of the tokens; the issuer is an identifier nobody dereferences |
 | `app.auth.local.access-token-ttl` | `15m` | access token lifetime |
+| `app.auth.local.setup-link-in-logs` | `true` | print the one-time first-run setup link in the core log. Set `false` on log-aggregated deploys; read `first-run-setup.txt` from the data dir instead |
+| `app.tenant.comp.allowed-tenants` | _(empty)_ | comma-separated tenant ids that `CompGrantController` may grant complimentary plans to. Empty means any tenant; a non-empty list rejects every other tenant id |
 | `app.auth.local.refresh-token-ttl` | `30d` | idle lifetime of one refresh token |
 | `app.auth.local.session-max-ttl` | `90d` | absolute lifetime of a login; refreshing never extends it |
 | `app.auth.local.key-rotation-interval` | `90d` | the key is rotated lazily when older than this |
@@ -1962,6 +1973,7 @@ stay unbounded. See [List endpoint paging](api/LIST-ENDPOINT-PAGING.md).
 | `app.knowledge.vector-index.interval-ms` | `21600000` | Time between pgvector index maintenance passes (6 hours). |
 | `app.llm.spend-counter.reconcile-initial-delay-ms` | `120000` | Delay after startup before the first tick of the spend-counter reconciler (the pass itself runs every `app.llm.spend-counter.reconcile-interval`). |
 | `app.llm.spend-counter.reconcile-tick-ms` | `60000` | How often the reconciler checks whether a pass is due; a pass in progress continues on each tick. |
+| `app.mcp.max-response-bytes` | `33554432` (32 MiB) | Heap ceiling on one remote-MCP response body; a peer streaming past it fails the call rather than growing the heap. `<= 0` disables. Env `APP_MCP_MAX_RESPONSE_BYTES`. |
 | `app.mcp.max-stdio-connections-per-tenant` | `5` | How many local (STDIO) MCP servers one workspace may keep connected at once; the next one is refused with a message to disable another or ask the operator to raise this. |
 | `app.mcp.registry-store` | `memory` | `memory`: each replica connects MCP servers on its own. `redis`: replicas share an ownership registry so one registration has one live client (set this when running more than one replica). |
 | `app.mcp.registry-heartbeat-ms` | `15000` | With `registry-store=redis`: how often a replica renews its leases and its own registration. |
@@ -2231,6 +2243,7 @@ The Default column is read from the code, not typed: `make config-docs` (`script
 | `app.agent.share.max-voice-turns-per-minute` | `20` | shapes that load the module | see source: `core/agents-turn/src/main/java/com/agenticai/core/agents/share/AgentShareService.java` |
 | `app.agents.default-temperature` | `0.7` | all shapes | see source: `core/agents/src/main/java/com/agenticai/core/agents/core/AgentDefaults.java` |
 | `app.agents.default-top-p` | `1.0` | all shapes | see source: `core/agents/src/main/java/com/agenticai/core/agents/core/AgentDefaults.java` |
+| `app.app-builder.allowed-tenants` | `${APP_BUILDER_ALLOWED_TENANTS:}` | all shapes | Comma-separated tenant-schema allow-list for `X-Tenant-Id` on the internal app-builder endpoints. Empty (default) means the service token may act for ANY tenant id - set it to bound a leaked token. |
 | `app.app-builder.max-tokens` | `8000` | all shapes | Mirrors app.agents.default-max-tokens' role for AssistService, but app-builder writes whole files (potentially several per turn), so the default ceiling is meaningfully higher. |
 | `app.app-builder.service-token` | `${APP_BUILDER_CORE_SERVICE_TOKEN:}` | all shapes | App Builder generation routing fix (2026-08-06, see AppBuilderCompletionController's javadoc). |
 | `app.attestation.issuer` |  | shapes that load the module | see source: `core/agents/src/main/java/com/agenticai/core/agents/attestation/AgentAttestationService.java` |
