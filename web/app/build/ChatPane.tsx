@@ -4,8 +4,7 @@
 // Split out of page.tsx (behaviour unchanged).
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Loader2, Send, ImagePlus, LayoutTemplate, Paperclip, Archive, Mic, MicOff } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Textarea } from "../components/ui/textarea";
+import { Button } from "../components/ui/button"; import { Textarea } from "../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useTranslations } from "../lib/i18n";
 import { appBuilder } from "./lib";

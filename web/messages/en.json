@@ -3095,7 +3095,13 @@
     "unknownActor": "unknown",
     "whyAgentAskedLabel": "WHY THE AGENT ASKED",
     "workflowNeedsHint": "Your answers are passed to the next step when you approve.",
-    "workflowNeedsLabel": "This workflow needs the following from you"
+    "workflowNeedsLabel": "This workflow needs the following from you",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "approvalsQueue": {
     "age_newer1h": "Newer than 1 hour",

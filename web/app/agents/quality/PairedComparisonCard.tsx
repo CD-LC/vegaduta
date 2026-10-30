@@ -296,8 +296,7 @@ export default function PairedComparisonCard({
 // The verdict
 // ---------------------------------------------------------------------------
 
-function verdictBadge(reading: ComparisonReading) {
-    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
+function verdictBadge(reading: ComparisonReading, tHC: ReturnType<typeof useTranslations>) {
   if (reading.state === "CANDIDATE_BETTER") {
     return (
       <Badge variant="state" state="var(--state-success)" className="gap-1.5">
@@ -348,7 +347,7 @@ function ComparisonResult({
   return (
     <div className="space-y-4 rounded-lg border border-border p-4">
       <div className="flex flex-wrap items-center gap-3">
-        {verdictBadge(reading)}
+        {verdictBadge(reading, tHC)}
         <span className="font-mono text-sm tabular-nums text-foreground">
           gap {formatSigned(gap.value)}
           {gap.ciLow !== null && gap.ciHigh !== null && (

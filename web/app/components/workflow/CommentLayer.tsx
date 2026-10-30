@@ -71,8 +71,7 @@ import {
   type NewThreadTarget,
 } from "./comments";
 import { listWorkflowComments } from "../../lib/api/workflows";
-import "./comments.css";
-import { useTranslations } from "../../lib/i18n";
+import "./comments.css"; import { useTranslations } from "../../lib/i18n";
 
 export type ScreenPoint = { x: number; y: number };
 export type PinTarget = CommentAnchor | string;
