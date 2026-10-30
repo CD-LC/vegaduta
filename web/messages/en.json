@@ -6277,6 +6277,12 @@
     "does_run_desktop_recipe": "Replays a recorded run of desktop actions on this computer."
   },
   "approvalsPanel": {
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown.",
     "channelWildcardOption": "All channels (wildcard policy)",
     "channelWhatsappTwilio": "WhatsApp (Twilio)",
     "channelInstagram": "Instagram DM",
