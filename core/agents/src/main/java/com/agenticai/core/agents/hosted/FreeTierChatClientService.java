@@ -533,7 +533,11 @@ public class FreeTierChatClientService {
                 sampling,
                 provider.effectiveSmallModel(),
                 provider.getToolCallGrade(),
-                hostedLlmChatClientFactory.isLocalOllamaRow(provider));
+                hostedLlmChatClientFactory.isLocalOllamaRow(provider),
+                provider.getResponseTimeoutMs() != null && provider.getResponseTimeoutMs() > 0
+                        ? java.time.Duration.ofMillis(provider.getResponseTimeoutMs())
+                        : null,
+                provider.getToolDeferral());
     }
 
     /**

@@ -40,10 +40,11 @@ class PersonalStarterConnectorsTest {
         classifications = mock(ToolClassificationRegistry.class);
         sidecar = new McpStdioSidecarProperties();
         connectors = new PersonalStarterConnectors(tenants, starters, classifications, sidecar);
-        doAnswer(inv -> {
-                    ((Consumer<String>) inv.getArgument(0)).accept("tenant_personal");
-                    return null;
-                })
+        doAnswer(
+                        inv -> {
+                            ((Consumer<String>) inv.getArgument(0)).accept("tenant_personal");
+                            return null;
+                        })
                 .when(tenants)
                 .forEachActiveTenantSchema(any());
     }
@@ -89,7 +90,8 @@ class PersonalStarterConnectorsTest {
 
         connectors.seedOnStartup();
 
-        ArgumentCaptor<ToolClassification> declared = ArgumentCaptor.forClass(ToolClassification.class);
+        ArgumentCaptor<ToolClassification> declared =
+                ArgumentCaptor.forClass(ToolClassification.class);
         verify(classifications).declare(declared.capture(), eq("MCP_IMPORT"), any(), any());
         assertThat(declared.getValue().toolName()).isEqualTo("mcp__time__*");
     }
@@ -103,9 +105,10 @@ class PersonalStarterConnectorsTest {
                                 new McpStarterService.Seeded(UUID.randomUUID(), "fetch", true),
                                 new McpStarterService.Seeded(UUID.randomUUID(), "time", true)));
         when(classifications.storedClassifications()).thenReturn(List.of());
-        doAnswer(inv -> {
-                    throw new IllegalStateException("db down");
-                })
+        doAnswer(
+                        inv -> {
+                            throw new IllegalStateException("db down");
+                        })
                 .when(classifications)
                 .declare(any(), any(), any(), any());
 
@@ -117,7 +120,8 @@ class PersonalStarterConnectorsTest {
     @Test
     void aClassificationThatFailedOnAnEarlierStartIsRetriedOnTheNextOne() {
         sidecar.setEnabled(true);
-        // Second start: nothing is newly registered, but fetch is still our registration and unclassified.
+        // Second start: nothing is newly registered, but fetch is still our registration and
+        // unclassified.
         when(starters.seedMissing()).thenReturn(List.of());
         when(starters.registeredStarterNames()).thenReturn(List.of("fetch", "time"));
         ToolClassificationEntity timeRow = stored("mcp__time__*");
@@ -125,15 +129,18 @@ class PersonalStarterConnectorsTest {
 
         connectors.seedOnStartup();
 
-        ArgumentCaptor<ToolClassification> declared = ArgumentCaptor.forClass(ToolClassification.class);
+        ArgumentCaptor<ToolClassification> declared =
+                ArgumentCaptor.forClass(ToolClassification.class);
         verify(classifications).declare(declared.capture(), eq("MCP_IMPORT"), any(), any());
         assertThat(declared.getValue().toolName()).isEqualTo("mcp__fetch__*");
     }
 
     @Test
     void seedingRunsBeforeTheStartupReconnectSoItsEnabledRowsAreConnectedByIt() throws Exception {
-        // DynamicMcpConnectionManager.reconnectEnabledOnStartup listens to the same event with the default
-        // (lowest) order and connects every enabled dynamic row it finds. This class registers rows and
+        // DynamicMcpConnectionManager.reconnectEnabledOnStartup listens to the same event with the
+        // default
+        // (lowest) order and connects every enabled dynamic row it finds. This class registers rows
+        // and
         // never connects them itself, so it must run first.
         java.lang.reflect.Method seed = PersonalStarterConnectors.class.getMethod("seedOnStartup");
         org.springframework.core.annotation.Order order =
@@ -142,10 +149,12 @@ class PersonalStarterConnectorsTest {
         assertThat(order.value()).isLessThan(org.springframework.core.Ordered.LOWEST_PRECEDENCE);
 
         java.lang.reflect.Method reconnect =
-                com.agenticai.core.agents.tools.DynamicMcpConnectionManager.class.getMethod(
-                        "reconnectEnabledOnStartup");
-        assertThat(reconnect.getAnnotation(org.springframework.core.annotation.Order.class)).isNull();
-        assertThat(reconnect.getAnnotation(org.springframework.context.event.EventListener.class)).isNotNull();
+                Class.forName("com.agenticai.core.agents.tools.DynamicMcpSchedulers")
+                        .getDeclaredMethod("reconnectEnabledOnStartup");
+        assertThat(reconnect.getAnnotation(org.springframework.core.annotation.Order.class))
+                .isNull();
+        assertThat(reconnect.getAnnotation(org.springframework.context.event.EventListener.class))
+                .isNotNull();
     }
 
     @Test

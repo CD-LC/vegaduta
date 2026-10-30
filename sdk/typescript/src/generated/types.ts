@@ -1234,6 +1234,42 @@ export interface ApprovalRequestResponse {
 
 export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "EXECUTION_FAILED" | "DEAD_LETTERED";
 
+export interface ApprovalTraceView {
+  requestId?: string;
+  actionType?: string;
+  status?: string;
+  createdAt?: string;
+  requestedBy?: string;
+  decidedBy?: string;
+  decidedAt?: string;
+  rejectionReason?: string;
+  executionResult?: string;
+  executionError?: string;
+  retryCount?: number;
+  conversation?: ApprovalTraceView_Conversation;
+  windowEnd?: string;
+  callsTruncated?: boolean;
+  calls?: ApprovalTraceView_Call[];
+  traceNote?: string;
+}
+
+export interface ApprovalTraceView_Call {
+  id?: string;
+  toolName?: string;
+  startedAt?: string;
+  completedAt?: string;
+  outcome?: string;
+  inputSummary?: string;
+  outputSummary?: string;
+  errorMessage?: string;
+}
+
+export interface ApprovalTraceView_Conversation {
+  agentId?: string;
+  sessionId?: string;
+  goal?: string;
+}
+
 export interface AssistCodeEditRequest {
   system: string;
   prompt: string;
@@ -5043,12 +5079,20 @@ export interface LocalModelsService_Settings {
   contextLength?: number;
   loadedContext?: number;
   wantedContext?: number;
+  numBatch?: number;
+  numParallel?: number;
+  responseTimeoutMs?: number;
+  toolDeferral?: boolean;
 }
 
 export interface LocalModelsService_SettingsUpdate {
   reasoningEffort?: string;
   keepAlive?: string;
   contextLength?: number;
+  numBatch?: number;
+  numParallel?: number;
+  responseTimeoutMs?: number;
+  toolDeferral?: boolean;
 }
 
 export interface LocalModelsService_UseResult {

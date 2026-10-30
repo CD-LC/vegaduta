@@ -45,12 +45,24 @@ final class McpTransportFactory {
     private final Supplier<McpOAuthTokenSource> providerTokens;
 
     /**
+     * Heap ceiling on a single remote-MCP response body (default 32 MiB): a registered remote
+     * server can stream an arbitrarily large {@code tools/call} result and the SDK materialises
+     * replies in memory - the tool-output truncation runs only AFTER full receipt, so without a
+     * transport cap a hostile server could exhaust the heap. Settable via {@code
+     * app.mcp.max-response-bytes} ({@code <= 0} restores unlimited); overrides in tests via {@link
+     * #setClientBuilders} bypass it entirely.
+     */
+    private volatile long maxResponseBytes = 32L * 1024 * 1024;
+
+    /**
      * Where the SDK transports get their {@code HttpClient}: the SSRF-guarded client, so the
      * address a connection goes to is the one the guard resolved and validated. Replaceable in
      * tests only.
      */
     private Supplier<HttpClient.Builder> clientBuilders =
-            () -> new GuardedHttpClientBuilder(REMOTE_SOCKET_TIMEOUT);
+            () ->
+                    new GuardedHttpClientBuilder(REMOTE_SOCKET_TIMEOUT)
+                            .maxResponseBytes(maxResponseBytes);
 
     McpTransportFactory(
             AtlassianOAuthService atlassianOAuthService,
@@ -66,6 +78,11 @@ final class McpTransportFactory {
     /** Test seam: the client builder handed to the SDK transports. */
     void setClientBuilders(Supplier<HttpClient.Builder> clientBuilders) {
         this.clientBuilders = clientBuilders;
+    }
+
+    /** See {@link #maxResponseBytes}' javadoc. */
+    void setMaxResponseBytes(long maxResponseBytes) {
+        this.maxResponseBytes = maxResponseBytes;
     }
 
     /** SSE or streamable-HTTP transport for a remote registration (see the manager's history). */

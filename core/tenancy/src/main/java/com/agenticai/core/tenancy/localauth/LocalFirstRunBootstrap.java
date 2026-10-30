@@ -43,16 +43,16 @@ import org.springframework.stereotype.Component;
  * hosted sign-up uses (with {@code LocalUserAdminClient} behind the identity port). Nothing about
  * tenant creation is duplicated here, so a local tenant is indistinguishable from any other.
  *
- * <p><b>No default password, ever.</b> The account is created with a random password nobody sees and
- * is flagged {@code setup_pending}, which refuses every sign-in. The owner sets a real password by
- * opening the one-time setup link this runner prints to the console and writes to
- * {@code <data-dir>/first-run-setup.txt} (mode 0600). The link expires ({@code
+ * <p><b>No default password, ever.</b> The account is created with a random password nobody sees
+ * and is flagged {@code setup_pending}, which refuses every sign-in. The owner sets a real password
+ * by opening the one-time setup link this runner prints to the console and writes to {@code
+ * <data-dir>/first-run-setup.txt} (mode 0600). The link expires ({@code
  * app.auth.local.setup-token-ttl}, default 24 h) and every restart while setup is still pending
  * issues a fresh one and retires the old, so a lost console never strands the install.
  *
- * <p><b>Idempotent.</b> If any account exists nothing is created. Several replicas starting together
- * are serialised by a Postgres advisory lock. A failure is logged loudly but does not stop the boot:
- * the API still serves, and the next start retries.
+ * <p><b>Idempotent.</b> If any account exists nothing is created. Several replicas starting
+ * together are serialised by a Postgres advisory lock. A failure is logged loudly but does not stop
+ * the boot: the API still serves, and the next start retries.
  */
 @Component
 @Profile("!insecure")
@@ -74,6 +74,16 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
     private final String tenantName;
     private final Set<String> extraRoles;
     private final String publicWebUrl;
+    // app.auth.local.setup-link-in-logs: when false (log-aggregated deploys), the
+    // one-use setup link is written only to the 0600 file, never to WARN output -
+    // a link sitting in a log shipper is owner takeover until it is consumed.
+    private boolean setupLinkInLogs = true;
+
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setSetupLinkInLogs(
+            @Value("${app.auth.local.setup-link-in-logs:true}") boolean setupLinkInLogs) {
+        this.setupLinkInLogs = setupLinkInLogs;
+    }
 
     @Autowired
     public LocalFirstRunBootstrap(
@@ -123,7 +133,9 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
                                 + " provisioning). Add it to SPRING_PROFILES_ACTIVE.");
                 return;
             }
-            log.info("Local auth: first start, creating the default tenant '{}' and its owner", tenantName);
+            log.info(
+                    "Local auth: first start, creating the default tenant '{}' and its owner",
+                    tenantName);
             LocalFirstRun.asOwnerSignup(
                     () ->
                             service.signup(
@@ -139,7 +151,8 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
                                             null)));
         }
         grantExtraRoles();
-        Optional<LocalAccount> pending = store.findByEmail(ownerEmail).filter(LocalAccount::setupPending);
+        Optional<LocalAccount> pending =
+                store.findByEmail(ownerEmail).filter(LocalAccount::setupPending);
         if (pending.isPresent()) {
             announce(auth.issueSetupToken(pending.get()));
         } else {
@@ -170,15 +183,23 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
         Path file = settings.dataDir().resolve(SETUP_FILE);
         String expiry = Instant.now().plus(settings.setupTokenTtl()).toString();
         log.warn("");
-        log.warn("=========================== VegaDuta: finish setting up ===========================");
+        log.warn(
+                "=========================== VegaDuta: finish setting up ===========================");
         log.warn("  Open this link in your browser to choose the owner password (one use):");
-        log.warn("    {}", link);
+        if (setupLinkInLogs) {
+            log.warn("    {}", link);
+        } else {
+            log.warn(
+                    "    <suppressed - app.auth.local.setup-link-in-logs=false; read {} instead>",
+                    file);
+        }
         if (base.isEmpty()) {
             log.warn("  (Set APP_WEB_PUBLIC_URL so this prints a full link.)");
         }
         log.warn("  Sign-in e-mail: {}    Link expires: {}", ownerEmail, expiry);
         log.warn("  The same link is saved, owner-readable only, in {}", file);
-        log.warn("====================================================================================");
+        log.warn(
+                "====================================================================================");
         log.warn("");
         writeSetupFile(file, link, expiry);
     }
@@ -189,12 +210,19 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
             Path tmp =
                     file.getFileSystem().supportedFileAttributeViews().contains("posix")
                             ? Files.createTempFile(
-                                    file.getParent(), "setup-", ".tmp",
-                                    PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")))
+                                    file.getParent(),
+                                    "setup-",
+                                    ".tmp",
+                                    PosixFilePermissions.asFileAttribute(
+                                            PosixFilePermissions.fromString("rw-------")))
                             : Files.createTempFile(file.getParent(), "setup-", ".tmp");
             Files.writeString(
                     tmp,
-                    "Open this link to set the owner password (single use, expires " + expiry + "):\n" + link + "\n",
+                    "Open this link to set the owner password (single use, expires "
+                            + expiry
+                            + "):\n"
+                            + link
+                            + "\n",
                     StandardCharsets.UTF_8);
             Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -220,6 +248,10 @@ public class LocalFirstRunBootstrap implements ApplicationRunner {
         if (value == null || value.isBlank()) {
             return Set.of();
         }
-        return new LinkedHashSet<>(Arrays.stream(value.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
+        return new LinkedHashSet<>(
+                Arrays.stream(value.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .toList());
     }
 }

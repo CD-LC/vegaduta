@@ -191,7 +191,10 @@ final class ToolResolver {
         // On-demand tool loading (default OFF). Only a real model call applies it: a null
         // chatClient marks a discovery/preview probe, which must keep seeing the real tools. When
         // it does not apply, apply() returns `allowed` itself and this block changes nothing.
-        if (ctx.chatClient() != null && toolSearchDeferral.isEnabled()) {
+        // forceToolDeferral is the serving row's own switch (V674): a slow local model defers its
+        // tools even with the global flag off.
+        if (ctx.chatClient() != null
+                && (toolSearchDeferral.isEnabled() || ctx.forceToolDeferral())) {
             List<ToolCallback> deferred =
                     toolSearchDeferral.apply(
                             allowed,
@@ -208,7 +211,8 @@ final class ToolResolver {
                                             ctx.userMessage(),
                                             ctx.chatClient(),
                                             false),
-                            ctx.chatClient());
+                            ctx.chatClient(),
+                            ctx.forceToolDeferral());
             if (deferred != allowed) {
                 // search_tools / call_tool are added here, after the pass above.
                 return new ResolvedToolList(

@@ -2717,6 +2717,12 @@ app:
     # contributes no tools until an admin approves (POST /api/mcp/tool-pins/{id}/approve).
     tool-pinning:
       mode: ${APP_MCP_TOOL_PINNING_MODE:warn}
+    # Heap ceiling on a single remote-MCP response body (bytes). The SDK
+    # materialises replies in memory and the tool-output truncation runs only
+    # after full receipt, so without a transport cap a remote server could
+    # stream an unbounded tools/call result and exhaust the heap. <= 0 disables
+    # the cap.
+    max-response-bytes: ${APP_MCP_MAX_RESPONSE_BYTES:33554432}
     client:
       # Send Mcp-Method / Mcp-Name on outbound Streamable HTTP POSTs (MCP 2026-07-28 routing headers).
       # Off: this client still speaks the handshake-based revisions, where they are not defined.
@@ -3042,6 +3048,11 @@ app:
       # comp-grant call rather than trusting an empty header. Set the SAME
       # value here (via CORE_COMP_SERVICE_TOKEN) and in the Academy's own env.
       service-token: ${CORE_COMP_SERVICE_TOKEN:}
+      # Optional comma-separated tenant-UUID allow-list for the comp-grant
+      # endpoint. The service token is one static credential not bound to a
+      # tenant - when this is empty (default), a caller holding it can flip
+      # the plan of ANY tenant; set it to bound a leaked token.
+      allowed-tenants: ${CORE_COMP_ALLOWED_TENANTS:}
   app-builder:
     # App Builder generation routing fix (2026-08-06, see
     # AppBuilderCompletionController's javadoc). Same "shared secret,
@@ -3049,6 +3060,12 @@ app:
     # set the SAME value here (via APP_BUILDER_CORE_SERVICE_TOKEN) and in
     # app-builder's own env (APP_BUILDER_CORE_SERVICE_TOKEN there too).
     service-token: ${APP_BUILDER_CORE_SERVICE_TOKEN:}
+    # Optional comma-separated tenant-schema allow-list for X-Tenant-Id on the
+    # internal app-builder endpoints. The service token is one static credential
+    # not bound to a tenant - when this is empty (default), a caller holding it
+    # can drive generation for ANY tenant id; set it to the schemas app-builder
+    # may act for (single-tenant installs should always set it).
+    allowed-tenants: ${APP_BUILDER_ALLOWED_TENANTS:}
     # Mirrors app.agents.default-max-tokens' role for AssistService, but
     # app-builder writes whole files (potentially several per turn), so the
     # default ceiling is meaningfully higher.

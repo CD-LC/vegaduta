@@ -92,7 +92,12 @@ public class LocalModelsService {
      * The local model's console-editable behaviour. {@code reasoningEffort}: none, low, medium,
      * high, or {@code default} (the model's own behaviour). {@code loadedContext} is what Ollama
      * actually loaded the model with (null when it is not loaded), {@code wantedContext} what core
-     * asks for.
+     * asks for. {@code numBatch}: tokens evaluated per prompt-processing step (Ollama {@code
+     * num_batch}); {@code numParallel}: the runner's parallelism, carried by a {@code -parN} model
+     * variant exactly like {@code contextLength}'s {@code -ctxNk}; {@code responseTimeoutMs}: how
+     * long a silent model stream is tolerated before the turn is declared idle; {@code
+     * toolDeferral}: on-demand tool loading forced on for this model's turns. Every nullable field
+     * reads null when the row leaves it to the server/configured default.
      */
     public record Settings(
             String servingModel,
@@ -100,18 +105,39 @@ public class LocalModelsService {
             String keepAlive,
             Integer contextLength,
             Integer loadedContext,
-            int wantedContext) {}
+            int wantedContext,
+            Integer numBatch,
+            Integer numParallel,
+            Long responseTimeoutMs,
+            Boolean toolDeferral) {}
 
-    /** Body of {@code PUT /settings}; a null field is left as it is. */
-    public record SettingsUpdate(String reasoningEffort, String keepAlive, Integer contextLength) {}
+    /**
+     * Body of {@code PUT /settings}; a null field is left as it is. {@code contextLength} and
+     * {@code numParallel} take 0 for "the server default" (the base tag); {@code numBatch} and
+     * {@code responseTimeoutMs} take 0 or a negative value for the same; {@code toolDeferral} takes
+     * {@code false} to return to the global {@code app.tools.search.enabled} default.
+     */
+    public record SettingsUpdate(
+            String reasoningEffort,
+            String keepAlive,
+            Integer contextLength,
+            Integer numBatch,
+            Integer numParallel,
+            Long responseTimeoutMs,
+            Boolean toolDeferral) {}
 
     static final java.util.Set<String> EFFORTS =
             java.util.Set.of("none", "low", "medium", "high", "default");
 
-    /** Context windows the console offers; 0 = the server default. */
-    static final java.util.Set<Integer> CONTEXTS = java.util.Set.of(0, 4096, 8192, 16384, 32768);
+    /** The largest {@code num_batch} the console accepts (must stay within the model's context). */
+    static final int MAX_BATCH = 32768;
 
-    private static final Pattern CTX_SUFFIX = Pattern.compile("^(.+)-ctx([0-9]+)k$");
+    /** The smallest stream idle timeout the console accepts (below it every slow turn is cut). */
+    static final long MIN_RESPONSE_TIMEOUT_MS = 5_000L;
+
+    /** The largest stream idle timeout the console accepts (one hour). */
+    static final long MAX_RESPONSE_TIMEOUT_MS = 3_600_000L;
+
     static final Pattern KEEP_ALIVE = Pattern.compile("^(-1|[0-9]{1,4}[smh])$");
 
     @Value("${app.llm.ollama.reasoning-effort:none}")
@@ -347,54 +373,28 @@ public class LocalModelsService {
                 keep,
                 contextOf(model),
                 loaded,
-                wantedContext);
+                wantedContext,
+                row == null ? null : row.getNumBatch(),
+                parallelOf(model),
+                row == null ? null : row.getResponseTimeoutMs(),
+                row == null ? null : row.getToolDeferral());
     }
 
-    /**
-     * The base tag of a console-made context variant ({@code qwen3.5:4b-ctx16k} -> {@code
-     * qwen3.5:4b}); any other tag as it is.
-     */
+    /** The base tag of a console-made variant; see {@link LocalModelVariants#baseTag}. */
     static String baseTag(String model) {
-        java.util.regex.Matcher m = model == null ? null : CTX_SUFFIX.matcher(model);
-        return m != null && m.matches() ? m.group(1) : model;
+        return LocalModelVariants.baseTag(model);
     }
 
-    /**
-     * The context a console-made variant carries ({@code -ctx16k} -> 16384), or null for a plain
-     * tag.
-     */
+    /** The context a console-made variant carries; see {@link LocalModelVariants#contextOf}. */
     static Integer contextOf(String model) {
-        java.util.regex.Matcher m = model == null ? null : CTX_SUFFIX.matcher(model);
-        return m != null && m.matches() ? Integer.valueOf(m.group(2)) * 1024 : null;
+        return LocalModelVariants.contextOf(model);
     }
 
     /**
-     * Points the serving row at {@code base} with a context window of {@code context} tokens: a
-     * variant made with {@link LocalModelOllamaGateway#createWithContext} (no download), or the
-     * base tag itself for 0. The row is re-measured by the pool service like any model change.
+     * The parallelism a console-made variant carries; see {@link LocalModelVariants#parallelOf}.
      */
-    private void applyContext(PlatformHostedLlmProvider row, int context) {
-        if (!CONTEXTS.contains(context)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Context must be 4096, 8192, 16384, 32768 or 0 for the server default.");
-        }
-        String base = baseTag(row.getModel());
-        String target = context == 0 ? base : base + "-ctx" + (context / 1024) + "k";
-        if (target.equals(row.getModel())) {
-            return;
-        }
-        LocalModelOllamaGateway.Tags tags = ollama.tags();
-        if (!tags.reachable()) {
-            throw new ResponseStatusException(
-                    HttpStatus.SERVICE_UNAVAILABLE, "The model server is not reachable.");
-        }
-        if (!tags.has(target) && !ollama.createWithContext(base, target, context)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_GATEWAY,
-                    "The model server could not make that context size for " + base + ".");
-        }
-        hostedPool.updateModel(row.getId(), target);
+    static Integer parallelOf(String model) {
+        return LocalModelVariants.parallelOf(model);
     }
 
     /**
@@ -413,8 +413,9 @@ public class LocalModelsService {
                                         new ResponseStatusException(
                                                 HttpStatus.NOT_FOUND,
                                                 "No local model is configured."));
-        if (update.contextLength() != null) {
-            applyContext(row, update.contextLength());
+        if (update.contextLength() != null || update.numParallel() != null) {
+            LocalModelVariants.apply(
+                    ollama, hostedPool, row, update.contextLength(), update.numParallel());
             // The model change saved the row; read it back so the switches below do not overwrite
             // it.
             row = servingPoolRow().orElse(row);
@@ -436,6 +437,36 @@ public class LocalModelsService {
                         "Keep loaded for must look like 30m, 2h or -1 (always).");
             }
             row.setKeepAlive(keep);
+        }
+        if (update.numBatch() != null) {
+            int batch = update.numBatch();
+            if (batch < 0 || batch > MAX_BATCH) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Batch size must be a positive number of tokens (at most "
+                                + MAX_BATCH
+                                + ", and no more than the context) or 0 for the server default.");
+            }
+            row.setNumBatch(batch == 0 ? null : batch);
+        }
+        if (update.responseTimeoutMs() != null) {
+            long timeoutMs = update.responseTimeoutMs();
+            if (timeoutMs != 0
+                    && (timeoutMs < MIN_RESPONSE_TIMEOUT_MS
+                            || timeoutMs > MAX_RESPONSE_TIMEOUT_MS)) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Response timeout must be between "
+                                + (MIN_RESPONSE_TIMEOUT_MS / 1000)
+                                + "s and "
+                                + (MAX_RESPONSE_TIMEOUT_MS / 60000)
+                                + "m, or 0 for the configured default.");
+            }
+            row.setResponseTimeoutMs(timeoutMs == 0 ? null : timeoutMs);
+        }
+        if (update.toolDeferral() != null) {
+            // false means "back to the app.tools.search.enabled default", so only true is stored.
+            row.setToolDeferral(Boolean.TRUE.equals(update.toolDeferral()) ? Boolean.TRUE : null);
         }
         hostedPoolRepository.save(row);
         String model = row.getModel();

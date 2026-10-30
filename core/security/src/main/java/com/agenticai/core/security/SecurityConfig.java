@@ -234,6 +234,14 @@ public class SecurityConfig {
         }
     }
 
+    /** {@link #requireClientCheckForNonKeycloakIssuer} behind an explicit opt-out lever. */
+    static void checkTokenAcceptanceConfig(
+            String issuerUri, String azp, String audience, boolean allowNoClientCheck) {
+        if (!allowNoClientCheck) {
+            requireClientCheckForNonKeycloakIssuer(issuerUri, azp, audience);
+        }
+    }
+
     private static java.util.Set<String> csvToSet(String csv) {
         java.util.Set<String> out = new java.util.LinkedHashSet<>();
         if (csv == null) {

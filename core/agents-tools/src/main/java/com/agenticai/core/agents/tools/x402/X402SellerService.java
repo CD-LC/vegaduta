@@ -238,9 +238,13 @@ public class X402SellerService {
 
         // Replay fold: the nonce UNIQUE means the first settlement wins; a
         // retry of the same header returns it instead of double-charging.
+        // Only a SETTLED record may fold: a REJECTED record - or a VERIFIED
+        // reservation whose settlement legs never finished - must re-throw
+        // so the client mints a fresh call nonce. Folding anything else
+        // would serve the paid resource on a payment that did not land.
         Optional<X402PaymentRecord> existing = paymentRepository.findByNonce(nonce);
         if (existing.isPresent()) {
-            return existing.get();
+            return foldInternalReplay(existing.get());
         }
 
         X402PaymentRecord record = newPaymentRecord(offer, payment);
@@ -250,10 +254,15 @@ public class X402SellerService {
         record.setPayerTenantId(d.tenantId());
         record.setPayerRef(d.walletId().toString());
         record.setAmountAtomic(offer.getPriceMinor());
+        // VERIFIED first - the delegation signature checked out, settlement
+        // legs below flip it to SETTLED or REJECTED. The column is NOT NULL
+        // with no default, so the reservation must carry a status (its
+        // absence previously made every internal-scheme insert throw).
+        record.setStatus(X402PaymentRecord.Status.VERIFIED);
         try {
             record = paymentRepository.save(record);
         } catch (DataIntegrityViolationException race) {
-            return paymentRepository.findByNonce(nonce).orElseThrow(() -> race);
+            return foldInternalReplay(paymentRepository.findByNonce(nonce).orElseThrow(() -> race));
         }
         final String recordId = record.getId().toString();
         final String jti = d.jti();
@@ -314,6 +323,21 @@ public class X402SellerService {
                     "SETTLEMENT_FAILED", "payment could not settle: " + shortReason(e));
         }
         return paymentRepository.save(record);
+    }
+
+    /**
+     * Replay-fold gate for the internal scheme: only a SETTLED record may be returned to the
+     * caller. A REJECTED record, or a VERIFIED reservation whose settlement legs never finished,
+     * re-throws so the client retries with a fresh call nonce - the paid resource is never served
+     * on a payment that did not land.
+     */
+    private X402PaymentRecord foldInternalReplay(X402PaymentRecord prior) {
+        if (prior.getStatus() == X402PaymentRecord.Status.SETTLED) {
+            return prior;
+        }
+        throw new X402Exception(
+                "SETTLEMENT_FAILED",
+                "a previous settlement for this payment did not complete - retry with a new call nonce");
     }
 
     /**
@@ -431,7 +455,16 @@ public class X402SellerService {
         String recordNonce = "evm:" + from.toLowerCase(java.util.Locale.ROOT) + ":" + nonce;
         Optional<X402PaymentRecord> existing = paymentRepository.findByNonce(recordNonce);
         if (existing.isPresent()) {
-            return existing.get();
+            X402PaymentRecord prior = existing.get();
+            // Same gate as the internal scheme's replay fold: a rejected
+            // payment must never fold into a served resource - the payer
+            // signs a fresh authorization (new nonce) and retries.
+            if (prior.getStatus() == X402PaymentRecord.Status.REJECTED) {
+                throw new X402Exception(
+                        "PAYMENT_REJECTED",
+                        "a previous settlement for this authorization nonce was rejected");
+            }
+            return prior;
         }
         X402PaymentRecord record = newPaymentRecord(offer, payment);
         record.setScheme(SCHEME_EXACT);

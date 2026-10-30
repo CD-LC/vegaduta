@@ -40,6 +40,7 @@ public class TenantMigrationService {
     private final TenantRepository tenantRepository;
     private final TenantSchemaMigrator schemaMigrator;
     private final int parallelism;
+    private TenantMigrationFailures failures = new TenantMigrationFailures();
 
     /** Hikari's default maximum-pool-size when the property is not set (application.yml). */
     static final int DEFAULT_POOL_SIZE = 15;
@@ -76,14 +77,46 @@ public class TenantMigrationService {
         if (this.parallelism < Math.max(1, parallelism)) {
             log.warn(
                     "app.tenancy.migrate-parallelism={} needs about {} pooled connections but the"
-                        + " pool has {}; running {} schema(s) at a time so Flyway runs do not"
-                        + " starve each other of connections. Raise DB_HIKARI_MAX_POOL_SIZE to use"
-                        + " the full parallelism.",
+                            + " pool has {}; running {} schema(s) at a time so Flyway runs do not"
+                            + " starve each other of connections. Raise DB_HIKARI_MAX_POOL_SIZE to use"
+                            + " the full parallelism.",
                     parallelism,
                     RESERVED_CONNECTIONS + CONNECTIONS_PER_FLYWAY_RUN * parallelism,
                     poolSize,
                     this.parallelism);
         }
+    }
+
+    /** Wired by Spring so the status guard and this service share one failure registry. */
+    @Autowired
+    public void setFailures(TenantMigrationFailures failures) {
+        this.failures = failures;
+    }
+
+    /**
+     * Re-runs the migration for the schemas that failed earlier; a success clears the schema's
+     * failed mark so {@link TenantStatusGuardImpl} serves it again.
+     *
+     * @return the schemas that still fail
+     */
+    public List<String> retryFailed() {
+        List<String> still = new ArrayList<>();
+        for (String schema : failures.snapshot()) {
+            try {
+                schemaMigrator.migrate(schema);
+                failures.recordSuccess(schema);
+                log.info(
+                        "Retry migration of tenant schema {} succeeded; tenant is served again.",
+                        schema);
+            } catch (RuntimeException e) {
+                still.add(schema);
+                log.warn(
+                        "Retry migration of tenant schema {} failed again: {}",
+                        schema,
+                        e.toString());
+            }
+        }
+        return still;
     }
 
     /**
@@ -117,8 +150,7 @@ public class TenantMigrationService {
         int skippedBefore = schemaMigrator.skippedUpToDate();
         ExecutorService pool =
                 TenantAwareExecutors.newFixedThreadPool(
-                        workers,
-                        TenantAwareExecutors.threadFactory("tenant-migrate", true));
+                        workers, TenantAwareExecutors.threadFactory("tenant-migrate", true));
         try {
             List<Future<?>> futures = new ArrayList<>(tenants.size());
             for (Tenant tenant : tenants) {
@@ -170,12 +202,14 @@ public class TenantMigrationService {
         String schema = tenant.getSchemaName();
         try {
             schemaMigrator.migrate(schema);
+            failures.recordSuccess(schema);
         } catch (RuntimeException e) {
             failedSchemas.add(schema);
+            failures.recordFailure(schema);
             log.error(
                     "Startup migration failed for tenant '{}' (schema {}) - that tenant may still"
-                        + " be missing recently-added tables/columns until this is fixed and core"
-                        + " is restarted",
+                            + " be missing recently-added tables/columns until this is fixed and core"
+                            + " is restarted",
                     tenant.getName(),
                     schema,
                     e);
