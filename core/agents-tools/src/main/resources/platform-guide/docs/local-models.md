@@ -227,6 +227,29 @@ or anything if the proxy has no master key. Model ids on the row are the
 names LiteLLM's `model_list` declares (find them with
 `curl http://<proxy>:4000/v1/models`), not the backends' raw ids.
 
+### A free-provider aggregator: FreeLLMAPI
+
+[FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi) (MIT) is the same
+idea pointed the other way: one OpenAI-compatible `/v1` gateway in front of
+~34 *free* LLM providers (Groq, Gemini, OpenRouter free tiers, and more), so
+an agent gets a working model with **zero per-provider API keys**. Run it as
+an opt-in Compose profile:
+
+```bash
+docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env \
+  --profile freellmapi up -d freellmapi
+```
+
+Then register a provider row of type **Local/OpenAI-compatible**
+(`LOCAL_OPENAI`) with base URL `http://freellmapi:3001/v1` and any model id
+the gateway exposes. The `freellmapi` service sits on the `agent-io` network
+with core, so its compose DNS name works out of the box - if the SSRF guard
+still refuses a private address, add `freellmapi:3001` to
+`APP_SECURITY_OUTBOUND_ALLOWED_PRIVATE_HOSTS` as with any BYOK endpoint. The
+gateway's own console listens on the loopback-only `${FREELLMAPI_HOST_PORT:-3001}`;
+free providers rate-limit by the minute and day, so keep it behind - not in
+front of - a paid or local row in the pool's priority order.
+
 ## Choosing a model
 
 These are starting points to try on your own hardware, not benchmark results.
