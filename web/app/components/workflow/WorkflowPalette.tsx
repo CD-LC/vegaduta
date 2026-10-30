@@ -24,7 +24,7 @@ export default function WorkflowPalette({
   setPaletteOpen,
   tNodeDefs,
 }: WorkflowPaletteProps) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowPalette");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowPalette");
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
@@ -74,7 +74,8 @@ export default function WorkflowPalette({
         </div>
         {visibleByCategory.length === 0 && (
           <div className="px-1 py-4 text-xs text-muted-foreground" role="status">
-            {tHC("s2")}{query}&rdquo;.
+            {tHC("s2")}
+            {query}&rdquo;.
           </div>
         )}
         {visibleByCategory.map(({ category, defs }) => {

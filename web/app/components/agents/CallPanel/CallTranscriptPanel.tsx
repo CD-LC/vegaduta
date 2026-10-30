@@ -23,8 +23,15 @@ interface CallTranscriptPanelProps {
   replay?: TranscriptReplay;
 }
 
-export default function CallTranscriptPanel({ callTranscript, pipelineBusy, lastTranscript, lastReply, transcriptScrollRef, replay }: CallTranscriptPanelProps) {
-    const tHC = useTranslations("hcComponentsAgentsCallPanelCallTranscriptPanel");
+export default function CallTranscriptPanel({
+  callTranscript,
+  pipelineBusy,
+  lastTranscript,
+  lastReply,
+  transcriptScrollRef,
+  replay,
+}: CallTranscriptPanelProps) {
+  const tHC = useTranslations("hcComponentsAgentsCallPanelCallTranscriptPanel");
   return (
     <>
       {/* Direct report (2026-08-12): "it should display all transcribe of

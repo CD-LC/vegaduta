@@ -65,7 +65,7 @@ type Props = {
 };
 
 export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Props) {
-    const tHC = useTranslations("hcComponentsCapabilitiesProcessTheater");
+  const tHC = useTranslations("hcComponentsCapabilitiesProcessTheater");
   const reduce = useReducedMotion();
   const [scenarioId, setScenarioId] = useState(PROCESS_SCENARIOS[0].id);
   const [at, setAt] = useState(0);
@@ -103,9 +103,7 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
         >
           {tHC("s7")}
         </h2>
-        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-          {tHC("s6")}
-        </p>
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{tHC("s6")}</p>
 
         <div role="group" aria-label="Process" className="mt-4 flex flex-wrap gap-1.5">
           {PROCESS_SCENARIOS.map((s) => (
@@ -252,7 +250,8 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="min-w-0 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">{tHC("s4")}</span> {scenario.needs}{tHC("s3")}
+            <span className="font-medium text-foreground">{tHC("s4")}</span> {scenario.needs}
+            {tHC("s3")}
           </p>
           <div className="flex shrink-0 gap-2">
             {!reduce && (

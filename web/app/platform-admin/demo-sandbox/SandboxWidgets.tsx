@@ -59,7 +59,7 @@ export function StatusBadge({ status }: { status: string }) {
 // scaled to the container's width by the `w-full` class, so it stays readable
 // on a phone without any resize listener or layout measurement.
 export function DailyChart({ series }: { series: any[] }) {
-    const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
+  const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
   const width = 760;
   const height = 170;
   const padBottom = 22;
@@ -209,7 +209,7 @@ export function NumberField({
   settingKey?: string;
   fallback?: any;
 }) {
-    const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
+  const tHC = useTranslations("hcPlatformadminDemosandboxSandboxWidgets");
   return (
     <div className="rounded-lg border border-border p-3">
       <Label className="text-sm font-medium text-foreground">{label}</Label>
@@ -223,7 +223,9 @@ export function NumberField({
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
         {settingKey && <code className="font-mono text-[11px] text-muted-foreground/70">{settingKey}</code>}
         {fallback !== undefined && fallback !== null && (
-          <span className="text-[11px] text-muted-foreground/70">{tHC("s1")} {String(fallback)}</span>
+          <span className="text-[11px] text-muted-foreground/70">
+            {tHC("s1")} {String(fallback)}
+          </span>
         )}
       </div>
     </div>

@@ -27,16 +27,25 @@ export interface NewCommentCardProps {
 }
 
 export function NewCommentCard({
-  workflowId, target, people = [], nodeLabel, onCreated, onCancel, autoFocus = true, onFocusFallback,
-  className, style, anchored = false,
+  workflowId,
+  target,
+  people = [],
+  nodeLabel,
+  onCreated,
+  onCancel,
+  autoFocus = true,
+  onFocusFallback,
+  className,
+  style,
+  anchored = false,
 }: NewCommentCardProps) {
-    const tHC = useTranslations("hcComponentsWorkflowNewCommentCard");
+  const tHC = useTranslations("hcComponentsWorkflowNewCommentCard");
   const uid = useId();
   const cardRef = useRef<HTMLDivElement>(null);
   const focus = useReturnFocus(cardRef, false, onFocusFallback);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const where = "nodeId" in target ? (nodeLabel?.(target.nodeId) || "Step") : "Canvas";
+  const where = "nodeId" in target ? nodeLabel?.(target.nodeId) || "Step" : "Canvas";
 
   async function create(body: string, mentionIds: string[]): Promise<boolean> {
     setBusy(true);

@@ -43,7 +43,7 @@ export default function RunHistory({
   /** The tools the sandbox simulated in the open run (from its detail); empty for a quick run or when none was. */
   simulatedTools?: string[];
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunHistory");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunHistory");
   const t = useTranslations("evalControls");
   // The turn records OK, FAILED, NOT_RUN, AWAITING_APPROVAL, REPLAYED or SIMULATED; an unknown value is shown as it came.
   const toolStatusLabel = (status: string): string => {
@@ -60,11 +60,7 @@ export default function RunHistory({
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-foreground">{tHC("s9")}</h3>
-      {loaded && runs.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          {tHC("s8")}
-        </p>
-      )}
+      {loaded && runs.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s8")}</p>}
       <div className="space-y-2">
         {runsPagination.pageItems.map((run) => (
           <div key={run.id} className="rounded-md border border-border">
@@ -111,20 +107,10 @@ export default function RunHistory({
               {traceLink(run.langfuseTraceUrl)}
               {!LIVE_STATUSES.includes(run.status) && (run.scoredCaseCount > 0 || run.erroredCaseCount > 0) && (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDownloadJunit(run.id)}
-                    title={tHC("s6")}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => onDownloadJunit(run.id)} title={tHC("s6")}>
                     <Download size={13} aria-hidden="true" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDownloadRunJsonl(run.id)}
-                    title={tHC("s5")}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => onDownloadRunJsonl(run.id)} title={tHC("s5")}>
                     <Braces size={13} aria-hidden="true" />
                   </Button>
                 </>

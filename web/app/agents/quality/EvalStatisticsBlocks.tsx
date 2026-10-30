@@ -49,7 +49,7 @@ function intervalTail(estimate: IntervalEstimate | null | undefined): string {
  *  Never decorative — the DTO contract says a warning is only present when
  *  it limits the figures, so every one is printed. */
 export function WarningsList({ warnings }: { warnings: string[] }) {
-    const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   if (!warnings || warnings.length === 0) return null;
   return (
     <Alert variant="warning">
@@ -79,7 +79,7 @@ export function DatasetReliabilityBlock({
   onlyUnstable: boolean;
   onToggleOnlyUnstable: () => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   const meanScore = metricEstimate(dataset, "MEAN_SCORE");
   const passAt1 = metricEstimate(dataset, "PASS_AT_1");
   const passHatK = metricEstimate(dataset, "PASS_HAT_K");
@@ -96,9 +96,7 @@ export function DatasetReliabilityBlock({
           <Alert variant="warning">
             <ShieldAlert aria-hidden="true" />
             <AlertTitle>{tHC("s22")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s21")}
-            </AlertDescription>
+            <AlertDescription>{tHC("s21")}</AlertDescription>
           </Alert>
         )}
 
@@ -178,7 +176,7 @@ function CaseReliabilityTable({
   onlyUnstable: boolean;
   onToggleOnlyUnstable: () => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   // "Unstable" deliberately covers both failure modes a reader must not miss:
   // a case whose rollouts disagreed (flaky) and a case with only one rollout
   // behind it (unreplicated). Both mean "do not quote this number".
@@ -198,7 +196,8 @@ function CaseReliabilityTable({
         <h3 className="text-sm font-semibold text-foreground">{tHC("s17")}</h3>
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <input type="checkbox" checked={onlyUnstable} onChange={onToggleOnlyUnstable} />
-          {tHC("s16")}{unstableCount})
+          {tHC("s16")}
+          {unstableCount})
         </label>
       </div>
 
@@ -258,10 +257,7 @@ function CaseReliabilityTable({
                         </Badge>
                       )}
                       {caseUnscoredRollouts(c) > 0 && (
-                        <Badge
-                          variant="secondary"
-                          title={tHC("s11")}
-                        >
+                        <Badge variant="secondary" title={tHC("s11")}>
                           {caseUnscoredRollouts(c)} unscored
                         </Badge>
                       )}
@@ -291,7 +287,7 @@ function CaseReliabilityTable({
 // ---------------------------------------------------------------------------
 
 export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | null }) {
-    const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   // Not measured is the default state for every new suite, and it is a
   // genuinely different statement from "the floor is zero". Saying so plainly
   // is the whole value of this card until the dataset has been run twice.
@@ -302,9 +298,7 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
         <Gauge aria-hidden="true" />
         <AlertTitle>{tHC("s10")}</AlertTitle>
         <AlertDescription>
-          <p>
-            {tHC("s9")}
-          </p>
+          <p>{tHC("s9")}</p>
           {(floor?.warnings || []).length > 0 && (
             <ul className="mt-2 list-disc space-y-1 ps-5 text-xs">
               {(floor?.warnings || []).map((w, i) => (
@@ -330,9 +324,7 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
           <Alert variant="warning">
             <ShieldAlert aria-hidden="true" />
             <AlertTitle>{tHC("s8")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s7")}
-            </AlertDescription>
+            <AlertDescription>{tHC("s7")}</AlertDescription>
           </Alert>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -361,8 +353,10 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          {tHC("s3")}{floor?.datasetName || "this dataset"}” over {measured.pairedCases} {tHC("s2")}
-          {measured.pairedCases === 1 ? "" : "s"}{tHC("s1")}
+          {tHC("s3")}
+          {floor?.datasetName || "this dataset"}” over {measured.pairedCases} {tHC("s2")}
+          {measured.pairedCases === 1 ? "" : "s"}
+          {tHC("s1")}
         </p>
       </CardContent>
     </Card>

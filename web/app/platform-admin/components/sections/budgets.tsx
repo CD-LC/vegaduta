@@ -49,7 +49,7 @@ function windowLabel(seconds: number) {
 }
 
 export function PerUserBudgetSection() {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [budget, setBudget] = useState<any>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -167,8 +167,7 @@ export function PerUserBudgetSection() {
       icon={Wallet}
     >
       <InfoNote>
-        {tHC("s21")}{" "}
-        <strong>{tHC("s20")}</strong> {tHC("s19")}
+        {tHC("s21")} <strong>{tHC("s20")}</strong> {tHC("s19")}
       </InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -200,9 +199,7 @@ export function PerUserBudgetSection() {
         </div>
       </div>
 
-      <div className="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        {tHC("s17")}
-      </div>
+      <div className="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s17")}</div>
       <div className="flex flex-wrap items-end gap-3">
         {["text", "image", "voice"].map((m) => (
           <div key={m} className="w-32 space-y-1.5">
@@ -236,7 +233,8 @@ export function PerUserBudgetSection() {
           {saving ? "Saving…" : "Save budget"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          {tHC("s16")}{Number(budget?.dailyUsd ?? 0).toFixed(2)} / {windowLabel(budget?.windowSeconds ?? 86400)}
+          {tHC("s16")}
+          {Number(budget?.dailyUsd ?? 0).toFixed(2)} / {windowLabel(budget?.windowSeconds ?? 86400)}
         </span>
       </div>
     </SectionCard>
@@ -253,7 +251,7 @@ export function PerUserBudgetSection() {
 // 2026-09-26); PREMIUM/UNLIMITED multiply it (default 400,000 x 3 =
 // 1,200,000/30 days).
 export function FreeTierQuotaSection() {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [, setQuota] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -330,9 +328,7 @@ export function FreeTierQuotaSection() {
       subtitle="Token cap on the platform-hosted LLM pool, per rolling 30 days - independent from the dollar budget above. Changes apply on the next request, no restart."
       icon={Gauge}
     >
-      <InfoNote>
-        {tHC("s14")}
-      </InfoNote>
+      <InfoNote>{tHC("s14")}</InfoNote>
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-56 space-y-1.5">
@@ -380,8 +376,7 @@ export function FreeTierQuotaSection() {
           {saving ? "Saving…" : "Save quota"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          {tHC("s10")} {effectivePremium.toLocaleString()} {tHC("s9")}{" "}
-          {effectiveUnlimited.toLocaleString()} tokens
+          {tHC("s10")} {effectivePremium.toLocaleString()} {tHC("s9")} {effectiveUnlimited.toLocaleString()} tokens
         </span>
       </div>
     </SectionCard>
@@ -409,7 +404,7 @@ const REASONING_EFFORTS = [
 ];
 
 export function ChatGenerationSection() {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsBudgets");
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -505,9 +500,7 @@ export function ChatGenerationSection() {
             onChange={(e) => setDraft((d: any) => ({ ...d, geminiReasoningEffort: e.target.value }))}
             options={REASONING_EFFORTS}
           />
-          <p className="text-xs text-muted-foreground">
-            {tHC("s5")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
         </div>
         <div className="w-44 space-y-1.5">
           <Label htmlFor="budget-history-max-turns" className="text-xs text-muted-foreground">
@@ -538,17 +531,15 @@ export function ChatGenerationSection() {
           />
         </div>
       </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        {tHC("s2")}
-      </p>
+      <p className="mt-1.5 text-xs text-muted-foreground">{tHC("s2")}</p>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="button" onClick={save} disabled={saving} size="sm">
           {saving ? "Saving…" : "Save defaults"}
         </Button>
         <span className="text-xs text-muted-foreground">
-          Current: {settings?.geminiReasoningEffort ?? "low"} {tHC("s1")} {Number(settings?.historyMaxTurns ?? 40)} turns ·{" "}
-          {Number(settings?.historyMaxChars ?? 32000).toLocaleString()} chars
+          Current: {settings?.geminiReasoningEffort ?? "low"} {tHC("s1")} {Number(settings?.historyMaxTurns ?? 40)}{" "}
+          turns · {Number(settings?.historyMaxChars ?? 32000).toLocaleString()} chars
         </span>
       </div>
     </SectionCard>

@@ -82,7 +82,7 @@ function StatTile({ icon: Icon, value, label }: { icon: LucideIcon; value: numbe
 const INDUSTRY_PAGE_SIZE = 12;
 
 export default function WorkflowRecipesClient() {
-    const tHC = useTranslations("hcHelpWorkflowrecipesWorkflowRecipesClient");
+  const tHC = useTranslations("hcHelpWorkflowrecipesWorkflowRecipesClient");
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
   const searching = q.length > 0;
@@ -300,8 +300,9 @@ export default function WorkflowRecipesClient() {
                 <section className="mb-12 scroll-mt-32 pb-12">
                   <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">{tHC("s23")}</h2>
                   <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
-                    {tHC("s22")} <strong className="font-semibold text-foreground">{tHC("s21")}</strong>{" "}
-                    {tHC("s20")} <strong className="font-semibold text-foreground">nodes</strong> {tHC("s19")} <strong className="font-semibold text-foreground">Output</strong> {tHC("s18")}
+                    {tHC("s22")} <strong className="font-semibold text-foreground">{tHC("s21")}</strong> {tHC("s20")}{" "}
+                    <strong className="font-semibold text-foreground">nodes</strong> {tHC("s19")}{" "}
+                    <strong className="font-semibold text-foreground">Output</strong> {tHC("s18")}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-2">
                     {LEGEND_ORDER.map((kind) => {
@@ -327,9 +328,7 @@ export default function WorkflowRecipesClient() {
                   <Alert className="mt-6 border-primary/25 bg-primary/5">
                     <UserCheck className="text-primary" aria-hidden="true" />
                     <AlertTitle>{tHC("s17")}</AlertTitle>
-                    <AlertDescription>
-                      {tHC("s16")}
-                    </AlertDescription>
+                    <AlertDescription>{tHC("s16")}</AlertDescription>
                   </Alert>
                 </section>
 
@@ -338,9 +337,7 @@ export default function WorkflowRecipesClient() {
                 {/* Design principles — the enterprise "why" every recipe follows */}
                 <section className="mb-12 scroll-mt-32 pb-12">
                   <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">{tHC("s15")}</h2>
-                  <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
-                    {tHC("s14")}
-                  </p>
+                  <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">{tHC("s14")}</p>
                   <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {PRINCIPLES.map((p) => {
                       const Icon = p.icon;
@@ -365,9 +362,7 @@ export default function WorkflowRecipesClient() {
 
                 {/* Which pattern should I use? — a decision reference, as a table */}
                 <section className="mb-12 scroll-mt-32 pb-12">
-                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">
-                    {tHC("s13")}
-                  </h2>
+                  <h2 className="mb-3 text-xl font-semibold tracking-tight text-foreground">{tHC("s13")}</h2>
                   <p className="max-w-[68ch] text-sm leading-relaxed text-muted-foreground">
                     {tHC("s12")}{" "}
                     <a
@@ -407,10 +402,11 @@ export default function WorkflowRecipesClient() {
               <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
                 <Search className="size-6 text-muted-foreground" aria-hidden="true" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">{tHC("s8")}{query}”.</p>
-                  <p className="text-sm text-muted-foreground">
-                    {tHC("s7")}
+                  <p className="text-sm font-medium text-foreground">
+                    {tHC("s8")}
+                    {query}”.
                   </p>
+                  <p className="text-sm text-muted-foreground">{tHC("s7")}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setQuery("")}>
                   {tHC("s6")}
@@ -530,7 +526,8 @@ export default function WorkflowRecipesClient() {
                       onClick={() => setVisibleCount((c) => c + INDUSTRY_PAGE_SIZE)}
                       data-testid="recipes-show-more"
                     >
-                      {tHC("s4")}{hiddenCount})
+                      {tHC("s4")}
+                      {hiddenCount})
                     </Button>
                   </div>
                 )}
@@ -541,9 +538,7 @@ export default function WorkflowRecipesClient() {
             <div className="mt-16 flex flex-col items-start gap-4 rounded-xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
                 <h3 className="text-base font-semibold tracking-tight text-foreground">{tHC("s3")}</h3>
-                <p className="max-w-[52ch] text-sm leading-relaxed text-muted-foreground">
-                  {tHC("s2")}
-                </p>
+                <p className="max-w-[52ch] text-sm leading-relaxed text-muted-foreground">{tHC("s2")}</p>
               </div>
               <Button asChild className="shrink-0">
                 <Link href="/workflows">

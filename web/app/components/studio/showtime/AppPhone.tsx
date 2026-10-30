@@ -40,7 +40,7 @@ type Handlers = {
 };
 
 export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: AppView } & Handlers) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeAppPhone");
+  const tHC = useTranslations("hcComponentsStudioShowtimeAppPhone");
   const b = view.build;
   const vis = (a: number, z: number) => ease(seg(b, a, z));
   const placing = (a: number, z: number) => b > a && b < z;

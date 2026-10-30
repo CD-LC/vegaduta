@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Award, CheckCircle2, Gauge, Lock, MessageSquareText, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { api } from "../../lib/api";
-import type { QualityConfigResponse, QualityHistoryResponse, QualityStatisticsResponse, QualitySummaryResponse } from "../../lib/api";
+import type {
+  QualityConfigResponse,
+  QualityHistoryResponse,
+  QualityStatisticsResponse,
+  QualitySummaryResponse,
+} from "../../lib/api";
 import { hasQualityRecords } from "../../lib/api/quality";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -60,7 +65,7 @@ export default function AgentQualityPanel({
   /** Where the "Test against attacks" link goes; omitted = no link (the attack test is not available). */
   attackTestHref?: string;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
+  const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
   const [config, setConfig] = useState<QualityConfigResponse | null>(null);
   const [summary, setSummary] = useState<QualitySummaryResponse | null>(null);
   const [statistics, setStatistics] = useState<QualityStatisticsResponse | null>(null);
@@ -145,9 +150,7 @@ export default function AgentQualityPanel({
         <Lock />
         <AlertTitle>{tHC("s20")}</AlertTitle>
         <AlertDescription>
-          <p>
-            {tHC("s19")}
-          </p>
+          <p>{tHC("s19")}</p>
           <UpgradeLock
             reason="Agent quality evaluations (scores, history, statistics) are a Premium feature - upgrade to view them."
             href="/admin/billing"
@@ -167,9 +170,7 @@ export default function AgentQualityPanel({
       <Alert>
         <Gauge />
         <AlertTitle>{tHC("s17")}</AlertTitle>
-        <AlertDescription>
-          {tHC("s16")}
-        </AlertDescription>
+        <AlertDescription>{tHC("s16")}</AlertDescription>
       </Alert>
     );
   }
@@ -286,7 +287,7 @@ export default function AgentQualityPanel({
  * via currentColor so it reads correctly in light and dark.
  */
 function QualityTrend({ history }: { history: QualityHistoryResponse }) {
-    const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
+  const tHC = useTranslations("hcComponentsAgentsAgentQualityPanel");
   const values = history.overallScores.map((v) => Number(v) || 0);
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);

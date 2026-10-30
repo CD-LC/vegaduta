@@ -43,7 +43,7 @@ export default function DeployPanel({
   onTurnSpent,
   onShareUrl,
 }: Props) {
-    const tHC = useTranslations("hcComponentsStudioDeployPanel");
+  const tHC = useTranslations("hcComponentsStudioDeployPanel");
   const [switching, setSwitching] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   // The messenger bridge is only shown when the deployment has a REAL
@@ -82,9 +82,7 @@ export default function DeployPanel({
         <div className="mb-1 flex items-center gap-2 text-sm font-medium">
           <Radio aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s7")}
         </div>
-        <p className="mb-3 text-xs text-muted-foreground">
-          {tHC("s6")}
-        </p>
+        <p className="mb-3 text-xs text-muted-foreground">{tHC("s6")}</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {agents.map((a) => (
             <div

@@ -52,7 +52,7 @@ function formatSize(bytes: number): string {
 }
 
 export default function PluginsPage() {
-    const tHC = useTranslations("hcPlatformadminPluginsPage");
+  const tHC = useTranslations("hcPlatformadminPluginsPage");
   const [catalog, setCatalog] = useState<PluginCatalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,10 +86,7 @@ export default function PluginsPage() {
     refresh().catch((e) => console.error("Failed to load the plugin catalog", e));
   }, [refresh]);
 
-  const selectedEntry = useMemo(
-    () => catalog?.plugins.find((p) => p.id === pluginId) || null,
-    [catalog, pluginId]
-  );
+  const selectedEntry = useMemo(() => catalog?.plugins.find((p) => p.id === pluginId) || null, [catalog, pluginId]);
 
   const publish = async (e: FormEvent) => {
     e.preventDefault();
@@ -154,7 +151,12 @@ export default function PluginsPage() {
       eyebrow="Distribution"
       actions={
         <div className="flex items-center gap-2 flex-wrap">
-          {catalog && <Badge variant="outline">{tHC("s24")}{catalog.version}</Badge>}
+          {catalog && (
+            <Badge variant="outline">
+              {tHC("s24")}
+              {catalog.version}
+            </Badge>
+          )}
           <Button variant="outline" size="sm" onClick={refresh} disabled={loading || uploading}>
             <RefreshCw size={14} aria-hidden /> Refresh
           </Button>
@@ -162,9 +164,10 @@ export default function PluginsPage() {
       }
     >
       <PageHint>
-        {tHC("s23")} <code>.vsix</code>{tHC("s22")}{" "}
-        <code>.zip</code>{tHC("s21")} <code>.zip</code>/<code>.crx</code>{tHC("s20")}{" "}
-        <code>/plugins</code> {tHC("s19")} <code>plugins.catalog</code> {tHC("s18")}
+        {tHC("s23")} <code>.vsix</code>
+        {tHC("s22")} <code>.zip</code>
+        {tHC("s21")} <code>.zip</code>/<code>.crx</code>
+        {tHC("s20")} <code>/plugins</code> {tHC("s19")} <code>plugins.catalog</code> {tHC("s18")}
       </PageHint>
 
       {error && (
@@ -183,7 +186,9 @@ export default function PluginsPage() {
           <form onSubmit={publish} className="space-y-4">
             <div className="flex flex-wrap items-end gap-3">
               <div className="w-56 max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-id" className="text-xs text-muted-foreground">Plugin</Label>
+                <Label htmlFor="plugin-publish-id" className="text-xs text-muted-foreground">
+                  Plugin
+                </Label>
                 <Select
                   id="plugin-publish-id"
                   value={pluginId}
@@ -193,7 +198,9 @@ export default function PluginsPage() {
                 />
               </div>
               <div className="w-40 max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-version" className="text-xs text-muted-foreground">Version</Label>
+                <Label htmlFor="plugin-publish-version" className="text-xs text-muted-foreground">
+                  Version
+                </Label>
                 <Input
                   id="plugin-publish-version"
                   placeholder={tHC("s16")}
@@ -203,7 +210,9 @@ export default function PluginsPage() {
                 />
               </div>
               <div className="w-72 max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-artifact" className="text-xs text-muted-foreground">{tHC("s15")}</Label>
+                <Label htmlFor="plugin-publish-artifact" className="text-xs text-muted-foreground">
+                  {tHC("s15")}
+                </Label>
                 <Input
                   id="plugin-publish-artifact"
                   key={fileInputKey}
@@ -216,7 +225,9 @@ export default function PluginsPage() {
             </div>
             <div className="flex flex-wrap items-end gap-3">
               <div className="w-[28rem] max-w-full space-y-1.5">
-                <Label htmlFor="plugin-publish-notes" className="text-xs text-muted-foreground">{tHC("s14")}</Label>
+                <Label htmlFor="plugin-publish-notes" className="text-xs text-muted-foreground">
+                  {tHC("s14")}
+                </Label>
                 <Textarea
                   id="plugin-publish-notes"
                   rows={2}
@@ -244,8 +255,10 @@ export default function PluginsPage() {
               <p className="text-xs text-muted-foreground">
                 {selectedEntry.artifact && selectedEntry.latestVersion ? (
                   <>
-                    {tHC("s11")}{selectedEntry.latestVersion} —{" "}
-                    {selectedEntry.artifact.fileName} ({formatSize(selectedEntry.artifact.sizeBytes)}{tHC("s10")}
+                    {tHC("s11")}
+                    {selectedEntry.latestVersion} — {selectedEntry.artifact.fileName} (
+                    {formatSize(selectedEntry.artifact.sizeBytes)}
+                    {tHC("s10")}
                   </>
                 ) : (
                   <>{tHC("s9")}</>
@@ -305,8 +318,7 @@ export default function PluginsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-2">
-            {tHC("s4")} <code>{tHC("s3")}</code> {tHC("s2")}{" "}
-            <code>plugins.catalog</code> {tHC("s1")}
+            {tHC("s4")} <code>{tHC("s3")}</code> {tHC("s2")} <code>plugins.catalog</code> {tHC("s1")}
           </p>
           <pre className="overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs leading-relaxed">
             {loading ? "Loading…" : JSON.stringify(catalog, null, 2)}

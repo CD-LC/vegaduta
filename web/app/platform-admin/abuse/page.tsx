@@ -16,7 +16,7 @@ import { useTranslations } from "../../lib/i18n";
 // home. Per-channel/per-IP token buckets and tool/provider circuit-breaker
 // config remain later phases (§7), labeled coming-soon.
 export default function AbuseRateControlPage() {
-    const tHC = useTranslations("hcPlatformadminAbusePage");
+  const tHC = useTranslations("hcPlatformadminAbusePage");
   return (
     <AdminShell title={tHC("s8")}>
       <PageHint>
@@ -33,10 +33,11 @@ export default function AbuseRateControlPage() {
         icon={Gauge}
         delay={0}
       >
-        <p className="text-sm text-muted-foreground">
-          {tHC("s4")}
-        </p>
-        <Link href="/platform-admin/fraud" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+        <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
+        <Link
+          href="/platform-admin/fraud"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
           {tHC("s3")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
@@ -50,9 +51,7 @@ export default function AbuseRateControlPage() {
 
       <ToolCircuitBreakersSection delay={0.06} />
 
-      <InfoNote>
-        {tHC("s1")}
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
     </AdminShell>
   );
 }

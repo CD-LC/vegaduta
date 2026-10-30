@@ -41,7 +41,7 @@ function statusIcon(status: string) {
 }
 
 export default function StatusPageClient() {
-    const tHC = useTranslations("hcStatusStatusPageClient");
+  const tHC = useTranslations("hcStatusStatusPageClient");
   const [state, setState] = useState<FetchState>({ kind: "loading" });
   const [lastPoll, setLastPoll] = useState<Date | null>(null);
 
@@ -123,9 +123,7 @@ export default function StatusPageClient() {
       <header className="mx-auto max-w-3xl px-6 pb-8 pt-10 text-center">
         <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">{tHC("s11")}</span>
         <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{tHC("s10")}</h1>
-        <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
-          {tHC("s9")}
-        </p>
+        <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">{tHC("s9")}</p>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 pb-20 sm:px-8">
@@ -186,9 +184,9 @@ export default function StatusPageClient() {
         <section className="mt-8 rounded-2xl border border-border/60 px-6 py-6">
           <h2 className="text-sm font-semibold">{tHC("s8")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            {tHC("s7")}{" "}
-            <code className="font-mono text-xs">describeCluster()</code>{tHC("s6")} <em>{tHC("s5")}</em> {tHC("s4")}{" "}
-            <em>Unknown</em> {tHC("s3")} <code className="font-mono text-xs">{tHC("s2")}</code>.
+            {tHC("s7")} <code className="font-mono text-xs">describeCluster()</code>
+            {tHC("s6")} <em>{tHC("s5")}</em> {tHC("s4")} <em>Unknown</em> {tHC("s3")}{" "}
+            <code className="font-mono text-xs">{tHC("s2")}</code>.
           </p>
           {lastPoll && (
             <p className="mt-3 font-mono text-xs text-muted-foreground">

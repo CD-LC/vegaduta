@@ -71,7 +71,7 @@ export default function AdminShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsAdminShell");
+  const tHC = useTranslations("hcPlatformadminComponentsAdminShell");
   const askConfirm = useConfirm();
   const { username, logout } = useAuth();
   const pathname = usePathname();
@@ -491,7 +491,8 @@ export default function AdminShell({
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-destructive">
               <Siren size={15} className="shrink-0" aria-hidden="true" />
               <span className="truncate">
-                {tHC("s1")}{killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
+                {tHC("s1")}
+                {killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
                 {killSwitch.stoppedAt ? ` · since ${new Date(killSwitch.stoppedAt).toLocaleString()}` : ""}
               </span>
             </div>

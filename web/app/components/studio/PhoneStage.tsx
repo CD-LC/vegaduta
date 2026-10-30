@@ -189,7 +189,7 @@ function AppBar({ name, sub }: { name: string; sub?: string }) {
 }
 
 function Idle() {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
       <div className="relative">
@@ -209,9 +209,7 @@ function Idle() {
       </div>
       <div>
         <div className="text-sm font-medium">{tHC("s18")}</div>
-        <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-          {tHC("s17")}
-        </p>
+        <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">{tHC("s17")}</p>
       </div>
       <div className="w-full space-y-1.5 opacity-60">
         {[70, 90, 55].map((w, i) => (
@@ -229,7 +227,7 @@ function Idle() {
 }
 
 function Brief({ job, animate }: { job: string; animate: boolean }) {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   const shown = useTyped(job || "Describe the job…", animate);
   return (
     <div className="flex h-full flex-col px-3 pb-10">
@@ -272,7 +270,7 @@ function Brief({ job, animate }: { job: string; animate: boolean }) {
 }
 
 function Built({ name, job, tools }: { name: string; job: string; tools: string[] }) {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   return (
     <div className="flex h-full flex-col px-3 pb-10">
       <motion.div
@@ -314,7 +312,7 @@ function Built({ name, job, tools }: { name: string; job: string; tools: string[
 }
 
 function Docs({ name }: { name: string }) {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   const files = [
     { n: "price-list.txt", d: "read" },
     { n: "returns-policy.txt", d: "read" },
@@ -424,7 +422,7 @@ function Run({
 }
 
 function Ask({ name }: { name: string }) {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   const [decided, setDecided] = useState(false);
   useEffect(() => {
     setDecided(false);
@@ -478,7 +476,7 @@ function Ask({ name }: { name: string }) {
 }
 
 function Pocket({ name, shareUrl }: { name: string; shareUrl: string | null }) {
-    const tHC = useTranslations("hcComponentsStudioPhoneStage");
+  const tHC = useTranslations("hcComponentsStudioPhoneStage");
   const qr = useMemo(() => {
     if (!shareUrl) return null;
     try {

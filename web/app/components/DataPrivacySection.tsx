@@ -22,7 +22,7 @@ import { useTranslations } from "../lib/i18n";
 // file download, POST /api/tenant/data-deletion a JSON ack - both now gated
 // by PERM_MANAGE_DATA_GOVERNANCE server-side (SecurityConfig).
 export default function DataPrivacySection() {
-    const tHC = useTranslations("hcComponentsDataPrivacySection");
+  const tHC = useTranslations("hcComponentsDataPrivacySection");
   const [organizationName, setOrganizationName] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState("idle"); // idle | loading | error | done
   const [exportError, setExportError] = useState<string | null>(null);
@@ -145,9 +145,7 @@ export default function DataPrivacySection() {
           >
             {tHC("s6")}
           </div>
-          <p style={hintStyle}>
-            {tHC("s5")}
-          </p>
+          <p style={hintStyle}>{tHC("s5")}</p>
           {exportStatus === "done" && (
             <p style={{ ...hintStyle, marginTop: "0.5rem", color: "var(--success-text)" }}>{tHC("s4")}</p>
           )}
@@ -180,12 +178,8 @@ export default function DataPrivacySection() {
           maxWidth: "44rem",
         }}
       >
-        <div style={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--danger-text)" }}>
-          {tHC("s3")}
-        </div>
-        <p style={hintStyle}>
-          {tHC("s2")}
-        </p>
+        <div style={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--danger-text)" }}>{tHC("s3")}</div>
+        <p style={hintStyle}>{tHC("s2")}</p>
         {deletionStatus === "done" ? (
           <p style={hintStyle}>{tHC("s1")}</p>
         ) : (

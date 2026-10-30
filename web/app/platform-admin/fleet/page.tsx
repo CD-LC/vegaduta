@@ -49,7 +49,7 @@ function money(x: number | null | undefined): string {
 }
 
 export default function FleetHealthPage() {
-    const tHC = useTranslations("hcPlatformadminFleetPage");
+  const tHC = useTranslations("hcPlatformadminFleetPage");
   const askConfirm = useConfirm();
   const [data, setData] = useState<FleetHealthResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -138,8 +138,8 @@ export default function FleetHealthPage() {
   return (
     <AdminShell title={tHC("s16")}>
       <PageHint>
-        {tHC("s15")}{" "}
-        <em>{tHC("s14")}</em>{tHC("s13")}
+        {tHC("s15")} <em>{tHC("s14")}</em>
+        {tHC("s13")}
       </PageHint>
 
       <SectionCard
@@ -407,7 +407,8 @@ export default function FleetHealthPage() {
 
       <InfoNote>
         {tHC("s2")}
-        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}{tHC("s1")}
+        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}
+        {tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

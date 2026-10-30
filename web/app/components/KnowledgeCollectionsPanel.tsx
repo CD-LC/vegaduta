@@ -85,7 +85,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
   { collections, onChanged, selectedId, onSelect }: KnowledgeCollectionsPanelProps,
   ref
 ) {
-    const tHC = useTranslations("hcComponentsKnowledgeCollectionsPanel");
+  const tHC = useTranslations("hcComponentsKnowledgeCollectionsPanel");
   const t = useTranslations("knowledgeCollectionsPanel");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

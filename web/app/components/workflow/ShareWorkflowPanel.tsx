@@ -31,8 +31,14 @@ type WorkflowShareStatus = {
 
 // workflowName is display-only chrome and the caller passes `workflow?.name`,
 // which is undefined until the canvas's initial fetch lands - hence optional.
-export default function ShareWorkflowPanel({ workflowId, workflowName }: { workflowId: string; workflowName?: string }) {
-    const tHC = useTranslations("hcComponentsWorkflowShareWorkflowPanel");
+export default function ShareWorkflowPanel({
+  workflowId,
+  workflowName,
+}: {
+  workflowId: string;
+  workflowName?: string;
+}) {
+  const tHC = useTranslations("hcComponentsWorkflowShareWorkflowPanel");
   const [status, setStatus] = useState<WorkflowShareStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -111,9 +117,7 @@ export default function ShareWorkflowPanel({ workflowId, workflowName }: { workf
 
   return (
     <div className="flex flex-col gap-2 border-t border-border px-5 py-3">
-      {workflowName ? (
-        <p className="truncate text-xs font-medium text-muted-foreground">{workflowName}</p>
-      ) : null}
+      {workflowName ? <p className="truncate text-xs font-medium text-muted-foreground">{workflowName}</p> : null}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {/* Shared .state-dot instead of a bespoke emerald/grey circle. */}
@@ -151,9 +155,7 @@ export default function ShareWorkflowPanel({ workflowId, workflowName }: { workf
               {copied ? <Check size={13} style={{ color: "var(--state-success)" }} /> : <Copy size={13} />}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {tHC("s1")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           <ShareLinkMeta status={status} />
         </>
       )}

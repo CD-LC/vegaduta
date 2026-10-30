@@ -31,7 +31,7 @@ type Props = {
 };
 
 export default function PocketPanel({ token, agentName, readOnly, signupHref, onShareUrl }: Props) {
-    const tHC = useTranslations("hcComponentsStudioPocketPanel");
+  const tHC = useTranslations("hcComponentsStudioPocketPanel");
   const apk = getMobileApkDownload();
   const [busy, setBusy] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -94,9 +94,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
               ? `Put “${agentName.length > 26 ? `${agentName.slice(0, 25)}…` : agentName}” on a phone.`
               : "Put your agent on a phone."}
           </h3>
-          <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">
-            {tHC("s13")}
-          </p>
+          <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">{tHC("s13")}</p>
 
           {!shareUrl ? (
             <div className="mt-4">
@@ -109,9 +107,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 {tHC("s12")}
               </Button>
               {message && <p className="mt-2 text-sm text-destructive">{message}</p>}
-              <p className="mt-2 max-w-md text-xs text-muted-foreground">
-                {tHC("s11")}
-              </p>
+              <p className="mt-2 max-w-md text-xs text-muted-foreground">{tHC("s11")}</p>
             </div>
           ) : (
             <div className="mt-4 space-y-2">
@@ -133,9 +129,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                   {copied ? "Copied" : "Copy"}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {tHC("s9")}
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
             </div>
           )}
         </div>
@@ -172,9 +166,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
           <div className="text-sm font-medium">
             {android ? "You are on Android - take it with you." : "Want it as an app?"}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {tHC("s6")}
-          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{tHC("s6")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {apk && (
@@ -192,7 +184,8 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
       </div>
       {apk && (
         <p className="border-t border-border/40 px-5 py-2 text-[10.5px] text-muted-foreground sm:px-7">
-          {tHC("s3")}{apk.version ? `, version ${apk.version}` : ""} {tHC("s2")}
+          {tHC("s3")}
+          {apk.version ? `, version ${apk.version}` : ""} {tHC("s2")}
           {apk.sha256 && (
             <>
               {" "}

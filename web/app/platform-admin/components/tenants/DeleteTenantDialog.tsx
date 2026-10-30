@@ -32,7 +32,7 @@ export default function DeleteTenantDialog({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTenantsDeleteTenantDialog");
+  const tHC = useTranslations("hcPlatformadminComponentsTenantsDeleteTenantDialog");
   const [typed, setTyped] = useState("");
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -100,9 +100,7 @@ export default function DeleteTenantDialog({
               </button>
             </div>
 
-            <p className="mt-2 text-xs text-muted-foreground">
-              {tHC("s6")}
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{tHC("s6")}</p>
             <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
               <li>{tHC("s5")}</li>
               <li>{tHC("s4")}</li>

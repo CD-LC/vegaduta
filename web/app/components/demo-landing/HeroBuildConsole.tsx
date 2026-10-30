@@ -102,7 +102,7 @@ export default function BuildConsole({
   runLabel: string;
   onRunSpec: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsDemolandingHeroBuildConsole");
+  const tHC = useTranslations("hcComponentsDemolandingHeroBuildConsole");
   const spec = BUILD_LOGS[workloadId] ?? BUILD_LOGS.support;
   const total = spec.steps.length + 1; // +1 lands the ship line
   // Start empty even under reduced motion — the effect below fills the whole

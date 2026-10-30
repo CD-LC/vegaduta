@@ -30,7 +30,7 @@ import QuickTaskResultCard from "./quickTask/QuickTaskResultCard";
 // quickTask/model.ts.
 
 export default function SimpleTaskRunner() {
-    const tHC = useTranslations("hcComponentsSimpleTaskRunner");
+  const tHC = useTranslations("hcComponentsSimpleTaskRunner");
   const t = useTranslations("simpleTaskRunner");
   const [phoneNumber, setPhoneNumber] = useState(null); // null = not loaded yet
   const [phoneDraft, setPhoneDraft] = useState("");

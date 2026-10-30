@@ -106,7 +106,7 @@ export default function AfterSandbox({
   onRestart: () => void;
   hasAgent: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsStudioAfterSandbox");
+  const tHC = useTranslations("hcComponentsStudioAfterSandbox");
   return (
     <div className="mt-28 space-y-24">
       {/* The ledger */}
@@ -118,9 +118,7 @@ export default function AfterSandbox({
           <h2 id="ledger-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
             {tHC("s8")}
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            {tHC("s7")}
-          </p>
+          <p className="mt-3 text-muted-foreground">{tHC("s7")}</p>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
@@ -160,9 +158,7 @@ export default function AfterSandbox({
           <h2 id="adds-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
             {tHC("s3")}
           </h2>
-          <p className="mt-3 text-muted-foreground">
-            {tHC("s2")}
-          </p>
+          <p className="mt-3 text-muted-foreground">{tHC("s2")}</p>
         </div>
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {ADDS.map((a, i) => (

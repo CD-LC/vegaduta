@@ -12,7 +12,7 @@ import { useTranslations } from "../../lib/i18n";
 // address the visitor is being held to.
 
 export default function FairUseBar({ status }: { status: StudioStatus | null }) {
-    const tHC = useTranslations("hcComponentsStudioFairUseBar");
+  const tHC = useTranslations("hcComponentsStudioFairUseBar");
   const [cool, setCool] = useState(0);
   const coolFromServer = status?.fairUse?.coolingSeconds ?? 0;
 
@@ -36,7 +36,8 @@ export default function FairUseBar({ status }: { status: StudioStatus | null }) 
       )}
       {status?.missionTimeoutSeconds ? (
         <Chip icon={Timer} tip="Every agent turn is stopped at this wall-clock limit, tools included.">
-          {status.missionTimeoutSeconds}{tHC("s3")}
+          {status.missionTimeoutSeconds}
+          {tHC("s3")}
         </Chip>
       ) : null}
       {status?.workflowTimeoutMinutes ? (

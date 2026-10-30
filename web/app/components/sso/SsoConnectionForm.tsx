@@ -68,11 +68,21 @@ const MAX_URL = 2048;
 export function validateSso(f: Form, secretAlreadySet: boolean): string | null {
   if (!f.displayName.trim()) return "errDisplayName";
   if (f.displayName.length > 255) return "errDisplayNameLength";
-  const urls = [f.oidcDiscoveryUrl, f.oidcAuthorizationUrl, f.oidcTokenUrl, f.oidcUserInfoUrl, f.oidcJwksUrl, f.oidcIssuer, f.samlEntityId, f.samlSsoUrl];
+  const urls = [
+    f.oidcDiscoveryUrl,
+    f.oidcAuthorizationUrl,
+    f.oidcTokenUrl,
+    f.oidcUserInfoUrl,
+    f.oidcJwksUrl,
+    f.oidcIssuer,
+    f.samlEntityId,
+    f.samlSsoUrl,
+  ];
   if (urls.some((u) => u.length > MAX_URL)) return "errUrlLength";
   if (f.providerType === "OIDC") {
     if (!f.oidcClientId.trim()) return "errClientId";
-    if (!f.oidcDiscoveryUrl.trim() && !(f.oidcAuthorizationUrl.trim() && f.oidcTokenUrl.trim())) return "errOidcEndpoints";
+    if (!f.oidcDiscoveryUrl.trim() && !(f.oidcAuthorizationUrl.trim() && f.oidcTokenUrl.trim()))
+      return "errOidcEndpoints";
     if (!f.clientSecret && !secretAlreadySet) return "errClientSecret";
   } else {
     if (!f.samlEntityId.trim() || !f.samlSsoUrl.trim()) return "errSamlRequired";
@@ -81,7 +91,7 @@ export function validateSso(f: Form, secretAlreadySet: boolean): string | null {
 }
 
 export default function SsoConnectionForm() {
-    const tHC = useTranslations("hcComponentsSsoSsoConnectionForm");
+  const tHC = useTranslations("hcComponentsSsoSsoConnectionForm");
   const t = useTranslations("privacySso");
   const [status, setStatus] = useState<SsoStatusDto | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -138,7 +148,11 @@ export default function SsoConnectionForm() {
     setFormError(null);
     setSaving(true);
     try {
-      const body: SsoUpsertRequest = { providerType: form.providerType, displayName: form.displayName.trim(), enabled: form.enabled };
+      const body: SsoUpsertRequest = {
+        providerType: form.providerType,
+        displayName: form.displayName.trim(),
+        enabled: form.enabled,
+      };
       if (form.providerType === "OIDC") {
         Object.assign(body, {
           oidcDiscoveryUrl: form.oidcDiscoveryUrl.trim(),
@@ -213,7 +227,9 @@ export default function SsoConnectionForm() {
           {status.configured ? t("ssoConfigured") : t("ssoNotConfigured")}
         </Badge>
         {status.configured && status.realmEnabled === null && <Badge variant="secondary">{t("ssoNotPushed")}</Badge>}
-        {status.configured && status.realmEnabled === false && <Badge variant="secondary">{t("ssoRealmDisabled")}</Badge>}
+        {status.configured && status.realmEnabled === false && (
+          <Badge variant="secondary">{t("ssoRealmDisabled")}</Badge>
+        )}
         {status.configured && status.realmEnabled && <Badge variant="default">{t("ssoRealmEnabled")}</Badge>}
         {status.alias && <span className="text-muted-foreground">{t("ssoAlias", { alias: status.alias })}</span>}
       </div>
@@ -221,7 +237,12 @@ export default function SsoConnectionForm() {
       {status.brokerRedirectUri && (
         <div className="grid gap-1.5">
           <Label htmlFor="sso-redirect">{t("ssoRedirectUri")}</Label>
-          <Input id="sso-redirect" readOnly value={status.brokerRedirectUri} onFocus={(e) => e.currentTarget.select()} />
+          <Input
+            id="sso-redirect"
+            readOnly
+            value={status.brokerRedirectUri}
+            onFocus={(e) => e.currentTarget.select()}
+          />
           <p className="text-xs text-muted-foreground">{t("ssoRedirectHint")}</p>
         </div>
       )}
@@ -251,7 +272,10 @@ export default function SsoConnectionForm() {
 
         {form.providerType === "OIDC" ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            {text("oidcDiscoveryUrl", t("oidcDiscovery"), { hint: t("oidcDiscoveryHint"), placeholder: "https://idp.example.com/.well-known/openid-configuration" })}
+            {text("oidcDiscoveryUrl", t("oidcDiscovery"), {
+              hint: t("oidcDiscoveryHint"),
+              placeholder: "https://idp.example.com/.well-known/openid-configuration",
+            })}
             {text("oidcIssuer", t("oidcIssuer"))}
             {text("oidcAuthorizationUrl", t("oidcAuthorization"))}
             {text("oidcTokenUrl", t("oidcToken"))}
@@ -267,7 +291,9 @@ export default function SsoConnectionForm() {
           <div className="grid gap-3 sm:grid-cols-2">
             {text("samlEntityId", t("samlEntityId"))}
             {text("samlSsoUrl", t("samlSsoUrl"))}
-            {text("samlNameIdFormat", t("samlNameId"), { placeholder: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" })}
+            {text("samlNameIdFormat", t("samlNameId"), {
+              placeholder: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+            })}
             <div className="grid gap-1.5 sm:col-span-2">
               <Label htmlFor="sso-samlX509Cert">{t("samlCert")}</Label>
               <Textarea
@@ -281,7 +307,12 @@ export default function SsoConnectionForm() {
         )}
 
         <div className="flex items-center gap-3">
-          <Switch id="sso-enabled" checked={form.enabled} onCheckedChange={(v) => set("enabled", v)} aria-label={t("ssoEnabled")} />
+          <Switch
+            id="sso-enabled"
+            checked={form.enabled}
+            onCheckedChange={(v) => set("enabled", v)}
+            aria-label={t("ssoEnabled")}
+          />
           <Label htmlFor="sso-enabled">{t("ssoEnabled")}</Label>
         </div>
 

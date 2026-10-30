@@ -50,7 +50,7 @@ interface UserToolScript {
 }
 
 export default function UserToolScriptsPanel() {
-    const tHC = useTranslations("hcComponentsUserToolScriptsPanel");
+  const tHC = useTranslations("hcComponentsUserToolScriptsPanel");
   const t = useTranslations("userToolScriptsPanel");
   const [scripts, setScripts] = useState<UserToolScript[]>([]);
   const [loading, setLoading] = useState(true);

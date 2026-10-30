@@ -81,7 +81,7 @@ export default function TranscriptionProviderOptions({
   onEdit,
   isBusy = false,
 }: TranscriptionProviderOptionsProps) {
-    const tHC = useTranslations("hcComponentsAgentsTranscriptionProviderOptions");
+  const tHC = useTranslations("hcComponentsAgentsTranscriptionProviderOptions");
   // Current selected provider details
   const currentProvider = providers.find((p) => p.id === value);
 
@@ -136,11 +136,7 @@ export default function TranscriptionProviderOptions({
     if (provider.id === null) return null;
     if (providerStatus[provider.id] !== "unavailable") return null;
     return (
-      <span
-        className="state-pill"
-        style={{ ["--state" as any]: "var(--state-warning)" } as any}
-        title={tHC("s2")}
-      >
+      <span className="state-pill" style={{ ["--state" as any]: "var(--state-warning)" } as any} title={tHC("s2")}>
         {tHC("s1")}
       </span>
     );

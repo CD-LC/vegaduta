@@ -61,7 +61,7 @@ export default function RlArmsEditor({
   canEdit: boolean;
   onChanged?: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsRlArmsEditor");
+  const tHC = useTranslations("hcComponentsAgentsRlArmsEditor");
   const dimension = "MODEL_ROUTE";
   const agentId = agent?.id;
   // This component is deliberately plain-English (see the header comment), but
@@ -182,9 +182,7 @@ export default function RlArmsEditor({
         <Info aria-hidden="true" />
         <AlertTitle>{tHC("s32")}</AlertTitle>
         <AlertDescription>
-          <p>
-            {tHC("s31")}
-          </p>
+          <p>{tHC("s31")}</p>
         </AlertDescription>
       </Alert>
     );
@@ -202,8 +200,8 @@ export default function RlArmsEditor({
           <AlertTitle>{tHC("s30")}</AlertTitle>
           <AlertDescription>
             <p>
-              {tHC("s29")} <strong>{tHC("s28")}</strong>{tHC("s27")}{" "}
-              <strong>{tHC("s26")}</strong> {tHC("s25")}
+              {tHC("s29")} <strong>{tHC("s28")}</strong>
+              {tHC("s27")} <strong>{tHC("s26")}</strong> {tHC("s25")}
             </p>
             {!canEdit && <p>{tHC("s24")}</p>}
           </AlertDescription>
@@ -215,9 +213,7 @@ export default function RlArmsEditor({
           <Info aria-hidden="true" />
           <AlertTitle>{tHC("s23")}</AlertTitle>
           <AlertDescription>
-            <p>
-              {tHC("s22")}
-            </p>
+            <p>{tHC("s22")}</p>
           </AlertDescription>
         </Alert>
       )}
@@ -383,9 +379,7 @@ export default function RlArmsEditor({
               value={contextBucket}
               onChange={(e) => setContextBucket(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              {tHC("s4")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s4")}</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -416,8 +410,8 @@ export default function RlArmsEditor({
             <AlertDialogDescription>
               {(pendingDelete?.pulls || 0) > 0 ? (
                 <>
-                  <strong>{pendingDelete?.armKey}</strong> {tHC("s3")}{" "}
-                  {(pendingDelete?.pulls || 0).toLocaleString()} {tHC("s2")}
+                  <strong>{pendingDelete?.armKey}</strong> {tHC("s3")} {(pendingDelete?.pulls || 0).toLocaleString()}{" "}
+                  {tHC("s2")}
                 </>
               ) : (
                 <>

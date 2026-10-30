@@ -30,7 +30,7 @@ type Props = {
 const QUICK = ["weather", "github", "maps", "search", "notion", "finance", "docs", "calendar"];
 
 export default function AgentConnectors({ token, agent, readOnly, connectorsEnabled, suggestions, onChanged }: Props) {
-    const tHC = useTranslations("hcComponentsStudioAgentConnectors");
+  const tHC = useTranslations("hcComponentsStudioAgentConnectors");
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<RegistryHit[] | null>(null);
   const [unavailable, setUnavailable] = useState(false);
@@ -116,18 +116,14 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
     <div className="space-y-4">
       <div>
         <div className="text-sm font-medium">{tHC("s12")}</div>
-        <p className="text-xs text-muted-foreground">
-          {tHC("s11")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tHC("s11")}</p>
       </div>
 
       {!connectorsEnabled && (
         <Alert>
           <Lock aria-hidden="true" />
           <AlertTitle>{tHC("s10")}</AlertTitle>
-          <AlertDescription>
-            {tHC("s9")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s9")}</AlertDescription>
         </Alert>
       )}
 
@@ -208,11 +204,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
 
       {error && <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-2.5 text-sm">{error}</div>}
 
-      {unavailable && (
-        <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-          {tHC("s5")}
-        </div>
-      )}
+      {unavailable && <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">{tHC("s5")}</div>}
 
       <ul className="space-y-2">
         {hits === null && [0, 1, 2].map((i) => <li key={i} className="h-16 animate-pulse rounded-xl bg-muted/50" />)}

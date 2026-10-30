@@ -25,7 +25,7 @@ export default function KnowledgeDocumentFilters({
   setDocGroup: (group: DocStatusGroup) => void;
   docCounts: Record<string, number>;
 }) {
-    const tHC = useTranslations("hcComponentsKnowledgeKnowledgeDocumentFilters");
+  const tHC = useTranslations("hcComponentsKnowledgeKnowledgeDocumentFilters");
   return (
     <>
       <div className="mb-3 flex flex-wrap items-center gap-2">

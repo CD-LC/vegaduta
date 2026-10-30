@@ -72,12 +72,14 @@ function CopyPromptButton({ text }: { text: string }) {
 // tab of a recipe. Visually distinct from the flow: a tinted inner panel so it
 // reads as a separate "spec" block.
 function BuildSpec({ build }: { build: RecipeBuild }) {
-    const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   return (
     <div className="space-y-4 rounded-xl border border-border bg-secondary/20 p-4">
       {/* Header + agent count */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{tHC("s1")}</span>
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+          {tHC("s1")}
+        </span>
         <Badge variant="secondary" className="gap-1">
           <Bot className="size-3" aria-hidden="true" />
           {build.agents} {build.agents === 1 ? "agent" : "agents"}
@@ -109,7 +111,8 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
         <div className="space-y-2">
           <SpecLabel>
             <Bot className="size-3" aria-hidden="true" />
-            {tHC("s5")}{build.agentRoles.length})
+            {tHC("s5")}
+            {build.agentRoles.length})
           </SpecLabel>
           <div className="space-y-2">
             {build.agentRoles.map((a) => (
@@ -197,7 +200,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
 // The flow tab: trigger, the numbered vertical stepper, connectors, and the
 // outcome/impact pair.
 function RecipeFlow({ recipe }: { recipe: Recipe }) {
-    const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   return (
     <div className="space-y-5">
       {/* Trigger */}
@@ -274,7 +277,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
 }
 
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
-    const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
+  const tHC = useTranslations("hcHelpWorkflowrecipesRecipeCard");
   // Split the reading surface into Flow vs Build spec tabs so an open recipe is
   // a scannable two-view panel instead of one long scroll. Flow-only recipes
   // (no `build`) render the flow directly, no tab chrome.

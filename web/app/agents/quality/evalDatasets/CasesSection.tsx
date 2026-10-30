@@ -50,13 +50,11 @@ export default function CasesSection({
   onAddCase: () => void;
   onDeleteCase: (caseId: string) => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsCasesSection");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsCasesSection");
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-foreground">Cases</h3>
-      {detail && detail.cases.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("s8")}</p>
-      )}
+      {detail && detail.cases.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s8")}</p>}
       {casesPagination.pageItems.map((c) => (
         <div key={c.id} className="flex items-start gap-3 rounded-md border border-border p-3">
           <div className="min-w-0 flex-1 space-y-1">
@@ -93,9 +91,7 @@ export default function CasesSection({
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>{tHC("s6")}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {tHC("s5")}
-                </AlertDialogDescription>
+                <AlertDialogDescription>{tHC("s5")}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -133,11 +129,7 @@ export default function CasesSection({
           onChange={(e) => onDraftChange({ expected: e.target.value })}
           placeholder={tHC("s3")}
         />
-        <Input
-          value={draft.tools}
-          onChange={(e) => onDraftChange({ tools: e.target.value })}
-          placeholder={tHC("s2")}
-        />
+        <Input value={draft.tools} onChange={(e) => onDraftChange({ tools: e.target.value })} placeholder={tHC("s2")} />
         <div className="flex justify-end">
           <Button size="sm" onClick={onAddCase} disabled={busy || !draft.message.trim()}>
             <Plus size={14} aria-hidden="true" /> {tHC("s1")}

@@ -44,7 +44,6 @@ import {
 import { AGENT_GLOSSARY } from "./glossary";
 import { goToGuideAnchor } from "./guideDom";
 import { requestDraftQuietly } from "./quietDraft";
-import { useTranslations } from "../../../lib/i18n";
 
 /**
  * The persistent "Create your agent" checklist (2026-09-19).
@@ -191,7 +190,6 @@ export interface CreateAgentChecklistProps {
 }
 
 export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
-    const tHC = useTranslations("hcComponentsAgentsGuideCreateAgentChecklist");
   const {
     isDraft,
     agentId,
@@ -545,7 +543,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     <div id={GUIDE_ANCHORS.describe} className="mt-3 rounded-lg border border-border bg-background p-3">
                       <label htmlFor="agent-guide-describe-input" className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                         <Sparkles size={13} className="text-primary" aria-hidden="true" />
-                        {tHC("s8")}
+                        Describe it in one sentence
                       </label>
                       <Textarea
                         id="agent-guide-describe-input"
@@ -553,7 +551,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                         value={sentence}
                         maxLength={DESCRIBE_MAX_CHARS}
                         disabled={drafting}
-                        placeholder={tHC("s7")}
+                        placeholder="e.g. Answer customer questions for my bakery and take cake orders."
                         onChange={(e) => {
                           setSentence(e.target.value);
                           if (describeError) setDescribeError(null);
@@ -579,14 +577,15 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                         <div className="mt-3 rounded-lg border border-border bg-card p-3" role="status">
                           {preview.source === "fallback" && (
                             <p className="m-0 mb-2 text-xs text-muted-foreground" data-testid="basic-draft-note">
-                              {tHC("s6")}
+                              We made a basic draft from your sentence. It works as it is, and you can edit every word
+                              after you press &quot;Use this&quot;.
                             </p>
                           )}
                           <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">Name</div>
                           <div className="text-sm font-medium text-foreground">{preview.draft.name}</div>
                           {typedNameKept && (
                             <p className="m-0 mt-0.5 text-[0.6875rem] text-muted-foreground">
-                              {tHC("s5")}{name.trim()}{tHC("s4")}
+                              You already typed a name (&quot;{name.trim()}&quot;), so that one is kept.
                             </p>
                           )}
                           <div className="mt-2 text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -597,12 +596,12 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                           </div>
                           {typedPromptReplaced && (
                             <p className="m-0 mt-1 text-[0.6875rem] text-muted-foreground">
-                              {tHC("s3")}
+                              This replaces the instructions currently in the box.
                             </p>
                           )}
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Button type="button" size="sm" onClick={handleUsePreview}>
-                              {tHC("s2")}
+                              Use this
                             </Button>
                             <Button type="button" variant="outline" size="sm" onClick={() => setPreview(null)}>
                               Discard
@@ -635,7 +634,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     <dt className="text-xs font-semibold text-foreground">
                       {g.term}
                       {g.onScreen.toLowerCase() !== g.term.toLowerCase() && (
-                        <span className="ml-1.5 font-normal text-muted-foreground">{tHC("s1")}{g.onScreen}&quot;</span>
+                        <span className="ml-1.5 font-normal text-muted-foreground">shown as &quot;{g.onScreen}&quot;</span>
                       )}
                     </dt>
                     <dd className="m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground">

@@ -29,7 +29,7 @@ import { useTranslations } from "../../lib/i18n";
 // which selected rows will actually be reached.
 
 export default function NewsletterPage() {
-    const tHC = useTranslations("hcPlatformadminNewsletterPage");
+  const tHC = useTranslations("hcPlatformadminNewsletterPage");
   const askConfirm = useConfirm();
   const [recipients, setRecipients] = useState([]);
   const [recipientsError, setRecipientsError] = useState(null);
@@ -145,7 +145,9 @@ export default function NewsletterPage() {
       }
     >
       <PageHint>
-        {tHC("s17")}<code>news_opt_in</code>{tHC("s16")}
+        {tHC("s17")}
+        <code>news_opt_in</code>
+        {tHC("s16")}
       </PageHint>
 
       <form onSubmit={handleSend}>
@@ -199,9 +201,7 @@ export default function NewsletterPage() {
                   placeholder={tHC("s10")}
                   className="font-mono text-xs"
                 />
-                <p className="text-[11px] text-muted-foreground">
-                  {tHC("s9")}
-                </p>
+                <p className="text-[11px] text-muted-foreground">{tHC("s9")}</p>
               </div>
             </CardContent>
           </Card>
@@ -220,8 +220,9 @@ export default function NewsletterPage() {
                   <Users2 size={16} className="text-primary" /> Recipients
                 </CardTitle>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {selectedOptedInCount} of {optedInCount} {tHC("s8")}{optedInCount === 1 ? "" : "s"} {tHC("s7")}{" "}
-                  {recipients.length} {tHC("s6")}{recipients.length === 1 ? "" : "s"} total
+                  {selectedOptedInCount} of {optedInCount} {tHC("s8")}
+                  {optedInCount === 1 ? "" : "s"} {tHC("s7")} {recipients.length} {tHC("s6")}
+                  {recipients.length === 1 ? "" : "s"} total
                 </p>
               </div>
               <Button

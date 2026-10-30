@@ -56,7 +56,7 @@ export default function MaintenanceScreen({
   onRetry?: () => void;
   maintenance?: { message: string | null; endsAt: string | null };
 }) {
-    const tHC = useTranslations("hcComponentsMaintenanceScreen");
+  const tHC = useTranslations("hcComponentsMaintenanceScreen");
   const t = useTranslations("platformStatus");
   const reduceMotion = useReducedMotionSafe();
   const endsAtText = (() => {
@@ -175,9 +175,7 @@ export default function MaintenanceScreen({
                 )}
               </>
             ) : (
-              <p className="mt-2.5 max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-                {tHC("s5")}
-              </p>
+              <p className="mt-2.5 max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">{tHC("s5")}</p>
             )}
 
             {/* Reassurance row — grounded, real platform properties, not a
@@ -258,9 +256,7 @@ export default function MaintenanceScreen({
           </div>
         </Card>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          {tHC("s1")}
-        </p>
+        <p className="mt-4 text-center text-xs text-muted-foreground">{tHC("s1")}</p>
       </motion.div>
     </div>
   );

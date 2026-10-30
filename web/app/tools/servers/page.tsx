@@ -175,7 +175,7 @@ function ServerRow({
   toggleBusy: boolean;
   fixBusy: boolean;
 }) {
-    const tHC = useTranslations("hcToolsServersPage");
+  const tHC = useTranslations("hcToolsServersPage");
   const [result, setResult] = useState<any>(null);
 
   async function runTest() {
@@ -240,11 +240,7 @@ function ServerRow({
                 {testBusy ? "Testing…" : "Test"}
               </Button>
             ) : (
-              <Badge
-                variant="secondary"
-                className="h-8 gap-1 px-2.5"
-                title={tHC("s16")}
-              >
+              <Badge variant="secondary" className="h-8 gap-1 px-2.5" title={tHC("s16")}>
                 {tHC("s15")}
               </Badge>
             )}
@@ -309,7 +305,10 @@ function ServerRow({
         {server.credentialsCorrupted && (
           <Alert variant="warning">
             <KeyRound aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("s13")}</AlertTitle>
+            <AlertTitle>
+              {server.name}
+              {tHC("s13")}
+            </AlertTitle>
             <AlertDescription>{tHC("s12")}</AlertDescription>
           </Alert>
         )}
@@ -320,16 +319,20 @@ function ServerRow({
         {server.reviewStatus === "PENDING" && (
           <Alert variant="info">
             <Clock aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("s11")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s10")}
-            </AlertDescription>
+            <AlertTitle>
+              {server.name}
+              {tHC("s11")}
+            </AlertTitle>
+            <AlertDescription>{tHC("s10")}</AlertDescription>
           </Alert>
         )}
         {server.reviewStatus === "REJECTED" && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("s9")}</AlertTitle>
+            <AlertTitle>
+              {server.name}
+              {tHC("s9")}
+            </AlertTitle>
             <AlertDescription>
               {server.reviewRejectionReason ||
                 "No reason was given. Edit the server's command/args and re-register to request another review."}
@@ -345,7 +348,10 @@ function ServerRow({
         {persistedError && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("s8")}</AlertTitle>
+            <AlertTitle>
+              {server.name}
+              {tHC("s8")}
+            </AlertTitle>
             <AlertDescription>
               {server.connectionHint && <p className="font-medium">{server.connectionHint}</p>}
               {server.connectionError && <p>{server.connectionError}</p>}
@@ -362,7 +368,9 @@ function ServerRow({
         {activeFix?.command && (
           <Alert variant="warning">
             <Wrench aria-hidden="true" />
-            <AlertTitle>{tHC("s7")} {server.name}</AlertTitle>
+            <AlertTitle>
+              {tHC("s7")} {server.name}
+            </AlertTitle>
             <AlertDescription>
               {activeFix.reason && <p>{activeFix.reason}</p>}
               <code className="block w-full break-words rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/10">
@@ -372,9 +380,7 @@ function ServerRow({
               <Button size="sm" className="mt-1 w-fit" disabled={fixBusy} onClick={() => onApplyFix(server, activeFix)}>
                 {fixBusy ? "Applying fix…" : "Apply suggested fix"}
               </Button>
-              <p className="text-xs text-muted-foreground">
-                {tHC("s6")}
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s6")}</p>
             </AlertDescription>
           </Alert>
         )}
@@ -384,7 +390,7 @@ function ServerRow({
 }
 
 export default function McpServersPage() {
-    const tHC = useTranslations("hcToolsServersPage");
+  const tHC = useTranslations("hcToolsServersPage");
   const [servers, setServers] = useState<any[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -416,7 +422,7 @@ export default function McpServersPage() {
 
   const needle = filter.trim().toLowerCase();
   const enabledServers = servers.filter(
-    (s) => s.enabled && (!needle || `${s.name} ${s.description ?? ""} ${s.type ?? ""}`.toLowerCase().includes(needle)),
+    (s) => s.enabled && (!needle || `${s.name} ${s.description ?? ""} ${s.type ?? ""}`.toLowerCase().includes(needle))
   );
   const attentionServers = enabledServers.filter(needsAttention);
   const serversPagination = usePagination(enabledServers);

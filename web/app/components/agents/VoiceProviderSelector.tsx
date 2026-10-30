@@ -43,7 +43,7 @@ export default function VoiceProviderSelector({
   onEdit,
   isBusy = false,
 }: VoiceProviderSelectorProps) {
-    const tHC = useTranslations("hcComponentsAgentsVoiceProviderSelector");
+  const tHC = useTranslations("hcComponentsAgentsVoiceProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("speechToText", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's STT providers",
@@ -54,14 +54,11 @@ export default function VoiceProviderSelector({
       providers={providers}
       icon={Volume2}
       label={tHC("s5")}
-      tooltipContent={
-        <>
-          {tHC("s4")}
-        </>
-      }
+      tooltipContent={<>{tHC("s4")}</>}
       freePlanWarningText={
         <>
-          {tHC("s3")} <strong>{tHC("s2")}</strong>{tHC("s1")}
+          {tHC("s3")} <strong>{tHC("s2")}</strong>
+          {tHC("s1")}
         </>
       }
       editorLockedTitle="Voice provider selection is a Premium feature"

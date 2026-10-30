@@ -66,7 +66,7 @@ interface SubmitTemplateFlowProps {
 }
 
 function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: SubmitTemplateFlowProps) {
-    const tHC = useTranslations("hcComponentsTemplatesSubmitTemplateFlow");
+  const tHC = useTranslations("hcComponentsTemplatesSubmitTemplateFlow");
   const [sources, setSources] = useState<Pickable[] | null>(null);
   const [sourcesError, setSourcesError] = useState<string | null>(null);
   const [sourceId, setSourceId] = useState<string>(presetSource?.id ?? "");
@@ -273,9 +273,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
           }}
         >
           <Info size={16} strokeWidth={2} className="mt-0.5 shrink-0" aria-hidden="true" />
-          <span>
-            {tHC("s11")}
-          </span>
+          <span>{tHC("s11")}</span>
         </div>
 
         <div className="mb-5">
@@ -308,9 +306,7 @@ function SubmitTemplateFlowInner({ open, onClose, onSubmitted, presetSource }: S
                   {sourcesError}
                 </p>
               ) : sources && sources.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {tHC("s8")}
-                </p>
+                <p className="text-sm text-muted-foreground">{tHC("s8")}</p>
               ) : (
                 <Select
                   id="tpl-source"

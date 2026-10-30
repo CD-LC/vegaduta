@@ -126,7 +126,7 @@ function tenantConsoleBase() {
 }
 
 export default function NotificationBell() {
-    const tHC = useTranslations("hcPlatformadminComponentsNotificationBell");
+  const tHC = useTranslations("hcPlatformadminComponentsNotificationBell");
   const router = useRouter();
   const wrapRef = useRef(null);
   const [open, setOpen] = useState(false);

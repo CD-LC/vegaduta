@@ -51,7 +51,7 @@ export function InboxDetailsPane({
   /** The rejected sender's session is gone: close the thread. */
   onRejected: () => void;
 }) {
-    const tHC = useTranslations("hcAdminInboxInboxDetailsPane");
+  const tHC = useTranslations("hcAdminInboxInboxDetailsPane");
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-sm">
       <div>
@@ -71,16 +71,16 @@ export function InboxDetailsPane({
             disabled={busy || !reassignId || reassignId === selected.agentId}
             onClick={() =>
               act(() =>
-                inboxApi.reassignAgent(selected.sessionId, reassignId).then(() => mergeSnapshot({ agentId: reassignId }))
+                inboxApi
+                  .reassignAgent(selected.sessionId, reassignId)
+                  .then(() => mergeSnapshot({ agentId: reassignId }))
               )
             }
           >
             Save
           </Button>
         </div>
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          {tHC("s11")}
-        </p>
+        <p className="mt-1 text-[11px] text-muted-foreground">{tHC("s11")}</p>
       </div>
 
       {selected.paired && selected.handoffState === "AGENT" && (
@@ -126,9 +126,7 @@ export function InboxDetailsPane({
                 disabled={busy}
                 onClick={() =>
                   act(() =>
-                    inboxApi
-                      .approve(selected.sessionId)
-                      .then(() => mergeSnapshot({ paired: true, pairingCode: null }))
+                    inboxApi.approve(selected.sessionId).then(() => mergeSnapshot({ paired: true, pairingCode: null }))
                   )
                 }
               >
@@ -143,9 +141,7 @@ export function InboxDetailsPane({
                     disabled={busy}
                     onClick={() => {
                       onConfirmRejectChange(false);
-                      act(() =>
-                        inboxApi.reject(selected.sessionId).then(onRejected)
-                      );
+                      act(() => inboxApi.reject(selected.sessionId).then(onRejected));
                     }}
                   >
                     {tHC("s7")}
@@ -155,7 +151,13 @@ export function InboxDetailsPane({
                   </Button>
                 </>
               ) : (
-                <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onConfirmRejectChange(true)}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => onConfirmRejectChange(true)}
+                >
                   <X size={13} /> Reject
                 </Button>
               )}
@@ -174,11 +176,12 @@ export function InboxDetailsPane({
                   onClick={() => {
                     onConfirmUnpairChange(false);
                     act(() =>
-                      inboxApi
-                        .unpair(selected.sessionId)
-                        .then((r) =>
-                          mergeSnapshot({ paired: false, pairingCode: (r as { pairingCode?: string }).pairingCode ?? null })
-                        )
+                      inboxApi.unpair(selected.sessionId).then((r) =>
+                        mergeSnapshot({
+                          paired: false,
+                          pairingCode: (r as { pairingCode?: string }).pairingCode ?? null,
+                        })
+                      )
                     );
                   }}
                 >
@@ -189,7 +192,13 @@ export function InboxDetailsPane({
                 </Button>
               </div>
             ) : (
-              <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onConfirmUnpairChange(true)}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy}
+                onClick={() => onConfirmUnpairChange(true)}
+              >
                 <Unlink size={13} /> {tHC("s4")}
               </Button>
             )}

@@ -47,7 +47,7 @@ import { useTranslations } from "../lib/i18n";
  * reachable by URL only — unchanged by this commit.
  */
 export default function LocalCodePage() {
-    const tHC = useTranslations("hcCodePage");
+  const tHC = useTranslations("hcCodePage");
   usePageReady(true);
   const t = useTranslations("localCode");
   const [authed, setAuthed] = useState(false);

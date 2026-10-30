@@ -44,7 +44,7 @@ type Cadence = "interval" | "cron";
 type Target = "AGENT" | "WORKFLOW";
 
 export default function SchedulePanel({ agents }: { agents: any[] }) {
-    const tHC = useTranslations("hcComponentsJobsSchedulePanel");
+  const tHC = useTranslations("hcComponentsJobsSchedulePanel");
   const t = useTranslations("schedulePanel");
   const { isAdmin } = useAuth();
   const [agentId, setAgentId] = useState<string>(agents[0]?.id || "");

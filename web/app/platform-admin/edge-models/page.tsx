@@ -82,7 +82,7 @@ function formatContextWindow(tokens: number): string {
 }
 
 export default function EdgeModelsPage() {
-    const tHC = useTranslations("hcPlatformadminEdgemodelsPage");
+  const tHC = useTranslations("hcPlatformadminEdgemodelsPage");
   const askConfirm = useConfirm();
   const [defaults, setDefaults] = useState<EdgeModelEntry[]>([]);
   const [effectiveVersion, setEffectiveVersion] = useState("1");
@@ -247,7 +247,9 @@ export default function EdgeModelsPage() {
       }
     >
       <PageHint>
-        {tHC("s14")}<code>platform.edge-agents.enabled</code>{tHC("s13")}
+        {tHC("s14")}
+        <code>platform.edge-agents.enabled</code>
+        {tHC("s13")}
       </PageHint>
 
       <div className="mb-4 flex items-center gap-2 flex-wrap">
@@ -265,7 +267,10 @@ export default function EdgeModelsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{tHC("s12")}{effectiveVersion})</CardTitle>
+          <CardTitle className="text-base">
+            {tHC("s12")}
+            {effectiveVersion})
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {loading ? (
@@ -325,8 +330,7 @@ export default function EdgeModelsPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            {tHC("s9")}{" "}
-            <strong>{tHC("s8")}</strong>.
+            {tHC("s9")} <strong>{tHC("s8")}</strong>.
           </p>
           {registryError && (
             <Alert variant="destructive">

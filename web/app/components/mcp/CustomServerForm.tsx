@@ -41,7 +41,7 @@ export default function CustomServerForm({
   noteRegisterResponse: (res: any, baseMessage: string) => string;
   scheduleAutoTestRefresh: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsMcpCustomServerForm");
+  const tHC = useTranslations("hcComponentsMcpCustomServerForm");
   const t = useTranslations("mcpPanel");
   const [name, setName] = useState("");
   const [type, setType] = useState("STDIO");
@@ -180,16 +180,11 @@ export default function CustomServerForm({
         {type !== "STDIO" && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-muted-foreground">
-              {tHC("s4")}{" "}
-              <code>application-mcp.yml</code>{tHC("s3")}
+              {tHC("s4")} <code>application-mcp.yml</code>
+              {tHC("s3")}
               {type === "SSE" && " SSE is deprecated in the MCP spec: prefer STREAMABLE_HTTP."}
             </p>
-            <Input
-              type="text"
-              placeholder={tHC("s2")}
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
+            <Input type="text" placeholder={tHC("s2")} value={url} onChange={(e) => setUrl(e.target.value)} />
             <McpRemoteOAuthSection url={url} ensureRegistered={registerForOAuth} onChanged={onChanged} />
           </div>
         )}

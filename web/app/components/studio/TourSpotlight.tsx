@@ -63,7 +63,7 @@ function rectOf(el: HTMLElement): Rect {
 }
 
 export default function TourSpotlight({ open, steps, onClose }: Props) {
-    const tHC = useTranslations("hcComponentsStudioTourSpotlight");
+  const tHC = useTranslations("hcComponentsStudioTourSpotlight");
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [cardH, setCardH] = useState(220);

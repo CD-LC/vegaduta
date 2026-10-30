@@ -25,7 +25,7 @@ export default function WorkflowRunPanel({
   agentName: (id: unknown) => string;
   decide: (approved: boolean) => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioWorkflowRunPanel");
+  const tHC = useTranslations("hcComponentsStudioWorkflowRunPanel");
   return (
     <>
       {/* Approval: the real pause */}
@@ -109,9 +109,7 @@ export default function WorkflowRunPanel({
                 <Send aria-hidden="true" className="h-4 w-4 shrink-0" /> Delivered
               </div>
               <div className="whitespace-pre-wrap break-all text-sm leading-relaxed">{run.output}</div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {tHC("s1")}
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{tHC("s1")}</p>
             </div>
           )}
         </div>

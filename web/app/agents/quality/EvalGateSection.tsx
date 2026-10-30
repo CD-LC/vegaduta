@@ -88,7 +88,7 @@ const REASON_LABEL: Record<string, string> = {
 };
 
 export default function EvalGateSection({ agentId }: { agentId: string | null }) {
-    const tHC = useTranslations("hcAgentsQualityEvalGateSection");
+  const tHC = useTranslations("hcAgentsQualityEvalGateSection");
   const [status, setStatus] = useState<GateStatus | null>(null);
   const [unavailable, setUnavailable] = useState(false); // older core without /gate (404)
   const [failed, setFailed] = useState(false);
@@ -239,9 +239,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{tHC("s20")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {tHC("s19")}
-                    </AlertDialogDescription>
+                    <AlertDialogDescription>{tHC("s19")}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -263,9 +261,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
       {locked && (
         <Alert>
           <AlertTitle>{tHC("s18")}</AlertTitle>
-          <AlertDescription>
-            {tHC("s17")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s17")}</AlertDescription>
         </Alert>
       )}
       {failed && (
@@ -298,7 +294,9 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 Dataset: <span className="font-medium">{status.gate.datasetName || status.gate.datasetId}</span>
               </span>
               {status.gate.maxRunAgeHours != null && (
-                <span className="text-xs text-muted-foreground">{tHC("s14")} {status.gate.maxRunAgeHours}h</span>
+                <span className="text-xs text-muted-foreground">
+                  {tHC("s14")} {status.gate.maxRunAgeHours}h
+                </span>
               )}
               {status.gate.requireSimulation && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -318,20 +316,15 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             )}
             {evaluation?.allowed && (
               <div className="text-sm text-muted-foreground">
-                {tHC("s12")}{evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
+                {tHC("s12")}
+                {evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
                 {evaluation.overallScore != null && ` scored ${Math.round(evaluation.overallScore * 100)}%`}.
               </div>
             )}
           </CardContent>
         </Card>
       ) : (
-        !failed &&
-        !locked &&
-        status != null && (
-          <p className="text-sm text-muted-foreground">
-            {tHC("s11")}
-          </p>
-        )
+        !failed && !locked && status != null && <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
       )}
 
       {showForm && (
@@ -364,9 +357,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {tHC("s7")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
             <div className="space-y-2 rounded-md border border-border p-3">
               <label className="flex items-start gap-2 text-sm">
                 <input
@@ -377,9 +368,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 />
                 <span>
                   <span className="font-medium">{tHC("s6")}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {tHC("s5")}
-                  </span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
                 </span>
               </label>
               {requireSim && (
@@ -393,9 +382,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                     onChange={(e) => setMaxSimAge(e.target.value)}
                     placeholder={tHC("s3")}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {tHC("s2")}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{tHC("s2")}</p>
                 </div>
               )}
             </div>

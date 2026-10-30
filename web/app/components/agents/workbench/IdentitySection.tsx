@@ -26,7 +26,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function IdentitySection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchIdentitySection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchIdentitySection");
   const {
     headCategory,
     identityAgent,
@@ -140,12 +140,12 @@ export default function IdentitySection() {
                     ? t("localModelBadgeLabelWithModel", { model: platformLlmInfo.model })
                     : t("localModelBadgeLabel")
                   : isFreePlan
-                  ? platformLlmInfo?.available
-                    ? t("platformLlmBadgeLabelWithModel", { model: platformLlmInfo.model })
-                    : t("platformLlmBadgeLabel")
-                  : platformLlmInfo?.available
-                    ? t("platformLlmBadgeLabelWithModelNeutral", { model: platformLlmInfo.model })
-                    : t("platformLlmBadgeLabelNeutral")}
+                    ? platformLlmInfo?.available
+                      ? t("platformLlmBadgeLabelWithModel", { model: platformLlmInfo.model })
+                      : t("platformLlmBadgeLabel")
+                    : platformLlmInfo?.available
+                      ? t("platformLlmBadgeLabelWithModelNeutral", { model: platformLlmInfo.model })
+                      : t("platformLlmBadgeLabelNeutral")}
               </span>
             )}
             {!isDraft && (

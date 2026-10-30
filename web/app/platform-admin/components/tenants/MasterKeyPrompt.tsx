@@ -31,7 +31,7 @@ export default function MasterKeyPrompt({
   onCancel: () => void;
   onSubmit: (key: string) => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTenantsMasterKeyPrompt");
+  const tHC = useTranslations("hcPlatformadminComponentsTenantsMasterKeyPrompt");
   const [value, setValue] = useState("");
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);

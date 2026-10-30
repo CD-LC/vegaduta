@@ -144,7 +144,7 @@ function latencyLines(l: LatencySlo): string[] {
 }
 
 export default function ReliabilityPage() {
-    const tHC = useTranslations("hcPlatformadminReliabilityPage");
+  const tHC = useTranslations("hcPlatformadminReliabilityPage");
   const [hours, setHours] = useState(24);
   const [deps, setDeps] = useState<DependenciesResponse | null>(null);
   const [depsError, setDepsError] = useState<string | null>(null);
@@ -270,8 +270,7 @@ export default function ReliabilityPage() {
       }
     >
       <PageHint>
-        {tHC("s14")}{" "}
-        {REFRESH_MS / 1000} {tHC("s13")}
+        {tHC("s14")} {REFRESH_MS / 1000} {tHC("s13")}
         <span aria-live="polite">{fetchedAt ? `; last updated ${new Date(fetchedAt).toLocaleTimeString()}` : ""}</span>.
       </PageHint>
 
@@ -319,7 +318,8 @@ export default function ReliabilityPage() {
               <span className="text-xs">{overallSummary(deps.dependencies)}</span>
             </div>
             <p className="mb-4 text-[11px] text-muted-foreground">
-              Probed {timeAgo(deps.generatedAt)}{tHC("s12")} {deps.cacheTtlSeconds} s.
+              Probed {timeAgo(deps.generatedAt)}
+              {tHC("s12")} {deps.cacheTtlSeconds} s.
             </p>
 
             {deps.dependencies.length === 0 ? (

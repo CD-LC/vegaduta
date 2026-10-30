@@ -49,7 +49,7 @@ import { useTranslations } from "../../lib/i18n";
 // standalone Subscription Plans screen; endpoints/behaviour are unchanged.
 
 export default function TenantsUsersPage() {
-    const tHC = useTranslations("hcPlatformadminTenantsPage");
+  const tHC = useTranslations("hcPlatformadminTenantsPage");
   const askConfirm = useConfirm();
   const [tenants, setTenants] = useState<PlatformTenantSummary[]>([]);
   const [tenantCounts, setTenantCounts] = useState(null);
@@ -307,7 +307,9 @@ export default function TenantsUsersPage() {
               <CreditCard size={16} className="text-primary" /> {tHC("s11")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              {tenants.length} {tHC("s10")}{tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} {tHC("s9")}{UNAVAILABLE}
+              {tenants.length} {tHC("s10")}
+              {tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} {tHC("s9")}
+              {UNAVAILABLE}
               {tHC("s8")}
             </p>
             {tenantCounts && (
@@ -398,9 +400,7 @@ export default function TenantsUsersPage() {
               <AdminEmptyState title={tHC("s2")} description="Tenants appear here once they sign up." />
             )}
             {tenants.length > 0 && filteredTenants.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                {tHC("s1")}
-              </p>
+              <p className="text-sm text-muted-foreground">{tHC("s1")}</p>
             )}
 
             <AnimatePresence initial={false}>

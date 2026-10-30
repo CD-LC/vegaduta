@@ -28,7 +28,7 @@ export default function PushToTalkRow({
   stopPushToTalk,
   setShowMicTest,
 }: PushToTalkRowProps) {
-    const tHC = useTranslations("hcComponentsAgentsCallPanelPushToTalkRow");
+  const tHC = useTranslations("hcComponentsAgentsCallPanelPushToTalkRow");
   return (
     <>
       <div className="flex items-center gap-2">

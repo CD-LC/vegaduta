@@ -96,7 +96,7 @@ const NAV_LINK_CLS = "whitespace-nowrap rounded-md px-1.5 py-2 transition-colors
 // Sticky landing nav: inline link row (only when measured to fit), hamburger
 // sheet, condense-on-scroll sentinel. Extracted verbatim from DemoLanding.
 export default function LandingNav({ journey, tried }: { journey: ReturnType<typeof useJourney>; tried: boolean }) {
-    const tHC = useTranslations("hcComponentsDemolandingLandingNav");
+  const tHC = useTranslations("hcComponentsDemolandingLandingNav");
   const t = useTranslations("landing");
   // Separate namespace: "languageSwitcher.label" is the one already-translated
   // "Language" string present in all 30 locale files, so the sheet's heading

@@ -146,7 +146,7 @@ function ResultView({ outcome }: { outcome: Outcome }) {
 }
 
 export default function ApiCallPanel({ method, path, title, query, body }: Props) {
-    const tHC = useTranslations("hcComponentsGenerativeuiApiCallPanel");
+  const tHC = useTranslations("hcComponentsGenerativeuiApiCallPanel");
   const names = placeholdersOf(path);
   const [values, setValues] = useState<Record<string, string>>({});
   const [bodyText, setBodyText] = useState(body === undefined ? "" : JSON.stringify(body, null, 2));
@@ -242,9 +242,7 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
           {isRead ? (outcome ? "Run again" : "Run") : outcome ? "Send again" : "Send"}
         </button>
       )}
-      {!isRead && !outcome && (
-        <p className="mt-1 text-xs text-muted-foreground">{tHC("s2")}</p>
-      )}
+      {!isRead && !outcome && <p className="mt-1 text-xs text-muted-foreground">{tHC("s2")}</p>}
       {running && isRead && !outcome && <p className="mt-2 text-xs text-muted-foreground">{tHC("s1")}</p>}
       {error && <p className="mt-2 text-xs text-[var(--danger-text)]">{error}</p>}
       {outcome && <ResultView outcome={outcome} />}

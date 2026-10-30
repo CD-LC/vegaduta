@@ -60,7 +60,7 @@ type AgentContext = {
 };
 
 export default function TryStudio() {
-    const tHC = useTranslations("hcComponentsStudioTryStudio");
+  const tHC = useTranslations("hcComponentsStudioTryStudio");
   const {
     phase,
     bootText,
@@ -361,9 +361,7 @@ export default function TryStudio() {
           <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
             <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s7")}
           </div>
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {tHC("s6")}
-          </h2>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">{tHC("s6")}</h2>
         </div>
       </div>
 

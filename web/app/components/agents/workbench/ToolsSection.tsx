@@ -12,7 +12,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function ToolsSection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchToolsSection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchToolsSection");
   const {
     t,
     isDraft,

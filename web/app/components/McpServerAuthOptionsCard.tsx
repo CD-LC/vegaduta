@@ -14,7 +14,7 @@ import { useTranslations } from "../lib/i18n";
  * Renders nothing if the endpoint is unavailable (the mcpserver profile is off).
  */
 export default function McpServerAuthOptionsCard() {
-    const tHC = useTranslations("hcComponentsMcpServerAuthOptionsCard");
+  const tHC = useTranslations("hcComponentsMcpServerAuthOptionsCard");
   const [opts, setOpts] = useState<McpServerAuthOptions | null>(null);
 
   useEffect(() => {
@@ -42,9 +42,7 @@ export default function McpServerAuthOptionsCard() {
           <dt className="font-medium">
             {tHC("s11")} <Badge variant="secondary">on</Badge>
           </dt>
-          <dd className="text-muted-foreground">
-            {tHC("s10")}
-          </dd>
+          <dd className="text-muted-foreground">{tHC("s10")}</dd>
         </div>
         <div data-testid="mcp-auth-oauth">
           <dt className="font-medium">
@@ -53,7 +51,10 @@ export default function McpServerAuthOptionsCard() {
           <dd className="text-muted-foreground">
             {oauth.enabled ? (
               <>
-                {tHC("s8")} <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>{tHC("s7")} <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> {tHC("s6")} <code>{oauth.metadataUrl}</code>{tHC("s5")}{" "}
+                {tHC("s8")} <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>
+                {tHC("s7")} <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> {tHC("s6")}{" "}
+                <code>{oauth.metadataUrl}</code>
+                {tHC("s5")}{" "}
                 {oauth.scopes.map((s) => (
                   <code key={s} className="me-1">
                     {s}
@@ -62,7 +63,8 @@ export default function McpServerAuthOptionsCard() {
               </>
             ) : (
               <>
-                {tHC("s4")} <code>app.mcpserver.oauth.enabled</code>{tHC("s3")}
+                {tHC("s4")} <code>app.mcpserver.oauth.enabled</code>
+                {tHC("s3")}
               </>
             )}
           </dd>

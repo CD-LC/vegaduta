@@ -112,7 +112,7 @@ export default function ApprovalPauseCard({
   autoFocus = false,
   onFocusFallback,
 }: ApprovalPauseCardProps) {
-    const tHC = useTranslations("hcComponentsWorkflowApprovalPauseCard");
+  const tHC = useTranslations("hcComponentsWorkflowApprovalPauseCard");
   const { status, nodeId, requestId } = awaiting;
   const meta = META[status] ?? META.PAUSED;
   const titleId = useId();
@@ -379,9 +379,7 @@ export default function ApprovalPauseCard({
 
       <div className="apc-body" id={descId}>
         {summary && <p className="apc-summary">{summary}</p>}
-        {!summary && status === "PAUSED" && (
-          <p className="apc-summary apc-muted">{tHC("s14")}</p>
-        )}
+        {!summary && status === "PAUSED" && <p className="apc-summary apc-muted">{tHC("s14")}</p>}
 
         {phase === "loading" && (
           <p className="apc-muted apc-loading">
@@ -389,9 +387,7 @@ export default function ApprovalPauseCard({
           </p>
         )}
 
-        {phase === "unavailable" && (
-          <p className="apc-muted">{tHC("s12")}</p>
-        )}
+        {phase === "unavailable" && <p className="apc-muted">{tHC("s12")}</p>}
 
         {payload && (
           <details className="apc-details">
@@ -408,9 +404,7 @@ export default function ApprovalPauseCard({
 
         {input?.message && <p className="apc-summary">{input.message}</p>}
 
-        {!canDecide && phase !== "loading" && (
-          <p className="apc-muted">{tHC("s9")}</p>
-        )}
+        {!canDecide && phase !== "loading" && <p className="apc-muted">{tHC("s9")}</p>}
 
         {decidable && status === "AWAITING_APPROVAL" && approval && approval.formFields.length > 0 && (
           <fieldset className="apc-fields">

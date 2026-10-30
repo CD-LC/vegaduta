@@ -46,7 +46,7 @@ function truncate(text: string, max: number) {
 }
 
 export default function ClipStudio() {
-    const tHC = useTranslations("hcComponentsClipsClipStudio");
+  const tHC = useTranslations("hcComponentsClipsClipStudio");
   const searchParams = useSearchParams();
   const preloadImageId = searchParams.get("imageId");
 
@@ -325,9 +325,7 @@ export default function ClipStudio() {
                 <CardTitle>
                   <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s22")}</h2>
                 </CardTitle>
-                <CardDescription>
-                  {tHC("s21")}
-                </CardDescription>
+                <CardDescription>{tHC("s21")}</CardDescription>
               </CardHeader>
               <CardContent>
                 {sourceError && (
@@ -342,9 +340,7 @@ export default function ClipStudio() {
                     <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s20")}
                   </div>
                 ) : imagesFailed ? (
-                  <p className="py-2 text-sm text-muted-foreground">
-                    {tHC("s19")}
-                  </p>
+                  <p className="py-2 text-sm text-muted-foreground">{tHC("s19")}</p>
                 ) : images.length === 0 ? (
                   <p className="py-2 text-sm text-muted-foreground">
                     {tHC("s18")}{" "}
@@ -429,9 +425,7 @@ export default function ClipStudio() {
                       }}
                     />
                   </label>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {tHC("s14")}
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{tHC("s14")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -576,7 +570,10 @@ export default function ClipStudio() {
                       />
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground" role="status">
-                      Recording {progress}{tHC("s4")}{durationSec}{tHC("s3")}
+                      Recording {progress}
+                      {tHC("s4")}
+                      {durationSec}
+                      {tHC("s3")}
                     </p>
                   </div>
                 )}
@@ -596,14 +593,13 @@ export default function ClipStudio() {
                       className="h-auto w-full rounded-md border border-border bg-black"
                     />
                     <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-                      <Download size={13} aria-hidden="true" /> {tHC("s2")}{result.extension}
+                      <Download size={13} aria-hidden="true" /> {tHC("s2")}
+                      {result.extension}
                     </Button>
                   </div>
                 )}
 
-                <p className="text-xs text-muted-foreground">
-                  {tHC("s1")}
-                </p>
+                <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
               </CardContent>
             </Card>
           </div>

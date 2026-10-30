@@ -52,7 +52,7 @@ export default function OpenApiImportWizard({
   step: "source" | "review";
   toggleKey: (key: string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsOpenapiOpenApiImportWizard");
+  const tHC = useTranslations("hcComponentsOpenapiOpenApiImportWizard");
   const t = useTranslations("openApiTools");
   return (
     <Card className="gap-4 p-6">

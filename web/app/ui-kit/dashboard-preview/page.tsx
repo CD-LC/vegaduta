@@ -47,7 +47,7 @@ const previewAuth = {
 };
 
 function PreviewPill() {
-    const tHC = useTranslations("hcUikitDashboardpreviewPage");
+  const tHC = useTranslations("hcUikitDashboardpreviewPage");
   return (
     <div
       role="status"

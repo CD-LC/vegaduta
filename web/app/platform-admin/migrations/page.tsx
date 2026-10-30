@@ -32,7 +32,7 @@ import { useTranslations } from "../../lib/i18n";
 // image ships.
 
 export default function MigrationsPage() {
-    const tHC = useTranslations("hcPlatformadminMigrationsPage");
+  const tHC = useTranslations("hcPlatformadminMigrationsPage");
   const [data, setData] = useState<MigrationsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,9 +79,7 @@ export default function MigrationsPage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s11")}
-      </PageHint>
+      <PageHint>{tHC("s11")}</PageHint>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => void load()} />}
       {loading && !data && <Skeleton className="mb-5 h-24 w-full" />}
@@ -223,9 +221,7 @@ export default function MigrationsPage() {
         </SectionCard>
       )}
 
-      <InfoNote>
-        {tHC("s1")}
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
     </AdminShell>
   );
 }

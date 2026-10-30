@@ -79,7 +79,7 @@ function Pager({ pg, label, capped }: { pg: ReturnType<typeof usePagination<any>
 }
 
 function SummaryPanel() {
-    const tHC = useTranslations("hcPlatformadminBillingPage");
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [data, setData] = useState<BillingSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -132,9 +132,7 @@ function SummaryPanel() {
             </p>
           )}
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {tHC("s26")}
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s26")}</p>
             {data.invoiceTotals.length === 0 ? (
               <p className="text-xs text-muted-foreground">{tHC("s25")}</p>
             ) : (
@@ -142,8 +140,8 @@ function SummaryPanel() {
                 <p key={c.currency} className="text-sm">
                   <span className="font-medium">{c.currency}</span>: {formatMinor(c.amountMinor, c.currency)} across{" "}
                   {c.invoices} invoice
-                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}{tHC("s24")}{" "}
-                  {formatMinor(c.amountMinorLast30d, c.currency)} / {c.invoicesLast30d}
+                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}
+                  {tHC("s24")} {formatMinor(c.amountMinorLast30d, c.currency)} / {c.invoicesLast30d}
                 </p>
               ))
             )}
@@ -166,7 +164,7 @@ function SummaryPanel() {
 }
 
 function SubscriptionsPanel() {
-    const tHC = useTranslations("hcPlatformadminBillingPage");
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [q, setQ] = useState("");
   const [plan, setPlan] = useState("");
   const [state, setState] = useState("");
@@ -241,9 +239,7 @@ function SubscriptionsPanel() {
     >
       {loading && !data && <Skeleton className="h-24 w-full" />}
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
-      {data?.scanTruncated && (
-        <InfoNote>{tHC("s17")}</InfoNote>
-      )}
+      {data?.scanTruncated && <InfoNote>{tHC("s17")}</InfoNote>}
       {!loading && !error && rows.length === 0 && (
         <AdminEmptyState title={tHC("s16")} description="Adjust the filters to see more tenants." />
       )}
@@ -265,17 +261,25 @@ function SubscriptionsPanel() {
               </span>
             )}
             {r.pastDueSince && (
-              <span className="block text-xs text-destructive">{tHC("s14")} {date(r.pastDueSince)}</span>
+              <span className="block text-xs text-destructive">
+                {tHC("s14")} {date(r.pastDueSince)}
+              </span>
             )}
             {r.pendingPlan && (
-              <span className="block text-xs text-muted-foreground">{tHC("s13")} {r.pendingPlan} {tHC("s12")}</span>
+              <span className="block text-xs text-muted-foreground">
+                {tHC("s13")} {r.pendingPlan} {tHC("s12")}
+              </span>
             )}
           </span>
           <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">{r.plan}</Badge>
             <Badge variant={stateVariant(r.state)}>{STATE_LABEL[r.state]}</Badge>
             {r.subscriptionStatus && <span>gateway: {r.subscriptionStatus}</span>}
-            {r.trialEndsAt && <span>{tHC("s11")} {date(r.trialEndsAt)}</span>}
+            {r.trialEndsAt && (
+              <span>
+                {tHC("s11")} {date(r.trialEndsAt)}
+              </span>
+            )}
             {r.currentPeriodEnd && <span>renews/ends {date(r.currentPeriodEnd)}</span>}
             {r.cancelScheduled && <span>{tHC("s10")}</span>}
           </span>
@@ -287,7 +291,7 @@ function SubscriptionsPanel() {
 }
 
 function CompGrantsPanel() {
-    const tHC = useTranslations("hcPlatformadminBillingPage");
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [grants, setGrants] = useState<CompGrantRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -338,7 +342,7 @@ function CompGrantsPanel() {
 }
 
 function InvoicesPanel() {
-    const tHC = useTranslations("hcPlatformadminBillingPage");
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [tenantId, setTenantId] = useState("");
   const [applied, setApplied] = useState("");
   const [rows, setRows] = useState<InvoiceRow[] | null>(null);
@@ -387,9 +391,7 @@ function InvoicesPanel() {
         </form>
       }
     >
-      <InfoNote>
-        {tHC("s4")}
-      </InfoNote>
+      <InfoNote>{tHC("s4")}</InfoNote>
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
       {!rows && !error && <Skeleton className="h-16 w-full" />}
       {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s3")}</p>}
@@ -420,12 +422,10 @@ function InvoicesPanel() {
 }
 
 export default function PlatformBillingPage() {
-    const tHC = useTranslations("hcPlatformadminBillingPage");
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   return (
     <AdminShell title={tHC("s2")}>
-      <PageHint>
-        {tHC("s1")}
-      </PageHint>
+      <PageHint>{tHC("s1")}</PageHint>
       <SummaryPanel />
       <SubscriptionsPanel />
       <CompGrantsPanel />

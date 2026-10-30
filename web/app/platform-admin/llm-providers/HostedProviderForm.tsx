@@ -23,7 +23,7 @@ import type { HostedPool } from "./useHostedPool";
 import { useTranslations } from "../../lib/i18n";
 
 export function HostedProviderForm({ pool }: { pool: HostedPool }) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersHostedProviderForm");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedProviderForm");
   const {
     hostedProviderDraft,
     setHostedProviderDraft,
@@ -153,9 +153,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             <Select
               id="hosted-provider"
               value={hostedProviderDraft.providerName}
-              onChange={(e) =>
-                setHostedProviderDraft((d) => ({ ...d, providerName: e.target.value, model: "" }))
-              }
+              onChange={(e) => setHostedProviderDraft((d) => ({ ...d, providerName: e.target.value, model: "" }))}
               options={HOSTED_POOL_GENERIC_PROVIDERS}
               placeholder={tHC("s30")}
             />
@@ -235,9 +233,9 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                 onChange={(e) => setHostedProviderDraft((d) => ({ ...d, model: e.target.value }))}
                 options={withCurrentValue(
                   [
-                    ...(HOSTED_PROVIDER_PRESETS.find(
-                      (p) => p.value === hostedProviderDraft.baseUrl
-                    )?.models.map((m) => ({ value: m, label: m })) || []),
+                    ...(HOSTED_PROVIDER_PRESETS.find((p) => p.value === hostedProviderDraft.baseUrl)?.models.map(
+                      (m) => ({ value: m, label: m })
+                    ) || []),
                     ...discoveredHostedModels.map((m) => ({ value: m, label: m })),
                   ],
                   hostedProviderDraft.model
@@ -288,9 +286,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
               type="password"
               value={hostedProviderDraft.apiKey}
               onChange={(e) => setHostedProviderDraft((d) => ({ ...d, apiKey: e.target.value }))}
-              placeholder={
-                editingHostedProviderId === null ? "Required" : "Leave blank to keep the current key"
-              }
+              placeholder={editingHostedProviderId === null ? "Required" : "Leave blank to keep the current key"}
               autoComplete="new-password"
             />
           </div>
@@ -333,11 +329,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
       </div>
       <div className="mt-3 flex items-center gap-2">
         <Button type="submit" size="sm" disabled={savingHostedProvider}>
-          {savingHostedProvider
-            ? "Saving…"
-            : editingHostedProviderId === null
-              ? "Add provider"
-              : "Save changes"}
+          {savingHostedProvider ? "Saving…" : editingHostedProviderId === null ? "Add provider" : "Save changes"}
         </Button>
         {editingHostedProviderId !== null && (
           <Button type="button" variant="outline" size="sm" onClick={cancelHostedProviderEdit}>
@@ -346,14 +338,12 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
         )}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        <strong>{tHC("s19")}</strong> {tHC("s18")}{" "}
-        <strong>{tHC("s17")}</strong> {tHC("s16")}{" "}
-        <strong>Discover</strong> {tHC("s15")} <code>/v1</code> {tHC("s14")}{" "}
-        <code>/v1/chat/completions</code> {tHC("s13")} <strong>{tHC("s12")}</strong> {tHC("s11")} <strong>{tHC("s10")}</strong>{tHC("s9")}{" "}
-        <code>https://generativelanguage.googleapis.com</code> {tHC("s8")}{" "}
-        <code>/v1beta/openai/chat/completions</code> {tHC("s7")}{" "}
-        <strong>{tHC("s6")}</strong> {tHC("s5")} <strong>{tHC("s4")}</strong> {tHC("s3")}{" "}
-        <strong>{tHC("s2")}</strong> {tHC("s1")}
+        <strong>{tHC("s19")}</strong> {tHC("s18")} <strong>{tHC("s17")}</strong> {tHC("s16")} <strong>Discover</strong>{" "}
+        {tHC("s15")} <code>/v1</code> {tHC("s14")} <code>/v1/chat/completions</code> {tHC("s13")}{" "}
+        <strong>{tHC("s12")}</strong> {tHC("s11")} <strong>{tHC("s10")}</strong>
+        {tHC("s9")} <code>https://generativelanguage.googleapis.com</code> {tHC("s8")}{" "}
+        <code>/v1beta/openai/chat/completions</code> {tHC("s7")} <strong>{tHC("s6")}</strong> {tHC("s5")}{" "}
+        <strong>{tHC("s4")}</strong> {tHC("s3")} <strong>{tHC("s2")}</strong> {tHC("s1")}
       </p>
     </form>
   );

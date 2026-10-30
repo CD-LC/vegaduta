@@ -36,7 +36,7 @@ export default function CreateDatasetForm({
   onCancel: () => void;
   onCreate: () => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsCreateDatasetForm");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsCreateDatasetForm");
   return (
     <Card>
       <CardContent className="space-y-3 pt-4">

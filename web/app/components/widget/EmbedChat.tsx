@@ -126,7 +126,7 @@ function accentForeground(accent: string): string {
 }
 
 export default function EmbedChat({ shareId, accent, greeting, title, theme, parentOrigin }: EmbedChatProps) {
-    const tHC = useTranslations("hcComponentsWidgetEmbedChat");
+  const tHC = useTranslations("hcComponentsWidgetEmbedChat");
   const [phase, setPhase] = useState<"loading" | "ready" | "blocked">("loading");
   const [info, setInfo] = useState<SharedAgentInfo | null>(null);
   const [blockedCode, setBlockedCode] = useState<ShareErrorCode>("unavailable");
@@ -472,7 +472,7 @@ const REPORT_REASONS = [
 /** Compact report affordance - same reasons and same fire-and-thank flow as
  *  the full-page viewer's ReportPanel, collapsed to footer scale. */
 function ReportControl({ shareId }: { shareId: string }) {
-    const tHC = useTranslations("hcComponentsWidgetEmbedChat");
+  const tHC = useTranslations("hcComponentsWidgetEmbedChat");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);

@@ -24,7 +24,7 @@ import { useTranslations } from "../../lib/i18n";
 // confirm says so.
 
 export default function EmailSuppressionsPage() {
-    const tHC = useTranslations("hcPlatformadminEmailsuppressionsPage");
+  const tHC = useTranslations("hcPlatformadminEmailsuppressionsPage");
   const askConfirm = useConfirm();
   const [q, setQ] = useState("");
   const [applied, setApplied] = useState("");
@@ -79,9 +79,7 @@ export default function EmailSuppressionsPage() {
 
   return (
     <AdminShell title={tHC("s5")}>
-      <PageHint>
-        {tHC("s4")}
-      </PageHint>
+      <PageHint>{tHC("s4")}</PageHint>
 
       <SectionCard
         title={tHC("s3")}

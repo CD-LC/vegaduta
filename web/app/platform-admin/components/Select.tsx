@@ -42,7 +42,7 @@ export default function Select({
   searchable = false,
   allowCustom = false,
 }: SelectProps) {
-    const tHC = useTranslations("hcPlatformadminComponentsSelect");
+  const tHC = useTranslations("hcPlatformadminComponentsSelect");
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
@@ -80,10 +80,14 @@ export default function Select({
     setFlipUp(up);
     setPopStyle(
       up
-        ? { position: "fixed", left, width, bottom: window.innerHeight - r.top + gap,
-            maxHeight: Math.max(120, Math.min(maxH, above)) }
-        : { position: "fixed", left, width, top: r.bottom + gap,
-            maxHeight: Math.max(120, Math.min(maxH, below)) }
+        ? {
+            position: "fixed",
+            left,
+            width,
+            bottom: window.innerHeight - r.top + gap,
+            maxHeight: Math.max(120, Math.min(maxH, above)),
+          }
+        : { position: "fixed", left, width, top: r.bottom + gap, maxHeight: Math.max(120, Math.min(maxH, below)) }
     );
   }, []);
 
@@ -103,13 +107,14 @@ export default function Select({
   );
   const selected = normalized.find((o) => String(o.value) === String(value));
 
-  const filtered = searchable && query.trim()
-    ? normalized.filter(
-        (o) =>
-          o.label.toLowerCase().includes(query.trim().toLowerCase()) ||
-          String(o.value).toLowerCase().includes(query.trim().toLowerCase())
-      )
-    : normalized;
+  const filtered =
+    searchable && query.trim()
+      ? normalized.filter(
+          (o) =>
+            o.label.toLowerCase().includes(query.trim().toLowerCase()) ||
+            String(o.value).toLowerCase().includes(query.trim().toLowerCase())
+        )
+      : normalized;
   const exactMatch = filtered.some((o) => String(o.value).toLowerCase() === query.trim().toLowerCase());
   const customOption =
     allowCustom && query.trim() && !exactMatch ? { value: query.trim(), label: query.trim(), isCustom: true } : null;
@@ -189,7 +194,9 @@ export default function Select({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        aria-activedescendant={open && activeIndex >= 0 && visibleOptions[activeIndex] ? optionId(activeIndex) : undefined}
+        aria-activedescendant={
+          open && activeIndex >= 0 && visibleOptions[activeIndex] ? optionId(activeIndex) : undefined
+        }
       >
         <span className={`select-trigger-value${selected ? "" : " select-trigger-placeholder"}`}>
           {selected ? selected.label : placeholder}
@@ -212,37 +219,37 @@ export default function Select({
                 exit={{ opacity: 0, scale: 0.96, y: flipUp ? 4 : -4 }}
                 transition={{ duration: 0.12, ease: [0.16, 1, 0.3, 1] }}
               >
-            {searchable && (
-              <input
-                ref={searchRef}
-                type="text"
-                className="select-search"
-                placeholder="Search…"
-                aria-label={tHC("s2")}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={onKeyDown}
-              />
-            )}
-            {visibleOptions.length === 0 && <div className="select-empty">{tHC("s1")}</div>}
-            {visibleOptions.map((o, idx) => (
-              <motion.button
-                type="button"
-                key={o.value}
-                id={optionId(idx)}
-                role="option"
-                aria-selected={String(o.value) === String(value)}
-                className={`select-option${String(o.value) === String(value) ? " select-option-selected" : ""}${idx === activeIndex ? " select-option-active" : ""}${o.isCustom ? " select-option-custom" : ""}`}
-                onMouseEnter={() => setActiveIndex(idx)}
-                onClick={() => commit(o)}
-                initial={searchable ? { opacity: 0, y: -2 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.12 }}
-              >
-                <span>{o.isCustom ? `Use "${o.label}"` : o.label}</span>
-                {String(o.value) === String(value) && <Check size={14} strokeWidth={3} />}
-              </motion.button>
-            ))}
+                {searchable && (
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    className="select-search"
+                    placeholder="Search…"
+                    aria-label={tHC("s2")}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={onKeyDown}
+                  />
+                )}
+                {visibleOptions.length === 0 && <div className="select-empty">{tHC("s1")}</div>}
+                {visibleOptions.map((o, idx) => (
+                  <motion.button
+                    type="button"
+                    key={o.value}
+                    id={optionId(idx)}
+                    role="option"
+                    aria-selected={String(o.value) === String(value)}
+                    className={`select-option${String(o.value) === String(value) ? " select-option-selected" : ""}${idx === activeIndex ? " select-option-active" : ""}${o.isCustom ? " select-option-custom" : ""}`}
+                    onMouseEnter={() => setActiveIndex(idx)}
+                    onClick={() => commit(o)}
+                    initial={searchable ? { opacity: 0, y: -2 } : false}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.12 }}
+                  >
+                    <span>{o.isCustom ? `Use "${o.label}"` : o.label}</span>
+                    {String(o.value) === String(value) && <Check size={14} strokeWidth={3} />}
+                  </motion.button>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>,

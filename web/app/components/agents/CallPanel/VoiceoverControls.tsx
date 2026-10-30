@@ -67,7 +67,7 @@ export default function VoiceoverControls({
   callVoice,
   onCallVoiceChange,
 }: VoiceoverControlsProps) {
-    const tHC = useTranslations("hcComponentsAgentsCallPanelVoiceoverControls");
+  const tHC = useTranslations("hcComponentsAgentsCallPanelVoiceoverControls");
   // Hydrate the persisted pick after mount (localStorage is not SSR-safe for
   // every consumer of this panel; the effect also re-reads so a pick made on
   // another surface is reflected on next mount).
@@ -257,7 +257,9 @@ export default function VoiceoverControls({
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-muted-foreground">
               {tHC("s1")}{" "}
-              {shownTts.provider ? `${shownTts.provider}${shownTts.model ? ` · ${shownTts.model}` : ""}` : "Platform default"}
+              {shownTts.provider
+                ? `${shownTts.provider}${shownTts.model ? ` · ${shownTts.model}` : ""}`
+                : "Platform default"}
             </span>
             <Button
               type="button"

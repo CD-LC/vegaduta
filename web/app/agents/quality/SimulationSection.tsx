@@ -108,7 +108,7 @@ const TERMINATION_LABEL: Record<string, string> = {
 };
 
 export default function SimulationSection({ agentId }: { agentId: string | null }) {
-    const tHC = useTranslations("hcAgentsQualitySimulationSection");
+  const tHC = useTranslations("hcAgentsQualitySimulationSection");
   const [personas, setPersonas] = useState<Persona[] | null>(null);
   const [sessions, setSessions] = useState<SimSession[]>([]);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -351,10 +351,11 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>{tHC("s12")}{p.name}&quot;?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {tHC("s11")}
-                          </AlertDialogDescription>
+                          <AlertDialogTitle>
+                            {tHC("s12")}
+                            {p.name}&quot;?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>{tHC("s11")}</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -397,11 +398,10 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
               />
             </div>
             <Button size="sm" onClick={() => void launch()} disabled={busy || selected.size === 0}>
-              <Play size={14} aria-hidden="true" /> {tHC("s8")}{selected.size})
+              <Play size={14} aria-hidden="true" /> {tHC("s8")}
+              {selected.size})
             </Button>
-            <span className="text-xs text-muted-foreground">
-              {tHC("s7")}
-            </span>
+            <span className="text-xs text-muted-foreground">{tHC("s7")}</span>
           </div>
         </CardContent>
       </Card>
@@ -409,9 +409,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
       {/* Session history */}
       <div className="space-y-2">
         {sessions.length === 0 && !loadFailed ? (
-          <p className="text-sm text-muted-foreground">
-            {tHC("s6")}
-          </p>
+          <p className="text-sm text-muted-foreground">{tHC("s6")}</p>
         ) : (
           sessions.map((s) => (
             <Card key={s.id}>

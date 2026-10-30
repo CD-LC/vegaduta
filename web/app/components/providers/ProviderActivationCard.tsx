@@ -47,7 +47,7 @@ export default function ProviderActivationCard({
   multiFieldValues,
   setMultiFieldValue,
 }: ProviderActivationCardProps) {
-    const tHC = useTranslations("hcComponentsProvidersProviderActivationCard");
+  const tHC = useTranslations("hcComponentsProvidersProviderActivationCard");
   const t = useTranslations("providersPanel");
   return (
     <Card className="gap-4 p-6">

@@ -170,7 +170,7 @@ function ToolButton({ tool, url }: { tool: ExternalToolDef; url: string }) {
 }
 
 function UnconfiguredTool({ tool }: { tool: ExternalToolDef }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsExternaltools");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsExternaltools");
   const Icon = ICONS[tool.key] || ExternalLink;
   return (
     <div
@@ -190,7 +190,7 @@ function UnconfiguredTool({ tool }: { tool: ExternalToolDef }) {
 }
 
 export function ExternalToolsSection({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsExternaltools");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsExternaltools");
   const { links, error } = useObservabilityLinks();
   return (
     <SectionCard

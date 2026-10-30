@@ -95,7 +95,7 @@ export default function StepTestPanel({
   onUnavailable,
   onClose,
 }: StepTestPanelProps) {
-    const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
+  const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
   const uid = useId();
   const reason = useMemo(() => untestableReason(node.type, node.config), [node.type, node.config]);
 
@@ -181,14 +181,14 @@ export default function StepTestPanel({
         onClose();
       }
     },
-    [run, onClose],
+    [run, onClose]
   );
 
   const saveMock = useCallback(
     (id: string) => {
       setMocks(setMock(workflowId, id, pinned[id] ?? ""));
     },
-    [workflowId, pinned],
+    [workflowId, pinned]
   );
 
   const forgetMock = useCallback(
@@ -198,7 +198,7 @@ export default function StepTestPanel({
       const u = upstream.find((x) => x.id === id);
       setPinned((p) => ({ ...p, [id]: u?.lastOutput ?? "" }));
     },
-    [workflowId, upstream],
+    [workflowId, upstream]
   );
 
   const copyOutput = useCallback((text: string) => {
@@ -239,7 +239,9 @@ export default function StepTestPanel({
 
       {reason ? (
         <div className="st-blocked" role="note">
-          <span className="st-blocked-ico" aria-hidden="true">⊘</span>
+          <span className="st-blocked-ico" aria-hidden="true">
+            ⊘
+          </span>
           <div>
             <p className="st-blocked-title">{tHC("s9")}</p>
             <p className="st-blocked-text">{reason}</p>
@@ -256,7 +258,9 @@ export default function StepTestPanel({
           <div className="st-field">
             <label htmlFor={`${uid}-input`} className="st-label">
               Input
-              <span className="st-sub">{upstream.length ? "optional - overrides pinned inputs" : "what this step receives"}</span>
+              <span className="st-sub">
+                {upstream.length ? "optional - overrides pinned inputs" : "what this step receives"}
+              </span>
             </label>
             <textarea
               id={`${uid}-input`}
@@ -265,7 +269,9 @@ export default function StepTestPanel({
               onChange={(e) => setInput(e.target.value)}
               rows={4}
               spellCheck={false}
-              placeholder={upstream.length ? "Leave empty to use the pinned inputs below" : "Type the input for this step"}
+              placeholder={
+                upstream.length ? "Leave empty to use the pinned inputs below" : "Type the input for this step"
+              }
             />
           </div>
 
@@ -364,7 +370,7 @@ function ResultView({
   copied: boolean;
   onCopy: (text: string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
+  const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
   if (!result.ok) {
     return (
       <div className="st-result" data-status="error">
@@ -435,7 +441,9 @@ function ResultView({
             {prettyText(output)}
           </pre>
         ) : (
-          <p className="st-hint">{e.outputJson == null ? "Output not captured by this server." : "This step produced no output."}</p>
+          <p className="st-hint">
+            {e.outputJson == null ? "Output not captured by this server." : "This step produced no output."}
+          </p>
         )}
         {e.outputTruncated ? (
           <p className="st-hint" role="note">

@@ -87,7 +87,7 @@ export default function Showtime({
   onLaunch,
   clientIp,
 }: Props) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeShowtime");
+  const tHC = useTranslations("hcComponentsStudioShowtimeShowtime");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -427,9 +427,7 @@ export default function Showtime({
         ) : (
           <div className="mx-auto mt-16 flex max-w-md flex-col items-center gap-3 text-center text-zinc-400">
             <Loader2 aria-hidden="true" className="h-6 w-6 animate-spin shrink-0" />
-            <p>
-              {tHC("s2")}
-            </p>
+            <p>{tHC("s2")}</p>
             <button
               type="button"
               onClick={() => setMode("day")}

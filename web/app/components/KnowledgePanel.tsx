@@ -65,7 +65,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
   { collections, selectedId, onDocumentsChanged, onRequestCreateCollection, processingAvailable = true }: any,
   ref
 ) {
-    const tHC = useTranslations("hcComponentsKnowledgePanel");
+  const tHC = useTranslations("hcComponentsKnowledgePanel");
   // When the Python sidecar (embeddings/extraction) is down, upload and
   // semantic search both hard-depend on it, so the page gates them off via
   // this prop. Optional + defaults true so the healthy case (and any caller
@@ -421,10 +421,14 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
       />
       <ConfirmDialog
         open={forgetTarget !== null}
-        onOpenChange={(o) => { if (!o) setForgetTarget(null); }}
+        onOpenChange={(o) => {
+          if (!o) setForgetTarget(null);
+        }}
         title={forgetTarget ? tFace("forgetPersonConfirm", { name: forgetTarget.personName }) : ""}
         destructive
-        onConfirm={async () => { if (forgetTarget) await handleDeleteFaceEnrollment(forgetTarget); }}
+        onConfirm={async () => {
+          if (forgetTarget) await handleDeleteFaceEnrollment(forgetTarget);
+        }}
       />
       <div className="space-y-5">
         <input

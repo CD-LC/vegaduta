@@ -29,7 +29,7 @@ export type ViewAsTarget = {
 };
 
 export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget | null; onClose: () => void }) {
-    const tHC = useTranslations("hcPlatformadminComponentsGovernanceViewAsDialog");
+  const tHC = useTranslations("hcPlatformadminComponentsGovernanceViewAsDialog");
   const open = target != null;
   const [reason, setReason] = useState("");
   const [masterKey, setMasterKey] = useState("");
@@ -151,9 +151,7 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
               role="note"
             >
               <ShieldAlert size={14} className="mt-0.5 shrink-0 text-[var(--warning-text)]" />
-              <span>
-                {tHC("s9")}
-              </span>
+              <span>{tHC("s9")}</span>
             </div>
 
             <div className="mt-3 space-y-1.5">

@@ -37,7 +37,7 @@ const REPO_ROWS: ReadonlyArray<{ dir: string; commitKey: string }> = [
 ];
 
 export default function OpenSourceBand() {
-    const tHC = useTranslations("hcComponentsDemolandingOpenSourceBand");
+  const tHC = useTranslations("hcComponentsDemolandingOpenSourceBand");
   const t = useTranslations("landing");
 
   return (

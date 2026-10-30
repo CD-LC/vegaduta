@@ -43,7 +43,7 @@ export default function VideoProviderSelector({
   onEdit,
   isBusy = false,
 }: VideoProviderSelectorProps) {
-    const tHC = useTranslations("hcComponentsAgentsVideoProviderSelector");
+  const tHC = useTranslations("hcComponentsAgentsVideoProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("videoToText", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's video providers",
@@ -54,14 +54,11 @@ export default function VideoProviderSelector({
       providers={providers}
       icon={Video}
       label={tHC("s5")}
-      tooltipContent={
-        <>
-          {tHC("s4")}
-        </>
-      }
+      tooltipContent={<>{tHC("s4")}</>}
       freePlanWarningText={
         <>
-          {tHC("s3")} <strong>{tHC("s2")}</strong>{tHC("s1")}
+          {tHC("s3")} <strong>{tHC("s2")}</strong>
+          {tHC("s1")}
         </>
       }
       editorLockedTitle="Video provider selection is a Premium feature"

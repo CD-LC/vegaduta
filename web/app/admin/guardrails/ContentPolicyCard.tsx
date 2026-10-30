@@ -21,7 +21,7 @@ import {
 // top of page.tsx): plain English until the next I18N-MIGRATION-PLAN batch.
 
 export default function ContentPolicyCard({ canManage }: { canManage: boolean }) {
-    const tHC = useTranslations("hcAdminGuardrailsContentPolicyCard");
+  const tHC = useTranslations("hcAdminGuardrailsContentPolicyCard");
   const tg = useTranslations("f2GapsAdmin");
   const [saved, setSaved] = useState<ContentPolicy>(DEFAULT_CONTENT_POLICY);
   const [draft, setDraft] = useState<ContentPolicy>(DEFAULT_CONTENT_POLICY);
@@ -80,9 +80,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
     <Card data-testid="content-policy-card">
       <CardHeader>
         <CardTitle>{tHC("s10")}</CardTitle>
-        <CardDescription>
-          {tHC("s9")}
-        </CardDescription>
+        <CardDescription>{tHC("s9")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {loading ? (
@@ -104,9 +102,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 <AlertDescription>{notice}</AlertDescription>
               </Alert>
             )}
-            {!canManage && (
-              <p className="text-xs text-muted-foreground">{tHC("s6")}</p>
-            )}
+            {!canManage && <p className="text-xs text-muted-foreground">{tHC("s6")}</p>}
 
             <fieldset className="flex flex-col gap-2">
               <label className="flex cursor-pointer items-start gap-2 text-sm">
@@ -120,9 +116,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 />
                 <span>
                   <span className="font-medium">{tg("redactPii")}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {tHC("s5")}
-                  </span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
                 </span>
               </label>
               <div className="ms-6 flex flex-col gap-1.5">
@@ -137,9 +131,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                     {label}
                   </label>
                 ))}
-                {isPiiRedactionInert(draft) && (
-                  <p className="text-xs text-destructive">{tHC("s4")}</p>
-                )}
+                {isPiiRedactionInert(draft) && <p className="text-xs text-destructive">{tHC("s4")}</p>}
               </div>
             </fieldset>
 
@@ -155,9 +147,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 />
                 <span>
                   <span className="font-medium">{tHC("s3")}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {tHC("s2")}
-                  </span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s2")}</span>
                 </span>
               </label>
               <div className="ms-6 flex flex-col gap-1.5">

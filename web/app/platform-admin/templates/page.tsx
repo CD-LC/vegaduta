@@ -57,7 +57,7 @@ function ListSkeleton() {
 }
 
 function PendingQueueTab() {
-    const tHC = useTranslations("hcPlatformadminTemplatesPage");
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [templates, setTemplates] = useState<CommunityTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -156,7 +156,10 @@ function PendingQueueTab() {
               />
             </div>
             {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">{tHC("s14")}{search}&rdquo;.</p>
+              <p className="text-sm text-muted-foreground">
+                {tHC("s14")}
+                {search}&rdquo;.
+              </p>
             )}
             <AnimatePresence initial={false}>
               {pageItems.map((t) => (
@@ -188,7 +191,7 @@ function PendingQueueTab() {
 }
 
 function PublishedTab() {
-    const tHC = useTranslations("hcPlatformadminTemplatesPage");
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -245,7 +248,11 @@ function PublishedTab() {
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
             {tHC("s12")}{" "}
-            <code className="font-mono">{tHC("s11")}{"{id}"}/withdraw</code>.
+            <code className="font-mono">
+              {tHC("s11")}
+              {"{id}"}/withdraw
+            </code>
+            .
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
@@ -254,7 +261,9 @@ function PublishedTab() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          {tHC("s10")}<code className="font-mono">{tHC("s9")}</code>{tHC("s8")}
+          {tHC("s10")}
+          <code className="font-mono">{tHC("s9")}</code>
+          {tHC("s8")}
         </p>
         {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
         {loading && !error && <ListSkeleton />}
@@ -304,14 +313,12 @@ function PublishedTab() {
 }
 
 export default function CommunityTemplatesPage() {
-    const tHC = useTranslations("hcPlatformadminTemplatesPage");
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [tab, setTab] = useState("pending");
 
   return (
     <AdminShell title={tHC("s3")}>
-      <PageHint>
-        {tHC("s2")}
-      </PageHint>
+      <PageHint>{tHC("s2")}</PageHint>
 
       <InfoNote>
         A template is a design snapshot only (system prompt, model/provider choice, tool/MCP names, guardrail settings,

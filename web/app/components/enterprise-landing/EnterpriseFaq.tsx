@@ -10,7 +10,7 @@ const PLAN_LINE = PLATFORM_FACTS.plans
   .join(", ");
 
 export default function EnterpriseFaq() {
-    const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseFaq");
+  const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseFaq");
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   // Answers rewritten 2026-10-03 against what exists. Removed: "4-8 weeks",
@@ -59,10 +59,7 @@ export default function EnterpriseFaq() {
         <h2 className="enterprise-faq-title">{tHC("s1")}</h2>
         <div className="enterprise-faq-list">
           {faqs.map((faq, idx) => (
-            <div
-              key={idx}
-              className={`enterprise-faq-item ${openIdx === idx ? "open" : ""}`}
-            >
+            <div key={idx} className={`enterprise-faq-item ${openIdx === idx ? "open" : ""}`}>
               <button
                 type="button"
                 className="enterprise-faq-question"

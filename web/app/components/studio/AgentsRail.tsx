@@ -36,7 +36,7 @@ export default function AgentsRail({
   onDelete: (agent: StudioAgent) => void;
   onNew: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioAgentsRail");
+  const tHC = useTranslations("hcComponentsStudioAgentsRail");
   const agentButton = (a: StudioAgent) => (
     <div
       key={a.id}
@@ -89,19 +89,13 @@ export default function AgentsRail({
           <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("s3")}
         </Button>
       )}
-      {atCap && (
-        <p className="text-[11px] text-muted-foreground">
-          {tHC("s2")}
-        </p>
-      )}
+      {atCap && <p className="text-[11px] text-muted-foreground">{tHC("s2")}</p>}
 
       <div className="pt-3">
         <LaunchChecklist progress={progress} />
       </div>
 
-      <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
-        {tHC("s1")}
-      </p>
+      <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">{tHC("s1")}</p>
     </aside>
   );
 }

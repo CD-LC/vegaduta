@@ -56,7 +56,7 @@ interface TenantSettings {
 }
 
 function AdminBrandingInner() {
-    const tHC = useTranslations("hcAdminBrandingPage");
+  const tHC = useTranslations("hcAdminBrandingPage");
   const tg = useTranslations("f2GapsAdmin");
   // MANAGE_TENANT_SETTINGS scope (granular RBAC, 2026-09-23) - was blanket
   // isAdmin; branding/settings is its own delegatable scope now.
@@ -75,8 +75,6 @@ function AdminBrandingInner() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-
 
   // Applies a fresh TenantSettingsResponse — every write endpoint returns the
   // whole settings object, so this is the single place server truth lands and
@@ -222,7 +220,8 @@ function AdminBrandingInner() {
           <AlertTitle>{tHC("s17")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-3">
             <span>
-              {tHC("s16")}{settings?.plan ? ` (${settings.plan})` : ""} {tHC("s15")}
+              {tHC("s16")}
+              {settings?.plan ? ` (${settings.plan})` : ""} {tHC("s15")}
             </span>
             {isBillingEnabled() && (
               <Button asChild size="sm">
@@ -252,9 +251,7 @@ function AdminBrandingInner() {
           <Card>
             <CardHeader>
               <CardTitle>Logo</CardTitle>
-              <CardDescription>
-                {tHC("s12")}
-              </CardDescription>
+              <CardDescription>{tHC("s12")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-4">
@@ -325,9 +322,7 @@ function AdminBrandingInner() {
                       </Button>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {tHC("s8")}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{tHC("s8")}</p>
                 </div>
               </div>
             </CardContent>
@@ -336,9 +331,7 @@ function AdminBrandingInner() {
           <Card>
             <CardHeader>
               <CardTitle>{tHC("s7")}</CardTitle>
-              <CardDescription>
-                {tHC("s6")}
-              </CardDescription>
+              <CardDescription>{tHC("s6")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <Label htmlFor="brand-display-name">{tHC("s5")}</Label>
@@ -370,9 +363,7 @@ function AdminBrandingInner() {
           <Card>
             <CardHeader>
               <CardTitle>{tHC("s4")}</CardTitle>
-              <CardDescription>
-                {tHC("s3")}
-              </CardDescription>
+              <CardDescription>{tHC("s3")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <Label htmlFor="brand-logo-url">{tHC("s2")}</Label>

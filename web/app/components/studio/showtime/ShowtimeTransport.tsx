@@ -48,7 +48,7 @@ export default function ShowtimeTransport({
   setNarrate: (update: (v: boolean) => boolean) => void;
   enterBuild: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeShowtimeTransport");
+  const tHC = useTranslations("hcComponentsStudioShowtimeShowtimeTransport");
   const barRef = useRef<HTMLDivElement | null>(null);
   const dragging = useRef(false);
   const scrub = (clientX: number) => {

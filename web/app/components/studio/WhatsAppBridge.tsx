@@ -24,7 +24,7 @@ const POLL_PENDING_MS = 3000;
 const POLL_LINKED_MS = 8000;
 
 export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) {
-    const tHC = useTranslations("hcComponentsStudioWhatsAppBridge");
+  const tHC = useTranslations("hcComponentsStudioWhatsAppBridge");
   const [channels, setChannels] = useState<ChannelsStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const expired = !!session?.expired;
@@ -80,17 +80,13 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
         <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
           <MessageCircle aria-hidden="true" className="size-4 text-primary" /> {tHC("s13")}
         </h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {tHC("s12")}
-        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{tHC("s12")}</p>
       </header>
 
       <div className="p-4">
         {view === "idle" && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {tHC("s11")}
-            </p>
+            <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
             <Button size="sm" onClick={onGetCode} disabled={busy}>
               {busy ? <Loader2 aria-hidden="true" className="me-2 h-3.5 w-3.5 animate-spin shrink-0" /> : null}
               {tHC("s10")}
@@ -100,12 +96,7 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
 
         {view === "waiting" && link && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <QrCode
-              value={link}
-              px={168}
-              label={tHC("s9")}
-              className="shrink-0 rounded-md border border-border/60"
-            />
+            <QrCode value={link} px={168} label={tHC("s9")} className="shrink-0 rounded-md border border-border/60" />
             <div className="space-y-2 text-sm">
               <p>
                 {tHC("s8")} <span className="font-mono text-base font-semibold tracking-wider">{wa.pairingCode}</span>
@@ -129,12 +120,11 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
         {view === "linked" && (
           <div className="space-y-3">
             <p className="text-sm">
-              {tHC("s3")}{wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} {tHC("s2")}
+              {tHC("s3")}
+              {wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} {tHC("s2")}
               {wa.messageCount > 0 ? ` ${wa.messageCount} ${wa.messageCount === 1 ? "turn" : "turns"} so far.` : ""}
             </p>
-            <p className="text-xs text-muted-foreground">
-              {tHC("s1")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
             <Button size="sm" variant="outline" onClick={onUnlink}>
               Disconnect
             </Button>

@@ -118,7 +118,7 @@ function ResultRow({ label, value, precise }: { label: string; value: number; pr
 }
 
 export default function WhatsAppCostCalculator() {
-    const tHC = useTranslations("hcWhatsappcostcalculatorCalculator");
+  const tHC = useTranslations("hcWhatsappcostcalculatorCalculator");
   // Volume + behaviour inputs. Every value here is a starting point, not a
   // claim — the user owns both sides of the comparison.
   const [conversations, setConversations] = useState(1000);
@@ -154,9 +154,7 @@ export default function WhatsAppCostCalculator() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{tHC("s30")}</CardTitle>
-          <CardDescription>
-            {tHC("s29")}
-          </CardDescription>
+          <CardDescription>{tHC("s29")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <SliderField
@@ -203,9 +201,7 @@ export default function WhatsAppCostCalculator() {
           />
 
           <div className="space-y-3 rounded-lg border border-border bg-muted/30 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {tHC("s24")}
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{tHC("s24")}</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label htmlFor="wa-rate-marketing" className="text-xs">
@@ -241,7 +237,8 @@ export default function WhatsAppCostCalculator() {
               </div>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground" data-testid="wa-rates-note">
-              {tHC("s21")} {PRICING_CHECKED_ON}{tHC("s20")}{" "}
+              {tHC("s21")} {PRICING_CHECKED_ON}
+              {tHC("s20")}{" "}
               <a
                 href={META_RATE_CARD_URL}
                 target="_blank"
@@ -274,9 +271,7 @@ export default function WhatsAppCostCalculator() {
                 <CardHeader className="gap-2">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Megaphone className="size-4" aria-hidden="true" />
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      {tHC("s15")}
-                    </CardTitle>
+                    <CardTitle className="text-sm font-medium text-muted-foreground">{tHC("s15")}</CardTitle>
                   </div>
                   <p className="text-2xl font-semibold tracking-tight text-foreground tabular-nums sm:text-3xl">
                     {inr.format(r.costBroadcast)}
@@ -334,7 +329,8 @@ export default function WhatsAppCostCalculator() {
                     {tHC("s10")} {marketingPct}% × ₹{marketingRate} + {100 - marketingPct}% × ₹{utilityRate} = ₹
                     {r.blendedRate.toFixed(4)} {tHC("s9")}
                     <br />
-                    {tHC("s8")} {conversations.toLocaleString("en-IN")} {tHC("s6")} {msgsBroadcast} {tHC("s5")} {inrPrecise.format(r.costBroadcast)}
+                    {tHC("s8")} {conversations.toLocaleString("en-IN")} {tHC("s6")} {msgsBroadcast} {tHC("s5")}{" "}
+                    {inrPrecise.format(r.costBroadcast)}
                     <br />
                     {tHC("s7")} {conversations.toLocaleString("en-IN")} {tHC("s6")} {msgsAgent} {tHC("s5")}{" "}
                     {inrPrecise.format(r.costAgent)}

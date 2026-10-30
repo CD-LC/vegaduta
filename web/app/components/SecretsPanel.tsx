@@ -60,7 +60,7 @@ interface SecretsPanelProps {
 }
 
 export default function SecretsPanel({ secrets, onChanged }: SecretsPanelProps) {
-    const tHC = useTranslations("hcComponentsSecretsPanel");
+  const tHC = useTranslations("hcComponentsSecretsPanel");
   const t = useTranslations("secretsPanel");
   const { hasPermission } = useAuth();
   const canManageTenantSecrets = hasPermission("MANAGE_INTEGRATIONS");

@@ -61,7 +61,7 @@ export function TenantRosterRow({
   onResetUsage: () => void;
   onDelete: () => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminTenantsTenantRosterRow");
+  const tHC = useTranslations("hcPlatformadminTenantsTenantRosterRow");
   const dirty = draftPlan && draftPlan !== t.plan;
   return (
     <motion.div
@@ -117,10 +117,7 @@ export function TenantRosterRow({
           <Meta label={tHC("s8")}>
             <span className="font-mono">{formatCountOrUnavailable(t.llmCalls30d)}</span>
           </Meta>
-          <Meta
-            label={tHC("s7")}
-            title={tHC("s6")}
-          >
+          <Meta label={tHC("s7")} title={tHC("s6")}>
             <span
               className={`font-mono ${
                 CAP_TONE_CLASS[
@@ -170,40 +167,18 @@ export function TenantRosterRow({
           {saving ? "Saving…" : "Save"}
         </Button>
         {t.emergencyStopped ? (
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={resuming}
-            onClick={onResume}
-            title={tHC("s5")}
-          >
+          <Button variant="outline" size="sm" disabled={resuming} onClick={onResume} title={tHC("s5")}>
             <ShieldCheck size={13} /> {resuming ? "Enabling…" : "Enable login"}
           </Button>
         ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onStop}
-            title={tHC("s4")}
-          >
+          <Button variant="outline" size="sm" onClick={onStop} title={tHC("s4")}>
             <ShieldOff size={13} /> {tHC("s3")}
           </Button>
         )}
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={resettingUsage}
-          onClick={onResetUsage}
-          title={tHC("s2")}
-        >
+        <Button variant="outline" size="sm" disabled={resettingUsage} onClick={onResetUsage} title={tHC("s2")}>
           <Gauge size={13} /> {resettingUsage ? "Resetting…" : "Reset usage"}
         </Button>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onDelete}
-          title={tHC("s1")}
-        >
+        <Button variant="destructive" size="sm" onClick={onDelete} title={tHC("s1")}>
           <Trash2 size={13} /> Delete
         </Button>
       </div>

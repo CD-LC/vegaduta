@@ -16,6 +16,10 @@ vi.mock("../../../lib/api", () => ({
 vi.mock("./quietDraft", () => ({
   requestDraftQuietly: (...args: unknown[]) => requestDraftQuietly(...args),
 }));
+vi.mock("../../../lib/i18n", () => ({
+  useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
+}));
 
 import CreateAgentChecklist, { type CreateAgentChecklistProps } from "./CreateAgentChecklist";
 import { DEFAULT_DRAFT_PROMPT } from "./agentChecklist";
@@ -88,7 +92,7 @@ describe("CreateAgentChecklist", () => {
   it("picking a starter hands it to the workbench", () => {
     const onPickStarter = vi.fn();
     render(<CreateAgentChecklist {...baseProps({ onPickStarter })} />);
-    fireEvent.click(screen.getByText("Kirana store"));
+    fireEvent.click(screen.getByText("try_personaKirana"));
     expect(onPickStarter).toHaveBeenCalledTimes(1);
     expect(onPickStarter.mock.calls[0][0].key).toBe("starter:kirana");
   });

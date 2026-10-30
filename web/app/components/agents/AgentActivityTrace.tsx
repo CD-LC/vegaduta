@@ -294,7 +294,7 @@ export function buildTraceRows(steps: readonly ActivityStep[]): TraceRow[] {
 }
 
 function OnDeviceBadge() {
-    const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   return (
     <span
       className="shrink-0 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground"
@@ -423,7 +423,7 @@ export default function AgentActivityTrace({
    * message goes (the composer draft). Without it - or with the flag off - no card is ever mounted. */
   appHost?: { agentId: string; onAddMessage?: (text: string) => void };
 }) {
-    const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   const [open, setOpen] = useState(defaultOpen);
   if (!steps || steps.length === 0) return null;
 

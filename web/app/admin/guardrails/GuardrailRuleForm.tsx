@@ -39,7 +39,7 @@ export function GuardrailRuleForm({
   onClose: () => void;
   onSave: () => void;
 }) {
-    const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleForm");
+  const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleForm");
   const tg = useTranslations("f2GapsAdmin");
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
@@ -60,9 +60,7 @@ export function GuardrailRuleForm({
           disabled={busy}
           onChange={(e) => onDraftChange({ ...draft, name: e.target.value })}
         />
-        <p className="text-xs text-muted-foreground">
-          {tHC("s10")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tHC("s10")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -93,11 +91,11 @@ export function GuardrailRuleForm({
           aria-describedby={patternError ? "rule-pattern-error" : undefined}
         />
         {patternError ? (
-          <p id="rule-pattern-error" className="text-xs text-destructive">{patternError}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">
-            {tHC("s7")}
+          <p id="rule-pattern-error" className="text-xs text-destructive">
+            {patternError}
           </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
         )}
       </div>
 
@@ -114,9 +112,7 @@ export function GuardrailRuleForm({
           />
           <span>
             <span className="font-medium">Block</span>
-            <span className="block text-xs text-muted-foreground">
-              {tHC("s5")}
-            </span>
+            <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
           </span>
         </label>
         <label className="flex cursor-pointer items-start gap-2 text-sm">
@@ -131,7 +127,8 @@ export function GuardrailRuleForm({
           <span>
             <span className="font-medium">{tg("redact")}</span>
             <span className="block text-xs text-muted-foreground">
-              {tHC("s4")} <code>[REDACTED]</code>{tHC("s3")}
+              {tHC("s4")} <code>[REDACTED]</code>
+              {tHC("s3")}
             </span>
           </span>
         </label>

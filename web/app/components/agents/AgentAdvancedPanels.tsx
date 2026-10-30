@@ -43,7 +43,7 @@ interface ToggleSpec {
 }
 
 export default function AgentAdvancedPanels({ agent, disabled, disabledReason, onSaved }: AgentAdvancedPanelsProps) {
-    const tHC = useTranslations("hcComponentsAgentsAgentAdvancedPanels");
+  const tHC = useTranslations("hcComponentsAgentsAgentAdvancedPanels");
   const uid = useId();
   const [state, setState] = useState<Record<string, SaveState>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -155,11 +155,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
   }
 
   return (
-    <section
-      aria-label={tHC("s5")}
-      data-testid="agent-advanced-panels"
-      className={disabled ? "opacity-70" : ""}
-    >
+    <section aria-label={tHC("s5")} data-testid="agent-advanced-panels" className={disabled ? "opacity-70" : ""}>
       <p className="text-[12.5px] text-muted-foreground">{tHC("s4")}</p>
       {disabled && disabledReason && <p className="mt-2 text-[12.5px] text-muted-foreground">{disabledReason}</p>}
 
@@ -200,9 +196,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
         <fieldset className="m-0 min-w-0 rounded-lg border border-border bg-background px-3 py-2" disabled={disabled}>
           <legend className="px-1 text-sm font-medium text-foreground">Collaborators</legend>
           <div className="flex items-start justify-between gap-2">
-            <p className="text-[12.5px] text-muted-foreground">
-              {tHC("s3")}
-            </p>
+            <p className="text-[12.5px] text-muted-foreground">{tHC("s3")}</p>
             {status("collaborators")}
           </div>
           {others === null && !othersError && (
@@ -216,11 +210,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
               {othersError}
             </div>
           )}
-          {others && others.length === 0 && (
-            <p className="mt-2 text-[12.5px] text-muted-foreground">
-              {tHC("s1")}
-            </p>
-          )}
+          {others && others.length === 0 && <p className="mt-2 text-[12.5px] text-muted-foreground">{tHC("s1")}</p>}
           {others && others.length > 0 && (
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {others.map((o) => (

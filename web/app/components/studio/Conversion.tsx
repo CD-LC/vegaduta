@@ -36,7 +36,7 @@ export function countDone(p: LaunchProgress): number {
 
 /** Sidebar checklist: the journey as five ticks. */
 export function LaunchChecklist({ progress }: { progress: LaunchProgress }) {
-    const tHC = useTranslations("hcComponentsStudioConversion");
+  const tHC = useTranslations("hcComponentsStudioConversion");
   const n = countDone(progress);
   return (
     <div className="rounded-xl border border-border/60 p-3" data-tour="launch-checklist">
@@ -95,7 +95,7 @@ export function ConvertBar({
   signupHref: string;
   hidden: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsStudioConversion");
+  const tHC = useTranslations("hcComponentsStudioConversion");
   const [dismissed, setDismissed] = useState(false);
   const n = countDone(progress);
   const show = n > 0 && !dismissed && !hidden;

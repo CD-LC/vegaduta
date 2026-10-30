@@ -9,7 +9,12 @@ import { EmptyState, Section } from "../../components/ax/page-kit";
 import type { DatasetNoiseFloorResponse, EvalReliabilityReport } from "../../lib/api";
 import type { EvalRunSummary } from "./evalDatasetsApi";
 import { resolveEvalApi } from "./evalDatasetsApi";
-import { isEvalStatsFeatureUnsupported, isPlanGate, markEvalStatsUnsupportedIf, resolveEvalStatsApi } from "./evalStatisticsApi";
+import {
+  isEvalStatsFeatureUnsupported,
+  isPlanGate,
+  markEvalStatsUnsupportedIf,
+  resolveEvalStatsApi,
+} from "./evalStatisticsApi";
 import PairedComparisonCard from "./PairedComparisonCard";
 import { DatasetReliabilityBlock, NoiseFloorCard, WarningsList } from "./EvalStatisticsBlocks";
 import { useTranslations } from "../../lib/i18n";
@@ -74,7 +79,7 @@ import { useTranslations } from "../../lib/i18n";
 type SelectChangeEvent = { target: { value: string } };
 
 export default function EvalStatisticsSection({ agentId }: { agentId: string | null }) {
-    const tHC = useTranslations("hcAgentsQualityEvalStatisticsSection");
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsSection");
   // Both resolvers are stable per bundle — memo once. The run LISTING
   // contract is reused from evalDatasetsApi rather than redeclared, so there
   // is one definition of "how do I list runs" in this folder.
@@ -218,10 +223,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   // floor, paired run comparison.
   if (!statsApi || !evalApi) {
     return (
-      <Section
-        title={tHC("s11")}
-        description={sectionDescription}
-      >
+      <Section title={tHC("s11")} description={sectionDescription}>
         <Alert>
           <Info aria-hidden="true" />
           <AlertTitle>{tHC("s18")}</AlertTitle>
@@ -231,11 +233,10 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
               <span className="font-mono text-xs">getEvalReliability</span>,{" "}
               <span className="font-mono text-xs">getDatasetNoiseFloor</span>,{" "}
               <span className="font-mono text-xs">compareEvalRunsPaired</span> in{" "}
-              <span className="font-mono text-xs">app/lib/api/quality.ts</span>{tHC("s16")}
+              <span className="font-mono text-xs">app/lib/api/quality.ts</span>
+              {tHC("s16")}
             </p>
-            <p className="mt-2">
-              {tHC("s15")}
-            </p>
+            <p className="mt-2">{tHC("s15")}</p>
           </AlertDescription>
         </Alert>
       </Section>
@@ -245,16 +246,11 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   // Gate 2: PREMIUM+ plan gate, same posture as AgentQualityPanel's 403.
   if (locked) {
     return (
-      <Section
-        title={tHC("s11")}
-        description={sectionDescription}
-      >
+      <Section title={tHC("s11")} description={sectionDescription}>
         <Alert>
           <ShieldAlert aria-hidden="true" />
           <AlertTitle>{tHC("s14")}</AlertTitle>
-          <AlertDescription>
-            {tHC("s13")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s13")}</AlertDescription>
         </Alert>
       </Section>
     );
@@ -264,10 +260,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   // this core. One honest notice beats hidden blocks and a bare heading.
   if (statsHidden && floorHidden && compareHidden) {
     return (
-      <Section
-        title={tHC("s11")}
-        description={sectionDescription}
-      >
+      <Section title={tHC("s11")} description={sectionDescription}>
         <EmptyState
           icon={Sigma}
           title={tHC("s12")}
@@ -281,10 +274,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   const selectedDataset = datasets.find((d) => d.datasetId === datasetId) || null;
 
   return (
-    <Section
-      title={tHC("s11")}
-      description={sectionDescription}
-    >
+    <Section title={tHC("s11")} description={sectionDescription}>
       <div className="space-y-8">
         {statsHidden ? null : reportFailed ? (
           <Alert variant="destructive">
@@ -406,4 +396,3 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
     </Section>
   );
 }
-

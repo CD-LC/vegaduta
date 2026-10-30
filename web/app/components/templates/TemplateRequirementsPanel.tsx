@@ -16,7 +16,7 @@ export default function TemplateRequirementsPanel({
   requirements: TemplateRequirement[] | undefined;
   className?: string;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
   if (!requirements) return null;
   const required = requirements.filter((r) => r.required);
   const optional = requirements.filter((r) => !r.required);
@@ -49,9 +49,7 @@ export default function TemplateRequirementsPanel({
           <PlugZap size={15} strokeWidth={2} aria-hidden />
           {tHC("s4")}
         </p>
-        <p className="text-sm text-muted-foreground">
-          {tHC("s3")}
-        </p>
+        <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
         {required.length > 0 && <RequirementList title="Required" items={required} />}
         {optional.length > 0 && <RequirementList title={tHC("s2")} items={optional} />}
       </CardContent>
@@ -60,7 +58,7 @@ export default function TemplateRequirementsPanel({
 }
 
 function RequirementList({ title, items }: { title: string; items: TemplateRequirement[] }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
   return (
     <div className="space-y-2">
       <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</p>

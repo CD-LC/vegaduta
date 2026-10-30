@@ -8,7 +8,7 @@ import { Section } from "../../../components/ax/page-kit";
 import { useTranslations } from "../../../lib/i18n";
 
 export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired" | "plan-locked" }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable");
   if (reason === "client-not-wired") {
     // The backend surface exists; the shared API client does not expose it
     // yet (api.ts is owned by a concurrent workstream — see
@@ -21,23 +21,17 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
       >
         <Alert>
           <AlertTitle>{tHC("s5")}</AlertTitle>
-          <AlertDescription>
-            {tHC("s4")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s4")}</AlertDescription>
         </Alert>
       </Section>
     );
   }
   // Same inline entitlement posture as AgentQualityPanel's 403 branch.
   return (
-    <Section
-      title={tHC("s3")}
-    >
+    <Section title={tHC("s3")}>
       <Alert>
         <AlertTitle>{tHC("s2")}</AlertTitle>
-        <AlertDescription>
-          {tHC("s1")}
-        </AlertDescription>
+        <AlertDescription>{tHC("s1")}</AlertDescription>
       </Alert>
     </Section>
   );

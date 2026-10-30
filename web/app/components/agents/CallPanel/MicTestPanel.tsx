@@ -24,7 +24,7 @@ export default function MicTestPanel({
   setShowMicTest,
   setMicTestResult,
 }: MicTestPanelProps) {
-    const tHC = useTranslations("hcComponentsAgentsCallPanelMicTestPanel");
+  const tHC = useTranslations("hcComponentsAgentsCallPanelMicTestPanel");
   return (
     <>
       {/* Microphone Test Panel */}
@@ -138,9 +138,15 @@ export default function MicTestPanel({
               )}
 
               <div className="text-xs text-muted-foreground space-y-1">
-                <div>{tHC("s4")} {micTestResult.mimeType}</div>
-                <div>{tHC("s3")} {(micTestResult.audioSize / 1024).toFixed(1)} KB</div>
-                <div>{tHC("s2")} {micTestResult.maxLevel}%</div>
+                <div>
+                  {tHC("s4")} {micTestResult.mimeType}
+                </div>
+                <div>
+                  {tHC("s3")} {(micTestResult.audioSize / 1024).toFixed(1)} KB
+                </div>
+                <div>
+                  {tHC("s2")} {micTestResult.maxLevel}%
+                </div>
               </div>
 
               <Button

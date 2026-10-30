@@ -12,16 +12,12 @@ import { useTranslations } from "../../lib/i18n";
 // detector's thresholds (migration V120) are edited here while Fraud &
 // Anomaly shows them read-only.
 export default function PlatformSettingsPage() {
-    const tHC = useTranslations("hcPlatformadminSettingsPage");
+  const tHC = useTranslations("hcPlatformadminSettingsPage");
   return (
     <AdminShell title={tHC("s3")}>
-      <PageHint>
-        {tHC("s2")}
-      </PageHint>
+      <PageHint>{tHC("s2")}</PageHint>
 
-      <InfoNote>
-        {tHC("s1")}
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
 
       <PlatformSettingsSection />
     </AdminShell>

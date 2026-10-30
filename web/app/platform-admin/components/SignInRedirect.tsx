@@ -23,7 +23,7 @@ import { useTranslations } from "../../lib/i18n";
 export const REDIRECT_TIMEOUT_MS = 15_000;
 
 export default function SignInRedirect() {
-    const tHC = useTranslations("hcPlatformadminComponentsSignInRedirect");
+  const tHC = useTranslations("hcPlatformadminComponentsSignInRedirect");
   const [failure, setFailure] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -49,7 +49,9 @@ export default function SignInRedirect() {
         <div className="auth-card" style={{ textAlign: "center" }}>
           <Logo size={48} />
           <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s4")}</p>
-          <p className="muted" style={{ marginTop: "0.5rem" }}>{failure}</p>
+          <p className="muted" style={{ marginTop: "0.5rem" }}>
+            {failure}
+          </p>
           <p className="muted" style={{ marginTop: "0.5rem", fontSize: "0.8rem", wordBreak: "break-all" }}>
             {tHC("s3")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
           </p>

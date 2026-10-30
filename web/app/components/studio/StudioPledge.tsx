@@ -47,7 +47,7 @@ type Props = {
 };
 
 export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, onAccept }: Props) {
-    const tHC = useTranslations("hcComponentsStudioStudioPledge");
+  const tHC = useTranslations("hcComponentsStudioStudioPledge");
   const [agree, setAgree] = useState(false);
   return (
     <AlertDialog open={open}>
@@ -58,18 +58,14 @@ export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, 
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4 text-start text-sm">
-              <p>
-                {tHC("s11")}
-              </p>
+              <p>{tHC("s11")}</p>
 
               <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-3">
                 <Fingerprint aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
                   <div className="font-medium text-foreground">{tHC("s10")}</div>
                   <div className="mt-0.5 font-mono text-xs text-foreground">{ip ?? "recorded on our side"}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {tHC("s9")}
-                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">{tHC("s9")}</div>
                 </div>
               </div>
 
@@ -98,7 +94,8 @@ export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, 
 
               <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-2.5 text-xs text-muted-foreground">
                 <Timer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                {tHC("s4")} {missionSeconds}{tHC("s3")}
+                {tHC("s4")} {missionSeconds}
+                {tHC("s3")}
               </div>
 
               <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">

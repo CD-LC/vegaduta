@@ -430,7 +430,7 @@ export function AttachButton({
   disabled?: boolean;
   onFiles: (files: File[]) => void;
 }) {
-    const tHC = useTranslations("hcComponentsChatAttachments");
+  const tHC = useTranslations("hcComponentsChatAttachments");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hint = attachHint(modalities);
 
@@ -483,7 +483,7 @@ export function AttachmentChips({
   onRemove: (id: string) => void;
   disabled?: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsChatAttachments");
+  const tHC = useTranslations("hcComponentsChatAttachments");
   if (attachments.length === 0) return null;
   return (
     <ul className="flex flex-wrap gap-2" aria-label={tHC("s1")}>

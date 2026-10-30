@@ -83,7 +83,7 @@ export function phoneViewFor(id: ActId, p: number): AppView {
 }
 // ---------------------------------------------------------------------- scenes
 function OpenScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const a = ease(seg(p, 0.05, 0.3));
   const b = ease(seg(p, 0.3, 0.55));
   const c = ease(seg(p, 0.6, 0.85));
@@ -123,7 +123,7 @@ const BLOCKS = [
 ];
 
 function DesignScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const cur = usePath(
     [
       { t: 0, x: 60, y: 90 },
@@ -212,7 +212,7 @@ const TILE_ICON: Record<string, typeof Globe> = {
 };
 
 function RegistryScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const query = typed("web", seg(p, 0.12, 0.3));
   const filtering = seg(p, 0.3, 0.42);
   const attached = seg(p, 0.66, 0.78);
@@ -289,7 +289,7 @@ function RegistryScene({ p }: SceneProps) {
 }
 
 function AgentScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenes");
   const mission = typed(AGENT.mission, seg(p, 0.08, 0.55));
   const tools = [
     { id: "web_search", label: "Search the web", icon: Globe },
@@ -350,8 +350,7 @@ function AgentScene({ p }: SceneProps) {
           className="mt-auto flex items-center gap-2 rounded-xl border border-violet-400/40 bg-violet-500/15 px-3.5 py-2.5 text-sm"
           style={{ opacity: seg(p, 0.72, 0.85) }}
         >
-          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> {tHC("s1")}{" "}
-          <b>“{APP.button}”</b> →
+          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> {tHC("s1")} <b>“{APP.button}”</b> →
           <span className="ms-auto inline-flex items-center gap-1 text-emerald-300">
             <Check className="h-4 w-4 shrink-0" aria-hidden="true" /> wired
           </span>

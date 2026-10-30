@@ -16,12 +16,16 @@ import { csvList, fmtTime, statusBadge } from "./trustFormat";
 
 // ---- Directory publish panel -------------------------------------------------
 
-export function DirectoryPanel({ agentId, entry, onChanged }: {
+export function DirectoryPanel({
+  agentId,
+  entry,
+  onChanged,
+}: {
   agentId: string;
   entry: DirectoryEntry | undefined;
   onChanged: () => void;
 }) {
-    const tHC = useTranslations("hcAdminAgenttrustDirectoryPanel");
+  const tHC = useTranslations("hcAdminAgenttrustDirectoryPanel");
   const t = useTranslations("adminAgentTrustPage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);

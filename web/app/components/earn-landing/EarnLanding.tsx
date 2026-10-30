@@ -75,9 +75,29 @@ const STATS = [
 ] as const;
 
 const PLAYBOOK = [
-  { icon: GraduationCap, titleKey: "earnPage_s1Title", bodyKey: "earnPage_s1Body", ctaKey: "earnPage_s1Cta", external: true, hrefFn: () => academyHref(), event: "earn_academy_click" as const },
-  { icon: KeyRound, titleKey: "earnPage_s2Title", bodyKey: "earnPage_s2Body", ctaKey: "earnPage_s2Cta", href: "/billing" },
-  { icon: Search, titleKey: "earnPage_s3Title", bodyKey: "earnPage_s3Body", ctaKey: "earnPage_s3Cta", href: "/help/workflow-recipes" },
+  {
+    icon: GraduationCap,
+    titleKey: "earnPage_s1Title",
+    bodyKey: "earnPage_s1Body",
+    ctaKey: "earnPage_s1Cta",
+    external: true,
+    hrefFn: () => academyHref(),
+    event: "earn_academy_click" as const,
+  },
+  {
+    icon: KeyRound,
+    titleKey: "earnPage_s2Title",
+    bodyKey: "earnPage_s2Body",
+    ctaKey: "earnPage_s2Cta",
+    href: "/billing",
+  },
+  {
+    icon: Search,
+    titleKey: "earnPage_s3Title",
+    bodyKey: "earnPage_s3Body",
+    ctaKey: "earnPage_s3Cta",
+    href: "/help/workflow-recipes",
+  },
   { icon: Wand2, titleKey: "earnPage_s4Title", bodyKey: "earnPage_s4Body", ctaKey: "earnPage_s4Cta", href: "/try" },
   { icon: Percent, titleKey: "earnPage_s5Title", bodyKey: "earnPage_s5Body" },
 ];
@@ -90,7 +110,7 @@ const STACK = [
 ];
 
 export default function EarnLanding() {
-    const tHC = useTranslations("hcComponentsEarnlandingEarnLanding");
+  const tHC = useTranslations("hcComponentsEarnlandingEarnLanding");
   const t = useTranslations("landing");
 
   return (
@@ -153,10 +173,7 @@ export default function EarnLanding() {
           </div>
           <h1 className="text-balance text-4xl font-black leading-[1.08] tracking-tight sm:text-6xl">
             {t("earnPage_h1_a")}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{ backgroundImage: "var(--accent-gradient)" }}
-            >
+            <span className="bg-clip-text text-transparent" style={{ backgroundImage: "var(--accent-gradient)" }}>
               {t("earnPage_h1_em")}
             </span>
           </h1>
@@ -189,9 +206,7 @@ export default function EarnLanding() {
             <p className="mt-2 text-sm uppercase tracking-[0.16em] text-muted-foreground/70">
               {t("earnPage_whyNowSub")}
             </p>
-            <p className="mt-6 text-pretty text-xl font-semibold text-foreground/90">
-              “{t("earnPage_whyNowPull")}”
-            </p>
+            <p className="mt-6 text-pretty text-xl font-semibold text-foreground/90">“{t("earnPage_whyNowPull")}”</p>
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STATS.map(({ icon: Icon, value, labelKey, source, href }, i) => (
@@ -222,9 +237,7 @@ export default function EarnLanding() {
       {/* The playbook */}
       <section className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-24">
         <div className="text-center">
-          <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
-            {t("earnPage_playbookTitle")}
-          </h2>
+          <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">{t("earnPage_playbookTitle")}</h2>
           <p className="mt-3 text-muted-foreground">{t("earnPage_playbookSub")}</p>
         </div>
         <div className="mt-12 space-y-6">
@@ -291,9 +304,7 @@ export default function EarnLanding() {
               </div>
             ))}
           </div>
-          <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
-            {t("earnPage_mathNote")}
-          </p>
+          <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">{t("earnPage_mathNote")}</p>
         </div>
       </section>
 
@@ -321,9 +332,7 @@ export default function EarnLanding() {
             <Users className="size-3.5" />
             {t("earnPage_studentTitle")}
           </div>
-          <p className="text-pretty text-lg leading-relaxed text-foreground/85">
-            {t("earnPage_studentBody")}
-          </p>
+          <p className="text-pretty text-lg leading-relaxed text-foreground/85">{t("earnPage_studentBody")}</p>
           <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
             {t("earnPage_studentStat")}{" "}
             <a
@@ -360,9 +369,7 @@ export default function EarnLanding() {
           <h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
             {t("earnPage_closingTitle")}
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-pretty text-muted-foreground">
-            {t("earnPage_closingSub")}
-          </p>
+          <p className="mx-auto mt-3 max-w-xl text-pretty text-muted-foreground">{t("earnPage_closingSub")}</p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button asChild size="lg" onClick={() => sendLandingEvent("earn_academy_click")}>
               <a href={academyHref()} target="_blank" rel="noopener noreferrer">

@@ -31,7 +31,7 @@ export default function PublicAuthCtas({
   size?: "sm" | "default" | "lg";
   variant?: "default" | "outline" | "ghost";
 }) {
-    const tHC = useTranslations("hcComponentsPublicAuthCtas");
+  const tHC = useTranslations("hcComponentsPublicAuthCtas");
   const authed = useAuthedHint();
   if (authed) {
     return (

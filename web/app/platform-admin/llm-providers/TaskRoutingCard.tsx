@@ -38,7 +38,7 @@ export default function TaskRoutingCard({
   routingModelSummary,
   loadingRoutingModelProviders,
 }: TaskRoutingCardProps) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersTaskRoutingCard");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersTaskRoutingCard");
   return (
     <>
       {/* (a) LLM Task Routing */}
@@ -53,9 +53,7 @@ export default function TaskRoutingCard({
             <CardTitle className="flex items-center gap-2 text-sm">
               <KeyRound size={16} className="text-primary" /> {tHC("s6")}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {tHC("s5")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
           </CardHeader>
           <CardContent className="space-y-2">
             {llmTasksError && (
@@ -79,17 +77,24 @@ export default function TaskRoutingCard({
                   >
                     <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <div className="text-sm font-semibold uppercase tracking-wide text-foreground">{info.label}</div>
+                        <div className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                          {info.label}
+                        </div>
                         <p className="mt-0.5 text-xs text-muted-foreground">{info.description}</p>
                       </div>
-                      <Badge variant={row?.hasCredential ? "outline" : "secondary"} className={row?.hasCredential ? TONE_BOX.ok : undefined}>
+                      <Badge
+                        variant={row?.hasCredential ? "outline" : "secondary"}
+                        className={row?.hasCredential ? TONE_BOX.ok : undefined}
+                      >
                         {row?.hasCredential ? "key configured" : "no key set"}
                       </Badge>
                     </div>
 
                     <div className="flex flex-wrap items-end gap-3">
                       <div className="w-48 space-y-1.5">
-                        <Label htmlFor={`task-provider-${taskKey}`} className="text-xs text-muted-foreground">Provider</Label>
+                        <Label htmlFor={`task-provider-${taskKey}`} className="text-xs text-muted-foreground">
+                          Provider
+                        </Label>
                         <Select
                           id={`task-provider-${taskKey}`}
                           searchable
@@ -100,7 +105,9 @@ export default function TaskRoutingCard({
                         />
                       </div>
                       <div className="w-56 space-y-1.5">
-                        <Label htmlFor={`task-model-${taskKey}`} className="text-xs text-muted-foreground">Model</Label>
+                        <Label htmlFor={`task-model-${taskKey}`} className="text-xs text-muted-foreground">
+                          Model
+                        </Label>
                         <Select
                           id={`task-model-${taskKey}`}
                           searchable
@@ -121,7 +128,9 @@ export default function TaskRoutingCard({
                         )}
                       </div>
                       <div className="w-56 space-y-1.5">
-                        <Label htmlFor={`task-apikey-${taskKey}`} className="text-xs text-muted-foreground">{tHC("s3")}</Label>
+                        <Label htmlFor={`task-apikey-${taskKey}`} className="text-xs text-muted-foreground">
+                          {tHC("s3")}
+                        </Label>
                         <Input
                           id={`task-apikey-${taskKey}`}
                           type="password"
@@ -147,7 +156,6 @@ export default function TaskRoutingCard({
           </CardContent>
         </Card>
       </motion.div>
-
     </>
   );
 }

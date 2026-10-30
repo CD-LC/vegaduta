@@ -49,7 +49,6 @@ export default function AgentStartingPoints({
   /** Fills the draft with a console-gallery template by key. Absent = the data-analysis card is not shown. */
   onPickTemplate?: (templateKey: string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsGuideAgentStartingPoints");
   const tTry = useTranslations("try");
   const tTemplates = useTranslations("agentTemplates");
   const [showAll, setShowAll] = useState(false);
@@ -59,9 +58,9 @@ export default function AgentStartingPoints({
     <div className="mb-4 rounded-lg border border-border bg-background p-4" data-testid="agent-starting-points">
       {/* No "you have no agents" claim: an empty list can also be a list that
           failed to load (see CreateAgentChecklist's header). */}
-      <h3 className="m-0 text-sm font-semibold text-foreground">{tHC("s15")}</h3>
+      <h3 className="m-0 text-sm font-semibold text-foreground">Pick a way to start</h3>
       <p className="m-0 mt-1 text-xs leading-relaxed text-muted-foreground">
-        {tHC("s14")}
+        An agent is an AI assistant that answers for your business. Nothing is created until you press Save draft.
       </p>
 
       {/* "Start in 1 minute" (wave 3): one-click drafts that need no documents,
@@ -72,9 +71,9 @@ export default function AgentStartingPoints({
           (OPEN_CONSOLE_TEMPLATE_KEYS). */}
       {onPickTemplate && (
         <div className="mt-3" data-testid="starting-point-quick-start">
-          <div className="text-xs font-semibold text-foreground">{tHC("s13")}</div>
+          <div className="text-xs font-semibold text-foreground">Start in 1 minute</div>
           <p className="m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground">
-            {tHC("s12")}
+            No setup needed. Pick one and start talking; you can add your own documents later.
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {QUICK_START_TEMPLATE_KEYS.map((key) => (
@@ -98,10 +97,11 @@ export default function AgentStartingPoints({
         <div className="rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <LayoutTemplate size={15} className="text-primary" aria-hidden="true" />
-            {tHC("s11")}
+            Start from a template
           </div>
           <p className="m-0 mt-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("s10")}
+            Ready-made instructions for a kind of business. Included on every plan. Pick one, then change anything you
+            like.
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {starters.map((starter) => (
@@ -130,14 +130,15 @@ export default function AgentStartingPoints({
         <div className="flex flex-col rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <PenLine size={15} className="text-primary" aria-hidden="true" />
-            {tHC("s9")}
+            Describe it in a sentence
           </div>
           <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("s8")}
+            Say what you want it to do in your own words. You get a draft name and instructions to check before
+            anything is used. If the AI helper is not available, the draft is a basic one built from your sentence.
           </p>
           <div className="mt-2">
             <Button type="button" size="sm" onClick={onDescribe}>
-              {tHC("s7")}
+              Describe my agent
             </Button>
           </div>
         </div>
@@ -160,14 +161,16 @@ export default function AgentStartingPoints({
           >
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <FileSpreadsheet size={15} className="text-primary" aria-hidden="true" />
-              {tHC("s6")}
+              Analyze data
             </div>
             <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-              {tHC("s5")}
+              An agent that works out the numbers in your data by running code instead of guessing, and shows the
+              script it used. It uses the Code execution capability; if that is not set up in this workspace yet, you
+              are told what is missing after you save.
             </p>
             <div className="mt-2">
               <Button type="button" variant="outline" size="sm" onClick={() => onPickTemplate("data-analyst")}>
-                {tHC("s4")}
+                Use the data analyst
               </Button>
             </div>
           </div>
@@ -176,16 +179,17 @@ export default function AgentStartingPoints({
         <div className="flex flex-col rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <PlayCircle size={15} className="text-primary" aria-hidden="true" />
-            {tHC("s3")}
+            Just look around first
           </div>
           <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("s2")}
+            The sandbox is a separate practice page with the same business types. Nothing you do there changes this
+            workspace.
           </p>
           <div className="mt-2">
             {/* New tab on purpose: leaving /agents would discard the draft. */}
             <Button asChild variant="outline" size="sm">
               <Link href="/try" target="_blank" rel="noopener noreferrer">
-                {tHC("s1")}
+                Open the sandbox
                 <ExternalLink size={12} aria-hidden="true" />
               </Link>
             </Button>

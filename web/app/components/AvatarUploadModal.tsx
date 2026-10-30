@@ -308,7 +308,7 @@ function AvatarCropDialog({
   onConfirm: () => void;
   uploading: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsAvatarUploadModal");
+  const tHC = useTranslations("hcComponentsAvatarUploadModal");
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   useDialogFocus(dialogRef, closeBtnRef, onClose);
@@ -352,9 +352,7 @@ function AvatarCropDialog({
             <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Upload aria-hidden="true" size={22} />
             </div>
-            <p className="text-center text-sm text-muted-foreground">
-              {tHC("s4")}
-            </p>
+            <p className="text-center text-sm text-muted-foreground">{tHC("s4")}</p>
             <Button type="button" onClick={() => fileInputRef.current?.click()}>
               {tHC("s3")}
             </Button>

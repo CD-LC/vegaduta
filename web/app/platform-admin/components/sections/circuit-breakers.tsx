@@ -19,7 +19,7 @@ import { useTranslations } from "../../../lib/i18n";
 // a still-broken tool simply trips again. Thresholds are boot-time config, so
 // they are shown read-only rather than as editable fields.
 export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsCircuitbreakers");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsCircuitbreakers");
   const askConfirm = useConfirm();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,12 +86,12 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
       {loading && !data && <Skeleton className="h-16 w-full" />}
       {cfg && (
         <p className="text-xs text-muted-foreground">
-          {tHC("s7")} <b>{cfg.failureThreshold}</b> {tHC("s6")} <b>{cfg.windowMinutes} min</b>{tHC("s5")} <b>{cfg.cooldownMinutes} min</b>{tHC("s4")}
+          {tHC("s7")} <b>{cfg.failureThreshold}</b> {tHC("s6")} <b>{cfg.windowMinutes} min</b>
+          {tHC("s5")} <b>{cfg.cooldownMinutes} min</b>
+          {tHC("s4")}
         </p>
       )}
-      {data && entries.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
-      )}
+      {data && entries.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s3")}</p>}
       {entries.map((e) => {
         const id = `${e.tenantId}:${e.tool}`;
         return (

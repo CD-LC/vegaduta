@@ -8,7 +8,7 @@ import { useWorkbench } from "./context";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function WorkbenchBanners() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchWorkbenchBanners");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchWorkbenchBanners");
   const {
     tenantSettingsError,
     tenantSettingsNoticeDismissed,

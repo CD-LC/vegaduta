@@ -52,7 +52,7 @@ function Stat({ label, value, note }: { label: string; value: any; note?: string
 // "View as" entry point. Platform operators are never offered (core refuses
 // them anyway); a suspended user can still be viewed - support often needs to.
 function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantName: string }) {
-    const tHC = useTranslations("hcPlatformadminTenantdetailPage");
+  const tHC = useTranslations("hcPlatformadminTenantdetailPage");
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [target, setTarget] = useState<ViewAsTarget | null>(null);
@@ -151,7 +151,7 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
 }
 
 export default function TenantDetailPage() {
-    const tHC = useTranslations("hcPlatformadminTenantdetailPage");
+  const tHC = useTranslations("hcPlatformadminTenantdetailPage");
   const askConfirm = useConfirm();
   const [roster, setRoster] = useState<TenantRef[]>([]);
   const [selected, setSelected] = useState<string>("");
@@ -269,9 +269,7 @@ export default function TenantDetailPage() {
 
   return (
     <AdminShell title={tHC("s21")}>
-      <PageHint>
-        {tHC("s20")}
-      </PageHint>
+      <PageHint>{tHC("s20")}</PageHint>
 
       <SectionCard
         title={tHC("s19")}
@@ -348,10 +346,7 @@ export default function TenantDetailPage() {
                 note="Declared only; no data moves"
               />
               <Stat label="Subscription" value={detail.subscriptionStatus || "-"} />
-              <Stat
-                label={tHC("s11")}
-                value={detail.compPlanExpiresAt ? fmtDate(detail.compPlanExpiresAt) : "-"}
-              />
+              <Stat label={tHC("s11")} value={detail.compPlanExpiresAt ? fmtDate(detail.compPlanExpiresAt) : "-"} />
               <Stat label="Users" value={missing("users") ? "unavailable" : (detail.userCount ?? "-")} />
               <Stat
                 label="Agents"
@@ -422,9 +417,7 @@ export default function TenantDetailPage() {
                   </div>
                 )}
                 {!q.usesPlatformLlm && detail.plan !== "FREE" && (
-                  <p className="text-[11px] text-muted-foreground">
-                    {tHC("s4")}
-                  </p>
+                  <p className="text-[11px] text-muted-foreground">{tHC("s4")}</p>
                 )}
               </div>
             )}
@@ -444,7 +437,8 @@ export default function TenantDetailPage() {
             )}
             {detail.status !== "ACTIVE" && (
               <p className="text-xs text-muted-foreground">
-                {tHC("s2")} {detail.status}{tHC("s1")}
+                {tHC("s2")} {detail.status}
+                {tHC("s1")}
               </p>
             )}
             {detail.emergencyStopped ? (

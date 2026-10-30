@@ -34,7 +34,7 @@ export function EnableConfirmCard({
   onConfirm: any;
   onCancel: any;
 }) {
-    const tHC = useTranslations("hcComponentsMcpPanelCatalogParts");
+  const tHC = useTranslations("hcComponentsMcpPanelCatalogParts");
   const guide = credentialGuideFor(server.name);
   const knownFields: McpCredentialGuideField[] = guide?.fields || [];
   const hasKnownFields = knownFields.length > 0;
@@ -74,7 +74,9 @@ export function EnableConfirmCard({
       <CardContent className="space-y-3 pt-6">
         <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s6")}</div>
         <p className="text-sm text-muted-foreground">
-          {tHC("s5")}{server.name}{tHC("s4")}
+          {tHC("s5")}
+          {server.name}
+          {tHC("s4")}
           {usageGated
             ? " It won't be used by your agents until it passes a connection test (or you mark it trusted)."
             : ""}

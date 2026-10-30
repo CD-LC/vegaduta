@@ -53,7 +53,7 @@ type Props = {
 };
 
 export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Props) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilder");
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilder");
   const apk = getMobileApkDownload();
   const [step, setStep] = useState<Step>("app");
   const [appTitle, setAppTitle] = useState(APP.title);
@@ -350,9 +350,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
               <Field label={tHC("s9")} value={appTitle} onChange={setAppTitle} max={24} />
               <Field label="Tagline" value={tagline} onChange={setTagline} max={40} />
               <Field label="Button" value={button} onChange={setButton} max={28} />
-              <p className="text-xs text-zinc-400">
-                {tHC("s8")}
-              </p>
+              <p className="text-xs text-zinc-400">{tHC("s8")}</p>
             </div>
           )}
 
@@ -375,11 +373,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
                 body="A real agent with a mission and the tools you just picked. Edit the mission if you like - it is the biggest steering wheel."
               />
               <div className="flex flex-wrap gap-1.5">
-                {picked.length === 0 && (
-                  <span className="text-xs text-zinc-400">
-                    {tHC("s6")}
-                  </span>
-                )}
+                {picked.length === 0 && <span className="text-xs text-zinc-400">{tHC("s6")}</span>}
                 {picked.map((t) => (
                   <span
                     key={t}
@@ -428,7 +422,8 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
               </div>
               {xray.length === 0 && !running && (
                 <p className="rounded-xl border border-dashed border-white/15 p-4 text-center text-sm text-zinc-400">
-                  Tap “{button}{tHC("s3")}
+                  Tap “{button}
+                  {tHC("s3")}
                 </p>
               )}
               <ol className="space-y-2">
@@ -450,11 +445,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
                   </li>
                 ))}
               </ol>
-              {ran && (
-                <p className="text-xs text-zinc-400">
-                  {tHC("s2")}
-                </p>
-              )}
+              {ran && <p className="text-xs text-zinc-400">{tHC("s2")}</p>}
             </div>
           )}
 

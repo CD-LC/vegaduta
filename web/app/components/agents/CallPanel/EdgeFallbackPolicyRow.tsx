@@ -4,15 +4,18 @@ import { edgeEnabled, setEdgeFallbackPolicy, type EdgeFallbackPolicy } from "../
 import { Select } from "../../ui/select";
 import { useTranslations } from "../../../lib/i18n";
 
-
 interface EdgeFallbackPolicyRowProps {
   fallbackPolicy: EdgeFallbackPolicy;
   edgeOptInActive: boolean;
   setFallbackPolicyState: (policy: EdgeFallbackPolicy) => void;
 }
 
-export default function EdgeFallbackPolicyRow({ fallbackPolicy, edgeOptInActive, setFallbackPolicyState }: EdgeFallbackPolicyRowProps) {
-    const tHC = useTranslations("hcComponentsAgentsCallPanelEdgeFallbackPolicyRow");
+export default function EdgeFallbackPolicyRow({
+  fallbackPolicy,
+  edgeOptInActive,
+  setFallbackPolicyState,
+}: EdgeFallbackPolicyRowProps) {
+  const tHC = useTranslations("hcComponentsAgentsCallPanelEdgeFallbackPolicyRow");
   return (
     <>
       {/* Client-side preference for what happens at the AUTOMATIC fallback

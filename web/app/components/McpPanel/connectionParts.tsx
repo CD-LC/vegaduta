@@ -34,7 +34,7 @@ let ackEndpointSupported: boolean | null = null;
 // reading like a stack-trace dump. Short single-line details still render
 // directly - a disclosure hiding twelve words would just be friction.
 export function ConnectionErrorBlock({ server, label }: { server: any; label: string }) {
-    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
+  const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   const { detail, hint } = splitConnectionError(server);
   if (!detail && !hint) return null;
   const shortDetail = detail && detail.length <= 110 && !detail.includes("\n");
@@ -68,7 +68,7 @@ export function ConnectionErrorBlock({ server, label }: { server: any; label: st
 // this degrades cleanly against an older core / a core that never lands the
 // field on this exact response shape.
 export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: any; busy: boolean }) {
-    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
+  const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   if (!fix || typeof fix.command !== "string" || !fix.command.trim()) return null;
   const argsText = Array.isArray(fix.args) ? fix.args.join(" ") : "";
   return (
@@ -84,9 +84,7 @@ export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: a
         <Button type="button" size="sm" className="mt-1 w-fit" disabled={busy} onClick={onApply}>
           {busy ? "Applying fix…" : "Apply suggested fix"}
         </Button>
-        <p className="text-xs text-muted-foreground">
-          {tHC("s2")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tHC("s2")}</p>
       </AlertDescription>
     </Alert>
   );
@@ -191,7 +189,7 @@ export function TestConnectionSection({
 // gates agents on usageStatus (field present) and only until a 404 proves
 // the acknowledge endpoint isn't there yet.
 export function AcknowledgeControl({ server, onRefresh }: { server: any; onRefresh: any }) {
-    const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
+  const tHC = useTranslations("hcComponentsMcpPanelConnectionParts");
   const [busy, setBusy] = useState(false);
   const [ackError, setAckError] = useState<string | null>(null);
   const [supported, setSupported] = useState<boolean | null>(ackEndpointSupported);
@@ -233,9 +231,7 @@ export function AcknowledgeControl({ server, onRefresh }: { server: any; onRefre
         <ShieldCheck size={13} aria-hidden="true" />
         {busy ? "Marking as trusted…" : "Use anyway (I trust this server)"}
       </Button>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        {tHC("s1")}
-      </p>
+      <p className="mt-1.5 text-xs text-muted-foreground">{tHC("s1")}</p>
       {ackError && <p className="mt-1.5 text-xs text-destructive">{ackError}</p>}
     </div>
   );

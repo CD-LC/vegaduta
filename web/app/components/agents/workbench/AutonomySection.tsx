@@ -17,7 +17,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function AutonomySection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchAutonomySection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchAutonomySection");
   const {
     isDraft,
     behaviourSummary,

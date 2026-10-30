@@ -26,7 +26,7 @@ export default function WorkflowLintChip({
   loading?: boolean;
   serverAvailable?: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowLintChip");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowLintChip");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const chipRef = useRef<HTMLButtonElement | null>(null);
@@ -65,14 +65,23 @@ export default function WorkflowLintChip({
         }
       });
     },
-    [onSelectNode],
+    [onSelectNode]
   );
 
   // The panel stays open at zero issues (after the last fix) until closed.
   // A clean graph keeps only the empty, invisible wrapper mounted so close()
   // has somewhere to put focus.
   if (issues.length === 0 && !open) {
-    return <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("s2")} role="group" style={{ outline: "none" }} />;
+    return (
+      <div
+        className="wf-lint"
+        ref={rootRef}
+        tabIndex={-1}
+        aria-label={tHC("s2")}
+        role="group"
+        style={{ outline: "none" }}
+      />
+    );
   }
   const errors = issues.filter((i) => i.severity === "error").length;
   const warnings = issues.filter((i) => i.severity === "warning").length;
@@ -80,14 +89,27 @@ export default function WorkflowLintChip({
   const count = issues.length;
   const noun =
     severity === "error"
-      ? count === 1 ? "issue" : "issues"
+      ? count === 1
+        ? "issue"
+        : "issues"
       : severity === "warn"
-        ? count === 1 ? "warning" : "warnings"
-        : count === 1 ? "suggestion" : "suggestions";
+        ? count === 1
+          ? "warning"
+          : "warnings"
+        : count === 1
+          ? "suggestion"
+          : "suggestions";
   const Icon = severity === "error" ? XCircle : severity === "warn" ? AlertTriangle : Info;
 
   return (
-    <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("s1")} role="group" style={{ outline: "none" }}>
+    <div
+      className="wf-lint"
+      ref={rootRef}
+      tabIndex={-1}
+      aria-label={tHC("s1")}
+      role="group"
+      style={{ outline: "none" }}
+    >
       {issues.length > 0 && (
         <button
           ref={chipRef}

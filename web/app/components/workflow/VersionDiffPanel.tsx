@@ -78,9 +78,16 @@ type DiffState =
   | { kind: "ready"; diff: WorkflowVersionDiff };
 
 export default function VersionDiffPanel({
-  workflowId, currentVersion, onFocusNode, onDecorations, nodeLabel, personLabel, canvasDirty = false, onClose,
+  workflowId,
+  currentVersion,
+  onFocusNode,
+  onDecorations,
+  nodeLabel,
+  personLabel,
+  canvasDirty = false,
+  onClose,
 }: VersionDiffPanelProps) {
-    const tHC = useTranslations("hcComponentsWorkflowVersionDiffPanel");
+  const tHC = useTranslations("hcComponentsWorkflowVersionDiffPanel");
   const uid = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [versions, setVersions] = useState<VersionsState>({ kind: "loading" });
@@ -176,11 +183,12 @@ export default function VersionDiffPanel({
     return Math.max(...versions.versions.map((v) => v.versionNumber));
   }, [currentVersion, versions]);
   const canDecorate = !!diff && !canvasDirty && canvasVersion != null && diff.meta.toVersion === canvasVersion;
-  const decorateHint = !diff || canDecorate
-    ? null
-    : canvasDirty
-      ? "Save your changes to highlight on the canvas."
-      : `Pick the current version${canvasVersion != null ? ` (v${canvasVersion})` : ""} as To to highlight on the canvas.`;
+  const decorateHint =
+    !diff || canDecorate
+      ? null
+      : canvasDirty
+        ? "Save your changes to highlight on the canvas."
+        : `Pick the current version${canvasVersion != null ? ` (v${canvasVersion})` : ""} as To to highlight on the canvas.`;
   const onDecorationsRef = useRef(onDecorations);
   useEffect(() => {
     onDecorationsRef.current = onDecorations;
@@ -201,7 +209,7 @@ export default function VersionDiffPanel({
     () => () => {
       if (sentRef.current) onDecorationsRef.current?.(null);
     },
-    [],
+    []
   );
 
   // ---- derived ------------------------------------------------------------
@@ -237,7 +245,10 @@ export default function VersionDiffPanel({
   }
 
   const versionList = versions.kind === "ready" ? versions.versions : [];
-  const versionOptions = versionList.map((v) => ({ value: String(v.versionNumber), label: versionOptionLabel(v, personLabel) }));
+  const versionOptions = versionList.map((v) => ({
+    value: String(v.versionNumber),
+    label: versionOptionLabel(v, personLabel),
+  }));
   const fromId = `${uid}-from`;
   const toId = `${uid}-to`;
   const titleId = `${uid}-title`;
@@ -347,7 +358,9 @@ export default function VersionDiffPanel({
             )}
             {diff && summary && (
               <span className="wf-vdiff-sr">
-                {summary.total === 0 ? "No differences." : `${summary.total} change${summary.total === 1 ? "" : "s"} found.`}
+                {summary.total === 0
+                  ? "No differences."
+                  : `${summary.total} change${summary.total === 1 ? "" : "s"} found.`}
               </span>
             )}
           </div>
@@ -380,7 +393,8 @@ export default function VersionDiffPanel({
                   ~{summary.nodesChanged} changed
                 </li>
                 <li className="wf-vdiff-chip">
-                  {tHC("s3")}{summary.edgesAdded} / −{summary.edgesRemoved}
+                  {tHC("s3")}
+                  {summary.edgesAdded} / −{summary.edgesRemoved}
                 </li>
               </ul>
 
@@ -394,7 +408,11 @@ export default function VersionDiffPanel({
                     disabled={!canDecorate}
                     onClick={() => setShowOnCanvas((v) => !v)}
                   >
-                    {showOnCanvas && canDecorate ? <EyeOff size={12} aria-hidden="true" /> : <Eye size={12} aria-hidden="true" />}
+                    {showOnCanvas && canDecorate ? (
+                      <EyeOff size={12} aria-hidden="true" />
+                    ) : (
+                      <Eye size={12} aria-hidden="true" />
+                    )}
                     {showOnCanvas && canDecorate ? "Hide on canvas" : "Show on canvas"}
                   </button>
                   {decorateHint && (
@@ -480,7 +498,11 @@ export default function VersionDiffPanel({
                     ).map(([kind, e], i) => (
                       <li key={`${kind}-${e.id ?? i}-${i}`} data-kind={kind}>
                         <span className="wf-vdiff-badge" data-kind={kind}>
-                          {kind === "added" ? <Plus size={10} aria-hidden="true" /> : <Minus size={10} aria-hidden="true" />}
+                          {kind === "added" ? (
+                            <Plus size={10} aria-hidden="true" />
+                          ) : (
+                            <Minus size={10} aria-hidden="true" />
+                          )}
                           {kind === "added" ? "Added" : "Removed"}
                         </span>
                         <span className="wf-vdiff-edge">

@@ -8,7 +8,7 @@ import { useTranslations } from "../../lib/i18n";
 // deployed but has not been validated against a customer identity provider
 // yet, so the card says "available", not "certified".
 export default function EnterpriseBenefits() {
-    const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseBenefits");
+  const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseBenefits");
   const benefits = [
     {
       icon: "🛡️",

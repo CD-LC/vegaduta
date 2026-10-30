@@ -50,7 +50,7 @@ export default function TranslationAndCatalogCards({
   handleRefreshModelCatalogNow,
   lastModelCatalogRefresh,
 }: TranslationAndCatalogCardsProps) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersTranslationAndCatalogCards");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersTranslationAndCatalogCards");
   return (
     <>
       {/* (b) Translation Job Reference Settings */}
@@ -69,8 +69,7 @@ export default function TranslationAndCatalogCards({
             <Alert>
               <Info />
               <AlertDescription>
-                {tHC("s17")} <strong>{tHC("s16")}</strong> {tHC("s15")}{" "}
-                <strong>Run now</strong> {tHC("s14")}
+                {tHC("s17")} <strong>{tHC("s16")}</strong> {tHC("s15")} <strong>Run now</strong> {tHC("s14")}
               </AlertDescription>
             </Alert>
 
@@ -88,14 +87,11 @@ export default function TranslationAndCatalogCards({
               {translationJob?.lastTriggeredAt && (
                 <Badge
                   variant="outline"
-                  className={
-                    translationJob.lastTriggerStatus === "DISPATCHED"
-                      ? TONE_BOX.ok
-                      : TONE_BOX.warn
-                  }
+                  className={translationJob.lastTriggerStatus === "DISPATCHED" ? TONE_BOX.ok : TONE_BOX.warn}
                   title={translationJob.lastTriggerMessage || ""}
                 >
-                  {tHC("s13")} {translationJob.lastTriggerStatus} - {new Date(translationJob.lastTriggeredAt).toLocaleString()}
+                  {tHC("s13")} {translationJob.lastTriggerStatus} -{" "}
+                  {new Date(translationJob.lastTriggeredAt).toLocaleString()}
                   {translationJob.lastTriggeredBy ? ` (by ${translationJob.lastTriggeredBy})` : ""}
                 </Badge>
               )}
@@ -108,16 +104,22 @@ export default function TranslationAndCatalogCards({
               <form onSubmit={handleSaveTranslationJob} className="space-y-3">
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="w-64 max-w-full space-y-1.5">
-                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">{tHC("s12")}</Label>
-                    <Input id="translation-cron"
+                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">
+                      {tHC("s12")}
+                    </Label>
+                    <Input
+                      id="translation-cron"
                       value={translationDraft.cronScheduleDisplay}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, cronScheduleDisplay: e.target.value }))}
                       placeholder={tHC("s11")}
                     />
                   </div>
                   <div className="w-48 max-w-full space-y-1.5">
-                    <Label htmlFor="translation-provider" className="text-xs text-muted-foreground">Provider</Label>
-                    <Select id="translation-provider"
+                    <Label htmlFor="translation-provider" className="text-xs text-muted-foreground">
+                      Provider
+                    </Label>
+                    <Select
+                      id="translation-provider"
                       searchable
                       value={translationDraft.providerName}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, providerName: e.target.value }))}
@@ -126,13 +128,19 @@ export default function TranslationAndCatalogCards({
                     />
                   </div>
                   <div className="w-56 max-w-full space-y-1.5">
-                    <Label htmlFor="translation-model" className="text-xs text-muted-foreground">Model</Label>
-                    <Select id="translation-model"
+                    <Label htmlFor="translation-model" className="text-xs text-muted-foreground">
+                      Model
+                    </Label>
+                    <Select
+                      id="translation-model"
                       searchable
                       allowCustom
                       value={translationDraft.model}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, model: e.target.value }))}
-                      options={withCurrentValue(routingModelOptions(translationDraft.providerName), translationDraft.model)}
+                      options={withCurrentValue(
+                        routingModelOptions(translationDraft.providerName),
+                        translationDraft.model
+                      )}
                       placeholder={
                         loadingRoutingModelProviders[translationDraft.providerName]
                           ? "Loading models…"
@@ -146,8 +154,11 @@ export default function TranslationAndCatalogCards({
                     )}
                   </div>
                   <div className="min-w-64 flex-1 space-y-1.5">
-                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">{tHC("s9")}</Label>
-                    <Input id="translation-workflow-path"
+                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">
+                      {tHC("s9")}
+                    </Label>
+                    <Input
+                      id="translation-workflow-path"
                       value={translationDraft.workflowPathHint}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, workflowPathHint: e.target.value }))}
                       placeholder=".github/workflows/translate-messages.yml"
@@ -155,8 +166,11 @@ export default function TranslationAndCatalogCards({
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="translation-notes" className="text-xs text-muted-foreground">Notes</Label>
-                  <Textarea id="translation-notes"
+                  <Label htmlFor="translation-notes" className="text-xs text-muted-foreground">
+                    Notes
+                  </Label>
+                  <Textarea
+                    id="translation-notes"
                     rows={3}
                     value={translationDraft.notes}
                     onChange={(e) => setTranslationDraft((d) => ({ ...d, notes: e.target.value }))}

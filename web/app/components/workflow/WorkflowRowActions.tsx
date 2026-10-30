@@ -37,7 +37,7 @@ export default function WorkflowRowActions({
   onCopyLink: () => void;
   onDelete: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowRowActions");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowRowActions");
   const t = useTranslations("workflowDesignerPanel");
   const deleteButton = (
     <Button

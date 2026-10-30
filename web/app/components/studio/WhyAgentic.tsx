@@ -94,16 +94,14 @@ const DIALS: { icon: typeof Brain; name: string; where: string; controls: string
   ];
 
 export default function WhyAgentic() {
-    const tHC = useTranslations("hcComponentsStudioWhyAgentic");
+  const tHC = useTranslations("hcComponentsStudioWhyAgentic");
   return (
     <section aria-labelledby="why-agentic" className="space-y-6 rounded-2xl border border-border/60 bg-muted/20 p-5">
       <div>
         <h3 id="why-agentic" className="text-lg font-semibold tracking-tight">
           {tHC("s19")}
         </h3>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          {tHC("s18")}
-        </p>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{tHC("s18")}</p>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2">
@@ -130,9 +128,7 @@ export default function WhyAgentic() {
       </div>
 
       <div>
-        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {tHC("s9")}
-        </div>
+        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s9")}</div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <Use icon={Repeat} title={tHC("s8")} body="The same research or check, every day, with sources." />
           <Use
@@ -140,11 +136,7 @@ export default function WhyAgentic() {
             title={tHC("s7")}
             body="Contracts, policies, manuals - answers with the line they came from."
           />
-          <Use
-            icon={Workflow}
-            title={tHC("s6")}
-            body="Research, then draft, then wait for your approval, then send."
-          />
+          <Use icon={Workflow} title={tHC("s6")} body="Research, then draft, then wait for your approval, then send." />
           <Use
             icon={Radio}
             title={tHC("s5")}
@@ -154,12 +146,8 @@ export default function WhyAgentic() {
       </div>
 
       <div>
-        <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {tHC("s4")}
-        </div>
-        <p className="mb-2 text-sm text-muted-foreground">
-          {tHC("s3")}
-        </p>
+        <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s4")}</div>
+        <p className="mb-2 text-sm text-muted-foreground">{tHC("s3")}</p>
         <Accordion type="single" collapsible className="rounded-xl border border-border/60 bg-background/70 px-3">
           {DIALS.map((d) => {
             const Icon = d.icon;

@@ -11,7 +11,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function TranscriptionSection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchTranscriptionSection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchTranscriptionSection");
   const {
     isDraft,
     transcriptionSummary,

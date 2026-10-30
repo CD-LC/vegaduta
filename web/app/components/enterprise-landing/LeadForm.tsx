@@ -5,7 +5,7 @@ import { ENTITY_FACTS } from "../../lib/platform-facts";
 import { useTranslations } from "../../lib/i18n";
 
 export default function LeadForm() {
-    const tHC = useTranslations("hcComponentsEnterpriselandingLeadForm");
+  const tHC = useTranslations("hcComponentsEnterpriselandingLeadForm");
   const [formData, setFormData] = useState({
     company: "",
     contact: "",
@@ -19,11 +19,7 @@ export default function LeadForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -63,9 +59,7 @@ export default function LeadForm() {
       <div className="enterprise-form-container">
         <div className="enterprise-form-header">
           <h2>{tHC("s19")}</h2>
-          <p>
-            {tHC("s18")}
-          </p>
+          <p>{tHC("s18")}</p>
         </div>
 
         {submitted && (
@@ -73,11 +67,7 @@ export default function LeadForm() {
             <div className="enterprise-success-icon">✓</div>
             <h3>{tHC("s17")}</h3>
             <p>{tHC("s16")}</p>
-            <button
-              type="button"
-              className="enterprise-form-submit"
-              onClick={() => setSubmitted(false)}
-            >
+            <button type="button" className="enterprise-form-submit" onClick={() => setSubmitted(false)}>
               {tHC("s15")}
             </button>
           </div>
@@ -157,12 +147,7 @@ export default function LeadForm() {
 
               <div className="enterprise-form-group">
                 <label htmlFor="timeline">{tHC("s6")}</label>
-                <select
-                  id="timeline"
-                  name="timeline"
-                  value={formData.timeline}
-                  onChange={handleChange}
-                >
+                <select id="timeline" name="timeline" value={formData.timeline} onChange={handleChange}>
                   <option value="urgent">{tHC("s5")}</option>
                   <option value="1-3 months">{tHC("s4")}</option>
                   <option value="3-6 months">{tHC("s3")}</option>
@@ -177,17 +162,11 @@ export default function LeadForm() {
               </div>
             )}
 
-            <button
-              type="submit"
-              className="enterprise-form-submit"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="enterprise-form-submit" disabled={isSubmitting}>
               {isSubmitting ? "Submitting..." : "Submit"}
             </button>
 
-            <p className="enterprise-form-privacy">
-              {tHC("s1")}
-            </p>
+            <p className="enterprise-form-privacy">{tHC("s1")}</p>
           </form>
         )}
       </div>

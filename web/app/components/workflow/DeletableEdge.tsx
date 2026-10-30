@@ -35,7 +35,7 @@ export default function DeletableEdge({
   interactionWidth,
   selected,
 }: EdgeProps) {
-    const tHC = useTranslations("hcComponentsWorkflowDeletableEdge");
+  const tHC = useTranslations("hcComponentsWorkflowDeletableEdge");
   const onDelete = useContext(WorkflowEdgeDeleteContext);
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,

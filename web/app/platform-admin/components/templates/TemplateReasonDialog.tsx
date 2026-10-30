@@ -39,7 +39,7 @@ export default function TemplateReasonDialog({
   onCancel: () => void;
   onConfirm: (reason: string) => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateReasonDialog");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateReasonDialog");
   const [reason, setReason] = useState("");
   const [mounted, setMounted] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -121,7 +121,8 @@ export default function TemplateReasonDialog({
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="template-reason-input" className="text-xs text-muted-foreground">
-                {tHC("s3")}{required ? " *" : " - optional"}
+                {tHC("s3")}
+                {required ? " *" : " - optional"}
               </Label>
               <Textarea
                 id="template-reason-input"

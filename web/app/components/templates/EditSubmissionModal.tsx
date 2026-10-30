@@ -27,7 +27,7 @@ export default function EditSubmissionModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesEditSubmissionModal");
+  const tHC = useTranslations("hcComponentsTemplatesEditSubmissionModal");
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id);

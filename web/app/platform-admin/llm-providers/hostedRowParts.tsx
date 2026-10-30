@@ -22,7 +22,7 @@ export function HostedRowBadges({
   };
   credentialTypeLabels: Record<string, string>;
 }) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   return (
     <>
       {row.authType && row.authType !== "API_KEY" && (
@@ -42,10 +42,7 @@ export function HostedRowBadges({
         </Badge>
       )}
       {row.zeroCost && (
-        <Badge
-          variant="secondary"
-          title={tHC("s10")}
-        >
+        <Badge variant="secondary" title={tHC("s10")}>
           Free
         </Badge>
       )}
@@ -63,11 +60,9 @@ export function HostedRowBadges({
         </Badge>
       )}
       {row.smallModelActive && (
-        <Badge
-          variant="secondary"
-          title={tHC("s9")}
-        >
-          {tHC("s8")}{row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
+        <Badge variant="secondary" title={tHC("s9")}>
+          {tHC("s8")}
+          {row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
         </Badge>
       )}
     </>
@@ -115,15 +110,12 @@ export function ToolCallGradeBadge({ grade }: { grade?: string | null }) {
  * which are always metered.
  */
 export function ZeroCostToggle({ authType, on, onToggle }: { authType?: string; on: boolean; onToggle: () => void }) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   if (authType === "VERTEX_ADC" || authType === "VERTEX_SERVICE_ACCOUNT") return null;
   return (
     <div className="flex items-center gap-2">
       <SwitchToggle on={on} label={tHC("s7")} onClick={onToggle} />
-      <span
-        className="text-xs text-muted-foreground"
-        title={tHC("s6")}
-      >
+      <span className="text-xs text-muted-foreground" title={tHC("s6")}>
         {tHC("s5")}
       </span>
     </div>
@@ -154,7 +146,13 @@ function TriStateControl({
       <label className="text-xs text-muted-foreground" htmlFor={id} title={title}>
         {label}
       </label>
-      <Select id={id} className="text-xs" value={value} onChange={(e) => onChange(e.target.value)} options={TRI_STATE} />
+      <Select
+        id={id}
+        className="text-xs"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        options={TRI_STATE}
+      />
     </div>
   );
 }
@@ -171,7 +169,7 @@ export function LocalModelControls({
   draft: { authType?: string; zeroCost?: boolean; toolRouterEnabled?: string; smallModel?: string };
   setDraft: (update: (d: any) => any) => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedRowParts");
   if (draft.authType === "VERTEX_ADC" || draft.authType === "VERTEX_SERVICE_ACCOUNT") return null;
   return (
     <div className="space-y-2">

@@ -20,18 +20,14 @@ export default function OnDeviceUtilities({
   utilityAvailable: Record<UtilityKind, boolean | null>;
   utilityBusy: Record<UtilityKind, boolean>;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceUtilities");
+  const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceUtilities");
   const t = useTranslations("edgeIntelligence");
   return (
     <div className="mt-2.5 border-t border-border pt-2.5">
       <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {t("onDeviceAudioVisionHeading")}
       </div>
-      {!reasoningModelReady && (
-        <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-          {tHC("s1")}
-        </p>
-      )}
+      {!reasoningModelReady && <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">{tHC("s1")}</p>}
       <div className="space-y-1">
         {UTILITY_DEFS.map((def) => {
           const cached = def.isCached();

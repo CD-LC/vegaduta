@@ -49,7 +49,7 @@ export function InboxThread({
   onBack: () => void;
   detailsPane: ReactNode;
 }) {
-    const tHC = useTranslations("hcAdminInboxInboxThread");
+  const tHC = useTranslations("hcAdminInboxInboxThread");
   return (
     <div className="flex h-full flex-col rounded-xl border border-border bg-card">
       <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
@@ -121,9 +121,7 @@ export function InboxThread({
       </div>
 
       {selected.handoffState === "HUMAN" && (
-        <div className="border-b border-border bg-accent/30 px-3 py-2 text-xs text-muted-foreground">
-          {tHC("s8")}
-        </div>
+        <div className="border-b border-border bg-accent/30 px-3 py-2 text-xs text-muted-foreground">{tHC("s8")}</div>
       )}
       {!selected.paired && (
         <div className="flex items-center gap-2 border-b border-border bg-amber-500/10 px-3 py-2 text-xs text-muted-foreground">
@@ -141,9 +139,7 @@ export function InboxThread({
             </Button>
           </div>
         )}
-        {!transcriptFailed && transcript.length === 0 && (
-          <p className="text-sm text-muted-foreground">{tHC("s5")}</p>
-        )}
+        {!transcriptFailed && transcript.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s5")}</p>}
         {transcript.map((m) => (
           <div key={m.id} className={cn("flex", m.direction === "OUTBOUND" ? "justify-end" : "justify-start")}>
             <div
@@ -159,17 +155,13 @@ export function InboxThread({
             </div>
           </div>
         ))}
-        <p className="pt-1 text-[10px] text-muted-foreground">
-          {tHC("s4")}
-        </p>
+        <p className="pt-1 text-[10px] text-muted-foreground">{tHC("s4")}</p>
         <div ref={transcriptEndRef} />
       </div>
 
       <div className="border-t border-border p-3">
         {selected.channel === "VOICE" ? (
-          <p className="text-xs text-muted-foreground">
-            {tHC("s3")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s3")}</p>
         ) : (
           <>
             <Textarea

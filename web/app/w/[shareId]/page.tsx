@@ -75,7 +75,7 @@ const ERROR_COPY: Record<MagicErrorCode, { text: string; blocking: boolean }> = 
 };
 
 export default function WorkflowRunPage() {
-    const tHC = useTranslations("hcWShareIdPage");
+  const tHC = useTranslations("hcWShareIdPage");
   usePageReady(true);
   const params = useParams<{ shareId: string }>();
   const shareId = typeof params?.shareId === "string" ? params.shareId : "";
@@ -237,9 +237,7 @@ export default function WorkflowRunPage() {
                 </div>
               )}
             </div>
-            <p className="text-center text-xs text-muted-foreground">
-              {tHC("s3")}
-            </p>
+            <p className="text-center text-xs text-muted-foreground">{tHC("s3")}</p>
             <BuildYourOwnCta />
           </div>
         ) : null}
@@ -303,7 +301,7 @@ function FormFieldInput({
 }
 
 function BuildYourOwnCta() {
-    const tHC = useTranslations("hcWShareIdPage");
+  const tHC = useTranslations("hcWShareIdPage");
   return (
     <Link
       href="/try"

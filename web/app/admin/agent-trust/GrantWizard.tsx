@@ -43,7 +43,7 @@ export function GrantWizard({
   wallets: AgentWallet[];
   onGranted: () => void;
 }) {
-    const tHC = useTranslations("hcAdminAgenttrustGrantWizard");
+  const tHC = useTranslations("hcAdminAgenttrustGrantWizard");
   const t = useTranslations("adminAgentTrustPage");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<GrantForm>(EMPTY_GRANT);
@@ -97,7 +97,15 @@ export function GrantWizard({
     <Card className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold">{t("grantWizardTitle")}</h3>
-        <Button type="button" variant="ghost" size="sm" onClick={() => { setOpen(false); setError(null); }}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setOpen(false);
+            setError(null);
+          }}
+        >
           {t("cancel")}
         </Button>
       </div>

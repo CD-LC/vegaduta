@@ -108,7 +108,7 @@ function Loading() {
 }
 
 export default function OpsHubPage() {
-    const tHC = useTranslations("hcPlatformadminOpsPage");
+  const tHC = useTranslations("hcPlatformadminOpsPage");
   const [deps, setDeps] = useState<Settled<DependenciesResponse>>(LOADING);
   const [versions, setVersions] = useState<Settled<VersionsResponse>>(LOADING);
   const [maint, setMaint] = useState<Settled<MaintenanceState>>(LOADING);
@@ -204,7 +204,8 @@ export default function OpsHubPage() {
           {versions.state === "ok" && (
             <p className="text-xs text-muted-foreground">
               {versions.value.services?.length ?? 0} {tHC("s21")}
-              {unreachable.length ? ` · ${unreachable.length} unreachable` : ""}{tHC("s20")}
+              {unreachable.length ? ` · ${unreachable.length} unreachable` : ""}
+              {tHC("s20")}
             </p>
           )}
           <p className="mt-1 text-xs">
@@ -254,7 +255,9 @@ export default function OpsHubPage() {
               <div className={`font-mono text-2xl font-semibold ${failedJobs ? "text-destructive" : ""}`}>
                 {failedJobs}
               </div>
-              <p className="text-xs text-muted-foreground">{tHC("s15")} {jobs.value.length} jobs</p>
+              <p className="text-xs text-muted-foreground">
+                {tHC("s15")} {jobs.value.length} jobs
+              </p>
             </>
           )}
         </HubCard>
@@ -273,7 +276,8 @@ export default function OpsHubPage() {
                 {driftCount}
               </div>
               <p className="text-xs text-muted-foreground">
-                {tHC("s13")}{drift.failed} failed, {drift.behind} behind)
+                {tHC("s13")}
+                {drift.failed} failed, {drift.behind} behind)
                 {drift.controlPlaneProblem ? " · control plane has pending/failed migrations" : ""}
               </p>
             </>
@@ -355,7 +359,8 @@ export default function OpsHubPage() {
               </table>
               {versions.state === "unavailable" && (
                 <p className="pt-2 text-xs text-muted-foreground">
-                  {tHC("s1")}{versions.reason ? `: ${versions.reason}` : ""}.
+                  {tHC("s1")}
+                  {versions.reason ? `: ${versions.reason}` : ""}.
                 </p>
               )}
             </div>

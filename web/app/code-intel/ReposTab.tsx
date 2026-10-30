@@ -81,7 +81,7 @@ function tricklePct(elapsedMs, phase) {
 }
 
 export default function ReposTab({ repos, repoId, setRepoId, refresh, onError }) {
-    const tHC = useTranslations("hcCodeintelReposTab");
+  const tHC = useTranslations("hcCodeintelReposTab");
   const t = useTranslations("codeIntel");
   const [form, setForm] = useState({
     repo_id: "",
@@ -408,9 +408,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      {tHC("s3")}
-                    </p>
+                    <p className="text-[11px] leading-relaxed text-muted-foreground">{tHC("s3")}</p>
                   </div>
                 )}
               </div>
@@ -431,10 +429,11 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
       <AlertDialog open={!!pendingDeleteRepo} onOpenChange={(open) => !open && setPendingDeleteRepo(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("s2")}{pendingDeleteRepo?.repo_id}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {tHC("s1")}
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {tHC("s2")}
+              {pendingDeleteRepo?.repo_id}&quot;?
+            </AlertDialogTitle>
+            <AlertDialogDescription>{tHC("s1")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deletingRepo}>Cancel</AlertDialogCancel>

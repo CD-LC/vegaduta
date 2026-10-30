@@ -73,7 +73,7 @@ function statusVariant(status: string): "default" | "secondary" | "destructive" 
 }
 
 export default function AiReportsPage() {
-    const tHC = useTranslations("hcPlatformadminAireportsPage");
+  const tHC = useTranslations("hcPlatformadminAireportsPage");
   const [filter, setFilter] = useState<string>("OPEN");
   const [rows, setRows] = useState<Report[]>([]);
   const [page, setPage] = useState(1);
@@ -138,12 +138,8 @@ export default function AiReportsPage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s9")}
-      </PageHint>
-      <InfoNote>
-        {tHC("s8")}
-      </InfoNote>
+      <PageHint>{tHC("s9")}</PageHint>
+      <InfoNote>{tHC("s8")}</InfoNote>
 
       <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label={tHC("s7")}>
         {FILTERS.map((s) => (

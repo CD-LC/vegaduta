@@ -177,7 +177,7 @@ const pickSuccess = (w: WeekPoint) => w.successRate;
 const pickShare = (w: WeekPoint) => w.scheduledShare;
 
 export default function NorthStarPage() {
-    const tHC = useTranslations("hcPlatformadminNorthstarPage");
+  const tHC = useTranslations("hcPlatformadminNorthstarPage");
   const [weeks, setWeeks] = useState(12);
   const [data, setData] = useState<NorthStarResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -285,8 +285,7 @@ export default function NorthStarPage() {
             >
               <div className="text-sm font-medium">{tHC("s26")}</div>
               <p className="mx-auto mt-1 max-w-xl text-xs text-muted-foreground">
-                {tHC("s25")} {weeks} {tHC("s24")}{" "}
-                {data.coverage.tenantsScanned} {tHC("s23")}
+                {tHC("s25")} {weeks} {tHC("s24")} {data.coverage.tenantsScanned} {tHC("s23")}
               </p>
             </div>
           )}

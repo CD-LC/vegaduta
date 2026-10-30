@@ -128,7 +128,7 @@ export default function TraceView({
   running: boolean;
   emptyHint?: string;
 }) {
-    const tHC = useTranslations("hcComponentsStudioTraceView");
+  const tHC = useTranslations("hcComponentsStudioTraceView");
   const rows = useMemo(() => foldTrace(events), [events]);
   const toolCalls = rows.filter((r) => r.kind === "tool").length;
 
@@ -145,7 +145,8 @@ export default function TraceView({
       {toolCalls > 0 && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-          {toolCalls} {tHC("s6")}{toolCalls === 1 ? "" : "s"} {tHC("s5")}
+          {toolCalls} {tHC("s6")}
+          {toolCalls === 1 ? "" : "s"} {tHC("s5")}
         </div>
       )}
       <ol className="relative space-y-2 border-s border-border/60 ps-4">
@@ -229,9 +230,7 @@ export default function TraceView({
             </motion.li>
           ))}
         </AnimatePresence>
-        {running && rows.length === 0 && (
-          <li className="text-sm text-muted-foreground animate-pulse">{tHC("s1")}</li>
-        )}
+        {running && rows.length === 0 && <li className="text-sm text-muted-foreground animate-pulse">{tHC("s1")}</li>}
       </ol>
     </div>
   );

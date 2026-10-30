@@ -50,7 +50,7 @@ export function useAuth(): PlatformAdminAuth {
 }
 
 export default function PlatformAdminGate({ children }: { children: ReactNode }) {
-    const tHC = useTranslations("hcPlatformadminComponentsPlatformAdminGate");
+  const tHC = useTranslations("hcPlatformadminComponentsPlatformAdminGate");
   // web's root AuthProvider only mounts children once Keycloak init has
   // resolved "ready" on a non-public route, so by the time this renders the
   // session is real. A null context is unreachable in practice (anonymous
@@ -96,7 +96,8 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
           <Logo size={48} />
           <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>{tHC("s4")}</h1>
           <p className="muted" style={{ marginTop: "0.5rem" }}>
-            {tHC("s3")} <strong>{ctx.username}</strong>{tHC("s2")}
+            {tHC("s3")} <strong>{ctx.username}</strong>
+            {tHC("s2")}
           </p>
           <button type="button" className="cross-link" style={{ marginTop: "1rem" }} onClick={() => auth.logout()}>
             {tHC("s1")}

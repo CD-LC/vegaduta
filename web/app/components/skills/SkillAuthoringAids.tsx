@@ -41,7 +41,7 @@ export function SkillLintPanel({
   existingNames: string[];
   editingName: string | null;
 }) {
-    const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
+  const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
   const issues: LintIssue[] = useMemo(
     () => lintSkillMd(draft, existingNames, editingName),
     [draft, existingNames, editingName]
@@ -79,15 +79,13 @@ export function SkillLintPanel({
           })}
         </ul>
       )}
-      <p className="text-[11px] text-muted-foreground">
-        {tHC("s15")}
-      </p>
+      <p className="text-[11px] text-muted-foreground">{tHC("s15")}</p>
     </div>
   );
 }
 
 export function SkillPromptPreview({ draft }: { draft: string }) {
-    const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
+  const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
   const p = useMemo(() => parseSkillMd(draft), [draft]);
   const ready = p.closed && p.name && p.description;
   return (
@@ -95,9 +93,7 @@ export function SkillPromptPreview({ draft }: { draft: string }) {
       <p className="text-xs font-medium text-foreground">{tHC("s14")}</p>
       {ready ? (
         <>
-          <p className="text-[11px] text-muted-foreground">
-            {tHC("s13")}
-          </p>
+          <p className="text-[11px] text-muted-foreground">{tHC("s13")}</p>
           <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-md border border-border/60 bg-muted/40 p-2 font-mono text-xs text-foreground">
             {promptLine(p.name, p.description)}
           </pre>
@@ -114,7 +110,7 @@ export function SkillPromptPreview({ draft }: { draft: string }) {
 }
 
 export function SkillTemplatePicker({ draft, onPick }: { draft: string; onPick: (skillMd: string) => void }) {
-    const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
+  const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
   const dirty = draft.trim() !== "" && !SKILL_TEMPLATES.some((t) => t.skillMd === draft);
   const [pending, setPending] = useState<string | null>(null);
   return (
@@ -175,7 +171,7 @@ export function SkillFilterBar({
   shown: number;
   total: number;
 }) {
-    const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
+  const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
   return (
     <div className="space-y-2" role="search">
       <div className="relative">
@@ -221,7 +217,7 @@ export function SkillFilterBar({
 
 /** Agents whose own allow-list names this skill. Agents on "all skills" use every enabled skill and are not listed. */
 export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] }) {
-    const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
+  const tHC = useTranslations("hcComponentsSkillsSkillAuthoringAids");
   const [agents, setAgents] = useState<{ id: string; name?: string | null }[] | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -244,9 +240,7 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
     <div className="space-y-1.5 rounded-md border border-border p-3" data-testid="skill-usage">
       <p className="text-sm font-medium text-foreground">Used by</p>
       {attachedAgentIds.length === 0 ? (
-        <p className="text-xs text-muted-foreground">
-          {tHC("s5")}
-        </p>
+        <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
       ) : failed ? (
         <p className="text-xs text-muted-foreground">
           {attachedAgentIds.length} agent{attachedAgentIds.length === 1 ? "" : "s"} {tHC("s4")}
@@ -269,9 +263,7 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
               </li>
             ))}
           </ul>
-          <p className="text-[11px] text-muted-foreground">
-            {tHC("s1")}
-          </p>
+          <p className="text-[11px] text-muted-foreground">{tHC("s1")}</p>
         </>
       )}
     </div>

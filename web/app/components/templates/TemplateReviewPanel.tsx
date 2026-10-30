@@ -15,7 +15,7 @@ export default function TemplateReviewPanel({
   advisories: TemplateIssue[];
   ai?: TemplateAiReview | null;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
   const allBlockers = [...blockers, ...(ai?.blockers ?? [])];
   const allAdvisories = [...advisories, ...(ai?.advisories ?? [])];
   const clean = allBlockers.length === 0;
@@ -62,7 +62,7 @@ export default function TemplateReviewPanel({
 }
 
 function IssueList({ title, tone, issues }: { title: string; tone: "error" | "warn"; issues: TemplateIssue[] }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
   const color = tone === "error" ? "var(--state-error)" : "var(--state-queued)";
   const Icon = tone === "error" ? AlertTriangle : Info;
   return (

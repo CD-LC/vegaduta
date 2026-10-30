@@ -1,26 +1,7 @@
 "use client";
 
-import {    useState } from "react";
-import {
-  Check,
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  Pause,
-  Play,
-  
-  
-  
-  
-  X,
-  
-} from "lucide-react";
+import { useState } from "react";
+import { Check, Pause, Play, X } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useTranslations } from "../../lib/i18n";
 import { downloadManager, type AssetStatus } from "../../lib/edge/downloadManager";
@@ -76,7 +57,7 @@ export default function MarketCard({
    * optional vision/voice download must not offer it. Omitted = not shown. */
   onUseHosted?: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsEdgeEdgeMarketCard");
+  const tHC = useTranslations("hcComponentsEdgeEdgeMarketCard");
   const t = useTranslations("edge");
   const [switchedToHosted, setSwitchedToHosted] = useState(false);
   // 2026-09-19: typed failure → a sentence and, where this card can perform

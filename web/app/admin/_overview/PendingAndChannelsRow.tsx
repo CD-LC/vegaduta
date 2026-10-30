@@ -15,7 +15,7 @@ export default function PendingAndChannelsRow({
   pendingApprovals: PendingApproval[];
   platforms: { key: PlatformKey; label: string; connected: boolean | null }[];
 }) {
-    const tHC = useTranslations("hcAdminOverviewPendingAndChannelsRow");
+  const tHC = useTranslations("hcAdminOverviewPendingAndChannelsRow");
   const t = useTranslations("adminOverview");
   return (
     <div className="defer-offscreen grid min-w-0 gap-4 lg:grid-cols-[3fr_2fr]">

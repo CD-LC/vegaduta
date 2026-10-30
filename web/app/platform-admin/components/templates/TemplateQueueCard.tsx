@@ -68,7 +68,7 @@ export default function TemplateQueueCard({
   onReject?: (reason: string) => Promise<void>;
   onWithdraw?: (reason: string) => Promise<void>;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateQueueCard");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateQueueCard");
   const askConfirm = useConfirm();
   // TemplateSummary (published) has none of these - only the pending
   // CommunityTemplate detail does. Narrowed once here so the rest of the

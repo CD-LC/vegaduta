@@ -32,7 +32,7 @@ export default function SemanticSearchPanel({
   processingAvailable: boolean;
   onError: (message: string | null) => void;
 }) {
-    const tHC = useTranslations("hcComponentsKnowledgeSemanticSearchPanel");
+  const tHC = useTranslations("hcComponentsKnowledgeSemanticSearchPanel");
   const t = useTranslations("knowledgePanel");
   const sidecarDown = !processingAvailable;
   const [query, setQuery] = useState("");
@@ -163,9 +163,7 @@ export default function SemanticSearchPanel({
             </Button>
           </div>
         </form>
-        {sidecarDown && (
-          <p className="text-xs text-[var(--ax-amber)]">{tHC("s3")}</p>
-        )}
+        {sidecarDown && <p className="text-xs text-[var(--ax-amber)]">{tHC("s3")}</p>}
         {recentSearches.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5" aria-label={tHC("s2")} role="group">
             <History size={12} className="text-muted-foreground" aria-hidden="true" />

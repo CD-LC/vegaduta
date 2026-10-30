@@ -65,7 +65,7 @@ export default function WorkflowCommandPalette({
   onClose: () => void;
   onPick: (type: string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowCommandPalette");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowCommandPalette");
   const t = useNodeDefTranslations();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -203,7 +203,8 @@ export default function WorkflowCommandPalette({
             <div id="wf-cmd-list" role="listbox" aria-label="Nodes" className="max-h-[52vh] overflow-y-auto p-1.5">
               {items.length === 0 && (
                 <div role="status" className="px-3 py-8 text-center text-sm text-muted-foreground">
-                  {tHC("s2")}{query}&rdquo;.
+                  {tHC("s2")}
+                  {query}&rdquo;.
                 </div>
               )}
               {items.map((def, idx) => {

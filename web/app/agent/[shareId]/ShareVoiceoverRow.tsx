@@ -31,7 +31,7 @@ export default function ShareVoiceoverRow({
   repliesMuted: boolean;
   onToggleRepliesMuted: () => void;
 }) {
-    const tHC = useTranslations("hcAgentShareIdShareVoiceoverRow");
+  const tHC = useTranslations("hcAgentShareIdShareVoiceoverRow");
   // Hydrate the persisted pick + voice lists after mount (localStorage and
   // speechSynthesis.getVoices() are not safe in the pre-rendered HTML).
   const [voiceover, setVoiceover] = useState<VoiceoverChoice>({ kind: "auto" });
@@ -71,7 +71,7 @@ export default function ShareVoiceoverRow({
         voiceover.kind === "kokoro"
           ? `On-device · ${voiceover.voiceId}`
           : voiceover.kind === "web-speech"
-            ? voiceover.label ?? voiceover.voiceURI
+            ? (voiceover.label ?? voiceover.voiceURI)
             : "Auto voice",
     });
   }

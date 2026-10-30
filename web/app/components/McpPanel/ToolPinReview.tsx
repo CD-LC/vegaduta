@@ -36,7 +36,7 @@ function ToolList({ label, names }: { label: string; names: string[] }) {
  * unavailable, so a deployment without changes sees an unchanged page.
  */
 export default function ToolPinReview({ onChanged }: { onChanged?: () => void }) {
-    const tHC = useTranslations("hcComponentsMcpPanelToolPinReview");
+  const tHC = useTranslations("hcComponentsMcpPanelToolPinReview");
   const [items, setItems] = useState<McpToolPinStatus[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +74,7 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
       <ShieldAlert className="h-4 w-4" />
       <AlertTitle>{tHC("s3")}</AlertTitle>
       <AlertDescription>
-        <p className="mb-3 text-sm">
-          {tHC("s2")}
-        </p>
+        <p className="mb-3 text-sm">{tHC("s2")}</p>
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
             <li key={item.registrationId} className="rounded-md border p-3" data-testid={`mcp-tool-pin-${item.name}`}>

@@ -46,7 +46,7 @@ export function MiniBars({
   fmt: (n: number) => string;
   testId?: string;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsOpsOpsWidgets");
+  const tHC = useTranslations("hcPlatformadminComponentsOpsOpsWidgets");
   const width = 360;
   const height = 120;
   const padTop = 10;

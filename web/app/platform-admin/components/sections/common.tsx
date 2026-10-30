@@ -114,7 +114,7 @@ export function ComingSoon({
   endpoints?: string[];
   roadmap?: any;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsCommon");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsCommon");
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border bg-secondary/30 p-4">
       <Construction size={18} className="mt-0.5 shrink-0 text-[var(--warning)]" />

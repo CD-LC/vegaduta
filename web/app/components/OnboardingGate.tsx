@@ -44,7 +44,7 @@ export default function OnboardingGate({
   firstName?: string | null;
   onProvisioned?: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsOnboardingGate");
+  const tHC = useTranslations("hcComponentsOnboardingGate");
   const router = useRouter();
   const [orgName, setOrgName] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -164,9 +164,7 @@ export default function OnboardingGate({
 
           <div className="mb-6 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">{tHC("s14")}</h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              {tHC("s13")}
-            </p>
+            <p className="mt-1.5 text-sm text-muted-foreground">{tHC("s13")}</p>
           </div>
 
           <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">
@@ -211,9 +209,7 @@ export default function OnboardingGate({
           <h1 className="text-2xl font-semibold tracking-tight">
             {firstName ? `Welcome, ${firstName}!` : "Almost there!"}
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            {tHC("s9")}
-          </p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{tHC("s9")}</p>
         </div>
 
         <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">

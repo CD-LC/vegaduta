@@ -14,12 +14,10 @@ import { useTranslations } from "../../lib/i18n";
 // editor (linked below, GET/PUT /api/platform/plan-limits). Per-tenant/user
 // overrides do not exist in core and are not shown.
 export default function BudgetsLimitsPage() {
-    const tHC = useTranslations("hcPlatformadminBudgetsPage");
+  const tHC = useTranslations("hcPlatformadminBudgetsPage");
   return (
     <AdminShell title={tHC("s7")}>
-      <PageHint>
-        {tHC("s6")}
-      </PageHint>
+      <PageHint>{tHC("s6")}</PageHint>
 
       <PerUserBudgetSection />
 
@@ -31,8 +29,7 @@ export default function BudgetsLimitsPage() {
 
       <SectionCard title={tHC("s5")} icon={CreditCard} delay={0.06}>
         <p className="text-xs text-muted-foreground">
-          {tHC("s4")}{" "}
-          <code className="font-mono">{tHC("s3")}</code>.
+          {tHC("s4")} <code className="font-mono">{tHC("s3")}</code>.
         </p>
         <Link
           href="/platform-admin/tenants"
@@ -42,9 +39,7 @@ export default function BudgetsLimitsPage() {
         </Link>
       </SectionCard>
 
-      <InfoNote>
-        {tHC("s1")}
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
     </AdminShell>
   );
 }

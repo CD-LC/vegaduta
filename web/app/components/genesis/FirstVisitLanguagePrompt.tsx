@@ -170,7 +170,7 @@ function LanguagePromptDialog({
   chooseRegional: () => void;
   dismiss: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsGenesisFirstVisitLanguagePrompt");
+  const tHC = useTranslations("hcComponentsGenesisFirstVisitLanguagePrompt");
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   useDialogFocus(panelRef, closeRef, dismiss);

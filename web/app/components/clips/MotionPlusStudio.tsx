@@ -73,7 +73,7 @@ interface MotionPlusStudioProps {
 }
 
 export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProps = {}) {
-    const tHC = useTranslations("hcComponentsClipsMotionPlusStudio");
+  const tHC = useTranslations("hcComponentsClipsMotionPlusStudio");
   // --- Environment / availability ----------------------------------------
   const [engines, setEngines] = useState<MotionEngineOption[]>([]);
   const [enginesLoaded, setEnginesLoaded] = useState(false);
@@ -346,9 +346,7 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
           <p className="text-sm font-medium text-foreground">
             {availability?.displayName || "Motion+ interpolation model"} {tHC("s23")}
           </p>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {tHC("s22")}
-          </p>
+          <p className="max-w-md text-sm text-muted-foreground">{tHC("s22")}</p>
           {onBackToStill && (
             <Button variant="outline" size="sm" onClick={onBackToStill} className="mt-2 gap-1.5">
               <ArrowLeft size={13} aria-hidden="true" /> {tHC("s21")}
@@ -402,9 +400,7 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
                 </p>
               )}
               {agentsLoaded && agents.length > 0 && capableAgents.length === 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {tHC("s14")}
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{tHC("s14")}</p>
               )}
             </div>
 
@@ -514,10 +510,16 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
             {/* Honest cost + ceiling, stated BEFORE anything is generated. */}
             <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
               <p>
-                Uses <span className="font-medium text-foreground">{frameCount} {tHC("s11")}</span> {tHC("s10")}
+                Uses{" "}
+                <span className="font-medium text-foreground">
+                  {frameCount} {tHC("s11")}
+                </span>{" "}
+                {tHC("s10")}
               </p>
               <p className="mt-1">
-                {tHC("s9")}{durationSec.toFixed(1)}{tHC("s8")} {MOTION_FPS} {tHC("s7")}{" "}
+                {tHC("s9")}
+                {durationSec.toFixed(1)}
+                {tHC("s8")} {MOTION_FPS} {tHC("s7")}{" "}
                 {availability?.detailName || "a small open frame-interpolation model"} {tHC("s6")}
               </p>
             </div>
@@ -595,14 +597,13 @@ export default function MotionPlusStudio({ onBackToStill }: MotionPlusStudioProp
               <div className="space-y-2">
                 <video controls src={result.url} className="h-auto w-full rounded-md border border-border bg-black" />
                 <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-                  <Download size={13} aria-hidden="true" /> {tHC("s2")}{result.extension}
+                  <Download size={13} aria-hidden="true" /> {tHC("s2")}
+                  {result.extension}
                 </Button>
               </div>
             )}
 
-            <p className="text-xs text-muted-foreground">
-              {tHC("s1")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           </CardContent>
         </Card>
       </div>

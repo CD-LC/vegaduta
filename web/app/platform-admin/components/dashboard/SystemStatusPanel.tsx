@@ -63,7 +63,7 @@ export default function SystemStatusPanel({
   error?: any;
   hideHeader?: boolean;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsDashboardSystemStatusPanel");
+  const tHC = useTranslations("hcPlatformadminComponentsDashboardSystemStatusPanel");
   return (
     <div className="mc-status-panel mc-hud-panel">
       <svg

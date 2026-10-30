@@ -29,7 +29,7 @@ export default function ShareCallLog({
   onReplay,
   onStopReplay,
 }: ShareCallLogProps) {
-    const tHC = useTranslations("hcAgentShareIdShareCallLog");
+  const tHC = useTranslations("hcAgentShareIdShareCallLog");
   if (callLog.length === 0 && !stageText && !transcript && !reply) return null;
   return (
     <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg bg-secondary/30 px-3 py-2 text-xs">
@@ -56,7 +56,12 @@ export default function ShareCallLog({
           )}
         </div>
       ))}
-      {transcript && <p className="text-muted-foreground">{tHC("s1")}{transcript}&quot;</p>}
+      {transcript && (
+        <p className="text-muted-foreground">
+          {tHC("s1")}
+          {transcript}&quot;
+        </p>
+      )}
       {reply && <p className="text-foreground">{reply}</p>}
     </div>
   );

@@ -12,7 +12,7 @@ import { useTranslations } from "../../lib/i18n";
 // exactly the shape of a loop. One click, no loop, and the person is told what
 // is happening instead of being bounced.
 export function InteractionRequiredScreen({ detail }: { detail: SilentAuthError | null }) {
-    const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
+  const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
   return (
     <main className="auth-shell">
       <div className="auth-card" style={{ textAlign: "center" }}>
@@ -41,7 +41,7 @@ export function InteractionRequiredScreen({ detail }: { detail: SilentAuthError 
 // The "Signing you in…" splash. Uses the AXON theme-aware .auth-shell/.auth-card
 // CSS classes (globals.css), which respond to <html data-mode="light|dark">.
 export function SigningInSplash() {
-    const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
+  const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
   return (
     <main className="auth-shell">
       {/* size 48 (was 40): this is the full-screen loading panel, and at
@@ -66,13 +66,15 @@ export function SigningInSplash() {
 // Shown only after the init retries are exhausted and no live session exists.
 // `error` is always a real, human-readable string (describeInitError).
 export function LoginFailedScreen({ error, onRetry }: { error: string | null; onRetry: () => void }) {
-    const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
+  const tHC = useTranslations("hcComponentsAuthProviderAuthScreens");
   return (
     <main className="auth-shell">
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
         <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s3")}</p>
-        <p className="muted" style={{ marginTop: "0.5rem" }}>{error}</p>
+        <p className="muted" style={{ marginTop: "0.5rem" }}>
+          {error}
+        </p>
         <p className="muted" style={{ marginTop: "0.5rem", fontSize: "0.8rem", wordBreak: "break-all" }}>
           {tHC("s2")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
         </p>

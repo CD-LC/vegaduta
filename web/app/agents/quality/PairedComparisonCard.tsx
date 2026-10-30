@@ -91,7 +91,7 @@ export default function PairedComparisonCard({
   measuredNoiseFloor,
   onUnsupported,
 }: PairedComparisonCardProps) {
-    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
+  const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
   // Only completed runs are offered. Newest-first, so index 0 is the natural
   // candidate and index 1 the natural baseline — the comparison a human
   // almost always wants is "did my last change help".
@@ -210,13 +210,7 @@ export default function PairedComparisonCard({
               placeholder={tHC("s26")}
             />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={swap}
-            title={tHC("s25")}
-            className="lg:mb-0.5"
-          >
+          <Button variant="outline" size="sm" onClick={swap} title={tHC("s25")} className="lg:mb-0.5">
             <ArrowLeftRight size={14} aria-hidden="true" /> Swap
           </Button>
           <div className="space-y-1">
@@ -246,19 +240,13 @@ export default function PairedComparisonCard({
           </Button>
         </div>
 
-        {effectiveBaseline === effectiveCandidate && (
-          <p className="text-xs text-muted-foreground">
-            {tHC("s22")}
-          </p>
-        )}
+        {effectiveBaseline === effectiveCandidate && <p className="text-xs text-muted-foreground">{tHC("s22")}</p>}
 
         {locked && (
           <Alert>
             <ShieldAlert aria-hidden="true" />
             <AlertTitle>{tHC("s21")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s20")}
-            </AlertDescription>
+            <AlertDescription>{tHC("s20")}</AlertDescription>
           </Alert>
         )}
 
@@ -274,11 +262,7 @@ export default function PairedComparisonCard({
           </Alert>
         )}
 
-        {!comparison && !loading && !failed && !locked && (
-          <p className="text-sm text-muted-foreground">
-            {tHC("s17")}
-          </p>
-        )}
+        {!comparison && !loading && !failed && !locked && <p className="text-sm text-muted-foreground">{tHC("s17")}</p>}
 
         {effectiveComparison && (
           <ComparisonResult
@@ -340,7 +324,7 @@ function ComparisonResult({
   reading: ComparisonReading;
   floorWasSubstituted: boolean;
 }) {
-    const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
+  const tHC = useTranslations("hcAgentsQualityPairedComparisonCard");
   const gap = orEmptyEstimate(gapEstimate(comparison));
   const undecided = reading.state === "INDISTINGUISHABLE" || reading.state === "INSUFFICIENT_DATA";
 
@@ -358,7 +342,8 @@ function ComparisonResult({
           )}
         </span>
         <span className="text-xs text-muted-foreground">
-          {comparison.pairedCases} {tHC("s13")}{comparison.pairedCases === 1 ? "" : "s"}
+          {comparison.pairedCases} {tHC("s13")}
+          {comparison.pairedCases === 1 ? "" : "s"}
         </span>
         {comparison.unreplicated && (
           <Badge variant="state" state="var(--state-warning)" className="gap-1.5">
@@ -383,9 +368,7 @@ function ComparisonResult({
         <Alert variant="warning">
           <Info aria-hidden="true" />
           <AlertTitle>{tHC("s10")}</AlertTitle>
-          <AlertDescription>
-            {tHC("s9")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s9")}</AlertDescription>
         </Alert>
       ) : (
         <p className="text-xs text-muted-foreground">
@@ -399,7 +382,8 @@ function ComparisonResult({
 
       {comparison.signTestPValue !== null && comparison.signTestPValue !== undefined && (
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
-          {tHC("s7")}{Number(comparison.signTestPValue).toPrecision(3)} over{" "}
+          {tHC("s7")}
+          {Number(comparison.signTestPValue).toPrecision(3)} over{" "}
           {comparison.casesVariantBetter + comparison.casesBaselineBetter} {tHC("s6")}
           {comparison.casesVariantBetter + comparison.casesBaselineBetter === 1 ? "" : "s"}
         </p>
@@ -410,7 +394,8 @@ function ComparisonResult({
           <ShieldAlert aria-hidden="true" />
           <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
-            {tHC("s4")} <span className="font-mono">{comparison.verdict}</span>{tHC("s3")}
+            {tHC("s4")} <span className="font-mono">{comparison.verdict}</span>
+            {tHC("s3")}
           </AlertDescription>
         </Alert>
       )}

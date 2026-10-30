@@ -60,7 +60,7 @@ function levelTone(level: string | null | undefined) {
 }
 
 function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }) {
-    const tHC = useTranslations("hcPlatformadminObservabilityPage");
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [detail, setDetail] = useState<TraceDetailResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -137,9 +137,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
               </Alert>
             )}
             {!detail && !error && <Skeleton className="h-64 w-full" />}
-            {detail && !detail.available && (
-              <UnavailableNote title={tHC("s3")} reason={detail.reason} />
-            )}
+            {detail && !detail.available && <UnavailableNote title={tHC("s3")} reason={detail.reason} />}
             {detail?.available && t && (
               <div className="space-y-4 text-sm">
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -170,24 +168,21 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                   </div>
                 )}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("s18")}
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s18")}</p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.input || "—"}
                   </pre>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("s17")}
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s17")}</p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.output || "—"}
                   </pre>
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("s16")}{detail.observations?.length ?? 0})
+                    {tHC("s16")}
+                    {detail.observations?.length ?? 0})
                   </p>
                   <div className="mt-1 space-y-1.5">
                     {(detail.observations || []).map((o) => {
@@ -226,7 +221,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
 }
 
 function MetricsSection({ range }: { range: { from: string; to: string } }) {
-    const tHC = useTranslations("hcPlatformadminObservabilityPage");
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [data, setData] = useState<TraceMetricsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -261,21 +256,16 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
       )}
       {!data && !error && <Skeleton className="h-40 w-full" />}
       {data && !data.available && (
-        <UnavailableNote
-          title={tHC("s3")}
-          reason={data.reason || "Langfuse not configured or unreachable."}
-        />
+        <UnavailableNote title={tHC("s3")} reason={data.reason || "Langfuse not configured or unreachable."} />
       )}
       {data?.available && (
         <div className="space-y-5">
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span>
-              {tHC("s14")}{" "}
-              <span className="font-mono text-foreground">{formatCountOrUnavailable(totals.traces)}</span>
+              {tHC("s14")} <span className="font-mono text-foreground">{formatCountOrUnavailable(totals.traces)}</span>
             </span>
             <span>
-              {tHC("s13")}{" "}
-              <span className="font-mono text-foreground">{formatUsdOrUnavailable(totals.costUsd)}</span>
+              {tHC("s13")} <span className="font-mono text-foreground">{formatUsdOrUnavailable(totals.costUsd)}</span>
             </span>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -336,7 +326,7 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
 }
 
 export default function ObservabilityPage() {
-    const tHC = useTranslations("hcPlatformadminObservabilityPage");
+  const tHC = useTranslations("hcPlatformadminObservabilityPage");
   const [days, setDays] = useState(7);
   // Bumped by Refresh so a preset window ("last 7 days") slides forward to now.
   const [tick, setTick] = useState(0);
@@ -391,9 +381,7 @@ export default function ObservabilityPage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s7")}
-      </PageHint>
+      <PageHint>{tHC("s7")}</PageHint>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div
@@ -513,14 +501,9 @@ export default function ObservabilityPage() {
         )}
         {loading && !list && <Skeleton className="h-40 w-full" />}
         {list && !list.available && (
-          <UnavailableNote
-            title={tHC("s3")}
-            reason={list.reason || "Langfuse not configured or unreachable."}
-          />
+          <UnavailableNote title={tHC("s3")} reason={list.reason || "Langfuse not configured or unreachable."} />
         )}
-        {list?.available && rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">{tHC("s2")}</p>
-        )}
+        {list?.available && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s2")}</p>}
         {list?.available && rows.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-start text-sm">

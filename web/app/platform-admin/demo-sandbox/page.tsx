@@ -37,7 +37,7 @@ import { useTranslations } from "../../lib/i18n";
 // two-series bar chart, and a new npm dep is explicitly out of scope here.
 
 export default function DemoSandboxPage() {
-    const tHC = useTranslations("hcPlatformadminDemosandboxPage");
+  const tHC = useTranslations("hcPlatformadminDemosandboxPage");
   const [metrics, setMetrics] = useState<any>(null);
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>(null);
@@ -144,8 +144,7 @@ export default function DemoSandboxPage() {
       }
     >
       <PageHint>
-        {tHC("s41")}{" "}
-        <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s40")}
+        {tHC("s41")} <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s40")}
       </PageHint>
 
       {metricsError && (
@@ -158,8 +157,7 @@ export default function DemoSandboxPage() {
         <Alert className="mb-5">
           <Info />
           <AlertDescription>
-            {tHC("s39")}{" "}
-            <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s38")}
+            {tHC("s39")} <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s38")}
           </AlertDescription>
         </Alert>
       )}
@@ -465,9 +463,7 @@ export default function DemoSandboxPage() {
               <Label htmlFor="demo-exempt-ips" className="text-sm font-medium text-foreground">
                 {tHC("s10")}
               </Label>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {tHC("s9")}
-              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{tHC("s9")}</p>
               <Input
                 id="demo-exempt-ips"
                 className="mt-2 font-mono text-xs"

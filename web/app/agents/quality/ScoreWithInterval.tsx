@@ -57,14 +57,9 @@ import { useTranslations } from "../../lib/i18n";
  * measurement on any screen that uses these atoms.
  */
 export function UnreplicatedBadge({ className }: { className?: string }) {
-    const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
+  const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
   return (
-    <Badge
-      variant="state"
-      state="var(--state-warning)"
-      className={cn("gap-1", className)}
-      title={tHC("s5")}
-    >
+    <Badge variant="state" state="var(--state-warning)" className={cn("gap-1", className)} title={tHC("s5")}>
       <AlertTriangle size={11} aria-hidden="true" /> unreplicated
     </Badge>
   );
@@ -76,15 +71,7 @@ export function UnreplicatedBadge({ className }: { className?: string }) {
  * depends on the sampling, not on the agent. This is usually the single most
  * actionable row on the screen.
  */
-export function FlakyBadge({
-  passed,
-  rollouts,
-  className,
-}: {
-  passed: number;
-  rollouts: number;
-  className?: string;
-}) {
+export function FlakyBadge({ passed, rollouts, className }: { passed: number; rollouts: number; className?: string }) {
   return (
     <Badge
       variant="state"
@@ -140,7 +127,7 @@ export function ScoreWithInterval({
   hideUnreplicatedBadge = false,
   className,
 }: ScoreWithIntervalProps) {
-    const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
+  const tHC = useTranslations("hcAgentsQualityScoreWithInterval");
   const e = orEmptyEstimate(estimate);
   const hasValue = e.value !== null && e.value !== undefined;
   const withInterval = hasInterval(e);
@@ -174,19 +161,13 @@ export function ScoreWithInterval({
           </span>
         )}
         {(e.rollouts || 0) > 0 && (
-          <span
-            className="font-mono text-xs tabular-nums text-muted-foreground"
-            title={tHC("s4")}
-          >
+          <span className="font-mono text-xs tabular-nums text-muted-foreground" title={tHC("s4")}>
             n={e.rollouts}
           </span>
         )}
         {!hasValue && <span className="text-xs text-muted-foreground">{tHC("s3")}</span>}
         {hasValue && !withInterval && !unreplicated && (
-          <span
-            className="text-xs text-muted-foreground"
-            title={tHC("s2")}
-          >
+          <span className="text-xs text-muted-foreground" title={tHC("s2")}>
             {tHC("s1")}
           </span>
         )}
@@ -286,7 +267,10 @@ export function GapIntervalBar({
   const e = orEmptyEstimate(estimate);
   if (e.value === null || e.value === undefined) return null;
 
-  const floor = noiseFloor !== null && noiseFloor !== undefined && Number.isFinite(Number(noiseFloor)) ? Math.abs(Number(noiseFloor)) : null;
+  const floor =
+    noiseFloor !== null && noiseFloor !== undefined && Number.isFinite(Number(noiseFloor))
+      ? Math.abs(Number(noiseFloor))
+      : null;
   // Symmetric domain around zero, sized by the largest thing we must show, so
   // the centre line is always the true zero and two bars on one screen are
   // not drawn to different scales by accident.
@@ -328,10 +312,7 @@ export function GapIntervalBar({
           className="absolute inset-y-[3px] rounded-full bg-primary/40"
           style={{ left: `${barLeft}%`, width: `${barWidth}%` }}
         />
-        <div
-          className="absolute inset-y-0 w-[2px] rounded-full bg-primary"
-          style={{ left: `calc(${point}% - 1px)` }}
-        />
+        <div className="absolute inset-y-0 w-[2px] rounded-full bg-primary" style={{ left: `calc(${point}% - 1px)` }} />
       </div>
       <div className="flex justify-between font-mono text-[0.65rem] tabular-nums text-muted-foreground">
         <span>{formatSigned(-domain)}</span>

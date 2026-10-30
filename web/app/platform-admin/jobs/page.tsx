@@ -26,7 +26,7 @@ import { useTranslations } from "../../lib/i18n";
 // for confirmation - it starts the job on the replica that answers.
 
 export default function JobsPage() {
-    const tHC = useTranslations("hcPlatformadminJobsPage");
+  const tHC = useTranslations("hcPlatformadminJobsPage");
   const askConfirm = useConfirm();
   const [jobs, setJobs] = useState<ScheduledJob[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +101,7 @@ export default function JobsPage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s8")}
-      </PageHint>
+      <PageHint>{tHC("s8")}</PageHint>
 
       <SectionCard
         title="Jobs"
@@ -199,10 +197,7 @@ export default function JobsPage() {
                               <Play /> {running === j.id ? "Starting..." : "Run now"}
                             </Button>
                           ) : (
-                            <span
-                              className="text-[11px] text-muted-foreground"
-                              title={tHC("s2")}
-                            >
+                            <span className="text-[11px] text-muted-foreground" title={tHC("s2")}>
                               {tHC("s1")}
                             </span>
                           )}

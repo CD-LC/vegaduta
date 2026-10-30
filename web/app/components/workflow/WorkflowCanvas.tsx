@@ -65,36 +65,150 @@ function CanvasInner({
   onBack: any;
   focusMode?: any;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvas");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvas");
   const c = useWorkflowCanvasController({ workflowId, focusMode });
   const {
-    workflow, setWorkflow, error, busy, t, tAw, tDescribe, tNodeDefs, canManageWorkflows, reactFlowWrapper,
-    paletteOpen, setPaletteOpen, inspectorOpen, setInspectorOpen, showShareModal, setShowShareModal,
-    historyOpen, setHistoryOpen, commentsOpen, setCommentsOpen, zoomPct, setZoomPct, showShortcuts, toggleShortcuts,
-    decideRequest, setDecideRequest, cmdOpen, setCmdOpen, validationErrors, setValidationErrors,
-    alerts, showAlertsPopover, setShowAlertsPopover, alertsPopoverRef,
+    workflow,
+    setWorkflow,
+    error,
+    busy,
+    t,
+    tAw,
+    tDescribe,
+    tNodeDefs,
+    canManageWorkflows,
+    reactFlowWrapper,
+    paletteOpen,
+    setPaletteOpen,
+    inspectorOpen,
+    setInspectorOpen,
+    showShareModal,
+    setShowShareModal,
+    historyOpen,
+    setHistoryOpen,
+    commentsOpen,
+    setCommentsOpen,
+    zoomPct,
+    setZoomPct,
+    showShortcuts,
+    toggleShortcuts,
+    decideRequest,
+    setDecideRequest,
+    cmdOpen,
+    setCmdOpen,
+    validationErrors,
+    setValidationErrors,
+    alerts,
+    showAlertsPopover,
+    setShowAlertsPopover,
+    alertsPopoverRef,
   } = c;
   const {
-    nodes, edges, selectedNode, triggerNodeCount, setSelectedNodeId, focusNodeFromLint, historyRef, undo, redo,
-    onNodesChange, onEdgesChange, onNodeDragStart, addNodeByClick, onDragOver, onDrop, updateNode, deleteNode,
-    deleteEdge, onConnect, onConnectEnd, clearPaletteMode, handlePalettePick, snapToGrid, toggleSnap, copySelected,
-    pasteCopied, duplicateSelected, tidyLayout, fitView, zoomIn, zoomOut, isDirty, autosaveState, save, validate,
+    nodes,
+    edges,
+    selectedNode,
+    triggerNodeCount,
+    setSelectedNodeId,
+    focusNodeFromLint,
+    historyRef,
+    undo,
+    redo,
+    onNodesChange,
+    onEdgesChange,
+    onNodeDragStart,
+    addNodeByClick,
+    onDragOver,
+    onDrop,
+    updateNode,
+    deleteNode,
+    deleteEdge,
+    onConnect,
+    onConnectEnd,
+    clearPaletteMode,
+    handlePalettePick,
+    snapToGrid,
+    toggleSnap,
+    copySelected,
+    pasteCopied,
+    duplicateSelected,
+    tidyLayout,
+    fitView,
+    zoomIn,
+    zoomOut,
+    isDirty,
+    autosaveState,
+    save,
+    validate,
     handleDuplicate,
   } = c;
   const {
-    graph, nodeLabel, live, streamOpen, obs, observing, observeActions, enterObserve, openLiveNode, awaiting,
-    runResult, runLive, runIsStoppable, trace, cancelBusy, pauseBusy, runWithRuntimeInputs, stopRun, pauseRun,
-    resumeRun, onAwaitingResolved, runModal,
+    graph,
+    nodeLabel,
+    live,
+    streamOpen,
+    obs,
+    observing,
+    observeActions,
+    enterObserve,
+    openLiveNode,
+    awaiting,
+    runResult,
+    runLive,
+    runIsStoppable,
+    trace,
+    cancelBusy,
+    pauseBusy,
+    runWithRuntimeInputs,
+    stopRun,
+    pauseRun,
+    resumeRun,
+    onAwaitingResolved,
+    runModal,
   } = c;
   const {
-    schedule, scheduleFrequency, setScheduleFrequency, scheduleTime, setScheduleTime, scheduleDay, setScheduleDay,
-    scheduleBusy, diagram, intelligence, ai, aiPlan, aiPlanOpen, setAiPlanOpen, suggestedScheduleOn,
-    stripShowsSuggestion, turnOnSuggestedSchedule, canvasHasContent,
+    schedule,
+    scheduleFrequency,
+    setScheduleFrequency,
+    scheduleTime,
+    setScheduleTime,
+    scheduleDay,
+    setScheduleDay,
+    scheduleBusy,
+    diagram,
+    intelligence,
+    ai,
+    aiPlan,
+    aiPlanOpen,
+    setAiPlanOpen,
+    suggestedScheduleOn,
+    stripShowsSuggestion,
+    turnOnSuggestedSchedule,
+    canvasHasContent,
   } = c;
   const {
-    allLint, lintLoading, lintServerAvailable, exprLint, applyLintFix, workflowEvalStats, stepTestCtx, pinsCtl,
-    pinCount, pinnedRunCount, displayNodes, displayEdges, runningNodeIds, streamOnScreen, setDiffDeco,
-    diffDrawerProps, tourOpen, tourSteps, focusTourNode, startTour, exitTour, studio, onToggleInspector,
+    allLint,
+    lintLoading,
+    lintServerAvailable,
+    exprLint,
+    applyLintFix,
+    workflowEvalStats,
+    stepTestCtx,
+    pinsCtl,
+    pinCount,
+    pinnedRunCount,
+    displayNodes,
+    displayEdges,
+    runningNodeIds,
+    streamOnScreen,
+    setDiffDeco,
+    diffDrawerProps,
+    tourOpen,
+    tourSteps,
+    focusTourNode,
+    startTour,
+    exitTour,
+    studio,
+    onToggleInspector,
   } = c;
   const {
     elapsedSeconds,
@@ -141,8 +255,11 @@ function CanvasInner({
         <WorkflowTopbar
           alerts={alerts}
           alertsPopoverRef={alertsPopoverRef}
-          canComment={workflow.editable !== false && !observing} commentsOpen={commentsOpen} historyOpen={historyOpen}
-          onToggleComments={() => setCommentsOpen((v) => !v)} onToggleHistory={() => setHistoryOpen((v) => !v)}
+          canComment={workflow.editable !== false && !observing}
+          commentsOpen={commentsOpen}
+          historyOpen={historyOpen}
+          onToggleComments={() => setCommentsOpen((v) => !v)}
+          onToggleHistory={() => setHistoryOpen((v) => !v)}
           autosaveState={autosaveState}
           busy={busy}
           exitTour={exitTour}
@@ -353,7 +470,13 @@ function CanvasInner({
                   />
                 </NodeLiveOpenContext.Provider>
               </WorkflowEdgeDeleteContext.Provider>
-              <WorkflowCommentsHost workflowId={workflowId} open={commentsOpen && !observing} onClose={() => setCommentsOpen(false)} nodeLabel={nodeLabel} onFocusNode={focusNodeFromLint} />
+              <WorkflowCommentsHost
+                workflowId={workflowId}
+                open={commentsOpen && !observing}
+                onClose={() => setCommentsOpen(false)}
+                nodeLabel={nodeLabel}
+                onFocusNode={focusNodeFromLint}
+              />
               {observing && (
                 <ObserveRail
                   obs={obs}
@@ -502,7 +625,17 @@ function CanvasInner({
         <WorkflowIntelligenceModal {...intelligence.modalProps} t={t} tAw={tAw} workflow={workflow} />
 
         {historyOpen && (
-          <WorkflowVersionsDrawer workflowId={workflowId} canvasDirty={isDirty} canWrite={workflow.editable !== false && !observing} onFocusNode={focusNodeFromLint} {...diffDrawerProps} onClose={() => { setDiffDeco(null); setHistoryOpen(false); }} />
+          <WorkflowVersionsDrawer
+            workflowId={workflowId}
+            canvasDirty={isDirty}
+            canWrite={workflow.editable !== false && !observing}
+            onFocusNode={focusNodeFromLint}
+            {...diffDrawerProps}
+            onClose={() => {
+              setDiffDeco(null);
+              setHistoryOpen(false);
+            }}
+          />
         )}
 
         <WorkflowShareModal

@@ -41,7 +41,7 @@ export function buildPreviewAuth(admin: boolean) {
 }
 
 function PreviewPill({ label }: { label: string }) {
-    const tHC = useTranslations("hcUikitConsolepreviewPreviewharness");
+  const tHC = useTranslations("hcUikitConsolepreviewPreviewharness");
   return (
     <div
       role="status"

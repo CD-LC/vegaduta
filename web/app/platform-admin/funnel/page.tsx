@@ -49,7 +49,7 @@ function fmtInt(v: number | undefined) {
 }
 
 export default function FunnelPage() {
-    const tHC = useTranslations("hcPlatformadminFunnelPage");
+  const tHC = useTranslations("hcPlatformadminFunnelPage");
   const [days, setDays] = useState(14);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -162,8 +162,9 @@ export default function FunnelPage() {
       }
     >
       <PageHint>
-        {tHC("s38")}{" "}
-        <code className="font-mono text-xs">LandingEventController</code> {tHC("s37")} <code className="font-mono text-xs">+1</code> {tHC("s36")} <strong>Reach</strong> {tHC("s35")} <strong>engage</strong> {tHC("s34")}
+        {tHC("s38")} <code className="font-mono text-xs">LandingEventController</code> {tHC("s37")}{" "}
+        <code className="font-mono text-xs">+1</code> {tHC("s36")} <strong>Reach</strong> {tHC("s35")}{" "}
+        <strong>engage</strong> {tHC("s34")}
       </PageHint>
 
       {error && (
@@ -175,8 +176,8 @@ export default function FunnelPage() {
       {awaitingDeploy && (
         <Alert className="mb-5">
           <AlertDescription>
-            <strong>{tHC("s33")}</strong> {tHC("s32")} {fmtInt(views)}{" "}
-            {tHC("s31")} <code className="font-mono text-xs">sec_*</code> {tHC("s30")}{" "}
+            <strong>{tHC("s33")}</strong> {tHC("s32")} {fmtInt(views)} {tHC("s31")}{" "}
+            <code className="font-mono text-xs">sec_*</code> {tHC("s30")}{" "}
             <code className="font-mono text-xs">SectionReach.tsx</code> {tHC("s29")}
           </AlertDescription>
         </Alert>
@@ -188,7 +189,8 @@ export default function FunnelPage() {
             <div className="text-xs text-muted-foreground">{tHC("s28")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-primary">{fmtInt(views)}</div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("s27")} <em>{tHC("s26")}</em>{tHC("s25")}
+              {tHC("s27")} <em>{tHC("s26")}</em>
+              {tHC("s25")}
             </div>
           </CardContent>
         </Card>
@@ -198,9 +200,7 @@ export default function FunnelPage() {
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_pricing ?? 0, views))}
             </div>
-            <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("s23")}
-            </div>
+            <div className="mt-1 text-[11px] leading-snug text-muted-foreground">{tHC("s23")}</div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
@@ -209,9 +209,7 @@ export default function FunnelPage() {
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_closing ?? 0, views))}
             </div>
-            <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("s21")}
-            </div>
+            <div className="mt-1 text-[11px] leading-snug text-muted-foreground">{tHC("s21")}</div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
@@ -330,9 +328,7 @@ export default function FunnelPage() {
         icon={Archive}
         delay={0.1}
       >
-        <p className="mb-3 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          {tHC("s11")}
-        </p>
+        <p className="mb-3 max-w-3xl text-xs leading-relaxed text-muted-foreground">{tHC("s11")}</p>
         <div className="flex flex-wrap gap-4">
           {RETIRED_EVENTS.map((r) => (
             <div key={r.event} className="min-w-[190px]">
@@ -363,8 +359,7 @@ export default function FunnelPage() {
             <strong className="text-foreground">{tHC("s5")}</strong> {tHC("s4")}
           </li>
           <li>
-            {tHC("s3")} <em>copy</em> {tHC("s2")}{" "}
-            <em>position</em> {tHC("s1")}
+            {tHC("s3")} <em>copy</em> {tHC("s2")} <em>position</em> {tHC("s1")}
           </li>
         </ul>
       </SectionCard>

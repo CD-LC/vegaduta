@@ -67,7 +67,7 @@ function formatDateTime(iso: string | null): string {
 }
 
 export default function McpReviewQueuePage() {
-    const tHC = useTranslations("hcPlatformadminMcpreviewPage");
+  const tHC = useTranslations("hcPlatformadminMcpreviewPage");
   const askConfirm = useConfirm();
   const [rows, setRows] = useState<PendingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,12 +164,8 @@ export default function McpReviewQueuePage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s8")}
-      </PageHint>
-      <InfoNote>
-        {tHC("s7")}
-      </InfoNote>
+      <PageHint>{tHC("s8")}</PageHint>
+      <InfoNote>{tHC("s7")}</InfoNote>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
 
@@ -224,7 +220,9 @@ export default function McpReviewQueuePage() {
                         {row.command}
                         {row.args ? ` ${formatArgs(row.args)}` : ""}
                       </code>
-                      <div className="text-xs text-muted-foreground">{tHC("s2")} {row.requestedBy || "—"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {tHC("s2")} {row.requestedBy || "—"}
+                      </div>
                       <div className="flex gap-2">
                         <Button
                           variant="default"

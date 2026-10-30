@@ -13,7 +13,7 @@ export default function TemplateReviewSummary({
   review?: TemplateReview | null;
   requirements?: TemplateRequirement[];
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateReviewSummary");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesTemplateReviewSummary");
   if (!review) {
     return (
       <p className="rounded-md border border-border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
@@ -30,7 +30,8 @@ export default function TemplateReviewSummary({
       data-testid="template-review-summary"
     >
       <p className="flex items-center gap-1.5 font-medium text-foreground">
-        <Sparkles size={12} aria-hidden /> {tHC("s3")}{review.standardVersion})
+        <Sparkles size={12} aria-hidden /> {tHC("s3")}
+        {review.standardVersion})
       </p>
       <p className="text-muted-foreground">
         Rules: {review.rules.ready ? "passed" : "failed"} · {advisories.length} suggestion

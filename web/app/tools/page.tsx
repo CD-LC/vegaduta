@@ -40,7 +40,7 @@ import CoachButton from "../components/brief/CoachDrawer";
  * fetched once here and passed down rather than duplicated.
  */
 export default function ToolsPage() {
-    const tHC = useTranslations("hcToolsPage");
+  const tHC = useTranslations("hcToolsPage");
   const t = useTranslations("toolsPage");
   const tOpenApi = useTranslations("openApiTools");
   const tOAuth = useTranslations("mcpOAuth");
@@ -176,8 +176,7 @@ export default function ToolsPage() {
             // Suppress the counter rather than print a wrong one - see the
             // loadFailed comment above.
             <>
-              {tHC("s7")}{" "}
-              <span className="text-muted-foreground">{tHC("s8")}</span>
+              {tHC("s7")} <span className="text-muted-foreground">{tHC("s8")}</span>
             </>
           ) : (
             <>
@@ -271,9 +270,7 @@ export default function ToolsPage() {
           <AlertTriangle aria-hidden="true" />
           <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
-            <p>
-              {tHC("s4")}
-            </p>
+            <p>{tHC("s4")}</p>
             <Button variant="outline" size="sm" className="mt-2" onClick={refresh}>
               {tHC("s3")}
             </Button>

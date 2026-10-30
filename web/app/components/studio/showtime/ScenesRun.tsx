@@ -32,7 +32,7 @@ const NODE_TONE: Record<string, string> = {
 const NODE_ICON: Record<string, typeof Bot> = { tap: Zap, agent: Bot, ok: ShieldCheck, out: Smartphone };
 
 export function FlowScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
   const n = FLOW_NODES.length;
   const draw = seg(p, 0.05, 0.6);
   const packet = seg(p, 0.6, 0.98);
@@ -91,15 +91,11 @@ export function FlowScene({ p }: SceneProps) {
         <div className="grid grid-cols-2 gap-3 text-[12px]" style={{ opacity: seg(p, 0.62, 0.78) }}>
           <div className="rounded-xl border border-amber-400/30 bg-amber-500/10 p-3">
             <div className="mb-0.5 font-medium text-amber-200">{tHC("s12")}</div>
-            <div className="text-zinc-400">
-              {tHC("s11")}
-            </div>
+            <div className="text-zinc-400">{tHC("s11")}</div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <div className="mb-0.5 font-medium text-zinc-200">{tHC("s10")}</div>
-            <div className="text-zinc-400">
-              {tHC("s9")}
-            </div>
+            <div className="text-zinc-400">{tHC("s9")}</div>
           </div>
         </div>
       </div>
@@ -108,7 +104,7 @@ export function FlowScene({ p }: SceneProps) {
 }
 
 export function RunScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
   const stepT = seg(p, 0.14, 0.62);
   return (
     <Panel title={tHC("s8")} icon={Zap}>
@@ -158,16 +154,14 @@ export function RunScene({ p }: SceneProps) {
             </div>
           </div>
         </div>
-        <div className="text-center text-[10px] uppercase tracking-wider text-zinc-600">
-          {tHC("s5")}
-        </div>
+        <div className="text-center text-[10px] uppercase tracking-wider text-zinc-600">{tHC("s5")}</div>
       </div>
     </Panel>
   );
 }
 
 export function ShipScene({ p }: SceneProps) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
+  const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
   const qr = useMemo(() => {
     try {
       return qrPath(`${SITE_URL}/try`, "M");

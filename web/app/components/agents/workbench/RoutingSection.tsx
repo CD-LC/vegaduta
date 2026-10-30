@@ -13,7 +13,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function RoutingSection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchRoutingSection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchRoutingSection");
   const {
     deviceRoutingSummary,
     edgeBrowser,
@@ -71,7 +71,10 @@ export default function RoutingSection() {
                 ? `WebGPU ${edgeBrowser.webgpu ? "available" : "not available"}, WebAssembly ${edgeBrowser.wasm ? "available" : "not available"}`
                 : "checking…"}
               {tHC("s5")}{" "}
-              {onPlatformLlm ? poolLabel("the shared platform pool", "the local model (Ollama) on this machine") : "your own provider key"}.
+              {onPlatformLlm
+                ? poolLabel("the shared platform pool", "the local model (Ollama) on this machine")
+                : "your own provider key"}
+              .
             </p>
             {/* "What drives this agent's intelligence" 3-way
              * override (platform pool / on-device / own provider). Flag-gated
@@ -141,17 +144,11 @@ export default function RoutingSection() {
                   {tHC("s4")}
                 </label>
                 {isDraft ? (
-                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    {tHC("s3")}
-                  </p>
+                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{tHC("s3")}</p>
                 ) : !edgeEnabled() ? (
-                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    {tHC("s2")}
-                  </p>
+                  <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">{tHC("s2")}</p>
                 ) : null}
-                <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-                  {tHC("s1")}
-                </p>
+                <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">{tHC("s1")}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Select
                     id="agent-edge-routing-policy-select"

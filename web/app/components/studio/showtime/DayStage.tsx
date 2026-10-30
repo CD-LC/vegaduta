@@ -125,7 +125,7 @@ function Orrery({
   litAgents: Set<AgentId>;
   finale: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
   const tone = ev ? TONE[ev.phone.tone] : TONE.violet;
 
   // Packets
@@ -446,7 +446,7 @@ function Orrery({
 }
 
 function Counters({ stats }: { stats: ReturnType<typeof statsAt> }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayStage");
   const items = [
     { l: "messages", v: stats.msgs, c: "" },
     { l: "tool calls", v: stats.tools, c: "" },

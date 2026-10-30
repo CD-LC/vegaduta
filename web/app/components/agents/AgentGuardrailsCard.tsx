@@ -85,7 +85,7 @@ export default function AgentGuardrailsCard({
   locked: boolean;
   editLockedTooltip?: string;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsAgentGuardrailsCard");
+  const tHC = useTranslations("hcComponentsAgentsAgentGuardrailsCard");
   const [data, setData] = useState<GuardrailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);

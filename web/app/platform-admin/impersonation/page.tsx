@@ -47,7 +47,7 @@ function SessionsTable({
   ending: string | null;
   onEnd: (s: ImpersonationSession) => void;
 }) {
-    const tHC = useTranslations("hcPlatformadminImpersonationPage");
+  const tHC = useTranslations("hcPlatformadminImpersonationPage");
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[820px] text-start text-sm">
@@ -115,7 +115,7 @@ function SessionsTable({
 }
 
 export default function ImpersonationPage() {
-    const tHC = useTranslations("hcPlatformadminImpersonationPage");
+  const tHC = useTranslations("hcPlatformadminImpersonationPage");
   const askConfirm = useConfirm();
   const [active, setActive] = useState<ImpersonationPage | null>(null);
   const [activeError, setActiveError] = useState<string | null>(null);

@@ -98,7 +98,7 @@ const TOOLS = [
 ];
 
 export default function ToolCredentialsPage() {
-    const tHC = useTranslations("hcPlatformadminToolcredentialsPage");
+  const tHC = useTranslations("hcPlatformadminToolcredentialsPage");
   const askConfirm = useConfirm();
   // The ElevenLabs voice credential is a CLOUD_SPEECH feature: no card where core has it off.
   const speech = useCloudSpeechOffered();
@@ -178,9 +178,7 @@ export default function ToolCredentialsPage() {
         </Button>
       }
     >
-      <p className="mb-6 text-sm text-muted-foreground">
-        {tHC("s11")}
-      </p>
+      <p className="mb-6 text-sm text-muted-foreground">{tHC("s11")}</p>
 
       {/* /platform-admin/mcp-catalog is outside the personal allowlist (a real 404 there): no card to it. */}
       {!isPersonalEdition() && (
@@ -189,9 +187,7 @@ export default function ToolCredentialsPage() {
             <CardTitle className="flex items-center gap-2 text-sm">
               <Plug size={16} className="text-primary" /> {tHC("s10")}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              {tHC("s9")}
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
           </CardHeader>
           <CardContent>
             <Link
@@ -230,7 +226,12 @@ export default function ToolCredentialsPage() {
                     {p.configured ? "Configured" : "Not configured"}
                   </Badge>
                   {p.role === "primary" && <Badge>Primary</Badge>}
-                  {p.role === "fallback" && <Badge variant="secondary">{tHC("s5")}{p.fallbackPosition}</Badge>}
+                  {p.role === "fallback" && (
+                    <Badge variant="secondary">
+                      {tHC("s5")}
+                      {p.fallbackPosition}
+                    </Badge>
+                  )}
                   {p.active && <Badge>{tHC("s4")}</Badge>}
                   {p.dailyCap > 0 && (
                     <span className="text-xs text-muted-foreground">
@@ -262,11 +263,7 @@ export default function ToolCredentialsPage() {
               </CardHeader>
               <CardContent className="space-y-3 p-0">
                 <p className="text-sm text-muted-foreground">{tool.description}</p>
-                {!tool.wired && (
-                  <p className="text-xs text-[var(--warning-text)]">
-                    {tHC("s2")}
-                  </p>
-                )}
+                {!tool.wired && <p className="text-xs text-[var(--warning-text)]">{tHC("s2")}</p>}
                 {configured && status.extraConfig && (
                   <p className="text-xs text-muted-foreground">
                     {tool.extraLabel}: <span className="font-mono">{status.extraConfig}</span>

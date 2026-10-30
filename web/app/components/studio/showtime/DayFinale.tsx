@@ -21,7 +21,7 @@ export default function Finale({
   signupHref: string;
   p: number;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeDayFinale");
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayFinale");
   const [job, setJob] = useState("");
   const k = ease(seg(p, 0.05, 0.3));
   return (
@@ -32,9 +32,7 @@ export default function Finale({
       <div>
         <div className="text-[11px] uppercase tracking-wider text-violet-300">{tHC("s7")}</div>
         <h3 className="mt-1 text-2xl font-semibold leading-tight">{tHC("s6")}</h3>
-        <p className="mt-1 text-sm text-zinc-400">
-          {tHC("s5")}
-        </p>
+        <p className="mt-1 text-sm text-zinc-400">{tHC("s5")}</p>
       </div>
       <div className="grid grid-cols-2 gap-2 text-center">
         {[

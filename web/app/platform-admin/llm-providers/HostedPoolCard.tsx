@@ -19,7 +19,7 @@ import type { HostedPool } from "./useHostedPool";
 import { useTranslations } from "../../lib/i18n";
 
 export function HostedPoolCard({ pool }: { pool: HostedPool }) {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersHostedPoolCard");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedPoolCard");
   const {
     hostedProviders,
     hostedProvidersError,
@@ -73,9 +73,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
           {poolSettings && !poolSettings.enabled && (
             <Alert variant="warning">
               <Info />
-              <AlertDescription>
-                {tHC("s8")}
-              </AlertDescription>
+              <AlertDescription>{tHC("s8")}</AlertDescription>
             </Alert>
           )}
 
@@ -112,9 +110,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
           {hostedProviders.length === 0 && !hostedProvidersError && (
             <Alert variant="warning">
               <Info />
-              <AlertDescription>
-                {tHC("s6")}
-              </AlertDescription>
+              <AlertDescription>{tHC("s6")}</AlertDescription>
             </Alert>
           )}
 
@@ -152,10 +148,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                       {row.baseUrl}
                       {row.completionsPath ? row.completionsPath : ""} · {row.model}
                       {row.modelAutoSelected && (
-                        <span
-                          className="ms-1 normal-case text-muted-foreground/80"
-                          title={tHC("s3")}
-                        >
+                        <span className="ms-1 normal-case text-muted-foreground/80" title={tHC("s3")}>
                           (auto)
                         </span>
                       )}{" "}

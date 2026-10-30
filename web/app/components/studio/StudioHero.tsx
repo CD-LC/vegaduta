@@ -29,7 +29,7 @@ type Props = {
 };
 
 export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Props) {
-    const tHC = useTranslations("hcComponentsStudioStudioHero");
+  const tHC = useTranslations("hcComponentsStudioStudioHero");
   const [text, setText] = useState("");
   const [ph, setPh] = useState(0);
   useEffect(() => {
@@ -113,9 +113,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
             </span>
             <span>
               <span className="block text-sm font-semibold">{tHC("s2")}</span>
-              <span className="block text-xs text-muted-foreground">
-                {tHC("s1")}
-              </span>
+              <span className="block text-xs text-muted-foreground">{tHC("s1")}</span>
             </span>
           </button>
 

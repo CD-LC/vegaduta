@@ -37,7 +37,7 @@ const TONE_BAR: Record<string, string> = {
 };
 
 export default function SpendCapCard({ tenantId, tenantName }: { tenantId: string; tenantName: string }) {
-    const tHC = useTranslations("hcPlatformadminComponentsGovernanceSpendCapCard");
+  const tHC = useTranslations("hcPlatformadminComponentsGovernanceSpendCapCard");
   const [cap, setCap] = useState<TenantSpendCap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,7 +130,11 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
       }
     >
       {loading && !cap && <Skeleton className="h-16 w-full" />}
-      {error && !loading && <p className="text-xs text-muted-foreground">{tHC("s6")} {error}</p>}
+      {error && !loading && (
+        <p className="text-xs text-muted-foreground">
+          {tHC("s6")} {error}
+        </p>
+      )}
 
       {cap && (
         <div className="space-y-3">
@@ -177,11 +181,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
                 />
               </div>
             )}
-            {cap.blocked && (
-              <p className="text-xs text-destructive">
-                {tHC("s2")}
-              </p>
-            )}
+            {cap.blocked && <p className="text-xs text-destructive">{tHC("s2")}</p>}
           </div>
 
           {editing && (

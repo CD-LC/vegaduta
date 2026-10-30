@@ -47,7 +47,7 @@ export default function WorkflowVoicePanel({
   shareId: string;
   onResult: (resultText: string) => void;
 }) {
-    const tHC = useTranslations("hcWorkflowShareIdWorkflowVoicePanel");
+  const tHC = useTranslations("hcWorkflowShareIdWorkflowVoicePanel");
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
 

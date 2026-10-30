@@ -18,18 +18,14 @@ import { useTranslations } from "../../lib/i18n";
 // Phase B (iframe-embedded Grafana/Langfuse behind a scoped token) is the
 // documented follow-up and intentionally not attempted here.
 export default function DiagnosticsPage() {
-    const tHC = useTranslations("hcPlatformadminDiagnosticsPage");
+  const tHC = useTranslations("hcPlatformadminDiagnosticsPage");
   return (
     <AdminShell title={tHC("s4")}>
-      <PageHint>
-        {tHC("s3")}
-      </PageHint>
+      <PageHint>{tHC("s3")}</PageHint>
 
       <ExternalToolsSection delay={0} />
 
-      <InfoNote>
-        {tHC("s2")}
-      </InfoNote>
+      <InfoNote>{tHC("s2")}</InfoNote>
 
       <SectionCard title={tHC("s1")} icon={HeartPulse} delay={0.03}>
         <SystemStatusSection pollMs={15000} hideHeader />

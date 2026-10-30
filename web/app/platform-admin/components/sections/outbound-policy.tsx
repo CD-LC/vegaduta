@@ -46,7 +46,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export function OutboundPolicyPanel({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsOutboundpolicy");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsOutboundpolicy");
   const [data, setData] = useState<OutboundPolicy | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,11 +100,7 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
         actions={refresh}
       >
         <Row label="Mode">
-          {egress.restricted ? (
-            <Badge>{tHC("s11")}</Badge>
-          ) : (
-            <Badge variant="secondary">{tHC("s10")}</Badge>
-          )}
+          {egress.restricted ? <Badge>{tHC("s11")}</Badge> : <Badge variant="secondary">{tHC("s10")}</Badge>}
         </Row>
         <Row label={tHC("s9")}>
           <HostList
@@ -115,9 +111,7 @@ export function OutboundPolicyPanel({ delay }: { delay?: number }) {
         <Row label={tHC("s8")}>
           <HostList hosts={egress.privateHostExceptions} empty="None." />
         </Row>
-        <p className="pt-1 text-xs text-muted-foreground">
-          {tHC("s7")}
-        </p>
+        <p className="pt-1 text-xs text-muted-foreground">{tHC("s7")}</p>
       </SectionCard>
 
       <SectionCard

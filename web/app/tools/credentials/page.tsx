@@ -147,7 +147,7 @@ function CredentialEditDialog({
   onCancel: () => void;
   isBusy: boolean;
 }) {
-    const tHC = useTranslations("hcToolsCredentialsPage");
+  const tHC = useTranslations("hcToolsCredentialsPage");
   const guide = credentialGuideFor(server.name);
   const knownFields: McpCredentialGuideField[] = guide?.fields || [];
   const hasKnownFields = knownFields.length > 0;
@@ -347,7 +347,7 @@ function CredentialEditDialog({
 }
 
 function StaticServerCard({ server }: { server: McpServer }) {
-    const tHC = useTranslations("hcToolsCredentialsPage");
+  const tHC = useTranslations("hcToolsCredentialsPage");
   return (
     <Card>
       <CardContent className="pt-6">
@@ -363,9 +363,7 @@ function StaticServerCard({ server }: { server: McpServer }) {
               </Badge>
             </div>
             {server.description && <p className="mt-1 text-xs text-muted-foreground">{server.description}</p>}
-            <p className="mt-2 text-xs text-muted-foreground">
-              {tHC("s15")}
-            </p>
+            <p className="mt-2 text-xs text-muted-foreground">{tHC("s15")}</p>
           </div>
         </div>
       </CardContent>
@@ -382,7 +380,7 @@ function ServerCredentialCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-    const tHC = useTranslations("hcToolsCredentialsPage");
+  const tHC = useTranslations("hcToolsCredentialsPage");
   const statusColor =
     server.usageStatus === "READY" || server.usageStatus === "ACKNOWLEDGED"
       ? "text-[var(--state-success)]"
@@ -438,7 +436,7 @@ function ServerCredentialCard({
 }
 
 export default function CredentialsPage() {
-    const tHC = useTranslations("hcToolsCredentialsPage");
+  const tHC = useTranslations("hcToolsCredentialsPage");
   const t = useTranslations("toolsPage");
   const [servers, setServers] = useState<McpServer[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -566,9 +564,7 @@ export default function CredentialsPage() {
           <Section title={tHC("s6")} className="space-y-4">
             {dynamicServers.length === 0 ? (
               <Alert>
-                <AlertDescription>
-                  {tHC("s5")}
-                </AlertDescription>
+                <AlertDescription>{tHC("s5")}</AlertDescription>
               </Alert>
             ) : (
               dynamicPagination.pageItems.map((server) => (
@@ -628,10 +624,12 @@ export default function CredentialsPage() {
       <AlertDialog open={!!deletingServer} onOpenChange={(open: boolean) => !open && setDeletingServer(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("s3")} {deletingServer?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {tHC("s3")} {deletingServer?.name}?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("s2")}{" "}
-              {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"} {tHC("s1")}
+              {tHC("s2")} {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"}{" "}
+              {tHC("s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

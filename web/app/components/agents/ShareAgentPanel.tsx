@@ -34,7 +34,7 @@ interface AgentShareStatus {
 // from any surface that has *some* agent-shaped object (AgentPlayground
 // passes its full agent), without re-declaring the whole AgentResponse shape.
 export default function ShareAgentPanel({ agent }: { agent: { id: string } | null }) {
-    const tHC = useTranslations("hcComponentsAgentsShareAgentPanel");
+  const tHC = useTranslations("hcComponentsAgentsShareAgentPanel");
   const [status, setStatus] = useState<AgentShareStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -166,9 +166,7 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {tHC("s1")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           <ShareLinkMeta status={status} />
         </>
       )}

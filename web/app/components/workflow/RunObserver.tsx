@@ -27,7 +27,15 @@ import RunFlightRecorder from "./RunFlightRecorder";
 import RunHistoryRail, { type RunSummary as RailRun } from "./RunHistoryRail";
 import RunStepInspector from "./RunStepInspector";
 import CanvasLensBar from "./CanvasLensBar";
-import { formatCostUsd, formatDuration, narrateLines, parseRunStatus, type NarrationLine, type NarrationTone, type RunEdge } from "./runModel";
+import {
+  formatCostUsd,
+  formatDuration,
+  narrateLines,
+  parseRunStatus,
+  type NarrationLine,
+  type NarrationTone,
+  type RunEdge,
+} from "./runModel";
 import { entryToolCalls, runTraceEntries, toInspectorVisit, wireRunDurationMs } from "./runOverlay";
 import ApprovalPauseCard, { type RunAwaiting } from "./ApprovalPauseCard";
 import type { RunObserver } from "./useRunObserver";
@@ -73,7 +81,7 @@ export function useObserveActions(obs: RunObserver) {
       const dy = sheet ? (paneHeight * SHEET_FRACTION) / 2 / zoom : 0;
       void setCenter(p.x + w / 2, p.y + h / 2 + dy, { zoom, duration: reduced ? 0 : 420 });
     },
-    [getInternalNode, setCenter, getZoom, paneHeight, reduced],
+    [getInternalNode, setCenter, getZoom, paneHeight, reduced]
   );
 
   /** Open the inspector on one visit and park the playhead at its outcome. */
@@ -85,7 +93,7 @@ export function useObserveActions(obs: RunObserver) {
       setSelectedVisit({ nodeId, visitIndex });
       if (seek === "end") setPosition((v.endMs ?? v.startMs) - model.t0);
     },
-    [model, setPlaying, setSelectedVisit, setPosition],
+    [model, setPlaying, setSelectedVisit, setPosition]
   );
 
   /** Canvas node click: the visit on screen at this moment, else the node's last. */
@@ -101,7 +109,7 @@ export function useObserveActions(obs: RunObserver) {
       else openVisit(nodeId, visits.length - 1);
       return true;
     },
-    [model, obs.display, openVisit, setSelectedVisit],
+    [model, obs.display, openVisit, setSelectedVisit]
   );
 
   return { focusNode, openVisit, openNode };
@@ -166,7 +174,7 @@ export function ObserveBanner({
   /** Live stream open for the run on screen (vs. polling). */
   streaming?: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowRunObserver");
+  const tHC = useTranslations("hcComponentsWorkflowRunObserver");
   const { model, selectedRunId, selectedRaw, compareRunId, runs, flightNumbers, following, selectedLive } = obs;
   const num = selectedRunId ? flightNumbers[selectedRunId] : undefined;
   const status = parseRunStatus(selectedRaw?.status);
@@ -174,9 +182,15 @@ export function ObserveBanner({
   const mine = selectedRaw ? wireRunDurationMs(selectedRaw) : null;
   const theirs = compareRaw ? wireRunDurationMs(compareRaw) : null;
   const delta = mine != null && theirs != null ? mine - theirs : null;
-  const Icon: LucideIcon = selectedLive ? Radio : status === "failed" ? XCircle : status === "completed" ? CheckCircle2 : Circle;
+  const Icon: LucideIcon = selectedLive
+    ? Radio
+    : status === "failed"
+      ? XCircle
+      : status === "completed"
+        ? CheckCircle2
+        : Circle;
   const titleRef = useRef<HTMLSpanElement>(null);
-  const statusWord = selectedRaw ? STATUS_WORD[status] ?? status : "";
+  const statusWord = selectedRaw ? (STATUS_WORD[status] ?? status) : "";
   const jumpToLive = () => {
     obs.setPosition(Number.POSITIVE_INFINITY);
     // The button unmounts once following; keep focus on the banner it lived in.
@@ -232,7 +246,12 @@ export function ObserveBanner({
           ) : delta != null ? (
             <strong> {tHC("s5")}</strong>
           ) : null}
-          <button type="button" className="rob-icon-btn" aria-label={tHC("s4")} onClick={() => obs.toggleCompare(compareRunId as string)}>
+          <button
+            type="button"
+            className="rob-icon-btn"
+            aria-label={tHC("s4")}
+            onClick={() => obs.toggleCompare(compareRunId as string)}
+          >
             <X size={12} aria-hidden="true" />
           </button>
         </span>
@@ -279,7 +298,7 @@ export function RunStory({
   position: number;
   onPick: (line: NarrationLine) => void;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowRunObserver");
+  const tHC = useTranslations("hcComponentsWorkflowRunObserver");
   const [open, setOpen] = useState(false);
   const bodyId = useId();
   // The line being "read" is the latest one the playhead has passed, so the
@@ -292,7 +311,13 @@ export function RunStory({
   if (!lines.length) return null;
   return (
     <section className="rob-story" data-open={open ? "true" : "false"}>
-      <button type="button" className="rob-story-head" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen((o) => !o)}>
+      <button
+        type="button"
+        className="rob-story-head"
+        aria-expanded={open}
+        aria-controls={bodyId}
+        onClick={() => setOpen((o) => !o)}
+      >
         <BookOpen size={14} aria-hidden="true" />
         <span className="rob-story-title">{tHC("s1")}</span>
         {!open && preview && <span className="rob-story-preview">{preview.text}</span>}
@@ -313,7 +338,12 @@ export function RunStory({
               </>
             );
             return (
-              <li key={i} data-tone={l.tone} data-told={i <= current ? "true" : undefined} aria-current={i === current ? "step" : undefined}>
+              <li
+                key={i}
+                data-tone={l.tone}
+                data-told={i <= current ? "true" : undefined}
+                aria-current={i === current ? "step" : undefined}
+              >
                 {clickable ? (
                   <button type="button" className="rob-story-line" onClick={() => onPick(l)}>
                     {body}
@@ -352,9 +382,12 @@ export function ObserveRail({
         requestedBy: r.requestedBy ?? null,
         workflowVersion: r.workflowVersion == null ? null : Number(r.workflowVersion),
       })),
-    [obs.runs],
+    [obs.runs]
   );
-  const lines = useMemo(() => (obs.model ? narrateLines(obs.model, nodeLabel, { edges: runEdges }) : []), [obs.model, nodeLabel, runEdges]);
+  const lines = useMemo(
+    () => (obs.model ? narrateLines(obs.model, nodeLabel, { edges: runEdges }) : []),
+    [obs.model, nodeLabel, runEdges]
+  );
   const { setPlaying, setPosition, model } = obs;
   const onPick = useCallback(
     (l: NarrationLine) => {
@@ -362,7 +395,7 @@ export function ObserveRail({
       if (l.atMs != null) setPosition(l.atMs);
       if (l.nodeId) focusNode(l.nodeId);
     },
-    [setPlaying, setPosition, focusNode],
+    [setPlaying, setPosition, focusNode]
   );
 
   return (
@@ -413,7 +446,8 @@ export function ObserveOverlay({
   const { model, selectedVisit, setSelectedVisit, runs, selectedRaw, selectedRunId } = obs;
   const { openVisit } = useObserveActions(obs);
 
-  const visit = selectedVisit && model ? model.byNode[selectedVisit.nodeId]?.[selectedVisit.visitIndex] ?? null : null;
+  const visit =
+    selectedVisit && model ? (model.byNode[selectedVisit.nodeId]?.[selectedVisit.visitIndex] ?? null) : null;
   // Anchor in the zone's own pixels: React Flow fills the zone, so flow ->
   // zone coordinates are just the viewport transform (no DOM reads needed).
   const anchorOf = (nodeId: string | undefined) => {
@@ -439,7 +473,7 @@ export function ObserveOverlay({
   const visitEntry = visit ? runTraceEntries(selectedRaw)[visit.traceIndex] : undefined;
   const inspectorVisit = useMemo(
     () => (visit ? toInspectorVisit(visit, nodeLabel(visit.nodeId), entryToolCalls(visitEntry)) : null),
-    [visit, nodeLabel, visitEntry],
+    [visit, nodeLabel, visitEntry]
   );
 
   // Decision card: one per (run, parked node). Closing it hides it until the
@@ -470,7 +504,9 @@ export function ObserveOverlay({
   const parkedNodeId = awaiting?.nodeId;
   const focusAfterCard = useCallback(() => {
     const esc = typeof CSS !== "undefined" && typeof CSS.escape === "function" ? CSS.escape : (s: string) => s;
-    const node = parkedNodeId ? document.querySelector<HTMLElement>(`.react-flow__node[data-id="${esc(parkedNodeId)}"]`) : null;
+    const node = parkedNodeId
+      ? document.querySelector<HTMLElement>(`.react-flow__node[data-id="${esc(parkedNodeId)}"]`)
+      : null;
     const target = node ?? document.querySelector<HTMLElement>(".rob-banner-title");
     if (target) {
       if (!target.hasAttribute("tabindex")) target.tabIndex = -1;
@@ -497,9 +533,7 @@ export function ObserveOverlay({
           onPrevVisit={() => openVisit(visit.nodeId, visit.visitIndex - 1)}
           onNextVisit={() => openVisit(visit.nodeId, visit.visitIndex + 1)}
           onClose={close}
-          onOpenFullRun={
-            model.run.id ? () => router.push(`/workflows/${workflowId}/runs/${model.run.id}`) : undefined
-          }
+          onOpenFullRun={model.run.id ? () => router.push(`/workflows/${workflowId}/runs/${model.run.id}`) : undefined}
           anchor={anchor}
           runSpan={{ startMs: model.t0, endMs: model.live ? null : model.t1 }}
           pinRunId={model.run.id || null}
@@ -545,13 +579,15 @@ export function ObserveDock({
   const closeDock = useMemo(() => withFocusHandoff(onClose), [onClose]);
   // Phones start with the 40px mini-strip so the graph keeps its height. Safe
   // to read at mount: the dock only exists after a client-side observe action.
-  const [startCollapsed] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 640px)").matches);
+  const [startCollapsed] = useState(
+    () => typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 640px)").matches
+  );
   const onSelectVisit = useCallback(
     (nodeId: string, visitIndex: number) => {
       openVisit(nodeId, visitIndex, "keep");
       focusNode(nodeId, true);
     },
-    [openVisit, focusNode],
+    [openVisit, focusNode]
   );
   if (!obs.model) {
     return (

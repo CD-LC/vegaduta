@@ -49,7 +49,7 @@ const EMPTY_ANNOUNCEMENT: AnnouncementState = {
 };
 
 function MaintenanceSection() {
-    const tHC = useTranslations("hcPlatformadminMaintenancePage");
+  const tHC = useTranslations("hcPlatformadminMaintenancePage");
   const askConfirm = useConfirm();
   const [current, setCurrent] = useState<MaintenanceState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -135,13 +135,7 @@ function MaintenanceSection() {
       subtitle="While on, every non-platform-admin API call gets 503 and the tenant app shows its maintenance screen. Platform admins keep access, so this console keeps working."
       icon={Construction}
       actions={
-        <Button
-          type="button"
-          size="icon"
-          variant="outline"
-          aria-label={tHC("s22")}
-          onClick={() => void load()}
-        >
+        <Button type="button" size="icon" variant="outline" aria-label={tHC("s22")} onClick={() => void load()}>
           <RefreshCw />
         </Button>
       }
@@ -163,17 +157,14 @@ function MaintenanceSection() {
               </span>
             )}
             {wasEnabled && current.endsAt && (
-              <span className="text-xs text-muted-foreground">{tHC("s21")} {formatExact(current.endsAt)}</span>
+              <span className="text-xs text-muted-foreground">
+                {tHC("s21")} {formatExact(current.endsAt)}
+              </span>
             )}
           </div>
 
           <div className="flex items-center gap-2 text-sm">
-            <SwitchToggle
-              on={enabled}
-              label={tHC("s20")}
-              disabled={saving}
-              onClick={() => setEnabled(!enabled)}
-            />
+            <SwitchToggle on={enabled} label={tHC("s20")} disabled={saving} onClick={() => setEnabled(!enabled)} />
             <span>{enabled ? "Maintenance on" : "Maintenance off"}</span>
           </div>
 
@@ -204,9 +195,7 @@ function MaintenanceSection() {
               onChange={(e) => setEndsAt(e.target.value)}
               disabled={saving}
             />
-            <p className="text-[11px] text-muted-foreground">
-              {tHC("s16")}
-            </p>
+            <p className="text-[11px] text-muted-foreground">{tHC("s16")}</p>
           </div>
 
           {enabled && !wasEnabled && (
@@ -269,7 +258,7 @@ function MaintenanceSection() {
 }
 
 function AnnouncementPreview({ a }: { a: AnnouncementState }) {
-    const tHC = useTranslations("hcPlatformadminMaintenancePage");
+  const tHC = useTranslations("hcPlatformadminMaintenancePage");
   if (!a.message.trim()) {
     return <p className="text-xs text-muted-foreground">{tHC("s14")}</p>;
   }
@@ -294,7 +283,7 @@ function AnnouncementPreview({ a }: { a: AnnouncementState }) {
 }
 
 function AnnouncementSection() {
-    const tHC = useTranslations("hcPlatformadminMaintenancePage");
+  const tHC = useTranslations("hcPlatformadminMaintenancePage");
   const [current, setCurrent] = useState<AnnouncementState | null>(null);
   const [draft, setDraft] = useState<AnnouncementState>(EMPTY_ANNOUNCEMENT);
   const [expiresLocal, setExpiresLocal] = useState("");
@@ -466,12 +455,10 @@ function AnnouncementSection() {
 }
 
 export default function MaintenancePage() {
-    const tHC = useTranslations("hcPlatformadminMaintenancePage");
+  const tHC = useTranslations("hcPlatformadminMaintenancePage");
   return (
     <AdminShell title={tHC("s4")}>
-      <PageHint>
-        {tHC("s3")}
-      </PageHint>
+      <PageHint>{tHC("s3")}</PageHint>
       <InfoNote>
         {tHC("s2")} <code>/api/public/status</code> {tHC("s1")}
       </InfoNote>

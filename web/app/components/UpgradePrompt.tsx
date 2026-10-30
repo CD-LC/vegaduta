@@ -97,7 +97,7 @@ export default function UpgradePrompt(props: UpgradePromptProps) {
 }
 
 function UpgradePromptDialog({ open, onClose, reason }: UpgradePromptProps) {
-    const tHC = useTranslations("hcComponentsUpgradePrompt");
+  const tHC = useTranslations("hcComponentsUpgradePrompt");
   const t = useTranslations("upgradePrompt");
   const { currency, detected, choices, choose, annualAvailable } = useCurrency();
   const [mounted, setMounted] = useState(false);

@@ -199,7 +199,7 @@ export default function UpgradeCelebration({
   plan: string;
   onDismiss: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsUpgradeCelebration");
+  const tHC = useTranslations("hcComponentsUpgradeCelebration");
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);

@@ -24,15 +24,13 @@ export function RestartSandboxDialog({
   onOpenChange: (open: boolean) => void;
   onRestart: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioStudioDialogs");
+  const tHC = useTranslations("hcComponentsStudioStudioDialogs");
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{tHC("s5")}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {tHC("s4")}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{tHC("s4")}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{tHC("s3")}</AlertDialogCancel>
@@ -52,7 +50,7 @@ export function DeleteAgentDialog({
   onCancel: () => void;
   onDelete: (agent: StudioAgent) => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioStudioDialogs");
+  const tHC = useTranslations("hcComponentsStudioStudioDialogs");
   return (
     <AlertDialog open={!!agent} onOpenChange={(o) => !o && onCancel()}>
       <AlertDialogContent>

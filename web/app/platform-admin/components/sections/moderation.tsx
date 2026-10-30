@@ -64,7 +64,7 @@ function LoadState({ loading, error, onRetry }: { loading: boolean; error: strin
 // ------------------------------------------------------------ policy packs
 
 export function PolicyPacksPanel({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [scope, setScope] = useState("GLOBAL");
   const [key, setKey] = useState("FREE");
   const scopeKey = scope === "GLOBAL" ? "" : key.trim();
@@ -131,9 +131,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
       }
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
-      {scope === "TENANT" && !scopeKey && (
-        <p className="text-xs text-muted-foreground">{tHC("s27")}</p>
-      )}
+      {scope === "TENANT" && !scopeKey && <p className="text-xs text-muted-foreground">{tHC("s27")}</p>}
       {!loading &&
         !error &&
         (data?.packs || []).map((pack: any) => (
@@ -143,7 +141,9 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
                 {pack.displayName}
                 {!pack.available && <Badge variant="destructive">{tHC("s26")}</Badge>}
                 {pack.available && pack.scopeOfEffectiveValue && pack.scopeOfEffectiveValue !== scope && (
-                  <Badge variant="outline">{tHC("s25")} {String(pack.scopeOfEffectiveValue).toLowerCase()}</Badge>
+                  <Badge variant="outline">
+                    {tHC("s25")} {String(pack.scopeOfEffectiveValue).toLowerCase()}
+                  </Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{pack.description}</p>
@@ -171,7 +171,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
 // -------------------------------------------------------------- thresholds
 
 export function ThresholdsPanel({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationThresholds());
   const [draft, setDraft] = useState<any>(null);
   const [saving, setSaving] = useState(false);
@@ -259,9 +259,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
           </div>
           {!draft.moderationEnabled && (
             <Alert>
-              <AlertDescription>
-                {tHC("s18")}
-              </AlertDescription>
+              <AlertDescription>{tHC("s18")}</AlertDescription>
             </Alert>
           )}
           <div className="space-y-2">
@@ -315,7 +313,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
 const QUEUE_STATUSES = ["PENDING", "ESCALATED", "APPROVED", "BLOCKED", "ALL"];
 
 export function ReviewQueuePanel({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [status, setStatus] = useState("PENDING");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationReviewQueue(status), [status]);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -366,9 +364,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
       }
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
-      {!loading && !error && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
-      )}
+      {!loading && !error && items.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s11")}</p>}
       {pg.pageItems.map((item) => (
         <div key={item.id} className="space-y-2 rounded-lg border border-border p-3">
           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -437,7 +433,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
 const BLOCKLIST_TYPES = ["USER", "PHONE", "DOMAIN", "REGION"];
 
 export function BlocklistsPanel({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsModeration");
   const [type, setType] = useState("");
   const { data, error, loading, refresh } = useLoad<any>(() => api.getModerationBlocklists(type), [type]);
   const [newType, setNewType] = useState("DOMAIN");

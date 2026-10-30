@@ -40,7 +40,7 @@ function TypeBadge({ type }: { type: string }) {
 }
 
 function ReadyBadge({ ready }: { ready?: boolean }) {
-    const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
+  const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
   return ready ? (
     <Badge variant="outline" className="gap-1 text-[var(--success-text)]">
       <CheckCircle2 size={12} /> Ready
@@ -53,7 +53,7 @@ function ReadyBadge({ ready }: { ready?: boolean }) {
 }
 
 export default function McpCatalogPage() {
-    const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
+  const tHC = useTranslations("hcPlatformadminMcpcatalogPage");
   const [tab, setTab] = useState("catalog");
   const [catalog, setCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -130,9 +130,7 @@ export default function McpCatalogPage() {
         </Button>
       }
     >
-      <p className="mb-4 text-sm text-muted-foreground">
-        {tHC("s9")}
-      </p>
+      <p className="mb-4 text-sm text-muted-foreground">{tHC("s9")}</p>
 
       <div className="mb-4 flex items-center gap-1 border-b border-border" role="tablist" aria-label={tHC("s8")}>
         <button
@@ -149,7 +147,8 @@ export default function McpCatalogPage() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          {tHC("s7")}{catalog.length})
+          {tHC("s7")}
+          {catalog.length})
         </button>
         <button
           type="button"
@@ -189,7 +188,8 @@ export default function McpCatalogPage() {
                   <TypeBadge type={entry.type} />
                   {entry.requiredEnvVars?.length > 0 && (
                     <Badge variant="secondary" className="text-[10px]">
-                      {entry.requiredEnvVars.length} {tHC("s5")}{entry.requiredEnvVars.length === 1 ? "" : "s"}
+                      {entry.requiredEnvVars.length} {tHC("s5")}
+                      {entry.requiredEnvVars.length === 1 ? "" : "s"}
                     </Badge>
                   )}
                 </div>
@@ -228,11 +228,7 @@ export default function McpCatalogPage() {
       {tab === "search" && (
         <div id="mcp-catalog-panel-search" role="tabpanel" aria-labelledby="mcp-catalog-tab-search">
           <form onSubmit={runSearch} className="mb-4 flex max-w-md items-center gap-2">
-            <Input
-              placeholder={tHC("s3")}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+            <Input placeholder={tHC("s3")} value={query} onChange={(e) => setQuery(e.target.value)} />
             <Button type="submit" size="sm" disabled={searching}>
               <Search size={14} /> Search
             </Button>
@@ -287,9 +283,7 @@ export default function McpCatalogPage() {
               {searchResults.unavailable ? "The registry is unavailable right now." : "No matches."}
             </p>
           )}
-          {!searchResults && (
-            <p className="py-8 text-center text-sm text-muted-foreground">{tHC("s1")}</p>
-          )}
+          {!searchResults && <p className="py-8 text-center text-sm text-muted-foreground">{tHC("s1")}</p>}
         </div>
       )}
     </AdminShell>

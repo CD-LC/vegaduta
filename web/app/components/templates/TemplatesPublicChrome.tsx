@@ -42,7 +42,7 @@ export default function TemplatesPublicChrome({
   // the existing /templates call sites need no change.
   footer?: ReactNode;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplatesPublicChrome");
+  const tHC = useTranslations("hcComponentsTemplatesTemplatesPublicChrome");
   const [authed, setAuthed] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -148,11 +148,7 @@ export default function TemplatesPublicChrome({
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">{children}</main>
 
       <footer className="mx-auto w-full max-w-6xl px-5 py-10 text-xs text-muted-foreground sm:px-8">
-        {footer ?? (
-          <p>
-            {tHC("s1")}
-          </p>
-        )}
+        {footer ?? <p>{tHC("s1")}</p>}
       </footer>
     </div>
   );

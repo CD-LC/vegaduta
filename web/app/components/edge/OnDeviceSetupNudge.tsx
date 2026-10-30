@@ -81,7 +81,7 @@ type Phase =
   | { kind: "error"; caps: EdgeCapabilities; model: ManifestModel; failure: EdgeDownloadFailureDescription };
 
 export default function OnDeviceSetupNudge({ className }: { className?: string }) {
-    const tHC = useTranslations("hcComponentsEdgeOnDeviceSetupNudge");
+  const tHC = useTranslations("hcComponentsEdgeOnDeviceSetupNudge");
   // edgeEnabled() is a build-time constant — stable across renders, so the
   // hooks below always run in the same order.
   const enabled = edgeEnabled();
@@ -289,12 +289,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             <span className="whitespace-nowrap text-foreground/80">
               One-time {formatSize(model.sizeBytes)} {tHC("s5")}
             </span>
-            {saveData && (
-              <span className="text-[var(--state-warning)]">
-                {" "}
-                {tHC("s4")}
-              </span>
-            )}
+            {saveData && <span className="text-[var(--state-warning)]"> {tHC("s4")}</span>}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -325,7 +320,8 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
         <span className="font-medium text-foreground">Downloading {phase.model.displayName}</span>
         {" · "}
         <span className="tabular-nums">{phase.pct}%</span>
-        {" — "}{tHC("s3")}
+        {" — "}
+        {tHC("s3")}
       </span>,
       false
     );
@@ -334,7 +330,10 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
   if (phase.kind === "done") {
     return shell(
       <span>
-        <span className="font-medium text-foreground">{EDGE_BRANDING.name} {tHC("s2")}</span> {EDGE_BRANDING.promise}
+        <span className="font-medium text-foreground">
+          {EDGE_BRANDING.name} {tHC("s2")}
+        </span>{" "}
+        {EDGE_BRANDING.promise}
       </span>,
       false
     );

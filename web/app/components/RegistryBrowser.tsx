@@ -84,7 +84,7 @@ function substituteArgs(args: string[], values: Record<string, string>) {
  * of the Tools screen.
  */
 export default function RegistryBrowser({ onChanged }: { onChanged: () => void }) {
-    const tHC = useTranslations("hcComponentsRegistryBrowser");
+  const tHC = useTranslations("hcComponentsRegistryBrowser");
   const t = useTranslations("mcpPanel");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -417,7 +417,8 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
           <AlertTitle>{tHC("s12")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-2">
             <span>
-              {results.length} server{results.length === 1 ? "" : "s"} {tHC("s11")}{query.trim()}&rdquo;, but
+              {results.length} server{results.length === 1 ? "" : "s"} {tHC("s11")}
+              {query.trim()}&rdquo;, but
               {(() => {
                 const reasons = activeFilterReasons();
                 if (reasons.length === 0) return " none of them are shown.";
@@ -482,11 +483,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                           </span>
                           <Badge variant="outline">{meta.label}</Badge>
                           {r.status === "deprecated" && (
-                            <Badge
-                              variant="destructive"
-                              title={tHC("s6")}
-                              className="gap-1"
-                            >
+                            <Badge variant="destructive" title={tHC("s6")} className="gap-1">
                               <AlertTriangle aria-hidden="true" size={12} />
                               deprecated
                             </Badge>
@@ -498,20 +495,12 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                            * RegistrySearchResult#reviewRequired's javadoc. */}
                           {r.runnable &&
                             (r.reviewRequired ? (
-                              <Badge
-                                variant="outline"
-                                className={cn("gap-1", TONE_INFO)}
-                                title={tHC("s5")}
-                              >
+                              <Badge variant="outline" className={cn("gap-1", TONE_INFO)} title={tHC("s5")}>
                                 <Clock aria-hidden="true" size={12} />
                                 {tHC("s4")}
                               </Badge>
                             ) : (
-                              <Badge
-                                variant="outline"
-                                className={cn("gap-1", TONE_SUCCESS)}
-                                title={tHC("s3")}
-                              >
+                              <Badge variant="outline" className={cn("gap-1", TONE_SUCCESS)} title={tHC("s3")}>
                                 <ShieldCheck aria-hidden="true" size={12} />
                                 {tHC("s2")}
                               </Badge>
@@ -561,9 +550,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                           <span className="text-xs font-medium text-foreground">
                             {t("browseRegistryCredentialsTitle")}
                           </span>
-                          <p className="text-xs text-muted-foreground">
-                            {tHC("s1")}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
                           <div className="flex flex-col gap-2">
                             {r.envVars.map((v: any) => {
                               const envFieldId = `registry-${r.name}-${v.name}`;

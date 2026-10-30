@@ -37,15 +37,13 @@ const AGENT_STEPS = [
 ];
 
 export default function ChatbotVsAgent() {
-    const tHC = useTranslations("hcComponentsStudioChatbotVsAgent");
+  const tHC = useTranslations("hcComponentsStudioChatbotVsAgent");
   const [mode, setMode] = useState<"bot" | "agent">("agent");
   return (
     <div className="mt-16 rounded-3xl border border-border/60 bg-background/60 p-5 backdrop-blur sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("s7")}
-          </div>
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s7")}</div>
           <div className="mt-1 max-w-2xl text-lg font-medium">&ldquo;{REQUEST}&rdquo;</div>
         </div>
         <div
@@ -78,8 +76,7 @@ export default function ChatbotVsAgent() {
               exit={{ opacity: 0 }}
               className="max-w-2xl rounded-2xl rounded-ss-sm bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground"
             >
-              {tHC("s5")}{" "}
-              <i>{tHC("s4")}</i> {tHC("s3")}
+              {tHC("s5")} <i>{tHC("s4")}</i> {tHC("s3")}
               <div className="mt-3 text-xs">{tHC("s2")}</div>
             </motion.div>
           ) : (
@@ -105,9 +102,7 @@ export default function ChatbotVsAgent() {
                   <Check aria-hidden="true" className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 </motion.li>
               ))}
-              <li className="max-w-2xl pt-1 text-xs text-muted-foreground">
-                {tHC("s1")}
-              </li>
+              <li className="max-w-2xl pt-1 text-xs text-muted-foreground">{tHC("s1")}</li>
             </motion.ol>
           )}
         </AnimatePresence>

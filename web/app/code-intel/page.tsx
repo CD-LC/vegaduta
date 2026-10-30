@@ -244,7 +244,7 @@ function GraphTab({ repoId, onError }) {
 /* Execute & rework                                                   */
 
 function ExecTab({ repoId, onError }) {
-    const tHC = useTranslations("hcCodeintelPage");
+  const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [ws, setWs] = useState(null);
   const [command, setCommand] = useState("");
@@ -425,7 +425,7 @@ function ExecTab({ repoId, onError }) {
 /* Autonomous resolve (SDLC agent)                                    */
 
 function AgentResolvePanel({ repoId, onError }) {
-    const tHC = useTranslations("hcCodeintelPage");
+  const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [goal, setGoal] = useState("");
   const [testCommand, setTestCommand] = useState("");
@@ -455,9 +455,7 @@ function AgentResolvePanel({ repoId, onError }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          {tHC("s11")}
-        </p>
+        <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{tHC("s11")}</p>
         <Field label={tHC("s10")}>
           <Textarea
             className="min-h-[70px]"
@@ -552,7 +550,7 @@ function AgentResolvePanel({ repoId, onError }) {
 /* Ask the Code (knowledge bridge, grounded + cited)                  */
 
 function KnowledgeTab({ repoId, onError }) {
-    const tHC = useTranslations("hcCodeintelPage");
+  const tHC = useTranslations("hcCodeintelPage");
   const t = useTranslations("codeIntel");
   const [q, setQ] = useState("");
   const [result, setResult] = useState(null);
@@ -590,11 +588,7 @@ function KnowledgeTab({ repoId, onError }) {
           {busy ? <Loader2 size={15} className="animate-spin" /> : <BookOpen size={15} />} {t("askButton")}
         </Button>
       </div>
-      {result && !result.grounded && (
-        <p className="text-sm text-muted-foreground">
-          {tHC("s1")}
-        </p>
-      )}
+      {result && !result.grounded && <p className="text-sm text-muted-foreground">{tHC("s1")}</p>}
       {passagesPagination.pageItems.map((p, i) => (
         <div key={i} className={HIT_CLS}>
           <div className="mb-2 flex flex-wrap items-center gap-2">

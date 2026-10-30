@@ -58,7 +58,7 @@ export default function SaveAsEvalCaseButton({
   agentResponse?: string;
   className?: string;
 }) {
-    const tHC = useTranslations("hcAgentsQualitySaveAsEvalCaseButton");
+  const tHC = useTranslations("hcAgentsQualitySaveAsEvalCaseButton");
   const [hooksApi] = useState(() => resolveEvalHooksApi());
   const [evalApi] = useState(() => resolveEvalApi());
   const [phase, setPhase] = useState<"idle" | "loading" | "picking" | "saving" | "saved">("idle");

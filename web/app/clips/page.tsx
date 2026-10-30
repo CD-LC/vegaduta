@@ -13,7 +13,7 @@ import { useTranslations } from "../lib/i18n";
  * boundary (useSearchParams requires one in the app router).
  */
 export default function ClipsPage() {
-    const tHC = useTranslations("hcClipsPage");
+  const tHC = useTranslations("hcClipsPage");
   return (
     <AppShell eyebrow="Create">
       <PageHeader

@@ -9,7 +9,7 @@ import { isPersonalEdition } from "../../lib/edition";
 import { useTranslations } from "../../lib/i18n";
 
 export default function WorkflowShareModal({ setShowShareModal, showShareModal, t, workflow }: any) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowShareModal");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowShareModal");
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, null, () => setShowShareModal(false), { enabled: !!(showShareModal && workflow) });

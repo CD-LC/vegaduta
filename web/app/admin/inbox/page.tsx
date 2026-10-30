@@ -20,7 +20,7 @@ import { useTranslations } from "../../lib/i18n";
 // web/messages/en.json and components/AppShell.tsx are other workstreams'
 // files - see InboxPanel's header comment and the coordination log entry.
 export default function AdminInboxPage() {
-    const tHC = useTranslations("hcAdminInboxPage");
+  const tHC = useTranslations("hcAdminInboxPage");
   // MANAGE_CHANNELS scope (granular RBAC, 2026-09-23) - the human-handoff
   // inbox is channel operations, same backend permission as the channel
   // pairing/contact surfaces it feeds.

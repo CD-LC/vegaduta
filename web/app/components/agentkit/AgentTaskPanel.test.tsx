@@ -23,7 +23,9 @@ vi.mock("../../lib/localcode/fsAccess", async (importOriginal) => ({
   listCodeFiles: async (): Promise<unknown[]> => [],
   writeLocalFileResult: async () => ({ ok: true }),
 }));
-vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
+}));
 
 import AgentTaskPanel from "./AgentTaskPanel";
 
@@ -48,7 +50,11 @@ function repo(): LocalRepoHandle {
       return {
         kind: "file",
         async getFile() {
-          return { size: bytes.length, slice: () => ({ arrayBuffer: async () => bytes.buffer }), text: async () => text };
+          return {
+            size: bytes.length,
+            slice: () => ({ arrayBuffer: async () => bytes.buffer }),
+            text: async () => text,
+          };
         },
       };
     },
@@ -87,7 +93,11 @@ describe("AgentTaskPanel", () => {
   });
 
   it("explains a missing model with a way forward instead of a silent disabled button", async () => {
-    resolveEdgeAgentModel.mockResolvedValue({ ok: false, reason: "no-model", detail: "No on-device model is downloaded yet." });
+    resolveEdgeAgentModel.mockResolvedValue({
+      ok: false,
+      reason: "no-model",
+      detail: "No on-device model is downloaded yet.",
+    });
     render(<AgentTaskPanel repo={repo()} />);
     await waitFor(() => expect(screen.getByText(/No on-device model is downloaded yet/)).toBeTruthy());
     expect(screen.getByRole("link", { name: /Open VegaDūta Edge/ }).getAttribute("href")).toBe("/edge");
@@ -124,7 +134,11 @@ describe("AgentTaskPanel", () => {
   });
 
   it("does not offer a re-check when on-device AI is switched off for the deployment", async () => {
-    resolveEdgeAgentModel.mockResolvedValue({ ok: false, reason: "edge-off", detail: "On-device AI is switched off for this deployment." });
+    resolveEdgeAgentModel.mockResolvedValue({
+      ok: false,
+      reason: "edge-off",
+      detail: "On-device AI is switched off for this deployment.",
+    });
     render(<AgentTaskPanel repo={repo()} />);
     await waitFor(() => expect(screen.getByText(/switched off/)).toBeTruthy());
     expect(screen.queryByRole("button", { name: "Check again" })).toBeNull();
@@ -154,8 +168,12 @@ describe("AgentTaskPanel", () => {
   });
 
   it("shows the diff and writes only after Apply, with write access granted inside that click", async () => {
-    const edit = '<agent_call>{"name":"edit_file","arguments":{"path":"a.ts","old_text":"const a = 1;","new_text":"const a = 2;"}}</agent_call>';
-    resolveEdgeAgentModel.mockResolvedValue({ ok: true, model: model([edit, "Changed a to 2. Not verified — run your tests."]) });
+    const edit =
+      '<agent_call>{"name":"edit_file","arguments":{"path":"a.ts","old_text":"const a = 1;","new_text":"const a = 2;"}}</agent_call>';
+    resolveEdgeAgentModel.mockResolvedValue({
+      ok: true,
+      model: model([edit, "Changed a to 2. Not verified — run your tests."]),
+    });
     ensureWritePermission.mockResolvedValueOnce(false).mockResolvedValue(true);
 
     render(<AgentTaskPanel repo={repo()} />);
@@ -182,7 +200,8 @@ describe("AgentTaskPanel", () => {
   });
 
   it("Stop works while an approval is pending, and nothing is written", async () => {
-    const edit = '<agent_call>{"name":"edit_file","arguments":{"path":"a.ts","old_text":"const a = 1;","new_text":"const a = 2;"}}</agent_call>';
+    const edit =
+      '<agent_call>{"name":"edit_file","arguments":{"path":"a.ts","old_text":"const a = 1;","new_text":"const a = 2;"}}</agent_call>';
     resolveEdgeAgentModel.mockResolvedValue({ ok: true, model: model([edit, "done"]) });
     render(<AgentTaskPanel repo={repo()} />);
     await waitFor(() => expect(screen.getByText(/On-device model ready/)).toBeTruthy());

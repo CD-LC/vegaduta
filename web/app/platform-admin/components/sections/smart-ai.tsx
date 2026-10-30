@@ -38,7 +38,7 @@ const SMART_AI_FEATURES = [
 ];
 
 export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsSmartai");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsSmartai");
   const { data: config, error, loading, refresh } = useSectionData<any>(() => api.getSmartAiConfig(), null, pollMs);
   const [draft, setDraft] = useState<any>({});
   const [saving, setSaving] = useState(false);
@@ -258,9 +258,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </Button>
           </div>
 
-          <div className="pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("s3")}
-          </div>
+          <div className="pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s3")}</div>
           <AnimatePresence initial={false}>
             {SMART_AI_FEATURES.map((f) => {
               const d = featureDrafts[f.key];

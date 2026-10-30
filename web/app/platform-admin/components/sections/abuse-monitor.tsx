@@ -67,7 +67,7 @@ function ScoreBar({ score, tier }: { score: number; tier: string }) {
 
 // ── Risk scores (WATCH+ principals across every active tenant) ─────────────
 export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
   const {
     data: scores,
     error,
@@ -98,9 +98,7 @@ export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?:
       {loading ? (
         <p className="py-1 text-sm text-muted-foreground">{tHC("s2")}</p>
       ) : scores.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">
-          {tHC("s12")}
-        </p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s12")}</p>
       ) : (
         <AnimatePresence initial={false}>
           {pg.pageItems.map((row) => {
@@ -171,7 +169,7 @@ export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?:
 
 // ── Anomaly issues raised by the detector ──────────────────────────────────
 export function AbuseAnomaliesSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
   const {
     data: anomalies,
     error,
@@ -236,7 +234,7 @@ export function AbuseAnomaliesSection({ pollMs, delay }: { pollMs?: number; dela
 
 // ── Currently-throttled principals + the reversible clear action ────────────
 export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
   const {
     data: throttled,
     error,
@@ -330,7 +328,7 @@ export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: n
 
 // ── Detector thresholds (read-only; edited via platform_setting keys) ───────
 export function AbuseThresholdsSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsAbusemonitor");
   const { data: cfg, error, loading } = useSectionData<any>(() => api.getAbuseConfig(), null, pollMs);
 
   const rows: Array<[string, any]> = cfg

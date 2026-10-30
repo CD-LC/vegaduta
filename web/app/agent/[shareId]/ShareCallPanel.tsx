@@ -87,7 +87,7 @@ export default function ShareCallPanel({
   agentName: string;
   supportsImageInput: boolean;
 }) {
-    const tHC = useTranslations("hcAgentShareIdShareCallPanel");
+  const tHC = useTranslations("hcAgentShareIdShareCallPanel");
   const [mode, setMode] = useState<"idle" | "push-to-talk" | "call">("idle");
   const [recording, setRecording] = useState(false);
   const [stage, setStage] = useState<CallStage>("idle");

@@ -30,7 +30,7 @@ import { useTranslations } from "../../lib/i18n";
 // /api/me itself; without the permission the share and submit actions
 // are replaced by a note, and editing or withdrawing an existing one stays.
 export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubmit?: boolean }) {
-    const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
+  const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
   const [authState, setAuthState] = useState<"checking" | "anon" | "authed">("checking");
   const [items, setItems] = useState<CommunityTemplateSubmission[] | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -119,9 +119,7 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
             <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
           </span>
           <p className="text-sm font-medium text-foreground">{tHC("s11")}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            {tHC("s10")}
-          </p>
+          <p className="max-w-sm text-sm text-muted-foreground">{tHC("s10")}</p>
           <Button onClick={() => auth.login({ redirectUri: `${window.location.origin}/templates/mine` })}>
             Sign in
           </Button>
@@ -134,9 +132,7 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          {tHC("s9")}
-        </p>
+        <p className="text-sm text-muted-foreground">{tHC("s9")}</p>
         {canShare && (
           <Button onClick={() => setSubmitOpen(true)} className="shrink-0">
             <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
@@ -179,9 +175,7 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
               <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
             </span>
             <p className="text-sm font-medium text-foreground">{tHC("s5")}</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              {tHC("s4")}
-            </p>
+            <p className="max-w-sm text-sm text-muted-foreground">{tHC("s4")}</p>
             {canShare && (
               <Button onClick={() => setSubmitOpen(true)}>
                 <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
@@ -244,7 +238,7 @@ function SubmissionRow({
   onSubmit: () => void;
   onWithdraw: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
+  const tHC = useTranslations("hcComponentsTemplatesMySubmissions");
   const cat = categoryMeta(sub.category);
   const kind = kindMeta(sub.kind);
   const KindIcon = kind.icon;

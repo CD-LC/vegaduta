@@ -21,9 +21,7 @@ vi.mock("./app/lib/i18n", async (importOriginal) => {
     const path = `${namespace}.${key}`;
     const template = lookup(path);
     if (template == null) return path;
-    return values
-      ? template.replace(/\{(\w+)\}/g, (m, k: string) => (k in values ? String(values[k]) : m))
-      : template;
+    return values ? template.replace(/\{(\w+)\}/g, (m, k: string) => (k in values ? String(values[k]) : m)) : template;
   };
   return {
     ...actual,

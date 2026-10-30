@@ -63,7 +63,7 @@ export default function AdminWelcomeBody({
   onBuild: () => void;
   onSkip: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsTourAdminWelcomeBody");
+  const tHC = useTranslations("hcComponentsTourAdminWelcomeBody");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [first, setFirst] = useState("");
@@ -153,9 +153,7 @@ export default function AdminWelcomeBody({
           </button>
           {inviteOpen && (
             <form onSubmit={(e) => void invite(e)} className="space-y-2 border-t border-border p-3">
-              <p className="text-xs text-muted-foreground">
-                {tHC("s9")}
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <Input
                   value={first}
@@ -217,9 +215,7 @@ export default function AdminWelcomeBody({
           {tHC("s2")}
         </Button>
       </div>
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        {tHC("s1")}
-      </p>
+      <p className="mt-3 text-[11px] text-muted-foreground">{tHC("s1")}</p>
     </div>
   );
 }

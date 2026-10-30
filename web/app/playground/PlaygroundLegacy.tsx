@@ -27,7 +27,7 @@ import { initialAgentId, persistAgentSelection, resolveAgentId } from "./selecti
  * connected rather than picking an agent from scratch every time.
  */
 function PlaygroundInner() {
-    const tHC = useTranslations("hcPlaygroundPlaygroundLegacy");
+  const tHC = useTranslations("hcPlaygroundPlaygroundLegacy");
   const t = useTranslations("playground");
   const searchParams = useSearchParams();
   const [agents, setAgents] = useState([]);

@@ -80,7 +80,7 @@ export default function WorkflowCanvas({
   onWorkflowsChanged,
   onFirstRun,
 }: Props) {
-    const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
+  const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
   const [selectedId, setSelectedId] = useState<string | null>(workflows.find((w) => w.mine)?.id ?? null);
   const [name, setName] = useState("");
   const [def, setDef] = useState<WorkflowDefinition>({ steps: [] });
@@ -400,7 +400,7 @@ function StepCard({
   onChange: (patch: Partial<WorkflowStep>) => void;
   onRemove?: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
+  const tHC = useTranslations("hcComponentsStudioWorkflowCanvas");
   const status = state?.status ?? "idle";
   const ring =
     status === "running" || status === "waiting"
@@ -449,11 +449,7 @@ function StepCard({
         {step.type}
       </Badge>
 
-      {step.type === "trigger" && (
-        <p className="text-xs text-muted-foreground">
-          {tHC("s10")}
-        </p>
-      )}
+      {step.type === "trigger" && <p className="text-xs text-muted-foreground">{tHC("s10")}</p>}
       {step.type === "agent" && (
         <div className="space-y-2">
           <select
@@ -523,11 +519,7 @@ function StepCard({
           placeholder={tHC("s2")}
         />
       )}
-      {step.type === "output" && (
-        <p className="text-xs text-muted-foreground">
-          {tHC("s1")}
-        </p>
-      )}
+      {step.type === "output" && <p className="text-xs text-muted-foreground">{tHC("s1")}</p>}
       {state?.summary && status !== "idle" && (
         <p className="mt-2 border-t border-border/40 pt-2 text-[11px] text-muted-foreground">{state.summary}</p>
       )}

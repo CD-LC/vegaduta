@@ -21,7 +21,7 @@ import { useTranslations } from "../lib/i18n";
 // they only render on the authenticated surface — a logged-out /docs visitor
 // gets the content without dead-end links into auth-gated routes.
 export default function DocsView({ showAppLinks = false }: { showAppLinks?: boolean }) {
-    const tHC = useTranslations("hcHelpDocsView");
+  const tHC = useTranslations("hcHelpDocsView");
   const DOC_TOPICS = visibleDocTopics();
   return (
     <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -62,7 +62,11 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
           {DOC_TOPICS.map((topic) => {
             const Icon = topic.icon;
             return (
-              <article key={topic.id} id={topic.id} className="scroll-mt-6 border-b border-border pb-12 last:border-b-0 last:pb-0">
+              <article
+                key={topic.id}
+                id={topic.id}
+                className="scroll-mt-6 border-b border-border pb-12 last:border-b-0 last:pb-0"
+              >
                 <div className="mb-4 flex items-start gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" aria-hidden="true" />
@@ -87,7 +91,10 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
                       {section.bullets && (
                         <ul className="max-w-[68ch] list-none space-y-2 p-0">
                           {section.bullets.map((b, j) => (
-                            <li key={j} className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground">
+                            <li
+                              key={j}
+                              className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
+                            >
                               <span
                                 aria-hidden="true"
                                 className="mt-[0.55em] h-1.5 w-1.5 shrink-0 rounded-full bg-primary/70"
@@ -100,7 +107,10 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
                       {section.steps && (
                         <ol className="max-w-[68ch] list-none space-y-3 p-0">
                           {section.steps.map((s, j) => (
-                            <li key={j} className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground">
+                            <li
+                              key={j}
+                              className="flex items-start gap-3 text-sm leading-relaxed text-muted-foreground"
+                            >
                               <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-semibold text-primary">
                                 {j + 1}
                               </span>

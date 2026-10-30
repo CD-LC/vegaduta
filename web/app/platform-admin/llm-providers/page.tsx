@@ -25,7 +25,7 @@ import { useTranslations } from "../../lib/i18n";
 // four provider/LLM cards below are unchanged from the original screen.
 
 export default function LlmProvidersPage() {
-    const tHC = useTranslations("hcPlatformadminLlmprovidersPage");
+  const tHC = useTranslations("hcPlatformadminLlmprovidersPage");
   const askConfirm = useConfirm();
   const [llmTasks, setLlmTasks] = useState([]);
   const [llmTasksError, setLlmTasksError] = useState(null);
@@ -231,7 +231,6 @@ export default function LlmProvidersPage() {
     const row = (routingModelsByProvider[provider] || []).find((m) => m.modelId === modelId);
     return row?.capabilitySummary || null;
   }
-
 
   return (
     <AdminShell

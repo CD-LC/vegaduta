@@ -38,7 +38,7 @@ export default function PaginationControls({
   onPageSizeChange: (size: number) => void;
   itemLabel?: string;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsPaginationControls");
+  const tHC = useTranslations("hcPlatformadminComponentsPaginationControls");
   const totalKnown = typeof totalItems === "number";
   if (totalKnown && totalItems === 0) return null;
   if (!totalKnown && (pageItemCount ?? 1) === 0 && page <= 1) return null;
@@ -58,7 +58,8 @@ export default function PaginationControls({
           : `${start}–${end} ${itemLabel}${hasMore ? " (more available)" : ""}`}
         {showCap && (
           <span className="ms-2 text-[var(--warning-text)]" role="status">
-            {tHC("s4")} {capped}{tHC("s3")}
+            {tHC("s4")} {capped}
+            {tHC("s3")}
           </span>
         )}
       </span>

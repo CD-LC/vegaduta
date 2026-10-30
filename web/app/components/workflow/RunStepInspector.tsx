@@ -61,7 +61,7 @@ export default function RunStepInspector({
   pinRunId,
   workflowId,
 }: RunStepInspectorProps) {
-    const tHC = useTranslations("hcComponentsWorkflowRunStepInspector");
+  const tHC = useTranslations("hcComponentsWorkflowRunStepInspector");
   const uid = useId();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [copied, copy] = useCopy();

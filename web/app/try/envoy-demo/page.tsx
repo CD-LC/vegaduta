@@ -11,7 +11,7 @@ import { useTranslations } from "../../lib/i18n";
 // so every number and result you see is invented for the demo. Public (under /try) so no sign-in is needed.
 
 export default function EnvoyDemoPage() {
-    const tHC = useTranslations("hcTryEnvoydemoPage");
+  const tHC = useTranslations("hcTryEnvoydemoPage");
   const auth = useContext(AuthContext) as Record<string, unknown> | null;
   const [run, setRun] = useState(0);
   // Install the fake before the console mounts (layout effects run before its data-loading effects) and restore the real API on leave.
@@ -33,12 +33,19 @@ export default function EnvoyDemoPage() {
           <button
             type="button"
             className="rounded-lg border border-border/70 px-3 py-1 text-xs hover:bg-background/60"
-            onClick={() => { resetMockBriefApi(); setRun((n) => n + 1); }}
+            onClick={() => {
+              resetMockBriefApi();
+              setRun((n) => n + 1);
+            }}
           >
             {tHC("s1")}
           </button>
         </div>
-        <BuildCenter key={run} onOpenAppBuilder={() => undefined} detailHref={(id) => `/try/envoy-demo/detail?id=${id}`} />
+        <BuildCenter
+          key={run}
+          onOpenAppBuilder={() => undefined}
+          detailHref={(id) => `/try/envoy-demo/detail?id=${id}`}
+        />
       </div>
     </AuthContext.Provider>
   );

@@ -18,7 +18,7 @@ export default function EndCard({
   signupHref: string;
   p: number;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeShowtimeEndCard");
+  const tHC = useTranslations("hcComponentsStudioShowtimeShowtimeEndCard");
   const k = Math.min(1, p * 4);
   return (
     <div
@@ -28,13 +28,9 @@ export default function EndCard({
       <h2 className="max-w-xl text-4xl font-semibold tracking-tight sm:text-5xl">
         {tHC("s5")}
         <br />
-        <span className="bg-gradient-to-r from-violet-300 to-sky-300 bg-clip-text text-transparent">
-          {tHC("s4")}
-        </span>
+        <span className="bg-gradient-to-r from-violet-300 to-sky-300 bg-clip-text text-transparent">{tHC("s4")}</span>
       </h2>
-      <p className="mt-4 max-w-md text-zinc-300">
-        {tHC("s3")}
-      </p>
+      <p className="mt-4 max-w-md text-zinc-300">{tHC("s3")}</p>
       <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
         <button
           type="button"

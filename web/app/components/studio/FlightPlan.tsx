@@ -129,7 +129,7 @@ const CHAPTERS: Chapter[] = [
 ];
 
 export default function FlightPlan({ onStart, onShowtime }: { onStart: () => void; onShowtime: () => void }) {
-    const tHC = useTranslations("hcComponentsStudioFlightPlan");
+  const tHC = useTranslations("hcComponentsStudioFlightPlan");
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLElement | null)[]>([]);
 
@@ -164,8 +164,7 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
           {tHC("s10")}
         </h2>
         <p className="mt-3 text-muted-foreground">
-          {tHC("s9")} <Badge2 kind="here" /> {tHC("s8")}{" "}
-          <Badge2 kind="workspace" /> {tHC("s7")}
+          {tHC("s9")} <Badge2 kind="here" /> {tHC("s8")} <Badge2 kind="workspace" /> {tHC("s7")}
         </p>
       </div>
 
@@ -229,9 +228,7 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
 
       <div className="mt-12 flex flex-wrap items-center gap-3 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
         <ShieldCheck aria-hidden="true" className="h-5 w-5 text-violet-600 dark:text-violet-300 shrink-0" />
-        <span className="flex-1 text-sm">
-          {tHC("s5")}
-        </span>
+        <span className="flex-1 text-sm">{tHC("s5")}</span>
         <Button variant="outline" onClick={onShowtime}>
           {tHC("s4")}
         </Button>
@@ -256,7 +253,7 @@ function sceneName(s: PhoneScene): string {
 }
 
 function Badge2({ kind }: { kind: "here" | "workspace" }) {
-    const tHC = useTranslations("hcComponentsStudioFlightPlan");
+  const tHC = useTranslations("hcComponentsStudioFlightPlan");
   return kind === "here" ? (
     <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
       {tHC("s2")}

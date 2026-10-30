@@ -51,7 +51,7 @@ function AxisColumn({ heading, question, tiers }: { heading: string; question: s
 }
 
 export default function ToolClassificationLegend({ className }: { className?: string }) {
-    const tHC = useTranslations("hcComponentsToolsToolClassificationLegend");
+  const tHC = useTranslations("hcComponentsToolsToolClassificationLegend");
   // Open by default: a non-expert landing here for the first time needs it,
   // and an expert collapsing it once is cheaper than an admin never finding
   // it. Collapse state is intentionally not persisted — this panel is
@@ -64,9 +64,7 @@ export default function ToolClassificationLegend({ className }: { className?: st
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-0.5">
             <h3 className="text-sm font-semibold text-foreground">{tHC("s4")}</h3>
-            <p className="text-sm text-muted-foreground">
-              {tHC("s3")}
-            </p>
+            <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
             {open ? <ChevronUp size={13} aria-hidden="true" /> : <ChevronDown size={13} aria-hidden="true" />}
@@ -114,9 +112,7 @@ export default function ToolClassificationLegend({ className }: { className?: st
                 <span className="text-sm font-medium text-foreground">{tHC("s2")}</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">{UNCLASSIFIED_META.meaning}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {tHC("s1")}
-              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{tHC("s1")}</p>
             </div>
           </>
         )}

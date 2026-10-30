@@ -32,7 +32,7 @@ import { useTranslations } from "../lib/i18n";
 // Icon audit (2026-09-24): every nav control and CTA carries a lucide glyph
 // that matches its destination, same vocabulary as TemplatesPublicChrome.
 export default function DocsPageClient() {
-    const tHC = useTranslations("hcDocsDocsPageClient");
+  const tHC = useTranslations("hcDocsDocsPageClient");
   return (
     <div className="vd-pub relative min-h-screen w-full overflow-x-clip bg-background text-foreground antialiased">
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
@@ -40,8 +40,15 @@ export default function DocsPageClient() {
       </div>
 
       {/* --------------------------------------------------------------- Nav */}
-      <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-3 px-5 py-5 sm:justify-between sm:px-8" aria-label="Site">
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label={tHC("s7")}>
+      <nav
+        className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-3 px-5 py-5 sm:justify-between sm:px-8"
+        aria-label="Site"
+      >
+        <Link
+          href="/"
+          className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
+          aria-label={tHC("s7")}
+        >
           {/* The human-in-helmet winged emblem, in its own colors, always
               next to the brand name (direct instruction, 2026-07-25). */}
           <Image
@@ -54,7 +61,9 @@ export default function DocsPageClient() {
             draggable={false}
             priority
           />
-          <span><BrandName /></span>
+          <span>
+            <BrandName />
+          </span>
         </Link>
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
           <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
@@ -138,9 +147,7 @@ export default function DocsPageClient() {
       <section className="mx-auto max-w-3xl px-6 pb-20 text-center">
         <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] px-6 py-10">
           <h2 className="text-balance text-2xl font-semibold tracking-tight">{tHC("s4")}</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            {tHC("s3")}
-          </p>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">{tHC("s3")}</p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <PublicAuthCtas size="default" variant="default">
               <Button asChild>

@@ -36,7 +36,7 @@ export interface CommentComposerProps {
     body: string,
     mentionIds: string[],
     mentioned: CommentPerson[],
-    meta: { pickedDuringEdit: boolean },
+    meta: { pickedDuringEdit: boolean }
   ) => Promise<boolean | void> | boolean | void;
   /** Escape (with the picker closed) and the Cancel button. Omit to let Escape bubble. */
   onCancel?: () => void;
@@ -45,10 +45,19 @@ export interface CommentComposerProps {
 }
 
 export function CommentComposer({
-  people = [], initialText = "", initialMentions = [], placeholder = "Write a comment…", submitLabel = "Comment",
-  label, busy = false, autoFocus = false, onSubmit, onCancel, keepOnSubmit = false,
+  people = [],
+  initialText = "",
+  initialMentions = [],
+  placeholder = "Write a comment…",
+  submitLabel = "Comment",
+  label,
+  busy = false,
+  autoFocus = false,
+  onSubmit,
+  onCancel,
+  keepOnSubmit = false,
 }: CommentComposerProps) {
-    const tHC = useTranslations("hcComponentsWorkflowCommentComposer");
+  const tHC = useTranslations("hcComponentsWorkflowCommentComposer");
   const uid = useId();
   const listId = `${uid}-people`;
   const hintId = `${uid}-hint`;
@@ -66,7 +75,7 @@ export function CommentComposer({
 
   const matches = useMemo(
     () => (canMention && mention ? filterPeople(people, mention.query) : []),
-    [canMention, mention, people],
+    [canMention, mention, people]
   );
   const pickerOpen = matches.length > 0;
   const activeIdx = Math.min(active, Math.max(0, matches.length - 1));
@@ -174,7 +183,9 @@ export function CommentComposer({
       }}
     >
       <div className="wfc-composer-box">
-        <label htmlFor={`${uid}-ta`} className="wfc-sr">{label}</label>
+        <label htmlFor={`${uid}-ta`} className="wfc-sr">
+          {label}
+        </label>
         <textarea
           id={`${uid}-ta`}
           ref={taRef}
@@ -215,7 +226,9 @@ export function CommentComposer({
                 }}
                 onMouseEnter={() => setActive(i)}
               >
-                <span className="wfc-avatar" aria-hidden="true">{initials(personLabel(p))}</span>
+                <span className="wfc-avatar" aria-hidden="true">
+                  {initials(personLabel(p))}
+                </span>
                 {personLabel(p)}
               </li>
             ))}
@@ -225,7 +238,9 @@ export function CommentComposer({
       <div className="wfc-composer-foot">
         <span id={hintId} className="wfc-hint">
           {near ? (
-            <span data-over={over || undefined}>{text.trim().length} / {COMMENT_MAX_CHARS}</span>
+            <span data-over={over || undefined}>
+              {text.trim().length} / {COMMENT_MAX_CHARS}
+            </span>
           ) : (
             <>
               {canMention && (
@@ -244,7 +259,11 @@ export function CommentComposer({
             </button>
           )}
           <button type="submit" className="wfc-btn" data-primary="true" disabled={busy || !text.trim() || over}>
-            {busy ? <Loader2 size={12} className="wfc-spin" aria-hidden="true" /> : <Send size={12} aria-hidden="true" />}
+            {busy ? (
+              <Loader2 size={12} className="wfc-spin" aria-hidden="true" />
+            ) : (
+              <Send size={12} aria-hidden="true" />
+            )}
             {submitLabel}
           </button>
         </span>

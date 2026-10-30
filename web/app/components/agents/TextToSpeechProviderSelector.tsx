@@ -41,7 +41,7 @@ export default function TextToSpeechProviderSelector({
   onEdit,
   isBusy = false,
 }: TextToSpeechProviderSelectorProps) {
-    const tHC = useTranslations("hcComponentsAgentsTextToSpeechProviderSelector");
+  const tHC = useTranslations("hcComponentsAgentsTextToSpeechProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("textToSpeech", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's TTS providers",
@@ -52,14 +52,11 @@ export default function TextToSpeechProviderSelector({
       providers={providers}
       icon={Speaker}
       label={tHC("s5")}
-      tooltipContent={
-        <>
-          {tHC("s4")}
-        </>
-      }
+      tooltipContent={<>{tHC("s4")}</>}
       freePlanWarningText={
         <>
-          {tHC("s3")} <strong>{tHC("s2")}</strong>{tHC("s1")}
+          {tHC("s3")} <strong>{tHC("s2")}</strong>
+          {tHC("s1")}
         </>
       }
       editorLockedTitle="TTS provider selection is a Premium feature"

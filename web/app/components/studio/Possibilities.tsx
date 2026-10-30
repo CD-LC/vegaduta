@@ -151,7 +151,7 @@ const CARDS: Card[] = [
 ];
 
 export default function Possibilities({ onPick }: { onPick: (job: string) => void }) {
-    const tHC = useTranslations("hcComponentsStudioPossibilities");
+  const tHC = useTranslations("hcComponentsStudioPossibilities");
   return (
     <section aria-labelledby="possible-title" className="mt-24">
       <div className="max-w-2xl">
@@ -161,9 +161,7 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
         <h2 id="possible-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
           {tHC("s4")}
         </h2>
-        <p className="mt-3 text-muted-foreground">
-          {tHC("s3")}
-        </p>
+        <p className="mt-3 text-muted-foreground">{tHC("s3")}</p>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

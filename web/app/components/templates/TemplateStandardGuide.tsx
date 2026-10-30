@@ -11,7 +11,7 @@ import { useTranslations } from "../../lib/i18n";
 // and a worked example they can copy. Loaded from the SAME standard the validator and the AI reviewer use,
 // so what is shown here is exactly what will be checked.
 export default function TemplateStandardGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateStandardGuide");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateStandardGuide");
   const [open, setOpen] = useState(defaultOpen);
   const [guide, setGuide] = useState<Guide | null>(null);
   const [error, setError] = useState(false);
@@ -55,9 +55,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s13")}
           </p>
         )}
-        {error && (
-          <p style={{ color: "var(--state-error)" }}>{tHC("s12")}</p>
-        )}
+        {error && <p style={{ color: "var(--state-error)" }}>{tHC("s12")}</p>}
         {guide && (
           <>
             <p className="text-muted-foreground">{guide.intro}</p>

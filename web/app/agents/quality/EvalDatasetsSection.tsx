@@ -70,7 +70,7 @@ const EMPTY_CASE_DRAFT: CaseDraft = { message: "", expected: "", tools: "" };
 const DEFAULT_RUN_OPTS: RunOptionValues = { judgeModel: "", strictJudge: false, repeats: "1", budget: "5", mode: "" };
 
 export default function EvalDatasetsSection({ agentId }: { agentId: string | null }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsSection");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsSection");
   // resolveEvalApi() is stable per bundle — memo once.
   const evalApi = useMemo(() => resolveEvalApi(), []);
   // Evals hooks (2026-09-09): seed-golden is feature-detected twice - the
@@ -432,13 +432,7 @@ export default function EvalDatasetsSection({ agentId }: { agentId: string | nul
             <RefreshCw size={14} className={loading ? "animate-spin" : undefined} aria-hidden="true" /> Refresh
           </Button>
           {hooksApi && !seedHidden && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={seedGolden}
-              disabled={seeding || busy}
-              title={tHC("s6")}
-            >
+            <Button variant="outline" size="sm" onClick={seedGolden} disabled={seeding || busy} title={tHC("s6")}>
               <Sparkles size={14} className={seeding ? "animate-pulse" : undefined} aria-hidden="true" />
               {seeding ? "Seeding…" : "Seed from golden set"}
             </Button>

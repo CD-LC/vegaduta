@@ -356,9 +356,10 @@ function MediaItem({ kind, id, unverified = false }: { kind: MediaKind; id: stri
             className="h-96 w-full rounded border border-border bg-white"
           />
         )}
-        {state.status === "ready" && kind === "sandbox-artifact" && !state.blob?.type.startsWith("image/") && state.blob?.type !== "text/html" && (
-          <DocumentPreview filename={state.filename} blobUrl={state.blobUrl} />
-        )}
+        {state.status === "ready" &&
+          kind === "sandbox-artifact" &&
+          !state.blob?.type.startsWith("image/") &&
+          state.blob?.type !== "text/html" && <DocumentPreview filename={state.filename} blobUrl={state.blobUrl} />}
         {state.status === "ready" && kind === "image" && (
           <img
             src={state.blobUrl}
@@ -452,7 +453,7 @@ export default function MediaCard({
  * the copy says that plainly instead.
  */
 function UnverifiedMediaNotice({ kind }: { kind: MediaKind }) {
-    const tHC = useTranslations("hcComponentsMediaCard");
+  const tHC = useTranslations("hcComponentsMediaCard");
   const Icon = KIND_ICON[kind];
   const label = KIND_LABEL[kind];
   return (

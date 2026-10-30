@@ -21,7 +21,7 @@ export default function RunOptionsPanel({
   values: RunOptionValues;
   onChange: (patch: Partial<RunOptionValues>) => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunOptionsPanel");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsRunOptionsPanel");
   const t = useTranslations("evalControls");
   return (
     <div className="space-y-3 rounded-md border border-border p-3">
@@ -86,9 +86,7 @@ export default function RunOptionsPanel({
           <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
         </label>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {tHC("s1")}
-      </p>
+      <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
     </div>
   );
 }

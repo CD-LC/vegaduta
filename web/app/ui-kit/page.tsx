@@ -72,7 +72,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function UiKitPage() {
-    const tHC = useTranslations("hcUikitPage");
+  const tHC = useTranslations("hcUikitPage");
   const [loading, setLoading] = useState(false);
 
   return (
@@ -263,15 +263,12 @@ export default function UiKitPage() {
             <AccordionItem value="a">
               <AccordionTrigger>{tHC("s5")}</AccordionTrigger>
               <AccordionContent>
-                {tHC("s4")} <BrandName />{" "}
-                {tHC("s3")}
+                {tHC("s4")} <BrandName /> {tHC("s3")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="b">
               <AccordionTrigger>{tHC("s2")}</AccordionTrigger>
-              <AccordionContent>
-                {tHC("s1")}
-              </AccordionContent>
+              <AccordionContent>{tHC("s1")}</AccordionContent>
             </AccordionItem>
           </Accordion>
         </Section>

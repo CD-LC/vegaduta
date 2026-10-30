@@ -46,7 +46,7 @@ export default function ChatTurn({
   runTurn: (message: string, attachments: any[]) => unknown;
   setInput: (updater: (prev: string) => string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsChatChatTurn");
+  const tHC = useTranslations("hcComponentsChatChatTurn");
   // Generative UI: an assistant turn may embed a ```json_ui block (the
   // contract in components/generative-ui/schema.ts). Extracted per
   // render - cheap for ordinary turns (one regex, no match => null).

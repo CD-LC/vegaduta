@@ -102,7 +102,7 @@ function OutcomeBadge({ outcome }: { outcome: any }) {
 
 // ── Issues (fingerprinted platform issues portal) ───────────────────────────
 export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: issues,
     error,
@@ -159,7 +159,8 @@ export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: numb
                   {issue.occurrenceCount > 1 && <Badge variant="secondary">&times;{issue.occurrenceCount}</Badge>}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  <span className="font-mono">{issue.tenantName}</span> {tHC("s22")} {timeAgo(issue.firstSeenAt)} {tHC("s21")} {timeAgo(issue.lastSeenAt)}
+                  <span className="font-mono">{issue.tenantName}</span> {tHC("s22")} {timeAgo(issue.firstSeenAt)}{" "}
+                  {tHC("s21")} {timeAgo(issue.lastSeenAt)}
                 </p>
               </div>
             </motion.div>
@@ -181,7 +182,7 @@ export function IssuesSection({ pollMs, delay }: { pollMs?: number; delay?: numb
 
 // ── LLM usage / cost per tenant ─────────────────────────────────────────────
 export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: rows,
     error,
@@ -253,7 +254,7 @@ export function LlmUsageSection({ pollMs, delay }: { pollMs?: number; delay?: nu
 // PlatformHostedLlmCostSummary's javadoc. The budget line is admin-set (no
 // fabricated default) via PlatformObservabilityService#updateHostedLlmBudget.
 export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: hostedCost,
     error,
@@ -417,9 +418,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
           </div>
 
           {hostedCost?.totalCalls === 0 ? (
-            <p className="py-1 text-sm text-muted-foreground">
-              {tHC("s11")}
-            </p>
+            <p className="py-1 text-sm text-muted-foreground">{tHC("s11")}</p>
           ) : (
             (hostedCost?.byTenant || []).map((row: any) => (
               <div
@@ -447,7 +446,7 @@ export function HostedCostSection({ pollMs, delay }: { pollMs?: number; delay?: 
 
 // ── Activity / audit feed ───────────────────────────────────────────────────
 export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: activity,
     error,
@@ -517,7 +516,7 @@ export function ActivitySection({ pollMs, delay }: { pollMs?: number; delay?: nu
 
 // ── Provider-fallback alert status + threshold editor ───────────────────────
 export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsObservability");
   const {
     data: fallbackStatus,
     error,
@@ -564,7 +563,10 @@ export function FallbackSection({ pollMs, delay }: { pollMs?: number; delay?: nu
         <Alert variant="destructive">
           <AlertOctagon />
           <AlertDescription>
-            {tHC("s7")}{fallbackStatus.totalFallbackFailures}{tHC("s6")}{fallbackStatus.threshold}). {fallbackStatus.tenantBreakdown?.length || 0} tenant
+            {tHC("s7")}
+            {fallbackStatus.totalFallbackFailures}
+            {tHC("s6")}
+            {fallbackStatus.threshold}). {fallbackStatus.tenantBreakdown?.length || 0} tenant
             {fallbackStatus.tenantBreakdown?.length === 1 ? "" : "s"} {tHC("s5")}
           </AlertDescription>
         </Alert>

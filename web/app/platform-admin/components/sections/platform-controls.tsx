@@ -26,7 +26,7 @@ import { useTranslations } from "../../../lib/i18n";
 
 // ── Platform-wide kill switch ───────────────────────────────────────────────
 export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
   const askConfirm = useConfirm();
   const { data: status, error, loading, refresh } = useSectionData<any>(() => api.getKillSwitchStatus(), null, pollMs);
   const [stopOpen, setStopOpen] = useState(false);
@@ -98,7 +98,8 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
               <AlertDescription>
                 {tHC("s12")} {timeAgo(status?.stoppedAt)}
                 {status?.updatedBy ? ` by ${status.updatedBy}` : ""}
-                {status?.reason ? ` — "${status.reason}"` : ""}{tHC("s11")}
+                {status?.reason ? ` — "${status.reason}"` : ""}
+                {tHC("s11")}
               </AlertDescription>
             </Alert>
           )}
@@ -146,7 +147,7 @@ export function KillSwitchSection({ pollMs, delay }: { pollMs?: number; delay?: 
 // tenants already on UNLIMITED are skipped. sendEmail is a deliberate second
 // opt-in, matching the backend's own split of "grant" vs "mail everyone".
 export function SiteWidePromoSection({ delay }: { delay?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformcontrols");
   const askConfirm = useConfirm();
   const [days, setDays] = useState("14");
   const [reason, setReason] = useState("");

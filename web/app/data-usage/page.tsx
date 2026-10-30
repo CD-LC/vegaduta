@@ -70,7 +70,7 @@ function orderedSystems(systems: TenantDataUsageSystem[]): TenantDataUsageSystem
 }
 
 function SystemCard({ system }: { system: TenantDataUsageSystem }) {
-    const tHC = useTranslations("hcDatausagePage");
+  const tHC = useTranslations("hcDatausagePage");
   const Icon = SYSTEM_DISPLAY[system.id]?.icon || Database;
   const isActive = system.status === "active";
 
@@ -97,9 +97,7 @@ function SystemCard({ system }: { system: TenantDataUsageSystem }) {
              * engaged" (Temporal) behind a vague "coming soon" - state it as
              * plainly as every active system's own status line. */}
             {!isActive && (
-              <span className="max-w-[9rem] text-[11px] leading-tight text-muted-foreground">
-                {tHC("s5")}
-              </span>
+              <span className="max-w-[9rem] text-[11px] leading-tight text-muted-foreground">{tHC("s5")}</span>
             )}
           </div>
         </div>
@@ -146,7 +144,7 @@ function SystemCardSkeleton() {
 }
 
 export default function DataUsagePage() {
-    const tHC = useTranslations("hcDatausagePage");
+  const tHC = useTranslations("hcDatausagePage");
   const { hasPermission } = useAuth();
   const canManageData = hasPermission("MANAGE_DATA_GOVERNANCE");
   const [data, setData] = useState<TenantDataUsageResponse | null>(null);
@@ -212,9 +210,7 @@ export default function DataUsagePage() {
           <Card className="mt-4">
             <CardContent>
               <h3 className="text-sm font-semibold text-foreground">{tHC("s2")}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {tHC("s1")}
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{tHC("s1")}</p>
               {canManageData ? (
                 <Link
                   href="/admin/data-privacy"

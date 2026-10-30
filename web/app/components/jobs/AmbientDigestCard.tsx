@@ -35,7 +35,7 @@ const OUTCOME_LABEL: Record<string, string> = {
 };
 
 export default function AmbientDigestCard() {
-    const tHC = useTranslations("hcComponentsJobsAmbientDigestCard");
+  const tHC = useTranslations("hcComponentsJobsAmbientDigestCard");
   const [digest, setDigest] = useState<AmbientDigest | null>(null);
   // id -> which decision is in flight. `decided` hides a row instantly even if
   // the refetched digest still carries it for a beat; the refetch keeps the
@@ -122,7 +122,12 @@ export default function AmbientDigestCard() {
         <p className="text-xs text-muted-foreground">
           {digest.jobs.observed}
           {digest.jobs.truncated ? "+" : ""} job{digest.jobs.observed === 1 ? "" : "s"} ran
-          {runningJobs > 0 && <> · {runningJobs} {tHC("s8")}</>}
+          {runningJobs > 0 && (
+            <>
+              {" "}
+              · {runningJobs} {tHC("s8")}
+            </>
+          )}
           {failedJobs > 0 && (
             <>
               {" "}
@@ -185,7 +190,8 @@ export default function AmbientDigestCard() {
           </ul>
           {decisionError && <p className="text-xs text-[var(--state-error)]">{decisionError}</p>}
           <Link href="/admin/approvals" className="inline-block text-xs text-primary underline">
-            {tHC("s4")}{otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
+            {tHC("s4")}
+            {otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
           </Link>
         </div>
       )}
@@ -212,7 +218,8 @@ export default function AmbientDigestCard() {
           </ul>
           {quietCount > 0 && (
             <p className="text-[11px] text-muted-foreground">
-              {quietCount} {tHC("s2")}{quietCount === 1 ? "" : "s"} {tHC("s1")}
+              {quietCount} {tHC("s2")}
+              {quietCount === 1 ? "" : "s"} {tHC("s1")}
             </p>
           )}
         </div>

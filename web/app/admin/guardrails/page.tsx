@@ -42,7 +42,7 @@ import type { GuardrailRule, RuleDraft } from "./guardrailRules";
 // are writing that file. The one string that does need a key is the nav row.
 
 export default function AdminGuardrailsPage() {
-    const tHC = useTranslations("hcAdminGuardrailsPage");
+  const tHC = useTranslations("hcAdminGuardrailsPage");
   const tg = useTranslations("f2GapsAdmin");
   const { hasPermission } = useAuth();
   // MANAGE_GUARDRAILS scope (granular RBAC, 2026-09-23) - was isAdmin;
@@ -106,9 +106,12 @@ export default function AdminGuardrailsPage() {
       const q = ruleQuery.trim().toLowerCase();
       return !q || `${r.name} ${r.description ?? ""} ${r.pattern}`.toLowerCase().includes(q);
     },
-    [ruleQuery],
+    [ruleQuery]
   );
-  const defaults = useMemo(() => rules.filter((r) => r.ruleType === "DEFAULT_TEMPLATE" && matchesQuery(r)), [rules, matchesQuery]);
+  const defaults = useMemo(
+    () => rules.filter((r) => r.ruleType === "DEFAULT_TEMPLATE" && matchesQuery(r)),
+    [rules, matchesQuery]
+  );
   const custom = useMemo(() => rules.filter((r) => r.ruleType === "CUSTOM" && matchesQuery(r)), [rules, matchesQuery]);
   const customPagination = usePagination(custom);
   const defaultsPagination = usePagination(defaults);
@@ -296,9 +299,7 @@ export default function AdminGuardrailsPage() {
             <Alert>
               <Shield className="size-4" aria-hidden="true" />
               <AlertTitle>{tHC("s26")}</AlertTitle>
-              <AlertDescription>
-                {tHC("s25")}
-              </AlertDescription>
+              <AlertDescription>{tHC("s25")}</AlertDescription>
             </Alert>
           )}
 
@@ -307,9 +308,7 @@ export default function AdminGuardrailsPage() {
               <Sparkles className="size-4" aria-hidden="true" />
               <AlertTitle>{tHC("s24")}</AlertTitle>
               <AlertDescription className="flex flex-col items-start gap-3">
-                <span>
-                  {tHC("s23")}
-                </span>
+                <span>{tHC("s23")}</span>
                 {isBillingEnabled() && (
                   <Button asChild size="sm">
                     <Link href="/admin/billing">{tHC("s22")}</Link>
@@ -322,26 +321,32 @@ export default function AdminGuardrailsPage() {
           <Card>
             <CardHeader>
               <CardTitle>{tHC("s21")}</CardTitle>
-              <CardDescription>
-                {tHC("s20")}
-              </CardDescription>
+              <CardDescription>{tHC("s20")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
               <p>
                 <span className="font-medium text-foreground">{tHC("s19")}</span> {tHC("s18")}
               </p>
               <p>
-                <span className="font-medium text-foreground">{tHC("s17")}</span> {tHC("s16")} <em>{tHC("s15")}</em> {tHC("s14")} <Link href="/agents" className="underline underline-offset-2">Agents</Link> {tHC("s13")} <strong>Block</strong> {tHC("s12")} <strong>Redact</strong> {tHC("s11")}
+                <span className="font-medium text-foreground">{tHC("s17")}</span> {tHC("s16")} <em>{tHC("s15")}</em>{" "}
+                {tHC("s14")}{" "}
+                <Link href="/agents" className="underline underline-offset-2">
+                  Agents
+                </Link>{" "}
+                {tHC("s13")} <strong>Block</strong> {tHC("s12")} <strong>Redact</strong> {tHC("s11")}
               </p>
               <p>
-                <span className="font-medium text-foreground">{tHC("s10")}</span>{tHC("s9")}
+                <span className="font-medium text-foreground">{tHC("s10")}</span>
+                {tHC("s9")}
               </p>
             </CardContent>
           </Card>
 
           {rules.length > 8 && (
             <div className="max-w-sm">
-              <Label htmlFor="guardrail-rule-search" className="sr-only">{tHC("s8")}</Label>
+              <Label htmlFor="guardrail-rule-search" className="sr-only">
+                {tHC("s8")}
+              </Label>
               <Input
                 id="guardrail-rule-search"
                 value={ruleQuery}
@@ -392,11 +397,7 @@ export default function AdminGuardrailsPage() {
                 />
               )}
 
-              {custom.length === 0 && !formOpen && (
-                <p className="text-sm text-muted-foreground">
-                  {tHC("s4")}
-                </p>
-              )}
+              {custom.length === 0 && !formOpen && <p className="text-sm text-muted-foreground">{tHC("s4")}</p>}
 
               {customPagination.pageItems.map((rule) => renderRuleRow(rule, true))}
               <PaginationControls
@@ -414,15 +415,11 @@ export default function AdminGuardrailsPage() {
           <Card>
             <CardHeader>
               <CardTitle>{tHC("s3")}</CardTitle>
-              <CardDescription>
-                {tHC("s2")}
-              </CardDescription>
+              <CardDescription>{tHC("s2")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {defaults.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {tHC("s1")}
-                </p>
+                <p className="text-sm text-muted-foreground">{tHC("s1")}</p>
               ) : (
                 defaultsPagination.pageItems.map((rule) => renderRuleRow(rule, false))
               )}

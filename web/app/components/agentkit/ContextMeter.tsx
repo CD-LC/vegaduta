@@ -20,7 +20,7 @@ function pct(used: number, cap: number): number {
 }
 
 export default function ContextMeter({ report, evictions }: { report: ContextReport | null; evictions: Eviction[] }) {
-    const tHC = useTranslations("hcComponentsAgentkitContextMeter");
+  const tHC = useTranslations("hcComponentsAgentkitContextMeter");
   return (
     <div className="mt-5 rounded-lg border border-border p-4" data-testid="agentkit-context-meter">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{AGENT_COPY.meterTitle}</p>
@@ -36,8 +36,8 @@ export default function ContextMeter({ report, evictions }: { report: ContextRep
                 ~{report.usedTokens.toLocaleString()} of {report.promptBudget.toLocaleString()} {tHC("s2")}
               </span>
               <span className="text-muted-foreground">
-                {report.contextWindow.toLocaleString()}{tHC("s1")}{" "}
-                {(report.contextWindow - report.promptBudget).toLocaleString()} {AGENT_COPY.meterReserved}
+                {report.contextWindow.toLocaleString()}
+                {tHC("s1")} {(report.contextWindow - report.promptBudget).toLocaleString()} {AGENT_COPY.meterReserved}
               </span>
             </div>
             <div

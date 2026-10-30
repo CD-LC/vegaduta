@@ -37,7 +37,7 @@ import { useTranslations } from "../../lib/i18n";
 // account belongs to. A cross-tenant queue needs a platform endpoint in core.
 
 function ReportPanel({ name, onApproved }: { name: string; onApproved: () => void }) {
-    const tHC = useTranslations("hcPlatformadminSkillsecurityPage");
+  const tHC = useTranslations("hcPlatformadminSkillsecurityPage");
   const askConfirm = useConfirm();
   const [report, setReport] = useState<SkillSecurityReport | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +126,9 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
         </div>
         <div>
           <dt className="inline text-muted-foreground">{tHC("s16")} </dt>
-          <dd className="inline">{report.attachedAgentIds?.length ?? 0} {tHC("s15")}</dd>
+          <dd className="inline">
+            {report.attachedAgentIds?.length ?? 0} {tHC("s15")}
+          </dd>
         </div>
       </dl>
 
@@ -143,12 +145,11 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {tHC("s13")}{report.scan?.findings?.length ?? 0}){report.scan?.truncated ? " - list truncated" : ""}
+          {tHC("s13")}
+          {report.scan?.findings?.length ?? 0}){report.scan?.truncated ? " - list truncated" : ""}
         </p>
         {!report.scan?.findings?.length ? (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {tHC("s12")}
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{tHC("s12")}</p>
         ) : (
           <div className="mt-1 space-y-1.5">
             {report.scan.findings.map((f, i) => {
@@ -172,8 +173,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
 
       {report.stagedScan && (
         <p className="text-xs text-[var(--warning-text)]">
-          {tHC("s11")}{" "}
-          {riskMeta(report.stagedScan.riskLevel).label.toLowerCase()}.
+          {tHC("s11")} {riskMeta(report.stagedScan.riskLevel).label.toLowerCase()}.
         </p>
       )}
 
@@ -184,9 +184,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
           {high && (
             <div className="flex items-start gap-2 text-xs">
               <Checkbox checked={ack} className="mt-0.5" onCheckedChange={(v) => setAck(v)} id="skill-ack" />
-              <label htmlFor="skill-ack">
-                {tHC("s10")}
-              </label>
+              <label htmlFor="skill-ack">{tHC("s10")}</label>
             </div>
           )}
           <Button size="sm" disabled={busy || (high && !ack)} onClick={approve}>
@@ -199,7 +197,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
 }
 
 export default function SkillSecurityPage() {
-    const tHC = useTranslations("hcPlatformadminSkillsecurityPage");
+  const tHC = useTranslations("hcPlatformadminSkillsecurityPage");
   const [overview, setOverview] = useState<SkillSecurityOverview | null>(null);
   const [reviews, setReviews] = useState<SkillReviewItem[] | null>(null);
   const [state, setState] = useState<"loading" | "ok" | "off" | "error">("loading");
@@ -243,12 +241,8 @@ export default function SkillSecurityPage() {
         </Button>
       }
     >
-      <PageHint>
-        {tHC("s8")}
-      </PageHint>
-      <InfoNote>
-        {tHC("s7")}
-      </InfoNote>
+      <PageHint>{tHC("s8")}</PageHint>
+      <InfoNote>{tHC("s7")}</InfoNote>
 
       {state === "loading" && <Skeleton className="h-32 w-full" />}
       {state === "off" && (
@@ -280,9 +274,7 @@ export default function SkillSecurityPage() {
             icon={ShieldAlert}
             subtitle={`${reviews?.length ?? 0} skill(s) waiting on an owner`}
           >
-            {reviews && reviews.length === 0 && (
-              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
-            )}
+            {reviews && reviews.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s4")}</p>}
             {reviewPg.pageItems.map((r) => {
               const m = riskMeta(r.riskLevel);
               return (

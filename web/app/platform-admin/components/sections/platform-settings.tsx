@@ -34,7 +34,7 @@ export function PlatformSettingsSection({
   keyFilter?: (key: string) => boolean;
   delay?: number;
 }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformsettings");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsPlatformsettings");
   const [settings, setSettings] = useState<any[]>([]);
   const [settingsError, setSettingsError] = useState<any>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -104,12 +104,7 @@ export function PlatformSettingsSection({
             size={14}
             className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={tHC("s2")}
-            className="ps-8"
-          />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tHC("s2")} className="ps-8" />
         </div>
       )}
       {visible.length === 0 && !settingsError && (

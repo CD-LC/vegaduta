@@ -37,7 +37,7 @@ const ASSIGNABLE_ROLES = [
 ];
 
 function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () => void }) {
-    const tHC = useTranslations("hcPlatformadminUsersPage");
+  const tHC = useTranslations("hcPlatformadminUsersPage");
   const askConfirm = useConfirm();
   const [detail, setDetail] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -133,9 +133,7 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
 
       {isOperator && (
         <Alert>
-          <AlertDescription>
-            {tHC("s18")}
-          </AlertDescription>
+          <AlertDescription>{tHC("s18")}</AlertDescription>
         </Alert>
       )}
 
@@ -155,7 +153,8 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
         </div>
         {otherRoles.length > 0 && (
           <p className="text-[11px] text-[color:var(--state-warning)]">
-            {tHC("s17")} {otherRoles.join(", ")}{tHC("s16")}
+            {tHC("s17")} {otherRoles.join(", ")}
+            {tHC("s16")}
           </p>
         )}
         <Button
@@ -199,7 +198,7 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
 }
 
 export default function PlatformUsersPage() {
-    const tHC = useTranslations("hcPlatformadminUsersPage");
+  const tHC = useTranslations("hcPlatformadminUsersPage");
   const askConfirm = useConfirm();
   const [q, setQ] = useState("");
   // Tenant filter: pick from the roster, or paste a tenant UUID / schema name
@@ -278,9 +277,7 @@ export default function PlatformUsersPage() {
 
   return (
     <AdminShell title={tHC("s12")}>
-      <PageHint>
-        {tHC("s11")}
-      </PageHint>
+      <PageHint>{tHC("s11")}</PageHint>
 
       <SectionCard
         title="Directory"

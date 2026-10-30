@@ -82,7 +82,7 @@ function Sha256Chip({ sha256 }: { sha256: string }) {
 }
 
 export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
-    const tHC = useTranslations("hcComponentsPluginsPluginCard");
+  const tHC = useTranslations("hcComponentsPluginsPluginCard");
   const Icon = PLUGIN_ICONS[plugin.id] ?? Puzzle;
   const released = plugin.releasedAt ? formatReleasedAt(plugin.releasedAt) : null;
   const downloadUrl =
@@ -130,7 +130,8 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
                   download from the API, never a client-side navigation. */}
               <a href={downloadUrl} download={plugin.artifact.fileName}>
                 <Download size={14} strokeWidth={2} aria-hidden="true" />
-                {tHC("s3")}{formatSize(plugin.artifact.sizeBytes)})
+                {tHC("s3")}
+                {formatSize(plugin.artifact.sizeBytes)})
               </a>
             </Button>
           ) : (

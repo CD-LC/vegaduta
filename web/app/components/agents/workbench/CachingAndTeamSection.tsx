@@ -8,7 +8,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function CachingAndTeamSection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchCachingAndTeamSection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchCachingAndTeamSection");
   const { isDraft, cachingSummary, selectedAgent, locked, t, onChanged } = useWorkbench();
   return (
     <>

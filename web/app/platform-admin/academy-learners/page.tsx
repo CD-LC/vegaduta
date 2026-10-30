@@ -120,7 +120,7 @@ type AcademyLearner = {
 };
 
 export default function AcademyLearnersPage() {
-    const tHC = useTranslations("hcPlatformadminAcademylearnersPage");
+  const tHC = useTranslations("hcPlatformadminAcademylearnersPage");
   const [learners, setLearners] = useState<AcademyLearner[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -390,12 +390,7 @@ export default function AcademyLearnersPage() {
                 </Button>
               </>
             ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setConfirmingTenantUnlock(true)}
-                title={tHC("s16")}
-              >
+              <Button size="sm" variant="outline" onClick={() => setConfirmingTenantUnlock(true)} title={tHC("s16")}>
                 <Building2 size={14} /> {tHC("s15")}
               </Button>
             )
@@ -417,12 +412,7 @@ export default function AcademyLearnersPage() {
               </Button>
             </>
           ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setConfirmingUnlockAll(true)}
-              title={tHC("s13")}
-            >
+            <Button size="sm" variant="outline" onClick={() => setConfirmingUnlockAll(true)} title={tHC("s13")}>
               <Users size={14} /> {tHC("s12")}
             </Button>
           )}
@@ -442,7 +432,14 @@ export default function AcademyLearnersPage() {
           <p className="p-5 text-sm text-muted-foreground">{tHC("s10")}</p>
         ) : filtered.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">
-            {search.trim() ? <>{tHC("s9")}{search}&rdquo;.</> : "No learners in this tenant filter."}
+            {search.trim() ? (
+              <>
+                {tHC("s9")}
+                {search}&rdquo;.
+              </>
+            ) : (
+              "No learners in this tenant filter."
+            )}
           </p>
         ) : (
           <>

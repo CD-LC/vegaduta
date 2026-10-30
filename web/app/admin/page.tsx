@@ -41,7 +41,7 @@ import { CardHeading, CardLink, Eyebrow, StatTile } from "./_overview/ui";
  * cards below.
  */
 export default function AdminOverviewPage() {
-    const tHC = useTranslations("hcAdminPage");
+  const tHC = useTranslations("hcAdminPage");
   const t = useTranslations("adminOverview");
   const router = useRouter();
   const { isAdmin } = useAuth();

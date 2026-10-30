@@ -22,7 +22,7 @@ import { useTranslations } from "../../lib/i18n";
 // decision): a signed-in visitor gets a highlighted "Back to console" and no
 // "Start free"; a logged-out visitor gets the acquisition pair.
 export default function PublicWorkflowNav() {
-    const tHC = useTranslations("hcHelpWorkflowrecipesPublicWorkflowNav");
+  const tHC = useTranslations("hcHelpWorkflowrecipesPublicWorkflowNav");
   const authedHint = useAuthedHint();
 
   return (
@@ -38,7 +38,9 @@ export default function PublicWorkflowNav() {
           draggable={false}
           priority
         />
-        <span><BrandName /></span>
+        <span>
+          <BrandName />
+        </span>
       </Link>
       <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
         <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">

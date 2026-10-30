@@ -122,7 +122,7 @@ async function runCommand(cmd: Command, notify: (text: string) => void): Promise
 }
 
 export default function DevicePage() {
-    const tHC = useTranslations("hcDevicePage");
+  const tHC = useTranslations("hcDevicePage");
   const [device, setDevice] = useState<Device | null>(null);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -230,9 +230,7 @@ export default function DevicePage() {
   return (
     <main style={{ maxWidth: 560, margin: "48px auto", padding: "0 16px", fontFamily: "system-ui" }}>
       <h1 style={{ fontSize: 22, fontWeight: 700 }}>{tHC("s6")}</h1>
-      <p style={{ color: "#555", marginTop: 8 }}>
-        {tHC("s5")}
-      </p>
+      <p style={{ color: "#555", marginTop: 8 }}>{tHC("s5")}</p>
 
       {!device ? (
         <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
@@ -273,7 +271,15 @@ export default function DevicePage() {
               localStorage.removeItem(STORE_KEY);
               setDevice(null);
             }}
-            style={{ marginTop: 8, fontSize: 13, color: "#b00020", background: "none", border: "none", padding: 0, textDecoration: "underline" }}
+            style={{
+              marginTop: 8,
+              fontSize: 13,
+              color: "#b00020",
+              background: "none",
+              border: "none",
+              padding: 0,
+              textDecoration: "underline",
+            }}
           >
             Unpair
           </button>

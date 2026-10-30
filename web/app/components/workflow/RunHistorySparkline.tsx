@@ -26,7 +26,7 @@ interface SparklineProps {
  * at a glance.
  */
 export default function Sparkline({ rows, typical, selectedRunId, compareRunId, onPick }: SparklineProps) {
-    const tHC = useTranslations("hcComponentsWorkflowRunHistorySparkline");
+  const tHC = useTranslations("hcComponentsWorkflowRunHistorySparkline");
   const pts = useMemo(() => {
     const recent = rows.slice(0, SPARK_MAX).reverse();
     const ds = recent.map((r) => r.duration).filter((d): d is number => d != null && d > 0);
@@ -135,7 +135,8 @@ export default function Sparkline({ rows, typical, selectedRunId, compareRunId, 
         {cmp && (
           <span>
             <i className="rh-lg-cmp" aria-hidden="true" />
-            {tHC("s1")}{cmp.row.flight}
+            {tHC("s1")}
+            {cmp.row.flight}
           </span>
         )}
       </figcaption>

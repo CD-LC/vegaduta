@@ -62,7 +62,7 @@ export default function InboxPanel({
   // route-transition cover, or a failed first fetch would hold it forever.
   onCountsChange?: (waiting: number | null, held: number | null) => void;
 }) {
-    const tHC = useTranslations("hcAdminInboxInboxPanel");
+  const tHC = useTranslations("hcAdminInboxInboxPanel");
   const tg = useTranslations("f2GapsAdmin");
   const [stats, setStats] = useState<InboxStats | null>(null);
   const [items, setItems] = useState<ConversationSummary[]>([]);
@@ -251,8 +251,9 @@ export default function InboxPanel({
       <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-foreground">
         <p className="font-medium">{tHC("s10")}</p>
         <p className="mt-1 text-muted-foreground">
-          {tHC("s9")}<code>web/app/lib/api.ts</code>{tHC("s8")}{" "}
-          <code>web/app/admin/inbox/inboxApi.ts</code> {tHC("s7")}
+          {tHC("s9")}
+          <code>web/app/lib/api.ts</code>
+          {tHC("s8")} <code>web/app/admin/inbox/inboxApi.ts</code> {tHC("s7")}
         </p>
       </div>
     );

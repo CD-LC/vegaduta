@@ -33,7 +33,7 @@ function toInstant(local: string): string | undefined {
 }
 
 function AuditSearchSection() {
-    const tHC = useTranslations("hcPlatformadminAuditPage");
+  const tHC = useTranslations("hcPlatformadminAuditPage");
   const [f, setF] = useState({
     tenantId: "",
     actorId: "",
@@ -163,9 +163,7 @@ function AuditSearchSection() {
           </p>
           {result.truncated && (
             <Alert>
-              <AlertDescription>
-                {tHC("s11")}
-              </AlertDescription>
+              <AlertDescription>{tHC("s11")}</AlertDescription>
             </Alert>
           )}
           {result.rows.length === 0 ? (
@@ -234,12 +232,10 @@ function AuditSearchSection() {
 }
 
 export default function AuditCompliancePage() {
-    const tHC = useTranslations("hcPlatformadminAuditPage");
+  const tHC = useTranslations("hcPlatformadminAuditPage");
   return (
     <AdminShell title={tHC("s9")}>
-      <PageHint>
-        {tHC("s8")}
-      </PageHint>
+      <PageHint>{tHC("s8")}</PageHint>
 
       <KillSwitchSection pollMs={15000} delay={0} />
 
@@ -248,9 +244,7 @@ export default function AuditCompliancePage() {
       <ActivitySection pollMs={10000} delay={0.03} />
 
       <SectionCard title={tHC("s7")} icon={ShieldAlert} delay={0.06}>
-        <p className="text-sm text-muted-foreground">
-          {tHC("s6")}
-        </p>
+        <p className="text-sm text-muted-foreground">{tHC("s6")}</p>
         <Link
           href="/platform-admin/tenants"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
@@ -261,7 +255,9 @@ export default function AuditCompliancePage() {
 
       <SectionCard title={tHC("s4")} icon={ShieldAlert} delay={0.09}>
         <p className="text-sm text-muted-foreground">
-          {tHC("s3")}<code>{tHC("s2")}</code>{tHC("s1")}
+          {tHC("s3")}
+          <code>{tHC("s2")}</code>
+          {tHC("s1")}
         </p>
       </SectionCard>
     </AdminShell>

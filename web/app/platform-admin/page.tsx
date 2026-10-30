@@ -135,7 +135,7 @@ export default function OverviewRoute() {
 }
 
 function OverviewPage() {
-    const tHC = useTranslations("hcPlatformadminPage");
+  const tHC = useTranslations("hcPlatformadminPage");
   const [health, setHealth] = useState<any>(null);
   const [healthError, setHealthError] = useState<any>(null);
   const [openAlerts, setOpenAlerts] = useState<TileValue>(LOADING);
@@ -274,9 +274,7 @@ function OverviewPage() {
             <Wrench size={18} className="shrink-0 text-primary" aria-hidden="true" />
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold text-foreground">{tHC("s8")}</div>
-              <div className="text-xs text-muted-foreground">
-                {tHC("s7")}
-              </div>
+              <div className="text-xs text-muted-foreground">{tHC("s7")}</div>
             </div>
             <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
               Open <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
@@ -293,10 +291,7 @@ function OverviewPage() {
               <CardContent className="p-4">
                 <div className="text-xs text-muted-foreground">{tile.label}</div>
                 {tile.value.state === "unavailable" ? (
-                  <div
-                    className="mt-1 text-sm font-medium text-muted-foreground"
-                    title={tHC("s6")}
-                  >
+                  <div className="mt-1 text-sm font-medium text-muted-foreground" title={tHC("s6")}>
                     unavailable
                   </div>
                 ) : (
@@ -334,7 +329,8 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-destructive/40 bg-destructive/10 text-destructive"
                     >
-                      <Power size={11} /> {tHC("s4")}{platformStopped.reason ? `: ${platformStopped.reason}` : ""}
+                      <Power size={11} /> {tHC("s4")}
+                      {platformStopped.reason ? `: ${platformStopped.reason}` : ""}
                     </Badge>
                   </Link>
                 )}
@@ -344,7 +340,8 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
                     >
-                      {pendingMcp} {tHC("s3")}{pendingMcp === 1 ? "" : "s"} pending
+                      {pendingMcp} {tHC("s3")}
+                      {pendingMcp === 1 ? "" : "s"} pending
                     </Badge>
                   </Link>
                 )}
@@ -354,7 +351,8 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
                     >
-                      {pendingTemplates} {tHC("s2")}{pendingTemplates === 1 ? "" : "s"} pending
+                      {pendingTemplates} {tHC("s2")}
+                      {pendingTemplates === 1 ? "" : "s"} pending
                     </Badge>
                   </Link>
                 )}

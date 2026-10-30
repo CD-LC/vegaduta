@@ -36,7 +36,7 @@ export default function TemplatesGallery({
   initialResult: CommunityTemplatePage | null;
   initialFilters: GalleryFilters;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplatesGallery");
+  const tHC = useTranslations("hcComponentsTemplatesTemplatesGallery");
   const router = useRouter();
   const [filters, setFilters] = useState<GalleryFilters>(initialFilters);
   const [result, setResult] = useState<CommunityTemplatePage | null>(initialResult);
@@ -49,27 +49,30 @@ export default function TemplatesGallery({
   const skipNextFetch = useRef<boolean>(!!initialResult);
   const reqId = useRef(0);
 
-  const load = useCallback(async (f: GalleryFilters) => {
-    const myReq = ++reqId.current;
-    setStatus("loading");
-    setError(null);
-    try {
-      const res = await api.listGalleryTemplates({
-        kind: f.kind === "all" ? undefined : f.kind,
-        category: f.category === "all" ? undefined : f.category,
-        tag: f.tag ?? undefined,
-        page: f.page,
-        pageSize,
-      });
-      if (myReq !== reqId.current) return; // a newer request superseded this one
-      setResult(res);
-      setStatus("ready");
-    } catch (e: any) {
-      if (myReq !== reqId.current) return;
-      setError(e?.message || "Couldn't load templates. Please try again.");
-      setStatus("error");
-    }
-  }, [pageSize]);
+  const load = useCallback(
+    async (f: GalleryFilters) => {
+      const myReq = ++reqId.current;
+      setStatus("loading");
+      setError(null);
+      try {
+        const res = await api.listGalleryTemplates({
+          kind: f.kind === "all" ? undefined : f.kind,
+          category: f.category === "all" ? undefined : f.category,
+          tag: f.tag ?? undefined,
+          page: f.page,
+          pageSize,
+        });
+        if (myReq !== reqId.current) return; // a newer request superseded this one
+        setResult(res);
+        setStatus("ready");
+      } catch (e: any) {
+        if (myReq !== reqId.current) return;
+        setError(e?.message || "Couldn't load templates. Please try again.");
+        setStatus("error");
+      }
+    },
+    [pageSize]
+  );
 
   useEffect(() => {
     if (skipNextFetch.current) {
@@ -185,9 +188,7 @@ export default function TemplatesGallery({
               <Search size={18} strokeWidth={2} aria-hidden="true" />
             </span>
             <p className="text-sm font-medium text-foreground">{tHC("s3")}</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              {tHC("s2")}
-            </p>
+            <p className="max-w-sm text-sm text-muted-foreground">{tHC("s2")}</p>
             {(filters.kind !== "all" || filters.category !== "all" || filters.tag) && (
               <Button
                 variant="outline"

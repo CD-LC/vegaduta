@@ -54,7 +54,7 @@ export default function CallControlsBar({
   endCall,
   startCall,
 }: CallControlsBarProps) {
-    const tHC = useTnsHC("hcComponentsAgentsCallPanelCallControlsBar");
+  const tHC = useTnsHC("hcComponentsAgentsCallPanelCallControlsBar");
   const statusLabel =
     status === "connected"
       ? reconnecting

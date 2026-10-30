@@ -119,7 +119,7 @@ const SHORTCUTS: Array<{ label: string; keys: string[] }> = [
 ];
 
 function ShortcutsSheet({ onClose }: { onClose: () => void }) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
   const ref = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -262,7 +262,7 @@ export default function WorkflowCanvasZone({
   overlay,
   titleExtra,
 }: WorkflowCanvasZoneProps) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowCanvasZone");
   // "select": drag draws a marquee, pan via middle/right button or Space.
   // "pan": plain drag pans the canvas.
   const [mode, setMode] = useState<"select" | "pan">("select");
@@ -426,11 +426,7 @@ export default function WorkflowCanvasZone({
           )}
           {!readOnly && (
             <>
-              <ToolbarButton
-                label={tHC("s8")}
-                pressed={!panMode}
-                onClick={() => setMode("select")}
-              >
+              <ToolbarButton label={tHC("s8")} pressed={!panMode} onClick={() => setMode("select")}>
                 <MousePointer2 size={15} />
               </ToolbarButton>
               <ToolbarButton label={tHC("s7")} pressed={panMode} onClick={() => setMode("pan")}>

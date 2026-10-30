@@ -22,7 +22,7 @@ import { useTranslations } from "./lib/i18n";
 // browser silently fell through to the system-font fallback anyway. Naming
 // only the fallback stack is honest about what actually renders.
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-    const tHC = useTranslations("hcGlobalerror");
+  const tHC = useTranslations("hcGlobalerror");
   return (
     <html lang="en" dir="auto">
       <body className="ge-body">
@@ -93,7 +93,9 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <h1 className="ge-heading">
             <BrandName /> {tHC("s3")}
           </h1>
-          <p className="ge-sub">{tHC("s2")} {error?.digest ? `Ref ${error.digest}.` : null}</p>
+          <p className="ge-sub">
+            {tHC("s2")} {error?.digest ? `Ref ${error.digest}.` : null}
+          </p>
           <div className="ge-actions">
             <button type="button" onClick={reset} className="ge-btn ge-btn-primary">
               <RotateCcw size={16} aria-hidden="true" />

@@ -78,7 +78,7 @@ function WorkflowEdgeImpl({
   selected,
   data,
 }: EdgeProps<WorkflowEdgeType>) {
-    const tHC = useTranslations("hcComponentsWorkflowWorkflowEdge");
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowEdge");
   const onDelete = useContext(WorkflowEdgeDeleteContext);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -105,7 +105,14 @@ function WorkflowEdgeImpl({
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
   }, []);
 
-  const cls = ["wf-edge", edgeStateClass(state), "wf-edge-path", lens?.className ?? "", selected ? "wf-edge-selected" : "", hovered ? "wf-edge-hot" : ""]
+  const cls = [
+    "wf-edge",
+    edgeStateClass(state),
+    "wf-edge-path",
+    lens?.className ?? "",
+    selected ? "wf-edge-selected" : "",
+    hovered ? "wf-edge-hot" : "",
+  ]
     .filter(Boolean)
     .join(" ");
   const lensStyle = lens ? ({ "--wfx-lens-i": lens.intensity.toFixed(3) } as React.CSSProperties) : undefined;

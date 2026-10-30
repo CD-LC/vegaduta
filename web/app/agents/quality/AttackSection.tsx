@@ -75,7 +75,7 @@ export default function AttackSection({
   /** Tells the page whether the section is showing, so it can hide links that point at it. */
   onAvailabilityChange?: (available: boolean) => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityAttackSection");
+  const tHC = useTranslations("hcAgentsQualityAttackSection");
   // null = not known yet / not supported; [] = supported route but no attack scenarios.
   const [attackKeys, setAttackKeys] = useState<string[] | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -335,11 +335,7 @@ export default function AttackSection({
                   )}
                   {outcomeBadge(row)}
                   {row.deterministic && (
-                    <Badge
-                      variant="outline"
-                      data-testid={`attack-deterministic-${row.key}`}
-                      title={tHC("s8")}
-                    >
+                    <Badge variant="outline" data-testid={`attack-deterministic-${row.key}`} title={tHC("s8")}>
                       {tHC("s7")}
                     </Badge>
                   )}

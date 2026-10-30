@@ -46,7 +46,7 @@ export function TriggerNodeConfig({
   config: WorkflowNodeConfig;
   setConfig: (patch: Partial<WorkflowNodeConfig>) => void;
 }) {
-    const tHC = useTranslations("hcComponentsWorkflowNodeConfigFormsTriggerForm");
+  const tHC = useTranslations("hcComponentsWorkflowNodeConfigFormsTriggerForm");
   const t = useTranslations("nodeConfigDrawer");
   const tExtra = useTranslations("nodeConfigExtra");
   const [channelBusy, setChannelBusy] = useState(false);

@@ -108,7 +108,7 @@ function KeyValueGrid({ pairs }: { pairs: Array<[string, any]> }) {
 // key: value lines rather than a JSON dump, so a nested workflow-node config
 // still reads as data, not code.
 function NestedObject({ value, depth = 0 }: { value: any; depth?: number }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   if (value === null || value === undefined) return <span className="text-muted-foreground">—</span>;
   if (Array.isArray(value)) {
     if (value.length === 0) return <span className="text-muted-foreground">{tHC("s11")}</span>;
@@ -157,7 +157,7 @@ function NestedObject({ value, depth = 0 }: { value: any; depth?: number }) {
 }
 
 function AgentConfigView({ config }: { config: AgentTemplateConfig }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const modelPairs: Array<[string, any]> = [
     ["Provider", config.providerName],
     ["Model", config.model],
@@ -252,7 +252,7 @@ function NodeCard({ node }: { node: WorkflowTemplateNode }) {
 }
 
 function WorkflowConfigView({ config }: { config: WorkflowTemplateConfig }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const nodes = config.graph?.nodes || [];
   const edges = config.graph?.edges || [];
   const labelOf = (id: string) => nodes.find((n) => n.id === id)?.data?.label || id;
@@ -298,7 +298,7 @@ function WorkflowConfigView({ config }: { config: WorkflowTemplateConfig }) {
 }
 
 export default function ConfigViewer({ kind, config }: { kind: TemplateKind | string; config?: TemplateConfig }) {
-    const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
+  const tHC = useTranslations("hcPlatformadminComponentsTemplatesConfigViewer");
   const [rawOpen, setRawOpen] = useState(false);
 
   if (!config || Object.keys(config).length === 0) {
@@ -315,7 +315,9 @@ export default function ConfigViewer({ kind, config }: { kind: TemplateKind | st
       {kind === "WORKFLOW" && <WorkflowConfigView config={config as WorkflowTemplateConfig} />}
       {kind !== "AGENT" && kind !== "WORKFLOW" && (
         <div className="flex items-center gap-2 rounded-md border border-[var(--warning-border)] bg-[var(--warning-bg)] px-3 py-2 text-xs text-[var(--warning-text)]">
-          <AlertTriangle size={13} /> {tHC("s3")}{String(kind)}{tHC("s2")}
+          <AlertTriangle size={13} /> {tHC("s3")}
+          {String(kind)}
+          {tHC("s2")}
         </div>
       )}
 

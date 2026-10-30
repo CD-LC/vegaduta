@@ -29,8 +29,16 @@ type VersionDiffNodeListProps = {
   onFocusNode: (nodeId: string) => void;
 };
 
-export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, expanded, toggle, onFocusNode }: VersionDiffNodeListProps) {
-    const tHC = useTranslations("hcComponentsWorkflowVersionDiffNodeList");
+export default function VersionDiffNodeList({
+  uid,
+  rows,
+  activeIdx,
+  setActive,
+  expanded,
+  toggle,
+  onFocusNode,
+}: VersionDiffNodeListProps) {
+  const tHC = useTranslations("hcComponentsWorkflowVersionDiffNodeList");
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   function moveTo(i: number) {
@@ -153,7 +161,12 @@ export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, e
                       <h4 className="wf-vdiff-gh">{g.title}</h4>
                       <ChangeTable
                         caption={`${label}: ${g.title} changes`}
-                        rows={g.fields.map((f) => ({ key: f.path, label: f.display, before: f.before, after: f.after }))}
+                        rows={g.fields.map((f) => ({
+                          key: f.path,
+                          label: f.display,
+                          before: f.before,
+                          after: f.after,
+                        }))}
                       />
                     </div>
                   ))

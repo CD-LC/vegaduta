@@ -72,7 +72,7 @@ type ModelGate =
 const MAX_EVICTIONS_SHOWN = 14;
 
 export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null }) {
-    const tHC = useTranslations("hcComponentsAgentkitAgentTaskPanel");
+  const tHC = useTranslations("hcComponentsAgentkitAgentTaskPanel");
   const [gate, setGate] = useState<ModelGate>({ kind: "checking" });
   const [task, setTask] = useState("");
   const [run, setRun] = useState<AgentRunState | null>(null);
@@ -437,7 +437,8 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
         )}
         {repo && gate.kind === "ready" && !running && (
           <span className="text-xs text-muted-foreground">
-            {tHC("s3")} {gate.modelId} · {gate.contextWindow.toLocaleString()}{tHC("s2")}
+            {tHC("s3")} {gate.modelId} · {gate.contextWindow.toLocaleString()}
+            {tHC("s2")}
           </span>
         )}
         {running && (

@@ -43,7 +43,7 @@ export default function CodeEditorTextarea({
   "aria-label"?: string;
   className?: string;
 }) {
-    const tHC = useTranslations("hcComponentsCodeEditorTextarea");
+  const tHC = useTranslations("hcComponentsCodeEditorTextarea");
   const gutterRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const hintId = useId();

@@ -17,7 +17,7 @@ type InputRequestFieldsProps = {
 };
 
 export default function InputRequestFields({ fields, idPrefix, values, setValues }: InputRequestFieldsProps) {
-    const tHC = useTranslations("hcComponentsWorkflowApprovalInputFields");
+  const tHC = useTranslations("hcComponentsWorkflowApprovalInputFields");
   return (
     <div className="apc-fields">
       {fields.map((f) => {
@@ -50,12 +50,7 @@ export default function InputRequestFields({ fields, idPrefix, values, setValues
             ) : f.type === "number" ? (
               <input {...common} type="number" inputMode="decimal" onChange={(e) => set(e.target.value)} />
             ) : (
-              <textarea
-                {...common}
-                className="apc-input apc-textarea"
-                rows={2}
-                onChange={(e) => set(e.target.value)}
-              />
+              <textarea {...common} className="apc-input apc-textarea" rows={2} onChange={(e) => set(e.target.value)} />
             )}
           </div>
         );

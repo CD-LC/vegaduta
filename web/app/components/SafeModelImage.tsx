@@ -19,7 +19,7 @@ export default function SafeModelImage({
   alt?: string;
   className?: string;
 }) {
-    const tHC = useTranslations("hcComponentsSafeModelImage");
+  const tHC = useTranslations("hcComponentsSafeModelImage");
   if (!src) return null;
   const origin = typeof window !== "undefined" ? window.location.origin : undefined;
   if (isTrustedImageUrl(src, origin)) {
@@ -34,7 +34,10 @@ export default function SafeModelImage({
       data-testid="blocked-image"
       className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
     >
-      <span>{tHC("s2")}{imageHostLabel(src)}){alt ? `: ${alt}` : ""}</span>
+      <span>
+        {tHC("s2")}
+        {imageHostLabel(src)}){alt ? `: ${alt}` : ""}
+      </span>
       {openable && (
         <a
           href={src}

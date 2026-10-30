@@ -43,7 +43,7 @@ export default function AuthBrandPanel({
   /** Optional extra row under the subtitle (e.g. the sign-in / sign-up switch). */
   children?: ReactNode;
 }) {
-    const tHC = useTranslations("hcComponentsAuthBrandPanel");
+  const tHC = useTranslations("hcComponentsAuthBrandPanel");
   return (
     <header className="vd-auth__strip">
       <Link href={logoHref} className="vd-auth__brand" aria-label={tHC("s1")}>

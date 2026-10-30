@@ -40,7 +40,7 @@ const REGISTRIES = [
 type Props = { installed: SkillSummary[]; onChanged: () => Promise<unknown> | void };
 
 export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
-    const tHC = useTranslations("hcComponentsSkillRegistryBrowser");
+  const tHC = useTranslations("hcComponentsSkillRegistryBrowser");
   const { hasPermission } = useAuth();
   const canManageSkills = hasPermission("MANAGE_AGENTS");
   const [query, setQuery] = useState("");
@@ -140,9 +140,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
         <h2 id="skill-registry-heading" className="text-lg font-semibold text-foreground">
           {tHC("s11")}
         </h2>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          {tHC("s10")}
-        </p>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{tHC("s10")}</p>
       </div>
 
       <form
@@ -266,9 +264,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
         itemLabel="skills"
       />
 
-      {!loading && results.length === 0 && !error && (
-        <p className="text-sm text-muted-foreground">{tHC("s5")}</p>
-      )}
+      {!loading && results.length === 0 && !error && <p className="text-sm text-muted-foreground">{tHC("s5")}</p>}
 
       {canManageSkills && (
         <form

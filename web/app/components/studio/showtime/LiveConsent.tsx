@@ -17,7 +17,7 @@ export default function LiveConsent({
   onAgree: (agree: boolean) => void;
   onAccept: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeLiveConsent");
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveConsent");
   return (
     <div className="mx-auto mt-8 max-w-lg rounded-3xl border border-white/10 bg-zinc-900/80 p-6 shadow-2xl">
       <h3 className="text-xl font-semibold">{tHC("s6")}</h3>
@@ -25,7 +25,9 @@ export default function LiveConsent({
         {tHC("s5")}{" "}
         {clientIp ? (
           <>
-            {tHC("s4")}<span className="font-mono">{clientIp}</span>{tHC("s3")}
+            {tHC("s4")}
+            <span className="font-mono">{clientIp}</span>
+            {tHC("s3")}
           </>
         ) : (
           "Your network address is recorded against this sandbox."

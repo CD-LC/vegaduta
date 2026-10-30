@@ -16,7 +16,7 @@ import { useTranslations } from "../../lib/i18n";
 // Honesty rule: the ONLY number asserted here is `importCount`, which is real
 // API data. Nothing else claims a count, rating or testimonial.
 export default function TemplateCard({ template }: { template: CommunityTemplateSummary }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateCard");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateCard");
   const cat = categoryMeta(template.category);
   const kind = kindMeta(template.kind);
   const KindIcon = kind.icon;

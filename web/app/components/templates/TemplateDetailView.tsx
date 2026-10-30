@@ -36,7 +36,7 @@ import { useTranslations } from "../../lib/i18n";
 // (crawlable) and self-heals on the client if the server couldn't reach the
 // not-yet-live backend.
 export default function TemplateDetailView({ id, initial }: { id: string; initial: CommunityTemplateDetail | null }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
   const router = useRouter();
   const [detail, setDetail] = useState<CommunityTemplateDetail | null>(initial);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(initial ? "ready" : "loading");
@@ -191,9 +191,7 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
 
       {/* ---- Read-only design --------------------------------------- */}
       <div className="space-y-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          {tHC("s6")}
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{tHC("s6")}</p>
 
         <TemplateRequirementsPanel requirements={detail.requirements} />
 
@@ -204,9 +202,7 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
             <p className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Lock size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s5")}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {tHC("s4")}
-            </p>
+            <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             <div className="pt-2">
               <Button onClick={handleImport} disabled={importing}>
                 <Download size={16} strokeWidth={2} aria-hidden="true" />
@@ -232,7 +228,7 @@ function DesignSection({
   children?: ReactNode;
   empty?: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
   return (
     <Card elevation="base" className="gap-3 py-5">
       <CardContent className="space-y-2.5">
@@ -364,7 +360,7 @@ const AGENT_KEYS = [
 ];
 
 function AgentDesign({ detail }: { detail: CommunityTemplateDetail }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
   const cfg = asCfg(detail.config);
   const systemPrompt = readString(cfg, ["systemPrompt", "system_prompt", "prompt", "instructions"]);
   const provider = readString(cfg, ["providerName", "provider"]);
@@ -469,7 +465,7 @@ function WorkflowDesign({ detail }: { detail: CommunityTemplateDetail }) {
 // snapshot field is never invisible - the reader can still see that it's part
 // of what they'd import.
 function ExtraSettings({ cfg, keys }: { cfg: Cfg; keys: string[] }) {
-    const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
+  const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
   return (
     <DesignSection icon={Settings2} title={tHC("s1")}>
       <dl className="space-y-1.5">

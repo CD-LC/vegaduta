@@ -88,7 +88,7 @@ function newId(): string {
 }
 
 export default function SharedAgentPage() {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   usePageReady(true);
   const params = useParams();
   const rawId = params?.shareId;
@@ -187,9 +187,9 @@ export default function SharedAgentPage() {
             <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
               <Info className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <p className="text-xs text-muted-foreground">
-                <span className="text-foreground">{info.agentName}</span> {tHC("s16")}{" "}
-                <BrandName /> sandbox
-                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}{tHC("s15")}
+                <span className="text-foreground">{info.agentName}</span> {tHC("s16")} <BrandName /> sandbox
+                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}
+                {tHC("s15")}
               </p>
             </div>
 
@@ -247,7 +247,7 @@ export default function SharedAgentPage() {
 }
 
 function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   const expiryLabel = expiresLine(info?.expiresAt || null);
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -347,7 +347,7 @@ function ThinkingBubble() {
 /** A blocking code, mid-conversation: the thread stays, the composer becomes
  *  the labelled state plus the only next step that actually works. */
 function BlockedComposer({ code }: { code: ShareErrorCode }) {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-border/70 bg-card/50 px-4 py-5 text-center">
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
@@ -364,7 +364,7 @@ function BlockedComposer({ code }: { code: ShareErrorCode }) {
 /** The page-level dead end (link expired/capped/unreachable before anything
  *  loaded). Same no-error-iconography posture as /try's Unavailable. */
 function BlockedScreen({ code }: { code: ShareErrorCode }) {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -396,7 +396,7 @@ const REPORT_REASONS = [
  *  picker. One tap files it; the thank-you renders regardless of transport
  *  outcome — a safety report is never bounced back to the reporter to retry. */
 function ReportPanel({ shareId }: { shareId: string }) {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -466,7 +466,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
 /** The persistent provenance + conversion line. Every visitor to a shared
  *  page is a prospect who just watched the product work. */
 function ViewerFooter() {
-    const tHC = useTranslations("hcAShareIdPage");
+  const tHC = useTranslations("hcAShareIdPage");
   return (
     <footer className="border-t border-border/60 bg-background/80">
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-1.5 px-4 py-4 text-center sm:px-6">
@@ -477,9 +477,7 @@ function ViewerFooter() {
           {tHC("s3")} <BrandName /> {tHC("s2")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
-        <p className="text-[11px] text-muted-foreground">
-          {tHC("s1")}
-        </p>
+        <p className="text-[11px] text-muted-foreground">{tHC("s1")}</p>
       </div>
     </footer>
   );

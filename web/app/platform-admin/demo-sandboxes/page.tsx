@@ -40,7 +40,7 @@ import { useTranslations } from "../../lib/i18n";
 type Pending = { mode: "selected" | "all"; ids: string[] };
 
 export default function DemoSandboxesPage() {
-    const tHC = useTranslations("hcPlatformadminDemosandboxesPage");
+  const tHC = useTranslations("hcPlatformadminDemosandboxesPage");
   const [inventory, setInventory] = useState<DemoSandboxInventory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -158,8 +158,8 @@ export default function DemoSandboxesPage() {
       }
     >
       <PageHint>
-        {tHC("s22")}{" "}
-        {RECLAIM_BATCH_LIMIT}{tHC("s21")}{" "}
+        {tHC("s22")} {RECLAIM_BATCH_LIMIT}
+        {tHC("s21")}{" "}
         <Link href="/platform-admin/demo-sandbox" className="underline underline-offset-2 hover:text-foreground">
           {tHC("s20")}
         </Link>
@@ -193,9 +193,7 @@ export default function DemoSandboxesPage() {
             ) : (
               <p className="text-sm text-muted-foreground">{tHC("s18")}</p>
             )}
-            <InfoNote>
-              {tHC("s17")}
-            </InfoNote>
+            <InfoNote>{tHC("s17")}</InfoNote>
           </SectionCard>
 
           <SectionCard
@@ -212,7 +210,8 @@ export default function DemoSandboxesPage() {
                   onClick={() => begin("selected")}
                   title={`Erase the selected sandboxes (first ${RECLAIM_BATCH_LIMIT} per click)`}
                 >
-                  {tHC("s15")}{Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
+                  {tHC("s15")}
+                  {Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
                 </Button>
                 <Button
                   size="sm"
@@ -221,14 +220,16 @@ export default function DemoSandboxesPage() {
                   onClick={() => begin("all")}
                   title={tHC("s14")}
                 >
-                  {tHC("s13")}{RECLAIM_BATCH_LIMIT} {tHC("s12")}
+                  {tHC("s13")}
+                  {RECLAIM_BATCH_LIMIT} {tHC("s12")}
                 </Button>
               </div>
             }
           >
             {selectedCount > RECLAIM_BATCH_LIMIT && (
               <p className="text-xs text-[var(--warning-text)]">
-                {selectedCount} {tHC("s11")} {RECLAIM_BATCH_LIMIT}{tHC("s10")}
+                {selectedCount} {tHC("s11")} {RECLAIM_BATCH_LIMIT}
+                {tHC("s10")}
               </p>
             )}
 
@@ -240,8 +241,7 @@ export default function DemoSandboxesPage() {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {pending.mode === "all" ? `The server picks the next batch of up to ${RECLAIM_BATCH_LIMIT}. ` : ""}
-                  {tHC("s7")}{" "}
-                  <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> {tHC("s6")}
+                  {tHC("s7")} <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> {tHC("s6")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Input
@@ -270,7 +270,9 @@ export default function DemoSandboxesPage() {
 
             {lastResult && (
               <div className="space-y-1 rounded-lg border border-border p-3 text-xs">
-                <p className="font-semibold">{tHC("s5")} {reclaimSummary(lastResult)}</p>
+                <p className="font-semibold">
+                  {tHC("s5")} {reclaimSummary(lastResult)}
+                </p>
                 {lastResult.failed.length > 0 && (
                   <ul className="list-disc ps-5 text-destructive">
                     {lastResult.failed.map((f) => (
@@ -282,7 +284,8 @@ export default function DemoSandboxesPage() {
                 )}
                 {lastResult.remaining > 0 && !pending && (
                   <Button size="sm" variant="outline" disabled={reclaiming} onClick={() => begin("all")}>
-                    {tHC("s4")}{Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
+                    {tHC("s4")}
+                    {Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
                   </Button>
                 )}
               </div>

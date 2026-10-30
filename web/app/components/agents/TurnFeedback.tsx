@@ -36,7 +36,7 @@ export default function TurnFeedback({
   sessionId: string | null;
   turnRef: string;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsTurnFeedback");
+  const tHC = useTranslations("hcComponentsAgentsTurnFeedback");
   const [thumb, setThumb] = useState<null | "up" | "down">(null);
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);

@@ -133,7 +133,7 @@ export default function AgentDesigner({
   onAgentRefresh,
   initialTab,
 }: Props) {
-    const tHC = useTranslations("hcComponentsStudioAgentDesigner");
+  const tHC = useTranslations("hcComponentsStudioAgentDesigner");
   const base = useMemo(() => (agent ? draftFromAgent(agent) : null), [agent]);
   const [draft, setDraft] = useState<DesignerDraft>(() => base ?? blankDraft());
   const [savedFlash, setSavedFlash] = useState(false);
@@ -250,16 +250,11 @@ export default function AgentDesigner({
                 placeholder={tHC("s23")}
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               />
-              {agent && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {tHC("s22")}
-                </p>
-              )}
+              {agent && <p className="mt-1 text-xs text-muted-foreground">{tHC("s22")}</p>}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium" htmlFor="studio-agent-mission">
-                Mission{" "}
-                <span className="font-normal text-muted-foreground">{tHC("s21")}</span>
+                Mission <span className="font-normal text-muted-foreground">{tHC("s21")}</span>
               </label>
               <Textarea
                 id="studio-agent-mission"
@@ -278,9 +273,7 @@ export default function AgentDesigner({
 
         {/* ---------------- Hands ---------------- */}
         <TabsContent value="hands" className="space-y-5">
-          <p className="text-xs text-muted-foreground">
-            {tHC("s19")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s19")}</p>
           {TOOL_GROUPS.map((g) => {
             const items = availableTools.filter((t) => t.group === g.id);
             if (items.length === 0) return null;
@@ -329,9 +322,7 @@ export default function AgentDesigner({
               </section>
             );
           })}
-          {availableTools.length === 0 && (
-            <div className="text-xs text-muted-foreground">{tHC("s16")}</div>
-          )}
+          {availableTools.length === 0 && <div className="text-xs text-muted-foreground">{tHC("s16")}</div>}
           {connectorTools.length > 0 && (
             <div className="rounded-xl border border-border/60 p-3 text-xs text-muted-foreground">
               Plus {connectorTools.length} tool{connectorTools.length === 1 ? "" : "s"} from {connectorServers.size}{" "}
@@ -523,9 +514,7 @@ export default function AgentDesigner({
                 onChange={(e) => setDraft({ ...draft, temperature: Number(e.target.value) })}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                {tHC("s7")}
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
             </div>
             <div>
               <label className="mb-1 flex items-center justify-between text-sm font-medium" htmlFor="studio-tokens">
@@ -543,9 +532,7 @@ export default function AgentDesigner({
                 onChange={(e) => setDraft({ ...draft, maxTokens: Number(e.target.value) })}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                {tHC("s5")}
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
             </div>
           </section>
         </TabsContent>
@@ -571,9 +558,7 @@ export default function AgentDesigner({
                 Cancel
               </Button>
             )}
-            {savedFlash && (
-              <span className="text-sm text-emerald-600">{tHC("s4")}</span>
-            )}
+            {savedFlash && <span className="text-sm text-emerald-600">{tHC("s4")}</span>}
             {readOnly && <span className="text-sm text-muted-foreground">{tHC("s3")}</span>}
             {!readOnly && agent && !dirty && !savedFlash && (
               <span className="text-xs text-muted-foreground">{tHC("s2")}</span>

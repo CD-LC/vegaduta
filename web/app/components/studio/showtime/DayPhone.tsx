@@ -19,7 +19,7 @@ export default function DayPhone({
   p: number;
   stats: ReturnType<typeof statsAt>;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
   const screen: PhoneScreen = ev
     ? ev.id === "report"
       ? {
@@ -69,9 +69,7 @@ export default function DayPhone({
               return <Item key={i} it={it} k={k} tone={screen.tone} />;
             })}
           </div>
-          <div className="pb-2 text-center text-[9px] uppercase tracking-wider text-zinc-600">
-            {tHC("s2")}
-          </div>
+          <div className="pb-2 text-center text-[9px] uppercase tracking-wider text-zinc-600">{tHC("s2")}</div>
         </div>
       </div>
     </div>
@@ -79,7 +77,7 @@ export default function DayPhone({
 }
 
 function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
   const style = { opacity: k, transform: `translateY(${(1 - k) * 12}px)` };
   const t = TONE[tone];
   switch (it.kind) {

@@ -12,7 +12,7 @@ import { useTranslations } from "../../../lib/i18n";
 // DEMO PAGE: the real proof-ledger / trust-ladder / rehearsal screen against the in-memory fake (mock data only).
 
 function Inner() {
-    const tHC = useTranslations("hcTryEnvoydemoDetailPage");
+  const tHC = useTranslations("hcTryEnvoydemoDetailPage");
   const auth = useContext(AuthContext) as Record<string, unknown> | null;
   const id = useSearchParams().get("id") || "demo-1";
   const value = { ...(auth ?? {}), isAdmin: true, hasPermission: () => true };
@@ -31,7 +31,10 @@ function Inner() {
           <span>
             <strong>{tHC("s3")}</strong> {tHC("s2")}
           </span>
-          <Link href="/try/envoy-demo" className="rounded-lg border border-border/70 px-3 py-1 text-xs hover:bg-background/60">
+          <Link
+            href="/try/envoy-demo"
+            className="rounded-lg border border-border/70 px-3 py-1 text-xs hover:bg-background/60"
+          >
             {tHC("s1")}
           </Link>
         </div>

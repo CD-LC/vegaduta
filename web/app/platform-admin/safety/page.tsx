@@ -16,16 +16,12 @@ import { useTranslations } from "../../lib/i18n";
 // the same platform_setting keys the live guardrail engine reads, so changes
 // take effect on the next inbound message.
 export default function SafetyModerationPage() {
-    const tHC = useTranslations("hcPlatformadminSafetyPage");
+  const tHC = useTranslations("hcPlatformadminSafetyPage");
   return (
     <AdminShell title={tHC("s3")}>
-      <PageHint>
-        {tHC("s2")}
-      </PageHint>
+      <PageHint>{tHC("s2")}</PageHint>
 
-      <InfoNote>
-        {tHC("s1")}
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
 
       <PolicyPacksPanel delay={0} />
       <ThresholdsPanel delay={0.03} />

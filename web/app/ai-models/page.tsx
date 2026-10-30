@@ -104,7 +104,7 @@ interface EditFormProps {
 }
 
 function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProps) {
-    const tHC = useTranslations("hcAimodelsPage");
+  const tHC = useTranslations("hcAimodelsPage");
   const [providerName, setProviderName] = useState(row.providerName || providerOptions[0]?.name || "PLATFORM_HOSTED");
   const [model, setModel] = useState(row.model || "");
 
@@ -164,7 +164,7 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
 }
 
 export default function AiModelControlPage() {
-    const tHC = useTranslations("hcAimodelsPage");
+  const tHC = useTranslations("hcAimodelsPage");
   const { hasPermission } = useAuth();
   const canManageSettings = hasPermission("MANAGE_TENANT_SETTINGS");
   const [settings, setSettings] = useState(null);
@@ -284,9 +284,7 @@ export default function AiModelControlPage() {
 
       {!canManageSettings && (
         <Card className="mb-4 gap-0 border-dashed p-4">
-          <p className="text-sm text-muted-foreground">
-            {tHC("s7")}
-          </p>
+          <p className="text-sm text-muted-foreground">{tHC("s7")}</p>
         </Card>
       )}
 
@@ -343,9 +341,7 @@ export default function AiModelControlPage() {
                       {(PROVIDER_LABELS[row.providerName] || row.providerName) + " · " + row.model}
                     </Badge>
                   ) : (
-                    <p className="text-xs text-muted-foreground">
-                      {tHC("s1")}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
                   )}
                 </div>
                 {canManageSettings && !editing && (

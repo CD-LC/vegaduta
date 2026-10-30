@@ -43,7 +43,7 @@ function kb(bytes: number): string {
 }
 
 export default function AgentKnowledge({ token, agent, limits, readOnly, topicHint, onChanged }: Props) {
-    const tHC = useTranslations("hcComponentsStudioAgentKnowledge");
+  const tHC = useTranslations("hcComponentsStudioAgentKnowledge");
   const [docs, setDocs] = useState<StudioDocument[] | null>(null);
   const [pending, setPending] = useState<Pending[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -130,9 +130,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
       <Alert>
         <AlertTriangle aria-hidden="true" />
         <AlertTitle>{tHC("s16")}</AlertTitle>
-        <AlertDescription>
-          {tHC("s15")}
-        </AlertDescription>
+        <AlertDescription>{tHC("s15")}</AlertDescription>
       </Alert>
     );
   }

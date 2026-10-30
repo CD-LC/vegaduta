@@ -69,7 +69,7 @@ const ERROR_COPY: Record<ShareErrorCode, { text: string; blocking: boolean }> = 
 type ResultSource = "text" | "voice";
 
 export default function SharedWorkflowPage() {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   usePageReady(true);
   const params = useParams();
   const rawId = params?.shareId;
@@ -179,7 +179,8 @@ export default function SharedWorkflowPage() {
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.workflowName}</span> {tHC("s12")} <BrandName />{tHC("s11")}
+                  <span className="text-foreground">{info.workflowName}</span> {tHC("s12")} <BrandName />
+                  {tHC("s11")}
                 </p>
               )}
             </div>
@@ -264,7 +265,7 @@ export default function SharedWorkflowPage() {
 }
 
 function ViewerHeader({ info }: { info: SharedWorkflowInfo | null }) {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   if (isWhiteLabeled(info)) {
     // The owning tenant's brand instead of VegaDūta's - a static lockup, not
     // a link (the only "home" this header could link to is VegaDūta's, which
@@ -335,7 +336,7 @@ function ThinkingBubble() {
 }
 
 function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLabeled: boolean }) {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   return (
     <div className="flex flex-col items-center gap-3 rounded-xl border border-border/70 bg-card/50 px-4 py-5 text-center">
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
@@ -353,7 +354,7 @@ function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLa
 }
 
 function BlockedScreen({ code }: { code: ShareErrorCode }) {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -382,7 +383,7 @@ const REPORT_REASONS = [
 ];
 
 function ReportPanel({ shareId }: { shareId: string }) {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -450,7 +451,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
 }
 
 function ViewerFooter() {
-    const tHC = useTranslations("hcWorkflowShareIdPage");
+  const tHC = useTranslations("hcWorkflowShareIdPage");
   return (
     <footer className="border-t border-border/60 bg-background/80">
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-1.5 px-4 py-4 text-center sm:px-6">

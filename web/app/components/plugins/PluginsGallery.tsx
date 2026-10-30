@@ -40,7 +40,7 @@ export function filterPlugins(
 }
 
 export default function PluginsGallery({ initialCatalog }: { initialCatalog: PluginCatalog | null }) {
-    const tHC = useTranslations("hcComponentsPluginsPluginsGallery");
+  const tHC = useTranslations("hcComponentsPluginsPluginsGallery");
   const [catalog, setCatalog] = useState<PluginCatalog | null>(initialCatalog);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(initialCatalog ? "ready" : "loading");
   const [error, setError] = useState<string | null>(null);

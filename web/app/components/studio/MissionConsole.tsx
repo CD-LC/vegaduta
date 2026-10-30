@@ -68,7 +68,7 @@ export default function MissionConsole({
   prefill,
   timeoutSeconds,
 }: Props) {
-    const tHC = useTranslations("hcComponentsStudioMissionConsole");
+  const tHC = useTranslations("hcComponentsStudioMissionConsole");
   const [elapsed, setElapsed] = useState(0);
   const [mission, setMission] = useState("");
   const [current, setCurrent] = useState<MissionOutcome | null>(null);
@@ -260,9 +260,7 @@ export default function MissionConsole({
             <span className="ms-auto text-xs text-muted-foreground">{tHC("s12")}</span>
           )}
         </div>
-        {outOfBudget && (
-          <p className="mt-2 text-sm text-muted-foreground">{tHC("s11")}</p>
-        )}
+        {outOfBudget && <p className="mt-2 text-sm text-muted-foreground">{tHC("s11")}</p>}
       </div>
 
       {!current && (
@@ -308,7 +306,7 @@ export default function MissionConsole({
 }
 
 function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; title: string; accent?: boolean }) {
-    const tHC = useTranslations("hcComponentsStudioMissionConsole");
+  const tHC = useTranslations("hcComponentsStudioMissionConsole");
   return (
     <div className={`rounded-xl border p-4 ${accent ? "border-primary/40" : "border-border/60"}`}>
       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -320,7 +318,8 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
         )}
         {!outcome.running && (
           <span className="ms-auto text-xs text-muted-foreground">
-            {outcome.toolCalls} {tHC("s4")}{outcome.toolCalls === 1 ? "" : "s"}
+            {outcome.toolCalls} {tHC("s4")}
+            {outcome.toolCalls === 1 ? "" : "s"}
             {outcome.ms != null ? ` · ${(outcome.ms / 1000).toFixed(1)} s` : ""}
           </span>
         )}
@@ -343,9 +342,7 @@ function OutcomeCard({ outcome, title, accent }: { outcome: MissionOutcome; titl
           ) : outcome.running ? (
             <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground animate-pulse">{tHC("s2")}</div>
           ) : (
-            <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">
-              {tHC("s1")}
-            </div>
+            <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">{tHC("s1")}</div>
           )}
         </div>
       </div>

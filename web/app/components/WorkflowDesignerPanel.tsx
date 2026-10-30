@@ -74,7 +74,7 @@ interface WorkflowDesignerPanelProps {
 }
 
 export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: WorkflowDesignerPanelProps) {
-    const tHC = useTranslations("hcComponentsWorkflowDesignerPanel");
+  const tHC = useTranslations("hcComponentsWorkflowDesignerPanel");
   const t = useTranslations("workflowDesignerPanel");
   const portable = usePortabilityEnabled();
   const tTemplates = useTranslations("workflowTemplates");

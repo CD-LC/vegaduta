@@ -39,7 +39,8 @@ function useRovingRadio<T>(items: readonly T[], value: T, onChange: (v: T) => vo
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const onKeyDown = useCallback(
     (e: KeyboardEvent<HTMLElement>) => {
-      const dir = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+      const dir =
+        e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
       const jump = e.key === "Home" ? "first" : e.key === "End" ? "last" : null;
       if (!dir && !jump) return;
       e.preventDefault();
@@ -49,13 +50,16 @@ function useRovingRadio<T>(items: readonly T[], value: T, onChange: (v: T) => vo
       if (jump === "first") next = enabled[0];
       else if (jump === "last") next = enabled[enabled.length - 1];
       else {
-        const at = Math.max(0, enabled.findIndex(({ v }) => v === value));
+        const at = Math.max(
+          0,
+          enabled.findIndex(({ v }) => v === value)
+        );
         next = enabled[(at + dir + enabled.length) % enabled.length];
       }
       onChange(next.v);
       refs.current[next.i]?.focus();
     },
-    [items, value, onChange, isDisabled],
+    [items, value, onChange, isDisabled]
   );
   return { refs, onKeyDown };
 }
@@ -71,10 +75,10 @@ export default function CanvasLensBar({
   loadedRuns,
   className,
 }: CanvasLensBarProps) {
-    const tHC = useTranslations("hcComponentsWorkflowCanvasLensBar");
+  const tHC = useTranslations("hcComponentsWorkflowCanvasLensBar");
   const lensReason = useCallback(
-    (l: CanvasLens): string | undefined => (l === "none" ? undefined : disabledReason ?? lensDisabledReasons?.[l]),
-    [disabledReason, lensDisabledReasons],
+    (l: CanvasLens): string | undefined => (l === "none" ? undefined : (disabledReason ?? lensDisabledReasons?.[l])),
+    [disabledReason, lensDisabledReasons]
   );
   const lensGroup = useRovingRadio(CANVAS_LENSES, lens, onLensChange, (l) => !!lensReason(l));
   const winDisabled = useCallback(() => !!disabledReason, [disabledReason]);
@@ -95,7 +99,9 @@ export default function CanvasLensBar({
             return (
               <button
                 key={l}
-                ref={(el) => { lensGroup.refs.current[i] = el; }}
+                ref={(el) => {
+                  lensGroup.refs.current[i] = el;
+                }}
                 type="button"
                 role="radio"
                 aria-checked={checked}
@@ -118,19 +124,18 @@ export default function CanvasLensBar({
           <>
             <span className="wfx-lensbar-sep" aria-hidden="true" />
             {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group */}
-            <div
-              className="wfx-lensbar-window"
-              role="radiogroup"
-              aria-label={tHC("s1")}
-              onKeyDown={winGroup.onKeyDown}
-            >
-              <span className="wfx-lensbar-window-label" aria-hidden="true">Last</span>
+            <div className="wfx-lensbar-window" role="radiogroup" aria-label={tHC("s1")} onKeyDown={winGroup.onKeyDown}>
+              <span className="wfx-lensbar-window-label" aria-hidden="true">
+                Last
+              </span>
               {RUNS_WINDOWS.map((n, i) => {
                 const checked = n === runsWindow;
                 return (
                   <button
                     key={n}
-                    ref={(el) => { winGroup.refs.current[i] = el; }}
+                    ref={(el) => {
+                      winGroup.refs.current[i] = el;
+                    }}
                     type="button"
                     role="radio"
                     aria-checked={checked}

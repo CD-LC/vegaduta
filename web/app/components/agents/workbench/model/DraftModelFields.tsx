@@ -14,7 +14,7 @@ import { useTranslations } from "../../../../lib/i18n";
 
 /** Creation form only: provider health, the default-model notice, the model picker and the transcription and voice-reply providers. */
 export default function DraftModelFields() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchModelDraftModelFields");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchModelDraftModelFields");
   const {
     t,
     isDraft,

@@ -99,14 +99,11 @@ export function UnrecognisedTierPill({ value, className }: { value: string; clas
  * an empty cell is the one rendering that would quietly read as "fine".
  */
 export function TierCell({ meta, rawValue }: { meta: TierMeta | null; rawValue: string | null | undefined }) {
-    const tHC = useTranslations("hcComponentsToolsToolClassificationBadges");
+  const tHC = useTranslations("hcComponentsToolsToolClassificationBadges");
   if (meta) return <TierPill meta={meta} />;
   if (rawValue) return <UnrecognisedTierPill value={rawValue} />;
   return (
-    <span
-      className="inline-flex items-center gap-1 text-xs text-muted-foreground"
-      title={tHC("s2")}
-    >
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title={tHC("s2")}>
       <HelpCircle className="size-3" aria-hidden="true" />
       {tHC("s1")}
     </span>

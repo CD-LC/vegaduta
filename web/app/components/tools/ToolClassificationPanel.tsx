@@ -107,7 +107,7 @@ export interface ToolClassificationPanelProps {
  *  policy lets this agent call it. Overstating that would be the one
  *  misreading that gets somebody hurt. */
 function StatusCell({ row }: { row: ToolClassificationRow }) {
-    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
+  const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   if (isUnclassified(row)) {
     return (
       <div className="space-y-1">
@@ -117,12 +117,7 @@ function StatusCell({ row }: { row: ToolClassificationRow }) {
     );
   }
   return (
-    <Badge
-      variant="state"
-      state={SEVERITY_STATE_TOKEN.safe}
-      className="gap-1.5"
-      title={tHC("s15")}
-    >
+    <Badge variant="state" state={SEVERITY_STATE_TOKEN.safe} className="gap-1.5" title={tHC("s15")}>
       <ShieldCheck aria-hidden="true" />
       Classified
     </Badge>
@@ -130,7 +125,7 @@ function StatusCell({ row }: { row: ToolClassificationRow }) {
 }
 
 function ToolCell({ row }: { row: ToolClassificationRow }) {
-    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
+  const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   const origin = originLabel(row.origin);
   const name = row.displayName || row.toolName;
   return (
@@ -153,10 +148,7 @@ function ToolCell({ row }: { row: ToolClassificationRow }) {
         {row.requiredScope && (
           <>
             <span aria-hidden="true">·</span>
-            <span
-              className="inline-flex items-center gap-1"
-              title={tHC("s14")}
-            >
+            <span className="inline-flex items-center gap-1" title={tHC("s14")}>
               <KeyRound className="size-3" aria-hidden="true" />
               <span className="font-mono">{row.requiredScope}</span>
             </span>
@@ -168,7 +160,7 @@ function ToolCell({ row }: { row: ToolClassificationRow }) {
 }
 
 export default function ToolClassificationPanel({ query = "", load, className }: ToolClassificationPanelProps) {
-    const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
+  const tHC = useTranslations("hcComponentsToolsToolClassificationPanel");
   const [rows, setRows] = useState<ToolClassificationRow[]>([]);
   const [enforced, setEnforced] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -305,9 +297,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
           <Alert variant="warning">
             <AlertTriangle aria-hidden="true" />
             <AlertTitle>{tHC("s9")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s8")}
-            </AlertDescription>
+            <AlertDescription>{tHC("s8")}</AlertDescription>
           </Alert>
         )}
 
@@ -351,9 +341,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
           <Alert variant="info">
             <Info aria-hidden="true" />
             <AlertTitle>{tHC("s6")}</AlertTitle>
-            <AlertDescription>
-              {tHC("s5")}
-            </AlertDescription>
+            <AlertDescription>{tHC("s5")}</AlertDescription>
           </Alert>
         ) : loadFailedNoRows ? null : rows.length === 0 ? (
           <EmptyState
@@ -427,7 +415,8 @@ export default function ToolClassificationPanel({ query = "", load, className }:
                     {visibleRows.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                          {tHC("s1")}{query.trim() ? " and search" : ""}.
+                          {tHC("s1")}
+                          {query.trim() ? " and search" : ""}.
                         </TableCell>
                       </TableRow>
                     ) : (

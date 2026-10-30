@@ -25,7 +25,7 @@ import { useTranslations } from "../../../lib/i18n";
 // edit/delete flags, drill into "who got which variant" per flag.
 
 function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loading: boolean }) {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -37,8 +37,7 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
   const { page, pageSize, pageItems, totalPages, totalItems, setPage, setPageSize } = usePagination(filtered);
 
   if (loading) return <p className="text-xs text-muted-foreground">{tHC("s14")}</p>;
-  if (assignments.length === 0)
-    return <p className="text-xs text-muted-foreground">{tHC("s13")}</p>;
+  if (assignments.length === 0) return <p className="text-xs text-muted-foreground">{tHC("s13")}</p>;
 
   return (
     <div className="space-y-2">
@@ -51,7 +50,10 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
         />
       )}
       {pageItems.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{tHC("s11")}{query}&quot;.</p>
+        <p className="text-xs text-muted-foreground">
+          {tHC("s11")}
+          {query}&quot;.
+        </p>
       ) : (
         pageItems.map((a) => (
           <div key={a.tenantId} className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
@@ -77,7 +79,7 @@ function FlagAssignmentsList({ assignments, loading }: { assignments: any[]; loa
 }
 
 export function FeatureFlagsSection() {
-    const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
+  const tHC = useTranslations("hcPlatformadminComponentsSectionsFeatureflags");
   const askConfirm = useConfirm();
   const [featureFlags, setFeatureFlags] = useState<any[]>([]);
   const [featureFlagsError, setFeatureFlagsError] = useState<any>(null);
@@ -262,9 +264,7 @@ export function FeatureFlagsSection() {
           <CardTitle className="flex items-center gap-2 text-sm">
             <FlaskConical size={16} className="text-primary" /> {tHC("s10")}
           </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            {tHC("s9")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
         </CardHeader>
         <CardContent className="space-y-2">
           {featureFlagsError && (

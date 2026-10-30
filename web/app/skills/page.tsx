@@ -24,7 +24,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { useTranslations } from "../lib/i18n";
 
 export default function SkillsPage() {
-    const tHC = useTranslations("hcSkillsPage");
+  const tHC = useTranslations("hcSkillsPage");
   const t = useTranslations("skillsPage");
   const [skills, setSkills] = useState<SkillSummary[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -57,7 +57,10 @@ export default function SkillsPage() {
       {loadFailed && (
         <Alert variant="destructive" className="mb-6" data-testid="skills-load-failed">
           <AlertDescription className="flex flex-wrap items-center gap-3">
-            <span>{tHC("s3")} {skills.length > 0 ? "Showing the last list we have." : "Nothing below reflects what is stored."}</span>
+            <span>
+              {tHC("s3")}{" "}
+              {skills.length > 0 ? "Showing the last list we have." : "Nothing below reflects what is stored."}
+            </span>
             <Button size="sm" variant="outline" onClick={() => void refresh()}>
               {tHC("s2")}
             </Button>

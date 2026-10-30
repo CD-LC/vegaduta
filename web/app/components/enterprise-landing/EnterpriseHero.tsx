@@ -8,17 +8,13 @@ import { useTranslations } from "../../lib/i18n";
 // counts that come from lib/platform-facts.ts (recounted in core/), and the
 // headline says what the platform does instead of promising an outcome.
 export default function EnterpriseHero() {
-    const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseHero");
+  const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseHero");
   return (
     <section className="enterprise-hero">
       <div className="enterprise-hero-container">
         <div className="enterprise-hero-content">
-          <h1 className="enterprise-hero-title">
-            {tHC("s7")}
-          </h1>
-          <p className="enterprise-hero-subtitle">
-            {tHC("s6")}
-          </p>
+          <h1 className="enterprise-hero-title">{tHC("s7")}</h1>
+          <p className="enterprise-hero-subtitle">{tHC("s6")}</p>
           <div className="enterprise-hero-cta">
             <a href="#contact-form" className="enterprise-cta-primary">
               {tHC("s5")}

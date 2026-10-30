@@ -21,12 +21,10 @@ import { useTranslations } from "../../lib/i18n";
 // rendered read-only here and edited on Platform Settings. The fleet-wide
 // provider-fallback signal rounds it out as a spend/reliability proxy.
 export default function FraudAnomalyPage() {
-    const tHC = useTranslations("hcPlatformadminFraudPage");
+  const tHC = useTranslations("hcPlatformadminFraudPage");
   return (
     <AdminShell title={tHC("s2")}>
-      <PageHint>
-        {tHC("s1")}
-      </PageHint>
+      <PageHint>{tHC("s1")}</PageHint>
 
       <AbuseScoresSection pollMs={15000} delay={0} />
       <ThrottledSection pollMs={15000} delay={0.03} />

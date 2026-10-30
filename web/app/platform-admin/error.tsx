@@ -13,7 +13,7 @@ import { useTranslations } from "../lib/i18n";
 // `reset()` re-renders the failed segment; the digest is shown so an operator
 // can find the matching server log line without reading a stack trace.
 export default function RouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-    const tHC = useTranslations("hcPlatformadminError");
+  const tHC = useTranslations("hcPlatformadminError");
   useEffect(() => {
     // Keep the console line: it is the only place the real stack lands in dev.
     console.error(error);
@@ -28,8 +28,7 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         </div>
         <h1 className="text-xl font-semibold text-foreground">{tHC("s3")}</h1>
         <p className="text-sm text-muted-foreground">
-          {tHC("s2")}{" "}
-          {error?.digest ? <span className="font-mono">Ref {error.digest}</span> : null}
+          {tHC("s2")} {error?.digest ? <span className="font-mono">Ref {error.digest}</span> : null}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button type="button" onClick={reset}>

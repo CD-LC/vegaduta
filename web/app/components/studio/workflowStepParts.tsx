@@ -26,7 +26,7 @@ export function StepIcon({ type }: { type: WorkflowStepType }) {
 }
 
 export function AddMenu({ onAdd }: { onAdd: (type: WorkflowStepType) => void }) {
-    const tHC = useTranslations("hcComponentsStudioWorkflowStepParts");
+  const tHC = useTranslations("hcComponentsStudioWorkflowStepParts");
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">

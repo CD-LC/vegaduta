@@ -39,7 +39,7 @@ export default function ChatComposerStatus(p: {
   /** True once any reply text has streamed for the in-flight turn. */
   liveHasText?: boolean;
 }) {
-    const tHC = useTranslations("hcComponentsChatChatComposerStatus");
+  const tHC = useTranslations("hcComponentsChatChatComposerStatus");
   const t = useTranslations("chatPanel");
   const tAttach = useTranslations("sandboxDataHint");
   const {

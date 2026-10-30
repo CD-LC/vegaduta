@@ -55,7 +55,7 @@ export default function TrustStrip({
   coreHealthy: boolean;
   status: SystemStatusSummary | null | undefined;
 }) {
-    const tHC = useTranslations("hcComponentsTrustStrip");
+  const tHC = useTranslations("hcComponentsTrustStrip");
   const tNav = useTranslations("nav");
   const { username, hasPermission, accountUrl } = useAuth();
   // VIEW_AUDIT_LOG scope (granular RBAC, 2026-09-23) - the strip's

@@ -42,7 +42,7 @@ const MARK: Record<State, React.ReactNode> = {
 };
 
 export default function TroubleshootPage() {
-    const tHC = useTranslations("hcTroubleshootPage");
+  const tHC = useTranslations("hcTroubleshootPage");
   const t = useTranslations("troubleshoot");
   const [rec, setRec] = useState<LocalModelRecommendation | null>(null);
   const [checks, setChecks] = useState<Check[]>([
@@ -399,9 +399,7 @@ export default function TroubleshootPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{t("check.down")}</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">{t("downBody")}</p>
-                <code className="mt-2 block rounded bg-muted px-3 py-2 text-xs">
-                  {tHC("s1")}
-                </code>
+                <code className="mt-2 block rounded bg-muted px-3 py-2 text-xs">{tHC("s1")}</code>
               </div>
             </div>
           </>

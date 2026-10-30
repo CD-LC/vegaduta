@@ -13,7 +13,7 @@ import { useTranslations } from "../../lib/i18n";
 // ---- x402 offers ---------------------------------------------------------------
 
 export default function OfferForm({ agentId, onCreated }: { agentId: string; onCreated: () => void }) {
-    const tHC = useTranslations("hcAdminCommerceOfferForm");
+  const tHC = useTranslations("hcAdminCommerceOfferForm");
   const t = useTranslations("adminCommercePage");
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -211,4 +211,3 @@ export default function OfferForm({ agentId, onCreated }: { agentId: string; onC
     </Card>
   );
 }
-

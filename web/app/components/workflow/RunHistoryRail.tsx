@@ -59,7 +59,7 @@ export default function RunHistoryRail({
   footer,
   className,
 }: RunHistoryRailProps) {
-    const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
+  const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
   const uid = useId();
   const listRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -125,7 +125,7 @@ export default function RunHistoryRail({
     if (selectedRunId) setActiveId(selectedRunId);
   }, [selectedRunId]);
 
-  const effectiveActive = activeId && order.includes(activeId) ? activeId : order[0] ?? null;
+  const effectiveActive = activeId && order.includes(activeId) ? activeId : (order[0] ?? null);
   const optionId = (id: string) => `${uid}-run-${id}`;
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function RunHistoryRail({
       setActiveId(id);
       onSelectRun(id);
     },
-    [onSelectRun],
+    [onSelectRun]
   );
 
   const onListKey = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -309,9 +309,7 @@ export default function RunHistoryRail({
                       latestVersion={latestVersion}
                       when={relativeTime(rtf, row.startMs, now)}
                       onSelect={() => select(row.run.id)}
-                      onCompare={
-                        onCompare && row.run.id !== selectedRunId ? () => onCompare(row.run.id) : undefined
-                      }
+                      onCompare={onCompare && row.run.id !== selectedRunId ? () => onCompare(row.run.id) : undefined}
                     />
                   ))}
                 </div>
@@ -347,8 +345,18 @@ interface RunOptionProps {
   onCompare?: () => void;
 }
 
-function RunOption({ row, domId, selected, active, comparing, latestVersion, when, onSelect, onCompare }: RunOptionProps) {
-    const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
+function RunOption({
+  row,
+  domId,
+  selected,
+  active,
+  comparing,
+  latestVersion,
+  when,
+  onSelect,
+  onCompare,
+}: RunOptionProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
   const { run, meta, flight, duration, slowFactor } = row;
   const Icon = meta.Icon;
   const v = typeof run.workflowVersion === "number" ? run.workflowVersion : null;
@@ -393,13 +401,15 @@ function RunOption({ row, domId, selected, active, comparing, latestVersion, whe
           </span>
           {slowFactor != null && (
             <span className="rh-slow" title={tHC("s3")}>
-              {slowFactor.toFixed(1)}{tHC("s2")}
+              {slowFactor.toFixed(1)}
+              {tHC("s2")}
             </span>
           )}
         </span>
         {stale && (
           <span className="rh-changed">
-            {tHC("s1")}{latestVersion}
+            {tHC("s1")}
+            {latestVersion}
           </span>
         )}
         {comparing && <span className="rh-compare-tag">Comparing</span>}

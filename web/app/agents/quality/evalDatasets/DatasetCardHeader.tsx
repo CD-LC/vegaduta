@@ -41,7 +41,7 @@ export function DatasetCardHeader({
   onExportJsonl: () => void;
   onDelete: () => void;
 }) {
-    const tHC = useTranslations("hcAgentsQualityEvalDatasetsDatasetCardHeader");
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsDatasetCardHeader");
   const t = useTranslations("evalControls");
   // What a run of this dataset does right now when nobody names a mode: its pin, else the workspace default.
   const mode = effectiveModeOf(dataset);
@@ -71,12 +71,7 @@ export function DatasetCardHeader({
         <Button size="sm" onClick={onRun} disabled={busy || dataset.caseCount === 0}>
           <Play size={14} aria-hidden="true" /> Run
         </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onToggleRunOptions}
-          title={tHC("s4")}
-        >
+        <Button variant="outline" size="sm" onClick={onToggleRunOptions} title={tHC("s4")}>
           <Settings2 size={14} aria-hidden="true" />
         </Button>
         <Button
@@ -97,10 +92,11 @@ export function DatasetCardHeader({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{tHC("s2")}{dataset.name}&quot;?</AlertDialogTitle>
-              <AlertDialogDescription>
-                {tHC("s1")}
-              </AlertDialogDescription>
+              <AlertDialogTitle>
+                {tHC("s2")}
+                {dataset.name}&quot;?
+              </AlertDialogTitle>
+              <AlertDialogDescription>{tHC("s1")}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>

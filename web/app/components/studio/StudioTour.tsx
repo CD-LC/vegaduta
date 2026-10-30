@@ -198,7 +198,7 @@ type Props = {
 };
 
 export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
-    const tHC = useTranslations("hcComponentsStudioStudioTour");
+  const tHC = useTranslations("hcComponentsStudioStudioTour");
   const [i, setI] = useState(0);
   const total = STEPS.length + 1; // + the workspace stop
   const onWorkspace = i === STEPS.length;
@@ -254,9 +254,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                 <div className="space-y-3 text-sm">
                   {onWorkspace ? (
                     <>
-                      <p>
-                        {tHC("s4")}
-                      </p>
+                      <p>{tHC("s4")}</p>
                       <ul className="grid gap-1.5 sm:grid-cols-2">
                         {WORKSPACE.map((w) => {
                           const WIcon = w.icon;

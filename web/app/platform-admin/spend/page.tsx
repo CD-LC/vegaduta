@@ -74,7 +74,7 @@ function Table({ head, children }: { head: any; children: any }) {
 }
 
 function Empty() {
-    const tHC = useTranslations("hcPlatformadminSpendPage");
+  const tHC = useTranslations("hcPlatformadminSpendPage");
   return <p className="py-3 text-xs text-muted-foreground">{tHC("s17")}</p>;
 }
 
@@ -108,7 +108,7 @@ function CoverageNote({ meta }: { meta: SpendMeta | undefined }) {
 }
 
 export default function SpendReportsPage() {
-    const tHC = useTranslations("hcPlatformadminSpendPage");
+  const tHC = useTranslations("hcPlatformadminSpendPage");
   const today = useMemo(() => new Date(), []);
   const [from, setFrom] = useState(isoDay(new Date(today.getTime() - 29 * 86400000)));
   const [to, setTo] = useState(isoDay(today));
@@ -211,9 +211,7 @@ export default function SpendReportsPage() {
 
   return (
     <AdminShell title={tHC("s16")}>
-      <PageHint>
-        {tHC("s15")}
-      </PageHint>
+      <PageHint>{tHC("s15")}</PageHint>
 
       <SectionCard
         title={selectedTenantName ? `Spend report - ${selectedTenantName}` : "Platform spend report"}
@@ -266,11 +264,7 @@ export default function SpendReportsPage() {
           all &&
           hosted && (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Tile
-                label={tHC("s14")}
-                value={formatUsd(all.estimatedCostUsd)}
-                sub="incl. tenants' BYOK keys"
-              />
+              <Tile label={tHC("s14")} value={formatUsd(all.estimatedCostUsd)} sub="incl. tenants' BYOK keys" />
               <Tile
                 label={tHC("s13")}
                 value={formatUsd(hosted.estimatedCostUsd)}
@@ -286,9 +280,7 @@ export default function SpendReportsPage() {
           )
         )}
         <div className="pt-2">{exportButtons}</div>
-        <InfoNote>
-          {tHC("s10")}
-        </InfoNote>
+        <InfoNote>{tHC("s10")}</InfoNote>
       </SectionCard>
 
       <SectionCard title={tHC("s9")} subtitle="Ordered by all-provider estimated cost" delay={0.03}>

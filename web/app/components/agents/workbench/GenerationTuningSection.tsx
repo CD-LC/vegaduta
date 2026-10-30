@@ -17,7 +17,7 @@ import { WorkbenchSection } from "./WorkbenchSection";
 import { useTranslations } from "../../../lib/i18n";
 
 export default function GenerationTuningSection() {
-    const tHC = useTranslations("hcComponentsAgentsWorkbenchGenerationTuningSection");
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchGenerationTuningSection");
   const {
     tuningSummary,
     isDraft,
@@ -149,11 +149,7 @@ export default function GenerationTuningSection() {
 
         {
           <>
-            {tuningMode === "SIMPLE" && (
-              <p className="mb-2 text-[11px] text-muted-foreground">
-                {tHC("s2")}
-              </p>
-            )}
+            {tuningMode === "SIMPLE" && <p className="mb-2 text-[11px] text-muted-foreground">{tHC("s2")}</p>}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {/* The hint lives inside the same grid cell as the slider
                * (wrapper div, not a 4th grid child) so it stays glued to

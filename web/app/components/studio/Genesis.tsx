@@ -83,7 +83,7 @@ type Props = {
 };
 
 export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed }: Props) {
-    const tHC = useTranslations("hcComponentsStudioGenesis");
+  const tHC = useTranslations("hcComponentsStudioGenesis");
   const [brief, setBrief] = useState<Brief>(EMPTY_BRIEF);
   const [step, setStep] = useState<StepId>("job");
   const [needsTouched, setNeedsTouched] = useState(false);
@@ -130,12 +130,8 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
           <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" />{" "}
           {fresh ? "Clean slate - nothing is pre-built" : "New agent - nothing is pre-built"}
         </div>
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {tHC("s30")}
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          {tHC("s29")}
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{tHC("s30")}</h2>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{tHC("s29")}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -201,9 +197,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     />
                     <div className="text-end text-xs text-muted-foreground">{brief.job.length}/240</div>
                     <div className="space-y-1.5">
-                      <div className="text-xs text-muted-foreground">
-                        {tHC("s26")}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{tHC("s26")}</div>
                       <div className="flex flex-wrap gap-1.5" data-tour="brief-ideas">
                         {JOB_IDEAS.map((idea) => (
                           <button
@@ -256,9 +250,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     />
                     <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-2.5 text-xs text-muted-foreground">
                       <ShieldCheck aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                      <span>
-                        {tHC("s20")}
-                      </span>
+                      <span>{tHC("s20")}</span>
                     </div>
                   </>
                 )}
@@ -303,9 +295,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                         <Lightbulb aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s14")}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      {tHC("s13")}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tHC("s13")}</p>
                   </>
                 )}
                 {step === "precision" && (
@@ -486,8 +476,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 <div className="flex items-start gap-2 rounded-lg bg-background/70 p-2.5 text-xs text-muted-foreground">
                   <Plug aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>
-                    {tHC("s4")}{" "}
-                    <b className="font-medium text-foreground">&ldquo;{draft.mcpQuery}&rdquo;</b>.
+                    {tHC("s4")} <b className="font-medium text-foreground">&ldquo;{draft.mcpQuery}&rdquo;</b>.
                   </span>
                 </div>
                 <div className="rounded-lg border border-dashed border-border/70 p-2.5">
@@ -508,9 +497,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 className="flex min-h-[260px] flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground"
               >
                 <Sparkles aria-hidden="true" className="h-6 w-6 shrink-0" />
-                <p className="max-w-[16rem]">
-                  {tHC("s2")}
-                </p>
+                <p className="max-w-[16rem]">{tHC("s2")}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -523,7 +510,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
 }
 
 function Q({ title, why, optional }: { title: string; why: string; optional?: boolean }) {
-    const tHC = useTranslations("hcComponentsStudioGenesis");
+  const tHC = useTranslations("hcComponentsStudioGenesis");
   return (
     <div>
       <div className="text-base font-semibold">

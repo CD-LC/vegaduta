@@ -17,7 +17,7 @@ import { LIMIT_NUMBER_FIELDS, LIMIT_TOGGLE_FIELDS, PLAN_OPTIONS } from "./tenant
 import { useTranslations } from "../../lib/i18n";
 
 export function PlanLimitsCard() {
-    const tHC = useTranslations("hcPlatformadminTenantsPlanLimitsCard");
+  const tHC = useTranslations("hcPlatformadminTenantsPlanLimitsCard");
   const [planLimits, setPlanLimits] = useState<Record<string, Record<string, any>>>({});
   const [draftLimits, setDraftLimits] = useState<Record<string, Record<string, any>>>({});
   const [limitsLoading, setLimitsLoading] = useState(true);
@@ -82,9 +82,7 @@ export function PlanLimitsCard() {
           <CardTitle className="flex items-center gap-2 text-sm">
             <Sliders size={16} className="text-primary" /> {tHC("s5")}
           </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            {tHC("s4")}
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s4")}</p>
         </CardHeader>
         <CardContent>
           {limitsError && (

@@ -25,7 +25,7 @@ import { useTranslations } from "../../lib/i18n";
 // brand-asset literals rather than mapped to theme tokens (A13; this file
 // is exempt from the design-tokens/no-hex-literal lint rule by name).
 export default function BrandIdentityModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-    const tHC = useTranslations("hcPlatformadminComponentsBrandIdentityModal");
+  const tHC = useTranslations("hcPlatformadminComponentsBrandIdentityModal");
   const [mounted, setMounted] = useState(false);
   const starsRef = useRef(null);
   const sparksRef = useRef(null);

@@ -34,7 +34,7 @@ export function GuardrailRuleRow({
   onDelete: () => void;
   onCancelDelete: () => void;
 }) {
-    const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleRow");
+  const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleRow");
   return (
     <div
       data-testid={`guardrail-rule-${rule.id}`}

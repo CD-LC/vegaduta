@@ -26,7 +26,7 @@ export default function OnDeviceFooter({
   onLearningOptInChange: (on: boolean) => void;
   memoryWriteStatus: EdgeMemoryWriteStatus | null;
 }) {
-    const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceFooter");
+  const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceFooter");
   const t = useTranslations("edgeIntelligence");
   return (
     <>
@@ -42,7 +42,8 @@ export default function OnDeviceFooter({
         </p>
       ) : tier0Status === "available" || tier0Status === "downloadable" || tier0Status === "downloading" ? (
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-          {tHC("s3")} {EDGE_BRANDING.tier0ModelDisplayName}{tHC("s2")} {hostedFallbackTarget} {tHC("s1")}
+          {tHC("s3")} {EDGE_BRANDING.tier0ModelDisplayName}
+          {tHC("s2")} {hostedFallbackTarget} {tHC("s1")}
         </p>
       ) : (
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">

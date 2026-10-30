@@ -42,7 +42,7 @@ export const STAGES: { id: Stage; label: string; icon: typeof PenTool; blurb: st
 
 /** Brand + a way out: the winged emblem beside the wordmark always links home. */
 export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
-    const tHC = useTranslations("hcComponentsStudioStudioPanels");
+  const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <header
       className="mb-8 flex items-center justify-between gap-3 border-b border-border/50 pb-3"
@@ -97,7 +97,7 @@ export function StudioStatusBar({
   onGuide: () => void;
   onRestart: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioStudioPanels");
+  const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm backdrop-blur">
       <div className="flex items-center gap-2 font-medium">
@@ -183,7 +183,7 @@ export function NextStepNudge({
   signupHref: string;
   onStage: (s: Stage) => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioStudioPanels");
+  const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/60 p-4 text-sm">
       <span className="text-muted-foreground">
@@ -215,7 +215,7 @@ export function NextStepNudge({
 }
 
 export function EmptyState({ onNew }: { onNew: () => void }) {
-    const tHC = useTranslations("hcComponentsStudioStudioPanels");
+  const tHC = useTranslations("hcComponentsStudioStudioPanels");
   return (
     <div className="rounded-xl border border-dashed border-border/70 p-8 text-center">
       <Bot aria-hidden="true" className="mx-auto mb-2 h-8 w-8 text-muted-foreground shrink-0" />

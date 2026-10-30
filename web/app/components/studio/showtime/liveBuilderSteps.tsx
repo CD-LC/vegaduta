@@ -63,7 +63,7 @@ export function RegistryStep({
   picked: string[];
   onToggle: (name: string) => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
   return (
     <div className="space-y-4">
       <Head
@@ -115,9 +115,7 @@ export function RegistryStep({
             </button>
           );
         })}
-        {palette && tools.length === 0 && (
-          <p className="text-sm text-zinc-400">{tHC("s13")}</p>
-        )}
+        {palette && tools.length === 0 && <p className="text-sm text-zinc-400">{tHC("s13")}</p>}
       </div>
       {(mcp.hits.length > 0 || mcp.unavailable) && (
         <div>
@@ -134,9 +132,7 @@ export function RegistryStep({
                   {h.description && <div className="line-clamp-1 text-zinc-400">{h.description}</div>}
                 </li>
               ))}
-              <li className="text-[11px] text-zinc-400">
-                {tHC("s10")}
-              </li>
+              <li className="text-[11px] text-zinc-400">{tHC("s10")}</li>
             </ul>
           )}
         </div>
@@ -172,7 +168,7 @@ export function ShipStep({
   onMakeShare: () => void;
   onCopy: () => void;
 }) {
-    const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
   return (
     <div className="space-y-4">
       <Head
@@ -236,9 +232,7 @@ export function ShipStep({
       )}
       <div className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
         <div className="text-sm font-semibold">{tHC("s4")}</div>
-        <p className="mt-1 text-xs text-zinc-300">
-          {tHC("s3")}
-        </p>
+        <p className="mt-1 text-xs text-zinc-300">{tHC("s3")}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <a
             href={signupHref}
