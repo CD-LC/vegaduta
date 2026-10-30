@@ -35,16 +35,11 @@ npx hyperframes media-use resolve --stats --project . --days 7
 
 ## Telemetry
 
-`resolve` and the edit tools (transcribe / transcript-cut / audio-duck) send a
-usage event to PostHog (`scripts/lib/telemetry.mjs`), so we can see which
-capabilities are actually used. It is anonymous until you sign in to HeyGen
-(see Privacy below). It records only the media TYPE, the
-resolution SOURCE, and the winning PROVIDER: never the intent text, file names,
-or paths, and `$ip:null` so no IP is stored. Best-effort and non-blocking (a
-resolve never waits on or fails from telemetry).
-
-Opt out with `DO_NOT_TRACK=1` or `HYPERFRAMES_NO_TELEMETRY=1` (also off in CI and
-dev). Same public PostHog project key and opt-outs as the `hyperframes` CLI.
+The upstream `media-use` tooling can send an anonymous usage event (media TYPE,
+resolution SOURCE and winning PROVIDER only: never intent text, file names or paths)
+from `resolve` and the edit tools (transcribe / transcript-cut / audio-duck).
+VegaDuta ships no telemetry: run these tools with `DO_NOT_TRACK=1` or
+`HYPERFRAMES_NO_TELEMETRY=1` set (it is also off in CI and dev), and do not enable it.
 
 HeyGen request tagging: every generating `heygen` call (TTS, avatar video, catalog
 search) carries the allowlisted `X-HeyGen-Client-Source: media-use` header, sourced

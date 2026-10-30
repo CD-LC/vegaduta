@@ -317,8 +317,9 @@ final class McpPlatformAndRemoteCatalog {
                     // the URL path: http://hindsight:8888/mcp/<bank_id>/. The dynamicUrl
                     // below uses `default` as the example bank - the tenant replaces that
                     // segment with their bank name when connecting, so this entry is
-                    // advisory (ready:false, no credential: a local Hindsight has no auth
-                    // of its own; keep it off the public network). Consolidation needs an
+                    // advisory (ready:false: needs its own LLM key, set on the Hindsight
+                    // container, and has no auth of its own; keep it off the public network).
+                    // Consolidation needs an
                     // LLM inside Hindsight itself (HINDSIGHT_API_LLM_* env, 25+ providers
                     // including OpenAI-compatible endpoints like the `freellmapi` profile).
                     new McpCatalogEntry(
@@ -329,7 +330,7 @@ final class McpPlatformAndRemoteCatalog {
                             "brain",
                             "https://hindsight.vectorize.io/developer/mcp-server",
                             false,
-                            List.of(),
+                            List.of("HINDSIGHT_API_LLM_API_KEY"),
                             """
             # Self-hosted streamable-HTTP endpoint - no static stdio YAML block.
             # Start it with `--profile hindsight` (deploy/compose/docker-compose.yml),
