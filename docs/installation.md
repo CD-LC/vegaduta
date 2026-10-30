@@ -1,6 +1,6 @@
 # Installation
 
-VegaDūta has four install tiers: **Personal** (one person, one machine; the easiest, see [Personal mode](personal-mode.md) and the Setup app in [installer/README.md](../installer/README.md), which needs no terminal and installs Docker and a free local model for you), Lite, Full and Kubernetes. All of them run the **same container images**
+VegaDūta has four install tiers: **Personal** (one person, one machine; the easiest, see [Personal mode](personal-mode.md) and the Setup app in [installer/README.md](../installer/README.md), which needs no terminal and installs Docker for you, and a free local model if you tick one; a first install is lean, about 3 GB, and the full set is about 8 GB), Lite, Full and Kubernetes. All of them run the **same container images**
 (`ghcr.io/cd-lc/<component>`), so you can start small and move up without
 changing code.
 

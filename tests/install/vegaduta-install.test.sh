@@ -105,14 +105,18 @@ new_home
 out="$(python3 "$PTY" "" "$CLI" up --dry-run 2>&1)"
 check "--cloud and an existing install are never asked again" "$(! has "$out" 'Which model should power'; echo $?)" "$out"
 
-echo "personal: a local model without asking"
+echo "personal: lean by default, a local model when asked for"
 new_home
 out="$("$CLI" personal --build --dry-run </dev/null 2>&1)"
-check "no terminal still gets the local model container" "$(has "$out" 'local_ai=container local_model=qwen3.5:' && has "$out" 'docker-compose.local-ai.yml --profile local-ai'; echo $?)" "$out"
-check "it is remembered" "$([ "$(state local_ai)" = container ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+check "a first install with no flag stays lean: no local model container" "$(has "$out" 'local_ai=none' && ! has "$out" '--profile local-ai'; echo $?)" "$out"
+check "the cloud-key choice is remembered" "$([ -z "$(state local_ai)" ] && [ "$(state cloud)" = 1 ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
 new_home
-out="$(FAKE_OLLAMA=1 "$CLI" personal --build --dry-run </dev/null 2>&1)"
-check "an Ollama answering on this machine is used instead of the container" "$(has "$out" 'local_ai=host local_model=qwen3.5:' && ! has "$out" '--profile local-ai'; echo $?)" "$out"
+out="$("$CLI" personal --build --local-ai --dry-run </dev/null 2>&1)"
+check "--local-ai opts in to the local model container" "$(has "$out" 'local_ai=container local_model=qwen3.5:' && has "$out" 'docker-compose.local-ai.yml --profile local-ai'; echo $?)" "$out"
+check "the opted-in model is remembered" "$([ "$(state local_ai)" = container ] && [ -n "$(state local_model)" ]; echo $?)" "$(cat "$VEGADUTA_STATE_FILE")"
+new_home
+out="$(FAKE_OLLAMA=1 "$CLI" personal --build --local-ai=host --dry-run </dev/null 2>&1)"
+check "--local-ai=host uses the Ollama answering on this machine, not the container" "$(has "$out" 'local_ai=host local_model=qwen3.5:' && ! has "$out" '--profile local-ai'; echo $?)" "$out"
 new_home
 out="$("$CLI" personal --build --cloud --dry-run </dev/null 2>&1)"
 check "--cloud opts out" "$(has "$out" 'local_ai=none'; echo $?)" "$out"

@@ -5,7 +5,7 @@
 .DESCRIPTION
   Same commands as scripts/vegaduta (bash):
     .\scripts\vegaduta.ps1 up [-Lite|-Full] [-Profile a,b] [-Build] [-Domain example.com]
-    .\scripts\vegaduta.ps1 personal [-Build] [-Search|-NoSearch] [-Cloud] [-LocalModel TAG] [-DryRun]
+    .\scripts\vegaduta.ps1 personal [-Build] [-Search|-NoSearch] [-Cloud] [-LocalAi] [-LocalModel TAG] [-DryRun]
                                               (one-person laptop mode, no Keycloak; the host-JVM -NativeCore option is bash-only: use WSL2;
                                                -DryRun prints the plan and starts nothing; -Search adds private web search (SearXNG))
     .\scripts\vegaduta.ps1 down [-Volumes]
@@ -38,6 +38,7 @@ param(
   [switch] $NoBackup,
   [switch] $Cloud,
   [string] $LocalModel = '',
+  [Alias('LocalAi')] [switch] $UseLocalAi,   # not named $LocalAi: that would collide with the script-scope $script:LocalAi state
   [switch] $Search,
   [switch] $NoSearch,
   [switch] $DryRun,
@@ -377,6 +378,17 @@ function Get-RecommendedModel([int]$Gb) {
   if ($Gb -ge 32) { return 'gpt-oss:20b' } elseif ($Gb -ge 24) { return 'qwen3.5:9b' } elseif ($Gb -ge 12) { return 'qwen3.5:4b' }
   return 'qwen3.5:2b'
 }
+# The catalog's download size in GB for a tag (field 3), or '' when it is not listed.
+function Get-ModelDownloadGb([string]$Tag) {
+  $cat = Join-Path $RepoRoot 'deploy\models\catalog.txt'
+  if (Test-Path $cat) {
+    foreach ($l in [System.IO.File]::ReadAllLines($cat)) {
+      $f = $l -split '\|'
+      if ($f.Count -ge 3 -and $f[0] -eq $Tag) { return $f[2] }
+    }
+  }
+  return ''
+}
 # The catalog's "RAM GB wanted" for a tag (field 4), or 0.
 function Get-ModelRamGb([string]$Tag) {
   $cat = Join-Path $RepoRoot 'deploy\models\catalog.txt'
@@ -412,8 +424,18 @@ function Install-HostOllama {
 function Resolve-LocalModel {
   $script:LocalAi = Read-StateValue 'local_ai'
   $script:LocalModelTag = if ($LocalModel) { $LocalModel } else { Read-StateValue 'local_model' }
-  $script:CloudChoice = $Cloud -or ((Read-StateValue 'cloud') -eq '1' -and -not $LocalModel)
+  $script:CloudChoice = $Cloud -or ((Read-StateValue 'cloud') -eq '1' -and -not ($LocalModel -or $UseLocalAi))
   if ($Cloud) { $script:LocalAi = ''; $script:LocalModelTag = ''; return }
+  # A FRESH install (no state file) is lean: Postgres, core and web, no model download, the cloud-key path.
+  # -LocalAi (a model that fits this machine) or -LocalModel TAG opt in; the choice is remembered like -Cloud.
+  $fresh = -not (Test-Path $StateFile)
+  if ($fresh -and -not $LocalModel -and -not $UseLocalAi -and -not (Get-EnvValue 'LOCAL_LLM_MODEL')) {
+    $script:CloudChoice = $true; $script:LocalAi = ''; $script:LocalModelTag = ''
+    Say 'Lean install: about 3 GB on disk (Postgres, core, web). Full: about 8 GB (adds a local model, web search, connector tools, build terminal).'
+    Write-Host '    Add the rest any time: console > Add-ons, or the opt-in switches (see: .\scripts\vegaduta.ps1 help).'
+    Say 'No local model on a first install: add a cloud provider key in the console after sign-up (or run with -LocalAi)'
+    return
+  }
   if ($script:CloudChoice) { return }
   # An install that uses (or could use) the computer's Ollama: start it if it is installed but not
   # running (after a restart, or its tray app was closed), or the model never answers.
@@ -455,6 +477,18 @@ function Resolve-LocalModel {
     return
   }
   $script:LocalAi = 'container'
+  $dl = Get-ModelDownloadGb $script:LocalModelTag
+  if ($fresh -and $dl) {
+    Say "The local model '$($script:LocalModelTag)' is about $dl GB to download (once)."
+    if (-not $Yes -and -not $DryRun -and [Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+      $a = Read-Host 'Download it now? [Y/n]'
+      if ($a -match '^(?i:n|no)$') {
+        $script:CloudChoice = $true; $script:LocalAi = ''; $script:LocalModelTag = ''
+        Say 'Skipping the local model: add a cloud provider key in the console (or run with -LocalAi later)'
+        return
+      }
+    }
+  }
   Say "Agents will use the free local model '$($script:LocalModelTag)' (downloaded once on first start; change with -LocalModel, opt out with -Cloud)"
   if ($modelGb -gt 0 -and $modelGb -lt 8) { Warn "$modelGb GB is tight: '$($script:LocalModelTag)' runs on the CPU and the first reply can take a minute; close other apps while it loads" }
 }

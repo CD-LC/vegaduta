@@ -25,11 +25,12 @@ key added later in the console, or a model you choose from the catalog
 terminal) are not asked and keep the cloud default; pass `--cloud` to skip the
 question, or `--local-ai` / `--local-model` to answer it up front.
 
-`./scripts/vegaduta personal` (and the Setup app, which runs it) does not ask:
-it picks the model that fits the memory it can use and downloads it. On macOS
-and Windows it installs Ollama on the computer when it is missing. Only
-`--cloud` (`-Cloud` on Windows), or a machine with less than 4 GB of memory,
-skips the model. See [Personal mode](personal-mode.md#picking-a-local-model).
+A first `./scripts/vegaduta personal` (and the Setup app, which runs it) is lean and
+downloads **no** model: add a cloud provider key in the console, or opt in with `--local-ai` /
+`--local-model TAG` (`-LocalAi` / `-LocalModel` on Windows, or tick a model pack in Setup). It then
+picks the model that fits the memory it can use, says how big the download is and asks before it
+pulls it. On macOS and Windows it installs Ollama on the computer when it is missing. An install
+that already chose keeps its choice. See [Personal mode](personal-mode.md#picking-a-local-model).
 
 ### Your first agent, no setup
 
@@ -292,8 +293,8 @@ as `cache hit total=... cached=... left=...`: `left` is what had to be read.
 | 8 GB of memory or less | `qwen3.5:2b` | Close other apps; a model that is swapped out answers erratically |
 
 **Memory.** The model, Docker's virtual machine and your other apps share the machine's memory, and a model that is
-pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.5-3.8 GB (see
-[personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
+pushed into swap writes in fits and starts. The personal stack's containers are limited to about 2.3 GB for the lean first install and up to about 3.8 GB with
+search and the connector runner (see [personal-mode.md](personal-mode.md)), so Docker needs about 4 GB; a much larger Docker allowance (Docker Desktop,
 Settings, Resources) only leaves less for the model on a small machine. Check with `ollama ps` (what is loaded) and
 your system's swap use (on a Mac, `sysctl vm.swapusage`); remove models you do not use (`ollama rm`).
 

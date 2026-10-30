@@ -58,14 +58,14 @@ func TestEmbeddedCatalogIsValid(t *testing.T) {
 			t.Errorf("%s: no licence shown for an installable add-on", a.ID)
 		}
 	}
-	for id, want := range map[string]bool{"workspace": true, "search": false, "documents": false} {
+	for id, want := range map[string]bool{"workspace": false, "search": false, "documents": false} {
 		a, ok := c.Find(id)
 		if !ok || a.DefaultOn != want {
 			t.Errorf("%s: defaultOn=%v want %v (present=%v)", id, a.DefaultOn, want, ok)
 		}
 	}
-	if got := strings.Join(Defaults(c).IDs(c), ","); got != "workspace,search,tools" {
-		t.Errorf("Defaults = %q, want workspace,search,tools (search and the tools runner are the launcher's day-one defaults)", got)
+	if got := strings.Join(Defaults(c).IDs(c), ","); got != "" {
+		t.Errorf("Defaults = %q, want nothing preselected (a fresh install is lean: Postgres, core and web only)", got)
 	}
 }
 

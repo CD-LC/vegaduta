@@ -14,7 +14,7 @@
       "license": "Apache-2.0",
       "free": true,
       "requires": [],
-      "defaultOn": true,
+      "defaultOn": false,
       "hostCommand": "./scripts/vegaduta personal --profile workspace",
       "learnMore": "docs/personal-mode.md#build-projects-with-the-assistant",
       "unlocks": ["assistant_terminal"],

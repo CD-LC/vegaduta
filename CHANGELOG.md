@@ -8,6 +8,25 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **A first personal install is lean.** With no remembered choices (no
+  `.vegaduta-state`) `scripts/vegaduta personal`, `scripts/vegaduta.ps1 personal`
+  and the Setup app now start only Postgres, core and web (about 3 GB on disk,
+  about 2.3 GB of container limits), download no local model, and use the
+  cloud-key path: add a provider key in the console after sign-up. Valkey,
+  private web search, the connector runner, the build terminal, the Assistant
+  browser and a local model are add-ons: turn each on from the console's Add-ons
+  page or with `--valkey`, `--search`, `--profile tools`, `--profile workspace`,
+  `--browser`, `--local-ai` / `--local-model TAG` (`-LocalAi` on Windows, new).
+  The launcher and Setup print "Lean: about 3 GB. Full: about 8 GB" before they
+  pull anything, and show a model's download size and ask before pulling it.
+  **Installs that already exist are untouched**: remembered `search=`, `tools=`,
+  `browser=`, `valkey=`, local-model and cloud choices are kept, and an install
+  that never chose still gets its model on the next plain `personal`. The
+  `workspace` add-on's catalog `defaultOn` is now `false`, and Setup preselects
+  no extras. The sizes quoted are estimates from image and model sizes, not
+  measurements.
 ### Security
 
 - **Security-review hardening (2026-10-29).** (1) `deploy/compose/backups/` snapshots are no longer committable (`.gitignore` covers the directory, `*.dump` and `files.tar.gz`); the three already-committed snapshots contain live install secrets and must be rotated - see the release note. (2) The internal app-builder endpoints now bound the caller-chosen `X-Tenant-Id`: reserved schemas are refused, `APP_BUILDER_ALLOWED_TENANTS` (`app.app-builder.allowed-tenants`) scopes which tenants the static service token may act for, and a `TenantStatusGuard` check rejects unknown/stopped tenants. (3) `POST /webhook/workflows/oidc/{workflowId}` now requires the workflow to have a WEBHOOK trigger node configured for OAUTH2 - a `workflow-trigger` role token no longer runs every ACTIVE workflow. (4) Delegation tokens honour the tenant-status guard and system-schema check (a stopped tenant's tokens stop working). (5) `remember_fact`/`remember_shared_fact` writes pass the knowledge write screen (injection phrases and credentials are refused). (6) Channel pairing codes use `SecureRandom`. (7) Remote MCP response bodies are capped at `APP_MCP_MAX_RESPONSE_BYTES` (default 32 MiB) at the transport, closing the heap-exhaustion path. (8) iMessage credential reads carry a masked webhook token; the full value is only in the activate response and `GET /api/channels/imessage/credential/webhook-token`. (9) x402: payment reservations carry a status (the internal scheme previously could not settle) and a REJECTED record no longer folds into a served resource on replay. (10) `X-Forwarded-Proto` can no longer downgrade an https-canonical deployment's redirects or the refresh cookie's `Secure` flag. (11) Twilio activation errors are scrubbed of submitted credential values before being returned.

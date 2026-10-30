@@ -378,12 +378,23 @@ Describe 'personal -DryRun' {
     $state | Should -Match 'cloud=1'
   }
 
-  It 'plans the free local model that fits the machine when nothing else is asked' {
+  It 'a first install is lean: no local model unless one is asked for, and the sizes are said first' {
     $sb = New-Sandbox
     $r = Invoke-Launcher $sb @('personal', '-DryRun')
     $r.ExitCode | Should -Be 0 -Because $r.Text
+    $r.Text | Should -Match 'Lean install: about 3 GB'
+    $r.Text | Should -Match 'local_ai=none'
+    $r.Text | Should -Not -Match 'docker-compose\.local-ai\.yml'
+    [System.IO.File]::ReadAllText($sb.State) | Should -Match 'cloud=1'
+  }
+
+  It 'plans the free local model that fits the machine with -LocalAi, and says how big it is' {
+    $sb = New-Sandbox
+    $r = Invoke-Launcher $sb @('personal', '-DryRun', '-LocalAi')
+    $r.ExitCode | Should -Be 0 -Because $r.Text
     $r.Text | Should -Match 'local_ai=container'
     $r.Text | Should -Match 'local_model=\S+'
+    $r.Text | Should -Match 'GB to download'
     $r.Text | Should -Match 'docker-compose\.local-ai\.yml'
   }
 
@@ -463,8 +474,8 @@ Describe 'personal: the closing lines of a real (not dry) start' {
   # A search `if` inserted between the local-model `if` and its `else` attached the hint to the search
   # switch: printed with a local model and search off, missing with no local model and search on.
   It 'local AI <ai>, web search <search>: <what>' -ForEach @(
-    @{ ai = 'on';  search = 'on';  flags = @('-Search');            model = $true;  web = $true;  hint = $false; what = 'model and search lines, no hint' }
-    @{ ai = 'on';  search = 'off'; flags = @('-NoSearch');          model = $true;  web = $false; hint = $false; what = 'model line only, no hint' }
+    @{ ai = 'on';  search = 'on';  flags = @('-LocalAi', '-Search');   model = $true;  web = $true;  hint = $false; what = 'model and search lines, no hint' }
+    @{ ai = 'on';  search = 'off'; flags = @('-LocalAi', '-NoSearch'); model = $true;  web = $false; hint = $false; what = 'model line only, no hint' }
     @{ ai = 'off'; search = 'on';  flags = @('-Cloud', '-Search');  model = $false; web = $true;  hint = $true;  what = 'search line and the hint' }
     @{ ai = 'off'; search = 'off'; flags = @('-Cloud', '-NoSearch'); model = $false; web = $false; hint = $true;  what = 'the hint only' }
   ) {

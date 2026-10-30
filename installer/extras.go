@@ -42,14 +42,10 @@ func selectionOf(ids ...string) Selection {
 }
 
 // launcherDefaultOn lists add-ons that scripts/vegaduta turns on by itself for a
-// fresh personal install (personal_apply_defaults: private web search and the MCP
-// tools runner). Setup preselects them too: an unticked box is passed as
-// --no-search / --no-tools, so leaving this out would make a Setup install the one
-// that quietly lacks the day-one default.
-// Keep it in step with the launcher. The catalog's own defaultOn stays false for
-// them because core reads defaultOn as "assume wanted" on every install, and an
-// install that opted out of search must not show it as waiting to be turned on.
-var launcherDefaultOn = []string{"search", "tools"}
+// fresh personal install. A fresh install is lean (Postgres, core and web only), so
+// there are none: Setup preselects nothing and each add-on is an explicit tick.
+// Keep it in step with personal_apply_defaults in the launcher.
+var launcherDefaultOn = []string{}
 
 // Defaults is what a fresh install preselects: every selectable defaultOn entry,
 // plus what the launcher turns on for a fresh personal install.
