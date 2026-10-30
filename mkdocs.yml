@@ -141,6 +141,7 @@ nav:
       - Connector specs: connectors/README.md
       - Google Calendar booking and Sheets: connectors/google-calendar-sheets.md
       - n8n bridge: integrations/n8n.md
+      - Hindsight agent memory: integrations/hindsight.md
   - SDKs and dependencies:
       - Overview: sdk/README.md
       - Java Agent SDK: sdk/java-agent-sdk.md

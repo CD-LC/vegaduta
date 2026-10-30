@@ -33,6 +33,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Trending open-source integrations.** Four minimal-effort integrations:
+  a `freellmapi` Compose profile running FreeLLMAPI (MIT) — an
+  OpenAI-compatible `/v1` gateway over ~34 free LLM providers for zero-key
+  agent models via a `LOCAL_OPENAI` provider row; a `hindsight` Compose
+  profile plus MCP catalog entry for Hindsight (MIT) learning agent memory
+  (`http://hindsight:8888/mcp/<bank_id>/`); a `context-mode` MCP catalog
+  entry (Elastic License 2.0 — not vendored, points at the user's own
+  `npx -y context-mode` install); and four vendored built-in agent skills —
+  Cloudflare's `security-audit` (MIT) and HeyGen's `hyperframes`,
+  `hyperframes-cli` and `media-use` (Apache-2.0). Attribution in `NOTICE`.
+
 - **Approval trace.** `GET /api/approval-traces/{requestId}` (viewer access to the request's agent) and a "What the agent executed after this decision" section on the approval detail show the decision, the conversation it belongs to and the agent's tool calls in that conversation from the decision on (sanitized, shortened inputs; 30-minute window, matched by conversation and time). Nothing new is stored, so approvals decided before this are covered too; a request that did not come from an agent turn says so.
 
 - **Per-model runtime knobs on the local model.** Providers → Local model →

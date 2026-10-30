@@ -6,7 +6,8 @@
 #                       [--local-ai[=container|host]] [--local-model TAG] [--cloud] [--search] [--browser] [--dry-run]
 #                       (lite/personal profiles: rag, tools, workspace, voice (implies rag),
 #                       plus docling on lite; full: temporal events jobs observability tracing
-#                       voice rl code-intel builder sandbox tools browser docling)
+#                       voice rl code-intel builder sandbox tools browser docling
+#                       freellmapi hindsight)
 #   scripts/vegaduta personal [--native-core] [--build] [--local-ai[=container|host]] [--local-model TAG]
 #                       [--cloud] [--no-search] [--no-tools] [--no-valkey|--valkey] [--minimal] [--browser] [--dry-run]
 #                       (one-person laptop mode: postgres + valkey + core + web, no Keycloak; docs: deploy/compose/personal.yml)
@@ -86,7 +87,7 @@ DD_SECRET_KEY:hex32
 DD_CREDENTIAL_AES_256_KEY:hex32
 DD_DATABASE_PASSWORD:hex16
 "
-ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser docling"
+ALL_PROFILES="temporal events jobs observability tracing voice rl code-intel builder sandbox tools browser docling freellmapi hindsight"
 
 # ------------------------------------------------------------------ helpers
 if [ -t 1 ]; then C_B=$'\033[1m'; C_G=$'\033[32m'; C_Y=$'\033[33m'; C_R=$'\033[31m'; C_C=$'\033[36m'; C_0=$'\033[0m'

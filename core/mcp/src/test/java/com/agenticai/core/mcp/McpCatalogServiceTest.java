@@ -81,7 +81,9 @@ class McpCatalogServiceTest {
             // different, equally valid reason for not being ready: it needs
             // a real browser-redirect consent flow, not a pasted credential
             // - requiredEnvVars is legitimately empty for these.
-            if (!entry.ready() && !entry.requiresOAuth()) {
+            // context-mode (2026-10-30) is not ready only because its npx STDIO server needs the
+            // mcp-stdio-runner or a core-full image - a runtime, not a credential.
+            if (!entry.ready() && !entry.requiresOAuth() && !"context-mode".equals(entry.key())) {
                 assertFalse(
                         entry.requiredEnvVars().isEmpty(),
                         "non-ready entry '"

@@ -23,6 +23,13 @@
 #   docling        docling document parser (services/docling): layout-aware
 #                  extraction ahead of the sidecar for PDF/Office/image formats
 #                  (the CLI exports DOCLING_BASE_URL=http://docling:8002)
+#   freellmapi     FreeLLMAPI (MIT): one OpenAI-compatible /v1 gateway over
+#                  ~34 free LLM providers - zero-key agent models via a
+#                  LOCAL_OPENAI provider row at http://freellmapi:3001/v1
+#                  (docs/local-models.md)
+#   hindsight     Hindsight (MIT): learning agent-memory server with a
+#                  per-bank MCP endpoint http://hindsight:8888/mcp/<bank>/
+#                  (catalog entry `hindsight`; docs/integrations/hindsight.md)
 #   code-intel     code-intel + its docker-in-docker executor (CODE_INTEL_ENABLED=true)
 #   builder        app-builder (pulls in code-intel)
 #   sandbox        tool-sandbox + mcp-stdio-runner
@@ -1593,6 +1600,71 @@ services:
           pids: 256
     networks: [mcp-stdio-net]
 
+  # ---------------------------------------------------------------------
+  # Optional third-party integrations
+  # ---------------------------------------------------------------------
+
+  freellmapi:
+    # FreeLLMAPI (github.com/tashfeenahmed/freellmapi, MIT): a single
+    # OpenAI-compatible /v1 gateway in front of ~34 free LLM providers, so an
+    # agent can call models with no per-provider API keys. Point a provider
+    # (or agent LLM override) of type LOCAL_OPENAI at
+    # http://freellmapi:3001/v1 - see docs/local-models.md. Its web console is
+    # single-user and stays on the loopback port; agent traffic is
+    # service-to-service over agent-io. `nnp` only: third-party image that
+    # may start as root.
+    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    profiles: ["freellmapi"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${FREELLMAPI_HOST_PORT:-3001}:3001"
+    volumes:
+      - freellmapi-data:/app/server/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/ping').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: ${FREELLMAPI_MEM_LIMIT:-1g}
+    networks: [agent-io]
+
+  hindsight:
+    # Hindsight (github.com/vectorize-io/hindsight, MIT): a learning agent
+    # memory server - world facts, experiences, consolidated observations and
+    # mental models, grouped into per-topic "banks". It serves a built-in
+    # per-bank streamable-HTTP MCP endpoint at
+    # http://hindsight:8888/mcp/<bank_id>/ (catalog entry `hindsight`), which
+    # complements the platform's built-in pgvector/AGE memory. Needs an LLM
+    # for consolidation: any of 25+ providers or any OpenAI-compatible
+    # endpoint via HINDSIGHT_API_LLM_BASE_URL - e.g. pair it with the
+    # `freellmapi` profile for a fully key-free local stack. `nnp` only:
+    # third-party image that may start as root.
+    image: ghcr.io/vectorize-io/hindsight:latest
+    profiles: ["hindsight"]
+    <<: [*restart, *logging, *nnp]
+    environment:
+      HINDSIGHT_API_LLM_PROVIDER: ${HINDSIGHT_API_LLM_PROVIDER:-openai}
+      HINDSIGHT_API_LLM_API_KEY: ${HINDSIGHT_API_LLM_API_KEY:?set HINDSIGHT_API_LLM_API_KEY in deploy/compose/.env (a placeholder is fine when HINDSIGHT_API_LLM_BASE_URL points at a keyless endpoint)}
+      HINDSIGHT_API_LLM_MODEL: ${HINDSIGHT_API_LLM_MODEL:-gpt-4o-mini}
+      HINDSIGHT_API_LLM_BASE_URL: ${HINDSIGHT_API_LLM_BASE_URL:-}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${HINDSIGHT_API_HOST_PORT:-8888}:8888"
+      - "${BIND_ADDR:-127.0.0.1}:${HINDSIGHT_UI_HOST_PORT:-9999}:9999"
+    volumes:
+      - hindsight-data:/home/hindsight/.pg0
+    deploy:
+      resources:
+        limits:
+          memory: ${HINDSIGHT_MEM_LIMIT:-2g}
+    networks: [agent-io]
+
 volumes:
   postgres-data:
   valkey-data:
@@ -1617,6 +1689,8 @@ volumes:
   code-intel-docker-data:
   app-builder-data:
   outreach-data:
+  freellmapi-data:
+  hindsight-data:
 
 # Segmented networks: a compromise of one group cannot reach another except
 # through a service that legitimately bridges both (core, keycloak).

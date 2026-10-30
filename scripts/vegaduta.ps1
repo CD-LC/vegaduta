@@ -51,7 +51,7 @@ $ComposeDir = Join-Path $RepoRoot 'deploy\compose'
 $EnvFile    = if ($env:VEGADUTA_ENV_FILE) { $env:VEGADUTA_ENV_FILE } else { Join-Path $ComposeDir '.env' }
 $EnvExample = Join-Path $ComposeDir '.env.example'
 $StateFile  = Join-Path $ComposeDir '.vegaduta-state'
-$AllProfiles = @('temporal','events','jobs','observability','tracing','voice','rl','code-intel','builder','sandbox','tools','browser')
+$AllProfiles = @('temporal','events','jobs','observability','tracing','voice','rl','code-intel','builder','sandbox','tools','browser','docling','freellmapi','hindsight')
 
 # NAME = kind (hex16|hex32|b64|fernet|lfpk|lfsk) - keep in sync with scripts/vegaduta
 $SecretSpecs = [ordered]@{

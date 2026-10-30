@@ -94,6 +94,8 @@ now lives in `mcp-stdio-runner` (and its `-browser` variant), or in the opt-in
 | core-full image | alternative | stdio MCP servers inside the core container, for hosts that cannot run the runner (single-user only: no isolation) | `CORE_IMAGE_VARIANT=-full` + `CORE_MCP_PROFILE=,mcp` | `global.core.mcpToolchain=full` (API only) | `MCP_STDIO_SIDECAR_ENABLED=false` |
 | sidecar | plug-and-play | document ingestion, embeddings, rerank, STT/TTS, rendering | always in full; lite profile `rag` | `global.components.sidecar` (default on) | `SIDECAR_BASE_URL` |
 | docling | plug-and-play | optional Docling-first document conversion (layout-aware PDF, tables, pptx/xlsx/csv) ahead of the sidecar extractor | profile `docling` | — | `DOCLING_BASE_URL`, `DOCLING_SHARED_SECRET` |
+| freellmapi | plug-and-play | FreeLLMAPI: one OpenAI-compatible `/v1` gateway over ~34 free LLM providers (docs/local-models.md) | profile `freellmapi` | — | `FREELLMAPI_HOST_PORT` |
+| hindsight | plug-and-play | Hindsight learning agent-memory server; per-bank MCP endpoint (docs/integrations/hindsight.md) | profile `hindsight` | — | `HINDSIGHT_API_LLM_*`, `HINDSIGHT_*_HOST_PORT` |
 | tool-sandbox | plug-and-play | tenant-authored Java/Python/JavaScript/TypeScript tools (and agent-authored `create_custom_tool`) | profile `sandbox` (full), `tools` (personal/lite) | | `global.components.toolSandbox` + RuntimeClass | `TOOL_SANDBOX_ENABLED=true` |
 | code-intel | plug-and-play | code intelligence, repository indexing | profile `code-intel` | `global.components.codeIntel` | `CODE_INTEL_ENABLED=true` |
 | app-builder | plug-and-play | the App Builder (`/build`) | profile `builder` | `global.components.appBuilder` | `APP_BUILDER_CORE_SERVICE_TOKEN` |
