@@ -50,7 +50,7 @@ export async function signUpFreshTenant(page: Page, label: string): Promise<Test
   // The step-1 button and two labels were renamed between the hosted site and the self-hosted
   // (lite) build ("Register now" / "Organization name" / "Launch your control panel" became
   // "Create free account" / "Workspace name" / "Create my workspace"): accept either.
-  await page.getByRole("button", { name: /register now|create free account/i }).click();
+  await page.getByRole("button", { name: /register now|create free account|create account/i }).click();
   const orgField = page.getByLabel(/^(organization|workspace) name$/i);
   await expect(orgField).toBeVisible();
 
@@ -89,7 +89,7 @@ export async function signUpFreshTenant(page: Page, label: string): Promise<Test
  */
 export async function signIn(page: Page, identity: Pick<TestTenant, "email" | "password">) {
   await page.goto("/");
-  await page.locator("header").getByRole("button", { name: "Sign in" }).click();
+  await page.locator("header").getByRole("link", { name: "Sign in" }).or(page.locator("header").getByRole("button", { name: "Sign in" })).click();
   await completeKeycloakLogin(page, identity.email, identity.password);
   await expectSignedIn(page);
 }

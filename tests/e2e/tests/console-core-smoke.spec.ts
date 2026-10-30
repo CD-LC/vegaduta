@@ -48,9 +48,9 @@ test.describe("Console core smoke - agents, workflows, knowledge base", () => {
       // Fresh tenant has zero agents -> AgentWorkbench lands in draft mode
       // by default (no agents to auto-select).
       const agentName = `E2E Agent ${Date.now()}`;
-      await expect(page.getByRole("button", { name: "Save draft" })).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByRole("button", { name: "Save draft" }).first()).toBeVisible({ timeout: 15_000 });
       await page.getByPlaceholder(/name this agent/i).fill(agentName);
-      await page.getByRole("button", { name: "Save draft" }).click();
+      await page.getByRole("button", { name: "Save draft" }).first().click();
 
       // Real success notice (role="status") + the agent is now "live".
       await expect(page.getByText(`"${agentName}" created.`)).toBeVisible({ timeout: 15_000 });

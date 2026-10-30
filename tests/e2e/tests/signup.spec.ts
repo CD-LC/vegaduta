@@ -10,7 +10,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 async function goToDetailsStep(page: Page) {
   await page.goto("/signup");
-  await page.getByRole("button", { name: /create free account/i }).click();
+  await page.getByRole("button", { name: /create free account|create account/i }).click();
   // DetailsForm is identified by its "Workspace name" field.
   await expect(page.getByLabel("Workspace name")).toBeVisible();
 }
@@ -79,7 +79,7 @@ test.describe("Signup wizard", () => {
 // separate from goToDetailsStep because that test wants to assert the intro
 // step's own content first, then move forward.
 async function goToDetailsStepFields(page: Page) {
-  await page.getByRole("button", { name: /create free account/i }).click();
+  await page.getByRole("button", { name: /create free account|create account/i }).click();
   await expect(page.getByLabel("Workspace name")).toBeVisible();
   await expect(page.getByLabel("First name")).toBeVisible();
   await expect(page.getByLabel("Last name")).toBeVisible();

@@ -53,9 +53,9 @@ test.describe("Workflow execution - real run to a terminal state", () => {
 
     // Before running: the inspector is hidden until it has something to show
     // (studio layout, 2026-09-29) - open it explicitly, then: no run yet.
-    await expect(page.getByText("No run yet")).toBeHidden();
+    await expect(page.getByText("No run yet").first()).toBeHidden();
     await page.getByRole("button", { name: "Show or hide the inspector" }).click();
-    await expect(page.getByText("No run yet")).toBeVisible();
+    await expect(page.getByText("No run yet").first()).toBeVisible();
 
     // --- Trigger a real execution ---
     // "Run now" opens a modal (runtime comment/attachments/params, all

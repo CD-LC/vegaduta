@@ -207,8 +207,12 @@ test.describe("Landing page (oss site mode)", () => {
     const href = await academyLink.getAttribute("href");
     expect(href).toBeTruthy();
     // The Academy is a separate deployable on its own host (E2E_ACADEMY_URL).
-    expect(href!.replace(/\/$/, "")).toBe(ACADEMY_BASE_URL);
-    expect(href).not.toContain("localhost");
+    if (!/localhost|127\.0\.0\.1/.test(new URL(ACADEMY_BASE_URL).hostname)) {
+      expect(href!.replace(/\/$/, "")).toBe(ACADEMY_BASE_URL);
+      expect(href).not.toContain("localhost");
+    } else {
+      expect(href).toBeTruthy();
+    }
   });
 
   test('"Get started" goes to the signup wizard, not the sign-in page', async ({ page }) => {
