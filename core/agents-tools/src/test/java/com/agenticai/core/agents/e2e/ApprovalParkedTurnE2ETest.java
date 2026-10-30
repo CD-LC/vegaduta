@@ -218,7 +218,7 @@ class ApprovalParkedTurnE2ETest {
         // Only the two requests this turn parked are asserted: a slow runner can resume the turn
         // before both flips are visible and record further pending requests of its own.
         assertTrue(
-                harness.awaitStatuses(ApprovalStatus.APPROVED, requests),
+                awaitApproved(requests),
                 "the parked requests landed APPROVED: " + harness.requestStatuses());
 
         assertAll(
@@ -343,5 +343,21 @@ class ApprovalParkedTurnE2ETest {
             cause = cause.getCause();
         }
         assertTrue(sawStepLimit, "expected the step-limit error to surface, got: " + thrown);
+    }
+
+    private static boolean awaitApproved(List<ApprovalRequest> requests) {
+        long deadline = System.nanoTime() + 5_000_000_000L;
+        while (System.nanoTime() < deadline) {
+            if (requests.stream().allMatch(r -> r.getStatus() == ApprovalStatus.APPROVED)) {
+                return true;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
     }
 }
