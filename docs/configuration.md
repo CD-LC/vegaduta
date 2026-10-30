@@ -1516,6 +1516,8 @@ mode is unchanged when this is left at `keycloak`. Needs the `security` profile 
 | `app.auth.local.data-dir` | `${user.home}/.vegaduta/auth` | signing keys (`signing-keys.json`, file `0600`, directory `0700`) and the one-time `first-run-setup.txt`. Keep it on a persistent volume: losing the key signs everyone out. One core process per directory. `personal.yml` sets `APP_AUTH_LOCAL_DATA_DIR=/data/storage/.auth` |
 | `app.auth.local.issuer` / `.audience` | `https://auth.local.vegaduta.invalid` / `vegaduta-api` | `iss` and `aud` of the tokens; the issuer is an identifier nobody dereferences |
 | `app.auth.local.access-token-ttl` | `15m` | access token lifetime |
+| `app.auth.local.setup-link-in-logs` | `true` | print the one-time first-run setup link in the core log. Set `false` on log-aggregated deploys; read `first-run-setup.txt` from the data dir instead |
+| `app.tenant.comp.allowed-tenants` | _(empty)_ | comma-separated tenant ids that `CompGrantController` may grant complimentary plans to. Empty means any tenant; a non-empty list rejects every other tenant id |
 | `app.auth.local.refresh-token-ttl` | `30d` | idle lifetime of one refresh token |
 | `app.auth.local.session-max-ttl` | `90d` | absolute lifetime of a login; refreshing never extends it |
 | `app.auth.local.key-rotation-interval` | `90d` | the key is rotated lazily when older than this |
