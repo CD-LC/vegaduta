@@ -27,7 +27,7 @@ process.env.E2E_EDITION ||= "personal";
 
 export default defineConfig({
   testDir: "./tests",
-  testMatch: /personal-(edition|smoke)\.spec\.ts/,
+  testMatch: /personal-(edition|smoke|agent)\.spec\.ts/,
   // One owner, one login throttle: keep the signed-in checks sequential.
   fullyParallel: false,
   workers: 1,
