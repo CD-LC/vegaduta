@@ -12,6 +12,7 @@ import { Separator } from "../components/ui/separator";
 import { Skeleton } from "../components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
+import { useTranslations } from "../lib/i18n";
 
 // ShadCN living style guide. Renders every canonical shadcn/ui primitive
 // (app/components/ui/*) in its variants and states, so the design system is
@@ -71,6 +72,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function UiKitPage() {
+  const tHC = useTranslations("hcUikitPage");
   const [loading, setLoading] = useState(false);
 
   return (
@@ -79,12 +81,11 @@ export default function UiKitPage() {
         {/* Header */}
         <header className="space-y-3">
           <Badge variant="accent" className="gap-1.5">
-            <Sparkles className="size-3" aria-hidden="true" /> ShadCN · new-york
+            <Sparkles className="size-3" aria-hidden="true" /> {tHC("s17")}
           </Badge>
-          <h1 className="text-4xl font-semibold tracking-tight">Design system</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">{tHC("s16")}</h1>
           <p className="max-w-2xl text-muted-foreground">
-            The canonical shadcn/ui primitive set powering the <BrandName /> public funnel — token-driven, dark, and
-            state-complete. Every component here is imported from{" "}
+            {tHC("s15")} <BrandName /> {tHC("s14")}{" "}
             <code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-xs">app/components/ui/*</code>.
           </p>
         </header>
@@ -172,7 +173,7 @@ export default function UiKitPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Button>
-              <Mail className="size-4" aria-hidden="true" /> With icon
+              <Mail className="size-4" aria-hidden="true" /> {tHC("s13")}
             </Button>
             <Button disabled>Disabled</Button>
             <Button
@@ -199,7 +200,7 @@ export default function UiKitPage() {
         </Section>
 
         {/* Inputs & labels */}
-        <Section title="Inputs & labels">
+        <Section title={tHC("s12")}>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="uk-email">Email</Label>
@@ -217,7 +218,7 @@ export default function UiKitPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="uk-search">Search</Label>
-              <Input id="uk-search" placeholder="Search agents…" />
+              <Input id="uk-search" placeholder={tHC("s11")} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="uk-dis">Disabled</Label>
@@ -231,19 +232,19 @@ export default function UiKitPage() {
           <div className="grid gap-6 sm:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>Visual workflow designer</CardTitle>
-                <CardDescription>Drag agents, tools and guardrails onto an infinite canvas.</CardDescription>
+                <CardTitle>{tHC("s10")}</CardTitle>
+                <CardDescription>{tHC("s9")}</CardDescription>
               </CardHeader>
               <CardFooter>
                 <Button variant="outline" size="sm" className="w-full">
-                  Open designer
+                  {tHC("s8")}
                 </Button>
               </CardFooter>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Grounded in your knowledge</CardTitle>
-                <CardDescription>Every answer cites your sources — no hallucinated policy.</CardDescription>
+                <CardTitle>{tHC("s7")}</CardTitle>
+                <CardDescription>{tHC("s6")}</CardDescription>
               </CardHeader>
             </Card>
             <Card>
@@ -260,18 +261,14 @@ export default function UiKitPage() {
         <Section title="Accordion">
           <Accordion type="single" collapsible className="max-w-2xl rounded-xl border border-border bg-card/60 px-5">
             <AccordionItem value="a">
-              <AccordionTrigger>What is this style guide for?</AccordionTrigger>
+              <AccordionTrigger>{tHC("s5")}</AccordionTrigger>
               <AccordionContent>
-                It&apos;s the single reference for every canonical shadcn/ui primitive used across the <BrandName />{" "}
-                public funnel, so the design system stays verifiable at a glance.
+                {tHC("s4")} <BrandName /> {tHC("s3")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="b">
-              <AccordionTrigger>Are these Radix-backed?</AccordionTrigger>
-              <AccordionContent>
-                Accordion and Separator are Radix primitives; Button, Card, Badge, Input, Label, Table and Skeleton are
-                token-driven shadcn components.
-              </AccordionContent>
+              <AccordionTrigger>{tHC("s2")}</AccordionTrigger>
+              <AccordionContent>{tHC("s1")}</AccordionContent>
             </AccordionItem>
           </Accordion>
         </Section>

@@ -19,6 +19,7 @@ import AppPhone, { type AppStep, type AppView } from "./AppPhone";
 import { AGENT, APP } from "./script";
 import { PhoneFit } from "./PhoneFit";
 import { Field, Head, RegistryStep, ShipStep, type McpSearch } from "./liveBuilderSteps";
+import { useTranslations } from "../../../lib/i18n";
 
 // Build it live: the trailer's six moves, for real, on the real demo backend.
 // Same stage, same phone - but the app is the visitor's (they can rename it), the
@@ -52,6 +53,7 @@ type Props = {
 };
 
 export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Props) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilder");
   const apk = getMobileApkDownload();
   const [step, setStep] = useState<Step>("app");
   const [appTitle, setAppTitle] = useState(APP.title);
@@ -312,7 +314,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
   return (
     <div className="flex h-full min-h-0 flex-col gap-4 lg:flex-row lg:items-stretch lg:justify-center lg:gap-8">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/70 shadow-2xl shadow-black/40 backdrop-blur lg:max-w-[720px]">
-        <ol className="flex flex-wrap gap-1.5 border-b border-white/10 p-3" aria-label="Live steps">
+        <ol className="flex flex-wrap gap-1.5 border-b border-white/10 p-3" aria-label={tHC("s11")}>
           {STEPS.map((s, i) => (
             <li key={s.id}>
               <button
@@ -342,15 +344,13 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
           {step === "app" && (
             <div className="space-y-4">
               <Head
-                title="Design your app"
+                title={tHC("s10")}
                 body="This is the phone on the right. Rename it, change the button - it updates as you type. (Yours can be any job; the studio behind this is the same.)"
               />
-              <Field label="App name" value={appTitle} onChange={setAppTitle} max={24} />
+              <Field label={tHC("s9")} value={appTitle} onChange={setAppTitle} max={24} />
               <Field label="Tagline" value={tagline} onChange={setTagline} max={40} />
               <Field label="Button" value={button} onChange={setButton} max={28} />
-              <p className="text-xs text-zinc-400">
-                Tip: type a crop into the phone&apos;s field too - that is what the agent will be asked about.
-              </p>
+              <p className="text-xs text-zinc-400">{tHC("s8")}</p>
             </div>
           )}
 
@@ -369,15 +369,11 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
           {step === "agent" && (
             <div className="space-y-4">
               <Head
-                title="Give the button a brain"
+                title={tHC("s7")}
                 body="A real agent with a mission and the tools you just picked. Edit the mission if you like - it is the biggest steering wheel."
               />
               <div className="flex flex-wrap gap-1.5">
-                {picked.length === 0 && (
-                  <span className="text-xs text-zinc-400">
-                    No tools attached - go back and pick some for a real agent.
-                  </span>
-                )}
+                {picked.length === 0 && <span className="text-xs text-zinc-400">{tHC("s6")}</span>}
                 {picked.map((t) => (
                   <span
                     key={t}
@@ -391,7 +387,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
                 value={mission}
                 onChange={(e) => setMission(e.target.value.slice(0, 1200))}
                 rows={7}
-                aria-label="Agent mission"
+                aria-label={tHC("s5")}
                 className="w-full resize-none rounded-xl border border-white/15 bg-black/30 p-3 text-sm leading-relaxed outline-none focus:border-violet-400"
               />
               <button
@@ -413,7 +409,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
           {step === "flow" && (
             <div className="space-y-4">
               <Head
-                title="Wire it and run it"
+                title={tHC("s4")}
                 body="Tap the button on the phone. The workflow is: button → agent → you approve → answer. The approval is real - the run waits for you."
               />
               <div className="grid grid-cols-4 gap-2 text-center text-[11px]">
@@ -426,7 +422,8 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
               </div>
               {xray.length === 0 && !running && (
                 <p className="rounded-xl border border-dashed border-white/15 p-4 text-center text-sm text-zinc-400">
-                  Tap “{button}” on the phone →
+                  Tap “{button}
+                  {tHC("s3")}
                 </p>
               )}
               <ol className="space-y-2">
@@ -448,11 +445,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
                   </li>
                 ))}
               </ol>
-              {ran && (
-                <p className="text-xs text-zinc-400">
-                  Run finished. Change the crop and tap again - or move on to put it on a phone.
-                </p>
-              )}
+              {ran && <p className="text-xs text-zinc-400">{tHC("s2")}</p>}
             </div>
           )}
 
@@ -486,7 +479,7 @@ export default function LiveBuilder({ token, signupHref, onBudget, onClose }: Pr
               disabled={!ran && !running}
               className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-sm font-medium disabled:opacity-40"
             >
-              Put it on a phone <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+              {tHC("s1")} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
             </button>
           )}
           {(step === "app" || step === "registry") && (

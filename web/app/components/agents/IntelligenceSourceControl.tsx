@@ -79,14 +79,18 @@ import { detectCapabilities, edgeEnabled, setEdgeLearningOptIn } from "../../lib
 // see that module's header for why. getEdgeRoutingPreference stays imported
 // from capabilities.ts above as one documented exception (used only inside
 // getEffectiveEdgeOptIn below — see that function's comment for why).
-import { setRoutingMode, subscribeRoutingMode, type RoutingMode, type TenantProviderState } from "../../lib/edge/routingState";
+import {
+  setRoutingMode,
+  subscribeRoutingMode,
+  type RoutingMode,
+  type TenantProviderState,
+} from "../../lib/edge/routingState";
 import { TIER0_ASSET_ID } from "../../lib/edge/tier0";
 import { isTier1ModelCached, prewarmTier1Engine } from "../../lib/edge/tier1";
 import { UpgradeLock } from "../ui/upgrade-lock";
 import { Button } from "../ui/button";
 
 export { getStoredEdgeOptInChoice, edgeTextModelReady, getEffectiveEdgeOptIn } from "./intelligence/optIn";
-
 
 export default function IntelligenceSourceControl({
   isFreePlan,
@@ -102,6 +106,7 @@ export default function IntelligenceSourceControl({
   agentId = null,
   routingPreview = null,
 }: IntelligenceSourceControlProps) {
+  const tHC = useTranslations("hcComponentsAgentsIntelligenceSourceControl");
   const enabled = edgeEnabled();
   const t = useTranslations("edgeIntelligence");
   // Reuse of existing keys where they fit (i18n rule): "Change" already
@@ -332,7 +337,9 @@ export default function IntelligenceSourceControl({
                   t("deviceReadyNoModel")
                 : "Not available in this browser";
 
-  const hostedFallbackTarget = onPlatformLlm ? poolLabel("the platform pool", "the local model (Ollama)") : "your own provider";
+  const hostedFallbackTarget = onPlatformLlm
+    ? poolLabel("the platform pool", "the local model (Ollama)")
+    : "your own provider";
 
   // Bug A fix: a downloaded tier-1 model can only actually be selected to
   // run when WebGPU is confirmed available on this device — otherwise the
@@ -366,12 +373,9 @@ export default function IntelligenceSourceControl({
 
   return (
     <div className="mb-3 rounded-lg border border-border p-3">
-      <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        What powers this agent&rsquo;s replies
-      </div>
+      <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{tHC("s5")}</div>
       <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">
-        Not a per-agent setting: {poolLabel("Platform pool", "Local model")} and Your own provider apply to your whole workspace, and On-device
-        applies to this browser only — either way, the choice you make here covers every agent, not just this one.
+        {tHC("s4")} {poolLabel("Platform pool", "Local model")} {tHC("s3")}
       </p>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
         <SourceOption
@@ -402,7 +406,7 @@ export default function IntelligenceSourceControl({
           >
             <SourceOption
               icon={<KeyRound size={13} />}
-              title="Your own provider"
+              title={tHC("s2")}
               subtitle={isFreePlan ? "Requires a paid plan" : "No active provider yet"}
               active={false}
               disabled
@@ -412,7 +416,7 @@ export default function IntelligenceSourceControl({
         ) : (
           <SourceOption
             icon={<KeyRound size={13} />}
-            title="Your own provider"
+            title={tHC("s2")}
             subtitle="Your configured credentials"
             active={selected === "own-provider"}
             disabled={busy}
@@ -442,10 +446,7 @@ export default function IntelligenceSourceControl({
               nothing server-side (workflow runs, channel replies, scheduled
               runs) can reach a model that lives in this tab. Plain literal,
               same as the policy note above: there is no catalogue key for it. */}
-          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-            On-device applies to chat in this browser. Workflows, channels and scheduled runs always use the server
-            model.
-          </p>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{tHC("s1")}</p>
           {/* A3: the actionable on-device model list. Downloaded models are
               switchable in place; not-yet-downloaded ones stay visible but
               greyed, with size + Download; the marketplace link leads to the

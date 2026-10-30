@@ -10,8 +10,10 @@ import { Button } from "../components/ui/button";
 import { Textarea } from "../components/ui/textarea";
 import type { Blueprint } from "../lib/build/blueprint";
 import { parseBlueprintJson, serializeBlueprint } from "./blueprintJson";
+import { useTranslations } from "../lib/i18n";
 
 export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; onImport: (next: Blueprint) => void }) {
+    const tHC = useTranslations("hcBuildBlueprintJsonTools");
   const uid = useId();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -46,13 +48,13 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
   };
 
   return (
-    <section className="rounded-xl border border-border bg-card p-3" aria-label="Blueprint JSON">
+    <section className="rounded-xl border border-border bg-card p-3" aria-label={tHC("s6")}>
       <div className="flex flex-wrap items-center gap-2">
         <FileJson className="size-4 text-muted-foreground" aria-hidden />
-        <span className="text-xs font-medium text-foreground">Blueprint as JSON</span>
+        <span className="text-xs font-medium text-foreground">{tHC("s5")}</span>
         <div className="ms-auto flex items-center gap-1.5">
           <Button type="button" size="sm" variant="outline" onClick={() => void copy()}>
-            <ClipboardCopy aria-hidden="true" className="size-3.5" /> Copy as JSON
+            <ClipboardCopy aria-hidden="true" className="size-3.5" /> {tHC("s4")}
           </Button>
           <Button
             type="button"
@@ -62,7 +64,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
             aria-controls={`${uid}-import`}
             onClick={() => setOpen((o) => !o)}
           >
-            <Upload aria-hidden="true" className="size-3.5" /> Import JSON
+            <Upload aria-hidden="true" className="size-3.5" /> {tHC("s3")}
           </Button>
         </div>
       </div>
@@ -72,7 +74,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
       {open && (
         <div id={`${uid}-import`} className="mt-2 space-y-2">
           <label htmlFor={`${uid}-text`} className="text-xs font-medium text-foreground">
-            Paste a blueprint JSON (this replaces the blueprint on screen)
+            {tHC("s2")}
           </label>
           <Textarea
             id={`${uid}-text`}
@@ -93,7 +95,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
           )}
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={load} disabled={!text.trim()}>
-              Load blueprint
+              {tHC("s1")}
             </Button>
             <Button
               type="button"

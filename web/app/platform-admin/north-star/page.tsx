@@ -23,6 +23,7 @@ import {
   weekBefore,
   weekLabel,
 } from "./format";
+import { useTranslations } from "../../lib/i18n";
 
 // North Star - the platform owner's headline numbers.
 //
@@ -176,6 +177,7 @@ const pickSuccess = (w: WeekPoint) => w.successRate;
 const pickShare = (w: WeekPoint) => w.scheduledShare;
 
 export default function NorthStarPage() {
+  const tHC = useTranslations("hcPlatformadminNorthstarPage");
   const [weeks, setWeeks] = useState(12);
   const [data, setData] = useState<NorthStarResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +214,7 @@ export default function NorthStarPage() {
 
   return (
     <AdminShell
-      title="North Star"
+      title={tHC("s31")}
       actions={
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label="Window">
@@ -239,9 +241,7 @@ export default function NorthStarPage() {
       }
     >
       <PageHint>
-        The numbers that say whether people actually get agents to do work. Everything is an aggregate across every
-        active tenant &mdash; no user, tenant or agent is ever named &mdash; and any cell fewer than 5 people
-        contributed to is hidden, not shown as zero. The server caches the sweep for an hour
+        {tHC("s30")}
         {data ? `; this one was generated ${timeAgo(data.generatedAt)}` : ""}.
       </PageHint>
 
@@ -250,7 +250,7 @@ export default function NorthStarPage() {
           <AlertDescription>
             {error}{" "}
             <button type="button" className="underline" onClick={() => void load(weeks)}>
-              Try again
+              {tHC("s29")}
             </button>
           </AlertDescription>
         </Alert>
@@ -273,8 +273,7 @@ export default function NorthStarPage() {
           {data.coverage.truncated && (
             <Alert variant="warning" className="mb-5">
               <AlertDescription>
-                Partial sweep: {data.coverage.tenantsScanned} of {data.coverage.tenantsTotal} active tenants were
-                scanned. Every figure below covers only those tenants.
+                {tHC("s28")} {data.coverage.tenantsScanned} of {data.coverage.tenantsTotal} {tHC("s27")}
               </AlertDescription>
             </Alert>
           )}
@@ -284,11 +283,9 @@ export default function NorthStarPage() {
               className="mb-5 rounded-lg border border-dashed border-border p-6 text-center"
               data-testid="north-star-empty"
             >
-              <div className="text-sm font-medium">No agent runs recorded in this window yet</div>
+              <div className="text-sm font-medium">{tHC("s26")}</div>
               <p className="mx-auto mt-1 max-w-xl text-xs text-muted-foreground">
-                Nothing has completed an agent job or Quick Task in the last {weeks} weeks across{" "}
-                {data.coverage.tenantsScanned} scanned tenants. The notes below say which metrics cannot be measured at
-                all.
+                {tHC("s25")} {weeks} {tHC("s24")} {data.coverage.tenantsScanned} {tHC("s23")}
               </p>
             </div>
           )}
@@ -297,35 +294,35 @@ export default function NorthStarPage() {
             <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="north-star-tiles">
               <Tile
                 testId="tile-wau"
-                label="Weekly active users"
+                label={tHC("s19")}
                 value={cellText(headline?.wau, headline?.suppressed ?? false)}
                 sub={[headlineLabel, deltaText(headline?.wau, previous?.wau)].filter(Boolean).join(" · ")}
                 definition="Weekly active = signed-in users with at least one completed agent run in the ISO week. Counts only runs a person started (an API-submitted agent job or a Quick Task); scheduled and event-triggered runs never count."
               />
               <Tile
                 testId="tile-runs"
-                label="Agent runs"
+                label={tHC("s18")}
                 value={cellText(headline?.runs, headline?.suppressed ?? false)}
                 sub={[headlineLabel, deltaText(headline?.runs, previous?.runs)].filter(Boolean).join(" · ")}
                 definition="Finished runs of every kind (succeeded or failed): agent jobs and Quick Task runs. Interactive chat turns are not recorded against a user, so they are not included."
               />
               <Tile
                 testId="tile-success"
-                label="Run success rate"
+                label={tHC("s17")}
                 value={cellText(headline?.successRate, headline?.suppressed ?? false, fmtPct)}
                 sub={headlineLabel}
                 definition="Succeeded ÷ (succeeded + failed). Cancelled, queued, running and awaiting-approval runs are left out of both sides."
               />
               <Tile
                 testId="tile-share"
-                label="Runs without a human present"
+                label={tHC("s16")}
                 value={cellText(headline?.scheduledShare, headline?.suppressed ?? false, fmtPct)}
                 sub={headlineLabel}
                 definition="Share of runs that were scheduled, event-triggered or delivered over WhatsApp, SMS or a call, rather than started interactively."
               />
               <Tile
                 testId="tile-ttfr"
-                label="Median time to first run"
+                label={tHC("s22")}
                 value={fmtMinutes(data.timeToFirstRunMedianMinutes)}
                 sub={
                   data.timeToFirstRunMedianMinutes == null
@@ -337,7 +334,7 @@ export default function NorthStarPage() {
               />
               <Tile
                 testId="tile-passk"
-                label="Average pass^k"
+                label={tHC("s21")}
                 value={cellText(data.passK?.average, data.passK != null, fmtPct)}
                 sub={data.passK?.cases != null ? `${fmtCount(data.passK.cases)} eval cases` : undefined}
                 tone={data.passK?.average == null ? "muted" : "default"}
@@ -348,14 +345,14 @@ export default function NorthStarPage() {
 
           {active && (
             <SectionCard
-              title="Weekly trend"
+              title={tHC("s20")}
               subtitle="One bar or point per ISO week (Monday start, UTC). The faded last week is still in progress. A dashed bar or a break in the line is a hidden week (fewer than 5 users), not zero."
               icon={Star}
             >
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <MiniChart
                   testId="chart-wau"
-                  title="Weekly active users"
+                  title={tHC("s19")}
                   weeks={data.weeks}
                   pick={pickWau}
                   kind="bar"
@@ -363,7 +360,7 @@ export default function NorthStarPage() {
                 />
                 <MiniChart
                   testId="chart-runs"
-                  title="Agent runs"
+                  title={tHC("s18")}
                   weeks={data.weeks}
                   pick={pickRuns}
                   kind="bar"
@@ -371,7 +368,7 @@ export default function NorthStarPage() {
                 />
                 <MiniChart
                   testId="chart-success"
-                  title="Run success rate"
+                  title={tHC("s17")}
                   weeks={data.weeks}
                   pick={pickSuccess}
                   kind="line"
@@ -380,7 +377,7 @@ export default function NorthStarPage() {
                 />
                 <MiniChart
                   testId="chart-share"
-                  title="Runs without a human present"
+                  title={tHC("s16")}
                   weeks={data.weeks}
                   pick={pickShare}
                   kind="line"
@@ -393,7 +390,7 @@ export default function NorthStarPage() {
 
           {active && (
             <SectionCard
-              title="Weekly detail"
+              title={tHC("s15")}
               subtitle="The exact figures behind the charts."
               icon={CalendarDays}
               delay={0.05}
@@ -403,10 +400,10 @@ export default function NorthStarPage() {
                   <thead>
                     <tr className="border-b border-border text-start text-xs text-muted-foreground">
                       <th className="py-2 pe-3 font-medium">Week of</th>
-                      <th className="py-2 pe-3 font-medium">Active users</th>
+                      <th className="py-2 pe-3 font-medium">{tHC("s14")}</th>
                       <th className="py-2 pe-3 font-medium">Runs</th>
                       <th className="py-2 pe-3 font-medium">Success</th>
-                      <th className="py-2 pe-3 font-medium">No human present</th>
+                      <th className="py-2 pe-3 font-medium">{tHC("s13")}</th>
                       <th className="py-2 pe-3 font-medium">Interactive</th>
                       <th className="py-2 pe-3 font-medium">Scheduled</th>
                       <th className="py-2 pe-3 font-medium">Triggered</th>
@@ -420,7 +417,7 @@ export default function NorthStarPage() {
                           {weekLabel(w.weekStart)}
                           {w.partial && (
                             <Badge variant="outline" className="ms-2 text-[10px]">
-                              in progress
+                              {tHC("s12")}
                             </Badge>
                           )}
                         </td>
@@ -446,7 +443,7 @@ export default function NorthStarPage() {
           )}
 
           <SectionCard
-            title="Time to first run, by signup week"
+            title={tHC("s11")}
             subtitle="Users who signed up in each week, how many have since completed a first successful run, and the median time it took."
             icon={Clock3}
             delay={0.1}
@@ -455,10 +452,10 @@ export default function NorthStarPage() {
               <table className="w-full min-w-[480px] text-sm" data-testid="cohort-table">
                 <thead>
                   <tr className="border-b border-border text-start text-xs text-muted-foreground">
-                    <th className="py-2 pe-3 font-medium">Signup week</th>
-                    <th className="py-2 pe-3 font-medium">Signed up</th>
-                    <th className="py-2 pe-3 font-medium">Reached a first run</th>
-                    <th className="py-2 font-medium">Median time</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s10")}</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s9")}</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s8")}</th>
+                    <th className="py-2 font-medium">{tHC("s7")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -478,14 +475,14 @@ export default function NorthStarPage() {
           </SectionCard>
 
           <SectionCard
-            title="Channel-delivered runs"
+            title={tHC("s6")}
             subtitle="Quick Task runs whose result is delivered outside the app, by channel, over the whole window."
             icon={Radio}
             delay={0.15}
           >
             {data.channels.length === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="channels-empty">
-                No channel-delivered runs in this window.
+                {tHC("s5")}
               </p>
             ) : (
               <div className="overflow-x-auto">
@@ -513,7 +510,7 @@ export default function NorthStarPage() {
 
           {data.passK && (
             <SectionCard
-              title="Eval reliability (pass^k)"
+              title={tHC("s4")}
               subtitle="Eval cases replayed k times; pass^k is the share where every one of the k repetitions passed."
               icon={FlaskConical}
               delay={0.2}
@@ -522,7 +519,7 @@ export default function NorthStarPage() {
                 <table className="w-full min-w-[320px] text-sm" data-testid="passk-table">
                   <thead>
                     <tr className="border-b border-border text-start text-xs text-muted-foreground">
-                      <th className="py-2 pe-3 font-medium">Repetitions (k)</th>
+                      <th className="py-2 pe-3 font-medium">{tHC("s3")}</th>
                       <th className="py-2 pe-3 font-medium">Cases</th>
                       <th className="py-2 font-medium">pass^k</th>
                     </tr>
@@ -542,13 +539,13 @@ export default function NorthStarPage() {
           )}
 
           <SectionCard
-            title="What this screen cannot tell you"
+            title={tHC("s2")}
             subtitle={`Coverage: ${data.coverage.tenantsScanned} of ${data.coverage.tenantsTotal} active tenants scanned. "${HIDDEN_LABEL}" means withheld, not zero.`}
             icon={Info}
             delay={0.25}
           >
             {data.notes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No caveats for this window.</p>
+              <p className="text-sm text-muted-foreground">{tHC("s1")}</p>
             ) : (
               <ul
                 className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground"

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { NODE_LABEL, PROCESS_SCENARIOS, type ProcessNode, type ProcessScenario } from "../../lib/processScenarios";
 import { cn } from "../../lib/utils";
+import { useTranslations } from "../../lib/i18n";
 
 // Exported: /try's ScenarioBuild reuses the same icon-per-node-type map so
 // the build theatre and the theater here speak one visual language.
@@ -64,6 +65,7 @@ type Props = {
 };
 
 export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Props) {
+  const tHC = useTranslations("hcComponentsCapabilitiesProcessTheater");
   const reduce = useReducedMotion();
   const [scenarioId, setScenarioId] = useState(PROCESS_SCENARIOS[0].id);
   const [at, setAt] = useState(0);
@@ -94,17 +96,14 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
       className="overflow-hidden rounded-xl border border-border bg-card"
     >
       <div className="p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Not just chat</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{tHC("s8")}</p>
         <h2
           id="process-theater-heading"
           className="mt-1 text-xl font-semibold leading-snug text-foreground sm:text-2xl"
         >
-          Whole processes. Ones that run for days.
+          {tHC("s7")}
         </h2>
-        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-          An agentic workflow is a durable run: it branches, fans out to specialist agents, calls your systems, waits
-          for a person or a reply for as long as that takes, then carries on. Pick a process and watch how it is built.
-        </p>
+        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{tHC("s6")}</p>
 
         <div role="group" aria-label="Process" className="mt-4 flex flex-wrap gap-1.5">
           {PROCESS_SCENARIOS.map((s) => (
@@ -214,7 +213,7 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
         {/* Run log */}
         <div className="mt-4 rounded-lg border border-border bg-card font-mono text-xs leading-relaxed">
           <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-1.5">
-            <span className="text-muted-foreground">run log · illustration of how this process is modelled</span>
+            <span className="text-muted-foreground">{tHC("s5")}</span>
             <span
               className={cn(
                 "inline-flex items-center gap-1",
@@ -251,8 +250,8 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="min-w-0 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground">To run it on your systems:</span> {scenario.needs}. You
-            connect those after you sign in; nothing here asks for a credential.
+            <span className="font-medium text-foreground">{tHC("s4")}</span> {scenario.needs}
+            {tHC("s3")}
           </p>
           <div className="flex shrink-0 gap-2">
             {!reduce && (
@@ -269,7 +268,7 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
                 href={ctaHref}
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
               >
-                <Bot size={13} aria-hidden="true" /> Design yours live, free, no account
+                <Bot size={13} aria-hidden="true" /> {tHC("s2")}
               </Link>
             )}
             {onDesign && (
@@ -279,7 +278,7 @@ export default function ProcessTheater({ onDesign, busy = false, ctaHref }: Prop
                 onClick={() => onDesign(scenario)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-primary bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-none hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Bot size={13} aria-hidden="true" /> Design this for my business, live
+                <Bot size={13} aria-hidden="true" /> {tHC("s1")}
               </button>
             )}
           </div>

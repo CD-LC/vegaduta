@@ -21,6 +21,7 @@ import { Input } from "../../components/ui/input";
 import Select from "../../components/Select";
 import { Section, SECTION_ACTION_GROUP_CLASS } from "../../components/ax/page-kit";
 import { api } from "../../lib/api";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Promote-gate card (EvalGateController, V260 + V343): the "CI for agents"
@@ -87,6 +88,7 @@ const REASON_LABEL: Record<string, string> = {
 };
 
 export default function EvalGateSection({ agentId }: { agentId: string | null }) {
+  const tHC = useTranslations("hcAgentsQualityEvalGateSection");
   const [status, setStatus] = useState<GateStatus | null>(null);
   const [unavailable, setUnavailable] = useState(false); // older core without /gate (404)
   const [failed, setFailed] = useState(false);
@@ -190,15 +192,15 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
   const evaluation = status?.headEvaluation || null;
   const evaluationBadge = !evaluation ? null : evaluation.allowed ? (
     <Badge variant="state" state="var(--state-success)">
-      Promotion allowed
+      {tHC("s24")}
     </Badge>
   ) : (
-    <Badge variant="destructive">Promotion blocked</Badge>
+    <Badge variant="destructive">{tHC("s23")}</Badge>
   );
 
   return (
     <Section
-      title="Promotion gate"
+      title={tHC("s22")}
       description="Require a passing eval run on the exact configuration before this agent can be labelled Production — the CI check for agent changes."
       actions={
         <div className={SECTION_ACTION_GROUP_CLASS}>
@@ -207,7 +209,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
           </Button>
           {!status?.gate ? (
             <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={locked}>
-              Configure gate
+              {tHC("s21")}
             </Button>
           ) : (
             <>
@@ -236,11 +238,8 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Remove the promotion gate?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This removes the promotion gate configuration for this agent. Production promotion will no longer
-                      require a passing eval run. This cannot be undone.
-                    </AlertDialogDescription>
+                    <AlertDialogTitle>{tHC("s20")}</AlertDialogTitle>
+                    <AlertDialogDescription>{tHC("s19")}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -261,18 +260,15 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
     >
       {locked && (
         <Alert>
-          <AlertTitle>Premium feature</AlertTitle>
-          <AlertDescription>
-            Configuring a promotion gate requires a Premium plan (it consumes premium eval runs). Reading or removing an
-            existing gate works on any plan.
-          </AlertDescription>
+          <AlertTitle>{tHC("s18")}</AlertTitle>
+          <AlertDescription>{tHC("s17")}</AlertDescription>
         </Alert>
       )}
       {failed && (
         <Alert variant="destructive">
-          <AlertTitle>Couldn&apos;t load the gate status</AlertTitle>
+          <AlertTitle>{tHC("s16")}</AlertTitle>
           <AlertDescription className="flex items-center gap-3">
-            This is a load failure, not a missing gate.
+            {tHC("s15")}
             <Button variant="outline" size="sm" onClick={refresh}>
               Retry
             </Button>
@@ -298,11 +294,13 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 Dataset: <span className="font-medium">{status.gate.datasetName || status.gate.datasetId}</span>
               </span>
               {status.gate.maxRunAgeHours != null && (
-                <span className="text-xs text-muted-foreground">runs expire after {status.gate.maxRunAgeHours}h</span>
+                <span className="text-xs text-muted-foreground">
+                  {tHC("s14")} {status.gate.maxRunAgeHours}h
+                </span>
               )}
               {status.gate.requireSimulation && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <FlaskConical size={11} aria-hidden="true" /> sim staging required
+                  <FlaskConical size={11} aria-hidden="true" /> {tHC("s13")}
                   {status.gate.maxSimulationAgeHours != null && ` (within ${status.gate.maxSimulationAgeHours}h)`}
                   {evaluation?.simulationVerdict != null && ` · latest sim: ${evaluation.simulationVerdict}`}
                 </span>
@@ -318,21 +316,15 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             )}
             {evaluation?.allowed && (
               <div className="text-sm text-muted-foreground">
-                Qualifying run{evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
+                {tHC("s12")}
+                {evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
                 {evaluation.overallScore != null && ` scored ${Math.round(evaluation.overallScore * 100)}%`}.
               </div>
             )}
           </CardContent>
         </Card>
       ) : (
-        !failed &&
-        !locked &&
-        status != null && (
-          <p className="text-sm text-muted-foreground">
-            No gate configured — promoting a version to Production is currently unrestricted. Configure one to require a
-            passing dataset run first.
-          </p>
-        )
+        !failed && !locked && status != null && <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
       )}
 
       {showForm && (
@@ -341,7 +333,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-dataset">
-                  Gated dataset
+                  {tHC("s10")}
                 </label>
                 <Select
                   id="eval-gate-dataset"
@@ -355,20 +347,17 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-max-age">
-                  Freshness window (hours, optional)
+                  {tHC("s9")}
                 </label>
                 <Input
                   id="eval-gate-max-age"
                   value={maxAge}
                   onChange={(e) => setMaxAge(e.target.value)}
-                  placeholder="e.g. 72 — blank = never expires"
+                  placeholder={tHC("s8")}
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              The gate also tracks the dataset&apos;s content hash: editing the dataset after a run makes that run stale
-              and blocks promotion until a fresh run passes.
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
             <div className="space-y-2 rounded-md border border-border p-3">
               <label className="flex items-start gap-2 text-sm">
                 <input
@@ -378,28 +367,22 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                   className="mt-0.5"
                 />
                 <span>
-                  <span className="font-medium">Require simulation staging</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Promote also needs the latest judged simulation session of this exact configuration to have every
-                    persona pass — the digital-twin dry run before production.
-                  </span>
+                  <span className="font-medium">{tHC("s6")}</span>
+                  <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
                 </span>
               </label>
               {requireSim && (
                 <div className="space-y-1 ps-6">
                   <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-sim-age">
-                    Simulation freshness window (hours, optional)
+                    {tHC("s4")}
                   </label>
                   <Input
                     id="eval-gate-sim-age"
                     value={maxSimAge}
                     onChange={(e) => setMaxSimAge(e.target.value)}
-                    placeholder="e.g. 168 — blank = never expires"
+                    placeholder={tHC("s3")}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Start a sim under Simulations; stale sim evidence blocks promote the same way stale eval evidence
-                    does.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{tHC("s2")}</p>
                 </div>
               )}
             </div>
@@ -408,7 +391,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 Cancel
               </Button>
               <Button size="sm" onClick={save} disabled={busy || !datasetId}>
-                Save gate
+                {tHC("s1")}
               </Button>
             </div>
           </CardContent>

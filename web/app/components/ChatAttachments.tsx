@@ -30,6 +30,7 @@ import { FileAudio, FileSpreadsheet, FileText, FileVideo, File as FileIcon, Pape
 import { Button } from "./ui/button";
 import { cn } from "../lib/utils";
 import { readSandboxDataUnavailableReason } from "../lib/sandboxDataHint";
+import { useTranslations } from "../lib/i18n";
 
 export type AgentModalities = {
   image: boolean;
@@ -429,6 +430,7 @@ export function AttachButton({
   disabled?: boolean;
   onFiles: (files: File[]) => void;
 }) {
+  const tHC = useTranslations("hcComponentsChatAttachments");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const hint = attachHint(modalities);
 
@@ -447,7 +449,7 @@ export function AttachButton({
         accept={buildAccept(modalities)}
         onChange={handleChange}
         className="sr-only"
-        aria-label="Choose files to attach"
+        aria-label={tHC("s2")}
         tabIndex={-1}
       />
       <Button
@@ -481,9 +483,10 @@ export function AttachmentChips({
   onRemove: (id: string) => void;
   disabled?: boolean;
 }) {
+  const tHC = useTranslations("hcComponentsChatAttachments");
   if (attachments.length === 0) return null;
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Files attached to your next message">
+    <ul className="flex flex-wrap gap-2" aria-label={tHC("s1")}>
       {attachments.map((att) => {
         const Icon = iconForMime(att.mimeType);
         return (

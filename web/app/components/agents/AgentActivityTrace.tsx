@@ -19,6 +19,7 @@ import { cn } from "../../lib/utils";
 import McpAppFrame from "../McpAppFrame";
 import { MCP_APPS_ENABLED, parseAppPointer, type McpAppPointer } from "../../lib/mcpApps/mcpApps";
 import { FINISH_STEP_TYPES, lifecycleDetails, type StepDetails } from "../../lib/turnLifecycle";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * AG-UI-style live activity trace, shared by ChatPanel (/playground) and
@@ -293,10 +294,11 @@ export function buildTraceRows(steps: readonly ActivityStep[]): TraceRow[] {
 }
 
 function OnDeviceBadge() {
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   return (
     <span
       className="shrink-0 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground"
-      title="This tool call was proposed by the on-device model and executed through the edge tool bridge"
+      title={tHC("s3")}
     >
       on-device
     </span>
@@ -421,6 +423,7 @@ export default function AgentActivityTrace({
    * message goes (the composer draft). Without it - or with the flag off - no card is ever mounted. */
   appHost?: { agentId: string; onAddMessage?: (text: string) => void };
 }) {
+  const tHC = useTranslations("hcComponentsAgentsAgentActivityTrace");
   const [open, setOpen] = useState(defaultOpen);
   if (!steps || steps.length === 0) return null;
 
@@ -469,7 +472,7 @@ export default function AgentActivityTrace({
           target="_blank"
           rel="noopener noreferrer"
           data-testid="memory-used-chip"
-          title="See and edit what your assistants remember"
+          title={tHC("s2")}
           aria-label={`${memorySentence} - opens Memory in a new tab`}
           className="ms-1 inline-flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-0.5 align-middle text-[11px] text-muted-foreground hover:text-foreground"
         >
@@ -535,7 +538,7 @@ export default function AgentActivityTrace({
                   {closing?.ms != null && <span className="shrink-0 text-muted-foreground">{closing.ms} ms</span>}
                   {/* Still running - the tool_call arrived but nothing has
                       closed it yet. This is the live half of the trace. */}
-                  {!closing && <span className="shrink-0 text-muted-foreground">running…</span>}
+                  {!closing && <span className="shrink-0 text-muted-foreground">{tHC("s1")}</span>}
                   {call.origin === "on-device" && <OnDeviceBadge />}
                 </div>
                 {/* Server-redacted and length-capped before it ever left the

@@ -15,9 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
+import { useTranslations } from "../../lib/i18n";
 
 /** Custom domains for a published studio app: add, see DNS records, verify, remove. */
 export function DomainsPanel({ appId }: { appId: string }) {
+    const tHC = useTranslations("hcBuildStudioDomainsPanel");
   const [domains, setDomains] = useState<DomainView[]>([]);
   const [host, setHost] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -86,17 +88,17 @@ export function DomainsPanel({ appId }: { appId: string }) {
   return (
     <div className="rounded-xl border border-border p-3">
       <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-        <Globe aria-hidden="true" size={13} /> Custom domain
+        <Globe aria-hidden="true" size={13} /> {tHC("s4")}
       </p>
       <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-        Serve the app from your own domain. Add it, create the DNS records shown, then verify.
+        {tHC("s5")}
       </p>
       <div className="mt-2 flex gap-1.5">
         <input
           value={host}
           onChange={(e) => setHost(e.target.value)}
           placeholder="app.yourcompany.com"
-          aria-label="Custom domain"
+          aria-label={tHC("s4")}
           className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-[12px] text-foreground"
         />
         <Button size="sm" onClick={add} disabled={busy === "add" || !host.trim()} className="h-8 text-[11px]">
@@ -182,8 +184,7 @@ export function DomainsPanel({ appId }: { appId: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove {confirmRemove?.hostname}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This domain is verified and live. Removing it stops the app answering on {confirmRemove?.hostname};
-              visitors to that address will get an error until you add and verify it again.
+              {tHC("s3")} {confirmRemove?.hostname}{tHC("s2")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -196,7 +197,7 @@ export function DomainsPanel({ appId }: { appId: string }) {
                 if (d) void remove(d);
               }}
             >
-              Remove domain
+              {tHC("s1")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -26,6 +26,7 @@ import GithubConnectCard from "../components/GithubConnectCard";
 import type { AppBuilderGithubStatus } from "../lib";
 import type { Blueprint, Level, OutputKind, ReadinessItem } from "../../lib/build/blueprint";
 import type { DraftEngine } from "./createShared";
+import { useTranslations } from "../../lib/i18n";
 
 /** Stage 2: review and edit the blueprint, then build. */
 export default function BlueprintStage({
@@ -73,6 +74,7 @@ export default function BlueprintStage({
   onBack: () => void;
   onBuild: () => void;
 }) {
+    const tHC = useTranslations("hcBuildCreateBlueprintStage");
   return (
     <motion.div
       key="blueprint"
@@ -90,7 +92,7 @@ export default function BlueprintStage({
         />
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Your blueprint</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">{tHC("s18")}</p>
             <h2 className="mt-0.5 truncate text-2xl font-semibold tracking-tight text-foreground">
               {bp.output === "agent" ? bp.agent.name || "Your agent" : bp.app.name || "Your app"}
             </h2>
@@ -99,15 +101,15 @@ export default function BlueprintStage({
               {bp.output === "agent" ? (
                 <>
                   <Badge variant="accent">
-                    <ShieldCheck aria-hidden="true" /> Starts under watch
+                    <ShieldCheck aria-hidden="true" /> {tHC("s17")}
                   </Badge>
                   <Badge variant="secondary">{bp.agent.tone} tone</Badge>
-                  {bp.agent.knowledgeBase && <Badge variant="secondary">Reads your documents</Badge>}
-                  {bp.workflow && <Badge variant="secondary">{bp.workflow.steps.length}-step workflow</Badge>}
+                  {bp.agent.knowledgeBase && <Badge variant="secondary">{tHC("s16")}</Badge>}
+                  {bp.workflow && <Badge variant="secondary">{bp.workflow.steps.length}{tHC("s15")}</Badge>}
                 </>
               ) : (
                 <Badge variant="accent">
-                  <GitBranch aria-hidden="true" /> Saved to your Git as a pull request
+                  <GitBranch aria-hidden="true" /> {tHC("s14")}
                 </Badge>
               )}
               {/* Which engine wrote this blueprint - on-device model
@@ -169,7 +171,7 @@ export default function BlueprintStage({
                 <XCircle aria-hidden="true" className="size-4" />
                 <AlertDescription>
                   <p className="font-semibold">
-                    Fix {v.errors.length === 1 ? "this" : `these ${v.errors.length} things`} before building:
+                    Fix {v.errors.length === 1 ? "this" : `these ${v.errors.length} things`} {tHC("s13")}
                   </p>
                   <ul className="mt-1 list-disc space-y-0.5 ps-4">
                     {v.errors.map((e, i) => (
@@ -202,16 +204,15 @@ export default function BlueprintStage({
 
       {/* Apps are committed to the person's own repository, so GitHub is the one required connection here. */}
       {bp.output === "app" && (
-        <section className="space-y-3 rounded-2xl border border-border bg-card p-4" aria-label="Connect GitHub">
+        <section className="space-y-3 rounded-2xl border border-border bg-card p-4" aria-label={tHC("s12")}>
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-foreground">Connect GitHub</h3>
+            <h3 className="text-sm font-semibold text-foreground">{tHC("s12")}</h3>
             <Badge variant={gh?.connected ? "accent" : "outline"}>
               {gh?.connected ? "Connected" : "Required for apps"}
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Your app is built in <span className="font-medium text-foreground">your own</span> GitHub repository, so you
-            own the code. Paste a repo-scoped token once and every build opens a pull request there.
+            {tHC("s11")} <span className="font-medium text-foreground">{tHC("s10")}</span> {tHC("s9")}
           </p>
           <GithubConnectCard onStatusChange={onGhStatusChange} />
         </section>
@@ -220,7 +221,7 @@ export default function BlueprintStage({
       {/* Readiness: one thing is required (a model). Everything else is optional and says so. */}
       {bp.output === "agent" && modelItem && (
         <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
-          <h3 className="text-sm font-semibold text-foreground">Ready to build?</h3>
+          <h3 className="text-sm font-semibold text-foreground">{tHC("s8")}</h3>
 
           <div
             className={cn(
@@ -246,7 +247,7 @@ export default function BlueprintStage({
             </div>
             {modelItem.state === "blocked" && factsLoaded && modelItem.href && (
               <Button asChild size="sm">
-                <Link href={modelItem.href}>Connect a model</Link>
+                <Link href={modelItem.href}>{tHC("s7")}</Link>
               </Button>
             )}
           </div>
@@ -254,8 +255,8 @@ export default function BlueprintStage({
           {addOns.length > 0 && (
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Optional extras{" "}
-                <span className="font-normal normal-case">- skip these now, add any of them after you build</span>
+                {tHC("s6")}{" "}
+                <span className="font-normal normal-case">{tHC("s5")}</span>
               </p>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {addOns.map((it) => (
@@ -271,7 +272,7 @@ export default function BlueprintStage({
                           href={it.href}
                           className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-2 hover:underline"
                         >
-                          Set up later <ArrowRight aria-hidden="true" className="size-3" />
+                          {tHC("s4")} <ArrowRight aria-hidden="true" className="size-3" />
                         </Link>
                       )}
                     </span>
@@ -306,11 +307,11 @@ export default function BlueprintStage({
       </div>
       {modelBlocked && (
         <p className="text-center text-xs text-muted-foreground">
-          No AI model is connected yet, so the build will stop at the last step.{" "}
+          {tHC("s3")}{" "}
           <Link href="/providers" className="text-primary underline-offset-2 hover:underline">
-            Connect one first
+            {tHC("s2")}
           </Link>{" "}
-          - it takes a minute.
+          {tHC("s1")}
         </p>
       )}
     </motion.div>

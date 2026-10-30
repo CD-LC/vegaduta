@@ -32,9 +32,9 @@ export const RECIPE_ICON: Record<string, ComponentType<{ className?: string }>> 
 // intelligence everything else runs on), then the workflow that orchestrates
 // it, then the app that puts both in people's hands.
 export const FLIGHT_PATH = [
-  { step: "01 · START HERE", title: "Custom agent", text: "Instructions, model, knowledge, tools and guardrails.", Icon: Bot, primary: true },
-  { step: "02 · ORCHESTRATE", title: "Workflow", text: "Triggers, approvals and repeatable work around the agent.", Icon: Workflow, primary: false },
-  { step: "03 · PUT IT IN HANDS", title: "AI-powered app", text: "Use your agent and workflows to power an experience people can use.", Icon: Smartphone, primary: false },
+  { key: "start", Icon: Bot, primary: true },
+  { key: "orchestrate", Icon: Workflow, primary: false },
+  { key: "hands", Icon: Smartphone, primary: false },
 ] as const;
 
 /** Everything useful an error carries, flattened to text (server "errors" arrays included).

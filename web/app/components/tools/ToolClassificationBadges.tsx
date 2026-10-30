@@ -4,6 +4,7 @@ import { AlertTriangle, Ban, HelpCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { cn } from "../../lib/utils";
 import { SEVERITY_STATE_TOKEN, UNCLASSIFIED_META, type TierMeta } from "./toolClassification";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * The pills the tool-classification surface renders. Split out of the panel
@@ -98,15 +99,13 @@ export function UnrecognisedTierPill({ value, className }: { value: string; clas
  * an empty cell is the one rendering that would quietly read as "fine".
  */
 export function TierCell({ meta, rawValue }: { meta: TierMeta | null; rawValue: string | null | undefined }) {
+  const tHC = useTranslations("hcComponentsToolsToolClassificationBadges");
   if (meta) return <TierPill meta={meta} />;
   if (rawValue) return <UnrecognisedTierPill value={rawValue} />;
   return (
-    <span
-      className="inline-flex items-center gap-1 text-xs text-muted-foreground"
-      title="No value declared for this axis, which is why the tool counts as unclassified and stays blocked."
-    >
+    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" title={tHC("s2")}>
       <HelpCircle className="size-3" aria-hidden="true" />
-      Not declared
+      {tHC("s1")}
     </span>
   );
 }

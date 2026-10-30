@@ -12,6 +12,7 @@ import { ChevronDown, ChevronUp, GripVertical, LayoutTemplate, Trash2, X } from 
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
+import { useTranslations } from "../lib/i18n";
 
 export interface SketchBlock {
   id: string;
@@ -48,6 +49,7 @@ export default function SketchPad({
   onChange: (blocks: SketchBlock[]) => void;
   onClose: () => void;
 }) {
+    const tHC = useTranslations("hcBuildSketchPad");
   const dragIndex = useRef<number | null>(null);
   const [draggingType, setDraggingType] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -99,16 +101,16 @@ export default function SketchPad({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <LayoutTemplate aria-hidden="true" size={15} className="text-primary" /> Sketch the layout
+          <LayoutTemplate aria-hidden="true" size={15} className="text-primary" /> {tHC("s6")}
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close sketch pad">
+        <Button variant="ghost" size="sm" onClick={onClose} aria-label={tHC("s5")}>
           <X aria-hidden="true" size={14} />
         </Button>
       </CardHeader>
       <CardContent ref={rootRef} className="grid gap-4 sm:grid-cols-[160px_1fr]">
         {/* Block palette — drag onto the canvas, or click to append. */}
         <div>
-          <p className="mb-2 text-xs text-muted-foreground">Drag or tap to add:</p>
+          <p className="mb-2 text-xs text-muted-foreground">{tHC("s4")}</p>
           <div className="flex flex-wrap gap-1.5 sm:flex-col sm:items-stretch">
             {PALETTE.map((p) => (
               <button
@@ -144,7 +146,7 @@ export default function SketchPad({
         >
           {blocks.length === 0 ? (
             <p className="py-12 text-center text-xs text-muted-foreground">
-              Drop blocks here — they read top to bottom like your page.
+              {tHC("s3")}
             </p>
           ) : (
             <ol className="space-y-1.5">
@@ -177,7 +179,7 @@ export default function SketchPad({
                       if (row) e.dataTransfer.setDragImage(row, 8, 8);
                     }}
                     className="flex size-8 shrink-0 cursor-grab items-center justify-center text-muted-foreground"
-                    title="Drag to reorder"
+                    title={tHC("s2")}
                     aria-hidden="true"
                   >
                     <GripVertical aria-hidden="true" size={14} />
@@ -186,7 +188,7 @@ export default function SketchPad({
                   <Input
                     value={b.label}
                     onChange={(e) => update(b.id, e.target.value)}
-                    placeholder="optional note (e.g. headline text)"
+                    placeholder={tHC("s1")}
                     aria-label={`Note for ${b.type} block ${i + 1}`}
                     data-sketch-note={i}
                     className="h-8 flex-1 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"

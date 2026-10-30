@@ -23,6 +23,7 @@ function maskDbUrl(url) {
 /* Backend panel                                                      */
 
 export default function BackendPanel({ project, setProject, onError, fileSet }) {
+    const tHC = useTranslations("hcBuildBackendPanel");
   const t = useTranslations("appBuilder");
   const [busy, setBusy] = useState(false);
   const [dbUrl, setDbUrl] = useState(null);
@@ -130,12 +131,12 @@ export default function BackendPanel({ project, setProject, onError, fileSet }) 
             </div>
             <div className="flex items-center gap-2">
               <code className="block min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{maskDbUrl(dbUrl)}</code>
-              <Button variant="ghost" size="sm" onClick={copyUrl} aria-label="Copy DATABASE_URL">
+              <Button variant="ghost" size="sm" onClick={copyUrl} aria-label={tHC("s5")}>
                 {copied ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />}
               </Button>
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Your app&apos;s own database login: it can only see its own schema, nothing else on the platform.
+              {tHC("s4")}
             </p>
           </div>
         )}
@@ -148,7 +149,7 @@ export default function BackendPanel({ project, setProject, onError, fileSet }) 
         {dbUrl && (
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="backend-sql" className="text-xs">Schema (SQL)</Label>
+              <Label htmlFor="backend-sql" className="text-xs">{tHC("s3")}</Label>
               {schemaFile && (
                 <Button variant="ghost" size="sm" onClick={() => setSql(schemaFile.content)}>
                   Load {schemaFile.path}
@@ -164,9 +165,9 @@ export default function BackendPanel({ project, setProject, onError, fileSet }) 
             />
             <div className="flex items-center gap-2">
               <Button size="sm" disabled={applying || !sql.trim()} onClick={applySchema}>
-                {applying ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Play aria-hidden="true" size={14} />} Apply schema
+                {applying ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Play aria-hidden="true" size={14} />} {tHC("s2")}
               </Button>
-              <span className="text-[11px] text-muted-foreground">Runs in one transaction with a 15s limit.</span>
+              <span className="text-[11px] text-muted-foreground">{tHC("s1")}</span>
             </div>
             {applyError && (
               <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/5 p-2 font-mono text-xs text-destructive">

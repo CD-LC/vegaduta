@@ -3,6 +3,7 @@
 import type { RefObject } from "react";
 import { FastForward, Loader2, Play, Square } from "lucide-react";
 import type { ReplayState } from "../call/useReplyPlayback";
+import { useTranslations } from "../../../lib/i18n";
 
 /** The per-line "play this reply" state + handlers (call/useReplyPlayback) -
  * absent when the panel has no replay support wired. */
@@ -22,7 +23,15 @@ interface CallTranscriptPanelProps {
   replay?: TranscriptReplay;
 }
 
-export default function CallTranscriptPanel({ callTranscript, pipelineBusy, lastTranscript, lastReply, transcriptScrollRef, replay }: CallTranscriptPanelProps) {
+export default function CallTranscriptPanel({
+  callTranscript,
+  pipelineBusy,
+  lastTranscript,
+  lastReply,
+  transcriptScrollRef,
+  replay,
+}: CallTranscriptPanelProps) {
+  const tHC = useTranslations("hcComponentsAgentsCallPanelCallTranscriptPanel");
   return (
     <>
       {/* Direct report (2026-08-12): "it should display all transcribe of
@@ -60,8 +69,8 @@ export default function CallTranscriptPanel({ callTranscript, pipelineBusy, last
                       <button
                         type="button"
                         className="text-muted-foreground hover:text-foreground"
-                        aria-label="Skip ahead"
-                        title="Skip ahead"
+                        aria-label={tHC("s2")}
+                        title={tHC("s2")}
                         onClick={replay.onSkip}
                       >
                         <FastForward size={12} />
@@ -89,7 +98,7 @@ export default function CallTranscriptPanel({ callTranscript, pipelineBusy, last
           })}
           {pipelineBusy && lastTranscript && (
             <div>
-              <span className="text-muted-foreground">You said: </span>
+              <span className="text-muted-foreground">{tHC("s1")} </span>
               {lastTranscript}
             </div>
           )}

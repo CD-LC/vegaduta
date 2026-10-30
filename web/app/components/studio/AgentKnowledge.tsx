@@ -20,6 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { studio, type DocumentLimits, type StudioAgent, type StudioDocument } from "./studioClient";
 import { sampleDocument } from "./topicDraft";
 import { TONES } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // Documents for one agent: real chunk + embed + store into a collection that
 // belongs to this agent alone, searched by the agent's own knowledge tool.
@@ -42,6 +43,7 @@ function kb(bytes: number): string {
 }
 
 export default function AgentKnowledge({ token, agent, limits, readOnly, topicHint, onChanged }: Props) {
+  const tHC = useTranslations("hcComponentsStudioAgentKnowledge");
   const [docs, setDocs] = useState<StudioDocument[] | null>(null);
   const [pending, setPending] = useState<Pending[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -127,11 +129,8 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
     return (
       <Alert>
         <AlertTriangle aria-hidden="true" />
-        <AlertTitle>Document search isn&apos;t switched on here yet</AlertTitle>
-        <AlertDescription>
-          Everything else in the studio works. In your own workspace, documents are unlimited and searched exactly like
-          this.
-        </AlertDescription>
+        <AlertTitle>{tHC("s16")}</AlertTitle>
+        <AlertDescription>{tHC("s15")}</AlertDescription>
       </Alert>
     );
   }
@@ -139,10 +138,9 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-sm font-medium">Give it something to read</div>
+        <div className="text-sm font-medium">{tHC("s14")}</div>
         <p className="text-xs text-muted-foreground">
-          Files are split, embedded and searched by <b className="font-medium text-foreground">{agent.name}</b> alone -
-          no other agent can see them. Try {topicHint}.
+          {tHC("s13")} <b className="font-medium text-foreground">{agent.name}</b> {tHC("s12")} {topicHint}.
         </p>
       </div>
 
@@ -168,14 +166,14 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
         />
         <div className="text-sm font-medium">{drag ? "Drop to add" : "Drag a document here"}</div>
         <p className="mb-3 text-xs text-muted-foreground">
-          {(limits?.extensions ?? [".md", ".txt", ".csv"]).join("  ")} · up to {kb(maxBytes)} · {maxDocs} per agent
+          {(limits?.extensions ?? [".md", ".txt", ".csv"]).join("  ")} · up to {kb(maxBytes)} · {maxDocs} {tHC("s11")}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" className={TONES.sky.cta} disabled={disabled} onClick={() => inputRef.current?.click()}>
-            <UploadCloud aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Choose files
+            <UploadCloud aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s10")}
           </Button>
           <Button size="sm" variant="outline" disabled={disabled} onClick={() => setPasteOpen((v) => !v)}>
-            <ClipboardPaste aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Paste notes
+            <ClipboardPaste aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s9")}
           </Button>
           <Button
             size="sm"
@@ -186,7 +184,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
               void addText(s.title, s.text);
             }}
           >
-            <FlaskConical aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Try a sample
+            <FlaskConical aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s8")}
           </Button>
         </div>
         <input
@@ -208,14 +206,14 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
           <Input
             value={pasteTitle}
             maxLength={80}
-            placeholder="Title, e.g. Refund policy"
+            placeholder={tHC("s7")}
             onChange={(e) => setPasteTitle(e.target.value)}
           />
           <Textarea
             value={pasteText}
             rows={6}
             maxLength={100000}
-            placeholder="Paste anything the agent should know - policies, FAQs, meeting notes…"
+            placeholder={tHC("s6")}
             onChange={(e) => setPasteText(e.target.value)}
           />
           <div className="flex gap-2">
@@ -224,7 +222,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
               disabled={!pasteText.trim() || disabled}
               onClick={() => void addText(pasteTitle.trim() || "Pasted notes", pasteText)}
             >
-              Add to knowledge
+              {tHC("s5")}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setPasteOpen(false)}>
               Cancel
@@ -236,7 +234,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
       {error && <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-2.5 text-sm">{error}</div>}
       {full && !readOnly && (
         <p className="text-xs text-muted-foreground">
-          This agent is holding {maxDocs} documents - remove one to add another.
+          {tHC("s4")} {maxDocs} {tHC("s3")}
         </p>
       )}
 
@@ -297,14 +295,13 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
         ))}
         {docs !== null && docs.length === 0 && pending.length === 0 && (
           <li className="rounded-xl border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-            No documents yet. This agent will answer from the web and its own reasoning until you add some.
+            {tHC("s2")}
           </li>
         )}
       </ul>
 
       <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
-        <ShieldCheck aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0" /> Deleted with the agent, and when the
-        sandbox ends. Don&apos;t upload anything confidential.
+        <ShieldCheck aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0" /> {tHC("s1")}
       </p>
     </div>
   );

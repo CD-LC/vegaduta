@@ -15,6 +15,7 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { useTranslations } from "../lib/i18n";
 
 // Shown by AuthProvider when a user is authenticated but has NO tenant — the
 // social-login (e.g. Google) path, where Keycloak's IdP first-login created the
@@ -43,6 +44,7 @@ export default function OnboardingGate({
   firstName?: string | null;
   onProvisioned?: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsOnboardingGate");
   const router = useRouter();
   const [orgName, setOrgName] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -161,21 +163,17 @@ export default function OnboardingGate({
           </div>
 
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Your organization is ready</h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              We couldn&apos;t finish updating this browser&apos;s session, so there&apos;s one last sign-in step — then
-              you&apos;ll go straight to your new workspace.
-            </p>
+            <h1 className="text-2xl font-semibold tracking-tight">{tHC("s14")}</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">{tHC("s13")}</p>
           </div>
 
           <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">
             <div className="space-y-5 px-6">
               <p className="text-sm text-muted-foreground">
-                Nothing is lost — <strong className="text-foreground">{orgName.trim()}</strong> already exists. Signing
-                in again just re-issues your session so it carries it.
+                {tHC("s12")} <strong className="text-foreground">{orgName.trim()}</strong> {tHC("s11")}
               </p>
               <Button size="lg" className="w-full" onClick={startInteractiveSignIn}>
-                Continue to sign in <ArrowRight aria-hidden="true" className="size-4" />
+                {tHC("s10")} <ArrowRight aria-hidden="true" className="size-4" />
               </Button>
             </div>
           </Card>
@@ -185,7 +183,7 @@ export default function OnboardingGate({
             onClick={() => void auth.logout()}
             className="mx-auto mt-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <LogOut aria-hidden="true" className="size-3.5" /> Sign out
+            <LogOut aria-hidden="true" className="size-3.5" /> {tHC("s1")}
           </button>
         </motion.div>
       </main>
@@ -211,15 +209,13 @@ export default function OnboardingGate({
           <h1 className="text-2xl font-semibold tracking-tight">
             {firstName ? `Welcome, ${firstName}!` : "Almost there!"}
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            One quick step — name your organization to finish setting up your workspace.
-          </p>
+          <p className="mt-1.5 text-sm text-muted-foreground">{tHC("s9")}</p>
         </div>
 
         <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-5 px-6">
             <div className="space-y-2">
-              <Label htmlFor="org-name">Organization name</Label>
+              <Label htmlFor="org-name">{tHC("s8")}</Label>
               <div className="relative">
                 <Building2
                   aria-hidden="true"
@@ -227,7 +223,7 @@ export default function OnboardingGate({
                 />
                 <Input
                   id="org-name"
-                  placeholder="e.g. Sharma General Store"
+                  placeholder={tHC("s7")}
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   className="ps-9"
@@ -245,13 +241,13 @@ export default function OnboardingGate({
                 className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
               />
               <span>
-                I agree to the{" "}
+                {tHC("s6")}{" "}
                 <Link href="/terms" className="text-primary hover:underline">
-                  Terms of Service
+                  {tHC("s5")}
                 </Link>{" "}
                 and{" "}
                 <Link href="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
+                  {tHC("s4")}
                 </Link>
                 .
               </span>
@@ -265,7 +261,7 @@ export default function OnboardingGate({
                 className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
               />
               <span>
-                Send me product updates &amp; news about <BrandName />.
+                {tHC("s3")} <BrandName />.
               </span>
             </label>
 
@@ -276,7 +272,7 @@ export default function OnboardingGate({
                 "Creating your workspace…"
               ) : (
                 <>
-                  Create organization <ArrowRight aria-hidden="true" className="size-4" />
+                  {tHC("s2")} <ArrowRight aria-hidden="true" className="size-4" />
                 </>
               )}
             </Button>
@@ -288,7 +284,7 @@ export default function OnboardingGate({
           onClick={() => void auth.logout()}
           className="mx-auto mt-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <LogOut aria-hidden="true" className="size-3.5" /> Sign out
+          <LogOut aria-hidden="true" className="size-3.5" /> {tHC("s1")}
         </button>
       </motion.div>
     </main>

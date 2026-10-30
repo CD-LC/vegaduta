@@ -3,6 +3,7 @@
 import { Loader2, Mic, Volume2 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { callStageLabel, type CallStage } from "./callStage";
+import { useTranslations } from "../../../lib/i18n";
 
 interface PushToTalkRowProps {
   recording: boolean;
@@ -27,6 +28,7 @@ export default function PushToTalkRow({
   stopPushToTalk,
   setShowMicTest,
 }: PushToTalkRowProps) {
+  const tHC = useTranslations("hcComponentsAgentsCallPanelPushToTalkRow");
   return (
     <>
       <div className="flex items-center gap-2">
@@ -74,10 +76,10 @@ export default function PushToTalkRow({
           variant="outline"
           onClick={() => setShowMicTest(!showMicTest)}
           disabled={testingMicrophone || recording || pipelineBusy}
-          title="Test your microphone to diagnose audio issues"
+          title={tHC("s2")}
         >
           <Volume2 size={12} aria-hidden="true" />
-          Test Mic
+          {tHC("s1")}
         </Button>
         {/* Part 5(a): replaces the old single binary "Thinking…" label with
             the 7-stage indicator. Shown across BOTH "recording" (Listening,

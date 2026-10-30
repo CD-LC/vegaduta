@@ -61,6 +61,7 @@ export default function RlArmsEditor({
   canEdit: boolean;
   onChanged?: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsAgentsRlArmsEditor");
   const dimension = "MODEL_ROUTE";
   const agentId = agent?.id;
   // This component is deliberately plain-English (see the header comment), but
@@ -171,7 +172,7 @@ export default function RlArmsEditor({
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading model routing arms…</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("s33")}</p>;
   }
 
   // Endpoint unreachable/absent - say that, rather than implying zero arms.
@@ -179,12 +180,9 @@ export default function RlArmsEditor({
     return (
       <Alert>
         <Info aria-hidden="true" />
-        <AlertTitle>Arm configuration isn&apos;t available</AlertTitle>
+        <AlertTitle>{tHC("s32")}</AlertTitle>
         <AlertDescription>
-          <p>
-            This deployment&apos;s API didn&apos;t return the arm list for model routing, so it can&apos;t be shown or
-            edited here yet.
-          </p>
+          <p>{tHC("s31")}</p>
         </AlertDescription>
       </Alert>
     );
@@ -199,16 +197,13 @@ export default function RlArmsEditor({
       {empty && policyEnabled && (
         <Alert variant="destructive">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>Model routing is on, but it has nothing to choose between</AlertTitle>
+          <AlertTitle>{tHC("s30")}</AlertTitle>
           <AlertDescription>
             <p>
-              This policy is switched on and has <strong>zero arms</strong>. An arm is one candidate model the policy
-              can try; with none configured there is nothing for it to select, so every turn runs on the agent&apos;s
-              normal model and no feedback is attributed to anything.{" "}
-              <strong>This agent cannot learn model routing until at least one arm is added</strong> — any thumbs up or
-              down collected in the meantime trains nothing.
+              {tHC("s29")} <strong>{tHC("s28")}</strong>
+              {tHC("s27")} <strong>{tHC("s26")}</strong> {tHC("s25")}
             </p>
-            {!canEdit && <p>Ask a tenant admin to add candidate models here.</p>}
+            {!canEdit && <p>{tHC("s24")}</p>}
           </AlertDescription>
         </Alert>
       )}
@@ -216,12 +211,9 @@ export default function RlArmsEditor({
       {empty && !policyEnabled && (
         <Alert>
           <Info aria-hidden="true" />
-          <AlertTitle>No candidate models configured</AlertTitle>
+          <AlertTitle>{tHC("s23")}</AlertTitle>
           <AlertDescription>
-            <p>
-              Add at least one arm before switching model routing on — an enabled policy with no arms has nothing to
-              select and learns nothing.
-            </p>
+            <p>{tHC("s22")}</p>
           </AlertDescription>
         </Alert>
       )}
@@ -229,7 +221,7 @@ export default function RlArmsEditor({
       {error && (
         <Alert variant="destructive">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>That arm wasn&apos;t saved</AlertTitle>
+          <AlertTitle>{tHC("s21")}</AlertTitle>
           <AlertDescription>
             <p>{error}</p>
           </AlertDescription>
@@ -241,10 +233,10 @@ export default function RlArmsEditor({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Candidate model</TableHead>
+                <TableHead>{tHC("s20")}</TableHead>
                 <TableHead>Context</TableHead>
-                <TableHead className="text-end">Turns tried</TableHead>
-                <TableHead className="text-end">Observed reward</TableHead>
+                <TableHead className="text-end">{tHC("s19")}</TableHead>
+                <TableHead className="text-end">{tHC("s15")}</TableHead>
                 {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
@@ -265,7 +257,7 @@ export default function RlArmsEditor({
                       {arm.contextBucket ? (
                         <span className="font-mono">{arm.contextBucket}</span>
                       ) : (
-                        <span>All traffic</span>
+                        <span>{tHC("s18")}</span>
                       )}
                     </TableCell>
                     <TableCell className="text-end tabular-nums text-muted-foreground">
@@ -276,7 +268,7 @@ export default function RlArmsEditor({
                         // Never pulled. The stored posterior would average to a
                         // confident-looking 50% here (Beta(1,1) prior); showing
                         // that would be inventing a result. Say "not tried".
-                        <Badge variant="outline">Not tried yet</Badge>
+                        <Badge variant="outline">{tHC("s17")}</Badge>
                       ) : (
                         <span className="inline-flex items-center justify-end gap-2">
                           {!observed.lowConfidence && <Trophy size={12} className="text-primary" aria-hidden="true" />}
@@ -291,7 +283,7 @@ export default function RlArmsEditor({
                         </span>
                       )}
                       {observed.rate !== null && observed.lowConfidence && (
-                        <div className="text-xs text-muted-foreground">too few turns to trust</div>
+                        <div className="text-xs text-muted-foreground">{tHC("s16")}</div>
                       )}
                     </TableCell>
                     {canEdit && (
@@ -314,10 +306,7 @@ export default function RlArmsEditor({
             </TableBody>
           </Table>
           <p className="border-t border-border px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-            <strong>Observed reward</strong> is the average feedback score this model actually earned across the turns
-            it was tried on — it is measured, not predicted, and an arm that has never been tried shows no figure at all
-            rather than a placeholder. Anything under {LOW_CONFIDENCE_PULLS} turns is flagged, because a handful of
-            lucky turns can look like a winner.
+            <strong>{tHC("s15")}</strong> {tHC("s14")} {LOW_CONFIDENCE_PULLS} {tHC("s13")}
           </p>
         </Card>
       )}
@@ -331,17 +320,16 @@ export default function RlArmsEditor({
             setAdding(true);
           }}
         >
-          <Plus size={14} aria-hidden="true" /> Add a candidate model
+          <Plus size={14} aria-hidden="true" /> {tHC("s12")}
         </Button>
       )}
 
       {canEdit && adding && (
         <Card className="gap-4 p-5">
           <div>
-            <div className="text-sm font-semibold text-foreground">Add a candidate model</div>
+            <div className="text-sm font-semibold text-foreground">{tHC("s12")}</div>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              The policy will send a share of this agent&apos;s turns to this model and keep the ones that score best.
-              It stays on {agent?.providerName || "the agent's provider"} — an arm changes the model, not the provider.
+              {tHC("s11")} {agent?.providerName || "the agent's provider"} {tHC("s10")}
             </p>
           </div>
 
@@ -352,7 +340,7 @@ export default function RlArmsEditor({
             <Select
               id="rl-arm-model"
               searchable
-              placeholder="Choose a model"
+              placeholder={tHC("s9")}
               value={modelChoice}
               onChange={(e: any) => setModelChoice(e.target.value)}
               options={[
@@ -365,8 +353,8 @@ export default function RlArmsEditor({
             />
             {(modelChoice === CUSTOM_MODEL || catalog.length === 0) && (
               <Input
-                aria-label="Model id"
-                placeholder="e.g. gpt-4o-mini"
+                aria-label={tHC("s8")}
+                placeholder={tHC("s7")}
                 value={customModel}
                 onChange={(e) => {
                   setCustomModel(e.target.value);
@@ -383,18 +371,15 @@ export default function RlArmsEditor({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground" htmlFor="rl-arm-bucket">
-              Context bucket <span className="font-normal text-muted-foreground">(optional)</span>
+              {tHC("s6")} <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
             <Input
               id="rl-arm-bucket"
-              placeholder="Leave blank to apply to all traffic"
+              placeholder={tHC("s5")}
               value={contextBucket}
               onChange={(e) => setContextBucket(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              Scopes what this arm learns to one slice of traffic. Leave it blank unless you are deliberately keeping
-              separate scores per slice.
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s4")}</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -425,14 +410,12 @@ export default function RlArmsEditor({
             <AlertDialogDescription>
               {(pendingDelete?.pulls || 0) > 0 ? (
                 <>
-                  <strong>{pendingDelete?.armKey}</strong> has been tried on{" "}
-                  {(pendingDelete?.pulls || 0).toLocaleString()} turns. Removing it deletes the score those turns earned
-                  — that history is not recoverable, and re-adding the same model starts it over from nothing.
+                  <strong>{pendingDelete?.armKey}</strong> {tHC("s3")} {(pendingDelete?.pulls || 0).toLocaleString()}{" "}
+                  {tHC("s2")}
                 </>
               ) : (
                 <>
-                  <strong>{pendingDelete?.armKey}</strong> has never been tried, so nothing learned is lost. The policy
-                  will stop considering it.
+                  <strong>{pendingDelete?.armKey}</strong> {tHC("s1")}
                 </>
               )}
             </AlertDialogDescription>

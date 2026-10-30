@@ -2,6 +2,7 @@
 
 import { AlertTriangle, CheckCircle2, Info, Sparkles, XCircle } from "lucide-react";
 import type { TemplateAiReview, TemplateIssue } from "../../lib/api";
+import { useTranslations } from "../../lib/i18n";
 
 // Every validation result in one place: blockers (must fix), advisories (should fix) and the AI review.
 // Each issue carries the principle it protects and exactly what to do about it - no guessing.
@@ -14,12 +15,13 @@ export default function TemplateReviewPanel({
   advisories: TemplateIssue[];
   ai?: TemplateAiReview | null;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
   const allBlockers = [...blockers, ...(ai?.blockers ?? [])];
   const allAdvisories = [...advisories, ...(ai?.advisories ?? [])];
   const clean = allBlockers.length === 0;
 
   return (
-    <div className="space-y-3" role="region" aria-label="Template check results" data-testid="template-review">
+    <div className="space-y-3" role="region" aria-label={tHC("s3")} data-testid="template-review">
       <div
         className="flex items-start gap-2.5 rounded-lg border p-3 text-sm"
         style={{
@@ -42,7 +44,7 @@ export default function TemplateReviewPanel({
         </span>
       </div>
 
-      {allBlockers.length > 0 && <IssueList title="Must fix" tone="error" issues={allBlockers} />}
+      {allBlockers.length > 0 && <IssueList title={tHC("s2")} tone="error" issues={allBlockers} />}
       {allAdvisories.length > 0 && <IssueList title="Suggestions" tone="warn" issues={allAdvisories} />}
 
       {ai && (
@@ -60,6 +62,7 @@ export default function TemplateReviewPanel({
 }
 
 function IssueList({ title, tone, issues }: { title: string; tone: "error" | "warn"; issues: TemplateIssue[] }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplateReviewPanel");
   const color = tone === "error" ? "var(--state-error)" : "var(--state-queued)";
   const Icon = tone === "error" ? AlertTriangle : Info;
   return (
@@ -73,7 +76,7 @@ function IssueList({ title, tone, issues }: { title: string; tone: "error" | "wa
               <span>{i.message}</span>
             </p>
             <p className="mt-1 ps-[22px] text-muted-foreground">
-              <span className="font-medium text-foreground">How to fix: </span>
+              <span className="font-medium text-foreground">{tHC("s1")} </span>
               {i.fix}
             </p>
             <p className="mt-1 ps-[22px] text-[0.6875rem] uppercase tracking-wide text-muted-foreground">

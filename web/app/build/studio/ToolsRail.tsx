@@ -6,13 +6,15 @@ import { type SidePanel } from "./sessionTypes";
 
 import FilesPane from "./FilesPane";
 import DeployPane from "./DeployPane";
+import { useTranslations } from "../../lib/i18n";
 
 /** Right column: the tool tab strip plus the active panel (files-side panels, then deploy-side panels). */
 export default function ToolsRail({ s }: { s: ProjectSession }) {
+    const tHC = useTranslations("hcBuildStudioToolsRail");
   const { panel, setPanel } = s;
   return (
     <div className="order-3 flex min-h-0 max-h-[75vh] flex-col gap-3 lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)]">
-      <div role="tablist" aria-label="App tools" className="grid shrink-0 grid-cols-4 gap-1 rounded-xl bg-secondary p-1">
+      <div role="tablist" aria-label={tHC("s1")} className="grid shrink-0 grid-cols-4 gap-1 rounded-xl bg-secondary p-1">
         {(
           [
             ["design", Palette, "Design"],

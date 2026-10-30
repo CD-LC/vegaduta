@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { apiFetch } from "../../lib/api/core";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * The live half of an `apiCall` node (schema.ts pins what it may ask for): calls this install's own
@@ -145,6 +146,7 @@ function ResultView({ outcome }: { outcome: Outcome }) {
 }
 
 export default function ApiCallPanel({ method, path, title, query, body }: Props) {
+  const tHC = useTranslations("hcComponentsGenerativeuiApiCallPanel");
   const names = placeholdersOf(path);
   const [values, setValues] = useState<Record<string, string>>({});
   const [bodyText, setBodyText] = useState(body === undefined ? "" : JSON.stringify(body, null, 2));
@@ -220,7 +222,7 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
       ))}
       {!isRead && (
         <label className="mt-2 flex flex-col gap-1 text-xs text-muted-foreground">
-          Request body (JSON)
+          {tHC("s3")}
           <textarea
             rows={4}
             className="rounded-md border border-border bg-background px-2 py-1 font-mono text-xs text-foreground"
@@ -240,10 +242,8 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
           {isRead ? (outcome ? "Run again" : "Run") : outcome ? "Send again" : "Send"}
         </button>
       )}
-      {!isRead && !outcome && (
-        <p className="mt-1 text-xs text-muted-foreground">Nothing is sent until you press Send.</p>
-      )}
-      {running && isRead && !outcome && <p className="mt-2 text-xs text-muted-foreground">Loading…</p>}
+      {!isRead && !outcome && <p className="mt-1 text-xs text-muted-foreground">{tHC("s2")}</p>}
+      {running && isRead && !outcome && <p className="mt-2 text-xs text-muted-foreground">{tHC("s1")}</p>}
       {error && <p className="mt-2 text-xs text-[var(--danger-text)]">{error}</p>}
       {outcome && <ResultView outcome={outcome} />}
     </div>

@@ -26,6 +26,7 @@ import {
   type ReclaimResult,
 } from "../lib/demoSandboxes";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Demo sandboxes - reclaim of the legacy per-visitor /try tenants
 // (GET/POST /api/platform/demo-sandboxes). The shared demo tenant that serves
@@ -39,6 +40,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 type Pending = { mode: "selected" | "all"; ids: string[] };
 
 export default function DemoSandboxesPage() {
+  const tHC = useTranslations("hcPlatformadminDemosandboxesPage");
   const [inventory, setInventory] = useState<DemoSandboxInventory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +150,7 @@ export default function DemoSandboxesPage() {
 
   return (
     <AdminShell
-      title="Demo sandboxes"
+      title={tHC("s23")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} title="Refresh">
           <RefreshCw size={14} className={loading ? "animate-spin" : undefined} /> Refresh
@@ -156,11 +158,10 @@ export default function DemoSandboxesPage() {
       }
     >
       <PageHint>
-        Before the shared demo tenant, every anonymous /try visitor got a sandbox tenant of their own: a real tenant row
-        and Postgres schema that nobody registered for. This page lists those leftovers and erases them in batches of{" "}
-        {RECLAIM_BATCH_LIMIT}. Demo limits and live session metrics are on{" "}
+        {tHC("s22")} {RECLAIM_BATCH_LIMIT}
+        {tHC("s21")}{" "}
         <Link href="/platform-admin/demo-sandbox" className="underline underline-offset-2 hover:text-foreground">
-          Demo Sandbox
+          {tHC("s20")}
         </Link>
         .
       </PageHint>
@@ -174,7 +175,7 @@ export default function DemoSandboxesPage() {
 
       {inventory && (
         <>
-          <SectionCard title="Shared demo tenant" icon={ShieldCheck} subtitle="Protected - cannot be reclaimed">
+          <SectionCard title={tHC("s19")} icon={ShieldCheck} subtitle="Protected - cannot be reclaimed">
             {inventory.shared ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3">
                 <div className="min-w-0">
@@ -190,16 +191,13 @@ export default function DemoSandboxesPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Core did not report a shared demo tenant.</p>
+              <p className="text-sm text-muted-foreground">{tHC("s18")}</p>
             )}
-            <InfoNote>
-              This one tenant powers the public /try demo for every visitor. It is never listed below, never selectable,
-              and the server refuses to reclaim it even if asked.
-            </InfoNote>
+            <InfoNote>{tHC("s17")}</InfoNote>
           </SectionCard>
 
           <SectionCard
-            title="Legacy sandboxes"
+            title={tHC("s16")}
             icon={Recycle}
             subtitle={`${total.toLocaleString()} reclaimable${total > rows.length ? ` (showing ${rows.length})` : ""}`}
             delay={0.03}
@@ -212,36 +210,38 @@ export default function DemoSandboxesPage() {
                   onClick={() => begin("selected")}
                   title={`Erase the selected sandboxes (first ${RECLAIM_BATCH_LIMIT} per click)`}
                 >
-                  Reclaim selected ({Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
+                  {tHC("s15")}
+                  {Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   disabled={total === 0 || reclaiming || !!pending}
                   onClick={() => begin("all")}
-                  title="Erase the next batch of legacy sandboxes - click again for the batch after"
+                  title={tHC("s14")}
                 >
-                  Reclaim all ({RECLAIM_BATCH_LIMIT} per batch)
+                  {tHC("s13")}
+                  {RECLAIM_BATCH_LIMIT} {tHC("s12")}
                 </Button>
               </div>
             }
           >
             {selectedCount > RECLAIM_BATCH_LIMIT && (
               <p className="text-xs text-[var(--warning-text)]">
-                {selectedCount} selected - one click reclaims the first {RECLAIM_BATCH_LIMIT}; click again for the rest.
+                {selectedCount} {tHC("s11")} {RECLAIM_BATCH_LIMIT}
+                {tHC("s10")}
               </p>
             )}
 
             {pending && masterKey && (
               <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
                 <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
-                  <AlertTriangle size={14} /> Permanently erase {confirmCount} sandbox tenant
+                  <AlertTriangle size={14} /> {tHC("s9")} {confirmCount} {tHC("s8")}
                   {confirmCount === 1 ? "" : "s"}?
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {pending.mode === "all" ? `The server picks the next batch of up to ${RECLAIM_BATCH_LIMIT}. ` : ""}
-                  Each tenant row and its schema are deleted. This cannot be undone. Type{" "}
-                  <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> to confirm.
+                  {tHC("s7")} <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> {tHC("s6")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Input
@@ -270,7 +270,9 @@ export default function DemoSandboxesPage() {
 
             {lastResult && (
               <div className="space-y-1 rounded-lg border border-border p-3 text-xs">
-                <p className="font-semibold">Last reclaim: {reclaimSummary(lastResult)}</p>
+                <p className="font-semibold">
+                  {tHC("s5")} {reclaimSummary(lastResult)}
+                </p>
                 {lastResult.failed.length > 0 && (
                   <ul className="list-disc ps-5 text-destructive">
                     {lastResult.failed.map((f) => (
@@ -282,14 +284,15 @@ export default function DemoSandboxesPage() {
                 )}
                 {lastResult.remaining > 0 && !pending && (
                   <Button size="sm" variant="outline" disabled={reclaiming} onClick={() => begin("all")}>
-                    Reclaim next batch ({Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
+                    {tHC("s4")}
+                    {Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
                   </Button>
                 )}
               </div>
             )}
 
             {rows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No legacy sandboxes left to reclaim.</p>
+              <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
@@ -298,7 +301,7 @@ export default function DemoSandboxesPage() {
                       <th className="w-8 px-2 py-1.5 text-start">
                         <Checkbox
                           checked={allOnPageSelected}
-                          aria-label="Select every sandbox on this page"
+                          aria-label={tHC("s2")}
                           onCheckedChange={() => togglePage()}
                         />
                       </th>
@@ -306,7 +309,7 @@ export default function DemoSandboxesPage() {
                       <th className="px-2 py-1.5 text-start font-medium">Schema</th>
                       <th className="px-2 py-1.5 text-start font-medium">Status</th>
                       <th className="px-2 py-1.5 text-start font-medium">Created</th>
-                      <th className="px-2 py-1.5 text-start font-medium">Last session</th>
+                      <th className="px-2 py-1.5 text-start font-medium">{tHC("s1")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

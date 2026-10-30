@@ -100,6 +100,7 @@ function AppShellBody({
   collapsibleRail = true,
   quietStatus = false,
 }: AppShellBodyProps) {
+  const tHC = useTranslations("hcComponentsAppShell");
   const bleed = bleedProp || fillViewport;
   const pathname = usePathname();
   useDocumentTitle(title, eyebrow);
@@ -414,7 +415,8 @@ function AppShellBody({
             workflow designer page scroll. */}
         {!fillViewport && (
           <footer className="mt-auto border-t border-border px-4 py-4 text-xs text-muted-foreground sm:px-6 lg:px-8">
-            © {new Date().getFullYear()} {LEGAL_ENTITY}. All rights reserved.
+            © {new Date().getFullYear()} {LEGAL_ENTITY}
+            {tHC("s1")}
           </footer>
         )}
       </div>

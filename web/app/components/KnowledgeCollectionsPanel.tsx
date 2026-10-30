@@ -85,6 +85,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
   { collections, onChanged, selectedId, onSelect }: KnowledgeCollectionsPanelProps,
   ref
 ) {
+  const tHC = useTranslations("hcComponentsKnowledgeCollectionsPanel");
   const t = useTranslations("knowledgeCollectionsPanel");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -434,7 +435,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
               autoFocus
             />
             <p id="kb-new-collection-name-help" className="text-xs text-muted-foreground">
-              A collection groups related files, for example “Return policy” or “Price list”.
+              {tHC("s1")}
             </p>
           </div>
           <div className="space-y-1.5">

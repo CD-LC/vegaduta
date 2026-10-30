@@ -84,6 +84,7 @@ function substituteArgs(args: string[], values: Record<string, string>) {
  * of the Tools screen.
  */
 export default function RegistryBrowser({ onChanged }: { onChanged: () => void }) {
+  const tHC = useTranslations("hcComponentsRegistryBrowser");
   const t = useTranslations("mcpPanel");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
@@ -299,7 +300,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
           className="shrink-0"
         >
           <AlertTriangle aria-hidden="true" size={14} />
-          Hide deprecated
+          {tHC("s17")}
         </Button>
         <Button
           type="button"
@@ -315,7 +316,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
           className="shrink-0"
         >
           <Clock aria-hidden="true" size={14} />
-          Hide pending review
+          {tHC("s16")}
         </Button>
       </div>
 
@@ -378,8 +379,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
             <Search aria-hidden="true" size={22} className="text-muted-foreground" />
             <p className="max-w-md text-sm text-muted-foreground">
-              Search the public MCP registry to add any published server. Matches names and descriptions; multiple words
-              all have to match, and <code>*</code> / <code>?</code> work as wildcards.
+              {tHC("s15")} <code>*</code> / <code>?</code> {tHC("s14")}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-1.5">
               <span className="text-xs text-muted-foreground">Try:</span>
@@ -405,7 +405,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
               {unavailable ? "This search couldn't run. It's usually back within a few minutes." : "Try another term."}
             </span>
             <Button type="button" variant="ghost" size="sm" onClick={() => runSearch(query.trim(), null)}>
-              Try again
+              {tHC("s13")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -414,10 +414,11 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
         // hide-deprecated and/or the runtime chip - hide every one of them.
         <Alert variant="warning">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>All results are hidden by your filters</AlertTitle>
+          <AlertTitle>{tHC("s12")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-2">
             <span>
-              {results.length} server{results.length === 1 ? "" : "s"} matched &ldquo;{query.trim()}&rdquo;, but
+              {results.length} server{results.length === 1 ? "" : "s"} {tHC("s11")}
+              {query.trim()}&rdquo;, but
               {(() => {
                 const reasons = activeFilterReasons();
                 if (reasons.length === 0) return " none of them are shown.";
@@ -428,17 +429,17 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
             <div className="flex flex-wrap gap-2">
               {hideDeprecated && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => setHideDeprecated(false)}>
-                  Show deprecated servers
+                  {tHC("s10")}
                 </Button>
               )}
               {hidePendingReview && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => setHidePendingReview(false)}>
-                  Show pending-review servers
+                  {tHC("s9")}
                 </Button>
               )}
               {runtimeFilter !== "all" && (
                 <Button type="button" variant="ghost" size="sm" onClick={() => setRuntimeFilter("all")}>
-                  Clear runtime filter
+                  {tHC("s8")}
                 </Button>
               )}
             </div>
@@ -448,7 +449,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
         <div className="flex flex-col gap-3">
           {filtersActive && filteredResults.length !== results.length && (
             <div className="px-0.5 text-xs text-muted-foreground">
-              {filteredResults.length} of {results.length} shown (filtered)
+              {filteredResults.length} of {results.length} {tHC("s7")}
             </div>
           )}
           {resultsPagination.pageItems.map((r) => {
@@ -482,11 +483,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                           </span>
                           <Badge variant="outline">{meta.label}</Badge>
                           {r.status === "deprecated" && (
-                            <Badge
-                              variant="destructive"
-                              title="No longer recommended by the registry maintainer"
-                              className="gap-1"
-                            >
+                            <Badge variant="destructive" title={tHC("s6")} className="gap-1">
                               <AlertTriangle aria-hidden="true" size={12} />
                               deprecated
                             </Badge>
@@ -498,22 +495,14 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                            * RegistrySearchResult#reviewRequired's javadoc. */}
                           {r.runnable &&
                             (r.reviewRequired ? (
-                              <Badge
-                                variant="outline"
-                                className={cn("gap-1", TONE_INFO)}
-                                title="This is a self-service registration (hand-typed or Browse registry, same as any other) - it will start pending platform-staff review and won't connect until that's approved."
-                              >
+                              <Badge variant="outline" className={cn("gap-1", TONE_INFO)} title={tHC("s5")}>
                                 <Clock aria-hidden="true" size={12} />
-                                Needs staff review first
+                                {tHC("s4")}
                               </Badge>
                             ) : (
-                              <Badge
-                                variant="outline"
-                                className={cn("gap-1", TONE_SUCCESS)}
-                                title="No staff review gate applies - this one connects as soon as you add it."
-                              >
+                              <Badge variant="outline" className={cn("gap-1", TONE_SUCCESS)} title={tHC("s3")}>
                                 <ShieldCheck aria-hidden="true" size={12} />
-                                Connects instantly
+                                {tHC("s2")}
                               </Badge>
                             ))}
                         </div>
@@ -561,10 +550,7 @@ export default function RegistryBrowser({ onChanged }: { onChanged: () => void }
                           <span className="text-xs font-medium text-foreground">
                             {t("browseRegistryCredentialsTitle")}
                           </span>
-                          <p className="text-xs text-muted-foreground">
-                            Stored encrypted, scoped to your organization only, and sent only to this server — no other
-                            tenant on this platform can see or use them.
-                          </p>
+                          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
                           <div className="flex flex-col gap-2">
                             {r.envVars.map((v: any) => {
                               const envFieldId = `registry-${r.name}-${v.name}`;

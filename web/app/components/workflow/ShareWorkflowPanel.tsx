@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { toast } from "../../lib/toastBus";
 import { errorMessage } from "../../lib/errors";
 import { ShareEndNotice, ShareLinkMeta, useShareEndReason } from "../channels/ShareLinkMeta";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Owner-side control for "even registered consumers should be able to share
@@ -30,7 +31,14 @@ type WorkflowShareStatus = {
 
 // workflowName is display-only chrome and the caller passes `workflow?.name`,
 // which is undefined until the canvas's initial fetch lands - hence optional.
-export default function ShareWorkflowPanel({ workflowId, workflowName }: { workflowId: string; workflowName?: string }) {
+export default function ShareWorkflowPanel({
+  workflowId,
+  workflowName,
+}: {
+  workflowId: string;
+  workflowName?: string;
+}) {
+  const tHC = useTranslations("hcComponentsWorkflowShareWorkflowPanel");
   const [status, setStatus] = useState<WorkflowShareStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -109,9 +117,7 @@ export default function ShareWorkflowPanel({ workflowId, workflowName }: { workf
 
   return (
     <div className="flex flex-col gap-2 border-t border-border px-5 py-3">
-      {workflowName ? (
-        <p className="truncate text-xs font-medium text-muted-foreground">{workflowName}</p>
-      ) : null}
+      {workflowName ? <p className="truncate text-xs font-medium text-muted-foreground">{workflowName}</p> : null}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {/* Shared .state-dot instead of a bespoke emerald/grey circle. */}
@@ -129,7 +135,7 @@ export default function ShareWorkflowPanel({ workflowId, workflowName }: { workf
         {status?.active ? (
           <Button type="button" variant="outline" size="sm" onClick={revokeShare} disabled={busy}>
             {busy ? <Loader2 size={12} className="animate-spin" /> : null}
-            Stop sharing
+            {tHC("s3")}
           </Button>
         ) : (
           <Button type="button" variant="outline" size="sm" onClick={createShare} disabled={busy}>
@@ -145,14 +151,11 @@ export default function ShareWorkflowPanel({ workflowId, workflowName }: { workf
         <>
           <div className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/30 px-2.5 py-2 text-xs">
             <span className="flex-1 truncate font-mono text-muted-foreground">{status.shareUrl}</span>
-            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label="Copy link">
+            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label={tHC("s2")}>
               {copied ? <Check size={13} style={{ color: "var(--state-success)" }} /> : <Copy size={13} />}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Anyone with this link can run this workflow - no sign-in required. Their runs use
-            your plan&apos;s normal usage.
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           <ShareLinkMeta status={status} />
         </>
       )}

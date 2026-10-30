@@ -24,6 +24,7 @@ import {
 } from "./stepTest";
 import PinOutputButton from "./PinOutputButton";
 import "./step-test.css";
+import { useTranslations } from "../../lib/i18n";
 
 export interface StepTestNode {
   id: string;
@@ -94,6 +95,7 @@ export default function StepTestPanel({
   onUnavailable,
   onClose,
 }: StepTestPanelProps) {
+  const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
   const uid = useId();
   const reason = useMemo(() => untestableReason(node.type, node.config), [node.type, node.config]);
 
@@ -179,14 +181,14 @@ export default function StepTestPanel({
         onClose();
       }
     },
-    [run, onClose],
+    [run, onClose]
   );
 
   const saveMock = useCallback(
     (id: string) => {
       setMocks(setMock(workflowId, id, pinned[id] ?? ""));
     },
-    [workflowId, pinned],
+    [workflowId, pinned]
   );
 
   const forgetMock = useCallback(
@@ -196,7 +198,7 @@ export default function StepTestPanel({
       const u = upstream.find((x) => x.id === id);
       setPinned((p) => ({ ...p, [id]: u?.lastOutput ?? "" }));
     },
-    [workflowId, upstream],
+    [workflowId, upstream]
   );
 
   const copyOutput = useCallback((text: string) => {
@@ -223,9 +225,9 @@ export default function StepTestPanel({
     <section className="wfx-st" aria-labelledby={`${uid}-title`} onKeyDown={onKeyDown}>
       <header className="st-head">
         <div className="st-titlerow">
-          <span className="st-kicker">Run this step</span>
+          <span className="st-kicker">{tHC("s11")}</span>
           {onClose ? (
-            <button type="button" className="st-iconbtn" onClick={onClose} aria-label="Close step test (Esc)">
+            <button type="button" className="st-iconbtn" onClick={onClose} aria-label={tHC("s10")}>
               <span aria-hidden="true">×</span>
             </button>
           ) : null}
@@ -237,9 +239,11 @@ export default function StepTestPanel({
 
       {reason ? (
         <div className="st-blocked" role="note">
-          <span className="st-blocked-ico" aria-hidden="true">⊘</span>
+          <span className="st-blocked-ico" aria-hidden="true">
+            ⊘
+          </span>
           <div>
-            <p className="st-blocked-title">This step can&apos;t be tested on its own</p>
+            <p className="st-blocked-title">{tHC("s9")}</p>
             <p className="st-blocked-text">{reason}</p>
           </div>
         </div>
@@ -247,14 +251,16 @@ export default function StepTestPanel({
         <div className="st-body">
           {dirty ? (
             <p className="st-warn" role="note">
-              <span aria-hidden="true">!</span> Tests run the <strong>saved</strong> version - save first to test your latest edits.
+              <span aria-hidden="true">!</span> {tHC("s8")} <strong>saved</strong> {tHC("s7")}
             </p>
           ) : null}
 
           <div className="st-field">
             <label htmlFor={`${uid}-input`} className="st-label">
               Input
-              <span className="st-sub">{upstream.length ? "optional - overrides pinned inputs" : "what this step receives"}</span>
+              <span className="st-sub">
+                {upstream.length ? "optional - overrides pinned inputs" : "what this step receives"}
+              </span>
             </label>
             <textarea
               id={`${uid}-input`}
@@ -263,13 +269,15 @@ export default function StepTestPanel({
               onChange={(e) => setInput(e.target.value)}
               rows={4}
               spellCheck={false}
-              placeholder={upstream.length ? "Leave empty to use the pinned inputs below" : "Type the input for this step"}
+              placeholder={
+                upstream.length ? "Leave empty to use the pinned inputs below" : "Type the input for this step"
+              }
             />
           </div>
 
           {upstream.length ? (
             <fieldset className="st-pins" aria-describedby={`${uid}-pinhint`}>
-              <legend className="st-label">Pinned upstream outputs</legend>
+              <legend className="st-label">{tHC("s6")}</legend>
               <p id={`${uid}-pinhint`} className="st-hint">
                 {inputWins
                   ? "Ignored while the Input box has text."
@@ -289,7 +297,7 @@ export default function StepTestPanel({
                         {u.label}
                       </label>
                       {isMock ? <span className="st-badge st-badge-mock">MOCK</span> : null}
-                      {!isMock && !edited && u.lastOutput ? <span className="st-badge">last run</span> : null}
+                      {!isMock && !edited && u.lastOutput ? <span className="st-badge">{tHC("s5")}</span> : null}
                       {edited ? <span className="st-badge">edited</span> : null}
                       {used ? <span className="st-badge st-badge-used">used</span> : null}
                     </div>
@@ -300,7 +308,7 @@ export default function StepTestPanel({
                       onChange={(e) => setPinned((p) => ({ ...p, [u.id]: e.target.value }))}
                       rows={3}
                       spellCheck={false}
-                      placeholder="No output pinned"
+                      placeholder={tHC("s4")}
                     />
                     <div className="st-pin-actions">
                       <button
@@ -313,7 +321,7 @@ export default function StepTestPanel({
                       </button>
                       {saved != null ? (
                         <button type="button" className="st-link" onClick={() => forgetMock(u.id)}>
-                          Forget mock
+                          {tHC("s3")}
                         </button>
                       ) : null}
                     </div>
@@ -362,6 +370,7 @@ function ResultView({
   copied: boolean;
   onCopy: (text: string) => void;
 }) {
+  const tHC = useTranslations("hcComponentsWorkflowStepTestPanel");
   if (!result.ok) {
     return (
       <div className="st-result" data-status="error">
@@ -432,11 +441,13 @@ function ResultView({
             {prettyText(output)}
           </pre>
         ) : (
-          <p className="st-hint">{e.outputJson == null ? "Output not captured by this server." : "This step produced no output."}</p>
+          <p className="st-hint">
+            {e.outputJson == null ? "Output not captured by this server." : "This step produced no output."}
+          </p>
         )}
         {e.outputTruncated ? (
           <p className="st-hint" role="note">
-            Output was cut to the capture limit.
+            {tHC("s2")}
           </p>
         ) : null}
       </section>
@@ -444,7 +455,7 @@ function ResultView({
       {tools.length ? (
         <section className="st-tools" aria-label={`Tool calls (${tools.length})`}>
           <span className="st-label">
-            Tool calls <span className="st-num">{intFmt.format(tools.length)}</span>
+            {tHC("s1")} <span className="st-num">{intFmt.format(tools.length)}</span>
           </span>
           <ol className="st-toollist">
             {tools.map((t, i) => (

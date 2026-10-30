@@ -8,6 +8,7 @@ import { toast } from "../../lib/toastBus";
 import { errorMessage } from "../../lib/errors";
 import { ShareEndNotice, ShareLinkMeta, useShareEndReason } from "../channels/ShareLinkMeta";
 import { QrCode } from "../ui/qr-code";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Owner-side control for "even registered consumers should be able to share
@@ -33,6 +34,7 @@ interface AgentShareStatus {
 // from any surface that has *some* agent-shaped object (AgentPlayground
 // passes its full agent), without re-declaring the whole AgentResponse shape.
 export default function ShareAgentPanel({ agent }: { agent: { id: string } | null }) {
+  const tHC = useTranslations("hcComponentsAgentsShareAgentPanel");
   const [status, setStatus] = useState<AgentShareStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -128,7 +130,7 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
         {status?.active ? (
           <Button type="button" variant="outline" size="sm" onClick={revokeShare} disabled={busy}>
             {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            Stop sharing
+            {tHC("s4")}
           </Button>
         ) : (
           <Button type="button" variant="outline" size="sm" onClick={createShare} disabled={busy}>
@@ -151,12 +153,12 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
           agent with its camera - no typing, no account. */}
           {status.shareUrl && (
             <div className="flex justify-center rounded-lg border border-border bg-white p-2" data-testid="share-qr">
-              <QrCode value={status.shareUrl} px={144} label="QR code for the public share link" />
+              <QrCode value={status.shareUrl} px={144} label={tHC("s3")} />
             </div>
           )}
           <div className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/30 px-2.5 py-2 text-xs">
             <span className="flex-1 truncate font-mono text-muted-foreground">{status.shareUrl}</span>
-            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label="Copy link">
+            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label={tHC("s2")}>
               {copied ? (
                 <Check size={13} style={{ color: "var(--state-success)" }} aria-hidden="true" />
               ) : (
@@ -164,10 +166,7 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Anyone with this link can chat with this agent - no sign-in required. Their messages use your plan&apos;s
-            normal usage.
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
           <ShareLinkMeta status={status} />
         </>
       )}

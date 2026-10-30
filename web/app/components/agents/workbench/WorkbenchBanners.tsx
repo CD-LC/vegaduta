@@ -5,8 +5,10 @@ import { AGENT_TEMPLATES } from "../../agentTemplates";
 import { Notice } from "../AgentWorkbench/Notice";
 import CreateAgentChecklist from "../guide/CreateAgentChecklist";
 import { useWorkbench } from "./context";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function WorkbenchBanners() {
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchWorkbenchBanners");
   const {
     tenantSettingsError,
     tenantSettingsNoticeDismissed,
@@ -52,8 +54,7 @@ export default function WorkbenchBanners() {
         >
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
           <span className="min-w-0 flex-1">
-            Couldn&rsquo;t load account settings, so premium controls below are showing restricted defaults until this
-            succeeds.{" "}
+            {tHC("s1")}{" "}
             <button
               type="button"
               onClick={() => fetchTenantSettings()}

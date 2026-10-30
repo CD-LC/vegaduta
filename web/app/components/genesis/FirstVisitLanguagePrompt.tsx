@@ -10,6 +10,7 @@ import { SUPPORTED_LOCALES, LOCALE_COOKIE } from "../../lib/i18n-config";
 import { useRegion } from "../../lib/useRegion";
 import { Button } from "../ui/button";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
+import { useTranslations } from "../../lib/i18n";
 
 // First-visit language prompt for India visitors. The proxy already geo-sets
 // NEXT_LOCALE=hi for many Indian requests, and LanguageSwitcher already
@@ -169,6 +170,7 @@ function LanguagePromptDialog({
   chooseRegional: () => void;
   dismiss: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsGenesisFirstVisitLanguagePrompt");
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   useDialogFocus(panelRef, closeRef, dismiss);
@@ -182,12 +184,12 @@ function LanguagePromptDialog({
       transition={{ duration: 0.2 }}
       role="dialog"
       aria-modal="true"
-      aria-label="Choose your language"
+      aria-label={tHC("s6")}
     >
       {/* Backdrop */}
       <button
         type="button"
-        aria-label="Continue in English"
+        aria-label={tHC("s2")}
         onClick={dismiss}
         className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-sm"
       />
@@ -227,7 +229,7 @@ function LanguagePromptDialog({
 
           {/* English structural line — an English-defaulted visitor reads this fine */}
           <p className="mt-3 text-sm text-muted-foreground">
-            Prefer another language? The <BrandName /> console is available in all 22 official Indian languages.
+            {tHC("s5")} <BrandName /> {tHC("s4")}
           </p>
 
           <label className="mt-5 flex cursor-pointer items-center gap-2.5 text-sm">
@@ -237,7 +239,7 @@ function LanguagePromptDialog({
               onChange={(e) => setMakeDefault(e.target.checked)}
               className="size-4 accent-[var(--primary)]"
             />
-            <span className="text-muted-foreground">Make this my default language</span>
+            <span className="text-muted-foreground">{tHC("s3")}</span>
           </label>
 
           <div className="mt-6 flex flex-col gap-2.5">
@@ -251,13 +253,13 @@ function LanguagePromptDialog({
               size="lg"
               className="w-full justify-center text-muted-foreground hover:text-foreground"
             >
-              Continue in English
+              {tHC("s2")}
             </Button>
           </div>
 
           <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
             <Globe aria-hidden="true" className="size-3.5" />
-            You can change the language anytime from the menu at the top.
+            {tHC("s1")}
           </p>
         </div>
       </motion.div>

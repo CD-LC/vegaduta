@@ -6,6 +6,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import { writeAppAuth, appApi, normUser } from "./appBridge";
+import { useTranslations } from "../../lib/i18n";
 
 // ---------------------------------------------------------------------------
 // The end-user sign-in overlay - rendered by the HOST (this studio page),
@@ -24,6 +25,7 @@ export function StudioSignInOverlay({
   appName: string;
   onDone: (user: { id?: string; email?: string; name?: string } | null) => void;
 }) {
+    const tHC = useTranslations("hcBuildStudioStudioSignInOverlay");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -73,7 +75,7 @@ export function StudioSignInOverlay({
       <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="studio-signin-title" className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
         <p id="studio-signin-title" className="text-sm font-semibold text-foreground">{mode === "signin" ? "Sign in" : "Create your account"}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {appName} · this account lives inside the app - it is not your VegaDūta console login.
+          {appName} {tHC("s2")}
         </p>
         <form
           className="mt-4 flex flex-col gap-2"
@@ -83,7 +85,7 @@ export function StudioSignInOverlay({
           }}
         >
           {mode === "signup" && (
-            <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" aria-label="Your name" />
+            <Input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder={tHC("s1")} aria-label={tHC("s1")} />
           )}
           <Input autoFocus={mode === "signin"} value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" aria-label="Email" />
           <Input

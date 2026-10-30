@@ -6,6 +6,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Select } from "../ui/select";
 import type { InputField } from "./approvalPauseModel";
+import { useTranslations } from "../../lib/i18n";
 
 type InputRequestFieldsProps = {
   fields: InputField[];
@@ -16,6 +17,7 @@ type InputRequestFieldsProps = {
 };
 
 export default function InputRequestFields({ fields, idPrefix, values, setValues }: InputRequestFieldsProps) {
+  const tHC = useTranslations("hcComponentsWorkflowApprovalInputFields");
   return (
     <div className="apc-fields">
       {fields.map((f) => {
@@ -39,7 +41,7 @@ export default function InputRequestFields({ fields, idPrefix, values, setValues
                 id={id}
                 value={values[f.key] ?? ""}
                 onValueChange={set}
-                placeholder="Choose..."
+                placeholder={tHC("s1")}
                 options={(f.type === "boolean" ? ["true", "false"] : f.options).map((o) => ({
                   value: o,
                   label: f.type === "boolean" ? (o === "true" ? "Yes" : "No") : o,
@@ -48,12 +50,7 @@ export default function InputRequestFields({ fields, idPrefix, values, setValues
             ) : f.type === "number" ? (
               <input {...common} type="number" inputMode="decimal" onChange={(e) => set(e.target.value)} />
             ) : (
-              <textarea
-                {...common}
-                className="apc-input apc-textarea"
-                rows={2}
-                onChange={(e) => set(e.target.value)}
-              />
+              <textarea {...common} className="apc-input apc-textarea" rows={2} onChange={(e) => set(e.target.value)} />
             )}
           </div>
         );

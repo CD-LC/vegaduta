@@ -4,6 +4,7 @@ import { ArrowRight, Check, Copy, Download, Globe, Link2, Loader2, Plug, QrCode,
 import type { RegistryHit, StudioPalette } from "../studioClient";
 import { QR_QUIET, type QrPath } from "../../../lib/qr";
 import type { MobileApkDownload } from "../../../lib/mobileApp";
+import { useTranslations } from "../../../lib/i18n";
 
 // The bigger step bodies of the live builder (LiveBuilder owns all state): the
 // tool-registry search and the "put it on a phone" share step, plus the small
@@ -62,10 +63,11 @@ export function RegistryStep({
   picked: string[];
   onToggle: (name: string) => void;
 }) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
   return (
     <div className="space-y-4">
       <Head
-        title="Open the tool registry"
+        title={tHC("s17")}
         body="These are the tools already switched on in the platform. Search, then attach the ones this agent needs. Try “web”."
       />
       <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2.5">
@@ -73,15 +75,15 @@ export function RegistryStep({
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
-          placeholder="Search tools…  e.g. web, code, page"
-          aria-label="Search tools"
+          placeholder={tHC("s16")}
+          aria-label={tHC("s15")}
           className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-zinc-400"
         />
         {mcp.loading && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-zinc-400 shrink-0" />}
       </div>
       {!palette && (
         <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin shrink-0" /> Loading the registry…
+          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin shrink-0" /> {tHC("s14")}
         </div>
       )}
       <div className="grid gap-2.5 sm:grid-cols-2">
@@ -113,17 +115,15 @@ export function RegistryStep({
             </button>
           );
         })}
-        {palette && tools.length === 0 && (
-          <p className="text-sm text-zinc-400">No built-in tool matches - the MCP registry below may.</p>
-        )}
+        {palette && tools.length === 0 && <p className="text-sm text-zinc-400">{tHC("s13")}</p>}
       </div>
       {(mcp.hits.length > 0 || mcp.unavailable) && (
         <div>
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-zinc-400">
-            <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> MCP registry · live search
+            <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s12")}
           </div>
           {mcp.unavailable ? (
-            <p className="text-xs text-zinc-400">The registry did not answer just now.</p>
+            <p className="text-xs text-zinc-400">{tHC("s11")}</p>
           ) : (
             <ul className="space-y-1.5">
               {mcp.hits.map((h) => (
@@ -132,9 +132,7 @@ export function RegistryStep({
                   {h.description && <div className="line-clamp-1 text-zinc-400">{h.description}</div>}
                 </li>
               ))}
-              <li className="text-[11px] text-zinc-400">
-                Connecting an MCP server to an agent is a workspace feature - here you can see what exists.
-              </li>
+              <li className="text-[11px] text-zinc-400">{tHC("s10")}</li>
             </ul>
           )}
         </div>
@@ -170,10 +168,11 @@ export function ShipStep({
   onMakeShare: () => void;
   onCopy: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeLiveBuilderSteps");
   return (
     <div className="space-y-4">
       <Head
-        title="Put it in a pocket"
+        title={tHC("s9")}
         body="Make the link, scan the code, and the agent you just built answers on your phone. Up to 5 people can chat with it; it goes away with this sandbox."
       />
       {!shareUrl ? (
@@ -188,7 +187,7 @@ export function ShipStep({
           ) : (
             <QrCode aria-hidden="true" className="h-4 w-4 shrink-0" />
           )}{" "}
-          Make my QR code
+          {tHC("s8")}
         </button>
       ) : (
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -198,7 +197,7 @@ export function ShipStep({
                 viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
                 className="h-44 w-44"
                 role="img"
-                aria-label="QR code for your agent"
+                aria-label={tHC("s7")}
               >
                 <path d={qr.d} fill="#09090b" />
               </svg>
@@ -211,7 +210,7 @@ export function ShipStep({
                 readOnly
                 value={shareUrl}
                 onFocus={(e) => e.currentTarget.select()}
-                aria-label="Share link"
+                aria-label={tHC("s6")}
                 className="min-w-0 flex-1 bg-transparent px-1 text-xs outline-none"
               />
               <button
@@ -227,21 +226,19 @@ export function ShipStep({
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="text-xs text-zinc-400">Scan with your phone camera.</p>
+            <p className="text-xs text-zinc-400">{tHC("s5")}</p>
           </div>
         </div>
       )}
       <div className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
-        <div className="text-sm font-semibold">Keep everything you just built</div>
-        <p className="mt-1 text-xs text-zinc-300">
-          A free account copies this agent into your own workspace - then add schedules, WhatsApp and your documents.
-        </p>
+        <div className="text-sm font-semibold">{tHC("s4")}</div>
+        <p className="mt-1 text-xs text-zinc-300">{tHC("s3")}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <a
             href={signupHref}
             className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium"
           >
-            Create my workspace <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+            {tHC("s2")} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
           </a>
           {apk && (
             <a
@@ -249,7 +246,7 @@ export function ShipStep({
               download
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-sm"
             >
-              <Download aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Android app
+              <Download aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s1")}
               {apk.sizeMb ? ` · ${apk.sizeMb} MB` : ""}
             </a>
           )}

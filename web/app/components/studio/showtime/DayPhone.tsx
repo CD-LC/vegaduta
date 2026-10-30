@@ -4,6 +4,7 @@ import { Bell, Check, ShieldAlert, ShieldCheck } from "lucide-react";
 import type { DayEvent, PhoneItem, PhoneScreen, statsAt } from "./day";
 import { ease, seg } from "./script";
 import { TONE } from "./dayTone";
+import { useTranslations } from "../../../lib/i18n";
 
 // The phone in "An Impossible Day": what the outside world saw for the current
 // chapter's event (split out of DayStage). Pure function of (event, p, stats).
@@ -18,6 +19,7 @@ export default function DayPhone({
   p: number;
   stats: ReturnType<typeof statsAt>;
 }) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
   const screen: PhoneScreen = ev
     ? ev.id === "report"
       ? {
@@ -56,9 +58,9 @@ export default function DayPhone({
           <div className="flex-1 space-y-2.5 overflow-hidden px-4 pt-4">
             {!ev && (
               <p className="mt-10 text-center text-[12px] text-zinc-400">
-                Meera is asleep.
+                {tHC("s4")}
                 <br />
-                Her phone is on silent.
+                {tHC("s3")}
               </p>
             )}
             {screen.items.map((it, i) => {
@@ -67,9 +69,7 @@ export default function DayPhone({
               return <Item key={i} it={it} k={k} tone={screen.tone} />;
             })}
           </div>
-          <div className="pb-2 text-center text-[9px] uppercase tracking-wider text-zinc-600">
-            Illustration - a sample day
-          </div>
+          <div className="pb-2 text-center text-[9px] uppercase tracking-wider text-zinc-600">{tHC("s2")}</div>
         </div>
       </div>
     </div>
@@ -77,6 +77,7 @@ export default function DayPhone({
 }
 
 function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeDayPhone");
   const style = { opacity: k, transform: `translateY(${(1 - k) * 12}px)` };
   const t = TONE[tone];
   switch (it.kind) {
@@ -112,7 +113,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
           <p className="text-[12px] leading-snug">{it.sub}</p>
           <div className="mt-2 flex gap-2">
             <span className="flex-1 rounded-lg bg-emerald-600 py-1.5 text-center text-[12px] font-medium">Approve</span>
-            <span className="flex-1 rounded-lg bg-white/10 py-1.5 text-center text-[12px]">Change it</span>
+            <span className="flex-1 rounded-lg bg-white/10 py-1.5 text-center text-[12px]">{tHC("s1")}</span>
           </div>
         </div>
       );

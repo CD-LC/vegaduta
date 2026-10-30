@@ -42,6 +42,7 @@ import type { GuardrailRule, RuleDraft } from "./guardrailRules";
 // are writing that file. The one string that does need a key is the nav row.
 
 export default function AdminGuardrailsPage() {
+  const tHC = useTranslations("hcAdminGuardrailsPage");
   const tg = useTranslations("f2GapsAdmin");
   const { hasPermission } = useAuth();
   // MANAGE_GUARDRAILS scope (granular RBAC, 2026-09-23) - was isAdmin;
@@ -105,9 +106,12 @@ export default function AdminGuardrailsPage() {
       const q = ruleQuery.trim().toLowerCase();
       return !q || `${r.name} ${r.description ?? ""} ${r.pattern}`.toLowerCase().includes(q);
     },
-    [ruleQuery],
+    [ruleQuery]
   );
-  const defaults = useMemo(() => rules.filter((r) => r.ruleType === "DEFAULT_TEMPLATE" && matchesQuery(r)), [rules, matchesQuery]);
+  const defaults = useMemo(
+    () => rules.filter((r) => r.ruleType === "DEFAULT_TEMPLATE" && matchesQuery(r)),
+    [rules, matchesQuery]
+  );
   const custom = useMemo(() => rules.filter((r) => r.ruleType === "CUSTOM" && matchesQuery(r)), [rules, matchesQuery]);
   const customPagination = usePagination(custom);
   const defaultsPagination = usePagination(defaults);
@@ -263,7 +267,7 @@ export default function AdminGuardrailsPage() {
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          Loading your guardrail rules…
+          {tHC("s28")}
         </div>
       )}
 
@@ -280,7 +284,7 @@ export default function AdminGuardrailsPage() {
           {error && (
             <Alert variant="destructive">
               <TriangleAlert className="size-4" aria-hidden="true" />
-              <AlertTitle>That didn&apos;t work</AlertTitle>
+              <AlertTitle>{tHC("s27")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -294,26 +298,20 @@ export default function AdminGuardrailsPage() {
           {!canManageGuardrails && (
             <Alert>
               <Shield className="size-4" aria-hidden="true" />
-              <AlertTitle>You can see these, but not change them</AlertTitle>
-              <AlertDescription>
-                Guardrail rules apply to every agent and every member of this workspace, so editing them is limited to
-                workspace admins. Ask an admin if one of these is getting in your way.
-              </AlertDescription>
+              <AlertTitle>{tHC("s26")}</AlertTitle>
+              <AlertDescription>{tHC("s25")}</AlertDescription>
             </Alert>
           )}
 
           {canManageGuardrails && isFreePlan && (
             <Alert>
               <Sparkles className="size-4" aria-hidden="true" />
-              <AlertTitle>Your own rules start on Premium</AlertTitle>
+              <AlertTitle>{tHC("s24")}</AlertTitle>
               <AlertDescription className="flex flex-col items-start gap-3">
-                <span>
-                  The platform&apos;s default rules below are active on every plan, including yours, and always will be.
-                  Writing your own patterns is a Premium feature.
-                </span>
+                <span>{tHC("s23")}</span>
                 {isBillingEnabled() && (
                   <Button asChild size="sm">
-                    <Link href="/admin/billing">See plans</Link>
+                    <Link href="/admin/billing">{tHC("s22")}</Link>
                   </Button>
                 )}
               </AlertDescription>
@@ -322,48 +320,45 @@ export default function AdminGuardrailsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Where these apply</CardTitle>
-              <CardDescription>
-                Worth knowing before you write one, because the two layers are enforced in different places.
-              </CardDescription>
+              <CardTitle>{tHC("s21")}</CardTitle>
+              <CardDescription>{tHC("s20")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">Tool results — always.</span> Every rule on this page runs
-                against whatever a tool hands back (an API response, a file, a web page, an MCP server&apos;s output)
-                before the model reads it. No per-agent switch: tool output is text from outside the platform, which is
-                the case these rules exist for.
+                <span className="font-medium text-foreground">{tHC("s19")}</span> {tHC("s18")}
               </p>
               <p>
-                <span className="font-medium text-foreground">Conversations — per agent, opt in.</span> To also check
-                what people type and what an agent replies, turn on <em>Custom rules</em> in that agent&apos;s Guardrails
-                card on the <Link href="/agents" className="underline underline-offset-2">Agents</Link> screen. There,
-                a <strong>Block</strong> rule works in both directions, while <strong>Redact</strong> can only rewrite
-                the agent&apos;s reply — a message someone already typed is left as they typed it.
+                <span className="font-medium text-foreground">{tHC("s17")}</span> {tHC("s16")} <em>{tHC("s15")}</em>{" "}
+                {tHC("s14")}{" "}
+                <Link href="/agents" className="underline underline-offset-2">
+                  Agents
+                </Link>{" "}
+                {tHC("s13")} <strong>Block</strong> {tHC("s12")} <strong>Redact</strong> {tHC("s11")}
               </p>
               <p>
-                <span className="font-medium text-foreground">Patterns are regular expressions</span>, matched
-                case-insensitively, anywhere in the text. They add to the platform&apos;s own built-in checks for
-                prompt-injection markers and secret-shaped strings; they never replace or switch those off.
+                <span className="font-medium text-foreground">{tHC("s10")}</span>
+                {tHC("s9")}
               </p>
             </CardContent>
           </Card>
 
           {rules.length > 8 && (
             <div className="max-w-sm">
-              <Label htmlFor="guardrail-rule-search" className="sr-only">Search rules</Label>
+              <Label htmlFor="guardrail-rule-search" className="sr-only">
+                {tHC("s8")}
+              </Label>
               <Input
                 id="guardrail-rule-search"
                 value={ruleQuery}
                 onChange={(e) => setRuleQuery(e.target.value)}
-                placeholder="Search rules by name, description or pattern"
+                placeholder={tHC("s7")}
               />
             </div>
           )}
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div className="flex flex-col gap-1.5">
-                <CardTitle>Your rules</CardTitle>
+                <CardTitle>{tHC("s6")}</CardTitle>
                 <CardDescription>
                   {custom.length === 0
                     ? "You haven't written any yet."
@@ -381,7 +376,7 @@ export default function AdminGuardrailsPage() {
                   upgradeHref="/admin/billing"
                   onClick={startCreate}
                 >
-                  <Plus className="size-4" aria-hidden="true" /> New rule
+                  <Plus className="size-4" aria-hidden="true" /> {tHC("s5")}
                 </Button>
               )}
             </CardHeader>
@@ -402,12 +397,7 @@ export default function AdminGuardrailsPage() {
                 />
               )}
 
-              {custom.length === 0 && !formOpen && (
-                <p className="text-sm text-muted-foreground">
-                  Rules you write here apply on top of the platform defaults below. A good first one is usually an
-                  internal identifier or codename you never want a model to see.
-                </p>
-              )}
+              {custom.length === 0 && !formOpen && <p className="text-sm text-muted-foreground">{tHC("s4")}</p>}
 
               {customPagination.pageItems.map((rule) => renderRuleRow(rule, true))}
               <PaginationControls
@@ -424,18 +414,12 @@ export default function AdminGuardrailsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Platform defaults</CardTitle>
-              <CardDescription>
-                Active for every workspace on every plan. They can&apos;t be edited or turned off — they are the floor
-                your own rules sit on top of.
-              </CardDescription>
+              <CardTitle>{tHC("s3")}</CardTitle>
+              <CardDescription>{tHC("s2")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {defaults.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No default rules are present in this workspace. The platform&apos;s own built-in checks still run —
-                  these rows are the data-driven copy of them.
-                </p>
+                <p className="text-sm text-muted-foreground">{tHC("s1")}</p>
               ) : (
                 defaultsPagination.pageItems.map((rule) => renderRuleRow(rule, false))
               )}

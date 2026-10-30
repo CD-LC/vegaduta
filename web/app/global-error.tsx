@@ -2,6 +2,7 @@
 
 import { Home, RotateCcw } from "lucide-react";
 import BrandName from "./components/BrandName";
+import { useTranslations } from "./lib/i18n";
 
 // Root error boundary (2026-09-24): replaces the whole root layout when it
 // throws, so it must render its own <html>/<body> and cannot rely on the
@@ -21,6 +22,7 @@ import BrandName from "./components/BrandName";
 // browser silently fell through to the system-font fallback anyway. Naming
 // only the fallback stack is honest about what actually renders.
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const tHC = useTranslations("hcGlobalerror");
   return (
     <html lang="en" dir="auto">
       <body className="ge-body">
@@ -89,13 +91,15 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <img className="ge-mark" src="/logo-mark-sm.webp" alt="" />
           <div className="ge-code">500</div>
           <h1 className="ge-heading">
-            <BrandName /> hit an unexpected error.
+            <BrandName /> {tHC("s3")}
           </h1>
-          <p className="ge-sub">Reload to try again. {error?.digest ? `Ref ${error.digest}.` : null}</p>
+          <p className="ge-sub">
+            {tHC("s2")} {error?.digest ? `Ref ${error.digest}.` : null}
+          </p>
           <div className="ge-actions">
             <button type="button" onClick={reset} className="ge-btn ge-btn-primary">
               <RotateCcw size={16} aria-hidden="true" />
-              Try again
+              {tHC("s1")}
             </button>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- root boundary must stay router-free */}
             <a href="/" className="ge-btn ge-btn-secondary">

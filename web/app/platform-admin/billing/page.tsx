@@ -21,6 +21,7 @@ import {
 } from "../lib/adminApi/billing";
 import { AdminEmptyState, AdminErrorState, TONE_TEXT } from "../components/admin/AdminKit";
 import { Select } from "../../components/ui/select";
+import { useTranslations } from "../../lib/i18n";
 
 // Platform billing & subscriptions - READ ONLY (PlatformBillingController,
 // /api/platform/billing/**). Plan overrides and the site-wide promo live on
@@ -78,6 +79,7 @@ function Pager({ pg, label, capped }: { pg: ReturnType<typeof usePagination<any>
 }
 
 function SummaryPanel() {
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [data, setData] = useState<BillingSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +102,7 @@ function SummaryPanel() {
       subtitle="Live tenants only (demo sandboxes excluded)"
       icon={CreditCard}
       actions={
-        <Button type="button" size="icon" variant="outline" aria-label="Refresh overview" onClick={() => void load()}>
+        <Button type="button" size="icon" variant="outline" aria-label={tHC("s34")} onClick={() => void load()}>
           <RefreshCw />
         </Button>
       }
@@ -110,45 +112,43 @@ function SummaryPanel() {
       {data && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label="Live tenants" value={data.liveTenants} />
+            <Stat label={tHC("s33")} value={data.liveTenants} />
             {Object.entries(data.tenantsByPlan).map(([plan, n]) => (
               <Stat key={plan} label={`${plan} plan`} value={n} />
             ))}
-            <Stat label="Active comp grants" value={data.activeCompGrants} />
+            <Stat label={tHC("s32")} value={data.activeCompGrants} />
             <Stat
-              label="Comp expiring in 7d"
+              label={tHC("s31")}
               value={data.compGrantsExpiringWithin7d}
               tone={data.compGrantsExpiringWithin7d > 0 ? "warn" : undefined}
             />
-            <Stat label="Past due" value={data.pastDue} tone={data.pastDue > 0 ? "warn" : undefined} />
-            <Stat label="Cancel scheduled" value={data.cancelScheduled} />
-            <Stat label="Upgrade pending" value={data.pendingUpgrade} />
+            <Stat label={tHC("s30")} value={data.pastDue} tone={data.pastDue > 0 ? "warn" : undefined} />
+            <Stat label={tHC("s29")} value={data.cancelScheduled} />
+            <Stat label={tHC("s28")} value={data.pendingUpgrade} />
           </div>
           {data.compGrantsOverdueForRevert > 0 && (
             <p className={`text-xs ${TONE_TEXT.warn}`}>
-              {data.compGrantsOverdueForRevert} comp grant(s) are past expiry and waiting for the hourly reverter.
+              {data.compGrantsOverdueForRevert} {tHC("s27")}
             </p>
           )}
           <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Captured payments (invoiced)
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s26")}</p>
             {data.invoiceTotals.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No invoices recorded.</p>
+              <p className="text-xs text-muted-foreground">{tHC("s25")}</p>
             ) : (
               data.invoiceTotals.map((c) => (
                 <p key={c.currency} className="text-sm">
                   <span className="font-medium">{c.currency}</span>: {formatMinor(c.amountMinor, c.currency)} across{" "}
                   {c.invoices} invoice
-                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}) · last 30 days{" "}
-                  {formatMinor(c.amountMinorLast30d, c.currency)} / {c.invoicesLast30d}
+                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}
+                  {tHC("s24")} {formatMinor(c.amountMinorLast30d, c.currency)} / {c.invoicesLast30d}
                 </p>
               ))
             )}
-            <p className="text-[11px] text-muted-foreground">Currencies are never added together.</p>
+            <p className="text-[11px] text-muted-foreground">{tHC("s23")}</p>
           </div>
           <details className="text-xs text-muted-foreground">
-            <summary className="cursor-pointer">Gateway subscription status counts</summary>
+            <summary className="cursor-pointer">{tHC("s22")}</summary>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {Object.entries(data.tenantsBySubscriptionStatus).map(([s, n]) => (
                 <Badge key={s} variant="outline">
@@ -164,6 +164,7 @@ function SummaryPanel() {
 }
 
 function SubscriptionsPanel() {
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [q, setQ] = useState("");
   const [plan, setPlan] = useState("");
   const [state, setState] = useState("");
@@ -210,21 +211,21 @@ function SubscriptionsPanel() {
           className="flex flex-wrap items-center gap-2"
         >
           <Input
-            aria-label="Search tenants"
+            aria-label={tHC("s21")}
             className="h-9 w-48"
-            placeholder="Tenant name"
+            placeholder={tHC("s20")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <Select
-            aria-label="Plan filter"
+            aria-label={tHC("s19")}
             className="w-40"
             value={plan}
             onValueChange={setPlan}
             options={[{ value: "", label: "All plans" }, ...PLANS.map((p) => ({ value: p, label: p }))]}
           />
           <Select
-            aria-label="State filter"
+            aria-label={tHC("s18")}
             className="w-44"
             value={state}
             onValueChange={setState}
@@ -238,11 +239,9 @@ function SubscriptionsPanel() {
     >
       {loading && !data && <Skeleton className="h-24 w-full" />}
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
-      {data?.scanTruncated && (
-        <InfoNote>The tenant scan hit its 5,000 row cap; narrow the filters to see the rest.</InfoNote>
-      )}
+      {data?.scanTruncated && <InfoNote>{tHC("s17")}</InfoNote>}
       {!loading && !error && rows.length === 0 && (
-        <AdminEmptyState title="No tenants match" description="Adjust the filters to see more tenants." />
+        <AdminEmptyState title={tHC("s16")} description="Adjust the filters to see more tenants." />
       )}
       {pg.pageItems.map((r) => (
         <div
@@ -256,25 +255,33 @@ function SubscriptionsPanel() {
             </span>
             {r.state === "COMP" && (
               <span className="block text-xs text-muted-foreground">
-                Comp until {date(r.compExpiresAt)} ({timeUntil(r.compExpiresAt)})
+                {tHC("s15")} {date(r.compExpiresAt)} ({timeUntil(r.compExpiresAt)})
                 {r.planBeforeComp ? `, reverts to ${r.planBeforeComp}` : ", reverts to FREE"}
                 {r.compReason ? ` - ${r.compReason}` : ""}
               </span>
             )}
             {r.pastDueSince && (
-              <span className="block text-xs text-destructive">Payment failing since {date(r.pastDueSince)}</span>
+              <span className="block text-xs text-destructive">
+                {tHC("s14")} {date(r.pastDueSince)}
+              </span>
             )}
             {r.pendingPlan && (
-              <span className="block text-xs text-muted-foreground">Upgrade to {r.pendingPlan} awaiting checkout</span>
+              <span className="block text-xs text-muted-foreground">
+                {tHC("s13")} {r.pendingPlan} {tHC("s12")}
+              </span>
             )}
           </span>
           <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">{r.plan}</Badge>
             <Badge variant={stateVariant(r.state)}>{STATE_LABEL[r.state]}</Badge>
             {r.subscriptionStatus && <span>gateway: {r.subscriptionStatus}</span>}
-            {r.trialEndsAt && <span>trial ends {date(r.trialEndsAt)}</span>}
+            {r.trialEndsAt && (
+              <span>
+                {tHC("s11")} {date(r.trialEndsAt)}
+              </span>
+            )}
             {r.currentPeriodEnd && <span>renews/ends {date(r.currentPeriodEnd)}</span>}
-            {r.cancelScheduled && <span>cancels at cycle end</span>}
+            {r.cancelScheduled && <span>{tHC("s10")}</span>}
           </span>
         </div>
       ))}
@@ -284,6 +291,7 @@ function SubscriptionsPanel() {
 }
 
 function CompGrantsPanel() {
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [grants, setGrants] = useState<CompGrantRow[] | null>(null);
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -306,10 +314,10 @@ function CompGrantsPanel() {
   const pg = usePagination(grants ?? [], 10);
 
   return (
-    <SectionCard title="Comp grants" subtitle="Soonest expiry first" icon={Gift} delay={0.06}>
+    <SectionCard title={tHC("s9")} subtitle="Soonest expiry first" icon={Gift} delay={0.06}>
       {error && <ErrorAlert message={error} onRetry={load} />}
       {!grants && !error && <Skeleton className="h-16 w-full" />}
-      {grants && grants.length === 0 && <p className="text-sm text-muted-foreground">No comp grants on record.</p>}
+      {grants && grants.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s8")}</p>}
       {pg.pageItems.map((g) => (
         <div
           key={g.tenantId}
@@ -334,6 +342,7 @@ function CompGrantsPanel() {
 }
 
 function InvoicesPanel() {
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   const [tenantId, setTenantId] = useState("");
   const [applied, setApplied] = useState("");
   const [rows, setRows] = useState<InvoiceRow[] | null>(null);
@@ -357,7 +366,7 @@ function InvoicesPanel() {
 
   return (
     <SectionCard
-      title="Recent invoices"
+      title={tHC("s7")}
       subtitle="One per captured payment, newest first (latest 100)"
       icon={Receipt}
       delay={0.09}
@@ -370,9 +379,9 @@ function InvoicesPanel() {
           className="flex items-center gap-2"
         >
           <Input
-            aria-label="Tenant id filter"
+            aria-label={tHC("s6")}
             className="h-9 w-72"
-            placeholder="Tenant id (optional)"
+            placeholder={tHC("s5")}
             value={tenantId}
             onChange={(e) => setTenantId(e.target.value)}
           />
@@ -382,13 +391,10 @@ function InvoicesPanel() {
         </form>
       }
     >
-      <InfoNote>
-        Only captured payments are recorded. There is no store of failed charges or refunds; a failing subscription
-        shows as &ldquo;Past due&rdquo; above instead.
-      </InfoNote>
+      <InfoNote>{tHC("s4")}</InfoNote>
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
       {!rows && !error && <Skeleton className="h-16 w-full" />}
-      {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">No invoices.</p>}
+      {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s3")}</p>}
       {pg.pageItems.map((i) => (
         <div
           key={i.id}
@@ -416,12 +422,10 @@ function InvoicesPanel() {
 }
 
 export default function PlatformBillingPage() {
+  const tHC = useTranslations("hcPlatformadminBillingPage");
   return (
-    <AdminShell title="Billing & Subscriptions">
-      <PageHint>
-        A read-only, cross-tenant view of plans, subscription state, comp grants and invoices. Plan overrides and the
-        site-wide promo are managed elsewhere; nothing on this page can charge, refund or cancel.
-      </PageHint>
+    <AdminShell title={tHC("s2")}>
+      <PageHint>{tHC("s1")}</PageHint>
       <SummaryPanel />
       <SubscriptionsPanel />
       <CompGrantsPanel />

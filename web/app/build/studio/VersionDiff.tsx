@@ -7,6 +7,7 @@ import { stripConnections } from "./connect";
 import { collapseContext, diffStats, lineDiff } from "./lineDiff";
 import type { AppVersion } from "./store";
 import { useFocusTrap } from "./useFocusTrap";
+import { useTranslations } from "../../lib/i18n";
 
 const LABEL = (v: AppVersion, i: number) => `#${i + 1} · ${v.note.length > 38 ? v.note.slice(0, 36) + "…" : v.note}`;
 
@@ -25,6 +26,7 @@ export function VersionDiff({
   onRestore: (index: number) => void;
   canRestore: boolean;
 }) {
+    const tHC = useTranslations("hcBuildStudioVersionDiff");
   const [from, setFrom] = useState(Math.min(Math.max(initialFrom, 0), versions.length - 1));
   const [to, setTo] = useState(versions.length - 1);
   const [full, setFull] = useState(false);
@@ -50,7 +52,7 @@ export function VersionDiff({
       >
         <div className="flex items-center gap-2">
           <p id="vdiff-title" className="text-sm font-semibold text-foreground">
-            Compare versions
+            {tHC("s5")}
           </p>
           <button type="button" onClick={onClose} aria-label="Close" className="ms-auto rounded p-1 hover:bg-secondary">
             <X aria-hidden="true" size={16} />
@@ -92,13 +94,13 @@ export function VersionDiff({
         </div>
         <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-neutral-950 font-mono text-[11px] leading-snug">
           {stats.added + stats.removed === 0 ? (
-            <p className="p-3 text-neutral-400">These two versions are identical.</p>
+            <p className="p-3 text-neutral-400">{tHC("s4")}</p>
           ) : (
             <pre className="m-0 min-w-max p-0">
               {rows.map((r, i) =>
                 r.kind === "gap" ? (
                   <div key={i} className="bg-neutral-900 px-3 py-0.5 text-neutral-400">
-                    ⋯ {r.hidden} unchanged line{r.hidden === 1 ? "" : "s"}
+                    ⋯ {r.hidden} {tHC("s3")}{r.hidden === 1 ? "" : "s"}
                   </div>
                 ) : (
                   <div
@@ -120,7 +122,7 @@ export function VersionDiff({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <input type="checkbox" checked={full} onChange={(e) => setFull(e.target.checked)} /> Show every line
+            <input type="checkbox" checked={full} onChange={(e) => setFull(e.target.checked)} /> {tHC("s2")}
           </label>
           {showRestore && (
             <Button
@@ -132,7 +134,7 @@ export function VersionDiff({
                 onClose();
               }}
             >
-              Restore #{from + 1}
+              {tHC("s1")}{from + 1}
             </Button>
           )}
           <Button

@@ -1,12 +1,14 @@
 "use client";
 
 import { PLATFORM_FACTS } from "../../lib/platform-facts";
+import { useTranslations } from "../../lib/i18n";
 
 // Copy rewritten 2026-10-03: each card names a shipped capability rather than
 // a promised result ("Proven ROI", "Bank-grade security"). SSO/SCIM is
 // deployed but has not been validated against a customer identity provider
 // yet, so the card says "available", not "certified".
 export default function EnterpriseBenefits() {
+  const tHC = useTranslations("hcComponentsEnterpriselandingEnterpriseBenefits");
   const benefits = [
     {
       icon: "🛡️",
@@ -47,7 +49,7 @@ export default function EnterpriseBenefits() {
   return (
     <section className="enterprise-benefits">
       <div className="enterprise-benefits-container">
-        <h2 className="enterprise-benefits-title">What your team gets on day one</h2>
+        <h2 className="enterprise-benefits-title">{tHC("s1")}</h2>
         <div className="enterprise-benefits-grid">
           {benefits.map((benefit, idx) => (
             <div key={idx} className="enterprise-benefit-card">

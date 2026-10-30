@@ -3,6 +3,7 @@
 import { Video } from "lucide-react";
 import TranscriptionProviderOptions from "./TranscriptionProviderOptions";
 import { useModalityCatalog } from "./useModalityCatalog";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Video-to-text provider selector - a thin, provider-agnostic wrapper over
@@ -42,6 +43,7 @@ export default function VideoProviderSelector({
   onEdit,
   isBusy = false,
 }: VideoProviderSelectorProps) {
+  const tHC = useTranslations("hcComponentsAgentsVideoProviderSelector");
   const { providers, providerStatus } = useModalityCatalog("videoToText", {
     name: "Platform Default",
     description: "Intelligent fallback across the deployment's video providers",
@@ -51,18 +53,12 @@ export default function VideoProviderSelector({
     <TranscriptionProviderOptions
       providers={providers}
       icon={Video}
-      label="Video Provider (Video-to-Text)"
-      tooltipContent={
-        <>
-          Pick which backend transcribes video input for this agent, or leave the platform default
-          fallback. Options marked &quot;Needs setup&quot; need a credential on the Providers page
-          first.
-        </>
-      }
+      label={tHC("s5")}
+      tooltipContent={<>{tHC("s4")}</>}
       freePlanWarningText={
         <>
-          Video provider selection is a <strong>Premium feature</strong>. Your agents use the
-          platform default fallback chain.
+          {tHC("s3")} <strong>{tHC("s2")}</strong>
+          {tHC("s1")}
         </>
       }
       editorLockedTitle="Video provider selection is a Premium feature"

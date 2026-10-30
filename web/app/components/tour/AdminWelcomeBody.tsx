@@ -28,6 +28,7 @@ import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { isLocalAuth } from "../../lib/authMode";
+import { useTranslations } from "../../lib/i18n";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -62,6 +63,7 @@ export default function AdminWelcomeBody({
   onBuild: () => void;
   onSkip: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsTourAdminWelcomeBody");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [first, setFirst] = useState("");
@@ -103,14 +105,13 @@ export default function AdminWelcomeBody({
   return (
     <div className="max-h-[min(78vh,640px)] overflow-y-auto p-5 sm:p-6">
       <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
-        <ShieldCheck size={12} aria-hidden="true" /> Your workspace · Admin controls unlocked
+        <ShieldCheck size={12} aria-hidden="true" /> {tHC("s13")}
       </span>
       <h2 id={titleId} className="mt-2.5 text-xl font-semibold tracking-tight text-foreground">
-        Build the agent. Then give the idea wings.
+        {tHC("s12")}
       </h2>
       <p id={bodyId} className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-        Start with a custom AI agent - the intelligence at the center. Tune it, connect a workflow, then power apps and
-        customer experiences with it.
+        {tHC("s11")}
       </p>
 
       <ul className="mt-4 space-y-2.5">
@@ -137,7 +138,7 @@ export default function AdminWelcomeBody({
             className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-start"
           >
             <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Mail size={14} className="text-primary" aria-hidden="true" /> Invite a teammate by email now
+              <Mail size={14} className="text-primary" aria-hidden="true" /> {tHC("s10")}
               {invited.length > 0 && (
                 <span className="rounded-full bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
                   {invited.length} sent
@@ -152,23 +153,20 @@ export default function AdminWelcomeBody({
           </button>
           {inviteOpen && (
             <form onSubmit={(e) => void invite(e)} className="space-y-2 border-t border-border p-3">
-              <p className="text-xs text-muted-foreground">
-                They get an email to set their own password. Add as many as your plan allows; you can set roles later
-                under Administration.
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 <Input
                   value={first}
                   onChange={(e) => setFirst(e.target.value)}
-                  placeholder="First name"
-                  aria-label="First name"
+                  placeholder={tHC("s8")}
+                  aria-label={tHC("s8")}
                   autoComplete="off"
                 />
                 <Input
                   value={last}
                   onChange={(e) => setLast(e.target.value)}
-                  placeholder="Last name"
-                  aria-label="Last name"
+                  placeholder={tHC("s7")}
+                  aria-label={tHC("s7")}
                   autoComplete="off"
                 />
               </div>
@@ -177,7 +175,7 @@ export default function AdminWelcomeBody({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="teammate@company.com"
-                aria-label="Email address"
+                aria-label={tHC("s6")}
                 autoComplete="off"
               />
               {error && (
@@ -192,7 +190,7 @@ export default function AdminWelcomeBody({
                   ) : (
                     <Mail size={14} aria-hidden="true" />
                   )}{" "}
-                  Send invitation
+                  {tHC("s5")}
                 </Button>
                 {invited.length > 0 && (
                   <span className="text-xs text-muted-foreground">
@@ -208,18 +206,16 @@ export default function AdminWelcomeBody({
 
       <div className="mt-5 flex flex-wrap items-center gap-2.5">
         <Button onClick={onStart} size="sm">
-          <Bot size={14} aria-hidden="true" /> Show me the launch path
+          <Bot size={14} aria-hidden="true" /> {tHC("s4")}
         </Button>
         <Button onClick={onBuild} variant="outline" size="sm">
-          Build my agent
+          {tHC("s3")}
         </Button>
         <Button onClick={onSkip} variant="ghost" size="sm" className="ms-auto text-muted-foreground">
-          Skip for now
+          {tHC("s2")}
         </Button>
       </div>
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        Agent → workflow → app → channels → test. Start focused. Fly as far as the idea can go.
-      </p>
+      <p className="mt-3 text-[11px] text-muted-foreground">{tHC("s1")}</p>
     </div>
   );
 }

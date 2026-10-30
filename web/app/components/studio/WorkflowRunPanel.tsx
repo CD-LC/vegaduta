@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import TraceView from "./TraceView";
 import type { WorkflowDefinition } from "./studioClient";
 import type { RunState } from "./workflowRun";
+import { useTranslations } from "../../lib/i18n";
 
 // What a studio workflow run shows below the canvas: the real approval pause
 // (Approve / Reject) and, per agent step, its tool trace and output, then the
@@ -24,6 +25,7 @@ export default function WorkflowRunPanel({
   agentName: (id: unknown) => string;
   decide: (approved: boolean) => void;
 }) {
+  const tHC = useTranslations("hcComponentsStudioWorkflowRunPanel");
   return (
     <>
       {/* Approval: the real pause */}
@@ -36,11 +38,10 @@ export default function WorkflowRunPanel({
             className="rounded-xl border-2 border-amber-500/60 bg-amber-500/5 p-4"
           >
             <div className="mb-1 flex items-center gap-2 font-medium">
-              <UserCheck aria-hidden="true" className="h-4 w-4 text-amber-600 shrink-0" /> The workflow is waiting for
-              you
+              <UserCheck aria-hidden="true" className="h-4 w-4 text-amber-600 shrink-0" /> {tHC("s4")}
             </div>
             <p className="mb-3 text-sm text-muted-foreground">
-              {run.approval.message} Nothing moves until you decide - that is what human-in-the-loop means in practice.
+              {run.approval.message} {tHC("s3")}
             </p>
             {run.approval.preview && (
               <pre className="mb-3 max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-3 text-xs">
@@ -94,7 +95,7 @@ export default function WorkflowRunPanel({
                         </div>
                       ) : st.status === "running" ? (
                         <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground animate-pulse">
-                          Working…
+                          {tHC("s2")}
                         </div>
                       ) : null}
                     </div>
@@ -108,9 +109,7 @@ export default function WorkflowRunPanel({
                 <Send aria-hidden="true" className="h-4 w-4 shrink-0" /> Delivered
               </div>
               <div className="whitespace-pre-wrap break-all text-sm leading-relaxed">{run.output}</div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                On a real account this step posts to email, WhatsApp, Telegram or Drive, on a schedule or a webhook.
-              </p>
+              <p className="mt-2 text-xs text-muted-foreground">{tHC("s1")}</p>
             </div>
           )}
         </div>

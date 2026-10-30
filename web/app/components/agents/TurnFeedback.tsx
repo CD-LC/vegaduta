@@ -7,6 +7,7 @@ import { api } from "../../lib/api";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { cn } from "../../lib/utils";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Inline per-turn feedback control for the agent Playground - the frontend
@@ -35,6 +36,7 @@ export default function TurnFeedback({
   sessionId: string | null;
   turnRef: string;
 }) {
+  const tHC = useTranslations("hcComponentsAgentsTurnFeedback");
   const [thumb, setThumb] = useState<null | "up" | "down">(null);
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
@@ -96,7 +98,7 @@ export default function TurnFeedback({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
         <FeedbackIconButton
-          label="Good answer"
+          label={tHC("s11")}
           pressed={thumb === "up"}
           activeClass="text-[color:var(--state-success)]"
           onClick={() => onThumb("up")}
@@ -104,7 +106,7 @@ export default function TurnFeedback({
           <ThumbsUp size={13} aria-hidden="true" />
         </FeedbackIconButton>
         <FeedbackIconButton
-          label="Bad answer"
+          label={tHC("s10")}
           pressed={thumb === "down"}
           activeClass="text-destructive"
           onClick={() => onThumb("down")}
@@ -112,7 +114,7 @@ export default function TurnFeedback({
           <ThumbsDown size={13} aria-hidden="true" />
         </FeedbackIconButton>
         <FeedbackIconButton
-          label="More feedback"
+          label={tHC("s9")}
           pressed={open}
           activeClass="text-primary"
           onClick={() => setOpen((v) => !v)}
@@ -139,7 +141,7 @@ export default function TurnFeedback({
               transition={{ duration: 0.16 }}
               className="ms-1 text-xs text-muted-foreground"
             >
-              Not saved
+              {tHC("s8")}
             </motion.span>
           )}
         </AnimatePresence>
@@ -157,8 +159,8 @@ export default function TurnFeedback({
             <div className="mt-1 w-full max-w-[85%] space-y-3 rounded-lg border border-border bg-secondary/30 p-3">
               {/* Rating */}
               <div className="space-y-1.5">
-                <div className="text-xs font-medium text-foreground">Rate this answer</div>
-                <div className="flex items-center gap-0.5" aria-label="Rate this answer 1 to 5">
+                <div className="text-xs font-medium text-foreground">{tHC("s7")}</div>
+                <div className="flex items-center gap-0.5" aria-label={tHC("s6")}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
                       key={n}
@@ -190,7 +192,7 @@ export default function TurnFeedback({
                   id={`fb-comment-${turnRef}`}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="What was helpful or off about this reply?"
+                  placeholder={tHC("s5")}
                   className="min-h-14 text-sm"
                 />
               </div>
@@ -201,14 +203,14 @@ export default function TurnFeedback({
                   className="flex items-center gap-1.5 text-xs font-medium text-foreground"
                   htmlFor={`fb-edit-${turnRef}`}
                 >
-                  <PencilLine size={12} aria-hidden="true" /> Suggest a better answer{" "}
+                  <PencilLine size={12} aria-hidden="true" /> {tHC("s4")}{" "}
                   <span className="font-normal text-muted-foreground">(optional)</span>
                 </label>
                 <Textarea
                   id={`fb-edit-${turnRef}`}
                   value={edit}
                   onChange={(e) => setEdit(e.target.value)}
-                  placeholder="Write the answer you'd have preferred…"
+                  placeholder={tHC("s3")}
                   className="min-h-16 text-sm"
                 />
                 <Button
@@ -218,13 +220,13 @@ export default function TurnFeedback({
                   disabled={!edit.trim() || sending}
                   onClick={() => send("EDIT", { editedAnswer: edit.trim(), comment: comment.trim() || undefined })}
                 >
-                  Submit suggestion
+                  {tHC("s2")}
                 </Button>
               </div>
 
               {/* Resolution */}
               <div className="flex items-center gap-2 border-t border-border pt-2.5">
-                <span className="text-xs text-muted-foreground">Did this resolve it?</span>
+                <span className="text-xs text-muted-foreground">{tHC("s1")}</span>
                 <Button
                   type="button"
                   size="sm"

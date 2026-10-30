@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Captions, Hammer, Pause, Play, RotateCcw, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { useTranslations } from "../../../lib/i18n";
 
 // Showtime's transport (split out of Showtime.tsx): the scrubbable timeline with
 // chapter ticks, play/pause, chapter jumps, speed, captions and voice-over.
@@ -47,6 +48,7 @@ export default function ShowtimeTransport({
   setNarrate: (update: (v: boolean) => boolean) => void;
   enterBuild: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsStudioShowtimeShowtimeTransport");
   const barRef = useRef<HTMLDivElement | null>(null);
   const dragging = useRef(false);
   const scrub = (clientX: number) => {
@@ -98,7 +100,7 @@ export default function ShowtimeTransport({
       </div>
 
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
-        <Btn label="Previous chapter (←)" onClick={() => jump(index - 1)}>
+        <Btn label={tHC("s5")} onClick={() => jump(index - 1)}>
           <SkipBack aria-hidden="true" className="h-4 w-4 shrink-0" />
         </Btn>
         <button
@@ -108,7 +110,7 @@ export default function ShowtimeTransport({
             setPlaying((v) => !v);
           }}
           aria-label={playing ? "Pause (Space)" : "Play (Space)"}
-          title="Play / pause (Space)"
+          title={tHC("s4")}
           className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-950 shadow-lg hover:scale-105"
         >
           {playing ? (
@@ -119,7 +121,7 @@ export default function ShowtimeTransport({
             <Play aria-hidden="true" className="h-5 w-5 translate-x-0.5 shrink-0" />
           )}
         </button>
-        <Btn label="Next chapter (→)" onClick={() => jump(index + 1)}>
+        <Btn label={tHC("s3")} onClick={() => jump(index + 1)}>
           <SkipForward aria-hidden="true" className="h-4 w-4 shrink-0" />
         </Btn>
         <span className="ms-1 font-mono text-xs tabular-nums text-zinc-400">
@@ -155,7 +157,7 @@ export default function ShowtimeTransport({
           >
             {speed}×
           </button>
-          <Btn label="Captions (C)" onClick={() => setCaptions((v) => !v)} active={captions}>
+          <Btn label={tHC("s2")} onClick={() => setCaptions((v) => !v)} active={captions}>
             <Captions aria-hidden="true" className="h-4 w-4 shrink-0" />
           </Btn>
           <Btn label="Voice-over" onClick={() => setNarrate((v) => !v)} active={narrate}>
@@ -170,7 +172,7 @@ export default function ShowtimeTransport({
             onClick={enterBuild}
             className="ms-1 hidden items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-medium hover:bg-emerald-500 sm:inline-flex"
           >
-            <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Build it live
+            <Hammer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s1")}
           </button>
         </div>
       </div>

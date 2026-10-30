@@ -5,11 +5,13 @@ import Link from "next/link";
 import { Home, RotateCcw } from "lucide-react";
 import Logo from "./components/Logo";
 import { reportClientError } from "./lib/clientLogger";
+import { useTranslations } from "./lib/i18n";
 
 // Route-segment error boundary (2026-09-24). Same glass slab as not-found.
 // `reset()` re-renders the failed segment; the digest is shown so support can
 // find the server log line without the user reading a stack trace.
 export default function RouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const tHC = useTranslations("hcError");
   useEffect(() => {
     // Keep the console line: it is the only place the real stack lands in dev.
     console.error(error);
@@ -31,13 +33,12 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="std-screen__code" aria-hidden="true">
           500
         </div>
-        <h1>Something went wrong on this screen.</h1>
+        <h1>{tHC("s4")}</h1>
         <p>
-          Your data is safe. Try again, or head back home.{" "}
-          {error.digest ? <span className="mkt-mono">Ref {error.digest}</span> : null}
+          {tHC("s3")} {error.digest ? <span className="mkt-mono">Ref {error.digest}</span> : null}
         </p>
         <details className="mt-4 text-start text-xs text-muted-foreground" data-testid="route-error-details">
-          <summary className="cursor-pointer">Technical details</summary>
+          <summary className="cursor-pointer">{tHC("s2")}</summary>
           <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words font-mono">
             {error.message}
             {"\n"}
@@ -47,7 +48,7 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="std-screen__actions">
           <button type="button" onClick={reset} className="std-screen__btn std-screen__btn--primary">
             <RotateCcw className="size-4" aria-hidden="true" />
-            Try again
+            {tHC("s1")}
           </button>
           <Link href="/" className="std-screen__btn std-screen__btn--secondary">
             <Home className="size-4" aria-hidden="true" />

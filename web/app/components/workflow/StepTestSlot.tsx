@@ -11,6 +11,7 @@ import { FlaskConical } from "lucide-react";
 import StepTestPanel, { type StepTestUpstream } from "./StepTestPanel";
 import { upstreamIds } from "./stepTest";
 import { Button } from "../ui/button";
+import { useTranslations } from "../../lib/i18n";
 
 type SlotNode = { id: string; type?: string; data?: { label?: string; config?: object | null } };
 type SlotEdge = { source: string; target: string };
@@ -32,6 +33,7 @@ export type StepTestContextValue = {
 export const StepTestContext = createContext<StepTestContextValue | null>(null);
 
 export default function StepTestSlot({ nodeId }: { nodeId: string }) {
+  const tHC = useTranslations("hcComponentsWorkflowStepTestSlot");
   const ctx = useContext(StepTestContext);
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement | null>(null);
@@ -51,7 +53,7 @@ export default function StepTestSlot({ nodeId }: { nodeId: string }) {
       edges && labelOf
         ? upstreamIds(nodeId, edges).map((id) => ({ id, label: labelOf(id) || id, lastOutput: lastIO?.[id]?.output }))
         : [],
-    [nodeId, edges, labelOf, lastIO],
+    [nodeId, edges, labelOf, lastIO]
   );
   const panelRef = useRef<HTMLDivElement | null>(null);
   // Set by the user's open/close, not by a node switch: only those move focus.
@@ -79,20 +81,20 @@ export default function StepTestSlot({ nodeId }: { nodeId: string }) {
     <div className="field" style={{ marginTop: "0.75rem" }}>
       {open ? (
         <div ref={panelRef} tabIndex={-1} style={{ outline: "none" }}>
-        <StepTestPanel
-          workflowId={ctx.workflowId}
-          node={{
-            id: node.id,
-            type: node.type ?? "",
-            label: node.data?.label ?? null,
-            config: (node.data?.config as Record<string, unknown> | null | undefined) ?? null,
-          }}
-          upstream={upstream}
-          dirty={ctx.dirty}
-          lastInput={lastIO?.[nodeId]?.input}
-          onUnavailable={ctx.onUnavailable}
-          onClose={close}
-        />
+          <StepTestPanel
+            workflowId={ctx.workflowId}
+            node={{
+              id: node.id,
+              type: node.type ?? "",
+              label: node.data?.label ?? null,
+              config: (node.data?.config as Record<string, unknown> | null | undefined) ?? null,
+            }}
+            upstream={upstream}
+            dirty={ctx.dirty}
+            lastInput={lastIO?.[nodeId]?.input}
+            onUnavailable={ctx.onUnavailable}
+            onClose={close}
+          />
         </div>
       ) : (
         // An opener, not a disclosure toggle: it is replaced by the panel,
@@ -107,7 +109,7 @@ export default function StepTestSlot({ nodeId }: { nodeId: string }) {
           }}
         >
           <FlaskConical size={14} aria-hidden="true" />
-          Run this step
+          {tHC("s1")}
         </Button>
       )}
     </div>

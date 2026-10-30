@@ -11,8 +11,10 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { normalizeSubdir, parseRepoInput } from "./syncLogic";
+import { useTranslations } from "../lib/i18n";
 
 export default function ImportRepoCard({ onImported }: { onImported: (projectId: string) => void }) {
+    const tHC = useTranslations("hcBuildImportRepoCard");
   const [repo, setRepo] = useState("");
   const [branch, setBranch] = useState("");
   const [subdir, setSubdir] = useState("");
@@ -59,8 +61,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
           }}
         >
           <p className="text-xs leading-relaxed text-muted-foreground">
-            We detect the stack and work on a separate <span className="font-mono">app-builder/</span> branch. Nothing is
-            added to your repo until you merge. Uses the GitHub token you connected.
+            {tHC("s9")} <span className="font-mono">app-builder/</span> {tHC("s8")}
           </p>
           <div className="space-y-1">
             <label htmlFor={`${uid}-repo`} className="text-xs font-medium text-foreground">
@@ -70,7 +71,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
               id={`${uid}-repo`}
               value={repo}
               onChange={(e) => setRepo(e.target.value)}
-              placeholder="owner/repo or https://github.com/owner/repo"
+              placeholder={tHC("s7")}
               disabled={busy}
               autoComplete="off"
               aria-invalid={repoBad}
@@ -78,20 +79,20 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
             />
             {repoBad && (
               <p id={`${uid}-repo-err`} className="text-xs text-destructive">
-                Enter a GitHub repository as owner/repo or a github.com link.
+                {tHC("s6")}
               </p>
             )}
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="space-y-1">
               <label htmlFor={`${uid}-branch`} className="text-xs font-medium text-foreground">
-                Base branch
+                {tHC("s5")}
               </label>
               <Input
                 id={`${uid}-branch`}
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
-                placeholder="Default: the repo's default branch"
+                placeholder={tHC("s4")}
                 disabled={busy}
                 autoComplete="off"
               />
@@ -104,7 +105,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
                 id={`${uid}-sub`}
                 value={subdir}
                 onChange={(e) => setSubdir(e.target.value)}
-                placeholder="For monorepos (optional)"
+                placeholder={tHC("s3")}
                 disabled={busy}
                 autoComplete="off"
                 aria-invalid={subBad}
@@ -114,7 +115,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
           </div>
           {subBad && (
             <p id={`${uid}-sub-err`} className="text-xs text-destructive">
-              Sub-folder cannot contain . or .. segments.
+              {tHC("s2")}
             </p>
           )}
           {error && (
@@ -123,7 +124,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
             </p>
           )}
           <Button type="submit" size="sm" disabled={busy || !parsed || subBad}>
-            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <FolderGit2 aria-hidden="true" size={14} />} Import repo
+            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <FolderGit2 aria-hidden="true" size={14} />} {tHC("s1")}
           </Button>
         </form>
       </CardContent>

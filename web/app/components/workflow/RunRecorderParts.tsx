@@ -9,6 +9,7 @@ import { Ban, CircleCheck, CircleDashed, CircleX, Hand, LoaderCircle, Pause, Ski
 import type { AwaitReason } from "./runModel";
 import { formatCostUsd, formatDuration } from "./runModel";
 import { formatClock, intFmt, statusText, type Bar, type Lane, type Tone } from "./runRecorderView";
+import { useTranslations } from "../../lib/i18n";
 
 export function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(false);
@@ -39,7 +40,15 @@ export function useElementWidth<T extends HTMLElement>(): [RefObject<T | null>, 
   return [ref, w];
 }
 
-export function ToneIcon({ tone, awaiting = null, size = 12 }: { tone: Tone; awaiting?: AwaitReason | null; size?: number }) {
+export function ToneIcon({
+  tone,
+  awaiting = null,
+  size = 12,
+}: {
+  tone: Tone;
+  awaiting?: AwaitReason | null;
+  size?: number;
+}) {
   const p = { size, "aria-hidden": true, strokeWidth: 2.4 } as const;
   switch (tone) {
     case "ok":
@@ -81,7 +90,17 @@ type RecorderLaneProps = {
 };
 
 /** One node's swim lane: a bar per visit whose fill "records" up to the playhead. */
-export function RecorderLane({ lane, pos, total, axisWidth, selected, scrub, onPickBar, onShowTip, onHideTip }: RecorderLaneProps) {
+export function RecorderLane({
+  lane,
+  pos,
+  total,
+  axisWidth,
+  selected,
+  scrub,
+  onPickBar,
+  onShowTip,
+  onHideTip,
+}: RecorderLaneProps) {
   const pct = (ms: number) => `${(Math.min(Math.max(ms, 0), total) / total) * 100}%`;
   const active = lane.bars.some((b) => pos >= b.start && pos < b.end);
   return (
@@ -149,6 +168,7 @@ type RecorderTipProps = {
 
 /** Hover/focus tooltip for one visit bar, floated above it (below near the viewport top). */
 export function RecorderTip({ bar: hoverBar, hover }: RecorderTipProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunRecorderParts");
   return (
     <div
       className="rfr-tip"
@@ -172,8 +192,8 @@ export function RecorderTip({ bar: hoverBar, hover }: RecorderTipProps) {
         {hoverBar.costUsd !== null ? ` · ${formatCostUsd(hoverBar.costUsd)}` : ""}
       </div>
       {hoverBar.summary && <div className="rfr-tip-sum">{hoverBar.summary}</div>}
-      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">Placement estimated - no timestamps</div>}
-      {hoverBar.critical && <div className="rfr-tip-crit">On the critical path</div>}
+      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">{tHC("s2")}</div>}
+      {hoverBar.critical && <div className="rfr-tip-crit">{tHC("s1")}</div>}
     </div>
   );
 }

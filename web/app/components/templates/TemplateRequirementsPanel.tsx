@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CheckCircle2, PlugZap } from "lucide-react";
 import type { TemplateRequirement } from "../../lib/api";
 import { Card, CardContent } from "../ui/card";
+import { useTranslations } from "../../lib/i18n";
 
 // "Needs setup": what an importer has to connect or switch on for the template to work as designed.
 // Derived server-side from the config (TemplateReadinessService#requirements), so platform and community
@@ -15,6 +16,7 @@ export default function TemplateRequirementsPanel({
   requirements: TemplateRequirement[] | undefined;
   className?: string;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
   if (!requirements) return null;
   const required = requirements.filter((r) => r.required);
   const optional = requirements.filter((r) => !r.required);
@@ -30,7 +32,7 @@ export default function TemplateRequirementsPanel({
               aria-hidden
               style={{ color: "var(--state-success, currentColor)" }}
             />
-            Nothing to set up
+            {tHC("s5")}
           </p>
           <p className="text-sm text-muted-foreground">
             This template needs no connections or tools - it works as soon as you import it.
@@ -45,19 +47,18 @@ export default function TemplateRequirementsPanel({
       <CardContent className="space-y-4">
         <p className="flex items-center gap-2 text-sm font-medium text-foreground">
           <PlugZap size={15} strokeWidth={2} aria-hidden />
-          Needs setup
+          {tHC("s4")}
         </p>
-        <p className="text-sm text-muted-foreground">
-          After importing, activate these so the agent can do everything it was designed to do.
-        </p>
+        <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
         {required.length > 0 && <RequirementList title="Required" items={required} />}
-        {optional.length > 0 && <RequirementList title="Good to know" items={optional} />}
+        {optional.length > 0 && <RequirementList title={tHC("s2")} items={optional} />}
       </CardContent>
     </Card>
   );
 }
 
 function RequirementList({ title, items }: { title: string; items: TemplateRequirement[] }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplateRequirementsPanel");
   return (
     <div className="space-y-2">
       <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
@@ -76,7 +77,7 @@ function RequirementList({ title, items }: { title: string; items: TemplateRequi
                 Set up
               </Link>
             ) : (
-              <span className="shrink-0 text-xs text-muted-foreground">Built in</span>
+              <span className="shrink-0 text-xs text-muted-foreground">{tHC("s1")}</span>
             )}
           </li>
         ))}

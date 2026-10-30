@@ -8,6 +8,7 @@ import { useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { ChevronRight, Crosshair, Minus, Pencil, Plus } from "lucide-react";
 import { groupFields, type DiffChangedNode, type DiffNodeBrief } from "./versionDiff";
 import { ChangeTable, shortId } from "./VersionDiffCells";
+import { useTranslations } from "../../lib/i18n";
 
 export type RowKind = "changed" | "added" | "removed";
 export type NodeRow = { kind: RowKind; node: DiffNodeBrief; changed: DiffChangedNode | null };
@@ -28,7 +29,16 @@ type VersionDiffNodeListProps = {
   onFocusNode: (nodeId: string) => void;
 };
 
-export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, expanded, toggle, onFocusNode }: VersionDiffNodeListProps) {
+export default function VersionDiffNodeList({
+  uid,
+  rows,
+  activeIdx,
+  setActive,
+  expanded,
+  toggle,
+  onFocusNode,
+}: VersionDiffNodeListProps) {
+  const tHC = useTranslations("hcComponentsWorkflowVersionDiffNodeList");
   const rowRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   function moveTo(i: number) {
@@ -134,7 +144,7 @@ export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, e
                   type="button"
                   className="wf-vdiff-icon"
                   aria-label={`Show ${label} on canvas`}
-                  title="Show on canvas"
+                  title={tHC("s1")}
                   onClick={() => onFocusNode(row.node.id)}
                 >
                   <Crosshair size={12} aria-hidden="true" />
@@ -151,7 +161,12 @@ export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, e
                       <h4 className="wf-vdiff-gh">{g.title}</h4>
                       <ChangeTable
                         caption={`${label}: ${g.title} changes`}
-                        rows={g.fields.map((f) => ({ key: f.path, label: f.display, before: f.before, after: f.after }))}
+                        rows={g.fields.map((f) => ({
+                          key: f.path,
+                          label: f.display,
+                          before: f.before,
+                          after: f.after,
+                        }))}
                       />
                     </div>
                   ))

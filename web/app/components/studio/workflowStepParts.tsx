@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Bot, GitBranch, Plus, Send, UserCheck, Zap } from "lucide-react";
 import type { WorkflowStepType } from "./studioClient";
 import { STEP_TYPES } from "./studioContent";
+import { useTranslations } from "../../lib/i18n";
 
 // Small pieces of the studio workflow canvas: the icon per step type and the
 // "+" menu that inserts a step between two cards.
@@ -25,6 +26,7 @@ export function StepIcon({ type }: { type: WorkflowStepType }) {
 }
 
 export function AddMenu({ onAdd }: { onAdd: (type: WorkflowStepType) => void }) {
+  const tHC = useTranslations("hcComponentsStudioWorkflowStepParts");
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
@@ -32,7 +34,7 @@ export function AddMenu({ onAdd }: { onAdd: (type: WorkflowStepType) => void }) 
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="mt-1 rounded-full border border-border/60 p-1 text-muted-foreground hover:border-primary/60 hover:text-foreground"
-        aria-label="Add a step here"
+        aria-label={tHC("s1")}
       >
         <Plus aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
       </button>

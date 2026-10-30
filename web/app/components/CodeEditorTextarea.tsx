@@ -2,6 +2,7 @@
 
 import { useId, useRef } from "react";
 import { cn } from "../lib/utils";
+import { useTranslations } from "../lib/i18n";
 
 // Deliberately NOT a CodeMirror/Monaco/Prism dependency. This console's
 // "no dependency until it earns its keep" rule (see app/lib/api.ts's header
@@ -42,6 +43,7 @@ export default function CodeEditorTextarea({
   "aria-label"?: string;
   className?: string;
 }) {
+  const tHC = useTranslations("hcComponentsCodeEditorTextarea");
   const gutterRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const hintId = useId();
@@ -138,7 +140,7 @@ export default function CodeEditorTextarea({
         />
       </div>
       <span id={hintId} className="text-xs text-muted-foreground">
-        Tab inserts a space; press Escape then Tab to leave
+        {tHC("s1")}
       </span>
     </div>
   );

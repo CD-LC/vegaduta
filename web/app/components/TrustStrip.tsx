@@ -55,6 +55,7 @@ export default function TrustStrip({
   coreHealthy: boolean;
   status: SystemStatusSummary | null | undefined;
 }) {
+  const tHC = useTranslations("hcComponentsTrustStrip");
   const tNav = useTranslations("nav");
   const { username, hasPermission, accountUrl } = useAuth();
   // VIEW_AUDIT_LOG scope (granular RBAC, 2026-09-23) - the strip's
@@ -144,7 +145,7 @@ export default function TrustStrip({
         <div className="mb-2.5 flex items-center justify-between text-xs" style={{ color: "var(--text-secondary)" }}>
           <span className="flex items-center gap-1.5">
             <Clock aria-hidden="true" size={12} style={{ color: "var(--text-faint)" }} />
-            Session expires in
+            {tHC("s4")}
           </span>
           <span className="font-mono tabular-nums" style={{ color: "var(--text-primary)" }}>
             {countdown ?? "—"}
@@ -184,7 +185,7 @@ export default function TrustStrip({
               className="mb-1 text-[10px] font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-faint)" }}
             >
-              Recent activity
+              {tHC("s3")}
             </p>
             {auditRows.map((row) => (
               <div
@@ -200,7 +201,7 @@ export default function TrustStrip({
               className="mt-1 flex items-center gap-1 text-[11px] font-medium"
               style={{ color: "var(--accent-500, #6d5bff)" }}
             >
-              View full trace <ExternalLink aria-hidden="true" size={10} />
+              {tHC("s2")} <ExternalLink aria-hidden="true" size={10} />
             </a>
           </div>
         )}
@@ -213,7 +214,7 @@ export default function TrustStrip({
             className="flex items-center gap-1.5 border-t border-[var(--surface-border)] pt-2.5 text-[11px] font-medium"
             style={{ color: "var(--accent-500, #6d5bff)" }}
           >
-            Manage security (2FA, sessions) <ExternalLink aria-hidden="true" size={11} />
+            {tHC("s1")} <ExternalLink aria-hidden="true" size={11} />
           </a>
         )}
       </PopoverContent>

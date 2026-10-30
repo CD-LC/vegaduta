@@ -22,6 +22,7 @@ import {
 } from "../lib/opsFormat";
 import { AdminErrorState, AdminEmptyState } from "../components/admin/AdminKit";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Flyway state for the control-plane schema and every tenant schema
 // (GET /api/platform/migrations). Read-only: a tenant behind or failed is
@@ -31,6 +32,7 @@ import { Checkbox } from "../../components/ui/checkbox";
 // image ships.
 
 export default function MigrationsPage() {
+  const tHC = useTranslations("hcPlatformadminMigrationsPage");
   const [data, setData] = useState<MigrationsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,17 +72,14 @@ export default function MigrationsPage() {
 
   return (
     <AdminShell
-      title="Schema migrations"
+      title={tHC("s12")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
-      <PageHint>
-        Flyway state for the control plane and every tenant schema. A tenant that is behind or failed sees errors on
-        features its missing migrations add. Fixes happen through a deploy or a Flyway repair, not from this page.
-      </PageHint>
+      <PageHint>{tHC("s11")}</PageHint>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => void load()} />}
       {loading && !data && <Skeleton className="mb-5 h-24 w-full" />}
@@ -89,7 +88,7 @@ export default function MigrationsPage() {
         <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="gap-0 py-0">
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">Control plane</div>
+              <div className="text-xs text-muted-foreground">{tHC("s10")}</div>
               <div className="mt-1 font-mono text-xl font-semibold">{cp?.version || UNAVAILABLE}</div>
               <div className="mt-1">
                 {cp && cp.failed > 0 ? (
@@ -104,16 +103,16 @@ export default function MigrationsPage() {
           </Card>
           <Card className="gap-0 py-0">
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">Expected tenant version</div>
+              <div className="text-xs text-muted-foreground">{tHC("s9")}</div>
               <div className="mt-1 font-mono text-xl font-semibold">{data.expectedTenantVersion || UNAVAILABLE}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">
-                {formatCountOrUnavailable(data.tenants.length)} tenant schemas
+                {formatCountOrUnavailable(data.tenants.length)} {tHC("s8")}
               </div>
             </CardContent>
           </Card>
           <Card className={`gap-0 py-0 ${drift.failed ? "border-destructive/40" : ""}`}>
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">Tenants failed</div>
+              <div className="text-xs text-muted-foreground">{tHC("s7")}</div>
               <div className={`mt-1 font-mono text-xl font-semibold ${drift.failed ? "text-destructive" : ""}`}>
                 {drift.failed}
               </div>
@@ -121,7 +120,7 @@ export default function MigrationsPage() {
           </Card>
           <Card className={`gap-0 py-0 ${drift.behind ? "border-[var(--warning-border)]" : ""}`}>
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">Tenants behind</div>
+              <div className="text-xs text-muted-foreground">{tHC("s6")}</div>
               <div
                 className={`mt-1 font-mono text-xl font-semibold ${drift.behind ? "text-[var(--warning-text)]" : ""}`}
               >
@@ -137,7 +136,7 @@ export default function MigrationsPage() {
 
       {data && (
         <SectionCard
-          title="Tenant schemas"
+          title={tHC("s5")}
           icon={Database}
           subtitle={`${rows.length} shown${onlyProblems ? " (problems only)" : ""}`}
           actions={
@@ -148,9 +147,9 @@ export default function MigrationsPage() {
                   className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
-                  aria-label="Search tenants"
+                  aria-label={tHC("s4")}
                   className="h-9 w-56 ps-8"
-                  placeholder="Tenant, schema or id"
+                  placeholder={tHC("s3")}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                 />
@@ -161,7 +160,7 @@ export default function MigrationsPage() {
                   onCheckedChange={(v) => setOnlyProblems(v)}
                   id="migrations-problems-only"
                 />
-                <label htmlFor="migrations-problems-only">Problems only</label>
+                <label htmlFor="migrations-problems-only">{tHC("s2")}</label>
               </div>
             </div>
           }
@@ -222,10 +221,7 @@ export default function MigrationsPage() {
         </SectionCard>
       )}
 
-      <InfoNote>
-        Version numbers come from each schema&apos;s own flyway_schema_history. &quot;Unknown&quot; means core could not
-        read that schema&apos;s history, not that it is current.
-      </InfoNote>
+      <InfoNote>{tHC("s1")}</InfoNote>
     </AdminShell>
   );
 }

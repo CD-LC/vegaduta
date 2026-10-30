@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Check, Circle, X, Trophy } from "lucide-react";
 import { TONES } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // Conversion, done as progress rather than pressure. The visitor sees how far
 // through the journey they are (five things they really did), and the offer
@@ -35,11 +36,12 @@ export function countDone(p: LaunchProgress): number {
 
 /** Sidebar checklist: the journey as five ticks. */
 export function LaunchChecklist({ progress }: { progress: LaunchProgress }) {
+  const tHC = useTranslations("hcComponentsStudioConversion");
   const n = countDone(progress);
   return (
     <div className="rounded-xl border border-border/60 p-3" data-tour="launch-checklist">
       <div className="mb-2 flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        <span>Launch checklist</span>
+        <span>{tHC("s3")}</span>
         <span className="text-foreground">
           {n}/{STEPS.length}
         </span>
@@ -50,7 +52,7 @@ export function LaunchChecklist({ progress }: { progress: LaunchProgress }) {
         aria-valuemin={0}
         aria-valuemax={STEPS.length}
         aria-valuenow={n}
-        aria-label="Launch progress"
+        aria-label={tHC("s2")}
       >
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-violet-500 via-emerald-500 to-sky-500"
@@ -93,6 +95,7 @@ export function ConvertBar({
   signupHref: string;
   hidden: boolean;
 }) {
+  const tHC = useTranslations("hcComponentsStudioConversion");
   const [dismissed, setDismissed] = useState(false);
   const n = countDone(progress);
   const show = n > 0 && !dismissed && !hidden;
@@ -126,7 +129,7 @@ export function ConvertBar({
           transition={{ type: "spring", stiffness: 220, damping: 24 }}
           className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-violet-500/40 bg-background/90 p-3 ps-4 shadow-2xl shadow-violet-500/20 backdrop-blur-xl"
           role="region"
-          aria-label="Keep your agent"
+          aria-label={tHC("s1")}
         >
           <span
             className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full sm:inline-flex ${TONES.violet.solid}`}

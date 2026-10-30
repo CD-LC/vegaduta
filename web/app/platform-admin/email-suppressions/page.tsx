@@ -14,6 +14,7 @@ import { opsApi, type EmailSuppressionPage } from "../lib/adminApi/operations";
 import { toast } from "../lib/toastBus";
 import { formatExact, formatRelative } from "../lib/platformFormat";
 import { useConfirm } from "../components/admin/ConfirmDialog";
+import { useTranslations } from "../../lib/i18n";
 
 // Outbound-email suppression list (GET/DELETE /api/platform/email/suppressions).
 // An address lands here after a hard bounce, a spam complaint or an
@@ -23,6 +24,7 @@ import { useConfirm } from "../components/admin/ConfirmDialog";
 // confirm says so.
 
 export default function EmailSuppressionsPage() {
+  const tHC = useTranslations("hcPlatformadminEmailsuppressionsPage");
   const askConfirm = useConfirm();
   const [q, setQ] = useState("");
   const [applied, setApplied] = useState("");
@@ -76,14 +78,11 @@ export default function EmailSuppressionsPage() {
   const total = data?.total ?? 0;
 
   return (
-    <AdminShell title="Email suppressions">
-      <PageHint>
-        Addresses core will not email - hard bounces, spam complaints and unsubscribes. Remove one only when you know
-        the mailbox now works and the person wants mail again.
-      </PageHint>
+    <AdminShell title={tHC("s5")}>
+      <PageHint>{tHC("s4")}</PageHint>
 
       <SectionCard
-        title="Suppressed addresses"
+        title={tHC("s3")}
         icon={MailX}
         subtitle={data ? `${total.toLocaleString("en-US")} address${total === 1 ? "" : "es"}` : undefined}
         actions={
@@ -96,9 +95,9 @@ export default function EmailSuppressionsPage() {
             }}
           >
             <Input
-              aria-label="Search email"
+              aria-label={tHC("s2")}
               className="h-9 w-64"
-              placeholder="Email contains..."
+              placeholder={tHC("s1")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />

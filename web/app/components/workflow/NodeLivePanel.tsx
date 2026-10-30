@@ -3,6 +3,7 @@
 import { memo, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, ChevronRight, Loader2, Maximize2, Wrench, X } from "lucide-react";
 import "./node-live.css";
+import { useTranslations } from "../../lib/i18n";
 
 // Live "agent thinking" strip rendered inside an agent/supervisor node card.
 // The parent re-renders on every node.token frame, so everything here is
@@ -41,7 +42,9 @@ export interface ToolCallSummary {
 }
 
 /** Pure tally for chips/headers; ignores missing or non-finite durations. */
-export function toolCallSummary(calls: readonly Pick<NodeLiveToolCall, "status" | "ms">[] | null | undefined): ToolCallSummary {
+export function toolCallSummary(
+  calls: readonly Pick<NodeLiveToolCall, "status" | "ms">[] | null | undefined
+): ToolCallSummary {
   const out: ToolCallSummary = { running: 0, ok: 0, error: 0, totalMs: 0 };
   if (!calls) return out;
   for (const c of calls) {
@@ -98,6 +101,7 @@ function StatusIcon({ status }: { status: NodeLiveToolStatus }) {
 }
 
 const ExpandedDetail = memo(function ExpandedDetail({ call }: { call: NodeLiveToolCall }) {
+  const tHC = useTranslations("hcComponentsWorkflowNodeLivePanel");
   // Serialised only while expanded; memo keys on the args reference.
   const argsText = useMemo(() => capText(stringifyArgs(call.args), EXPANDED_ARGS_CAP), [call.args]);
   const result = call.error ?? call.preview ?? "";
@@ -117,7 +121,7 @@ const ExpandedDetail = memo(function ExpandedDetail({ call }: { call: NodeLiveTo
           </pre>
         </>
       )}
-      {!argsText && !result && <div className="nlp-detail-empty">No arguments or output yet.</div>}
+      {!argsText && !result && <div className="nlp-detail-empty">{tHC("s5")}</div>}
     </div>
   );
 });
@@ -147,7 +151,9 @@ const ToolRow = memo(function ToolRow({ call, expanded, onToggle }: ToolRowProps
       >
         <ChevronRight size={11} className="nlp-chev" aria-hidden="true" />
         <Wrench size={11} className="nlp-tool-icon" aria-hidden="true" />
-        <span className="nlp-tool-name" title={call.tool}>{call.tool}</span>
+        <span className="nlp-tool-name" title={call.tool}>
+          {call.tool}
+        </span>
         <span className="nlp-tool-status">
           <StatusIcon status={call.status} />
           <span>{STATUS_TEXT[call.status]}</span>
@@ -155,7 +161,11 @@ const ToolRow = memo(function ToolRow({ call, expanded, onToggle }: ToolRowProps
         {ms && <span className="nlp-tool-ms">{ms}</span>}
       </button>
       {line && !expanded && (
-        <div className="nlp-tool-line" data-error={call.error ? "true" : undefined} title={line.length > 200 ? line.slice(0, 200) : line}>
+        <div
+          className="nlp-tool-line"
+          data-error={call.error ? "true" : undefined}
+          title={line.length > 200 ? line.slice(0, 200) : line}
+        >
           {line.length > 160 ? line.slice(0, 160) : line}
         </div>
       )}
@@ -167,6 +177,7 @@ const ToolRow = memo(function ToolRow({ call, expanded, onToggle }: ToolRowProps
 });
 
 function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen }: NodeLivePanelProps) {
+  const tHC = useTranslations("hcComponentsWorkflowNodeLivePanel");
   const calls = toolCalls ?? [];
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
   const [showAll, setShowAll] = useState(false);
@@ -188,7 +199,7 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
         else next.add(id);
         return next;
       }),
-    [],
+    []
   );
 
   const summary = toolCallSummary(calls);
@@ -202,7 +213,11 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
         data-state={summary.error > 0 ? "error" : summary.running > 0 || streaming ? "running" : "ok"}
         aria-label={`${label}${summary.running ? `, ${summary.running} running` : ""}${summary.error ? `, ${summary.error} failed` : ""}`}
       >
-        {summary.running > 0 || streaming ? <Loader2 size={9} className="nlp-spin" aria-hidden="true" /> : <Wrench size={9} aria-hidden="true" />}
+        {summary.running > 0 || streaming ? (
+          <Loader2 size={9} className="nlp-spin" aria-hidden="true" />
+        ) : (
+          <Wrench size={9} aria-hidden="true" />
+        )}
         {calls.length > 0 ? label : "thinking"}
       </span>
     );
@@ -229,14 +244,18 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
           ) : (
             "Tool calls"
           )}
-          {capped && <span className="nlp-capped" title="Live preview limit reached; the full output is in the step inspector">preview capped</span>}
+          {capped && (
+            <span className="nlp-capped" title={tHC("s4")}>
+              {tHC("s3")}
+            </span>
+          )}
         </span>
         {onOpen && (
           <button
             type="button"
             className="nlp-open nodrag"
-            aria-label="Open step details"
-            title="Open step details"
+            aria-label={tHC("s2")}
+            title={tHC("s2")}
             onClick={(e) => {
               e.stopPropagation();
               onOpen();
@@ -248,7 +267,7 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
       </div>
 
       {(hasText || streaming) && (
-        <div className="nlp-stream" aria-live="off" aria-label="Streamed agent output">
+        <div className="nlp-stream" aria-live="off" aria-label={tHC("s1")}>
           <div className="nlp-stream-inner">
             <span className="nlp-text">{hasText ? tail : ""}</span>
             {streaming && !capped && <span className="nlp-caret" aria-hidden="true" />}
@@ -257,7 +276,10 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
       )}
 
       {calls.length > 0 && (
-        <ul className="nlp-tools" aria-label={`Tool calls: ${summary.ok} done, ${summary.running} running, ${summary.error} failed`}>
+        <ul
+          className="nlp-tools"
+          aria-label={`Tool calls: ${summary.ok} done, ${summary.running} running, ${summary.error} failed`}
+        >
           {visible.map((c) => (
             <ToolRow key={c.id} call={c} expanded={expanded.has(c.id)} onToggle={toggle} />
           ))}
@@ -279,7 +301,9 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
         </ul>
       )}
 
-      <span className="nlp-sr" role="status" aria-live="polite">{announce}</span>
+      <span className="nlp-sr" role="status" aria-live="polite">
+        {announce}
+      </span>
     </div>
   );
 }

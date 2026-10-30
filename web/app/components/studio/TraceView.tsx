@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { StudioEvent } from "./studioClient";
 import { toolLabel } from "./studioContent";
+import { useTranslations } from "../../lib/i18n";
 
 // The live trace: what an agent actually did, in the order it did it. This
 // is the page's central argument - a chatbot has nothing to show here, an
@@ -127,6 +128,7 @@ export default function TraceView({
   running: boolean;
   emptyHint?: string;
 }) {
+  const tHC = useTranslations("hcComponentsStudioTraceView");
   const rows = useMemo(() => foldTrace(events), [events]);
   const toolCalls = rows.filter((r) => r.kind === "tool").length;
 
@@ -143,8 +145,8 @@ export default function TraceView({
       {toolCalls > 0 && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-          {toolCalls} tool call{toolCalls === 1 ? "" : "s"} so far - each one is a real request the agent decided to
-          make.
+          {toolCalls} {tHC("s6")}
+          {toolCalls === 1 ? "" : "s"} {tHC("s5")}
         </div>
       )}
       <ol className="relative space-y-2 border-s border-border/60 ps-4">
@@ -181,7 +183,7 @@ export default function TraceView({
                       </span>
                     )}
                     {row.ms == null && !row.error && (
-                      <span className="ms-auto text-xs text-muted-foreground animate-pulse">running…</span>
+                      <span className="ms-auto text-xs text-muted-foreground animate-pulse">{tHC("s4")}</span>
                     )}
                   </div>
                   <pre className="mt-2 max-h-28 overflow-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-2 text-xs text-muted-foreground">
@@ -206,7 +208,7 @@ export default function TraceView({
                 <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
                   <ShieldAlert aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <div>
-                    <div className="font-medium">Guardrail stepped in</div>
+                    <div className="font-medium">{tHC("s3")}</div>
                     <div className="text-xs text-muted-foreground">
                       {row.tool}: {row.reason}
                     </div>
@@ -221,16 +223,14 @@ export default function TraceView({
               )}
               {row.kind === "finished" && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Finished in{" "}
+                  <CheckCircle2 aria-hidden="true" className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> {tHC("s2")}{" "}
                   {(row.ms / 1000).toFixed(1)} s
                 </div>
               )}
             </motion.li>
           ))}
         </AnimatePresence>
-        {running && rows.length === 0 && (
-          <li className="text-sm text-muted-foreground animate-pulse">Reading the mission…</li>
-        )}
+        {running && rows.length === 0 && <li className="text-sm text-muted-foreground animate-pulse">{tHC("s1")}</li>}
       </ol>
     </div>
   );

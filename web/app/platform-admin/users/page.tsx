@@ -21,6 +21,7 @@ import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminEmptyState, AdminErrorState } from "../components/admin/AdminKit";
 import { Select } from "../../components/ui/select";
 import { Checkbox } from "../../components/ui/checkbox";
+import { useTranslations } from "../../lib/i18n";
 
 // Cross-tenant user directory (PlatformUserController, /api/platform/users).
 // Before this screen an operator had to open the Keycloak console to find,
@@ -36,6 +37,7 @@ const ASSIGNABLE_ROLES = [
 ];
 
 function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () => void }) {
+  const tHC = useTranslations("hcPlatformadminUsersPage");
   const askConfirm = useConfirm();
   const [detail, setDetail] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -100,15 +102,15 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
             {u.username}
             {!u.enabled && <Badge variant="destructive">Suspended</Badge>}
-            {isOperator && <Badge variant="accent">Platform operator</Badge>}
+            {isOperator && <Badge variant="accent">{tHC("s21")}</Badge>}
           </div>
           <p className="text-xs text-muted-foreground">
-            {u.email || "no email"} · tenant <code>{u.tenantId || "none"}</code>
+            {u.email || "no email"} {tHC("s20")} <code>{u.tenantId || "none"}</code>
             {u.emailVerified ? "" : " · email not verified"}
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm">
-          <span>Can sign in</span>
+          <span>{tHC("s19")}</span>
           <SwitchToggle
             on={u.enabled}
             label={`Sign-in enabled for ${u.username}`}
@@ -131,9 +133,7 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
 
       {isOperator && (
         <Alert>
-          <AlertDescription>
-            Platform operators are managed in the Keycloak admin console. This screen only lets you view them.
-          </AlertDescription>
+          <AlertDescription>{tHC("s18")}</AlertDescription>
         </Alert>
       )}
 
@@ -153,8 +153,8 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
         </div>
         {otherRoles.length > 0 && (
           <p className="text-[11px] text-[color:var(--state-warning)]">
-            Also holds: {otherRoles.join(", ")}. Saving sets the roles to exactly the ticked boxes, so these will be
-            removed (Keycloak&apos;s default-roles-* is always kept).
+            {tHC("s17")} {otherRoles.join(", ")}
+            {tHC("s16")}
           </p>
         )}
         <Button
@@ -167,9 +167,9 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
       </div>
 
       <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Granted permissions</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s15")}</p>
         {detail.permissions.length === 0 ? (
-          <p className="text-xs text-muted-foreground">None stored.</p>
+          <p className="text-xs text-muted-foreground">{tHC("s14")}</p>
         ) : (
           <div className="flex flex-wrap gap-1.5">
             {detail.permissions.map((p: string) => (
@@ -190,7 +190,7 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
             run("reset", () => api.sendPlatformUserPasswordReset(u.id), `Password-reset email sent to ${u.email}.`)
           }
         >
-          <MailCheck /> Send password-reset email
+          <MailCheck /> {tHC("s13")}
         </Button>
       </div>
     </div>
@@ -198,6 +198,7 @@ function UserDetailPanel({ userId, onChanged }: { userId: string; onChanged: () 
 }
 
 export default function PlatformUsersPage() {
+  const tHC = useTranslations("hcPlatformadminUsersPage");
   const askConfirm = useConfirm();
   const [q, setQ] = useState("");
   // Tenant filter: pick from the roster, or paste a tenant UUID / schema name
@@ -275,11 +276,8 @@ export default function PlatformUsersPage() {
   const users: any[] = data?.users || [];
 
   return (
-    <AdminShell title="Platform Users">
-      <PageHint>
-        Every user across every tenant. Search by name or email, narrow to one tenant, then suspend, restore, re-role or
-        send a password reset. Platform operators and your own account are read-only here by design.
-      </PageHint>
+    <AdminShell title={tHC("s12")}>
+      <PageHint>{tHC("s11")}</PageHint>
 
       <SectionCard
         title="Directory"
@@ -292,14 +290,14 @@ export default function PlatformUsersPage() {
         actions={
           <form onSubmit={submit} className="flex flex-wrap items-center gap-2">
             <Input
-              aria-label="Search users"
+              aria-label={tHC("s10")}
               className="h-9 w-56"
-              placeholder="Name or email"
+              placeholder={tHC("s9")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
             <Select
-              aria-label="Tenant filter"
+              aria-label={tHC("s8")}
               className="max-w-56"
               value={tenantPick}
               onValueChange={(v) => {
@@ -317,9 +315,9 @@ export default function PlatformUsersPage() {
               ]}
             />
             <Input
-              aria-label="Tenant id or schema"
+              aria-label={tHC("s7")}
               className="h-9 w-56"
-              placeholder="or paste tenant UUID / schema"
+              placeholder={tHC("s6")}
               value={tenantId}
               onChange={(e) => setTenantId(e.target.value)}
             />
@@ -335,7 +333,7 @@ export default function PlatformUsersPage() {
         {loading && !data && <Skeleton className="h-24 w-full" />}
         {error && <AdminErrorState message={error} onRetry={() => void load()} />}
         {!loading && !error && users.length === 0 && (
-          <AdminEmptyState title="No users match" description="Adjust the search or filters and try again." />
+          <AdminEmptyState title={tHC("s5")} description="Adjust the search or filters and try again." />
         )}
         {users.map((u) => (
           <div
@@ -354,7 +352,7 @@ export default function PlatformUsersPage() {
                 <span className="font-medium">{u.username}</span>
                 <span className="ms-2 text-xs text-muted-foreground">{u.email}</span>
                 <span className="mt-0.5 block text-[11px] text-muted-foreground">
-                  Created <span title={formatExact(u.createdAt)}>{formatDay(u.createdAt)}</span> · Last seen{" "}
+                  Created <span title={formatExact(u.createdAt)}>{formatDay(u.createdAt)}</span> {tHC("s4")}{" "}
                   <span title={formatExact(u.lastSeenAt)}>
                     {u.lastSeenAt ? formatRelative(u.lastSeenAt) : UNAVAILABLE}
                   </span>
@@ -383,9 +381,9 @@ export default function PlatformUsersPage() {
                       tenantName: u.tenantName,
                     })
                   }
-                  title="Open the tenant app as this user, read-only (audited)"
+                  title={tHC("s3")}
                 >
-                  <Eye /> View as (read-only)
+                  <Eye /> {tHC("s2")}
                 </Button>
               )}
               <Button
@@ -394,7 +392,7 @@ export default function PlatformUsersPage() {
                 variant="outline"
                 disabled={loggingOut != null}
                 onClick={() => void forceLogout(u)}
-                title="End every session this user has"
+                title={tHC("s1")}
               >
                 <LogOut /> {loggingOut === u.id ? "Signing out..." : "Force logout"}
               </Button>

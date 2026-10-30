@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { QrCode } from "../ui/qr-code";
 import { fetchChannels, pairWhatsApp, unlinkWhatsApp, type ChannelsStatus, type DemoSession } from "../try/demoClient";
 import { safeWaLink, whatsappView } from "./waPairing";
+import { useTranslations } from "../../lib/i18n";
 
 // Real WhatsApp pairing for the Studio Deploy stage: a wa.me click-to-chat
 // link (QR for a laptop, tap for a phone) prefilled with a single-use code,
@@ -23,6 +24,7 @@ const POLL_PENDING_MS = 3000;
 const POLL_LINKED_MS = 8000;
 
 export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) {
+  const tHC = useTranslations("hcComponentsStudioWhatsAppBridge");
   const [channels, setChannels] = useState<ChannelsStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const expired = !!session?.expired;
@@ -76,52 +78,40 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
     <section className="rounded-xl border border-border/60 bg-card/40">
       <header className="border-b border-border/60 px-4 py-3">
         <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <MessageCircle aria-hidden="true" className="size-4 text-primary" /> Chat with your agent on WhatsApp
+          <MessageCircle aria-hidden="true" className="size-4 text-primary" /> {tHC("s13")}
         </h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          A shared demo number, your agent, until this sandbox expires. It replies to you - it cannot message you first.
-        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{tHC("s12")}</p>
       </header>
 
       <div className="p-4">
         {view === "idle" && (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Get a one-time code, then scan the QR (or tap the link on your phone) and send the pre-filled message.
-              Your live agent answers you in WhatsApp.
-            </p>
+            <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
             <Button size="sm" onClick={onGetCode} disabled={busy}>
               {busy ? <Loader2 aria-hidden="true" className="me-2 h-3.5 w-3.5 animate-spin shrink-0" /> : null}
-              Get code
+              {tHC("s10")}
             </Button>
           </div>
         )}
 
         {view === "waiting" && link && (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <QrCode
-              value={link}
-              px={168}
-              label="Scan with your phone camera to open WhatsApp with your pairing code"
-              className="shrink-0 rounded-md border border-border/60"
-            />
+            <QrCode value={link} px={168} label={tHC("s9")} className="shrink-0 rounded-md border border-border/60" />
             <div className="space-y-2 text-sm">
               <p>
-                Your code: <span className="font-mono text-base font-semibold tracking-wider">{wa.pairingCode}</span>
+                {tHC("s8")} <span className="font-mono text-base font-semibold tracking-wider">{wa.pairingCode}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Scan the QR with your phone camera, or on this phone tap the button. WhatsApp opens with the code
-                already typed - just press send.
-                {wa.businessNumberMasked ? ` The demo number is ${wa.businessNumberMasked}.` : ""} The code works once.
+                {tHC("s7")}
+                {wa.businessNumberMasked ? ` The demo number is ${wa.businessNumberMasked}.` : ""} {tHC("s6")}
               </p>
               <Button asChild size="sm" variant="outline">
                 <a href={link} target="_blank" rel="noopener noreferrer">
-                  Open WhatsApp <ExternalLink aria-hidden="true" className="ms-2 h-3.5 w-3.5 shrink-0" />
+                  {tHC("s5")} <ExternalLink aria-hidden="true" className="ms-2 h-3.5 w-3.5 shrink-0" />
                 </a>
               </Button>
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin shrink-0" /> Waiting for your first
-                message...
+                <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin shrink-0" /> {tHC("s4")}
               </p>
             </div>
           </div>
@@ -130,14 +120,11 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
         {view === "linked" && (
           <div className="space-y-3">
             <p className="text-sm">
-              Connected. Message the demo number{wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} and
-              your live agent answers.
+              {tHC("s3")}
+              {wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} {tHC("s2")}
               {wa.messageCount > 0 ? ` ${wa.messageCount} ${wa.messageCount === 1 ? "turn" : "turns"} so far.` : ""}
             </p>
-            <p className="text-xs text-muted-foreground">
-              Turns here count against this sandbox&apos;s message allowance, same as chatting on this page. It replies
-              only when you write - it never messages you first.
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
             <Button size="sm" variant="outline" onClick={onUnlink}>
               Disconnect
             </Button>

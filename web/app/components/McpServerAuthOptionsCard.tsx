@@ -5,6 +5,7 @@ import { ShieldCheck } from "lucide-react";
 import { api } from "../lib/api";
 import type { McpServerAuthOptions } from "../lib/api/mcpToolPins";
 import { Badge } from "./ui/badge";
+import { useTranslations } from "../lib/i18n";
 
 /**
  * How callers can authenticate to this deployment's /mcp endpoint, read-only: grant keys (the simple option,
@@ -13,6 +14,7 @@ import { Badge } from "./ui/badge";
  * Renders nothing if the endpoint is unavailable (the mcpserver profile is off).
  */
 export default function McpServerAuthOptionsCard() {
+  const tHC = useTranslations("hcComponentsMcpServerAuthOptionsCard");
   const [opts, setOpts] = useState<McpServerAuthOptions | null>(null);
 
   useEffect(() => {
@@ -33,27 +35,26 @@ export default function McpServerAuthOptionsCard() {
     <section className="panel mb-4" style={{ padding: "1rem 1.25rem" }} data-testid="mcp-auth-options">
       <div className="mb-2 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4" />
-        <h2 className="text-sm font-semibold">How callers authenticate to /mcp</h2>
+        <h2 className="text-sm font-semibold">{tHC("s12")}</h2>
       </div>
       <dl className="grid gap-3 text-sm md:grid-cols-3">
         <div>
           <dt className="font-medium">
-            Grant keys <Badge variant="secondary">on</Badge>
+            {tHC("s11")} <Badge variant="secondary">on</Badge>
           </dt>
-          <dd className="text-muted-foreground">
-            The simple option: create a key below and send it as a bearer token.
-          </dd>
+          <dd className="text-muted-foreground">{tHC("s10")}</dd>
         </div>
         <div data-testid="mcp-auth-oauth">
           <dt className="font-medium">
-            OAuth 2.1 <Badge variant={oauth.enabled ? "secondary" : "outline"}>{oauth.enabled ? "on" : "off"}</Badge>
+            {tHC("s9")} <Badge variant={oauth.enabled ? "secondary" : "outline"}>{oauth.enabled ? "on" : "off"}</Badge>
           </dt>
           <dd className="text-muted-foreground">
             {oauth.enabled ? (
               <>
-                Tokens issued by <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>. Each token must carry
-                the <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> claims (the grant it acts as).
-                Metadata: <code>{oauth.metadataUrl}</code>. Scopes:{" "}
+                {tHC("s8")} <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>
+                {tHC("s7")} <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> {tHC("s6")}{" "}
+                <code>{oauth.metadataUrl}</code>
+                {tHC("s5")}{" "}
                 {oauth.scopes.map((s) => (
                   <code key={s} className="me-1">
                     {s}
@@ -62,22 +63,22 @@ export default function McpServerAuthOptionsCard() {
               </>
             ) : (
               <>
-                Off. The operator enables it with <code>app.mcpserver.oauth.enabled</code>; grant keys keep working
-                either way.
+                {tHC("s4")} <code>app.mcpserver.oauth.enabled</code>
+                {tHC("s3")}
               </>
             )}
           </dd>
         </div>
         <div data-testid="mcp-auth-origin">
           <dt className="font-medium">
-            Browser origins <Badge variant="outline">{origin.mode}</Badge>
+            {tHC("s2")} <Badge variant="outline">{origin.mode}</Badge>
           </dt>
           <dd className="text-muted-foreground">
             {origin.mode === "off" ? (
               "Origin is not checked."
             ) : origin.allowed.length > 0 ? (
               <>
-                Browsers may call from:{" "}
+                {tHC("s1")}{" "}
                 {origin.allowed.map((o) => (
                   <code key={o} className="me-1">
                     {o}

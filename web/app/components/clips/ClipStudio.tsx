@@ -22,6 +22,7 @@ import {
   releaseImageSource,
 } from "../../lib/edge/video/kenburns";
 import { type ClipRecordingSupport, detectClipRecordingSupport, recordClip } from "../../lib/edge/video/assemble";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Clip Studio (tier V0 — Ken Burns clip maker). Turns a still
@@ -45,6 +46,7 @@ function truncate(text: string, max: number) {
 }
 
 export default function ClipStudio() {
+  const tHC = useTranslations("hcComponentsClipsClipStudio");
   const searchParams = useSearchParams();
   const preloadImageId = searchParams.get("imageId");
 
@@ -279,7 +281,7 @@ export default function ClipStudio() {
         <div
           className="flex w-fit gap-1 rounded-lg border border-border bg-muted/40 p-1"
           role="group"
-          aria-label="Clip Studio mode"
+          aria-label={tHC("s24")}
         >
           <Button
             aria-pressed={mode === "still"}
@@ -289,7 +291,7 @@ export default function ClipStudio() {
             disabled={recording}
             onClick={() => setMode("still")}
           >
-            Still clip
+            {tHC("s23")}
           </Button>
           <Button
             aria-pressed={mode === "motion"}
@@ -321,11 +323,9 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>1 · Pick an image</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s22")}</h2>
                 </CardTitle>
-                <CardDescription>
-                  Use one of your generated images, or upload a photo — uploads never leave your browser.
-                </CardDescription>
+                <CardDescription>{tHC("s21")}</CardDescription>
               </CardHeader>
               <CardContent>
                 {sourceError && (
@@ -337,19 +337,17 @@ export default function ClipStudio() {
 
                 {!imagesLoaded ? (
                   <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-                    <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Loading your generated images…
+                    <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s20")}
                   </div>
                 ) : imagesFailed ? (
-                  <p className="py-2 text-sm text-muted-foreground">
-                    Couldn&apos;t load your generated images just now — you can still upload an image below.
-                  </p>
+                  <p className="py-2 text-sm text-muted-foreground">{tHC("s19")}</p>
                 ) : images.length === 0 ? (
                   <p className="py-2 text-sm text-muted-foreground">
-                    No generated images yet. Ask an agent to create one in the{" "}
+                    {tHC("s18")}{" "}
                     <Link href="/playground" className="font-medium text-primary underline underline-offset-2">
                       Playground
                     </Link>
-                    , or upload an image below.
+                    {tHC("s17")}
                   </p>
                 ) : (
                   <ul className="max-h-72 space-y-1 overflow-y-auto pe-1">
@@ -387,7 +385,7 @@ export default function ClipStudio() {
                             {loadingImageId === row.id ? (
                               <>
                                 <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-                                <span className="sr-only">Loading…</span>
+                                <span className="sr-only">{tHC("s16")}</span>
                               </>
                             ) : selected ? (
                               "Selected"
@@ -416,7 +414,7 @@ export default function ClipStudio() {
                 <div className="mt-4 border-t border-border pt-4">
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-md text-sm font-medium text-primary has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]">
                     <Upload size={14} aria-hidden="true" />
-                    Upload an image from this device
+                    {tHC("s15")}
                     <input
                       type="file"
                       accept="image/*"
@@ -427,9 +425,7 @@ export default function ClipStudio() {
                       }}
                     />
                   </label>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Stays on your device — it is read locally and never uploaded.
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{tHC("s14")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -437,9 +433,9 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>2 · Motion</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s13")}</h2>
                 </CardTitle>
-                <CardDescription>Pick a camera move — the preview loops live below.</CardDescription>
+                <CardDescription>{tHC("s12")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <MotionPresetPicker value={preset} onChange={setPreset} disabled={!source} />
@@ -458,14 +454,14 @@ export default function ClipStudio() {
                     disabled={!source}
                     onChange={(e) => setDurationSec(Number(e.target.value))}
                     className="w-full accent-[var(--primary,#6366f1)]"
-                    aria-label="Clip duration in seconds"
+                    aria-label={tHC("s11")}
                   />
                 </div>
 
                 <div className="flex flex-wrap items-end gap-6">
                   <div>
                     <div className="mb-1 text-sm font-medium text-foreground" id="clip-fps-label">
-                      Frame rate
+                      {tHC("s10")}
                     </div>
                     <div className="flex gap-1" role="group" aria-labelledby="clip-fps-label">
                       {([24, 30] as const).map((value) => (
@@ -485,7 +481,7 @@ export default function ClipStudio() {
                   </div>
                   <div className="min-w-48 flex-1">
                     <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="clip-output-size">
-                      Output size
+                      {tHC("s9")}
                     </label>
                     <select
                       id="clip-output-size"
@@ -511,7 +507,7 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>3 · Preview &amp; create</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s8")}</h2>
                 </CardTitle>
                 <CardDescription>
                   {source ? (
@@ -527,7 +523,7 @@ export default function ClipStudio() {
                 {unsupported && (
                   <Alert variant="destructive">
                     <AlertTriangle aria-hidden="true" />
-                    <AlertTitle>This browser can&apos;t record clips</AlertTitle>
+                    <AlertTitle>{tHC("s7")}</AlertTitle>
                     <AlertDescription>{support?.reason}</AlertDescription>
                   </Alert>
                 )}
@@ -538,7 +534,7 @@ export default function ClipStudio() {
                   </div>
                 ) : (
                   <div className="flex h-48 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-                    No image selected yet
+                    {tHC("s6")}
                   </div>
                 )}
 
@@ -563,7 +559,7 @@ export default function ClipStudio() {
                     <div
                       className="h-2 w-full overflow-hidden rounded-full bg-muted"
                       role="progressbar"
-                      aria-label="Clip recording progress"
+                      aria-label={tHC("s5")}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={progress}
@@ -574,8 +570,10 @@ export default function ClipStudio() {
                       />
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground" role="status">
-                      Recording {progress}% — the clip records in real time ({durationSec}s). Keep this tab visible:
-                      browsers pause canvas capture in hidden tabs. The rest of the page stays usable.
+                      Recording {progress}
+                      {tHC("s4")}
+                      {durationSec}
+                      {tHC("s3")}
                     </p>
                   </div>
                 )}
@@ -595,15 +593,13 @@ export default function ClipStudio() {
                       className="h-auto w-full rounded-md border border-border bg-black"
                     />
                     <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-                      <Download size={13} aria-hidden="true" /> Download .{result.extension}
+                      <Download size={13} aria-hidden="true" /> {tHC("s2")}
+                      {result.extension}
                     </Button>
                   </div>
                 )}
 
-                <p className="text-xs text-muted-foreground">
-                  Clips are made entirely on your device — free, private, and at no server cost. On-device clips are
-                  stylised motion from a still image; cinematic AI video generation is a separate paid feature.
-                </p>
+                <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
               </CardContent>
             </Card>
           </div>

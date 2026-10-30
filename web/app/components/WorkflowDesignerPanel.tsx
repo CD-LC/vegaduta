@@ -74,6 +74,7 @@ interface WorkflowDesignerPanelProps {
 }
 
 export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: WorkflowDesignerPanelProps) {
+  const tHC = useTranslations("hcComponentsWorkflowDesignerPanel");
   const t = useTranslations("workflowDesignerPanel");
   const portable = usePortabilityEnabled();
   const tTemplates = useTranslations("workflowTemplates");
@@ -361,7 +362,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                     autoFocus
                   />
                   <p id="wf-new-name-help" className="text-xs text-muted-foreground">
-                    A short name teammates will recognise in the list, for example “Support triage”.
+                    {tHC("s2")}
                   </p>
                 </div>
                 <div className="space-y-1.5">
@@ -426,7 +427,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                 href="/help#workflows"
                 className="text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                Learn how workflows work
+                {tHC("s1")}
               </Link>
             </div>
           }

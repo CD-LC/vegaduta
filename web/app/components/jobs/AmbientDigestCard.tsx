@@ -23,6 +23,7 @@ import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { formatWhen } from "./jobStatus";
+import { useTranslations } from "../../lib/i18n";
 
 const OUTCOME_LABEL: Record<string, string> = {
   QUIET: "quiet",
@@ -34,6 +35,7 @@ const OUTCOME_LABEL: Record<string, string> = {
 };
 
 export default function AmbientDigestCard() {
+  const tHC = useTranslations("hcComponentsJobsAmbientDigestCard");
   const [digest, setDigest] = useState<AmbientDigest | null>(null);
   // id -> which decision is in flight. `decided` hides a row instantly even if
   // the refetched digest still carries it for a beat; the refetch keeps the
@@ -106,8 +108,8 @@ export default function AmbientDigestCard() {
     <Card className="gap-3 p-4">
       <div className="flex items-center gap-2">
         <MoonStar className="size-4 text-[var(--accent-500)]" aria-hidden="true" />
-        <h3 className="text-sm font-medium text-foreground">While you were away</h3>
-        <span className="text-xs text-muted-foreground">last 24h</span>
+        <h3 className="text-sm font-medium text-foreground">{tHC("s10")}</h3>
+        <span className="text-xs text-muted-foreground">{tHC("s9")}</span>
         {digest.sentinelScheduleCount > 0 && (
           <Badge variant="outline" className="ms-auto">
             <Eye className="size-3" aria-hidden="true" /> {digest.sentinelScheduleCount} sentinel
@@ -120,7 +122,12 @@ export default function AmbientDigestCard() {
         <p className="text-xs text-muted-foreground">
           {digest.jobs.observed}
           {digest.jobs.truncated ? "+" : ""} job{digest.jobs.observed === 1 ? "" : "s"} ran
-          {runningJobs > 0 && <> · {runningJobs} still running</>}
+          {runningJobs > 0 && (
+            <>
+              {" "}
+              · {runningJobs} {tHC("s8")}
+            </>
+          )}
           {failedJobs > 0 && (
             <>
               {" "}
@@ -133,7 +140,7 @@ export default function AmbientDigestCard() {
       {digest.pendingApprovals.total > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-foreground">
-            {digest.pendingApprovals.total} action{digest.pendingApprovals.total === 1 ? "" : "s"} waiting for approval
+            {digest.pendingApprovals.total} action{digest.pendingApprovals.total === 1 ? "" : "s"} {tHC("s7")}
           </p>
           <ul className="space-y-1">
             {digest.pendingApprovals.items
@@ -153,7 +160,7 @@ export default function AmbientDigestCard() {
                         size="icon"
                         className="size-6 text-[var(--state-success)]"
                         disabled={a.id in deciding}
-                        aria-label="Approve proposal"
+                        aria-label={tHC("s6")}
                         onClick={() => decide(a.id, "approve")}
                       >
                         {deciding[a.id] === "approve" ? (
@@ -167,7 +174,7 @@ export default function AmbientDigestCard() {
                         size="icon"
                         className="size-6 text-[var(--state-error)]"
                         disabled={a.id in deciding}
-                        aria-label="Reject proposal"
+                        aria-label={tHC("s5")}
                         onClick={() => decide(a.id, "reject")}
                       >
                         {deciding[a.id] === "reject" ? (
@@ -183,14 +190,15 @@ export default function AmbientDigestCard() {
           </ul>
           {decisionError && <p className="text-xs text-[var(--state-error)]">{decisionError}</p>}
           <Link href="/admin/approvals" className="inline-block text-xs text-primary underline">
-            Review in Approvals{otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
+            {tHC("s4")}
+            {otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
           </Link>
         </div>
       )}
 
       {escalations.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-xs font-medium text-foreground">Sentinels reported</p>
+          <p className="text-xs font-medium text-foreground">{tHC("s3")}</p>
           <ul className="space-y-1">
             {escalations.slice(0, 5).map((o) => (
               <li key={o.runId} className="flex items-center gap-2 text-xs">
@@ -210,7 +218,8 @@ export default function AmbientDigestCard() {
           </ul>
           {quietCount > 0 && (
             <p className="text-[11px] text-muted-foreground">
-              {quietCount} other watch run{quietCount === 1 ? "" : "s"} reported quiet.
+              {quietCount} {tHC("s2")}
+              {quietCount === 1 ? "" : "s"} {tHC("s1")}
             </p>
           )}
         </div>

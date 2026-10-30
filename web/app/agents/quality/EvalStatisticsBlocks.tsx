@@ -26,6 +26,7 @@ import {
   type IntervalEstimate,
 } from "./evalStatisticsApi";
 import { FlakyBadge, ScoreWithInterval, UnreplicatedBadge } from "./ScoreWithInterval";
+import { useTranslations } from "../../lib/i18n";
 
 /** The `[lo–hi], n=k` tail of a formatted estimate, for StatCard's `sub` slot
  *  where the point estimate is already the big figure. Returns the honest
@@ -48,11 +49,12 @@ function intervalTail(estimate: IntervalEstimate | null | undefined): string {
  *  Never decorative — the DTO contract says a warning is only present when
  *  it limits the figures, so every one is printed. */
 export function WarningsList({ warnings }: { warnings: string[] }) {
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   if (!warnings || warnings.length === 0) return null;
   return (
     <Alert variant="warning">
       <ShieldAlert aria-hidden="true" />
-      <AlertTitle>Read these before quoting the numbers</AlertTitle>
+      <AlertTitle>{tHC("s24")}</AlertTitle>
       <AlertDescription>
         <ul className="list-disc space-y-1 ps-5">
           {warnings.map((w, i) => (
@@ -77,6 +79,7 @@ export function DatasetReliabilityBlock({
   onlyUnstable: boolean;
   onToggleOnlyUnstable: () => void;
 }) {
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   const meanScore = metricEstimate(dataset, "MEAN_SCORE");
   const passAt1 = metricEstimate(dataset, "PASS_AT_1");
   const passHatK = metricEstimate(dataset, "PASS_HAT_K");
@@ -85,24 +88,21 @@ export function DatasetReliabilityBlock({
 
   return (
     <Section
-      title="Dataset reliability"
+      title={tHC("s23")}
       description="pass@1 answers “can it ever do this”. pass^k answers “can I put it on a phone line”. The gap between them is the number a customer actually buys — pooled over this dataset's recent runs, one rollout per case per run."
     >
       <div className="space-y-5">
         {dataset.unreplicated && (
           <Alert variant="warning">
             <ShieldAlert aria-hidden="true" />
-            <AlertTitle>Every case below was observed exactly once</AlertTitle>
-            <AlertDescription>
-              There is no within-case variance to measure, so no interval can be computed and pass^k does not exist.
-              Re-run the dataset before treating any of these numbers as a measurement.
-            </AlertDescription>
+            <AlertTitle>{tHC("s22")}</AlertTitle>
+            <AlertDescription>{tHC("s21")}</AlertDescription>
           </Alert>
         )}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            label="Mean judge score"
+            label={tHC("s12")}
             value={<span className="font-mono text-2xl">{formatValue(orEmptyEstimate(meanScore).value)}</span>}
             sub={<span className="font-mono">{intervalTail(meanScore)}</span>}
             icon={Sigma}
@@ -131,7 +131,7 @@ export function DatasetReliabilityBlock({
             icon={Repeat}
           />
           <StatCard
-            label="Reliability gap"
+            label={tHC("s20")}
             value={<span className="font-mono text-2xl">{formatValue(dataset.reliabilityGap)}</span>}
             sub={`pass@1 minus pass^${dataset.k} — how much of the pass rate does not survive repetition`}
             icon={Waves}
@@ -145,7 +145,7 @@ export function DatasetReliabilityBlock({
               : `${dataset.minRolloutsPerCase} rollouts/case`}
           </Badge>
           <Badge variant="outline">
-            pooled over {dataset.runsConsidered} run{dataset.runsConsidered === 1 ? "" : "s"}
+            {tHC("s19")} {dataset.runsConsidered} run{dataset.runsConsidered === 1 ? "" : "s"}
           </Badge>
           <Badge variant="outline">{dataset.caseCount} cases</Badge>
           {dataset.unreplicated && <UnreplicatedBadge />}
@@ -176,6 +176,7 @@ function CaseReliabilityTable({
   onlyUnstable: boolean;
   onToggleOnlyUnstable: () => void;
 }) {
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   // "Unstable" deliberately covers both failure modes a reader must not miss:
   // a case whose rollouts disagreed (flaky) and a case with only one rollout
   // behind it (unreplicated). Both mean "do not quote this number".
@@ -186,25 +187,26 @@ function CaseReliabilityTable({
   const casesPagination = usePagination(visible);
 
   if (cases.length === 0) {
-    return <p className="text-sm text-muted-foreground">This dataset has no per-case statistics.</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("s18")}</p>;
   }
 
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-foreground">Per-case reliability</h3>
+        <h3 className="text-sm font-semibold text-foreground">{tHC("s17")}</h3>
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <input type="checkbox" checked={onlyUnstable} onChange={onToggleOnlyUnstable} />
-          Only unstable cases ({unstableCount})
+          {tHC("s16")}
+          {unstableCount})
         </label>
       </div>
 
       {visible.length === 0 ? (
         <Alert variant="success">
           <Dices aria-hidden="true" />
-          <AlertTitle>Every case in this dataset is stable</AlertTitle>
+          <AlertTitle>{tHC("s15")}</AlertTitle>
           <AlertDescription>
-            All {cases.length} cases agreed across every observed rollout, with none unscored.
+            All {cases.length} {tHC("s14")}
           </AlertDescription>
         </Alert>
       ) : (
@@ -214,8 +216,8 @@ function CaseReliabilityTable({
               <TableRow>
                 <TableHead className="w-10">#</TableHead>
                 <TableHead>Case</TableHead>
-                <TableHead className="w-56">pass rate</TableHead>
-                <TableHead className="w-56">Mean judge score</TableHead>
+                <TableHead className="w-56">{tHC("s13")}</TableHead>
+                <TableHead className="w-56">{tHC("s12")}</TableHead>
                 <TableHead className="w-44">Stability</TableHead>
               </TableRow>
             </TableHeader>
@@ -255,10 +257,7 @@ function CaseReliabilityTable({
                         </Badge>
                       )}
                       {caseUnscoredRollouts(c) > 0 && (
-                        <Badge
-                          variant="secondary"
-                          title="Rollouts that produced no judge score are excluded from the mean — missing data, not a failure."
-                        >
+                        <Badge variant="secondary" title={tHC("s11")}>
                           {caseUnscoredRollouts(c)} unscored
                         </Badge>
                       )}
@@ -288,6 +287,7 @@ function CaseReliabilityTable({
 // ---------------------------------------------------------------------------
 
 export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | null }) {
+  const tHC = useTranslations("hcAgentsQualityEvalStatisticsBlocks");
   // Not measured is the default state for every new suite, and it is a
   // genuinely different statement from "the floor is zero". Saying so plainly
   // is the whole value of this card until the dataset has been run twice.
@@ -296,13 +296,9 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
     return (
       <Alert variant="warning">
         <Gauge aria-hidden="true" />
-        <AlertTitle>Noise floor not measured yet</AlertTitle>
+        <AlertTitle>{tHC("s10")}</AlertTitle>
         <AlertDescription>
-          <p>
-            The floor is measured by comparing two completed runs of this dataset and recording how much they disagree.
-            Until at least two runs exist, a small A/B difference on this screen cannot be interpreted — and this
-            console will not assume the floor is zero on your behalf.
-          </p>
+          <p>{tHC("s9")}</p>
           {(floor?.warnings || []).length > 0 && (
             <ul className="mt-2 list-disc space-y-1 ps-5 text-xs">
               {(floor?.warnings || []).map((w, i) => (
@@ -327,29 +323,26 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
         {measured.configurationSuspect && (
           <Alert variant="warning">
             <ShieldAlert aria-hidden="true" />
-            <AlertTitle>These two runs were not identical after all</AlertTitle>
-            <AlertDescription>
-              The signed disagreement between the two runs excludes zero — the supposedly unchanged configuration
-              drifted between them, so this number is drift evidence rather than a clean floor.
-            </AlertDescription>
+            <AlertTitle>{tHC("s8")}</AlertTitle>
+            <AlertDescription>{tHC("s7")}</AlertDescription>
           </Alert>
         )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatCard
-            label="Noise floor"
+            label={tHC("s6")}
             value={<span className="font-mono text-2xl">±{formatValue(measured.floor)}</span>}
             sub="differences at or below this are indistinguishable from run-to-run variance"
             icon={Waves}
             accent
           />
           <StatCard
-            label="Mean disagreement"
+            label={tHC("s5")}
             value={<span className="font-mono text-2xl">{formatValue(orEmptyEstimate(disagreement).value)}</span>}
             sub={<span className="font-mono">{intervalTail(disagreement)}</span>}
             icon={Dices}
           />
           <StatCard
-            label="Worst case"
+            label={tHC("s4")}
             value={<span className="font-mono text-2xl">{formatValue(measured.maxAbsoluteDelta)}</span>}
             sub={
               measured.secondRunFinishedAt
@@ -360,9 +353,10 @@ export function NoiseFloorCard({ floor }: { floor: DatasetNoiseFloorResponse | n
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Measured on “{floor?.datasetName || "this dataset"}” over {measured.pairedCases} paired case
-          {measured.pairedCases === 1 ? "" : "s"}. A floor only describes the suite it was measured on — a different
-          dataset has its own.
+          {tHC("s3")}
+          {floor?.datasetName || "this dataset"}” over {measured.pairedCases} {tHC("s2")}
+          {measured.pairedCases === 1 ? "" : "s"}
+          {tHC("s1")}
         </p>
       </CardContent>
     </Card>

@@ -16,6 +16,7 @@ import PaginationControls from "../components/PaginationControls";
 import { usePagination } from "../lib/usePagination";
 import { searchAudit, auditRowsToCsv, type AuditSearchResult } from "../lib/adminApi/audit";
 import { AdminEmptyState, AdminErrorState, AdminFilterBar, AdminTableWrap } from "../components/admin/AdminKit";
+import { useTranslations } from "../../lib/i18n";
 
 // Audit & Compliance §3.8 - cross-tenant audit search (PlatformAuditSearchController:
 // fans out over every active tenant's audit_log_entry, bounded and honest about
@@ -32,6 +33,7 @@ function toInstant(local: string): string | undefined {
 }
 
 function AuditSearchSection() {
+  const tHC = useTranslations("hcPlatformadminAuditPage");
   const [f, setF] = useState({
     tenantId: "",
     actorId: "",
@@ -77,38 +79,38 @@ function AuditSearchSection() {
 
   return (
     <SectionCard
-      title="Cross-tenant audit search"
+      title={tHC("s20")}
       icon={Search}
       subtitle="Searches every active tenant's audit log. Platform-operator actions (platform.user.*) are recorded in the target tenant's log, so they appear here. Use a trailing * on the action type for a prefix match."
       delay={0.02}
     >
       <form onSubmit={run}>
-        <AdminFilterBar label="Audit filters">
+        <AdminFilterBar label={tHC("s19")}>
           <Input
-            aria-label="Tenant id"
+            aria-label={tHC("s18")}
             className="h-9 w-40"
-            placeholder="Tenant id"
+            placeholder={tHC("s18")}
             value={f.tenantId}
             onChange={set("tenantId")}
           />
           <Input
-            aria-label="Actor id"
+            aria-label={tHC("s17")}
             className="h-9 w-48"
-            placeholder="Actor id"
+            placeholder={tHC("s17")}
             value={f.actorId}
             onChange={set("actorId")}
           />
           <Input
-            aria-label="Action type"
+            aria-label={tHC("s16")}
             className="h-9 w-52"
-            placeholder="Action type (platform.user.*)"
+            placeholder={tHC("s15")}
             value={f.actionType}
             onChange={set("actionType")}
           />
           <Input
-            aria-label="Target type"
+            aria-label={tHC("s14")}
             className="h-9 w-40"
-            placeholder="Target type"
+            placeholder={tHC("s14")}
             value={f.targetType}
             onChange={set("targetType")}
           />
@@ -128,7 +130,7 @@ function AuditSearchSection() {
             <Input type="datetime-local" aria-label="To" className="h-9 w-48" value={f.to} onChange={set("to")} />
           </label>
           <Select
-            aria-label="Row limit"
+            aria-label={tHC("s13")}
             className="w-40"
             value={String(limit)}
             onValueChange={(v) => setLimit(Number(v))}
@@ -156,19 +158,16 @@ function AuditSearchSection() {
           <p className="text-xs text-muted-foreground">
             {result.rows.length} row{result.rows.length === 1 ? "" : "s"} from {result.tenantsScanned} of{" "}
             {result.tenantsInScope} tenant{result.tenantsInScope === 1 ? "" : "s"} (caps: {result.rowLimit} rows,{" "}
-            {result.maxTenants} tenants).
+            {result.maxTenants} {tHC("s12")}
             {result.tenantsFailed > 0 && ` ${result.tenantsFailed} tenant(s) failed and were skipped.`}
           </p>
           {result.truncated && (
             <Alert>
-              <AlertDescription>
-                Results are truncated - more matching rows may exist than are shown. Narrow the filters (tenant, actor,
-                action or date range) to see the rest.
-              </AlertDescription>
+              <AlertDescription>{tHC("s11")}</AlertDescription>
             </Alert>
           )}
           {result.rows.length === 0 ? (
-            <AdminEmptyState title="No audit rows match" description="Widen the date range or clear a filter." />
+            <AdminEmptyState title={tHC("s10")} description="Widen the date range or clear a filter." />
           ) : (
             <AdminTableWrap>
               <table className="w-full min-w-[56rem] text-start text-xs">
@@ -233,12 +232,10 @@ function AuditSearchSection() {
 }
 
 export default function AuditCompliancePage() {
+  const tHC = useTranslations("hcPlatformadminAuditPage");
   return (
-    <AdminShell title="Audit & Compliance">
-      <PageHint>
-        The forensic record and the emergency brake - a searchable audit log of every actor/action/resource/outcome,
-        plus data residency and the platform kill switch.
-      </PageHint>
+    <AdminShell title={tHC("s9")}>
+      <PageHint>{tHC("s8")}</PageHint>
 
       <KillSwitchSection pollMs={15000} delay={0} />
 
@@ -246,26 +243,21 @@ export default function AuditCompliancePage() {
 
       <ActivitySection pollMs={10000} delay={0.03} />
 
-      <SectionCard title="Data residency" icon={ShieldAlert} delay={0.06}>
-        <p className="text-sm text-muted-foreground">
-          Each tenant&rsquo;s declared data-residency jurisdiction (UNSPECIFIED / INDIA / EU / US / OTHER) is shown and
-          editable per tenant on the roster - informational only, it declares intent rather than moving data (see
-          PlatformTenantDataResidencyService).
-        </p>
+      <SectionCard title={tHC("s7")} icon={ShieldAlert} delay={0.06}>
+        <p className="text-sm text-muted-foreground">{tHC("s6")}</p>
         <Link
           href="/platform-admin/tenants"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
-          Open Tenants &amp; Users <ChevronRight size={13} />
+          {tHC("s5")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
 
-      <SectionCard title="Data erasure" icon={ShieldAlert} delay={0.09}>
+      <SectionCard title={tHC("s4")} icon={ShieldAlert} delay={0.09}>
         <p className="text-sm text-muted-foreground">
-          There is no per-subject (single user) GDPR erasure endpoint on the platform. What exists is whole-tenant
-          deletion (<code>DELETE /api/platform/tenants/&#123;id&#125;</code>), which is irreversible, requires the
-          platform master key and a typed tenant-name confirmation, and is not exposed in this console. Erasing an
-          individual user&rsquo;s data is currently a manual operation.
+          {tHC("s3")}
+          <code>{tHC("s2")}</code>
+          {tHC("s1")}
         </p>
       </SectionCard>
     </AdminShell>

@@ -20,6 +20,7 @@ import PaginationControls from "../../../components/PaginationControls";
 import type { EvalCase, EvalDatasetDetail, EvalDatasetSummary } from "../evalDatasetsApi";
 import TrajectoryExpectedEditor from "../TrajectoryExpectedEditor";
 import type { PageState } from "./pageState";
+import { useTranslations } from "../../../lib/i18n";
 
 export interface CaseDraft {
   message: string;
@@ -49,12 +50,11 @@ export default function CasesSection({
   onAddCase: () => void;
   onDeleteCase: (caseId: string) => void;
 }) {
+  const tHC = useTranslations("hcAgentsQualityEvalDatasetsCasesSection");
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-foreground">Cases</h3>
-      {detail && detail.cases.length === 0 && (
-        <p className="text-sm text-muted-foreground">No cases yet — add the first one below.</p>
-      )}
+      {detail && detail.cases.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s8")}</p>}
       {casesPagination.pageItems.map((c) => (
         <div key={c.id} className="flex items-start gap-3 rounded-md border border-border p-3">
           <div className="min-w-0 flex-1 space-y-1">
@@ -84,16 +84,14 @@ export default function CasesSection({
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="shrink-0" aria-label="Delete case">
+              <Button variant="outline" size="sm" className="shrink-0" aria-label={tHC("s7")}>
                 <Trash2 size={13} aria-hidden="true" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete this case?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This permanently deletes the eval case. This cannot be undone.
-                </AlertDialogDescription>
+                <AlertDialogTitle>{tHC("s6")}</AlertDialogTitle>
+                <AlertDialogDescription>{tHC("s5")}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -123,22 +121,18 @@ export default function CasesSection({
           rows={2}
           value={draft.message}
           onChange={(e) => onDraftChange({ message: e.target.value })}
-          placeholder="User message to replay (required)"
+          placeholder={tHC("s4")}
         />
         <Textarea
           rows={2}
           value={draft.expected}
           onChange={(e) => onDraftChange({ expected: e.target.value })}
-          placeholder="Expected answer (optional — given to the accuracy judge as ground truth)"
+          placeholder={tHC("s3")}
         />
-        <Input
-          value={draft.tools}
-          onChange={(e) => onDraftChange({ tools: e.target.value })}
-          placeholder="Expected tools, comma-separated (optional; needs 'Execute tools' on)"
-        />
+        <Input value={draft.tools} onChange={(e) => onDraftChange({ tools: e.target.value })} placeholder={tHC("s2")} />
         <div className="flex justify-end">
           <Button size="sm" onClick={onAddCase} disabled={busy || !draft.message.trim()}>
-            <Plus size={14} aria-hidden="true" /> Add case
+            <Plus size={14} aria-hidden="true" /> {tHC("s1")}
           </Button>
         </div>
       </div>

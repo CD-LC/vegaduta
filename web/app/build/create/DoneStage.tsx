@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Badge } from "../../components/ui/badge";
 import PoweredByChip, { inferSource } from "../../components/PoweredByChip";
 import type { Blueprint } from "../../lib/build/blueprint";
+import { useTranslations } from "../../lib/i18n";
 
 /** Stage 4: the thing is built; offer the next steps. */
 export default function DoneStage({
@@ -27,6 +28,7 @@ export default function DoneStage({
   onOpenApp: (projectId: string) => void;
   onReset: () => void;
 }) {
+    const tHC = useTranslations("hcBuildCreateDoneStage");
   const noun = bp.output === "app" ? "app" : "agent";
   return (
     <motion.div
@@ -79,7 +81,7 @@ export default function DoneStage({
       )}
 
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">What next</p>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s10")}</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {bp.output === "agent" && briefId && (
             <Link
@@ -87,9 +89,9 @@ export default function DoneStage({
               className="group flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <Play aria-hidden="true" className="size-4 text-primary" /> Open your {noun}
+                <Play aria-hidden="true" className="size-4 text-primary" /> {tHC("s9")} {noun}
               </span>
-              <span className="text-xs text-muted-foreground">See it, chat with it and check its track record.</span>
+              <span className="text-xs text-muted-foreground">{tHC("s8")}</span>
             </Link>
           )}
           {bp.output === "agent" && bp.agent.knowledgeBase && (
@@ -98,9 +100,9 @@ export default function DoneStage({
               className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <BookOpen aria-hidden="true" className="size-4 text-primary" /> Add your documents
+                <BookOpen aria-hidden="true" className="size-4 text-primary" /> {tHC("s7")}
               </span>
-              <span className="text-xs text-muted-foreground">So answers come from your own material.</span>
+              <span className="text-xs text-muted-foreground">{tHC("s6")}</span>
             </Link>
           )}
           {bp.output === "agent" && (
@@ -109,10 +111,10 @@ export default function DoneStage({
               className="group flex flex-col gap-1 rounded-xl border border-border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-md"
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <MessageCircle aria-hidden="true" className="size-4 text-primary" /> Put it on a channel{" "}
+                <MessageCircle aria-hidden="true" className="size-4 text-primary" /> {tHC("s5")}{" "}
                 <Badge variant="outline">optional</Badge>
               </span>
-              <span className="text-xs text-muted-foreground">WhatsApp, Telegram or email - when you are ready.</span>
+              <span className="text-xs text-muted-foreground">{tHC("s4")}</span>
             </Link>
           )}
           {bp.output === "app" && projectId && (
@@ -122,10 +124,10 @@ export default function DoneStage({
               className="flex flex-col gap-1 rounded-xl border border-primary/50 bg-primary/10 p-3 text-start transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <GitBranch aria-hidden="true" className="size-4 text-primary" /> Open in Custom apps
+                <GitBranch aria-hidden="true" className="size-4 text-primary" /> {tHC("s3")}
               </span>
               <span className="text-xs text-muted-foreground">
-                Preview it, chat to change it, review the pull request.
+                {tHC("s2")}
               </span>
             </button>
           )}
@@ -133,7 +135,7 @@ export default function DoneStage({
       </div>
 
       <Button variant="outline" onClick={reset}>
-        <Wand2 aria-hidden="true" className="size-4" /> Build something else
+        <Wand2 aria-hidden="true" className="size-4" /> {tHC("s1")}
       </Button>
     </motion.div>
   );

@@ -18,6 +18,7 @@ import { Input } from "./ui/input";
 import PaginationControls from "./PaginationControls";
 import { usePagination } from "../lib/usePagination";
 import SkillScanDialog, { type SkillScanPrompt } from "./skills/SkillScanDialog";
+import { useTranslations } from "../lib/i18n";
 
 const QUICK = [
   "code review",
@@ -39,6 +40,7 @@ const REGISTRIES = [
 type Props = { installed: SkillSummary[]; onChanged: () => Promise<unknown> | void };
 
 export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
+  const tHC = useTranslations("hcComponentsSkillRegistryBrowser");
   const { hasPermission } = useAuth();
   const canManageSkills = hasPermission("MANAGE_AGENTS");
   const [query, setQuery] = useState("");
@@ -136,14 +138,9 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
     <section aria-labelledby="skill-registry-heading" className="mt-10 space-y-4">
       <div>
         <h2 id="skill-registry-heading" className="text-lg font-semibold text-foreground">
-          Skill registry
+          {tHC("s11")}
         </h2>
-        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          Search public Agent Skills and install one in a click. Skills are downloaded from their GitHub source and
-          stored in your workspace as instructions and text files; nothing in them is executed. Read a skill before you
-          give it to an agent, as you would any shared prompt. Each install is scanned first and you see the result
-          before anything is saved; a scan reduces risk, it does not prove a skill is safe.
-        </p>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{tHC("s10")}</p>
       </div>
 
       <form
@@ -162,8 +159,8 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search skills: code review, pdf, testing..."
-            aria-label="Search the skill registry"
+            placeholder={tHC("s9")}
+            aria-label={tHC("s8")}
             className="ps-8"
           />
         </div>
@@ -201,7 +198,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
 
       {!loading && results.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {new Intl.NumberFormat().format(total)} skills match. Showing the most starred.
+          {new Intl.NumberFormat().format(total)} {tHC("s7")}
         </p>
       )}
 
@@ -249,7 +246,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
                           : "Install"}
                     </Button>
                   ) : (
-                    <span className="text-xs text-muted-foreground">Ask a workspace admin to install</span>
+                    <span className="text-xs text-muted-foreground">{tHC("s6")}</span>
                   )}
                 </div>
               </CardContent>
@@ -267,9 +264,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
         itemLabel="skills"
       />
 
-      {!loading && results.length === 0 && !error && (
-        <p className="text-sm text-muted-foreground">No skills found for that search.</p>
-      )}
+      {!loading && results.length === 0 && !error && <p className="text-sm text-muted-foreground">{tHC("s5")}</p>}
 
       {canManageSkills && (
         <form
@@ -280,7 +275,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
           }}
         >
           <label htmlFor="skill-github-link" className="text-xs font-medium text-foreground">
-            Found one elsewhere? Paste its GitHub folder link
+            {tHC("s4")}
           </label>
           <Input
             id="skill-github-link"
@@ -295,13 +290,13 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
             variant="outline"
             disabled={installing !== null || scanning !== null || !link.trim()}
           >
-            Install from link
+            {tHC("s3")}
           </Button>
         </form>
       )}
 
       <p className="text-xs text-muted-foreground">
-        Browse more on{" "}
+        {tHC("s2")}{" "}
         {REGISTRIES.map((r, i) => (
           <span key={r.href}>
             {i > 0 && " and "}
@@ -310,7 +305,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
             </a>
           </span>
         ))}
-        ; any skill there that links to a GitHub folder installs with the box above.
+        {tHC("s1")}
       </p>
 
       <SkillScanDialog prompt={scanPrompt} busy={installing !== null} onCancel={() => setScanPrompt(null)} />

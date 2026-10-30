@@ -25,6 +25,7 @@ import Select from "../components/Select";
 import { usePagination } from "../lib/usePagination";
 import PaginationControls from "../components/PaginationControls";
 import { auth } from "../lib/auth";
+import { useTranslations } from "../../lib/i18n";
 
 // Academy Learners — the admin's learner controls:
 //
@@ -119,6 +120,7 @@ type AcademyLearner = {
 };
 
 export default function AcademyLearnersPage() {
+  const tHC = useTranslations("hcPlatformadminAcademylearnersPage");
   const [learners, setLearners] = useState<AcademyLearner[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -317,9 +319,9 @@ export default function AcademyLearnersPage() {
 
   return (
     <AdminShell
-      title="Academy Learners"
+      title={tHC("s22")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title="Refresh learners">
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("s21")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
@@ -330,16 +332,13 @@ export default function AcademyLearnersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        Unlock opens every remaining lesson for one learner — sequential gating off for them only, completion history
-        untouched, the action recorded. This changes nothing about their tenant&apos;s billing plan. Reset history wipes
-        a learner&apos;s progress back to day one (their login still works). Hide from board keeps a learner off the
-        public leaderboard without touching anything else.
+        {tHC("s20")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </motion.p>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <StatTile label="Learners" value={learners.length} icon={Users} />
-        <StatTile label="Fully open" value={fullyUnlockedCount} icon={LockOpen} />
+        <StatTile label={tHC("s6")} value={fullyUnlockedCount} icon={LockOpen} />
         <StatTile label="Tenants" value={tenants.length} icon={Building2} />
       </div>
 
@@ -353,7 +352,7 @@ export default function AcademyLearnersPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search learner…"
+              placeholder={tHC("s19")}
               className="ps-8"
             />
           </div>
@@ -365,7 +364,7 @@ export default function AcademyLearnersPage() {
                 setConfirmingTenantUnlock(false);
               }}
               options={tenantOptions}
-              placeholder="Filter by tenant…"
+              placeholder={tHC("s18")}
             />
           </div>
         </div>
@@ -379,7 +378,7 @@ export default function AcademyLearnersPage() {
               <>
                 <Button size="sm" variant="destructive" disabled={busyBulk === "tenant"} onClick={handleUnlockTenant}>
                   {busyBulk === "tenant" ? <Loader2 size={14} className="animate-spin" /> : <LockOpen size={14} />}
-                  Confirm tenant unlock
+                  {tHC("s17")}
                 </Button>
                 <Button
                   size="sm"
@@ -391,13 +390,8 @@ export default function AcademyLearnersPage() {
                 </Button>
               </>
             ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setConfirmingTenantUnlock(true)}
-                title="Open the course for every learner in this tenant"
-              >
-                <Building2 size={14} /> Unlock tenant
+              <Button size="sm" variant="outline" onClick={() => setConfirmingTenantUnlock(true)} title={tHC("s16")}>
+                <Building2 size={14} /> {tHC("s15")}
               </Button>
             )
           ) : null}
@@ -406,7 +400,7 @@ export default function AcademyLearnersPage() {
             <>
               <Button size="sm" variant="destructive" disabled={busyBulk === "all"} onClick={handleUnlockAll}>
                 {busyBulk === "all" ? <Loader2 size={14} className="animate-spin" /> : <LockOpen size={14} />}
-                Confirm: unlock for ALL learners
+                {tHC("s14")}
               </Button>
               <Button
                 size="sm"
@@ -418,13 +412,8 @@ export default function AcademyLearnersPage() {
               </Button>
             </>
           ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setConfirmingUnlockAll(true)}
-              title="Opens the course for every learner on this instance — completion history untouched, but every gate opens"
-            >
-              <Users size={14} /> Unlock all users
+            <Button size="sm" variant="outline" onClick={() => setConfirmingUnlockAll(true)} title={tHC("s13")}>
+              <Users size={14} /> {tHC("s12")}
             </Button>
           )}
         </div>
@@ -438,12 +427,19 @@ export default function AcademyLearnersPage() {
 
       <Card className="gap-0 overflow-hidden py-0">
         {loading ? (
-          <p className="p-5 text-sm text-muted-foreground">Loading…</p>
+          <p className="p-5 text-sm text-muted-foreground">{tHC("s11")}</p>
         ) : learners.length === 0 ? (
-          <p className="p-5 text-sm text-muted-foreground">No learners yet.</p>
+          <p className="p-5 text-sm text-muted-foreground">{tHC("s10")}</p>
         ) : filtered.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">
-            {search.trim() ? <>No learners match &ldquo;{search}&rdquo;.</> : "No learners in this tenant filter."}
+            {search.trim() ? (
+              <>
+                {tHC("s9")}
+                {search}&rdquo;.
+              </>
+            ) : (
+              "No learners in this tenant filter."
+            )}
           </p>
         ) : (
           <>
@@ -471,12 +467,12 @@ export default function AcademyLearnersPage() {
                       ) : null}
                       {learner.hiddenFromLeaderboard ? (
                         <Badge variant="outline" className="gap-1 text-[10px]">
-                          <EyeOff size={10} /> Hidden from board
+                          <EyeOff size={10} /> {tHC("s8")}
                         </Badge>
                       ) : null}
                     </div>
                     <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {learner.completedLessons}/{learner.totalLessons} lessons · {learner.labsCompleted} labs ·{" "}
+                      {learner.completedLessons}/{learner.totalLessons} {tHC("s7")} {learner.labsCompleted} labs ·{" "}
                       {learner.xpTotal} XP
                       {learner.lastActiveDate ? ` · active ${formatDate(learner.lastActiveDate)}` : ""}
                     </p>
@@ -485,7 +481,7 @@ export default function AcademyLearnersPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     {learner.fullyUnlocked ? (
                       <Badge variant="outline" className={`${OK_BADGE} gap-1`}>
-                        <LockOpen size={12} /> Fully open
+                        <LockOpen size={12} /> {tHC("s6")}
                       </Badge>
                     ) : confirmingId === learner.id ? (
                       <>
@@ -495,7 +491,7 @@ export default function AcademyLearnersPage() {
                           ) : (
                             <LockOpen size={14} />
                           )}
-                          Confirm unlock
+                          {tHC("s5")}
                         </Button>
                         <Button
                           size="sm"
@@ -508,7 +504,7 @@ export default function AcademyLearnersPage() {
                       </>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => setConfirmingId(learner.id)}>
-                        <Lock size={14} /> Unlock full course
+                        <Lock size={14} /> {tHC("s4")}
                       </Button>
                     )}
 
@@ -540,7 +536,7 @@ export default function AcademyLearnersPage() {
                           ) : (
                             <Trash2 size={14} />
                           )}
-                          Confirm: wipe history
+                          {tHC("s3")}
                         </Button>
                         <Button
                           size="sm"
@@ -557,9 +553,9 @@ export default function AcademyLearnersPage() {
                         variant="ghost"
                         disabled={busyId === learner.id}
                         onClick={() => setConfirmingResetId(learner.id)}
-                        title="Wipe this learner's progress, labs, review state and telemetry — resets them to day one (login keeps working)"
+                        title={tHC("s2")}
                       >
-                        <Trash2 size={14} /> Reset history
+                        <Trash2 size={14} /> {tHC("s1")}
                       </Button>
                     )}
                   </div>

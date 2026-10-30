@@ -18,6 +18,7 @@ import { toast } from "../lib/toastBus";
 import TemplateQueueCard from "../components/templates/TemplateQueueCard";
 import type { CommunityTemplate, TemplateSummary } from "./types";
 import { AdminErrorState } from "../components/admin/AdminKit";
+import { useTranslations } from "../../lib/i18n";
 
 // Community Templates - moderation queue
 // (docs/COMMUNITY-TEMPLATES-CONTRACT-2026-07-30.md). Public submission of
@@ -56,6 +57,7 @@ function ListSkeleton() {
 }
 
 function PendingQueueTab() {
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [templates, setTemplates] = useState<CommunityTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +116,7 @@ function PendingQueueTab() {
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <ListChecks size={16} className="text-primary" /> Pending review
+            <ListChecks size={16} className="text-primary" /> {tHC("s1")}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
             {loading ? "Loading…" : `${totalItems} submission${totalItems === 1 ? "" : "s"} awaiting a decision`}
@@ -135,7 +137,7 @@ function PendingQueueTab() {
 
         {!loading && !error && templates.length === 0 && (
           <p className="rounded-lg border border-border bg-secondary/20 px-4 py-6 text-center text-sm text-muted-foreground">
-            Nothing waiting on review - the queue is empty.
+            {tHC("s16")}
           </p>
         )}
 
@@ -149,12 +151,15 @@ function PendingQueueTab() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search title, submitter, tenant…"
+                placeholder={tHC("s15")}
                 className="ps-8"
               />
             </div>
             {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">No submissions match &ldquo;{search}&rdquo;.</p>
+              <p className="text-sm text-muted-foreground">
+                {tHC("s14")}
+                {search}&rdquo;.
+              </p>
             )}
             <AnimatePresence initial={false}>
               {pageItems.map((t) => (
@@ -186,6 +191,7 @@ function PendingQueueTab() {
 }
 
 function PublishedTab() {
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -238,11 +244,15 @@ function PublishedTab() {
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Globe2 size={16} className="text-primary" /> Published (withdraw)
+            <Globe2 size={16} className="text-primary" /> {tHC("s13")}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            Approved templates currently public in the gallery - pull one after a report with{" "}
-            <code className="font-mono">POST /api/admin/templates/{"{id}"}/withdraw</code>.
+            {tHC("s12")}{" "}
+            <code className="font-mono">
+              {tHC("s11")}
+              {"{id}"}/withdraw
+            </code>
+            .
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
@@ -251,28 +261,28 @@ function PublishedTab() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          Reads the admin-scoped approved list (<code className="font-mono">GET /api/admin/templates/approved</code>)
-          purely to find a template to withdraw - it&rsquo;s a summary (no config, no submitter/tenant history), since
-          that was already reviewed in full at approval time.
+          {tHC("s10")}
+          <code className="font-mono">{tHC("s9")}</code>
+          {tHC("s8")}
         </p>
         {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
         {loading && !error && <ListSkeleton />}
         {!loading && !error && templates.length === 0 && (
           <p className="rounded-lg border border-border bg-secondary/20 px-4 py-6 text-center text-sm text-muted-foreground">
-            Nothing published yet.
+            {tHC("s7")}
           </p>
         )}
         {!loading && !error && templates.length > 0 && (
           <Input
-            aria-label="Search published templates"
+            aria-label={tHC("s6")}
             className="h-9 max-w-sm"
-            placeholder="Search title, summary or category"
+            placeholder={tHC("s5")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         )}
         {!loading && !error && templates.length > 0 && filtered.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">No published templates match.</p>
+          <p className="text-center text-sm text-muted-foreground">{tHC("s4")}</p>
         )}
         {!loading && !error && templates.length > 0 && (
           <AnimatePresence initial={false}>
@@ -303,14 +313,12 @@ function PublishedTab() {
 }
 
 export default function CommunityTemplatesPage() {
+  const tHC = useTranslations("hcPlatformadminTemplatesPage");
   const [tab, setTab] = useState("pending");
 
   return (
-    <AdminShell title="Community Templates">
-      <PageHint>
-        The moderation gate for the community template gallery - review a submitted agent or workflow&rsquo;s full,
-        sanitised config before it ever becomes public. Nothing here is auto-approved.
-      </PageHint>
+    <AdminShell title={tHC("s3")}>
+      <PageHint>{tHC("s2")}</PageHint>
 
       <InfoNote>
         A template is a design snapshot only (system prompt, model/provider choice, tool/MCP names, guardrail settings,
@@ -325,7 +333,7 @@ export default function CommunityTemplatesPage() {
       >
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="max-w-md">
-            <TabsTrigger value="pending">Pending review</TabsTrigger>
+            <TabsTrigger value="pending">{tHC("s1")}</TabsTrigger>
             <TabsTrigger value="published">Published</TabsTrigger>
           </TabsList>
           <TabsContent value="pending">

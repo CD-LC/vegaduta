@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { runFaqEval, type FaqEvalCase, type FaqEvalReport } from "../../lib/edge/faqEval";
 import { EDGE_OPT_IN_KEY, EDGE_ROUTING_PREF_KEY } from "../../lib/edge/capabilities";
+import { useTranslations } from "../../lib/i18n";
 
 declare global {
   interface Window {
@@ -32,6 +33,7 @@ declare global {
  * immediately; otherwise a Start button is shown for manual runs.
  */
 export default function EdgeFaqEvalPage() {
+  const tHC = useTranslations("hcEvalEdgefaqPage");
   const [status, setStatus] = useState("idle");
   const [progress, setProgress] = useState("");
   const [report, setReport] = useState<FaqEvalReport | null>(null);
@@ -51,8 +53,7 @@ export default function EdgeFaqEvalPage() {
 
       setStatus(`running ${cases.length} cases`);
       const r = await runFaqEval(cases, {
-        onProgress: (done, total, last) =>
-          setProgress(`${done}/${total} ${last.id}: ${last.outcome}`),
+        onProgress: (done, total, last) => setProgress(`${done}/${total} ${last.id}: ${last.outcome}`),
       });
       window.__FAQ_EVAL_RESULT__ = r;
       setReport(r);
@@ -64,9 +65,14 @@ export default function EdgeFaqEvalPage() {
         datasetCaseCount: 0,
         results: [],
         summary: {
-          handled: 0, fallback: 0, errors: 0,
-          abstentionExpected: 0, abstentionDetected: 0, abstentionMissed: 0,
-          latencyMsP50: null, latencyMsMax: null,
+          handled: 0,
+          fallback: 0,
+          errors: 0,
+          abstentionExpected: 0,
+          abstentionDetected: 0,
+          abstentionMissed: 0,
+          latencyMsP50: null,
+          latencyMsMax: null,
         },
       };
       window.__FAQ_EVAL_RESULT__ = failed;
@@ -79,13 +85,14 @@ export default function EdgeFaqEvalPage() {
     if (new URLSearchParams(window.location.search).get("autorun") === "1") {
       void run();
     }
-     
   }, []);
 
   return (
     <main style={{ padding: 24, fontFamily: "monospace" }}>
-      <h1>Edge FAQ eval</h1>
-      <p data-testid="eval-status" id="eval-status">{status}</p>
+      <h1>{tHC("s1")}</h1>
+      <p data-testid="eval-status" id="eval-status">
+        {status}
+      </p>
       <p id="eval-progress">{progress}</p>
       {!report && (
         <button onClick={() => void run()} disabled={started.current}>

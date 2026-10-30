@@ -5,9 +5,11 @@ import { Button } from "../../components/ui/button";
 import SandboxFrame from "../SandboxFrame";
 import Select from "../../components/Select";
 import type { ProjectSession } from "./useProjectSession";
+import { useTranslations } from "../../lib/i18n";
 
 /** Centre column: the device preview (sandboxed iframe) with its toolbar and preview-only environment toggles. */
 export default function PreviewPane({ s }: { s: ProjectSession }) {
+    const tHC = useTranslations("hcBuildStudioPreviewPane");
   const {
     busy, device, editable, env, frameRef, inspect, nonce, project, scale, setDevice, setEnv, setNonce, size, srcDoc, stageRef, syncEnv, syncInspect, undo, undoTarget
   } = s;
@@ -26,20 +28,20 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
           </Button>
         ))}
         <span className="mx-1 h-4 w-px bg-border" />
-        <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label="Reload app" title="Reload app">
+        <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label={tHC("s7")} title={tHC("s7")}>
           <RefreshCw aria-hidden="true" size={14} />
         </Button>
-        <Button variant="ghost" size="sm" onClick={undo} disabled={undoTarget() < 0 || !!busy || !editable} aria-label="Undo" title="Undo last change">
+        <Button variant="ghost" size="sm" onClick={undo} disabled={undoTarget() < 0 || !!busy || !editable} aria-label="Undo" title={tHC("s6")}>
           <RotateCcw aria-hidden="true" size={14} />
         </Button>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-1.5" role="group" aria-label="Preview conditions">
+      <div className="flex flex-wrap items-center justify-center gap-1.5" role="group" aria-label={tHC("s5")}>
         <Button
           variant={env.dark ? "secondary" : "ghost"}
           size="sm"
           aria-pressed={env.dark}
           onClick={() => setEnv((e) => ({ ...e, dark: !e.dark }))}
-          title="Preview the app as if the phone were in dark mode"
+          title={tHC("s4")}
           className="gap-1 text-xs"
         >
           <Moon aria-hidden="true" size={13} /> Dark
@@ -49,7 +51,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
           size="sm"
           aria-pressed={env.offline}
           onClick={() => setEnv((e) => ({ ...e, offline: !e.offline }))}
-          title="Preview with no connection: fetch() and connected services fail"
+          title={tHC("s3")}
           className="gap-1 text-xs"
         >
           <WifiOff aria-hidden="true" size={13} /> Offline
@@ -57,7 +59,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
         <Select
           value={env.delayMs}
           onChange={(e) => setEnv((v) => ({ ...v, delayMs: Number(e.target.value) }))}
-          aria-label="Simulated network speed"
+          aria-label={tHC("s2")}
           className="rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground"
           options={[
             { value: 0, label: "Network: normal" },
@@ -96,7 +98,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
         </div>
         {inspect && (
           <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-orange-500 px-3 py-1 text-xs font-medium text-white shadow">
-            Tap any part of the app to change it
+            {tHC("s1")}
           </div>
         )}
       </div>

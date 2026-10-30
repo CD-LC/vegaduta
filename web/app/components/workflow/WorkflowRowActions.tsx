@@ -37,6 +37,7 @@ export default function WorkflowRowActions({
   onCopyLink: () => void;
   onDelete: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowRowActions");
   const t = useTranslations("workflowDesignerPanel");
   const deleteButton = (
     <Button
@@ -71,7 +72,7 @@ export default function WorkflowRowActions({
             className="size-8"
             disabled={atLimit || duplicating}
             onClick={onDuplicate}
-            aria-label="Duplicate workflow"
+            aria-label={tHC("s2")}
           >
             {duplicating ? (
               <Loader2 aria-hidden="true" size={15} className="animate-spin" />
@@ -84,7 +85,7 @@ export default function WorkflowRowActions({
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label="Copy workflow link">
+          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label={tHC("s1")}>
             {copied ? <Check aria-hidden="true" size={15} /> : <Link2 aria-hidden="true" size={15} />}
           </Button>
         </TooltipTrigger>

@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { studio, type RegistryHit, type StudioAgent, type StudioConnector } from "./studioClient";
 import { connectorToolLabel } from "./studioContent";
+import { useTranslations } from "../../lib/i18n";
 
 // Search the public MCP registry and plug a hosted server into ONE agent.
 // Searching is always live; connecting is a separate switch on the backend, and
@@ -29,6 +30,7 @@ type Props = {
 const QUICK = ["weather", "github", "maps", "search", "notion", "finance", "docs", "calendar"];
 
 export default function AgentConnectors({ token, agent, readOnly, connectorsEnabled, suggestions, onChanged }: Props) {
+  const tHC = useTranslations("hcComponentsStudioAgentConnectors");
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<RegistryHit[] | null>(null);
   const [unavailable, setUnavailable] = useState(false);
@@ -113,28 +115,22 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-sm font-medium">Plug in the outside world</div>
-        <p className="text-xs text-muted-foreground">
-          The MCP registry is the public directory of tools agents can use - calendars, code hosts, weather, maps.
-          Search it, connect one, and the agent can call it on its next mission.
-        </p>
+        <div className="text-sm font-medium">{tHC("s12")}</div>
+        <p className="text-xs text-muted-foreground">{tHC("s11")}</p>
       </div>
 
       {!connectorsEnabled && (
         <Alert>
           <Lock aria-hidden="true" />
-          <AlertTitle>Browse now, connect in your workspace</AlertTitle>
-          <AlertDescription>
-            Live connections are switched off in this shared sandbox. The search below is the real registry; sign up and
-            the same list connects with one click.
-          </AlertDescription>
+          <AlertTitle>{tHC("s10")}</AlertTitle>
+          <AlertDescription>{tHC("s9")}</AlertDescription>
         </Alert>
       )}
 
       {(connected?.length ?? 0) > 0 && (
         <div className="space-y-2">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Connected to {agent.name}
+            {tHC("s8")} {agent.name}
           </div>
           {connected!.map((c) => (
             <div
@@ -179,9 +175,9 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search the MCP registry - weather, github, maps…"
+          placeholder={tHC("s7")}
           className="ps-9"
-          aria-label="Search the MCP registry"
+          aria-label={tHC("s6")}
         />
         {searching && (
           <Loader2
@@ -208,12 +204,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
 
       {error && <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-2.5 text-sm">{error}</div>}
 
-      {unavailable && (
-        <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-          The registry didn&apos;t answer just now - that&apos;s different from &ldquo;no matches&rdquo;. Try again in a
-          moment.
-        </div>
-      )}
+      {unavailable && <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">{tHC("s5")}</div>}
 
       <ul className="space-y-2">
         {hits === null && [0, 1, 2].map((i) => <li key={i} className="h-16 animate-pulse rounded-xl bg-muted/50" />)}
@@ -237,8 +228,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
                 <div className="truncate font-medium">{h.title}</div>
                 <div className="line-clamp-2 text-xs text-muted-foreground">{h.description ?? h.name}</div>
                 <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <ExternalLink aria-hidden="true" className="h-3 w-3 shrink-0" /> {h.host ?? "hosted"} · no credentials
-                  needed
+                  <ExternalLink aria-hidden="true" className="h-3 w-3 shrink-0" /> {h.host ?? "hosted"} {tHC("s4")}
                 </div>
               </div>
               {connectorsEnabled ? (
@@ -248,7 +238,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
                   <TooltipTrigger asChild>
                     <span>{button}</span>
                   </TooltipTrigger>
-                  <TooltipContent>Connections open up in your own workspace.</TooltipContent>
+                  <TooltipContent>{tHC("s3")}</TooltipContent>
                 </Tooltip>
               )}
             </li>
@@ -256,13 +246,13 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
         })}
         {hits !== null && hits.length === 0 && !unavailable && !searching && (
           <li className="rounded-xl border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-            Nothing hosted and credential-free matches that. Try a broader word.
+            {tHC("s2")}
           </li>
         )}
       </ul>
       {next && (
         <Button size="sm" variant="ghost" disabled={searching} onClick={() => void search(q.trim() || seed, next)}>
-          Show more
+          {tHC("s1")}
         </Button>
       )}
     </div>

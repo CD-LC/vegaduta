@@ -35,8 +35,13 @@
  * <CommentComposer> - textarea + @mention picker; Ctrl/Cmd+Enter sends.
  */
 import {
-  useCallback, useId, useMemo, useRef, useState,
-  type CSSProperties, type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { Check, CircleDot, Crosshair, MessageSquare, RotateCcw, X } from "lucide-react";
 import {
@@ -60,6 +65,7 @@ import { useNow, useReturnFocus, type MentionPerson, type ThreadsUpdater } from 
 import { CommentComposer } from "./CommentComposer";
 import CommentItem from "./CommentItem";
 import "./comments.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type { MentionPerson, MutationPhase, ThreadsUpdater } from "./commentCardShared";
 export { CommentComposer, type CommentComposerProps } from "./CommentComposer";
@@ -87,9 +93,23 @@ export interface CommentThreadProps {
 }
 
 export default function CommentThread({
-  workflowId, thread, number, people = [], currentUserId, currentUserName, onThreadsChange, onClose,
-  nodeLabel, onFocusNode, autoFocus = false, onFocusFallback, className, style, anchored = false,
+  workflowId,
+  thread,
+  number,
+  people = [],
+  currentUserId,
+  currentUserName,
+  onThreadsChange,
+  onClose,
+  nodeLabel,
+  onFocusNode,
+  autoFocus = false,
+  onFocusFallback,
+  className,
+  style,
+  anchored = false,
 }: CommentThreadProps) {
+  const tHC = useTranslations("hcComponentsWorkflowCommentThread");
   const uid = useId();
   const titleId = `${uid}-title`;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -103,11 +123,14 @@ export default function CommentThread({
   const [announce, setAnnounce] = useState("");
 
   const peopleById = useMemo(() => new Map(people.map((p) => [p.id, p])), [people]);
-  const me = useMemo<CommentPerson>(() => ({
-    id: currentUserId ?? "me",
-    displayName: currentUserName || (currentUserId && peopleById.get(currentUserId)?.displayName) || "You",
-  }), [currentUserId, currentUserName, peopleById]);
-  const where = thread.nodeId ? (nodeLabel?.(thread.nodeId) || "Step") : "Canvas";
+  const me = useMemo<CommentPerson>(
+    () => ({
+      id: currentUserId ?? "me",
+      displayName: currentUserName || (currentUserId && peopleById.get(currentUserId)?.displayName) || "You",
+    }),
+    [currentUserId, currentUserName, peopleById]
+  );
+  const where = thread.nodeId ? nodeLabel?.(thread.nodeId) || "Step" : "Canvas";
   const replyCount = thread.replies.length;
 
   const fail = useCallback((message: string) => {
@@ -124,7 +147,10 @@ export default function CommentThread({
       requestAnimationFrame(() => listRef.current?.lastElementChild?.scrollIntoView({ block: "nearest" }));
       const r = await createWorkflowComment(workflowId, { body, parentId: thread.id, mentions: mentionIds });
       if (r.ok) {
-        onThreadsChange((prev) => replaceComment(prev, temp.id, { ...r.data, parentId: r.data.parentId ?? thread.id }), "settle");
+        onThreadsChange(
+          (prev) => replaceComment(prev, temp.id, { ...r.data, parentId: r.data.parentId ?? thread.id }),
+          "settle"
+        );
         setAnnounce("Reply posted.");
         return true;
       }
@@ -132,13 +158,17 @@ export default function CommentThread({
       fail(r.status === 404 ? "This thread no longer exists." : r.message);
       return false;
     },
-    [workflowId, thread, onThreadsChange, fail, me],
+    [workflowId, thread, onThreadsChange, fail, me]
   );
 
   /* ---- edit own ---- */
   const saveEdit = useCallback(
     async (
-      target: CommentView, body: string, pickedIds: string[], mentioned: CommentPerson[], meta: { pickedDuringEdit: boolean },
+      target: CommentView,
+      body: string,
+      pickedIds: string[],
+      mentioned: CommentPerson[],
+      meta: { pickedDuringEdit: boolean }
     ): Promise<boolean> => {
       setError(null);
       const before = (target.body ?? "").trim();
@@ -147,7 +177,10 @@ export default function CommentThread({
       const ids = editMentionIds({
         before,
         after: body,
-        original: target.mentions.map((m) => ({ id: m.id, labels: mentionLabels(m.id, [peopleById.get(m.id)?.displayName, m.displayName]) })),
+        original: target.mentions.map((m) => ({
+          id: m.id,
+          labels: mentionLabels(m.id, [peopleById.get(m.id)?.displayName, m.displayName]),
+        })),
         pickedIds,
         pickedDuringEdit: meta.pickedDuringEdit,
       });
@@ -156,12 +189,20 @@ export default function CommentThread({
         setEditingId(null);
         return true;
       }
-      const nextMentions = ids === null
-        ? target.mentions
-        : ids.map((id) => mentioned.find((p) => p.id === id) ?? target.mentions.find((p) => p.id === id) ?? { id, displayName: null });
+      const nextMentions =
+        ids === null
+          ? target.mentions
+          : ids.map(
+              (id) =>
+                mentioned.find((p) => p.id === id) ??
+                target.mentions.find((p) => p.id === id) ?? { id, displayName: null }
+            );
       setBusyId(target.id);
       const prev = target;
-      onThreadsChange((p) => patchComment(p, target.id, { body, mentions: nextMentions, updatedAt: new Date().toISOString() }), "start");
+      onThreadsChange(
+        (p) => patchComment(p, target.id, { body, mentions: nextMentions, updatedAt: new Date().toISOString() }),
+        "start"
+      );
       setEditingId(null);
       const r = await updateWorkflowComment(workflowId, target.id, ids === null ? { body } : { body, mentions: ids });
       setBusyId(null);
@@ -174,7 +215,7 @@ export default function CommentThread({
       fail(r.status === 410 || r.status === 404 ? "This comment was deleted." : r.message);
       return false;
     },
-    [workflowId, onThreadsChange, fail, peopleById],
+    [workflowId, onThreadsChange, fail, peopleById]
   );
 
   /* ---- delete own ---- */
@@ -206,7 +247,7 @@ export default function CommentThread({
       onThreadsChange((p) => (snap ? restoreThread(p, snap, index) : p), "settle");
       fail(r.message);
     },
-    [workflowId, thread.id, onThreadsChange, fail],
+    [workflowId, thread.id, onThreadsChange, fail]
   );
 
   /* ---- resolve / reopen ---- */
@@ -219,15 +260,25 @@ export default function CommentThread({
     setResolving(true);
     const next = !thread.resolved;
     const before = { resolved: thread.resolved, by: thread.resolvedBy, at: thread.resolvedAt };
-    onThreadsChange((p) => setThreadResolved(p, thread.id, next, currentUserId ?? null, new Date().toISOString()), "start");
+    onThreadsChange(
+      (p) => setThreadResolved(p, thread.id, next, currentUserId ?? null, new Date().toISOString()),
+      "start"
+    );
     const r = await updateWorkflowComment(workflowId, resolveVia, { resolved: next });
     setResolving(false);
     if (r.ok) {
       // The response is the row we PATCHed (root or the carrying reply) with
       // the root's resolution mirrored onto it.
       onThreadsChange(
-        (p) => setThreadResolved(replaceComment(p, resolveVia, r.data), thread.id, r.data.resolved, r.data.resolvedBy, r.data.resolvedAt),
-        "settle",
+        (p) =>
+          setThreadResolved(
+            replaceComment(p, resolveVia, r.data),
+            thread.id,
+            r.data.resolved,
+            r.data.resolvedBy,
+            r.data.resolvedAt
+          ),
+        "settle"
       );
       setAnnounce(next ? "Thread resolved." : "Thread reopened.");
       return;
@@ -285,7 +336,12 @@ export default function CommentThread({
         </div>
         <div className="wfc-head-actions">
           {thread.nodeId && onFocusNode && !thread.orphaned && (
-            <button type="button" className="wfc-icon" aria-label={`Show ${where} on canvas`} onClick={() => onFocusNode(thread.nodeId as string)}>
+            <button
+              type="button"
+              className="wfc-icon"
+              aria-label={`Show ${where} on canvas`}
+              onClick={() => onFocusNode(thread.nodeId as string)}
+            >
               <Crosshair size={13} aria-hidden="true" />
             </button>
           )}
@@ -302,7 +358,7 @@ export default function CommentThread({
               {thread.resolved ? "Reopen" : "Resolve"}
             </button>
           )}
-          <button type="button" className="wfc-icon" aria-label="Close comment thread" onClick={onClose}>
+          <button type="button" className="wfc-icon" aria-label={tHC("s3")} onClick={onClose}>
             <X size={14} aria-hidden="true" />
           </button>
         </div>
@@ -311,7 +367,7 @@ export default function CommentThread({
       {thread.orphaned && (
         <p className="wfc-banner" data-tone="warn">
           <CircleDot size={12} aria-hidden="true" />
-          This step was removed. The thread is kept for reference.
+          {tHC("s2")}
         </p>
       )}
       {thread.resolved && (
@@ -324,7 +380,7 @@ export default function CommentThread({
 
       <div className="wfc-scroll">
         {rootGone ? (
-          <p className="wfc-deleted">This thread was deleted.</p>
+          <p className="wfc-deleted">{tHC("s1")}</p>
         ) : (
           <ol className="wfc-list" ref={listRef}>
             {all.map((c) => (
@@ -367,7 +423,9 @@ export default function CommentThread({
           />
         </div>
       )}
-      <span className="wfc-sr" aria-live="polite">{announce}</span>
+      <span className="wfc-sr" aria-live="polite">
+        {announce}
+      </span>
     </div>
   );
 }

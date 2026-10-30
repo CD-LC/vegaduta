@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { TOUR_PULSE, TONES } from "./studioTheme";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import "./studio.css";
+import { useTranslations } from "../../lib/i18n";
 
 // An interactive coach-mark tour over the REAL studio. It dims the page except
 // for one control at a time, points at it, and - for steps marked as actions -
@@ -62,6 +63,7 @@ function rectOf(el: HTMLElement): Rect {
 }
 
 export default function TourSpotlight({ open, steps, onClose }: Props) {
+  const tHC = useTranslations("hcComponentsStudioTourSpotlight");
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [cardH, setCardH] = useState(220);
@@ -279,7 +281,7 @@ export default function TourSpotlight({ open, steps, onClose }: Props) {
           <button
             type="button"
             onClick={() => onClose(false)}
-            aria-label="Skip the tour"
+            aria-label={tHC("s2")}
             className="text-muted-foreground hover:text-foreground"
           >
             <X aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -307,7 +309,7 @@ export default function TourSpotlight({ open, steps, onClose }: Props) {
             <ArrowLeft aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Back
           </Button>
           <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => onClose(false)}>
-            Skip tour
+            {tHC("s1")}
           </Button>
           <Button size="sm" className={`ms-auto ${t.cta}`} onClick={() => go(1)}>
             {last ? "Finish" : isAction ? "Skip ahead" : "Next"}{" "}

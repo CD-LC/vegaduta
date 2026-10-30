@@ -26,6 +26,7 @@ export default function OnDeviceFooter({
   onLearningOptInChange: (on: boolean) => void;
   memoryWriteStatus: EdgeMemoryWriteStatus | null;
 }) {
+  const tHC = useTranslations("hcComponentsAgentsIntelligenceOnDeviceFooter");
   const t = useTranslations("edgeIntelligence");
   return (
     <>
@@ -41,9 +42,8 @@ export default function OnDeviceFooter({
         </p>
       ) : tier0Status === "available" || tier0Status === "downloadable" || tier0Status === "downloading" ? (
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-          Chat-only replies from {EDGE_BRANDING.tier0ModelDisplayName}, free and private — no tool calls yet. If it
-          can&rsquo;t answer in this browser, this agent automatically falls back to {hostedFallbackTarget} instead
-          of showing an error.
+          {tHC("s3")} {EDGE_BRANDING.tier0ModelDisplayName}
+          {tHC("s2")} {hostedFallbackTarget} {tHC("s1")}
         </p>
       ) : (
         <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">

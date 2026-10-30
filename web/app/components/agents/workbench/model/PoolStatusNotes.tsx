@@ -5,9 +5,11 @@ import Link from "next/link";
 import { Button } from "../../../ui/button";
 import { useWorkbench } from "../context";
 import { isPersonalInstall, poolLabel } from "../../../../lib/personalInstall";
+import { useTranslations } from "../../../../lib/i18n";
 
 /** Platform pool vs own provider key status, each with the tenant-wide switch to the other. */
 export default function PoolStatusNotes() {
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchModelPoolStatusNotes");
   const {
     t,
     onPlatformLlm,
@@ -55,18 +57,10 @@ export default function PoolStatusNotes() {
                 : t("platformLlmNoteUnavailable")}
           </p>
           {isFreePlan ? (
-            <p className="m-0 text-[12.5px] leading-relaxed text-muted-foreground">
-              {t("platformLlmFreeUpgradeHint")}
-            </p>
+            <p className="m-0 text-[12.5px] leading-relaxed text-muted-foreground">{t("platformLlmFreeUpgradeHint")}</p>
           ) : (
             <div className="mt-0.5">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSwitchToByok}
-                disabled={switchByokBusy}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={handleSwitchToByok} disabled={switchByokBusy}>
                 {switchByokBusy ? t("switchingToByok") : t("switchToByok")}
               </Button>
             </div>
@@ -79,18 +73,16 @@ export default function PoolStatusNotes() {
        * tenant-wide usePlatformLlm call as the pool -> BYOK switch. */}
       {!onPlatformLlm && (
         <div className="mb-3 flex flex-col gap-1.5 rounded-lg border border-border bg-secondary/20 px-3 py-2.5">
-          <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-            Own provider key (BYOK)
-          </span>
+          <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">{tHC("s5")}</span>
           <p className="m-0 text-[12.5px] leading-relaxed text-foreground">
-            This workspace runs on your own provider key
+            {tHC("s4")}
             {activeProviders.length === 0 ? (
               <>
-                , but none is active yet -{" "}
+                {tHC("s3")}{" "}
                 <Link href="/providers" className="font-medium text-primary underline-offset-4 hover:underline">
-                  add one on the Providers page
+                  {tHC("s2")}
                 </Link>{" "}
-                to pick your own models. The page walks you through creating an API key.
+                {tHC("s1")}
               </>
             ) : (
               "."

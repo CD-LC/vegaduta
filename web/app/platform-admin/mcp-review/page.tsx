@@ -16,6 +16,7 @@ import PaginationControls from "../components/PaginationControls";
 import { usePagination } from "../lib/usePagination";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { AdminErrorState, AdminEmptyState } from "../components/admin/AdminKit";
+import { useTranslations } from "../../lib/i18n";
 
 // MCP-STDIO-SANDBOXING (2026-08-05) - platform-staff review queue for
 // self-service custom/registry-browsed STDIO MCP registrations. Per
@@ -66,6 +67,7 @@ function formatDateTime(iso: string | null): string {
 }
 
 export default function McpReviewQueuePage() {
+  const tHC = useTranslations("hcPlatformadminMcpreviewPage");
   const askConfirm = useConfirm();
   const [rows, setRows] = useState<PendingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -155,31 +157,23 @@ export default function McpReviewQueuePage() {
 
   return (
     <AdminShell
-      title="MCP Review Queue"
+      title={tHC("s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
-      <PageHint>
-        Self-service custom or registry-browsed STDIO MCP registrations (hand-typed, or added via a tenant&rsquo;s
-        &ldquo;Browse registry&rdquo; search) can never spawn a process until approved here - remote (SSE/HTTP)
-        connections and curated catalog entries skip this gate entirely and never appear below.
-      </PageHint>
-      <InfoNote>
-        Approving lets this exact command/args run inside the shared core container for that tenant going forward. Look
-        at the command and args as real, executable input - this queue exists because no automated allowlist could
-        safely close that gap on its own.
-      </InfoNote>
+      <PageHint>{tHC("s8")}</PageHint>
+      <InfoNote>{tHC("s7")}</InfoNote>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
 
       {rows.length > 0 && (
         <Input
-          aria-label="Search registrations"
+          aria-label={tHC("s6")}
           className="mb-4 h-9 max-w-sm"
-          placeholder="Search tenant, server, command"
+          placeholder={tHC("s5")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -195,10 +189,10 @@ export default function McpReviewQueuePage() {
           ) : rows.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-8 text-center">
               <CheckCircle2 size={20} className="text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Nothing waiting on review - the queue is empty.</p>
+              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             </div>
           ) : filtered.length === 0 ? (
-            <AdminEmptyState title="No registrations match" description="Try a different search or status." />
+            <AdminEmptyState title={tHC("s3")} description="Try a different search or status." />
           ) : (
             <>
               {/* Stacked cards below md - the wide table's min-width put the
@@ -226,7 +220,9 @@ export default function McpReviewQueuePage() {
                         {row.command}
                         {row.args ? ` ${formatArgs(row.args)}` : ""}
                       </code>
-                      <div className="text-xs text-muted-foreground">Requested by {row.requestedBy || "—"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {tHC("s2")} {row.requestedBy || "—"}
+                      </div>
                       <div className="flex gap-2">
                         <Button
                           variant="default"
@@ -256,7 +252,7 @@ export default function McpReviewQueuePage() {
                           <Textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder='Reason (optional) - shown to the tenant, e.g. "no published source for this package"'
+                            placeholder={tHC("s1")}
                             className="min-h-16 resize-y text-sm"
                             disabled={busy}
                           />
@@ -277,7 +273,7 @@ export default function McpReviewQueuePage() {
                       <th className="px-3 py-2 font-medium">Tenant</th>
                       <th className="px-3 py-2 font-medium">Server</th>
                       <th className="px-3 py-2 font-medium">Command</th>
-                      <th className="px-3 py-2 font-medium">Requested by</th>
+                      <th className="px-3 py-2 font-medium">{tHC("s2")}</th>
                       <th className="px-3 py-2 font-medium">Created</th>
                       <th className="px-3 py-2 text-end font-medium">Actions</th>
                     </tr>
@@ -345,7 +341,7 @@ export default function McpReviewQueuePage() {
                                   <Textarea
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
-                                    placeholder='Reason (optional) - shown to the tenant, e.g. "no published source for this package"'
+                                    placeholder={tHC("s1")}
                                     className="min-h-16 flex-1 resize-y text-sm"
                                     disabled={busy}
                                   />

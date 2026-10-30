@@ -81,6 +81,7 @@ function tricklePct(elapsedMs, phase) {
 }
 
 export default function ReposTab({ repos, repoId, setRepoId, refresh, onError }) {
+  const tHC = useTranslations("hcCodeintelReposTab");
   const t = useTranslations("codeIntel");
   const [form, setForm] = useState({
     repo_id: "",
@@ -309,7 +310,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                   onChange={(e) => setForm({ ...form, git_url: e.target.value })}
                 />
               </Field>
-              <Field label="Auth env var (optional)">
+              <Field label={tHC("s5")}>
                 <Input
                   value={form.auth_env}
                   placeholder="GITHUB_TOKEN_ACME"
@@ -378,7 +379,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                     className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     disabled={indexing}
                     onClick={() => setPendingDeleteRepo(r)}
-                    aria-label="Delete repository"
+                    aria-label={tHC("s4")}
                   >
                     <Trash2 size={13} />
                   </Button>
@@ -407,10 +408,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      Safe to leave this page — indexing continues on the server and this progress will still be here
-                      when you return. No need to click again.
-                    </p>
+                    <p className="text-[11px] leading-relaxed text-muted-foreground">{tHC("s3")}</p>
                   </div>
                 )}
               </div>
@@ -431,11 +429,11 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
       <AlertDialog open={!!pendingDeleteRepo} onOpenChange={(open) => !open && setPendingDeleteRepo(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete repository &quot;{pendingDeleteRepo?.repo_id}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes the repository and its index from code-intel. Search, graph queries and autonomous-resolve
-              will no longer find anything in it.
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {tHC("s2")}
+              {pendingDeleteRepo?.repo_id}&quot;?
+            </AlertDialogTitle>
+            <AlertDialogDescription>{tHC("s1")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deletingRepo}>Cancel</AlertDialogCancel>

@@ -4,8 +4,7 @@
 // Split out of page.tsx (behaviour unchanged).
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Loader2, Send, ImagePlus, LayoutTemplate, Paperclip, Archive, Mic, MicOff } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Textarea } from "../components/ui/textarea";
+import { Button } from "../components/ui/button"; import { Textarea } from "../components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useTranslations } from "../lib/i18n";
 import { appBuilder } from "./lib";
@@ -39,6 +38,7 @@ export default function ChatPane({
   fileSet,
   disabled,
 }: any) {
+    const tHC = useTranslations("hcBuildChatPane");
   const t = useTranslations("appBuilder");
   const pid = project.project_id;
   // The thread and the unsent draft survive a surface-tab switch / reload
@@ -656,7 +656,7 @@ export default function ChatPane({
             {listening
               ? "Listening… speak your request."
               : voiceNote || (
-                  <span className="hidden sm:inline">Enter to send · Shift+Enter for a new line · / to focus</span>
+                  <span className="hidden sm:inline">{tHC("s1")}</span>
                 )}
           </p>
         </div>

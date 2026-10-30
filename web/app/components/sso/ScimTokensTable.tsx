@@ -27,6 +27,7 @@ const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleString() : "-")
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 export default function ScimTokensTable() {
+  const tHC = useTranslations("hcComponentsSsoScimTokensTable");
   const t = useTranslations("privacySso");
   const [tokens, setTokens] = useState<ScimTokenDto[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -104,7 +105,7 @@ export default function ScimTokensTable() {
             id="scim-label"
             value={label}
             maxLength={120}
-            placeholder="Okta provisioning"
+            placeholder={tHC("s1")}
             onChange={(e) => setLabel(e.target.value)}
           />
         </div>

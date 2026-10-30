@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/button";
 import { STT_MODEL_SIZE_BYTES } from "../../lib/edge/audio/whisper";
 import { TTS_MODEL_SIZE_BYTES } from "../../lib/edge/audio/kokoro";
 import type { DownloadState } from "../../lib/voice/callPreflight";
+import { useTranslations } from "../../lib/i18n";
 
 function approxMb(bytes: number): string {
   return `~${Math.round(bytes / 1_000_000)} MB`;
@@ -70,13 +71,11 @@ export default function ShareVoiceSetup({
   onSttDownload: () => void;
   onTtsDownload: () => void;
 }) {
+  const tHC = useTranslations("hcAgentShareIdShareVoiceSetup");
   if (!sttInstallable && !ttsInstallable) return null;
   return (
     <div className="flex flex-col gap-1.5 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
-      <p className="text-xs text-muted-foreground">
-        Download voice models to this device so you can talk even when the platform&apos;s speech services are
-        unavailable - audio then stays on this device entirely.
-      </p>
+      <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
       {sttInstallable && (
         <Row
           label={`On-device speech-to-text (${approxMb(STT_MODEL_SIZE_BYTES)}, English)`}

@@ -20,6 +20,7 @@ import SpendCapCard from "../components/governance/SpendCapCard";
 import ViewAsDialog, { type ViewAsTarget } from "../components/governance/ViewAsDialog";
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { Select } from "../../components/ui/select";
+import { useTranslations } from "../../lib/i18n";
 
 // Per-tenant control page. Lifecycle note: the request path only enforces
 // status == ACTIVE && !emergencyStopped (TenantStatusGuardImpl), and nothing in
@@ -51,6 +52,7 @@ function Stat({ label, value, note }: { label: string; value: any; note?: string
 // "View as" entry point. Platform operators are never offered (core refuses
 // them anyway); a suspended user can still be viewed - support often needs to.
 function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantName: string }) {
+  const tHC = useTranslations("hcPlatformadminTenantdetailPage");
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [target, setTarget] = useState<ViewAsTarget | null>(null);
@@ -95,14 +97,14 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
     >
       {error && (
         <p className="text-xs text-muted-foreground">
-          Users unavailable: {error}{" "}
+          {tHC("s25")} {error}{" "}
           <button type="button" className="underline" onClick={() => setReload((n) => n + 1)}>
             Retry
           </button>
         </p>
       )}
       {!data && !error && <Skeleton className="h-16 w-full" />}
-      {data && users.length === 0 && <p className="text-xs text-muted-foreground">No users in this tenant.</p>}
+      {data && users.length === 0 && <p className="text-xs text-muted-foreground">{tHC("s24")}</p>}
       {users.length > 0 && (
         <div className="divide-y divide-border rounded-lg border border-border">
           {users.map((u) => (
@@ -120,9 +122,9 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
                 size="sm"
                 variant="outline"
                 onClick={() => setTarget({ tenantId, userId: u.id, label: u.email || u.username, tenantName })}
-                title="Open the tenant app as this user, read-only"
+                title={tHC("s23")}
               >
-                <Eye /> View as (read-only)
+                <Eye /> {tHC("s22")}
               </Button>
             </div>
           ))}
@@ -149,6 +151,7 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
 }
 
 export default function TenantDetailPage() {
+  const tHC = useTranslations("hcPlatformadminTenantdetailPage");
   const askConfirm = useConfirm();
   const [roster, setRoster] = useState<TenantRef[]>([]);
   const [selected, setSelected] = useState<string>("");
@@ -265,14 +268,11 @@ export default function TenantDetailPage() {
   const missing = (key: string) => !!detail?.unavailable.includes(key);
 
   return (
-    <AdminShell title="Tenant detail">
-      <PageHint>
-        One tenant at a time: status, plan, residency, usage against quota and the emergency-stop switch. Emergency stop
-        is the suspend control: it is the only per-tenant switch the request path enforces, and it is fully reversible.
-      </PageHint>
+    <AdminShell title={tHC("s21")}>
+      <PageHint>{tHC("s20")}</PageHint>
 
       <SectionCard
-        title="Pick a tenant"
+        title={tHC("s19")}
         icon={Building2}
         subtitle="Includes suspended and failed-provisioning tenants that the main roster hides."
         actions={
@@ -284,17 +284,17 @@ export default function TenantDetailPage() {
         <div className="flex flex-wrap gap-2">
           <input
             className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            placeholder="Filter by name"
+            placeholder={tHC("s18")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label="Filter tenants"
+            aria-label={tHC("s17")}
           />
           <Select
             className="min-w-64"
             value={selected}
             onValueChange={setSelected}
             aria-label="Tenant"
-            placeholder="Select a tenant..."
+            placeholder={tHC("s16")}
             options={[
               { value: "", label: "Select a tenant..." },
               ...shown.map((t) => ({
@@ -327,8 +327,8 @@ export default function TenantDetailPage() {
               <Badge variant={detail.status === "ACTIVE" ? "default" : "destructive"}>{detail.status}</Badge>
               <Badge variant="outline">{detail.plan}</Badge>
               {detail.accountType && <Badge variant="outline">{detail.accountType}</Badge>}
-              {detail.emergencyStopped && <Badge variant="destructive">Emergency stop</Badge>}
-              {detail.pastDue && <Badge variant="destructive">Payment past due</Badge>}
+              {detail.emergencyStopped && <Badge variant="destructive">{tHC("s15")}</Badge>}
+              {detail.pastDue && <Badge variant="destructive">{tHC("s14")}</Badge>}
             </div>
             <p className="text-xs">
               <span
@@ -336,20 +336,17 @@ export default function TenantDetailPage() {
               >
                 {access.label}
               </span>
-              . The platform-wide kill switch is separate and overrides this.
+              {tHC("s13")}
             </p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Stat label="Created" value={fmtDate(detail.createdAt)} />
               <Stat
-                label="Data residency"
+                label={tHC("s12")}
                 value={detail.dataResidencyRegion || "Unspecified"}
                 note="Declared only; no data moves"
               />
               <Stat label="Subscription" value={detail.subscriptionStatus || "-"} />
-              <Stat
-                label="Comp plan expires"
-                value={detail.compPlanExpiresAt ? fmtDate(detail.compPlanExpiresAt) : "-"}
-              />
+              <Stat label={tHC("s11")} value={detail.compPlanExpiresAt ? fmtDate(detail.compPlanExpiresAt) : "-"} />
               <Stat label="Users" value={missing("users") ? "unavailable" : (detail.userCount ?? "-")} />
               <Stat
                 label="Agents"
@@ -364,7 +361,7 @@ export default function TenantDetailPage() {
                 }
               />
               <Stat
-                label="Last LLM call"
+                label={tHC("s10")}
                 value={
                   missing("lastLlmCall")
                     ? "unavailable"
@@ -377,7 +374,7 @@ export default function TenantDetailPage() {
                 note="Latest of the last 200 logged calls; not a login time"
               />
               <Stat
-                label="Last activity"
+                label={tHC("s9")}
                 value={
                   <span title={formatExact(detail.lastActivityAt)}>
                     {detail.lastActivityAt ? formatRelative(detail.lastActivityAt) : "unavailable"}
@@ -386,7 +383,7 @@ export default function TenantDetailPage() {
                 note={detail.lastActivityAt ? formatExact(detail.lastActivityAt) : undefined}
               />
               <Stat
-                label="LLM spend (30d)"
+                label={tHC("s8")}
                 value={detail.spend30dUsd == null ? "unavailable" : formatUsdOrUnavailable(detail.spend30dUsd)}
                 note="All providers incl. BYOK; estimate, not an invoice"
               />
@@ -395,16 +392,16 @@ export default function TenantDetailPage() {
               href={`/platform-admin/spend?tenantId=${encodeURIComponent(detail.tenantId)}`}
               className="inline-flex items-center gap-1.5 text-xs text-primary underline underline-offset-2 hover:text-foreground"
             >
-              <BarChart3 size={13} /> View spend for this tenant
+              <BarChart3 size={13} /> {tHC("s7")}
             </Link>
           </SectionCard>
 
           <SectionCard
-            title="Usage vs quota"
+            title={tHC("s6")}
             subtitle="Monthly hosted-pool token counter, the same one the chat path enforces against."
           >
             {!q ? (
-              <p className="text-xs text-muted-foreground">Quota counter unavailable right now.</p>
+              <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
             ) : (
               <div className="space-y-2">
                 <p className="text-sm">
@@ -420,10 +417,7 @@ export default function TenantDetailPage() {
                   </div>
                 )}
                 {!q.usesPlatformLlm && detail.plan !== "FREE" && (
-                  <p className="text-[11px] text-muted-foreground">
-                    This tenant has not opted into the platform LLM pool, so the counter may sit at zero while it uses
-                    its own keys.
-                  </p>
+                  <p className="text-[11px] text-muted-foreground">{tHC("s4")}</p>
                 )}
               </div>
             )}
@@ -432,7 +426,7 @@ export default function TenantDetailPage() {
           <SpendCapCard tenantId={detail.tenantId} tenantName={detail.name} />
 
           <SectionCard
-            title="Suspend / reactivate"
+            title={tHC("s3")}
             subtitle="Emergency stop blocks every user in this tenant at the request filter. Data is untouched."
           >
             {detail.emergencyStopped && (
@@ -443,8 +437,8 @@ export default function TenantDetailPage() {
             )}
             {detail.status !== "ACTIVE" && (
               <p className="text-xs text-muted-foreground">
-                Status is {detail.status}; the guard blocks this tenant regardless of the emergency stop, and there is
-                no control here to change status.
+                {tHC("s2")} {detail.status}
+                {tHC("s1")}
               </p>
             )}
             {detail.emergencyStopped ? (

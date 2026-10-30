@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import Select from "../Select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { cn } from "../../lib/utils";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * Shared shape for transcription-style provider options (voice STT, video-to-text, ...).
@@ -80,6 +81,7 @@ export default function TranscriptionProviderOptions({
   onEdit,
   isBusy = false,
 }: TranscriptionProviderOptionsProps) {
+  const tHC = useTranslations("hcComponentsAgentsTranscriptionProviderOptions");
   // Current selected provider details
   const currentProvider = providers.find((p) => p.id === value);
 
@@ -134,12 +136,8 @@ export default function TranscriptionProviderOptions({
     if (provider.id === null) return null;
     if (providerStatus[provider.id] !== "unavailable") return null;
     return (
-      <span
-        className="state-pill"
-        style={{ ["--state" as any]: "var(--state-warning)" } as any}
-        title="This provider needs a separate credential configured before it can be used"
-      >
-        Needs setup
+      <span className="state-pill" style={{ ["--state" as any]: "var(--state-warning)" } as any} title={tHC("s2")}>
+        {tHC("s1")}
       </span>
     );
   };

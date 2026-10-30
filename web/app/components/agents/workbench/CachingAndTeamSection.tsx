@@ -5,8 +5,10 @@ import AgentAdvancedPanels from "../AgentAdvancedPanels";
 import AgentTeamSwarmCard from "../AgentTeamSwarmCard";
 import { useWorkbench } from "./context";
 import { WorkbenchSection } from "./WorkbenchSection";
+import { useTranslations } from "../../../lib/i18n";
 
 export default function CachingAndTeamSection() {
+  const tHC = useTranslations("hcComponentsAgentsWorkbenchCachingAndTeamSection");
   const { isDraft, cachingSummary, selectedAgent, locked, t, onChanged } = useWorkbench();
   return (
     <>
@@ -14,14 +16,14 @@ export default function CachingAndTeamSection() {
       {isDraft ? (
         <WorkbenchSection.SavedOnly
           icon={<Database size={13} />}
-          label="Caching, sharing & knowledge"
+          label={tHC("s1")}
           cat="var(--cat-data)"
           what="response caching, memory sharing, collaborators and the knowledge-base toggle are saved on the agent."
         />
       ) : (
         <WorkbenchSection
           icon={<Database size={13} />}
-          label="Caching, sharing & knowledge"
+          label={tHC("s1")}
           cat="var(--cat-data)"
           actions={<WorkbenchSection.Summary>{cachingSummary}</WorkbenchSection.Summary>}
         >

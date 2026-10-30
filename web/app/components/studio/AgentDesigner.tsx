@@ -27,6 +27,7 @@ import { AUTONOMY_TIERS, GUARDRAILS, REASONING_DEPTHS, parseConnectorTool } from
 import AgentKnowledge from "./AgentKnowledge";
 import AgentConnectors from "./AgentConnectors";
 import { TONES, pick } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // The designer: every control here is a real column on a real agent row in
 // the demo tenant, written through the same AgentService setters the paid
@@ -132,6 +133,7 @@ export default function AgentDesigner({
   onAgentRefresh,
   initialTab,
 }: Props) {
+  const tHC = useTranslations("hcComponentsStudioAgentDesigner");
   const base = useMemo(() => (agent ? draftFromAgent(agent) : null), [agent]);
   const [draft, setDraft] = useState<DesignerDraft>(() => base ?? blankDraft());
   const [savedFlash, setSavedFlash] = useState(false);
@@ -245,19 +247,14 @@ export default function AgentDesigner({
                 value={draft.name}
                 disabled={!!agent || readOnly}
                 maxLength={60}
-                placeholder="e.g. Research scout"
+                placeholder={tHC("s23")}
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               />
-              {agent && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Names are fixed once created - make a new agent for a new name.
-                </p>
-              )}
+              {agent && <p className="mt-1 text-xs text-muted-foreground">{tHC("s22")}</p>}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium" htmlFor="studio-agent-mission">
-                Mission{" "}
-                <span className="font-normal text-muted-foreground">- the standing instructions it works from</span>
+                Mission <span className="font-normal text-muted-foreground">{tHC("s21")}</span>
               </label>
               <Textarea
                 id="studio-agent-mission"
@@ -265,7 +262,7 @@ export default function AgentDesigner({
                 disabled={readOnly}
                 rows={12}
                 maxLength={4000}
-                placeholder="What is this agent for, how should it behave, what must it never do?"
+                placeholder={tHC("s20")}
                 onChange={(e) => setDraft({ ...draft, mission: e.target.value })}
                 className="font-mono text-[13px] leading-relaxed"
               />
@@ -276,10 +273,7 @@ export default function AgentDesigner({
 
         {/* ---------------- Hands ---------------- */}
         <TabsContent value="hands" className="space-y-5">
-          <p className="text-xs text-muted-foreground">
-            Switch everything off and you have a chatbot: words in, words out. Switch tools on and the same model can
-            look things up, call APIs and run code - you&apos;ll see each call in the trace.
-          </p>
+          <p className="text-xs text-muted-foreground">{tHC("s19")}</p>
           {TOOL_GROUPS.map((g) => {
             const items = availableTools.filter((t) => t.group === g.id);
             if (items.length === 0) return null;
@@ -310,12 +304,12 @@ export default function AgentDesigner({
                             {t.label}
                             {!t.available && t.name === "search_knowledge_base" && (
                               <Badge variant="outline" className="text-[10px]">
-                                <FileText aria-hidden="true" /> switches on with your first document
+                                <FileText aria-hidden="true" /> {tHC("s18")}
                               </Badge>
                             )}
                             {!t.available && t.name !== "search_knowledge_base" && (
                               <Badge variant="outline" className="text-[10px]">
-                                <Lock aria-hidden="true" /> not enabled here
+                                <Lock aria-hidden="true" /> {tHC("s17")}
                               </Badge>
                             )}
                           </div>
@@ -328,19 +322,16 @@ export default function AgentDesigner({
               </section>
             );
           })}
-          {availableTools.length === 0 && (
-            <div className="text-xs text-muted-foreground">Loading the tool palette…</div>
-          )}
+          {availableTools.length === 0 && <div className="text-xs text-muted-foreground">{tHC("s16")}</div>}
           {connectorTools.length > 0 && (
             <div className="rounded-xl border border-border/60 p-3 text-xs text-muted-foreground">
               Plus {connectorTools.length} tool{connectorTools.length === 1 ? "" : "s"} from {connectorServers.size}{" "}
-              connector{connectorServers.size === 1 ? "" : "s"} - manage those in the Connectors tab.
+              connector{connectorServers.size === 1 ? "" : "s"} {tHC("s15")}
             </div>
           )}
           {draft.tools.length === 0 && (
             <div className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-800 dark:text-amber-300">
-              <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Chatbot mode: no tools. Good for a
-              before/after comparison.
+              <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s14")}
             </div>
           )}
         </TabsContent>
@@ -357,7 +348,7 @@ export default function AgentDesigner({
               onChanged={changed}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">Create the agent first, then give it documents.</p>
+            <p className="text-sm text-muted-foreground">{tHC("s13")}</p>
           )}
         </TabsContent>
 
@@ -373,7 +364,7 @@ export default function AgentDesigner({
               onChanged={changed}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">Create the agent first, then connect tools to it.</p>
+            <p className="text-sm text-muted-foreground">{tHC("s12")}</p>
           )}
         </TabsContent>
 
@@ -437,7 +428,7 @@ export default function AgentDesigner({
                           {a.label}
                           {locked && (
                             <Badge variant="outline" className="text-[10px]">
-                              <Lock aria-hidden="true" /> needs an account
+                              <Lock aria-hidden="true" /> {tHC("s11")}
                             </Badge>
                           )}
                         </span>
@@ -457,7 +448,7 @@ export default function AgentDesigner({
           <section>
             <div className="mb-1 flex items-center gap-2 text-sm font-medium">
               <ShieldCheck aria-hidden="true" className="h-4 w-4 shrink-0" /> Rules{" "}
-              <span className="font-normal text-muted-foreground">- checks that run on every turn</span>
+              <span className="font-normal text-muted-foreground">{tHC("s10")}</span>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {GUARDRAILS.map((g) => {
@@ -482,12 +473,12 @@ export default function AgentDesigner({
                         <span>{g.label}</span>
                         {enforced && (
                           <Badge variant="outline" className="text-[11px] text-foreground">
-                            <ShieldCheck aria-hidden="true" /> always on in the studio
+                            <ShieldCheck aria-hidden="true" /> {tHC("s9")}
                           </Badge>
                         )}
                         {!available && !enforced && (
                           <Badge variant="outline" className="text-[11px] text-foreground">
-                            <Lock aria-hidden="true" /> paid plans
+                            <Lock aria-hidden="true" /> {tHC("s8")}
                           </Badge>
                         )}
                       </div>
@@ -523,13 +514,11 @@ export default function AgentDesigner({
                 onChange={(e) => setDraft({ ...draft, temperature: Number(e.target.value) })}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                Low = same answer every time. High = more varied wording, more risk of wandering.
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
             </div>
             <div>
               <label className="mb-1 flex items-center justify-between text-sm font-medium" htmlFor="studio-tokens">
-                <span>Reply length</span>
+                <span>{tHC("s6")}</span>
                 <span className="text-xs font-normal text-muted-foreground">up to {draft.maxTokens} tokens</span>
               </label>
               <input
@@ -543,9 +532,7 @@ export default function AgentDesigner({
                 onChange={(e) => setDraft({ ...draft, maxTokens: Number(e.target.value) })}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">
-                Roughly 4 characters per token. 1024 is a solid paragraph or two.
-              </p>
+              <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
             </div>
           </section>
         </TabsContent>
@@ -571,12 +558,10 @@ export default function AgentDesigner({
                 Cancel
               </Button>
             )}
-            {savedFlash && (
-              <span className="text-sm text-emerald-600">Saved - the next mission runs with these settings.</span>
-            )}
-            {readOnly && <span className="text-sm text-muted-foreground">This sandbox is view-only now.</span>}
+            {savedFlash && <span className="text-sm text-emerald-600">{tHC("s4")}</span>}
+            {readOnly && <span className="text-sm text-muted-foreground">{tHC("s3")}</span>}
             {!readOnly && agent && !dirty && !savedFlash && (
-              <span className="text-xs text-muted-foreground">Change anything and save - or jump to Run.</span>
+              <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
             )}
           </div>
         )}
@@ -625,7 +610,7 @@ export default function AgentDesigner({
             />
           </div>
           <div className="border-t border-border/60 pt-2 text-[11px] leading-relaxed text-muted-foreground">
-            The more it is armed, the more the trace has to show. Documents make it factual; connectors make it act.
+            {tHC("s1")}
           </div>
         </div>
       </aside>

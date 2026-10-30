@@ -5,11 +5,13 @@ import { BookOpenCheck, Copy, Loader2 } from "lucide-react";
 import { api } from "../../lib/api";
 import type { TemplateStandardGuide as Guide } from "../../lib/api";
 import { toast } from "../../lib/toastBus";
+import { useTranslations } from "../../lib/i18n";
 
 // The complete instruction set for authors: how sharing works, the principles, every rule (with how to fix it)
 // and a worked example they can copy. Loaded from the SAME standard the validator and the AI reviewer use,
 // so what is shown here is exactly what will be checked.
 export default function TemplateStandardGuide({ defaultOpen = false }: { defaultOpen?: boolean }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplateStandardGuide");
   const [open, setOpen] = useState(defaultOpen);
   const [guide, setGuide] = useState<Guide | null>(null);
   const [error, setError] = useState(false);
@@ -44,24 +46,22 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
     >
       <summary className="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-medium text-foreground">
         <BookOpenCheck size={15} strokeWidth={2} aria-hidden />
-        Read the full template guide
-        <span className="ms-auto text-xs font-normal text-muted-foreground">what we check, and how to pass</span>
+        {tHC("s15")}
+        <span className="ms-auto text-xs font-normal text-muted-foreground">{tHC("s14")}</span>
       </summary>
       <div className="max-h-[50vh] space-y-5 overflow-y-auto border-t border-border px-4 py-4 text-sm">
         {!guide && !error && (
           <p className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Loading the guide…
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s13")}
           </p>
         )}
-        {error && (
-          <p style={{ color: "var(--state-error)" }}>Couldn&apos;t load the guide. Please try again in a moment.</p>
-        )}
+        {error && <p style={{ color: "var(--state-error)" }}>{tHC("s12")}</p>}
         {guide && (
           <>
             <p className="text-muted-foreground">{guide.intro}</p>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">How it works</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s11")}</h3>
               <ol className="list-decimal space-y-1.5 ps-5 text-muted-foreground">
                 {guide.steps.map((s) => (
                   <li key={s}>{s}</li>
@@ -70,7 +70,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">The principles behind the checks</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s10")}</h3>
               <ul className="space-y-1.5 text-muted-foreground">
                 {guide.principles.map((p) => (
                   <li key={p.name}>
@@ -81,10 +81,9 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">Every check</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s9")}</h3>
               <p className="text-muted-foreground">
-                <strong>Must fix</strong> items stop the submission. <strong>Suggestion</strong> items are advice. Items
-                marked <em>AI</em> are judged by the AI reviewer; the rest are automatic.
+                <strong>{tHC("s8")}</strong> {tHC("s7")} <strong>Suggestion</strong> {tHC("s6")} <em>AI</em> {tHC("s5")}
               </p>
               <ul className="space-y-2">
                 {guide.rules.map((r) => (
@@ -107,7 +106,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
                       <span className="font-medium">{r.requirement}</span>
                     </p>
                     <p className="mt-1 text-muted-foreground">
-                      <span className="font-medium text-foreground">How to pass: </span>
+                      <span className="font-medium text-foreground">{tHC("s4")} </span>
                       {r.howToFix}
                     </p>
                   </li>
@@ -116,12 +115,12 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">A worked example</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s3")}</h3>
               <p className="text-muted-foreground">Summary</p>
               <pre className="whitespace-pre-wrap rounded-lg bg-[var(--surface-sunken,transparent)] p-3 text-xs text-foreground">
                 {guide.exampleSummary}
               </pre>
-              <p className="text-muted-foreground">System prompt (adapt it - don&apos;t paste it unchanged)</p>
+              <p className="text-muted-foreground">{tHC("s2")}</p>
               <pre className="whitespace-pre-wrap rounded-lg bg-[var(--surface-sunken,transparent)] p-3 text-xs text-foreground">
                 {guide.examplePrompt}
               </pre>
@@ -130,7 +129,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
                 onClick={() => copy(guide.examplePrompt)}
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
               >
-                <Copy size={12} aria-hidden /> Copy example prompt
+                <Copy size={12} aria-hidden /> {tHC("s1")}
               </button>
             </section>
           </>

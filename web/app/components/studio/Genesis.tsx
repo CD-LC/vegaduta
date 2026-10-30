@@ -43,6 +43,7 @@ import {
 import { toolLabel } from "./studioContent";
 import WhyAgentic from "./WhyAgentic";
 import { TONES, pick } from "./studioTheme";
+import { useTranslations } from "../../lib/i18n";
 
 // The briefing. Nothing is pre-built: the studio asks five short questions and
 // composes the agent from the answers. Each question says WHY it is asked,
@@ -82,6 +83,7 @@ type Props = {
 };
 
 export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed }: Props) {
+  const tHC = useTranslations("hcComponentsStudioGenesis");
   const [brief, setBrief] = useState<Brief>(EMPTY_BRIEF);
   const [step, setStep] = useState<StepId>("job");
   const [needsTouched, setNeedsTouched] = useState(false);
@@ -128,19 +130,14 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
           <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" />{" "}
           {fresh ? "Clean slate - nothing is pre-built" : "New agent - nothing is pre-built"}
         </div>
-        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          Tell us the job. We&apos;ll build the agent around your answers.
-        </h2>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Five short questions - about a minute. Every part of the agent (its brief, tools, care level, boundaries) is
-          composed from what you say, and you can rewrite any of it afterwards.
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{tHC("s30")}</h2>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{tHC("s29")}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="space-y-4">
           {/* Stepper */}
-          <ol className="flex flex-wrap gap-1.5" aria-label="Briefing steps" data-tour="brief-steps">
+          <ol className="flex flex-wrap gap-1.5" aria-label={tHC("s28")} data-tour="brief-steps">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
               const active = s.id === step;
@@ -184,7 +181,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 {step === "job" && (
                   <>
                     <Q
-                      title="What should this agent get done?"
+                      title={tHC("s27")}
                       why="The brief is the biggest steering wheel you have. A specific job (who, what, for what result) beats a vague one every time."
                     />
                     <Textarea
@@ -192,7 +189,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                       rows={4}
                       maxLength={240}
                       disabled={busy || readOnly}
-                      aria-label="What should this agent get done?"
+                      aria-label={tHC("s27")}
                       data-tour="brief-job"
                       placeholder={JOB_PLACEHOLDERS[ph]}
                       onChange={(e) => set("job", e.target.value)}
@@ -200,9 +197,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     />
                     <div className="text-end text-xs text-muted-foreground">{brief.job.length}/240</div>
                     <div className="space-y-1.5">
-                      <div className="text-xs text-muted-foreground">
-                        Nothing in mind? Start from an idea, then make it yours:
-                      </div>
+                      <div className="text-xs text-muted-foreground">{tHC("s26")}</div>
                       <div className="flex flex-wrap gap-1.5" data-tour="brief-ideas">
                         {JOB_IDEAS.map((idea) => (
                           <button
@@ -222,7 +217,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 {step === "who" && (
                   <>
                     <Q
-                      title="Who is it working for - and who reads what it writes?"
+                      title={tHC("s25")}
                       why="Tone and level of detail follow the reader. 'A busy shop owner' and 'a compliance officer' get very different answers from the same facts."
                       optional
                     />
@@ -231,7 +226,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                       maxLength={160}
                       disabled={busy || readOnly}
                       aria-label="Audience"
-                      placeholder="e.g. first-time customers who message on WhatsApp"
+                      placeholder={tHC("s24")}
                       onChange={(e) => set("audience", e.target.value)}
                     />
                   </>
@@ -239,7 +234,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 {step === "never" && (
                   <>
                     <Q
-                      title="What must it never do?"
+                      title={tHC("s23")}
                       why="Boundaries are cheaper than cleanups. This becomes a standing rule in its brief - the single most valuable answer here."
                       optional
                     />
@@ -248,51 +243,48 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                       rows={3}
                       maxLength={300}
                       disabled={busy || readOnly}
-                      aria-label="What it must never do"
-                      placeholder="e.g. promise refunds, quote a price that isn't in the price list, give medical advice"
+                      aria-label={tHC("s22")}
+                      placeholder={tHC("s21")}
                       onChange={(e) => set("never", e.target.value)}
                       className="resize-none"
                     />
                     <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-2.5 text-xs text-muted-foreground">
                       <ShieldCheck aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                      <span>
-                        Separately, the studio always applies its own safety rules (policy violations, jailbreak
-                        attempts). Those can&apos;t be switched off here.
-                      </span>
+                      <span>{tHC("s20")}</span>
                     </div>
                   </>
                 )}
                 {step === "needs" && (
                   <>
                     <Q
-                      title="What does it need in order to do the job?"
+                      title={tHC("s19")}
                       why="Tools are what turn an answer into an action. Give it only what the job needs - every extra tool is one more thing it can get wrong."
                     />
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Need
                         icon={Globe}
-                        label="Look things up on the web"
+                        label={tHC("s18")}
                         hint="Live search and page reading, with sources"
                         on={brief.needs.web}
                         onChange={(v) => setNeed("web", v)}
                       />
                       <Need
                         icon={Code2}
-                        label="Calculate with real code"
+                        label={tHC("s17")}
                         hint="Maths done by code, not by guessing"
                         on={brief.needs.code}
                         onChange={(v) => setNeed("code", v)}
                       />
                       <Need
                         icon={Webhook}
-                        label="Call public APIs"
+                        label={tHC("s16")}
                         hint="Read live data straight from a service"
                         on={brief.needs.api}
                         onChange={(v) => setNeed("api", v)}
                       />
                       <Need
                         icon={FileText}
-                        label="Read my documents"
+                        label={tHC("s15")}
                         hint="You'll upload them next - it answers from your pages"
                         on={brief.needs.docs}
                         onChange={(v) => setNeed("docs", v)}
@@ -300,24 +292,21 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     </div>
                     {brief.job && !needsTouched && (
                       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Lightbulb aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Pre-ticked from the words of
-                        your job - change any of them.
+                        <Lightbulb aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s14")}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      Connectors from the MCP registry come after it&apos;s built - search for one that fits.
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tHC("s13")}</p>
                   </>
                 )}
                 {step === "precision" && (
                   <>
                     <Q
-                      title="How precise should it be?"
+                      title={tHC("s12")}
                       why="Three dials trade speed and cost against certainty. Turn them up when a mistake would be expensive; down when you want speed."
                     />
                     <div>
                       <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Care - how much it checks itself
+                        {tHC("s11")}
                       </div>
                       <div className="grid gap-2 sm:grid-cols-3">
                         {CARE.map((c) => (
@@ -338,7 +327,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     </div>
                     <div>
                       <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Autonomy - how freely it acts
+                        {tHC("s10")}
                       </div>
                       <div className="grid gap-2 sm:grid-cols-2">
                         {(
@@ -413,7 +402,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
               ) : null}
               <div className="ms-auto flex gap-2">
                 <Button variant="ghost" size="sm" disabled={busy || readOnly} onClick={onBlank}>
-                  <PenLine aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Write it all myself
+                  <PenLine aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s9")}
                 </Button>
                 <Button
                   size="sm"
@@ -441,7 +430,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
           data-tour="blueprint-preview"
         >
           <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <Brain aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> Built from your answers
+            <Brain aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s8")}
           </div>
           <AnimatePresence mode="wait">
             {draft ? (
@@ -461,12 +450,12 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                     {draft.spec.autonomy === "FULLY_AUTONOMOUS" ? "runs on its own" : "asks before sensitive acts"}
                   </Badge>
                   <Badge variant="outline">
-                    <ShieldCheck aria-hidden="true" /> safety rules always on
+                    <ShieldCheck aria-hidden="true" /> {tHC("s7")}
                   </Badge>
                 </div>
                 <div>
                   <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Hand aria-hidden="true" className="h-3 w-3 shrink-0" /> Hands you chose
+                    <Hand aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("s6")}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {draft.spec.tools.map((t) => (
@@ -480,20 +469,19 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                   <div className="flex items-start gap-2 rounded-lg bg-background/70 p-2.5 text-xs text-muted-foreground">
                     <FileText aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     <span>
-                      Next you&apos;ll drop in <b className="font-medium text-foreground">{draft.docIdea}</b>.
+                      {tHC("s5")} <b className="font-medium text-foreground">{draft.docIdea}</b>.
                     </span>
                   </div>
                 )}
                 <div className="flex items-start gap-2 rounded-lg bg-background/70 p-2.5 text-xs text-muted-foreground">
                   <Plug aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span>
-                    Then search the MCP registry for a connector - try{" "}
-                    <b className="font-medium text-foreground">&ldquo;{draft.mcpQuery}&rdquo;</b>.
+                    {tHC("s4")} <b className="font-medium text-foreground">&ldquo;{draft.mcpQuery}&rdquo;</b>.
                   </span>
                 </div>
                 <div className="rounded-lg border border-dashed border-border/70 p-2.5">
                   <div className="mb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                    Its brief (you can rewrite it)
+                    {tHC("s3")}
                   </div>
                   <div className="line-clamp-6 whitespace-pre-line font-mono text-[11px] leading-relaxed text-muted-foreground">
                     {draft.spec.mission}
@@ -509,10 +497,7 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
                 className="flex min-h-[260px] flex-col items-center justify-center gap-2 text-center text-sm text-muted-foreground"
               >
                 <Sparkles aria-hidden="true" className="h-6 w-6 shrink-0" />
-                <p className="max-w-[16rem]">
-                  Answer the first question and your agent&apos;s name, tools and brief appear here - built from your
-                  words alone.
-                </p>
+                <p className="max-w-[16rem]">{tHC("s2")}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -525,13 +510,14 @@ export default function Genesis({ onBuild, onBlank, busy, readOnly, fresh, seed 
 }
 
 function Q({ title, why, optional }: { title: string; why: string; optional?: boolean }) {
+  const tHC = useTranslations("hcComponentsStudioGenesis");
   return (
     <div>
       <div className="text-base font-semibold">
         {title} {optional && <span className="text-xs font-normal text-muted-foreground">optional</span>}
       </div>
       <p className="mt-0.5 text-xs text-muted-foreground">
-        <b className="font-medium text-foreground">Why we ask:</b> {why}
+        <b className="font-medium text-foreground">{tHC("s1")}</b> {why}
       </p>
     </div>
   );

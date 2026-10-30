@@ -34,6 +34,7 @@ import {
   type Bar,
   type RecorderSpeed,
 } from "./runRecorderView";
+import { useTranslations } from "../../lib/i18n";
 
 /* ------------------------------------------------------------------ types */
 
@@ -85,6 +86,7 @@ export default function RunFlightRecorder({
   defaultCollapsed = false,
   className,
 }: RunFlightRecorderProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunFlightRecorder");
   const view = useMemo(() => buildView(model, nodeLabel, edges), [model, nodeLabel, edges]);
   const { total } = view;
   const reducedMotion = useReducedMotion();
@@ -176,7 +178,7 @@ export default function RunFlightRecorder({
       posRef.current = next;
       cbRef.current.onPositionChange(next);
     },
-    [total],
+    [total]
   );
 
   const msFromClientX = useCallback(
@@ -187,7 +189,7 @@ export default function RunFlightRecorder({
       if (r.width <= 0) return 0;
       return ((clientX - r.left) / r.width) * total;
     },
-    [axisRef, total],
+    [axisRef, total]
   );
 
   const dragging = useRef(false);
@@ -229,7 +231,7 @@ export default function RunFlightRecorder({
   /* ---- keyboard ---- */
   const barAt = useCallback(
     (ms: number): Bar | undefined => view.bars.find((b) => b.start === ms) ?? view.bars.find((b) => b.end === ms),
-    [view.bars],
+    [view.bars]
   );
 
   const step = useCallback(
@@ -238,18 +240,18 @@ export default function RunFlightRecorder({
       const pos = posRef.current;
       const target =
         dir > 0
-          ? view.boundaries.find((b) => b > pos + eps) ?? total
-          : [...view.boundaries].reverse().find((b) => b < pos - eps) ?? 0;
+          ? (view.boundaries.find((b) => b > pos + eps) ?? total)
+          : ([...view.boundaries].reverse().find((b) => b < pos - eps) ?? 0);
       if (playing) onPlayingChange(false);
       seek(target);
       const b = barAt(target);
       setAnnounce(
         b
           ? `${formatClock(target)}: ${b.label}${b.visitCount > 1 ? `, visit ${b.visitIndex + 1} of ${b.visitCount}` : ""}, ${b.start === target ? "starts" : "ends"}, ${statusText(b.tone, b.awaiting)}`
-          : formatClock(target),
+          : formatClock(target)
       );
     },
-    [view.boundaries, total, playing, onPlayingChange, seek, barAt],
+    [view.boundaries, total, playing, onPlayingChange, seek, barAt]
   );
 
   const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
@@ -291,7 +293,8 @@ export default function RunFlightRecorder({
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
     e.preventDefault();
     const i = RECORDER_SPEEDS.indexOf(speed);
-    const next = RECORDER_SPEEDS[(i + (e.key === "ArrowRight" ? 1 : -1) + RECORDER_SPEEDS.length) % RECORDER_SPEEDS.length];
+    const next =
+      RECORDER_SPEEDS[(i + (e.key === "ArrowRight" ? 1 : -1) + RECORDER_SPEEDS.length) % RECORDER_SPEEDS.length];
     onSpeedChange(next);
     const btn = e.currentTarget.querySelector<HTMLButtonElement>(`[data-speed="${String(next)}"]`);
     btn?.focus();
@@ -332,7 +335,12 @@ export default function RunFlightRecorder({
   const hideTip = useCallback(() => setHover(null), []);
   const hoverBar = hover ? view.bars.find((b) => b.key === hover.key) : undefined;
 
-  const scrub = { onPointerDown: onScrubDown, onPointerMove: onScrubMove, onPointerUp: onScrubUp, onPointerCancel: onScrubUp };
+  const scrub = {
+    onPointerDown: onScrubDown,
+    onPointerMove: onScrubMove,
+    onPointerUp: onScrubUp,
+    onPointerCancel: onScrubUp,
+  };
   const pickBar = (b: Bar) => {
     if (playing) onPlayingChange(false);
     seek(b.start);
@@ -361,7 +369,7 @@ export default function RunFlightRecorder({
       data-collapsed={collapsed}
       data-live={view.live && !reducedMotion}
       role="region"
-      aria-label="Run flight recorder"
+      aria-label={tHC("s9")}
       aria-roledescription="run timeline"
       tabIndex={-1}
       onKeyDown={onKeyDown}
@@ -370,7 +378,7 @@ export default function RunFlightRecorder({
         <button
           type="button"
           className="rfr-grip"
-          aria-label="Resize recorder. Use up and down arrows."
+          aria-label={tHC("s8")}
           onPointerDown={onGripDown}
           onPointerMove={onGripMove}
           onPointerUp={onGripUp}
@@ -394,7 +402,7 @@ export default function RunFlightRecorder({
 
         <span className="rfr-title">
           <span className="rfr-rec" aria-hidden />
-          <span className="rfr-title-text">Flight recorder</span>
+          <span className="rfr-title-text">{tHC("s7")}</span>
         </span>
 
         <button
@@ -406,11 +414,17 @@ export default function RunFlightRecorder({
           onClick={() => onPlayingChange(!playing)}
           disabled={visitCount === 0}
         >
-          {playing ? <Pause size={14} aria-hidden /> : atEnd ? <RotateCcw size={14} aria-hidden /> : <Play size={14} aria-hidden />}
+          {playing ? (
+            <Pause size={14} aria-hidden />
+          ) : atEnd ? (
+            <RotateCcw size={14} aria-hidden />
+          ) : (
+            <Play size={14} aria-hidden />
+          )}
         </button>
 
         {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group */}
-        <div className="rfr-speeds" role="radiogroup" aria-label="Replay speed" onKeyDown={onSpeedKey}>
+        <div className="rfr-speeds" role="radiogroup" aria-label={tHC("s6")} onKeyDown={onSpeedKey}>
           {RECORDER_SPEEDS.map((s) => (
             <button
               key={String(s)}
@@ -446,7 +460,7 @@ export default function RunFlightRecorder({
             className="rfr-mini"
             role="slider"
             tabIndex={0}
-            aria-label="Run position"
+            aria-label={tHC("s5")}
             aria-valuemin={0}
             aria-valuemax={Math.round(total)}
             aria-valuenow={Math.round(pos)}
@@ -481,14 +495,11 @@ export default function RunFlightRecorder({
             <ToneIcon tone={view.tone} awaiting={view.runAwaiting} size={11} />
             <span className="rfr-pill-text">{statusLabel}</span>
           </span>
-          <span className="rfr-meta-item" title="Total run duration">
+          <span className="rfr-meta-item" title={tHC("s4")}>
             {formatDuration(total)}
           </span>
           {view.startedAtMs !== null && (
-            <span
-              className="rfr-meta-item rfr-meta-started"
-              title={new Date(view.startedAtMs).toLocaleString()}
-            >
+            <span className="rfr-meta-item rfr-meta-started" title={new Date(view.startedAtMs).toLocaleString()}>
               {formatRelative(view.startedAtMs, now)}
             </span>
           )}
@@ -503,14 +514,14 @@ export default function RunFlightRecorder({
           />
         </span>
 
-        <button type="button" className="rfr-btn" aria-label="Close flight recorder" title="Close" onClick={onClose}>
+        <button type="button" className="rfr-btn" aria-label={tHC("s3")} title="Close" onClick={onClose}>
           <X size={15} aria-hidden />
         </button>
       </div>
 
       <div className="rfr-body" id={`${uid}-body`} hidden={collapsed}>
         {visitCount === 0 ? (
-          <div className="rfr-empty">No steps recorded for this run yet.</div>
+          <div className="rfr-empty">{tHC("s2")}</div>
         ) : (
           <div className="rfr-scroll">
             <div className="rfr-inner">
@@ -545,7 +556,7 @@ export default function RunFlightRecorder({
                     className="rfr-head-knob"
                     role="slider"
                     tabIndex={0}
-                    aria-label="Playhead. Left and right arrows step between visit boundaries."
+                    aria-label={tHC("s1")}
                     aria-valuemin={0}
                     aria-valuemax={Math.round(total)}
                     aria-valuenow={Math.round(pos)}

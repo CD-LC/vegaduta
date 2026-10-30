@@ -27,6 +27,7 @@ import {
   type Member,
 } from "./collab";
 import type { AppVersion, CollabRole } from "./store";
+import { useTranslations } from "../../lib/i18n";
 
 interface Props {
   projectId: string;
@@ -37,6 +38,7 @@ interface Props {
 }
 
 export default function CollabPanel({ projectId, role, versions = [] }: Props) {
+    const tHC = useTranslations("hcBuildStudioCollabPanel");
   const me = auth.getUserId?.() ?? null;
   const owner = canAdminister(role);
   const [members, setMembers] = useState<Member[]>([]);
@@ -114,7 +116,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
     <section className="flex flex-col gap-4 text-sm" aria-label="Team">
       {role && role !== "OWNER" && (
         <p className="rounded-lg bg-secondary/60 p-2 text-xs text-muted-foreground">
-          Shared with you: <b>{roleLabel(role)}</b>.{" "}
+          {tHC("s11")} <b>{roleLabel(role)}</b>.{" "}
           {role === "VIEWER"
             ? "This copy is read-only."
             : "You can add versions; the owner manages settings and sharing."}
@@ -128,7 +130,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
 
       <div className="flex flex-col gap-2">
         <h3 className="font-medium">People</h3>
-        {loading && <p className="text-xs text-muted-foreground">Loading...</p>}
+        {loading && <p className="text-xs text-muted-foreground">{tHC("s10")}</p>}
         <ul className="flex flex-col gap-1.5">
           {members.map((m) => (
             <li key={m.subject} className="flex items-center gap-2 rounded-lg border border-border p-2">
@@ -162,7 +164,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
               type="email"
               required
               placeholder="teammate@company.com"
-              aria-label="Teammate email"
+              aria-label={tHC("s9")}
               className="min-w-0 flex-1"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -173,8 +175,8 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as "VIEWER" | "EDITOR")}
             >
-              <option value="VIEWER">Can view</option>
-              <option value="EDITOR">Can edit</option>
+              <option value="VIEWER">{tHC("s8")}</option>
+              <option value="EDITOR">{tHC("s7")}</option>
             </select>
             <Button type="submit" size="sm" disabled={inviting || !email.trim()}>
               <UserPlus aria-hidden="true" size={14} className="me-1" /> Invite
@@ -191,11 +193,11 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
           </h3>
           <label className="ms-auto flex items-center gap-1 text-xs text-muted-foreground">
             <input type="checkbox" checked={showResolved} onChange={(e) => setShowResolved(e.target.checked)} />
-            Show resolved
+            {tHC("s6")}
           </label>
         </div>
         <ul className="flex flex-col gap-1.5">
-          {visible.length === 0 && !loading && <li className="text-xs text-muted-foreground">No comments yet.</li>}
+          {visible.length === 0 && !loading && <li className="text-xs text-muted-foreground">{tHC("s5")}</li>}
           {visible.map((c) => (
             <li key={c.id} className={`rounded-lg border border-border p-2 ${c.resolved ? "bg-muted/40" : ""}`}>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -214,7 +216,7 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
                     <Check aria-hidden="true" size={14} />
                   </Button>
                   {canDeleteComment(role ?? "OWNER", c, me) && (
-                    <Button size="sm" variant="ghost" aria-label="Delete comment" onClick={() => void del(c)}>
+                    <Button size="sm" variant="ghost" aria-label={tHC("s4")} onClick={() => void del(c)}>
                       <Trash2 aria-hidden="true" size={14} />
                     </Button>
                   )}
@@ -232,8 +234,8 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
           }}
         >
           <Textarea
-            aria-label="Add a comment"
-            placeholder="Add a comment"
+            aria-label={tHC("s3")}
+            placeholder={tHC("s3")}
             maxLength={MAX_COMMENT_CHARS}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -241,12 +243,12 @@ export default function CollabPanel({ projectId, role, versions = [] }: Props) {
           <div className="flex items-center gap-2">
             {versions.length > 0 && (
               <select
-                aria-label="About version"
+                aria-label={tHC("s2")}
                 className="min-w-0 rounded-md border border-border bg-background px-2 py-1.5 text-xs"
                 value={anchor}
                 onChange={(e) => setAnchor(e.target.value)}
               >
-                <option value="">Whole app</option>
+                <option value="">{tHC("s1")}</option>
                 {[...versions].reverse().map((v) => (
                   <option key={v.at} value={v.at}>
                     {new Date(v.at).toLocaleTimeString()} {v.note ? `- ${v.note.slice(0, 40)}` : ""}

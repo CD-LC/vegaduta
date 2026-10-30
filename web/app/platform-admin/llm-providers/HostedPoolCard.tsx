@@ -16,8 +16,10 @@ import { HostedRowBadges } from "./hostedRowParts";
 import { CREDENTIAL_TYPE_LABELS } from "./constants";
 import { HostedProviderForm } from "./HostedProviderForm";
 import type { HostedPool } from "./useHostedPool";
+import { useTranslations } from "../../lib/i18n";
 
 export function HostedPoolCard({ pool }: { pool: HostedPool }) {
+  const tHC = useTranslations("hcPlatformadminLlmprovidersHostedPoolCard");
   const {
     hostedProviders,
     hostedProvidersError,
@@ -47,11 +49,10 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Server size={16} className="text-primary" /> Platform-Hosted LLM Providers
+              <Server size={16} className="text-primary" /> {tHC("s11")}
             </CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
-              {hostedProviders.length} provider{hostedProviders.length === 1 ? "" : "s"} in the free-tier pool ·
-              lowest-priority enabled row wins every FREE-tier chat call
+              {hostedProviders.length} provider{hostedProviders.length === 1 ? "" : "s"} {tHC("s10")}
             </p>
           </div>
           {poolSettings && (
@@ -61,7 +62,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
               </span>
               <SwitchToggle
                 on={poolSettings.enabled}
-                label="Turn the whole platform-hosted LLM pool on or off"
+                label={tHC("s9")}
                 disabled={poolSettingsBusy}
                 onClick={handleTogglePoolEnabled}
               />
@@ -72,16 +73,13 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
           {poolSettings && !poolSettings.enabled && (
             <Alert variant="warning">
               <Info />
-              <AlertDescription>
-                The hosted LLM pool is switched off - every FREE-plan tenant&apos;s chat, Ask AI, and AI workflow
-                generator calls will fail until you flip this back on, even if rows below are enabled.
-              </AlertDescription>
+              <AlertDescription>{tHC("s8")}</AlertDescription>
             </Alert>
           )}
 
           {hostedProviders.some((row) => row.region) && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">Filter by region:</span>
+              <span className="text-xs text-muted-foreground">{tHC("s7")}</span>
               <Button
                 variant={hostedProviderRegionFilter === "" ? "default" : "outline"}
                 size="sm"
@@ -112,10 +110,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
           {hostedProviders.length === 0 && !hostedProvidersError && (
             <Alert variant="warning">
               <Info />
-              <AlertDescription>
-                No hosted provider is configured yet - FREE-plan tenants cannot chat until at least one row exists here
-                and is enabled.
-              </AlertDescription>
+              <AlertDescription>{tHC("s6")}</AlertDescription>
             </Alert>
           )}
 
@@ -123,7 +118,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
             <Input
               value={hostedQuery}
               onChange={(e) => setHostedQuery(e.target.value)}
-              placeholder="Search hosted providers…"
+              placeholder={tHC("s5")}
               className="max-w-xs"
             />
           )}
@@ -143,7 +138,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                     <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground">
                       {row.label}
                       {row.providerName && (
-                        <Badge variant="outline" title="Configured via the generic provider+key flow">
+                        <Badge variant="outline" title={tHC("s4")}>
                           {row.providerName}
                         </Badge>
                       )}
@@ -153,14 +148,11 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                       {row.baseUrl}
                       {row.completionsPath ? row.completionsPath : ""} · {row.model}
                       {row.modelAutoSelected && (
-                        <span
-                          className="ms-1 normal-case text-muted-foreground/80"
-                          title="Auto-selected - blank the model field and save to re-detect after a vendor deprecates it"
-                        >
+                        <span className="ms-1 normal-case text-muted-foreground/80" title={tHC("s3")}>
                           (auto)
                         </span>
                       )}{" "}
-                      · priority {row.priority}
+                      {tHC("s2")} {row.priority}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
@@ -192,7 +184,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                 </div>
                 {row.lastValidatedAt && (
                   <div className="mt-2 font-mono text-xs text-muted-foreground">
-                    Last validated {new Date(row.lastValidatedAt).toLocaleString()}
+                    {tHC("s1")} {new Date(row.lastValidatedAt).toLocaleString()}
                   </div>
                 )}
               </motion.div>

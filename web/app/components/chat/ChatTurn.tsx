@@ -16,6 +16,7 @@ import AgentActivityTrace from "../agents/AgentActivityTrace";
 import SaveAsEvalCaseButton from "../../agents/quality/SaveAsEvalCaseButton";
 import { ChatBranchTurnBar, EditMessageForm } from "../ChatBranchControls";
 import TurnFeedback from "../agents/TurnFeedback";
+import { useTranslations } from "../../lib/i18n";
 
 /** One transcript entry (user bubble, assistant bubble or failed reply) and its per-turn extras. */
 export default function ChatTurn({
@@ -45,6 +46,7 @@ export default function ChatTurn({
   runTurn: (message: string, attachments: any[]) => unknown;
   setInput: (updater: (prev: string) => string) => void;
 }) {
+  const tHC = useTranslations("hcComponentsChatChatTurn");
   // Generative UI: an assistant turn may embed a ```json_ui block (the
   // contract in components/generative-ui/schema.ts). Extracted per
   // render - cheap for ordinary turns (one regex, no match => null).
@@ -160,7 +162,7 @@ export default function ChatTurn({
               variant="secondary"
               className="cursor-default px-2 py-0 text-[10px] uppercase tracking-wide text-muted-foreground"
             >
-              On-device (tier {turn.edgeTier})
+              {tHC("s2")} {turn.edgeTier})
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
@@ -177,7 +179,7 @@ export default function ChatTurn({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-              Platform — {edgeFallbackShortLabel(turn.edgeFallbackReason)}
+              {tHC("s1")} {edgeFallbackShortLabel(turn.edgeFallbackReason)}
             </Badge>
           </TooltipTrigger>
           <TooltipContent>{edgeFallbackLabel(turn.edgeFallbackReason)}</TooltipContent>

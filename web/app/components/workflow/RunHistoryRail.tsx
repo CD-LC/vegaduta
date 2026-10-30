@@ -24,6 +24,7 @@ import {
   type RunSummary,
 } from "./runHistoryModel";
 import "./run-history.css";
+import { useTranslations } from "../../lib/i18n";
 
 export type { RunSummary } from "./runHistoryModel";
 
@@ -58,6 +59,7 @@ export default function RunHistoryRail({
   footer,
   className,
 }: RunHistoryRailProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
   const uid = useId();
   const listRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -123,7 +125,7 @@ export default function RunHistoryRail({
     if (selectedRunId) setActiveId(selectedRunId);
   }, [selectedRunId]);
 
-  const effectiveActive = activeId && order.includes(activeId) ? activeId : order[0] ?? null;
+  const effectiveActive = activeId && order.includes(activeId) ? activeId : (order[0] ?? null);
   const optionId = (id: string) => `${uid}-run-${id}`;
 
   useEffect(() => {
@@ -139,7 +141,7 @@ export default function RunHistoryRail({
       setActiveId(id);
       onSelectRun(id);
     },
-    [onSelectRun],
+    [onSelectRun]
   );
 
   const onListKey = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -195,7 +197,7 @@ export default function RunHistoryRail({
     <aside
       className={`rh-rail${className ? ` ${className}` : ""}`}
       data-open={mobileOpen ? "true" : "false"}
-      aria-label="Run history"
+      aria-label={tHC("s10")}
     >
       <button
         ref={toggleRef}
@@ -219,7 +221,7 @@ export default function RunHistoryRail({
       <div className="rh-panel" id={panelId} aria-busy={loading || undefined}>
         <header className="rh-head">
           <History size={15} aria-hidden="true" className="rh-head-icon" />
-          <h2 className="rh-title">Flight log</h2>
+          <h2 className="rh-title">{tHC("s9")}</h2>
           {runs.length > 0 && <span className="rh-sub">{runs.length} runs</span>}
           {onRefresh && (
             <button
@@ -240,7 +242,7 @@ export default function RunHistoryRail({
               setMobileOpen(false);
               toggleRef.current?.focus();
             }}
-            aria-label="Close run history"
+            aria-label={tHC("s8")}
           >
             <X size={14} aria-hidden="true" />
           </button>
@@ -257,7 +259,7 @@ export default function RunHistoryRail({
         )}
 
         {loading && rows.length === 0 ? (
-          <div className="rh-skeleton" aria-label="Loading runs" role="status">
+          <div className="rh-skeleton" aria-label={tHC("s7")} role="status">
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className="rh-skel-row" />
             ))}
@@ -269,8 +271,8 @@ export default function RunHistoryRail({
               <path className="rh-empty-path" d="M10 32 C 40 32, 60 10, 110 8" />
               <circle className="rh-empty-dot" cx="110" cy="8" r="3" />
             </svg>
-            <p className="rh-empty-line">No flights logged yet.</p>
-            <p className="rh-empty-sub">Every run lands here with its full black-box trace, ready to replay.</p>
+            <p className="rh-empty-line">{tHC("s6")}</p>
+            <p className="rh-empty-sub">{tHC("s5")}</p>
             {children ??
               (onRunNow && (
                 <button type="button" className="rh-run-now" onClick={onRunNow}>
@@ -286,7 +288,7 @@ export default function RunHistoryRail({
               className="rh-list"
               role="listbox"
               tabIndex={0}
-              aria-label="Workflow runs"
+              aria-label={tHC("s4")}
               aria-describedby={hintId}
               aria-activedescendant={effectiveActive ? optionId(effectiveActive) : undefined}
               onKeyDown={onListKey}
@@ -307,9 +309,7 @@ export default function RunHistoryRail({
                       latestVersion={latestVersion}
                       when={relativeTime(rtf, row.startMs, now)}
                       onSelect={() => select(row.run.id)}
-                      onCompare={
-                        onCompare && row.run.id !== selectedRunId ? () => onCompare(row.run.id) : undefined
-                      }
+                      onCompare={onCompare && row.run.id !== selectedRunId ? () => onCompare(row.run.id) : undefined}
                     />
                   ))}
                 </div>
@@ -345,7 +345,18 @@ interface RunOptionProps {
   onCompare?: () => void;
 }
 
-function RunOption({ row, domId, selected, active, comparing, latestVersion, when, onSelect, onCompare }: RunOptionProps) {
+function RunOption({
+  row,
+  domId,
+  selected,
+  active,
+  comparing,
+  latestVersion,
+  when,
+  onSelect,
+  onCompare,
+}: RunOptionProps) {
+  const tHC = useTranslations("hcComponentsWorkflowRunHistoryRail");
   const { run, meta, flight, duration, slowFactor } = row;
   const Icon = meta.Icon;
   const v = typeof run.workflowVersion === "number" ? run.workflowVersion : null;
@@ -389,14 +400,16 @@ function RunOption({ row, domId, selected, active, comparing, latestVersion, whe
             {formatDuration(duration)}
           </span>
           {slowFactor != null && (
-            <span className="rh-slow" title="Compared with the median of successful runs">
-              {slowFactor.toFixed(1)}× typical
+            <span className="rh-slow" title={tHC("s3")}>
+              {slowFactor.toFixed(1)}
+              {tHC("s2")}
             </span>
           )}
         </span>
         {stale && (
           <span className="rh-changed">
-            Workflow changed since - now v{latestVersion}
+            {tHC("s1")}
+            {latestVersion}
           </span>
         )}
         {comparing && <span className="rh-compare-tag">Comparing</span>}

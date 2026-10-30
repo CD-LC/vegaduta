@@ -8,6 +8,7 @@ import { auth } from "../../lib/auth";
 import { Button } from "../ui/button";
 import { isBillingEnabled } from "../../lib/billing-flag";
 import { isPersonalDenied, isPersonalEdition } from "../../lib/edition";
+import { useTranslations } from "../../lib/i18n";
 
 // Standalone dark chrome for the PUBLIC template pages (/templates and
 // /templates/[id]) - and, since 2026-08-09, the /plugins marketplace page,
@@ -41,6 +42,7 @@ export default function TemplatesPublicChrome({
   // the existing /templates call sites need no change.
   footer?: ReactNode;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesTemplatesPublicChrome");
   const [authed, setAuthed] = useState(false);
   useEffect(() => {
     let cancelled = false;
@@ -65,7 +67,7 @@ export default function TemplatesPublicChrome({
         <Link
           href="/"
           className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
-          aria-label="VegaDūta home"
+          aria-label={tHC("s5")}
         >
           <img src="/logo-mark.png" alt="" className="h-8 w-auto object-contain" draggable={false} />
           <span>
@@ -99,13 +101,13 @@ export default function TemplatesPublicChrome({
               {!notServed("/templates/mine") && (
                 <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                   <Link href="/templates/mine">
-                    <LayoutTemplate className="size-4" aria-hidden="true" /> My templates
+                    <LayoutTemplate className="size-4" aria-hidden="true" /> {tHC("s4")}
                   </Link>
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
                 <Link href="/">
-                  <ArrowLeft className="size-4" aria-hidden="true" /> Back to console
+                  <ArrowLeft className="size-4" aria-hidden="true" /> {tHC("s3")}
                 </Link>
               </Button>
             </>
@@ -134,7 +136,7 @@ export default function TemplatesPublicChrome({
               {!notServed("/signup") && (
                 <Button asChild variant="outline" size="sm">
                   <Link href="/signup">
-                    Start free <ArrowRight className="size-4" aria-hidden="true" />
+                    {tHC("s2")} <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
                 </Button>
               )}
@@ -146,12 +148,7 @@ export default function TemplatesPublicChrome({
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 sm:px-8">{children}</main>
 
       <footer className="mx-auto w-full max-w-6xl px-5 py-10 text-xs text-muted-foreground sm:px-8">
-        {footer ?? (
-          <p>
-            Community templates are shared by VegaDūta members and reviewed before they appear here. Importing a
-            template creates your own private copy - you can edit it freely afterwards.
-          </p>
-        )}
+        {footer ?? <p>{tHC("s1")}</p>}
       </footer>
     </div>
   );

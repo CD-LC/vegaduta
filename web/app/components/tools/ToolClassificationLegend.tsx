@@ -14,6 +14,7 @@ import {
   UNCLASSIFIED_META,
   type TierMeta,
 } from "./toolClassification";
+import { useTranslations } from "../../lib/i18n";
 
 /**
  * The legend for the tool-classification table: every tier of every axis, with
@@ -50,6 +51,7 @@ function AxisColumn({ heading, question, tiers }: { heading: string; question: s
 }
 
 export default function ToolClassificationLegend({ className }: { className?: string }) {
+  const tHC = useTranslations("hcComponentsToolsToolClassificationLegend");
   // Open by default: a non-expert landing here for the first time needs it,
   // and an expert collapsing it once is cheaper than an admin never finding
   // it. Collapse state is intentionally not persisted — this panel is
@@ -61,11 +63,8 @@ export default function ToolClassificationLegend({ className }: { className?: st
       <CardContent className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-0.5">
-            <h3 className="text-sm font-semibold text-foreground">What these labels mean</h3>
-            <p className="text-sm text-muted-foreground">
-              Every tool an agent can call is declared along three axes. Together they answer: can I trust what it says,
-              what can it do to me, and is it safe to run again.
-            </p>
+            <h3 className="text-sm font-semibold text-foreground">{tHC("s4")}</h3>
+            <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
             {open ? <ChevronUp size={13} aria-hidden="true" /> : <ChevronDown size={13} aria-hidden="true" />}
@@ -110,14 +109,10 @@ export default function ToolClassificationLegend({ className }: { className?: st
             <div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <UnclassifiedPill />
-                <span className="text-sm font-medium text-foreground">is a refusal, not a gap</span>
+                <span className="text-sm font-medium text-foreground">{tHC("s2")}</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">{UNCLASSIFIED_META.meaning}</p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                If a tool you need is blocked, the fix is to classify it — not to bypass it. A tool also counts as
-                blocked when only some of its three axes are declared, because the safety check that runs before a call
-                needs all three to make a decision.
-              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{tHC("s1")}</p>
             </div>
           </>
         )}

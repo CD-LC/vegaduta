@@ -186,6 +186,7 @@ export function McpCredentialGuideAlert({ name }: { name: string | null | undefi
 // vs "not verified" either way - FAILED and UNTESTED share copy, just not
 // color, exactly as before this restyle.
 export function ReadinessBadge({ server, compact }: { server: any; compact?: boolean }) {
+  const tHC = useTranslations("hcComponentsMcpPanelParts");
   const status = usageStatusOf(server);
   if (!status) return null;
   const ready = status === "READY";
@@ -229,7 +230,7 @@ export function ReadinessBadge({ server, compact }: { server: any; compact?: boo
     <p className={cn("mt-1 flex items-center gap-1 text-xs font-semibold", toneClass)}>
       {ready ? (
         <>
-          <CheckCircle2 size={12} aria-hidden="true" /> Tested & ready — agents can use this server
+          <CheckCircle2 size={12} aria-hidden="true" /> {tHC("s1")}
         </>
       ) : acked ? (
         "Trusted — manually acknowledged; agents can use this server"

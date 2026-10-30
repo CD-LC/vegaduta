@@ -43,6 +43,7 @@ import BrandText from "../BrandText";
 // ALWAYS, never the V monogram"): the nav logo is /logo-mark.png + wordmark
 // instead of the mockup's V logomark.
 export default function HireLanding() {
+  const tHC = useTranslations("hcComponentsHirelandingHireLanding");
   const t = useTranslations("hire");
   const authedHint = useAuthedHint();
   const [biz, setBiz] = useState<BizKey | null>(null);
@@ -62,89 +63,91 @@ export default function HireLanding() {
 
       <div className="vd-pub hire-scope">
         <nav>
-        <div className="wrap navrow">
-          <Link href="/" className="logo" aria-label={t("nav_homeAria")}>
-            <Image
-              src="/logo-mark.png"
-              alt=""
-              height={26}
-              width={36}
-              style={{ height: 26, width: "auto" }}
-              draggable={false}
-              priority
-            />
-            <span className="brand-name text-lg font-semibold tracking-tight">
-              Vega<span className="text-primary">Dūta</span>
-            </span>
-          </Link>
-          <div className="navlinks">
-            <a href="#cv">{t("nav_cv")}</a>
-            <a href="#trial">{t("nav_trial")}</a>
-            <a href="#pool">{t("nav_pool")}</a>
-            <a href="#salary">{t("nav_salary")}</a>
-            <a href="#contract">{t("nav_contract")}</a>
-            <a href="#faq">{t("nav_faq")}</a>
-          </div>
-          {/* vd_authed hint: a signed-in visitor gets "Open console", never a
+          <div className="wrap navrow">
+            <Link href="/" className="logo" aria-label={t("nav_homeAria")}>
+              <Image
+                src="/logo-mark.png"
+                alt=""
+                height={26}
+                width={36}
+                style={{ height: 26, width: "auto" }}
+                draggable={false}
+                priority
+              />
+              <span className="brand-name text-lg font-semibold tracking-tight">
+                Vega<span className="text-primary">Dūta</span>
+              </span>
+            </Link>
+            <div className="navlinks">
+              <a href="#cv">{t("nav_cv")}</a>
+              <a href="#trial">{t("nav_trial")}</a>
+              <a href="#pool">{t("nav_pool")}</a>
+              <a href="#salary">{t("nav_salary")}</a>
+              <a href="#contract">{t("nav_contract")}</a>
+              <a href="#faq">{t("nav_faq")}</a>
+            </div>
+            {/* vd_authed hint: a signed-in visitor gets "Open console", never a
               sign-in link to a session they already hold. */}
-          {authedHint ? (
-            <Link className="btn btn-ghost" href="/" style={{ padding: "7px 16px", fontSize: 14 }}>
-              Open console
-            </Link>
-          ) : (
-            <Link className="btn btn-ghost" href="/login" style={{ padding: "7px 16px", fontSize: 14 }}>
-              {t("nav_signIn")}
-            </Link>
-          )}
-          <a
-            className="btn btn-primary"
-            href="#offer"
-            data-testid="hire-cta-nav"
-            onClick={navCta}
-            style={{ padding: "7px 16px", fontSize: 14 }}
-          >
-            {t("nav_hireFree")}
-          </a>
-        </div>
-      </nav>
+            {authedHint ? (
+              <Link className="btn btn-ghost" href="/" style={{ padding: "7px 16px", fontSize: 14 }}>
+                {tHC("s1")}
+              </Link>
+            ) : (
+              <Link className="btn btn-ghost" href="/login" style={{ padding: "7px 16px", fontSize: 14 }}>
+                {t("nav_signIn")}
+              </Link>
+            )}
+            <a
+              className="btn btn-primary"
+              href="#offer"
+              data-testid="hire-cta-nav"
+              onClick={navCta}
+              style={{ padding: "7px 16px", fontSize: 14 }}
+            >
+              {t("nav_hireFree")}
+            </a>
+          </div>
+        </nav>
 
-      <HireHero onBizSelected={setBiz} />
-      <PledgeBand />
-      {/* The candidate's senses, compact — eyes/ears/voice/hands/wings live,
+        <HireHero onBizSelected={setBiz} />
+        <PledgeBand />
+        {/* The candidate's senses, compact — eyes/ears/voice/hands/wings live,
           IoT honestly "in design"; links to the landing's full band. Uses
           theme tokens, so it sits fine inside this page's dossier styling. */}
-      <SensesStrip />
-      <AgentCv biz={biz} />
-      <WorkTrial biz={biz} />
-      <CandidatePool />
-      {/* Priced plan slips (Free/Premium/Unlimited) - billing-only surface. */}
-      {isBillingEnabled() && <SalaryWorksheet biz={biz} />}
-      <EmploymentContract />
-      <HireFaq />
-      <OfferLetter biz={biz} />
+        <SensesStrip />
+        <AgentCv biz={biz} />
+        <WorkTrial biz={biz} />
+        <CandidatePool />
+        {/* Priced plan slips (Free/Premium/Unlimited) - billing-only surface. */}
+        {isBillingEnabled() && <SalaryWorksheet biz={biz} />}
+        <EmploymentContract />
+        <HireFaq />
+        <OfferLetter biz={biz} />
 
-      <div className="wrap">
-        <footer>
-          <span><BrandText text={t("footer_tagline")} /></span>
-          <span>
-            <a href={academyHref()} target="_blank" rel="noopener noreferrer">
-              {t("footer_academy")}
-            </a>
-            {" · "}
-            <Link href="/docs">{t("footer_docs")}</Link>
-            {" · "}
-            <Link href="/templates">{t("footer_templates")}</Link>
-            {" · "}
-            {isBillingEnabled() && (
-              <>
-                <Link href="/billing">{t("footer_pricing")}</Link>
-                {" · "}
-              </>
-            )}
-            {t("footer_status")}
-          </span>
-        </footer>
-      </div>
+        <div className="wrap">
+          <footer>
+            <span>
+              <BrandText text={t("footer_tagline")} />
+            </span>
+            <span>
+              <a href={academyHref()} target="_blank" rel="noopener noreferrer">
+                {t("footer_academy")}
+              </a>
+              {" · "}
+              <Link href="/docs">{t("footer_docs")}</Link>
+              {" · "}
+              <Link href="/templates">{t("footer_templates")}</Link>
+              {" · "}
+              {isBillingEnabled() && (
+                <>
+                  <Link href="/billing">{t("footer_pricing")}</Link>
+                  {" · "}
+                </>
+              )}
+              {t("footer_status")}
+            </span>
+          </footer>
+        </div>
       </div>
     </>
   );

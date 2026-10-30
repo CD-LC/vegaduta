@@ -23,6 +23,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Skeleton } from "../components/ui/skeleton";
 import { StatusDot } from "../components/ui/status-dot";
+import { useTranslations } from "../lib/i18n";
 
 // Tenant-facing "how does our infrastructure use your data" transparency
 // page - backed by GET /api/tenant/data-usage (TenantDataUsageController,
@@ -69,6 +70,7 @@ function orderedSystems(systems: TenantDataUsageSystem[]): TenantDataUsageSystem
 }
 
 function SystemCard({ system }: { system: TenantDataUsageSystem }) {
+  const tHC = useTranslations("hcDatausagePage");
   const Icon = SYSTEM_DISPLAY[system.id]?.icon || Database;
   const isActive = system.status === "active";
 
@@ -95,9 +97,7 @@ function SystemCard({ system }: { system: TenantDataUsageSystem }) {
              * engaged" (Temporal) behind a vague "coming soon" - state it as
              * plainly as every active system's own status line. */}
             {!isActive && (
-              <span className="max-w-[9rem] text-[11px] leading-tight text-muted-foreground">
-                Built, not yet handling live traffic
-              </span>
+              <span className="max-w-[9rem] text-[11px] leading-tight text-muted-foreground">{tHC("s5")}</span>
             )}
           </div>
         </div>
@@ -144,6 +144,7 @@ function SystemCardSkeleton() {
 }
 
 export default function DataUsagePage() {
+  const tHC = useTranslations("hcDatausagePage");
   const { hasPermission } = useAuth();
   const canManageData = hasPermission("MANAGE_DATA_GOVERNANCE");
   const [data, setData] = useState<TenantDataUsageResponse | null>(null);
@@ -173,7 +174,7 @@ export default function DataUsagePage() {
   return (
     <AppShell eyebrow="Trust">
       <PageHeader
-        title="How your data is used"
+        title={tHC("s4")}
         subtitle="A plain accounting of every system your workspace's data touches, and exactly how it's kept isolated from every other tenant."
       />
 
@@ -197,7 +198,7 @@ export default function DataUsagePage() {
       {loaded && data && (
         <>
           <p className="mb-4 text-xs text-muted-foreground">
-            Snapshot generated {new Date(data.generatedAt).toLocaleString()}
+            {tHC("s3")} {new Date(data.generatedAt).toLocaleString()}
           </p>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -208,11 +209,8 @@ export default function DataUsagePage() {
 
           <Card className="mt-4">
             <CardContent>
-              <h3 className="text-sm font-semibold text-foreground">Export or delete your workspace&apos;s data</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                You can download everything listed above as a single export, or permanently delete your entire
-                workspace.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground">{tHC("s2")}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{tHC("s1")}</p>
               {canManageData ? (
                 <Link
                   href="/admin/data-privacy"

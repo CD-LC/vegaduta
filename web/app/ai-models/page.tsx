@@ -19,6 +19,7 @@ import { errorMessage } from "../lib/errors";
 import { poolLabel } from "../lib/personalInstall";
 import PaginationControls from "../components/PaginationControls";
 import { usePagination } from "../lib/usePagination";
+import { useTranslations } from "../lib/i18n";
 
 // "AI Model Control" - per-tenant, per-feature preferred provider/model
 // overrides. Backed by TenantAiModelPreferenceController.java (core/tenancy) -
@@ -103,6 +104,7 @@ interface EditFormProps {
 }
 
 function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProps) {
+  const tHC = useTranslations("hcAimodelsPage");
   const [providerName, setProviderName] = useState(row.providerName || providerOptions[0]?.name || "PLATFORM_HOSTED");
   const [model, setModel] = useState(row.model || "");
 
@@ -136,20 +138,18 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
             id={`model-${row.featureKey}`}
             value={model}
             onChange={(e) => setModel(e.target.value)}
-            placeholder="e.g. claude-sonnet-4-5-20250929"
+            placeholder={tHC("s12")}
             autoFocus
             required
           />
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        This only takes effect once the provider you pick above is the one your call actually resolves to (an active
-        provider key from{" "}
+        {tHC("s11")}{" "}
         <Link href="/providers" className="underline underline-offset-2">
           Providers
         </Link>
-        , or Platform-hosted) - it swaps the model, it can&apos;t reroute a call to a provider that isn&apos;t already
-        connected.
+        {tHC("s10")}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" size="sm" disabled={busy}>
@@ -164,6 +164,7 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
 }
 
 export default function AiModelControlPage() {
+  const tHC = useTranslations("hcAimodelsPage");
   const { hasPermission } = useAuth();
   const canManageSettings = hasPermission("MANAGE_TENANT_SETTINGS");
   const [settings, setSettings] = useState(null);
@@ -254,12 +255,12 @@ export default function AiModelControlPage() {
   return (
     <AppShell eyebrow="Workspace">
       <PageHeader
-        title="AI Model Control"
+        title={tHC("s9")}
         subtitle="Choose which provider and model each AI-touching feature in your workspace runs on, instead of the platform's built-in default."
         actions={
           <Button asChild variant="outline" size="sm">
             <Link href="/providers">
-              Manage providers <ArrowRight size={14} />
+              {tHC("s8")} <ArrowRight size={14} />
             </Link>
           </Button>
         }
@@ -283,9 +284,7 @@ export default function AiModelControlPage() {
 
       {!canManageSettings && (
         <Card className="mb-4 gap-0 border-dashed p-4">
-          <p className="text-sm text-muted-foreground">
-            Only a workspace admin can change these overrides. You can still see what&apos;s configured below.
-          </p>
+          <p className="text-sm text-muted-foreground">{tHC("s7")}</p>
         </Card>
       )}
 
@@ -302,11 +301,11 @@ export default function AiModelControlPage() {
 
       <Card className="mb-4 gap-0 border-dashed p-4">
         <p className="text-sm text-muted-foreground">
-          On-device (Edge) routing is a separate, independent setting managed from the{" "}
+          {tHC("s6")}{" "}
           <Link href="/edge" className="underline underline-offset-2">
-            Edge page
+            {tHC("s5")}
           </Link>{" "}
-          — this page only controls which hosted provider/model each feature calls.
+          {tHC("s4")}
         </p>
       </Card>
 
@@ -332,9 +331,9 @@ export default function AiModelControlPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{row.featureLabel || row.featureKey}</span>
                     {isDefault ? (
-                      <Badge variant="accent">Live routing today</Badge>
+                      <Badge variant="accent">{tHC("s3")}</Badge>
                     ) : (
-                      <Badge variant="outline">Follows Default until wired</Badge>
+                      <Badge variant="outline">{tHC("s2")}</Badge>
                     )}
                   </div>
                   {hasOverride ? (
@@ -342,9 +341,7 @@ export default function AiModelControlPage() {
                       {(PROVIDER_LABELS[row.providerName] || row.providerName) + " · " + row.model}
                     </Badge>
                   ) : (
-                    <p className="text-xs text-muted-foreground">
-                      No override set — uses the platform&apos;s built-in default.
-                    </p>
+                    <p className="text-xs text-muted-foreground">{tHC("s1")}</p>
                   )}
                 </div>
                 {canManageSettings && !editing && (

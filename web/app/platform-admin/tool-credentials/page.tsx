@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { useConfirm } from "../components/admin/ConfirmDialog";
 import { isPersonalEdition } from "../../lib/edition";
 import { useCloudSpeechOffered } from "../../lib/cloudSpeech";
+import { useTranslations } from "../../lib/i18n";
 
 // Platform-admin-settable credentials for tool-capability providers that were
 // previously BYOK-only with zero admin path - 2026-08-03, "even I should be
@@ -97,6 +98,7 @@ const TOOLS = [
 ];
 
 export default function ToolCredentialsPage() {
+  const tHC = useTranslations("hcPlatformadminToolcredentialsPage");
   const askConfirm = useConfirm();
   // The ElevenLabs voice credential is a CLOUD_SPEECH feature: no card where core has it off.
   const speech = useCloudSpeechOffered();
@@ -169,37 +171,30 @@ export default function ToolCredentialsPage() {
 
   return (
     <AdminShell
-      title="Voice & Tool Credentials"
+      title={tHC("s12")}
       actions={
         <Button variant="outline" size="sm" onClick={refresh} disabled={loading} title="Refresh">
           <RefreshCw size={14} className={loading ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
-      <p className="mb-6 text-sm text-muted-foreground">
-        Platform-wide credentials for tool-capability providers (not chat/LLM providers - see LLM & Providers for
-        those). A tenant with their own BYOK key for a tool always uses their own key first; these only apply as a
-        fallback.
-      </p>
+      <p className="mb-6 text-sm text-muted-foreground">{tHC("s11")}</p>
 
       {/* /platform-admin/mcp-catalog is outside the personal allowlist (a real 404 there): no card to it. */}
       {!isPersonalEdition() && (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Plug size={16} className="text-primary" /> MCP Catalog
+              <Plug size={16} className="text-primary" /> {tHC("s10")}
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              See the curated MCP server catalog every tenant browses from Tools → MCP Servers, and search the public
-              MCP Registry.
-            </p>
+            <p className="text-xs text-muted-foreground">{tHC("s9")}</p>
           </CardHeader>
           <CardContent>
             <Link
               href="/platform-admin/mcp-catalog"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
-              Open MCP Catalog <ChevronRight size={13} />
+              {tHC("s8")} <ChevronRight size={13} />
             </Link>
           </CardContent>
         </Card>
@@ -208,7 +203,7 @@ export default function ToolCredentialsPage() {
       {searchStatus && (
         <Card className="mb-6" data-testid="web-search-providers">
           <CardHeader>
-            <CardTitle className="text-sm">Web search providers</CardTitle>
+            <CardTitle className="text-sm">{tHC("s7")}</CardTitle>
             <p className="text-xs text-muted-foreground">
               {searchStatus.multiProviderActive
                 ? `Primary: ${searchStatus.primary}${
@@ -219,7 +214,7 @@ export default function ToolCredentialsPage() {
                       : "No provider in the chain is configured, so web_search is not offered."
                   }`
                 : "Default mode: Brave only, exactly as before. Alternative providers are used only when the operator sets WEB_SEARCH_PROVIDER or WEB_SEARCH_FALLBACK."}{" "}
-              &quot;Configured&quot; means a key or URL is present, not that it works.
+              {tHC("s6")}
             </p>
           </CardHeader>
           <CardContent>
@@ -231,11 +226,16 @@ export default function ToolCredentialsPage() {
                     {p.configured ? "Configured" : "Not configured"}
                   </Badge>
                   {p.role === "primary" && <Badge>Primary</Badge>}
-                  {p.role === "fallback" && <Badge variant="secondary">Fallback #{p.fallbackPosition}</Badge>}
-                  {p.active && <Badge>Active now</Badge>}
+                  {p.role === "fallback" && (
+                    <Badge variant="secondary">
+                      {tHC("s5")}
+                      {p.fallbackPosition}
+                    </Badge>
+                  )}
+                  {p.active && <Badge>{tHC("s4")}</Badge>}
                   {p.dailyCap > 0 && (
                     <span className="text-xs text-muted-foreground">
-                      {p.usedToday}/{p.dailyCap} attempts today
+                      {p.usedToday}/{p.dailyCap} {tHC("s3")}
                     </span>
                   )}
                 </li>
@@ -263,11 +263,7 @@ export default function ToolCredentialsPage() {
               </CardHeader>
               <CardContent className="space-y-3 p-0">
                 <p className="text-sm text-muted-foreground">{tool.description}</p>
-                {!tool.wired && (
-                  <p className="text-xs text-[var(--warning-text)]">
-                    Storage only for now - not yet wired into tenant agent runs.
-                  </p>
-                )}
+                {!tool.wired && <p className="text-xs text-[var(--warning-text)]">{tHC("s2")}</p>}
                 {configured && status.extraConfig && (
                   <p className="text-xs text-muted-foreground">
                     {tool.extraLabel}: <span className="font-mono">{status.extraConfig}</span>
@@ -275,7 +271,7 @@ export default function ToolCredentialsPage() {
                 )}
                 {configured && status.updatedAt && (
                   <p className="text-xs text-muted-foreground">
-                    Last updated {new Date(status.updatedAt).toLocaleString()}
+                    {tHC("s1")} {new Date(status.updatedAt).toLocaleString()}
                     {status.updatedBy ? ` by ${status.updatedBy}` : ""}
                   </p>
                 )}

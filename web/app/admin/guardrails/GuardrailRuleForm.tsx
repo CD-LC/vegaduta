@@ -39,6 +39,7 @@ export function GuardrailRuleForm({
   onClose: () => void;
   onSave: () => void;
 }) {
+  const tHC = useTranslations("hcAdminGuardrailsGuardrailRuleForm");
   const tg = useTranslations("f2GapsAdmin");
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
@@ -55,22 +56,20 @@ export function GuardrailRuleForm({
           id="rule-name"
           value={draft.name}
           maxLength={MAX_NAME}
-          placeholder="Internal project codenames"
+          placeholder={tHC("s11")}
           disabled={busy}
           onChange={(e) => onDraftChange({ ...draft, name: e.target.value })}
         />
-        <p className="text-xs text-muted-foreground">
-          Shown to the agent when this rule stops something, so name it after what it protects.
-        </p>
+        <p className="text-xs text-muted-foreground">{tHC("s10")}</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="rule-description">Description (optional)</Label>
+        <Label htmlFor="rule-description">{tHC("s9")}</Label>
         <Input
           id="rule-description"
           value={draft.description}
           maxLength={MAX_DESCRIPTION}
-          placeholder="Why this exists, for whoever reads it next"
+          placeholder={tHC("s8")}
           disabled={busy}
           onChange={(e) => onDraftChange({ ...draft, description: e.target.value })}
         />
@@ -92,17 +91,16 @@ export function GuardrailRuleForm({
           aria-describedby={patternError ? "rule-pattern-error" : undefined}
         />
         {patternError ? (
-          <p id="rule-pattern-error" className="text-xs text-destructive">{patternError}</p>
-        ) : (
-          <p className="text-xs text-muted-foreground">
-            A regular expression, matched case-insensitively. Checked here as you type by your browser; the
-            server checks it again with Java&apos;s regex engine, which differs on exotic syntax.
+          <p id="rule-pattern-error" className="text-xs text-destructive">
+            {patternError}
           </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{tHC("s7")}</p>
         )}
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium">What happens on a match</legend>
+        <legend className="mb-1 text-sm font-medium">{tHC("s6")}</legend>
         <label className="flex cursor-pointer items-start gap-2 text-sm">
           <input
             type="radio"
@@ -114,10 +112,7 @@ export function GuardrailRuleForm({
           />
           <span>
             <span className="font-medium">Block</span>
-            <span className="block text-xs text-muted-foreground">
-              The whole result is withheld. The agent is told a rule stopped it, by name, and carries on with
-              the rest of the turn.
-            </span>
+            <span className="block text-xs text-muted-foreground">{tHC("s5")}</span>
           </span>
         </label>
         <label className="flex cursor-pointer items-start gap-2 text-sm">
@@ -132,8 +127,8 @@ export function GuardrailRuleForm({
           <span>
             <span className="font-medium">{tg("redact")}</span>
             <span className="block text-xs text-muted-foreground">
-              Only the matched text is replaced with <code>[REDACTED]</code>. The rest still reaches the
-              model, which is usually what you want for something like a key or an internal id.
+              {tHC("s4")} <code>[REDACTED]</code>
+              {tHC("s3")}
             </span>
           </span>
         </label>
@@ -157,7 +152,7 @@ export function GuardrailRuleForm({
           rows={2}
           spellCheck={false}
           className="text-xs"
-          placeholder="Paste some text to see whether this rule would catch it"
+          placeholder={tHC("s2")}
           onChange={(e) => onSampleChange(e.target.value)}
         />
         {preview && (
@@ -175,7 +170,7 @@ export function GuardrailRuleForm({
                 )}
               </>
             ) : (
-              <p className="text-muted-foreground">No match — this text would pass through untouched.</p>
+              <p className="text-muted-foreground">{tHC("s1")}</p>
             )}
           </div>
         )}

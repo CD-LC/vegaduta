@@ -8,6 +8,7 @@ import { summariseApply } from "../../components/brief/logic";
 import type { Blueprint } from "../../lib/build/blueprint";
 import type { explainBuildError, RawBuildError } from "../../lib/build/explainError";
 import type { ApplyJob } from "../../components/brief/types";
+import { useTranslations } from "../../lib/i18n";
 
 /** Stage 3: build progress, or the explained failure. */
 export default function BuildingStage({
@@ -35,6 +36,7 @@ export default function BuildingStage({
   onRetry: () => void;
   onBack: () => void;
 }) {
+    const tHC = useTranslations("hcBuildCreateBuildingStage");
   return (
     <motion.div
       key="building"
@@ -78,7 +80,7 @@ export default function BuildingStage({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={pct ?? undefined}
-            aria-label="Build progress"
+            aria-label={tHC("s1")}
           >
             {pct == null ? (
               reduceMotion ? (

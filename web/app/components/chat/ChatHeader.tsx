@@ -19,6 +19,7 @@ export default function ChatHeader({
   sending: boolean;
   onNewSession: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsChatChatHeader");
   const t = useTranslations("chatPanel");
   return (
     <header className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
@@ -41,12 +42,10 @@ export default function ChatHeader({
         <TooltipTrigger asChild>
           <Button type="button" variant="ghost" size="sm" onClick={onNewSession}>
             <RotateCcw aria-hidden="true" size={12} className="size-3" />
-            Clear context
+            {tHC("s2")}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>
-          Start a fresh conversation — clears on-device and server-side session memory for this chat
-        </TooltipContent>
+        <TooltipContent>{tHC("s1")}</TooltipContent>
       </Tooltip>
     </header>
   );

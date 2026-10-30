@@ -12,6 +12,7 @@ import { Label } from "../ui/label";
 import { Select } from "../ui/select";
 import { TEMPLATE_CATEGORIES } from "./categories";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
+import { useTranslations } from "../../lib/i18n";
 
 // Edit the descriptive metadata of a draft/rejected submission (title,
 // summary, category, tags). The underlying agent/workflow design is not edited
@@ -26,6 +27,7 @@ export default function EditSubmissionModal({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const tHC = useTranslations("hcComponentsTemplatesEditSubmissionModal");
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0].id);
@@ -91,11 +93,11 @@ export default function EditSubmissionModal({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Edit template"
+        aria-label={tHC("s3")}
         className="elev-raised w-full max-w-xl rounded-2xl p-6 shadow-xl"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Edit template</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("s3")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -138,7 +140,7 @@ export default function EditSubmissionModal({
                 id="edit-tags"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="comma, separated"
+                placeholder={tHC("s2")}
               />
             </div>
           </div>
@@ -150,7 +152,7 @@ export default function EditSubmissionModal({
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
-            Save changes
+            {tHC("s1")}
           </Button>
         </div>
       </div>

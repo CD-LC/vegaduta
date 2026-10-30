@@ -6,8 +6,10 @@ import ShareWorkflowPanel from "./ShareWorkflowPanel";
 import { useDialogFocus } from "../../lib/hooks/useDialogFocus";
 import McpExposureField from "../McpExposureField";
 import { isPersonalEdition } from "../../lib/edition";
+import { useTranslations } from "../../lib/i18n";
 
 export default function WorkflowShareModal({ setShowShareModal, showShareModal, t, workflow }: any) {
+  const tHC = useTranslations("hcComponentsWorkflowWorkflowShareModal");
   // Focus in on open, Tab trap, Escape closes, focus back to the opener on close (FE-041).
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, null, () => setShowShareModal(false), { enabled: !!(showShareModal && workflow) });
@@ -33,7 +35,7 @@ export default function WorkflowShareModal({ setShowShareModal, showShareModal, 
             aria-modal="true"
           >
             <div className="flex items-start justify-between gap-3 px-5 pb-1 pt-5">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">Share this workflow</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("s1")}</h2>
               <button
                 type="button"
                 className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"

@@ -10,6 +10,7 @@ import { Button } from "../components/ui/button";
 import PublicAuthCtas from "../components/PublicAuthCtas";
 import { componentLabel, describeBanner, statusIconKind, statusLabel, type ComponentStatus } from "./statusModel";
 import BrandName from "../components/BrandName";
+import { useTranslations } from "../lib/i18n";
 
 // Public system-status client (Tier-4 public surface). Polls
 // GET {API_BASE}/api/public/status every 30s - a permitAll endpoint that
@@ -40,6 +41,7 @@ function statusIcon(status: string) {
 }
 
 export default function StatusPageClient() {
+  const tHC = useTranslations("hcStatusStatusPageClient");
   const [state, setState] = useState<FetchState>({ kind: "loading" });
   const [lastPoll, setLastPoll] = useState<Date | null>(null);
 
@@ -112,20 +114,16 @@ export default function StatusPageClient() {
           </Button>
           <PublicAuthCtas>
             <Button asChild variant="outline" size="sm">
-              <Link href="/signup">Start free</Link>
+              <Link href="/signup">{tHC("s12")}</Link>
             </Button>
           </PublicAuthCtas>
         </div>
       </nav>
 
       <header className="mx-auto max-w-3xl px-6 pb-8 pt-10 text-center">
-        <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">System status</span>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Platform health, live</h1>
-        <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
-          Real component readings from the platform&rsquo;s own health checks, requested every 30 seconds while this
-          page is open. Nothing here is edited by hand - a green row means the probe passed when the page last asked,
-          and a red one means it failed.
-        </p>
+        <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">{tHC("s11")}</span>
+        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{tHC("s10")}</h1>
+        <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">{tHC("s9")}</p>
       </header>
 
       <main className="mx-auto max-w-3xl px-6 pb-20 sm:px-8">
@@ -184,21 +182,15 @@ export default function StatusPageClient() {
         </section>
 
         <section className="mt-8 rounded-2xl border border-border/60 px-6 py-6">
-          <h2 className="text-sm font-semibold">What this page measures</h2>
+          <h2 className="text-sm font-semibold">{tHC("s8")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            Each row is read from a live probe when the page asks: the database and cache report through Spring
-            Boot&rsquo;s health indicators, the event bus answers a real broker{" "}
-            <code className="font-mono text-xs">describeCluster()</code>, disk space is the API host&rsquo;s own
-            reading, and the embeddings and WhatsApp services answer their own liveness endpoints (liveness only: they
-            do not test model quality or message delivery). The API row is simply this request being answered. A
-            component marked <em>Not deployed</em> is intentionally off in this environment, not failing;{" "}
-            <em>Unknown</em> means the probe could not be read, which is not the same as healthy. This page shows only
-            the current reading: it keeps no history and publishes no uptime percentage. API consumers can read the same
-            feed at <code className="font-mono text-xs">GET /api/public/status</code>.
+            {tHC("s7")} <code className="font-mono text-xs">describeCluster()</code>
+            {tHC("s6")} <em>{tHC("s5")}</em> {tHC("s4")} <em>Unknown</em> {tHC("s3")}{" "}
+            <code className="font-mono text-xs">{tHC("s2")}</code>.
           </p>
           {lastPoll && (
             <p className="mt-3 font-mono text-xs text-muted-foreground">
-              Next refresh {new Date(lastPoll.getTime() + POLL_MS).toLocaleTimeString()}
+              {tHC("s1")} {new Date(lastPoll.getTime() + POLL_MS).toLocaleTimeString()}
             </p>
           )}
         </section>
