@@ -16,13 +16,13 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
     // instead of rendering a dead UI.
     return (
       <Section
-        title={tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s3")}
+        title={tHC("s3")}
         description="Golden test cases replayed against this agent and scored by the quality judges, run over run."
       >
         <Alert>
-          <AlertTitle>{tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s5")}</AlertTitle>
+          <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s4")}
+            {tHC("s4")}
           </AlertDescription>
         </Alert>
       </Section>
@@ -31,12 +31,12 @@ export function EvalDatasetsUnavailable({ reason }: { reason: "client-not-wired"
   // Same inline entitlement posture as AgentQualityPanel's 403 branch.
   return (
     <Section
-      title={tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s3")}
+      title={tHC("s3")}
     >
       <Alert>
-        <AlertTitle>{tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s2")}</AlertTitle>
+        <AlertTitle>{tHC("s2")}</AlertTitle>
         <AlertDescription>
-          {tHC("hcAgentsQualityEvalDatasetsEvalDatasetsUnavailable.s1")}
+          {tHC("s1")}
         </AlertDescription>
       </Alert>
     </Section>

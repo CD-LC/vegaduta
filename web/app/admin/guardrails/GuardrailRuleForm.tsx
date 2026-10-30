@@ -56,22 +56,22 @@ export function GuardrailRuleForm({
           id="rule-name"
           value={draft.name}
           maxLength={MAX_NAME}
-          placeholder={tHC("hcAdminGuardrailsGuardrailRuleForm.s11")}
+          placeholder={tHC("s11")}
           disabled={busy}
           onChange={(e) => onDraftChange({ ...draft, name: e.target.value })}
         />
         <p className="text-xs text-muted-foreground">
-          {tHC("hcAdminGuardrailsGuardrailRuleForm.s10")}
+          {tHC("s10")}
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="rule-description">{tHC("hcAdminGuardrailsGuardrailRuleForm.s9")}</Label>
+        <Label htmlFor="rule-description">{tHC("s9")}</Label>
         <Input
           id="rule-description"
           value={draft.description}
           maxLength={MAX_DESCRIPTION}
-          placeholder={tHC("hcAdminGuardrailsGuardrailRuleForm.s8")}
+          placeholder={tHC("s8")}
           disabled={busy}
           onChange={(e) => onDraftChange({ ...draft, description: e.target.value })}
         />
@@ -96,13 +96,13 @@ export function GuardrailRuleForm({
           <p id="rule-pattern-error" className="text-xs text-destructive">{patternError}</p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            {tHC("hcAdminGuardrailsGuardrailRuleForm.s7")}
+            {tHC("s7")}
           </p>
         )}
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium">{tHC("hcAdminGuardrailsGuardrailRuleForm.s6")}</legend>
+        <legend className="mb-1 text-sm font-medium">{tHC("s6")}</legend>
         <label className="flex cursor-pointer items-start gap-2 text-sm">
           <input
             type="radio"
@@ -115,7 +115,7 @@ export function GuardrailRuleForm({
           <span>
             <span className="font-medium">Block</span>
             <span className="block text-xs text-muted-foreground">
-              {tHC("hcAdminGuardrailsGuardrailRuleForm.s5")}
+              {tHC("s5")}
             </span>
           </span>
         </label>
@@ -131,7 +131,7 @@ export function GuardrailRuleForm({
           <span>
             <span className="font-medium">{tg("redact")}</span>
             <span className="block text-xs text-muted-foreground">
-              {tHC("hcAdminGuardrailsGuardrailRuleForm.s4")} <code>[REDACTED]</code>{tHC("hcAdminGuardrailsGuardrailRuleForm.s3")}
+              {tHC("s4")} <code>[REDACTED]</code>{tHC("s3")}
             </span>
           </span>
         </label>
@@ -155,7 +155,7 @@ export function GuardrailRuleForm({
           rows={2}
           spellCheck={false}
           className="text-xs"
-          placeholder={tHC("hcAdminGuardrailsGuardrailRuleForm.s2")}
+          placeholder={tHC("s2")}
           onChange={(e) => onSampleChange(e.target.value)}
         />
         {preview && (
@@ -173,7 +173,7 @@ export function GuardrailRuleForm({
                 )}
               </>
             ) : (
-              <p className="text-muted-foreground">{tHC("hcAdminGuardrailsGuardrailRuleForm.s1")}</p>
+              <p className="text-muted-foreground">{tHC("s1")}</p>
             )}
           </div>
         )}

@@ -86,7 +86,7 @@ export default function EdgeFaqEvalPage() {
 
   return (
     <main style={{ padding: 24, fontFamily: "monospace" }}>
-      <h1>{tHC("hcEvalEdgefaqPage.s1")}</h1>
+      <h1>{tHC("s1")}</h1>
       <p data-testid="eval-status" id="eval-status">{status}</p>
       <p id="eval-progress">{progress}</p>
       {!report && (

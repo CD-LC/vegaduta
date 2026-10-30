@@ -229,24 +229,24 @@ export default function DevicePage() {
 
   return (
     <main style={{ maxWidth: 560, margin: "48px auto", padding: "0 16px", fontFamily: "system-ui" }}>
-      <h1 style={{ fontSize: 22, fontWeight: 700 }}>{tHC("hcDevicePage.s6")}</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 700 }}>{tHC("s6")}</h1>
       <p style={{ color: "#555", marginTop: 8 }}>
-        {tHC("hcDevicePage.s5")}
+        {tHC("s5")}
       </p>
 
       {!device ? (
         <div style={{ marginTop: 24, display: "grid", gap: 12 }}>
           <label style={{ display: "grid", gap: 4 }}>
-            <span style={{ fontSize: 13, color: "#555" }}>{tHC("hcDevicePage.s4")}</span>
+            <span style={{ fontSize: 13, color: "#555" }}>{tHC("s4")}</span>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder={tHC("hcDevicePage.s3")}
+              placeholder={tHC("s3")}
               style={{ padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
             />
           </label>
           <label style={{ display: "grid", gap: 4 }}>
-            <span style={{ fontSize: 13, color: "#555" }}>{tHC("hcDevicePage.s2")}</span>
+            <span style={{ fontSize: 13, color: "#555" }}>{tHC("s2")}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -265,7 +265,7 @@ export default function DevicePage() {
       ) : (
         <div style={{ marginTop: 24 }}>
           <p>
-            <strong>{device.name}</strong> {tHC("hcDevicePage.s1")}
+            <strong>{device.name}</strong> {tHC("s1")}
           </p>
           <p style={{ fontSize: 13, color: "#555", marginTop: 8 }}>Capabilities: {caps.join(", ") || "none"}</p>
           <button

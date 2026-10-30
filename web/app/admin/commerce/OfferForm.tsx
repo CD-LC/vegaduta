@@ -148,7 +148,7 @@ export default function OfferForm({ agentId, onCreated }: { agentId: string; onC
             id="offer-payload"
             rows={3}
             className="font-mono text-xs"
-            placeholder={tHC("hcAdminCommerceOfferForm.s1")}
+            placeholder={tHC("s1")}
             value={form.resourcePayload}
             onChange={(e) => setForm((f) => ({ ...f, resourcePayload: e.target.value }))}
           />

@@ -141,7 +141,7 @@ export default function MaintenanceScreen({
             </Badge>
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="size-3.5" style={{ color: "var(--state-success)" }} aria-hidden="true" />
-              {tHC("hcComponentsMaintenanceScreen.s7")}
+              {tHC("s7")}
             </span>
           </div>
 
@@ -161,7 +161,7 @@ export default function MaintenanceScreen({
             </div>
 
             <h1 className="text-balance text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
-              {maintenance ? t("maintenanceTitle") : <>{tHC("hcComponentsMaintenanceScreen.s6")}</>}
+              {maintenance ? t("maintenanceTitle") : <>{tHC("s6")}</>}
             </h1>
             {maintenance ? (
               <>
@@ -176,7 +176,7 @@ export default function MaintenanceScreen({
               </>
             ) : (
               <p className="mt-2.5 max-w-sm text-pretty text-sm leading-relaxed text-muted-foreground">
-                {tHC("hcComponentsMaintenanceScreen.s5")}
+                {tHC("s5")}
               </p>
             )}
 
@@ -210,12 +210,12 @@ export default function MaintenanceScreen({
                   {checking ? (
                     <>
                       <Loader2 className="size-3.5 animate-spin text-primary" aria-hidden="true" />
-                      {tHC("hcComponentsMaintenanceScreen.s4")}
+                      {tHC("s4")}
                     </>
                   ) : (
                     <>
                       <PlugZap className="size-3.5 text-primary" aria-hidden="true" />
-                      {tHC("hcComponentsMaintenanceScreen.s3")}
+                      {tHC("s3")}
                     </>
                   )}
                 </span>
@@ -252,14 +252,14 @@ export default function MaintenanceScreen({
                 className="mt-5 inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
                 <Gamepad2 className="size-3.5" aria-hidden="true" />
-                {tHC("hcComponentsMaintenanceScreen.s2")}
+                {tHC("s2")}
               </button>
             )}
           </div>
         </Card>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          {tHC("hcComponentsMaintenanceScreen.s1")}
+          {tHC("s1")}
         </p>
       </motion.div>
     </div>

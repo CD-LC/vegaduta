@@ -87,7 +87,7 @@ function PlaygroundInner() {
           // "try it before it's live" surface.
           <Button asChild variant="outline" size="sm">
             <Link href="/capabilities/decision">
-              <BrainCircuit aria-hidden="true" size={14} /> {tHC("hcPlaygroundPlaygroundLegacy.s5")} <ArrowRight aria-hidden="true" size={14} />
+              <BrainCircuit aria-hidden="true" size={14} /> {tHC("s5")} <ArrowRight aria-hidden="true" size={14} />
             </Link>
           </Button>
         }
@@ -95,11 +95,11 @@ function PlaygroundInner() {
       {loadFailed ? (
         <EmptyState
           icon={AlertTriangle}
-          title={tHC("hcPlaygroundPlaygroundLegacy.s4")}
+          title={tHC("s4")}
           description="The request to load this workspace's agents failed, so this list is empty because we don't know — not because you have none. Check your connection and try again."
           action={
             <Button onClick={loadAgents} variant="outline">
-              {tHC("hcPlaygroundPlaygroundLegacy.s3")}
+              {tHC("s3")}
             </Button>
           }
         />
@@ -114,7 +114,7 @@ function PlaygroundInner() {
                 <Link href="/agents">{t("goToAgents")}</Link>
               </Button>
               <Link href="/help#agents" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
-                {tHC("hcPlaygroundPlaygroundLegacy.s2")}
+                {tHC("s2")}
               </Link>
             </div>
           }
@@ -132,7 +132,7 @@ function PlaygroundInner() {
               />
             </div>
             <p id="pg-agent-select-help" className="text-xs text-muted-foreground">
-              {tHC("hcPlaygroundPlaygroundLegacy.s1")}
+              {tHC("s1")}
             </p>
             {/* Engine disclosure - the agent's configured provider/model.
              * "Will run on", not "powered by": each individual turn may still

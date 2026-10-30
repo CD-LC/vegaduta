@@ -41,7 +41,7 @@ export function LaunchChecklist({ progress }: { progress: LaunchProgress }) {
   return (
     <div className="rounded-xl border border-border/60 p-3" data-tour="launch-checklist">
       <div className="mb-2 flex items-center justify-between text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        <span>{tHC("hcComponentsStudioConversion.s3")}</span>
+        <span>{tHC("s3")}</span>
         <span className="text-foreground">
           {n}/{STEPS.length}
         </span>
@@ -52,7 +52,7 @@ export function LaunchChecklist({ progress }: { progress: LaunchProgress }) {
         aria-valuemin={0}
         aria-valuemax={STEPS.length}
         aria-valuenow={n}
-        aria-label={tHC("hcComponentsStudioConversion.s2")}
+        aria-label={tHC("s2")}
       >
         <motion.div
           className="h-full rounded-full bg-gradient-to-r from-violet-500 via-emerald-500 to-sky-500"
@@ -129,7 +129,7 @@ export function ConvertBar({
           transition={{ type: "spring", stiffness: 220, damping: 24 }}
           className="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-violet-500/40 bg-background/90 p-3 ps-4 shadow-2xl shadow-violet-500/20 backdrop-blur-xl"
           role="region"
-          aria-label={tHC("hcComponentsStudioConversion.s1")}
+          aria-label={tHC("s1")}
         >
           <span
             className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full sm:inline-flex ${TONES.violet.solid}`}

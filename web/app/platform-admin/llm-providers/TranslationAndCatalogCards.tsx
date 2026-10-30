@@ -62,15 +62,15 @@ export default function TranslationAndCatalogCards({
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s19")}</CardTitle>
-            <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s18")}</p>
+            <CardTitle className="text-sm">{tHC("s19")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{tHC("s18")}</p>
           </CardHeader>
           <CardContent className="space-y-3">
             <Alert>
               <Info />
               <AlertDescription>
-                {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s17")} <strong>{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s16")}</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s15")}{" "}
-                <strong>Run now</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s14")}
+                {tHC("s17")} <strong>{tHC("s16")}</strong> {tHC("s15")}{" "}
+                <strong>Run now</strong> {tHC("s14")}
               </AlertDescription>
             </Alert>
 
@@ -95,7 +95,7 @@ export default function TranslationAndCatalogCards({
                   }
                   title={translationJob.lastTriggerMessage || ""}
                 >
-                  {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s13")} {translationJob.lastTriggerStatus} - {new Date(translationJob.lastTriggeredAt).toLocaleString()}
+                  {tHC("s13")} {translationJob.lastTriggerStatus} - {new Date(translationJob.lastTriggeredAt).toLocaleString()}
                   {translationJob.lastTriggeredBy ? ` (by ${translationJob.lastTriggeredBy})` : ""}
                 </Badge>
               )}
@@ -108,11 +108,11 @@ export default function TranslationAndCatalogCards({
               <form onSubmit={handleSaveTranslationJob} className="space-y-3">
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="w-64 max-w-full space-y-1.5">
-                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s12")}</Label>
+                    <Label htmlFor="translation-cron" className="text-xs text-muted-foreground">{tHC("s12")}</Label>
                     <Input id="translation-cron"
                       value={translationDraft.cronScheduleDisplay}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, cronScheduleDisplay: e.target.value }))}
-                      placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s11")}
+                      placeholder={tHC("s11")}
                     />
                   </div>
                   <div className="w-48 max-w-full space-y-1.5">
@@ -122,7 +122,7 @@ export default function TranslationAndCatalogCards({
                       value={translationDraft.providerName}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, providerName: e.target.value }))}
                       options={PROVIDER_OPTIONS}
-                      placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s10")}
+                      placeholder={tHC("s10")}
                     />
                   </div>
                   <div className="w-56 max-w-full space-y-1.5">
@@ -146,7 +146,7 @@ export default function TranslationAndCatalogCards({
                     )}
                   </div>
                   <div className="min-w-64 flex-1 space-y-1.5">
-                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s9")}</Label>
+                    <Label htmlFor="translation-workflow-path" className="text-xs text-muted-foreground">{tHC("s9")}</Label>
                     <Input id="translation-workflow-path"
                       value={translationDraft.workflowPathHint}
                       onChange={(e) => setTranslationDraft((d) => ({ ...d, workflowPathHint: e.target.value }))}
@@ -160,7 +160,7 @@ export default function TranslationAndCatalogCards({
                     rows={3}
                     value={translationDraft.notes}
                     onChange={(e) => setTranslationDraft((d) => ({ ...d, notes: e.target.value }))}
-                    placeholder={tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s8")}
+                    placeholder={tHC("s8")}
                   />
                 </div>
                 <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export default function TranslationAndCatalogCards({
                   </Button>
                   {translationJob?.updatedAt && (
                     <span className="text-xs text-muted-foreground">
-                      {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s7")} {new Date(translationJob.updatedAt).toLocaleString()}
+                      {tHC("s7")} {new Date(translationJob.updatedAt).toLocaleString()}
                       {translationJob.updatedBy ? ` by ${translationJob.updatedBy}` : ""}
                     </span>
                   )}
@@ -189,14 +189,14 @@ export default function TranslationAndCatalogCards({
       >
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s6")}</CardTitle>
-            <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s5")}</p>
+            <CardTitle className="text-sm">{tHC("s6")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
           </CardHeader>
           <CardContent className="space-y-3">
             <Alert>
               <Info />
               <AlertDescription>
-                {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s4")} <strong>{tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s3")}</strong> {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s2")}
+                {tHC("s4")} <strong>{tHC("s3")}</strong> {tHC("s2")}
               </AlertDescription>
             </Alert>
 
@@ -207,7 +207,7 @@ export default function TranslationAndCatalogCards({
               </Button>
               {lastModelCatalogRefresh && (
                 <Badge variant="outline" className={TONE_BOX.ok}>
-                  {tHC("hcPlatformadminLlmprovidersTranslationAndCatalogCards.s1")} {new Date(lastModelCatalogRefresh).toLocaleString()}
+                  {tHC("s1")} {new Date(lastModelCatalogRefresh).toLocaleString()}
                 </Badge>
               )}
             </div>

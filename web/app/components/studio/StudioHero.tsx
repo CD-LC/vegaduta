@@ -55,17 +55,17 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs text-violet-700 dark:text-violet-300"
           >
-            <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s11")}
+            <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s11")}
           </motion.div>
           <h1 id="hero-title" className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
-            {tHC("hcComponentsStudioStudioHero.s10")}
+            {tHC("s10")}
             <br />
             <span className="bg-gradient-to-r from-violet-600 via-indigo-500 to-sky-500 bg-clip-text text-transparent">
-              {tHC("hcComponentsStudioStudioHero.s9")}
+              {tHC("s9")}
             </span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            {tHC("hcComponentsStudioStudioHero.s8")} <b className="text-foreground">{tHC("hcComponentsStudioStudioHero.s7")}</b> {tHC("hcComponentsStudioStudioHero.s6")}
+            {tHC("s8")} <b className="text-foreground">{tHC("s7")}</b> {tHC("s6")}
           </p>
 
           <form onSubmit={submit} className="mt-7 max-w-xl" data-tour="hero-launch">
@@ -73,7 +73,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
               htmlFor="hero-job"
               className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted-foreground"
             >
-              {tHC("hcComponentsStudioStudioHero.s5")}
+              {tHC("s5")}
             </label>
             <div className="flex flex-col gap-2 rounded-2xl border border-violet-500/30 bg-background/70 p-2 shadow-lg shadow-violet-500/10 backdrop-blur sm:flex-row">
               <input
@@ -85,7 +85,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
                 className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2.5 text-base outline-none placeholder:text-muted-foreground"
               />
               <Button type="submit" size="lg" className={TONES.violet.cta} disabled={phase === "unavailable"}>
-                <Sparkles aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s4")}{" "}
+                <Sparkles aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s4")}{" "}
                 <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
               </Button>
             </div>
@@ -96,7 +96,7 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
                 </>
               ) : (
                 <>
-                  <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioHero.s3")}
+                  <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s3")}
                 </>
               )}
             </div>
@@ -112,9 +112,9 @@ export default function StudioHero({ phase, bootLine, onLaunch, onShowtime }: Pr
               <Clapperboard aria-hidden="true" className="h-5 w-5 shrink-0" />
             </span>
             <span>
-              <span className="block text-sm font-semibold">{tHC("hcComponentsStudioStudioHero.s2")}</span>
+              <span className="block text-sm font-semibold">{tHC("s2")}</span>
               <span className="block text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioStudioHero.s1")}
+                {tHC("s1")}
               </span>
             </span>
           </button>

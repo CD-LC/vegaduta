@@ -44,14 +44,14 @@ export default function ChatbotVsAgent() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("hcComponentsStudioChatbotVsAgent.s7")}
+            {tHC("s7")}
           </div>
           <div className="mt-1 max-w-2xl text-lg font-medium">&ldquo;{REQUEST}&rdquo;</div>
         </div>
         <div
           className="inline-flex rounded-full border border-border/60 p-1 text-sm"
           role="tablist"
-          aria-label={tHC("hcComponentsStudioChatbotVsAgent.s6")}
+          aria-label={tHC("s6")}
         >
           {(["bot", "agent"] as const).map((m) => (
             <button
@@ -78,9 +78,9 @@ export default function ChatbotVsAgent() {
               exit={{ opacity: 0 }}
               className="max-w-2xl rounded-2xl rounded-ss-sm bg-muted/60 p-4 text-sm leading-relaxed text-muted-foreground"
             >
-              {tHC("hcComponentsStudioChatbotVsAgent.s5")}{" "}
-              <i>{tHC("hcComponentsStudioChatbotVsAgent.s4")}</i> {tHC("hcComponentsStudioChatbotVsAgent.s3")}
-              <div className="mt-3 text-xs">{tHC("hcComponentsStudioChatbotVsAgent.s2")}</div>
+              {tHC("s5")}{" "}
+              <i>{tHC("s4")}</i> {tHC("s3")}
+              <div className="mt-3 text-xs">{tHC("s2")}</div>
             </motion.div>
           ) : (
             <motion.ol
@@ -106,7 +106,7 @@ export default function ChatbotVsAgent() {
                 </motion.li>
               ))}
               <li className="max-w-2xl pt-1 text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioChatbotVsAgent.s1")}
+                {tHC("s1")}
               </li>
             </motion.ol>
           )}

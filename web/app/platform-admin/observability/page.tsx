@@ -124,7 +124,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
               <button
                 type="button"
                 onClick={onClose}
-                aria-label={tHC("hcPlatformadminObservabilityPage.s20")}
+                aria-label={tHC("s20")}
                 className="rounded-md border-0 bg-transparent p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 <X size={16} />
@@ -138,7 +138,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
             )}
             {!detail && !error && <Skeleton className="h-64 w-full" />}
             {detail && !detail.available && (
-              <UnavailableNote title={tHC("hcPlatformadminObservabilityPage.s3")} reason={detail.reason} />
+              <UnavailableNote title={tHC("s3")} reason={detail.reason} />
             )}
             {detail?.available && t && (
               <div className="space-y-4 text-sm">
@@ -155,7 +155,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                   <dd>{formatDurationMs(t.latencyMs)}</dd>
                   <dt className="text-muted-foreground">Cost</dt>
                   <dd>{formatUsdOrUnavailable(t.totalCostUsd)}</dd>
-                  <dt className="text-muted-foreground">{tHC("hcPlatformadminObservabilityPage.s19")}</dt>
+                  <dt className="text-muted-foreground">{tHC("s19")}</dt>
                   <dd>
                     {formatCountOrUnavailable(t.inputTokens)} / {formatCountOrUnavailable(t.outputTokens)}
                   </dd>
@@ -171,7 +171,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                 )}
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("hcPlatformadminObservabilityPage.s18")}
+                    {tHC("s18")}
                   </p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.input || "—"}
@@ -179,7 +179,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("hcPlatformadminObservabilityPage.s17")}
+                    {tHC("s17")}
                   </p>
                   <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-md bg-secondary/40 p-2 font-mono text-[11px]">
                     {t.output || "—"}
@@ -187,7 +187,7 @@ function TraceDrawer({ id, onClose }: { id: string | null; onClose: () => void }
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {tHC("hcPlatformadminObservabilityPage.s16")}{detail.observations?.length ?? 0})
+                    {tHC("s16")}{detail.observations?.length ?? 0})
                   </p>
                   <div className="mt-1 space-y-1.5">
                     {(detail.observations || []).map((o) => {
@@ -249,7 +249,7 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminObservabilityPage.s15")}
+      title={tHC("s15")}
       icon={BarChart3}
       subtitle="Daily traces, cost and latency from Langfuse, plus a per-model breakdown."
       delay={0.03}
@@ -262,7 +262,7 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
       {!data && !error && <Skeleton className="h-40 w-full" />}
       {data && !data.available && (
         <UnavailableNote
-          title={tHC("hcPlatformadminObservabilityPage.s3")}
+          title={tHC("s3")}
           reason={data.reason || "Langfuse not configured or unreachable."}
         />
       )}
@@ -270,31 +270,31 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
         <div className="space-y-5">
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span>
-              {tHC("hcPlatformadminObservabilityPage.s14")}{" "}
+              {tHC("s14")}{" "}
               <span className="font-mono text-foreground">{formatCountOrUnavailable(totals.traces)}</span>
             </span>
             <span>
-              {tHC("hcPlatformadminObservabilityPage.s13")}{" "}
+              {tHC("s13")}{" "}
               <span className="font-mono text-foreground">{formatUsdOrUnavailable(totals.costUsd)}</span>
             </span>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             <MiniBars
-              title={tHC("hcPlatformadminObservabilityPage.s12")}
+              title={tHC("s12")}
               labels={labels}
               values={days.map((d) => d.traces)}
               fmt={formatCompact}
               testId="chart-traces"
             />
             <MiniBars
-              title={tHC("hcPlatformadminObservabilityPage.s11")}
+              title={tHC("s11")}
               labels={labels}
               values={days.map((d) => d.costUsd)}
               fmt={formatUsdOrUnavailable}
               testId="chart-cost"
             />
             <MiniBars
-              title={tHC("hcPlatformadminObservabilityPage.s10")}
+              title={tHC("s10")}
               labels={labels}
               values={days.map((d) => d.p95LatencyMs)}
               fmt={formatDurationMs}
@@ -308,8 +308,8 @@ function MetricsSection({ range }: { range: { from: string; to: string } }) {
                   <tr className="border-b border-border">
                     <th className="py-2 pe-3 font-medium">Model</th>
                     <th className="py-2 pe-3 font-medium">Calls</th>
-                    <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminObservabilityPage.s9")}</th>
-                    <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminObservabilityPage.s8")}</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s9")}</th>
+                    <th className="py-2 pe-3 font-medium">{tHC("s8")}</th>
                     <th className="py-2 font-medium">Cost</th>
                   </tr>
                 </thead>
@@ -392,14 +392,14 @@ export default function ObservabilityPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminObservabilityPage.s7")}
+        {tHC("s7")}
       </PageHint>
 
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div
           className="flex items-center gap-1 rounded-md border border-border p-0.5"
           role="group"
-          aria-label={tHC("hcPlatformadminObservabilityPage.s6")}
+          aria-label={tHC("s6")}
         >
           {RANGES.map((r) => (
             <button
@@ -480,9 +480,9 @@ export default function ObservabilityPage() {
             }}
           >
             <Input
-              aria-label={tHC("hcPlatformadminObservabilityPage.s5")}
+              aria-label={tHC("s5")}
               className="h-9 w-40"
-              placeholder={tHC("hcPlatformadminObservabilityPage.s5")}
+              placeholder={tHC("s5")}
               value={tenantId}
               onChange={(e) => setTenantId(e.target.value)}
             />
@@ -494,9 +494,9 @@ export default function ObservabilityPage() {
               onChange={(e) => setUserId(e.target.value)}
             />
             <Input
-              aria-label={tHC("hcPlatformadminObservabilityPage.s4")}
+              aria-label={tHC("s4")}
               className="h-9 w-40"
-              placeholder={tHC("hcPlatformadminObservabilityPage.s4")}
+              placeholder={tHC("s4")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -514,12 +514,12 @@ export default function ObservabilityPage() {
         {loading && !list && <Skeleton className="h-40 w-full" />}
         {list && !list.available && (
           <UnavailableNote
-            title={tHC("hcPlatformadminObservabilityPage.s3")}
+            title={tHC("s3")}
             reason={list.reason || "Langfuse not configured or unreachable."}
           />
         )}
         {list?.available && rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminObservabilityPage.s2")}</p>
+          <p className="text-sm text-muted-foreground">{tHC("s2")}</p>
         )}
         {list?.available && rows.length > 0 && (
           <div className="overflow-x-auto">
@@ -528,7 +528,7 @@ export default function ObservabilityPage() {
                 <tr className="border-b border-border">
                   <th className="py-2 pe-3 font-medium">Trace</th>
                   <th className="py-2 pe-3 font-medium">When</th>
-                  <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminObservabilityPage.s1")}</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s1")}</th>
                   <th className="py-2 pe-3 font-medium">Latency</th>
                   <th className="py-2 pe-3 font-medium">Tokens</th>
                   <th className="py-2 font-medium">Cost</th>

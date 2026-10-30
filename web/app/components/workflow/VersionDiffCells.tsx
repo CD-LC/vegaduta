@@ -54,7 +54,7 @@ export function ValueCell({ value, segs, side }: { value: string | null; segs: W
   if (value == null) return <span className="wf-vdiff-none">(none)</span>;
   if (isRedacted(value)) {
     return (
-      <span className="wf-vdiff-lock" title={tHC("hcComponentsWorkflowVersionDiffCells.s3")}>
+      <span className="wf-vdiff-lock" title={tHC("s3")}>
         <Lock size={11} aria-hidden="true" />
         redacted
       </span>
@@ -64,9 +64,9 @@ export function ValueCell({ value, segs, side }: { value: string | null; segs: W
     <span className="wf-vdiff-val">
       {segs ? <Segments segs={segs} kind={side === "before" ? "del" : "ins"} /> : value}
       {hasRedaction(value) && (
-        <span className="wf-vdiff-lock" data-inline="true" title={tHC("hcComponentsWorkflowVersionDiffCells.s2")}>
+        <span className="wf-vdiff-lock" data-inline="true" title={tHC("s2")}>
           <Lock size={11} aria-hidden="true" />
-          <span className="wf-vdiff-sr">{tHC("hcComponentsWorkflowVersionDiffCells.s1")}</span>
+          <span className="wf-vdiff-sr">{tHC("s1")}</span>
         </span>
       )}
     </span>

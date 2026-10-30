@@ -72,9 +72,9 @@ export function EnableConfirmCard({
   return (
     <Card className="border-[color-mix(in_srgb,var(--state-warning)_40%,transparent)]">
       <CardContent className="space-y-3 pt-6">
-        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("hcComponentsMcpPanelCatalogParts.s6")}</div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s6")}</div>
         <p className="text-sm text-muted-foreground">
-          {tHC("hcComponentsMcpPanelCatalogParts.s5")}{server.name}{tHC("hcComponentsMcpPanelCatalogParts.s4")}
+          {tHC("s5")}{server.name}{tHC("s4")}
           {usageGated
             ? " It won't be used by your agents until it passes a connection test (or you mark it trusted)."
             : ""}
@@ -85,14 +85,14 @@ export function EnableConfirmCard({
           rel="noopener noreferrer"
           className="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary hover:underline"
         >
-          <BookOpen size={12} aria-hidden="true" /> {tHC("hcComponentsMcpPanelCatalogParts.s3")}
+          <BookOpen size={12} aria-hidden="true" /> {tHC("s3")}
         </Link>
         {isDynamic && (
           <div className="flex flex-col gap-2">
             {/* First-contact credential guide, right where the fields are -
              * #wire-credential-guides. */}
             <McpCredentialGuideAlert name={server.name} />
-            <div className="text-xs font-semibold">{tHC("hcComponentsMcpPanelCatalogParts.s2")}</div>
+            <div className="text-xs font-semibold">{tHC("s2")}</div>
             <p className="text-xs text-muted-foreground">
               {isRemote
                 ? "Entries are sent as HTTP headers — e.g. Authorization: Bearer <token>."
@@ -149,7 +149,7 @@ export function EnableConfirmCard({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label={tHC("hcComponentsMcpPanelCatalogParts.s1")}
+                    aria-label={tHC("s1")}
                     onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))}
                   >
                     <X size={13} aria-hidden="true" />

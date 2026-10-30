@@ -54,21 +54,21 @@ export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, 
       <AlertDialogContent className="max-w-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
-            <ShieldCheck aria-hidden="true" className="h-5 w-5 text-primary shrink-0" /> {tHC("hcComponentsStudioStudioPledge.s12")}
+            <ShieldCheck aria-hidden="true" className="h-5 w-5 text-primary shrink-0" /> {tHC("s12")}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4 text-start text-sm">
               <p>
-                {tHC("hcComponentsStudioStudioPledge.s11")}
+                {tHC("s11")}
               </p>
 
               <div className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-3">
                 <Fingerprint aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
-                  <div className="font-medium text-foreground">{tHC("hcComponentsStudioStudioPledge.s10")}</div>
+                  <div className="font-medium text-foreground">{tHC("s10")}</div>
                   <div className="mt-0.5 font-mono text-xs text-foreground">{ip ?? "recorded on our side"}</div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    {tHC("hcComponentsStudioStudioPledge.s9")}
+                    {tHC("s9")}
                   </div>
                 </div>
               </div>
@@ -76,41 +76,41 @@ export default function StudioPledge({ open, ip, missionSeconds, runsPerMinute, 
               <ul className="grid gap-2 sm:grid-cols-2">
                 <Rule
                   icon={Ban}
-                  title={tHC("hcComponentsStudioStudioPledge.s8")}
+                  title={tHC("s8")}
                   body="Nothing that helps fraud, harm, harassment, or anything unlawful where you are."
                 />
                 <Rule
                   icon={Ghost}
-                  title={tHC("hcComponentsStudioStudioPledge.s7")}
+                  title={tHC("s7")}
                   body="No scraping at scale, no bots, no trying to jailbreak the agents or the limits."
                 />
                 <Rule
                   icon={Sparkles}
-                  title={tHC("hcComponentsStudioStudioPledge.s6")}
+                  title={tHC("s6")}
                   body="Don't paste passwords, card numbers or other people's personal data."
                 />
                 <Rule
                   icon={Gauge}
-                  title={tHC("hcComponentsStudioStudioPledge.s5")}
+                  title={tHC("s5")}
                   body={`Up to ${runsPerMinute} runs a minute; repeated refusals by the safety rules pause your sandbox for a while.`}
                 />
               </ul>
 
               <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-2.5 text-xs text-muted-foreground">
                 <Timer aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                {tHC("hcComponentsStudioStudioPledge.s4")} {missionSeconds}{tHC("hcComponentsStudioStudioPledge.s3")}
+                {tHC("s4")} {missionSeconds}{tHC("s3")}
               </div>
 
               <label className="flex cursor-pointer items-start gap-2 text-sm text-foreground">
                 <input type="checkbox" className="mt-1" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-                <span>{tHC("hcComponentsStudioStudioPledge.s2")}</span>
+                <span>{tHC("s2")}</span>
               </label>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <Button disabled={!agree} onClick={onAccept}>
-            {tHC("hcComponentsStudioStudioPledge.s1")}
+            {tHC("s1")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

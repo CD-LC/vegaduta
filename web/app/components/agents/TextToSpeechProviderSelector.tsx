@@ -51,15 +51,15 @@ export default function TextToSpeechProviderSelector({
     <TranscriptionProviderOptions
       providers={providers}
       icon={Speaker}
-      label={tHC("hcComponentsAgentsTextToSpeechProviderSelector.s5")}
+      label={tHC("s5")}
       tooltipContent={
         <>
-          {tHC("hcComponentsAgentsTextToSpeechProviderSelector.s4")}
+          {tHC("s4")}
         </>
       }
       freePlanWarningText={
         <>
-          {tHC("hcComponentsAgentsTextToSpeechProviderSelector.s3")} <strong>{tHC("hcComponentsAgentsTextToSpeechProviderSelector.s2")}</strong>{tHC("hcComponentsAgentsTextToSpeechProviderSelector.s1")}
+          {tHC("s3")} <strong>{tHC("s2")}</strong>{tHC("s1")}
         </>
       }
       editorLockedTitle="TTS provider selection is a Premium feature"

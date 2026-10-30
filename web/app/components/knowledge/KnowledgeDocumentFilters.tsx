@@ -39,19 +39,19 @@ export default function KnowledgeDocumentFilters({
             type="search"
             value={docQuery}
             onChange={(e) => setDocQuery(e.target.value)}
-            placeholder={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s3")}
-            aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s3")}
+            placeholder={tHC("s3")}
+            aria-label={tHC("s3")}
             className="h-8 ps-9"
           />
         </div>
         <Select
-          aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s2")}
+          aria-label={tHC("s2")}
           value={docSort}
           onChange={(e) => setDocSort(e.target.value as DocSort)}
           options={DOC_SORTS}
         />
       </div>
-      <div role="group" aria-label={tHC("hcComponentsKnowledgeKnowledgeDocumentFilters.s1")} className="mb-3 flex flex-wrap gap-1.5">
+      <div role="group" aria-label={tHC("s1")} className="mb-3 flex flex-wrap gap-1.5">
         {DOC_STATUS_GROUPS.filter((g) => g.id === "all" || docCounts[g.id] > 0).map((g) => (
           <Button
             key={g.id}

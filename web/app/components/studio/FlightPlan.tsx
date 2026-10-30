@@ -158,14 +158,14 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
     <section aria-labelledby="flight-title" className="mt-24">
       <div className="max-w-2xl">
         <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
-          <Compass aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioFlightPlan.s11")}
+          <Compass aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s11")}
         </div>
         <h2 id="flight-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {tHC("hcComponentsStudioFlightPlan.s10")}
+          {tHC("s10")}
         </h2>
         <p className="mt-3 text-muted-foreground">
-          {tHC("hcComponentsStudioFlightPlan.s9")} <Badge2 kind="here" /> {tHC("hcComponentsStudioFlightPlan.s8")}{" "}
-          <Badge2 kind="workspace" /> {tHC("hcComponentsStudioFlightPlan.s7")}
+          {tHC("s9")} <Badge2 kind="here" /> {tHC("s8")}{" "}
+          <Badge2 kind="workspace" /> {tHC("s7")}
         </p>
       </div>
 
@@ -218,7 +218,7 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
                 </ul>
                 {/* On phones there is no sticky phone: show the scene as a compact chip instead of hiding the picture entirely. */}
                 <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground lg:hidden">
-                  <Radio aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioFlightPlan.s6")}{" "}
+                  <Radio aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s6")}{" "}
                   <b className="text-foreground">{sceneName(c.scene)}</b>
                 </div>
               </li>
@@ -230,13 +230,13 @@ export default function FlightPlan({ onStart, onShowtime }: { onStart: () => voi
       <div className="mt-12 flex flex-wrap items-center gap-3 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5">
         <ShieldCheck aria-hidden="true" className="h-5 w-5 text-violet-600 dark:text-violet-300 shrink-0" />
         <span className="flex-1 text-sm">
-          {tHC("hcComponentsStudioFlightPlan.s5")}
+          {tHC("s5")}
         </span>
         <Button variant="outline" onClick={onShowtime}>
-          {tHC("hcComponentsStudioFlightPlan.s4")}
+          {tHC("s4")}
         </Button>
         <Button className={TONES.violet.cta} onClick={onStart}>
-          {tHC("hcComponentsStudioFlightPlan.s3")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
+          {tHC("s3")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
         </Button>
       </div>
     </section>
@@ -259,11 +259,11 @@ function Badge2({ kind }: { kind: "here" | "workspace" }) {
     const tHC = useTranslations("hcComponentsStudioFlightPlan");
   return kind === "here" ? (
     <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
-      {tHC("hcComponentsStudioFlightPlan.s2")}
+      {tHC("s2")}
     </span>
   ) : (
     <span className="inline-flex shrink-0 items-center rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-medium text-violet-700 dark:text-violet-300">
-      {tHC("hcComponentsStudioFlightPlan.s1")}
+      {tHC("s1")}
     </span>
   );
 }

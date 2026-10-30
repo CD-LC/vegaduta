@@ -87,7 +87,7 @@ export default function CanvasLensBar({
     <div className={["wfx-lensbar", className].filter(Boolean).join(" ")} data-lens={lens}>
       <div className="wfx-lensbar-row">
         {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group */}
-        <div className="wfx-lensbar-seg" role="radiogroup" aria-label={tHC("hcComponentsWorkflowCanvasLensBar.s2")} onKeyDown={lensGroup.onKeyDown}>
+        <div className="wfx-lensbar-seg" role="radiogroup" aria-label={tHC("s2")} onKeyDown={lensGroup.onKeyDown}>
           {CANVAS_LENSES.map((l, i) => {
             const { label, hint, Icon } = LENS_META[l];
             const checked = l === lens;
@@ -121,7 +121,7 @@ export default function CanvasLensBar({
             <div
               className="wfx-lensbar-window"
               role="radiogroup"
-              aria-label={tHC("hcComponentsWorkflowCanvasLensBar.s1")}
+              aria-label={tHC("s1")}
               onKeyDown={winGroup.onKeyDown}
             >
               <span className="wfx-lensbar-window-label" aria-hidden="true">Last</span>

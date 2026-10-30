@@ -23,7 +23,6 @@ vi.mock("../../lib/localcode/fsAccess", async (importOriginal) => ({
   listCodeFiles: async (): Promise<unknown[]> => [],
   writeLocalFileResult: async () => ({ ok: true }),
 }));
-vi.mock("../../lib/i18n", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 
 import AgentTaskPanel from "./AgentTaskPanel";
@@ -169,13 +168,13 @@ describe("AgentTaskPanel", () => {
     expect(ensureWritePermission).not.toHaveBeenCalled();
 
     // First Apply: the browser refuses. The proposal must stay on screen.
-    fireEvent.click(screen.getByRole("button", { name: "edit.apply" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply to my file" }));
     await waitFor(() => expect(ensureWritePermission).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(screen.getByText("edit.permissionDenied")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/Write permission wasn.t granted/)).toBeTruthy());
     expect(screen.getByText("Waiting for your approval")).toBeTruthy();
 
     // Second Apply: granted → the run carries on to its answer.
-    fireEvent.click(screen.getByRole("button", { name: "edit.apply" }));
+    fireEvent.click(screen.getByRole("button", { name: "Apply to my file" }));
     await waitFor(() => expect(screen.getByText(/Changed a to 2/)).toBeTruthy());
     expect(screen.queryByText("Waiting for your approval")).toBeNull();
     // The meter rendered the report of the prompt that was sent.

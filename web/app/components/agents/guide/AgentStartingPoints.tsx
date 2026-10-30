@@ -59,9 +59,9 @@ export default function AgentStartingPoints({
     <div className="mb-4 rounded-lg border border-border bg-background p-4" data-testid="agent-starting-points">
       {/* No "you have no agents" claim: an empty list can also be a list that
           failed to load (see CreateAgentChecklist's header). */}
-      <h3 className="m-0 text-sm font-semibold text-foreground">{tHC("hcComponentsAgentsGuideAgentStartingPoints.s15")}</h3>
+      <h3 className="m-0 text-sm font-semibold text-foreground">{tHC("s15")}</h3>
       <p className="m-0 mt-1 text-xs leading-relaxed text-muted-foreground">
-        {tHC("hcComponentsAgentsGuideAgentStartingPoints.s14")}
+        {tHC("s14")}
       </p>
 
       {/* "Start in 1 minute" (wave 3): one-click drafts that need no documents,
@@ -72,9 +72,9 @@ export default function AgentStartingPoints({
           (OPEN_CONSOLE_TEMPLATE_KEYS). */}
       {onPickTemplate && (
         <div className="mt-3" data-testid="starting-point-quick-start">
-          <div className="text-xs font-semibold text-foreground">{tHC("hcComponentsAgentsGuideAgentStartingPoints.s13")}</div>
+          <div className="text-xs font-semibold text-foreground">{tHC("s13")}</div>
           <p className="m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s12")}
+            {tHC("s12")}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {QUICK_START_TEMPLATE_KEYS.map((key) => (
@@ -98,10 +98,10 @@ export default function AgentStartingPoints({
         <div className="rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <LayoutTemplate size={15} className="text-primary" aria-hidden="true" />
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s11")}
+            {tHC("s11")}
           </div>
           <p className="m-0 mt-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s10")}
+            {tHC("s10")}
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {starters.map((starter) => (
@@ -130,14 +130,14 @@ export default function AgentStartingPoints({
         <div className="flex flex-col rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <PenLine size={15} className="text-primary" aria-hidden="true" />
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s9")}
+            {tHC("s9")}
           </div>
           <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s8")}
+            {tHC("s8")}
           </p>
           <div className="mt-2">
             <Button type="button" size="sm" onClick={onDescribe}>
-              {tHC("hcComponentsAgentsGuideAgentStartingPoints.s7")}
+              {tHC("s7")}
             </Button>
           </div>
         </div>
@@ -160,14 +160,14 @@ export default function AgentStartingPoints({
           >
             <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <FileSpreadsheet size={15} className="text-primary" aria-hidden="true" />
-              {tHC("hcComponentsAgentsGuideAgentStartingPoints.s6")}
+              {tHC("s6")}
             </div>
             <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-              {tHC("hcComponentsAgentsGuideAgentStartingPoints.s5")}
+              {tHC("s5")}
             </p>
             <div className="mt-2">
               <Button type="button" variant="outline" size="sm" onClick={() => onPickTemplate("data-analyst")}>
-                {tHC("hcComponentsAgentsGuideAgentStartingPoints.s4")}
+                {tHC("s4")}
               </Button>
             </div>
           </div>
@@ -176,16 +176,16 @@ export default function AgentStartingPoints({
         <div className="flex flex-col rounded-lg border border-border bg-card p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
             <PlayCircle size={15} className="text-primary" aria-hidden="true" />
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s3")}
+            {tHC("s3")}
           </div>
           <p className="m-0 mt-1 flex-1 text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsAgentsGuideAgentStartingPoints.s2")}
+            {tHC("s2")}
           </p>
           <div className="mt-2">
             {/* New tab on purpose: leaving /agents would discard the draft. */}
             <Button asChild variant="outline" size="sm">
               <Link href="/try" target="_blank" rel="noopener noreferrer">
-                {tHC("hcComponentsAgentsGuideAgentStartingPoints.s1")}
+                {tHC("s1")}
                 <ExternalLink size={12} aria-hidden="true" />
               </Link>
             </Button>

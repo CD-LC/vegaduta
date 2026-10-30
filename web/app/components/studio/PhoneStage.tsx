@@ -208,9 +208,9 @@ function Idle() {
         </div>
       </div>
       <div>
-        <div className="text-sm font-medium">{tHC("hcComponentsStudioPhoneStage.s18")}</div>
+        <div className="text-sm font-medium">{tHC("s18")}</div>
         <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
-          {tHC("hcComponentsStudioPhoneStage.s17")}
+          {tHC("s17")}
         </p>
       </div>
       <div className="w-full space-y-1.5 opacity-60">
@@ -234,10 +234,10 @@ function Brief({ job, animate }: { job: string; animate: boolean }) {
   return (
     <div className="flex h-full flex-col px-3 pb-10">
       <div className="mb-3 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-violet-300">
-        <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioPhoneStage.s16")}
+        <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("s16")}
       </div>
       <div className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-3">
-        <div className="mb-1 text-[10px] text-violet-200">{tHC("hcComponentsStudioPhoneStage.s15")}</div>
+        <div className="mb-1 text-[10px] text-violet-200">{tHC("s15")}</div>
         <p className="min-h-[92px] text-[12.5px] leading-relaxed">
           {shown}
           <motion.span
@@ -265,7 +265,7 @@ function Brief({ job, animate }: { job: string; animate: boolean }) {
         animate={{ boxShadow: ["0 0 0 0 rgba(139,92,246,0.5)", "0 0 0 10px rgba(139,92,246,0)"] }}
         transition={{ duration: 1.6, repeat: Infinity }}
       >
-        {tHC("hcComponentsStudioPhoneStage.s14")}
+        {tHC("s14")}
       </motion.div>
     </div>
   );
@@ -286,7 +286,7 @@ function Built({ name, job, tools }: { name: string; job: string; tools: string[
       <div className="mt-2 text-center">
         <div className="text-[14px] font-semibold">{name}</div>
         <div className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] text-emerald-300">
-          <Check aria-hidden="true" className="h-2.5 w-2.5 shrink-0" /> {tHC("hcComponentsStudioPhoneStage.s13")}
+          <Check aria-hidden="true" className="h-2.5 w-2.5 shrink-0" /> {tHC("s13")}
         </div>
       </div>
       {job && (
@@ -296,7 +296,7 @@ function Built({ name, job, tools }: { name: string; job: string; tools: string[
       )}
       <div className="mt-3 text-[9px] uppercase tracking-wider text-zinc-400">Hands</div>
       <div className="mt-1 flex flex-wrap gap-1.5">
-        {tools.length === 0 && <span className="text-[10px] text-zinc-400">{tHC("hcComponentsStudioPhoneStage.s12")}</span>}
+        {tools.length === 0 && <span className="text-[10px] text-zinc-400">{tHC("s12")}</span>}
         {tools.slice(0, 6).map((t, i) => (
           <motion.span
             key={t}
@@ -351,7 +351,7 @@ function Docs({ name }: { name: string }) {
         transition={{ delay: 1.4 }}
         className="mt-4 rounded-2xl rounded-ss-sm bg-white/10 p-2.5 text-[11.5px] leading-relaxed"
       >
-        {tHC("hcComponentsStudioPhoneStage.s11")} <b>{tHC("hcComponentsStudioPhoneStage.s10")}</b> {tHC("hcComponentsStudioPhoneStage.s9")}
+        {tHC("s11")} <b>{tHC("s10")}</b> {tHC("s9")}
       </motion.div>
     </div>
   );
@@ -433,7 +433,7 @@ function Ask({ name }: { name: string }) {
   }, []);
   return (
     <div className="flex h-full flex-col px-3 pb-10">
-      <div className="mb-2 text-center text-[10px] text-zinc-400">{tHC("hcComponentsStudioPhoneStage.s8")}</div>
+      <div className="mb-2 text-center text-[10px] text-zinc-400">{tHC("s8")}</div>
       <motion.div
         initial={{ y: -40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -441,9 +441,9 @@ function Ask({ name }: { name: string }) {
         className="rounded-2xl border border-amber-400/30 bg-zinc-800/90 p-3 shadow-xl shadow-amber-500/10"
       >
         <div className="mb-1 flex items-center gap-1.5 text-[9px] uppercase tracking-wider text-amber-300">
-          <Bell aria-hidden="true" className="h-3 w-3 shrink-0" /> {name} {tHC("hcComponentsStudioPhoneStage.s7")}
+          <Bell aria-hidden="true" className="h-3 w-3 shrink-0" /> {name} {tHC("s7")}
         </div>
-        <p className="text-[11.5px] leading-relaxed">{tHC("hcComponentsStudioPhoneStage.s6")}</p>
+        <p className="text-[11.5px] leading-relaxed">{tHC("s6")}</p>
         <div className="mt-2.5 flex gap-2">
           <motion.button
             type="button"
@@ -460,7 +460,7 @@ function Ask({ name }: { name: string }) {
             )}
           </motion.button>
           <button type="button" tabIndex={-1} className="flex-1 rounded-lg bg-white/10 py-1.5 text-[11px]">
-            {tHC("hcComponentsStudioPhoneStage.s5")}
+            {tHC("s5")}
           </button>
         </div>
       </motion.div>
@@ -471,7 +471,7 @@ function Ask({ name }: { name: string }) {
         className="mt-4 flex items-start gap-2 rounded-xl border border-white/10 bg-white/5 p-2.5 text-[10.5px] leading-relaxed text-zinc-300"
       >
         <ShieldCheck aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
-        {tHC("hcComponentsStudioPhoneStage.s4")}
+        {tHC("s4")}
       </motion.div>
     </div>
   );
@@ -494,7 +494,7 @@ function Pocket({ name, shareUrl }: { name: string; shareUrl: string | null }) {
   ];
   return (
     <div className="flex h-full flex-col items-center px-3 pb-10">
-      <div className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioPhoneStage.s3")}</div>
+      <div className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("s3")}</div>
       <motion.div
         initial={{ scale: 0.4, rotate: -12, opacity: 0 }}
         animate={{ scale: 1, rotate: 0, opacity: 1 }}
@@ -539,13 +539,13 @@ function Pocket({ name, shareUrl }: { name: string; shareUrl: string | null }) {
             viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
             className="h-[104px] w-[104px]"
             role="img"
-            aria-label={tHC("hcComponentsStudioPhoneStage.s2")}
+            aria-label={tHC("s2")}
           >
             <path d={qr.d} fill="#09090b" />
           </svg>
         ) : (
           <div className="flex h-[104px] w-[104px] items-center justify-center text-center text-[9px] leading-snug text-zinc-400">
-            {tHC("hcComponentsStudioPhoneStage.s1")}
+            {tHC("s1")}
           </div>
         )}
       </motion.div>

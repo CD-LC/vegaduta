@@ -93,11 +93,11 @@ export default function EditSubmissionModal({
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label={tHC("hcComponentsTemplatesEditSubmissionModal.s3")}
+        aria-label={tHC("s3")}
         className="elev-raised w-full max-w-xl rounded-2xl p-6 shadow-xl"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("hcComponentsTemplatesEditSubmissionModal.s3")}</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("s3")}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -140,7 +140,7 @@ export default function EditSubmissionModal({
                 id="edit-tags"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                placeholder={tHC("hcComponentsTemplatesEditSubmissionModal.s2")}
+                placeholder={tHC("s2")}
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function EditSubmissionModal({
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : null}
-            {tHC("hcComponentsTemplatesEditSubmissionModal.s1")}
+            {tHC("s1")}
           </Button>
         </div>
       </div>

@@ -108,8 +108,8 @@ export default function AmbientDigestCard() {
     <Card className="gap-3 p-4">
       <div className="flex items-center gap-2">
         <MoonStar className="size-4 text-[var(--accent-500)]" aria-hidden="true" />
-        <h3 className="text-sm font-medium text-foreground">{tHC("hcComponentsJobsAmbientDigestCard.s10")}</h3>
-        <span className="text-xs text-muted-foreground">{tHC("hcComponentsJobsAmbientDigestCard.s9")}</span>
+        <h3 className="text-sm font-medium text-foreground">{tHC("s10")}</h3>
+        <span className="text-xs text-muted-foreground">{tHC("s9")}</span>
         {digest.sentinelScheduleCount > 0 && (
           <Badge variant="outline" className="ms-auto">
             <Eye className="size-3" aria-hidden="true" /> {digest.sentinelScheduleCount} sentinel
@@ -122,7 +122,7 @@ export default function AmbientDigestCard() {
         <p className="text-xs text-muted-foreground">
           {digest.jobs.observed}
           {digest.jobs.truncated ? "+" : ""} job{digest.jobs.observed === 1 ? "" : "s"} ran
-          {runningJobs > 0 && <> · {runningJobs} {tHC("hcComponentsJobsAmbientDigestCard.s8")}</>}
+          {runningJobs > 0 && <> · {runningJobs} {tHC("s8")}</>}
           {failedJobs > 0 && (
             <>
               {" "}
@@ -135,7 +135,7 @@ export default function AmbientDigestCard() {
       {digest.pendingApprovals.total > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-foreground">
-            {digest.pendingApprovals.total} action{digest.pendingApprovals.total === 1 ? "" : "s"} {tHC("hcComponentsJobsAmbientDigestCard.s7")}
+            {digest.pendingApprovals.total} action{digest.pendingApprovals.total === 1 ? "" : "s"} {tHC("s7")}
           </p>
           <ul className="space-y-1">
             {digest.pendingApprovals.items
@@ -155,7 +155,7 @@ export default function AmbientDigestCard() {
                         size="icon"
                         className="size-6 text-[var(--state-success)]"
                         disabled={a.id in deciding}
-                        aria-label={tHC("hcComponentsJobsAmbientDigestCard.s6")}
+                        aria-label={tHC("s6")}
                         onClick={() => decide(a.id, "approve")}
                       >
                         {deciding[a.id] === "approve" ? (
@@ -169,7 +169,7 @@ export default function AmbientDigestCard() {
                         size="icon"
                         className="size-6 text-[var(--state-error)]"
                         disabled={a.id in deciding}
-                        aria-label={tHC("hcComponentsJobsAmbientDigestCard.s5")}
+                        aria-label={tHC("s5")}
                         onClick={() => decide(a.id, "reject")}
                       >
                         {deciding[a.id] === "reject" ? (
@@ -185,14 +185,14 @@ export default function AmbientDigestCard() {
           </ul>
           {decisionError && <p className="text-xs text-[var(--state-error)]">{decisionError}</p>}
           <Link href="/admin/approvals" className="inline-block text-xs text-primary underline">
-            {tHC("hcComponentsJobsAmbientDigestCard.s4")}{otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
+            {tHC("s4")}{otherPending > 0 ? ` (${digest.pendingApprovals.total} total)` : ""}
           </Link>
         </div>
       )}
 
       {escalations.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-xs font-medium text-foreground">{tHC("hcComponentsJobsAmbientDigestCard.s3")}</p>
+          <p className="text-xs font-medium text-foreground">{tHC("s3")}</p>
           <ul className="space-y-1">
             {escalations.slice(0, 5).map((o) => (
               <li key={o.runId} className="flex items-center gap-2 text-xs">
@@ -212,7 +212,7 @@ export default function AmbientDigestCard() {
           </ul>
           {quietCount > 0 && (
             <p className="text-[11px] text-muted-foreground">
-              {quietCount} {tHC("hcComponentsJobsAmbientDigestCard.s2")}{quietCount === 1 ? "" : "s"} {tHC("hcComponentsJobsAmbientDigestCard.s1")}
+              {quietCount} {tHC("s2")}{quietCount === 1 ? "" : "s"} {tHC("s1")}
             </p>
           )}
         </div>

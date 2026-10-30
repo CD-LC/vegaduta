@@ -26,7 +26,7 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
   return (
     <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)]">
       {/* Sticky rail (wide screens) */}
-      <nav aria-label={tHC("hcHelpDocsView.s1")} className="hidden lg:block">
+      <nav aria-label={tHC("s1")} className="hidden lg:block">
         {/* top offset clears AppShell's sticky header (h-16 + border, ~65px)
             when this view renders inside the console; no shared nav-height
             CSS variable exists to reference instead (checked public.css
@@ -34,7 +34,7 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
             room stacked below that header height. */}
         <div className="sticky top-[5.5rem] space-y-1">
           <span className="mb-2 block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            {tHC("hcHelpDocsView.s1")}
+            {tHC("s1")}
           </span>
           {DOC_TOPICS.map((topic) => (
             <a
@@ -50,7 +50,7 @@ export default function DocsView({ showAppLinks = false }: { showAppLinks?: bool
 
       <div className="min-w-0">
         {/* Jump pills (narrow screens) */}
-        <nav aria-label={tHC("hcHelpDocsView.s1")} className="mb-8 flex flex-wrap gap-2 lg:hidden">
+        <nav aria-label={tHC("s1")} className="mb-8 flex flex-wrap gap-2 lg:hidden">
           {DOC_TOPICS.map((topic) => (
             <Badge key={topic.id} asChild variant="outline">
               <a href={`#${topic.id}`}>{topic.title}</a>

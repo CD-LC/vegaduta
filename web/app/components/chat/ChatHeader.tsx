@@ -42,11 +42,11 @@ export default function ChatHeader({
         <TooltipTrigger asChild>
           <Button type="button" variant="ghost" size="sm" onClick={onNewSession}>
             <RotateCcw aria-hidden="true" size={12} className="size-3" />
-            {tHC("hcComponentsChatChatHeader.s2")}
+            {tHC("s2")}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          {tHC("hcComponentsChatChatHeader.s1")}
+          {tHC("s1")}
         </TooltipContent>
       </Tooltip>
     </header>

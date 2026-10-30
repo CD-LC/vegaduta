@@ -29,7 +29,7 @@ export default function OnDeviceUtilities({
       </div>
       {!reasoningModelReady && (
         <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-          {tHC("hcComponentsAgentsIntelligenceOnDeviceUtilities.s1")}
+          {tHC("s1")}
         </p>
       )}
       <div className="space-y-1">

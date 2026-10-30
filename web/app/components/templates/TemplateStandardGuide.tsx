@@ -46,24 +46,24 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
     >
       <summary className="flex cursor-pointer items-center gap-2 px-3 py-2.5 text-sm font-medium text-foreground">
         <BookOpenCheck size={15} strokeWidth={2} aria-hidden />
-        {tHC("hcComponentsTemplatesTemplateStandardGuide.s15")}
-        <span className="ms-auto text-xs font-normal text-muted-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s14")}</span>
+        {tHC("s15")}
+        <span className="ms-auto text-xs font-normal text-muted-foreground">{tHC("s14")}</span>
       </summary>
       <div className="max-h-[50vh] space-y-5 overflow-y-auto border-t border-border px-4 py-4 text-sm">
         {!guide && !error && (
           <p className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplateStandardGuide.s13")}
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s13")}
           </p>
         )}
         {error && (
-          <p style={{ color: "var(--state-error)" }}>{tHC("hcComponentsTemplatesTemplateStandardGuide.s12")}</p>
+          <p style={{ color: "var(--state-error)" }}>{tHC("s12")}</p>
         )}
         {guide && (
           <>
             <p className="text-muted-foreground">{guide.intro}</p>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s11")}</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s11")}</h3>
               <ol className="list-decimal space-y-1.5 ps-5 text-muted-foreground">
                 {guide.steps.map((s) => (
                   <li key={s}>{s}</li>
@@ -72,7 +72,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s10")}</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s10")}</h3>
               <ul className="space-y-1.5 text-muted-foreground">
                 {guide.principles.map((p) => (
                   <li key={p.name}>
@@ -83,9 +83,9 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s9")}</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s9")}</h3>
               <p className="text-muted-foreground">
-                <strong>{tHC("hcComponentsTemplatesTemplateStandardGuide.s8")}</strong> {tHC("hcComponentsTemplatesTemplateStandardGuide.s7")} <strong>Suggestion</strong> {tHC("hcComponentsTemplatesTemplateStandardGuide.s6")} <em>AI</em> {tHC("hcComponentsTemplatesTemplateStandardGuide.s5")}
+                <strong>{tHC("s8")}</strong> {tHC("s7")} <strong>Suggestion</strong> {tHC("s6")} <em>AI</em> {tHC("s5")}
               </p>
               <ul className="space-y-2">
                 {guide.rules.map((r) => (
@@ -108,7 +108,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
                       <span className="font-medium">{r.requirement}</span>
                     </p>
                     <p className="mt-1 text-muted-foreground">
-                      <span className="font-medium text-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s4")} </span>
+                      <span className="font-medium text-foreground">{tHC("s4")} </span>
                       {r.howToFix}
                     </p>
                   </li>
@@ -117,12 +117,12 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
             </section>
 
             <section className="space-y-2">
-              <h3 className="font-semibold text-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s3")}</h3>
+              <h3 className="font-semibold text-foreground">{tHC("s3")}</h3>
               <p className="text-muted-foreground">Summary</p>
               <pre className="whitespace-pre-wrap rounded-lg bg-[var(--surface-sunken,transparent)] p-3 text-xs text-foreground">
                 {guide.exampleSummary}
               </pre>
-              <p className="text-muted-foreground">{tHC("hcComponentsTemplatesTemplateStandardGuide.s2")}</p>
+              <p className="text-muted-foreground">{tHC("s2")}</p>
               <pre className="whitespace-pre-wrap rounded-lg bg-[var(--surface-sunken,transparent)] p-3 text-xs text-foreground">
                 {guide.examplePrompt}
               </pre>
@@ -131,7 +131,7 @@ export default function TemplateStandardGuide({ defaultOpen = false }: { default
                 onClick={() => copy(guide.examplePrompt)}
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
               >
-                <Copy size={12} aria-hidden /> {tHC("hcComponentsTemplatesTemplateStandardGuide.s1")}
+                <Copy size={12} aria-hidden /> {tHC("s1")}
               </button>
             </section>
           </>

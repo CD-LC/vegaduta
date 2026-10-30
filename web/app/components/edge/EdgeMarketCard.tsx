@@ -218,7 +218,7 @@ export default function MarketCard({
           </div>
           {onUseHosted && switchedToHosted && (
             <p className="mt-1 leading-relaxed text-muted-foreground" role="status">
-              {tHC("hcComponentsEdgeEdgeMarketCard.s1")}
+              {tHC("s1")}
             </p>
           )}
         </div>

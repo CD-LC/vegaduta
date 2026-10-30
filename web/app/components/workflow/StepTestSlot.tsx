@@ -109,7 +109,7 @@ export default function StepTestSlot({ nodeId }: { nodeId: string }) {
           }}
         >
           <FlaskConical size={14} aria-hidden="true" />
-          {tHC("hcComponentsWorkflowStepTestSlot.s1")}
+          {tHC("s1")}
         </Button>
       )}
     </div>

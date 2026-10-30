@@ -101,8 +101,8 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
         variant="ghost"
         size="sm"
         className="h-7 w-9 px-0"
-        title={tHC("hcBuildFigmaImport.s7")}
-        aria-label={tHC("hcBuildFigmaImport.s7")}
+        title={tHC("s7")}
+        aria-label={tHC("s7")}
         aria-haspopup="dialog"
         disabled={disabled}
         onClick={() => setOpen(true)}
@@ -131,14 +131,14 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
             }}
           >
             <h3 id={`${uid}-title`} className="text-sm font-semibold">
-              {tHC("hcBuildFigmaImport.s6")}
+              {tHC("s6")}
             </h3>
             <p id={`${uid}-desc`} className="text-xs text-muted-foreground">
-              {tHC("hcBuildFigmaImport.s5")}
+              {tHC("s5")}
             </p>
             <div className="space-y-1">
               <label htmlFor={`${uid}-url`} className="text-xs font-medium text-foreground">
-                {tHC("hcBuildFigmaImport.s4")}
+                {tHC("s4")}
               </label>
               <Input
                 id={`${uid}-url`}
@@ -152,12 +152,12 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
             </div>
             <div className="space-y-1">
               <label htmlFor={`${uid}-token`} className="text-xs font-medium text-foreground">
-                {tHC("hcBuildFigmaImport.s3")}
+                {tHC("s3")}
               </label>
               <Input
                 id={`${uid}-token`}
                 type="password"
-                placeholder={tHC("hcBuildFigmaImport.s2")}
+                placeholder={tHC("s2")}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 autoComplete="off"
@@ -169,7 +169,7 @@ export default function FigmaImport({ projectId, disabled, onImported, onError }
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              {tHC("hcBuildFigmaImport.s1")}
+              {tHC("s1")}
             </p>
             <div className="flex justify-end gap-2">
               <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={close}>

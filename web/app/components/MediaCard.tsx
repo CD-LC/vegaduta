@@ -466,7 +466,7 @@ function UnverifiedMediaNotice({ kind }: { kind: MediaKind }) {
       </div>
       <div className="flex items-center gap-2 p-2 text-xs text-destructive">
         <AlertTriangle aria-hidden="true" size={13} />
-        {tHC("hcComponentsMediaCard.s1")}
+        {tHC("s1")}
       </div>
     </div>
   );

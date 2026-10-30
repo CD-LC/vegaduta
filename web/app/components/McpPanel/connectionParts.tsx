@@ -45,7 +45,7 @@ export function ConnectionErrorBlock({ server, label }: { server: any; label: st
       {detail && shortDetail && <p className="text-sm text-destructive">{detail}</p>}
       {detail && !shortDetail && (
         <details className="text-xs">
-          <summary className="cursor-pointer text-muted-foreground">{tHC("hcComponentsMcpPanelConnectionParts.s4")}</summary>
+          <summary className="cursor-pointer text-muted-foreground">{tHC("s4")}</summary>
           {/* Real code-block surface (background + border), not just red text
            * floating on the panel background - the thing the product owner
            * flagged as "reads like a raw stack trace" was this block having
@@ -74,7 +74,7 @@ export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: a
   return (
     <Alert variant="warning" className="mt-3">
       <Wrench aria-hidden="true" />
-      <AlertTitle>{tHC("hcComponentsMcpPanelConnectionParts.s3")}</AlertTitle>
+      <AlertTitle>{tHC("s3")}</AlertTitle>
       <AlertDescription>
         {fix.reason && <p>{fix.reason}</p>}
         <code className="block w-full break-words rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/10">
@@ -85,7 +85,7 @@ export function SuggestedFixBlock({ fix, onApply, busy }: { fix: any; onApply: a
           {busy ? "Applying fix…" : "Apply suggested fix"}
         </Button>
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsMcpPanelConnectionParts.s2")}
+          {tHC("s2")}
         </p>
       </AlertDescription>
     </Alert>
@@ -234,7 +234,7 @@ export function AcknowledgeControl({ server, onRefresh }: { server: any; onRefre
         {busy ? "Marking as trusted…" : "Use anyway (I trust this server)"}
       </Button>
       <p className="mt-1.5 text-xs text-muted-foreground">
-        {tHC("hcComponentsMcpPanelConnectionParts.s1")}
+        {tHC("s1")}
       </p>
       {ackError && <p className="mt-1.5 text-xs text-destructive">{ackError}</p>}
     </div>

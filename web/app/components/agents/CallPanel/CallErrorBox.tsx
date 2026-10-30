@@ -21,7 +21,7 @@ export default function CallErrorBox({ callError, pipelineError, setShowMicTest 
               onClick={() => setShowMicTest(true)}
               className="text-primary hover:underline font-medium text-xs"
             >
-              {tHC("hcComponentsAgentsCallPanelCallErrorBox.s1")}
+              {tHC("s1")}
             </button>
           )}
         </div>

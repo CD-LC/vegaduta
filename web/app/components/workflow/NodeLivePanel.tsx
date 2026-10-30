@@ -119,7 +119,7 @@ const ExpandedDetail = memo(function ExpandedDetail({ call }: { call: NodeLiveTo
           </pre>
         </>
       )}
-      {!argsText && !result && <div className="nlp-detail-empty">{tHC("hcComponentsWorkflowNodeLivePanel.s5")}</div>}
+      {!argsText && !result && <div className="nlp-detail-empty">{tHC("s5")}</div>}
     </div>
   );
 });
@@ -232,14 +232,14 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
           ) : (
             "Tool calls"
           )}
-          {capped && <span className="nlp-capped" title={tHC("hcComponentsWorkflowNodeLivePanel.s4")}>{tHC("hcComponentsWorkflowNodeLivePanel.s3")}</span>}
+          {capped && <span className="nlp-capped" title={tHC("s4")}>{tHC("s3")}</span>}
         </span>
         {onOpen && (
           <button
             type="button"
             className="nlp-open nodrag"
-            aria-label={tHC("hcComponentsWorkflowNodeLivePanel.s2")}
-            title={tHC("hcComponentsWorkflowNodeLivePanel.s2")}
+            aria-label={tHC("s2")}
+            title={tHC("s2")}
             onClick={(e) => {
               e.stopPropagation();
               onOpen();
@@ -251,7 +251,7 @@ function NodeLivePanelImpl({ text, streaming, capped, toolCalls, compact, onOpen
       </div>
 
       {(hasText || streaming) && (
-        <div className="nlp-stream" aria-live="off" aria-label={tHC("hcComponentsWorkflowNodeLivePanel.s1")}>
+        <div className="nlp-stream" aria-live="off" aria-label={tHC("s1")}>
           <div className="nlp-stream-inner">
             <span className="nlp-text">{hasText ? tail : ""}</span>
             {streaming && !capped && <span className="nlp-caret" aria-hidden="true" />}

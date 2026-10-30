@@ -368,10 +368,10 @@ export default function IntelligenceSourceControl({
   return (
     <div className="mb-3 rounded-lg border border-border p-3">
       <div className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        {tHC("hcComponentsAgentsIntelligenceSourceControl.s5")}
+        {tHC("s5")}
       </div>
       <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">
-        {tHC("hcComponentsAgentsIntelligenceSourceControl.s4")} {poolLabel("Platform pool", "Local model")} {tHC("hcComponentsAgentsIntelligenceSourceControl.s3")}
+        {tHC("s4")} {poolLabel("Platform pool", "Local model")} {tHC("s3")}
       </p>
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
         <SourceOption
@@ -402,7 +402,7 @@ export default function IntelligenceSourceControl({
           >
             <SourceOption
               icon={<KeyRound size={13} />}
-              title={tHC("hcComponentsAgentsIntelligenceSourceControl.s2")}
+              title={tHC("s2")}
               subtitle={isFreePlan ? "Requires a paid plan" : "No active provider yet"}
               active={false}
               disabled
@@ -412,7 +412,7 @@ export default function IntelligenceSourceControl({
         ) : (
           <SourceOption
             icon={<KeyRound size={13} />}
-            title={tHC("hcComponentsAgentsIntelligenceSourceControl.s2")}
+            title={tHC("s2")}
             subtitle="Your configured credentials"
             active={selected === "own-provider"}
             disabled={busy}
@@ -443,7 +443,7 @@ export default function IntelligenceSourceControl({
               runs) can reach a model that lives in this tab. Plain literal,
               same as the policy note above: there is no catalogue key for it. */}
           <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsAgentsIntelligenceSourceControl.s1")}
+            {tHC("s1")}
           </p>
           {/* A3: the actionable on-device model list. Downloaded models are
               switchable in place; not-yet-downloaded ones stay visible but

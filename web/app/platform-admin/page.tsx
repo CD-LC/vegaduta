@@ -239,7 +239,7 @@ function OverviewPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminPage.s11")}
+        {tHC("s11")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </PageHint>
 
@@ -253,7 +253,7 @@ function OverviewPage() {
         <Card className="mb-4 gap-0 border-primary/25 bg-gradient-to-br from-primary/10 to-cyan-400/5 py-0">
           <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[11px] tracking-[0.12em] text-primary">{tHC("hcPlatformadminPage.s10")}</span>
+              <span className="font-mono text-[11px] tracking-[0.12em] text-primary">{tHC("s10")}</span>
               <Badge variant="outline" className="gap-1.5">
                 <span
                   className={`size-1.5 rounded-full ${health ? "bg-[var(--state-success)]" : "bg-muted-foreground"}`}
@@ -261,7 +261,7 @@ function OverviewPage() {
                 {health?.overallStatus || (healthError ? "UNREACHABLE" : "CHECKING…")}
               </Badge>
             </div>
-            <span className="text-xs text-muted-foreground">{tHC("hcPlatformadminPage.s9")}</span>
+            <span className="text-xs text-muted-foreground">{tHC("s9")}</span>
           </CardContent>
         </Card>
       </motion.div>
@@ -273,9 +273,9 @@ function OverviewPage() {
           <CardContent className="flex flex-wrap items-center gap-3 p-4">
             <Wrench size={18} className="shrink-0 text-primary" aria-hidden="true" />
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold text-foreground">{tHC("hcPlatformadminPage.s8")}</div>
+              <div className="text-sm font-semibold text-foreground">{tHC("s8")}</div>
               <div className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminPage.s7")}
+                {tHC("s7")}
               </div>
             </div>
             <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
@@ -295,7 +295,7 @@ function OverviewPage() {
                 {tile.value.state === "unavailable" ? (
                   <div
                     className="mt-1 text-sm font-medium text-muted-foreground"
-                    title={tHC("hcPlatformadminPage.s6")}
+                    title={tHC("s6")}
                   >
                     unavailable
                   </div>
@@ -325,7 +325,7 @@ function OverviewPage() {
           <Card className="mb-4 gap-0 border-[var(--warning-border)] bg-[var(--warning-bg)] py-0">
             <CardContent className="p-4">
               <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--warning-text)]">
-                <AlertOctagon size={14} /> {tHC("hcPlatformadminPage.s5")}
+                <AlertOctagon size={14} /> {tHC("s5")}
               </h2>
               <div className="flex flex-wrap gap-2">
                 {platformStopped && (
@@ -334,7 +334,7 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-destructive/40 bg-destructive/10 text-destructive"
                     >
-                      <Power size={11} /> {tHC("hcPlatformadminPage.s4")}{platformStopped.reason ? `: ${platformStopped.reason}` : ""}
+                      <Power size={11} /> {tHC("s4")}{platformStopped.reason ? `: ${platformStopped.reason}` : ""}
                     </Badge>
                   </Link>
                 )}
@@ -344,7 +344,7 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
                     >
-                      {pendingMcp} {tHC("hcPlatformadminPage.s3")}{pendingMcp === 1 ? "" : "s"} pending
+                      {pendingMcp} {tHC("s3")}{pendingMcp === 1 ? "" : "s"} pending
                     </Badge>
                   </Link>
                 )}
@@ -354,7 +354,7 @@ function OverviewPage() {
                       variant="outline"
                       className="gap-1.5 border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
                     >
-                      {pendingTemplates} {tHC("hcPlatformadminPage.s2")}{pendingTemplates === 1 ? "" : "s"} pending
+                      {pendingTemplates} {tHC("s2")}{pendingTemplates === 1 ? "" : "s"} pending
                     </Badge>
                   </Link>
                 )}
@@ -383,7 +383,7 @@ function OverviewPage() {
         <Card>
           <CardContent className="p-4">
             <h2 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              <Activity size={14} /> {tHC("hcPlatformadminPage.s1")}
+              <Activity size={14} /> {tHC("s1")}
             </h2>
             <SystemStatusSection pollMs={15000} />
           </CardContent>

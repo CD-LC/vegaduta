@@ -87,7 +87,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
           <div
             className={`mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide ${TONES.sky.text}`}
           >
-            <Smartphone aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioPocketPanel.s14")}
+            <Smartphone aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s14")}
           </div>
           <h3 className="text-2xl font-semibold tracking-tight">
             {agentName
@@ -95,7 +95,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
               : "Put your agent on a phone."}
           </h3>
           <p className="mt-1.5 max-w-lg text-sm text-muted-foreground">
-            {tHC("hcComponentsStudioPocketPanel.s13")}
+            {tHC("s13")}
           </p>
 
           {!shareUrl ? (
@@ -106,11 +106,11 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 ) : (
                   <QrCode aria-hidden="true" className="me-2 h-4 w-4 shrink-0" />
                 )}{" "}
-                {tHC("hcComponentsStudioPocketPanel.s12")}
+                {tHC("s12")}
               </Button>
               {message && <p className="mt-2 text-sm text-destructive">{message}</p>}
               <p className="mt-2 max-w-md text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioPocketPanel.s11")}
+                {tHC("s11")}
               </p>
             </div>
           ) : (
@@ -121,7 +121,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                   readOnly
                   value={shareUrl}
                   onFocus={(e) => e.currentTarget.select()}
-                  aria-label={tHC("hcComponentsStudioPocketPanel.s10")}
+                  aria-label={tHC("s10")}
                   className="min-w-0 flex-1 bg-transparent px-1 text-sm outline-none"
                 />
                 <Button size="sm" variant="outline" onClick={copy}>
@@ -134,7 +134,7 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioPocketPanel.s9")}
+                {tHC("s9")}
               </p>
             </div>
           )}
@@ -153,14 +153,14 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
                 viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
                 className="h-[196px] w-[196px]"
                 role="img"
-                aria-label={tHC("hcComponentsStudioPocketPanel.s8")}
+                aria-label={tHC("s8")}
               >
                 <path d={qr.d} fill="#09090b" />
               </svg>
             ) : (
               <div className="flex h-[196px] w-[196px] flex-col items-center justify-center gap-2 text-center text-xs text-zinc-500">
                 <QrCode aria-hidden="true" className="h-10 w-10 text-zinc-300 shrink-0" />
-                {tHC("hcComponentsStudioPocketPanel.s7")}
+                {tHC("s7")}
               </div>
             )}
           </motion.div>
@@ -173,30 +173,30 @@ export default function PocketPanel({ token, agentName, readOnly, signupHref, on
             {android ? "You are on Android - take it with you." : "Want it as an app?"}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {tHC("hcComponentsStudioPocketPanel.s6")}
+            {tHC("s6")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {apk && (
             <Button asChild variant={android ? "default" : "outline"} size="sm">
               <a href={apk.href} download>
-                <Download aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioPocketPanel.s5")}
+                <Download aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s5")}
                 {apk.sizeMb ? ` · ${apk.sizeMb} MB` : ""}
               </a>
             </Button>
           )}
           <Button asChild size="sm" className={TONES.violet.cta}>
-            <a href={signupHref}>{tHC("hcComponentsStudioPocketPanel.s4")}</a>
+            <a href={signupHref}>{tHC("s4")}</a>
           </Button>
         </div>
       </div>
       {apk && (
         <p className="border-t border-border/40 px-5 py-2 text-[10.5px] text-muted-foreground sm:px-7">
-          {tHC("hcComponentsStudioPocketPanel.s3")}{apk.version ? `, version ${apk.version}` : ""} {tHC("hcComponentsStudioPocketPanel.s2")}
+          {tHC("s3")}{apk.version ? `, version ${apk.version}` : ""} {tHC("s2")}
           {apk.sha256 && (
             <>
               {" "}
-              {tHC("hcComponentsStudioPocketPanel.s1")} <span className="break-all font-mono">{apk.sha256}</span>
+              {tHC("s1")} <span className="break-all font-mono">{apk.sha256}</span>
             </>
           )}
         </p>

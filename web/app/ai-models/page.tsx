@@ -138,18 +138,18 @@ function EditForm({ row, providerOptions, busy, onSave, onCancel }: EditFormProp
             id={`model-${row.featureKey}`}
             value={model}
             onChange={(e) => setModel(e.target.value)}
-            placeholder={tHC("hcAimodelsPage.s12")}
+            placeholder={tHC("s12")}
             autoFocus
             required
           />
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {tHC("hcAimodelsPage.s11")}{" "}
+        {tHC("s11")}{" "}
         <Link href="/providers" className="underline underline-offset-2">
           Providers
         </Link>
-        {tHC("hcAimodelsPage.s10")}
+        {tHC("s10")}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button type="submit" size="sm" disabled={busy}>
@@ -255,12 +255,12 @@ export default function AiModelControlPage() {
   return (
     <AppShell eyebrow="Workspace">
       <PageHeader
-        title={tHC("hcAimodelsPage.s9")}
+        title={tHC("s9")}
         subtitle="Choose which provider and model each AI-touching feature in your workspace runs on, instead of the platform's built-in default."
         actions={
           <Button asChild variant="outline" size="sm">
             <Link href="/providers">
-              {tHC("hcAimodelsPage.s8")} <ArrowRight size={14} />
+              {tHC("s8")} <ArrowRight size={14} />
             </Link>
           </Button>
         }
@@ -285,7 +285,7 @@ export default function AiModelControlPage() {
       {!canManageSettings && (
         <Card className="mb-4 gap-0 border-dashed p-4">
           <p className="text-sm text-muted-foreground">
-            {tHC("hcAimodelsPage.s7")}
+            {tHC("s7")}
           </p>
         </Card>
       )}
@@ -303,11 +303,11 @@ export default function AiModelControlPage() {
 
       <Card className="mb-4 gap-0 border-dashed p-4">
         <p className="text-sm text-muted-foreground">
-          {tHC("hcAimodelsPage.s6")}{" "}
+          {tHC("s6")}{" "}
           <Link href="/edge" className="underline underline-offset-2">
-            {tHC("hcAimodelsPage.s5")}
+            {tHC("s5")}
           </Link>{" "}
-          {tHC("hcAimodelsPage.s4")}
+          {tHC("s4")}
         </p>
       </Card>
 
@@ -333,9 +333,9 @@ export default function AiModelControlPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-foreground">{row.featureLabel || row.featureKey}</span>
                     {isDefault ? (
-                      <Badge variant="accent">{tHC("hcAimodelsPage.s3")}</Badge>
+                      <Badge variant="accent">{tHC("s3")}</Badge>
                     ) : (
-                      <Badge variant="outline">{tHC("hcAimodelsPage.s2")}</Badge>
+                      <Badge variant="outline">{tHC("s2")}</Badge>
                     )}
                   </div>
                   {hasOverride ? (
@@ -344,7 +344,7 @@ export default function AiModelControlPage() {
                     </Badge>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      {tHC("hcAimodelsPage.s1")}
+                      {tHC("s1")}
                     </p>
                   )}
                 </div>

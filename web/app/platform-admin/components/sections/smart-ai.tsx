@@ -155,7 +155,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsSmartai.s11")}
+      title={tHC("s11")}
       subtitle="The platform's own AI-native niceties - one master switch + a combined daily USD ceiling, with a per-feature override below"
       icon={Sparkles}
       delay={delay}
@@ -180,9 +180,9 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsSmartai.s10")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s10")}</p>
       ) : !config ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsSmartai.s9")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s9")}</p>
       ) : (
         <>
           <div className="flex flex-wrap items-end gap-4 rounded-lg border border-border p-4">
@@ -192,19 +192,19 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
                 className="flex items-center gap-2 text-xs font-medium leading-none text-muted-foreground select-none"
                 aria-hidden="true"
               >
-                {tHC("hcPlatformadminComponentsSectionsSmartai.s8")}
+                {tHC("s8")}
               </span>
               <div className="flex h-9 items-center">
                 <SwitchToggle
                   on={!!draft.enabled}
                   onClick={() => setDraft((p: any) => ({ ...p, enabled: !p.enabled }))}
-                  label={tHC("hcPlatformadminComponentsSectionsSmartai.s7")}
+                  label={tHC("s7")}
                 />
               </div>
             </div>
             <div className="w-40 space-y-1.5">
               <Label htmlFor="smartai-master" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsSectionsSmartai.s6")}
+                {tHC("s6")}
               </Label>
               <Input
                 id="smartai-master"
@@ -221,7 +221,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </div>
             <div className="w-40 space-y-1.5">
               <Label htmlFor="smartai-window" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsSectionsSmartai.s5")}
+                {tHC("s5")}
               </Label>
               <Input
                 id="smartai-window"
@@ -238,7 +238,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
             </div>
             <div className="w-44 space-y-1.5">
               <Label htmlFor="smartai-default" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsSectionsSmartai.s4")}
+                {tHC("s4")}
               </Label>
               <Input
                 id="smartai-default"
@@ -259,7 +259,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
           </div>
 
           <div className="pt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("hcPlatformadminComponentsSectionsSmartai.s3")}
+            {tHC("s3")}
           </div>
           <AnimatePresence initial={false}>
             {SMART_AI_FEATURES.map((f) => {
@@ -267,7 +267,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
               if (!d) {
                 return (
                   <div key={f.key} className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground">
-                    {f.label} {tHC("hcPlatformadminComponentsSectionsSmartai.s2")}
+                    {f.label} {tHC("s2")}
                   </div>
                 );
               }
@@ -294,7 +294,7 @@ export function SmartAiSection({ pollMs, delay }: { pollMs?: number; delay?: num
                   />
                   <div className="w-36 space-y-1">
                     <Label htmlFor={`smartai-daily-${f.key}`} className="text-xs text-muted-foreground">
-                      {tHC("hcPlatformadminComponentsSectionsSmartai.s1")}
+                      {tHC("s1")}
                     </Label>
                     <Input
                       id={`smartai-daily-${f.key}`}

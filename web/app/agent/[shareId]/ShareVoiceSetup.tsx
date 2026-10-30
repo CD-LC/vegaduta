@@ -76,7 +76,7 @@ export default function ShareVoiceSetup({
   return (
     <div className="flex flex-col gap-1.5 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
       <p className="text-xs text-muted-foreground">
-        {tHC("hcAgentShareIdShareVoiceSetup.s1")}
+        {tHC("s1")}
       </p>
       {sttInstallable && (
         <Row

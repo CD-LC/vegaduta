@@ -35,7 +35,7 @@ export default function WorkflowShareModal({ setShowShareModal, showShareModal, 
             aria-modal="true"
           >
             <div className="flex items-start justify-between gap-3 px-5 pb-1 pt-5">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("hcComponentsWorkflowWorkflowShareModal.s1")}</h2>
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">{tHC("s1")}</h2>
               <button
                 type="button"
                 className="-me-1 -mt-1 flex size-8 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"

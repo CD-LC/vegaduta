@@ -38,10 +38,10 @@ export default function WorkflowRunPanel({
             className="rounded-xl border-2 border-amber-500/60 bg-amber-500/5 p-4"
           >
             <div className="mb-1 flex items-center gap-2 font-medium">
-              <UserCheck aria-hidden="true" className="h-4 w-4 text-amber-600 shrink-0" /> {tHC("hcComponentsStudioWorkflowRunPanel.s4")}
+              <UserCheck aria-hidden="true" className="h-4 w-4 text-amber-600 shrink-0" /> {tHC("s4")}
             </div>
             <p className="mb-3 text-sm text-muted-foreground">
-              {run.approval.message} {tHC("hcComponentsStudioWorkflowRunPanel.s3")}
+              {run.approval.message} {tHC("s3")}
             </p>
             {run.approval.preview && (
               <pre className="mb-3 max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-background p-3 text-xs">
@@ -95,7 +95,7 @@ export default function WorkflowRunPanel({
                         </div>
                       ) : st.status === "running" ? (
                         <div className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground animate-pulse">
-                          {tHC("hcComponentsStudioWorkflowRunPanel.s2")}
+                          {tHC("s2")}
                         </div>
                       ) : null}
                     </div>
@@ -110,7 +110,7 @@ export default function WorkflowRunPanel({
               </div>
               <div className="whitespace-pre-wrap break-all text-sm leading-relaxed">{run.output}</div>
               <p className="mt-2 text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioWorkflowRunPanel.s1")}
+                {tHC("s1")}
               </p>
             </div>
           )}

@@ -53,15 +53,15 @@ export default function VideoProviderSelector({
     <TranscriptionProviderOptions
       providers={providers}
       icon={Video}
-      label={tHC("hcComponentsAgentsVideoProviderSelector.s5")}
+      label={tHC("s5")}
       tooltipContent={
         <>
-          {tHC("hcComponentsAgentsVideoProviderSelector.s4")}
+          {tHC("s4")}
         </>
       }
       freePlanWarningText={
         <>
-          {tHC("hcComponentsAgentsVideoProviderSelector.s3")} <strong>{tHC("hcComponentsAgentsVideoProviderSelector.s2")}</strong>{tHC("hcComponentsAgentsVideoProviderSelector.s1")}
+          {tHC("s3")} <strong>{tHC("s2")}</strong>{tHC("s1")}
         </>
       }
       editorLockedTitle="Video provider selection is a Premium feature"

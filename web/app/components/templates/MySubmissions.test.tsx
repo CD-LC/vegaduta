@@ -21,9 +21,6 @@ vi.mock("./SubmitTemplateFlow", () => ({
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="submit-flow-open" /> : null),
 }));
 vi.mock("./EditSubmissionModal", () => ({ default: (): null => null }));
-vi.mock("../../lib/i18n", () => ({
-  useTranslations: () => (key: string) => key,
-}));
 
 import MySubmissions from "./MySubmissions";
 

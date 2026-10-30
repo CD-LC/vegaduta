@@ -62,23 +62,23 @@ export default function LeadForm() {
     <section id="contact-form" className="enterprise-form-section">
       <div className="enterprise-form-container">
         <div className="enterprise-form-header">
-          <h2>{tHC("hcComponentsEnterpriselandingLeadForm.s19")}</h2>
+          <h2>{tHC("s19")}</h2>
           <p>
-            {tHC("hcComponentsEnterpriselandingLeadForm.s18")}
+            {tHC("s18")}
           </p>
         </div>
 
         {submitted && (
           <div className="enterprise-form-success" role="status">
             <div className="enterprise-success-icon">✓</div>
-            <h3>{tHC("hcComponentsEnterpriselandingLeadForm.s17")}</h3>
-            <p>{tHC("hcComponentsEnterpriselandingLeadForm.s16")}</p>
+            <h3>{tHC("s17")}</h3>
+            <p>{tHC("s16")}</p>
             <button
               type="button"
               className="enterprise-form-submit"
               onClick={() => setSubmitted(false)}
             >
-              {tHC("hcComponentsEnterpriselandingLeadForm.s15")}
+              {tHC("s15")}
             </button>
           </div>
         )}
@@ -87,7 +87,7 @@ export default function LeadForm() {
           <form className="enterprise-form" onSubmit={handleSubmit}>
             <div className="enterprise-form-grid">
               <div className="enterprise-form-group">
-                <label htmlFor="company">{tHC("hcComponentsEnterpriselandingLeadForm.s14")}</label>
+                <label htmlFor="company">{tHC("s14")}</label>
                 <input
                   id="company"
                   name="company"
@@ -96,12 +96,12 @@ export default function LeadForm() {
                   autoComplete="organization"
                   value={formData.company}
                   onChange={handleChange}
-                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s13")}
+                  placeholder={tHC("s13")}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="contact">{tHC("hcComponentsEnterpriselandingLeadForm.s12")}</label>
+                <label htmlFor="contact">{tHC("s12")}</label>
                 <input
                   id="contact"
                   name="contact"
@@ -110,12 +110,12 @@ export default function LeadForm() {
                   autoComplete="name"
                   value={formData.contact}
                   onChange={handleChange}
-                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s11")}
+                  placeholder={tHC("s11")}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="email">{tHC("hcComponentsEnterpriselandingLeadForm.s10")}</label>
+                <label htmlFor="email">{tHC("s10")}</label>
                 <input
                   id="email"
                   name="email"
@@ -129,7 +129,7 @@ export default function LeadForm() {
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="phone">{tHC("hcComponentsEnterpriselandingLeadForm.s9")}</label>
+                <label htmlFor="phone">{tHC("s9")}</label>
                 <input
                   id="phone"
                   name="phone"
@@ -143,30 +143,30 @@ export default function LeadForm() {
               </div>
 
               <div className="enterprise-form-group enterprise-form-full">
-                <label htmlFor="useCase">{tHC("hcComponentsEnterpriselandingLeadForm.s8")}</label>
+                <label htmlFor="useCase">{tHC("s8")}</label>
                 <textarea
                   id="useCase"
                   name="useCase"
                   required
                   value={formData.useCase}
                   onChange={handleChange}
-                  placeholder={tHC("hcComponentsEnterpriselandingLeadForm.s7")}
+                  placeholder={tHC("s7")}
                   rows={4}
                 />
               </div>
 
               <div className="enterprise-form-group">
-                <label htmlFor="timeline">{tHC("hcComponentsEnterpriselandingLeadForm.s6")}</label>
+                <label htmlFor="timeline">{tHC("s6")}</label>
                 <select
                   id="timeline"
                   name="timeline"
                   value={formData.timeline}
                   onChange={handleChange}
                 >
-                  <option value="urgent">{tHC("hcComponentsEnterpriselandingLeadForm.s5")}</option>
-                  <option value="1-3 months">{tHC("hcComponentsEnterpriselandingLeadForm.s4")}</option>
-                  <option value="3-6 months">{tHC("hcComponentsEnterpriselandingLeadForm.s3")}</option>
-                  <option value="exploring">{tHC("hcComponentsEnterpriselandingLeadForm.s2")}</option>
+                  <option value="urgent">{tHC("s5")}</option>
+                  <option value="1-3 months">{tHC("s4")}</option>
+                  <option value="3-6 months">{tHC("s3")}</option>
+                  <option value="exploring">{tHC("s2")}</option>
                 </select>
               </div>
             </div>
@@ -186,7 +186,7 @@ export default function LeadForm() {
             </button>
 
             <p className="enterprise-form-privacy">
-              {tHC("hcComponentsEnterpriselandingLeadForm.s1")}
+              {tHC("s1")}
             </p>
           </form>
         )}

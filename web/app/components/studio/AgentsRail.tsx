@@ -72,7 +72,7 @@ export default function AgentsRail({
   return (
     <aside className="space-y-2" data-tour="agents-rail">
       <div className="flex items-center justify-between">
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("hcComponentsStudioAgentsRail.s5")}</div>
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s5")}</div>
         <span className="text-[11px] text-muted-foreground">
           {mine.length}
           {maxAgents !== null ? `/${maxAgents}` : ""}
@@ -81,17 +81,17 @@ export default function AgentsRail({
       {mine.map(agentButton)}
       {mine.length === 0 && (
         <p className="rounded-xl border border-dashed border-border/60 p-3 text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioAgentsRail.s4")}
+          {tHC("s4")}
         </p>
       )}
       {!readOnly && (
         <Button variant="outline" size="sm" className="w-full" disabled={atCap} onClick={onNew}>
-          <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentsRail.s3")}
+          <Plus aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("s3")}
         </Button>
       )}
       {atCap && (
         <p className="text-[11px] text-muted-foreground">
-          {tHC("hcComponentsStudioAgentsRail.s2")}
+          {tHC("s2")}
         </p>
       )}
 
@@ -100,7 +100,7 @@ export default function AgentsRail({
       </div>
 
       <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
-        {tHC("hcComponentsStudioAgentsRail.s1")}
+        {tHC("s1")}
       </p>
     </aside>
   );

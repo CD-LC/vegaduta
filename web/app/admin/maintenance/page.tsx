@@ -256,7 +256,7 @@ export default function PlatformMaintenancePage() {
             Approvals
           </TabsTrigger>
           <TabsTrigger value="data-privacy" className="flex-none">
-            {tHC("hcAdminMaintenancePage.s1")}
+            {tHC("s1")}
           </TabsTrigger>
         </TabsList>
 

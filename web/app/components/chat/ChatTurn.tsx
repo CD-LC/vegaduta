@@ -162,7 +162,7 @@ export default function ChatTurn({
               variant="secondary"
               className="cursor-default px-2 py-0 text-[10px] uppercase tracking-wide text-muted-foreground"
             >
-              {tHC("hcComponentsChatChatTurn.s2")} {turn.edgeTier})
+              {tHC("s2")} {turn.edgeTier})
             </Badge>
           </TooltipTrigger>
           <TooltipContent>
@@ -179,7 +179,7 @@ export default function ChatTurn({
         <Tooltip>
           <TooltipTrigger asChild>
             <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-              {tHC("hcComponentsChatChatTurn.s1")} {edgeFallbackShortLabel(turn.edgeFallbackReason)}
+              {tHC("s1")} {edgeFallbackShortLabel(turn.edgeFallbackReason)}
             </Badge>
           </TooltipTrigger>
           <TooltipContent>{edgeFallbackLabel(turn.edgeFallbackReason)}</TooltipContent>

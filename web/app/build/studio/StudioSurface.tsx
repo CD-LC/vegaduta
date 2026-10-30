@@ -277,15 +277,15 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
         <div className="grid items-center gap-10 lg:grid-cols-[1.25fr_1fr]">
           <div className="flex flex-col gap-5">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Cpu aria-hidden="true" size={12} /> {tHC("hcBuildStudioStudioSurface.s30")}
+              <Cpu aria-hidden="true" size={12} /> {tHC("s30")}
             </span>
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl">
-              {tHC("hcBuildStudioStudioSurface.s29")}
+              {tHC("s29")}
               <br />
-              <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">{tHC("hcBuildStudioStudioSurface.s28")}</span>
+              <span className="bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">{tHC("s28")}</span>
             </h1>
             <p className="max-w-xl text-base text-muted-foreground">
-              {tHC("hcBuildStudioStudioSurface.s27")}
+              {tHC("s27")}
             </p>
             <form
               className="flex flex-col gap-2 rounded-2xl border border-border bg-background/80 p-2 shadow-sm backdrop-blur"
@@ -304,14 +304,14 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
                   }
                 }}
                 rows={2}
-                placeholder={tHC("hcBuildStudioStudioSurface.s26")}
+                placeholder={tHC("s26")}
                 className="min-h-[64px] resize-none border-0 bg-transparent text-base shadow-none focus-visible:ring-0"
-                aria-label={tHC("hcBuildStudioStudioSurface.s25")}
+                aria-label={tHC("s25")}
               />
               <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                 <EngineBadge engine={engine} setPref={setPref} />
                 <Button type="submit" disabled={!idea.trim()} className="gap-1.5">
-                  <Sparkles aria-hidden="true" size={15} /> {tHC("hcBuildStudioStudioSurface.s24")}
+                  <Sparkles aria-hidden="true" size={15} /> {tHC("s24")}
                 </Button>
               </div>
             </form>
@@ -324,8 +324,8 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
       {/* Starters */}
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildStudioStudioSurface.s23")}</h2>
-          <span className="text-xs text-muted-foreground">{tHC("hcBuildStudioStudioSurface.s22")}</span>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("s23")}</h2>
+          <span className="text-xs text-muted-foreground">{tHC("s22")}</span>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {TEMPLATES.map((t) => (
@@ -369,7 +369,7 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
       {/* Your apps */}
       {projects.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildStudioStudioSurface.s21")}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("s21")}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {projects.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
@@ -394,13 +394,13 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">{tHC("hcBuildStudioStudioSurface.s20")}</p>
+          <p className="text-xs text-muted-foreground">{tHC("s20")}</p>
         </section>
       )}
 
       {/* Why not a chatbot */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildStudioStudioSurface.s19")}</h2>
+        <h2 className="text-lg font-semibold text-foreground">{tHC("s19")}</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {WHY.map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex gap-3 rounded-2xl border border-border bg-card p-4">
@@ -422,10 +422,10 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
       <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("hcBuildStudioStudioSurface.s18")}{confirmDelete?.name}&rdquo;?</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s18")}{confirmDelete?.name}&rdquo;?</AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("hcBuildStudioStudioSurface.s17")} {confirmDelete?.versions.length ?? 0} {tHC("hcBuildStudioStudioSurface.s16")}
-              {(confirmDelete?.versions.length ?? 0) === 1 ? "" : "s"} {tHC("hcBuildStudioStudioSurface.s15")}
+              {tHC("s17")} {confirmDelete?.versions.length ?? 0} {tHC("s16")}
+              {(confirmDelete?.versions.length ?? 0) === 1 ? "" : "s"} {tHC("s15")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -437,7 +437,7 @@ export default function StudioSurface({ onOpenApp }: { onOpenApp?: (projectId: s
                 setConfirmDelete(null);
               }}
             >
-              {tHC("hcBuildStudioStudioSurface.s14")}
+              {tHC("s14")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -482,7 +482,7 @@ function EngineBadge({
         { value: "device", label: "On my device (edge) only" },
         { value: "auto", label: "Auto: device first, then platform" },
       ]}
-      aria-label={tHC("hcBuildStudioStudioSurface.s13")}
+      aria-label={tHC("s13")}
     />
   );
   const nextChip = (
@@ -505,7 +505,7 @@ function EngineBadge({
     return (
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5" title={`On device: ${dev.text}
 Cloud: ${engine.cloud?.label || "…"}`}>
-        <span className="shrink-0 text-xs text-muted-foreground">{tHC("hcBuildStudioStudioSurface.s12")}</span>
+        <span className="shrink-0 text-xs text-muted-foreground">{tHC("s12")}</span>
         <span className="flex min-w-0 max-w-full">{nextChip}</span>
         <span className="w-56 max-w-full shrink-0">{select}</span>
       </div>
@@ -514,7 +514,7 @@ Cloud: ${engine.cloud?.label || "…"}`}>
   return (
     <div className="flex w-full flex-col gap-2 rounded-xl border border-border bg-background/60 p-2.5 text-xs">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-muted-foreground">{tHC("hcBuildStudioStudioSurface.s11")}</span>
+        <span className="text-muted-foreground">{tHC("s11")}</span>
         <span className="min-w-0 max-w-full">{nextChip}</span>
         <span className="ml-auto">{select}</span>
       </div>
@@ -523,7 +523,7 @@ Cloud: ${engine.cloud?.label || "…"}`}>
           <span className={`mt-1 size-2 shrink-0 rounded-full ${dot(dev.tone)}`} />
           <span className="min-w-0">
             <span className="block font-medium text-foreground">
-              <Cpu aria-hidden="true" size={11} className="mr-1 inline" /> {tHC("hcBuildStudioStudioSurface.s10")} {dev.text}
+              <Cpu aria-hidden="true" size={11} className="mr-1 inline" /> {tHC("s10")} {dev.text}
             </span>
             <span className="block text-muted-foreground">{dev.detail}</span>
           </span>
@@ -539,7 +539,7 @@ Cloud: ${engine.cloud?.label || "…"}`}>
         </div>
       </div>
       <p className="leading-relaxed text-muted-foreground">
-        {tHC("hcBuildStudioStudioSurface.s9")}
+        {tHC("s9")}
       </p>
     </div>
   );
@@ -552,17 +552,17 @@ function HeroPhone({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      aria-label={tHC("hcBuildStudioStudioSurface.s8")}
+      aria-label={tHC("s8")}
       className="group relative mx-auto hidden w-[210px] rotate-[3deg] cursor-pointer self-center transition duration-300 hover:-translate-y-2 hover:rotate-[1.5deg] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:block lg:w-[260px]"
     >
       <span className="absolute -right-5 -top-3 z-10 rounded-full bg-gradient-to-r from-primary to-orange-500 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white shadow-lg">
-        {tHC("hcBuildStudioStudioSurface.s7")}
+        {tHC("s7")}
       </span>
       <div className="rounded-[2.6rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl transition duration-300 group-hover:shadow-[0_28px_60px_-12px_rgba(244,82,30,0.45)]">
         <div className="relative h-[430px] overflow-hidden rounded-[2rem] bg-white lg:h-[520px]">
           <SandboxFrame html={demo} sandbox="allow-scripts" title="" tabIndex={-1} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 h-[750px] w-[360px] origin-top-left scale-[0.53] border-0 lg:scale-[0.667]" />
           <span className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-gradient-to-t from-neutral-900/85 via-neutral-900/40 to-transparent pb-4 pt-10 text-[13px] font-semibold text-white">
-            {tHC("hcBuildStudioStudioSurface.s6")} <span aria-hidden="true">→</span>
+            {tHC("s6")} <span aria-hidden="true">→</span>
           </span>
         </div>
       </div>
@@ -583,7 +583,7 @@ function Workspace(props: WorkspaceProps) {
       {/* Top bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" onClick={onBack} className="gap-1">
-          <ArrowLeft aria-hidden="true" size={14} /> {tHC("hcBuildStudioStudioSurface.s5")}
+          <ArrowLeft aria-hidden="true" size={14} /> {tHC("s5")}
         </Button>
         <span className="text-xl">{project.emoji}</span>
         <Input
@@ -591,19 +591,19 @@ function Workspace(props: WorkspaceProps) {
           onChange={(e) => update((p) => ({ ...p, name: e.target.value.slice(0, 60) }))}
           disabled={!isOwner}
           className="h-8 w-56 border-transparent bg-transparent px-1 text-base font-semibold shadow-none hover:border-border"
-          aria-label={tHC("hcBuildStudioStudioSurface.s4")}
+          aria-label={tHC("s4")}
         />
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <EngineBadge engine={engine} setPref={setEnginePref} compact />
           <Button variant="outline" size="sm" onClick={() => setPanel("share")} className="gap-1.5">
-            <Smartphone aria-hidden="true" size={14} /> {tHC("hcBuildStudioStudioSurface.s3")}
+            <Smartphone aria-hidden="true" size={14} /> {tHC("s3")}
           </Button>
         </div>
       </div>
 
       {!editable && (
         <p role="status" className="rounded-xl border border-border bg-secondary/60 p-2.5 text-xs text-muted-foreground">
-          {tHC("hcBuildStudioStudioSurface.s2")} <b>view-only</b> {tHC("hcBuildStudioStudioSurface.s1")}
+          {tHC("s2")} <b>view-only</b> {tHC("s1")}
         </p>
       )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[320px_minmax(0,1fr)_320px]">

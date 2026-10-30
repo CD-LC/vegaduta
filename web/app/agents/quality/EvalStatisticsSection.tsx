@@ -219,22 +219,22 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (!statsApi || !evalApi) {
     return (
       <Section
-        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
+        title={tHC("s11")}
         description={sectionDescription}
       >
         <Alert>
           <Info aria-hidden="true" />
-          <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s18")}</AlertTitle>
+          <AlertTitle>{tHC("s18")}</AlertTitle>
           <AlertDescription>
             <p>
-              {tHC("hcAgentsQualityEvalStatisticsSection.s17")}
+              {tHC("s17")}
               <span className="font-mono text-xs">getEvalReliability</span>,{" "}
               <span className="font-mono text-xs">getDatasetNoiseFloor</span>,{" "}
               <span className="font-mono text-xs">compareEvalRunsPaired</span> in{" "}
-              <span className="font-mono text-xs">app/lib/api/quality.ts</span>{tHC("hcAgentsQualityEvalStatisticsSection.s16")}
+              <span className="font-mono text-xs">app/lib/api/quality.ts</span>{tHC("s16")}
             </p>
             <p className="mt-2">
-              {tHC("hcAgentsQualityEvalStatisticsSection.s15")}
+              {tHC("s15")}
             </p>
           </AlertDescription>
         </Alert>
@@ -246,14 +246,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (locked) {
     return (
       <Section
-        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
+        title={tHC("s11")}
         description={sectionDescription}
       >
         <Alert>
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s14")}</AlertTitle>
+          <AlertTitle>{tHC("s14")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcAgentsQualityEvalStatisticsSection.s13")}
+            {tHC("s13")}
           </AlertDescription>
         </Alert>
       </Section>
@@ -265,12 +265,12 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
   if (statsHidden && floorHidden && compareHidden) {
     return (
       <Section
-        title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
+        title={tHC("s11")}
         description={sectionDescription}
       >
         <EmptyState
           icon={Sigma}
-          title={tHC("hcAgentsQualityEvalStatisticsSection.s12")}
+          title={tHC("s12")}
           description="The repeat-aware statistics endpoints (reliability, noise floor, paired comparison) aren't mounted on the core this console is talking to. Nothing is wrong with your agent — this console simply has nothing honest to show until that ships."
         />
       </Section>
@@ -282,15 +282,15 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
 
   return (
     <Section
-      title={tHC("hcAgentsQualityEvalStatisticsSection.s11")}
+      title={tHC("s11")}
       description={sectionDescription}
     >
       <div className="space-y-8">
         {statsHidden ? null : reportFailed ? (
           <Alert variant="destructive">
-            <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s10")}</AlertTitle>
+            <AlertTitle>{tHC("s10")}</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
-              {tHC("hcAgentsQualityEvalStatisticsSection.s9")}
+              {tHC("s9")}
               <Button variant="outline" size="sm" onClick={loadReport}>
                 Retry
               </Button>
@@ -303,7 +303,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
         ) : datasets.length === 0 ? (
           <EmptyState
             icon={FlaskConical}
-            title={tHC("hcAgentsQualityEvalStatisticsSection.s8")}
+            title={tHC("s8")}
             description="Reliability statistics are computed over an agent's completed eval runs. Run a dataset from the section above — twice is better than once, because a single run is still only one observation."
           />
         ) : (
@@ -326,7 +326,7 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
                     label: `${d.datasetName} (${d.caseCount} case${d.caseCount === 1 ? "" : "s"})`,
                   }))}
                   searchable
-                  placeholder={tHC("hcAgentsQualityEvalStatisticsSection.s7")}
+                  placeholder={tHC("s7")}
                 />
               </div>
               <Button variant="outline" size="sm" onClick={loadReport} disabled={reportLoading}>
@@ -353,14 +353,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
             {/* --------------------------------------------------------- */}
             {!floorHidden && datasetId && (
               <Section
-                title={tHC("hcAgentsQualityEvalStatisticsSection.s6")}
+                title={tHC("s6")}
                 description="Two runs of the UNCHANGED configuration, compared pairwise. Any “improvement” smaller than this is not one."
               >
                 {floorFailed ? (
                   <Alert variant="destructive">
-                    <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s5")}</AlertTitle>
+                    <AlertTitle>{tHC("s5")}</AlertTitle>
                     <AlertDescription className="flex flex-wrap items-center gap-3">
-                      {tHC("hcAgentsQualityEvalStatisticsSection.s4")}
+                      {tHC("s4")}
                       <Button variant="outline" size="sm" onClick={loadFloor}>
                         Retry
                       </Button>
@@ -377,14 +377,14 @@ export default function EvalStatisticsSection({ agentId }: { agentId: string | n
             {/* --------------------------------------------------------- */}
             {!compareHidden && datasetId && (
               <Section
-                title={tHC("hcAgentsQualityEvalStatisticsSection.s3")}
+                title={tHC("s3")}
                 description="Same cases, same order, compared pair by pair — with an interval, so this can legitimately come back “we cannot tell”."
               >
                 {runsFailed && (
                   <Alert variant="destructive">
-                    <AlertTitle>{tHC("hcAgentsQualityEvalStatisticsSection.s2")}</AlertTitle>
+                    <AlertTitle>{tHC("s2")}</AlertTitle>
                     <AlertDescription className="flex flex-wrap items-center gap-3">
-                      {tHC("hcAgentsQualityEvalStatisticsSection.s1")}
+                      {tHC("s1")}
                       <Button variant="outline" size="sm" onClick={loadRuns}>
                         Retry
                       </Button>

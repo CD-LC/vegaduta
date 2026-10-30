@@ -58,9 +58,9 @@ export default function DayPhone({
           <div className="flex-1 space-y-2.5 overflow-hidden px-4 pt-4">
             {!ev && (
               <p className="mt-10 text-center text-[12px] text-zinc-400">
-                {tHC("hcComponentsStudioShowtimeDayPhone.s4")}
+                {tHC("s4")}
                 <br />
-                {tHC("hcComponentsStudioShowtimeDayPhone.s3")}
+                {tHC("s3")}
               </p>
             )}
             {screen.items.map((it, i) => {
@@ -70,7 +70,7 @@ export default function DayPhone({
             })}
           </div>
           <div className="pb-2 text-center text-[9px] uppercase tracking-wider text-zinc-600">
-            {tHC("hcComponentsStudioShowtimeDayPhone.s2")}
+            {tHC("s2")}
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@ function Item({ it, k, tone }: { it: PhoneItem; k: number; tone: string }) {
           <p className="text-[12px] leading-snug">{it.sub}</p>
           <div className="mt-2 flex gap-2">
             <span className="flex-1 rounded-lg bg-emerald-600 py-1.5 text-center text-[12px] font-medium">Approve</span>
-            <span className="flex-1 rounded-lg bg-white/10 py-1.5 text-center text-[12px]">{tHC("hcComponentsStudioShowtimeDayPhone.s1")}</span>
+            <span className="flex-1 rounded-lg bg-white/10 py-1.5 text-center text-[12px]">{tHC("s1")}</span>
           </div>
         </div>
       );

@@ -138,10 +138,10 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
     <section aria-labelledby="skill-registry-heading" className="mt-10 space-y-4">
       <div>
         <h2 id="skill-registry-heading" className="text-lg font-semibold text-foreground">
-          {tHC("hcComponentsSkillRegistryBrowser.s11")}
+          {tHC("s11")}
         </h2>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          {tHC("hcComponentsSkillRegistryBrowser.s10")}
+          {tHC("s10")}
         </p>
       </div>
 
@@ -161,8 +161,8 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tHC("hcComponentsSkillRegistryBrowser.s9")}
-            aria-label={tHC("hcComponentsSkillRegistryBrowser.s8")}
+            placeholder={tHC("s9")}
+            aria-label={tHC("s8")}
             className="ps-8"
           />
         </div>
@@ -200,7 +200,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
 
       {!loading && results.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {new Intl.NumberFormat().format(total)} {tHC("hcComponentsSkillRegistryBrowser.s7")}
+          {new Intl.NumberFormat().format(total)} {tHC("s7")}
         </p>
       )}
 
@@ -248,7 +248,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
                           : "Install"}
                     </Button>
                   ) : (
-                    <span className="text-xs text-muted-foreground">{tHC("hcComponentsSkillRegistryBrowser.s6")}</span>
+                    <span className="text-xs text-muted-foreground">{tHC("s6")}</span>
                   )}
                 </div>
               </CardContent>
@@ -267,7 +267,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
       />
 
       {!loading && results.length === 0 && !error && (
-        <p className="text-sm text-muted-foreground">{tHC("hcComponentsSkillRegistryBrowser.s5")}</p>
+        <p className="text-sm text-muted-foreground">{tHC("s5")}</p>
       )}
 
       {canManageSkills && (
@@ -279,7 +279,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
           }}
         >
           <label htmlFor="skill-github-link" className="text-xs font-medium text-foreground">
-            {tHC("hcComponentsSkillRegistryBrowser.s4")}
+            {tHC("s4")}
           </label>
           <Input
             id="skill-github-link"
@@ -294,13 +294,13 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
             variant="outline"
             disabled={installing !== null || scanning !== null || !link.trim()}
           >
-            {tHC("hcComponentsSkillRegistryBrowser.s3")}
+            {tHC("s3")}
           </Button>
         </form>
       )}
 
       <p className="text-xs text-muted-foreground">
-        {tHC("hcComponentsSkillRegistryBrowser.s2")}{" "}
+        {tHC("s2")}{" "}
         {REGISTRIES.map((r, i) => (
           <span key={r.href}>
             {i > 0 && " and "}
@@ -309,7 +309,7 @@ export default function SkillRegistryBrowser({ installed, onChanged }: Props) {
             </a>
           </span>
         ))}
-        {tHC("hcComponentsSkillRegistryBrowser.s1")}
+        {tHC("s1")}
       </p>
 
       <SkillScanDialog prompt={scanPrompt} busy={installing !== null} onCancel={() => setScanPrompt(null)} />

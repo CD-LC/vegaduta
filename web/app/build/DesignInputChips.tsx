@@ -18,7 +18,7 @@ export function DesignInputChips({ designInputs, sketchBlockCount, onOpenSketch,
           onClick={onOpenSketch}
           className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-xs text-foreground hover:bg-accent/60"
         >
-          <LayoutTemplate aria-hidden="true" size={11} /> {tHC("hcBuildDesignInputChips.s1")}{sketchBlockCount} blocks)
+          <LayoutTemplate aria-hidden="true" size={11} /> {tHC("s1")}{sketchBlockCount} blocks)
         </button>
       )}
       {designInputs.map((d) => (

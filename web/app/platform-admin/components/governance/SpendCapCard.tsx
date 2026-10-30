@@ -118,19 +118,19 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s8")}
+      title={tHC("s8")}
       icon={Wallet}
       subtitle="Monthly limit on hosted-pool LLM spend (calendar month, UTC). BYOK calls are never counted or blocked."
       actions={
         cap && !editing ? (
           <Button size="sm" variant="outline" onClick={startEdit}>
-            <Pencil /> {tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s7")}
+            <Pencil /> {tHC("s7")}
           </Button>
         ) : undefined
       }
     >
       {loading && !cap && <Skeleton className="h-16 w-full" />}
-      {error && !loading && <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s6")} {error}</p>}
+      {error && !loading && <p className="text-xs text-muted-foreground">{tHC("s6")} {error}</p>}
 
       {cap && (
         <div className="space-y-3">
@@ -152,7 +152,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
           <div className="max-w-md space-y-1">
             <div className="flex items-baseline justify-between text-xs">
               <span>
-                {tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s5")} <span className="font-mono">{formatCapUsd(cap.monthToDateUsd)}</span>
+                {tHC("s5")} <span className="font-mono">{formatCapUsd(cap.monthToDateUsd)}</span>
                 {cap.monthStart ? (
                   <span className="text-muted-foreground"> since {formatDay(cap.monthStart)}</span>
                 ) : null}
@@ -163,7 +163,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
               <div
                 className="relative h-2 w-full overflow-hidden rounded-full bg-muted"
                 role="meter"
-                aria-label={tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s4")}
+                aria-label={tHC("s4")}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={capBarWidth(pct)}
@@ -172,14 +172,14 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
                 <div
                   className="absolute inset-y-0 w-px bg-foreground/60"
                   style={{ left: "80%" }}
-                  title={tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s3")}
+                  title={tHC("s3")}
                   aria-hidden="true"
                 />
               </div>
             )}
             {cap.blocked && (
               <p className="text-xs text-destructive">
-                {tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s2")}
+                {tHC("s2")}
               </p>
             )}
           </div>
@@ -189,7 +189,7 @@ export default function SpendCapCard({ tenantId, tenantName }: { tenantId: strin
               <div className="flex flex-wrap items-end gap-3">
                 <div className="space-y-1">
                   <Label htmlFor="spend-cap-input" className="text-xs text-muted-foreground">
-                    {tHC("hcPlatformadminComponentsGovernanceSpendCapCard.s1")}
+                    {tHC("s1")}
                   </Label>
                   <Input
                     id="spend-cap-input"

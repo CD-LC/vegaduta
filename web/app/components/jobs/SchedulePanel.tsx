@@ -415,7 +415,7 @@ export default function SchedulePanel({ agents }: { agents: any[] }) {
                     id="sched-cron"
                     value={cron}
                     onChange={(e) => setCron(e.target.value)}
-                    placeholder={tHC("hcComponentsJobsSchedulePanel.s1")}
+                    placeholder={tHC("s1")}
                     className="font-mono"
                     aria-describedby="sched-cron-hint"
                   />

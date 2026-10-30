@@ -70,7 +70,7 @@ function PreviewPill() {
         fontFamily: "ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      {tHC("hcUikitDashboardpreviewPage.s1")}
+      {tHC("s1")}
     </div>
   );
 }

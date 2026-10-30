@@ -41,7 +41,7 @@ export default function InputRequestFields({ fields, idPrefix, values, setValues
                 id={id}
                 value={values[f.key] ?? ""}
                 onValueChange={set}
-                placeholder={tHC("hcComponentsWorkflowApprovalInputFields.s1")}
+                placeholder={tHC("s1")}
                 options={(f.type === "boolean" ? ["true", "false"] : f.options).map((o) => ({
                   value: o,
                   label: f.type === "boolean" ? (o === "true" ? "Yes" : "No") : o,

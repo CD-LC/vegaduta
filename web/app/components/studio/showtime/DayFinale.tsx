@@ -30,10 +30,10 @@ export default function Finale({
       style={{ opacity: k, transform: `translateY(${(1 - k) * 14}px)` }}
     >
       <div>
-        <div className="text-[11px] uppercase tracking-wider text-violet-300">{tHC("hcComponentsStudioShowtimeDayFinale.s7")}</div>
-        <h3 className="mt-1 text-2xl font-semibold leading-tight">{tHC("hcComponentsStudioShowtimeDayFinale.s6")}</h3>
+        <div className="text-[11px] uppercase tracking-wider text-violet-300">{tHC("s7")}</div>
+        <h3 className="mt-1 text-2xl font-semibold leading-tight">{tHC("s6")}</h3>
         <p className="mt-1 text-sm text-zinc-400">
-          {tHC("hcComponentsStudioShowtimeDayFinale.s5")}
+          {tHC("s5")}
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2 text-center">
@@ -57,21 +57,21 @@ export default function Finale({
         className="space-y-2"
       >
         <label htmlFor="day-job" className="block text-[11px] uppercase tracking-wider text-zinc-400">
-          {tHC("hcComponentsStudioShowtimeDayFinale.s4")}
+          {tHC("s4")}
         </label>
         <textarea
           id="day-job"
           value={job}
           onChange={(e) => setJob(e.target.value.slice(0, 240))}
           rows={3}
-          placeholder={tHC("hcComponentsStudioShowtimeDayFinale.s3")}
+          placeholder={tHC("s3")}
           className="w-full resize-none rounded-xl border border-white/15 bg-black/30 p-3 text-sm outline-none placeholder:text-zinc-400 focus:border-violet-400"
         />
         <button
           type="submit"
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3 text-sm font-semibold shadow-lg shadow-violet-500/30 hover:brightness-110"
         >
-          <Hammer aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioShowtimeDayFinale.s2")}{" "}
+          <Hammer aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s2")}{" "}
           <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
         </button>
       </form>
@@ -79,7 +79,7 @@ export default function Finale({
         href={signupHref}
         className="text-center text-xs text-zinc-400 underline-offset-2 hover:text-zinc-100 hover:underline"
       >
-        {tHC("hcComponentsStudioShowtimeDayFinale.s1")}
+        {tHC("s1")}
       </a>
     </div>
   );

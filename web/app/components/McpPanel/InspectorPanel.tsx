@@ -257,7 +257,7 @@ export default function InspectorPanel({
             <span className="min-w-0 break-words font-medium">{new Date(server.updatedAt).toLocaleString()}</span>
           </div>
           <p className="pt-1 text-xs text-muted-foreground">
-            {tHC("hcComponentsMcpPanelInspectorPanel.s1")}
+            {tHC("s1")}
           </p>
         </CardContent>
       </Card>

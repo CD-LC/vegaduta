@@ -71,7 +71,7 @@ export function DailyChart({ series }: { series: any[] }) {
   );
 
   if (!series.length) {
-    return <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminDemosandboxSandboxWidgets.s4")}</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("s4")}</p>;
   }
 
   const slot = width / series.length;
@@ -83,10 +83,10 @@ export function DailyChart({ series }: { series: any[] }) {
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-primary" aria-hidden="true" /> {tHC("hcPlatformadminDemosandboxSandboxWidgets.s3")}
+          <span className="inline-block size-2.5 rounded-sm bg-primary" aria-hidden="true" /> {tHC("s3")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-sm bg-[var(--state-success)]" aria-hidden="true" /> {tHC("hcPlatformadminDemosandboxSandboxWidgets.s2")}
+          <span className="inline-block size-2.5 rounded-sm bg-[var(--state-success)]" aria-hidden="true" /> {tHC("s2")}
         </span>
         <span className="ms-auto font-mono">peak {fmtInt(max)}/day</span>
       </div>
@@ -223,7 +223,7 @@ export function NumberField({
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
         {settingKey && <code className="font-mono text-[11px] text-muted-foreground/70">{settingKey}</code>}
         {fallback !== undefined && fallback !== null && (
-          <span className="text-[11px] text-muted-foreground/70">{tHC("hcPlatformadminDemosandboxSandboxWidgets.s1")} {String(fallback)}</span>
+          <span className="text-[11px] text-muted-foreground/70">{tHC("s1")} {String(fallback)}</span>
         )}
       </div>
     </div>

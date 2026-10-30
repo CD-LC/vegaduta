@@ -61,12 +61,12 @@ export default function BuildErrorPanel({
 
       <div className="space-y-4 p-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("hcBuildBuildErrorPanel.s6")}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s6")}</p>
           <p className="mt-1 text-sm text-foreground">{x.why}</p>
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("hcBuildBuildErrorPanel.s5")}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s5")}</p>
           <ol className="mt-1.5 space-y-1.5">
             {x.fixes.map((f, i) => (
               <li key={f} className="flex items-start gap-2 text-sm text-foreground">
@@ -84,7 +84,7 @@ export default function BuildErrorPanel({
         <div className="flex flex-wrap items-center gap-2">
           {x.upgrade && (
             <Button onClick={() => setUpgradeOpen(true)}>
-              <ArrowUpRight aria-hidden="true" className="size-4" /> {tHC("hcBuildBuildErrorPanel.s4")}
+              <ArrowUpRight aria-hidden="true" className="size-4" /> {tHC("s4")}
             </Button>
           )}
           {x.action && (
@@ -96,18 +96,18 @@ export default function BuildErrorPanel({
           )}
           {x.retryable && (
             <Button variant={x.action ? "outline" : "default"} onClick={onRetry}>
-              <RotateCw aria-hidden="true" className="size-4" /> {tHC("hcBuildBuildErrorPanel.s3")}
+              <RotateCw aria-hidden="true" className="size-4" /> {tHC("s3")}
             </Button>
           )}
           <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft aria-hidden="true" className="size-4" /> {tHC("hcBuildBuildErrorPanel.s2")}
+            <ArrowLeft aria-hidden="true" className="size-4" /> {tHC("s2")}
           </Button>
         </div>
 
         <details className="group rounded-lg border border-border">
           <summary className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">
             <span className="flex items-center gap-1.5">
-              <LifeBuoy aria-hidden="true" className="size-3.5" /> {tHC("hcBuildBuildErrorPanel.s1")}
+              <LifeBuoy aria-hidden="true" className="size-3.5" /> {tHC("s1")}
             </span>
           </summary>
           <div className="space-y-2 border-t border-border p-3">

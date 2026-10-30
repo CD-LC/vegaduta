@@ -81,11 +81,11 @@ export default function UiKitPage() {
         {/* Header */}
         <header className="space-y-3">
           <Badge variant="accent" className="gap-1.5">
-            <Sparkles className="size-3" aria-hidden="true" /> {tHC("hcUikitPage.s17")}
+            <Sparkles className="size-3" aria-hidden="true" /> {tHC("s17")}
           </Badge>
-          <h1 className="text-4xl font-semibold tracking-tight">{tHC("hcUikitPage.s16")}</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">{tHC("s16")}</h1>
           <p className="max-w-2xl text-muted-foreground">
-            {tHC("hcUikitPage.s15")} <BrandName /> {tHC("hcUikitPage.s14")}{" "}
+            {tHC("s15")} <BrandName /> {tHC("s14")}{" "}
             <code className="rounded bg-secondary px-1.5 py-0.5 font-mono text-xs">app/components/ui/*</code>.
           </p>
         </header>
@@ -173,7 +173,7 @@ export default function UiKitPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Button>
-              <Mail className="size-4" aria-hidden="true" /> {tHC("hcUikitPage.s13")}
+              <Mail className="size-4" aria-hidden="true" /> {tHC("s13")}
             </Button>
             <Button disabled>Disabled</Button>
             <Button
@@ -200,7 +200,7 @@ export default function UiKitPage() {
         </Section>
 
         {/* Inputs & labels */}
-        <Section title={tHC("hcUikitPage.s12")}>
+        <Section title={tHC("s12")}>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="uk-email">Email</Label>
@@ -218,7 +218,7 @@ export default function UiKitPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="uk-search">Search</Label>
-              <Input id="uk-search" placeholder={tHC("hcUikitPage.s11")} />
+              <Input id="uk-search" placeholder={tHC("s11")} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="uk-dis">Disabled</Label>
@@ -232,19 +232,19 @@ export default function UiKitPage() {
           <div className="grid gap-6 sm:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>{tHC("hcUikitPage.s10")}</CardTitle>
-                <CardDescription>{tHC("hcUikitPage.s9")}</CardDescription>
+                <CardTitle>{tHC("s10")}</CardTitle>
+                <CardDescription>{tHC("s9")}</CardDescription>
               </CardHeader>
               <CardFooter>
                 <Button variant="outline" size="sm" className="w-full">
-                  {tHC("hcUikitPage.s8")}
+                  {tHC("s8")}
                 </Button>
               </CardFooter>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>{tHC("hcUikitPage.s7")}</CardTitle>
-                <CardDescription>{tHC("hcUikitPage.s6")}</CardDescription>
+                <CardTitle>{tHC("s7")}</CardTitle>
+                <CardDescription>{tHC("s6")}</CardDescription>
               </CardHeader>
             </Card>
             <Card>
@@ -261,16 +261,16 @@ export default function UiKitPage() {
         <Section title="Accordion">
           <Accordion type="single" collapsible className="max-w-2xl rounded-xl border border-border bg-card/60 px-5">
             <AccordionItem value="a">
-              <AccordionTrigger>{tHC("hcUikitPage.s5")}</AccordionTrigger>
+              <AccordionTrigger>{tHC("s5")}</AccordionTrigger>
               <AccordionContent>
-                {tHC("hcUikitPage.s4")} <BrandName />{" "}
-                {tHC("hcUikitPage.s3")}
+                {tHC("s4")} <BrandName />{" "}
+                {tHC("s3")}
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="b">
-              <AccordionTrigger>{tHC("hcUikitPage.s2")}</AccordionTrigger>
+              <AccordionTrigger>{tHC("s2")}</AccordionTrigger>
               <AccordionContent>
-                {tHC("hcUikitPage.s1")}
+                {tHC("s1")}
               </AccordionContent>
             </AccordionItem>
           </Accordion>

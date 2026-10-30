@@ -163,15 +163,15 @@ function WorkflowEdgeImpl({
             ))}
           {!text && paused && (
             <span className="wf-edge-pill" role="status">
-              <span aria-hidden="true">{PAUSE_GLYPH}</span> {tHC("hcComponentsWorkflowWorkflowEdge.s4")}
+              <span aria-hidden="true">{PAUSE_GLYPH}</span> {tHC("s4")}
             </span>
           )}
           {showTools && data?.onInsert && (
             <button
               type="button"
               className="wf-edge-btn"
-              aria-label={tHC("hcComponentsWorkflowWorkflowEdge.s3")}
-              title={tHC("hcComponentsWorkflowWorkflowEdge.s2")}
+              aria-label={tHC("s3")}
+              title={tHC("s2")}
               onClick={(e) => {
                 e.stopPropagation();
                 data.onInsert?.(id, { x: labelX, y: labelY });
@@ -184,8 +184,8 @@ function WorkflowEdgeImpl({
             <button
               type="button"
               className="wf-edge-btn wf-edge-btn-delete"
-              aria-label={tHC("hcComponentsWorkflowWorkflowEdge.s1")}
-              title={tHC("hcComponentsWorkflowWorkflowEdge.s1")}
+              aria-label={tHC("s1")}
+              title={tHC("s1")}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(id);

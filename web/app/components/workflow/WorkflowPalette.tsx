@@ -67,14 +67,14 @@ export default function WorkflowPalette({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={tHC("hcComponentsWorkflowWorkflowPalette.s4")}
-            aria-label={tHC("hcComponentsWorkflowWorkflowPalette.s3")}
+            placeholder={tHC("s4")}
+            aria-label={tHC("s3")}
             className="h-8 text-xs"
           />
         </div>
         {visibleByCategory.length === 0 && (
           <div className="px-1 py-4 text-xs text-muted-foreground" role="status">
-            {tHC("hcComponentsWorkflowWorkflowPalette.s2")}{query}&rdquo;.
+            {tHC("s2")}{query}&rdquo;.
           </div>
         )}
         {visibleByCategory.map(({ category, defs }) => {
@@ -132,7 +132,7 @@ export default function WorkflowPalette({
         })}
         <div className="mt-4 border-t border-border px-1 pt-3">
           <SetupGuideCard
-            title={tHC("hcComponentsWorkflowWorkflowPalette.s1")}
+            title={tHC("s1")}
             steps={["providers", "tools", "mcp", "secrets", "knowledge", "channels"]}
             newTab
           />

@@ -76,7 +76,7 @@ export default function SandboxFrame({ html, sandbox = "allow-scripts", onLoad, 
 
   return (
     <iframe
-      title={tHC("hcBuildSandboxFrame.s1")}
+      title={tHC("s1")}
       {...rest}
       key={frameKey}
       ref={(el) => {

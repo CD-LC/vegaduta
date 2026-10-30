@@ -37,14 +37,14 @@ export function HostedRowBadges({
         </Badge>
       )}
       {row.region && (
-        <Badge variant="secondary" title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s11")}>
+        <Badge variant="secondary" title={tHC("s11")}>
           {row.region}
         </Badge>
       )}
       {row.zeroCost && (
         <Badge
           variant="secondary"
-          title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s10")}
+          title={tHC("s10")}
         >
           Free
         </Badge>
@@ -65,9 +65,9 @@ export function HostedRowBadges({
       {row.smallModelActive && (
         <Badge
           variant="secondary"
-          title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s9")}
+          title={tHC("s9")}
         >
-          {tHC("hcPlatformadminLlmprovidersHostedRowParts.s8")}{row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
+          {tHC("s8")}{row.parameterBillions ? ` · ${row.parameterBillions}B` : ""}
         </Badge>
       )}
     </>
@@ -119,12 +119,12 @@ export function ZeroCostToggle({ authType, on, onToggle }: { authType?: string; 
   if (authType === "VERTEX_ADC" || authType === "VERTEX_SERVICE_ACCOUNT") return null;
   return (
     <div className="flex items-center gap-2">
-      <SwitchToggle on={on} label={tHC("hcPlatformadminLlmprovidersHostedRowParts.s7")} onClick={onToggle} />
+      <SwitchToggle on={on} label={tHC("s7")} onClick={onToggle} />
       <span
         className="text-xs text-muted-foreground"
-        title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s6")}
+        title={tHC("s6")}
       >
-        {tHC("hcPlatformadminLlmprovidersHostedRowParts.s5")}
+        {tHC("s5")}
       </span>
     </div>
   );
@@ -182,15 +182,15 @@ export function LocalModelControls({
       />
       <TriStateControl
         id="hosted-tool-router"
-        label={tHC("hcPlatformadminLlmprovidersHostedRowParts.s4")}
-        title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s3")}
+        label={tHC("s4")}
+        title={tHC("s3")}
         value={draft.toolRouterEnabled ?? ""}
         onChange={(v) => setDraft((d) => ({ ...d, toolRouterEnabled: v }))}
       />
       <TriStateControl
         id="hosted-small-model"
-        label={tHC("hcPlatformadminLlmprovidersHostedRowParts.s2")}
-        title={tHC("hcPlatformadminLlmprovidersHostedRowParts.s1")}
+        label={tHC("s2")}
+        title={tHC("s1")}
         value={draft.smallModel ?? ""}
         onChange={(v) => setDraft((d) => ({ ...d, smallModel: v }))}
       />

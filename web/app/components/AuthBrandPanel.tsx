@@ -46,7 +46,7 @@ export default function AuthBrandPanel({
     const tHC = useTranslations("hcComponentsAuthBrandPanel");
   return (
     <header className="vd-auth__strip">
-      <Link href={logoHref} className="vd-auth__brand" aria-label={tHC("hcComponentsAuthBrandPanel.s1")}>
+      <Link href={logoHref} className="vd-auth__brand" aria-label={tHC("s1")}>
         <Logo size={32} />
       </Link>
       {eyebrow && <p className="vd-auth__eyebrow">{eyebrow}</p>}

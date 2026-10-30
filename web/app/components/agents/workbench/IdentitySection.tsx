@@ -98,7 +98,7 @@ export default function IdentitySection() {
           </div>
           {isDraft && (
             <p id="agent-name-help" className="mt-1 text-xs text-muted-foreground">
-              {tHC("hcComponentsAgentsWorkbenchIdentitySection.s1")}
+              {tHC("s1")}
             </p>
           )}
           <div className={cn("mt-1.5", SUB_TEXT)}>

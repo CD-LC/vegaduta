@@ -298,7 +298,7 @@ function OnDeviceBadge() {
   return (
     <span
       className="shrink-0 rounded-full border border-border px-1.5 py-px text-[11px] uppercase tracking-wide text-muted-foreground"
-      title={tHC("hcComponentsAgentsAgentActivityTrace.s3")}
+      title={tHC("s3")}
     >
       on-device
     </span>
@@ -472,7 +472,7 @@ export default function AgentActivityTrace({
           target="_blank"
           rel="noopener noreferrer"
           data-testid="memory-used-chip"
-          title={tHC("hcComponentsAgentsAgentActivityTrace.s2")}
+          title={tHC("s2")}
           aria-label={`${memorySentence} - opens Memory in a new tab`}
           className="ms-1 inline-flex max-w-full items-center gap-1 rounded-full border border-border px-2 py-0.5 align-middle text-[11px] text-muted-foreground hover:text-foreground"
         >
@@ -538,7 +538,7 @@ export default function AgentActivityTrace({
                   {closing?.ms != null && <span className="shrink-0 text-muted-foreground">{closing.ms} ms</span>}
                   {/* Still running - the tool_call arrived but nothing has
                       closed it yet. This is the live half of the trace. */}
-                  {!closing && <span className="shrink-0 text-muted-foreground">{tHC("hcComponentsAgentsAgentActivityTrace.s1")}</span>}
+                  {!closing && <span className="shrink-0 text-muted-foreground">{tHC("s1")}</span>}
                   {call.origin === "on-device" && <OnDeviceBadge />}
                 </div>
                 {/* Server-redacted and length-capped before it ever left the

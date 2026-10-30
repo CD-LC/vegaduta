@@ -243,9 +243,9 @@ function ServerRow({
               <Badge
                 variant="secondary"
                 className="h-8 gap-1 px-2.5"
-                title={tHC("hcToolsServersPage.s16")}
+                title={tHC("s16")}
               >
-                {tHC("hcToolsServersPage.s15")}
+                {tHC("s15")}
               </Badge>
             )}
             {/* Trusting a server that's blocked on unreadable credentials or
@@ -285,7 +285,7 @@ function ServerRow({
         {result && (
           <Alert variant={result.unsupported ? "default" : result.ok ? "success" : "destructive"}>
             {result.unsupported ? (
-              <AlertDescription>{tHC("hcToolsServersPage.s14")}</AlertDescription>
+              <AlertDescription>{tHC("s14")}</AlertDescription>
             ) : (
               <>
                 {result.ok ? <CheckCircle2 aria-hidden="true" /> : <AlertTriangle aria-hidden="true" />}
@@ -309,8 +309,8 @@ function ServerRow({
         {server.credentialsCorrupted && (
           <Alert variant="warning">
             <KeyRound aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("hcToolsServersPage.s13")}</AlertTitle>
-            <AlertDescription>{tHC("hcToolsServersPage.s12")}</AlertDescription>
+            <AlertTitle>{server.name}{tHC("s13")}</AlertTitle>
+            <AlertDescription>{tHC("s12")}</AlertDescription>
           </Alert>
         )}
 
@@ -320,16 +320,16 @@ function ServerRow({
         {server.reviewStatus === "PENDING" && (
           <Alert variant="info">
             <Clock aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("hcToolsServersPage.s11")}</AlertTitle>
+            <AlertTitle>{server.name}{tHC("s11")}</AlertTitle>
             <AlertDescription>
-              {tHC("hcToolsServersPage.s10")}
+              {tHC("s10")}
             </AlertDescription>
           </Alert>
         )}
         {server.reviewStatus === "REJECTED" && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("hcToolsServersPage.s9")}</AlertTitle>
+            <AlertTitle>{server.name}{tHC("s9")}</AlertTitle>
             <AlertDescription>
               {server.reviewRejectionReason ||
                 "No reason was given. Edit the server's command/args and re-register to request another review."}
@@ -345,7 +345,7 @@ function ServerRow({
         {persistedError && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{server.name}{tHC("hcToolsServersPage.s8")}</AlertTitle>
+            <AlertTitle>{server.name}{tHC("s8")}</AlertTitle>
             <AlertDescription>
               {server.connectionHint && <p className="font-medium">{server.connectionHint}</p>}
               {server.connectionError && <p>{server.connectionError}</p>}
@@ -362,7 +362,7 @@ function ServerRow({
         {activeFix?.command && (
           <Alert variant="warning">
             <Wrench aria-hidden="true" />
-            <AlertTitle>{tHC("hcToolsServersPage.s7")} {server.name}</AlertTitle>
+            <AlertTitle>{tHC("s7")} {server.name}</AlertTitle>
             <AlertDescription>
               {activeFix.reason && <p>{activeFix.reason}</p>}
               <code className="block w-full break-words rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/10">
@@ -373,7 +373,7 @@ function ServerRow({
                 {fixBusy ? "Applying fix…" : "Apply suggested fix"}
               </Button>
               <p className="text-xs text-muted-foreground">
-                {tHC("hcToolsServersPage.s6")}
+                {tHC("s6")}
               </p>
             </AlertDescription>
           </Alert>
@@ -535,23 +535,23 @@ export default function McpServersPage() {
   return (
     <AppShell eyebrow="Tools & MCP">
       <PageHeader
-        title={tHC("hcToolsServersPage.s5")}
+        title={tHC("s5")}
         subtitle="Every MCP server enabled for this workspace in one place — test a connection, trust a server's actions, or disable it, without opening the full catalog."
         actions={
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/help/docs#tools" target="_blank" rel="noopener noreferrer">
-                <HelpCircle size={13} aria-hidden="true" /> {tHC("hcToolsServersPage.s4")}
+                <HelpCircle size={13} aria-hidden="true" /> {tHC("s4")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools/credentials">
-                <Lock size={13} aria-hidden="true" /> {tHC("hcToolsServersPage.s3")}
+                <Lock size={13} aria-hidden="true" /> {tHC("s3")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools">
-                <ArrowLeft size={13} aria-hidden="true" /> {tHC("hcToolsServersPage.s2")}
+                <ArrowLeft size={13} aria-hidden="true" /> {tHC("s2")}
               </Link>
             </Button>
             <Button size="sm" disabled={bulkBusy || attentionServers.length === 0} onClick={handleTrustAll}>
@@ -570,7 +570,7 @@ export default function McpServersPage() {
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>{tHC("hcToolsServersPage.s1")}</AlertTitle>
+          <AlertTitle>{tHC("s1")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

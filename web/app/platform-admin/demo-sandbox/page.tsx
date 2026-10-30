@@ -131,11 +131,11 @@ export default function DemoSandboxPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminDemosandboxPage.s43")}
+      title={tHC("s43")}
       actions={
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link href="/platform-admin/demo-sandboxes">{tHC("hcPlatformadminDemosandboxPage.s42")}</Link>
+            <Link href="/platform-admin/demo-sandboxes">{tHC("s42")}</Link>
           </Button>
           <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title="Refresh">
             <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
@@ -144,8 +144,8 @@ export default function DemoSandboxPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminDemosandboxPage.s41")}{" "}
-        <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("hcPlatformadminDemosandboxPage.s40")}
+        {tHC("s41")}{" "}
+        <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s40")}
       </PageHint>
 
       {metricsError && (
@@ -158,8 +158,8 @@ export default function DemoSandboxPage() {
         <Alert className="mb-5">
           <Info />
           <AlertDescription>
-            {tHC("hcPlatformadminDemosandboxPage.s39")}{" "}
-            <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("hcPlatformadminDemosandboxPage.s38")}
+            {tHC("s39")}{" "}
+            <code className="font-mono text-xs">control_plane.demo_session</code> {tHC("s38")}
           </AlertDescription>
         </Alert>
       )}
@@ -178,18 +178,18 @@ export default function DemoSandboxPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-muted-foreground">
                     <TrendingUp size={14} className="text-primary" />
-                    {tHC("hcPlatformadminDemosandboxPage.s37")}
+                    {tHC("s37")}
                   </div>
                   <div className="mt-2 font-mono text-5xl font-semibold tabular-nums text-primary">
                     {fmtRate(hero?.conversionRate)}
                   </div>
                   <p className="mt-2 max-w-xl text-xs leading-relaxed text-muted-foreground">
-                    {fmtInt(hero?.converted)} of the {fmtInt(hero?.created)} {tHC("hcPlatformadminDemosandboxPage.s36")}
+                    {fmtInt(hero?.converted)} of the {fmtInt(hero?.created)} {tHC("s36")}
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminDemosandboxPage.s35")}</div>
+                    <div className="text-xs text-muted-foreground">{tHC("s35")}</div>
                     <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
                       {fmtRate(metrics?.last7Days?.conversionRate)}
                     </div>
@@ -198,7 +198,7 @@ export default function DemoSandboxPage() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminDemosandboxPage.s34")}</div>
+                    <div className="text-xs text-muted-foreground">{tHC("s34")}</div>
                     <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-foreground">
                       {fmtRate(metrics?.allTime?.conversionRate)}
                     </div>
@@ -212,19 +212,19 @@ export default function DemoSandboxPage() {
           </motion.div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile label={tHC("hcPlatformadminDemosandboxPage.s33")} value={fmtInt(metrics?.today?.created)} hint="UTC day" />
-            <StatTile label={tHC("hcPlatformadminDemosandboxPage.s32")} value={fmtInt(metrics?.last7Days?.created)} />
-            <StatTile label={tHC("hcPlatformadminDemosandboxPage.s31")} value={fmtInt(metrics?.last30Days?.created)} />
-            <StatTile label={tHC("hcPlatformadminDemosandboxPage.s30")} value={fmtInt(metrics?.allTime?.created)} />
+            <StatTile label={tHC("s33")} value={fmtInt(metrics?.today?.created)} hint="UTC day" />
+            <StatTile label={tHC("s32")} value={fmtInt(metrics?.last7Days?.created)} />
+            <StatTile label={tHC("s31")} value={fmtInt(metrics?.last30Days?.created)} />
+            <StatTile label={tHC("s30")} value={fmtInt(metrics?.allTime?.created)} />
             <StatTile
-              label={tHC("hcPlatformadminDemosandboxPage.s29")}
+              label={tHC("s29")}
               value={fmtInt(metrics?.liveCount)}
               hint="Not retired and not past expiry"
               emphasis
             />
             <StatTile label="Expired" value={fmtInt(metrics?.expiredCount)} hint="Retired or past expiry" />
             <StatTile
-              label={tHC("hcPlatformadminDemosandboxPage.s28")}
+              label={tHC("s28")}
               value={fmtInt(metrics?.allTime?.converted)}
               hint="converted_tenant_id is set"
             />
@@ -236,7 +236,7 @@ export default function DemoSandboxPage() {
           </div>
 
           <SectionCard
-            title={tHC("hcPlatformadminDemosandboxPage.s27")}
+            title={tHC("s27")}
             subtitle="UTC days. Created is bucketed by creation date; converted by the date the visitor actually registered."
             icon={Activity}
             actions={
@@ -270,9 +270,9 @@ export default function DemoSandboxPage() {
             delay={0.06}
           >
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <StatTile label={tHC("hcPlatformadminDemosandboxPage.s26")} value={fmtInt(engagement?.totalMessages)} />
+              <StatTile label={tHC("s26")} value={fmtInt(engagement?.totalMessages)} />
               <StatTile
-                label={tHC("hcPlatformadminDemosandboxPage.s25")}
+                label={tHC("s25")}
                 value={fmtAvg(engagement?.averageMessagesPerSandbox)}
                 hint="Across every sandbox, including the ones that never sent a turn"
               />
@@ -282,7 +282,7 @@ export default function DemoSandboxPage() {
                 hint="Created but never sent a message"
               />
               <StatTile
-                label={tHC("hcPlatformadminDemosandboxPage.s24")}
+                label={tHC("s24")}
                 value={
                   engagement?.imagesGenerated === null || engagement?.imagesGenerated === undefined
                     ? "not available"
@@ -299,24 +299,24 @@ export default function DemoSandboxPage() {
                 <span className="text-muted-foreground">{engagement.channelMetricsUnavailableReason}</span>
               ) : (
                 <span className="text-foreground">
-                  <span className="font-mono tabular-nums">{fmtInt(engagement?.channelLinks)}</span> {tHC("hcPlatformadminDemosandboxPage.s23")}
-                  {engagement?.channelLinks === 1 ? "" : "s"} {tHC("hcPlatformadminDemosandboxPage.s22")}{" "}
+                  <span className="font-mono tabular-nums">{fmtInt(engagement?.channelLinks)}</span> {tHC("s23")}
+                  {engagement?.channelLinks === 1 ? "" : "s"} {tHC("s22")}{" "}
                   <span className="font-mono tabular-nums">{fmtInt(engagement?.sandboxesWithChannelLink)}</span>{" "}
                   sandbox(es); <span className="font-mono tabular-nums">{fmtInt(engagement?.linkedChannelLinks)}</span>{" "}
-                  {tHC("hcPlatformadminDemosandboxPage.s21")}
+                  {tHC("s21")}
                 </span>
               )}
             </div>
           </SectionCard>
 
           <SectionCard
-            title={tHC("hcPlatformadminDemosandboxPage.s20")}
+            title={tHC("s20")}
             subtitle="The 20 most recent, newest first. Tokens and creator IPs are deliberately not exposed here."
             icon={Table2}
             delay={0.09}
           >
             {(metrics?.recent ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminDemosandboxPage.s19")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s19")}</p>
             ) : (
               <div className="-mx-2 overflow-x-auto">
                 <table className="w-full min-w-[52rem] border-collapse text-sm">
@@ -390,7 +390,7 @@ export default function DemoSandboxPage() {
           )}
 
           <Toggle
-            label={tHC("hcPlatformadminDemosandboxPage.s18")}
+            label={tHC("s18")}
             description="Master kill switch. Off refuses new sandboxes; existing ones keep working until they expire."
             settingKey={keys.enabled}
             value={!!draft.enabled}
@@ -399,7 +399,7 @@ export default function DemoSandboxPage() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s17")}
+              label={tHC("s17")}
               description="How many unexpired sandboxes one IP may hold at once. 1 = one demo per visitor."
               settingKey={keys.maxLiveSessionsPerIp}
               fallback={defaults?.maxLiveSessionsPerIp}
@@ -407,7 +407,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, maxLiveSessionsPerIp: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s16")}
+              label={tHC("s16")}
               description="Paired with the cooldown window below: 1 per 60 minutes means one attempt, then wait an hour."
               settingKey={keys.maxSessionsPerCooldown}
               fallback={defaults?.maxSessionsPerCooldown}
@@ -415,7 +415,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, maxSessionsPerCooldown: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s15")}
+              label={tHC("s15")}
               description="How long an IP waits before it may create another sandbox. 1–10080."
               settingKey={keys.cooldownMinutes}
               fallback={defaults?.cooldownMinutes}
@@ -423,7 +423,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, cooldownMinutes: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s14")}
+              label={tHC("s14")}
               description="TTL an ACTIVE sandbox gets once real activity happens (a chat turn, an image) - each activity slides this deadline forward again. 1–30."
               settingKey={keys.ttlDays}
               fallback={defaults?.ttlDays}
@@ -431,7 +431,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, ttlDays: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s13")}
+              label={tHC("s13")}
               description="A sandbox that's NEVER been touched retires after this many hours instead of the full lifetime above. 'Retired' suspends it (visitor's data stays, they just can't chat) - deleting it is a manual operator step, not automatic. 1–168."
               settingKey={keys.inactivityTimeoutHours}
               fallback={defaults?.inactivityTimeoutHours}
@@ -439,7 +439,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, inactivityTimeoutHours: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s12")}
+              label={tHC("s12")}
               description="Chat turns a single sandbox may spend. 1–500."
               settingKey={keys.messageLimit}
               fallback={defaults?.messageLimit}
@@ -447,7 +447,7 @@ export default function DemoSandboxPage() {
               onChange={(v) => setDraft((d: any) => ({ ...d, messageLimit: v }))}
             />
             <NumberField
-              label={tHC("hcPlatformadminDemosandboxPage.s11")}
+              label={tHC("s11")}
               description="When the one-time 'your sandbox is ending' email goes out. Must be less than the lifetime."
               settingKey={keys.reminderHoursBeforeExpiry}
               fallback={defaults?.reminderHoursBeforeExpiry}
@@ -463,15 +463,15 @@ export default function DemoSandboxPage() {
           {keys.exemptIps && (
             <div className="rounded-lg border border-border p-3">
               <Label htmlFor="demo-exempt-ips" className="text-sm font-medium text-foreground">
-                {tHC("hcPlatformadminDemosandboxPage.s10")}
+                {tHC("s10")}
               </Label>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {tHC("hcPlatformadminDemosandboxPage.s9")}
+                {tHC("s9")}
               </p>
               <Input
                 id="demo-exempt-ips"
                 className="mt-2 font-mono text-xs"
-                placeholder={tHC("hcPlatformadminDemosandboxPage.s8")}
+                placeholder={tHC("s8")}
                 value={draft.exemptIps ?? ""}
                 onChange={(e) => setDraft((d: any) => ({ ...d, exemptIps: e.target.value }))}
               />
@@ -480,14 +480,14 @@ export default function DemoSandboxPage() {
           )}
 
           <Toggle
-            label={tHC("hcPlatformadminDemosandboxPage.s7")}
+            label={tHC("s7")}
             description="Whether a sandbox may generate images at all."
             settingKey={keys.imageEnabled}
             value={!!draft.imageEnabled}
             onChange={(next) => setDraft((d: any) => ({ ...d, imageEnabled: next }))}
           />
           <NumberField
-            label={tHC("hcPlatformadminDemosandboxPage.s6")}
+            label={tHC("s6")}
             description="Total images one sandbox may generate. 0 stops generation without flipping the toggle above."
             settingKey={keys.imagePerSessionLimit}
             fallback={defaults?.imagePerSessionLimit}
@@ -495,7 +495,7 @@ export default function DemoSandboxPage() {
             onChange={(v) => setDraft((d: any) => ({ ...d, imagePerSessionLimit: v }))}
           />
           <Toggle
-            label={tHC("hcPlatformadminDemosandboxPage.s5")}
+            label={tHC("s5")}
             description="Kill switch for demo Telegram channel linking. See the note above — this is stored but not yet enforced."
             settingKey={keys.telegramEnabled}
             value={!!draft.telegramEnabled}
@@ -509,7 +509,7 @@ export default function DemoSandboxPage() {
           {keys.magicEnabled && (
             <>
               <Toggle
-                label={tHC("hcPlatformadminDemosandboxPage.s4")}
+                label={tHC("s4")}
                 description="Kill switch for the landing workflow-builder AND every published public run link (/w/…)."
                 settingKey={keys.magicEnabled}
                 value={!!draft.magicEnabled}
@@ -517,7 +517,7 @@ export default function DemoSandboxPage() {
               />
               <div className="grid gap-3 sm:grid-cols-3">
                 <NumberField
-                  label={tHC("hcPlatformadminDemosandboxPage.s3")}
+                  label={tHC("s3")}
                   description="Distinct visitors allowed to run one published workflow link, for its whole life. 1–100."
                   settingKey={keys.magicRunCap}
                   fallback={defaults?.magicRunCap}
@@ -525,7 +525,7 @@ export default function DemoSandboxPage() {
                   onChange={(v) => setDraft((d: any) => ({ ...d, magicRunCap: v }))}
                 />
                 <NumberField
-                  label={tHC("hcPlatformadminDemosandboxPage.s2")}
+                  label={tHC("s2")}
                   description="Runs one IP gets on one link. 1 = once per person. 1–10."
                   settingKey={keys.magicPerIpRuns}
                   fallback={defaults?.magicPerIpRuns}
@@ -533,7 +533,7 @@ export default function DemoSandboxPage() {
                   onChange={(v) => setDraft((d: any) => ({ ...d, magicPerIpRuns: v }))}
                 />
                 <NumberField
-                  label={tHC("hcPlatformadminDemosandboxPage.s1")}
+                  label={tHC("s1")}
                   description="Magic workflows one sandbox may create. 1–50."
                   settingKey={keys.magicPerSessionLimit}
                   fallback={defaults?.magicPerSessionLimit}

@@ -69,7 +69,7 @@ const WhatsAppArt: Art = ({ className }) => {
     <rect x="114" y="111" width="80" height="4" rx="2" fill={INK3} />
     <rect x="114" y="120" width="52" height="4" rx="2" fill={INK3} />
     <rect x="114" y="131" width="44" height="9" rx="4.5" fill={ACC} />
-    <text x="136" y="138" fontSize="6.5" fill="#fff" textAnchor="middle" fontFamily="ui-sans-serif, system-ui">{tHC("hcComponentsDemolandingOutcomesBand.s1")}</text>
+    <text x="136" y="138" fontSize="6.5" fill="#fff" textAnchor="middle" fontFamily="ui-sans-serif, system-ui">{tHC("s1")}</text>
     {/* typing dots */}
     <circle cx="116" cy="164" r="3" fill={ACC} />
     <circle cx="126" cy="164" r="3" fill={ACC} opacity="0.6" />

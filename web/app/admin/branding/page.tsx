@@ -193,14 +193,14 @@ function AdminBrandingInner() {
     <AppShell eyebrow="Branding">
       <PageHeader
         eyebrow="White-label"
-        title={tHC("hcAdminBrandingPage.s19")}
+        title={tHC("s19")}
         subtitle="Replace the VegaDūta name and mark with your own on the pages your customers see — shared agents, shared workflows and the embeddable chat widget."
       />
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          {tHC("hcAdminBrandingPage.s18")}
+          {tHC("s18")}
         </div>
       )}
 
@@ -219,14 +219,14 @@ function AdminBrandingInner() {
         // why any values already stored are still shown below.
         <Alert className="mb-6">
           <Sparkles className="size-4" aria-hidden="true" />
-          <AlertTitle>{tHC("hcAdminBrandingPage.s17")}</AlertTitle>
+          <AlertTitle>{tHC("s17")}</AlertTitle>
           <AlertDescription className="flex flex-col items-start gap-3">
             <span>
-              {tHC("hcAdminBrandingPage.s16")}{settings?.plan ? ` (${settings.plan})` : ""} {tHC("hcAdminBrandingPage.s15")}
+              {tHC("s16")}{settings?.plan ? ` (${settings.plan})` : ""} {tHC("s15")}
             </span>
             {isBillingEnabled() && (
               <Button asChild size="sm">
-                <Link href="/admin/billing">{tHC("hcAdminBrandingPage.s14")}</Link>
+                <Link href="/admin/billing">{tHC("s14")}</Link>
               </Button>
             )}
           </AlertDescription>
@@ -238,7 +238,7 @@ function AdminBrandingInner() {
           {error && (
             <Alert variant="destructive">
               <TriangleAlert className="size-4" aria-hidden="true" />
-              <AlertTitle>{tHC("hcAdminBrandingPage.s13")}</AlertTitle>
+              <AlertTitle>{tHC("s13")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -253,7 +253,7 @@ function AdminBrandingInner() {
             <CardHeader>
               <CardTitle>Logo</CardTitle>
               <CardDescription>
-                {tHC("hcAdminBrandingPage.s12")}
+                {tHC("s12")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
@@ -276,9 +276,9 @@ function AdminBrandingInner() {
                     // three existing render sites for this exact URL (both
                     // share pages and the widget) all use a plain <img> too.
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt={tHC("hcAdminBrandingPage.s11")} className="max-h-16 max-w-36 object-contain" />
+                    <img src={logoUrl} alt={tHC("s11")} className="max-h-16 max-w-36 object-contain" />
                   ) : (
-                    <span className="px-2 text-center text-xs text-muted-foreground">{tHC("hcAdminBrandingPage.s10")}</span>
+                    <span className="px-2 text-center text-xs text-muted-foreground">{tHC("s10")}</span>
                   )}
                 </div>
 
@@ -286,7 +286,7 @@ function AdminBrandingInner() {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    aria-label={tHC("hcAdminBrandingPage.s9")}
+                    aria-label={tHC("s9")}
                     accept={ACCEPTED_TYPES.join(",")}
                     className="sr-only"
                     onChange={(e) => void onPickFile(e.target.files?.[0])}
@@ -326,7 +326,7 @@ function AdminBrandingInner() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {tHC("hcAdminBrandingPage.s8")}
+                    {tHC("s8")}
                   </p>
                 </div>
               </div>
@@ -335,13 +335,13 @@ function AdminBrandingInner() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{tHC("hcAdminBrandingPage.s7")}</CardTitle>
+              <CardTitle>{tHC("s7")}</CardTitle>
               <CardDescription>
-                {tHC("hcAdminBrandingPage.s6")}
+                {tHC("s6")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <Label htmlFor="brand-display-name">{tHC("hcAdminBrandingPage.s5")}</Label>
+              <Label htmlFor="brand-display-name">{tHC("s5")}</Label>
               <Input
                 id="brand-display-name"
                 value={displayName}
@@ -369,13 +369,13 @@ function AdminBrandingInner() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{tHC("hcAdminBrandingPage.s4")}</CardTitle>
+              <CardTitle>{tHC("s4")}</CardTitle>
               <CardDescription>
-                {tHC("hcAdminBrandingPage.s3")}
+                {tHC("s3")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              <Label htmlFor="brand-logo-url">{tHC("hcAdminBrandingPage.s2")}</Label>
+              <Label htmlFor="brand-logo-url">{tHC("s2")}</Label>
               <Input
                 id="brand-logo-url"
                 value={logoUrlDraft}
@@ -395,7 +395,7 @@ function AdminBrandingInner() {
                   upgradeReason="White-labelling is included on the Unlimited plan."
                 >
                   {saving && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                  {tHC("hcAdminBrandingPage.s1")}
+                  {tHC("s1")}
                 </Button>
               </div>
             </CardContent>

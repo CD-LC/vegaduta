@@ -318,7 +318,7 @@ function ExecTab({ repoId, onError }) {
   return (
     <div>
       <div className={INFO_CLS}>
-        <b className="font-medium text-foreground">{tHC("hcCodeintelPage.s18")}</b> {tHC("hcCodeintelPage.s17")}
+        <b className="font-medium text-foreground">{tHC("s18")}</b> {tHC("s17")}
         <code className="mx-1 rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[11px]">
           CODE_INTEL_ALLOW_EXEC=true
         </code>
@@ -338,7 +338,7 @@ function ExecTab({ repoId, onError }) {
           <div className="mb-4 flex gap-2">
             <Input
               className="flex-1 font-mono"
-              placeholder={tHC("hcCodeintelPage.s7")}
+              placeholder={tHC("s7")}
               value={command}
               onChange={(e) => setCommand(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && command && run()}
@@ -377,17 +377,17 @@ function ExecTab({ repoId, onError }) {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">{tHC("hcCodeintelPage.s16")}</CardTitle>
+                <CardTitle className="text-sm">{tHC("s16")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Field label={tHC("hcCodeintelPage.s15")}>
+                <Field label={tHC("s15")}>
                   <Input
                     placeholder="src/main/java/.../Foo.java"
                     value={fixPath}
                     onChange={(e) => setFixPath(e.target.value)}
                   />
                 </Field>
-                <Field label={tHC("hcCodeintelPage.s14")}>
+                <Field label={tHC("s14")}>
                   <Textarea
                     className="min-h-40 font-mono text-xs"
                     value={fixContent}
@@ -403,7 +403,7 @@ function ExecTab({ repoId, onError }) {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">{tHC("hcCodeintelPage.s13")}</CardTitle>
+                <CardTitle className="text-sm">{tHC("s13")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Button variant="secondary" size="sm" onClick={showDiff}>
@@ -451,31 +451,31 @@ function AgentResolvePanel({ repoId, onError }) {
     <Card className="mt-5">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Sparkles size={16} className="text-primary" /> {tHC("hcCodeintelPage.s12")}
+          <Sparkles size={16} className="text-primary" /> {tHC("s12")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          {tHC("hcCodeintelPage.s11")}
+          {tHC("s11")}
         </p>
-        <Field label={tHC("hcCodeintelPage.s10")}>
+        <Field label={tHC("s10")}>
           <Textarea
             className="min-h-[70px]"
-            placeholder={tHC("hcCodeintelPage.s9")}
+            placeholder={tHC("s9")}
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label={tHC("hcCodeintelPage.s8")}>
+          <Field label={tHC("s8")}>
             <Input
               className="font-mono"
-              placeholder={tHC("hcCodeintelPage.s7")}
+              placeholder={tHC("s7")}
               value={testCommand}
               onChange={(e) => setTestCommand(e.target.value)}
             />
           </Field>
-          <Field label={tHC("hcCodeintelPage.s6")}>
+          <Field label={tHC("s6")}>
             <Input
               type="number"
               min={1}
@@ -537,7 +537,7 @@ function AgentResolvePanel({ repoId, onError }) {
             />
             {result.diff && (
               <>
-                <div className="mt-2.5 text-xs font-semibold text-foreground">{tHC("hcCodeintelPage.s5")}</div>
+                <div className="mt-2.5 text-xs font-semibold text-foreground">{tHC("s5")}</div>
                 <pre className={`${CODE_CLS} mt-1 max-h-80`}>{result.diff}</pre>
               </>
             )}
@@ -575,12 +575,12 @@ function KnowledgeTab({ repoId, onError }) {
   return (
     <div>
       <div className={INFO_CLS}>
-        <b className="font-medium text-foreground">{tHC("hcCodeintelPage.s4")}</b> {tHC("hcCodeintelPage.s3")}
+        <b className="font-medium text-foreground">{tHC("s4")}</b> {tHC("s3")}
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Input
           className="min-w-0 flex-1"
-          placeholder={tHC("hcCodeintelPage.s2")}
+          placeholder={tHC("s2")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && run()}
@@ -592,7 +592,7 @@ function KnowledgeTab({ repoId, onError }) {
       </div>
       {result && !result.grounded && (
         <p className="text-sm text-muted-foreground">
-          {tHC("hcCodeintelPage.s1")}
+          {tHC("s1")}
         </p>
       )}
       {passagesPagination.pageItems.map((p, i) => (

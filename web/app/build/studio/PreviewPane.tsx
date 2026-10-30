@@ -28,20 +28,20 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
           </Button>
         ))}
         <span className="mx-1 h-4 w-px bg-border" />
-        <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label={tHC("hcBuildStudioPreviewPane.s7")} title={tHC("hcBuildStudioPreviewPane.s7")}>
+        <Button variant="ghost" size="sm" onClick={() => setNonce((n) => n + 1)} aria-label={tHC("s7")} title={tHC("s7")}>
           <RefreshCw aria-hidden="true" size={14} />
         </Button>
-        <Button variant="ghost" size="sm" onClick={undo} disabled={undoTarget() < 0 || !!busy || !editable} aria-label="Undo" title={tHC("hcBuildStudioPreviewPane.s6")}>
+        <Button variant="ghost" size="sm" onClick={undo} disabled={undoTarget() < 0 || !!busy || !editable} aria-label="Undo" title={tHC("s6")}>
           <RotateCcw aria-hidden="true" size={14} />
         </Button>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-1.5" role="group" aria-label={tHC("hcBuildStudioPreviewPane.s5")}>
+      <div className="flex flex-wrap items-center justify-center gap-1.5" role="group" aria-label={tHC("s5")}>
         <Button
           variant={env.dark ? "secondary" : "ghost"}
           size="sm"
           aria-pressed={env.dark}
           onClick={() => setEnv((e) => ({ ...e, dark: !e.dark }))}
-          title={tHC("hcBuildStudioPreviewPane.s4")}
+          title={tHC("s4")}
           className="gap-1 text-xs"
         >
           <Moon aria-hidden="true" size={13} /> Dark
@@ -51,7 +51,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
           size="sm"
           aria-pressed={env.offline}
           onClick={() => setEnv((e) => ({ ...e, offline: !e.offline }))}
-          title={tHC("hcBuildStudioPreviewPane.s3")}
+          title={tHC("s3")}
           className="gap-1 text-xs"
         >
           <WifiOff aria-hidden="true" size={13} /> Offline
@@ -59,7 +59,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
         <Select
           value={env.delayMs}
           onChange={(e) => setEnv((v) => ({ ...v, delayMs: Number(e.target.value) }))}
-          aria-label={tHC("hcBuildStudioPreviewPane.s2")}
+          aria-label={tHC("s2")}
           className="rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground"
           options={[
             { value: 0, label: "Network: normal" },
@@ -98,7 +98,7 @@ export default function PreviewPane({ s }: { s: ProjectSession }) {
         </div>
         {inspect && (
           <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-orange-500 px-3 py-1 text-xs font-medium text-white shadow">
-            {tHC("hcBuildStudioPreviewPane.s1")}
+            {tHC("s1")}
           </div>
         )}
       </div>

@@ -59,8 +59,8 @@ export function InboxThread({
           size="icon"
           className="bg-transparent lg:hidden"
           onClick={onBack}
-          title={tHC("hcAdminInboxInboxThread.s13")}
-          aria-label={tHC("hcAdminInboxInboxThread.s13")}
+          title={tHC("s13")}
+          aria-label={tHC("s13")}
         >
           <ArrowLeft size={15} aria-hidden="true" />
         </Button>
@@ -74,7 +74,7 @@ export function InboxThread({
           // Slack sessions are keyed by CHANNEL id, not by person
           // (SlackWebhookController's documented design) - a takeover
           // holds the whole channel/DM, worth saying out loud.
-          <span className="text-[11px] text-muted-foreground">{tHC("hcAdminInboxInboxThread.s12")}</span>
+          <span className="text-[11px] text-muted-foreground">{tHC("s12")}</span>
         )}
         <div className="ms-auto flex items-center gap-2">
           <Button
@@ -83,7 +83,7 @@ export function InboxThread({
             size="sm"
             className="bg-transparent xl:hidden"
             onClick={onToggleDetails}
-            title={tHC("hcAdminInboxInboxThread.s11")}
+            title={tHC("s11")}
           >
             <PanelRight size={14} />
           </Button>
@@ -100,7 +100,7 @@ export function InboxThread({
                   )
                 }
               >
-                <Headset size={13} /> {tHC("hcAdminInboxInboxThread.s10")}
+                <Headset size={13} /> {tHC("s10")}
               </Button>
             ) : (
               <Button
@@ -114,7 +114,7 @@ export function InboxThread({
                   )
                 }
               >
-                <Undo2 size={13} /> {tHC("hcAdminInboxInboxThread.s9")}
+                <Undo2 size={13} /> {tHC("s9")}
               </Button>
             ))}
         </div>
@@ -122,27 +122,27 @@ export function InboxThread({
 
       {selected.handoffState === "HUMAN" && (
         <div className="border-b border-border bg-accent/30 px-3 py-2 text-xs text-muted-foreground">
-          {tHC("hcAdminInboxInboxThread.s8")}
+          {tHC("s8")}
         </div>
       )}
       {!selected.paired && (
         <div className="flex items-center gap-2 border-b border-border bg-amber-500/10 px-3 py-2 text-xs text-muted-foreground">
           <ShieldCheck size={13} className="shrink-0" />
-          {tHC("hcAdminInboxInboxThread.s7")}
+          {tHC("s7")}
         </div>
       )}
 
       <div className="flex-1 space-y-2 overflow-y-auto p-3" style={{ minHeight: 240, maxHeight: 480 }}>
         {transcriptFailed && (
           <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-            <span>{tHC("hcAdminInboxInboxThread.s6")}</span>
+            <span>{tHC("s6")}</span>
             <Button type="button" size="sm" onClick={onRetryTranscript}>
               Retry
             </Button>
           </div>
         )}
         {!transcriptFailed && transcript.length === 0 && (
-          <p className="text-sm text-muted-foreground">{tHC("hcAdminInboxInboxThread.s5")}</p>
+          <p className="text-sm text-muted-foreground">{tHC("s5")}</p>
         )}
         {transcript.map((m) => (
           <div key={m.id} className={cn("flex", m.direction === "OUTBOUND" ? "justify-end" : "justify-start")}>
@@ -160,7 +160,7 @@ export function InboxThread({
           </div>
         ))}
         <p className="pt-1 text-[10px] text-muted-foreground">
-          {tHC("hcAdminInboxInboxThread.s4")}
+          {tHC("s4")}
         </p>
         <div ref={transcriptEndRef} />
       </div>
@@ -168,7 +168,7 @@ export function InboxThread({
       <div className="border-t border-border p-3">
         {selected.channel === "VOICE" ? (
           <p className="text-xs text-muted-foreground">
-            {tHC("hcAdminInboxInboxThread.s3")}
+            {tHC("s3")}
           </p>
         ) : (
           <>
@@ -182,7 +182,7 @@ export function InboxThread({
                     ? "Reply as a human operator…"
                     : "Take the conversation over to reply — that's what silences the agent."
               }
-              aria-label={tHC("hcAdminInboxInboxThread.s2")}
+              aria-label={tHC("s2")}
               disabled={!selected.paired || selected.handoffState !== "HUMAN" || busy}
               rows={3}
             />
@@ -193,7 +193,7 @@ export function InboxThread({
                 onClick={sendReply}
                 disabled={!selected.paired || selected.handoffState !== "HUMAN" || busy || !draft.trim()}
               >
-                <Send size={13} /> {tHC("hcAdminInboxInboxThread.s1")}
+                <Send size={13} /> {tHC("s1")}
               </Button>
             </div>
           </>

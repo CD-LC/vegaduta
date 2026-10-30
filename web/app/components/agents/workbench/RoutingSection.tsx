@@ -52,7 +52,7 @@ export default function RoutingSection() {
       {true && (
         <WorkbenchSection
           icon={<Cpu size={13} />}
-          label={tHC("hcComponentsAgentsWorkbenchRoutingSection.s8")}
+          label={tHC("s8")}
           cat="var(--cat-automation)"
           actions={<WorkbenchSection.Summary>{deviceRoutingSummary}</WorkbenchSection.Summary>}
         >
@@ -62,15 +62,15 @@ export default function RoutingSection() {
                 aria-disabled="true"
                 className="m-0 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground"
               >
-                {tHC("hcComponentsAgentsWorkbenchRoutingSection.s7")}
+                {tHC("s7")}
               </p>
             )}
             <p className="m-0 text-[11px] text-muted-foreground">
-              {tHC("hcComponentsAgentsWorkbenchRoutingSection.s6")}{" "}
+              {tHC("s6")}{" "}
               {edgeBrowser
                 ? `WebGPU ${edgeBrowser.webgpu ? "available" : "not available"}, WebAssembly ${edgeBrowser.wasm ? "available" : "not available"}`
                 : "checking…"}
-              {tHC("hcComponentsAgentsWorkbenchRoutingSection.s5")}{" "}
+              {tHC("s5")}{" "}
               {onPlatformLlm ? poolLabel("the shared platform pool", "the local model (Ollama) on this machine") : "your own provider key"}.
             </p>
             {/* "What drives this agent's intelligence" 3-way
@@ -138,19 +138,19 @@ export default function RoutingSection() {
                   htmlFor="agent-edge-routing-policy-select"
                   className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted-foreground"
                 >
-                  {tHC("hcComponentsAgentsWorkbenchRoutingSection.s4")}
+                  {tHC("s4")}
                 </label>
                 {isDraft ? (
                   <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    {tHC("hcComponentsAgentsWorkbenchRoutingSection.s3")}
+                    {tHC("s3")}
                   </p>
                 ) : !edgeEnabled() ? (
                   <p className="mb-1.5 text-[11px] font-medium text-muted-foreground">
-                    {tHC("hcComponentsAgentsWorkbenchRoutingSection.s2")}
+                    {tHC("s2")}
                   </p>
                 ) : null}
                 <p className="mb-1.5 text-[11px] leading-relaxed text-muted-foreground">
-                  {tHC("hcComponentsAgentsWorkbenchRoutingSection.s1")}
+                  {tHC("s1")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Select

@@ -243,7 +243,7 @@ export default function MiniCatchGame() {
           ref={canvasRef}
           style={{ width: "100%", height: "auto", aspectRatio: `${W} / ${H}`, touchAction: "none" }}
           className="block rounded-xl border border-border/70 bg-secondary/20"
-          aria-label={tHC("hcComponentsMiniCatchGame.s5")}
+          aria-label={tHC("s5")}
         />
         {over && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-background/85 backdrop-blur-[2px]">
@@ -251,23 +251,23 @@ export default function MiniCatchGame() {
               {score >= best && score > 0 ? "New best!" : "Nice run!"}
             </div>
             <div className="text-xs text-muted-foreground">
-              {tHC("hcComponentsMiniCatchGame.s4")} {score} spark{score === 1 ? "" : "s"}
+              {tHC("s4")} {score} spark{score === 1 ? "" : "s"}
             </div>
             <Button size="sm" className="mt-1" onClick={() => setRound((r) => r + 1)}>
-              {tHC("hcComponentsMiniCatchGame.s3")}
+              {tHC("s3")}
             </Button>
           </div>
         )}
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        {tHC("hcComponentsMiniCatchGame.s2")}
+        {tHC("s2")}
       </p>
       <button
         type="button"
         onClick={() => setRunning(false)}
         className="mt-1 border-0 bg-transparent p-0 text-[11px] text-muted-foreground underline-offset-2 hover:underline"
       >
-        {tHC("hcComponentsMiniCatchGame.s1")}
+        {tHC("s1")}
       </button>
     </div>
   );

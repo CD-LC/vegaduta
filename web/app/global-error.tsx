@@ -91,13 +91,13 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <img className="ge-mark" src="/logo-mark-sm.webp" alt="" />
           <div className="ge-code">500</div>
           <h1 className="ge-heading">
-            <BrandName /> {tHC("hcGlobalerror.s3")}
+            <BrandName /> {tHC("s3")}
           </h1>
-          <p className="ge-sub">{tHC("hcGlobalerror.s2")} {error?.digest ? `Ref ${error.digest}.` : null}</p>
+          <p className="ge-sub">{tHC("s2")} {error?.digest ? `Ref ${error.digest}.` : null}</p>
           <div className="ge-actions">
             <button type="button" onClick={reset} className="ge-btn ge-btn-primary">
               <RotateCcw size={16} aria-hidden="true" />
-              {tHC("hcGlobalerror.s1")}
+              {tHC("s1")}
             </button>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- root boundary must stay router-free */}
             <a href="/" className="ge-btn ge-btn-secondary">

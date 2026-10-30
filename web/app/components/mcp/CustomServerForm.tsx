@@ -146,7 +146,7 @@ export default function CustomServerForm({
               required
             />
             <p id="mcp-server-name-help" className="text-xs text-muted-foreground">
-              {tHC("hcComponentsMcpCustomServerForm.s5")}
+              {tHC("s5")}
             </p>
           </div>
           <Select
@@ -180,13 +180,13 @@ export default function CustomServerForm({
         {type !== "STDIO" && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-muted-foreground">
-              {tHC("hcComponentsMcpCustomServerForm.s4")}{" "}
-              <code>application-mcp.yml</code>{tHC("hcComponentsMcpCustomServerForm.s3")}
+              {tHC("s4")}{" "}
+              <code>application-mcp.yml</code>{tHC("s3")}
               {type === "SSE" && " SSE is deprecated in the MCP spec: prefer STREAMABLE_HTTP."}
             </p>
             <Input
               type="text"
-              placeholder={tHC("hcComponentsMcpCustomServerForm.s2")}
+              placeholder={tHC("s2")}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
@@ -198,7 +198,7 @@ export default function CustomServerForm({
             <p className="text-xs text-muted-foreground">
               {t("optionalCommandNotePrefix")}
               <code>application-mcp.yml</code>
-              {t("optionalCommandNoteSuffix")} {tHC("hcComponentsMcpCustomServerForm.s1")}
+              {t("optionalCommandNoteSuffix")} {tHC("s1")}
             </p>
             <Input
               type="text"

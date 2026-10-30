@@ -77,7 +77,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
     <div className="space-y-4 rounded-xl border border-border bg-secondary/20 p-4">
       {/* Header + agent count */}
       <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{tHC("hcHelpWorkflowrecipesRecipeCard.s1")}</span>
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{tHC("s1")}</span>
         <Badge variant="secondary" className="gap-1">
           <Bot className="size-3" aria-hidden="true" />
           {build.agents} {build.agents === 1 ? "agent" : "agents"}
@@ -109,7 +109,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
         <div className="space-y-2">
           <SpecLabel>
             <Bot className="size-3" aria-hidden="true" />
-            {tHC("hcHelpWorkflowrecipesRecipeCard.s5")}{build.agentRoles.length})
+            {tHC("s5")}{build.agentRoles.length})
           </SpecLabel>
           <div className="space-y-2">
             {build.agentRoles.map((a) => (
@@ -133,7 +133,7 @@ function BuildSpec({ build }: { build: RecipeBuild }) {
         <div className="space-y-2">
           <SpecLabel>
             <Wrench className="size-3" aria-hidden="true" />
-            {tHC("hcHelpWorkflowrecipesRecipeCard.s4")}
+            {tHC("s4")}
           </SpecLabel>
           <div className="flex flex-wrap gap-1.5">
             {build.mcp.map((m) => (
@@ -206,7 +206,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
       {/* The flow — a numbered vertical stepper */}
       <div className="space-y-2.5">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          {tHC("hcHelpWorkflowrecipesRecipeCard.s3")}
+          {tHC("s3")}
         </span>
         <ol className="space-y-0">
           {recipe.steps.map((step, i) => {
@@ -245,7 +245,7 @@ function RecipeFlow({ recipe }: { recipe: Recipe }) {
       {/* Connectors */}
       <div className="space-y-2">
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          {tHC("hcHelpWorkflowrecipesRecipeCard.s2")}
+          {tHC("s2")}
         </span>
         <div className="flex flex-wrap gap-1.5">
           {recipe.connectors.map((c) => (
@@ -304,7 +304,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
               </TabsTrigger>
               <TabsTrigger value="build">
                 <Wrench className="size-3.5" aria-hidden="true" />
-                {tHC("hcHelpWorkflowrecipesRecipeCard.s1")}
+                {tHC("s1")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="flow" className="mt-1">

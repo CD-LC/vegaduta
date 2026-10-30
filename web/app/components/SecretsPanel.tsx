@@ -394,7 +394,7 @@ export default function SecretsPanel({ secrets, onChanged }: SecretsPanelProps) 
               value={allowedHostsText}
               onChange={(e) => setAllowedHostsText(e.target.value)}
               rows={2}
-              placeholder={tHC("hcComponentsSecretsPanel.s1")}
+              placeholder={tHC("s1")}
               spellCheck={false}
               autoComplete="off"
               className="w-full rounded-md border bg-transparent px-3 py-2 font-mono text-xs"

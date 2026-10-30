@@ -142,13 +142,13 @@ export default function WorkflowRunPage() {
         {/* Who/what this is — always, before anything else. */}
         <header className="mb-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">
-            {tHC("hcWShareIdPage.s9")} <BrandName /> user
+            {tHC("s9")} <BrandName /> user
           </p>
           {meta ? <h1 className="mt-2 text-xl font-semibold leading-snug">{meta.title}</h1> : null}
           {meta && !result && !blocked ? (
             <p className="mt-1 text-xs text-muted-foreground">
-              {tHC("hcWShareIdPage.s8")} {Math.max(0, meta.runsRemaining)} run
-              {meta.runsRemaining === 1 ? "" : "s"} {tHC("hcWShareIdPage.s7")}
+              {tHC("s8")} {Math.max(0, meta.runsRemaining)} run
+              {meta.runsRemaining === 1 ? "" : "s"} {tHC("s7")}
             </p>
           ) : null}
         </header>
@@ -165,7 +165,7 @@ export default function WorkflowRunPage() {
         {!loadError && !meta ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
-            <span className="sr-only">{tHC("hcWShareIdPage.s6")}</span>
+            <span className="sr-only">{tHC("s6")}</span>
           </div>
         ) : null}
 
@@ -196,7 +196,7 @@ export default function WorkflowRunPage() {
                 {running ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                    {tHC("hcWShareIdPage.s5")}
+                    {tHC("s5")}
                   </>
                 ) : (
                   <>
@@ -228,7 +228,7 @@ export default function WorkflowRunPage() {
                 // eslint-disable-next-line @next/next/no-img-element -- runtime API origin, not a static asset
                 <img
                   src={absoluteImageUrl(result.imageUrl)}
-                  alt={tHC("hcWShareIdPage.s4")}
+                  alt={tHC("s4")}
                   className="w-full rounded-xl border border-border/50"
                 />
               ) : (
@@ -238,14 +238,14 @@ export default function WorkflowRunPage() {
               )}
             </div>
             <p className="text-center text-xs text-muted-foreground">
-              {tHC("hcWShareIdPage.s3")}
+              {tHC("s3")}
             </p>
             <BuildYourOwnCta />
           </div>
         ) : null}
 
         <footer className="mt-auto pt-8 text-center text-xs text-muted-foreground">
-          {tHC("hcWShareIdPage.s2")}{" "}
+          {tHC("s2")}{" "}
           <Link href="/" className="underline-offset-2 hover:underline">
             What is <BrandName />?
           </Link>
@@ -309,7 +309,7 @@ function BuildYourOwnCta() {
       href="/try"
       className="mx-auto inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-medium text-primary transition hover:bg-primary/15"
     >
-      {tHC("hcWShareIdPage.s1")}
+      {tHC("s1")}
       <ArrowRight className="h-4 w-4" aria-hidden />
     </Link>
   );

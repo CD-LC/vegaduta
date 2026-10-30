@@ -144,10 +144,10 @@ export function ProjectView({
             variant="outline"
             size="sm"
             disabled={!fileSet?.length}
-            title={tHC("hcBuildProjectView.s2")}
+            title={tHC("s2")}
             onClick={() => downloadZip(project.project_id, fileSet || [])}
           >
-            <Download aria-hidden="true" size={13} /> {tHC("hcBuildProjectView.s1")}
+            <Download aria-hidden="true" size={13} /> {tHC("s1")}
           </Button>
           {ephemeral && (
             <>

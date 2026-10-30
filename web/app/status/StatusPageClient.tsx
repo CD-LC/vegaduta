@@ -114,17 +114,17 @@ export default function StatusPageClient() {
           </Button>
           <PublicAuthCtas>
             <Button asChild variant="outline" size="sm">
-              <Link href="/signup">{tHC("hcStatusStatusPageClient.s12")}</Link>
+              <Link href="/signup">{tHC("s12")}</Link>
             </Button>
           </PublicAuthCtas>
         </div>
       </nav>
 
       <header className="mx-auto max-w-3xl px-6 pb-8 pt-10 text-center">
-        <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">{tHC("hcStatusStatusPageClient.s11")}</span>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{tHC("hcStatusStatusPageClient.s10")}</h1>
+        <span className="font-mono text-xs uppercase tracking-[0.18em] text-primary">{tHC("s11")}</span>
+        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{tHC("s10")}</h1>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
-          {tHC("hcStatusStatusPageClient.s9")}
+          {tHC("s9")}
         </p>
       </header>
 
@@ -184,15 +184,15 @@ export default function StatusPageClient() {
         </section>
 
         <section className="mt-8 rounded-2xl border border-border/60 px-6 py-6">
-          <h2 className="text-sm font-semibold">{tHC("hcStatusStatusPageClient.s8")}</h2>
+          <h2 className="text-sm font-semibold">{tHC("s8")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            {tHC("hcStatusStatusPageClient.s7")}{" "}
-            <code className="font-mono text-xs">describeCluster()</code>{tHC("hcStatusStatusPageClient.s6")} <em>{tHC("hcStatusStatusPageClient.s5")}</em> {tHC("hcStatusStatusPageClient.s4")}{" "}
-            <em>Unknown</em> {tHC("hcStatusStatusPageClient.s3")} <code className="font-mono text-xs">{tHC("hcStatusStatusPageClient.s2")}</code>.
+            {tHC("s7")}{" "}
+            <code className="font-mono text-xs">describeCluster()</code>{tHC("s6")} <em>{tHC("s5")}</em> {tHC("s4")}{" "}
+            <em>Unknown</em> {tHC("s3")} <code className="font-mono text-xs">{tHC("s2")}</code>.
           </p>
           {lastPoll && (
             <p className="mt-3 font-mono text-xs text-muted-foreground">
-              {tHC("hcStatusStatusPageClient.s1")} {new Date(lastPoll.getTime() + POLL_MS).toLocaleTimeString()}
+              {tHC("s1")} {new Date(lastPoll.getTime() + POLL_MS).toLocaleTimeString()}
             </p>
           )}
         </section>

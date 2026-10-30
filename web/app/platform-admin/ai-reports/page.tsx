@@ -131,7 +131,7 @@ export default function AiReportsPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminAireportsPage.s10")}
+      title={tHC("s10")}
       actions={
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
@@ -139,13 +139,13 @@ export default function AiReportsPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminAireportsPage.s9")}
+        {tHC("s9")}
       </PageHint>
       <InfoNote>
-        {tHC("hcPlatformadminAireportsPage.s8")}
+        {tHC("s8")}
       </InfoNote>
 
-      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label={tHC("hcPlatformadminAireportsPage.s7")}>
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label={tHC("s7")}>
         {FILTERS.map((s) => (
           <Button
             key={s || "ALL"}
@@ -176,7 +176,7 @@ export default function AiReportsPage() {
             <div className="flex flex-col items-center gap-2 p-8 text-center">
               <CheckCircle2 size={20} className="text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                No {filter ? filterLabel(filter).toLowerCase() : ""} {tHC("hcPlatformadminAireportsPage.s6")}
+                No {filter ? filterLabel(filter).toLowerCase() : ""} {tHC("s6")}
               </p>
             </div>
           ) : (
@@ -206,7 +206,7 @@ export default function AiReportsPage() {
                       <span className="ms-auto text-xs text-muted-foreground">{formatDateTime(row.createdAt)}</span>
                     </button>
                     <div className="text-xs text-muted-foreground">
-                      Tenant {row.tenantId || "—"} {tHC("hcPlatformadminAireportsPage.s5")} {row.reporterId || "(deleted account)"}
+                      Tenant {row.tenantId || "—"} {tHC("s5")} {row.reporterId || "(deleted account)"}
                       {row.agentId ? ` · Agent ${row.agentId}` : ""}
                       {row.sessionId ? ` · Session ${row.sessionId}` : ""}
                       {row.messageRef ? ` · Message ${row.messageRef}` : ""}
@@ -223,23 +223,23 @@ export default function AiReportsPage() {
                           </div>
                         )}
                         <div>
-                          <div className="text-xs font-medium text-muted-foreground">{tHC("hcPlatformadminAireportsPage.s4")}</div>
+                          <div className="text-xs font-medium text-muted-foreground">{tHC("s4")}</div>
                           <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words rounded bg-muted px-2 py-1.5 text-xs">
                             {row.content}
                           </pre>
                         </div>
                         {row.reviewedAt && (
                           <div className="text-xs text-muted-foreground">
-                            {tHC("hcPlatformadminAireportsPage.s3")} {formatDateTime(row.reviewedAt)} by {row.reviewedBy || "—"}
+                            {tHC("s3")} {formatDateTime(row.reviewedAt)} by {row.reviewedBy || "—"}
                           </div>
                         )}
                         <Textarea
                           value={notes[row.id] ?? row.reviewNote ?? ""}
                           onChange={(e) => setNotes((prev) => ({ ...prev, [row.id]: e.target.value }))}
-                          placeholder={tHC("hcPlatformadminAireportsPage.s2")}
+                          placeholder={tHC("s2")}
                           maxLength={2000}
                           rows={2}
-                          aria-label={tHC("hcPlatformadminAireportsPage.s1")}
+                          aria-label={tHC("s1")}
                         />
                         <div className="flex flex-wrap gap-2">
                           {REVIEW_STATUSES.map((s) => (

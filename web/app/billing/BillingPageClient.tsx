@@ -272,7 +272,7 @@ export default function BillingPageClient({ forcePaid = false }: { forcePaid?: b
           <div className="mx-auto mt-6 flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-primary/25 bg-primary/[0.06] px-4 py-1.5 text-center text-xs font-medium text-primary">
             <IndianRupee className="size-3.5 flex-shrink-0" aria-hidden="true" />
             <span>
-              {tHC("hcBillingBillingPageClient.s1")}
+              {tHC("s1")}
             </span>
           </div>
         )}

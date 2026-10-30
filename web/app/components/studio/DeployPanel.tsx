@@ -80,10 +80,10 @@ export default function DeployPanel({
     <div className="space-y-6">
       <section>
         <div className="mb-1 flex items-center gap-2 text-sm font-medium">
-          <Radio aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioDeployPanel.s7")}
+          <Radio aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s7")}
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioDeployPanel.s6")}
+          {tHC("s6")}
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {agents.map((a) => (
@@ -142,14 +142,14 @@ export default function DeployPanel({
       <WhatsAppBridge token={token} session={session} />
 
       <section className="rounded-2xl border border-primary/30 bg-primary/5 p-5">
-        <div className="mb-1 text-base font-semibold">{tHC("hcComponentsStudioDeployPanel.s5")}</div>
+        <div className="mb-1 text-base font-semibold">{tHC("s5")}</div>
         <p className="mb-3 text-sm text-muted-foreground">
-          {tHC("hcComponentsStudioDeployPanel.s4")} {mine.length === 1 ? "the agent" : `all ${mine.length} agents`} {tHC("hcComponentsStudioDeployPanel.s3")}{" "}
-          {mine.length === 1 ? "is" : "are"} {tHC("hcComponentsStudioDeployPanel.s2")}
+          {tHC("s4")} {mine.length === 1 ? "the agent" : `all ${mine.length} agents`} {tHC("s3")}{" "}
+          {mine.length === 1 ? "is" : "are"} {tHC("s2")}
         </p>
         <Button asChild>
           <Link href={signupHref}>
-            {tHC("hcComponentsStudioDeployPanel.s1")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
+            {tHC("s1")} <ArrowRight aria-hidden="true" className="ms-2 h-4 w-4 shrink-0" />
           </Link>
         </Button>
       </section>

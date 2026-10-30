@@ -78,10 +78,10 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
     <section className="rounded-xl border border-border/60 bg-card/40">
       <header className="border-b border-border/60 px-4 py-3">
         <h2 className="flex items-center gap-2 text-sm font-medium text-foreground">
-          <MessageCircle aria-hidden="true" className="size-4 text-primary" /> {tHC("hcComponentsStudioWhatsAppBridge.s13")}
+          <MessageCircle aria-hidden="true" className="size-4 text-primary" /> {tHC("s13")}
         </h2>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioWhatsAppBridge.s12")}
+          {tHC("s12")}
         </p>
       </header>
 
@@ -89,11 +89,11 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
         {view === "idle" && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              {tHC("hcComponentsStudioWhatsAppBridge.s11")}
+              {tHC("s11")}
             </p>
             <Button size="sm" onClick={onGetCode} disabled={busy}>
               {busy ? <Loader2 aria-hidden="true" className="me-2 h-3.5 w-3.5 animate-spin shrink-0" /> : null}
-              {tHC("hcComponentsStudioWhatsAppBridge.s10")}
+              {tHC("s10")}
             </Button>
           </div>
         )}
@@ -103,24 +103,24 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
             <QrCode
               value={link}
               px={168}
-              label={tHC("hcComponentsStudioWhatsAppBridge.s9")}
+              label={tHC("s9")}
               className="shrink-0 rounded-md border border-border/60"
             />
             <div className="space-y-2 text-sm">
               <p>
-                {tHC("hcComponentsStudioWhatsAppBridge.s8")} <span className="font-mono text-base font-semibold tracking-wider">{wa.pairingCode}</span>
+                {tHC("s8")} <span className="font-mono text-base font-semibold tracking-wider">{wa.pairingCode}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioWhatsAppBridge.s7")}
-                {wa.businessNumberMasked ? ` The demo number is ${wa.businessNumberMasked}.` : ""} {tHC("hcComponentsStudioWhatsAppBridge.s6")}
+                {tHC("s7")}
+                {wa.businessNumberMasked ? ` The demo number is ${wa.businessNumberMasked}.` : ""} {tHC("s6")}
               </p>
               <Button asChild size="sm" variant="outline">
                 <a href={link} target="_blank" rel="noopener noreferrer">
-                  {tHC("hcComponentsStudioWhatsAppBridge.s5")} <ExternalLink aria-hidden="true" className="ms-2 h-3.5 w-3.5 shrink-0" />
+                  {tHC("s5")} <ExternalLink aria-hidden="true" className="ms-2 h-3.5 w-3.5 shrink-0" />
                 </a>
               </Button>
               <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin shrink-0" /> {tHC("hcComponentsStudioWhatsAppBridge.s4")}
+                <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin shrink-0" /> {tHC("s4")}
               </p>
             </div>
           </div>
@@ -129,11 +129,11 @@ export default function WhatsAppBridge({ token, session, onBridgeUsed }: Props) 
         {view === "linked" && (
           <div className="space-y-3">
             <p className="text-sm">
-              {tHC("hcComponentsStudioWhatsAppBridge.s3")}{wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} {tHC("hcComponentsStudioWhatsAppBridge.s2")}
+              {tHC("s3")}{wa.businessNumberMasked ? ` (${wa.businessNumberMasked})` : ""} {tHC("s2")}
               {wa.messageCount > 0 ? ` ${wa.messageCount} ${wa.messageCount === 1 ? "turn" : "turns"} so far.` : ""}
             </p>
             <p className="text-xs text-muted-foreground">
-              {tHC("hcComponentsStudioWhatsAppBridge.s1")}
+              {tHC("s1")}
             </p>
             <Button size="sm" variant="outline" onClick={onUnlink}>
               Disconnect

@@ -40,7 +40,7 @@ export default function SkillViewerToolbar({
           size="sm"
           variant="outline"
           disabled={busy}
-          title={tHC("hcComponentsSkillsSkillViewerToolbar.s2")}
+          title={tHC("s2")}
           onClick={onDownloadText}
         >
           <FileText aria-hidden="true" size={14} /> {filePath === null ? "SKILL.md" : "File"}
@@ -50,7 +50,7 @@ export default function SkillViewerToolbar({
             size="sm"
             variant="outline"
             disabled={busy}
-            title={tHC("hcComponentsSkillsSkillViewerToolbar.s1")}
+            title={tHC("s1")}
             onClick={onDuplicate}
           >
             <Copy aria-hidden="true" size={14} /> {detail.source === "BUILT_IN" ? "Customize" : "Duplicate"}

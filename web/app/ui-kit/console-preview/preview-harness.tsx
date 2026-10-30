@@ -64,7 +64,7 @@ function PreviewPill({ label }: { label: string }) {
         fontFamily: "ui-sans-serif, system-ui, sans-serif",
       }}
     >
-      {tHC("hcUikitConsolepreviewPreviewharness.s2")} {label} {tHC("hcUikitConsolepreviewPreviewharness.s1")}
+      {tHC("s2")} {label} {tHC("s1")}
     </div>
   );
 }

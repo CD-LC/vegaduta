@@ -279,9 +279,9 @@ export default function TenantsUsersPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminTenantsPage.s14")}
+      title={tHC("s14")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("hcPlatformadminTenantsPage.s13")}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("s13")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
@@ -292,7 +292,7 @@ export default function TenantsUsersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {tHC("hcPlatformadminTenantsPage.s12")}
+        {tHC("s12")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </motion.p>
 
@@ -304,15 +304,15 @@ export default function TenantsUsersPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <CreditCard size={16} className="text-primary" /> {tHC("hcPlatformadminTenantsPage.s11")}
+              <CreditCard size={16} className="text-primary" /> {tHC("s11")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              {tenants.length} {tHC("hcPlatformadminTenantsPage.s10")}{tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} {tHC("hcPlatformadminTenantsPage.s9")}{UNAVAILABLE}
-              {tHC("hcPlatformadminTenantsPage.s8")}
+              {tenants.length} {tHC("s10")}{tenants.length === 1 ? "" : "s"} ({statusCounts.ACTIVE || 0} {tHC("s9")}{UNAVAILABLE}
+              {tHC("s8")}
             </p>
             {tenantCounts && (
               <p className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminTenantsPage.s7")} {demoSandboxSummary(tenantCounts)} -{" "}
+                {tHC("s7")} {demoSandboxSummary(tenantCounts)} -{" "}
                 <Link
                   href="/platform-admin/demo-sandbox"
                   className="underline underline-offset-2 hover:text-foreground"
@@ -324,7 +324,7 @@ export default function TenantsUsersPage() {
                   href="/platform-admin/demo-sandboxes"
                   className="underline underline-offset-2 hover:text-foreground"
                 >
-                  {tHC("hcPlatformadminTenantsPage.s6")}
+                  {tHC("s6")}
                 </Link>
               </p>
             )}
@@ -332,7 +332,7 @@ export default function TenantsUsersPage() {
           <CardContent className="space-y-2">
             {tenantsError && <AdminErrorState message={tenantsError} onRetry={() => void refresh()} />}
             {tenants.length > 0 && (
-              <AdminFilterBar label={tHC("hcPlatformadminTenantsPage.s5")} className="mb-1">
+              <AdminFilterBar label={tHC("s5")} className="mb-1">
                 <div className="relative w-full max-w-sm">
                   <Search
                     size={14}
@@ -341,7 +341,7 @@ export default function TenantsUsersPage() {
                   <Input
                     value={tenantSearch}
                     onChange={(e) => setTenantSearch(e.target.value)}
-                    placeholder={tHC("hcPlatformadminTenantsPage.s4")}
+                    placeholder={tHC("s4")}
                     className="ps-8"
                   />
                 </div>
@@ -358,7 +358,7 @@ export default function TenantsUsersPage() {
                 </div>
                 <div className="w-full space-y-1.5 sm:w-44">
                   <Label htmlFor="tenant-filter-cap" className="text-xs text-muted-foreground">
-                    {tHC("hcPlatformadminTenantsPage.s3")}
+                    {tHC("s3")}
                   </Label>
                   <Select
                     id="tenant-filter-cap"
@@ -395,11 +395,11 @@ export default function TenantsUsersPage() {
               </AdminFilterBar>
             )}
             {tenants.length === 0 && !tenantsError && (
-              <AdminEmptyState title={tHC("hcPlatformadminTenantsPage.s2")} description="Tenants appear here once they sign up." />
+              <AdminEmptyState title={tHC("s2")} description="Tenants appear here once they sign up." />
             )}
             {tenants.length > 0 && filteredTenants.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                {tHC("hcPlatformadminTenantsPage.s1")}
+                {tHC("s1")}
               </p>
             )}
 

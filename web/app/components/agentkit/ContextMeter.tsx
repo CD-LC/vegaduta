@@ -33,10 +33,10 @@ export default function ContextMeter({ report, evictions }: { report: ContextRep
           <div className="mt-3">
             <div className="flex flex-wrap items-baseline justify-between gap-2 text-xs">
               <span className="font-medium text-foreground">
-                ~{report.usedTokens.toLocaleString()} of {report.promptBudget.toLocaleString()} {tHC("hcComponentsAgentkitContextMeter.s2")}
+                ~{report.usedTokens.toLocaleString()} of {report.promptBudget.toLocaleString()} {tHC("s2")}
               </span>
               <span className="text-muted-foreground">
-                {report.contextWindow.toLocaleString()}{tHC("hcComponentsAgentkitContextMeter.s1")}{" "}
+                {report.contextWindow.toLocaleString()}{tHC("s1")}{" "}
                 {(report.contextWindow - report.promptBudget).toLocaleString()} {AGENT_COPY.meterReserved}
               </span>
             </div>

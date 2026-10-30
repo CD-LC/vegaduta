@@ -72,7 +72,7 @@ export default function WorkflowRowActions({
             className="size-8"
             disabled={atLimit || duplicating}
             onClick={onDuplicate}
-            aria-label={tHC("hcComponentsWorkflowWorkflowRowActions.s2")}
+            aria-label={tHC("s2")}
           >
             {duplicating ? (
               <Loader2 aria-hidden="true" size={15} className="animate-spin" />
@@ -85,7 +85,7 @@ export default function WorkflowRowActions({
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label={tHC("hcComponentsWorkflowWorkflowRowActions.s1")}>
+          <Button variant="ghost" size="icon" className="size-8" onClick={onCopyLink} aria-label={tHC("s1")}>
             {copied ? <Check aria-hidden="true" size={15} /> : <Link2 aria-hidden="true" size={15} />}
           </Button>
         </TooltipTrigger>

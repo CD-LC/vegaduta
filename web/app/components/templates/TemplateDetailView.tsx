@@ -91,7 +91,7 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
       href="/templates"
       className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
-      <ArrowLeft size={15} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplateDetailView.s9")}
+      <ArrowLeft size={15} strokeWidth={2} aria-hidden="true" /> {tHC("s9")}
     </Link>
   );
 
@@ -120,12 +120,12 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
               <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesTemplateDetailView.s8")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s8")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
               {error || "It may have been withdrawn, or the service is temporarily unavailable."}
             </p>
             <Button variant="outline" size="sm" onClick={load}>
-              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplateDetailView.s7")}
+              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s7")}
             </Button>
           </CardContent>
         </Card>
@@ -192,7 +192,7 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
       {/* ---- Read-only design --------------------------------------- */}
       <div className="space-y-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          {tHC("hcComponentsTemplatesTemplateDetailView.s6")}
+          {tHC("s6")}
         </p>
 
         <TemplateRequirementsPanel requirements={detail.requirements} />
@@ -202,10 +202,10 @@ export default function TemplateDetailView({ id, initial }: { id: string; initia
         <Card elevation="sunken" className="gap-2 py-5">
           <CardContent className="flex flex-col gap-1">
             <p className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Lock size={14} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplateDetailView.s5")}
+              <Lock size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s5")}
             </p>
             <p className="text-sm text-muted-foreground">
-              {tHC("hcComponentsTemplatesTemplateDetailView.s4")}
+              {tHC("s4")}
             </p>
             <div className="pt-2">
               <Button onClick={handleImport} disabled={importing}>
@@ -240,7 +240,7 @@ function DesignSection({
           <Icon size={15} strokeWidth={2} aria-hidden />
           {title}
         </p>
-        {empty ? <p className="text-sm text-muted-foreground">{tHC("hcComponentsTemplatesTemplateDetailView.s3")}</p> : children}
+        {empty ? <p className="text-sm text-muted-foreground">{tHC("s3")}</p> : children}
       </CardContent>
     </Card>
   );
@@ -377,7 +377,7 @@ function AgentDesign({ detail }: { detail: CommunityTemplateDetail }) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="lg:col-span-2">
-        <DesignSection icon={BookOpen} title={tHC("hcComponentsTemplatesTemplateDetailView.s2")} empty={!systemPrompt}>
+        <DesignSection icon={BookOpen} title={tHC("s2")} empty={!systemPrompt}>
           <pre className="elev-sunken max-h-72 overflow-auto whitespace-pre-wrap rounded-lg p-3 text-xs leading-relaxed text-foreground">
             {systemPrompt}
           </pre>
@@ -471,7 +471,7 @@ function WorkflowDesign({ detail }: { detail: CommunityTemplateDetail }) {
 function ExtraSettings({ cfg, keys }: { cfg: Cfg; keys: string[] }) {
     const tHC = useTranslations("hcComponentsTemplatesTemplateDetailView");
   return (
-    <DesignSection icon={Settings2} title={tHC("hcComponentsTemplatesTemplateDetailView.s1")}>
+    <DesignSection icon={Settings2} title={tHC("s1")}>
       <dl className="space-y-1.5">
         {keys.map((k) => {
           const v = cfg[k];

@@ -22,7 +22,7 @@ export default function EdgeFallbackPolicyRow({ fallbackPolicy, edgeOptInActive,
           (localStorage), see capabilities.ts's getEdgeFallbackPolicy. */}
       {edgeEnabled() && (
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-          <label htmlFor="edge-fallback-policy">{tHC("hcComponentsAgentsCallPanelEdgeFallbackPolicyRow.s2")}</label>
+          <label htmlFor="edge-fallback-policy">{tHC("s2")}</label>
           <Select
             id="edge-fallback-policy"
             className="w-auto min-w-56 [&_button]:h-7 [&_button]:text-[11px]"
@@ -44,7 +44,7 @@ export default function EdgeFallbackPolicyRow({ fallbackPolicy, edgeOptInActive,
               }` - every fallback point this selector governs is unreachable
               whenever on-device replies are off for this browser, so say so
               instead of leaving the control looking live but inert. */}
-          {!edgeOptInActive && <span>{tHC("hcComponentsAgentsCallPanelEdgeFallbackPolicyRow.s1")}</span>}
+          {!edgeOptInActive && <span>{tHC("s1")}</span>}
         </div>
       )}
     </>

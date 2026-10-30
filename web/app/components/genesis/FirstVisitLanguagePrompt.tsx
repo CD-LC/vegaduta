@@ -184,12 +184,12 @@ function LanguagePromptDialog({
       transition={{ duration: 0.2 }}
       role="dialog"
       aria-modal="true"
-      aria-label={tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s6")}
+      aria-label={tHC("s6")}
     >
       {/* Backdrop */}
       <button
         type="button"
-        aria-label={tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s2")}
+        aria-label={tHC("s2")}
         onClick={dismiss}
         className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-sm"
       />
@@ -229,7 +229,7 @@ function LanguagePromptDialog({
 
           {/* English structural line — an English-defaulted visitor reads this fine */}
           <p className="mt-3 text-sm text-muted-foreground">
-            {tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s5")} <BrandName /> {tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s4")}
+            {tHC("s5")} <BrandName /> {tHC("s4")}
           </p>
 
           <label className="mt-5 flex cursor-pointer items-center gap-2.5 text-sm">
@@ -239,7 +239,7 @@ function LanguagePromptDialog({
               onChange={(e) => setMakeDefault(e.target.checked)}
               className="size-4 accent-[var(--primary)]"
             />
-            <span className="text-muted-foreground">{tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s3")}</span>
+            <span className="text-muted-foreground">{tHC("s3")}</span>
           </label>
 
           <div className="mt-6 flex flex-col gap-2.5">
@@ -253,13 +253,13 @@ function LanguagePromptDialog({
               size="lg"
               className="w-full justify-center text-muted-foreground hover:text-foreground"
             >
-              {tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s2")}
+              {tHC("s2")}
             </Button>
           </div>
 
           <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
             <Globe aria-hidden="true" className="size-3.5" />
-            {tHC("hcComponentsGenesisFirstVisitLanguagePrompt.s1")}
+            {tHC("s1")}
           </p>
         </div>
       </motion.div>

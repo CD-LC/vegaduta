@@ -80,7 +80,7 @@ export default function BuildingStage({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={pct ?? undefined}
-            aria-label={tHC("hcBuildCreateBuildingStage.s1")}
+            aria-label={tHC("s1")}
           >
             {pct == null ? (
               reduceMotion ? (

@@ -80,7 +80,7 @@ export default function ShareVoiceoverRow({
     <div className="flex items-center gap-2">
       <div className="min-w-0 flex-1">
         <Select
-          aria-label={tHC("hcAgentShareIdShareVoiceoverRow.s1")}
+          aria-label={tHC("s1")}
           value={voiceoverValue}
           options={options}
           searchable={options.length > 12}

@@ -35,25 +35,25 @@ export default function McpServerAuthOptionsCard() {
     <section className="panel mb-4" style={{ padding: "1rem 1.25rem" }} data-testid="mcp-auth-options">
       <div className="mb-2 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4" />
-        <h2 className="text-sm font-semibold">{tHC("hcComponentsMcpServerAuthOptionsCard.s12")}</h2>
+        <h2 className="text-sm font-semibold">{tHC("s12")}</h2>
       </div>
       <dl className="grid gap-3 text-sm md:grid-cols-3">
         <div>
           <dt className="font-medium">
-            {tHC("hcComponentsMcpServerAuthOptionsCard.s11")} <Badge variant="secondary">on</Badge>
+            {tHC("s11")} <Badge variant="secondary">on</Badge>
           </dt>
           <dd className="text-muted-foreground">
-            {tHC("hcComponentsMcpServerAuthOptionsCard.s10")}
+            {tHC("s10")}
           </dd>
         </div>
         <div data-testid="mcp-auth-oauth">
           <dt className="font-medium">
-            {tHC("hcComponentsMcpServerAuthOptionsCard.s9")} <Badge variant={oauth.enabled ? "secondary" : "outline"}>{oauth.enabled ? "on" : "off"}</Badge>
+            {tHC("s9")} <Badge variant={oauth.enabled ? "secondary" : "outline"}>{oauth.enabled ? "on" : "off"}</Badge>
           </dt>
           <dd className="text-muted-foreground">
             {oauth.enabled ? (
               <>
-                {tHC("hcComponentsMcpServerAuthOptionsCard.s8")} <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>{tHC("hcComponentsMcpServerAuthOptionsCard.s7")} <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> {tHC("hcComponentsMcpServerAuthOptionsCard.s6")} <code>{oauth.metadataUrl}</code>{tHC("hcComponentsMcpServerAuthOptionsCard.s5")}{" "}
+                {tHC("s8")} <code>{oauth.issuer}</code> for <code>{oauth.resource}</code>{tHC("s7")} <code>{oauth.tenantClaim}</code> and <code>{oauth.grantClaim}</code> {tHC("s6")} <code>{oauth.metadataUrl}</code>{tHC("s5")}{" "}
                 {oauth.scopes.map((s) => (
                   <code key={s} className="me-1">
                     {s}
@@ -62,21 +62,21 @@ export default function McpServerAuthOptionsCard() {
               </>
             ) : (
               <>
-                {tHC("hcComponentsMcpServerAuthOptionsCard.s4")} <code>app.mcpserver.oauth.enabled</code>{tHC("hcComponentsMcpServerAuthOptionsCard.s3")}
+                {tHC("s4")} <code>app.mcpserver.oauth.enabled</code>{tHC("s3")}
               </>
             )}
           </dd>
         </div>
         <div data-testid="mcp-auth-origin">
           <dt className="font-medium">
-            {tHC("hcComponentsMcpServerAuthOptionsCard.s2")} <Badge variant="outline">{origin.mode}</Badge>
+            {tHC("s2")} <Badge variant="outline">{origin.mode}</Badge>
           </dt>
           <dd className="text-muted-foreground">
             {origin.mode === "off" ? (
               "Origin is not checked."
             ) : origin.allowed.length > 0 ? (
               <>
-                {tHC("hcComponentsMcpServerAuthOptionsCard.s1")}{" "}
+                {tHC("s1")}{" "}
                 {origin.allowed.map((o) => (
                   <code key={o} className="me-1">
                     {o}

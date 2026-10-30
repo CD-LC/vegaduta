@@ -53,7 +53,7 @@ function SessionsTable({
       <table className="w-full min-w-[820px] text-start text-sm">
         <thead className="text-xs text-muted-foreground">
           <tr className="border-b border-border">
-            <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminImpersonationPage.s7")}</th>
+            <th className="py-2 pe-3 font-medium">{tHC("s7")}</th>
             <th className="py-2 pe-3 font-medium">Tenant</th>
             <th className="py-2 pe-3 font-medium">Admin</th>
             <th className="py-2 pe-3 font-medium">Reason</th>
@@ -190,15 +190,15 @@ export default function ImpersonationPage() {
   return (
     <AdminShell title="Impersonation">
       <PageHint>
-        {tHC("hcPlatformadminImpersonationPage.s6")}{" "}
+        {tHC("s6")}{" "}
         <Link href="/platform-admin/users" className="underline underline-offset-2">
-          {tHC("hcPlatformadminImpersonationPage.s5")}
+          {tHC("s5")}
         </Link>{" "}
-        {tHC("hcPlatformadminImpersonationPage.s4")}
+        {tHC("s4")}
       </PageHint>
 
       <SectionCard
-        title={tHC("hcPlatformadminImpersonationPage.s3")}
+        title={tHC("s3")}
         icon={Eye}
         subtitle={active ? `${activeItems.length} active` : undefined}
         actions={
@@ -219,7 +219,7 @@ export default function ImpersonationPage() {
         {activeError && <AdminErrorState className="mb-4" message={activeError} onRetry={() => void loadActive()} />}
         {!active && !activeError && <Skeleton className="h-20 w-full" />}
         {active && activeItems.length === 0 && (
-          <AdminEmptyState icon={Eye} title={tHC("hcPlatformadminImpersonationPage.s2")} description="No one is viewing as a user right now." />
+          <AdminEmptyState icon={Eye} title={tHC("s2")} description="No one is viewing as a user right now." />
         )}
         {activeItems.length > 0 && (
           <SessionsTable items={activeItems} now={now} showEnd ending={ending} onEnd={(s) => void end(s)} />
@@ -235,7 +235,7 @@ export default function ImpersonationPage() {
       >
         {historyError && <AdminErrorState className="mb-4" message={historyError} onRetry={() => void loadHistory()} />}
         {!history && !historyError && <Skeleton className="h-32 w-full" />}
-        {history && historyItems.length === 0 && <AdminEmptyState icon={History} title={tHC("hcPlatformadminImpersonationPage.s1")} />}
+        {history && historyItems.length === 0 && <AdminEmptyState icon={History} title={tHC("s1")} />}
         {historyItems.length > 0 && (
           <SessionsTable items={historyItems} now={now} showEnd={false} ending={null} onEnd={() => {}} />
         )}

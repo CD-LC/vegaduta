@@ -214,7 +214,7 @@ export function TriggerNodeConfig({
             <p className="ax-wf-empty">
               POST {`${API_BASE}${oidcTriggerPath}`}
               {t("oauthHintWithAn")}
-              <code>{tHC("hcComponentsWorkflowNodeConfigFormsTriggerForm.s1")}</code>
+              <code>{tHC("s1")}</code>
               {t("oauthHintHeaderPeriod")}
               <code>workflow-trigger</code>
               {t("oauthHintRealmRoleSuffix")}

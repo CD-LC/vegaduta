@@ -85,7 +85,7 @@ export function DataPanel({
       <div>
         <p className="text-sm font-semibold text-foreground">Data</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-          {tHC("hcBuildStudioDataPanel.s12")} {keys} item{keys === 1 ? "" : "s"}, {Math.max(1, Math.round(bytes / 1024))} {tHC("hcBuildStudioDataPanel.s11")}
+          {tHC("s12")} {keys} item{keys === 1 ? "" : "s"}, {Math.max(1, Math.round(bytes / 1024))} {tHC("s11")}
         </p>
       </div>
       <textarea
@@ -97,7 +97,7 @@ export function DataPanel({
         spellCheck={false}
         disabled={disabled}
         className="h-64 w-full resize-y rounded-lg border border-border bg-neutral-950 p-2 font-mono text-[11px] leading-snug text-neutral-100 disabled:opacity-60"
-        aria-label={tHC("hcBuildStudioDataPanel.s10")}
+        aria-label={tHC("s10")}
       />
       {msg && (
         <p role={msg.tone === "err" ? "alert" : "status"} className={`text-xs ${msg.tone === "err" ? "text-destructive" : "text-emerald-600"}`}>
@@ -122,7 +122,7 @@ export function DataPanel({
         </Button>
       </div>
       <div className="flex flex-col gap-2 border-t border-border pt-3">
-        <p className="text-xs font-medium text-foreground">{tHC("hcBuildStudioDataPanel.s9")}</p>
+        <p className="text-xs font-medium text-foreground">{tHC("s9")}</p>
         <div className="flex flex-wrap items-center gap-2">
           <Button size="sm" variant="outline" className="gap-1.5" disabled={keys === 0} onClick={() => saveText(`${fileSafe(name)}-data.json`, formatted + "\n", "application/json")}>
             <Download aria-hidden="true" size={13} /> JSON
@@ -138,7 +138,7 @@ export function DataPanel({
           </Button>
           {tables.length > 0 && (
             <select value={csvKey} onChange={(e) => setCsvKey(e.target.value)} aria-label="Which data to export as CSV" className="rounded-md border border-border bg-background px-2 py-1.5 text-xs">
-              <option value="">{tHC("hcBuildStudioDataPanel.s8")}</option>
+              <option value="">{tHC("s8")}</option>
               {tables.map((k) => (
                 <option key={k} value={k}>
                   Table: {k}
@@ -147,26 +147,26 @@ export function DataPanel({
             </select>
           )}
           <Button size="sm" variant="outline" className="gap-1.5" disabled={disabled} onClick={() => fileRef.current?.click()}>
-            <Upload aria-hidden="true" size={13} /> {tHC("hcBuildStudioDataPanel.s7")}
+            <Upload aria-hidden="true" size={13} /> {tHC("s7")}
           </Button>
-          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-label={tHC("hcBuildStudioDataPanel.s6")} onChange={(e) => void onFile(e.target.files?.[0])} />
+          <input ref={fileRef} type="file" accept="application/json,.json" className="hidden" aria-label={tHC("s6")} onChange={(e) => void onFile(e.target.files?.[0])} />
         </div>
       </div>
       <div className="border-t border-border pt-3">
         <Button size="sm" variant="outline" className="gap-1.5 text-destructive" disabled={keys === 0 || disabled} onClick={() => setConfirmReset(true)}>
-          <RotateCcw aria-hidden="true" size={13} /> {tHC("hcBuildStudioDataPanel.s1")}
+          <RotateCcw aria-hidden="true" size={13} /> {tHC("s1")}
         </Button>
       </div>
       <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("hcBuildStudioDataPanel.s5")}</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s5")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("hcBuildStudioDataPanel.s4")}{keys} item{keys === 1 ? "" : "s"}{tHC("hcBuildStudioDataPanel.s3")}
+              {tHC("s4")}{keys} item{keys === 1 ? "" : "s"}{tHC("s3")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{tHC("hcBuildStudioDataPanel.s2")}</AlertDialogCancel>
+            <AlertDialogCancel>{tHC("s2")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => {
@@ -175,7 +175,7 @@ export function DataPanel({
                 setMsg({ tone: "ok", text: "Data reset. The preview reloaded." });
               }}
             >
-              {tHC("hcBuildStudioDataPanel.s1")}
+              {tHC("s1")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

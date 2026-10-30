@@ -168,7 +168,7 @@ export default function SharedAgentPage() {
         {phase === "loading" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center">
             <Loader2 className="size-6 animate-spin text-primary" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">{tHC("hcAShareIdPage.s17")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s17")}</p>
           </div>
         )}
 
@@ -187,9 +187,9 @@ export default function SharedAgentPage() {
             <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-card/40 px-3 py-2">
               <Info className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
               <p className="text-xs text-muted-foreground">
-                <span className="text-foreground">{info.agentName}</span> {tHC("hcAShareIdPage.s16")}{" "}
+                <span className="text-foreground">{info.agentName}</span> {tHC("s16")}{" "}
                 <BrandName /> sandbox
-                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}{tHC("hcAShareIdPage.s15")}
+                {info.personaLabel ? ` for a ${info.personaLabel.toLowerCase()}` : ""}{tHC("s15")}
               </p>
             </div>
 
@@ -200,7 +200,7 @@ export default function SharedAgentPage() {
             >
               {bubbles.length === 0 && (
                 <p className="py-10 text-center text-sm text-muted-foreground">
-                  {tHC("hcAShareIdPage.s14")} {info.agentName} {tHC("hcAShareIdPage.s13")}
+                  {tHC("s14")} {info.agentName} {tHC("s13")}
                 </p>
               )}
               {bubbles.map((b) => (
@@ -252,7 +252,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcAShareIdPage.s12")}>
+        <Link href="/" className="flex items-center gap-2" aria-label={tHC("s12")}>
           <img src="/logo-mark.png" alt="" className="h-7 w-auto shrink-0 object-contain" />
           <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
             Vega<span className="text-primary">Dūta</span>
@@ -261,7 +261,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <Sparkles className="size-3" aria-hidden="true" />
-          {tHC("hcAShareIdPage.s11")}
+          {tHC("s11")}
         </span>
 
         {expiryLabel && (
@@ -274,8 +274,8 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
         <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/try">
-              <span className="hidden sm:inline">{tHC("hcAShareIdPage.s10")}</span>
-              <span className="sm:hidden">{tHC("hcAShareIdPage.s9")}</span>
+              <span className="hidden sm:inline">{tHC("s10")}</span>
+              <span className="sm:hidden">{tHC("s9")}</span>
             </Link>
           </Button>
         </div>
@@ -353,7 +353,7 @@ function BlockedComposer({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild size="sm">
         <Link href="/try">
-          {tHC("hcAShareIdPage.s8")}
+          {tHC("s8")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -377,7 +377,7 @@ function BlockedScreen({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild>
         <Link href="/try">
-          {tHC("hcAShareIdPage.s7")}
+          {tHC("s7")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -417,7 +417,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
     <div className="flex flex-col items-center gap-2 py-1">
       {done ? (
         <p className="text-xs text-muted-foreground" role="status">
-          {tHC("hcAShareIdPage.s6")}
+          {tHC("s6")}
         </p>
       ) : !open ? (
         <button
@@ -426,7 +426,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
           className="inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           <Flag className="size-3" aria-hidden="true" />
-          {tHC("hcAShareIdPage.s5")}
+          {tHC("s5")}
         </button>
       ) : (
         <AnimatePresence>
@@ -435,7 +435,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
           >
-            <p className="text-xs text-muted-foreground">{tHC("hcAShareIdPage.s4")}</p>
+            <p className="text-xs text-muted-foreground">{tHC("s4")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {REPORT_REASONS.map((r) => (
                 <button
@@ -474,11 +474,11 @@ function ViewerFooter() {
           href="/try"
           className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
         >
-          {tHC("hcAShareIdPage.s3")} <BrandName /> {tHC("hcAShareIdPage.s2")}
+          {tHC("s3")} <BrandName /> {tHC("s2")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
         <p className="text-[11px] text-muted-foreground">
-          {tHC("hcAShareIdPage.s1")}
+          {tHC("s1")}
         </p>
       </div>
     </footer>

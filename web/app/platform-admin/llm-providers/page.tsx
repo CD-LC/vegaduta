@@ -235,15 +235,15 @@ export default function LlmProvidersPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminLlmprovidersPage.s3")}
+      title={tHC("s3")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("hcPlatformadminLlmprovidersPage.s2")}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("s2")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminLlmprovidersPage.s1")}
+        {tHC("s1")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </PageHint>
 

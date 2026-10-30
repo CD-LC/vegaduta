@@ -41,7 +41,7 @@ export default function DocsPageClient() {
 
       {/* --------------------------------------------------------------- Nav */}
       <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-y-3 px-5 py-5 sm:justify-between sm:px-8" aria-label="Site">
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label={tHC("hcDocsDocsPageClient.s7")}>
+        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label={tHC("s7")}>
           {/* The human-in-helmet winged emblem, in its own colors, always
               next to the brand name (direct instruction, 2026-07-25). */}
           <Image
@@ -84,7 +84,7 @@ export default function DocsPageClient() {
           {docsSiteUrl() && (
             <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
               <a href={docsSiteUrl() ?? undefined}>
-                <BookOpen className="size-4" aria-hidden="true" /> {tHC("hcDocsDocsPageClient.s6")}
+                <BookOpen className="size-4" aria-hidden="true" /> {tHC("s6")}
               </a>
             </Button>
           )}
@@ -113,7 +113,7 @@ export default function DocsPageClient() {
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/signup">
-                {tHC("hcDocsDocsPageClient.s2")} <ArrowRight className="size-4" aria-hidden="true" />
+                {tHC("s2")} <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
             </Button>
           </PublicAuthCtas>
@@ -123,7 +123,7 @@ export default function DocsPageClient() {
       {/* ------------------------------------------------------------- Header */}
       <header className="mx-auto max-w-3xl px-6 pb-12 pt-10 text-center">
         <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-primary">
-          <BookOpen className="size-4" aria-hidden="true" /> {tHC("hcDocsDocsPageClient.s5")}
+          <BookOpen className="size-4" aria-hidden="true" /> {tHC("s5")}
         </span>
         <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{DOCS_TITLE}</h1>
         <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">{DOCS_SUBTITLE}</p>
@@ -137,22 +137,22 @@ export default function DocsPageClient() {
       {/* ----------------------------------------------------------- Footer CTA */}
       <section className="mx-auto max-w-3xl px-6 pb-20 text-center">
         <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] px-6 py-10">
-          <h2 className="text-balance text-2xl font-semibold tracking-tight">{tHC("hcDocsDocsPageClient.s4")}</h2>
+          <h2 className="text-balance text-2xl font-semibold tracking-tight">{tHC("s4")}</h2>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            {tHC("hcDocsDocsPageClient.s3")}
+            {tHC("s3")}
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <PublicAuthCtas size="default" variant="default">
               <Button asChild>
                 <Link href="/signup">
-                  {tHC("hcDocsDocsPageClient.s2")} <ArrowRight className="size-4" aria-hidden="true" />
+                  {tHC("s2")} <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
             </PublicAuthCtas>
             {hasAcademy() && (
               <Button asChild variant="outline">
                 <a href={academyUrl()} target="_blank" rel="noopener noreferrer">
-                  <GraduationCap className="size-4" aria-hidden="true" /> {tHC("hcDocsDocsPageClient.s1")}
+                  <GraduationCap className="size-4" aria-hidden="true" /> {tHC("s1")}
                 </a>
               </Button>
             )}

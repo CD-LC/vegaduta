@@ -105,7 +105,7 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
             </span>
           ) : (
             <span className="rounded-full border border-border/70 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {tHC("hcComponentsPluginsPluginCard.s4")}
+              {tHC("s4")}
             </span>
           )}
         </div>
@@ -130,17 +130,17 @@ export default function PluginCard({ plugin }: { plugin: PluginEntry }) {
                   download from the API, never a client-side navigation. */}
               <a href={downloadUrl} download={plugin.artifact.fileName}>
                 <Download size={14} strokeWidth={2} aria-hidden="true" />
-                {tHC("hcComponentsPluginsPluginCard.s3")}{formatSize(plugin.artifact.sizeBytes)})
+                {tHC("s3")}{formatSize(plugin.artifact.sizeBytes)})
               </a>
             </Button>
           ) : (
-            <span className="text-xs text-muted-foreground">{tHC("hcComponentsPluginsPluginCard.s2")}</span>
+            <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
           )}
           {plugin.externalStoreUrl && (
             <Button asChild variant="outline" size="sm">
               <a href={plugin.externalStoreUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink size={14} strokeWidth={2} aria-hidden="true" />
-                {tHC("hcComponentsPluginsPluginCard.s1")}
+                {tHC("s1")}
               </a>
             </Button>
           )}

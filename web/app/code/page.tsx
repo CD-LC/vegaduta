@@ -78,7 +78,7 @@ export default function LocalCodePage() {
     <main className="vd-pub relative flex min-h-screen w-full flex-col overflow-x-clip bg-background text-foreground antialiased">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcCodePage.s3")}>
+          <Link href="/" className="flex items-center gap-2" aria-label={tHC("s3")}>
             <img src="/logo-mark.png" alt="" width={38} height={28} className="h-7 w-auto shrink-0 object-contain" />
             <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
               Vega<span className="text-primary">Dūta</span>
@@ -90,7 +90,7 @@ export default function LocalCodePage() {
               <Button asChild size="sm" variant="outline">
                 <Link href="/">
                   <ArrowLeft className="size-3.5" />
-                  <span className="hidden sm:inline">{tHC("hcCodePage.s2")}</span>
+                  <span className="hidden sm:inline">{tHC("s2")}</span>
                   <span className="sm:hidden">Console</span>
                 </Link>
               </Button>
@@ -106,7 +106,7 @@ export default function LocalCodePage() {
                   Sign in
                 </Button>
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/signup">{tHC("hcCodePage.s1")}</Link>
+                  <Link href="/signup">{tHC("s1")}</Link>
                 </Button>
               </>
             )}

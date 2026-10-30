@@ -285,7 +285,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
 
   return (
     <Section
-      title={tHC("hcAgentsQualitySimulationSection.s18")}
+      title={tHC("s18")}
       description="Adversarial personas hold a bounded conversation with this agent — tools disabled, so no real side effects — and a judge scores each transcript."
       actions={
         <div className="flex items-center gap-2">
@@ -297,9 +297,9 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
     >
       {loadFailed && (
         <Alert variant="destructive">
-          <AlertTitle>{tHC("hcAgentsQualitySimulationSection.s17")}</AlertTitle>
+          <AlertTitle>{tHC("s17")}</AlertTitle>
           <AlertDescription className="flex items-center gap-3">
-            {tHC("hcAgentsQualitySimulationSection.s16")}
+            {tHC("s16")}
             <Button variant="outline" size="sm" onClick={refresh}>
               Retry
             </Button>
@@ -311,7 +311,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
       <Card>
         <CardContent className="space-y-3 pt-4">
           {personas == null ? (
-            <p className="text-sm text-muted-foreground">{tHC("hcAgentsQualitySimulationSection.s15")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s15")}</p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {personas.map((p) => (
@@ -342,8 +342,8 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                         <button
                           type="button"
                           className="ms-auto text-muted-foreground hover:text-destructive"
-                          title={tHC("hcAgentsQualitySimulationSection.s14")}
-                          aria-label={tHC("hcAgentsQualitySimulationSection.s13")}
+                          title={tHC("s14")}
+                          aria-label={tHC("s13")}
                           onClick={(e) => e.preventDefault()}
                         >
                           <Trash2 size={13} aria-hidden="true" />
@@ -351,9 +351,9 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>{tHC("hcAgentsQualitySimulationSection.s12")}{p.name}&quot;?</AlertDialogTitle>
+                          <AlertDialogTitle>{tHC("s12")}{p.name}&quot;?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            {tHC("hcAgentsQualitySimulationSection.s11")}
+                            {tHC("s11")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -375,7 +375,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground" htmlFor="simulation-max-turns">
-                {tHC("hcAgentsQualitySimulationSection.s10")}
+                {tHC("s10")}
               </label>
               <Input
                 id="simulation-max-turns"
@@ -386,7 +386,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground" htmlFor="simulation-budget">
-                {tHC("hcAgentsQualitySimulationSection.s9")}
+                {tHC("s9")}
               </label>
               <Input
                 id="simulation-budget"
@@ -397,10 +397,10 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
               />
             </div>
             <Button size="sm" onClick={() => void launch()} disabled={busy || selected.size === 0}>
-              <Play size={14} aria-hidden="true" /> {tHC("hcAgentsQualitySimulationSection.s8")}{selected.size})
+              <Play size={14} aria-hidden="true" /> {tHC("s8")}{selected.size})
             </Button>
             <span className="text-xs text-muted-foreground">
-              {tHC("hcAgentsQualitySimulationSection.s7")}
+              {tHC("s7")}
             </span>
           </div>
         </CardContent>
@@ -410,7 +410,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
       <div className="space-y-2">
         {sessions.length === 0 && !loadFailed ? (
           <p className="text-sm text-muted-foreground">
-            {tHC("hcAgentsQualitySimulationSection.s6")}
+            {tHC("s6")}
           </p>
         ) : (
           sessions.map((s) => (
@@ -427,9 +427,9 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                     <ChevronRight size={14} aria-hidden="true" />
                   )}
                   {statusBadge(s.status)}
-                  {s.cancelRequested && LIVE.includes(s.status) && <Badge variant="secondary">{tHC("hcAgentsQualitySimulationSection.s5")}</Badge>}
+                  {s.cancelRequested && LIVE.includes(s.status) && <Badge variant="secondary">{tHC("s5")}</Badge>}
                   <span className="text-sm text-foreground">
-                    {s.personaKeys.length} persona{s.personaKeys.length === 1 ? "" : "s"} · {s.maxTurns} {tHC("hcAgentsQualitySimulationSection.s4")}
+                    {s.personaKeys.length} persona{s.personaKeys.length === 1 ? "" : "s"} · {s.maxTurns} {tHC("s4")}
                   </span>
                   <span className="ms-auto text-xs text-muted-foreground">
                     {new Date(s.createdAt).toLocaleString()}
@@ -438,14 +438,14 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                 {LIVE.includes(s.status) && !s.cancelRequested && (
                   <div className="mt-2">
                     <Button variant="outline" size="sm" onClick={() => void cancelSession(s.id)}>
-                      <StopCircle size={14} aria-hidden="true" /> {tHC("hcAgentsQualitySimulationSection.s3")}
+                      <StopCircle size={14} aria-hidden="true" /> {tHC("s3")}
                     </Button>
                   </div>
                 )}
                 {expandedSession === s.id && (
                   <div className="mt-3 space-y-1 border-t border-border pt-3">
                     {(sessionRuns[s.id] || []).length === 0 ? (
-                      <p className="text-sm text-muted-foreground">{tHC("hcAgentsQualitySimulationSection.s2")}</p>
+                      <p className="text-sm text-muted-foreground">{tHC("s2")}</p>
                     ) : (
                       (sessionRuns[s.id] || []).map((r) => (
                         <div key={r.id} className="rounded-md border border-border">
@@ -481,7 +481,7 @@ export default function SimulationSection({ agentId }: { agentId: string | null 
                                 </pre>
                               )}
                               {!openRunDetail && !r.verdictReason && !r.errorMessage && (
-                                <p className="text-muted-foreground">{tHC("hcAgentsQualitySimulationSection.s1")}</p>
+                                <p className="text-muted-foreground">{tHC("s1")}</p>
                               )}
                             </div>
                           )}

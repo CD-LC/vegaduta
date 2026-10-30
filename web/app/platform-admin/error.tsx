@@ -26,15 +26,15 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="font-mono text-5xl font-semibold tracking-tight text-primary" aria-hidden="true">
           500
         </div>
-        <h1 className="text-xl font-semibold text-foreground">{tHC("hcPlatformadminError.s3")}</h1>
+        <h1 className="text-xl font-semibold text-foreground">{tHC("s3")}</h1>
         <p className="text-sm text-muted-foreground">
-          {tHC("hcPlatformadminError.s2")}{" "}
+          {tHC("s2")}{" "}
           {error?.digest ? <span className="font-mono">Ref {error.digest}</span> : null}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button type="button" onClick={reset}>
             <RotateCcw aria-hidden="true" />
-            {tHC("hcPlatformadminError.s1")}
+            {tHC("s1")}
           </Button>
           <Button asChild variant="outline">
             <Link href="/platform-admin">

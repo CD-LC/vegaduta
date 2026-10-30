@@ -76,10 +76,10 @@ export default function PushToTalkRow({
           variant="outline"
           onClick={() => setShowMicTest(!showMicTest)}
           disabled={testingMicrophone || recording || pipelineBusy}
-          title={tHC("hcComponentsAgentsCallPanelPushToTalkRow.s2")}
+          title={tHC("s2")}
         >
           <Volume2 size={12} aria-hidden="true" />
-          {tHC("hcComponentsAgentsCallPanelPushToTalkRow.s1")}
+          {tHC("s1")}
         </Button>
         {/* Part 5(a): replaces the old single binary "Thinking…" label with
             the 7-stage indicator. Shown across BOTH "recording" (Listening,

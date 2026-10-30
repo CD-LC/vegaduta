@@ -32,7 +32,7 @@ export default function TemplateRequirementsPanel({
               aria-hidden
               style={{ color: "var(--state-success, currentColor)" }}
             />
-            {tHC("hcComponentsTemplatesTemplateRequirementsPanel.s5")}
+            {tHC("s5")}
           </p>
           <p className="text-sm text-muted-foreground">
             This template needs no connections or tools - it works as soon as you import it.
@@ -47,13 +47,13 @@ export default function TemplateRequirementsPanel({
       <CardContent className="space-y-4">
         <p className="flex items-center gap-2 text-sm font-medium text-foreground">
           <PlugZap size={15} strokeWidth={2} aria-hidden />
-          {tHC("hcComponentsTemplatesTemplateRequirementsPanel.s4")}
+          {tHC("s4")}
         </p>
         <p className="text-sm text-muted-foreground">
-          {tHC("hcComponentsTemplatesTemplateRequirementsPanel.s3")}
+          {tHC("s3")}
         </p>
         {required.length > 0 && <RequirementList title="Required" items={required} />}
-        {optional.length > 0 && <RequirementList title={tHC("hcComponentsTemplatesTemplateRequirementsPanel.s2")} items={optional} />}
+        {optional.length > 0 && <RequirementList title={tHC("s2")} items={optional} />}
       </CardContent>
     </Card>
   );
@@ -79,7 +79,7 @@ function RequirementList({ title, items }: { title: string; items: TemplateRequi
                 Set up
               </Link>
             ) : (
-              <span className="shrink-0 text-xs text-muted-foreground">{tHC("hcComponentsTemplatesTemplateRequirementsPanel.s1")}</span>
+              <span className="shrink-0 text-xs text-muted-foreground">{tHC("s1")}</span>
             )}
           </li>
         ))}

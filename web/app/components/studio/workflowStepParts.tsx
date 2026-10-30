@@ -34,7 +34,7 @@ export function AddMenu({ onAdd }: { onAdd: (type: WorkflowStepType) => void }) 
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="mt-1 rounded-full border border-border/60 p-1 text-muted-foreground hover:border-primary/60 hover:text-foreground"
-        aria-label={tHC("hcComponentsStudioWorkflowStepParts.s1")}
+        aria-label={tHC("s1")}
       >
         <Plus aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
       </button>

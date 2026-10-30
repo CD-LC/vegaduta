@@ -140,7 +140,7 @@ export default function CodeEditorTextarea({
         />
       </div>
       <span id={hintId} className="text-xs text-muted-foreground">
-        {tHC("hcComponentsCodeEditorTextarea.s1")}
+        {tHC("s1")}
       </span>
     </div>
   );

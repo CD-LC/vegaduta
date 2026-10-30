@@ -332,7 +332,7 @@ export default function EarnLanding() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
             >
-              {tHC("hcComponentsEarnlandingEarnLanding.s1")} <ExternalLink className="size-3" />
+              {tHC("s1")} <ExternalLink className="size-3" />
             </a>
           </p>
         </div>

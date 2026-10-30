@@ -197,7 +197,7 @@ export default function RunHistoryRail({
     <aside
       className={`rh-rail${className ? ` ${className}` : ""}`}
       data-open={mobileOpen ? "true" : "false"}
-      aria-label={tHC("hcComponentsWorkflowRunHistoryRail.s10")}
+      aria-label={tHC("s10")}
     >
       <button
         ref={toggleRef}
@@ -221,7 +221,7 @@ export default function RunHistoryRail({
       <div className="rh-panel" id={panelId} aria-busy={loading || undefined}>
         <header className="rh-head">
           <History size={15} aria-hidden="true" className="rh-head-icon" />
-          <h2 className="rh-title">{tHC("hcComponentsWorkflowRunHistoryRail.s9")}</h2>
+          <h2 className="rh-title">{tHC("s9")}</h2>
           {runs.length > 0 && <span className="rh-sub">{runs.length} runs</span>}
           {onRefresh && (
             <button
@@ -242,7 +242,7 @@ export default function RunHistoryRail({
               setMobileOpen(false);
               toggleRef.current?.focus();
             }}
-            aria-label={tHC("hcComponentsWorkflowRunHistoryRail.s8")}
+            aria-label={tHC("s8")}
           >
             <X size={14} aria-hidden="true" />
           </button>
@@ -259,7 +259,7 @@ export default function RunHistoryRail({
         )}
 
         {loading && rows.length === 0 ? (
-          <div className="rh-skeleton" aria-label={tHC("hcComponentsWorkflowRunHistoryRail.s7")} role="status">
+          <div className="rh-skeleton" aria-label={tHC("s7")} role="status">
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className="rh-skel-row" />
             ))}
@@ -271,8 +271,8 @@ export default function RunHistoryRail({
               <path className="rh-empty-path" d="M10 32 C 40 32, 60 10, 110 8" />
               <circle className="rh-empty-dot" cx="110" cy="8" r="3" />
             </svg>
-            <p className="rh-empty-line">{tHC("hcComponentsWorkflowRunHistoryRail.s6")}</p>
-            <p className="rh-empty-sub">{tHC("hcComponentsWorkflowRunHistoryRail.s5")}</p>
+            <p className="rh-empty-line">{tHC("s6")}</p>
+            <p className="rh-empty-sub">{tHC("s5")}</p>
             {children ??
               (onRunNow && (
                 <button type="button" className="rh-run-now" onClick={onRunNow}>
@@ -288,7 +288,7 @@ export default function RunHistoryRail({
               className="rh-list"
               role="listbox"
               tabIndex={0}
-              aria-label={tHC("hcComponentsWorkflowRunHistoryRail.s4")}
+              aria-label={tHC("s4")}
               aria-describedby={hintId}
               aria-activedescendant={effectiveActive ? optionId(effectiveActive) : undefined}
               onKeyDown={onListKey}
@@ -392,14 +392,14 @@ function RunOption({ row, domId, selected, active, comparing, latestVersion, whe
             {formatDuration(duration)}
           </span>
           {slowFactor != null && (
-            <span className="rh-slow" title={tHC("hcComponentsWorkflowRunHistoryRail.s3")}>
-              {slowFactor.toFixed(1)}{tHC("hcComponentsWorkflowRunHistoryRail.s2")}
+            <span className="rh-slow" title={tHC("s3")}>
+              {slowFactor.toFixed(1)}{tHC("s2")}
             </span>
           )}
         </span>
         {stale && (
           <span className="rh-changed">
-            {tHC("hcComponentsWorkflowRunHistoryRail.s1")}{latestVersion}
+            {tHC("s1")}{latestVersion}
           </span>
         )}
         {comparing && <span className="rh-compare-tag">Comparing</span>}

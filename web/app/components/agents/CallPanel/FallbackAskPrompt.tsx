@@ -28,7 +28,7 @@ export default function FallbackAskPrompt({ pendingFallbackAsk, fallbackAskResol
               variant="outline"
               onClick={() => fallbackAskResolverRef.current?.(true)}
             >
-              {tHC("hcComponentsAgentsCallPanelFallbackAskPrompt.s1")}
+              {tHC("s1")}
             </Button>
             <Button
               type="button"

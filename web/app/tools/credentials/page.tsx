@@ -189,7 +189,7 @@ function CredentialEditDialog({
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center justify-between gap-3">
-            <AlertDialogTitle>{tHC("hcToolsCredentialsPage.s14")}</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s14")}</AlertDialogTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -300,8 +300,8 @@ function CredentialEditDialog({
                     className="text-muted-foreground hover:text-destructive"
                     disabled={isBusy}
                     onClick={() => setRows((prev) => prev.filter((_, idx) => idx !== i))}
-                    aria-label={tHC("hcToolsCredentialsPage.s16")}
-                    title={tHC("hcToolsCredentialsPage.s16")}
+                    aria-label={tHC("s16")}
+                    title={tHC("s16")}
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </Button>
@@ -364,7 +364,7 @@ function StaticServerCard({ server }: { server: McpServer }) {
             </div>
             {server.description && <p className="mt-1 text-xs text-muted-foreground">{server.description}</p>}
             <p className="mt-2 text-xs text-muted-foreground">
-              {tHC("hcToolsCredentialsPage.s15")}
+              {tHC("s15")}
             </p>
           </div>
         </div>
@@ -420,7 +420,7 @@ function ServerCredentialCard({
         {server.dynamic && (
           <div className="mt-4 flex gap-2">
             <Button variant="outline" size="sm" onClick={onEdit} className="gap-1">
-              <Pencil size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s14")}
+              <Pencil size={14} aria-hidden="true" /> {tHC("s14")}
             </Button>
             <Button
               variant="outline"
@@ -428,7 +428,7 @@ function ServerCredentialCard({
               onClick={onDelete}
               className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <Trash2 size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s13")}
+              <Trash2 size={14} aria-hidden="true" /> {tHC("s13")}
             </Button>
           </div>
         )}
@@ -532,18 +532,18 @@ export default function CredentialsPage() {
   return (
     <AppShell eyebrow={t("pageEyebrow")}>
       <PageHeader
-        title={tHC("hcToolsCredentialsPage.s12")}
+        title={tHC("s12")}
         subtitle="Manage API keys and tokens for your connected MCP servers"
         actions={
           <>
             <Button variant="ghost" size="sm" className="gap-1" asChild>
               <Link href="/help/docs#tools" target="_blank" rel="noopener noreferrer">
-                <HelpCircle size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s11")}
+                <HelpCircle size={14} aria-hidden="true" /> {tHC("s11")}
               </Link>
             </Button>
             <Button variant="outline" size="sm" className="gap-1" asChild>
               <Link href="/tools/servers">
-                <ArrowLeft size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s10")}
+                <ArrowLeft size={14} aria-hidden="true" /> {tHC("s10")}
               </Link>
             </Button>
           </>
@@ -553,21 +553,21 @@ export default function CredentialsPage() {
       {servers.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-12 text-center">
           <Lock size={32} className="mb-3 text-muted-foreground" aria-hidden="true" />
-          <h3 className="font-semibold">{tHC("hcToolsCredentialsPage.s9")}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{tHC("hcToolsCredentialsPage.s8")}</p>
+          <h3 className="font-semibold">{tHC("s9")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{tHC("s8")}</p>
           <Button className="mt-4" size="sm" asChild>
             <Link href="/tools">
-              <Plus size={14} aria-hidden="true" /> {tHC("hcToolsCredentialsPage.s7")}
+              <Plus size={14} aria-hidden="true" /> {tHC("s7")}
             </Link>
           </Button>
         </div>
       ) : (
         <div className="space-y-8">
-          <Section title={tHC("hcToolsCredentialsPage.s6")} className="space-y-4">
+          <Section title={tHC("s6")} className="space-y-4">
             {dynamicServers.length === 0 ? (
               <Alert>
                 <AlertDescription>
-                  {tHC("hcToolsCredentialsPage.s5")}
+                  {tHC("s5")}
                 </AlertDescription>
               </Alert>
             ) : (
@@ -593,7 +593,7 @@ export default function CredentialsPage() {
 
           {staticServers.length > 0 && (
             <Section
-              title={tHC("hcToolsCredentialsPage.s4")}
+              title={tHC("s4")}
               description="Shared platform-wide and wired at deployment via an env var on the server — not a per-workspace credential, so there's nothing to edit here."
               className="space-y-3"
             >
@@ -628,10 +628,10 @@ export default function CredentialsPage() {
       <AlertDialog open={!!deletingServer} onOpenChange={(open: boolean) => !open && setDeletingServer(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("hcToolsCredentialsPage.s3")} {deletingServer?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s3")} {deletingServer?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("hcToolsCredentialsPage.s2")}{" "}
-              {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"} {tHC("hcToolsCredentialsPage.s1")}
+              {tHC("s2")}{" "}
+              {deletingServer?.url && !deletingServer?.command ? "headers" : "environment variables"} {tHC("s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

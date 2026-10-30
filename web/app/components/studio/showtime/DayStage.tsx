@@ -397,7 +397,7 @@ function Orrery({
           }}
         >
           <div className="mb-[0.6cqw] uppercase tracking-wider text-zinc-400" style={{ fontSize: "max(8px,1.1cqw)" }}>
-            {DAY_AGENTS.find((a) => a.id === ev.agent)?.name} {tHC("hcComponentsStudioShowtimeDayStage.s3")}
+            {DAY_AGENTS.find((a) => a.id === ev.agent)?.name} {tHC("s3")}
           </div>
           <ul className="space-y-[0.5cqw]">
             {ev.tools.map((t, i) => {
@@ -457,9 +457,9 @@ function Counters({ stats }: { stats: ReturnType<typeof statsAt> }) {
   return (
     <div
       className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-xl border border-white/10 bg-black/40 px-3 py-1.5 text-xs backdrop-blur"
-      aria-label={tHC("hcComponentsStudioShowtimeDayStage.s2")}
+      aria-label={tHC("s2")}
     >
-      <span className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeDayStage.s1")}</span>
+      <span className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("s1")}</span>
       {items.map((i) => (
         <span key={i.l} className={`tabular-nums ${i.c || "text-zinc-300"}`}>
           <b className="text-sm">{i.v}</b> <span className="text-zinc-400">{i.l}</span>

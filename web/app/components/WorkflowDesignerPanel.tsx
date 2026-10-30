@@ -362,7 +362,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                     autoFocus
                   />
                   <p id="wf-new-name-help" className="text-xs text-muted-foreground">
-                    {tHC("hcComponentsWorkflowDesignerPanel.s2")}
+                    {tHC("s2")}
                   </p>
                 </div>
                 <div className="space-y-1.5">
@@ -427,7 +427,7 @@ export default function WorkflowDesignerPanel({ onOpen, initialTemplateKey }: Wo
                 href="/help#workflows"
                 className="text-sm font-medium text-primary underline-offset-4 hover:underline"
               >
-                {tHC("hcComponentsWorkflowDesignerPanel.s1")}
+                {tHC("s1")}
               </Link>
             </div>
           }

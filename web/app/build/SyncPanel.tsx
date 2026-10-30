@@ -113,9 +113,9 @@ export default function SyncPanel({ project, onError }: Props) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-2">
-            <GitMerge aria-hidden="true" size={14} /> {tHC("hcBuildSyncPanel.s7")} {status?.base_branch || "base"}
+            <GitMerge aria-hidden="true" size={14} /> {tHC("s7")} {status?.base_branch || "base"}
           </span>
-          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label={tHC("hcBuildSyncPanel.s6")}>
+          <Button variant="ghost" size="sm" onClick={manualRefresh} disabled={loading} aria-label={tHC("s6")}>
             {loading ? (
               <Loader2 aria-hidden="true" size={14} className="animate-spin" />
             ) : (
@@ -131,7 +131,7 @@ export default function SyncPanel({ project, onError }: Props) {
               <span className="state-dot" /> {c.label}
             </span>
           ))}
-          {!status && !loading && <span className="text-xs text-muted-foreground">{tHC("hcBuildSyncPanel.s5")}</span>}
+          {!status && !loading && <span className="text-xs text-muted-foreground">{tHC("s5")}</span>}
         </div>
 
         {extLine && (
@@ -147,9 +147,9 @@ export default function SyncPanel({ project, onError }: Props) {
             ) : (
               <GitMerge aria-hidden="true" size={14} />
             )}{" "}
-            Pull {status?.base_branch || "base"} {tHC("hcBuildSyncPanel.s4")}
+            Pull {status?.base_branch || "base"} {tHC("s4")}
           </Button>
-          {status && !status.can_pull && <span className="text-xs text-muted-foreground">{tHC("hcBuildSyncPanel.s3")}</span>}
+          {status && !status.can_pull && <span className="text-xs text-muted-foreground">{tHC("s3")}</span>}
         </div>
 
         {conflicts && (
@@ -159,7 +159,7 @@ export default function SyncPanel({ project, onError }: Props) {
             data-testid="sync-conflicts"
           >
             <p className="mb-2 font-medium text-foreground">
-              {tHC("hcBuildSyncPanel.s2")}
+              {tHC("s2")}
             </p>
             {conflicts.length ? (
               <ul className="list-disc space-y-0.5 ps-5 font-mono text-muted-foreground">
@@ -168,7 +168,7 @@ export default function SyncPanel({ project, onError }: Props) {
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground">{tHC("hcBuildSyncPanel.s1")}</p>
+              <p className="text-muted-foreground">{tHC("s1")}</p>
             )}
           </div>
         )}

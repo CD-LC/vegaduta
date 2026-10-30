@@ -319,9 +319,9 @@ export default function AcademyLearnersPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminAcademylearnersPage.s22")}
+      title={tHC("s22")}
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("hcPlatformadminAcademylearnersPage.s21")}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={refreshing} title={tHC("s21")}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
@@ -332,13 +332,13 @@ export default function AcademyLearnersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {tHC("hcPlatformadminAcademylearnersPage.s20")}
+        {tHC("s20")}
         {lastChecked && ` Last checked ${lastChecked.toLocaleTimeString()}.`}
       </motion.p>
 
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <StatTile label="Learners" value={learners.length} icon={Users} />
-        <StatTile label={tHC("hcPlatformadminAcademylearnersPage.s6")} value={fullyUnlockedCount} icon={LockOpen} />
+        <StatTile label={tHC("s6")} value={fullyUnlockedCount} icon={LockOpen} />
         <StatTile label="Tenants" value={tenants.length} icon={Building2} />
       </div>
 
@@ -352,7 +352,7 @@ export default function AcademyLearnersPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={tHC("hcPlatformadminAcademylearnersPage.s19")}
+              placeholder={tHC("s19")}
               className="ps-8"
             />
           </div>
@@ -364,7 +364,7 @@ export default function AcademyLearnersPage() {
                 setConfirmingTenantUnlock(false);
               }}
               options={tenantOptions}
-              placeholder={tHC("hcPlatformadminAcademylearnersPage.s18")}
+              placeholder={tHC("s18")}
             />
           </div>
         </div>
@@ -378,7 +378,7 @@ export default function AcademyLearnersPage() {
               <>
                 <Button size="sm" variant="destructive" disabled={busyBulk === "tenant"} onClick={handleUnlockTenant}>
                   {busyBulk === "tenant" ? <Loader2 size={14} className="animate-spin" /> : <LockOpen size={14} />}
-                  {tHC("hcPlatformadminAcademylearnersPage.s17")}
+                  {tHC("s17")}
                 </Button>
                 <Button
                   size="sm"
@@ -394,9 +394,9 @@ export default function AcademyLearnersPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => setConfirmingTenantUnlock(true)}
-                title={tHC("hcPlatformadminAcademylearnersPage.s16")}
+                title={tHC("s16")}
               >
-                <Building2 size={14} /> {tHC("hcPlatformadminAcademylearnersPage.s15")}
+                <Building2 size={14} /> {tHC("s15")}
               </Button>
             )
           ) : null}
@@ -405,7 +405,7 @@ export default function AcademyLearnersPage() {
             <>
               <Button size="sm" variant="destructive" disabled={busyBulk === "all"} onClick={handleUnlockAll}>
                 {busyBulk === "all" ? <Loader2 size={14} className="animate-spin" /> : <LockOpen size={14} />}
-                {tHC("hcPlatformadminAcademylearnersPage.s14")}
+                {tHC("s14")}
               </Button>
               <Button
                 size="sm"
@@ -421,9 +421,9 @@ export default function AcademyLearnersPage() {
               size="sm"
               variant="outline"
               onClick={() => setConfirmingUnlockAll(true)}
-              title={tHC("hcPlatformadminAcademylearnersPage.s13")}
+              title={tHC("s13")}
             >
-              <Users size={14} /> {tHC("hcPlatformadminAcademylearnersPage.s12")}
+              <Users size={14} /> {tHC("s12")}
             </Button>
           )}
         </div>
@@ -437,12 +437,12 @@ export default function AcademyLearnersPage() {
 
       <Card className="gap-0 overflow-hidden py-0">
         {loading ? (
-          <p className="p-5 text-sm text-muted-foreground">{tHC("hcPlatformadminAcademylearnersPage.s11")}</p>
+          <p className="p-5 text-sm text-muted-foreground">{tHC("s11")}</p>
         ) : learners.length === 0 ? (
-          <p className="p-5 text-sm text-muted-foreground">{tHC("hcPlatformadminAcademylearnersPage.s10")}</p>
+          <p className="p-5 text-sm text-muted-foreground">{tHC("s10")}</p>
         ) : filtered.length === 0 ? (
           <p className="p-5 text-sm text-muted-foreground">
-            {search.trim() ? <>{tHC("hcPlatformadminAcademylearnersPage.s9")}{search}&rdquo;.</> : "No learners in this tenant filter."}
+            {search.trim() ? <>{tHC("s9")}{search}&rdquo;.</> : "No learners in this tenant filter."}
           </p>
         ) : (
           <>
@@ -470,12 +470,12 @@ export default function AcademyLearnersPage() {
                       ) : null}
                       {learner.hiddenFromLeaderboard ? (
                         <Badge variant="outline" className="gap-1 text-[10px]">
-                          <EyeOff size={10} /> {tHC("hcPlatformadminAcademylearnersPage.s8")}
+                          <EyeOff size={10} /> {tHC("s8")}
                         </Badge>
                       ) : null}
                     </div>
                     <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      {learner.completedLessons}/{learner.totalLessons} {tHC("hcPlatformadminAcademylearnersPage.s7")} {learner.labsCompleted} labs ·{" "}
+                      {learner.completedLessons}/{learner.totalLessons} {tHC("s7")} {learner.labsCompleted} labs ·{" "}
                       {learner.xpTotal} XP
                       {learner.lastActiveDate ? ` · active ${formatDate(learner.lastActiveDate)}` : ""}
                     </p>
@@ -484,7 +484,7 @@ export default function AcademyLearnersPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     {learner.fullyUnlocked ? (
                       <Badge variant="outline" className={`${OK_BADGE} gap-1`}>
-                        <LockOpen size={12} /> {tHC("hcPlatformadminAcademylearnersPage.s6")}
+                        <LockOpen size={12} /> {tHC("s6")}
                       </Badge>
                     ) : confirmingId === learner.id ? (
                       <>
@@ -494,7 +494,7 @@ export default function AcademyLearnersPage() {
                           ) : (
                             <LockOpen size={14} />
                           )}
-                          {tHC("hcPlatformadminAcademylearnersPage.s5")}
+                          {tHC("s5")}
                         </Button>
                         <Button
                           size="sm"
@@ -507,7 +507,7 @@ export default function AcademyLearnersPage() {
                       </>
                     ) : (
                       <Button size="sm" variant="outline" onClick={() => setConfirmingId(learner.id)}>
-                        <Lock size={14} /> {tHC("hcPlatformadminAcademylearnersPage.s4")}
+                        <Lock size={14} /> {tHC("s4")}
                       </Button>
                     )}
 
@@ -539,7 +539,7 @@ export default function AcademyLearnersPage() {
                           ) : (
                             <Trash2 size={14} />
                           )}
-                          {tHC("hcPlatformadminAcademylearnersPage.s3")}
+                          {tHC("s3")}
                         </Button>
                         <Button
                           size="sm"
@@ -556,9 +556,9 @@ export default function AcademyLearnersPage() {
                         variant="ghost"
                         disabled={busyId === learner.id}
                         onClick={() => setConfirmingResetId(learner.id)}
-                        title={tHC("hcPlatformadminAcademylearnersPage.s2")}
+                        title={tHC("s2")}
                       >
-                        <Trash2 size={14} /> {tHC("hcPlatformadminAcademylearnersPage.s1")}
+                        <Trash2 size={14} /> {tHC("s1")}
                       </Button>
                     )}
                   </div>

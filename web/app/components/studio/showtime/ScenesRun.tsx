@@ -37,7 +37,7 @@ export function FlowScene({ p }: SceneProps) {
   const draw = seg(p, 0.05, 0.6);
   const packet = seg(p, 0.6, 0.98);
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenesRun.s13")} icon={Layers}>
+    <Panel title={tHC("s13")} icon={Layers}>
       <div className="relative flex h-full flex-col justify-center gap-8">
         <div className="relative grid grid-cols-4 gap-3">
           {/* edges */}
@@ -90,15 +90,15 @@ export function FlowScene({ p }: SceneProps) {
         </div>
         <div className="grid grid-cols-2 gap-3 text-[12px]" style={{ opacity: seg(p, 0.62, 0.78) }}>
           <div className="rounded-xl border border-amber-400/30 bg-amber-500/10 p-3">
-            <div className="mb-0.5 font-medium text-amber-200">{tHC("hcComponentsStudioShowtimeScenesRun.s12")}</div>
+            <div className="mb-0.5 font-medium text-amber-200">{tHC("s12")}</div>
             <div className="text-zinc-400">
-              {tHC("hcComponentsStudioShowtimeScenesRun.s11")}
+              {tHC("s11")}
             </div>
           </div>
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <div className="mb-0.5 font-medium text-zinc-200">{tHC("hcComponentsStudioShowtimeScenesRun.s10")}</div>
+            <div className="mb-0.5 font-medium text-zinc-200">{tHC("s10")}</div>
             <div className="text-zinc-400">
-              {tHC("hcComponentsStudioShowtimeScenesRun.s9")}
+              {tHC("s9")}
             </div>
           </div>
         </div>
@@ -111,13 +111,13 @@ export function RunScene({ p }: SceneProps) {
     const tHC = useTranslations("hcComponentsStudioShowtimeScenesRun");
   const stepT = seg(p, 0.14, 0.62);
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenesRun.s8")} icon={Zap}>
+    <Panel title={tHC("s8")} icon={Zap}>
       <div className="flex h-full flex-col gap-3">
         <div
           className="rounded-xl border border-white/10 bg-black/25 px-3.5 py-2.5 text-sm"
           style={{ opacity: seg(p, 0.03, 0.1) }}
         >
-          <span className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeScenesRun.s7")}</span>
+          <span className="text-[10px] uppercase tracking-wider text-zinc-400">{tHC("s7")}</span>
           <div className="mt-0.5 text-zinc-100">
             {APP.button} <span className="text-zinc-400">· crop: {APP.crop}</span>
           </div>
@@ -148,7 +148,7 @@ export function RunScene({ p }: SceneProps) {
         </ol>
         <div className="mt-auto grid grid-cols-2 gap-2 text-[11px]" style={{ opacity: seg(p, 0.66, 0.8) }}>
           <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
-            <span className="text-zinc-400">{tHC("hcComponentsStudioShowtimeScenesRun.s6")}</span>
+            <span className="text-zinc-400">{tHC("s6")}</span>
             <div className="text-lg font-semibold">3</div>
           </div>
           <div className="rounded-xl border border-amber-400/30 bg-amber-500/10 p-2.5">
@@ -159,7 +159,7 @@ export function RunScene({ p }: SceneProps) {
           </div>
         </div>
         <div className="text-center text-[10px] uppercase tracking-wider text-zinc-600">
-          {tHC("hcComponentsStudioShowtimeScenesRun.s5")}
+          {tHC("s5")}
         </div>
       </div>
     </Panel>
@@ -183,7 +183,7 @@ export function ShipScene({ p }: SceneProps) {
     { icon: Smartphone, label: "Android app" },
   ];
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenesRun.s4")} icon={Send}>
+    <Panel title={tHC("s4")} icon={Send}>
       <div className="relative flex h-full flex-col items-center justify-center gap-5">
         <div
           className="relative rounded-3xl bg-white p-3 shadow-2xl shadow-sky-500/30"
@@ -194,14 +194,14 @@ export function ShipScene({ p }: SceneProps) {
               viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
               className="h-44 w-44"
               role="img"
-              aria-label={tHC("hcComponentsStudioShowtimeScenesRun.s3")}
+              aria-label={tHC("s3")}
             >
               <path d={qr.d} fill="#09090b" />
             </svg>
           )}
         </div>
         <div className="text-center text-[10px] uppercase tracking-wider text-zinc-400" style={{ opacity: k }}>
-          {tHC("hcComponentsStudioShowtimeScenesRun.s2")}
+          {tHC("s2")}
         </div>
         <div className="flex gap-3">
           {orbit.map((o, i) => {
@@ -219,7 +219,7 @@ export function ShipScene({ p }: SceneProps) {
           })}
         </div>
         <div className="text-center text-xs text-zinc-400" style={{ opacity: seg(p, 0.78, 0.92) }}>
-          {tHC("hcComponentsStudioShowtimeScenesRun.s1")}
+          {tHC("s1")}
         </div>
       </div>
     </Panel>

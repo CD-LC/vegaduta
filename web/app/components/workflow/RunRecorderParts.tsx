@@ -174,8 +174,8 @@ export function RecorderTip({ bar: hoverBar, hover }: RecorderTipProps) {
         {hoverBar.costUsd !== null ? ` · ${formatCostUsd(hoverBar.costUsd)}` : ""}
       </div>
       {hoverBar.summary && <div className="rfr-tip-sum">{hoverBar.summary}</div>}
-      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">{tHC("hcComponentsWorkflowRunRecorderParts.s2")}</div>}
-      {hoverBar.critical && <div className="rfr-tip-crit">{tHC("hcComponentsWorkflowRunRecorderParts.s1")}</div>}
+      {hoverBar.timing === "estimated" && <div className="rfr-tip-crit">{tHC("s2")}</div>}
+      {hoverBar.critical && <div className="rfr-tip-crit">{tHC("s1")}</div>}
     </div>
   );
 }

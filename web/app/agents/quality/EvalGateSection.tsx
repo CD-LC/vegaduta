@@ -192,15 +192,15 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
   const evaluation = status?.headEvaluation || null;
   const evaluationBadge = !evaluation ? null : evaluation.allowed ? (
     <Badge variant="state" state="var(--state-success)">
-      {tHC("hcAgentsQualityEvalGateSection.s24")}
+      {tHC("s24")}
     </Badge>
   ) : (
-    <Badge variant="destructive">{tHC("hcAgentsQualityEvalGateSection.s23")}</Badge>
+    <Badge variant="destructive">{tHC("s23")}</Badge>
   );
 
   return (
     <Section
-      title={tHC("hcAgentsQualityEvalGateSection.s22")}
+      title={tHC("s22")}
       description="Require a passing eval run on the exact configuration before this agent can be labelled Production — the CI check for agent changes."
       actions={
         <div className={SECTION_ACTION_GROUP_CLASS}>
@@ -209,7 +209,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
           </Button>
           {!status?.gate ? (
             <Button size="sm" onClick={() => setShowForm((v) => !v)} disabled={locked}>
-              {tHC("hcAgentsQualityEvalGateSection.s21")}
+              {tHC("s21")}
             </Button>
           ) : (
             <>
@@ -238,9 +238,9 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{tHC("hcAgentsQualityEvalGateSection.s20")}</AlertDialogTitle>
+                    <AlertDialogTitle>{tHC("s20")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {tHC("hcAgentsQualityEvalGateSection.s19")}
+                      {tHC("s19")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -262,17 +262,17 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
     >
       {locked && (
         <Alert>
-          <AlertTitle>{tHC("hcAgentsQualityEvalGateSection.s18")}</AlertTitle>
+          <AlertTitle>{tHC("s18")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcAgentsQualityEvalGateSection.s17")}
+            {tHC("s17")}
           </AlertDescription>
         </Alert>
       )}
       {failed && (
         <Alert variant="destructive">
-          <AlertTitle>{tHC("hcAgentsQualityEvalGateSection.s16")}</AlertTitle>
+          <AlertTitle>{tHC("s16")}</AlertTitle>
           <AlertDescription className="flex items-center gap-3">
-            {tHC("hcAgentsQualityEvalGateSection.s15")}
+            {tHC("s15")}
             <Button variant="outline" size="sm" onClick={refresh}>
               Retry
             </Button>
@@ -298,11 +298,11 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 Dataset: <span className="font-medium">{status.gate.datasetName || status.gate.datasetId}</span>
               </span>
               {status.gate.maxRunAgeHours != null && (
-                <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityEvalGateSection.s14")} {status.gate.maxRunAgeHours}h</span>
+                <span className="text-xs text-muted-foreground">{tHC("s14")} {status.gate.maxRunAgeHours}h</span>
               )}
               {status.gate.requireSimulation && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <FlaskConical size={11} aria-hidden="true" /> {tHC("hcAgentsQualityEvalGateSection.s13")}
+                  <FlaskConical size={11} aria-hidden="true" /> {tHC("s13")}
                   {status.gate.maxSimulationAgeHours != null && ` (within ${status.gate.maxSimulationAgeHours}h)`}
                   {evaluation?.simulationVerdict != null && ` · latest sim: ${evaluation.simulationVerdict}`}
                 </span>
@@ -318,7 +318,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             )}
             {evaluation?.allowed && (
               <div className="text-sm text-muted-foreground">
-                {tHC("hcAgentsQualityEvalGateSection.s12")}{evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
+                {tHC("s12")}{evaluation.qualifyingRunId ? ` ${evaluation.qualifyingRunId.slice(0, 8)}…` : ""}
                 {evaluation.overallScore != null && ` scored ${Math.round(evaluation.overallScore * 100)}%`}.
               </div>
             )}
@@ -329,7 +329,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
         !locked &&
         status != null && (
           <p className="text-sm text-muted-foreground">
-            {tHC("hcAgentsQualityEvalGateSection.s11")}
+            {tHC("s11")}
           </p>
         )
       )}
@@ -340,7 +340,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-dataset">
-                  {tHC("hcAgentsQualityEvalGateSection.s10")}
+                  {tHC("s10")}
                 </label>
                 <Select
                   id="eval-gate-dataset"
@@ -354,18 +354,18 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-max-age">
-                  {tHC("hcAgentsQualityEvalGateSection.s9")}
+                  {tHC("s9")}
                 </label>
                 <Input
                   id="eval-gate-max-age"
                   value={maxAge}
                   onChange={(e) => setMaxAge(e.target.value)}
-                  placeholder={tHC("hcAgentsQualityEvalGateSection.s8")}
+                  placeholder={tHC("s8")}
                 />
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              {tHC("hcAgentsQualityEvalGateSection.s7")}
+              {tHC("s7")}
             </p>
             <div className="space-y-2 rounded-md border border-border p-3">
               <label className="flex items-start gap-2 text-sm">
@@ -376,25 +376,25 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                   className="mt-0.5"
                 />
                 <span>
-                  <span className="font-medium">{tHC("hcAgentsQualityEvalGateSection.s6")}</span>
+                  <span className="font-medium">{tHC("s6")}</span>
                   <span className="block text-xs text-muted-foreground">
-                    {tHC("hcAgentsQualityEvalGateSection.s5")}
+                    {tHC("s5")}
                   </span>
                 </span>
               </label>
               {requireSim && (
                 <div className="space-y-1 ps-6">
                   <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-gate-sim-age">
-                    {tHC("hcAgentsQualityEvalGateSection.s4")}
+                    {tHC("s4")}
                   </label>
                   <Input
                     id="eval-gate-sim-age"
                     value={maxSimAge}
                     onChange={(e) => setMaxSimAge(e.target.value)}
-                    placeholder={tHC("hcAgentsQualityEvalGateSection.s3")}
+                    placeholder={tHC("s3")}
                   />
                   <p className="text-xs text-muted-foreground">
-                    {tHC("hcAgentsQualityEvalGateSection.s2")}
+                    {tHC("s2")}
                   </p>
                 </div>
               )}
@@ -404,7 +404,7 @@ export default function EvalGateSection({ agentId }: { agentId: string | null })
                 Cancel
               </Button>
               <Button size="sm" onClick={save} disabled={busy || !datasetId}>
-                {tHC("hcAgentsQualityEvalGateSection.s1")}
+                {tHC("s1")}
               </Button>
             </div>
           </CardContent>

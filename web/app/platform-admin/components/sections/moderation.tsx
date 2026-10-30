@@ -89,14 +89,14 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsModeration.s31")}
+      title={tHC("s31")}
       subtitle="Deterministic blocklist packs, toggled per platform default, plan, or tenant."
       icon={ShieldCheck}
       delay={delay}
       actions={
         <div className="flex flex-wrap items-center gap-2">
           <Select
-            aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s30")}
+            aria-label={tHC("s30")}
             className="w-44"
             value={scope}
             onValueChange={(v) => {
@@ -120,9 +120,9 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
           )}
           {scope === "TENANT" && (
             <Input
-              aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s29")}
+              aria-label={tHC("s29")}
               className="h-9 w-64"
-              placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s28")}
+              placeholder={tHC("s28")}
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
@@ -132,7 +132,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
       {scope === "TENANT" && !scopeKey && (
-        <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s27")}</p>
+        <p className="text-xs text-muted-foreground">{tHC("s27")}</p>
       )}
       {!loading &&
         !error &&
@@ -141,9 +141,9 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                 {pack.displayName}
-                {!pack.available && <Badge variant="destructive">{tHC("hcPlatformadminComponentsSectionsModeration.s26")}</Badge>}
+                {!pack.available && <Badge variant="destructive">{tHC("s26")}</Badge>}
                 {pack.available && pack.scopeOfEffectiveValue && pack.scopeOfEffectiveValue !== scope && (
-                  <Badge variant="outline">{tHC("hcPlatformadminComponentsSectionsModeration.s25")} {String(pack.scopeOfEffectiveValue).toLowerCase()}</Badge>
+                  <Badge variant="outline">{tHC("s25")} {String(pack.scopeOfEffectiveValue).toLowerCase()}</Badge>
                 )}
               </div>
               <p className="text-xs text-muted-foreground">{pack.description}</p>
@@ -152,7 +152,7 @@ export function PolicyPacksPanel({ delay }: { delay?: number }) {
               )}
               {pack.updatedBy && (
                 <p className="text-[11px] text-muted-foreground/80">
-                  {tHC("hcPlatformadminComponentsSectionsModeration.s24")} {pack.updatedBy} {timeAgo(pack.updatedAt)}
+                  {tHC("s24")} {pack.updatedBy} {timeAgo(pack.updatedAt)}
                 </p>
               )}
             </div>
@@ -226,7 +226,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsModeration.s23")}
+      title={tHC("s23")}
       subtitle="Master switch, external classifier, and per-pack confidence bands (0-100)."
       icon={ScanLine}
       delay={delay}
@@ -243,24 +243,24 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
             <label className="flex items-center gap-2 text-sm">
               <SwitchToggle
                 on={draft.moderationEnabled}
-                label={tHC("hcPlatformadminComponentsSectionsModeration.s22")}
+                label={tHC("s22")}
                 onClick={() => setDraft({ ...draft, moderationEnabled: !draft.moderationEnabled })}
               />
-              {tHC("hcPlatformadminComponentsSectionsModeration.s21")}
+              {tHC("s21")}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <SwitchToggle
                 on={draft.externalClassifierEnabled}
-                label={tHC("hcPlatformadminComponentsSectionsModeration.s20")}
+                label={tHC("s20")}
                 onClick={() => setDraft({ ...draft, externalClassifierEnabled: !draft.externalClassifierEnabled })}
               />
-              {tHC("hcPlatformadminComponentsSectionsModeration.s19")}
+              {tHC("s19")}
             </label>
           </div>
           {!draft.moderationEnabled && (
             <Alert>
               <AlertDescription>
-                {tHC("hcPlatformadminComponentsSectionsModeration.s18")}
+                {tHC("s18")}
               </AlertDescription>
             </Alert>
           )}
@@ -277,10 +277,10 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
                     label={`${id} semantic layer`}
                     onClick={() => setPack(id, { semanticEnabled: !p.semanticEnabled })}
                   />
-                  {tHC("hcPlatformadminComponentsSectionsModeration.s17")}
+                  {tHC("s17")}
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  {tHC("hcPlatformadminComponentsSectionsModeration.s16")}
+                  {tHC("s16")}
                   <Input
                     type="number"
                     min={0}
@@ -291,7 +291,7 @@ export function ThresholdsPanel({ delay }: { delay?: number }) {
                   />
                 </label>
                 <label className="flex items-center gap-2 text-xs">
-                  {tHC("hcPlatformadminComponentsSectionsModeration.s15")}
+                  {tHC("s15")}
                   <Input
                     type="number"
                     min={0}
@@ -344,7 +344,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsModeration.s14")}
+      title={tHC("s14")}
       subtitle={
         data ? `${data.pendingCount} pending across all tenants` : "Flagged content awaiting a trust & safety decision."
       }
@@ -353,13 +353,13 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
       actions={
         <div className="flex items-center gap-2">
           <Select
-            aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s13")}
+            aria-label={tHC("s13")}
             className="w-40"
             value={status}
             onValueChange={setStatus}
             options={QUEUE_STATUSES.map((s) => ({ value: s, label: s.charAt(0) + s.slice(1).toLowerCase() }))}
           />
-          <Button size="icon" variant="outline" aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s12")} onClick={refresh}>
+          <Button size="icon" variant="outline" aria-label={tHC("s12")} onClick={refresh}>
             <RefreshCw />
           </Button>
         </div>
@@ -367,7 +367,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
     >
       <LoadState loading={loading} error={error} onRetry={refresh} />
       {!loading && !error && items.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s11")}</p>
+        <p className="text-sm text-muted-foreground">{tHC("s11")}</p>
       )}
       {pg.pageItems.map((item) => (
         <div key={item.id} className="space-y-2 rounded-lg border border-border p-3">
@@ -388,9 +388,9 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
           {item.status === "PENDING" || item.status === "ESCALATED" ? (
             <div className="flex flex-wrap items-center gap-2">
               <Input
-                aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s10")}
+                aria-label={tHC("s10")}
                 className="h-8 min-w-48 flex-1"
-                placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s9")}
+                placeholder={tHC("s9")}
                 value={notes[item.id] || ""}
                 onChange={(e) => setNotes({ ...notes, [item.id]: e.target.value })}
               />
@@ -413,7 +413,7 @@ export function ReviewQueuePanel({ delay }: { delay?: number }) {
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              {tHC("hcPlatformadminComponentsSectionsModeration.s8")} {item.reviewedBy || "unknown"} {timeAgo(item.reviewedAt)}
+              {tHC("s8")} {item.reviewedBy || "unknown"} {timeAgo(item.reviewedAt)}
               {item.reviewNotes ? ` - ${item.reviewNotes}` : ""}
             </p>
           )}
@@ -476,13 +476,13 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsModeration.s7")}
+      title={tHC("s7")}
       subtitle="Users, phone numbers, domains and regions refused on inbound. Unblocking keeps the row for audit."
       icon={Ban}
       delay={delay}
       actions={
         <Select
-          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s6")}
+          aria-label={tHC("s6")}
           className="w-44"
           value={type}
           onValueChange={setType}
@@ -495,14 +495,14 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
     >
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border p-3">
         <Select
-          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s5")}
+          aria-label={tHC("s5")}
           className="w-40"
           value={newType}
           onValueChange={setNewType}
           options={BLOCKLIST_TYPES.map((t) => ({ value: t, label: t }))}
         />
         <Input
-          aria-label={tHC("hcPlatformadminComponentsSectionsModeration.s4")}
+          aria-label={tHC("s4")}
           className="h-9 min-w-48 flex-1"
           placeholder={
             newType === "REGION" ? "ISO country code, e.g. KP" : newType === "PHONE" ? "+919999999999" : "value"
@@ -513,7 +513,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
         <Input
           aria-label="Reason"
           className="h-9 min-w-48 flex-1"
-          placeholder={tHC("hcPlatformadminComponentsSectionsModeration.s3")}
+          placeholder={tHC("s3")}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
@@ -522,7 +522,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
         </Button>
       </div>
       <LoadState loading={loading} error={error} onRetry={refresh} />
-      {!loading && !error && entries.length === 0 && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsModeration.s2")}</p>}
+      {!loading && !error && entries.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s2")}</p>}
       {pg.pageItems.map((e) => (
         <div key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
           <div className="min-w-0 space-y-0.5">
@@ -532,7 +532,7 @@ export function BlocklistsPanel({ delay }: { delay?: number }) {
               {!e.active && <Badge variant="outline">unblocked</Badge>}
             </div>
             <p className="text-xs text-muted-foreground">
-              {e.reason || "No reason recorded"} {tHC("hcPlatformadminComponentsSectionsModeration.s1")} {e.createdBy || "unknown"} {timeAgo(e.createdAt)}
+              {e.reason || "No reason recorded"} {tHC("s1")} {e.createdBy || "unknown"} {timeAgo(e.createdAt)}
             </p>
           </div>
           <SwitchToggle

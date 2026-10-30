@@ -230,7 +230,7 @@ export function ReadinessBadge({ server, compact }: { server: any; compact?: boo
     <p className={cn("mt-1 flex items-center gap-1 text-xs font-semibold", toneClass)}>
       {ready ? (
         <>
-          <CheckCircle2 size={12} aria-hidden="true" /> {tHC("hcComponentsMcpPanelParts.s1")}
+          <CheckCircle2 size={12} aria-hidden="true" /> {tHC("s1")}
         </>
       ) : acked ? (
         "Trusted — manually acknowledged; agents can use this server"

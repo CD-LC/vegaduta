@@ -491,7 +491,7 @@ export default function ShareCallPanel({
         {callStatus === "connected" ? (
           <Button type="button" size="lg" variant="destructive" onClick={endCall} className="gap-2 rounded-full px-5">
             <PhoneOff className="size-4" aria-hidden="true" />
-            {tHC("hcAgentShareIdShareCallPanel.s1")}
+            {tHC("s1")}
           </Button>
         ) : (
           <Button

@@ -28,14 +28,14 @@ export default function EnvoyDemoPage() {
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm">
           <span>
-            <strong>{tHC("hcTryEnvoydemoPage.s3")}</strong> {tHC("hcTryEnvoydemoPage.s2")}
+            <strong>{tHC("s3")}</strong> {tHC("s2")}
           </span>
           <button
             type="button"
             className="rounded-lg border border-border/70 px-3 py-1 text-xs hover:bg-background/60"
             onClick={() => { resetMockBriefApi(); setRun((n) => n + 1); }}
           >
-            {tHC("hcTryEnvoydemoPage.s1")}
+            {tHC("s1")}
           </button>
         </div>
         <BuildCenter key={run} onOpenAppBuilder={() => undefined} detailHref={(id) => `/try/envoy-demo/detail?id=${id}`} />

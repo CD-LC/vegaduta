@@ -121,7 +121,7 @@ function StatusCell({ row }: { row: ToolClassificationRow }) {
       variant="state"
       state={SEVERITY_STATE_TOKEN.safe}
       className="gap-1.5"
-      title={tHC("hcComponentsToolsToolClassificationPanel.s15")}
+      title={tHC("s15")}
     >
       <ShieldCheck aria-hidden="true" />
       Classified
@@ -155,7 +155,7 @@ function ToolCell({ row }: { row: ToolClassificationRow }) {
             <span aria-hidden="true">·</span>
             <span
               className="inline-flex items-center gap-1"
-              title={tHC("hcComponentsToolsToolClassificationPanel.s14")}
+              title={tHC("s14")}
             >
               <KeyRound className="size-3" aria-hidden="true" />
               <span className="font-mono">{row.requiredScope}</span>
@@ -267,7 +267,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
     <div id="tool-classification" className="scroll-mt-24">
       <Section
         className={className}
-        title={tHC("hcComponentsToolsToolClassificationPanel.s13")}
+        title={tHC("s13")}
         description="What every tool an agent can call is declared to be — where its answers come from, what it is allowed to touch, and whether running it twice is safe. A tool nobody has classified is blocked."
         actions={
           <Button variant="outline" size="sm" onClick={() => void refresh()} disabled={loading}>
@@ -286,13 +286,13 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         {error && (
           <Alert variant="destructive">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s12")}</AlertTitle>
+            <AlertTitle>{tHC("s12")}</AlertTitle>
             <AlertDescription>
               <p>
-                {error} {tHC("hcComponentsToolsToolClassificationPanel.s11")}
+                {error} {tHC("s11")}
               </p>
               <Button variant="outline" size="sm" className="mt-2 w-fit" onClick={() => void refresh()}>
-                {tHC("hcComponentsToolsToolClassificationPanel.s10")}
+                {tHC("s10")}
               </Button>
             </AlertDescription>
           </Alert>
@@ -304,9 +304,9 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         {enforced === false && (
           <Alert variant="warning">
             <AlertTriangle aria-hidden="true" />
-            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s9")}</AlertTitle>
+            <AlertTitle>{tHC("s9")}</AlertTitle>
             <AlertDescription>
-              {tHC("hcComponentsToolsToolClassificationPanel.s8")}
+              {tHC("s8")}
             </AlertDescription>
           </Alert>
         )}
@@ -318,7 +318,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
           <Alert variant="warning">
             <Ban aria-hidden="true" />
             <AlertTitle>
-              {blockedCount} tool{blockedCount === 1 ? "" : "s"} {blockedCount === 1 ? "is" : "are"} {tHC("hcComponentsToolsToolClassificationPanel.s7")}
+              {blockedCount} tool{blockedCount === 1 ? "" : "s"} {blockedCount === 1 ? "is" : "are"} {tHC("s7")}
             </AlertTitle>
             <AlertDescription>
               {/* Do not promise a refusal the deployment isn't making. When the
@@ -350,15 +350,15 @@ export default function ToolClassificationPanel({ query = "", load, className }:
         ) : unsupported ? (
           <Alert variant="info">
             <Info aria-hidden="true" />
-            <AlertTitle>{tHC("hcComponentsToolsToolClassificationPanel.s6")}</AlertTitle>
+            <AlertTitle>{tHC("s6")}</AlertTitle>
             <AlertDescription>
-              {tHC("hcComponentsToolsToolClassificationPanel.s5")}
+              {tHC("s5")}
             </AlertDescription>
           </Alert>
         ) : loadFailedNoRows ? null : rows.length === 0 ? (
           <EmptyState
             icon={ShieldQuestion}
-            title={tHC("hcComponentsToolsToolClassificationPanel.s4")}
+            title={tHC("s4")}
             description="The classification registry answered, but it has no tools for this workspace yet. Connect an MCP server or add a custom code tool and its classification will appear here."
           />
         ) : (
@@ -414,11 +414,11 @@ export default function ToolClassificationPanel({ query = "", load, className }:
                         <InfoTip text={AXIS_QUESTIONS.trust} />
                       </TableHead>
                       <TableHead>
-                        {tHC("hcComponentsToolsToolClassificationPanel.s3")}
+                        {tHC("s3")}
                         <InfoTip text={AXIS_QUESTIONS.sensitivity} />
                       </TableHead>
                       <TableHead>
-                        {tHC("hcComponentsToolsToolClassificationPanel.s2")}
+                        {tHC("s2")}
                         <InfoTip text={AXIS_QUESTIONS.determinism} />
                       </TableHead>
                     </TableRow>
@@ -427,7 +427,7 @@ export default function ToolClassificationPanel({ query = "", load, className }:
                     {visibleRows.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                          {tHC("hcComponentsToolsToolClassificationPanel.s1")}{query.trim() ? " and search" : ""}.
+                          {tHC("s1")}{query.trim() ? " and search" : ""}.
                         </TableCell>
                       </TableRow>
                     ) : (

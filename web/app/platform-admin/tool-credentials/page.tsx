@@ -171,7 +171,7 @@ export default function ToolCredentialsPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminToolcredentialsPage.s12")}
+      title={tHC("s12")}
       actions={
         <Button variant="outline" size="sm" onClick={refresh} disabled={loading} title="Refresh">
           <RefreshCw size={14} className={loading ? "animate-spin" : undefined} /> Refresh
@@ -179,7 +179,7 @@ export default function ToolCredentialsPage() {
       }
     >
       <p className="mb-6 text-sm text-muted-foreground">
-        {tHC("hcPlatformadminToolcredentialsPage.s11")}
+        {tHC("s11")}
       </p>
 
       {/* /platform-admin/mcp-catalog is outside the personal allowlist (a real 404 there): no card to it. */}
@@ -187,10 +187,10 @@ export default function ToolCredentialsPage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Plug size={16} className="text-primary" /> {tHC("hcPlatformadminToolcredentialsPage.s10")}
+              <Plug size={16} className="text-primary" /> {tHC("s10")}
             </CardTitle>
             <p className="text-xs text-muted-foreground">
-              {tHC("hcPlatformadminToolcredentialsPage.s9")}
+              {tHC("s9")}
             </p>
           </CardHeader>
           <CardContent>
@@ -198,7 +198,7 @@ export default function ToolCredentialsPage() {
               href="/platform-admin/mcp-catalog"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
-              {tHC("hcPlatformadminToolcredentialsPage.s8")} <ChevronRight size={13} />
+              {tHC("s8")} <ChevronRight size={13} />
             </Link>
           </CardContent>
         </Card>
@@ -207,7 +207,7 @@ export default function ToolCredentialsPage() {
       {searchStatus && (
         <Card className="mb-6" data-testid="web-search-providers">
           <CardHeader>
-            <CardTitle className="text-sm">{tHC("hcPlatformadminToolcredentialsPage.s7")}</CardTitle>
+            <CardTitle className="text-sm">{tHC("s7")}</CardTitle>
             <p className="text-xs text-muted-foreground">
               {searchStatus.multiProviderActive
                 ? `Primary: ${searchStatus.primary}${
@@ -218,7 +218,7 @@ export default function ToolCredentialsPage() {
                       : "No provider in the chain is configured, so web_search is not offered."
                   }`
                 : "Default mode: Brave only, exactly as before. Alternative providers are used only when the operator sets WEB_SEARCH_PROVIDER or WEB_SEARCH_FALLBACK."}{" "}
-              {tHC("hcPlatformadminToolcredentialsPage.s6")}
+              {tHC("s6")}
             </p>
           </CardHeader>
           <CardContent>
@@ -230,11 +230,11 @@ export default function ToolCredentialsPage() {
                     {p.configured ? "Configured" : "Not configured"}
                   </Badge>
                   {p.role === "primary" && <Badge>Primary</Badge>}
-                  {p.role === "fallback" && <Badge variant="secondary">{tHC("hcPlatformadminToolcredentialsPage.s5")}{p.fallbackPosition}</Badge>}
-                  {p.active && <Badge>{tHC("hcPlatformadminToolcredentialsPage.s4")}</Badge>}
+                  {p.role === "fallback" && <Badge variant="secondary">{tHC("s5")}{p.fallbackPosition}</Badge>}
+                  {p.active && <Badge>{tHC("s4")}</Badge>}
                   {p.dailyCap > 0 && (
                     <span className="text-xs text-muted-foreground">
-                      {p.usedToday}/{p.dailyCap} {tHC("hcPlatformadminToolcredentialsPage.s3")}
+                      {p.usedToday}/{p.dailyCap} {tHC("s3")}
                     </span>
                   )}
                 </li>
@@ -264,7 +264,7 @@ export default function ToolCredentialsPage() {
                 <p className="text-sm text-muted-foreground">{tool.description}</p>
                 {!tool.wired && (
                   <p className="text-xs text-[var(--warning-text)]">
-                    {tHC("hcPlatformadminToolcredentialsPage.s2")}
+                    {tHC("s2")}
                   </p>
                 )}
                 {configured && status.extraConfig && (
@@ -274,7 +274,7 @@ export default function ToolCredentialsPage() {
                 )}
                 {configured && status.updatedAt && (
                   <p className="text-xs text-muted-foreground">
-                    {tHC("hcPlatformadminToolcredentialsPage.s1")} {new Date(status.updatedAt).toLocaleString()}
+                    {tHC("s1")} {new Date(status.updatedAt).toLocaleString()}
                     {status.updatedBy ? ` by ${status.updatedBy}` : ""}
                   </p>
                 )}

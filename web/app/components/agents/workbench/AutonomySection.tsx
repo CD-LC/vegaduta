@@ -40,7 +40,7 @@ export default function AutonomySection() {
       {isDraft ? (
         <WorkbenchSection.SavedOnly
           icon={<ShieldCheck size={13} />}
-          label={tHC("hcComponentsAgentsWorkbenchAutonomySection.s1")}
+          label={tHC("s1")}
           cat="var(--cat-analysis)"
           what="reasoning depth, autonomy, guardrails, specialists and skills apply to a saved agent."
         />
@@ -48,7 +48,7 @@ export default function AutonomySection() {
         <WorkbenchSection
           anchorId={BEHAVIOR_ANCHORS.autonomy}
           icon={<ShieldCheck size={13} />}
-          label={tHC("hcComponentsAgentsWorkbenchAutonomySection.s1")}
+          label={tHC("s1")}
           cat="var(--cat-analysis)"
           actions={<WorkbenchSection.Summary>{behaviourSummary}</WorkbenchSection.Summary>}
         >

@@ -144,7 +144,7 @@ export default function SharedRealAgentPage() {
         {phase === "loading" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-24 text-center">
             <Loader2 className="size-10 animate-spin text-primary" strokeWidth={2.5} aria-hidden="true" />
-            <p className="text-sm font-medium text-foreground">{tHC("hcAgentShareIdPage.s16")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s16")}</p>
           </div>
         )}
 
@@ -164,12 +164,12 @@ export default function SharedRealAgentPage() {
                 // agent answering on X's behalf") but carries the tenant's
                 // name, not this platform's.
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.agentName}</span> {tHC("hcAgentShareIdPage.s15")}{" "}
+                  <span className="text-foreground">{info.agentName}</span> {tHC("s15")}{" "}
                   <span className="text-foreground">{info.brandDisplayName || "its owner"}</span>.
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.agentName}</span> {tHC("hcAgentShareIdPage.s14")} <BrandName />{tHC("hcAgentShareIdPage.s13")}
+                  <span className="text-foreground">{info.agentName}</span> {tHC("s14")} <BrandName />{tHC("s13")}
                 </p>
               )}
             </div>
@@ -181,7 +181,7 @@ export default function SharedRealAgentPage() {
             >
               {bubbles.length === 0 && (
                 <p className="py-10 text-center text-sm text-muted-foreground">
-                  {tHC("hcAgentShareIdPage.s12")} {info.agentName} {tHC("hcAgentShareIdPage.s11")}
+                  {tHC("s12")} {info.agentName} {tHC("s11")}
                 </p>
               )}
               {bubbles.map((b) => (
@@ -259,7 +259,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
           <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
             <Sparkles className="size-3" aria-hidden="true" />
-            {tHC("hcAgentShareIdPage.s10")}
+            {tHC("s10")}
           </span>
         </div>
       </header>
@@ -268,7 +268,7 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-3xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcAgentShareIdPage.s9")}>
+        <Link href="/" className="flex items-center gap-2" aria-label={tHC("s9")}>
           <img src="/logo-mark.png" alt="" className="h-7 w-auto shrink-0 object-contain" />
           <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
             Vega<span className="text-primary">Dūta</span>
@@ -277,14 +277,14 @@ function ViewerHeader({ info }: { info: SharedAgentInfo | null }) {
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <Sparkles className="size-3" aria-hidden="true" />
-          {tHC("hcAgentShareIdPage.s8")}
+          {tHC("s8")}
         </span>
 
         <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/">
-              <span className="hidden sm:inline">{tHC("hcAgentShareIdPage.s6")}</span>
-              <span className="sm:hidden">{tHC("hcAgentShareIdPage.s7")}</span>
+              <span className="hidden sm:inline">{tHC("s6")}</span>
+              <span className="sm:hidden">{tHC("s7")}</span>
             </Link>
           </Button>
         </div>
@@ -354,7 +354,7 @@ function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLa
       {!whiteLabeled && (
         <Button asChild size="sm">
           <Link href="/">
-            {tHC("hcAgentShareIdPage.s6")}
+            {tHC("s6")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>
@@ -377,7 +377,7 @@ function BlockedScreen({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild>
         <Link href="/">
-          {tHC("hcAgentShareIdPage.s6")}
+          {tHC("s6")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -414,7 +414,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
     <div className="flex flex-col items-center gap-2 py-1">
       {done ? (
         <p className="text-xs text-muted-foreground" role="status">
-          {tHC("hcAgentShareIdPage.s5")}
+          {tHC("s5")}
         </p>
       ) : !open ? (
         <button
@@ -423,7 +423,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
           className="inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           <Flag className="size-3" aria-hidden="true" />
-          {tHC("hcAgentShareIdPage.s4")}
+          {tHC("s4")}
         </button>
       ) : (
         <AnimatePresence>
@@ -432,7 +432,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
           >
-            <p className="text-xs text-muted-foreground">{tHC("hcAgentShareIdPage.s3")}</p>
+            <p className="text-xs text-muted-foreground">{tHC("s3")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {REPORT_REASONS.map((r) => (
                 <button
@@ -469,7 +469,7 @@ function ViewerFooter() {
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
         >
-          {tHC("hcAgentShareIdPage.s2")} <BrandName /> {tHC("hcAgentShareIdPage.s1")}
+          {tHC("s2")} <BrandName /> {tHC("s1")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>

@@ -188,7 +188,7 @@ export function ObserveBanner({
   };
 
   return (
-    <div className="rob-banner" role="region" aria-label={tHC("hcComponentsWorkflowRunObserver.s9")} data-tone={selectedLive ? "live" : status}>
+    <div className="rob-banner" role="region" aria-label={tHC("s9")} data-tone={selectedLive ? "live" : status}>
       <span className="rob-banner-state">
         <Icon size={14} aria-hidden="true" className={selectedLive ? "rob-live-icon" : undefined} />
         <span className="rob-banner-title" ref={titleRef} tabIndex={-1}>
@@ -209,13 +209,13 @@ export function ObserveBanner({
           {model && <span className="rob-mono">{formatDuration(model.totalMs)}</span>}
           {model?.run.workflowVersion != null && <span className="rob-mono">v{model.run.workflowVersion}</span>}
           {liveCostUsd != null && Number.isFinite(liveCostUsd) && (
-            <span className="rob-mono" title={tHC("hcComponentsWorkflowRunObserver.s8")}>
-              <span className="rob-sr">{tHC("hcComponentsWorkflowRunObserver.s7")} </span>
+            <span className="rob-mono" title={tHC("s8")}>
+              <span className="rob-sr">{tHC("s7")} </span>
               {formatCostUsd(liveCostUsd)}
             </span>
           )}
           {selectedLive && streaming && (
-            <span className="rob-mono" title={tHC("hcComponentsWorkflowRunObserver.s6")}>
+            <span className="rob-mono" title={tHC("s6")}>
               streaming
             </span>
           )}
@@ -230,9 +230,9 @@ export function ObserveBanner({
               {formatDuration(Math.abs(delta))} {delta < 0 ? "faster" : "slower"}
             </strong>
           ) : delta != null ? (
-            <strong> {tHC("hcComponentsWorkflowRunObserver.s5")}</strong>
+            <strong> {tHC("s5")}</strong>
           ) : null}
-          <button type="button" className="rob-icon-btn" aria-label={tHC("hcComponentsWorkflowRunObserver.s4")} onClick={() => obs.toggleCompare(compareRunId as string)}>
+          <button type="button" className="rob-icon-btn" aria-label={tHC("s4")} onClick={() => obs.toggleCompare(compareRunId as string)}>
             <X size={12} aria-hidden="true" />
           </button>
         </span>
@@ -248,11 +248,11 @@ export function ObserveBanner({
       )}
       {selectedLive && !following && (
         <button type="button" className="rob-btn" onClick={jumpToLive}>
-          <Radio size={13} aria-hidden="true" /> {tHC("hcComponentsWorkflowRunObserver.s3")}
+          <Radio size={13} aria-hidden="true" /> {tHC("s3")}
         </button>
       )}
       <button type="button" className="rob-btn rob-btn-primary" onClick={backToEdit}>
-        <Pencil size={13} aria-hidden="true" /> {tHC("hcComponentsWorkflowRunObserver.s2")}
+        <Pencil size={13} aria-hidden="true" /> {tHC("s2")}
       </button>
     </div>
   );
@@ -294,7 +294,7 @@ export function RunStory({
     <section className="rob-story" data-open={open ? "true" : "false"}>
       <button type="button" className="rob-story-head" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen((o) => !o)}>
         <BookOpen size={14} aria-hidden="true" />
-        <span className="rob-story-title">{tHC("hcComponentsWorkflowRunObserver.s1")}</span>
+        <span className="rob-story-title">{tHC("s1")}</span>
         {!open && preview && <span className="rob-story-preview">{preview.text}</span>}
         <ChevronDown size={14} aria-hidden="true" className="rob-story-chev" />
       </button>

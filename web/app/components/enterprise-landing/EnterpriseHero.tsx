@@ -14,16 +14,16 @@ export default function EnterpriseHero() {
       <div className="enterprise-hero-container">
         <div className="enterprise-hero-content">
           <h1 className="enterprise-hero-title">
-            {tHC("hcComponentsEnterpriselandingEnterpriseHero.s7")}
+            {tHC("s7")}
           </h1>
           <p className="enterprise-hero-subtitle">
-            {tHC("hcComponentsEnterpriselandingEnterpriseHero.s6")}
+            {tHC("s6")}
           </p>
           <div className="enterprise-hero-cta">
             <a href="#contact-form" className="enterprise-cta-primary">
-              {tHC("hcComponentsEnterpriselandingEnterpriseHero.s5")}
+              {tHC("s5")}
             </a>
-            <p className="enterprise-cta-note">{tHC("hcComponentsEnterpriselandingEnterpriseHero.s4")}</p>
+            <p className="enterprise-cta-note">{tHC("s4")}</p>
           </div>
         </div>
 
@@ -31,15 +31,15 @@ export default function EnterpriseHero() {
           <div className="enterprise-hero-card">
             <div className="enterprise-hero-stat">
               <span className="enterprise-hero-number">{PLATFORM_FACTS.channels}</span>
-              <span className="enterprise-hero-label">{tHC("hcComponentsEnterpriselandingEnterpriseHero.s3")}</span>
+              <span className="enterprise-hero-label">{tHC("s3")}</span>
             </div>
             <div className="enterprise-hero-stat">
               <span className="enterprise-hero-number">{PLATFORM_FACTS.byokProviders}</span>
-              <span className="enterprise-hero-label">{tHC("hcComponentsEnterpriselandingEnterpriseHero.s2")}</span>
+              <span className="enterprise-hero-label">{tHC("s2")}</span>
             </div>
             <div className="enterprise-hero-stat">
               <span className="enterprise-hero-number">1</span>
-              <span className="enterprise-hero-label">{tHC("hcComponentsEnterpriselandingEnterpriseHero.s1")}</span>
+              <span className="enterprise-hero-label">{tHC("s1")}</span>
             </div>
           </div>
         </div>

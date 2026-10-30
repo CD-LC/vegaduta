@@ -33,13 +33,13 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="std-screen__code" aria-hidden="true">
           500
         </div>
-        <h1>{tHC("hcError.s4")}</h1>
+        <h1>{tHC("s4")}</h1>
         <p>
-          {tHC("hcError.s3")}{" "}
+          {tHC("s3")}{" "}
           {error.digest ? <span className="mkt-mono">Ref {error.digest}</span> : null}
         </p>
         <details className="mt-4 text-start text-xs text-muted-foreground" data-testid="route-error-details">
-          <summary className="cursor-pointer">{tHC("hcError.s2")}</summary>
+          <summary className="cursor-pointer">{tHC("s2")}</summary>
           <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words font-mono">
             {error.message}
             {"\n"}
@@ -49,7 +49,7 @@ export default function RouteError({ error, reset }: { error: Error & { digest?:
         <div className="std-screen__actions">
           <button type="button" onClick={reset} className="std-screen__btn std-screen__btn--primary">
             <RotateCcw className="size-4" aria-hidden="true" />
-            {tHC("hcError.s1")}
+            {tHC("s1")}
           </button>
           <Link href="/" className="std-screen__btn std-screen__btn--secondary">
             <Home className="size-4" aria-hidden="true" />

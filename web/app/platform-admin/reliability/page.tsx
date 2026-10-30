@@ -243,10 +243,10 @@ export default function ReliabilityPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminReliabilityPage.s16")}
+      title={tHC("s16")}
       actions={
         <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label={tHC("hcPlatformadminReliabilityPage.s15")}>
+          <div className="flex overflow-hidden rounded-md border border-border" role="group" aria-label={tHC("s15")}>
             {WINDOWS_HOURS.map((h) => (
               <button
                 key={h}
@@ -270,8 +270,8 @@ export default function ReliabilityPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminReliabilityPage.s14")}{" "}
-        {REFRESH_MS / 1000} {tHC("hcPlatformadminReliabilityPage.s13")}
+        {tHC("s14")}{" "}
+        {REFRESH_MS / 1000} {tHC("s13")}
         <span aria-live="polite">{fetchedAt ? `; last updated ${new Date(fetchedAt).toLocaleTimeString()}` : ""}</span>.
       </PageHint>
 
@@ -287,7 +287,7 @@ export default function ReliabilityPage() {
               {depsError}
               {deps ? " Showing the last reading below." : ""}{" "}
               <button type="button" className="underline" onClick={() => void loadDeps()}>
-                {tHC("hcPlatformadminReliabilityPage.s9")}
+                {tHC("s9")}
               </button>
             </AlertDescription>
           </Alert>
@@ -319,12 +319,12 @@ export default function ReliabilityPage() {
               <span className="text-xs">{overallSummary(deps.dependencies)}</span>
             </div>
             <p className="mb-4 text-[11px] text-muted-foreground">
-              Probed {timeAgo(deps.generatedAt)}{tHC("hcPlatformadminReliabilityPage.s12")} {deps.cacheTtlSeconds} s.
+              Probed {timeAgo(deps.generatedAt)}{tHC("s12")} {deps.cacheTtlSeconds} s.
             </p>
 
             {deps.dependencies.length === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="deps-empty">
-                {tHC("hcPlatformadminReliabilityPage.s11")}
+                {tHC("s11")}
               </p>
             ) : (
               groups.map((g) => (
@@ -344,7 +344,7 @@ export default function ReliabilityPage() {
 
       {/* ------------------------------------------------------------------- SLOs */}
       <SectionCard
-        title={tHC("hcPlatformadminReliabilityPage.s10")}
+        title={tHC("s10")}
         subtitle={`Measured over the last ${windowLabel(hours)}. Burn rate 1.00x means errors arrive exactly as fast as the objective allows.`}
         icon={Gauge}
         delay={0.05}
@@ -355,7 +355,7 @@ export default function ReliabilityPage() {
               {sloError}
               {slo ? " Showing the last reading below." : ""}{" "}
               <button type="button" className="underline" onClick={() => void loadSlo(hours)}>
-                {tHC("hcPlatformadminReliabilityPage.s9")}
+                {tHC("s9")}
               </button>
             </AlertDescription>
           </Alert>
@@ -385,13 +385,13 @@ export default function ReliabilityPage() {
                   : "This replica only: not every replica"}
               </span>
               <span className="rounded-full border border-border px-2 py-0.5">
-                {tHC("hcPlatformadminReliabilityPage.s8")} {fmtDuration(slo.coveredSeconds)} of {windowLabel(slo.windowHours)}
+                {tHC("s8")} {fmtDuration(slo.coveredSeconds)} of {windowLabel(slo.windowHours)}
               </span>
             </div>
 
             {slo.replicas === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="slo-empty">
-                {tHC("hcPlatformadminReliabilityPage.s7")}
+                {tHC("s7")}
               </p>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="slo-tiles">
@@ -422,7 +422,7 @@ export default function ReliabilityPage() {
                 ))}
                 <SloTile
                   testId="tile-jobs"
-                  label={tHC("hcPlatformadminReliabilityPage.s6")}
+                  label={tHC("s6")}
                   value={fmtPct(slo.jobs?.successRate, 1)}
                   lines={
                     slo.jobs
@@ -435,16 +435,16 @@ export default function ReliabilityPage() {
 
             {slo.latency.length === 0 && slo.replicas > 0 && (
               <p className="mt-3 text-xs text-muted-foreground" data-testid="slo-no-latency">
-                {tHC("hcPlatformadminReliabilityPage.s5")}
+                {tHC("s5")}
               </p>
             )}
 
             {slo.replicas > 0 && (
               <div className="mt-5">
-                <h3 className="mb-2 text-xs font-medium text-muted-foreground">{tHC("hcPlatformadminReliabilityPage.s4")}</h3>
+                <h3 className="mb-2 text-xs font-medium text-muted-foreground">{tHC("s4")}</h3>
                 {slo.llmProviders.length === 0 ? (
                   <p className="text-sm text-muted-foreground" data-testid="providers-empty">
-                    {tHC("hcPlatformadminReliabilityPage.s3")}
+                    {tHC("s3")}
                   </p>
                 ) : (
                   <div className="overflow-x-auto">
@@ -454,7 +454,7 @@ export default function ReliabilityPage() {
                           <th className="py-2 pe-3 font-medium">Provider</th>
                           <th className="py-2 pe-3 font-medium">Calls</th>
                           <th className="py-2 pe-3 font-medium">Errors</th>
-                          <th className="py-2 font-medium">{tHC("hcPlatformadminReliabilityPage.s2")}</th>
+                          <th className="py-2 font-medium">{tHC("s2")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -478,7 +478,7 @@ export default function ReliabilityPage() {
 
       {/* ------------------------------------------------------------------ Notes */}
       <SectionCard
-        title={tHC("hcPlatformadminReliabilityPage.s1")}
+        title={tHC("s1")}
         subtitle="Every gap, estimate and limit of the readings above, in plain words."
         icon={Info}
         delay={0.1}

@@ -72,7 +72,7 @@ export default function MigrationsPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminMigrationsPage.s12")}
+      title={tHC("s12")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : undefined} /> Refresh
@@ -80,7 +80,7 @@ export default function MigrationsPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminMigrationsPage.s11")}
+        {tHC("s11")}
       </PageHint>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => void load()} />}
@@ -90,7 +90,7 @@ export default function MigrationsPage() {
         <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="gap-0 py-0">
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminMigrationsPage.s10")}</div>
+              <div className="text-xs text-muted-foreground">{tHC("s10")}</div>
               <div className="mt-1 font-mono text-xl font-semibold">{cp?.version || UNAVAILABLE}</div>
               <div className="mt-1">
                 {cp && cp.failed > 0 ? (
@@ -105,16 +105,16 @@ export default function MigrationsPage() {
           </Card>
           <Card className="gap-0 py-0">
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminMigrationsPage.s9")}</div>
+              <div className="text-xs text-muted-foreground">{tHC("s9")}</div>
               <div className="mt-1 font-mono text-xl font-semibold">{data.expectedTenantVersion || UNAVAILABLE}</div>
               <div className="mt-1 text-[11px] text-muted-foreground">
-                {formatCountOrUnavailable(data.tenants.length)} {tHC("hcPlatformadminMigrationsPage.s8")}
+                {formatCountOrUnavailable(data.tenants.length)} {tHC("s8")}
               </div>
             </CardContent>
           </Card>
           <Card className={`gap-0 py-0 ${drift.failed ? "border-destructive/40" : ""}`}>
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminMigrationsPage.s7")}</div>
+              <div className="text-xs text-muted-foreground">{tHC("s7")}</div>
               <div className={`mt-1 font-mono text-xl font-semibold ${drift.failed ? "text-destructive" : ""}`}>
                 {drift.failed}
               </div>
@@ -122,7 +122,7 @@ export default function MigrationsPage() {
           </Card>
           <Card className={`gap-0 py-0 ${drift.behind ? "border-[var(--warning-border)]" : ""}`}>
             <CardContent className="p-4">
-              <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminMigrationsPage.s6")}</div>
+              <div className="text-xs text-muted-foreground">{tHC("s6")}</div>
               <div
                 className={`mt-1 font-mono text-xl font-semibold ${drift.behind ? "text-[var(--warning-text)]" : ""}`}
               >
@@ -138,7 +138,7 @@ export default function MigrationsPage() {
 
       {data && (
         <SectionCard
-          title={tHC("hcPlatformadminMigrationsPage.s5")}
+          title={tHC("s5")}
           icon={Database}
           subtitle={`${rows.length} shown${onlyProblems ? " (problems only)" : ""}`}
           actions={
@@ -149,9 +149,9 @@ export default function MigrationsPage() {
                   className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
                 <Input
-                  aria-label={tHC("hcPlatformadminMigrationsPage.s4")}
+                  aria-label={tHC("s4")}
                   className="h-9 w-56 ps-8"
-                  placeholder={tHC("hcPlatformadminMigrationsPage.s3")}
+                  placeholder={tHC("s3")}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                 />
@@ -162,7 +162,7 @@ export default function MigrationsPage() {
                   onCheckedChange={(v) => setOnlyProblems(v)}
                   id="migrations-problems-only"
                 />
-                <label htmlFor="migrations-problems-only">{tHC("hcPlatformadminMigrationsPage.s2")}</label>
+                <label htmlFor="migrations-problems-only">{tHC("s2")}</label>
               </div>
             </div>
           }
@@ -224,7 +224,7 @@ export default function MigrationsPage() {
       )}
 
       <InfoNote>
-        {tHC("hcPlatformadminMigrationsPage.s1")}
+        {tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

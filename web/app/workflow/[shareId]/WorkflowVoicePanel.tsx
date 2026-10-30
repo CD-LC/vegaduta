@@ -211,7 +211,7 @@ export default function WorkflowVoicePanel({
     <div className="flex flex-col items-center gap-2 py-1">
       <button
         type="button"
-        aria-label={tHC("hcWorkflowShareIdWorkflowVoicePanel.s1")}
+        aria-label={tHC("s1")}
         onMouseDown={startPushToTalk}
         onMouseUp={stopPushToTalk}
         onMouseLeave={() => {

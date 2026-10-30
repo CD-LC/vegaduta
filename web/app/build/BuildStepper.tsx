@@ -19,7 +19,7 @@ const STAGES = [
 export default function BuildStepper({ index, failed }: { index: number; failed?: boolean }) {
     const tHC = useTranslations("hcBuildBuildStepper");
   return (
-    <ol className="relative grid grid-cols-4 gap-2" aria-label={tHC("hcBuildBuildStepper.s1")}>
+    <ol className="relative grid grid-cols-4 gap-2" aria-label={tHC("s1")}>
       {/* rail */}
       <div
         className="pointer-events-none absolute start-[12.5%] end-[12.5%] top-4 h-0.5 rounded-full bg-border"

@@ -67,7 +67,7 @@ export function RegistryStep({
   return (
     <div className="space-y-4">
       <Head
-        title={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s17")}
+        title={tHC("s17")}
         body="These are the tools already switched on in the platform. Search, then attach the ones this agent needs. Try “web”."
       />
       <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2.5">
@@ -75,15 +75,15 @@ export function RegistryStep({
         <input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
-          placeholder={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s16")}
-          aria-label={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s15")}
+          placeholder={tHC("s16")}
+          aria-label={tHC("s15")}
           className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-zinc-400"
         />
         {mcp.loading && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-zinc-400 shrink-0" />}
       </div>
       {!palette && (
         <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin shrink-0" /> {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s14")}
+          <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin shrink-0" /> {tHC("s14")}
         </div>
       )}
       <div className="grid gap-2.5 sm:grid-cols-2">
@@ -116,16 +116,16 @@ export function RegistryStep({
           );
         })}
         {palette && tools.length === 0 && (
-          <p className="text-sm text-zinc-400">{tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s13")}</p>
+          <p className="text-sm text-zinc-400">{tHC("s13")}</p>
         )}
       </div>
       {(mcp.hits.length > 0 || mcp.unavailable) && (
         <div>
           <div className="mb-1.5 flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-zinc-400">
-            <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s12")}
+            <Plug aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s12")}
           </div>
           {mcp.unavailable ? (
-            <p className="text-xs text-zinc-400">{tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s11")}</p>
+            <p className="text-xs text-zinc-400">{tHC("s11")}</p>
           ) : (
             <ul className="space-y-1.5">
               {mcp.hits.map((h) => (
@@ -135,7 +135,7 @@ export function RegistryStep({
                 </li>
               ))}
               <li className="text-[11px] text-zinc-400">
-                {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s10")}
+                {tHC("s10")}
               </li>
             </ul>
           )}
@@ -176,7 +176,7 @@ export function ShipStep({
   return (
     <div className="space-y-4">
       <Head
-        title={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s9")}
+        title={tHC("s9")}
         body="Make the link, scan the code, and the agent you just built answers on your phone. Up to 5 people can chat with it; it goes away with this sandbox."
       />
       {!shareUrl ? (
@@ -191,7 +191,7 @@ export function ShipStep({
           ) : (
             <QrCode aria-hidden="true" className="h-4 w-4 shrink-0" />
           )}{" "}
-          {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s8")}
+          {tHC("s8")}
         </button>
       ) : (
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -201,7 +201,7 @@ export function ShipStep({
                 viewBox={`0 0 ${qr.size + QR_QUIET * 2} ${qr.size + QR_QUIET * 2}`}
                 className="h-44 w-44"
                 role="img"
-                aria-label={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s7")}
+                aria-label={tHC("s7")}
               >
                 <path d={qr.d} fill="#09090b" />
               </svg>
@@ -214,7 +214,7 @@ export function ShipStep({
                 readOnly
                 value={shareUrl}
                 onFocus={(e) => e.currentTarget.select()}
-                aria-label={tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s6")}
+                aria-label={tHC("s6")}
                 className="min-w-0 flex-1 bg-transparent px-1 text-xs outline-none"
               />
               <button
@@ -230,21 +230,21 @@ export function ShipStep({
                 {copied ? "Copied" : "Copy"}
               </button>
             </div>
-            <p className="text-xs text-zinc-400">{tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s5")}</p>
+            <p className="text-xs text-zinc-400">{tHC("s5")}</p>
           </div>
         </div>
       )}
       <div className="rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
-        <div className="text-sm font-semibold">{tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s4")}</div>
+        <div className="text-sm font-semibold">{tHC("s4")}</div>
         <p className="mt-1 text-xs text-zinc-300">
-          {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s3")}
+          {tHC("s3")}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <a
             href={signupHref}
             className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 text-sm font-medium"
           >
-            {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s2")} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+            {tHC("s2")} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
           </a>
           {apk && (
             <a
@@ -252,7 +252,7 @@ export function ShipStep({
               download
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 px-3 py-2 text-sm"
             >
-              <Download aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeLiveBuilderSteps.s1")}
+              <Download aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s1")}
               {apk.sizeMb ? ` · ${apk.sizeMb} MB` : ""}
             </a>
           )}

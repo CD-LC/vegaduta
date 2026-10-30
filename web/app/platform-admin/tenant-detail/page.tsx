@@ -97,14 +97,14 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
     >
       {error && (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcPlatformadminTenantdetailPage.s25")} {error}{" "}
+          {tHC("s25")} {error}{" "}
           <button type="button" className="underline" onClick={() => setReload((n) => n + 1)}>
             Retry
           </button>
         </p>
       )}
       {!data && !error && <Skeleton className="h-16 w-full" />}
-      {data && users.length === 0 && <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminTenantdetailPage.s24")}</p>}
+      {data && users.length === 0 && <p className="text-xs text-muted-foreground">{tHC("s24")}</p>}
       {users.length > 0 && (
         <div className="divide-y divide-border rounded-lg border border-border">
           {users.map((u) => (
@@ -122,9 +122,9 @@ function TenantUsersCard({ tenantId, tenantName }: { tenantId: string; tenantNam
                 size="sm"
                 variant="outline"
                 onClick={() => setTarget({ tenantId, userId: u.id, label: u.email || u.username, tenantName })}
-                title={tHC("hcPlatformadminTenantdetailPage.s23")}
+                title={tHC("s23")}
               >
-                <Eye /> {tHC("hcPlatformadminTenantdetailPage.s22")}
+                <Eye /> {tHC("s22")}
               </Button>
             </div>
           ))}
@@ -268,13 +268,13 @@ export default function TenantDetailPage() {
   const missing = (key: string) => !!detail?.unavailable.includes(key);
 
   return (
-    <AdminShell title={tHC("hcPlatformadminTenantdetailPage.s21")}>
+    <AdminShell title={tHC("s21")}>
       <PageHint>
-        {tHC("hcPlatformadminTenantdetailPage.s20")}
+        {tHC("s20")}
       </PageHint>
 
       <SectionCard
-        title={tHC("hcPlatformadminTenantdetailPage.s19")}
+        title={tHC("s19")}
         icon={Building2}
         subtitle="Includes suspended and failed-provisioning tenants that the main roster hides."
         actions={
@@ -286,17 +286,17 @@ export default function TenantDetailPage() {
         <div className="flex flex-wrap gap-2">
           <input
             className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            placeholder={tHC("hcPlatformadminTenantdetailPage.s18")}
+            placeholder={tHC("s18")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label={tHC("hcPlatformadminTenantdetailPage.s17")}
+            aria-label={tHC("s17")}
           />
           <Select
             className="min-w-64"
             value={selected}
             onValueChange={setSelected}
             aria-label="Tenant"
-            placeholder={tHC("hcPlatformadminTenantdetailPage.s16")}
+            placeholder={tHC("s16")}
             options={[
               { value: "", label: "Select a tenant..." },
               ...shown.map((t) => ({
@@ -329,8 +329,8 @@ export default function TenantDetailPage() {
               <Badge variant={detail.status === "ACTIVE" ? "default" : "destructive"}>{detail.status}</Badge>
               <Badge variant="outline">{detail.plan}</Badge>
               {detail.accountType && <Badge variant="outline">{detail.accountType}</Badge>}
-              {detail.emergencyStopped && <Badge variant="destructive">{tHC("hcPlatformadminTenantdetailPage.s15")}</Badge>}
-              {detail.pastDue && <Badge variant="destructive">{tHC("hcPlatformadminTenantdetailPage.s14")}</Badge>}
+              {detail.emergencyStopped && <Badge variant="destructive">{tHC("s15")}</Badge>}
+              {detail.pastDue && <Badge variant="destructive">{tHC("s14")}</Badge>}
             </div>
             <p className="text-xs">
               <span
@@ -338,18 +338,18 @@ export default function TenantDetailPage() {
               >
                 {access.label}
               </span>
-              {tHC("hcPlatformadminTenantdetailPage.s13")}
+              {tHC("s13")}
             </p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Stat label="Created" value={fmtDate(detail.createdAt)} />
               <Stat
-                label={tHC("hcPlatformadminTenantdetailPage.s12")}
+                label={tHC("s12")}
                 value={detail.dataResidencyRegion || "Unspecified"}
                 note="Declared only; no data moves"
               />
               <Stat label="Subscription" value={detail.subscriptionStatus || "-"} />
               <Stat
-                label={tHC("hcPlatformadminTenantdetailPage.s11")}
+                label={tHC("s11")}
                 value={detail.compPlanExpiresAt ? fmtDate(detail.compPlanExpiresAt) : "-"}
               />
               <Stat label="Users" value={missing("users") ? "unavailable" : (detail.userCount ?? "-")} />
@@ -366,7 +366,7 @@ export default function TenantDetailPage() {
                 }
               />
               <Stat
-                label={tHC("hcPlatformadminTenantdetailPage.s10")}
+                label={tHC("s10")}
                 value={
                   missing("lastLlmCall")
                     ? "unavailable"
@@ -379,7 +379,7 @@ export default function TenantDetailPage() {
                 note="Latest of the last 200 logged calls; not a login time"
               />
               <Stat
-                label={tHC("hcPlatformadminTenantdetailPage.s9")}
+                label={tHC("s9")}
                 value={
                   <span title={formatExact(detail.lastActivityAt)}>
                     {detail.lastActivityAt ? formatRelative(detail.lastActivityAt) : "unavailable"}
@@ -388,7 +388,7 @@ export default function TenantDetailPage() {
                 note={detail.lastActivityAt ? formatExact(detail.lastActivityAt) : undefined}
               />
               <Stat
-                label={tHC("hcPlatformadminTenantdetailPage.s8")}
+                label={tHC("s8")}
                 value={detail.spend30dUsd == null ? "unavailable" : formatUsdOrUnavailable(detail.spend30dUsd)}
                 note="All providers incl. BYOK; estimate, not an invoice"
               />
@@ -397,16 +397,16 @@ export default function TenantDetailPage() {
               href={`/platform-admin/spend?tenantId=${encodeURIComponent(detail.tenantId)}`}
               className="inline-flex items-center gap-1.5 text-xs text-primary underline underline-offset-2 hover:text-foreground"
             >
-              <BarChart3 size={13} /> {tHC("hcPlatformadminTenantdetailPage.s7")}
+              <BarChart3 size={13} /> {tHC("s7")}
             </Link>
           </SectionCard>
 
           <SectionCard
-            title={tHC("hcPlatformadminTenantdetailPage.s6")}
+            title={tHC("s6")}
             subtitle="Monthly hosted-pool token counter, the same one the chat path enforces against."
           >
             {!q ? (
-              <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminTenantdetailPage.s5")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s5")}</p>
             ) : (
               <div className="space-y-2">
                 <p className="text-sm">
@@ -423,7 +423,7 @@ export default function TenantDetailPage() {
                 )}
                 {!q.usesPlatformLlm && detail.plan !== "FREE" && (
                   <p className="text-[11px] text-muted-foreground">
-                    {tHC("hcPlatformadminTenantdetailPage.s4")}
+                    {tHC("s4")}
                   </p>
                 )}
               </div>
@@ -433,7 +433,7 @@ export default function TenantDetailPage() {
           <SpendCapCard tenantId={detail.tenantId} tenantName={detail.name} />
 
           <SectionCard
-            title={tHC("hcPlatformadminTenantdetailPage.s3")}
+            title={tHC("s3")}
             subtitle="Emergency stop blocks every user in this tenant at the request filter. Data is untouched."
           >
             {detail.emergencyStopped && (
@@ -444,7 +444,7 @@ export default function TenantDetailPage() {
             )}
             {detail.status !== "ACTIVE" && (
               <p className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminTenantdetailPage.s2")} {detail.status}{tHC("hcPlatformadminTenantdetailPage.s1")}
+                {tHC("s2")} {detail.status}{tHC("s1")}
               </p>
             )}
             {detail.emergencyStopped ? (

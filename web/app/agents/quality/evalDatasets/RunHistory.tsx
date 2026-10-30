@@ -59,10 +59,10 @@ export default function RunHistory({
   };
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s9")}</h3>
+      <h3 className="text-sm font-semibold text-foreground">{tHC("s9")}</h3>
       {loaded && runs.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          {tHC("hcAgentsQualityEvalDatasetsRunHistory.s8")}
+          {tHC("s8")}
         </p>
       )}
       <div className="space-y-2">
@@ -93,7 +93,7 @@ export default function RunHistory({
               {run.judgeModel && <span className="text-xs text-muted-foreground">judge: {run.judgeModel}</span>}
               <JudgeTrustBadge info={run.judgeCalibration} />
               {(run.repeats ?? 1) > 1 && <span className="text-xs text-muted-foreground">×{run.repeats} reps</span>}
-              {run.strictJudge && <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s7")}</span>}
+              {run.strictJudge && <span className="text-xs text-muted-foreground">{tHC("s7")}</span>}
               {run.mode && (
                 <Badge
                   variant={run.mode === "FULL" ? "accent" : "outline"}
@@ -115,7 +115,7 @@ export default function RunHistory({
                     variant="ghost"
                     size="sm"
                     onClick={() => onDownloadJunit(run.id)}
-                    title={tHC("hcAgentsQualityEvalDatasetsRunHistory.s6")}
+                    title={tHC("s6")}
                   >
                     <Download size={13} aria-hidden="true" />
                   </Button>
@@ -123,7 +123,7 @@ export default function RunHistory({
                     variant="ghost"
                     size="sm"
                     onClick={() => onDownloadRunJsonl(run.id)}
-                    title={tHC("hcAgentsQualityEvalDatasetsRunHistory.s5")}
+                    title={tHC("s5")}
                   >
                     <Braces size={13} aria-hidden="true" />
                   </Button>
@@ -147,7 +147,7 @@ export default function RunHistory({
 
             {runDetailId === run.id && (
               <div className="space-y-2 border-t border-border p-3">
-                {caseResults === null && <p className="text-sm text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s4")}</p>}
+                {caseResults === null && <p className="text-sm text-muted-foreground">{tHC("s4")}</p>}
                 {simulatedTools.length > 0 && (
                   <p className="text-xs text-muted-foreground" data-testid="run-simulated-tools">
                     {t("runSimulatedTools", { tools: simulatedTools.join(", ") })}
@@ -166,14 +166,14 @@ export default function RunHistory({
                       {r.status === "ERROR" ? (
                         <Badge variant="destructive">Error</Badge>
                       ) : r.status === "UNAVAILABLE" ? (
-                        <Badge variant="secondary">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s3")}</Badge>
+                        <Badge variant="secondary">{tHC("s3")}</Badge>
                       ) : (
                         <Badge variant="outline">{pct(r.overallScore)}</Badge>
                       )}
-                      {r.expectedToolsSatisfied === false && <Badge variant="destructive">{tHC("hcAgentsQualityEvalDatasetsRunHistory.s2")}</Badge>}
+                      {r.expectedToolsSatisfied === false && <Badge variant="destructive">{tHC("s2")}</Badge>}
                       {r.expectedToolsSatisfied === true && (
                         <Badge variant="state" state="var(--state-success)">
-                          {tHC("hcAgentsQualityEvalDatasetsRunHistory.s1")}
+                          {tHC("s1")}
                         </Badge>
                       )}
                       {traceLink(r.langfuseTraceUrl)}

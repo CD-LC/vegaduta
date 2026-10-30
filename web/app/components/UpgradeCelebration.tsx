@@ -317,13 +317,13 @@ export default function UpgradeCelebration({
             </motion.div>
 
             <p className="mt-5 flex items-center justify-center gap-1.5 text-center text-xs font-medium uppercase tracking-[0.18em] text-primary">
-              <Sparkles aria-hidden="true" size={13} /> {tHC("hcComponentsUpgradeCelebration.s5")}
+              <Sparkles aria-hidden="true" size={13} /> {tHC("s5")}
             </p>
             <h2 className="mt-2 text-balance text-center text-2xl font-semibold tracking-tight sm:text-[1.7rem]">
-              {tHC("hcComponentsUpgradeCelebration.s4")} {info.name}!
+              {tHC("s4")} {info.name}!
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-              {info.tagline} {tHC("hcComponentsUpgradeCelebration.s3")}
+              {info.tagline} {tHC("s3")}
             </p>
 
             <ul className="mt-6 flex list-none flex-col gap-2.5 p-0">
@@ -345,10 +345,10 @@ export default function UpgradeCelebration({
 
             <div className="mt-7 flex flex-col gap-2.5">
               <Button type="button" className="w-full" onClick={goToDashboard}>
-                {tHC("hcComponentsUpgradeCelebration.s2")} <ArrowRight aria-hidden="true" size={15} />
+                {tHC("s2")} <ArrowRight aria-hidden="true" size={15} />
               </Button>
               <Button type="button" variant="ghost" className="w-full text-muted-foreground" onClick={onDismiss}>
-                {tHC("hcComponentsUpgradeCelebration.s1")}
+                {tHC("s1")}
               </Button>
             </div>
           </motion.div>

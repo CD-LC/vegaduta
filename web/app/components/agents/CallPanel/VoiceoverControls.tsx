@@ -207,7 +207,7 @@ export default function VoiceoverControls({
     <div className="space-y-1.5 rounded-lg border border-border/60 bg-secondary/20 p-2" data-voiceover-controls>
       <div className="flex items-center gap-2">
         <span className="shrink-0 text-xs text-muted-foreground" id="voiceover-pick-label">
-          {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s3")}
+          {tHC("s3")}
         </span>
         <div className="min-w-0 flex-1">
           <Select
@@ -233,7 +233,7 @@ export default function VoiceoverControls({
       {callVoices && callVoices.length > 0 && (
         <div className="flex items-center gap-2">
           <span className="shrink-0 text-xs text-muted-foreground" id="call-voice-pick-label">
-            {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s2")}
+            {tHC("s2")}
           </span>
           <div className="min-w-0 flex-1">
             <Select
@@ -256,7 +256,7 @@ export default function VoiceoverControls({
         {!ttsEditing ? (
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs text-muted-foreground">
-              {tHC("hcComponentsAgentsCallPanelVoiceoverControls.s1")}{" "}
+              {tHC("s1")}{" "}
               {shownTts.provider ? `${shownTts.provider}${shownTts.model ? ` · ${shownTts.model}` : ""}` : "Platform default"}
             </span>
             <Button

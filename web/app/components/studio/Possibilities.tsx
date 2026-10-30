@@ -156,13 +156,13 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
     <section aria-labelledby="possible-title" className="mt-24">
       <div className="max-w-2xl">
         <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-          <Sprout aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioPossibilities.s5")}
+          <Sprout aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s5")}
         </div>
         <h2 id="possible-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {tHC("hcComponentsStudioPossibilities.s4")}
+          {tHC("s4")}
         </h2>
         <p className="mt-3 text-muted-foreground">
-          {tHC("hcComponentsStudioPossibilities.s3")}
+          {tHC("s3")}
         </p>
       </div>
 
@@ -196,7 +196,7 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
             </div>
             <dl className="mt-3 space-y-1.5 text-xs">
               <div className="flex gap-2">
-                <dt className="w-[74px] shrink-0 font-medium text-emerald-700 dark:text-emerald-300">{tHC("hcComponentsStudioPossibilities.s2")}</dt>
+                <dt className="w-[74px] shrink-0 font-medium text-emerald-700 dark:text-emerald-300">{tHC("s2")}</dt>
                 <dd className="text-muted-foreground">{c.here}</dd>
               </div>
               <div className="flex gap-2">
@@ -209,7 +209,7 @@ export default function Possibilities({ onPick }: { onPick: (job: string) => voi
               onClick={() => onPick(c.job)}
               className="mt-4 inline-flex items-center gap-1.5 self-start rounded-lg bg-violet-500/10 px-3 py-1.5 text-sm font-medium text-violet-700 transition-colors hover:bg-violet-600 hover:text-white dark:text-violet-300"
             >
-              {tHC("hcComponentsStudioPossibilities.s1")}{" "}
+              {tHC("s1")}{" "}
               <ArrowRight
                 aria-hidden="true"
                 className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 shrink-0"

@@ -79,10 +79,10 @@ export function NewCommentCard({
         <div className="wfc-title" id={`${uid}-t`}>
           <MessageSquare size={13} aria-hidden="true" />
           <strong>
-            {tHC("hcComponentsWorkflowNewCommentCard.s2")} <span className="wfc-sub">on {where}</span>
+            {tHC("s2")} <span className="wfc-sub">on {where}</span>
           </strong>
         </div>
-        <button type="button" className="wfc-icon" aria-label={tHC("hcComponentsWorkflowNewCommentCard.s1")} onClick={onCancel}>
+        <button type="button" className="wfc-icon" aria-label={tHC("s1")} onClick={onCancel}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>

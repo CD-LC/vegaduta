@@ -61,7 +61,7 @@ export function LevelPicker({
     // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group
     <div
       role="radiogroup"
-      aria-label={tHC("hcBuildBlueprintView.s7")}
+      aria-label={tHC("s7")}
       onKeyDown={radioGroupKeyDown}
       className="inline-flex flex-wrap rounded-xl border border-border bg-card p-1"
     >
@@ -116,7 +116,7 @@ function Control({ spec, bp, onChange }: { spec: FieldSpec; bp: Blueprint; onCha
         {value}
         {spec.href && (
           <Link href={spec.href} className="ms-2 text-xs text-primary underline-offset-2 hover:underline">
-            {tHC("hcBuildBlueprintView.s6")}
+            {tHC("s6")}
           </Link>
         )}
       </span>
@@ -309,14 +309,14 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <div>
           <h3 className="text-sm font-semibold text-foreground">Workflow</h3>
           <p className="text-xs text-muted-foreground">
-            {tHC("hcBuildBlueprintView.s5")}
+            {tHC("s5")}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Switch
             checked={!!wf}
             onCheckedChange={(v) => onChange(withWorkflow(bp, v))}
-            aria-label={tHC("hcBuildBlueprintView.s4")}
+            aria-label={tHC("s4")}
           />
           <span className="text-sm text-foreground">{wf ? "Build one" : "Agent only"}</span>
         </div>
@@ -326,7 +326,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
         <>
           <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
             <SourceTag source={bp.sources["workflow.steps"] ?? "default"} />
-            <span>Named &ldquo;{wf.name}{tHC("hcBuildBlueprintView.s3")}</span>
+            <span>Named &ldquo;{wf.name}{tHC("s3")}</span>
           </div>
           <ol className="mt-3">
             {wf.steps.map((s, i) => (
@@ -394,7 +394,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
             ))}
           </ol>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">{tHC("hcBuildBlueprintView.s2")}</span>
+            <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
             {ADDABLE.map((k) => (
               <button
                 key={k}
@@ -411,7 +411,7 @@ export function FlowEditor({ bp, onChange }: { bp: Blueprint; onChange: (next: B
       {!wf && (
         <p className="mt-3 text-xs text-muted-foreground">
           <Sparkles aria-hidden="true" size={11} className="me-1 inline text-primary" />
-          {tHC("hcBuildBlueprintView.s1")}
+          {tHC("s1")}
         </p>
       )}
     </section>

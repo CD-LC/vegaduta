@@ -105,10 +105,10 @@ export function TierCell({ meta, rawValue }: { meta: TierMeta | null; rawValue: 
   return (
     <span
       className="inline-flex items-center gap-1 text-xs text-muted-foreground"
-      title={tHC("hcComponentsToolsToolClassificationBadges.s2")}
+      title={tHC("s2")}
     >
       <HelpCircle className="size-3" aria-hidden="true" />
-      {tHC("hcComponentsToolsToolClassificationBadges.s1")}
+      {tHC("s1")}
     </span>
   );
 }

@@ -89,7 +89,7 @@ export default function CommentItem({
 
       {editing ? (
         <CommentComposer
-          label={tHC("hcComponentsWorkflowCommentItem.s3")}
+          label={tHC("s3")}
           people={people}
           initialText={c.body ?? ""}
           initialMentions={mentions}
@@ -113,8 +113,8 @@ export default function CommentItem({
       )}
 
       {confirmDelete && (
-        <div className="wfc-confirm" role="group" aria-label={tHC("hcComponentsWorkflowCommentItem.s2")}>
-          <span>{tHC("hcComponentsWorkflowCommentItem.s1")}</span>
+        <div className="wfc-confirm" role="group" aria-label={tHC("s2")}>
+          <span>{tHC("s1")}</span>
           <button
             type="button"
             className="wfc-btn"

@@ -114,7 +114,7 @@ export default function DataPrivacySection() {
       <div className="ax-mnt-head">
         <div>
           <h2 className="ax-mnt-title" id="data-privacy-heading">
-            {tHC("hcComponentsDataPrivacySection.s7")}
+            {tHC("s7")}
           </h2>
           <div className="ax-mnt-sub">
             Tenant-wide export and deletion. Applies to the entire workspace, not a single user.
@@ -143,13 +143,13 @@ export default function DataPrivacySection() {
               marginBottom: "0.25rem",
             }}
           >
-            {tHC("hcComponentsDataPrivacySection.s6")}
+            {tHC("s6")}
           </div>
           <p style={hintStyle}>
-            {tHC("hcComponentsDataPrivacySection.s5")}
+            {tHC("s5")}
           </p>
           {exportStatus === "done" && (
-            <p style={{ ...hintStyle, marginTop: "0.5rem", color: "var(--success-text)" }}>{tHC("hcComponentsDataPrivacySection.s4")}</p>
+            <p style={{ ...hintStyle, marginTop: "0.5rem", color: "var(--success-text)" }}>{tHC("s4")}</p>
           )}
           {exportStatus === "error" && (
             <div className="error-box" style={{ margin: "0.5rem 0 0" }}>
@@ -181,13 +181,13 @@ export default function DataPrivacySection() {
         }}
       >
         <div style={{ fontWeight: 600, fontSize: "0.8125rem", color: "var(--danger-text)" }}>
-          {tHC("hcComponentsDataPrivacySection.s3")}
+          {tHC("s3")}
         </div>
         <p style={hintStyle}>
-          {tHC("hcComponentsDataPrivacySection.s2")}
+          {tHC("s2")}
         </p>
         {deletionStatus === "done" ? (
-          <p style={hintStyle}>{tHC("hcComponentsDataPrivacySection.s1")}</p>
+          <p style={hintStyle}>{tHC("s1")}</p>
         ) : (
           <>
             <label

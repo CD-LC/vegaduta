@@ -274,15 +274,15 @@ export default function NotificationBell() {
                 className="flex items-center gap-1 rounded border-0 bg-transparent p-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <CheckCheck size={12} />
-                {tHC("hcPlatformadminComponentsNotificationBell.s3")}
+                {tHC("s3")}
               </button>
             </div>
 
             <div className="max-h-96 overflow-y-auto">
-              {loading && <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsNotificationBell.s2")}</div>}
+              {loading && <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("s2")}</div>}
 
               {!loading && items.length === 0 && (
-                <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsNotificationBell.s1")}</div>
+                <div className="px-3.5 py-8 text-center text-xs text-muted-foreground">{tHC("s1")}</div>
               )}
 
               {!loading &&

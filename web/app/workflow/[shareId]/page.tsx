@@ -154,7 +154,7 @@ export default function SharedWorkflowPage() {
         {phase === "loading" && (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-24 text-center">
             <Loader2 className="size-6 animate-spin text-primary" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">{tHC("hcWorkflowShareIdPage.s14")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s14")}</p>
           </div>
         )}
 
@@ -174,12 +174,12 @@ export default function SharedWorkflowPage() {
                 // real workflow run on the owner's behalf) but carries the
                 // tenant's name, not this platform's.
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.workflowName}</span> {tHC("hcWorkflowShareIdPage.s13")}{" "}
+                  <span className="text-foreground">{info.workflowName}</span> {tHC("s13")}{" "}
                   <span className="text-foreground">{info.brandDisplayName || "its owner"}</span>.
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  <span className="text-foreground">{info.workflowName}</span> {tHC("hcWorkflowShareIdPage.s12")} <BrandName />{tHC("hcWorkflowShareIdPage.s11")}
+                  <span className="text-foreground">{info.workflowName}</span> {tHC("s12")} <BrandName />{tHC("s11")}
                 </p>
               )}
             </div>
@@ -190,7 +190,7 @@ export default function SharedWorkflowPage() {
             >
               {!resultText && !running && !notice && (
                 <p className="py-10 text-center text-sm text-muted-foreground">
-                  {tHC("hcWorkflowShareIdPage.s10")} {info.workflowName}.
+                  {tHC("s10")} {info.workflowName}.
                 </p>
               )}
 
@@ -292,7 +292,7 @@ function ViewerHeader({ info }: { info: SharedWorkflowInfo | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-2xl items-center gap-3 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2" aria-label={tHC("hcWorkflowShareIdPage.s9")}>
+        <Link href="/" className="flex items-center gap-2" aria-label={tHC("s9")}>
           <img src="/logo-mark.png" alt="" width={38} height={28} className="h-7 w-auto shrink-0 object-contain" />
           <span className="brand-name hidden text-lg font-semibold tracking-tight sm:inline">
             Vega<span className="text-primary">Dūta</span>
@@ -301,14 +301,14 @@ function ViewerHeader({ info }: { info: SharedWorkflowInfo | null }) {
 
         <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <Sparkles className="size-3" aria-hidden="true" />
-          {tHC("hcWorkflowShareIdPage.s8")}
+          {tHC("s8")}
         </span>
 
         <div className="ms-auto flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
             <Link href="/">
-              <span className="hidden sm:inline">{tHC("hcWorkflowShareIdPage.s6")}</span>
-              <span className="sm:hidden">{tHC("hcWorkflowShareIdPage.s7")}</span>
+              <span className="hidden sm:inline">{tHC("s6")}</span>
+              <span className="sm:hidden">{tHC("s7")}</span>
             </Link>
           </Button>
         </div>
@@ -343,7 +343,7 @@ function BlockedComposer({ code, whiteLabeled }: { code: ShareErrorCode; whiteLa
       {!whiteLabeled && (
         <Button asChild size="sm">
           <Link href="/">
-            {tHC("hcWorkflowShareIdPage.s6")}
+            {tHC("s6")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </Button>
@@ -366,7 +366,7 @@ function BlockedScreen({ code }: { code: ShareErrorCode }) {
       <p className="text-sm text-muted-foreground">{ERROR_COPY[code].text}</p>
       <Button asChild>
         <Link href="/">
-          {tHC("hcWorkflowShareIdPage.s6")}
+          {tHC("s6")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
@@ -403,7 +403,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
     <div className="flex flex-col items-center gap-2 py-1">
       {done ? (
         <p className="text-xs text-muted-foreground" role="status">
-          {tHC("hcWorkflowShareIdPage.s5")}
+          {tHC("s5")}
         </p>
       ) : !open ? (
         <button
@@ -412,7 +412,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
           className="inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-xs text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         >
           <Flag className="size-3" aria-hidden="true" />
-          {tHC("hcWorkflowShareIdPage.s4")}
+          {tHC("s4")}
         </button>
       ) : (
         <AnimatePresence>
@@ -421,7 +421,7 @@ function ReportPanel({ shareId }: { shareId: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
           >
-            <p className="text-xs text-muted-foreground">{tHC("hcWorkflowShareIdPage.s3")}</p>
+            <p className="text-xs text-muted-foreground">{tHC("s3")}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {REPORT_REASONS.map((r) => (
                 <button
@@ -458,7 +458,7 @@ function ViewerFooter() {
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-primary underline-offset-4 hover:underline"
         >
-          {tHC("hcWorkflowShareIdPage.s2")} <BrandName /> {tHC("hcWorkflowShareIdPage.s1")}
+          {tHC("s2")} <BrandName /> {tHC("s1")}
           <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>

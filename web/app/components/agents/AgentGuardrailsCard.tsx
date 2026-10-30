@@ -145,12 +145,12 @@ export default function AgentGuardrailsCard({
 
   return (
     <div className="mb-4">
-      <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsAgentGuardrailsCard.s5")}</div>
+      <div className="mb-1 text-xs text-muted-foreground">{tHC("s5")}</div>
 
       {loading && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          {tHC("hcComponentsAgentsAgentGuardrailsCard.s4")}
+          {tHC("s4")}
         </div>
       )}
 
@@ -160,7 +160,7 @@ export default function AgentGuardrailsCard({
         <>
           {!canManage && (
             <p className="mb-2 text-xs text-muted-foreground" data-testid="agent-guardrails-read-only">
-              {tHC("hcComponentsAgentsAgentGuardrailsCard.s3")}
+              {tHC("s3")}
             </p>
           )}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -208,11 +208,11 @@ export default function AgentGuardrailsCard({
           </div>
 
           <p className="mt-2 text-xs text-muted-foreground">
-            {tHC("hcComponentsAgentsAgentGuardrailsCard.s2")}{" "}
+            {tHC("s2")}{" "}
             <Link href="/admin/guardrails" className="underline underline-offset-2">
               Guardrails
             </Link>{" "}
-            {tHC("hcComponentsAgentsAgentGuardrailsCard.s1")}
+            {tHC("s1")}
           </p>
         </>
       )}

@@ -257,7 +257,7 @@ export default function WorkflowCanvas({
         ))}
         {!readOnly && workflows.length < workflowsMax && chainFromAgents(agents) && (
           <Button variant="outline" size="sm" onClick={() => startNew(chainFromAgents(agents))}>
-            <Layers aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioWorkflowCanvas.s18")}
+            <Layers aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> {tHC("s18")}
           </Button>
         )}
         {!readOnly && workflows.length < workflowsMax && (
@@ -267,7 +267,7 @@ export default function WorkflowCanvas({
         )}
         {workflows.length >= workflowsMax && (
           <span className="text-xs text-muted-foreground">
-            {tHC("hcComponentsStudioWorkflowCanvas.s17")} {workflowsMax} {tHC("hcComponentsStudioWorkflowCanvas.s16")}
+            {tHC("s17")} {workflowsMax} {tHC("s16")}
           </span>
         )}
       </div>
@@ -347,17 +347,17 @@ export default function WorkflowCanvas({
               rows={2}
               maxLength={2000}
               disabled={readOnly || run.running}
-              placeholder={tHC("hcComponentsStudioWorkflowCanvas.s15")}
+              placeholder={tHC("s15")}
               onChange={(e) => setInput(e.target.value)}
             />
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {!run.running ? (
                 <Button onClick={execute} disabled={!canRun}>
-                  <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioWorkflowCanvas.s14")}
+                  <Play aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s14")}
                 </Button>
               ) : (
                 <Button variant="outline" onClick={stop}>
-                  <Square aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioWorkflowCanvas.s13")}
+                  <Square aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s13")}
                 </Button>
               )}
               {run.status && (
@@ -371,7 +371,7 @@ export default function WorkflowCanvas({
                   {run.ms != null ? ` · ${(run.ms / 1000).toFixed(1)} s` : ""}
                 </span>
               )}
-              {outOfBudget && <span className="text-sm text-muted-foreground">{tHC("hcComponentsStudioWorkflowCanvas.s12")}</span>}
+              {outOfBudget && <span className="text-sm text-muted-foreground">{tHC("s12")}</span>}
               {run.error && <span className="text-sm text-destructive">{run.error}</span>}
             </div>
           </div>
@@ -439,7 +439,7 @@ function StepCard({
             type="button"
             onClick={onRemove}
             className="text-muted-foreground hover:text-destructive"
-            aria-label={tHC("hcComponentsStudioWorkflowCanvas.s11")}
+            aria-label={tHC("s11")}
           >
             <Trash2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
           </button>
@@ -451,7 +451,7 @@ function StepCard({
 
       {step.type === "trigger" && (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioWorkflowCanvas.s10")}
+          {tHC("s10")}
         </p>
       )}
       {step.type === "agent" && (
@@ -462,7 +462,7 @@ function StepCard({
             onChange={(e) => onChange({ config: { agentId: e.target.value } })}
             className="w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs"
           >
-            <option value="">{tHC("hcComponentsStudioWorkflowCanvas.s9")}</option>
+            <option value="">{tHC("s9")}</option>
             {agents
               .filter((a) => a.mine || a.id === step.config.agentId)
               .map((a) => (
@@ -481,21 +481,21 @@ function StepCard({
             placeholder="Instruction. Use {{input}} and {{previous}}."
           />
           <p className="text-[10px] text-muted-foreground">
-            {agentName(step.config.agentId)} · {"{{input}}"} {tHC("hcComponentsStudioWorkflowCanvas.s8")} {"{{previous}}"} {tHC("hcComponentsStudioWorkflowCanvas.s7")}
+            {agentName(step.config.agentId)} · {"{{input}}"} {tHC("s8")} {"{{previous}}"} {tHC("s7")}
           </p>
         </div>
       )}
       {step.type === "condition" && (
         <div className="space-y-2">
           <label className="block text-xs">
-            {tHC("hcComponentsStudioWorkflowCanvas.s6")}
+            {tHC("s6")}
             <input
               value={String(step.config.contains ?? "")}
               disabled={readOnly}
               maxLength={80}
               onChange={(e) => onChange({ config: { contains: e.target.value } })}
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-2 py-1 text-xs"
-              placeholder={tHC("hcComponentsStudioWorkflowCanvas.s5")}
+              placeholder={tHC("s5")}
             />
           </label>
           <label className="block text-xs">
@@ -506,8 +506,8 @@ function StepCard({
               onChange={(e) => onChange({ config: { onFalse: e.target.value } })}
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-2 py-1 text-xs"
             >
-              <option value="stop">{tHC("hcComponentsStudioWorkflowCanvas.s4")}</option>
-              <option value="skip">{tHC("hcComponentsStudioWorkflowCanvas.s3")}</option>
+              <option value="stop">{tHC("s4")}</option>
+              <option value="skip">{tHC("s3")}</option>
             </select>
           </label>
         </div>
@@ -520,12 +520,12 @@ function StepCard({
           maxLength={200}
           onChange={(e) => onChange({ config: { message: e.target.value } })}
           className="w-full rounded-lg border border-border/60 bg-background p-2 text-xs"
-          placeholder={tHC("hcComponentsStudioWorkflowCanvas.s2")}
+          placeholder={tHC("s2")}
         />
       )}
       {step.type === "output" && (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioWorkflowCanvas.s1")}
+          {tHC("s1")}
         </p>
       )}
       {state?.summary && status !== "idle" && (

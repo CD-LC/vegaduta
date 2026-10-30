@@ -63,7 +63,7 @@ export function UnreplicatedBadge({ className }: { className?: string }) {
       variant="state"
       state="var(--state-warning)"
       className={cn("gap-1", className)}
-      title={tHC("hcAgentsQualityScoreWithInterval.s5")}
+      title={tHC("s5")}
     >
       <AlertTriangle size={11} aria-hidden="true" /> unreplicated
     </Badge>
@@ -176,18 +176,18 @@ export function ScoreWithInterval({
         {(e.rollouts || 0) > 0 && (
           <span
             className="font-mono text-xs tabular-nums text-muted-foreground"
-            title={tHC("hcAgentsQualityScoreWithInterval.s4")}
+            title={tHC("s4")}
           >
             n={e.rollouts}
           </span>
         )}
-        {!hasValue && <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityScoreWithInterval.s3")}</span>}
+        {!hasValue && <span className="text-xs text-muted-foreground">{tHC("s3")}</span>}
         {hasValue && !withInterval && !unreplicated && (
           <span
             className="text-xs text-muted-foreground"
-            title={tHC("hcAgentsQualityScoreWithInterval.s2")}
+            title={tHC("s2")}
           >
-            {tHC("hcAgentsQualityScoreWithInterval.s1")}
+            {tHC("s1")}
           </span>
         )}
         {unreplicated && !hideUnreplicatedBadge && <UnreplicatedBadge />}

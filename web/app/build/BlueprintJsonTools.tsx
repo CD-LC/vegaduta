@@ -48,13 +48,13 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
   };
 
   return (
-    <section className="rounded-xl border border-border bg-card p-3" aria-label={tHC("hcBuildBlueprintJsonTools.s6")}>
+    <section className="rounded-xl border border-border bg-card p-3" aria-label={tHC("s6")}>
       <div className="flex flex-wrap items-center gap-2">
         <FileJson className="size-4 text-muted-foreground" aria-hidden />
-        <span className="text-xs font-medium text-foreground">{tHC("hcBuildBlueprintJsonTools.s5")}</span>
+        <span className="text-xs font-medium text-foreground">{tHC("s5")}</span>
         <div className="ms-auto flex items-center gap-1.5">
           <Button type="button" size="sm" variant="outline" onClick={() => void copy()}>
-            <ClipboardCopy aria-hidden="true" className="size-3.5" /> {tHC("hcBuildBlueprintJsonTools.s4")}
+            <ClipboardCopy aria-hidden="true" className="size-3.5" /> {tHC("s4")}
           </Button>
           <Button
             type="button"
@@ -64,7 +64,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
             aria-controls={`${uid}-import`}
             onClick={() => setOpen((o) => !o)}
           >
-            <Upload aria-hidden="true" className="size-3.5" /> {tHC("hcBuildBlueprintJsonTools.s3")}
+            <Upload aria-hidden="true" className="size-3.5" /> {tHC("s3")}
           </Button>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
       {open && (
         <div id={`${uid}-import`} className="mt-2 space-y-2">
           <label htmlFor={`${uid}-text`} className="text-xs font-medium text-foreground">
-            {tHC("hcBuildBlueprintJsonTools.s2")}
+            {tHC("s2")}
           </label>
           <Textarea
             id={`${uid}-text`}
@@ -95,7 +95,7 @@ export default function BlueprintJsonTools({ bp, onImport }: { bp: Blueprint; on
           )}
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={load} disabled={!text.trim()}>
-              {tHC("hcBuildBlueprintJsonTools.s1")}
+              {tHC("s1")}
             </Button>
             <Button
               type="button"

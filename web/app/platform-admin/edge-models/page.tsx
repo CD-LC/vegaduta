@@ -230,7 +230,7 @@ export default function EdgeModelsPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminEdgemodelsPage.s16")}
+      title={tHC("s16")}
       eyebrow="On-device catalog"
       actions={
         <div className="flex items-center gap-2 flex-wrap">
@@ -238,7 +238,7 @@ export default function EdgeModelsPage() {
             <RefreshCw size={14} aria-hidden /> Refresh
           </Button>
           <Button variant="outline" size="sm" onClick={resetToDefaults} disabled={saving || !overridePresent}>
-            <RotateCcw size={14} aria-hidden /> {tHC("hcPlatformadminEdgemodelsPage.s15")}
+            <RotateCcw size={14} aria-hidden /> {tHC("s15")}
           </Button>
           <Button size="sm" onClick={save} disabled={saving || !dirty}>
             <Save size={14} aria-hidden /> {saving ? "Saving…" : "Save catalog"}
@@ -247,7 +247,7 @@ export default function EdgeModelsPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminEdgemodelsPage.s14")}<code>platform.edge-agents.enabled</code>{tHC("hcPlatformadminEdgemodelsPage.s13")}
+        {tHC("s14")}<code>platform.edge-agents.enabled</code>{tHC("s13")}
       </PageHint>
 
       <div className="mb-4 flex items-center gap-2 flex-wrap">
@@ -265,11 +265,11 @@ export default function EdgeModelsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{tHC("hcPlatformadminEdgemodelsPage.s12")}{effectiveVersion})</CardTitle>
+          <CardTitle className="text-base">{tHC("s12")}{effectiveVersion})</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {loading ? (
-            <div className="text-sm text-muted-foreground">{tHC("hcPlatformadminEdgemodelsPage.s11")}</div>
+            <div className="text-sm text-muted-foreground">{tHC("s11")}</div>
           ) : (
             rows.map((m) => (
               <div key={m.id} className="flex items-start justify-between gap-4 rounded-md border p-3">
@@ -278,7 +278,7 @@ export default function EdgeModelsPage() {
                     <span className="font-medium">{m.displayName}</span>
                     <Badge variant="outline">{TIER_LABELS[m.tier] ?? `tier ${m.tier}`}</Badge>
                     <Badge variant="outline">{formatSize(m.sizeBytes)}</Badge>
-                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("hcPlatformadminEdgemodelsPage.s6")}</Badge>}
+                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("s6")}</Badge>}
                     {m.kind !== "llm" && <Badge variant="secondary">{m.kind}</Badge>}
                     {m.speedTier && <Badge variant="outline">{SPEED_TIER_LABELS[m.speedTier] ?? m.speedTier}</Badge>}
                     {m.contextWindowSize != null && m.contextWindowSize > 0 && (
@@ -319,14 +319,14 @@ export default function EdgeModelsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            {tHC("hcPlatformadminEdgemodelsPage.s10")}
+            {tHC("s10")}
             <Badge variant="outline">{registryCandidates.length} available</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            {tHC("hcPlatformadminEdgemodelsPage.s9")}{" "}
-            <strong>{tHC("hcPlatformadminEdgemodelsPage.s8")}</strong>.
+            {tHC("s9")}{" "}
+            <strong>{tHC("s8")}</strong>.
           </p>
           {registryError && (
             <Alert variant="destructive">
@@ -334,7 +334,7 @@ export default function EdgeModelsPage() {
             </Alert>
           )}
           {registryLoading ? (
-            <div className="text-sm text-muted-foreground">{tHC("hcPlatformadminEdgemodelsPage.s7")}</div>
+            <div className="text-sm text-muted-foreground">{tHC("s7")}</div>
           ) : registryCandidates.length === 0 ? (
             <div className="text-sm text-muted-foreground">
               {registry.length === 0
@@ -349,7 +349,7 @@ export default function EdgeModelsPage() {
                     <span className="font-medium">{m.displayName}</span>
                     <Badge variant="outline">{TIER_LABELS[m.tier] ?? `tier ${m.tier}`}</Badge>
                     <Badge variant="outline">{formatSize(m.sizeBytes)}</Badge>
-                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("hcPlatformadminEdgemodelsPage.s6")}</Badge>}
+                    {m.requiresWebGpu && <Badge variant="secondary">{tHC("s6")}</Badge>}
                     {m.speedTier && <Badge variant="outline">{SPEED_TIER_LABELS[m.speedTier] ?? m.speedTier}</Badge>}
                     {m.contextWindowSize != null && m.contextWindowSize > 0 && (
                       <Badge variant="outline">{formatContextWindow(m.contextWindowSize)}</Badge>
@@ -376,14 +376,14 @@ export default function EdgeModelsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{tHC("hcPlatformadminEdgemodelsPage.s5")}</CardTitle>
+          <CardTitle className="text-base">{tHC("s5")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            {tHC("hcPlatformadminEdgemodelsPage.s4")} <code>platform.edge-agents.enabled</code> {tHC("hcPlatformadminEdgemodelsPage.s3")}
+            {tHC("s4")} <code>platform.edge-agents.enabled</code> {tHC("s3")}
           </p>
           {fixedUtilities.length === 0 ? (
-            <div className="text-sm text-muted-foreground">{tHC("hcPlatformadminEdgemodelsPage.s2")}</div>
+            <div className="text-sm text-muted-foreground">{tHC("s2")}</div>
           ) : (
             fixedUtilities.map((m) => (
               <div key={m.id} className="flex items-start justify-between gap-4 rounded-md border p-3">
@@ -397,7 +397,7 @@ export default function EdgeModelsPage() {
                   <p className="text-xs text-muted-foreground mt-1 font-mono break-all">{m.id}</p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">
-                  {tHC("hcPlatformadminEdgemodelsPage.s1")}
+                  {tHC("s1")}
                 </Badge>
               </div>
             ))

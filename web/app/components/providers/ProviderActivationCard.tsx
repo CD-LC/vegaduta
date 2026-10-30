@@ -132,7 +132,7 @@ export default function ProviderActivationCard({
               />
               {i === 0 && (
                 <p id="provider-first-field-help" className="text-xs text-muted-foreground">
-                  {tHC("hcComponentsProvidersProviderActivationCard.s2")}
+                  {tHC("s2")}
                 </p>
               )}
             </div>
@@ -152,7 +152,7 @@ export default function ProviderActivationCard({
               required
             />
             <p id="provider-api-key-help" className="text-xs text-muted-foreground">
-              {tHC("hcComponentsProvidersProviderActivationCard.s1")}
+              {tHC("s1")}
             </p>
           </div>
         )}

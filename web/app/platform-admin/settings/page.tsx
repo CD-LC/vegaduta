@@ -14,13 +14,13 @@ import { useTranslations } from "../../lib/i18n";
 export default function PlatformSettingsPage() {
     const tHC = useTranslations("hcPlatformadminSettingsPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminSettingsPage.s3")}>
+    <AdminShell title={tHC("s3")}>
       <PageHint>
-        {tHC("hcPlatformadminSettingsPage.s2")}
+        {tHC("s2")}
       </PageHint>
 
       <InfoNote>
-        {tHC("hcPlatformadminSettingsPage.s1")}
+        {tHC("s1")}
       </InfoNote>
 
       <PlatformSettingsSection />

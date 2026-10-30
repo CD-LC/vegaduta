@@ -121,7 +121,7 @@ export default function ConnectPanel({
           )}
         </div>
         {items === null ? (
-          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s25")}</p>
+          <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">{tHC("s25")}</p>
         ) : total === 0 ? (
           <p className="rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">
             {q
@@ -166,7 +166,7 @@ export default function ConnectPanel({
                             type="button"
                             onClick={() => setEditing(editing === key ? null : key)}
                             className="rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-foreground transition hover:border-primary/40 hover:bg-accent"
-                            title={tHC("hcBuildStudioStudioConnectPanel.s24")}
+                            title={tHC("s24")}
                           >
                             Configure
                           </button>
@@ -174,7 +174,7 @@ export default function ConnectPanel({
                             type="button"
                             onClick={() => onDetach(kind, it.id)}
                             className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-700 transition hover:bg-destructive/10 hover:text-destructive dark:text-emerald-300"
-                            title={tHC("hcBuildStudioStudioConnectPanel.s23")}
+                            title={tHC("s23")}
                           >
                             <Check aria-hidden="true" size={11} /> Connected
                           </button>
@@ -247,7 +247,7 @@ export default function ConnectPanel({
           <Rocket aria-hidden="true" size={15} />
         </span>
         <p className="text-xs leading-snug text-muted-foreground">
-          <span className="font-bold text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s22")}</span> {tHC("hcBuildStudioStudioConnectPanel.s21")}
+          <span className="font-bold text-foreground">{tHC("s22")}</span> {tHC("s21")}
         </p>
       </div>
 
@@ -261,8 +261,8 @@ export default function ConnectPanel({
           <input
             value={query}
             onChange={(e) => onQuery(e.target.value)}
-            placeholder={tHC("hcBuildStudioStudioConnectPanel.s20")}
-            aria-label={tHC("hcBuildStudioStudioConnectPanel.s19")}
+            placeholder={tHC("s20")}
+            aria-label={tHC("s19")}
             className="w-full rounded-xl border border-border bg-background py-2 ps-9 pe-3 text-sm text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
           />
         </label>
@@ -281,13 +281,13 @@ export default function ConnectPanel({
 
       <details open={authMode !== "off"} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
-          {tHC("hcBuildStudioStudioConnectPanel.s18")}
+          {tHC("s18")}
           <span className="text-[11px] font-normal normal-case text-muted-foreground">
             {authMode === "off" ? "Off" : authMode === "optional" ? "Optional" : "Required"}
           </span>
         </summary>
         <p className="mb-2.5 text-xs leading-relaxed text-muted-foreground">
-          {tHC("hcBuildStudioStudioConnectPanel.s17")} <em>your</em> {tHC("hcBuildStudioStudioConnectPanel.s16")}
+          {tHC("s17")} <em>your</em> {tHC("s16")}
         </p>
         <div className="flex flex-col gap-1.5">
           {(
@@ -325,14 +325,14 @@ export default function ConnectPanel({
         </div>
         {authMode !== "off" && !published && (
           <p className="mt-2 rounded-lg bg-amber-500/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
-            {tHC("hcBuildStudioStudioConnectPanel.s15")}
+            {tHC("s15")}
           </p>
         )}
       </details>
 
       <details open={!!ai?.enabled} className="group rounded-2xl border border-border bg-card p-3.5">
         <summary className="mb-1 flex cursor-pointer list-none items-center justify-between text-xs font-bold uppercase tracking-wide text-foreground">
-          {tHC("hcBuildStudioStudioConnectPanel.s14")}
+          {tHC("s14")}
           <span className="text-[11px] font-normal normal-case text-muted-foreground">
             {ai?.enabled ? "On" : "Off"}
           </span>
@@ -349,22 +349,22 @@ export default function ConnectPanel({
             className="mt-0.5 accent-primary"
           />
           <span>
-            <span className="block text-xs font-medium text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s13")}</span>
+            <span className="block text-xs font-medium text-foreground">{tHC("s13")}</span>
             <span className="block text-[11px] leading-relaxed text-muted-foreground">
-              {tHC("hcBuildStudioStudioConnectPanel.s12")} <code className="text-foreground">{tHC("hcBuildStudioStudioConnectPanel.s11")}</code> {tHC("hcBuildStudioStudioConnectPanel.s10")}
+              {tHC("s12")} <code className="text-foreground">{tHC("s11")}</code> {tHC("s10")}
             </span>
           </span>
         </label>
         {ai?.enabled && (
           <div className="mt-2">
             <p className="mb-1 text-[11px] text-muted-foreground">
-              {tHC("hcBuildStudioStudioConnectPanel.s9")}
+              {tHC("s9")}
             </p>
             <textarea
               value={ai.systemPrompt || ""}
               onChange={(e) => onSetAi({ enabled: true, systemPrompt: e.target.value })}
               rows={2}
-              placeholder={tHC("hcBuildStudioStudioConnectPanel.s8")}
+              placeholder={tHC("s8")}
               className="w-full resize-none rounded-xl border border-border bg-background p-2.5 text-xs text-foreground outline-none transition focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -442,15 +442,15 @@ function ConnectionEditor({
     <div className="border-t border-border/70 px-2.5 py-2">
       <div className="flex flex-col gap-2">
         <div>
-          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s7")}</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("s7")}</p>
           <Input value={alias} onChange={(e) => setAlias(e.target.value)} className="h-7 font-mono text-[11px]" />
           <p className="mt-1 text-[10px] text-muted-foreground">
-            {tHC("hcBuildStudioStudioConnectPanel.s6")} {alias || "it"} {tHC("hcBuildStudioStudioConnectPanel.s5")}
+            {tHC("s6")} {alias || "it"} {tHC("s5")}
           </p>
         </div>
         <div>
           <p className="mb-1 text-[11px] text-muted-foreground">
-            {tHC("hcBuildStudioStudioConnectPanel.s4")}
+            {tHC("s4")}
           </p>
           <textarea
             value={template}
@@ -467,7 +467,7 @@ function ConnectionEditor({
           </p>
         </div>
         <div>
-          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("hcBuildStudioStudioConnectPanel.s3")}</p>
+          <p className="mb-1 text-[11px] text-muted-foreground">{tHC("s3")}</p>
           <Input
             value={responsePath}
             onChange={(e) => setResponsePath(e.target.value)}
@@ -477,11 +477,11 @@ function ConnectionEditor({
         </div>
         <label className="flex cursor-pointer items-center gap-2 text-xs text-foreground">
           <input type="checkbox" checked={requiresAuth} onChange={(e) => setRequiresAuth(e.target.checked)} />
-          {tHC("hcBuildStudioStudioConnectPanel.s2")}
+          {tHC("s2")}
         </label>
         {!published && requiresAuth && (
           <p className="rounded-md bg-amber-500/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
-            {tHC("hcBuildStudioStudioConnectPanel.s1")}
+            {tHC("s1")}
           </p>
         )}
         <div className="flex items-center gap-1.5">

@@ -281,7 +281,7 @@ export default function TourSpotlight({ open, steps, onClose }: Props) {
           <button
             type="button"
             onClick={() => onClose(false)}
-            aria-label={tHC("hcComponentsStudioTourSpotlight.s2")}
+            aria-label={tHC("s2")}
             className="text-muted-foreground hover:text-foreground"
           >
             <X aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -309,7 +309,7 @@ export default function TourSpotlight({ open, steps, onClose }: Props) {
             <ArrowLeft aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Back
           </Button>
           <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => onClose(false)}>
-            {tHC("hcComponentsStudioTourSpotlight.s1")}
+            {tHC("s1")}
           </Button>
           <Button size="sm" className={`ms-auto ${t.cta}`} onClick={() => go(1)}>
             {last ? "Finish" : isAction ? "Skip ahead" : "Next"}{" "}

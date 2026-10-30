@@ -98,7 +98,7 @@ export default function OpenApiImportWizard({
                 aria-describedby="oas-name-help"
               />
               <p id="oas-name-help" className="text-xs text-muted-foreground">
-                {tHC("hcComponentsOpenapiOpenApiImportWizard.s1")}
+                {tHC("s1")}
               </p>
             </div>
             <div className="space-y-1.5">

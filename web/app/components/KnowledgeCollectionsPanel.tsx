@@ -435,7 +435,7 @@ const KnowledgeCollectionsPanel = forwardRef(function KnowledgeCollectionsPanel(
               autoFocus
             />
             <p id="kb-new-collection-name-help" className="text-xs text-muted-foreground">
-              {tHC("hcComponentsKnowledgeCollectionsPanel.s1")}
+              {tHC("s1")}
             </p>
           </div>
           <div className="space-y-1.5">

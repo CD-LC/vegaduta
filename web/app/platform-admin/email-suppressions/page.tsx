@@ -78,13 +78,13 @@ export default function EmailSuppressionsPage() {
   const total = data?.total ?? 0;
 
   return (
-    <AdminShell title={tHC("hcPlatformadminEmailsuppressionsPage.s5")}>
+    <AdminShell title={tHC("s5")}>
       <PageHint>
-        {tHC("hcPlatformadminEmailsuppressionsPage.s4")}
+        {tHC("s4")}
       </PageHint>
 
       <SectionCard
-        title={tHC("hcPlatformadminEmailsuppressionsPage.s3")}
+        title={tHC("s3")}
         icon={MailX}
         subtitle={data ? `${total.toLocaleString("en-US")} address${total === 1 ? "" : "es"}` : undefined}
         actions={
@@ -97,9 +97,9 @@ export default function EmailSuppressionsPage() {
             }}
           >
             <Input
-              aria-label={tHC("hcPlatformadminEmailsuppressionsPage.s2")}
+              aria-label={tHC("s2")}
               className="h-9 w-64"
-              placeholder={tHC("hcPlatformadminEmailsuppressionsPage.s1")}
+              placeholder={tHC("s1")}
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />

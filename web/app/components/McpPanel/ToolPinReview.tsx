@@ -72,10 +72,10 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
   return (
     <Alert variant="destructive" className="mb-4" data-testid="mcp-tool-pin-review">
       <ShieldAlert className="h-4 w-4" />
-      <AlertTitle>{tHC("hcComponentsMcpPanelToolPinReview.s3")}</AlertTitle>
+      <AlertTitle>{tHC("s3")}</AlertTitle>
       <AlertDescription>
         <p className="mb-3 text-sm">
-          {tHC("hcComponentsMcpPanelToolPinReview.s2")}
+          {tHC("s2")}
         </p>
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
@@ -100,7 +100,7 @@ export default function ToolPinReview({ onChanged }: { onChanged?: () => void })
                 onClick={() => void approve(item)}
                 data-testid={`mcp-tool-pin-approve-${item.name}`}
               >
-                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} {tHC("hcComponentsMcpPanelToolPinReview.s1")}
+                {busyId === item.registrationId ? <Loader2 className="h-3 w-3 animate-spin" /> : null} {tHC("s1")}
               </Button>
             </li>
           ))}

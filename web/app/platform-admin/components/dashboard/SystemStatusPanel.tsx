@@ -86,7 +86,7 @@ export default function SystemStatusPanel({
       <div className="mc-status-header">
         {!hideHeader && (
           <h3>
-            {tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s6")} <span className="mc-status-header-id">ECOSYSTEM</span>
+            {tHC("s6")} <span className="mc-status-header-id">ECOSYSTEM</span>
           </h3>
         )}
         {status && (
@@ -111,17 +111,17 @@ export default function SystemStatusPanel({
           />
           <Readout label="Redis" status={status.redis?.status} detail={status.redis?.status || "—"} />
           <Readout
-            label={tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s5")}
+            label={tHC("s5")}
             status={status.kafka?.status}
             detail={status.kafka?.status === "UNKNOWN" ? "not active" : status.kafka?.status || "—"}
           />
           <Readout
-            label={tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s4")}
+            label={tHC("s4")}
             status={status.mcp ? "UP" : "UNKNOWN"}
             detail={status.mcp ? `${status.mcp.enabledServers}/${status.mcp.totalServers} enabled` : "—"}
           />
           <Readout
-            label={tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s3")}
+            label={tHC("s3")}
             status="UP"
             detail={
               status.jvm ? `${status.jvm.heapUsedMb}${status.jvm.heapMaxMb ? `/${status.jvm.heapMaxMb}` : ""} MB` : "—"
@@ -129,7 +129,7 @@ export default function SystemStatusPanel({
           />
           <Readout label="Uptime" status="UP" detail={formatUptime(status.jvm?.uptimeSeconds)} />
           <Readout
-            label={tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s2")}
+            label={tHC("s2")}
             status={status.llm?.totalCalls > 0 ? "UP" : "UNKNOWN"}
             detail={
               status.llm
@@ -139,7 +139,7 @@ export default function SystemStatusPanel({
             hint="Each count is one full agent turn (ChatClient call), not one raw model completion."
           />
           <Readout
-            label={tHC("hcPlatformadminComponentsDashboardSystemStatusPanel.s1")}
+            label={tHC("s1")}
             status={status.llm?.avgLatencyMs != null ? "UP" : "UNKNOWN"}
             detail={status.llm?.avgLatencyMs != null ? `${Math.round(status.llm.avgLatencyMs)}ms avg` : "no calls yet"}
             hint="Whole-turn latency, including any tool calls the model made - not raw model completion time."

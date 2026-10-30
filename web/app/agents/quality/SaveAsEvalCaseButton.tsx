@@ -134,7 +134,7 @@ export default function SaveAsEvalCaseButton({
     return (
       <span className={cn("inline-flex items-center gap-1 text-xs text-muted-foreground", className)}>
         <Check size={12} className="size-3" aria-hidden="true" />
-        {tHC("hcAgentsQualitySaveAsEvalCaseButton.s4")}
+        {tHC("s4")}
       </span>
     );
   }
@@ -143,7 +143,7 @@ export default function SaveAsEvalCaseButton({
     return (
       <div className={cn("flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground", className)}>
         <label className="sr-only" htmlFor={`eval-ds-${turnRef}`}>
-          {tHC("hcAgentsQualitySaveAsEvalCaseButton.s3")}
+          {tHC("s3")}
         </label>
         <Select
           id={`eval-ds-${turnRef}`}
@@ -194,14 +194,14 @@ export default function SaveAsEvalCaseButton({
         className="h-auto gap-1 px-1.5 py-0.5 text-xs font-normal text-muted-foreground"
         onClick={openPicker}
         disabled={phase === "loading"}
-        title={tHC("hcAgentsQualitySaveAsEvalCaseButton.s2")}
+        title={tHC("s2")}
       >
         {phase === "loading" ? (
           <Loader2 size={12} className="size-3 animate-spin" aria-hidden="true" />
         ) : (
           <FlaskConical size={12} className="size-3" aria-hidden="true" />
         )}
-        {tHC("hcAgentsQualitySaveAsEvalCaseButton.s1")}
+        {tHC("s1")}
       </Button>
       {error && (
         <span className="text-xs text-destructive" role="alert">

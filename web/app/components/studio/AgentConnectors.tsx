@@ -115,18 +115,18 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-sm font-medium">{tHC("hcComponentsStudioAgentConnectors.s12")}</div>
+        <div className="text-sm font-medium">{tHC("s12")}</div>
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioAgentConnectors.s11")}
+          {tHC("s11")}
         </p>
       </div>
 
       {!connectorsEnabled && (
         <Alert>
           <Lock aria-hidden="true" />
-          <AlertTitle>{tHC("hcComponentsStudioAgentConnectors.s10")}</AlertTitle>
+          <AlertTitle>{tHC("s10")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcComponentsStudioAgentConnectors.s9")}
+            {tHC("s9")}
           </AlertDescription>
         </Alert>
       )}
@@ -134,7 +134,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
       {(connected?.length ?? 0) > 0 && (
         <div className="space-y-2">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("hcComponentsStudioAgentConnectors.s8")} {agent.name}
+            {tHC("s8")} {agent.name}
           </div>
           {connected!.map((c) => (
             <div
@@ -179,9 +179,9 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={tHC("hcComponentsStudioAgentConnectors.s7")}
+          placeholder={tHC("s7")}
           className="ps-9"
-          aria-label={tHC("hcComponentsStudioAgentConnectors.s6")}
+          aria-label={tHC("s6")}
         />
         {searching && (
           <Loader2
@@ -210,7 +210,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
 
       {unavailable && (
         <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
-          {tHC("hcComponentsStudioAgentConnectors.s5")}
+          {tHC("s5")}
         </div>
       )}
 
@@ -236,7 +236,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
                 <div className="truncate font-medium">{h.title}</div>
                 <div className="line-clamp-2 text-xs text-muted-foreground">{h.description ?? h.name}</div>
                 <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <ExternalLink aria-hidden="true" className="h-3 w-3 shrink-0" /> {h.host ?? "hosted"} {tHC("hcComponentsStudioAgentConnectors.s4")}
+                  <ExternalLink aria-hidden="true" className="h-3 w-3 shrink-0" /> {h.host ?? "hosted"} {tHC("s4")}
                 </div>
               </div>
               {connectorsEnabled ? (
@@ -246,7 +246,7 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
                   <TooltipTrigger asChild>
                     <span>{button}</span>
                   </TooltipTrigger>
-                  <TooltipContent>{tHC("hcComponentsStudioAgentConnectors.s3")}</TooltipContent>
+                  <TooltipContent>{tHC("s3")}</TooltipContent>
                 </Tooltip>
               )}
             </li>
@@ -254,13 +254,13 @@ export default function AgentConnectors({ token, agent, readOnly, connectorsEnab
         })}
         {hits !== null && hits.length === 0 && !unavailable && !searching && (
           <li className="rounded-xl border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-            {tHC("hcComponentsStudioAgentConnectors.s2")}
+            {tHC("s2")}
           </li>
         )}
       </ul>
       {next && (
         <Button size="sm" variant="ghost" disabled={searching} onClick={() => void search(q.trim() || seed, next)}>
-          {tHC("hcComponentsStudioAgentConnectors.s1")}
+          {tHC("s1")}
         </Button>
       )}
     </div>

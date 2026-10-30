@@ -23,9 +23,9 @@ import { useTranslations } from "../../lib/i18n";
 export default function FraudAnomalyPage() {
     const tHC = useTranslations("hcPlatformadminFraudPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminFraudPage.s2")}>
+    <AdminShell title={tHC("s2")}>
       <PageHint>
-        {tHC("hcPlatformadminFraudPage.s1")}
+        {tHC("s1")}
       </PageHint>
 
       <AbuseScoresSection pollMs={15000} delay={0} />

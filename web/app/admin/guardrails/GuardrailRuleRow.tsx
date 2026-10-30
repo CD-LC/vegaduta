@@ -56,7 +56,7 @@ export function GuardrailRuleRow({
           </Badge>
           {!editable && (
             <Badge variant="outline">
-              <Lock aria-hidden="true" /> {tHC("hcAdminGuardrailsGuardrailRuleRow.s2")}
+              <Lock aria-hidden="true" /> {tHC("s2")}
             </Badge>
           )}
           {!rule.enabled && <Badge variant="outline">Off</Badge>}
@@ -94,7 +94,7 @@ export function GuardrailRuleRow({
           {isConfirming ? (
             <>
               <Button type="button" size="sm" variant="destructive" disabled={busy} onClick={onDelete}>
-                {tHC("hcAdminGuardrailsGuardrailRuleRow.s1")}
+                {tHC("s1")}
               </Button>
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={onCancelDelete}>
                 Cancel

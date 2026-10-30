@@ -18,31 +18,31 @@ import { useTranslations } from "../../lib/i18n";
 export default function AbuseRateControlPage() {
     const tHC = useTranslations("hcPlatformadminAbusePage");
   return (
-    <AdminShell title={tHC("hcPlatformadminAbusePage.s8")}>
+    <AdminShell title={tHC("s8")}>
       <PageHint>
-        {tHC("hcPlatformadminAbusePage.s7")}{" "}
+        {tHC("s7")}{" "}
         <Link href="/platform-admin/fraud" className="font-medium text-primary hover:underline">
-          {tHC("hcPlatformadminAbusePage.s6")}
+          {tHC("s6")}
         </Link>
         .
       </PageHint>
 
       <SectionCard
-        title={tHC("hcPlatformadminAbusePage.s5")}
+        title={tHC("s5")}
         subtitle="Risk scores, anomaly log and active throttles for every tenant"
         icon={Gauge}
         delay={0}
       >
         <p className="text-sm text-muted-foreground">
-          {tHC("hcPlatformadminAbusePage.s4")}
+          {tHC("s4")}
         </p>
         <Link href="/platform-admin/fraud" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-          {tHC("hcPlatformadminAbusePage.s3")} <ChevronRight size={13} />
+          {tHC("s3")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
 
       <PlatformSettingsSection
-        title={tHC("hcPlatformadminAbusePage.s2")}
+        title={tHC("s2")}
         subtitle="The rate-limit/abuse subset of the platform settings table - the full list lives on Platform Settings"
         keyFilter={(key) => RATE_LIMIT_KEY_PATTERN.test(key)}
         delay={0.03}
@@ -51,7 +51,7 @@ export default function AbuseRateControlPage() {
       <ToolCircuitBreakersSection delay={0.06} />
 
       <InfoNote>
-        {tHC("hcPlatformadminAbusePage.s1")}
+        {tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

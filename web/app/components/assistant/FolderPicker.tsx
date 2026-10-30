@@ -112,7 +112,7 @@ export default function FolderPicker({
           </form>
           <p className="mt-2 border-t border-border pt-2 text-xs text-muted-foreground">
             {t("folderSwitchHint")}{" "}
-            <code className="rounded bg-secondary/60 px-1">{tHC("hcComponentsAssistantFolderPicker.s1")}</code>
+            <code className="rounded bg-secondary/60 px-1">{tHC("s1")}</code>
           </p>
           {error && (
             <p role="alert" className="mt-1 text-xs text-destructive">

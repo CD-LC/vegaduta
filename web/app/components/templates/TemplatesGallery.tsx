@@ -113,7 +113,7 @@ export default function TemplatesGallery({
         {/* Kind */}
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton active={filters.kind === "all"} onClick={() => update({ kind: "all" })}>
-            {tHC("hcComponentsTemplatesTemplatesGallery.s7")}
+            {tHC("s7")}
           </FilterButton>
           {TEMPLATE_KINDS.map((k) => {
             const Icon = k.icon;
@@ -128,7 +128,7 @@ export default function TemplatesGallery({
         {/* Category */}
         <div className="flex flex-wrap items-center gap-2">
           <FilterButton active={filters.category === "all"} onClick={() => update({ category: "all" })}>
-            <LayoutGrid size={13} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplatesGallery.s6")}
+            <LayoutGrid size={13} strokeWidth={2} aria-hidden="true" /> {tHC("s6")}
           </FilterButton>
           {TEMPLATE_CATEGORIES.map((c) => (
             <FilterButton key={c.id} active={filters.category === c.id} onClick={() => update({ category: c.id })}>
@@ -169,10 +169,10 @@ export default function TemplatesGallery({
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
               <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesTemplatesGallery.s5")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s5")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={() => load(filters)}>
-              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplatesGallery.s4")}
+              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s4")}
             </Button>
           </CardContent>
         </Card>
@@ -184,9 +184,9 @@ export default function TemplatesGallery({
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
               <Search size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesTemplatesGallery.s3")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s3")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              {tHC("hcComponentsTemplatesTemplatesGallery.s2")}
+              {tHC("s2")}
             </p>
             {(filters.kind !== "all" || filters.category !== "all" || filters.tag) && (
               <Button
@@ -194,7 +194,7 @@ export default function TemplatesGallery({
                 size="sm"
                 onClick={() => setFilters({ kind: "all", category: "all", tag: null, page: 1 })}
               >
-                {tHC("hcComponentsTemplatesTemplatesGallery.s1")}
+                {tHC("s1")}
               </Button>
             )}
           </CardContent>

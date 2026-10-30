@@ -233,7 +233,7 @@ export default function RunStepInspector({
           <h2 id={`${uid}-title`} className="ri-title" title={title}>
             {title}
           </h2>
-          <button type="button" className="ri-iconbtn" onClick={onClose} aria-label={tHC("hcComponentsWorkflowRunStepInspector.s7")}>
+          <button type="button" className="ri-iconbtn" onClick={onClose} aria-label={tHC("s7")}>
             <X size={15} aria-hidden="true" />
           </button>
         </div>
@@ -243,13 +243,13 @@ export default function RunStepInspector({
           </span>
           {visit.nodeType ? <span className="ri-type">{visit.nodeType}</span> : null}
           {visitCount > 1 ? (
-            <div className="ri-visits" role="group" aria-label={tHC("hcComponentsWorkflowRunStepInspector.s6")}>
+            <div className="ri-visits" role="group" aria-label={tHC("s6")}>
               <button
                 type="button"
                 className="ri-iconbtn ri-sm"
                 onClick={onPrevVisit}
                 disabled={!canPrev}
-                aria-label={tHC("hcComponentsWorkflowRunStepInspector.s5")}
+                aria-label={tHC("s5")}
               >
                 <ChevronLeft size={14} aria-hidden="true" />
               </button>
@@ -262,7 +262,7 @@ export default function RunStepInspector({
                 className="ri-iconbtn ri-sm"
                 onClick={onNextVisit}
                 disabled={!canNext}
-                aria-label={tHC("hcComponentsWorkflowRunStepInspector.s4")}
+                aria-label={tHC("s4")}
               >
                 <ChevronRight size={14} aria-hidden="true" />
               </button>
@@ -273,7 +273,7 @@ export default function RunStepInspector({
       </header>
 
       {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the tabs; arrow keys bubble to the tablist */}
-      <div className="ri-tabs" role="tablist" aria-label={tHC("hcComponentsWorkflowRunStepInspector.s3")} onKeyDown={onTabKey}>
+      <div className="ri-tabs" role="tablist" aria-label={tHC("s3")} onKeyDown={onTabKey}>
         {tabs.map((k) => {
           const t = tabMeta[k];
           return (
@@ -372,14 +372,14 @@ export default function RunStepInspector({
           {visitCount > 1 ? (
             <>
               <kbd>[</kbd>
-              <kbd>]</kbd> {tHC("hcComponentsWorkflowRunStepInspector.s2")}{" "}
+              <kbd>]</kbd> {tHC("s2")}{" "}
             </>
           ) : null}
           <kbd>Esc</kbd> close
         </span>
         {onOpenFullRun ? (
           <button type="button" className="ri-btn" onClick={onOpenFullRun}>
-            {tHC("hcComponentsWorkflowRunStepInspector.s1")}
+            {tHC("s1")}
             <ExternalLink size={13} aria-hidden="true" />
           </button>
         ) : null}

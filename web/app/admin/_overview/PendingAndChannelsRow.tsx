@@ -20,7 +20,7 @@ export default function PendingAndChannelsRow({
   return (
     <div className="defer-offscreen grid min-w-0 gap-4 lg:grid-cols-[3fr_2fr]">
       <Card className="gap-4 p-5" data-testid="admin-pending-approvals">
-        <CardHeading action={<CardLink href="/admin/maintenance">{tHC("hcAdminOverviewPendingAndChannelsRow.s1")}</CardLink>}>
+        <CardHeading action={<CardLink href="/admin/maintenance">{tHC("s1")}</CardLink>}>
           {t("pendingApprovalsHeading")}
         </CardHeading>
         {/* Bounded to 5 rows; the max-height is a defensive cap so a

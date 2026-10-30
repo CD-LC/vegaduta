@@ -13,13 +13,13 @@ export default function CodePanel({ html, onApply }: { html: string; onApply: (n
   useEffect(() => setDraft(html), [html]);
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs text-muted-foreground">{tHC("hcBuildStudioStudioCodePanel.s3")} {Math.max(1, Math.round(html.length / 1024))} {tHC("hcBuildStudioStudioCodePanel.s2")}</p>
+      <p className="text-xs text-muted-foreground">{tHC("s3")} {Math.max(1, Math.round(html.length / 1024))} {tHC("s2")}</p>
       <textarea
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         spellCheck={false}
         className="h-[420px] w-full resize-y rounded-lg border border-border bg-neutral-950 p-2 font-mono text-[11px] leading-snug text-neutral-100"
-        aria-label={tHC("hcBuildStudioStudioCodePanel.s1")}
+        aria-label={tHC("s1")}
       />
       {err && <p className="text-xs text-destructive">{err}</p>}
       <div className="flex gap-2">

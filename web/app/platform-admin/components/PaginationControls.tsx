@@ -58,7 +58,7 @@ export default function PaginationControls({
           : `${start}–${end} ${itemLabel}${hasMore ? " (more available)" : ""}`}
         {showCap && (
           <span className="ms-2 text-[var(--warning-text)]" role="status">
-            {tHC("hcPlatformadminComponentsPaginationControls.s4")} {capped}{tHC("hcPlatformadminComponentsPaginationControls.s3")}
+            {tHC("s4")} {capped}{tHC("s3")}
           </span>
         )}
       </span>
@@ -90,7 +90,7 @@ export default function PaginationControls({
               className="size-7"
               disabled={loading || page <= 1}
               onClick={() => onPageChange(page - 1)}
-              aria-label={tHC("hcPlatformadminComponentsPaginationControls.s2")}
+              aria-label={tHC("s2")}
             >
               <ChevronLeft size={14} />
             </Button>
@@ -101,7 +101,7 @@ export default function PaginationControls({
               className="size-7"
               disabled={loading || atEnd}
               onClick={() => onPageChange(page + 1)}
-              aria-label={tHC("hcPlatformadminComponentsPaginationControls.s1")}
+              aria-label={tHC("s1")}
             >
               <ChevronRight size={14} />
             </Button>

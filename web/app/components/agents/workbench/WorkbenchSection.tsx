@@ -53,12 +53,12 @@ function SectionSummary({ children }: { children: ReactNode }) {
 function SavedOnlyStub({ icon, label, cat, what }: { icon: ReactNode; label: string; cat: string; what: string }) {
     const tHC = useTranslations("hcComponentsAgentsWorkbenchWorkbenchSection");
   return (
-    <CollapsibleSection icon={icon} label={label} cat={cat} actions={<SectionSummary>{tHC("hcComponentsAgentsWorkbenchWorkbenchSection.s2")}</SectionSummary>}>
+    <CollapsibleSection icon={icon} label={label} cat={cat} actions={<SectionSummary>{tHC("s2")}</SectionSummary>}>
       <p
         aria-disabled="true"
         className="m-0 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground opacity-80"
       >
-        {tHC("hcComponentsAgentsWorkbenchWorkbenchSection.s1")} {what}
+        {tHC("s1")} {what}
       </p>
     </CollapsibleSection>
   );

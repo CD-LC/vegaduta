@@ -98,7 +98,7 @@ function SystemCard({ system }: { system: TenantDataUsageSystem }) {
              * plainly as every active system's own status line. */}
             {!isActive && (
               <span className="max-w-[9rem] text-[11px] leading-tight text-muted-foreground">
-                {tHC("hcDatausagePage.s5")}
+                {tHC("s5")}
               </span>
             )}
           </div>
@@ -176,7 +176,7 @@ export default function DataUsagePage() {
   return (
     <AppShell eyebrow="Trust">
       <PageHeader
-        title={tHC("hcDatausagePage.s4")}
+        title={tHC("s4")}
         subtitle="A plain accounting of every system your workspace's data touches, and exactly how it's kept isolated from every other tenant."
       />
 
@@ -200,7 +200,7 @@ export default function DataUsagePage() {
       {loaded && data && (
         <>
           <p className="mb-4 text-xs text-muted-foreground">
-            {tHC("hcDatausagePage.s3")} {new Date(data.generatedAt).toLocaleString()}
+            {tHC("s3")} {new Date(data.generatedAt).toLocaleString()}
           </p>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -211,9 +211,9 @@ export default function DataUsagePage() {
 
           <Card className="mt-4">
             <CardContent>
-              <h3 className="text-sm font-semibold text-foreground">{tHC("hcDatausagePage.s2")}</h3>
+              <h3 className="text-sm font-semibold text-foreground">{tHC("s2")}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {tHC("hcDatausagePage.s1")}
+                {tHC("s1")}
               </p>
               {canManageData ? (
                 <Link

@@ -118,9 +118,9 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
           <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
             <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
           </span>
-          <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesMySubmissions.s11")}</p>
+          <p className="text-sm font-medium text-foreground">{tHC("s11")}</p>
           <p className="max-w-sm text-sm text-muted-foreground">
-            {tHC("hcComponentsTemplatesMySubmissions.s10")}
+            {tHC("s10")}
           </p>
           <Button onClick={() => auth.login({ redirectUri: `${window.location.origin}/templates/mine` })}>
             Sign in
@@ -135,18 +135,18 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <p className="text-sm text-muted-foreground">
-          {tHC("hcComponentsTemplatesMySubmissions.s9")}
+          {tHC("s9")}
         </p>
         {canShare && (
           <Button onClick={() => setSubmitOpen(true)} className="shrink-0">
-            <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesMySubmissions.s3")}
+            <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
           </Button>
         )}
       </div>
 
       {canShare === false && (
         <p className="text-sm text-muted-foreground" data-testid="templates-share-needs-permission">
-          {tHC("hcComponentsTemplatesMySubmissions.s8")}
+          {tHC("s8")}
         </p>
       )}
 
@@ -163,10 +163,10 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--state-error)" }}>
               <AlertCircle size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesMySubmissions.s7")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s7")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">{error}</p>
             <Button variant="outline" size="sm" onClick={load}>
-              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesMySubmissions.s6")}
+              <RefreshCw size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s6")}
             </Button>
           </CardContent>
         </Card>
@@ -178,13 +178,13 @@ export default function MySubmissions({ autoOpenSubmit = false }: { autoOpenSubm
             <span className="cat-chip cat-chip-lg" style={{ ["--cat" as string]: "var(--cat-assistant)" }}>
               <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
             </span>
-            <p className="text-sm font-medium text-foreground">{tHC("hcComponentsTemplatesMySubmissions.s5")}</p>
+            <p className="text-sm font-medium text-foreground">{tHC("s5")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              {tHC("hcComponentsTemplatesMySubmissions.s4")}
+              {tHC("s4")}
             </p>
             {canShare && (
               <Button onClick={() => setSubmitOpen(true)}>
-                <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesMySubmissions.s3")}
+                <Plus size={16} strokeWidth={2} aria-hidden="true" /> {tHC("s3")}
               </Button>
             )}
           </CardContent>
@@ -276,7 +276,7 @@ function SubmissionRow({
                 backgroundColor: "color-mix(in srgb, var(--state-error) 10%, transparent)",
               }}
             >
-              <span className="font-medium">{tHC("hcComponentsTemplatesMySubmissions.s2")}</span>{" "}
+              <span className="font-medium">{tHC("s2")}</span>{" "}
               {sub.rejectReason || "No reason was provided. Edit and resubmit when ready."}
             </p>
           ) : (
@@ -291,7 +291,7 @@ function SubmissionRow({
           {sub.status === "APPROVED" && (
             <Button asChild variant="ghost" size="sm">
               <Link href={`/templates/${encodeURIComponent(sub.id)}`}>
-                <ExternalLink size={14} strokeWidth={2} aria-hidden="true" /> {tHC("hcComponentsTemplatesMySubmissions.s1")}
+                <ExternalLink size={14} strokeWidth={2} aria-hidden="true" /> {tHC("s1")}
               </Link>
             </Button>
           )}

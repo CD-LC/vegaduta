@@ -72,7 +72,7 @@ export default function WorkflowLintChip({
   // A clean graph keeps only the empty, invisible wrapper mounted so close()
   // has somewhere to put focus.
   if (issues.length === 0 && !open) {
-    return <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("hcComponentsWorkflowWorkflowLintChip.s2")} role="group" style={{ outline: "none" }} />;
+    return <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("s2")} role="group" style={{ outline: "none" }} />;
   }
   const errors = issues.filter((i) => i.severity === "error").length;
   const warnings = issues.filter((i) => i.severity === "warning").length;
@@ -87,7 +87,7 @@ export default function WorkflowLintChip({
   const Icon = severity === "error" ? XCircle : severity === "warn" ? AlertTriangle : Info;
 
   return (
-    <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("hcComponentsWorkflowWorkflowLintChip.s1")} role="group" style={{ outline: "none" }}>
+    <div className="wf-lint" ref={rootRef} tabIndex={-1} aria-label={tHC("s1")} role="group" style={{ outline: "none" }}>
       {issues.length > 0 && (
         <button
           ref={chipRef}

@@ -145,7 +145,7 @@ export default function TrustStrip({
         <div className="mb-2.5 flex items-center justify-between text-xs" style={{ color: "var(--text-secondary)" }}>
           <span className="flex items-center gap-1.5">
             <Clock aria-hidden="true" size={12} style={{ color: "var(--text-faint)" }} />
-            {tHC("hcComponentsTrustStrip.s4")}
+            {tHC("s4")}
           </span>
           <span className="font-mono tabular-nums" style={{ color: "var(--text-primary)" }}>
             {countdown ?? "—"}
@@ -185,7 +185,7 @@ export default function TrustStrip({
               className="mb-1 text-[10px] font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-faint)" }}
             >
-              {tHC("hcComponentsTrustStrip.s3")}
+              {tHC("s3")}
             </p>
             {auditRows.map((row) => (
               <div
@@ -201,7 +201,7 @@ export default function TrustStrip({
               className="mt-1 flex items-center gap-1 text-[11px] font-medium"
               style={{ color: "var(--accent-500, #6d5bff)" }}
             >
-              {tHC("hcComponentsTrustStrip.s2")} <ExternalLink aria-hidden="true" size={10} />
+              {tHC("s2")} <ExternalLink aria-hidden="true" size={10} />
             </a>
           </div>
         )}
@@ -214,7 +214,7 @@ export default function TrustStrip({
             className="flex items-center gap-1.5 border-t border-[var(--surface-border)] pt-2.5 text-[11px] font-medium"
             style={{ color: "var(--accent-500, #6d5bff)" }}
           >
-            {tHC("hcComponentsTrustStrip.s1")} <ExternalLink aria-hidden="true" size={11} />
+            {tHC("s1")} <ExternalLink aria-hidden="true" size={11} />
           </a>
         )}
       </PopoverContent>

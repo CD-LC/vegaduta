@@ -20,18 +20,18 @@ import { useTranslations } from "../../lib/i18n";
 export default function DiagnosticsPage() {
     const tHC = useTranslations("hcPlatformadminDiagnosticsPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminDiagnosticsPage.s4")}>
+    <AdminShell title={tHC("s4")}>
       <PageHint>
-        {tHC("hcPlatformadminDiagnosticsPage.s3")}
+        {tHC("s3")}
       </PageHint>
 
       <ExternalToolsSection delay={0} />
 
       <InfoNote>
-        {tHC("hcPlatformadminDiagnosticsPage.s2")}
+        {tHC("s2")}
       </InfoNote>
 
-      <SectionCard title={tHC("hcPlatformadminDiagnosticsPage.s1")} icon={HeartPulse} delay={0.03}>
+      <SectionCard title={tHC("s1")} icon={HeartPulse} delay={0.03}>
         <SystemStatusSection pollMs={15000} hideHeader />
       </SectionCard>
 

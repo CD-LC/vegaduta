@@ -475,7 +475,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
                     href="/help#knowledge"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    {tHC("hcComponentsKnowledgePanel.s2")}
+                    {tHC("s2")}
                   </Link>
                 </div>
               }
@@ -555,7 +555,7 @@ const KnowledgePanel = forwardRef(function KnowledgePanel(
                   />
                   {visibleDocuments.length === 0 && (
                     <div className="rounded-lg border border-dashed border-border bg-card/40 px-4 py-6 text-center text-sm text-muted-foreground">
-                      {tHC("hcComponentsKnowledgePanel.s1")}
+                      {tHC("s1")}
                     </div>
                   )}
                   <KnowledgeDocumentsTable

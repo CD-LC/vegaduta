@@ -347,11 +347,11 @@ function TelegramCard({
                 <QrCode
                   value={deepLink}
                   px={104}
-                  label={tHC("hcComponentsTryChannelBridge.s2")}
+                  label={tHC("s2")}
                   className="shrink-0 rounded-md"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {tHC("hcComponentsTryChannelBridge.s1")}
+                  {tHC("s1")}
                 </p>
               </div>
             )}

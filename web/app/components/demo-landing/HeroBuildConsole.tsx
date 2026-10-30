@@ -152,7 +152,7 @@ export default function BuildConsole({
           to prevent. */}
       <div aria-hidden="true">
         <p className="mkt-term__line">
-          <span className="mkt-term__ps">❯</span> <span className="mkt-term__cmd">{tHC("hcComponentsDemolandingHeroBuildConsole.s1")}</span>{" "}
+          <span className="mkt-term__ps">❯</span> <span className="mkt-term__cmd">{tHC("s1")}</span>{" "}
           <span className="mkt-term__arg">&ldquo;{brief.slice(0, typed)}&rdquo;</span>
           {!done && <span className="mkt-term__cursor" />}
         </p>

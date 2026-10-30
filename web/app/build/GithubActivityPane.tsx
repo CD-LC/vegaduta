@@ -29,36 +29,36 @@ export default function GithubActivityPane({ project, githubStatus }) {
           <span className="cat-chip cat-chip-sm" style={{ ["--cat" as string]: "var(--cat-automation)" }}>
             <Github aria-hidden="true" size={13} />
           </span>
-          {tHC("hcBuildGithubActivityPane.s28")}
+          {tHC("s28")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          {tHC("hcBuildGithubActivityPane.s27")}
+          {tHC("s27")}
         </p>
 
         <details className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">
           <summary className="cursor-pointer font-medium text-foreground">
-            {tHC("hcBuildGithubActivityPane.s26")}
+            {tHC("s26")}
           </summary>
           <ol className="mt-2 list-decimal space-y-1.5 ps-4">
             <li>
-              {tHC("hcBuildGithubActivityPane.s25")}{" "}
-              <code className="rounded bg-muted px-1 py-0.5">app-builder/&lt;project&gt;</code> {tHC("hcBuildGithubActivityPane.s24")}{" "}
-              <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s23")}</span> {tHC("hcBuildGithubActivityPane.s22")}
+              {tHC("s25")}{" "}
+              <code className="rounded bg-muted px-1 py-0.5">app-builder/&lt;project&gt;</code> {tHC("s24")}{" "}
+              <span className="font-medium text-foreground">{tHC("s23")}</span> {tHC("s22")}
             </li>
             <li>
-              {tHC("hcBuildGithubActivityPane.s21")}{" "}
-              <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s20")}</span>{tHC("hcBuildGithubActivityPane.s19")} <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s18")}</span> job.
+              {tHC("s21")}{" "}
+              <span className="font-medium text-foreground">{tHC("s20")}</span>{tHC("s19")} <span className="font-medium text-foreground">{tHC("s18")}</span> job.
             </li>
             <li>
-              {tHC("hcBuildGithubActivityPane.s17")}{" "}
-              <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s16")}</span>, then{" "}
-              <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s15")}</span>{tHC("hcBuildGithubActivityPane.s14")}{" "}
-              <span className="font-medium text-foreground">{tHC("hcBuildGithubActivityPane.s13")}</span> {tHC("hcBuildGithubActivityPane.s12")}
+              {tHC("s17")}{" "}
+              <span className="font-medium text-foreground">{tHC("s16")}</span>, then{" "}
+              <span className="font-medium text-foreground">{tHC("s15")}</span>{tHC("s14")}{" "}
+              <span className="font-medium text-foreground">{tHC("s13")}</span> {tHC("s12")}
             </li>
             <li>
-              {tHC("hcBuildGithubActivityPane.s11")}
+              {tHC("s11")}
             </li>
           </ol>
         </details>
@@ -66,17 +66,17 @@ export default function GithubActivityPane({ project, githubStatus }) {
         {!connected ? (
           <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
             <p className="mb-3 text-sm text-muted-foreground">
-              {tHC("hcBuildGithubActivityPane.s10")}
+              {tHC("s10")}
             </p>
             <Button asChild size="sm">
               <Link href="/build/github">
-                <Github aria-hidden="true" size={14} /> {tHC("hcBuildGithubActivityPane.s9")}
+                <Github aria-hidden="true" size={14} /> {tHC("s9")}
               </Link>
             </Button>
           </div>
         ) : !activity ? (
           <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            {tHC("hcBuildGithubActivityPane.s8")} <span className="font-mono text-foreground">{githubStatus.repo_full_name}</span>{tHC("hcBuildGithubActivityPane.s7")}
+            {tHC("s8")} <span className="font-mono text-foreground">{githubStatus.repo_full_name}</span>{tHC("s7")}
           </div>
         ) : (
           <div className="space-y-3">
@@ -88,13 +88,13 @@ export default function GithubActivityPane({ project, githubStatus }) {
                 <span className="state-pill" style={{ ["--state" as string]: "var(--state-queued)" }}>
                   <GitBranch aria-hidden="true" size={12} /> {activity.branch}
                 </span>
-                <span className="text-xs text-muted-foreground">{tHC("hcBuildGithubActivityPane.s6")}</span>
+                <span className="text-xs text-muted-foreground">{tHC("s6")}</span>
               </div>
             )}
             {activity.pr_url ? (
               <div className="flex items-center gap-2">
                 <span className="state-pill" style={{ ["--state" as string]: "var(--state-success)" }}>
-                  <span className="state-dot" /> {tHC("hcBuildGithubActivityPane.s5")}
+                  <span className="state-dot" /> {tHC("s5")}
                 </span>
                 <a
                   href={activity.pr_url}
@@ -109,13 +109,13 @@ export default function GithubActivityPane({ project, githubStatus }) {
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">
-                {tHC("hcBuildGithubActivityPane.s4")}
+                {tHC("s4")}
               </p>
             )}
             {activity.pages_url && (
               <div className="flex items-center gap-2">
                 <span className="state-pill" style={{ ["--state" as string]: "var(--state-success)" }}>
-                  <span className="state-dot" /> {tHC("hcBuildGithubActivityPane.s3")}
+                  <span className="state-dot" /> {tHC("s3")}
                 </span>
                 <a
                   href={activity.pages_url}
@@ -127,14 +127,14 @@ export default function GithubActivityPane({ project, githubStatus }) {
                 </a>
                 {activity.pages_enabled === false && (
                   <span className="text-xs text-muted-foreground">
-                    {tHC("hcBuildGithubActivityPane.s2")}
+                    {tHC("s2")}
                   </span>
                 )}
               </div>
             )}
             {activity.pushed_at && (
               <p className="text-xs text-muted-foreground">
-                {tHC("hcBuildGithubActivityPane.s1")} {new Date(activity.pushed_at).toLocaleString()}
+                {tHC("s1")} {new Date(activity.pushed_at).toLocaleString()}
               </p>
             )}
           </div>

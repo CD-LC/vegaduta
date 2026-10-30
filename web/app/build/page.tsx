@@ -305,12 +305,12 @@ export default function AppBuilderPage() {
           <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
             <Sparkles aria-hidden="true" size={22} />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">{tHC("hcBuildPage.s5")}</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tHC("s5")}</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            {tHC("hcBuildPage.s4")}
+            {tHC("s4")}
           </p>
           <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcBuildPage.s3")}
+            {tHC("s3")}
           </p>
         </div>
       </AppShell>
@@ -439,10 +439,10 @@ export default function AppBuilderPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={() => openProject(activeProjectId)}>
-                <RotateCw aria-hidden="true" size={14} /> {tHC("hcBuildPage.s2")}
+                <RotateCw aria-hidden="true" size={14} /> {tHC("s2")}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => openProject(null)}>
-                {tHC("hcBuildPage.s1")}
+                {tHC("s1")}
               </Button>
             </div>
           </CardContent>

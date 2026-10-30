@@ -52,7 +52,7 @@ export default function AdminInboxPage() {
         title="Inbox"
         subtitle={
           <span className="tabular-nums">
-            <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> {tHC("hcAdminInboxPage.s1")}{" "}
+            <strong className="font-semibold text-foreground">{waiting ?? "—"}</strong> {tHC("s1")}{" "}
             <span className="text-muted-foreground">/</span> {held ?? "—"} human-held
           </span>
         }

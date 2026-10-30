@@ -16,9 +16,9 @@ import { useTranslations } from "../../lib/i18n";
 export default function BudgetsLimitsPage() {
     const tHC = useTranslations("hcPlatformadminBudgetsPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminBudgetsPage.s7")}>
+    <AdminShell title={tHC("s7")}>
       <PageHint>
-        {tHC("hcPlatformadminBudgetsPage.s6")}
+        {tHC("s6")}
       </PageHint>
 
       <PerUserBudgetSection />
@@ -29,21 +29,21 @@ export default function BudgetsLimitsPage() {
 
       <SmartAiSection delay={0.03} />
 
-      <SectionCard title={tHC("hcPlatformadminBudgetsPage.s5")} icon={CreditCard} delay={0.06}>
+      <SectionCard title={tHC("s5")} icon={CreditCard} delay={0.06}>
         <p className="text-xs text-muted-foreground">
-          {tHC("hcPlatformadminBudgetsPage.s4")}{" "}
-          <code className="font-mono">{tHC("hcPlatformadminBudgetsPage.s3")}</code>.
+          {tHC("s4")}{" "}
+          <code className="font-mono">{tHC("s3")}</code>.
         </p>
         <Link
           href="/platform-admin/tenants"
           className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
-          {tHC("hcPlatformadminBudgetsPage.s2")} <ChevronRight size={13} />
+          {tHC("s2")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
 
       <InfoNote>
-        {tHC("hcPlatformadminBudgetsPage.s1")}
+        {tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

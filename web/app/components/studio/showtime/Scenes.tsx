@@ -96,20 +96,20 @@ function OpenScene({ p }: SceneProps) {
         className="mt-5 max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl"
         style={{ opacity: a, transform: `translateY(${(1 - a) * 24}px)` }}
       >
-        {tHC("hcComponentsStudioShowtimeScenes.s14")}
+        {tHC("s14")}
         <br />
         <span
           className="bg-gradient-to-r from-emerald-300 via-teal-300 to-sky-300 bg-clip-text text-transparent"
           style={{ opacity: b }}
         >
-          {tHC("hcComponentsStudioShowtimeScenes.s13")}
+          {tHC("s13")}
         </span>
       </h2>
       <p
         className="mt-6 max-w-xl text-lg text-zinc-300"
         style={{ opacity: c, transform: `translateY(${(1 - c) * 12}px)` }}
       >
-        {tHC("hcComponentsStudioShowtimeScenes.s12")}
+        {tHC("s12")}
       </p>
     </div>
   );
@@ -140,7 +140,7 @@ function DesignScene({ p }: SceneProps) {
     p
   );
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s11")} icon={Smartphone}>
+    <Panel title={tHC("s11")} icon={Smartphone}>
       <div className="grid h-full grid-cols-[150px_1fr] gap-4">
         <div className="space-y-2">
           <div className="text-[10px] uppercase tracking-wider text-zinc-400">Blocks</div>
@@ -163,7 +163,7 @@ function DesignScene({ p }: SceneProps) {
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center text-sm text-zinc-400"
             style={{ opacity: 1 - seg(p, 0.06, 0.2) }}
           >
-            {tHC("hcComponentsStudioShowtimeScenes.s10")}
+            {tHC("s10")}
           </div>
           <div
             className="absolute inset-x-6 top-6 space-y-2 text-xs text-zinc-400"
@@ -177,19 +177,19 @@ function DesignScene({ p }: SceneProps) {
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
               style={{ opacity: seg(p, 0.42, 0.5) }}
             >
-              Field · <span className="text-zinc-200">{tHC("hcComponentsStudioShowtimeScenes.s9")}</span>
+              Field · <span className="text-zinc-200">{tHC("s9")}</span>
             </div>
             <div
               className="rounded-lg border border-white/10 bg-white/5 px-3 py-2"
               style={{ opacity: seg(p, 0.66, 0.74) }}
             >
-              {tHC("hcComponentsStudioShowtimeScenes.s8")} <span className="text-zinc-200">{typed(APP.button, seg(p, 0.66, 0.78))}</span>
+              {tHC("s8")} <span className="text-zinc-200">{typed(APP.button, seg(p, 0.66, 0.78))}</span>
             </div>
             <div
               className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-emerald-200"
               style={{ opacity: seg(p, 0.86, 0.95) }}
             >
-              {tHC("hcComponentsStudioShowtimeScenes.s7")}
+              {tHC("s7")}
             </div>
           </div>
         </div>
@@ -232,7 +232,7 @@ function RegistryScene({ p }: SceneProps) {
     p
   );
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s6")} icon={Search}>
+    <Panel title={tHC("s6")} icon={Search}>
       <div className="flex h-full flex-col gap-3">
         <div className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2.5 text-sm">
           <Search aria-hidden="true" className="h-4 w-4 text-zinc-400 shrink-0" />
@@ -268,7 +268,7 @@ function RegistryScene({ p }: SceneProps) {
                   >
                     {attached > 0.3 ? (
                       <>
-                        <Check aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioShowtimeScenes.s5")}
+                        <Check aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("s5")}
                       </>
                     ) : (
                       "Attach to agent"
@@ -280,7 +280,7 @@ function RegistryScene({ p }: SceneProps) {
           })}
         </div>
         <div className="flex items-center gap-2 text-[11px] text-zinc-400" style={{ opacity: seg(p, 0.8, 0.92) }}>
-          <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-300 shrink-0" /> {tHC("hcComponentsStudioShowtimeScenes.s4")}
+          <Check aria-hidden="true" className="h-3.5 w-3.5 text-emerald-300 shrink-0" /> {tHC("s4")}
         </div>
       </div>
       <Cursor {...cur} />
@@ -297,7 +297,7 @@ function AgentScene({ p }: SceneProps) {
     { id: "run_code", label: "Run code", icon: Code2 },
   ];
   return (
-    <Panel title={tHC("hcComponentsStudioShowtimeScenes.s3")} icon={Bot}>
+    <Panel title={tHC("s3")} icon={Bot}>
       <div className="flex h-full flex-col gap-4">
         <div className="flex items-center gap-3">
           <span
@@ -308,7 +308,7 @@ function AgentScene({ p }: SceneProps) {
           </span>
           <div>
             <div className="text-lg font-semibold">{AGENT.name}</div>
-            <div className="text-xs text-emerald-300">{tHC("hcComponentsStudioShowtimeScenes.s2")}</div>
+            <div className="text-xs text-emerald-300">{tHC("s2")}</div>
           </div>
         </div>
         <div>
@@ -350,7 +350,7 @@ function AgentScene({ p }: SceneProps) {
           className="mt-auto flex items-center gap-2 rounded-xl border border-violet-400/40 bg-violet-500/15 px-3.5 py-2.5 text-sm"
           style={{ opacity: seg(p, 0.72, 0.85) }}
         >
-          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> {tHC("hcComponentsStudioShowtimeScenes.s1")}{" "}
+          <Link2 className="h-4 w-4 shrink-0 text-violet-200" aria-hidden="true" /> {tHC("s1")}{" "}
           <b>“{APP.button}”</b> →
           <span className="ms-auto inline-flex items-center gap-1 text-emerald-300">
             <Check className="h-4 w-4 shrink-0" aria-hidden="true" /> wired

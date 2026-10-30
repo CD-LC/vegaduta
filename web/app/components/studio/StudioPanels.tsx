@@ -50,7 +50,7 @@ export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
     >
       <Link
         href="/"
-        aria-label={tHC("hcComponentsStudioStudioPanels.s11")}
+        aria-label={tHC("s11")}
         className="inline-flex items-center rounded-lg outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
       >
         <Logo size={34} />
@@ -72,7 +72,7 @@ export function StudioSiteHeader({ signupHref }: { signupHref: string }) {
           href={signupHref}
           className={`inline-flex items-center rounded-lg px-3.5 py-1.5 text-sm font-medium ${TONES.violet.cta}`}
         >
-          {tHC("hcComponentsStudioStudioPanels.s10")}
+          {tHC("s10")}
         </Link>
       </nav>
     </header>
@@ -101,9 +101,9 @@ export function StudioStatusBar({
   return (
     <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm backdrop-blur">
       <div className="flex items-center gap-2 font-medium">
-        <Users aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s9")}
+        <Users aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s9")}
         <Badge variant="outline" className="text-[11px]">
-          {tHC("hcComponentsStudioStudioPanels.s8")}
+          {tHC("s8")}
         </Badge>
       </div>
       <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -119,13 +119,13 @@ export function StudioStatusBar({
             : `${session.daysRemaining} days left`}
       </div>
       <Button size="sm" className={`ms-auto ${TONES.violet.cta}`} onClick={onTour} data-tour="tour-btn">
-        <Compass aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s7")}
+        <Compass aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s7")}
       </Button>
       <Button variant="outline" size="sm" onClick={onShowtime} data-tour="showtime-header">
         <Clapperboard aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> Showtime
       </Button>
       <Button variant="ghost" size="sm" onClick={onGuide}>
-        <BookOpen aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s6")}
+        <BookOpen aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s6")}
       </Button>
       <Button variant="outline" size="sm" onClick={onRestart} disabled={resetting}>
         {resetting ? (
@@ -133,7 +133,7 @@ export function StudioStatusBar({
         ) : (
           <RefreshCw aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" />
         )}{" "}
-        {tHC("hcComponentsStudioStudioPanels.s5")}
+        {tHC("s5")}
       </Button>
     </div>
   );
@@ -206,7 +206,7 @@ export function NextStepNudge({
       ) : (
         <Button size="sm" className={TONES.violet.cta} asChild>
           <Link href={signupHref}>
-            {tHC("hcComponentsStudioStudioPanels.s4")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
+            {tHC("s4")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
           </Link>
         </Button>
       )}
@@ -219,10 +219,10 @@ export function EmptyState({ onNew }: { onNew: () => void }) {
   return (
     <div className="rounded-xl border border-dashed border-border/70 p-8 text-center">
       <Bot aria-hidden="true" className="mx-auto mb-2 h-8 w-8 text-muted-foreground shrink-0" />
-      <div className="font-medium">{tHC("hcComponentsStudioStudioPanels.s3")}</div>
-      <p className="mb-4 text-sm text-muted-foreground">{tHC("hcComponentsStudioStudioPanels.s2")}</p>
+      <div className="font-medium">{tHC("s3")}</div>
+      <p className="mb-4 text-sm text-muted-foreground">{tHC("s2")}</p>
       <Button onClick={onNew}>
-        <Plus aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioStudioPanels.s1")}
+        <Plus aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s1")}
       </Button>
     </div>
   );

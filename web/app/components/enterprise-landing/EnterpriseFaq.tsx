@@ -56,7 +56,7 @@ export default function EnterpriseFaq() {
   return (
     <section className="enterprise-faq">
       <div className="enterprise-faq-container">
-        <h2 className="enterprise-faq-title">{tHC("hcComponentsEnterpriselandingEnterpriseFaq.s1")}</h2>
+        <h2 className="enterprise-faq-title">{tHC("s1")}</h2>
         <div className="enterprise-faq-list">
           {faqs.map((faq, idx) => (
             <div

@@ -55,7 +55,7 @@ export default function CasesSection({
     <div className="space-y-2">
       <h3 className="text-sm font-semibold text-foreground">Cases</h3>
       {detail && detail.cases.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsCasesSection.s8")}</p>
+        <p className="text-sm text-muted-foreground">{tHC("s8")}</p>
       )}
       {casesPagination.pageItems.map((c) => (
         <div key={c.id} className="flex items-start gap-3 rounded-md border border-border p-3">
@@ -86,15 +86,15 @@ export default function CasesSection({
           </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="shrink-0" aria-label={tHC("hcAgentsQualityEvalDatasetsCasesSection.s7")}>
+              <Button variant="outline" size="sm" className="shrink-0" aria-label={tHC("s7")}>
                 <Trash2 size={13} aria-hidden="true" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>{tHC("hcAgentsQualityEvalDatasetsCasesSection.s6")}</AlertDialogTitle>
+                <AlertDialogTitle>{tHC("s6")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {tHC("hcAgentsQualityEvalDatasetsCasesSection.s5")}
+                  {tHC("s5")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -125,22 +125,22 @@ export default function CasesSection({
           rows={2}
           value={draft.message}
           onChange={(e) => onDraftChange({ message: e.target.value })}
-          placeholder={tHC("hcAgentsQualityEvalDatasetsCasesSection.s4")}
+          placeholder={tHC("s4")}
         />
         <Textarea
           rows={2}
           value={draft.expected}
           onChange={(e) => onDraftChange({ expected: e.target.value })}
-          placeholder={tHC("hcAgentsQualityEvalDatasetsCasesSection.s3")}
+          placeholder={tHC("s3")}
         />
         <Input
           value={draft.tools}
           onChange={(e) => onDraftChange({ tools: e.target.value })}
-          placeholder={tHC("hcAgentsQualityEvalDatasetsCasesSection.s2")}
+          placeholder={tHC("s2")}
         />
         <div className="flex justify-end">
           <Button size="sm" onClick={onAddCase} disabled={busy || !draft.message.trim()}>
-            <Plus size={14} aria-hidden="true" /> {tHC("hcAgentsQualityEvalDatasetsCasesSection.s1")}
+            <Plus size={14} aria-hidden="true" /> {tHC("s1")}
           </Button>
         </div>
       </div>

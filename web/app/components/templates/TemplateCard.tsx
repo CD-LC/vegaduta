@@ -65,7 +65,7 @@ export default function TemplateCard({ template }: { template: CommunityTemplate
                 {count.toLocaleString()} {count === 1 ? "import" : "imports"}
               </span>
             ) : (
-              <span>{tHC("hcComponentsTemplatesTemplateCard.s1")}</span>
+              <span>{tHC("s1")}</span>
             )}
           </div>
         </Link>

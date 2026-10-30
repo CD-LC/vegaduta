@@ -158,7 +158,7 @@ export default function DesignPanel({ project, fileSet, onFiles, assets, onAsset
             role="status"
             className="flex items-start gap-1.5 rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-xs text-muted-foreground"
           >
-            <Archive size={13} className="mt-0.5 shrink-0" aria-hidden="true" /> {tHC("hcBuildDesignPanel.s6")}
+            <Archive size={13} className="mt-0.5 shrink-0" aria-hidden="true" /> {tHC("s6")}
           </p>
         )}
         {/* Brand tokens — deterministic edits, no AI needed. */}
@@ -196,12 +196,12 @@ export default function DesignPanel({ project, fileSet, onFiles, assets, onAsset
             </div>
           ) : (
             <p className="text-xs text-muted-foreground">
-              {tHC("hcBuildDesignPanel.s5")} <code className="font-mono">src/theme.css</code> {tHC("hcBuildDesignPanel.s4")}
+              {tHC("s5")} <code className="font-mono">src/theme.css</code> {tHC("s4")}
             </p>
           )}
           {busy && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Loader2 aria-hidden="true" size={12} className="animate-spin" /> {tHC("hcBuildDesignPanel.s3")}
+              <Loader2 aria-hidden="true" size={12} className="animate-spin" /> {tHC("s3")}
             </p>
           )}
         </section>
@@ -209,7 +209,7 @@ export default function DesignPanel({ project, fileSet, onFiles, assets, onAsset
         {/* Asset strip — uploads land under assets/ on the branch. */}
         <section>
           <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Assets <span className="font-normal normal-case">{tHC("hcBuildDesignPanel.s2")}</span>
+            Assets <span className="font-normal normal-case">{tHC("s2")}</span>
           </h3>
           <input
             ref={assetFileRef}
@@ -256,7 +256,7 @@ export default function DesignPanel({ project, fileSet, onFiles, assets, onAsset
             />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {tHC("hcBuildDesignPanel.s1")}
+            {tHC("s1")}
           </p>
         </section>
       </CardContent>

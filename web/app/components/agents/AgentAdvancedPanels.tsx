@@ -139,7 +139,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
             Saved
           </>
         )}
-        {s === "error" && <span className="text-destructive">{tHC("hcComponentsAgentsAgentAdvancedPanels.s6")}</span>}
+        {s === "error" && <span className="text-destructive">{tHC("s6")}</span>}
       </span>
     );
   };
@@ -156,11 +156,11 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
 
   return (
     <section
-      aria-label={tHC("hcComponentsAgentsAgentAdvancedPanels.s5")}
+      aria-label={tHC("s5")}
       data-testid="agent-advanced-panels"
       className={disabled ? "opacity-70" : ""}
     >
-      <p className="text-[12.5px] text-muted-foreground">{tHC("hcComponentsAgentsAgentAdvancedPanels.s4")}</p>
+      <p className="text-[12.5px] text-muted-foreground">{tHC("s4")}</p>
       {disabled && disabledReason && <p className="mt-2 text-[12.5px] text-muted-foreground">{disabledReason}</p>}
 
       <div className="mt-3 flex flex-col gap-2">
@@ -201,14 +201,14 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
           <legend className="px-1 text-sm font-medium text-foreground">Collaborators</legend>
           <div className="flex items-start justify-between gap-2">
             <p className="text-[12.5px] text-muted-foreground">
-              {tHC("hcComponentsAgentsAgentAdvancedPanels.s3")}
+              {tHC("s3")}
             </p>
             {status("collaborators")}
           </div>
           {others === null && !othersError && (
             <div className="mt-2 flex items-center gap-2 text-[12.5px] text-muted-foreground">
               <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-              {tHC("hcComponentsAgentsAgentAdvancedPanels.s2")}
+              {tHC("s2")}
             </div>
           )}
           {othersError && (
@@ -218,7 +218,7 @@ export default function AgentAdvancedPanels({ agent, disabled, disabledReason, o
           )}
           {others && others.length === 0 && (
             <p className="mt-2 text-[12.5px] text-muted-foreground">
-              {tHC("hcComponentsAgentsAgentAdvancedPanels.s1")}
+              {tHC("s1")}
             </p>
           )}
           {others && others.length > 0 && (

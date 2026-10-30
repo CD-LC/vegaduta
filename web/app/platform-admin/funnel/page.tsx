@@ -135,7 +135,7 @@ export default function FunnelPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminFunnelPage.s39")}
+      title={tHC("s39")}
       actions={
         <div className="flex items-center gap-2">
           <div className="flex overflow-hidden rounded-md border border-border">
@@ -162,8 +162,8 @@ export default function FunnelPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminFunnelPage.s38")}{" "}
-        <code className="font-mono text-xs">LandingEventController</code> {tHC("hcPlatformadminFunnelPage.s37")} <code className="font-mono text-xs">+1</code> {tHC("hcPlatformadminFunnelPage.s36")} <strong>Reach</strong> {tHC("hcPlatformadminFunnelPage.s35")} <strong>engage</strong> {tHC("hcPlatformadminFunnelPage.s34")}
+        {tHC("s38")}{" "}
+        <code className="font-mono text-xs">LandingEventController</code> {tHC("s37")} <code className="font-mono text-xs">+1</code> {tHC("s36")} <strong>Reach</strong> {tHC("s35")} <strong>engage</strong> {tHC("s34")}
       </PageHint>
 
       {error && (
@@ -175,9 +175,9 @@ export default function FunnelPage() {
       {awaitingDeploy && (
         <Alert className="mb-5">
           <AlertDescription>
-            <strong>{tHC("hcPlatformadminFunnelPage.s33")}</strong> {tHC("hcPlatformadminFunnelPage.s32")} {fmtInt(views)}{" "}
-            {tHC("hcPlatformadminFunnelPage.s31")} <code className="font-mono text-xs">sec_*</code> {tHC("hcPlatformadminFunnelPage.s30")}{" "}
-            <code className="font-mono text-xs">SectionReach.tsx</code> {tHC("hcPlatformadminFunnelPage.s29")}
+            <strong>{tHC("s33")}</strong> {tHC("s32")} {fmtInt(views)}{" "}
+            {tHC("s31")} <code className="font-mono text-xs">sec_*</code> {tHC("s30")}{" "}
+            <code className="font-mono text-xs">SectionReach.tsx</code> {tHC("s29")}
           </AlertDescription>
         </Alert>
       )}
@@ -185,38 +185,38 @@ export default function FunnelPage() {
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s28")}</div>
+            <div className="text-xs text-muted-foreground">{tHC("s28")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-primary">{fmtInt(views)}</div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("hcPlatformadminFunnelPage.s27")} <em>{tHC("hcPlatformadminFunnelPage.s26")}</em>{tHC("hcPlatformadminFunnelPage.s25")}
+              {tHC("s27")} <em>{tHC("s26")}</em>{tHC("s25")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s24")}</div>
+            <div className="text-xs text-muted-foreground">{tHC("s24")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_pricing ?? 0, views))}
             </div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("hcPlatformadminFunnelPage.s23")}
+              {tHC("s23")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s22")}</div>
+            <div className="text-xs text-muted-foreground">{tHC("s22")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">
               {awaitingDeploy ? "n/a" : fmtPct(pct(totals.sec_closing ?? 0, views))}
             </div>
             <div className="mt-1 text-[11px] leading-snug text-muted-foreground">
-              {tHC("hcPlatformadminFunnelPage.s21")}
+              {tHC("s21")}
             </div>
           </CardContent>
         </Card>
         <Card className="gap-0 py-0">
           <CardContent className="p-4">
-            <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminFunnelPage.s20")}</div>
+            <div className="text-xs text-muted-foreground">{tHC("s20")}</div>
             <div className="mt-1 font-mono text-2xl font-semibold tabular-nums text-destructive">
               {biggestDrop ? fmtPct(biggestDrop.lostPct) : "n/a"}
             </div>
@@ -230,7 +230,7 @@ export default function FunnelPage() {
       </div>
 
       <SectionCard
-        title={tHC("hcPlatformadminFunnelPage.s19")}
+        title={tHC("s19")}
         subtitle="Bands in page order. Reach can only fall as you go down - a rise would mean an instrumentation bug."
         icon={Eye}
       >
@@ -240,9 +240,9 @@ export default function FunnelPage() {
               <tr className="border-b border-border text-start text-xs text-muted-foreground">
                 <th className="py-2 pe-3 font-medium">Band</th>
                 <th className="py-2 pe-3 font-medium">Reach</th>
-                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s18")}</th>
-                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s17")}</th>
-                <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminFunnelPage.s16")}</th>
+                <th className="py-2 pe-3 font-medium">{tHC("s18")}</th>
+                <th className="py-2 pe-3 font-medium">{tHC("s17")}</th>
+                <th className="py-2 pe-3 font-medium">{tHC("s16")}</th>
                 <th className="py-2 font-medium">Engage</th>
               </tr>
             </thead>
@@ -288,7 +288,7 @@ export default function FunnelPage() {
                     </td>
                     <td className="py-2.5 font-mono tabular-nums">
                       {!row.hasCta ? (
-                        <span className="text-muted-foreground" title={tHC("hcPlatformadminFunnelPage.s15")}>
+                        <span className="text-muted-foreground" title={tHC("s15")}>
                           &mdash;
                         </span>
                       ) : awaitingDeploy ? (
@@ -306,7 +306,7 @@ export default function FunnelPage() {
       </SectionCard>
 
       <SectionCard
-        title={tHC("hcPlatformadminFunnelPage.s14")}
+        title={tHC("s14")}
         subtitle="Reachable from any scroll position, so they belong to no single band and get no engage rate."
         icon={MousePointerClick}
         delay={0.05}
@@ -317,7 +317,7 @@ export default function FunnelPage() {
               <div className="text-xs text-muted-foreground">{c.label}</div>
               <div className="font-mono text-lg font-semibold tabular-nums">{fmtInt(totals[c.event])}</div>
               <div className="text-[11px] text-muted-foreground">
-                {fmtPct(pct(totals[c.event] ?? 0, views))} {tHC("hcPlatformadminFunnelPage.s13")}
+                {fmtPct(pct(totals[c.event] ?? 0, views))} {tHC("s13")}
               </div>
             </div>
           ))}
@@ -325,13 +325,13 @@ export default function FunnelPage() {
       </SectionCard>
 
       <SectionCard
-        title={tHC("hcPlatformadminFunnelPage.s12")}
+        title={tHC("s12")}
         subtitle="Whitelisted server-side, but no mounted component can fire them any more."
         icon={Archive}
         delay={0.1}
       >
         <p className="mb-3 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-          {tHC("hcPlatformadminFunnelPage.s11")}
+          {tHC("s11")}
         </p>
         <div className="flex flex-wrap gap-4">
           {RETIRED_EVENTS.map((r) => (
@@ -351,20 +351,20 @@ export default function FunnelPage() {
         </div>
       </SectionCard>
 
-      <SectionCard title={tHC("hcPlatformadminFunnelPage.s10")} icon={TrendingDown} delay={0.15}>
+      <SectionCard title={tHC("s10")} icon={TrendingDown} delay={0.15}>
         <ul className="max-w-3xl list-disc space-y-2 ps-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s9")}</strong> {tHC("hcPlatformadminFunnelPage.s8")}
+            <strong className="text-foreground">{tHC("s9")}</strong> {tHC("s8")}
           </li>
           <li>
-            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s7")}</strong> {tHC("hcPlatformadminFunnelPage.s6")}
+            <strong className="text-foreground">{tHC("s7")}</strong> {tHC("s6")}
           </li>
           <li>
-            <strong className="text-foreground">{tHC("hcPlatformadminFunnelPage.s5")}</strong> {tHC("hcPlatformadminFunnelPage.s4")}
+            <strong className="text-foreground">{tHC("s5")}</strong> {tHC("s4")}
           </li>
           <li>
-            {tHC("hcPlatformadminFunnelPage.s3")} <em>copy</em> {tHC("hcPlatformadminFunnelPage.s2")}{" "}
-            <em>position</em> {tHC("hcPlatformadminFunnelPage.s1")}
+            {tHC("s3")} <em>copy</em> {tHC("s2")}{" "}
+            <em>position</em> {tHC("s1")}
           </li>
         </ul>
       </SectionCard>

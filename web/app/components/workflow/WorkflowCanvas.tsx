@@ -306,7 +306,7 @@ function CanvasInner({
                             letterSpacing: "normal",
                           }}
                         >
-                          <span className="sr-only">{tHC("hcComponentsWorkflowWorkflowCanvas.s1")} </span>
+                          <span className="sr-only">{tHC("s1")} </span>
                           <EvalBadge stats={workflowEvalStats} compact />
                         </span>
                       ) : null

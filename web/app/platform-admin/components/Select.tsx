@@ -218,13 +218,13 @@ export default function Select({
                 type="text"
                 className="select-search"
                 placeholder="Search…"
-                aria-label={tHC("hcPlatformadminComponentsSelect.s2")}
+                aria-label={tHC("s2")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
               />
             )}
-            {visibleOptions.length === 0 && <div className="select-empty">{tHC("hcPlatformadminComponentsSelect.s1")}</div>}
+            {visibleOptions.length === 0 && <div className="select-empty">{tHC("s1")}</div>}
             {visibleOptions.map((o, idx) => (
               <motion.button
                 type="button"

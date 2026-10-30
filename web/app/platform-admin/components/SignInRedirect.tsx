@@ -48,10 +48,10 @@ export default function SignInRedirect() {
       <main className="auth-shell">
         <div className="auth-card" style={{ textAlign: "center" }}>
           <Logo size={48} />
-          <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("hcPlatformadminComponentsSignInRedirect.s4")}</p>
+          <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s4")}</p>
           <p className="muted" style={{ marginTop: "0.5rem" }}>{failure}</p>
           <p className="muted" style={{ marginTop: "0.5rem", fontSize: "0.8rem", wordBreak: "break-all" }}>
-            {tHC("hcPlatformadminComponentsSignInRedirect.s3")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
+            {tHC("s3")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
           </p>
           <Button
             style={{ marginTop: "1.25rem" }}
@@ -60,7 +60,7 @@ export default function SignInRedirect() {
               setAttempt((n) => n + 1);
             }}
           >
-            {tHC("hcPlatformadminComponentsSignInRedirect.s2")}
+            {tHC("s2")}
           </Button>
         </div>
       </main>
@@ -72,7 +72,7 @@ export default function SignInRedirect() {
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
         <p className="muted" style={{ marginTop: "1rem" }}>
-          {tHC("hcPlatformadminComponentsSignInRedirect.s1")}
+          {tHC("s1")}
         </p>
       </div>
     </main>

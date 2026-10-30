@@ -16,14 +16,14 @@ export default function CachingAndTeamSection() {
       {isDraft ? (
         <WorkbenchSection.SavedOnly
           icon={<Database size={13} />}
-          label={tHC("hcComponentsAgentsWorkbenchCachingAndTeamSection.s1")}
+          label={tHC("s1")}
           cat="var(--cat-data)"
           what="response caching, memory sharing, collaborators and the knowledge-base toggle are saved on the agent."
         />
       ) : (
         <WorkbenchSection
           icon={<Database size={13} />}
-          label={tHC("hcComponentsAgentsWorkbenchCachingAndTeamSection.s1")}
+          label={tHC("s1")}
           cat="var(--cat-data)"
           actions={<WorkbenchSection.Summary>{cachingSummary}</WorkbenchSection.Summary>}
         >

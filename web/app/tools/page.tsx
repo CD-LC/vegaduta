@@ -176,12 +176,12 @@ export default function ToolsPage() {
             // Suppress the counter rather than print a wrong one - see the
             // loadFailed comment above.
             <>
-              {tHC("hcToolsPage.s7")}{" "}
-              <span className="text-muted-foreground">{tHC("hcToolsPage.s8")}</span>
+              {tHC("s7")}{" "}
+              <span className="text-muted-foreground">{tHC("s8")}</span>
             </>
           ) : (
             <>
-              {tHC("hcToolsPage.s7")}{" "}
+              {tHC("s7")}{" "}
               <span className="whitespace-nowrap">
                 <span className="font-medium text-foreground tabular-nums">{enabledCount}</span> {t("enabledSuffix")}{" "}
                 <span className="tabular-nums">/ {totalCount}</span> {t("availableSuffix")}
@@ -212,7 +212,7 @@ export default function ToolsPage() {
              * replace it. */}
             <Button variant="outline" size="sm" asChild>
               <Link href="/tools/servers">
-                <ListChecks size={14} aria-hidden="true" /> {tHC("hcToolsPage.s6")}
+                <ListChecks size={14} aria-hidden="true" /> {tHC("s6")}
               </Link>
             </Button>
             <CoachButton />
@@ -269,13 +269,13 @@ export default function ToolsPage() {
       {loadFailed && (
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>{tHC("hcToolsPage.s5")}</AlertTitle>
+          <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
             <p>
-              {tHC("hcToolsPage.s4")}
+              {tHC("s4")}
             </p>
             <Button variant="outline" size="sm" className="mt-2" onClick={refresh}>
-              {tHC("hcToolsPage.s3")}
+              {tHC("s3")}
             </Button>
           </AlertDescription>
         </Alert>
@@ -306,10 +306,10 @@ export default function ToolsPage() {
             Classification
           </TabsTrigger>
           <TabsTrigger value="custom-code" className="flex-none gap-1.5 px-3 py-1.5">
-            {tHC("hcToolsPage.s2")}
+            {tHC("s2")}
           </TabsTrigger>
           <TabsTrigger value="openapi" className="flex-none gap-1.5 px-3 py-1.5">
-            {tHC("hcToolsPage.s1")}
+            {tHC("s1")}
           </TabsTrigger>
         </TabsList>
 

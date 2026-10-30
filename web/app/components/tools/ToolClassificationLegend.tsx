@@ -63,9 +63,9 @@ export default function ToolClassificationLegend({ className }: { className?: st
       <CardContent className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-0.5">
-            <h3 className="text-sm font-semibold text-foreground">{tHC("hcComponentsToolsToolClassificationLegend.s4")}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{tHC("s4")}</h3>
             <p className="text-sm text-muted-foreground">
-              {tHC("hcComponentsToolsToolClassificationLegend.s3")}
+              {tHC("s3")}
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
@@ -111,11 +111,11 @@ export default function ToolClassificationLegend({ className }: { className?: st
             <div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
               <div className="flex flex-wrap items-center gap-2">
                 <UnclassifiedPill />
-                <span className="text-sm font-medium text-foreground">{tHC("hcComponentsToolsToolClassificationLegend.s2")}</span>
+                <span className="text-sm font-medium text-foreground">{tHC("s2")}</span>
               </div>
               <p className="text-xs leading-relaxed text-muted-foreground">{UNCLASSIFIED_META.meaning}</p>
               <p className="text-xs leading-relaxed text-muted-foreground">
-                {tHC("hcComponentsToolsToolClassificationLegend.s1")}
+                {tHC("s1")}
               </p>
             </div>
           </>

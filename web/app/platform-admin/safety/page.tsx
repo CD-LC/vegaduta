@@ -18,13 +18,13 @@ import { useTranslations } from "../../lib/i18n";
 export default function SafetyModerationPage() {
     const tHC = useTranslations("hcPlatformadminSafetyPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminSafetyPage.s3")}>
+    <AdminShell title={tHC("s3")}>
       <PageHint>
-        {tHC("hcPlatformadminSafetyPage.s2")}
+        {tHC("s2")}
       </PageHint>
 
       <InfoNote>
-        {tHC("hcPlatformadminSafetyPage.s1")}
+        {tHC("s1")}
       </InfoNote>
 
       <PolicyPacksPanel delay={0} />

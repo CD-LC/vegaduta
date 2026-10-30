@@ -138,7 +138,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
   if (loading && !cfg) {
     return (
       <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-        <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {tHC("hcBuildDataApiPanel.s30")}
+        <Loader2 aria-hidden="true" size={13} className="animate-spin" /> {tHC("s30")}
       </div>
     );
   }
@@ -147,21 +147,21 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
     <div className="mt-5 space-y-3 border-t border-border pt-4" data-testid="data-api-panel">
       <div className="flex items-center gap-2">
         <Globe aria-hidden="true" size={15} className="text-primary" />
-        <h3 className="text-sm font-medium text-foreground">{tHC("hcBuildDataApiPanel.s29")}</h3>
+        <h3 className="text-sm font-medium text-foreground">{tHC("s29")}</h3>
         {cfg?.enabled && <Badge variant="secondary">on</Badge>}
       </div>
 
       {cfg?.available === false && (
-        <p className="text-xs text-muted-foreground">{tHC("hcBuildDataApiPanel.s28")}</p>
+        <p className="text-xs text-muted-foreground">{tHC("s28")}</p>
       )}
 
       {cfg && !cfg.enabled && cfg.available !== false && (
         <>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcBuildDataApiPanel.s27")} <em>{tHC("hcBuildDataApiPanel.s26")}</em>{tHC("hcBuildDataApiPanel.s25")}
+            {tHC("s27")} <em>{tHC("s26")}</em>{tHC("s25")}
           </p>
           <Button size="sm" disabled={busy} onClick={() => run(() => appBuilder.dataEnable(id))}>
-            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <ShieldCheck aria-hidden="true" size={14} />} {tHC("hcBuildDataApiPanel.s24")}
+            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <ShieldCheck aria-hidden="true" size={14} />} {tHC("s24")}
           </Button>
         </>
       )}
@@ -169,33 +169,33 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
       {cfg?.enabled && (
         <>
           <div className="space-y-1.5">
-            <Copyable label={tHC("hcBuildDataApiPanel.s23")} value={cfg.base_url ?? ""} copied={copied} onCopy={copy} />
-            <Copyable label={tHC("hcBuildDataApiPanel.s22")} value={cfg.anon_key ?? ""} shown={maskKey(cfg.anon_key ?? "")} copied={copied} onCopy={copy} />
+            <Copyable label={tHC("s23")} value={cfg.base_url ?? ""} copied={copied} onCopy={copy} />
+            <Copyable label={tHC("s22")} value={cfg.anon_key ?? ""} shown={maskKey(cfg.anon_key ?? "")} copied={copied} onCopy={copy} />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            {tHC("hcBuildDataApiPanel.s21")}
+            {tHC("s21")}
           </p>
 
           {serviceKey && (
             <div role="alert" className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground">
-                <KeyRound aria-hidden="true" size={13} /> {tHC("hcBuildDataApiPanel.s20")}
+                <KeyRound aria-hidden="true" size={13} /> {tHC("s20")}
               </div>
-              <Copyable label={tHC("hcBuildDataApiPanel.s19")} value={serviceKey} shown={maskKey(serviceKey)} copied={copied} onCopy={copy} />
+              <Copyable label={tHC("s19")} value={serviceKey} shown={maskKey(serviceKey)} copied={copied} onCopy={copy} />
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {tHC("hcBuildDataApiPanel.s18")}
+                {tHC("s18")}
               </p>
               <Button variant="ghost" size="sm" className="mt-1" onClick={() => setServiceKey(null)}>
-                {tHC("hcBuildDataApiPanel.s17")}
+                {tHC("s17")}
               </Button>
             </div>
           )}
 
           <div className="space-y-1.5">
-            <Label className="text-xs">{tHC("hcBuildDataApiPanel.s16")}</Label>
-            {cfg.tables_error && <p className="text-xs text-destructive">{tHC("hcBuildDataApiPanel.s15")} {cfg.tables_error}</p>}
+            <Label className="text-xs">{tHC("s16")}</Label>
+            {cfg.tables_error && <p className="text-xs text-destructive">{tHC("s15")} {cfg.tables_error}</p>}
             {tables.length === 0 && !cfg.tables_error && (
-              <p className="text-xs text-muted-foreground">{tHC("hcBuildDataApiPanel.s14")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s14")}</p>
             )}
             {tables.map((t) => {
               const notes = riskNotes(t);
@@ -228,7 +228,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
 
           <div className="space-y-1">
             <Label htmlFor="data-origins" className="text-xs">
-              {tHC("hcBuildDataApiPanel.s13")}
+              {tHC("s13")}
             </Label>
             <Input
               id="data-origins"
@@ -238,20 +238,20 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               onChange={(e) => setOriginsRaw(e.target.value)}
             />
             <p className="text-[11px] text-muted-foreground">
-              {tHC("hcBuildDataApiPanel.s12")}
-              {parsed.invalid.length > 0 && <span className="text-destructive"> {tHC("hcBuildDataApiPanel.s11")} {parsed.invalid[0]}</span>}
+              {tHC("s12")}
+              {parsed.invalid.length > 0 && <span className="text-destructive"> {tHC("s11")} {parsed.invalid[0]}</span>}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <Button size="sm" disabled={busy || !dirty} onClick={save}>
-              {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Check aria-hidden="true" size={14} />} {tHC("hcBuildDataApiPanel.s10")}
+              {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <Check aria-hidden="true" size={14} />} {tHC("s10")}
             </Button>
-            {dirty && <span className="text-[11px] text-muted-foreground">{tHC("hcBuildDataApiPanel.s9")}</span>}
+            {dirty && <span className="text-[11px] text-muted-foreground">{tHC("s9")}</span>}
           </div>
 
           <details className="rounded-md border border-border p-2">
-            <summary className="cursor-pointer text-xs font-medium text-foreground">{tHC("hcBuildDataApiPanel.s8")}</summary>
+            <summary className="cursor-pointer text-xs font-medium text-foreground">{tHC("s8")}</summary>
             <pre className="mt-2 max-h-56 overflow-auto rounded bg-muted/50 p-2 font-mono text-[11px] leading-snug">
               {fetchSnippet(cfg.base_url ?? "", cfg.anon_key ?? "", tables)}
             </pre>
@@ -260,16 +260,16 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               size="sm"
               onClick={() => copy("snippet", fetchSnippet(cfg.base_url ?? "", cfg.anon_key ?? "", tables))}
             >
-              {copied === "snippet" ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />} {tHC("hcBuildDataApiPanel.s7")}
+              {copied === "snippet" ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />} {tHC("s7")}
             </Button>
           </details>
 
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-2">
             {confirm === "rotate" ? (
               <>
-                <span className="text-[11px] text-muted-foreground">{tHC("hcBuildDataApiPanel.s6")}</span>
+                <span className="text-[11px] text-muted-foreground">{tHC("s6")}</span>
                 <Button size="sm" variant="outline" disabled={busy} onClick={() => run(() => appBuilder.dataRotateKey(id, "service"))}>
-                  {tHC("hcBuildDataApiPanel.s5")}
+                  {tHC("s5")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>
                   Cancel
@@ -277,7 +277,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
               </>
             ) : confirm === "disable" ? (
               <>
-                <span className="text-[11px] text-muted-foreground">{tHC("hcBuildDataApiPanel.s4")}</span>
+                <span className="text-[11px] text-muted-foreground">{tHC("s4")}</span>
                 <Button
                   size="sm"
                   variant="outline"
@@ -285,7 +285,7 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
                   disabled={busy}
                   onClick={() => run(() => appBuilder.dataDisable(id))}
                 >
-                  {tHC("hcBuildDataApiPanel.s3")}
+                  {tHC("s3")}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm(null)}>
                   Cancel
@@ -294,10 +294,10 @@ export default function DataApiPanel({ project, onError, refreshToken }: Props) 
             ) : (
               <>
                 <Button size="sm" variant="ghost" onClick={() => setConfirm("rotate")}>
-                  <KeyRound aria-hidden="true" size={13} /> {tHC("hcBuildDataApiPanel.s2")}
+                  <KeyRound aria-hidden="true" size={13} /> {tHC("s2")}
                 </Button>
                 <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirm("disable")}>
-                  {tHC("hcBuildDataApiPanel.s1")}
+                  {tHC("s1")}
                 </Button>
               </>
             )}

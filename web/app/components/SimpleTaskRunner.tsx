@@ -396,7 +396,7 @@ export default function SimpleTaskRunner() {
             disabled={busy}
           />
           <p id="qt-task-help" className="text-xs text-muted-foreground">
-            {tHC("hcComponentsSimpleTaskRunner.s1")}
+            {tHC("s1")}
           </p>
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
             <input

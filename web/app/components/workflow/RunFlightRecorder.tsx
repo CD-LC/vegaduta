@@ -363,7 +363,7 @@ export default function RunFlightRecorder({
       data-collapsed={collapsed}
       data-live={view.live && !reducedMotion}
       role="region"
-      aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s9")}
+      aria-label={tHC("s9")}
       aria-roledescription="run timeline"
       tabIndex={-1}
       onKeyDown={onKeyDown}
@@ -372,7 +372,7 @@ export default function RunFlightRecorder({
         <button
           type="button"
           className="rfr-grip"
-          aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s8")}
+          aria-label={tHC("s8")}
           onPointerDown={onGripDown}
           onPointerMove={onGripMove}
           onPointerUp={onGripUp}
@@ -396,7 +396,7 @@ export default function RunFlightRecorder({
 
         <span className="rfr-title">
           <span className="rfr-rec" aria-hidden />
-          <span className="rfr-title-text">{tHC("hcComponentsWorkflowRunFlightRecorder.s7")}</span>
+          <span className="rfr-title-text">{tHC("s7")}</span>
         </span>
 
         <button
@@ -412,7 +412,7 @@ export default function RunFlightRecorder({
         </button>
 
         {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex lives on the radios; arrow keys bubble to the group */}
-        <div className="rfr-speeds" role="radiogroup" aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s6")} onKeyDown={onSpeedKey}>
+        <div className="rfr-speeds" role="radiogroup" aria-label={tHC("s6")} onKeyDown={onSpeedKey}>
           {RECORDER_SPEEDS.map((s) => (
             <button
               key={String(s)}
@@ -448,7 +448,7 @@ export default function RunFlightRecorder({
             className="rfr-mini"
             role="slider"
             tabIndex={0}
-            aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s5")}
+            aria-label={tHC("s5")}
             aria-valuemin={0}
             aria-valuemax={Math.round(total)}
             aria-valuenow={Math.round(pos)}
@@ -483,7 +483,7 @@ export default function RunFlightRecorder({
             <ToneIcon tone={view.tone} awaiting={view.runAwaiting} size={11} />
             <span className="rfr-pill-text">{statusLabel}</span>
           </span>
-          <span className="rfr-meta-item" title={tHC("hcComponentsWorkflowRunFlightRecorder.s4")}>
+          <span className="rfr-meta-item" title={tHC("s4")}>
             {formatDuration(total)}
           </span>
           {view.startedAtMs !== null && (
@@ -505,14 +505,14 @@ export default function RunFlightRecorder({
           />
         </span>
 
-        <button type="button" className="rfr-btn" aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s3")} title="Close" onClick={onClose}>
+        <button type="button" className="rfr-btn" aria-label={tHC("s3")} title="Close" onClick={onClose}>
           <X size={15} aria-hidden />
         </button>
       </div>
 
       <div className="rfr-body" id={`${uid}-body`} hidden={collapsed}>
         {visitCount === 0 ? (
-          <div className="rfr-empty">{tHC("hcComponentsWorkflowRunFlightRecorder.s2")}</div>
+          <div className="rfr-empty">{tHC("s2")}</div>
         ) : (
           <div className="rfr-scroll">
             <div className="rfr-inner">
@@ -547,7 +547,7 @@ export default function RunFlightRecorder({
                     className="rfr-head-knob"
                     role="slider"
                     tabIndex={0}
-                    aria-label={tHC("hcComponentsWorkflowRunFlightRecorder.s1")}
+                    aria-label={tHC("s1")}
                     aria-valuemin={0}
                     aria-valuemax={Math.round(total)}
                     aria-valuenow={Math.round(pos)}

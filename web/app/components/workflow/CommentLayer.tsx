@@ -342,7 +342,7 @@ export default function CommentLayer({
       data-panel-open={panelOpen || undefined}
       data-mode={mode}
       tabIndex={-1}
-      aria-label={tHC("hcComponentsWorkflowCommentLayer.s6")}
+      aria-label={tHC("s6")}
     >
       {pins.map(({ thread, number, anchor }) => {
         if (thread.resolved && !showResolvedPins && thread.id !== openThreadId) return null;
@@ -488,7 +488,7 @@ function PlaceSurface({
       className="wfc-place"
       role="button"
       tabIndex={0}
-      aria-label={tHC("hcComponentsWorkflowCommentLayer.s5")}
+      aria-label={tHC("s5")}
       aria-describedby={hintId}
       onClick={(e) => onPlaced?.(e.clientX, e.clientY)}
       onKeyDown={(e) => {
@@ -503,7 +503,7 @@ function PlaceSurface({
       }}
     >
       <span id={hintId} className="wfc-place-hint">
-        {tHC("hcComponentsWorkflowCommentLayer.s4")}
+        {tHC("s4")}
       </span>
     </div>
   );
@@ -583,7 +583,7 @@ function CommentsPanel({
           <strong id={`${uid}-t`}>Comments</strong>
           <span className="wfc-sub">{openCount} open</span>
         </div>
-        <button type="button" className="wfc-icon" aria-label={tHC("hcComponentsWorkflowCommentLayer.s3")} onClick={onClose}>
+        <button type="button" className="wfc-icon" aria-label={tHC("s3")} onClick={onClose}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>
@@ -646,11 +646,11 @@ function CommentsPanel({
                       <span className="wfc-row-time">{relativeTime(last.createdAt, now)}</span>
                     </span>
                     <span className="wfc-row-body">
-                      {t.deleted ? <em>{tHC("hcComponentsWorkflowCommentLayer.s2")}</em> : <><strong>{personLabel(t.author)}:</strong> {t.body}</>}
+                      {t.deleted ? <em>{tHC("s2")}</em> : <><strong>{personLabel(t.author)}:</strong> {t.body}</>}
                     </span>
                     <span className="wfc-row-meta">
                       {replies > 0 && `${replies} ${replies === 1 ? "reply" : "replies"}`}
-                      {t.orphaned && <span className="wfc-row-tag">{tHC("hcComponentsWorkflowCommentLayer.s1")}</span>}
+                      {t.orphaned && <span className="wfc-row-tag">{tHC("s1")}</span>}
                       {t.resolved && <span className="wfc-row-tag" data-tone="ok">Resolved</span>}
                     </span>
                   </span>

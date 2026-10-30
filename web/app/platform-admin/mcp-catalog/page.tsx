@@ -47,7 +47,7 @@ function ReadyBadge({ ready }: { ready?: boolean }) {
     </Badge>
   ) : (
     <Badge variant="secondary" className="gap-1">
-      <CircleDashed size={12} /> {tHC("hcPlatformadminMcpcatalogPage.s11")}
+      <CircleDashed size={12} /> {tHC("s11")}
     </Badge>
   );
 }
@@ -116,7 +116,7 @@ export default function McpCatalogPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminMcpcatalogPage.s10")}
+      title={tHC("s10")}
       actions={
         <Button
           variant="outline"
@@ -131,10 +131,10 @@ export default function McpCatalogPage() {
       }
     >
       <p className="mb-4 text-sm text-muted-foreground">
-        {tHC("hcPlatformadminMcpcatalogPage.s9")}
+        {tHC("s9")}
       </p>
 
-      <div className="mb-4 flex items-center gap-1 border-b border-border" role="tablist" aria-label={tHC("hcPlatformadminMcpcatalogPage.s8")}>
+      <div className="mb-4 flex items-center gap-1 border-b border-border" role="tablist" aria-label={tHC("s8")}>
         <button
           type="button"
           id="mcp-catalog-tab-catalog"
@@ -149,7 +149,7 @@ export default function McpCatalogPage() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          {tHC("hcPlatformadminMcpcatalogPage.s7")}{catalog.length})
+          {tHC("s7")}{catalog.length})
         </button>
         <button
           type="button"
@@ -165,7 +165,7 @@ export default function McpCatalogPage() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
-          {tHC("hcPlatformadminMcpcatalogPage.s6")}
+          {tHC("s6")}
         </button>
       </div>
 
@@ -189,7 +189,7 @@ export default function McpCatalogPage() {
                   <TypeBadge type={entry.type} />
                   {entry.requiredEnvVars?.length > 0 && (
                     <Badge variant="secondary" className="text-[10px]">
-                      {entry.requiredEnvVars.length} {tHC("hcPlatformadminMcpcatalogPage.s5")}{entry.requiredEnvVars.length === 1 ? "" : "s"}
+                      {entry.requiredEnvVars.length} {tHC("s5")}{entry.requiredEnvVars.length === 1 ? "" : "s"}
                     </Badge>
                   )}
                 </div>
@@ -209,7 +209,7 @@ export default function McpCatalogPage() {
             </Card>
           ))}
           {!loading && catalog.length === 0 && (
-            <p className="col-span-full py-8 text-center text-sm text-muted-foreground">{tHC("hcPlatformadminMcpcatalogPage.s4")}</p>
+            <p className="col-span-full py-8 text-center text-sm text-muted-foreground">{tHC("s4")}</p>
           )}
           <div className="col-span-full">
             <PaginationControls
@@ -229,7 +229,7 @@ export default function McpCatalogPage() {
         <div id="mcp-catalog-panel-search" role="tabpanel" aria-labelledby="mcp-catalog-tab-search">
           <form onSubmit={runSearch} className="mb-4 flex max-w-md items-center gap-2">
             <Input
-              placeholder={tHC("hcPlatformadminMcpcatalogPage.s3")}
+              placeholder={tHC("s3")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -245,7 +245,7 @@ export default function McpCatalogPage() {
                     <CardTitle className="text-base">{s.displayName || s.name}</CardTitle>
                     {!s.runnable && (
                       <Badge variant="destructive" title={s.notRunnableReason || ""}>
-                        {tHC("hcPlatformadminMcpcatalogPage.s2")}
+                        {tHC("s2")}
                       </Badge>
                     )}
                   </div>
@@ -288,7 +288,7 @@ export default function McpCatalogPage() {
             </p>
           )}
           {!searchResults && (
-            <p className="py-8 text-center text-sm text-muted-foreground">{tHC("hcPlatformadminMcpcatalogPage.s1")}</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{tHC("s1")}</p>
           )}
         </div>
       )}

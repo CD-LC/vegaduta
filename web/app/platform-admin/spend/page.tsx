@@ -75,7 +75,7 @@ function Table({ head, children }: { head: any; children: any }) {
 
 function Empty() {
     const tHC = useTranslations("hcPlatformadminSpendPage");
-  return <p className="py-3 text-xs text-muted-foreground">{tHC("hcPlatformadminSpendPage.s17")}</p>;
+  return <p className="py-3 text-xs text-muted-foreground">{tHC("s17")}</p>;
 }
 
 function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -210,9 +210,9 @@ export default function SpendReportsPage() {
   );
 
   return (
-    <AdminShell title={tHC("hcPlatformadminSpendPage.s16")}>
+    <AdminShell title={tHC("s16")}>
       <PageHint>
-        {tHC("hcPlatformadminSpendPage.s15")}
+        {tHC("s15")}
       </PageHint>
 
       <SectionCard
@@ -267,18 +267,18 @@ export default function SpendReportsPage() {
           hosted && (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <Tile
-                label={tHC("hcPlatformadminSpendPage.s14")}
+                label={tHC("s14")}
                 value={formatUsd(all.estimatedCostUsd)}
                 sub="incl. tenants' BYOK keys"
               />
               <Tile
-                label={tHC("hcPlatformadminSpendPage.s13")}
+                label={tHC("s13")}
                 value={formatUsd(hosted.estimatedCostUsd)}
                 sub="platform-paid (PLATFORM_HOSTED)"
               />
-              <Tile label={tHC("hcPlatformadminSpendPage.s12")} value={n(all.totalCalls)} sub={`${n(all.errorCount)} errors`} />
+              <Tile label={tHC("s12")} value={n(all.totalCalls)} sub={`${n(all.errorCount)} errors`} />
               <Tile
-                label={tHC("hcPlatformadminSpendPage.s11")}
+                label={tHC("s11")}
                 value={n(all.totalTokens)}
                 sub={all.avgLatencyMs == null ? undefined : `avg latency ${Math.round(all.avgLatencyMs)} ms`}
               />
@@ -287,11 +287,11 @@ export default function SpendReportsPage() {
         )}
         <div className="pt-2">{exportButtons}</div>
         <InfoNote>
-          {tHC("hcPlatformadminSpendPage.s10")}
+          {tHC("s10")}
         </InfoNote>
       </SectionCard>
 
-      <SectionCard title={tHC("hcPlatformadminSpendPage.s9")} subtitle="Ordered by all-provider estimated cost" delay={0.03}>
+      <SectionCard title={tHC("s9")} subtitle="Ordered by all-provider estimated cost" delay={0.03}>
         {tenants.length === 0 ? (
           <Empty />
         ) : (
@@ -302,8 +302,8 @@ export default function SpendReportsPage() {
                   <Th>Tenant</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s7")}</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s5")}</Th>
+                  <Th right>{tHC("s7")}</Th>
+                  <Th right>{tHC("s5")}</Th>
                 </>
               }
             >
@@ -338,12 +338,12 @@ export default function SpendReportsPage() {
             <Table
               head={
                 <>
-                  <Th>{tHC("hcPlatformadminSpendPage.s8")}</Th>
+                  <Th>{tHC("s8")}</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s7")}</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s6")}</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s5")}</Th>
+                  <Th right>{tHC("s7")}</Th>
+                  <Th right>{tHC("s6")}</Th>
+                  <Th right>{tHC("s5")}</Th>
                 </>
               }
             >
@@ -372,7 +372,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <SectionCard
-        title={tHC("hcPlatformadminSpendPage.s4")}
+        title={tHC("s4")}
         subtitle="The PLATFORM_HOSTED row is the platform's own outlay; the rest is tenant BYOK usage"
         delay={0.09}
       >
@@ -386,7 +386,7 @@ export default function SpendReportsPage() {
                 <Th right>Calls</Th>
                 <Th right>Errors</Th>
                 <Th right>Tokens</Th>
-                <Th right>{tHC("hcPlatformadminSpendPage.s2")}</Th>
+                <Th right>{tHC("s2")}</Th>
               </>
             }
           >
@@ -407,7 +407,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <SectionCard
-        title={tHC("hcPlatformadminSpendPage.s3")}
+        title={tHC("s3")}
         subtitle={
           modelTotal > models.length
             ? `Top ${models.length} of ${modelTotal} models by estimated cost`
@@ -426,7 +426,7 @@ export default function SpendReportsPage() {
                   <Th>Modality</Th>
                   <Th right>Calls</Th>
                   <Th right>Tokens</Th>
-                  <Th right>{tHC("hcPlatformadminSpendPage.s2")}</Th>
+                  <Th right>{tHC("s2")}</Th>
                 </>
               }
             >
@@ -454,7 +454,7 @@ export default function SpendReportsPage() {
       </SectionCard>
 
       <PageHint>
-        <strong>All-time</strong> {tHC("hcPlatformadminSpendPage.s1")}
+        <strong>All-time</strong> {tHC("s1")}
       </PageHint>
       <LlmUsageSection pollMs={10000} delay={0} />
       <HostedCostSection pollMs={10000} delay={0.03} />

@@ -400,7 +400,7 @@ export default function TroubleshootPage() {
                 <p className="text-sm font-medium">{t("check.down")}</p>
                 <p className="mt-0.5 text-sm text-muted-foreground">{t("downBody")}</p>
                 <code className="mt-2 block rounded bg-muted px-3 py-2 text-xs">
-                  {tHC("hcTroubleshootPage.s1")}
+                  {tHC("s1")}
                 </code>
               </div>
             </div>

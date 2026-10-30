@@ -113,18 +113,18 @@ export default function AfterSandbox({
       <section aria-labelledby="ledger-title">
         <div className="max-w-2xl">
           <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-amber-700 dark:text-amber-300">
-            <Scale aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioAfterSandbox.s9")}
+            <Scale aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s9")}
           </div>
           <h2 id="ledger-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {tHC("hcComponentsStudioAfterSandbox.s8")}
+            {tHC("s8")}
           </h2>
           <p className="mt-3 text-muted-foreground">
-            {tHC("hcComponentsStudioAfterSandbox.s7")}
+            {tHC("s7")}
           </p>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-            <div className={`mb-3 text-sm font-semibold ${TONES.emerald.text}`}>{tHC("hcComponentsStudioAfterSandbox.s6")}</div>
+            <div className={`mb-3 text-sm font-semibold ${TONES.emerald.text}`}>{tHC("s6")}</div>
             <ul className="space-y-2.5">
               {REAL.map((r) => (
                 <li key={r} className="flex items-start gap-2.5 text-sm">
@@ -138,7 +138,7 @@ export default function AfterSandbox({
             </ul>
           </div>
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
-            <div className={`mb-3 text-sm font-semibold ${TONES.amber.text}`}>{tHC("hcComponentsStudioAfterSandbox.s5")}</div>
+            <div className={`mb-3 text-sm font-semibold ${TONES.amber.text}`}>{tHC("s5")}</div>
             <ul className="space-y-2.5">
               {NOT_YET.map((r) => (
                 <li key={r} className="flex items-start gap-2.5 text-sm">
@@ -155,13 +155,13 @@ export default function AfterSandbox({
       <section aria-labelledby="adds-title">
         <div className="max-w-2xl">
           <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
-            <Mail aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioAfterSandbox.s4")}
+            <Mail aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s4")}
           </div>
           <h2 id="adds-title" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {tHC("hcComponentsStudioAfterSandbox.s3")}
+            {tHC("s3")}
           </h2>
           <p className="mt-3 text-muted-foreground">
-            {tHC("hcComponentsStudioAfterSandbox.s2")}
+            {tHC("s2")}
           </p>
         </div>
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -216,7 +216,7 @@ export default function AfterSandbox({
           </Button>
         </div>
         <p className="relative mt-5 text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioAfterSandbox.s1")}{" "}
+          {tHC("s1")}{" "}
           <a
             className="underline underline-offset-2 hover:text-foreground"
             href={`mailto:${ENTITY_FACTS.contactEmail}`}

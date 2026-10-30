@@ -55,14 +55,14 @@ export function InboxDetailsPane({
   return (
     <div className="space-y-4 rounded-xl border border-border bg-card p-4 text-sm">
       <div>
-        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("hcAdminInboxInboxDetailsPane.s13")}</p>
+        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tHC("s13")}</p>
         <div className="flex items-center gap-2">
           <Select
             className="select-inline min-w-0 flex-1"
             value={reassignId}
             onChange={(e) => onReassignIdChange(e.target.value)}
             options={agents.map((a) => ({ value: a.id, label: a.name }))}
-            placeholder={tHC("hcAdminInboxInboxDetailsPane.s12")}
+            placeholder={tHC("s12")}
           />
           <Button
             type="button"
@@ -79,7 +79,7 @@ export function InboxDetailsPane({
           </Button>
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          {tHC("hcAdminInboxInboxDetailsPane.s11")}
+          {tHC("s11")}
         </p>
       </div>
 
@@ -89,8 +89,8 @@ export function InboxDetailsPane({
           <Input
             value={escalateReason}
             onChange={(e) => onEscalateReasonChange(e.target.value)}
-            placeholder={tHC("hcAdminInboxInboxDetailsPane.s10")}
-            aria-label={tHC("hcAdminInboxInboxDetailsPane.s10")}
+            placeholder={tHC("s10")}
+            aria-label={tHC("s10")}
             className="mb-2"
           />
           <Button
@@ -106,7 +106,7 @@ export function InboxDetailsPane({
               )
             }
           >
-            <Flag size={13} /> {tHC("hcAdminInboxInboxDetailsPane.s9")}
+            <Flag size={13} /> {tHC("s9")}
           </Button>
         </div>
       )}
@@ -116,7 +116,7 @@ export function InboxDetailsPane({
         {!selected.paired ? (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              {tHC("hcAdminInboxInboxDetailsPane.s8")}{" "}
+              {tHC("s8")}{" "}
               <code className="rounded bg-muted px-1 py-0.5 text-foreground">{selected.pairingCode ?? "—"}</code>
             </p>
             <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export function InboxDetailsPane({
                       );
                     }}
                   >
-                    {tHC("hcAdminInboxInboxDetailsPane.s7")}
+                    {tHC("s7")}
                   </Button>
                   <Button type="button" size="sm" variant="ghost" onClick={() => onConfirmRejectChange(false)}>
                     Cancel
@@ -163,7 +163,7 @@ export function InboxDetailsPane({
           </div>
         ) : (
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">{tHC("hcAdminInboxInboxDetailsPane.s6")}</p>
+            <p className="text-xs text-muted-foreground">{tHC("s6")}</p>
             {confirmUnpair ? (
               <div className="flex items-center gap-2">
                 <Button
@@ -182,7 +182,7 @@ export function InboxDetailsPane({
                     );
                   }}
                 >
-                  {tHC("hcAdminInboxInboxDetailsPane.s5")}
+                  {tHC("s5")}
                 </Button>
                 <Button type="button" size="sm" variant="ghost" onClick={() => onConfirmUnpairChange(false)}>
                   Cancel
@@ -190,7 +190,7 @@ export function InboxDetailsPane({
               </div>
             ) : (
               <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onConfirmUnpairChange(true)}>
-                <Unlink size={13} /> {tHC("hcAdminInboxInboxDetailsPane.s4")}
+                <Unlink size={13} /> {tHC("s4")}
               </Button>
             )}
           </div>
@@ -206,16 +206,16 @@ export function InboxDetailsPane({
           </div>
           {selected.resolvedPhoneMasked && selected.resolvedPhoneMasked !== "***" && (
             <div className="flex justify-between gap-2">
-              <dt>{tHC("hcAdminInboxInboxDetailsPane.s3")}</dt>
+              <dt>{tHC("s3")}</dt>
               <dd className="font-mono text-foreground">{selected.resolvedPhoneMasked}</dd>
             </div>
           )}
           <div className="flex justify-between gap-2">
-            <dt>{tHC("hcAdminInboxInboxDetailsPane.s2")}</dt>
+            <dt>{tHC("s2")}</dt>
             <dd className="tabular-nums text-foreground">{fullTime(selected.createdAt)}</dd>
           </div>
           <div className="flex justify-between gap-2">
-            <dt>{tHC("hcAdminInboxInboxDetailsPane.s1")}</dt>
+            <dt>{tHC("s1")}</dt>
             <dd className="tabular-nums text-foreground">{fullTime(selected.lastMessageAt)}</dd>
           </div>
           {selected.escalatedAt && (

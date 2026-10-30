@@ -94,7 +94,7 @@ export default function JobsPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminJobsPage.s9")}
+      title={tHC("s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
           <RefreshCw className={loading ? "animate-spin" : undefined} /> Refresh
@@ -102,7 +102,7 @@ export default function JobsPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminJobsPage.s8")}
+        {tHC("s8")}
       </PageHint>
 
       <SectionCard
@@ -121,16 +121,16 @@ export default function JobsPage() {
                 className="pointer-events-none absolute start-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
               <Input
-                aria-label={tHC("hcPlatformadminJobsPage.s7")}
+                aria-label={tHC("s7")}
                 className="h-9 w-60 ps-8"
-                placeholder={tHC("hcPlatformadminJobsPage.s6")}
+                placeholder={tHC("s6")}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-1.5 text-xs">
               <Checkbox checked={onlyFailed} onCheckedChange={(v) => setOnlyFailed(v)} id="jobs-failed-only" />
-              <label htmlFor="jobs-failed-only">{tHC("hcPlatformadminJobsPage.s5")}</label>
+              <label htmlFor="jobs-failed-only">{tHC("s5")}</label>
             </div>
           </div>
         }
@@ -147,8 +147,8 @@ export default function JobsPage() {
                 <tr className="border-b border-border">
                   <th className="py-2 pe-3 font-medium">Job</th>
                   <th className="py-2 pe-3 font-medium">Schedule</th>
-                  <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminJobsPage.s4")}</th>
-                  <th className="py-2 pe-3 font-medium">{tHC("hcPlatformadminJobsPage.s3")}</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s4")}</th>
+                  <th className="py-2 pe-3 font-medium">{tHC("s3")}</th>
                   <th className="py-2 pe-3 font-medium">Duration</th>
                   <th className="py-2 font-medium">
                     <span className="sr-only">Actions</span>
@@ -201,9 +201,9 @@ export default function JobsPage() {
                           ) : (
                             <span
                               className="text-[11px] text-muted-foreground"
-                              title={tHC("hcPlatformadminJobsPage.s2")}
+                              title={tHC("s2")}
                             >
-                              {tHC("hcPlatformadminJobsPage.s1")}
+                              {tHC("s1")}
                             </span>
                           )}
                         </td>

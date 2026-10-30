@@ -449,7 +449,7 @@ export function AttachButton({
         accept={buildAccept(modalities)}
         onChange={handleChange}
         className="sr-only"
-        aria-label={tHC("hcComponentsChatAttachments.s2")}
+        aria-label={tHC("s2")}
         tabIndex={-1}
       />
       <Button
@@ -486,7 +486,7 @@ export function AttachmentChips({
     const tHC = useTranslations("hcComponentsChatAttachments");
   if (attachments.length === 0) return null;
   return (
-    <ul className="flex flex-wrap gap-2" aria-label={tHC("hcComponentsChatAttachments.s1")}>
+    <ul className="flex flex-wrap gap-2" aria-label={tHC("s1")}>
       {attachments.map((att) => {
         const Icon = iconForMime(att.mimeType);
         return (

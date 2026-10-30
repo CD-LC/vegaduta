@@ -97,7 +97,7 @@ export function IntentForm({ agentId, onCreated }: { agentId: string; onCreated:
           <Label htmlFor="intent-cats">{t("fieldCategories")}</Label>
           <Input
             id="intent-cats"
-            placeholder={tHC("hcAdminCommerceIntentForm.s1")}
+            placeholder={tHC("s1")}
             value={form.categories}
             onChange={(e) => setForm((f) => ({ ...f, categories: e.target.value }))}
           />

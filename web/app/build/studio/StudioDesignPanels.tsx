@@ -33,7 +33,7 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
     <div className="flex flex-col gap-4">
       {!theme && (
         <p className="rounded-lg bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300">
-          {tHC("hcBuildStudioStudioDesignPanels.s13")}
+          {tHC("s13")}
         </p>
       )}
       <div>
@@ -88,16 +88,16 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
       </div>
       {Object.keys(draft).length > 0 && (
         <Button size="sm" onClick={() => commitTokens(draft, "Colours")}>
-          {tHC("hcBuildStudioStudioDesignPanels.s12")}
+          {tHC("s12")}
         </Button>
       )}
       {ratio !== null && ratio < 4.5 && (
         <p className="text-xs text-amber-600 dark:text-amber-400">
-          {tHC("hcBuildStudioStudioDesignPanels.s11")} {ratio.toFixed(1)}{tHC("hcBuildStudioStudioDesignPanels.s10")}
+          {tHC("s11")} {ratio.toFixed(1)}{tHC("s10")}
         </p>
       )}
       <label className="flex flex-col gap-1 text-xs text-foreground">
-        {tHC("hcBuildStudioStudioDesignPanels.s9")} {radiusPx}px
+        {tHC("s9")} {radiusPx}px
         <input
           type="range"
           min={0}
@@ -127,7 +127,7 @@ export function DesignPanel({ html, onChange }: { html: string; onChange: (next:
         </div>
       </div>
       <p className="text-[11px] text-muted-foreground">
-        {tHC("hcBuildStudioStudioDesignPanels.s8")}
+        {tHC("s8")}
       </p>
     </div>
   );
@@ -167,9 +167,9 @@ export function ElementPanel({
     return (
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <MousePointerClick aria-hidden="true" size={22} className="text-primary" />
-        <p className="text-sm text-foreground">{tHC("hcBuildStudioStudioDesignPanels.s7")}</p>
+        <p className="text-sm text-foreground">{tHC("s7")}</p>
         <Button size="sm" variant="outline" onClick={onStartSelect}>
-          {tHC("hcBuildStudioStudioDesignPanels.s6")}
+          {tHC("s6")}
         </Button>
       </div>
     );
@@ -232,7 +232,7 @@ export function ElementPanel({
                 }}
                 className="size-7 cursor-pointer rounded border-0 bg-transparent p-0"
               />
-              {tHC("hcBuildStudioStudioDesignPanels.s5")}
+              {tHC("s5")}
             </label>
             <label className="flex items-center gap-2 rounded-lg border border-border p-1.5 text-xs text-foreground">
               <input
@@ -286,20 +286,20 @@ export function ElementPanel({
         </>
       ) : (
         <p className="rounded-lg bg-secondary p-2 text-xs text-muted-foreground">
-          {tHC("hcBuildStudioStudioDesignPanels.s4")}
+          {tHC("s4")}
         </p>
       )}
       <div className="flex flex-col gap-1.5 border-t border-border pt-3">
-        <p className="text-xs font-medium text-foreground">{tHC("hcBuildStudioStudioDesignPanels.s3")}</p>
+        <p className="text-xs font-medium text-foreground">{tHC("s3")}</p>
         <Textarea
           value={ask}
           onChange={(e) => setAsk(e.target.value)}
           rows={2}
           className="resize-none text-sm"
-          placeholder={tHC("hcBuildStudioStudioDesignPanels.s2")}
+          placeholder={tHC("s2")}
         />
         <Button size="sm" disabled={!ask.trim() || busy} onClick={() => onAsk(ask.trim())} className="gap-1.5">
-          <Sparkles aria-hidden="true" size={13} /> {tHC("hcBuildStudioStudioDesignPanels.s1")}
+          <Sparkles aria-hidden="true" size={13} /> {tHC("s1")}
         </Button>
       </div>
     </div>

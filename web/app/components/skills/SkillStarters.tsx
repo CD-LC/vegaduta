@@ -109,10 +109,10 @@ export default function SkillStarters({ skills }: { skills: SkillSummary[] }) {
     <section aria-labelledby="skill-starters-heading" className="mb-8 space-y-3">
       <div>
         <h2 id="skill-starters-heading" className="text-lg font-semibold text-foreground">
-          {tHC("hcComponentsSkillsSkillStarters.s2")}
+          {tHC("s2")}
         </h2>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
-          {tHC("hcComponentsSkillsSkillStarters.s1")}
+          {tHC("s1")}
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

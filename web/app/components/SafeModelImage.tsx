@@ -34,7 +34,7 @@ export default function SafeModelImage({
       data-testid="blocked-image"
       className="inline-flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground"
     >
-      <span>{tHC("hcComponentsSafeModelImage.s2")}{imageHostLabel(src)}){alt ? `: ${alt}` : ""}</span>
+      <span>{tHC("s2")}{imageHostLabel(src)}){alt ? `: ${alt}` : ""}</span>
       {openable && (
         <a
           href={src}
@@ -42,7 +42,7 @@ export default function SafeModelImage({
           rel="noopener noreferrer nofollow"
           className="font-medium text-primary underline underline-offset-2"
         >
-          {tHC("hcComponentsSafeModelImage.s1")}
+          {tHC("s1")}
         </a>
       )}
     </span>

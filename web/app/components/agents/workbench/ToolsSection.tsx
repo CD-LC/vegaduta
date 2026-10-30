@@ -111,7 +111,7 @@ export default function ToolsSection() {
 
         {!isDraft && effectiveMode(selectedAgent) === "SIMPLE" && (
           <p className={SUB_TEXT}>
-            {t("toolsAutoSelectLiveHint")} {tHC("hcComponentsAgentsWorkbenchToolsSection.s1")}
+            {t("toolsAutoSelectLiveHint")} {tHC("s1")}
           </p>
         )}
 

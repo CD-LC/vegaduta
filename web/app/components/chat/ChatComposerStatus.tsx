@@ -128,7 +128,7 @@ export default function ChatComposerStatus(p: {
         <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
           <span className="min-w-0">{pendingFallbackAsk}</span>
           <Button type="button" variant="outline" size="sm" onClick={() => answerFallbackAsk(true)}>
-            {tHC("hcComponentsChatChatComposerStatus.s1")}
+            {tHC("s1")}
           </Button>
           <Button type="button" variant="ghost" size="sm" onClick={() => answerFallbackAsk(false)}>
             Cancel

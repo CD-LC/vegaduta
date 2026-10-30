@@ -135,7 +135,7 @@ export default function Sparkline({ rows, typical, selectedRunId, compareRunId, 
         {cmp && (
           <span>
             <i className="rh-lg-cmp" aria-hidden="true" />
-            {tHC("hcComponentsWorkflowRunHistorySparkline.s1")}{cmp.row.flight}
+            {tHC("s1")}{cmp.row.flight}
           </span>
         )}
       </figcaption>

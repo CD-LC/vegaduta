@@ -52,7 +52,7 @@ export function TurnMetricsRow({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s5")}
+                            {tHC("s5")}
                           </TooltipContent>
                         </Tooltip>
                         <Separator orientation="vertical" className="data-[orientation=vertical]:h-3" />
@@ -65,7 +65,7 @@ export function TurnMetricsRow({
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s4")}
+                            {tHC("s4")}
                           </TooltipContent>
                         </Tooltip>
                         {/* Per-turn LLM usage (real rows off the session's
@@ -135,11 +135,11 @@ export function TurnMetricsRow({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-                                {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s3")}
+                                {tHC("s3")}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
-                              {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s2")} {turn.metrics.edgeDowngradeDetail}
+                              {tHC("s2")} {turn.metrics.edgeDowngradeDetail}
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -179,7 +179,7 @@ export function TurnMetricsRow({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Badge variant="state" state="var(--state-warning)" className="cursor-default">
-                                {tHC("hcComponentsAgentsPlaygroundTurnMetricsRow.s1")} {edgeFallbackShortLabel(turn.metrics.edgeFallbackReason)}
+                                {tHC("s1")} {edgeFallbackShortLabel(turn.metrics.edgeFallbackReason)}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>{edgeFallbackLabel(turn.metrics.edgeFallbackReason)}</TooltipContent>

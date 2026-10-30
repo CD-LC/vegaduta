@@ -42,14 +42,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
       <div className="mb-3 text-sm font-semibold text-foreground">
         {editingHostedProviderId === null ? (
           <span className="inline-flex items-center gap-1.5">
-            <Plus size={13} /> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s36")}
+            <Plus size={13} /> {tHC("s36")}
           </span>
         ) : (
           `Editing "${hostedProviderDraft.label}"`
         )}
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s35")}</span>
+        <span className="text-xs text-muted-foreground">{tHC("s35")}</span>
         {CREDENTIAL_TYPE_OPTIONS.map((opt) => (
           <Button
             key={opt.value}
@@ -82,7 +82,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             aria-pressed={hostedProviderDraft.mode === "custom"}
             onClick={() => setHostedProviderDraft((d) => ({ ...d, mode: "custom" }))}
           >
-            {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s17")}
+            {tHC("s17")}
           </Button>
           <Button
             type="button"
@@ -99,7 +99,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
               }))
             }
           >
-            {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s19")}
+            {tHC("s19")}
           </Button>
           <span className="text-xs text-muted-foreground">
             {hostedProviderDraft.mode === "provider"
@@ -117,25 +117,25 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             id="hosted-label"
             value={hostedProviderDraft.label}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, label: e.target.value }))}
-            placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s34")}
+            placeholder={tHC("s34")}
           />
         </div>
         {hostedProviderDraft.authType !== "API_KEY" ? (
           <>
             <div className="w-56 space-y-1.5">
               <Label htmlFor="hosted-vertex-project" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s33")}
+                {tHC("s33")}
               </Label>
               <Input
                 id="hosted-vertex-project"
                 value={hostedProviderDraft.vertexProjectId}
                 onChange={(e) => setHostedProviderDraft((d) => ({ ...d, vertexProjectId: e.target.value }))}
-                placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s32")}
+                placeholder={tHC("s32")}
               />
             </div>
             <div className="w-48 space-y-1.5">
               <Label htmlFor="hosted-vertex-location" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s31")}
+                {tHC("s31")}
               </Label>
               <Input
                 id="hosted-vertex-location"
@@ -157,14 +157,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                 setHostedProviderDraft((d) => ({ ...d, providerName: e.target.value, model: "" }))
               }
               options={HOSTED_POOL_GENERIC_PROVIDERS}
-              placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s30")}
+              placeholder={tHC("s30")}
             />
           </div>
         ) : (
           <>
             <div className="w-64 max-w-full space-y-1.5">
               <Label htmlFor="hosted-base-url" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s29")}
+                {tHC("s29")}
               </Label>
               <Select
                 id="hosted-base-url"
@@ -185,14 +185,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                   HOSTED_PROVIDER_PRESETS.map((p) => ({ value: p.value, label: `${p.label} — ${p.value}` })),
                   hostedProviderDraft.baseUrl
                 )}
-                placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s28")}
+                placeholder={tHC("s28")}
                 allowCustom
                 searchable
               />
             </div>
             <div className="w-64 max-w-full space-y-1.5">
               <Label htmlFor="hosted-completions-path" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s27")}
+                {tHC("s27")}
               </Label>
               <Input
                 id="hosted-completions-path"
@@ -214,7 +214,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             <Input
               value={hostedProviderDraft.model}
               onChange={(e) => setHostedProviderDraft((d) => ({ ...d, model: e.target.value }))}
-              placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s26")}
+              placeholder={tHC("s26")}
             />
           ) : hostedProviderDraft.mode === "provider" ? (
             <Select
@@ -242,7 +242,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                   ],
                   hostedProviderDraft.model
                 )}
-                placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s25")}
+                placeholder={tHC("s25")}
                 allowCustom
                 searchable
               />
@@ -252,7 +252,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
                 size="sm"
                 onClick={handleDiscoverHostedModels}
                 disabled={discoveringHostedModels}
-                title={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s24")}
+                title={tHC("s24")}
               >
                 {discoveringHostedModels ? "…" : "Discover"}
               </Button>
@@ -262,7 +262,7 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
         {hostedProviderDraft.authType === "VERTEX_SERVICE_ACCOUNT" && (
           <div className="w-full space-y-1.5 sm:w-80">
             <Label htmlFor="hosted-sa-json" className="text-xs text-muted-foreground">
-              {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s23")}
+              {tHC("s23")}
             </Label>
             <Textarea
               id="hosted-sa-json"
@@ -304,20 +304,20 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
             value={String(hostedProviderDraft.priority)}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, priority: e.target.value }))}
             options={withCurrentValue(HOSTED_PROVIDER_PRIORITY_OPTIONS, hostedProviderDraft.priority)}
-            placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s22")}
+            placeholder={tHC("s22")}
             allowCustom
           />
         </div>
         <div className="w-40 space-y-1.5">
           <Label htmlFor="hosted-region" className="text-xs text-muted-foreground">
-            {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s21")}
+            {tHC("s21")}
           </Label>
           <Select
             id="hosted-region"
             value={hostedProviderDraft.region}
             onChange={(e) => setHostedProviderDraft((d) => ({ ...d, region: e.target.value }))}
             options={withCurrentValue(HOSTED_PROVIDER_REGION_OPTIONS, hostedProviderDraft.region)}
-            placeholder={tHC("hcPlatformadminLlmprovidersHostedProviderForm.s20")}
+            placeholder={tHC("s20")}
             allowCustom
           />
         </div>
@@ -346,14 +346,14 @@ export function HostedProviderForm({ pool }: { pool: HostedPool }) {
         )}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s19")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s18")}{" "}
-        <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s17")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s16")}{" "}
-        <strong>Discover</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s15")} <code>/v1</code> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s14")}{" "}
-        <code>/v1/chat/completions</code> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s13")} <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s12")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s11")} <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s10")}</strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s9")}{" "}
-        <code>https://generativelanguage.googleapis.com</code> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s8")}{" "}
-        <code>/v1beta/openai/chat/completions</code> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s7")}{" "}
-        <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s6")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s5")} <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s4")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s3")}{" "}
-        <strong>{tHC("hcPlatformadminLlmprovidersHostedProviderForm.s2")}</strong> {tHC("hcPlatformadminLlmprovidersHostedProviderForm.s1")}
+        <strong>{tHC("s19")}</strong> {tHC("s18")}{" "}
+        <strong>{tHC("s17")}</strong> {tHC("s16")}{" "}
+        <strong>Discover</strong> {tHC("s15")} <code>/v1</code> {tHC("s14")}{" "}
+        <code>/v1/chat/completions</code> {tHC("s13")} <strong>{tHC("s12")}</strong> {tHC("s11")} <strong>{tHC("s10")}</strong>{tHC("s9")}{" "}
+        <code>https://generativelanguage.googleapis.com</code> {tHC("s8")}{" "}
+        <code>/v1beta/openai/chat/completions</code> {tHC("s7")}{" "}
+        <strong>{tHC("s6")}</strong> {tHC("s5")} <strong>{tHC("s4")}</strong> {tHC("s3")}{" "}
+        <strong>{tHC("s2")}</strong> {tHC("s1")}
       </p>
     </form>
   );

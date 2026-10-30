@@ -157,7 +157,7 @@ export default function McpReviewQueuePage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminMcpreviewPage.s9")}
+      title={tHC("s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
           <RefreshCw size={14} className={refreshing ? "animate-spin" : undefined} /> Refresh
@@ -165,19 +165,19 @@ export default function McpReviewQueuePage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminMcpreviewPage.s8")}
+        {tHC("s8")}
       </PageHint>
       <InfoNote>
-        {tHC("hcPlatformadminMcpreviewPage.s7")}
+        {tHC("s7")}
       </InfoNote>
 
       {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
 
       {rows.length > 0 && (
         <Input
-          aria-label={tHC("hcPlatformadminMcpreviewPage.s6")}
+          aria-label={tHC("s6")}
           className="mb-4 h-9 max-w-sm"
-          placeholder={tHC("hcPlatformadminMcpreviewPage.s5")}
+          placeholder={tHC("s5")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -193,10 +193,10 @@ export default function McpReviewQueuePage() {
           ) : rows.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-8 text-center">
               <CheckCircle2 size={20} className="text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminMcpreviewPage.s4")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             </div>
           ) : filtered.length === 0 ? (
-            <AdminEmptyState title={tHC("hcPlatformadminMcpreviewPage.s3")} description="Try a different search or status." />
+            <AdminEmptyState title={tHC("s3")} description="Try a different search or status." />
           ) : (
             <>
               {/* Stacked cards below md - the wide table's min-width put the
@@ -224,7 +224,7 @@ export default function McpReviewQueuePage() {
                         {row.command}
                         {row.args ? ` ${formatArgs(row.args)}` : ""}
                       </code>
-                      <div className="text-xs text-muted-foreground">{tHC("hcPlatformadminMcpreviewPage.s2")} {row.requestedBy || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{tHC("s2")} {row.requestedBy || "—"}</div>
                       <div className="flex gap-2">
                         <Button
                           variant="default"
@@ -254,7 +254,7 @@ export default function McpReviewQueuePage() {
                           <Textarea
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
-                            placeholder={tHC("hcPlatformadminMcpreviewPage.s1")}
+                            placeholder={tHC("s1")}
                             className="min-h-16 resize-y text-sm"
                             disabled={busy}
                           />
@@ -275,7 +275,7 @@ export default function McpReviewQueuePage() {
                       <th className="px-3 py-2 font-medium">Tenant</th>
                       <th className="px-3 py-2 font-medium">Server</th>
                       <th className="px-3 py-2 font-medium">Command</th>
-                      <th className="px-3 py-2 font-medium">{tHC("hcPlatformadminMcpreviewPage.s2")}</th>
+                      <th className="px-3 py-2 font-medium">{tHC("s2")}</th>
                       <th className="px-3 py-2 font-medium">Created</th>
                       <th className="px-3 py-2 text-end font-medium">Actions</th>
                     </tr>
@@ -343,7 +343,7 @@ export default function McpReviewQueuePage() {
                                   <Textarea
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
-                                    placeholder={tHC("hcPlatformadminMcpreviewPage.s1")}
+                                    placeholder={tHC("s1")}
                                     className="min-h-16 flex-1 resize-y text-sm"
                                     disabled={busy}
                                   />

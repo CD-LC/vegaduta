@@ -181,9 +181,9 @@ function UnconfiguredTool({ tool }: { tool: ExternalToolDef }) {
         <Icon size={16} className="text-muted-foreground" />
         <span className="text-sm font-semibold text-muted-foreground">{tool.label}</span>
       </div>
-      <span className="text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsExternaltools.s3")}</span>
+      <span className="text-xs text-muted-foreground">{tHC("s3")}</span>
       <span className="font-mono text-[10.5px] text-muted-foreground">
-        Set {tool.envName} {tHC("hcPlatformadminComponentsSectionsExternaltools.s2")}
+        Set {tool.envName} {tHC("s2")}
       </span>
     </div>
   );
@@ -194,7 +194,7 @@ export function ExternalToolsSection({ delay }: { delay?: number }) {
   const { links, error } = useObservabilityLinks();
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsExternaltools.s1")}
+      title={tHC("s1")}
       subtitle="Deep-link out to the full observability stack. Live reachability dot per tool; URLs come from the server environment (GRAFANA_URL / PROMETHEUS_URL / LANGFUSE_URL / TEMPORAL_UI_URL)."
       icon={ExternalLink}
       delay={delay}

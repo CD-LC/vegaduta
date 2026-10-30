@@ -63,7 +63,7 @@ export function DatasetCardHeader({
         {t(mode === "FULL" ? "badgeFull" : "badgeQuick")}
       </Badge>
       {mode === "FULL" && dataset.autoApproveTools && (
-        <Badge variant="outline" title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s5")}>
+        <Badge variant="outline" title={tHC("s5")}>
           auto-approve
         </Badge>
       )}
@@ -75,7 +75,7 @@ export function DatasetCardHeader({
           variant="outline"
           size="sm"
           onClick={onToggleRunOptions}
-          title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s4")}
+          title={tHC("s4")}
         >
           <Settings2 size={14} aria-hidden="true" />
         </Button>
@@ -84,7 +84,7 @@ export function DatasetCardHeader({
           size="sm"
           onClick={onExportJsonl}
           disabled={dataset.caseCount === 0}
-          title={tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s3")}
+          title={tHC("s3")}
           aria-label={`Export dataset ${dataset.name} as JSONL`}
         >
           <Braces size={14} aria-hidden="true" />
@@ -97,9 +97,9 @@ export function DatasetCardHeader({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s2")}{dataset.name}&quot;?</AlertDialogTitle>
+              <AlertDialogTitle>{tHC("s2")}{dataset.name}&quot;?</AlertDialogTitle>
               <AlertDialogDescription>
-                {tHC("hcAgentsQualityEvalDatasetsDatasetCardHeader.s1")}
+                {tHC("s1")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

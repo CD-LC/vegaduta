@@ -105,7 +105,7 @@ export default function ScimTokensTable() {
             id="scim-label"
             value={label}
             maxLength={120}
-            placeholder={tHC("hcComponentsSsoScimTokensTable.s1")}
+            placeholder={tHC("s1")}
             onChange={(e) => setLabel(e.target.value)}
           />
         </div>

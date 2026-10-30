@@ -177,9 +177,9 @@ export default function PairedComparisonCard({
           <div className="flex items-start gap-3">
             <ArrowLeftRight size={16} className="mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
             <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">{tHC("hcAgentsQualityPairedComparisonCard.s30")}</p>
+              <p className="text-sm font-medium text-foreground">{tHC("s30")}</p>
               <p className="text-sm text-muted-foreground">
-                {tHC("hcAgentsQualityPairedComparisonCard.s29")} {comparable.length === 0 ? "no" : "one"} {tHC("hcAgentsQualityPairedComparisonCard.s28")}
+                {tHC("s29")} {comparable.length === 0 ? "no" : "one"} {tHC("s28")}
               </p>
             </div>
           </div>
@@ -195,7 +195,7 @@ export default function PairedComparisonCard({
         <div className="grid gap-3 lg:grid-cols-[1fr_auto_1fr_auto] lg:items-end">
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="paired-baseline-run">
-              {tHC("hcAgentsQualityPairedComparisonCard.s27")}
+              {tHC("s27")}
             </label>
             <Select
               id="paired-baseline-run"
@@ -207,21 +207,21 @@ export default function PairedComparisonCard({
               }}
               options={runOptions}
               searchable
-              placeholder={tHC("hcAgentsQualityPairedComparisonCard.s26")}
+              placeholder={tHC("s26")}
             />
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={swap}
-            title={tHC("hcAgentsQualityPairedComparisonCard.s25")}
+            title={tHC("s25")}
             className="lg:mb-0.5"
           >
             <ArrowLeftRight size={14} aria-hidden="true" /> Swap
           </Button>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="paired-candidate-run">
-              {tHC("hcAgentsQualityPairedComparisonCard.s24")}
+              {tHC("s24")}
             </label>
             <Select
               id="paired-candidate-run"
@@ -233,7 +233,7 @@ export default function PairedComparisonCard({
               }}
               options={runOptions}
               searchable
-              placeholder={tHC("hcAgentsQualityPairedComparisonCard.s23")}
+              placeholder={tHC("s23")}
             />
           </div>
           <Button
@@ -248,25 +248,25 @@ export default function PairedComparisonCard({
 
         {effectiveBaseline === effectiveCandidate && (
           <p className="text-xs text-muted-foreground">
-            {tHC("hcAgentsQualityPairedComparisonCard.s22")}
+            {tHC("s22")}
           </p>
         )}
 
         {locked && (
           <Alert>
             <ShieldAlert aria-hidden="true" />
-            <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s21")}</AlertTitle>
+            <AlertTitle>{tHC("s21")}</AlertTitle>
             <AlertDescription>
-              {tHC("hcAgentsQualityPairedComparisonCard.s20")}
+              {tHC("s20")}
             </AlertDescription>
           </Alert>
         )}
 
         {failed && (
           <Alert variant="destructive">
-            <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s19")}</AlertTitle>
+            <AlertTitle>{tHC("s19")}</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
-              {tHC("hcAgentsQualityPairedComparisonCard.s18")}
+              {tHC("s18")}
               <Button variant="outline" size="sm" onClick={compare}>
                 Retry
               </Button>
@@ -276,7 +276,7 @@ export default function PairedComparisonCard({
 
         {!comparison && !loading && !failed && !locked && (
           <p className="text-sm text-muted-foreground">
-            {tHC("hcAgentsQualityPairedComparisonCard.s17")}
+            {tHC("s17")}
           </p>
         )}
 
@@ -300,14 +300,14 @@ function verdictBadge(reading: ComparisonReading, tHC: ReturnType<typeof useTran
   if (reading.state === "CANDIDATE_BETTER") {
     return (
       <Badge variant="state" state="var(--state-success)" className="gap-1.5">
-        <TrendingUp size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s16")}
+        <TrendingUp size={11} aria-hidden="true" /> {tHC("s16")}
       </Badge>
     );
   }
   if (reading.state === "BASELINE_BETTER") {
     return (
       <Badge variant="state" state="var(--state-error)" className="gap-1.5">
-        <TrendingDown size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s15")}
+        <TrendingDown size={11} aria-hidden="true" /> {tHC("s15")}
       </Badge>
     );
   }
@@ -326,7 +326,7 @@ function verdictBadge(reading: ComparisonReading, tHC: ReturnType<typeof useTran
   }
   return (
     <Badge variant="outline" className="gap-1.5">
-      <CircleHelp size={11} aria-hidden="true" /> {tHC("hcAgentsQualityPairedComparisonCard.s14")}
+      <CircleHelp size={11} aria-hidden="true" /> {tHC("s14")}
     </Badge>
   );
 }
@@ -358,7 +358,7 @@ function ComparisonResult({
           )}
         </span>
         <span className="text-xs text-muted-foreground">
-          {comparison.pairedCases} {tHC("hcAgentsQualityPairedComparisonCard.s13")}{comparison.pairedCases === 1 ? "" : "s"}
+          {comparison.pairedCases} {tHC("s13")}{comparison.pairedCases === 1 ? "" : "s"}
         </span>
         {comparison.unreplicated && (
           <Badge variant="state" state="var(--state-warning)" className="gap-1.5">
@@ -374,22 +374,22 @@ function ComparisonResult({
       <GapIntervalBar estimate={gap} noiseFloor={comparison.noiseFloorTested} />
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <PairedCount label={tHC("hcAgentsQualityPairedComparisonCard.s12")} count={comparison.casesVariantBetter} total={comparison.pairedCases} />
+        <PairedCount label={tHC("s12")} count={comparison.casesVariantBetter} total={comparison.pairedCases} />
         <PairedCount label="Tied" count={comparison.casesTied} total={comparison.pairedCases} />
-        <PairedCount label={tHC("hcAgentsQualityPairedComparisonCard.s11")} count={comparison.casesBaselineBetter} total={comparison.pairedCases} />
+        <PairedCount label={tHC("s11")} count={comparison.casesBaselineBetter} total={comparison.pairedCases} />
       </div>
 
       {comparison.noiseFloorTested === null || comparison.noiseFloorTested === undefined ? (
         <Alert variant="warning">
           <Info aria-hidden="true" />
-          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s10")}</AlertTitle>
+          <AlertTitle>{tHC("s10")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcAgentsQualityPairedComparisonCard.s9")}
+            {tHC("s9")}
           </AlertDescription>
         </Alert>
       ) : (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcAgentsQualityPairedComparisonCard.s8")} {formatValue(comparison.noiseFloorTested)}
+          {tHC("s8")} {formatValue(comparison.noiseFloorTested)}
           {floorWasSubstituted
             ? " (taken from this dataset's noise-floor measurement; the comparison response did not carry one)"
             : ""}
@@ -399,8 +399,8 @@ function ComparisonResult({
 
       {comparison.signTestPValue !== null && comparison.signTestPValue !== undefined && (
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
-          {tHC("hcAgentsQualityPairedComparisonCard.s7")}{Number(comparison.signTestPValue).toPrecision(3)} over{" "}
-          {comparison.casesVariantBetter + comparison.casesBaselineBetter} {tHC("hcAgentsQualityPairedComparisonCard.s6")}
+          {tHC("s7")}{Number(comparison.signTestPValue).toPrecision(3)} over{" "}
+          {comparison.casesVariantBetter + comparison.casesBaselineBetter} {tHC("s6")}
           {comparison.casesVariantBetter + comparison.casesBaselineBetter === 1 ? "" : "s"}
         </p>
       )}
@@ -408,9 +408,9 @@ function ComparisonResult({
       {reading.downgradedFromServerVerdict && (
         <Alert variant="warning">
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s5")}</AlertTitle>
+          <AlertTitle>{tHC("s5")}</AlertTitle>
           <AlertDescription>
-            {tHC("hcAgentsQualityPairedComparisonCard.s4")} <span className="font-mono">{comparison.verdict}</span>{tHC("hcAgentsQualityPairedComparisonCard.s3")}
+            {tHC("s4")} <span className="font-mono">{comparison.verdict}</span>{tHC("s3")}
           </AlertDescription>
         </Alert>
       )}
@@ -418,7 +418,7 @@ function ComparisonResult({
       {(comparison.warnings || []).length > 0 && (
         <Alert variant="warning">
           <ShieldAlert aria-hidden="true" />
-          <AlertTitle>{tHC("hcAgentsQualityPairedComparisonCard.s2")}</AlertTitle>
+          <AlertTitle>{tHC("s2")}</AlertTitle>
           <AlertDescription>
             <ul className="list-disc space-y-1 ps-5">
               {comparison.warnings.map((w, i) => (
@@ -430,7 +430,7 @@ function ComparisonResult({
       )}
 
       <div className="border-t border-border pt-3">
-        <ScoreWithInterval estimate={gap} label={tHC("hcAgentsQualityPairedComparisonCard.s1")} size="sm" />
+        <ScoreWithInterval estimate={gap} label={tHC("s1")} size="sm" />
       </div>
     </div>
   );

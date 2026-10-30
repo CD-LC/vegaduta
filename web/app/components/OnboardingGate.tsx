@@ -163,19 +163,19 @@ export default function OnboardingGate({
           </div>
 
           <div className="mb-6 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">{tHC("hcComponentsOnboardingGate.s14")}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{tHC("s14")}</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              {tHC("hcComponentsOnboardingGate.s13")}
+              {tHC("s13")}
             </p>
           </div>
 
           <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">
             <div className="space-y-5 px-6">
               <p className="text-sm text-muted-foreground">
-                {tHC("hcComponentsOnboardingGate.s12")} <strong className="text-foreground">{orgName.trim()}</strong> {tHC("hcComponentsOnboardingGate.s11")}
+                {tHC("s12")} <strong className="text-foreground">{orgName.trim()}</strong> {tHC("s11")}
               </p>
               <Button size="lg" className="w-full" onClick={startInteractiveSignIn}>
-                {tHC("hcComponentsOnboardingGate.s10")} <ArrowRight aria-hidden="true" className="size-4" />
+                {tHC("s10")} <ArrowRight aria-hidden="true" className="size-4" />
               </Button>
             </div>
           </Card>
@@ -185,7 +185,7 @@ export default function OnboardingGate({
             onClick={() => void auth.logout()}
             className="mx-auto mt-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <LogOut aria-hidden="true" className="size-3.5" /> {tHC("hcComponentsOnboardingGate.s1")}
+            <LogOut aria-hidden="true" className="size-3.5" /> {tHC("s1")}
           </button>
         </motion.div>
       </main>
@@ -212,14 +212,14 @@ export default function OnboardingGate({
             {firstName ? `Welcome, ${firstName}!` : "Almost there!"}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            {tHC("hcComponentsOnboardingGate.s9")}
+            {tHC("s9")}
           </p>
         </div>
 
         <Card className="gap-0 border-border/80 bg-card/80 py-6 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-5 px-6">
             <div className="space-y-2">
-              <Label htmlFor="org-name">{tHC("hcComponentsOnboardingGate.s8")}</Label>
+              <Label htmlFor="org-name">{tHC("s8")}</Label>
               <div className="relative">
                 <Building2
                   aria-hidden="true"
@@ -227,7 +227,7 @@ export default function OnboardingGate({
                 />
                 <Input
                   id="org-name"
-                  placeholder={tHC("hcComponentsOnboardingGate.s7")}
+                  placeholder={tHC("s7")}
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   className="ps-9"
@@ -245,13 +245,13 @@ export default function OnboardingGate({
                 className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
               />
               <span>
-                {tHC("hcComponentsOnboardingGate.s6")}{" "}
+                {tHC("s6")}{" "}
                 <Link href="/terms" className="text-primary hover:underline">
-                  {tHC("hcComponentsOnboardingGate.s5")}
+                  {tHC("s5")}
                 </Link>{" "}
                 and{" "}
                 <Link href="/privacy" className="text-primary hover:underline">
-                  {tHC("hcComponentsOnboardingGate.s4")}
+                  {tHC("s4")}
                 </Link>
                 .
               </span>
@@ -265,7 +265,7 @@ export default function OnboardingGate({
                 className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]"
               />
               <span>
-                {tHC("hcComponentsOnboardingGate.s3")} <BrandName />.
+                {tHC("s3")} <BrandName />.
               </span>
             </label>
 
@@ -276,7 +276,7 @@ export default function OnboardingGate({
                 "Creating your workspace…"
               ) : (
                 <>
-                  {tHC("hcComponentsOnboardingGate.s2")} <ArrowRight aria-hidden="true" className="size-4" />
+                  {tHC("s2")} <ArrowRight aria-hidden="true" className="size-4" />
                 </>
               )}
             </Button>
@@ -288,7 +288,7 @@ export default function OnboardingGate({
           onClick={() => void auth.logout()}
           className="mx-auto mt-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <LogOut aria-hidden="true" className="size-3.5" /> {tHC("hcComponentsOnboardingGate.s1")}
+          <LogOut aria-hidden="true" className="size-3.5" /> {tHC("s1")}
         </button>
       </motion.div>
     </main>

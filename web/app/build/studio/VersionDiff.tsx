@@ -52,7 +52,7 @@ export function VersionDiff({
       >
         <div className="flex items-center gap-2">
           <p id="vdiff-title" className="text-sm font-semibold text-foreground">
-            {tHC("hcBuildStudioVersionDiff.s5")}
+            {tHC("s5")}
           </p>
           <button type="button" onClick={onClose} aria-label="Close" className="ms-auto rounded p-1 hover:bg-secondary">
             <X aria-hidden="true" size={16} />
@@ -94,13 +94,13 @@ export function VersionDiff({
         </div>
         <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-border bg-neutral-950 font-mono text-[11px] leading-snug">
           {stats.added + stats.removed === 0 ? (
-            <p className="p-3 text-neutral-400">{tHC("hcBuildStudioVersionDiff.s4")}</p>
+            <p className="p-3 text-neutral-400">{tHC("s4")}</p>
           ) : (
             <pre className="m-0 min-w-max p-0">
               {rows.map((r, i) =>
                 r.kind === "gap" ? (
                   <div key={i} className="bg-neutral-900 px-3 py-0.5 text-neutral-400">
-                    ⋯ {r.hidden} {tHC("hcBuildStudioVersionDiff.s3")}{r.hidden === 1 ? "" : "s"}
+                    ⋯ {r.hidden} {tHC("s3")}{r.hidden === 1 ? "" : "s"}
                   </div>
                 ) : (
                   <div
@@ -122,7 +122,7 @@ export function VersionDiff({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <input type="checkbox" checked={full} onChange={(e) => setFull(e.target.checked)} /> {tHC("hcBuildStudioVersionDiff.s2")}
+            <input type="checkbox" checked={full} onChange={(e) => setFull(e.target.checked)} /> {tHC("s2")}
           </label>
           {showRestore && (
             <Button
@@ -134,7 +134,7 @@ export function VersionDiff({
                 onClose();
               }}
             >
-              {tHC("hcBuildStudioVersionDiff.s1")}{from + 1}
+              {tHC("s1")}{from + 1}
             </Button>
           )}
           <Button

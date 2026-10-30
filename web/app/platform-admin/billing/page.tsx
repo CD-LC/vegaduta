@@ -102,7 +102,7 @@ function SummaryPanel() {
       subtitle="Live tenants only (demo sandboxes excluded)"
       icon={CreditCard}
       actions={
-        <Button type="button" size="icon" variant="outline" aria-label={tHC("hcPlatformadminBillingPage.s34")} onClick={() => void load()}>
+        <Button type="button" size="icon" variant="outline" aria-label={tHC("s34")} onClick={() => void load()}>
           <RefreshCw />
         </Button>
       }
@@ -112,45 +112,45 @@ function SummaryPanel() {
       {data && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Stat label={tHC("hcPlatformadminBillingPage.s33")} value={data.liveTenants} />
+            <Stat label={tHC("s33")} value={data.liveTenants} />
             {Object.entries(data.tenantsByPlan).map(([plan, n]) => (
               <Stat key={plan} label={`${plan} plan`} value={n} />
             ))}
-            <Stat label={tHC("hcPlatformadminBillingPage.s32")} value={data.activeCompGrants} />
+            <Stat label={tHC("s32")} value={data.activeCompGrants} />
             <Stat
-              label={tHC("hcPlatformadminBillingPage.s31")}
+              label={tHC("s31")}
               value={data.compGrantsExpiringWithin7d}
               tone={data.compGrantsExpiringWithin7d > 0 ? "warn" : undefined}
             />
-            <Stat label={tHC("hcPlatformadminBillingPage.s30")} value={data.pastDue} tone={data.pastDue > 0 ? "warn" : undefined} />
-            <Stat label={tHC("hcPlatformadminBillingPage.s29")} value={data.cancelScheduled} />
-            <Stat label={tHC("hcPlatformadminBillingPage.s28")} value={data.pendingUpgrade} />
+            <Stat label={tHC("s30")} value={data.pastDue} tone={data.pastDue > 0 ? "warn" : undefined} />
+            <Stat label={tHC("s29")} value={data.cancelScheduled} />
+            <Stat label={tHC("s28")} value={data.pendingUpgrade} />
           </div>
           {data.compGrantsOverdueForRevert > 0 && (
             <p className={`text-xs ${TONE_TEXT.warn}`}>
-              {data.compGrantsOverdueForRevert} {tHC("hcPlatformadminBillingPage.s27")}
+              {data.compGrantsOverdueForRevert} {tHC("s27")}
             </p>
           )}
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {tHC("hcPlatformadminBillingPage.s26")}
+              {tHC("s26")}
             </p>
             {data.invoiceTotals.length === 0 ? (
-              <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminBillingPage.s25")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s25")}</p>
             ) : (
               data.invoiceTotals.map((c) => (
                 <p key={c.currency} className="text-sm">
                   <span className="font-medium">{c.currency}</span>: {formatMinor(c.amountMinor, c.currency)} across{" "}
                   {c.invoices} invoice
-                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}{tHC("hcPlatformadminBillingPage.s24")}{" "}
+                  {c.invoices === 1 ? "" : "s"} (GST {formatMinor(c.gstMinor, c.currency)}{tHC("s24")}{" "}
                   {formatMinor(c.amountMinorLast30d, c.currency)} / {c.invoicesLast30d}
                 </p>
               ))
             )}
-            <p className="text-[11px] text-muted-foreground">{tHC("hcPlatformadminBillingPage.s23")}</p>
+            <p className="text-[11px] text-muted-foreground">{tHC("s23")}</p>
           </div>
           <details className="text-xs text-muted-foreground">
-            <summary className="cursor-pointer">{tHC("hcPlatformadminBillingPage.s22")}</summary>
+            <summary className="cursor-pointer">{tHC("s22")}</summary>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {Object.entries(data.tenantsBySubscriptionStatus).map(([s, n]) => (
                 <Badge key={s} variant="outline">
@@ -213,21 +213,21 @@ function SubscriptionsPanel() {
           className="flex flex-wrap items-center gap-2"
         >
           <Input
-            aria-label={tHC("hcPlatformadminBillingPage.s21")}
+            aria-label={tHC("s21")}
             className="h-9 w-48"
-            placeholder={tHC("hcPlatformadminBillingPage.s20")}
+            placeholder={tHC("s20")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <Select
-            aria-label={tHC("hcPlatformadminBillingPage.s19")}
+            aria-label={tHC("s19")}
             className="w-40"
             value={plan}
             onValueChange={setPlan}
             options={[{ value: "", label: "All plans" }, ...PLANS.map((p) => ({ value: p, label: p }))]}
           />
           <Select
-            aria-label={tHC("hcPlatformadminBillingPage.s18")}
+            aria-label={tHC("s18")}
             className="w-44"
             value={state}
             onValueChange={setState}
@@ -242,10 +242,10 @@ function SubscriptionsPanel() {
       {loading && !data && <Skeleton className="h-24 w-full" />}
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
       {data?.scanTruncated && (
-        <InfoNote>{tHC("hcPlatformadminBillingPage.s17")}</InfoNote>
+        <InfoNote>{tHC("s17")}</InfoNote>
       )}
       {!loading && !error && rows.length === 0 && (
-        <AdminEmptyState title={tHC("hcPlatformadminBillingPage.s16")} description="Adjust the filters to see more tenants." />
+        <AdminEmptyState title={tHC("s16")} description="Adjust the filters to see more tenants." />
       )}
       {pg.pageItems.map((r) => (
         <div
@@ -259,25 +259,25 @@ function SubscriptionsPanel() {
             </span>
             {r.state === "COMP" && (
               <span className="block text-xs text-muted-foreground">
-                {tHC("hcPlatformadminBillingPage.s15")} {date(r.compExpiresAt)} ({timeUntil(r.compExpiresAt)})
+                {tHC("s15")} {date(r.compExpiresAt)} ({timeUntil(r.compExpiresAt)})
                 {r.planBeforeComp ? `, reverts to ${r.planBeforeComp}` : ", reverts to FREE"}
                 {r.compReason ? ` - ${r.compReason}` : ""}
               </span>
             )}
             {r.pastDueSince && (
-              <span className="block text-xs text-destructive">{tHC("hcPlatformadminBillingPage.s14")} {date(r.pastDueSince)}</span>
+              <span className="block text-xs text-destructive">{tHC("s14")} {date(r.pastDueSince)}</span>
             )}
             {r.pendingPlan && (
-              <span className="block text-xs text-muted-foreground">{tHC("hcPlatformadminBillingPage.s13")} {r.pendingPlan} {tHC("hcPlatformadminBillingPage.s12")}</span>
+              <span className="block text-xs text-muted-foreground">{tHC("s13")} {r.pendingPlan} {tHC("s12")}</span>
             )}
           </span>
           <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">{r.plan}</Badge>
             <Badge variant={stateVariant(r.state)}>{STATE_LABEL[r.state]}</Badge>
             {r.subscriptionStatus && <span>gateway: {r.subscriptionStatus}</span>}
-            {r.trialEndsAt && <span>{tHC("hcPlatformadminBillingPage.s11")} {date(r.trialEndsAt)}</span>}
+            {r.trialEndsAt && <span>{tHC("s11")} {date(r.trialEndsAt)}</span>}
             {r.currentPeriodEnd && <span>renews/ends {date(r.currentPeriodEnd)}</span>}
-            {r.cancelScheduled && <span>{tHC("hcPlatformadminBillingPage.s10")}</span>}
+            {r.cancelScheduled && <span>{tHC("s10")}</span>}
           </span>
         </div>
       ))}
@@ -310,10 +310,10 @@ function CompGrantsPanel() {
   const pg = usePagination(grants ?? [], 10);
 
   return (
-    <SectionCard title={tHC("hcPlatformadminBillingPage.s9")} subtitle="Soonest expiry first" icon={Gift} delay={0.06}>
+    <SectionCard title={tHC("s9")} subtitle="Soonest expiry first" icon={Gift} delay={0.06}>
       {error && <ErrorAlert message={error} onRetry={load} />}
       {!grants && !error && <Skeleton className="h-16 w-full" />}
-      {grants && grants.length === 0 && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminBillingPage.s8")}</p>}
+      {grants && grants.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s8")}</p>}
       {pg.pageItems.map((g) => (
         <div
           key={g.tenantId}
@@ -362,7 +362,7 @@ function InvoicesPanel() {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminBillingPage.s7")}
+      title={tHC("s7")}
       subtitle="One per captured payment, newest first (latest 100)"
       icon={Receipt}
       delay={0.09}
@@ -375,9 +375,9 @@ function InvoicesPanel() {
           className="flex items-center gap-2"
         >
           <Input
-            aria-label={tHC("hcPlatformadminBillingPage.s6")}
+            aria-label={tHC("s6")}
             className="h-9 w-72"
-            placeholder={tHC("hcPlatformadminBillingPage.s5")}
+            placeholder={tHC("s5")}
             value={tenantId}
             onChange={(e) => setTenantId(e.target.value)}
           />
@@ -388,11 +388,11 @@ function InvoicesPanel() {
       }
     >
       <InfoNote>
-        {tHC("hcPlatformadminBillingPage.s4")}
+        {tHC("s4")}
       </InfoNote>
       {error && <ErrorAlert message={error} onRetry={() => void load()} />}
       {!rows && !error && <Skeleton className="h-16 w-full" />}
-      {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminBillingPage.s3")}</p>}
+      {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">{tHC("s3")}</p>}
       {pg.pageItems.map((i) => (
         <div
           key={i.id}
@@ -422,9 +422,9 @@ function InvoicesPanel() {
 export default function PlatformBillingPage() {
     const tHC = useTranslations("hcPlatformadminBillingPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminBillingPage.s2")}>
+    <AdminShell title={tHC("s2")}>
       <PageHint>
-        {tHC("hcPlatformadminBillingPage.s1")}
+        {tHC("s1")}
       </PageHint>
       <SummaryPanel />
       <SubscriptionsPanel />

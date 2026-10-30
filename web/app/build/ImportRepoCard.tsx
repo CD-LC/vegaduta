@@ -61,7 +61,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
           }}
         >
           <p className="text-xs leading-relaxed text-muted-foreground">
-            {tHC("hcBuildImportRepoCard.s9")} <span className="font-mono">app-builder/</span> {tHC("hcBuildImportRepoCard.s8")}
+            {tHC("s9")} <span className="font-mono">app-builder/</span> {tHC("s8")}
           </p>
           <div className="space-y-1">
             <label htmlFor={`${uid}-repo`} className="text-xs font-medium text-foreground">
@@ -71,7 +71,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
               id={`${uid}-repo`}
               value={repo}
               onChange={(e) => setRepo(e.target.value)}
-              placeholder={tHC("hcBuildImportRepoCard.s7")}
+              placeholder={tHC("s7")}
               disabled={busy}
               autoComplete="off"
               aria-invalid={repoBad}
@@ -79,20 +79,20 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
             />
             {repoBad && (
               <p id={`${uid}-repo-err`} className="text-xs text-destructive">
-                {tHC("hcBuildImportRepoCard.s6")}
+                {tHC("s6")}
               </p>
             )}
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="space-y-1">
               <label htmlFor={`${uid}-branch`} className="text-xs font-medium text-foreground">
-                {tHC("hcBuildImportRepoCard.s5")}
+                {tHC("s5")}
               </label>
               <Input
                 id={`${uid}-branch`}
                 value={branch}
                 onChange={(e) => setBranch(e.target.value)}
-                placeholder={tHC("hcBuildImportRepoCard.s4")}
+                placeholder={tHC("s4")}
                 disabled={busy}
                 autoComplete="off"
               />
@@ -105,7 +105,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
                 id={`${uid}-sub`}
                 value={subdir}
                 onChange={(e) => setSubdir(e.target.value)}
-                placeholder={tHC("hcBuildImportRepoCard.s3")}
+                placeholder={tHC("s3")}
                 disabled={busy}
                 autoComplete="off"
                 aria-invalid={subBad}
@@ -115,7 +115,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
           </div>
           {subBad && (
             <p id={`${uid}-sub-err`} className="text-xs text-destructive">
-              {tHC("hcBuildImportRepoCard.s2")}
+              {tHC("s2")}
             </p>
           )}
           {error && (
@@ -124,7 +124,7 @@ export default function ImportRepoCard({ onImported }: { onImported: (projectId:
             </p>
           )}
           <Button type="submit" size="sm" disabled={busy || !parsed || subBad}>
-            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <FolderGit2 aria-hidden="true" size={14} />} {tHC("hcBuildImportRepoCard.s1")}
+            {busy ? <Loader2 aria-hidden="true" size={14} className="animate-spin" /> : <FolderGit2 aria-hidden="true" size={14} />} {tHC("s1")}
           </Button>
         </form>
       </CardContent>

@@ -136,7 +136,7 @@ export default function VersionDiffNodeList({ uid, rows, activeIdx, setActive, e
                   type="button"
                   className="wf-vdiff-icon"
                   aria-label={`Show ${label} on canvas`}
-                  title={tHC("hcComponentsWorkflowVersionDiffNodeList.s1")}
+                  title={tHC("s1")}
                   onClick={() => onFocusNode(row.node.id)}
                 >
                   <Crosshair size={12} aria-hidden="true" />

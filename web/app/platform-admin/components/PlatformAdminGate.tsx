@@ -75,7 +75,7 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
         <div className="auth-card" style={{ textAlign: "center" }}>
           <Logo size={48} />
           <p className="muted" style={{ marginTop: "1rem" }}>
-            {tHC("hcPlatformadminComponentsPlatformAdminGate.s5")}
+            {tHC("s5")}
           </p>
         </div>
       </main>
@@ -94,12 +94,12 @@ export default function PlatformAdminGate({ children }: { children: ReactNode })
       <main className="auth-shell">
         <div className="auth-card" style={{ textAlign: "center", maxWidth: "440px" }}>
           <Logo size={48} />
-          <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>{tHC("hcPlatformadminComponentsPlatformAdminGate.s4")}</h1>
+          <h1 style={{ fontSize: "1.1rem", marginTop: "1.25rem" }}>{tHC("s4")}</h1>
           <p className="muted" style={{ marginTop: "0.5rem" }}>
-            {tHC("hcPlatformadminComponentsPlatformAdminGate.s3")} <strong>{ctx.username}</strong>{tHC("hcPlatformadminComponentsPlatformAdminGate.s2")}
+            {tHC("s3")} <strong>{ctx.username}</strong>{tHC("s2")}
           </p>
           <button type="button" className="cross-link" style={{ marginTop: "1rem" }} onClick={() => auth.logout()}>
-            {tHC("hcPlatformadminComponentsPlatformAdminGate.s1")}
+            {tHC("s1")}
           </button>
         </div>
       </main>

@@ -67,7 +67,7 @@ export default function TemplatesPublicChrome({
         <Link
           href="/"
           className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
-          aria-label={tHC("hcComponentsTemplatesTemplatesPublicChrome.s5")}
+          aria-label={tHC("s5")}
         >
           <img src="/logo-mark.png" alt="" className="h-8 w-auto object-contain" draggable={false} />
           <span>
@@ -101,13 +101,13 @@ export default function TemplatesPublicChrome({
               {!notServed("/templates/mine") && (
                 <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                   <Link href="/templates/mine">
-                    <LayoutTemplate className="size-4" aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplatesPublicChrome.s4")}
+                    <LayoutTemplate className="size-4" aria-hidden="true" /> {tHC("s4")}
                   </Link>
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
                 <Link href="/">
-                  <ArrowLeft className="size-4" aria-hidden="true" /> {tHC("hcComponentsTemplatesTemplatesPublicChrome.s3")}
+                  <ArrowLeft className="size-4" aria-hidden="true" /> {tHC("s3")}
                 </Link>
               </Button>
             </>
@@ -136,7 +136,7 @@ export default function TemplatesPublicChrome({
               {!notServed("/signup") && (
                 <Button asChild variant="outline" size="sm">
                   <Link href="/signup">
-                    {tHC("hcComponentsTemplatesTemplatesPublicChrome.s2")} <ArrowRight className="size-4" aria-hidden="true" />
+                    {tHC("s2")} <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
                 </Button>
               )}
@@ -150,7 +150,7 @@ export default function TemplatesPublicChrome({
       <footer className="mx-auto w-full max-w-6xl px-5 py-10 text-xs text-muted-foreground sm:px-8">
         {footer ?? (
           <p>
-            {tHC("hcComponentsTemplatesTemplatesPublicChrome.s1")}
+            {tHC("s1")}
           </p>
         )}
       </footer>

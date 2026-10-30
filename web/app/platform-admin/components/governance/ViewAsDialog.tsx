@@ -127,7 +127,7 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
               <div className="flex items-center gap-2">
                 <Eye size={16} className="text-primary" />
                 <h2 id="view-as-title" className="text-sm font-semibold text-foreground">
-                  {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s10")}
+                  {tHC("s10")}
                 </h2>
               </div>
               <button
@@ -152,20 +152,20 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
             >
               <ShieldAlert size={14} className="mt-0.5 shrink-0 text-[var(--warning-text)]" />
               <span>
-                {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s9")}
+                {tHC("s9")}
               </span>
             </div>
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="view-as-reason" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s8")} {IMPERSONATION_REASON_MIN} characters)
+                {tHC("s8")} {IMPERSONATION_REASON_MIN} characters)
               </Label>
               <Textarea
                 id="view-as-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 onBlur={() => setTouched(true)}
-                placeholder={tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s7")}
+                placeholder={tHC("s7")}
                 disabled={submitting}
                 maxLength={500}
                 aria-invalid={touched && !!problem}
@@ -181,7 +181,7 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="view-as-master-key" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s6")}
+                {tHC("s6")}
               </Label>
               <Input
                 id="view-as-master-key"
@@ -192,13 +192,13 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
                 autoComplete="off"
                 disabled={submitting}
               />
-              <p className="text-[11px] text-muted-foreground">{tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s5")}</p>
+              <p className="text-[11px] text-muted-foreground">{tHC("s5")}</p>
             </div>
 
             {started && (
               <div className="mt-3 space-y-2 rounded-lg border border-border p-3 text-xs" role="status">
                 <p>
-                  {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s4")} <span className="font-medium">{started.who}</span> {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s3")}
+                  {tHC("s4")} <span className="font-medium">{started.who}</span> {tHC("s3")}
                 </p>
                 <a
                   href={started.viewUrl}
@@ -206,9 +206,9 @@ export default function ViewAsDialog({ target, onClose }: { target: ViewAsTarget
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-medium text-primary underline underline-offset-2"
                 >
-                  <Eye size={12} /> {tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s2")}
+                  <Eye size={12} /> {tHC("s2")}
                 </a>
-                <p className="text-muted-foreground">{tHC("hcPlatformadminComponentsGovernanceViewAsDialog.s1")}</p>
+                <p className="text-muted-foreground">{tHC("s1")}</p>
               </div>
             )}
 

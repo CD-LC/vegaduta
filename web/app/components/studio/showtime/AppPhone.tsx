@@ -85,12 +85,12 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
 
           {/* crop input */}
           <div style={item(0.4, 0.58)} className={`mt-6 rounded-2xl ${outline(0.4, 0.58)}`}>
-            <div className="mb-1 text-[10px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeAppPhone.s6")}</div>
+            <div className="mb-1 text-[10px] uppercase tracking-wider text-zinc-400">{tHC("s6")}</div>
             {onCrop ? (
               <input
                 value={view.crop}
                 onChange={(e) => onCrop(e.target.value)}
-                aria-label={tHC("hcComponentsStudioShowtimeAppPhone.s6")}
+                aria-label={tHC("s6")}
                 className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-[15px] outline-none focus:border-emerald-400"
               />
             ) : (
@@ -118,7 +118,7 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
               {view.bound && (
                 <span
                   className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-violet-600 text-white ring-2 ring-zinc-950"
-                  title={tHC("hcComponentsStudioShowtimeAppPhone.s5")}
+                  title={tHC("s5")}
                 >
                   <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" />
                 </span>
@@ -151,7 +151,7 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
               <div className="rounded-2xl rounded-ss-sm border border-white/10 bg-white/10 p-3 text-[12px] leading-relaxed">
                 {view.answer}
                 {view.sample && (
-                  <div className="mt-1.5 text-[9px] uppercase tracking-wider text-zinc-400">{tHC("hcComponentsStudioShowtimeAppPhone.s4")}</div>
+                  <div className="mt-1.5 text-[9px] uppercase tracking-wider text-zinc-400">{tHC("s4")}</div>
                 )}
               </div>
             ) : null}
@@ -165,9 +165,9 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
             style={{ animation: "showtime-push .45s cubic-bezier(.2,1.2,.4,1)" }}
           >
             <div className="mb-1 flex items-center gap-1.5 text-[9px] uppercase tracking-wider text-amber-300">
-              <Bell aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioShowtimeAppPhone.s3")}
+              <Bell aria-hidden="true" className="h-3 w-3 shrink-0" /> {tHC("s3")}
             </div>
-            <p className="text-[12px] leading-snug">{tHC("hcComponentsStudioShowtimeAppPhone.s2")}</p>
+            <p className="text-[12px] leading-snug">{tHC("s2")}</p>
             <div className="mt-2 flex gap-2">
               {view.push === "ask" ? (
                 <>
@@ -190,7 +190,7 @@ export default function AppPhone({ view, onCrop, onTap, onApprove }: { view: App
                 </>
               ) : (
                 <div className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600/25 py-1.5 text-[12px] text-emerald-200">
-                  <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioShowtimeAppPhone.s1")}
+                  <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s1")}
                 </div>
               )}
             </div>

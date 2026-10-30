@@ -656,7 +656,7 @@ export default function ChatPane({
             {listening
               ? "Listening… speak your request."
               : voiceNote || (
-                  <span className="hidden sm:inline">{tHC("hcBuildChatPane.s1")}</span>
+                  <span className="hidden sm:inline">{tHC("s1")}</span>
                 )}
           </p>
         </div>

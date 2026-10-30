@@ -101,18 +101,18 @@ export default function DeleteTenantDialog({
             </div>
 
             <p className="mt-2 text-xs text-muted-foreground">
-              {tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s6")}
+              {tHC("s6")}
             </p>
             <ul className="mt-1.5 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
-              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s5")}</li>
-              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s4")}</li>
-              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s3")}</li>
-              <li>{tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s2")}</li>
+              <li>{tHC("s5")}</li>
+              <li>{tHC("s4")}</li>
+              <li>{tHC("s3")}</li>
+              <li>{tHC("s2")}</li>
             </ul>
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="delete-tenant-confirm-input" className="text-xs text-muted-foreground">
-                Type <span className="font-mono font-semibold text-foreground">{tenantName}</span> {tHC("hcPlatformadminComponentsTenantsDeleteTenantDialog.s1")}
+                Type <span className="font-mono font-semibold text-foreground">{tenantName}</span> {tHC("s1")}
               </Label>
               <Input
                 id="delete-tenant-confirm-input"

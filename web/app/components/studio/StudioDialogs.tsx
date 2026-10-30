@@ -29,13 +29,13 @@ export function RestartSandboxDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{tHC("hcComponentsStudioStudioDialogs.s5")}</AlertDialogTitle>
+          <AlertDialogTitle>{tHC("s5")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {tHC("hcComponentsStudioStudioDialogs.s4")}
+            {tHC("s4")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{tHC("hcComponentsStudioStudioDialogs.s3")}</AlertDialogCancel>
+          <AlertDialogCancel>{tHC("s3")}</AlertDialogCancel>
           <AlertDialogAction onClick={onRestart}>Restart</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -59,14 +59,14 @@ export function DeleteAgentDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete {agent?.name}?</AlertDialogTitle>
           <AlertDialogDescription>
-            {tHC("hcComponentsStudioStudioDialogs.s2")}
+            {tHC("s2")}
             {agent?.live &&
               " It is your live agent, so its share link and Telegram bridge stop until another agent is made live."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => agent && onDelete(agent)}>{tHC("hcComponentsStudioStudioDialogs.s1")}</AlertDialogAction>
+          <AlertDialogAction onClick={() => agent && onDelete(agent)}>{tHC("s1")}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

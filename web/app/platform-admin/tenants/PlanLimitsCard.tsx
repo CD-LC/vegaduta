@@ -80,10 +80,10 @@ export function PlanLimitsCard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Sliders size={16} className="text-primary" /> {tHC("hcPlatformadminTenantsPlanLimitsCard.s5")}
+            <Sliders size={16} className="text-primary" /> {tHC("s5")}
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            {tHC("hcPlatformadminTenantsPlanLimitsCard.s4")}
+            {tHC("s4")}
           </p>
         </CardHeader>
         <CardContent>
@@ -92,9 +92,9 @@ export function PlanLimitsCard() {
               {limitsError}
             </div>
           )}
-          {limitsLoading && !limitsError && <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s3")}</p>}
+          {limitsLoading && !limitsError && <p className="text-sm text-muted-foreground">{tHC("s3")}</p>}
           {!limitsLoading && !limitsError && Object.keys(draftLimits).length === 0 && (
-            <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s2")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s2")}</p>
           )}
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -120,7 +120,7 @@ export function PlanLimitsCard() {
                           handleLimitFieldChange(plan, f.key, e.target.value === "" ? "" : Number(e.target.value))
                         }
                       />
-                      <span className="text-[11px] text-muted-foreground">{tHC("hcPlatformadminTenantsPlanLimitsCard.s1")}</span>
+                      <span className="text-[11px] text-muted-foreground">{tHC("s1")}</span>
                     </div>
                   ))}
 

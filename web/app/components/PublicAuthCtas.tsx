@@ -37,7 +37,7 @@ export default function PublicAuthCtas({
     return (
       <Button asChild size={size} variant={variant}>
         <Link href="/">
-          {tHC("hcComponentsPublicAuthCtas.s1")} <ArrowRight className="size-4" aria-hidden="true" />
+          {tHC("s1")} <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </Button>
     );

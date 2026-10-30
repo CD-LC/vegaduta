@@ -116,7 +116,7 @@ function PendingQueueTab() {
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <ListChecks size={16} className="text-primary" /> {tHC("hcPlatformadminTemplatesPage.s1")}
+            <ListChecks size={16} className="text-primary" /> {tHC("s1")}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
             {loading ? "Loading…" : `${totalItems} submission${totalItems === 1 ? "" : "s"} awaiting a decision`}
@@ -137,7 +137,7 @@ function PendingQueueTab() {
 
         {!loading && !error && templates.length === 0 && (
           <p className="rounded-lg border border-border bg-secondary/20 px-4 py-6 text-center text-sm text-muted-foreground">
-            {tHC("hcPlatformadminTemplatesPage.s16")}
+            {tHC("s16")}
           </p>
         )}
 
@@ -151,12 +151,12 @@ function PendingQueueTab() {
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={tHC("hcPlatformadminTemplatesPage.s15")}
+                placeholder={tHC("s15")}
                 className="ps-8"
               />
             </div>
             {filtered.length === 0 && (
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminTemplatesPage.s14")}{search}&rdquo;.</p>
+              <p className="text-sm text-muted-foreground">{tHC("s14")}{search}&rdquo;.</p>
             )}
             <AnimatePresence initial={false}>
               {pageItems.map((t) => (
@@ -241,11 +241,11 @@ function PublishedTab() {
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Globe2 size={16} className="text-primary" /> {tHC("hcPlatformadminTemplatesPage.s13")}
+            <Globe2 size={16} className="text-primary" /> {tHC("s13")}
           </CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            {tHC("hcPlatformadminTemplatesPage.s12")}{" "}
-            <code className="font-mono">{tHC("hcPlatformadminTemplatesPage.s11")}{"{id}"}/withdraw</code>.
+            {tHC("s12")}{" "}
+            <code className="font-mono">{tHC("s11")}{"{id}"}/withdraw</code>.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refresh(true)} disabled={refreshing || loading}>
@@ -254,26 +254,26 @@ function PublishedTab() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground">
-          {tHC("hcPlatformadminTemplatesPage.s10")}<code className="font-mono">{tHC("hcPlatformadminTemplatesPage.s9")}</code>{tHC("hcPlatformadminTemplatesPage.s8")}
+          {tHC("s10")}<code className="font-mono">{tHC("s9")}</code>{tHC("s8")}
         </p>
         {error && <AdminErrorState className="mb-4" message={error} onRetry={() => refresh(true)} />}
         {loading && !error && <ListSkeleton />}
         {!loading && !error && templates.length === 0 && (
           <p className="rounded-lg border border-border bg-secondary/20 px-4 py-6 text-center text-sm text-muted-foreground">
-            {tHC("hcPlatformadminTemplatesPage.s7")}
+            {tHC("s7")}
           </p>
         )}
         {!loading && !error && templates.length > 0 && (
           <Input
-            aria-label={tHC("hcPlatformadminTemplatesPage.s6")}
+            aria-label={tHC("s6")}
             className="h-9 max-w-sm"
-            placeholder={tHC("hcPlatformadminTemplatesPage.s5")}
+            placeholder={tHC("s5")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         )}
         {!loading && !error && templates.length > 0 && filtered.length === 0 && (
-          <p className="text-center text-sm text-muted-foreground">{tHC("hcPlatformadminTemplatesPage.s4")}</p>
+          <p className="text-center text-sm text-muted-foreground">{tHC("s4")}</p>
         )}
         {!loading && !error && templates.length > 0 && (
           <AnimatePresence initial={false}>
@@ -308,9 +308,9 @@ export default function CommunityTemplatesPage() {
   const [tab, setTab] = useState("pending");
 
   return (
-    <AdminShell title={tHC("hcPlatformadminTemplatesPage.s3")}>
+    <AdminShell title={tHC("s3")}>
       <PageHint>
-        {tHC("hcPlatformadminTemplatesPage.s2")}
+        {tHC("s2")}
       </PageHint>
 
       <InfoNote>
@@ -326,7 +326,7 @@ export default function CommunityTemplatesPage() {
       >
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="max-w-md">
-            <TabsTrigger value="pending">{tHC("hcPlatformadminTemplatesPage.s1")}</TabsTrigger>
+            <TabsTrigger value="pending">{tHC("s1")}</TabsTrigger>
             <TabsTrigger value="published">Published</TabsTrigger>
           </TabsList>
           <TabsContent value="pending">

@@ -17,7 +17,7 @@ export default function ClipsPage() {
   return (
     <AppShell eyebrow="Create">
       <PageHeader
-        title={tHC("hcClipsPage.s1")}
+        title={tHC("s1")}
         subtitle="Turn a still image into a short pan-and-zoom video clip, rendered entirely in your browser."
       />
       <Suspense fallback={null}>

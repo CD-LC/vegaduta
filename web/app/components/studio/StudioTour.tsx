@@ -209,7 +209,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent className="max-w-3xl gap-0 p-0">
         <div className="grid min-h-[420px] md:grid-cols-[210px_minmax(0,1fr)]">
-          <nav aria-label={tHC("hcComponentsStudioStudioTour.s7")} className="hidden border-e border-border/60 bg-muted/30 p-3 md:block">
+          <nav aria-label={tHC("s7")} className="hidden border-e border-border/60 bg-muted/30 p-3 md:block">
             <ol className="space-y-0.5">
               {[
                 ...STEPS.map((s) => ({ id: s.id, icon: s.icon, title: s.title.replace(/^\d+ - /, "") })),
@@ -236,12 +236,12 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
             <AlertDialogHeader className="text-start">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-primary">
-                  <Icon className="h-4 w-4" /> {tHC("hcComponentsStudioStudioTour.s6")} {i + 1} of {total}
+                  <Icon className="h-4 w-4" /> {tHC("s6")} {i + 1} of {total}
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  aria-label={tHC("hcComponentsStudioStudioTour.s5")}
+                  aria-label={tHC("s5")}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <X aria-hidden="true" className="h-4 w-4 shrink-0" />
@@ -255,7 +255,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                   {onWorkspace ? (
                     <>
                       <p>
-                        {tHC("hcComponentsStudioStudioTour.s4")}
+                        {tHC("s4")}
                       </p>
                       <ul className="grid gap-1.5 sm:grid-cols-2">
                         {WORKSPACE.map((w) => {
@@ -277,7 +277,7 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                       <p className="text-foreground">{step.lead}</p>
                       <div>
                         <div className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          {tHC("hcComponentsStudioStudioTour.s3")}
+                          {tHC("s3")}
                         </div>
                         <ul className="space-y-1.5">
                           {step.controls.map((c) => (
@@ -317,11 +317,11 @@ export default function StudioTour({ open, onClose, onGo, signupHref }: Props) {
                 {onWorkspace && (
                   <>
                     <Button variant="outline" size="sm" onClick={onClose}>
-                      {tHC("hcComponentsStudioStudioTour.s2")}
+                      {tHC("s2")}
                     </Button>
                     <Button size="sm" asChild>
                       <Link href={signupHref}>
-                        {tHC("hcComponentsStudioStudioTour.s1")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
+                        {tHC("s1")} <ArrowRight aria-hidden="true" className="ms-1 h-3.5 w-3.5 shrink-0" />
                       </Link>
                     </Button>
                   </>

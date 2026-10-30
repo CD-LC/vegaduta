@@ -39,7 +39,7 @@ function DiffView({ diff }: { diff: string }) {
   return (
     <details className="mt-2 rounded-md border border-border bg-background/60">
       <summary className="cursor-pointer select-none px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-        {tHC("hcBuildChatResultEntry.s9")}{" "}
+        {tHC("s9")}{" "}
         <span className="font-normal">
           (<span className="text-[var(--state-success)]">+{adds}</span>{" "}
           <span className="text-[var(--state-error)]">&minus;{dels}</span>)
@@ -55,7 +55,7 @@ function DiffView({ diff }: { diff: string }) {
             {l.text || " "}
           </div>
         ))}
-        {truncated && <div className="px-2 text-muted-foreground">{tHC("hcBuildChatResultEntry.s8")}</div>}
+        {truncated && <div className="px-2 text-muted-foreground">{tHC("s8")}</div>}
       </pre>
     </details>
   );
@@ -110,7 +110,7 @@ export function ChatResultEntry({
             source="device"
             model={entry.poweredBy?.model}
             prefix="Generated"
-            title={tHC("hcBuildChatResultEntry.s7")}
+            title={tHC("s7")}
             className="ms-1 font-normal"
           />
         )}
@@ -160,7 +160,7 @@ export function ChatResultEntry({
       )}
       {entry.skippedFiles?.length > 0 && (
         <div className="mt-1 text-xs text-[var(--state-warning)]">
-          {tHC("hcBuildChatResultEntry.s6")} {entry.skippedFiles.join(", ")}
+          {tHC("s6")} {entry.skippedFiles.join(", ")}
         </div>
       )}
       {entry.success && entry.diff && <DiffView diff={entry.diff} />}
@@ -182,13 +182,13 @@ export function ChatResultEntry({
               {entry.prNumber ? `PR #${entry.prNumber}` : "View PR"} <ExternalLink aria-hidden="true" size={10} />
             </a>
           ) : entry.branch ? (
-            <span className="text-xs text-muted-foreground">{tHC("hcBuildChatResultEntry.s5")}</span>
+            <span className="text-xs text-muted-foreground">{tHC("s5")}</span>
           ) : null}
         </div>
       )}
       {entry.success && entry.undone && (
         <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Undo2 size={12} aria-hidden="true" /> {tHC("hcBuildChatResultEntry.s4")}
+          <Undo2 size={12} aria-hidden="true" /> {tHC("s4")}
         </p>
       )}
       {entry.success && entry.undo && !entry.undone && (
@@ -210,11 +210,11 @@ export function ChatResultEntry({
             ) : (
               <Undo2 aria-hidden="true" size={12} />
             )}{" "}
-            {tHC("hcBuildChatResultEntry.s3")}
+            {tHC("s3")}
           </Button>
           {entry.undo.created?.length > 0 && (
             <span className="ms-2 text-[11px] text-muted-foreground">
-              {tHC("hcBuildChatResultEntry.s2")}{entry.undo.created.length > 1 ? "s" : ""} ({entry.undo.created.join(", ")}{tHC("hcBuildChatResultEntry.s1")}
+              {tHC("s2")}{entry.undo.created.length > 1 ? "s" : ""} ({entry.undo.created.join(", ")}{tHC("s1")}
             </span>
           )}
         </div>

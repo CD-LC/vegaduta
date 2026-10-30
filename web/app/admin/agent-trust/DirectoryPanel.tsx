@@ -134,7 +134,7 @@ export function DirectoryPanel({ agentId, entry, onChanged }: {
             <Label htmlFor="dir-caps">{t("fieldCapabilities")}</Label>
             <Input
               id="dir-caps"
-              placeholder={tHC("hcAdminAgenttrustDirectoryPanel.s1")}
+              placeholder={tHC("s1")}
               value={form.capabilities}
               onChange={(e) => setForm((f) => ({ ...f, capabilities: e.target.value }))}
             />

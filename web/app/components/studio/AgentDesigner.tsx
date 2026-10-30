@@ -247,19 +247,19 @@ export default function AgentDesigner({
                 value={draft.name}
                 disabled={!!agent || readOnly}
                 maxLength={60}
-                placeholder={tHC("hcComponentsStudioAgentDesigner.s23")}
+                placeholder={tHC("s23")}
                 onChange={(e) => setDraft({ ...draft, name: e.target.value })}
               />
               {agent && (
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {tHC("hcComponentsStudioAgentDesigner.s22")}
+                  {tHC("s22")}
                 </p>
               )}
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium" htmlFor="studio-agent-mission">
                 Mission{" "}
-                <span className="font-normal text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s21")}</span>
+                <span className="font-normal text-muted-foreground">{tHC("s21")}</span>
               </label>
               <Textarea
                 id="studio-agent-mission"
@@ -267,7 +267,7 @@ export default function AgentDesigner({
                 disabled={readOnly}
                 rows={12}
                 maxLength={4000}
-                placeholder={tHC("hcComponentsStudioAgentDesigner.s20")}
+                placeholder={tHC("s20")}
                 onChange={(e) => setDraft({ ...draft, mission: e.target.value })}
                 className="font-mono text-[13px] leading-relaxed"
               />
@@ -279,7 +279,7 @@ export default function AgentDesigner({
         {/* ---------------- Hands ---------------- */}
         <TabsContent value="hands" className="space-y-5">
           <p className="text-xs text-muted-foreground">
-            {tHC("hcComponentsStudioAgentDesigner.s19")}
+            {tHC("s19")}
           </p>
           {TOOL_GROUPS.map((g) => {
             const items = availableTools.filter((t) => t.group === g.id);
@@ -311,12 +311,12 @@ export default function AgentDesigner({
                             {t.label}
                             {!t.available && t.name === "search_knowledge_base" && (
                               <Badge variant="outline" className="text-[10px]">
-                                <FileText aria-hidden="true" /> {tHC("hcComponentsStudioAgentDesigner.s18")}
+                                <FileText aria-hidden="true" /> {tHC("s18")}
                               </Badge>
                             )}
                             {!t.available && t.name !== "search_knowledge_base" && (
                               <Badge variant="outline" className="text-[10px]">
-                                <Lock aria-hidden="true" /> {tHC("hcComponentsStudioAgentDesigner.s17")}
+                                <Lock aria-hidden="true" /> {tHC("s17")}
                               </Badge>
                             )}
                           </div>
@@ -330,17 +330,17 @@ export default function AgentDesigner({
             );
           })}
           {availableTools.length === 0 && (
-            <div className="text-xs text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s16")}</div>
+            <div className="text-xs text-muted-foreground">{tHC("s16")}</div>
           )}
           {connectorTools.length > 0 && (
             <div className="rounded-xl border border-border/60 p-3 text-xs text-muted-foreground">
               Plus {connectorTools.length} tool{connectorTools.length === 1 ? "" : "s"} from {connectorServers.size}{" "}
-              connector{connectorServers.size === 1 ? "" : "s"} {tHC("hcComponentsStudioAgentDesigner.s15")}
+              connector{connectorServers.size === 1 ? "" : "s"} {tHC("s15")}
             </div>
           )}
           {draft.tools.length === 0 && (
             <div className="inline-flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs text-amber-800 dark:text-amber-300">
-              <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentDesigner.s14")}
+              <Sparkles aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /> {tHC("s14")}
             </div>
           )}
         </TabsContent>
@@ -357,7 +357,7 @@ export default function AgentDesigner({
               onChanged={changed}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s13")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s13")}</p>
           )}
         </TabsContent>
 
@@ -373,7 +373,7 @@ export default function AgentDesigner({
               onChanged={changed}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s12")}</p>
+            <p className="text-sm text-muted-foreground">{tHC("s12")}</p>
           )}
         </TabsContent>
 
@@ -437,7 +437,7 @@ export default function AgentDesigner({
                           {a.label}
                           {locked && (
                             <Badge variant="outline" className="text-[10px]">
-                              <Lock aria-hidden="true" /> {tHC("hcComponentsStudioAgentDesigner.s11")}
+                              <Lock aria-hidden="true" /> {tHC("s11")}
                             </Badge>
                           )}
                         </span>
@@ -457,7 +457,7 @@ export default function AgentDesigner({
           <section>
             <div className="mb-1 flex items-center gap-2 text-sm font-medium">
               <ShieldCheck aria-hidden="true" className="h-4 w-4 shrink-0" /> Rules{" "}
-              <span className="font-normal text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s10")}</span>
+              <span className="font-normal text-muted-foreground">{tHC("s10")}</span>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {GUARDRAILS.map((g) => {
@@ -482,12 +482,12 @@ export default function AgentDesigner({
                         <span>{g.label}</span>
                         {enforced && (
                           <Badge variant="outline" className="text-[11px] text-foreground">
-                            <ShieldCheck aria-hidden="true" /> {tHC("hcComponentsStudioAgentDesigner.s9")}
+                            <ShieldCheck aria-hidden="true" /> {tHC("s9")}
                           </Badge>
                         )}
                         {!available && !enforced && (
                           <Badge variant="outline" className="text-[11px] text-foreground">
-                            <Lock aria-hidden="true" /> {tHC("hcComponentsStudioAgentDesigner.s8")}
+                            <Lock aria-hidden="true" /> {tHC("s8")}
                           </Badge>
                         )}
                       </div>
@@ -524,12 +524,12 @@ export default function AgentDesigner({
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioAgentDesigner.s7")}
+                {tHC("s7")}
               </p>
             </div>
             <div>
               <label className="mb-1 flex items-center justify-between text-sm font-medium" htmlFor="studio-tokens">
-                <span>{tHC("hcComponentsStudioAgentDesigner.s6")}</span>
+                <span>{tHC("s6")}</span>
                 <span className="text-xs font-normal text-muted-foreground">up to {draft.maxTokens} tokens</span>
               </label>
               <input
@@ -544,7 +544,7 @@ export default function AgentDesigner({
                 className="w-full"
               />
               <p className="text-xs text-muted-foreground">
-                {tHC("hcComponentsStudioAgentDesigner.s5")}
+                {tHC("s5")}
               </p>
             </div>
           </section>
@@ -572,11 +572,11 @@ export default function AgentDesigner({
               </Button>
             )}
             {savedFlash && (
-              <span className="text-sm text-emerald-600">{tHC("hcComponentsStudioAgentDesigner.s4")}</span>
+              <span className="text-sm text-emerald-600">{tHC("s4")}</span>
             )}
-            {readOnly && <span className="text-sm text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s3")}</span>}
+            {readOnly && <span className="text-sm text-muted-foreground">{tHC("s3")}</span>}
             {!readOnly && agent && !dirty && !savedFlash && (
-              <span className="text-xs text-muted-foreground">{tHC("hcComponentsStudioAgentDesigner.s2")}</span>
+              <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
             )}
           </div>
         )}
@@ -625,7 +625,7 @@ export default function AgentDesigner({
             />
           </div>
           <div className="border-t border-border/60 pt-2 text-[11px] leading-relaxed text-muted-foreground">
-            {tHC("hcComponentsStudioAgentDesigner.s1")}
+            {tHC("s1")}
           </div>
         </div>
       </aside>

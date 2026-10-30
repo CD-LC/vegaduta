@@ -118,7 +118,7 @@ export function MatrixInspector({ ctx }: { ctx: ChannelCtx }) {
         <Textarea
           id="matrix-allowed-senders"
           rows={3}
-          placeholder={tHC("hcComponentsChannelsAdaptersMatrix.s1")}
+          placeholder={tHC("s1")}
           value={allowedSenders}
           onChange={(e) => setAllowedSenders(e.target.value)}
         />

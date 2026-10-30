@@ -63,7 +63,7 @@ export function MiniBars({
         <span className="font-mono text-[11px] text-muted-foreground">peak {values.length ? fmt(geo.max) : "—"}</span>
       </div>
       {values.length === 0 ? (
-        <p className="py-8 text-center text-xs text-muted-foreground">{tHC("hcPlatformadminComponentsOpsOpsWidgets.s1")}</p>
+        <p className="py-8 text-center text-xs text-muted-foreground">{tHC("s1")}</p>
       ) : (
         <svg
           viewBox={`0 0 ${width} ${height}`}

@@ -56,7 +56,7 @@ export default function ShareCallLog({
           )}
         </div>
       ))}
-      {transcript && <p className="text-muted-foreground">{tHC("hcAgentShareIdShareCallLog.s1")}{transcript}&quot;</p>}
+      {transcript && <p className="text-muted-foreground">{tHC("s1")}{transcript}&quot;</p>}
       {reply && <p className="text-foreground">{reply}</p>}
     </div>
   );

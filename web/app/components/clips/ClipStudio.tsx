@@ -281,7 +281,7 @@ export default function ClipStudio() {
         <div
           className="flex w-fit gap-1 rounded-lg border border-border bg-muted/40 p-1"
           role="group"
-          aria-label={tHC("hcComponentsClipsClipStudio.s24")}
+          aria-label={tHC("s24")}
         >
           <Button
             aria-pressed={mode === "still"}
@@ -291,7 +291,7 @@ export default function ClipStudio() {
             disabled={recording}
             onClick={() => setMode("still")}
           >
-            {tHC("hcComponentsClipsClipStudio.s23")}
+            {tHC("s23")}
           </Button>
           <Button
             aria-pressed={mode === "motion"}
@@ -323,10 +323,10 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("hcComponentsClipsClipStudio.s22")}</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s22")}</h2>
                 </CardTitle>
                 <CardDescription>
-                  {tHC("hcComponentsClipsClipStudio.s21")}
+                  {tHC("s21")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -339,19 +339,19 @@ export default function ClipStudio() {
 
                 {!imagesLoaded ? (
                   <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
-                    <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("hcComponentsClipsClipStudio.s20")}
+                    <Loader2 size={14} className="animate-spin" aria-hidden="true" /> {tHC("s20")}
                   </div>
                 ) : imagesFailed ? (
                   <p className="py-2 text-sm text-muted-foreground">
-                    {tHC("hcComponentsClipsClipStudio.s19")}
+                    {tHC("s19")}
                   </p>
                 ) : images.length === 0 ? (
                   <p className="py-2 text-sm text-muted-foreground">
-                    {tHC("hcComponentsClipsClipStudio.s18")}{" "}
+                    {tHC("s18")}{" "}
                     <Link href="/playground" className="font-medium text-primary underline underline-offset-2">
                       Playground
                     </Link>
-                    {tHC("hcComponentsClipsClipStudio.s17")}
+                    {tHC("s17")}
                   </p>
                 ) : (
                   <ul className="max-h-72 space-y-1 overflow-y-auto pe-1">
@@ -389,7 +389,7 @@ export default function ClipStudio() {
                             {loadingImageId === row.id ? (
                               <>
                                 <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-                                <span className="sr-only">{tHC("hcComponentsClipsClipStudio.s16")}</span>
+                                <span className="sr-only">{tHC("s16")}</span>
                               </>
                             ) : selected ? (
                               "Selected"
@@ -418,7 +418,7 @@ export default function ClipStudio() {
                 <div className="mt-4 border-t border-border pt-4">
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-md text-sm font-medium text-primary has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)]">
                     <Upload size={14} aria-hidden="true" />
-                    {tHC("hcComponentsClipsClipStudio.s15")}
+                    {tHC("s15")}
                     <input
                       type="file"
                       accept="image/*"
@@ -430,7 +430,7 @@ export default function ClipStudio() {
                     />
                   </label>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {tHC("hcComponentsClipsClipStudio.s14")}
+                    {tHC("s14")}
                   </p>
                 </div>
               </CardContent>
@@ -439,9 +439,9 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("hcComponentsClipsClipStudio.s13")}</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s13")}</h2>
                 </CardTitle>
-                <CardDescription>{tHC("hcComponentsClipsClipStudio.s12")}</CardDescription>
+                <CardDescription>{tHC("s12")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <MotionPresetPicker value={preset} onChange={setPreset} disabled={!source} />
@@ -460,14 +460,14 @@ export default function ClipStudio() {
                     disabled={!source}
                     onChange={(e) => setDurationSec(Number(e.target.value))}
                     className="w-full accent-[var(--primary,#6366f1)]"
-                    aria-label={tHC("hcComponentsClipsClipStudio.s11")}
+                    aria-label={tHC("s11")}
                   />
                 </div>
 
                 <div className="flex flex-wrap items-end gap-6">
                   <div>
                     <div className="mb-1 text-sm font-medium text-foreground" id="clip-fps-label">
-                      {tHC("hcComponentsClipsClipStudio.s10")}
+                      {tHC("s10")}
                     </div>
                     <div className="flex gap-1" role="group" aria-labelledby="clip-fps-label">
                       {([24, 30] as const).map((value) => (
@@ -487,7 +487,7 @@ export default function ClipStudio() {
                   </div>
                   <div className="min-w-48 flex-1">
                     <label className="mb-1 block text-sm font-medium text-foreground" htmlFor="clip-output-size">
-                      {tHC("hcComponentsClipsClipStudio.s9")}
+                      {tHC("s9")}
                     </label>
                     <select
                       id="clip-output-size"
@@ -513,7 +513,7 @@ export default function ClipStudio() {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("hcComponentsClipsClipStudio.s8")}</h2>
+                  <h2 style={{ font: "inherit", letterSpacing: "inherit", margin: 0 }}>{tHC("s8")}</h2>
                 </CardTitle>
                 <CardDescription>
                   {source ? (
@@ -529,7 +529,7 @@ export default function ClipStudio() {
                 {unsupported && (
                   <Alert variant="destructive">
                     <AlertTriangle aria-hidden="true" />
-                    <AlertTitle>{tHC("hcComponentsClipsClipStudio.s7")}</AlertTitle>
+                    <AlertTitle>{tHC("s7")}</AlertTitle>
                     <AlertDescription>{support?.reason}</AlertDescription>
                   </Alert>
                 )}
@@ -540,7 +540,7 @@ export default function ClipStudio() {
                   </div>
                 ) : (
                   <div className="flex h-48 items-center justify-center rounded-md border border-dashed border-border text-sm text-muted-foreground">
-                    {tHC("hcComponentsClipsClipStudio.s6")}
+                    {tHC("s6")}
                   </div>
                 )}
 
@@ -565,7 +565,7 @@ export default function ClipStudio() {
                     <div
                       className="h-2 w-full overflow-hidden rounded-full bg-muted"
                       role="progressbar"
-                      aria-label={tHC("hcComponentsClipsClipStudio.s5")}
+                      aria-label={tHC("s5")}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={progress}
@@ -576,7 +576,7 @@ export default function ClipStudio() {
                       />
                     </div>
                     <p className="mt-1.5 text-xs text-muted-foreground" role="status">
-                      Recording {progress}{tHC("hcComponentsClipsClipStudio.s4")}{durationSec}{tHC("hcComponentsClipsClipStudio.s3")}
+                      Recording {progress}{tHC("s4")}{durationSec}{tHC("s3")}
                     </p>
                   </div>
                 )}
@@ -596,13 +596,13 @@ export default function ClipStudio() {
                       className="h-auto w-full rounded-md border border-border bg-black"
                     />
                     <Button variant="outline" size="sm" onClick={handleDownload} className="gap-1.5">
-                      <Download size={13} aria-hidden="true" /> {tHC("hcComponentsClipsClipStudio.s2")}{result.extension}
+                      <Download size={13} aria-hidden="true" /> {tHC("s2")}{result.extension}
                     </Button>
                   </div>
                 )}
 
                 <p className="text-xs text-muted-foreground">
-                  {tHC("hcComponentsClipsClipStudio.s1")}
+                  {tHC("s1")}
                 </p>
               </CardContent>
             </Card>

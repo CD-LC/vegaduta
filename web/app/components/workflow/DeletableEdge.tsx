@@ -69,8 +69,8 @@ export default function DeletableEdge({
               e.stopPropagation();
               onDelete(id);
             }}
-            aria-label={tHC("hcComponentsWorkflowDeletableEdge.s1")}
-            title={tHC("hcComponentsWorkflowDeletableEdge.s1")}
+            aria-label={tHC("s1")}
+            title={tHC("s1")}
           >
             <X size={12} strokeWidth={2.5} aria-hidden="true" />
           </button>

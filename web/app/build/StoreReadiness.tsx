@@ -108,10 +108,10 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm">
-          <Smartphone aria-hidden="true" size={16} className="text-primary" /> {tHC("hcBuildStoreReadiness.s8")}
+          <Smartphone aria-hidden="true" size={16} className="text-primary" /> {tHC("s8")}
           {items.length > 0 && (
             <span className="ms-auto text-xs font-normal text-muted-foreground">
-              {progress.done}/{progress.total} {tHC("hcBuildStoreReadiness.s7")}
+              {progress.done}/{progress.total} {tHC("s7")}
             </span>
           )}
         </CardTitle>
@@ -123,13 +123,13 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
           </div>
         )}
 
-        <ul className="mb-6 space-y-2" aria-label={tHC("hcBuildStoreReadiness.s6")}>
+        <ul className="mb-6 space-y-2" aria-label={tHC("s6")}>
           {items.map((it) => (
             <li key={it.id} className="flex items-start gap-2 text-sm">
               {it.state === "done" ? (
                 <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-emerald-500" aria-label="done" />
               ) : it.state === "manual" ? (
-                <Hand size={16} className="mt-0.5 shrink-0 text-amber-500" aria-label={tHC("hcBuildStoreReadiness.s5")} />
+                <Hand size={16} className="mt-0.5 shrink-0 text-amber-500" aria-label={tHC("s5")} />
               ) : (
                 <Circle size={16} className="mt-0.5 shrink-0 text-muted-foreground" aria-label="to do" />
               )}
@@ -152,10 +152,10 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
             <Field label={`App name (max ${STORE_LIMITS.title})`} error={errs.app_name}>
               <Input value={form.app_name} onChange={set("app_name")} maxLength={200} />
             </Field>
-            <Field label={tHC("hcBuildStoreReadiness.s4")} error={errs.package_id}>
+            <Field label={tHC("s4")} error={errs.package_id}>
               <Input value={form.package_id} onChange={set("package_id")} placeholder="com.acme.myapp" />
             </Field>
-            <Field label={tHC("hcBuildStoreReadiness.s3")} error={errs.version_name}>
+            <Field label={tHC("s3")} error={errs.version_name}>
               <Input value={form.version_name} onChange={set("version_name")} placeholder="1.0.0" />
             </Field>
             <Field
@@ -171,11 +171,11 @@ export default function StoreReadiness({ project, assets, onError }: Props) {
               <Textarea rows={6} value={form.full_description} onChange={set("full_description")} />
             </Field>
             <Button type="submit" size="sm" disabled={busy || !valid}>
-              {busy && <Loader2 aria-hidden="true" size={15} className="animate-spin" />} {tHC("hcBuildStoreReadiness.s2")}
+              {busy && <Loader2 aria-hidden="true" size={15} className="animate-spin" />} {tHC("s2")}
             </Button>
             {note && <p className="text-sm text-muted-foreground">{note}</p>}
             <p className="text-xs text-muted-foreground">
-              {tHC("hcBuildStoreReadiness.s1")}
+              {tHC("s1")}
             </p>
           </form>
         )}

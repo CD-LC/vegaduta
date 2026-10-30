@@ -165,7 +165,7 @@ export default function AdminOverviewPage() {
                     href="/help#getting-started"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    {tHC("hcAdminPage.s3")}
+                    {tHC("s3")}
                   </Link>
                 </div>
               </div>
@@ -296,10 +296,10 @@ export default function AdminOverviewPage() {
               <CardHeading>
                 <span className="inline-flex items-center gap-2">
                   <Activity aria-hidden="true" className="size-4 text-muted-foreground" />
-                  {tHC("hcAdminPage.s2")}
+                  {tHC("s2")}
                 </span>
               </CardHeading>
-              <CardLink href="/admin/audit-tail">{tHC("hcAdminPage.s1")}</CardLink>
+              <CardLink href="/admin/audit-tail">{tHC("s1")}</CardLink>
             </div>
             <AdminEventTail />
             <div className="flex items-center gap-3 border-t border-border px-5 py-3">

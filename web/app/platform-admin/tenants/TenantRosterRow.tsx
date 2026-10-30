@@ -76,7 +76,7 @@ export function TenantRosterRow({
           <Link
             href={`/platform-admin/tenant-detail?id=${encodeURIComponent(t.tenantId)}`}
             className="hover:text-primary hover:underline hover:underline-offset-2"
-            title={tHC("hcPlatformadminTenantsTenantRosterRow.s13")}
+            title={tHC("s13")}
           >
             {t.name}
           </Link>
@@ -89,7 +89,7 @@ export function TenantRosterRow({
           </span>
           {t.emergencyStopped && (
             <span className="rounded-full border border-destructive/30 bg-destructive/10 px-1.5 py-0.5 text-xs font-medium uppercase tracking-wide text-destructive">
-              {tHC("hcPlatformadminTenantsTenantRosterRow.s12")}
+              {tHC("s12")}
             </span>
           )}
         </div>
@@ -105,21 +105,21 @@ export function TenantRosterRow({
           <Meta label="Created" title={formatExact(t.createdAt)}>
             {formatDay(t.createdAt)}
           </Meta>
-          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s11")} title={formatExact(t.lastActivityAt)}>
+          <Meta label={tHC("s11")} title={formatExact(t.lastActivityAt)}>
             {formatRelative(t.lastActivityAt)}
           </Meta>
-          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s10")} title={tHC("hcPlatformadminTenantsTenantRosterRow.s9")}>
+          <Meta label={tHC("s10")} title={tHC("s9")}>
             <span className="font-mono">{formatUsdOrUnavailable(t.spend30dUsd)}</span>
             <span className="ms-1 text-[11px] text-muted-foreground">
               hosted {formatUsdOrUnavailable(t.hostedSpend30dUsd)}
             </span>
           </Meta>
-          <Meta label={tHC("hcPlatformadminTenantsTenantRosterRow.s8")}>
+          <Meta label={tHC("s8")}>
             <span className="font-mono">{formatCountOrUnavailable(t.llmCalls30d)}</span>
           </Meta>
           <Meta
-            label={tHC("hcPlatformadminTenantsTenantRosterRow.s7")}
-            title={tHC("hcPlatformadminTenantsTenantRosterRow.s6")}
+            label={tHC("s7")}
+            title={tHC("s6")}
           >
             <span
               className={`font-mono ${
@@ -175,7 +175,7 @@ export function TenantRosterRow({
             size="sm"
             disabled={resuming}
             onClick={onResume}
-            title={tHC("hcPlatformadminTenantsTenantRosterRow.s5")}
+            title={tHC("s5")}
           >
             <ShieldCheck size={13} /> {resuming ? "Enabling…" : "Enable login"}
           </Button>
@@ -184,9 +184,9 @@ export function TenantRosterRow({
             variant="outline"
             size="sm"
             onClick={onStop}
-            title={tHC("hcPlatformadminTenantsTenantRosterRow.s4")}
+            title={tHC("s4")}
           >
-            <ShieldOff size={13} /> {tHC("hcPlatformadminTenantsTenantRosterRow.s3")}
+            <ShieldOff size={13} /> {tHC("s3")}
           </Button>
         )}
         <Button
@@ -194,7 +194,7 @@ export function TenantRosterRow({
           size="sm"
           disabled={resettingUsage}
           onClick={onResetUsage}
-          title={tHC("hcPlatformadminTenantsTenantRosterRow.s2")}
+          title={tHC("s2")}
         >
           <Gauge size={13} /> {resettingUsage ? "Resetting…" : "Reset usage"}
         </Button>
@@ -202,7 +202,7 @@ export function TenantRosterRow({
           variant="destructive"
           size="sm"
           onClick={onDelete}
-          title={tHC("hcPlatformadminTenantsTenantRosterRow.s1")}
+          title={tHC("s1")}
         >
           <Trash2 size={13} /> Delete
         </Button>

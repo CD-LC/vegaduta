@@ -49,10 +49,10 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Server size={16} className="text-primary" /> {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s11")}
+              <Server size={16} className="text-primary" /> {tHC("s11")}
             </CardTitle>
             <p className="mt-1 text-xs text-muted-foreground">
-              {hostedProviders.length} provider{hostedProviders.length === 1 ? "" : "s"} {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s10")}
+              {hostedProviders.length} provider{hostedProviders.length === 1 ? "" : "s"} {tHC("s10")}
             </p>
           </div>
           {poolSettings && (
@@ -62,7 +62,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
               </span>
               <SwitchToggle
                 on={poolSettings.enabled}
-                label={tHC("hcPlatformadminLlmprovidersHostedPoolCard.s9")}
+                label={tHC("s9")}
                 disabled={poolSettingsBusy}
                 onClick={handleTogglePoolEnabled}
               />
@@ -74,14 +74,14 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
             <Alert variant="warning">
               <Info />
               <AlertDescription>
-                {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s8")}
+                {tHC("s8")}
               </AlertDescription>
             </Alert>
           )}
 
           {hostedProviders.some((row) => row.region) && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-muted-foreground">{tHC("hcPlatformadminLlmprovidersHostedPoolCard.s7")}</span>
+              <span className="text-xs text-muted-foreground">{tHC("s7")}</span>
               <Button
                 variant={hostedProviderRegionFilter === "" ? "default" : "outline"}
                 size="sm"
@@ -113,7 +113,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
             <Alert variant="warning">
               <Info />
               <AlertDescription>
-                {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s6")}
+                {tHC("s6")}
               </AlertDescription>
             </Alert>
           )}
@@ -122,7 +122,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
             <Input
               value={hostedQuery}
               onChange={(e) => setHostedQuery(e.target.value)}
-              placeholder={tHC("hcPlatformadminLlmprovidersHostedPoolCard.s5")}
+              placeholder={tHC("s5")}
               className="max-w-xs"
             />
           )}
@@ -142,7 +142,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                     <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground">
                       {row.label}
                       {row.providerName && (
-                        <Badge variant="outline" title={tHC("hcPlatformadminLlmprovidersHostedPoolCard.s4")}>
+                        <Badge variant="outline" title={tHC("s4")}>
                           {row.providerName}
                         </Badge>
                       )}
@@ -154,12 +154,12 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                       {row.modelAutoSelected && (
                         <span
                           className="ms-1 normal-case text-muted-foreground/80"
-                          title={tHC("hcPlatformadminLlmprovidersHostedPoolCard.s3")}
+                          title={tHC("s3")}
                         >
                           (auto)
                         </span>
                       )}{" "}
-                      {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s2")} {row.priority}
+                      {tHC("s2")} {row.priority}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
@@ -191,7 +191,7 @@ export function HostedPoolCard({ pool }: { pool: HostedPool }) {
                 </div>
                 {row.lastValidatedAt && (
                   <div className="mt-2 font-mono text-xs text-muted-foreground">
-                    {tHC("hcPlatformadminLlmprovidersHostedPoolCard.s1")} {new Date(row.lastValidatedAt).toLocaleString()}
+                    {tHC("s1")} {new Date(row.lastValidatedAt).toLocaleString()}
                   </div>
                 )}
               </motion.div>

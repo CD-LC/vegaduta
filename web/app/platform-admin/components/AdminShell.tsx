@@ -264,7 +264,7 @@ export default function AdminShell({
 
       {/* Sidebar */}
       <nav
-        aria-label={tHC("hcPlatformadminComponentsAdminShell.s6")}
+        aria-label={tHC("s6")}
         className={`fixed inset-y-0 start-0 z-50 flex w-56 flex-col border-e border-border bg-card/60 backdrop-blur-xl transition-transform duration-300 ease-out lg:sticky lg:top-0 lg:h-dvh lg:translate-x-0 ${
           mobileNavOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
         }`}
@@ -282,7 +282,7 @@ export default function AdminShell({
         <div className="flex h-16 shrink-0 items-center gap-2.5 border-b border-border px-4">
           <button
             type="button"
-            aria-label={tHC("hcPlatformadminComponentsAdminShell.s5")}
+            aria-label={tHC("s5")}
             onClick={() => setBrandOpen(true)}
             className="flex h-9 shrink-0 items-center transition-opacity hover:opacity-80"
           >
@@ -405,8 +405,8 @@ export default function AdminShell({
             <button
               type="button"
               onClick={logout}
-              title={tHC("hcPlatformadminComponentsAdminShell.s4")}
-              aria-label={tHC("hcPlatformadminComponentsAdminShell.s4")}
+              title={tHC("s4")}
+              aria-label={tHC("s4")}
               className="flex size-8 shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-accent hover:text-foreground"
             >
               <Power size={15} />
@@ -451,7 +451,7 @@ export default function AdminShell({
                 type="button"
                 onClick={() => setMode("dark")}
                 aria-pressed={mode === "dark"}
-                aria-label={tHC("hcPlatformadminComponentsAdminShell.s3")}
+                aria-label={tHC("s3")}
                 className={`flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 transition-colors ${mode === "dark" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Moon size={13} />
@@ -460,7 +460,7 @@ export default function AdminShell({
                 type="button"
                 onClick={() => setMode("light")}
                 aria-pressed={mode === "light"}
-                aria-label={tHC("hcPlatformadminComponentsAdminShell.s2")}
+                aria-label={tHC("s2")}
                 className={`flex size-7 items-center justify-center rounded border-0 bg-transparent p-0 transition-colors ${mode === "light" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <Sun size={13} />
@@ -491,7 +491,7 @@ export default function AdminShell({
             <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-destructive">
               <Siren size={15} className="shrink-0" aria-hidden="true" />
               <span className="truncate">
-                {tHC("hcPlatformadminComponentsAdminShell.s1")}{killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
+                {tHC("s1")}{killSwitch.reason ? ` — ${killSwitch.reason}` : ""}
                 {killSwitch.stoppedAt ? ` · since ${new Date(killSwitch.stoppedAt).toLocaleString()}` : ""}
               </span>
             </div>

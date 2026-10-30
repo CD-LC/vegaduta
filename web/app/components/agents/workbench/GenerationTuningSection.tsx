@@ -79,7 +79,7 @@ export default function GenerationTuningSection() {
       <WorkbenchSection
         anchorId={BEHAVIOR_ANCHORS.generation}
         icon={<Gauge size={13} />}
-        label={tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s3")}
+        label={tHC("s3")}
         cat="var(--cat-comms)"
         actions={<WorkbenchSection.Summary>{tuningSummary}</WorkbenchSection.Summary>}
       >
@@ -151,7 +151,7 @@ export default function GenerationTuningSection() {
           <>
             {tuningMode === "SIMPLE" && (
               <p className="mb-2 text-[11px] text-muted-foreground">
-                {tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s2")}
+                {tHC("s2")}
               </p>
             )}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -208,7 +208,7 @@ export default function GenerationTuningSection() {
                 aria-disabled="true"
                 className="mt-4 rounded-md border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground opacity-80"
               >
-                {tHC("hcComponentsAgentsWorkbenchGenerationTuningSection.s1")}
+                {tHC("s1")}
               </p>
             ) : (
               <div className="mt-4">

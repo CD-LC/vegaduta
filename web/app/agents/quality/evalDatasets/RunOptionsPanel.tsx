@@ -25,7 +25,7 @@ export default function RunOptionsPanel({
   const t = useTranslations("evalControls");
   return (
     <div className="space-y-3 rounded-md border border-border p-3">
-      <h3 className="text-sm font-semibold text-foreground">{tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s8")}</h3>
+      <h3 className="text-sm font-semibold text-foreground">{tHC("s8")}</h3>
       <div className="space-y-1">
         <label className="text-xs font-medium text-muted-foreground" id="eval-run-mode-label">
           {t("runModeLabel")}
@@ -45,18 +45,18 @@ export default function RunOptionsPanel({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-judge-model">
-            {tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s7")}
+            {tHC("s7")}
           </label>
           <Input
             id="eval-run-judge-model"
             value={values.judgeModel}
             onChange={(e) => onChange({ judgeModel: e.target.value })}
-            placeholder={tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s6")}
+            placeholder={tHC("s6")}
           />
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-repeats">
-            {tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s5")}
+            {tHC("s5")}
           </label>
           <Input
             id="eval-run-repeats"
@@ -67,7 +67,7 @@ export default function RunOptionsPanel({
         </div>
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-run-budget">
-            {tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s4")}
+            {tHC("s4")}
           </label>
           <Input
             id="eval-run-budget"
@@ -82,12 +82,12 @@ export default function RunOptionsPanel({
             checked={values.strictJudge}
             onChange={(e) => onChange({ strictJudge: e.target.checked })}
           />
-          {tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s3")}
-          <span className="text-xs text-muted-foreground">{tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s2")}</span>
+          {tHC("s3")}
+          <span className="text-xs text-muted-foreground">{tHC("s2")}</span>
         </label>
       </div>
       <p className="text-xs text-muted-foreground">
-        {tHC("hcAgentsQualityEvalDatasetsRunOptionsPanel.s1")}
+        {tHC("s1")}
       </p>
     </div>
   );

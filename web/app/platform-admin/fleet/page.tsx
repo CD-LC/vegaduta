@@ -136,10 +136,10 @@ export default function FleetHealthPage() {
   const pg = usePagination(rows, 25);
 
   return (
-    <AdminShell title={tHC("hcPlatformadminFleetPage.s16")}>
+    <AdminShell title={tHC("s16")}>
       <PageHint>
-        {tHC("hcPlatformadminFleetPage.s15")}{" "}
-        <em>{tHC("hcPlatformadminFleetPage.s14")}</em>{tHC("hcPlatformadminFleetPage.s13")}
+        {tHC("s15")}{" "}
+        <em>{tHC("s14")}</em>{tHC("s13")}
       </PageHint>
 
       <SectionCard
@@ -160,7 +160,7 @@ export default function FleetHealthPage() {
                 setSlo((s) => ({ ...s, windowHours }));
                 setSloDraft((s) => ({ ...s, windowHours }));
               }}
-              aria-label={tHC("hcPlatformadminFleetPage.s12")}
+              aria-label={tHC("s12")}
               options={[
                 { value: "1", label: "Last hour" },
                 { value: "24", label: "Last 24h" },
@@ -231,7 +231,7 @@ export default function FleetHealthPage() {
                   setShowSloPanel(false);
                 }}
               >
-                {tHC("hcPlatformadminFleetPage.s11")}
+                {tHC("s11")}
               </Button>
             </div>
           </div>
@@ -239,12 +239,12 @@ export default function FleetHealthPage() {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <input
             className="h-9 rounded-md border border-border bg-background px-3 text-sm"
-            placeholder={tHC("hcPlatformadminFleetPage.s10")}
+            placeholder={tHC("s10")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label={tHC("hcPlatformadminFleetPage.s9")}
+            aria-label={tHC("s9")}
           />
-          <div className="flex items-center gap-1" role="group" aria-label={tHC("hcPlatformadminFleetPage.s8")}>
+          <div className="flex items-center gap-1" role="group" aria-label={tHC("s8")}>
             {(["ALL", "BREACH", "WARN", "STOPPED", "OK"] as const).map((h) => (
               <button
                 key={h}
@@ -263,7 +263,7 @@ export default function FleetHealthPage() {
           </div>
           {data && data.unavailableTenants.length > 0 && (
             <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-              <TriangleAlert size={13} /> {tHC("hcPlatformadminFleetPage.s7")} {data.unavailableTenants.join(", ")} {tHC("hcPlatformadminFleetPage.s6")}
+              <TriangleAlert size={13} /> {tHC("s7")} {data.unavailableTenants.join(", ")} {tHC("s6")}
             </span>
           )}
         </div>
@@ -280,12 +280,12 @@ export default function FleetHealthPage() {
                   <th className="py-2 pe-3 font-semibold">Agent</th>
                   <th className="py-2 pe-3 font-semibold">Tenant</th>
                   <th className="py-2 pe-3 font-semibold text-end">Calls</th>
-                  <th className="py-2 pe-3 font-semibold text-end">{tHC("hcPlatformadminFleetPage.s5")}</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("s5")}</th>
                   <th className="py-2 pe-3 font-semibold text-end">Spend</th>
                   <th className="py-2 pe-3 font-semibold text-end">Jobs OK</th>
                   <th className="py-2 pe-3 font-semibold text-end">Eval</th>
                   <th className="py-2 pe-3 font-semibold">Alerts</th>
-                  <th className="py-2 pe-3 font-semibold text-end">{tHC("hcPlatformadminFleetPage.s4")}</th>
+                  <th className="py-2 pe-3 font-semibold text-end">{tHC("s4")}</th>
                   <th className="py-2 font-semibold text-end">Escalate</th>
                 </tr>
               </thead>
@@ -386,7 +386,7 @@ export default function FleetHealthPage() {
                 {rows.length === 0 && (
                   <tr>
                     <td colSpan={11} className="py-8 text-center text-muted-foreground">
-                      {tHC("hcPlatformadminFleetPage.s3")}
+                      {tHC("s3")}
                     </td>
                   </tr>
                 )}
@@ -406,8 +406,8 @@ export default function FleetHealthPage() {
       </SectionCard>
 
       <InfoNote>
-        {tHC("hcPlatformadminFleetPage.s2")}
-        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}{tHC("hcPlatformadminFleetPage.s1")}
+        {tHC("s2")}
+        {/* a $-amount literal would trip the plan-price ratchet (scripts/ci/price-grep.sh) */}{tHC("s1")}
       </InfoNote>
     </AdminShell>
   );

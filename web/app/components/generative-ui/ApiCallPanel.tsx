@@ -222,7 +222,7 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
       ))}
       {!isRead && (
         <label className="mt-2 flex flex-col gap-1 text-xs text-muted-foreground">
-          {tHC("hcComponentsGenerativeuiApiCallPanel.s3")}
+          {tHC("s3")}
           <textarea
             rows={4}
             className="rounded-md border border-border bg-background px-2 py-1 font-mono text-xs text-foreground"
@@ -243,9 +243,9 @@ export default function ApiCallPanel({ method, path, title, query, body }: Props
         </button>
       )}
       {!isRead && !outcome && (
-        <p className="mt-1 text-xs text-muted-foreground">{tHC("hcComponentsGenerativeuiApiCallPanel.s2")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{tHC("s2")}</p>
       )}
-      {running && isRead && !outcome && <p className="mt-2 text-xs text-muted-foreground">{tHC("hcComponentsGenerativeuiApiCallPanel.s1")}</p>}
+      {running && isRead && !outcome && <p className="mt-2 text-xs text-muted-foreground">{tHC("s1")}</p>}
       {error && <p className="mt-2 text-xs text-[var(--danger-text)]">{error}</p>}
       {outcome && <ResultView outcome={outcome} />}
     </div>

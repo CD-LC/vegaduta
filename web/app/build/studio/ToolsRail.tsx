@@ -14,7 +14,7 @@ export default function ToolsRail({ s }: { s: ProjectSession }) {
   const { panel, setPanel } = s;
   return (
     <div className="order-3 flex min-h-0 max-h-[75vh] flex-col gap-3 lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)]">
-      <div role="tablist" aria-label={tHC("hcBuildStudioToolsRail.s1")} className="grid shrink-0 grid-cols-4 gap-1 rounded-xl bg-secondary p-1">
+      <div role="tablist" aria-label={tHC("s1")} className="grid shrink-0 grid-cols-4 gap-1 rounded-xl bg-secondary p-1">
         {(
           [
             ["design", Palette, "Design"],

@@ -54,7 +54,7 @@ export function WorkflowListFilters({
     const tHC = useTranslations("hcComponentsWorkflowWorkflowListChrome");
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <div role="group" aria-label={tHC("hcComponentsWorkflowWorkflowListChrome.s2")} className="flex flex-wrap gap-1.5">
+      <div role="group" aria-label={tHC("s2")} className="flex flex-wrap gap-1.5">
         <Button
           type="button"
           size="sm"
@@ -80,7 +80,7 @@ export function WorkflowListFilters({
         ))}
       </div>
       <Select
-        aria-label={tHC("hcComponentsWorkflowWorkflowListChrome.s1")}
+        aria-label={tHC("s1")}
         value={sort}
         onChange={(e) => setSort(e.target.value as WorkflowSort)}
         options={WORKFLOW_SORTS}

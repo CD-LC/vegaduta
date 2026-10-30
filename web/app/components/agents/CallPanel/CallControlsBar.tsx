@@ -137,7 +137,7 @@ export default function CallControlsBar({
             >
               {agentAudioMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </Button>
-            <Button type="button" variant="destructive" size="icon" onClick={endCall} aria-label={tHC("hcComponentsAgentsCallPanelCallControlsBar.s1")}>
+            <Button type="button" variant="destructive" size="icon" onClick={endCall} aria-label={tHC("s1")}>
               <PhoneOff size={14} />
             </Button>
           </div>

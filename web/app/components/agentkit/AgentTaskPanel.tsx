@@ -419,7 +419,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
                 the reason is a missing model rather than the feature being off. */}
             {gate.reason === "no-model" && (
               <Link href="/edge" className="underline underline-offset-2">
-                {tHC("hcComponentsAgentkitAgentTaskPanel.s4")}
+                {tHC("s4")}
               </Link>
             )}{" "}
             {/* No use re-checking a deployment-level switch. */}
@@ -437,7 +437,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
         )}
         {repo && gate.kind === "ready" && !running && (
           <span className="text-xs text-muted-foreground">
-            {tHC("hcComponentsAgentkitAgentTaskPanel.s3")} {gate.modelId} · {gate.contextWindow.toLocaleString()}{tHC("hcComponentsAgentkitAgentTaskPanel.s2")}
+            {tHC("s3")} {gate.modelId} · {gate.contextWindow.toLocaleString()}{tHC("s2")}
           </span>
         )}
         {running && (
@@ -538,7 +538,7 @@ export default function AgentTaskPanel({ repo }: { repo: LocalRepoHandle | null 
                     {item.status === "done" ? (
                       <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-primary" aria-label="done" />
                     ) : item.status === "doing" ? (
-                      <CircleDot size={14} className="mt-0.5 shrink-0 text-primary" aria-label={tHC("hcComponentsAgentkitAgentTaskPanel.s1")} />
+                      <CircleDot size={14} className="mt-0.5 shrink-0 text-primary" aria-label={tHC("s1")} />
                     ) : (
                       <Circle size={14} className="mt-0.5 shrink-0 text-muted-foreground" aria-label="to do" />
                     )}

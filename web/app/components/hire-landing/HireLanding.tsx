@@ -90,7 +90,7 @@ export default function HireLanding() {
               sign-in link to a session they already hold. */}
           {authedHint ? (
             <Link className="btn btn-ghost" href="/" style={{ padding: "7px 16px", fontSize: 14 }}>
-              {tHC("hcComponentsHirelandingHireLanding.s1")}
+              {tHC("s1")}
             </Link>
           ) : (
             <Link className="btn btn-ghost" href="/login" style={{ padding: "7px 16px", fontSize: 14 }}>

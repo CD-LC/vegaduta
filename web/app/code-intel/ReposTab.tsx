@@ -310,7 +310,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                   onChange={(e) => setForm({ ...form, git_url: e.target.value })}
                 />
               </Field>
-              <Field label={tHC("hcCodeintelReposTab.s5")}>
+              <Field label={tHC("s5")}>
                 <Input
                   value={form.auth_env}
                   placeholder="GITHUB_TOKEN_ACME"
@@ -379,7 +379,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                     className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     disabled={indexing}
                     onClick={() => setPendingDeleteRepo(r)}
-                    aria-label={tHC("hcCodeintelReposTab.s4")}
+                    aria-label={tHC("s4")}
                   >
                     <Trash2 size={13} />
                   </Button>
@@ -409,7 +409,7 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
                       />
                     </div>
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      {tHC("hcCodeintelReposTab.s3")}
+                      {tHC("s3")}
                     </p>
                   </div>
                 )}
@@ -431,9 +431,9 @@ export default function ReposTab({ repos, repoId, setRepoId, refresh, onError })
       <AlertDialog open={!!pendingDeleteRepo} onOpenChange={(open) => !open && setPendingDeleteRepo(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{tHC("hcCodeintelReposTab.s2")}{pendingDeleteRepo?.repo_id}&quot;?</AlertDialogTitle>
+            <AlertDialogTitle>{tHC("s2")}{pendingDeleteRepo?.repo_id}&quot;?</AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("hcCodeintelReposTab.s1")}
+              {tHC("s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

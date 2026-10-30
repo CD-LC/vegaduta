@@ -130,7 +130,7 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
         {status?.active ? (
           <Button type="button" variant="outline" size="sm" onClick={revokeShare} disabled={busy}>
             {busy ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : null}
-            {tHC("hcComponentsAgentsShareAgentPanel.s4")}
+            {tHC("s4")}
           </Button>
         ) : (
           <Button type="button" variant="outline" size="sm" onClick={createShare} disabled={busy}>
@@ -153,12 +153,12 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
           agent with its camera - no typing, no account. */}
           {status.shareUrl && (
             <div className="flex justify-center rounded-lg border border-border bg-white p-2" data-testid="share-qr">
-              <QrCode value={status.shareUrl} px={144} label={tHC("hcComponentsAgentsShareAgentPanel.s3")} />
+              <QrCode value={status.shareUrl} px={144} label={tHC("s3")} />
             </div>
           )}
           <div className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/30 px-2.5 py-2 text-xs">
             <span className="flex-1 truncate font-mono text-muted-foreground">{status.shareUrl}</span>
-            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label={tHC("hcComponentsAgentsShareAgentPanel.s2")}>
+            <Button type="button" variant="ghost" size="icon" onClick={copyLink} aria-label={tHC("s2")}>
               {copied ? (
                 <Check size={13} style={{ color: "var(--state-success)" }} aria-hidden="true" />
               ) : (
@@ -167,7 +167,7 @@ export default function ShareAgentPanel({ agent }: { agent: { id: string } | nul
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            {tHC("hcComponentsAgentsShareAgentPanel.s1")}
+            {tHC("s1")}
           </p>
           <ShareLinkMeta status={status} />
         </>

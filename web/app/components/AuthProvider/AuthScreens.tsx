@@ -17,20 +17,20 @@ export function InteractionRequiredScreen({ detail }: { detail: SilentAuthError 
     <main className="auth-shell">
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
-        <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("hcComponentsAuthProviderAuthScreens.s8")}</p>
+        <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s8")}</p>
         <p className="muted" style={{ marginTop: "0.5rem" }}>
-          {tHC("hcComponentsAuthProviderAuthScreens.s7")}
+          {tHC("s7")}
         </p>
         {/* No prompt option: this must reuse the live SSO session so Keycloak
             shows the pending screen and sends the person straight back, rather
             than making them re-enter credentials they never lost. login()'s own
             default redirectUri (origin + pathname) returns them here. */}
         <Button style={{ marginTop: "1.25rem" }} onClick={() => auth.login()}>
-          {tHC("hcComponentsAuthProviderAuthScreens.s6")}
+          {tHC("s6")}
         </Button>
         {detail?.error && (
           <p className="muted" style={{ marginTop: "0.75rem", fontSize: "0.75rem" }}>
-            {tHC("hcComponentsAuthProviderAuthScreens.s5")} {detail.error}
+            {tHC("s5")} {detail.error}
           </p>
         )}
       </div>
@@ -56,7 +56,7 @@ export function SigningInSplash() {
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
         <p className="muted" style={{ marginTop: "1rem", letterSpacing: "0.5px" }}>
-          {tHC("hcComponentsAuthProviderAuthScreens.s4")}
+          {tHC("s4")}
         </p>
       </div>
     </main>
@@ -71,13 +71,13 @@ export function LoginFailedScreen({ error, onRetry }: { error: string | null; on
     <main className="auth-shell">
       <div className="auth-card" style={{ textAlign: "center" }}>
         <Logo size={48} />
-        <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("hcComponentsAuthProviderAuthScreens.s3")}</p>
+        <p style={{ marginTop: "1rem", fontWeight: 600 }}>{tHC("s3")}</p>
         <p className="muted" style={{ marginTop: "0.5rem" }}>{error}</p>
         <p className="muted" style={{ marginTop: "0.5rem", fontSize: "0.8rem", wordBreak: "break-all" }}>
-          {tHC("hcComponentsAuthProviderAuthScreens.s2")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
+          {tHC("s2")} <code data-testid="signin-endpoint">{auth.signInEndpoint()}</code>
         </p>
         <Button style={{ marginTop: "1.25rem" }} onClick={onRetry}>
-          {tHC("hcComponentsAuthProviderAuthScreens.s1")}
+          {tHC("s1")}
         </Button>
       </div>
     </main>

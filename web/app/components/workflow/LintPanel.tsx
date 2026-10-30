@@ -176,13 +176,13 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
   let flatIdx = -1;
 
   return (
-    <div className="wf-lintp" role="dialog" aria-label={tHC("hcComponentsWorkflowLintPanel.s5")} ref={rootRef} tabIndex={-1}>
+    <div className="wf-lintp" role="dialog" aria-label={tHC("s5")} ref={rootRef} tabIndex={-1}>
       <div className="wf-lintp-head">
         <div className="wf-lintp-title">
-          <strong>{tHC("hcComponentsWorkflowLintPanel.s5")}</strong>
+          <strong>{tHC("s5")}</strong>
           <span className="wf-lintp-sum">{summary || "No issues"}</span>
         </div>
-        <button type="button" className="wf-lintp-icon" aria-label={tHC("hcComponentsWorkflowLintPanel.s4")} onClick={onClose}>
+        <button type="button" className="wf-lintp-icon" aria-label={tHC("s4")} onClick={onClose}>
           <X size={14} aria-hidden="true" />
         </button>
       </div>
@@ -191,13 +191,13 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
         {loading && (
           <span className="wf-lintp-note">
             <Loader2 size={12} className="wf-lintp-spin" aria-hidden="true" />
-            {tHC("hcComponentsWorkflowLintPanel.s3")}
+            {tHC("s3")}
           </span>
         )}
         {!loading && !serverAvailable && (
           <span className="wf-lintp-note">
             <Info size={12} aria-hidden="true" />
-            {tHC("hcComponentsWorkflowLintPanel.s2")}
+            {tHC("s2")}
           </span>
         )}
       </div>
@@ -315,7 +315,7 @@ export default function LintPanel({ issues, nodeLabel, onFocusNode, onApplyFix, 
                                 onClick={() => onFocusNode(issue.nodeId as string)}
                               >
                                 <Crosshair size={12} aria-hidden="true" />
-                                {tHC("hcComponentsWorkflowLintPanel.s1")}
+                                {tHC("s1")}
                               </button>
                             )}
                           </div>

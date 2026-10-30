@@ -121,7 +121,7 @@ export default function TemplateReasonDialog({
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="template-reason-input" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s3")}{required ? " *" : " - optional"}
+                {tHC("s3")}{required ? " *" : " - optional"}
               </Label>
               <Textarea
                 id="template-reason-input"
@@ -129,10 +129,10 @@ export default function TemplateReasonDialog({
                 onChange={(e: any) => setReason(e.target.value)}
                 onBlur={() => setTouched(true)}
                 rows={4}
-                placeholder={tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s2")}
+                placeholder={tHC("s2")}
                 aria-invalid={showError}
               />
-              {showError && <p className="text-xs text-destructive">{tHC("hcPlatformadminComponentsTemplatesTemplateReasonDialog.s1")}</p>}
+              {showError && <p className="text-xs text-destructive">{tHC("s1")}</p>}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">

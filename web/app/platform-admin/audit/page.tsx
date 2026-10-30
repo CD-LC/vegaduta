@@ -79,38 +79,38 @@ function AuditSearchSection() {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminAuditPage.s20")}
+      title={tHC("s20")}
       icon={Search}
       subtitle="Searches every active tenant's audit log. Platform-operator actions (platform.user.*) are recorded in the target tenant's log, so they appear here. Use a trailing * on the action type for a prefix match."
       delay={0.02}
     >
       <form onSubmit={run}>
-        <AdminFilterBar label={tHC("hcPlatformadminAuditPage.s19")}>
+        <AdminFilterBar label={tHC("s19")}>
           <Input
-            aria-label={tHC("hcPlatformadminAuditPage.s18")}
+            aria-label={tHC("s18")}
             className="h-9 w-40"
-            placeholder={tHC("hcPlatformadminAuditPage.s18")}
+            placeholder={tHC("s18")}
             value={f.tenantId}
             onChange={set("tenantId")}
           />
           <Input
-            aria-label={tHC("hcPlatformadminAuditPage.s17")}
+            aria-label={tHC("s17")}
             className="h-9 w-48"
-            placeholder={tHC("hcPlatformadminAuditPage.s17")}
+            placeholder={tHC("s17")}
             value={f.actorId}
             onChange={set("actorId")}
           />
           <Input
-            aria-label={tHC("hcPlatformadminAuditPage.s16")}
+            aria-label={tHC("s16")}
             className="h-9 w-52"
-            placeholder={tHC("hcPlatformadminAuditPage.s15")}
+            placeholder={tHC("s15")}
             value={f.actionType}
             onChange={set("actionType")}
           />
           <Input
-            aria-label={tHC("hcPlatformadminAuditPage.s14")}
+            aria-label={tHC("s14")}
             className="h-9 w-40"
-            placeholder={tHC("hcPlatformadminAuditPage.s14")}
+            placeholder={tHC("s14")}
             value={f.targetType}
             onChange={set("targetType")}
           />
@@ -130,7 +130,7 @@ function AuditSearchSection() {
             <Input type="datetime-local" aria-label="To" className="h-9 w-48" value={f.to} onChange={set("to")} />
           </label>
           <Select
-            aria-label={tHC("hcPlatformadminAuditPage.s13")}
+            aria-label={tHC("s13")}
             className="w-40"
             value={String(limit)}
             onValueChange={(v) => setLimit(Number(v))}
@@ -158,18 +158,18 @@ function AuditSearchSection() {
           <p className="text-xs text-muted-foreground">
             {result.rows.length} row{result.rows.length === 1 ? "" : "s"} from {result.tenantsScanned} of{" "}
             {result.tenantsInScope} tenant{result.tenantsInScope === 1 ? "" : "s"} (caps: {result.rowLimit} rows,{" "}
-            {result.maxTenants} {tHC("hcPlatformadminAuditPage.s12")}
+            {result.maxTenants} {tHC("s12")}
             {result.tenantsFailed > 0 && ` ${result.tenantsFailed} tenant(s) failed and were skipped.`}
           </p>
           {result.truncated && (
             <Alert>
               <AlertDescription>
-                {tHC("hcPlatformadminAuditPage.s11")}
+                {tHC("s11")}
               </AlertDescription>
             </Alert>
           )}
           {result.rows.length === 0 ? (
-            <AdminEmptyState title={tHC("hcPlatformadminAuditPage.s10")} description="Widen the date range or clear a filter." />
+            <AdminEmptyState title={tHC("s10")} description="Widen the date range or clear a filter." />
           ) : (
             <AdminTableWrap>
               <table className="w-full min-w-[56rem] text-start text-xs">
@@ -236,9 +236,9 @@ function AuditSearchSection() {
 export default function AuditCompliancePage() {
     const tHC = useTranslations("hcPlatformadminAuditPage");
   return (
-    <AdminShell title={tHC("hcPlatformadminAuditPage.s9")}>
+    <AdminShell title={tHC("s9")}>
       <PageHint>
-        {tHC("hcPlatformadminAuditPage.s8")}
+        {tHC("s8")}
       </PageHint>
 
       <KillSwitchSection pollMs={15000} delay={0} />
@@ -247,21 +247,21 @@ export default function AuditCompliancePage() {
 
       <ActivitySection pollMs={10000} delay={0.03} />
 
-      <SectionCard title={tHC("hcPlatformadminAuditPage.s7")} icon={ShieldAlert} delay={0.06}>
+      <SectionCard title={tHC("s7")} icon={ShieldAlert} delay={0.06}>
         <p className="text-sm text-muted-foreground">
-          {tHC("hcPlatformadminAuditPage.s6")}
+          {tHC("s6")}
         </p>
         <Link
           href="/platform-admin/tenants"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
         >
-          {tHC("hcPlatformadminAuditPage.s5")} <ChevronRight size={13} />
+          {tHC("s5")} <ChevronRight size={13} />
         </Link>
       </SectionCard>
 
-      <SectionCard title={tHC("hcPlatformadminAuditPage.s4")} icon={ShieldAlert} delay={0.09}>
+      <SectionCard title={tHC("s4")} icon={ShieldAlert} delay={0.09}>
         <p className="text-sm text-muted-foreground">
-          {tHC("hcPlatformadminAuditPage.s3")}<code>{tHC("hcPlatformadminAuditPage.s2")}</code>{tHC("hcPlatformadminAuditPage.s1")}
+          {tHC("s3")}<code>{tHC("s2")}</code>{tHC("s1")}
         </p>
       </SectionCard>
     </AdminShell>

@@ -139,9 +139,9 @@ export default function TranscriptionProviderOptions({
       <span
         className="state-pill"
         style={{ ["--state" as any]: "var(--state-warning)" } as any}
-        title={tHC("hcComponentsAgentsTranscriptionProviderOptions.s2")}
+        title={tHC("s2")}
       >
-        {tHC("hcComponentsAgentsTranscriptionProviderOptions.s1")}
+        {tHC("s1")}
       </span>
     );
   };

@@ -79,22 +79,22 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
   return (
     <Card data-testid="content-policy-card">
       <CardHeader>
-        <CardTitle>{tHC("hcAdminGuardrailsContentPolicyCard.s10")}</CardTitle>
+        <CardTitle>{tHC("s10")}</CardTitle>
         <CardDescription>
-          {tHC("hcAdminGuardrailsContentPolicyCard.s9")}
+          {tHC("s9")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> {tHC("hcAdminGuardrailsContentPolicyCard.s8")}
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> {tHC("s8")}
           </div>
         ) : (
           <>
             {error && (
               <Alert variant="destructive">
                 <TriangleAlert className="size-4" aria-hidden="true" />
-                <AlertTitle>{tHC("hcAdminGuardrailsContentPolicyCard.s7")}</AlertTitle>
+                <AlertTitle>{tHC("s7")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -105,7 +105,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
               </Alert>
             )}
             {!canManage && (
-              <p className="text-xs text-muted-foreground">{tHC("hcAdminGuardrailsContentPolicyCard.s6")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s6")}</p>
             )}
 
             <fieldset className="flex flex-col gap-2">
@@ -121,7 +121,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 <span>
                   <span className="font-medium">{tg("redactPii")}</span>
                   <span className="block text-xs text-muted-foreground">
-                    {tHC("hcAdminGuardrailsContentPolicyCard.s5")}
+                    {tHC("s5")}
                   </span>
                 </span>
               </label>
@@ -138,7 +138,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                   </label>
                 ))}
                 {isPiiRedactionInert(draft) && (
-                  <p className="text-xs text-destructive">{tHC("hcAdminGuardrailsContentPolicyCard.s4")}</p>
+                  <p className="text-xs text-destructive">{tHC("s4")}</p>
                 )}
               </div>
             </fieldset>
@@ -154,9 +154,9 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                   onChange={(e) => patch({ injectionScreeningEnabled: e.target.checked })}
                 />
                 <span>
-                  <span className="font-medium">{tHC("hcAdminGuardrailsContentPolicyCard.s3")}</span>
+                  <span className="font-medium">{tHC("s3")}</span>
                   <span className="block text-xs text-muted-foreground">
-                    {tHC("hcAdminGuardrailsContentPolicyCard.s2")}
+                    {tHC("s2")}
                   </span>
                 </span>
               </label>
@@ -198,7 +198,7 @@ export default function ContentPolicyCard({ canManage }: { canManage: boolean })
                 onClick={() => void save()}
               >
                 {busy && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
-                {tHC("hcAdminGuardrailsContentPolicyCard.s1")}
+                {tHC("s1")}
               </Button>
             </div>
           </>

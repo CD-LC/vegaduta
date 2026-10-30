@@ -174,7 +174,7 @@ export default function BrandIdentityModal({ open, onClose }: { open: boolean; o
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label={tHC("hcPlatformadminComponentsBrandIdentityModal.s1")}
+          aria-label={tHC("s1")}
         >
           <motion.div
             ref={dialogRef}

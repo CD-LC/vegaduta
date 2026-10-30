@@ -101,16 +101,16 @@ export default function SketchPad({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <LayoutTemplate aria-hidden="true" size={15} className="text-primary" /> {tHC("hcBuildSketchPad.s6")}
+          <LayoutTemplate aria-hidden="true" size={15} className="text-primary" /> {tHC("s6")}
         </CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose} aria-label={tHC("hcBuildSketchPad.s5")}>
+        <Button variant="ghost" size="sm" onClick={onClose} aria-label={tHC("s5")}>
           <X aria-hidden="true" size={14} />
         </Button>
       </CardHeader>
       <CardContent ref={rootRef} className="grid gap-4 sm:grid-cols-[160px_1fr]">
         {/* Block palette — drag onto the canvas, or click to append. */}
         <div>
-          <p className="mb-2 text-xs text-muted-foreground">{tHC("hcBuildSketchPad.s4")}</p>
+          <p className="mb-2 text-xs text-muted-foreground">{tHC("s4")}</p>
           <div className="flex flex-wrap gap-1.5 sm:flex-col sm:items-stretch">
             {PALETTE.map((p) => (
               <button
@@ -146,7 +146,7 @@ export default function SketchPad({
         >
           {blocks.length === 0 ? (
             <p className="py-12 text-center text-xs text-muted-foreground">
-              {tHC("hcBuildSketchPad.s3")}
+              {tHC("s3")}
             </p>
           ) : (
             <ol className="space-y-1.5">
@@ -179,7 +179,7 @@ export default function SketchPad({
                       if (row) e.dataTransfer.setDragImage(row, 8, 8);
                     }}
                     className="flex size-8 shrink-0 cursor-grab items-center justify-center text-muted-foreground"
-                    title={tHC("hcBuildSketchPad.s2")}
+                    title={tHC("s2")}
                     aria-hidden="true"
                   >
                     <GripVertical aria-hidden="true" size={14} />
@@ -188,7 +188,7 @@ export default function SketchPad({
                   <Input
                     value={b.label}
                     onChange={(e) => update(b.id, e.target.value)}
-                    placeholder={tHC("hcBuildSketchPad.s1")}
+                    placeholder={tHC("s1")}
                     aria-label={`Note for ${b.type} block ${i + 1}`}
                     data-sketch-note={i}
                     className="h-8 flex-1 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"

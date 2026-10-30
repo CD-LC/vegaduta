@@ -148,7 +148,7 @@ export default function DraftModelFields() {
             Transcription
           </span>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchModelDraftModelFields.s3")}</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s3")}</div>
             <VoiceProviderSelector
               value={voiceModelProvider}
               onChange={(provider, model) => {
@@ -162,7 +162,7 @@ export default function DraftModelFields() {
             />
           </div>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchModelDraftModelFields.s2")}</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s2")}</div>
             <VideoProviderSelector
               value={videoModelProvider}
               onChange={(provider, model) => {
@@ -176,7 +176,7 @@ export default function DraftModelFields() {
             />
           </div>
           <div>
-            <div className="mb-1 text-xs text-muted-foreground">{tHC("hcComponentsAgentsWorkbenchModelDraftModelFields.s1")}</div>
+            <div className="mb-1 text-xs text-muted-foreground">{tHC("s1")}</div>
             <TextToSpeechProviderSelector
               value={ttsProvider}
               onChange={(provider, model) => {

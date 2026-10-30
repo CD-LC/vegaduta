@@ -122,14 +122,14 @@ export function ComingSoon({
         <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
           {title}
           <Badge variant="secondary" className="text-2xs uppercase tracking-wide">
-            {tHC("hcPlatformadminComponentsSectionsCommon.s2")}
+            {tHC("s2")}
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">{description}</p>
         {roadmap && <p className="text-xs text-muted-foreground/80">{roadmap}</p>}
         {endpoints && endpoints.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-0.5">
-            <span className="text-[11px] text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsCommon.s1")}</span>
+            <span className="text-[11px] text-muted-foreground">{tHC("s1")}</span>
             {endpoints.map((ep) => (
               <code
                 key={ep}

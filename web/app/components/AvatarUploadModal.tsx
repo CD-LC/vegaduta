@@ -323,7 +323,7 @@ function AvatarCropDialog({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={tHC("hcComponentsAvatarUploadModal.s5")}
+      aria-label={tHC("s5")}
     >
       <motion.div
         ref={dialogRef}
@@ -335,7 +335,7 @@ function AvatarCropDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold tracking-tight">{tHC("hcComponentsAvatarUploadModal.s5")}</h2>
+          <h2 className="text-base font-semibold tracking-tight">{tHC("s5")}</h2>
           <button
             ref={closeBtnRef}
             type="button"
@@ -353,10 +353,10 @@ function AvatarCropDialog({
               <Upload aria-hidden="true" size={22} />
             </div>
             <p className="text-center text-sm text-muted-foreground">
-              {tHC("hcComponentsAvatarUploadModal.s4")}
+              {tHC("s4")}
             </p>
             <Button type="button" onClick={() => fileInputRef.current?.click()}>
-              {tHC("hcComponentsAvatarUploadModal.s3")}
+              {tHC("s3")}
             </Button>
             <input
               ref={fileInputRef}
@@ -398,11 +398,11 @@ function AvatarCropDialog({
               />
             </div>
 
-            <p className="text-center text-xs text-muted-foreground">{tHC("hcComponentsAvatarUploadModal.s2")}</p>
+            <p className="text-center text-xs text-muted-foreground">{tHC("s2")}</p>
 
             <div className="flex w-full items-center justify-between gap-2 pt-1">
               <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                {tHC("hcComponentsAvatarUploadModal.s1")}
+                {tHC("s1")}
               </Button>
               <input
                 ref={fileInputRef}

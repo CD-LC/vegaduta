@@ -82,17 +82,17 @@ export default function PoolStatusNotes() {
       {!onPlatformLlm && (
         <div className="mb-3 flex flex-col gap-1.5 rounded-lg border border-border bg-secondary/20 px-3 py-2.5">
           <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-            {tHC("hcComponentsAgentsWorkbenchModelPoolStatusNotes.s5")}
+            {tHC("s5")}
           </span>
           <p className="m-0 text-[12.5px] leading-relaxed text-foreground">
-            {tHC("hcComponentsAgentsWorkbenchModelPoolStatusNotes.s4")}
+            {tHC("s4")}
             {activeProviders.length === 0 ? (
               <>
-                {tHC("hcComponentsAgentsWorkbenchModelPoolStatusNotes.s3")}{" "}
+                {tHC("s3")}{" "}
                 <Link href="/providers" className="font-medium text-primary underline-offset-4 hover:underline">
-                  {tHC("hcComponentsAgentsWorkbenchModelPoolStatusNotes.s2")}
+                  {tHC("s2")}
                 </Link>{" "}
-                {tHC("hcComponentsAgentsWorkbenchModelPoolStatusNotes.s1")}
+                {tHC("s1")}
               </>
             ) : (
               "."

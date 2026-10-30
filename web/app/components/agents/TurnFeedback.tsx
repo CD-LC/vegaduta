@@ -98,7 +98,7 @@ export default function TurnFeedback({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
         <FeedbackIconButton
-          label={tHC("hcComponentsAgentsTurnFeedback.s11")}
+          label={tHC("s11")}
           pressed={thumb === "up"}
           activeClass="text-[color:var(--state-success)]"
           onClick={() => onThumb("up")}
@@ -106,7 +106,7 @@ export default function TurnFeedback({
           <ThumbsUp size={13} aria-hidden="true" />
         </FeedbackIconButton>
         <FeedbackIconButton
-          label={tHC("hcComponentsAgentsTurnFeedback.s10")}
+          label={tHC("s10")}
           pressed={thumb === "down"}
           activeClass="text-destructive"
           onClick={() => onThumb("down")}
@@ -114,7 +114,7 @@ export default function TurnFeedback({
           <ThumbsDown size={13} aria-hidden="true" />
         </FeedbackIconButton>
         <FeedbackIconButton
-          label={tHC("hcComponentsAgentsTurnFeedback.s9")}
+          label={tHC("s9")}
           pressed={open}
           activeClass="text-primary"
           onClick={() => setOpen((v) => !v)}
@@ -141,7 +141,7 @@ export default function TurnFeedback({
               transition={{ duration: 0.16 }}
               className="ms-1 text-xs text-muted-foreground"
             >
-              {tHC("hcComponentsAgentsTurnFeedback.s8")}
+              {tHC("s8")}
             </motion.span>
           )}
         </AnimatePresence>
@@ -159,8 +159,8 @@ export default function TurnFeedback({
             <div className="mt-1 w-full max-w-[85%] space-y-3 rounded-lg border border-border bg-secondary/30 p-3">
               {/* Rating */}
               <div className="space-y-1.5">
-                <div className="text-xs font-medium text-foreground">{tHC("hcComponentsAgentsTurnFeedback.s7")}</div>
-                <div className="flex items-center gap-0.5" aria-label={tHC("hcComponentsAgentsTurnFeedback.s6")}>
+                <div className="text-xs font-medium text-foreground">{tHC("s7")}</div>
+                <div className="flex items-center gap-0.5" aria-label={tHC("s6")}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
                       key={n}
@@ -192,7 +192,7 @@ export default function TurnFeedback({
                   id={`fb-comment-${turnRef}`}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={tHC("hcComponentsAgentsTurnFeedback.s5")}
+                  placeholder={tHC("s5")}
                   className="min-h-14 text-sm"
                 />
               </div>
@@ -203,14 +203,14 @@ export default function TurnFeedback({
                   className="flex items-center gap-1.5 text-xs font-medium text-foreground"
                   htmlFor={`fb-edit-${turnRef}`}
                 >
-                  <PencilLine size={12} aria-hidden="true" /> {tHC("hcComponentsAgentsTurnFeedback.s4")}{" "}
+                  <PencilLine size={12} aria-hidden="true" /> {tHC("s4")}{" "}
                   <span className="font-normal text-muted-foreground">(optional)</span>
                 </label>
                 <Textarea
                   id={`fb-edit-${turnRef}`}
                   value={edit}
                   onChange={(e) => setEdit(e.target.value)}
-                  placeholder={tHC("hcComponentsAgentsTurnFeedback.s3")}
+                  placeholder={tHC("s3")}
                   className="min-h-16 text-sm"
                 />
                 <Button
@@ -220,13 +220,13 @@ export default function TurnFeedback({
                   disabled={!edit.trim() || sending}
                   onClick={() => send("EDIT", { editedAnswer: edit.trim(), comment: comment.trim() || undefined })}
                 >
-                  {tHC("hcComponentsAgentsTurnFeedback.s2")}
+                  {tHC("s2")}
                 </Button>
               </div>
 
               {/* Resolution */}
               <div className="flex items-center gap-2 border-t border-border pt-2.5">
-                <span className="text-xs text-muted-foreground">{tHC("hcComponentsAgentsTurnFeedback.s1")}</span>
+                <span className="text-xs text-muted-foreground">{tHC("s1")}</span>
                 <Button
                   type="button"
                   size="sm"

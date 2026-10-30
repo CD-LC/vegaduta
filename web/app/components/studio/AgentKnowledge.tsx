@@ -129,9 +129,9 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
     return (
       <Alert>
         <AlertTriangle aria-hidden="true" />
-        <AlertTitle>{tHC("hcComponentsStudioAgentKnowledge.s16")}</AlertTitle>
+        <AlertTitle>{tHC("s16")}</AlertTitle>
         <AlertDescription>
-          {tHC("hcComponentsStudioAgentKnowledge.s15")}
+          {tHC("s15")}
         </AlertDescription>
       </Alert>
     );
@@ -140,9 +140,9 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
   return (
     <div className="space-y-4">
       <div>
-        <div className="text-sm font-medium">{tHC("hcComponentsStudioAgentKnowledge.s14")}</div>
+        <div className="text-sm font-medium">{tHC("s14")}</div>
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioAgentKnowledge.s13")} <b className="font-medium text-foreground">{agent.name}</b> {tHC("hcComponentsStudioAgentKnowledge.s12")} {topicHint}.
+          {tHC("s13")} <b className="font-medium text-foreground">{agent.name}</b> {tHC("s12")} {topicHint}.
         </p>
       </div>
 
@@ -168,14 +168,14 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
         />
         <div className="text-sm font-medium">{drag ? "Drop to add" : "Drag a document here"}</div>
         <p className="mb-3 text-xs text-muted-foreground">
-          {(limits?.extensions ?? [".md", ".txt", ".csv"]).join("  ")} · up to {kb(maxBytes)} · {maxDocs} {tHC("hcComponentsStudioAgentKnowledge.s11")}
+          {(limits?.extensions ?? [".md", ".txt", ".csv"]).join("  ")} · up to {kb(maxBytes)} · {maxDocs} {tHC("s11")}
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" className={TONES.sky.cta} disabled={disabled} onClick={() => inputRef.current?.click()}>
-            <UploadCloud aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentKnowledge.s10")}
+            <UploadCloud aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s10")}
           </Button>
           <Button size="sm" variant="outline" disabled={disabled} onClick={() => setPasteOpen((v) => !v)}>
-            <ClipboardPaste aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentKnowledge.s9")}
+            <ClipboardPaste aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s9")}
           </Button>
           <Button
             size="sm"
@@ -186,7 +186,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
               void addText(s.title, s.text);
             }}
           >
-            <FlaskConical aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("hcComponentsStudioAgentKnowledge.s8")}
+            <FlaskConical aria-hidden="true" className="me-1.5 h-3.5 w-3.5 shrink-0" /> {tHC("s8")}
           </Button>
         </div>
         <input
@@ -208,14 +208,14 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
           <Input
             value={pasteTitle}
             maxLength={80}
-            placeholder={tHC("hcComponentsStudioAgentKnowledge.s7")}
+            placeholder={tHC("s7")}
             onChange={(e) => setPasteTitle(e.target.value)}
           />
           <Textarea
             value={pasteText}
             rows={6}
             maxLength={100000}
-            placeholder={tHC("hcComponentsStudioAgentKnowledge.s6")}
+            placeholder={tHC("s6")}
             onChange={(e) => setPasteText(e.target.value)}
           />
           <div className="flex gap-2">
@@ -224,7 +224,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
               disabled={!pasteText.trim() || disabled}
               onClick={() => void addText(pasteTitle.trim() || "Pasted notes", pasteText)}
             >
-              {tHC("hcComponentsStudioAgentKnowledge.s5")}
+              {tHC("s5")}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setPasteOpen(false)}>
               Cancel
@@ -236,7 +236,7 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
       {error && <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-2.5 text-sm">{error}</div>}
       {full && !readOnly && (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsStudioAgentKnowledge.s4")} {maxDocs} {tHC("hcComponentsStudioAgentKnowledge.s3")}
+          {tHC("s4")} {maxDocs} {tHC("s3")}
         </p>
       )}
 
@@ -297,13 +297,13 @@ export default function AgentKnowledge({ token, agent, limits, readOnly, topicHi
         ))}
         {docs !== null && docs.length === 0 && pending.length === 0 && (
           <li className="rounded-xl border border-dashed border-border/60 p-4 text-center text-xs text-muted-foreground">
-            {tHC("hcComponentsStudioAgentKnowledge.s2")}
+            {tHC("s2")}
           </li>
         )}
       </ul>
 
       <p className="flex items-start gap-1.5 text-[11px] leading-relaxed text-muted-foreground">
-        <ShieldCheck aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0" /> {tHC("hcComponentsStudioAgentKnowledge.s1")}
+        <ShieldCheck aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0" /> {tHC("s1")}
       </p>
     </div>
   );

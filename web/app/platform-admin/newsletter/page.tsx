@@ -139,13 +139,13 @@ export default function NewsletterPage() {
     <AdminShell
       title="Newsletter"
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={loadingRecipients} title={tHC("hcPlatformadminNewsletterPage.s18")}>
+        <Button variant="outline" size="sm" onClick={refresh} disabled={loadingRecipients} title={tHC("s18")}>
           <RefreshCw size={14} className={loadingRecipients ? "animate-spin" : undefined} /> Refresh
         </Button>
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminNewsletterPage.s17")}<code>news_opt_in</code>{tHC("hcPlatformadminNewsletterPage.s16")}
+        {tHC("s17")}<code>news_opt_in</code>{tHC("s16")}
       </PageHint>
 
       <form onSubmit={handleSend}>
@@ -160,7 +160,7 @@ export default function NewsletterPage() {
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Megaphone size={16} className="text-primary" /> Compose
               </CardTitle>
-              <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminNewsletterPage.s15")}</p>
+              <p className="text-xs text-muted-foreground">{tHC("s15")}</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1.5">
@@ -171,36 +171,36 @@ export default function NewsletterPage() {
                   id="newsletter-subject"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  placeholder={tHC("hcPlatformadminNewsletterPage.s14")}
+                  placeholder={tHC("s14")}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="newsletter-body" className="text-xs text-muted-foreground">
-                  {tHC("hcPlatformadminNewsletterPage.s13")}
+                  {tHC("s13")}
                 </Label>
                 <Textarea
                   id="newsletter-body"
                   rows={10}
                   value={bodyHtml}
                   onChange={(e) => setBodyHtml(e.target.value)}
-                  placeholder={tHC("hcPlatformadminNewsletterPage.s12")}
+                  placeholder={tHC("s12")}
                   className="font-mono text-xs"
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="newsletter-body-text" className="text-xs text-muted-foreground">
-                  {tHC("hcPlatformadminNewsletterPage.s11")}
+                  {tHC("s11")}
                 </Label>
                 <Textarea
                   id="newsletter-body-text"
                   rows={6}
                   value={bodyText}
                   onChange={(e) => setBodyText(e.target.value)}
-                  placeholder={tHC("hcPlatformadminNewsletterPage.s10")}
+                  placeholder={tHC("s10")}
                   className="font-mono text-xs"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  {tHC("hcPlatformadminNewsletterPage.s9")}
+                  {tHC("s9")}
                 </p>
               </div>
             </CardContent>
@@ -220,8 +220,8 @@ export default function NewsletterPage() {
                   <Users2 size={16} className="text-primary" /> Recipients
                 </CardTitle>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {selectedOptedInCount} of {optedInCount} {tHC("hcPlatformadminNewsletterPage.s8")}{optedInCount === 1 ? "" : "s"} {tHC("hcPlatformadminNewsletterPage.s7")}{" "}
-                  {recipients.length} {tHC("hcPlatformadminNewsletterPage.s6")}{recipients.length === 1 ? "" : "s"} total
+                  {selectedOptedInCount} of {optedInCount} {tHC("s8")}{optedInCount === 1 ? "" : "s"} {tHC("s7")}{" "}
+                  {recipients.length} {tHC("s6")}{recipients.length === 1 ? "" : "s"} total
                 </p>
               </div>
               <Button
@@ -244,7 +244,7 @@ export default function NewsletterPage() {
 
               {recipients.length > 0 && (
                 <Input
-                  aria-label={tHC("hcPlatformadminNewsletterPage.s5")}
+                  aria-label={tHC("s5")}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => {
@@ -253,13 +253,13 @@ export default function NewsletterPage() {
                     // send flow instead of just... filtering.
                     if (e.key === "Enter") e.preventDefault();
                   }}
-                  placeholder={tHC("hcPlatformadminNewsletterPage.s4")}
+                  placeholder={tHC("s4")}
                   className="max-w-xs"
                 />
               )}
 
               {!loadingRecipients && filteredRecipients.length === 0 && !recipientsError && (
-                <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminNewsletterPage.s3")}</p>
+                <p className="text-xs text-muted-foreground">{tHC("s3")}</p>
               )}
 
               <div className="max-h-96 space-y-1.5 overflow-y-auto">
@@ -280,7 +280,7 @@ export default function NewsletterPage() {
                           variant="outline"
                           className="shrink-0 border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
                         >
-                          <Mail size={11} /> {tHC("hcPlatformadminNewsletterPage.s2")}
+                          <Mail size={11} /> {tHC("s2")}
                         </Badge>
                       ) : (
                         <Badge
@@ -324,7 +324,7 @@ export default function NewsletterPage() {
                   : "border-[var(--warning-border)] bg-[var(--warning-bg)] text-[var(--warning-text)]"
               }
             >
-              {tHC("hcPlatformadminNewsletterPage.s1")} {lastResult.sent} sent, {lastResult.skipped} skipped
+              {tHC("s1")} {lastResult.sent} sent, {lastResult.skipped} skipped
             </Badge>
           )}
         </div>

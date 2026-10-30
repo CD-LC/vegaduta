@@ -29,10 +29,10 @@ function Inner() {
       <div className="mx-auto max-w-6xl px-4 py-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm">
           <span>
-            <strong>{tHC("hcTryEnvoydemoDetailPage.s3")}</strong> {tHC("hcTryEnvoydemoDetailPage.s2")}
+            <strong>{tHC("s3")}</strong> {tHC("s2")}
           </span>
           <Link href="/try/envoy-demo" className="rounded-lg border border-border/70 px-3 py-1 text-xs hover:bg-background/60">
-            {tHC("hcTryEnvoydemoDetailPage.s1")}
+            {tHC("s1")}
           </Link>
         </div>
         <EnvoyDetail id={id} />

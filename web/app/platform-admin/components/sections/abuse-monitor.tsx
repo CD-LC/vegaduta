@@ -78,7 +78,7 @@ export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?:
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsAbusemonitor.s13")}
+      title={tHC("s13")}
       subtitle="Per-principal anomaly score across every active tenant - only principals at WATCH or above are listed, highest first"
       icon={Radar}
       delay={delay}
@@ -96,10 +96,10 @@ export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?:
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s2")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s2")}</p>
       ) : scores.length === 0 ? (
         <p className="py-1 text-sm text-muted-foreground">
-          {tHC("hcPlatformadminComponentsSectionsAbusemonitor.s12")}
+          {tHC("s12")}
         </p>
       ) : (
         <AnimatePresence initial={false}>
@@ -143,7 +143,7 @@ export function AbuseScoresSection({ pollMs, delay }: { pollMs?: number; delay?:
                         {s.detail && <span className="text-muted-foreground">{s.detail}</span>}
                         {s.available && (
                           <span className={META_CLS}>
-                            score {Number(s.normalizedScore || 0).toFixed(2)} {tHC("hcPlatformadminComponentsSectionsAbusemonitor.s11")} {s.weight}
+                            score {Number(s.normalizedScore || 0).toFixed(2)} {tHC("s11")} {s.weight}
                           </span>
                         )}
                       </div>
@@ -181,7 +181,7 @@ export function AbuseAnomaliesSection({ pollMs, delay }: { pollMs?: number; dela
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsAbusemonitor.s10")}
+      title={tHC("s10")}
       subtitle="Fingerprinted ABUSE_ANOMALY issues the detector raised, newest first - repeats fold into the same row via occurrenceCount"
       icon={ShieldAlert}
       delay={delay}
@@ -192,9 +192,9 @@ export function AbuseAnomaliesSection({ pollMs, delay }: { pollMs?: number; dela
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s2")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s2")}</p>
       ) : anomalies.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s9")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s9")}</p>
       ) : (
         <AnimatePresence initial={false}>
           {pg.pageItems.map((a) => (
@@ -270,7 +270,7 @@ export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: n
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsAbusemonitor.s8")}
+      title={tHC("s8")}
       subtitle="Principals currently rate-limited by the detector (self-expiring, TTL-bounded) - clearing is audited and reversible"
       icon={Gauge}
       delay={delay}
@@ -288,9 +288,9 @@ export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: n
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s2")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s2")}</p>
       ) : throttled.length === 0 ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s7")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s7")}</p>
       ) : (
         pg.pageItems.map((entry) => (
           <div
@@ -300,7 +300,7 @@ export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: n
             <div className="min-w-0">
               <div className="font-mono text-sm font-semibold text-foreground">{entry.principal}</div>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {entry.reason} {tHC("hcPlatformadminComponentsSectionsAbusemonitor.s6")} {timeUntil(entry.expiresAt)}
+                {entry.reason} {tHC("s6")} {timeUntil(entry.expiresAt)}
               </p>
             </div>
             <Button
@@ -308,7 +308,7 @@ export function ThrottledSection({ pollMs, delay }: { pollMs?: number; delay?: n
               size="sm"
               disabled={clearing === entry.principal}
               onClick={() => handleClear(entry)}
-              title={tHC("hcPlatformadminComponentsSectionsAbusemonitor.s5")}
+              title={tHC("s5")}
             >
               <Undo2 size={13} /> {clearing === entry.principal ? "Clearing…" : "Clear"}
             </Button>
@@ -360,7 +360,7 @@ export function AbuseThresholdsSection({ pollMs, delay }: { pollMs?: number; del
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsAbusemonitor.s4")}
+      title={tHC("s4")}
       subtitle="The effective AbuseThresholds the scanner is running with right now (seeded by migration V120, tuned via platform_setting keys)"
       icon={Sliders}
       delay={delay}
@@ -369,7 +369,7 @@ export function AbuseThresholdsSection({ pollMs, delay }: { pollMs?: number; del
           href="/platform-admin/settings"
           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
         >
-          {tHC("hcPlatformadminComponentsSectionsAbusemonitor.s3")} <ExternalLink size={11} />
+          {tHC("s3")} <ExternalLink size={11} />
         </Link>
       }
     >
@@ -379,9 +379,9 @@ export function AbuseThresholdsSection({ pollMs, delay }: { pollMs?: number; del
         </Alert>
       )}
       {loading ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s2")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s2")}</p>
       ) : cfg == null ? (
-        <p className="py-1 text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsAbusemonitor.s1")}</p>
+        <p className="py-1 text-sm text-muted-foreground">{tHC("s1")}</p>
       ) : (
         <div className="divide-y divide-border rounded-lg border border-border">
           {rows.map(([label, value]) => (

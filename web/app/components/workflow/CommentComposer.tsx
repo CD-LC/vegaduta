@@ -200,7 +200,7 @@ export function CommentComposer({
           onKeyDown={onKeyDown}
         />
         {pickerOpen && (
-          <ul id={listId} className="wfc-picker" role="listbox" aria-label={tHC("hcComponentsWorkflowCommentComposer.s3")}>
+          <ul id={listId} className="wfc-picker" role="listbox" aria-label={tHC("s3")}>
             {matches.map((p, i) => (
               <li
                 key={p.id}
@@ -230,10 +230,10 @@ export function CommentComposer({
             <>
               {canMention && (
                 <span className="wfc-hint-item">
-                  <AtSign size={11} aria-hidden="true" /> {tHC("hcComponentsWorkflowCommentComposer.s2")}
+                  <AtSign size={11} aria-hidden="true" /> {tHC("s2")}
                 </span>
               )}
-              <span className="wfc-hint-item wfc-keys">{tHC("hcComponentsWorkflowCommentComposer.s1")}</span>
+              <span className="wfc-hint-item wfc-keys">{tHC("s1")}</span>
             </>
           )}
         </span>

@@ -438,7 +438,7 @@ export default function HeroOutcome() {
               <span className="size-2 rounded-full" style={{ background: "var(--mkt-line-strong)" }} />
               <span className="size-2 rounded-full" style={{ background: "var(--mkt-line-strong)" }} />
             </span>
-            <span className="mkt-ui-label mkt-ink-3 truncate">{tHC("hcComponentsDemolandingHeroOutcome.s1")} {t("h2_termTitle")}</span>
+            <span className="mkt-ui-label mkt-ink-3 truncate">{tHC("s1")} {t("h2_termTitle")}</span>
             <span className="mkt-pill ms-auto shrink-0">{t("h2_termSimLabel")}</span>
           </div>
           <BuildConsole

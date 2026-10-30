@@ -53,16 +53,16 @@ export function SkillLintPanel({
       <p className="flex items-center gap-1.5 text-xs font-medium text-foreground">
         {errors === 0 && warnings === 0 ? (
           <>
-            <CheckCircle2 size={13} className="text-primary" aria-hidden="true" /> {tHC("hcComponentsSkillsSkillAuthoringAids.s18")}
+            <CheckCircle2 size={13} className="text-primary" aria-hidden="true" /> {tHC("s18")}
           </>
         ) : errors > 0 ? (
           <>
             <XCircle size={13} className="text-[var(--state-error)]" aria-hidden="true" /> {errors} problem
-            {errors === 1 ? "" : "s"} {tHC("hcComponentsSkillsSkillAuthoringAids.s17")}
+            {errors === 1 ? "" : "s"} {tHC("s17")}
           </>
         ) : (
           <>
-            <AlertTriangle size={13} className="text-[var(--state-warning)]" aria-hidden="true" /> {tHC("hcComponentsSkillsSkillAuthoringAids.s16")}
+            <AlertTriangle size={13} className="text-[var(--state-warning)]" aria-hidden="true" /> {tHC("s16")}
           </>
         )}
       </p>
@@ -80,7 +80,7 @@ export function SkillLintPanel({
         </ul>
       )}
       <p className="text-[11px] text-muted-foreground">
-        {tHC("hcComponentsSkillsSkillAuthoringAids.s15")}
+        {tHC("s15")}
       </p>
     </div>
   );
@@ -92,22 +92,22 @@ export function SkillPromptPreview({ draft }: { draft: string }) {
   const ready = p.closed && p.name && p.description;
   return (
     <div className="space-y-1.5 rounded-md border border-border p-3" data-testid="skill-prompt-preview">
-      <p className="text-xs font-medium text-foreground">{tHC("hcComponentsSkillsSkillAuthoringAids.s14")}</p>
+      <p className="text-xs font-medium text-foreground">{tHC("s14")}</p>
       {ready ? (
         <>
           <p className="text-[11px] text-muted-foreground">
-            {tHC("hcComponentsSkillsSkillAuthoringAids.s13")}
+            {tHC("s13")}
           </p>
           <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-md border border-border/60 bg-muted/40 p-2 font-mono text-xs text-foreground">
             {promptLine(p.name, p.description)}
           </pre>
           <p className="text-[11px] text-muted-foreground">
-            About {estimateTokens(promptLine(p.name, p.description))} {tHC("hcComponentsSkillsSkillAuthoringAids.s12")}{" "}
-            {estimateTokens(p.body).toLocaleString("en-US")} {tHC("hcComponentsSkillsSkillAuthoringAids.s11")}
+            About {estimateTokens(promptLine(p.name, p.description))} {tHC("s12")}{" "}
+            {estimateTokens(p.body).toLocaleString("en-US")} {tHC("s11")}
           </p>
         </>
       ) : (
-        <p className="text-[11px] text-muted-foreground">{tHC("hcComponentsSkillsSkillAuthoringAids.s10")}</p>
+        <p className="text-[11px] text-muted-foreground">{tHC("s10")}</p>
       )}
     </div>
   );
@@ -124,13 +124,13 @@ export function SkillTemplatePicker({ draft, onPick }: { draft: string; onPick: 
         onOpenChange={(o) => {
           if (!o) setPending(null);
         }}
-        title={tHC("hcComponentsSkillsSkillAuthoringAids.s9")}
+        title={tHC("s9")}
         confirmLabel="Replace"
         onConfirm={() => {
           if (pending !== null) onPick(pending);
         }}
       />
-      <p className="text-xs font-medium text-foreground">{tHC("hcComponentsSkillsSkillAuthoringAids.s8")}</p>
+      <p className="text-xs font-medium text-foreground">{tHC("s8")}</p>
       <div className="flex flex-wrap gap-1.5">
         {SKILL_TEMPLATES.map((t) => (
           <button
@@ -187,8 +187,8 @@ export function SkillFilterBar({
         <Input
           value={query}
           onChange={(e) => onQuery(e.target.value)}
-          placeholder={tHC("hcComponentsSkillsSkillAuthoringAids.s7")}
-          aria-label={tHC("hcComponentsSkillsSkillAuthoringAids.s6")}
+          placeholder={tHC("s7")}
+          aria-label={tHC("s6")}
           className="ps-8"
         />
       </div>
@@ -245,16 +245,16 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
       <p className="text-sm font-medium text-foreground">Used by</p>
       {attachedAgentIds.length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcComponentsSkillsSkillAuthoringAids.s5")}
+          {tHC("s5")}
         </p>
       ) : failed ? (
         <p className="text-xs text-muted-foreground">
-          {attachedAgentIds.length} agent{attachedAgentIds.length === 1 ? "" : "s"} {tHC("hcComponentsSkillsSkillAuthoringAids.s4")}
+          {attachedAgentIds.length} agent{attachedAgentIds.length === 1 ? "" : "s"} {tHC("s4")}
         </p>
       ) : agents === null ? (
-        <p className="text-xs text-muted-foreground">{tHC("hcComponentsSkillsSkillAuthoringAids.s3")}</p>
+        <p className="text-xs text-muted-foreground">{tHC("s3")}</p>
       ) : used.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{tHC("hcComponentsSkillsSkillAuthoringAids.s2")}</p>
+        <p className="text-xs text-muted-foreground">{tHC("s2")}</p>
       ) : (
         <>
           <ul className="flex flex-wrap gap-1.5">
@@ -270,7 +270,7 @@ export function SkillUsage({ attachedAgentIds }: { attachedAgentIds: string[] })
             ))}
           </ul>
           <p className="text-[11px] text-muted-foreground">
-            {tHC("hcComponentsSkillsSkillAuthoringAids.s1")}
+            {tHC("s1")}
           </p>
         </>
       )}

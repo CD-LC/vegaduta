@@ -68,7 +68,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s8")}
+      title={tHC("s8")}
       subtitle="Live state per tenant and tool - open circuits and failure streaks in progress"
       icon={CircuitBoard}
       delay={delay}
@@ -86,11 +86,11 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
       {loading && !data && <Skeleton className="h-16 w-full" />}
       {cfg && (
         <p className="text-xs text-muted-foreground">
-          {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s7")} <b>{cfg.failureThreshold}</b> {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s6")} <b>{cfg.windowMinutes} min</b>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s5")} <b>{cfg.cooldownMinutes} min</b>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s4")}
+          {tHC("s7")} <b>{cfg.failureThreshold}</b> {tHC("s6")} <b>{cfg.windowMinutes} min</b>{tHC("s5")} <b>{cfg.cooldownMinutes} min</b>{tHC("s4")}
         </p>
       )}
       {data && entries.length === 0 && (
-        <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s3")}</p>
+        <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
       )}
       {entries.map((e) => {
         const id = `${e.tenantId}:${e.tool}`;
@@ -112,7 +112,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
               </p>
               {e.open && e.lastError && (
                 <p className="mt-1 truncate text-xs text-muted-foreground" title={e.lastError}>
-                  {tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s2")} <code>{e.lastError}</code>
+                  {tHC("s2")} <code>{e.lastError}</code>
                 </p>
               )}
             </div>
@@ -122,7 +122,7 @@ export function ToolCircuitBreakersSection({ delay }: { delay?: number }) {
           </div>
         );
       })}
-      {data?.truncated && <InfoNote>{tHC("hcPlatformadminComponentsSectionsCircuitbreakers.s1")}</InfoNote>}
+      {data?.truncated && <InfoNote>{tHC("s1")}</InfoNote>}
     </SectionCard>
   );
 }

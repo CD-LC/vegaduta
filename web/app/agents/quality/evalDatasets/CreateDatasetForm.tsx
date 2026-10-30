@@ -49,12 +49,12 @@ export default function CreateDatasetForm({
               id="eval-dataset-new-name"
               value={draft.name}
               onChange={(e) => onChange({ name: e.target.value })}
-              placeholder={tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s4")}
+              placeholder={tHC("s4")}
             />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="eval-dataset-new-threshold">
-              {tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s3")}
+              {tHC("s3")}
             </label>
             <Input
               id="eval-dataset-new-threshold"
@@ -73,7 +73,7 @@ export default function CreateDatasetForm({
             rows={2}
             value={draft.description}
             onChange={(e) => onChange({ description: e.target.value })}
-            placeholder={tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s2")}
+            placeholder={tHC("s2")}
           />
         </div>
         <DatasetModeControls
@@ -88,7 +88,7 @@ export default function CreateDatasetForm({
             Cancel
           </Button>
           <Button size="sm" onClick={onCreate} disabled={busy || !draft.name.trim()}>
-            {tHC("hcAgentsQualityEvalDatasetsCreateDatasetForm.s1")}
+            {tHC("s1")}
           </Button>
         </div>
       </CardContent>

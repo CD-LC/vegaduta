@@ -49,7 +49,7 @@ export default function EnterpriseBenefits() {
   return (
     <section className="enterprise-benefits">
       <div className="enterprise-benefits-container">
-        <h2 className="enterprise-benefits-title">{tHC("hcComponentsEnterpriselandingEnterpriseBenefits.s1")}</h2>
+        <h2 className="enterprise-benefits-title">{tHC("s1")}</h2>
         <div className="enterprise-benefits-grid">
           {benefits.map((benefit, idx) => (
             <div key={idx} className="enterprise-benefit-card">

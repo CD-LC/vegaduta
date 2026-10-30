@@ -17,7 +17,7 @@ export default function TemplateReviewSummary({
   if (!review) {
     return (
       <p className="rounded-md border border-border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
-        {tHC("hcPlatformadminComponentsTemplatesTemplateReviewSummary.s4")}
+        {tHC("s4")}
       </p>
     );
   }
@@ -30,11 +30,11 @@ export default function TemplateReviewSummary({
       data-testid="template-review-summary"
     >
       <p className="flex items-center gap-1.5 font-medium text-foreground">
-        <Sparkles size={12} aria-hidden /> {tHC("hcPlatformadminComponentsTemplatesTemplateReviewSummary.s3")}{review.standardVersion})
+        <Sparkles size={12} aria-hidden /> {tHC("s3")}{review.standardVersion})
       </p>
       <p className="text-muted-foreground">
         Rules: {review.rules.ready ? "passed" : "failed"} · {advisories.length} suggestion
-        {advisories.length === 1 ? "" : "s"} {tHC("hcPlatformadminComponentsTemplatesTemplateReviewSummary.s2")}{" "}
+        {advisories.length === 1 ? "" : "s"} {tHC("s2")}{" "}
         {review.ai.status === "UNAVAILABLE" ? "did not run" : review.ai.status.toLowerCase()}
         {review.ai.summary ? ` - ${review.ai.summary}` : ""}
       </p>
@@ -42,7 +42,7 @@ export default function TemplateReviewSummary({
       {advisories.length > 0 && <IssueLines label="Suggestions" issues={advisories} />}
       {reqs.length > 0 && (
         <p className="text-muted-foreground">
-          <span className="font-medium text-foreground">{tHC("hcPlatformadminComponentsTemplatesTemplateReviewSummary.s1")} </span>
+          <span className="font-medium text-foreground">{tHC("s1")} </span>
           {reqs.map((r) => r.label).join(" · ")}
         </p>
       )}

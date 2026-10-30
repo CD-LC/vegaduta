@@ -26,7 +26,7 @@ export default function ApprovalForm({ config, setConfig }: NodeFormProps) {
                   <p className="ax-wf-empty">{t("approvalMessageHint")}</p>
                 </div>
                 <div className="field">
-                  <Label>{tHC("hcComponentsWorkflowNodeConfigFormsApprovalForm.s2")}</Label>
+                  <Label>{tHC("s2")}</Label>
                   <textarea
                     rows={3}
                     className={TEXTAREA_CLASS}
@@ -42,7 +42,7 @@ export default function ApprovalForm({ config, setConfig }: NodeFormProps) {
                     }
                   />
                   <p className="ax-wf-empty">
-                    {tHC("hcComponentsWorkflowNodeConfigFormsApprovalForm.s1")}
+                    {tHC("s1")}
                   </p>
                 </div>
                 <label

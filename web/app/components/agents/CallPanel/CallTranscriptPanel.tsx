@@ -62,8 +62,8 @@ export default function CallTranscriptPanel({ callTranscript, pipelineBusy, last
                       <button
                         type="button"
                         className="text-muted-foreground hover:text-foreground"
-                        aria-label={tHC("hcComponentsAgentsCallPanelCallTranscriptPanel.s2")}
-                        title={tHC("hcComponentsAgentsCallPanelCallTranscriptPanel.s2")}
+                        aria-label={tHC("s2")}
+                        title={tHC("s2")}
                         onClick={replay.onSkip}
                       >
                         <FastForward size={12} />
@@ -91,7 +91,7 @@ export default function CallTranscriptPanel({ callTranscript, pipelineBusy, last
           })}
           {pipelineBusy && lastTranscript && (
             <div>
-              <span className="text-muted-foreground">{tHC("hcComponentsAgentsCallPanelCallTranscriptPanel.s1")} </span>
+              <span className="text-muted-foreground">{tHC("s1")} </span>
               {lastTranscript}
             </div>
           )}

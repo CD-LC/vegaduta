@@ -164,10 +164,10 @@ export default function SemanticSearchPanel({
           </div>
         </form>
         {sidecarDown && (
-          <p className="text-xs text-[var(--ax-amber)]">{tHC("hcComponentsKnowledgeSemanticSearchPanel.s3")}</p>
+          <p className="text-xs text-[var(--ax-amber)]">{tHC("s3")}</p>
         )}
         {recentSearches.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5" aria-label={tHC("hcComponentsKnowledgeSemanticSearchPanel.s2")} role="group">
+          <div className="flex flex-wrap items-center gap-1.5" aria-label={tHC("s2")} role="group">
             <History size={12} className="text-muted-foreground" aria-hidden="true" />
             {recentSearches.map((q) => (
               <button
@@ -269,8 +269,8 @@ export default function SemanticSearchPanel({
                     <button
                       type="button"
                       className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-secondary hover:text-foreground"
-                      aria-label={tHC("hcComponentsKnowledgeSemanticSearchPanel.s1")}
-                      title={tHC("hcComponentsKnowledgeSemanticSearchPanel.s1")}
+                      aria-label={tHC("s1")}
+                      title={tHC("s1")}
                       onClick={() => copyText(r.id, r.content)}
                     >
                       {copiedKey === r.id ? (

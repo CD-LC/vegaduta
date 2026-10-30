@@ -545,7 +545,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     <div id={GUIDE_ANCHORS.describe} className="mt-3 rounded-lg border border-border bg-background p-3">
                       <label htmlFor="agent-guide-describe-input" className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
                         <Sparkles size={13} className="text-primary" aria-hidden="true" />
-                        {tHC("hcComponentsAgentsGuideCreateAgentChecklist.s8")}
+                        {tHC("s8")}
                       </label>
                       <Textarea
                         id="agent-guide-describe-input"
@@ -553,7 +553,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                         value={sentence}
                         maxLength={DESCRIBE_MAX_CHARS}
                         disabled={drafting}
-                        placeholder={tHC("hcComponentsAgentsGuideCreateAgentChecklist.s7")}
+                        placeholder={tHC("s7")}
                         onChange={(e) => {
                           setSentence(e.target.value);
                           if (describeError) setDescribeError(null);
@@ -579,14 +579,14 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                         <div className="mt-3 rounded-lg border border-border bg-card p-3" role="status">
                           {preview.source === "fallback" && (
                             <p className="m-0 mb-2 text-xs text-muted-foreground" data-testid="basic-draft-note">
-                              {tHC("hcComponentsAgentsGuideCreateAgentChecklist.s6")}
+                              {tHC("s6")}
                             </p>
                           )}
                           <div className="text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">Name</div>
                           <div className="text-sm font-medium text-foreground">{preview.draft.name}</div>
                           {typedNameKept && (
                             <p className="m-0 mt-0.5 text-[0.6875rem] text-muted-foreground">
-                              {tHC("hcComponentsAgentsGuideCreateAgentChecklist.s5")}{name.trim()}{tHC("hcComponentsAgentsGuideCreateAgentChecklist.s4")}
+                              {tHC("s5")}{name.trim()}{tHC("s4")}
                             </p>
                           )}
                           <div className="mt-2 text-[0.6875rem] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -597,12 +597,12 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                           </div>
                           {typedPromptReplaced && (
                             <p className="m-0 mt-1 text-[0.6875rem] text-muted-foreground">
-                              {tHC("hcComponentsAgentsGuideCreateAgentChecklist.s3")}
+                              {tHC("s3")}
                             </p>
                           )}
                           <div className="mt-3 flex flex-wrap gap-2">
                             <Button type="button" size="sm" onClick={handleUsePreview}>
-                              {tHC("hcComponentsAgentsGuideCreateAgentChecklist.s2")}
+                              {tHC("s2")}
                             </Button>
                             <Button type="button" variant="outline" size="sm" onClick={() => setPreview(null)}>
                               Discard
@@ -635,7 +635,7 @@ export default function CreateAgentChecklist(props: CreateAgentChecklistProps) {
                     <dt className="text-xs font-semibold text-foreground">
                       {g.term}
                       {g.onScreen.toLowerCase() !== g.term.toLowerCase() && (
-                        <span className="ml-1.5 font-normal text-muted-foreground">{tHC("hcComponentsAgentsGuideCreateAgentChecklist.s1")}{g.onScreen}&quot;</span>
+                        <span className="ml-1.5 font-normal text-muted-foreground">{tHC("s1")}{g.onScreen}&quot;</span>
                       )}
                     </dt>
                     <dd className="m-0 mt-0.5 text-xs leading-relaxed text-muted-foreground">

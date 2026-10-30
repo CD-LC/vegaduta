@@ -47,17 +47,17 @@ export default function PublicWorkflowNav() {
         {authedHint ? (
           <Button asChild size="sm">
             <Link href="/help">
-              {tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s3")}
+              {tHC("s3")}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </Button>
         ) : (
           <>
             <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-              <Link href="/help">{tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s2")}</Link>
+              <Link href="/help">{tHC("s2")}</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
-              <Link href="/signup">{tHC("hcHelpWorkflowrecipesPublicWorkflowNav.s1")}</Link>
+              <Link href="/signup">{tHC("s1")}</Link>
             </Button>
           </>
         )}

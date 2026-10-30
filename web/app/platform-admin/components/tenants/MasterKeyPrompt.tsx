@@ -89,7 +89,7 @@ export default function MasterKeyPrompt({
               <div className="flex items-center gap-2">
                 <KeyRound size={16} className="text-primary" />
                 <h2 id="master-key-prompt-title" className="text-sm font-semibold text-foreground">
-                  {tHC("hcPlatformadminComponentsTenantsMasterKeyPrompt.s2")}
+                  {tHC("s2")}
                 </h2>
               </div>
               <button
@@ -110,7 +110,7 @@ export default function MasterKeyPrompt({
 
             <div className="mt-3 space-y-1.5">
               <Label htmlFor="master-key-input" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsTenantsMasterKeyPrompt.s1")}
+                {tHC("s1")}
               </Label>
               <Input
                 id="master-key-input"

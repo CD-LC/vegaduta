@@ -264,7 +264,7 @@ export default function AdminGuardrailsPage() {
       {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          {tHC("hcAdminGuardrailsPage.s28")}
+          {tHC("s28")}
         </div>
       )}
 
@@ -281,7 +281,7 @@ export default function AdminGuardrailsPage() {
           {error && (
             <Alert variant="destructive">
               <TriangleAlert className="size-4" aria-hidden="true" />
-              <AlertTitle>{tHC("hcAdminGuardrailsPage.s27")}</AlertTitle>
+              <AlertTitle>{tHC("s27")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -295,9 +295,9 @@ export default function AdminGuardrailsPage() {
           {!canManageGuardrails && (
             <Alert>
               <Shield className="size-4" aria-hidden="true" />
-              <AlertTitle>{tHC("hcAdminGuardrailsPage.s26")}</AlertTitle>
+              <AlertTitle>{tHC("s26")}</AlertTitle>
               <AlertDescription>
-                {tHC("hcAdminGuardrailsPage.s25")}
+                {tHC("s25")}
               </AlertDescription>
             </Alert>
           )}
@@ -305,14 +305,14 @@ export default function AdminGuardrailsPage() {
           {canManageGuardrails && isFreePlan && (
             <Alert>
               <Sparkles className="size-4" aria-hidden="true" />
-              <AlertTitle>{tHC("hcAdminGuardrailsPage.s24")}</AlertTitle>
+              <AlertTitle>{tHC("s24")}</AlertTitle>
               <AlertDescription className="flex flex-col items-start gap-3">
                 <span>
-                  {tHC("hcAdminGuardrailsPage.s23")}
+                  {tHC("s23")}
                 </span>
                 {isBillingEnabled() && (
                   <Button asChild size="sm">
-                    <Link href="/admin/billing">{tHC("hcAdminGuardrailsPage.s22")}</Link>
+                    <Link href="/admin/billing">{tHC("s22")}</Link>
                   </Button>
                 )}
               </AlertDescription>
@@ -321,39 +321,39 @@ export default function AdminGuardrailsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{tHC("hcAdminGuardrailsPage.s21")}</CardTitle>
+              <CardTitle>{tHC("s21")}</CardTitle>
               <CardDescription>
-                {tHC("hcAdminGuardrailsPage.s20")}
+                {tHC("s20")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 text-sm text-muted-foreground">
               <p>
-                <span className="font-medium text-foreground">{tHC("hcAdminGuardrailsPage.s19")}</span> {tHC("hcAdminGuardrailsPage.s18")}
+                <span className="font-medium text-foreground">{tHC("s19")}</span> {tHC("s18")}
               </p>
               <p>
-                <span className="font-medium text-foreground">{tHC("hcAdminGuardrailsPage.s17")}</span> {tHC("hcAdminGuardrailsPage.s16")} <em>{tHC("hcAdminGuardrailsPage.s15")}</em> {tHC("hcAdminGuardrailsPage.s14")} <Link href="/agents" className="underline underline-offset-2">Agents</Link> {tHC("hcAdminGuardrailsPage.s13")} <strong>Block</strong> {tHC("hcAdminGuardrailsPage.s12")} <strong>Redact</strong> {tHC("hcAdminGuardrailsPage.s11")}
+                <span className="font-medium text-foreground">{tHC("s17")}</span> {tHC("s16")} <em>{tHC("s15")}</em> {tHC("s14")} <Link href="/agents" className="underline underline-offset-2">Agents</Link> {tHC("s13")} <strong>Block</strong> {tHC("s12")} <strong>Redact</strong> {tHC("s11")}
               </p>
               <p>
-                <span className="font-medium text-foreground">{tHC("hcAdminGuardrailsPage.s10")}</span>{tHC("hcAdminGuardrailsPage.s9")}
+                <span className="font-medium text-foreground">{tHC("s10")}</span>{tHC("s9")}
               </p>
             </CardContent>
           </Card>
 
           {rules.length > 8 && (
             <div className="max-w-sm">
-              <Label htmlFor="guardrail-rule-search" className="sr-only">{tHC("hcAdminGuardrailsPage.s8")}</Label>
+              <Label htmlFor="guardrail-rule-search" className="sr-only">{tHC("s8")}</Label>
               <Input
                 id="guardrail-rule-search"
                 value={ruleQuery}
                 onChange={(e) => setRuleQuery(e.target.value)}
-                placeholder={tHC("hcAdminGuardrailsPage.s7")}
+                placeholder={tHC("s7")}
               />
             </div>
           )}
           <Card>
             <CardHeader className="flex flex-row items-start justify-between gap-4">
               <div className="flex flex-col gap-1.5">
-                <CardTitle>{tHC("hcAdminGuardrailsPage.s6")}</CardTitle>
+                <CardTitle>{tHC("s6")}</CardTitle>
                 <CardDescription>
                   {custom.length === 0
                     ? "You haven't written any yet."
@@ -371,7 +371,7 @@ export default function AdminGuardrailsPage() {
                   upgradeHref="/admin/billing"
                   onClick={startCreate}
                 >
-                  <Plus className="size-4" aria-hidden="true" /> {tHC("hcAdminGuardrailsPage.s5")}
+                  <Plus className="size-4" aria-hidden="true" /> {tHC("s5")}
                 </Button>
               )}
             </CardHeader>
@@ -394,7 +394,7 @@ export default function AdminGuardrailsPage() {
 
               {custom.length === 0 && !formOpen && (
                 <p className="text-sm text-muted-foreground">
-                  {tHC("hcAdminGuardrailsPage.s4")}
+                  {tHC("s4")}
                 </p>
               )}
 
@@ -413,15 +413,15 @@ export default function AdminGuardrailsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>{tHC("hcAdminGuardrailsPage.s3")}</CardTitle>
+              <CardTitle>{tHC("s3")}</CardTitle>
               <CardDescription>
-                {tHC("hcAdminGuardrailsPage.s2")}
+                {tHC("s2")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {defaults.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  {tHC("hcAdminGuardrailsPage.s1")}
+                  {tHC("s1")}
                 </p>
               ) : (
                 defaultsPagination.pageItems.map((rule) => renderRuleRow(rule, false))

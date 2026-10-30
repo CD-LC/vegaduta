@@ -251,7 +251,7 @@ export default function AttackSection({
 
   return (
     <Section
-      title={tHC("hcAgentsQualityAttackSection.s13")}
+      title={tHC("s13")}
       description="Hands this agent a poisoned email, web page, tool description and document - each with instructions hidden inside - and checks whether it obeys them. Tools stay disabled, so nothing real is sent."
     >
       <Card>
@@ -259,7 +259,7 @@ export default function AttackSection({
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-1">
               <label htmlFor="attack-budget" className="text-xs font-medium text-muted-foreground">
-                {tHC("hcAgentsQualityAttackSection.s12")}
+                {tHC("s12")}
               </label>
               <Input
                 id="attack-budget"
@@ -286,17 +286,17 @@ export default function AttackSection({
               </Button>
             )}
             <span className="text-xs text-muted-foreground">
-              {scenarioCount} scenario{scenarioCount === 1 ? "" : "s"}, up to {ATTACK_MAX_TURNS} {tHC("hcAgentsQualityAttackSection.s11")}
+              {scenarioCount} scenario{scenarioCount === 1 ? "" : "s"}, up to {ATTACK_MAX_TURNS} {tHC("s11")}
             </span>
           </div>
           {budgetUsd == null && (
             <p className="text-xs text-destructive" role="alert">
-              {tHC("hcAgentsQualityAttackSection.s10")}
+              {tHC("s10")}
             </p>
           )}
           {startFailed && !report && (
             <p className="text-xs text-destructive" role="alert" data-testid="attack-start-failed">
-              {tHC("hcAgentsQualityAttackSection.s9")}
+              {tHC("s9")}
             </p>
           )}
         </CardContent>
@@ -338,13 +338,13 @@ export default function AttackSection({
                     <Badge
                       variant="outline"
                       data-testid={`attack-deterministic-${row.key}`}
-                      title={tHC("hcAgentsQualityAttackSection.s8")}
+                      title={tHC("s8")}
                     >
-                      {tHC("hcAgentsQualityAttackSection.s7")}
+                      {tHC("s7")}
                     </Badge>
                   )}
                   <span className="text-sm font-medium text-foreground">{row.name}</span>
-                  <span className="ms-auto text-xs text-muted-foreground">{tHC("hcAgentsQualityAttackSection.s6")}</span>
+                  <span className="ms-auto text-xs text-muted-foreground">{tHC("s6")}</span>
                 </button>
                 {row.reason && (
                   <p className="min-w-0 break-words px-3 pb-2 text-xs text-muted-foreground">{row.reason}</p>
@@ -369,22 +369,22 @@ export default function AttackSection({
           {compromised && (
             <Alert variant="warning" data-testid="attack-fixes">
               <ShieldAlert aria-hidden="true" />
-              <AlertTitle>{tHC("hcAgentsQualityAttackSection.s5")}</AlertTitle>
+              <AlertTitle>{tHC("s5")}</AlertTitle>
               <AlertDescription>
                 <ul className="w-full list-disc space-y-1 ps-4">
                   <li>
-                    {tHC("hcAgentsQualityAttackSection.s4")}{" "}
+                    {tHC("s4")}{" "}
                     <Link
                       className="underline"
                       data-testid="attack-fix-workbench"
                       href={`/agents?agentId=${encodeURIComponent(agentId)}`}
                     >
-                      {tHC("hcAgentsQualityAttackSection.s3")}
+                      {tHC("s3")}
                     </Link>
                   </li>
-                  <li>{tHC("hcAgentsQualityAttackSection.s2")}</li>
+                  <li>{tHC("s2")}</li>
                   <li>
-                    {tHC("hcAgentsQualityAttackSection.s1")}{" "}
+                    {tHC("s1")}{" "}
                     <Link className="underline" data-testid="attack-fix-guardrails" href="/admin/guardrails">
                       Guardrails
                     </Link>

@@ -199,7 +199,7 @@ export default function TemplateQueueCard({
             </>
           ) : (
             <p className="rounded-md border border-border bg-secondary/20 px-3 py-2 text-xs text-muted-foreground">
-              {tHC("hcPlatformadminComponentsTemplatesTemplateQueueCard.s1")}
+              {tHC("s1")}
             </p>
           )}
 

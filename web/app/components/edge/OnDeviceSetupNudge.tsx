@@ -257,7 +257,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             <button
               type="button"
               onClick={dismiss}
-              aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
+              aria-label={tHC("s1")}
               className="flex size-6 shrink-0 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
             >
               <X size={12} aria-hidden="true" />
@@ -287,12 +287,12 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             {" — "}
             {EDGE_BRANDING.readyToEnableBody}{" "}
             <span className="whitespace-nowrap text-foreground/80">
-              One-time {formatSize(model.sizeBytes)} {tHC("hcComponentsEdgeOnDeviceSetupNudge.s5")}
+              One-time {formatSize(model.sizeBytes)} {tHC("s5")}
             </span>
             {saveData && (
               <span className="text-[var(--state-warning)]">
                 {" "}
-                {tHC("hcComponentsEdgeOnDeviceSetupNudge.s4")}
+                {tHC("s4")}
               </span>
             )}
           </p>
@@ -306,7 +306,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
               <button
                 type="button"
                 onClick={dismiss}
-                aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
+                aria-label={tHC("s1")}
                 className="flex size-6 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
               >
                 <X size={12} aria-hidden="true" />
@@ -325,7 +325,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
         <span className="font-medium text-foreground">Downloading {phase.model.displayName}</span>
         {" · "}
         <span className="tabular-nums">{phase.pct}%</span>
-        {" — "}{tHC("hcComponentsEdgeOnDeviceSetupNudge.s3")}
+        {" — "}{tHC("s3")}
       </span>,
       false
     );
@@ -334,7 +334,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
   if (phase.kind === "done") {
     return shell(
       <span>
-        <span className="font-medium text-foreground">{EDGE_BRANDING.name} {tHC("hcComponentsEdgeOnDeviceSetupNudge.s2")}</span> {EDGE_BRANDING.promise}
+        <span className="font-medium text-foreground">{EDGE_BRANDING.name} {tHC("s2")}</span> {EDGE_BRANDING.promise}
       </span>,
       false
     );
@@ -377,7 +377,7 @@ export default function OnDeviceSetupNudge({ className }: { className?: string }
             <button
               type="button"
               onClick={dismiss}
-              aria-label={tHC("hcComponentsEdgeOnDeviceSetupNudge.s1")}
+              aria-label={tHC("s1")}
               className="flex size-6 items-center justify-center rounded border-0 bg-transparent p-0 text-muted-foreground shadow-none transition-colors hover:bg-secondary hover:text-foreground"
             >
               <X size={12} aria-hidden="true" />

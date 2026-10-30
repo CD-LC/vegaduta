@@ -242,8 +242,8 @@ export default function SsoConnectionForm() {
               value={form.providerType}
               onChange={(e) => set("providerType", e.target.value as SsoProviderType)}
             >
-              <option value="OIDC">{tHC("hcComponentsSsoSsoConnectionForm.s2")}</option>
-              <option value="SAML">{tHC("hcComponentsSsoSsoConnectionForm.s1")}</option>
+              <option value="OIDC">{tHC("s2")}</option>
+              <option value="SAML">{tHC("s1")}</option>
             </select>
           </div>
           {text("displayName", t("ssoDisplayName"), { placeholder: "Acme SSO" })}

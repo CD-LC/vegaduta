@@ -123,16 +123,16 @@ export default function GovernanceTab({ onError }) {
           <CardContent>
             {policyError ? (
               <div className="text-sm text-muted-foreground">
-                <p className="mb-2 text-destructive">{tHC("hcCodeintelGovernanceTab.s6")} {policyError}</p>
+                <p className="mb-2 text-destructive">{tHC("s6")} {policyError}</p>
                 <p>
-                  {tHC("hcCodeintelGovernanceTab.s5")}
+                  {tHC("s5")}
                 </p>
                 <Button variant="secondary" size="sm" className="mt-2" onClick={refresh}>
                   <RefreshCw size={13} /> {t("retryButton")}
                 </Button>
               </div>
             ) : !policy ? (
-              <p className="text-sm text-muted-foreground">{tHC("hcCodeintelGovernanceTab.s4")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             ) : (
               <>
                 <Field label={t("autonomyModeLabel")}>
@@ -163,7 +163,7 @@ export default function GovernanceTab({ onError }) {
                   />
                 </div>
                 <div className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                  caps: {policy.max_files_per_apply} {tHC("hcCodeintelGovernanceTab.s3")} {Math.round(policy.max_bytes_per_file / 1024)} {tHC("hcCodeintelGovernanceTab.s2")} {policy.max_command_timeout}{tHC("hcCodeintelGovernanceTab.s1")}
+                  caps: {policy.max_files_per_apply} {tHC("s3")} {Math.round(policy.max_bytes_per_file / 1024)} {tHC("s2")} {policy.max_command_timeout}{tHC("s1")}
                   <br />
                   protected: {(policy.protected_path_globs || []).join(", ")}
                 </div>

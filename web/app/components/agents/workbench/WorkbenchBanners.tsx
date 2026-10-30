@@ -54,7 +54,7 @@ export default function WorkbenchBanners() {
         >
           <AlertTriangle size={15} className="mt-0.5 shrink-0" />
           <span className="min-w-0 flex-1">
-            {tHC("hcComponentsAgentsWorkbenchWorkbenchBanners.s1")}{" "}
+            {tHC("s1")}{" "}
             <button
               type="button"
               onClick={() => fetchTenantSettings()}

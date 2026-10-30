@@ -131,7 +131,7 @@ function MaintenanceSection() {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminMaintenancePage.s20")}
+      title={tHC("s20")}
       subtitle="While on, every non-platform-admin API call gets 503 and the tenant app shows its maintenance screen. Platform admins keep access, so this console keeps working."
       icon={Construction}
       actions={
@@ -139,7 +139,7 @@ function MaintenanceSection() {
           type="button"
           size="icon"
           variant="outline"
-          aria-label={tHC("hcPlatformadminMaintenancePage.s22")}
+          aria-label={tHC("s22")}
           onClick={() => void load()}
         >
           <RefreshCw />
@@ -163,14 +163,14 @@ function MaintenanceSection() {
               </span>
             )}
             {wasEnabled && current.endsAt && (
-              <span className="text-xs text-muted-foreground">{tHC("hcPlatformadminMaintenancePage.s21")} {formatExact(current.endsAt)}</span>
+              <span className="text-xs text-muted-foreground">{tHC("s21")} {formatExact(current.endsAt)}</span>
             )}
           </div>
 
           <div className="flex items-center gap-2 text-sm">
             <SwitchToggle
               on={enabled}
-              label={tHC("hcPlatformadminMaintenancePage.s20")}
+              label={tHC("s20")}
               disabled={saving}
               onClick={() => setEnabled(!enabled)}
             />
@@ -179,14 +179,14 @@ function MaintenanceSection() {
 
           <div className="space-y-1.5">
             <Label htmlFor="maint-message" className="text-xs text-muted-foreground">
-              {tHC("hcPlatformadminMaintenancePage.s19")}
+              {tHC("s19")}
             </Label>
             <Textarea
               id="maint-message"
               rows={3}
               value={message}
               maxLength={500}
-              placeholder={tHC("hcPlatformadminMaintenancePage.s18")}
+              placeholder={tHC("s18")}
               onChange={(e: any) => setMessage(e.target.value)}
               disabled={saving}
             />
@@ -194,7 +194,7 @@ function MaintenanceSection() {
 
           <div className="space-y-1.5">
             <Label htmlFor="maint-ends" className="text-xs text-muted-foreground">
-              {tHC("hcPlatformadminMaintenancePage.s17")}
+              {tHC("s17")}
             </Label>
             <Input
               id="maint-ends"
@@ -205,14 +205,14 @@ function MaintenanceSection() {
               disabled={saving}
             />
             <p className="text-[11px] text-muted-foreground">
-              {tHC("hcPlatformadminMaintenancePage.s16")}
+              {tHC("s16")}
             </p>
           </div>
 
           {enabled && !wasEnabled && (
             <div className="space-y-1.5 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <Label htmlFor="maint-confirm" className="text-xs">
-                Type <code className="font-mono">{MAINTENANCE_CONFIRM_WORD}</code> {tHC("hcPlatformadminMaintenancePage.s15")}
+                Type <code className="font-mono">{MAINTENANCE_CONFIRM_WORD}</code> {tHC("s15")}
               </Label>
               <Input
                 id="maint-confirm"
@@ -271,23 +271,23 @@ function MaintenanceSection() {
 function AnnouncementPreview({ a }: { a: AnnouncementState }) {
     const tHC = useTranslations("hcPlatformadminMaintenancePage");
   if (!a.message.trim()) {
-    return <p className="text-xs text-muted-foreground">{tHC("hcPlatformadminMaintenancePage.s14")}</p>;
+    return <p className="text-xs text-muted-foreground">{tHC("s14")}</p>;
   }
   return (
     <div
       className={`flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm ${announcementLevelClasses(a.level)}`}
       role="note"
-      aria-label={tHC("hcPlatformadminMaintenancePage.s13")}
+      aria-label={tHC("s13")}
     >
       <Megaphone size={14} className="shrink-0" aria-hidden="true" />
       <span className="min-w-0 flex-1">{a.message}</span>
       {a.linkUrl && (
         <span className="inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2">
-          {tHC("hcPlatformadminMaintenancePage.s12")} <ExternalLink size={11} />
+          {tHC("s12")} <ExternalLink size={11} />
         </span>
       )}
       <span className="text-xs opacity-70" aria-hidden="true">
-        {tHC("hcPlatformadminMaintenancePage.s11")}
+        {tHC("s11")}
       </span>
     </div>
   );
@@ -349,7 +349,7 @@ function AnnouncementSection() {
 
   return (
     <SectionCard
-      title={tHC("hcPlatformadminMaintenancePage.s10")}
+      title={tHC("s10")}
       subtitle="A dismissible banner at the top of the tenant app for every signed-in and public visitor. Users who dismiss it see it again only if the message changes."
       icon={Megaphone}
     >
@@ -366,7 +366,7 @@ function AnnouncementSection() {
             {announcementLive(current) ? (
               <ToneChip tone="warn" label="Live" />
             ) : (
-              <ToneChip tone="muted" label={tHC("hcPlatformadminMaintenancePage.s9")} />
+              <ToneChip tone="muted" label={tHC("s9")} />
             )}
             {current.enabled && current.expiresAt && !announcementLive(current) && (
               <span className="text-xs text-muted-foreground">expired {formatRelative(current.expiresAt)}</span>
@@ -376,7 +376,7 @@ function AnnouncementSection() {
           <div className="flex items-center gap-2 text-sm">
             <SwitchToggle
               on={draft.enabled}
-              label={tHC("hcPlatformadminMaintenancePage.s8")}
+              label={tHC("s8")}
               disabled={saving}
               onClick={() => setDraft({ ...draft, enabled: !draft.enabled })}
             />
@@ -417,7 +417,7 @@ function AnnouncementSection() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ann-link" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminMaintenancePage.s7")}
+                {tHC("s7")}
               </Label>
               <Input
                 id="ann-link"
@@ -430,7 +430,7 @@ function AnnouncementSection() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ann-expires" className="text-xs text-muted-foreground">
-                {tHC("hcPlatformadminMaintenancePage.s6")}
+                {tHC("s6")}
               </Label>
               <Input
                 id="ann-expires"
@@ -444,7 +444,7 @@ function AnnouncementSection() {
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("hcPlatformadminMaintenancePage.s5")}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s5")}</p>
             <AnnouncementPreview a={candidate} />
           </div>
 
@@ -468,12 +468,12 @@ function AnnouncementSection() {
 export default function MaintenancePage() {
     const tHC = useTranslations("hcPlatformadminMaintenancePage");
   return (
-    <AdminShell title={tHC("hcPlatformadminMaintenancePage.s4")}>
+    <AdminShell title={tHC("s4")}>
       <PageHint>
-        {tHC("hcPlatformadminMaintenancePage.s3")}
+        {tHC("s3")}
       </PageHint>
       <InfoNote>
-        {tHC("hcPlatformadminMaintenancePage.s2")} <code>/api/public/status</code> {tHC("hcPlatformadminMaintenancePage.s1")}
+        {tHC("s2")} <code>/api/public/status</code> {tHC("s1")}
       </InfoNote>
       <MaintenanceSection />
       <AnnouncementSection />

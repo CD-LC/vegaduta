@@ -107,7 +107,7 @@ export function GrantWizard({
           <Input
             id="grant-audience"
             value={form.audience}
-            placeholder={tHC("hcAdminAgenttrustGrantWizard.s2")}
+            placeholder={tHC("s2")}
             onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldAudienceHint")}</p>
@@ -117,7 +117,7 @@ export function GrantWizard({
           <Input
             id="grant-scopes"
             value={form.scopes}
-            placeholder={tHC("hcAdminAgenttrustGrantWizard.s1")}
+            placeholder={tHC("s1")}
             onChange={(e) => setForm((f) => ({ ...f, scopes: e.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{t("fieldScopesHint")}</p>

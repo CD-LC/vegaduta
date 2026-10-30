@@ -48,7 +48,7 @@ function Unsupported({ type }: { type: string }) {
     const tHC = useTranslations("hcComponentsGenerativeuiGenerativeUiRenderer");
   return (
     <div className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-      {tHC("hcComponentsGenerativeuiGenerativeUiRenderer.s2")} {type}
+      {tHC("s2")} {type}
     </div>
   );
 }
@@ -403,7 +403,7 @@ export function GenerativeUiRenderer({
   return (
     <div className="generative-ui rounded-xl border border-border bg-background/60 p-3">
       {errors && errors.length > 0 && (
-        <p className="mb-2 text-xs text-muted-foreground">{tHC("hcComponentsGenerativeuiGenerativeUiRenderer.s1")}{errors.length}).</p>
+        <p className="mb-2 text-xs text-muted-foreground">{tHC("s1")}{errors.length}).</p>
       )}
       <Node node={spec.root} onAction={handle} />
       {fired && <p className="mt-2 text-xs text-muted-foreground">Sent.</p>}

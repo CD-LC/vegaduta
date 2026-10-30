@@ -150,7 +150,7 @@ export default function DemoSandboxesPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminDemosandboxesPage.s23")}
+      title={tHC("s23")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} title="Refresh">
           <RefreshCw size={14} className={loading ? "animate-spin" : undefined} /> Refresh
@@ -158,10 +158,10 @@ export default function DemoSandboxesPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminDemosandboxesPage.s22")}{" "}
-        {RECLAIM_BATCH_LIMIT}{tHC("hcPlatformadminDemosandboxesPage.s21")}{" "}
+        {tHC("s22")}{" "}
+        {RECLAIM_BATCH_LIMIT}{tHC("s21")}{" "}
         <Link href="/platform-admin/demo-sandbox" className="underline underline-offset-2 hover:text-foreground">
-          {tHC("hcPlatformadminDemosandboxesPage.s20")}
+          {tHC("s20")}
         </Link>
         .
       </PageHint>
@@ -175,7 +175,7 @@ export default function DemoSandboxesPage() {
 
       {inventory && (
         <>
-          <SectionCard title={tHC("hcPlatformadminDemosandboxesPage.s19")} icon={ShieldCheck} subtitle="Protected - cannot be reclaimed">
+          <SectionCard title={tHC("s19")} icon={ShieldCheck} subtitle="Protected - cannot be reclaimed">
             {inventory.shared ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3">
                 <div className="min-w-0">
@@ -191,15 +191,15 @@ export default function DemoSandboxesPage() {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminDemosandboxesPage.s18")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s18")}</p>
             )}
             <InfoNote>
-              {tHC("hcPlatformadminDemosandboxesPage.s17")}
+              {tHC("s17")}
             </InfoNote>
           </SectionCard>
 
           <SectionCard
-            title={tHC("hcPlatformadminDemosandboxesPage.s16")}
+            title={tHC("s16")}
             icon={Recycle}
             subtitle={`${total.toLocaleString()} reclaimable${total > rows.length ? ` (showing ${rows.length})` : ""}`}
             delay={0.03}
@@ -212,36 +212,36 @@ export default function DemoSandboxesPage() {
                   onClick={() => begin("selected")}
                   title={`Erase the selected sandboxes (first ${RECLAIM_BATCH_LIMIT} per click)`}
                 >
-                  {tHC("hcPlatformadminDemosandboxesPage.s15")}{Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
+                  {tHC("s15")}{Math.min(selectedCount, RECLAIM_BATCH_LIMIT)})
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   disabled={total === 0 || reclaiming || !!pending}
                   onClick={() => begin("all")}
-                  title={tHC("hcPlatformadminDemosandboxesPage.s14")}
+                  title={tHC("s14")}
                 >
-                  {tHC("hcPlatformadminDemosandboxesPage.s13")}{RECLAIM_BATCH_LIMIT} {tHC("hcPlatformadminDemosandboxesPage.s12")}
+                  {tHC("s13")}{RECLAIM_BATCH_LIMIT} {tHC("s12")}
                 </Button>
               </div>
             }
           >
             {selectedCount > RECLAIM_BATCH_LIMIT && (
               <p className="text-xs text-[var(--warning-text)]">
-                {selectedCount} {tHC("hcPlatformadminDemosandboxesPage.s11")} {RECLAIM_BATCH_LIMIT}{tHC("hcPlatformadminDemosandboxesPage.s10")}
+                {selectedCount} {tHC("s11")} {RECLAIM_BATCH_LIMIT}{tHC("s10")}
               </p>
             )}
 
             {pending && masterKey && (
               <div className="space-y-2 rounded-lg border border-destructive/40 bg-destructive/5 p-3">
                 <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
-                  <AlertTriangle size={14} /> {tHC("hcPlatformadminDemosandboxesPage.s9")} {confirmCount} {tHC("hcPlatformadminDemosandboxesPage.s8")}
+                  <AlertTriangle size={14} /> {tHC("s9")} {confirmCount} {tHC("s8")}
                   {confirmCount === 1 ? "" : "s"}?
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {pending.mode === "all" ? `The server picks the next batch of up to ${RECLAIM_BATCH_LIMIT}. ` : ""}
-                  {tHC("hcPlatformadminDemosandboxesPage.s7")}{" "}
-                  <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> {tHC("hcPlatformadminDemosandboxesPage.s6")}
+                  {tHC("s7")}{" "}
+                  <code className="font-semibold">{RECLAIM_CONFIRM_WORD}</code> {tHC("s6")}
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Input
@@ -270,7 +270,7 @@ export default function DemoSandboxesPage() {
 
             {lastResult && (
               <div className="space-y-1 rounded-lg border border-border p-3 text-xs">
-                <p className="font-semibold">{tHC("hcPlatformadminDemosandboxesPage.s5")} {reclaimSummary(lastResult)}</p>
+                <p className="font-semibold">{tHC("s5")} {reclaimSummary(lastResult)}</p>
                 {lastResult.failed.length > 0 && (
                   <ul className="list-disc ps-5 text-destructive">
                     {lastResult.failed.map((f) => (
@@ -282,14 +282,14 @@ export default function DemoSandboxesPage() {
                 )}
                 {lastResult.remaining > 0 && !pending && (
                   <Button size="sm" variant="outline" disabled={reclaiming} onClick={() => begin("all")}>
-                    {tHC("hcPlatformadminDemosandboxesPage.s4")}{Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
+                    {tHC("s4")}{Math.min(RECLAIM_BATCH_LIMIT, lastResult.remaining)} of {lastResult.remaining})
                   </Button>
                 )}
               </div>
             )}
 
             {rows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminDemosandboxesPage.s3")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s3")}</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
@@ -298,7 +298,7 @@ export default function DemoSandboxesPage() {
                       <th className="w-8 px-2 py-1.5 text-start">
                         <Checkbox
                           checked={allOnPageSelected}
-                          aria-label={tHC("hcPlatformadminDemosandboxesPage.s2")}
+                          aria-label={tHC("s2")}
                           onCheckedChange={() => togglePage()}
                         />
                       </th>
@@ -306,7 +306,7 @@ export default function DemoSandboxesPage() {
                       <th className="px-2 py-1.5 text-start font-medium">Schema</th>
                       <th className="px-2 py-1.5 text-start font-medium">Status</th>
                       <th className="px-2 py-1.5 text-start font-medium">Created</th>
-                      <th className="px-2 py-1.5 text-start font-medium">{tHC("hcPlatformadminDemosandboxesPage.s1")}</th>
+                      <th className="px-2 py-1.5 text-start font-medium">{tHC("s1")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">

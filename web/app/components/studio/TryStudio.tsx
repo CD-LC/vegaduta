@@ -359,10 +359,10 @@ export default function TryStudio() {
       <div ref={studioRef} className="mt-24 scroll-mt-20">
         <div className="max-w-2xl">
           <div className="mb-2 inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
-            <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioTryStudio.s7")}
+            <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" /> {tHC("s7")}
           </div>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {tHC("hcComponentsStudioTryStudio.s6")}
+            {tHC("s6")}
           </h2>
         </div>
       </div>
@@ -375,14 +375,14 @@ export default function TryStudio() {
             animate={{ opacity: 1 }}
             className="mt-10 rounded-2xl border border-border/60 p-6"
           >
-            <div className="mb-1 text-lg font-semibold">{tHC("hcComponentsStudioTryStudio.s5")}</div>
+            <div className="mb-1 text-lg font-semibold">{tHC("s5")}</div>
             <p className="mb-4 text-sm text-muted-foreground">{unavailable}</p>
             <div className="flex gap-2">
               <Button onClick={() => window.location.reload()}>
-                <RefreshCw aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("hcComponentsStudioTryStudio.s4")}
+                <RefreshCw aria-hidden="true" className="me-2 h-4 w-4 shrink-0" /> {tHC("s4")}
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/signup">{tHC("hcComponentsStudioTryStudio.s3")}</Link>
+                <Link href="/signup">{tHC("s3")}</Link>
               </Button>
             </div>
           </motion.div>
@@ -523,7 +523,7 @@ export default function TryStudio() {
               </div>
 
               {/* The phone: the same object as in the hero, now rendered from the visitor's own agent. */}
-              <aside className="hidden xl:block" aria-label={tHC("hcComponentsStudioTryStudio.s2")} data-tour="phone">
+              <aside className="hidden xl:block" aria-label={tHC("s2")} data-tour="phone">
                 <div className="sticky top-20">
                   <PhoneStage
                     scene={phoneScene}
@@ -534,7 +534,7 @@ export default function TryStudio() {
                     shareUrl={shareUrl}
                   />
                   <p className="mx-auto mt-4 max-w-[230px] text-center text-[11px] leading-relaxed text-muted-foreground">
-                    {tHC("hcComponentsStudioTryStudio.s1")}
+                    {tHC("s1")}
                   </p>
                 </div>
               </aside>

@@ -389,7 +389,7 @@ export default function LandingNav({ journey, tried }: { journey: ReturnType<typ
               {/* How it works section */}
               <div>
                 <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground/70">
-                  {tHC("hcComponentsDemolandingLandingNav.s1")}
+                  {tHC("s1")}
                 </h3>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
                   {MENU_ANCHOR_ITEMS.map((l) => {

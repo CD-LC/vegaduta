@@ -337,7 +337,7 @@ export default function UserToolScriptsPanel() {
               </div>
             </div>
             <p id="uts-tool-name-help" className="text-xs text-muted-foreground">
-              {tHC("hcComponentsUserToolScriptsPanel.s1")}
+              {tHC("s1")}
             </p>
             <div className="space-y-1">
               <Label htmlFor={descriptionId}>{t("descriptionLabel")}</Label>

@@ -172,7 +172,7 @@ export default function RlArmsEditor({
   }
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">{tHC("hcComponentsAgentsRlArmsEditor.s33")}</p>;
+    return <p className="text-sm text-muted-foreground">{tHC("s33")}</p>;
   }
 
   // Endpoint unreachable/absent - say that, rather than implying zero arms.
@@ -180,10 +180,10 @@ export default function RlArmsEditor({
     return (
       <Alert>
         <Info aria-hidden="true" />
-        <AlertTitle>{tHC("hcComponentsAgentsRlArmsEditor.s32")}</AlertTitle>
+        <AlertTitle>{tHC("s32")}</AlertTitle>
         <AlertDescription>
           <p>
-            {tHC("hcComponentsAgentsRlArmsEditor.s31")}
+            {tHC("s31")}
           </p>
         </AlertDescription>
       </Alert>
@@ -199,13 +199,13 @@ export default function RlArmsEditor({
       {empty && policyEnabled && (
         <Alert variant="destructive">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>{tHC("hcComponentsAgentsRlArmsEditor.s30")}</AlertTitle>
+          <AlertTitle>{tHC("s30")}</AlertTitle>
           <AlertDescription>
             <p>
-              {tHC("hcComponentsAgentsRlArmsEditor.s29")} <strong>{tHC("hcComponentsAgentsRlArmsEditor.s28")}</strong>{tHC("hcComponentsAgentsRlArmsEditor.s27")}{" "}
-              <strong>{tHC("hcComponentsAgentsRlArmsEditor.s26")}</strong> {tHC("hcComponentsAgentsRlArmsEditor.s25")}
+              {tHC("s29")} <strong>{tHC("s28")}</strong>{tHC("s27")}{" "}
+              <strong>{tHC("s26")}</strong> {tHC("s25")}
             </p>
-            {!canEdit && <p>{tHC("hcComponentsAgentsRlArmsEditor.s24")}</p>}
+            {!canEdit && <p>{tHC("s24")}</p>}
           </AlertDescription>
         </Alert>
       )}
@@ -213,10 +213,10 @@ export default function RlArmsEditor({
       {empty && !policyEnabled && (
         <Alert>
           <Info aria-hidden="true" />
-          <AlertTitle>{tHC("hcComponentsAgentsRlArmsEditor.s23")}</AlertTitle>
+          <AlertTitle>{tHC("s23")}</AlertTitle>
           <AlertDescription>
             <p>
-              {tHC("hcComponentsAgentsRlArmsEditor.s22")}
+              {tHC("s22")}
             </p>
           </AlertDescription>
         </Alert>
@@ -225,7 +225,7 @@ export default function RlArmsEditor({
       {error && (
         <Alert variant="destructive">
           <AlertTriangle aria-hidden="true" />
-          <AlertTitle>{tHC("hcComponentsAgentsRlArmsEditor.s21")}</AlertTitle>
+          <AlertTitle>{tHC("s21")}</AlertTitle>
           <AlertDescription>
             <p>{error}</p>
           </AlertDescription>
@@ -237,10 +237,10 @@ export default function RlArmsEditor({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{tHC("hcComponentsAgentsRlArmsEditor.s20")}</TableHead>
+                <TableHead>{tHC("s20")}</TableHead>
                 <TableHead>Context</TableHead>
-                <TableHead className="text-end">{tHC("hcComponentsAgentsRlArmsEditor.s19")}</TableHead>
-                <TableHead className="text-end">{tHC("hcComponentsAgentsRlArmsEditor.s15")}</TableHead>
+                <TableHead className="text-end">{tHC("s19")}</TableHead>
+                <TableHead className="text-end">{tHC("s15")}</TableHead>
                 {canEdit && <TableHead className="w-10" />}
               </TableRow>
             </TableHeader>
@@ -261,7 +261,7 @@ export default function RlArmsEditor({
                       {arm.contextBucket ? (
                         <span className="font-mono">{arm.contextBucket}</span>
                       ) : (
-                        <span>{tHC("hcComponentsAgentsRlArmsEditor.s18")}</span>
+                        <span>{tHC("s18")}</span>
                       )}
                     </TableCell>
                     <TableCell className="text-end tabular-nums text-muted-foreground">
@@ -272,7 +272,7 @@ export default function RlArmsEditor({
                         // Never pulled. The stored posterior would average to a
                         // confident-looking 50% here (Beta(1,1) prior); showing
                         // that would be inventing a result. Say "not tried".
-                        <Badge variant="outline">{tHC("hcComponentsAgentsRlArmsEditor.s17")}</Badge>
+                        <Badge variant="outline">{tHC("s17")}</Badge>
                       ) : (
                         <span className="inline-flex items-center justify-end gap-2">
                           {!observed.lowConfidence && <Trophy size={12} className="text-primary" aria-hidden="true" />}
@@ -287,7 +287,7 @@ export default function RlArmsEditor({
                         </span>
                       )}
                       {observed.rate !== null && observed.lowConfidence && (
-                        <div className="text-xs text-muted-foreground">{tHC("hcComponentsAgentsRlArmsEditor.s16")}</div>
+                        <div className="text-xs text-muted-foreground">{tHC("s16")}</div>
                       )}
                     </TableCell>
                     {canEdit && (
@@ -310,7 +310,7 @@ export default function RlArmsEditor({
             </TableBody>
           </Table>
           <p className="border-t border-border px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-            <strong>{tHC("hcComponentsAgentsRlArmsEditor.s15")}</strong> {tHC("hcComponentsAgentsRlArmsEditor.s14")} {LOW_CONFIDENCE_PULLS} {tHC("hcComponentsAgentsRlArmsEditor.s13")}
+            <strong>{tHC("s15")}</strong> {tHC("s14")} {LOW_CONFIDENCE_PULLS} {tHC("s13")}
           </p>
         </Card>
       )}
@@ -324,16 +324,16 @@ export default function RlArmsEditor({
             setAdding(true);
           }}
         >
-          <Plus size={14} aria-hidden="true" /> {tHC("hcComponentsAgentsRlArmsEditor.s12")}
+          <Plus size={14} aria-hidden="true" /> {tHC("s12")}
         </Button>
       )}
 
       {canEdit && adding && (
         <Card className="gap-4 p-5">
           <div>
-            <div className="text-sm font-semibold text-foreground">{tHC("hcComponentsAgentsRlArmsEditor.s12")}</div>
+            <div className="text-sm font-semibold text-foreground">{tHC("s12")}</div>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {tHC("hcComponentsAgentsRlArmsEditor.s11")} {agent?.providerName || "the agent's provider"} {tHC("hcComponentsAgentsRlArmsEditor.s10")}
+              {tHC("s11")} {agent?.providerName || "the agent's provider"} {tHC("s10")}
             </p>
           </div>
 
@@ -344,7 +344,7 @@ export default function RlArmsEditor({
             <Select
               id="rl-arm-model"
               searchable
-              placeholder={tHC("hcComponentsAgentsRlArmsEditor.s9")}
+              placeholder={tHC("s9")}
               value={modelChoice}
               onChange={(e: any) => setModelChoice(e.target.value)}
               options={[
@@ -357,8 +357,8 @@ export default function RlArmsEditor({
             />
             {(modelChoice === CUSTOM_MODEL || catalog.length === 0) && (
               <Input
-                aria-label={tHC("hcComponentsAgentsRlArmsEditor.s8")}
-                placeholder={tHC("hcComponentsAgentsRlArmsEditor.s7")}
+                aria-label={tHC("s8")}
+                placeholder={tHC("s7")}
                 value={customModel}
                 onChange={(e) => {
                   setCustomModel(e.target.value);
@@ -375,16 +375,16 @@ export default function RlArmsEditor({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground" htmlFor="rl-arm-bucket">
-              {tHC("hcComponentsAgentsRlArmsEditor.s6")} <span className="font-normal text-muted-foreground">(optional)</span>
+              {tHC("s6")} <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
             <Input
               id="rl-arm-bucket"
-              placeholder={tHC("hcComponentsAgentsRlArmsEditor.s5")}
+              placeholder={tHC("s5")}
               value={contextBucket}
               onChange={(e) => setContextBucket(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              {tHC("hcComponentsAgentsRlArmsEditor.s4")}
+              {tHC("s4")}
             </p>
           </div>
 
@@ -416,12 +416,12 @@ export default function RlArmsEditor({
             <AlertDialogDescription>
               {(pendingDelete?.pulls || 0) > 0 ? (
                 <>
-                  <strong>{pendingDelete?.armKey}</strong> {tHC("hcComponentsAgentsRlArmsEditor.s3")}{" "}
-                  {(pendingDelete?.pulls || 0).toLocaleString()} {tHC("hcComponentsAgentsRlArmsEditor.s2")}
+                  <strong>{pendingDelete?.armKey}</strong> {tHC("s3")}{" "}
+                  {(pendingDelete?.pulls || 0).toLocaleString()} {tHC("s2")}
                 </>
               ) : (
                 <>
-                  <strong>{pendingDelete?.armKey}</strong> {tHC("hcComponentsAgentsRlArmsEditor.s1")}
+                  <strong>{pendingDelete?.armKey}</strong> {tHC("s1")}
                 </>
               )}
             </AlertDialogDescription>

@@ -162,13 +162,13 @@ export default function GithubConnectCard({ onStatusChange }: GithubConnectCardP
           <span className="cat-chip cat-chip-sm" style={{ ["--cat" as string]: "var(--cat-automation)" }}>
             <Github aria-hidden="true" size={13} />
           </span>
-          {tHC("hcBuildComponentsGithubConnectCard.s35")}
+          {tHC("s35")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
-            <Loader2 aria-hidden="true" size={15} className="animate-spin" /> {tHC("hcBuildComponentsGithubConnectCard.s34")}
+            <Loader2 aria-hidden="true" size={15} className="animate-spin" /> {tHC("s34")}
           </div>
         ) : status?.connected ? (
           <ConnectedState
@@ -228,8 +228,8 @@ function DisconnectedForm({
   return (
     <div>
       <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-        {tHC("hcBuildComponentsGithubConnectCard.s33")} <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s32")}</span> {tHC("hcBuildComponentsGithubConnectCard.s31")}
-        <span className="font-medium text-foreground"> {tHC("hcBuildComponentsGithubConnectCard.s30")}</span>{tHC("hcBuildComponentsGithubConnectCard.s29")}
+        {tHC("s33")} <span className="font-medium text-foreground">{tHC("s32")}</span> {tHC("s31")}
+        <span className="font-medium text-foreground"> {tHC("s30")}</span>{tHC("s29")}
       </p>
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
@@ -240,11 +240,11 @@ function DisconnectedForm({
             className="cat-tint"
             style={{ ["--cat" as string]: "var(--cat-automation)" }}
           />
-          {tHC("hcBuildComponentsGithubConnectCard.s28")}
+          {tHC("s28")}
         </div>
         <p className="text-xs leading-relaxed text-muted-foreground">
-          {tHC("hcBuildComponentsGithubConnectCard.s27")}{" "}
-          <span className="font-medium text-foreground">fine-grained</span> {tHC("hcBuildComponentsGithubConnectCard.s26")}
+          {tHC("s27")}{" "}
+          <span className="font-medium text-foreground">fine-grained</span> {tHC("s26")}
         </p>
       </div>
 
@@ -263,7 +263,7 @@ function DisconnectedForm({
           autoComplete="off"
           spellCheck={false}
         />
-        <p className="mt-1 text-xs text-muted-foreground">{tHC("hcBuildComponentsGithubConnectCard.s25")}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{tHC("s25")}</p>
       </div>
 
       <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3">
@@ -274,31 +274,31 @@ function DisconnectedForm({
             className="cat-tint"
             style={{ ["--cat" as string]: "var(--cat-automation)" }}
           />
-          {tHC("hcBuildComponentsGithubConnectCard.s24")}
+          {tHC("s24")}
         </div>
         <ol className="list-decimal space-y-1 ps-4 text-xs leading-relaxed text-muted-foreground">
           <li>
-            Click <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s5")}</span> {tHC("hcBuildComponentsGithubConnectCard.s23")} <span className="font-medium text-foreground">fine-grained</span> {tHC("hcBuildComponentsGithubConnectCard.s22")}
+            Click <span className="font-medium text-foreground">{tHC("s5")}</span> {tHC("s23")} <span className="font-medium text-foreground">fine-grained</span> {tHC("s22")}
           </li>
           <li>
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s21")}</span> {tHC("hcBuildComponentsGithubConnectCard.s20")}
+            <span className="font-medium text-foreground">{tHC("s21")}</span> {tHC("s20")}
           </li>
           <li>
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s19")}</span> {tHC("hcBuildComponentsGithubConnectCard.s18")}{" "}
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s17")}</span> {tHC("hcBuildComponentsGithubConnectCard.s16")}
+            <span className="font-medium text-foreground">{tHC("s19")}</span> {tHC("s18")}{" "}
+            <span className="font-medium text-foreground">{tHC("s17")}</span> {tHC("s16")}
           </li>
           <li>
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s15")}</span> — set{" "}
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s14")}</span>,{" "}
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s13")}</span>, and{" "}
-            <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s12")}</span> {tHC("hcBuildComponentsGithubConnectCard.s11")}
+            <span className="font-medium text-foreground">{tHC("s15")}</span> — set{" "}
+            <span className="font-medium text-foreground">{tHC("s14")}</span>,{" "}
+            <span className="font-medium text-foreground">{tHC("s13")}</span>, and{" "}
+            <span className="font-medium text-foreground">{tHC("s12")}</span> {tHC("s11")}
           </li>
           <li>
-            <span className="font-medium text-foreground">Expiration</span> {tHC("hcBuildComponentsGithubConnectCard.s10")}
+            <span className="font-medium text-foreground">Expiration</span> {tHC("s10")}
           </li>
           <li>
-            Click <span className="font-medium text-foreground">{tHC("hcBuildComponentsGithubConnectCard.s9")}</span> {tHC("hcBuildComponentsGithubConnectCard.s8")}{" "}
-            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> {tHC("hcBuildComponentsGithubConnectCard.s7")}
+            Click <span className="font-medium text-foreground">{tHC("s9")}</span> {tHC("s8")}{" "}
+            <code className="rounded bg-muted px-1 py-0.5">github_pat_</code> {tHC("s7")}
           </li>
         </ol>
       </div>
@@ -306,7 +306,7 @@ function DisconnectedForm({
       <div className="mb-2">
         <div className="mb-1.5 flex items-center justify-between">
           <Label htmlFor="gh-token" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {tHC("hcBuildComponentsGithubConnectCard.s6")}
+            {tHC("s6")}
           </Label>
           <a
             href={buildGithubPatUrl(repoFullName)}
@@ -314,7 +314,7 @@ function DisconnectedForm({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
           >
-            {tHC("hcBuildComponentsGithubConnectCard.s5")} <ExternalLink aria-hidden="true" size={11} />
+            {tHC("s5")} <ExternalLink aria-hidden="true" size={11} />
           </a>
         </div>
         <div className="relative">
@@ -326,7 +326,7 @@ function DisconnectedForm({
           <Input
             id="gh-token"
             type="password"
-            placeholder={tHC("hcBuildComponentsGithubConnectCard.s4")}
+            placeholder={tHC("s4")}
             value={token}
             onChange={(e) => setToken(e.target.value)}
             className="ps-9"
@@ -335,7 +335,7 @@ function DisconnectedForm({
           />
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          {tHC("hcBuildComponentsGithubConnectCard.s3")}
+          {tHC("s3")}
         </p>
       </div>
 
@@ -386,7 +386,7 @@ function ConnectedState({
       </div>
 
       <p className="mb-1 text-sm leading-relaxed text-muted-foreground">
-        {tHC("hcBuildComponentsGithubConnectCard.s2")}
+        {tHC("s2")}
       </p>
       {(connectedBy || connectedAt) && (
         <p className="mb-4 text-xs text-muted-foreground">
@@ -422,7 +422,7 @@ function ConnectedState({
           <AlertDialogHeader>
             <AlertDialogTitle>Disconnect {repoFullName}?</AlertDialogTitle>
             <AlertDialogDescription>
-              {tHC("hcBuildComponentsGithubConnectCard.s1")}
+              {tHC("s1")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -107,7 +107,7 @@ export function PlatformSettingsSection({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={tHC("hcPlatformadminComponentsSectionsPlatformsettings.s2")}
+            placeholder={tHC("s2")}
             className="ps-8"
           />
         </div>
@@ -156,7 +156,7 @@ export function PlatformSettingsSection({
             </div>
             {row.updatedAt && (
               <div className="mt-2 font-mono text-xs text-muted-foreground">
-                {tHC("hcPlatformadminComponentsSectionsPlatformsettings.s1")} {new Date(row.updatedAt).toLocaleString()}
+                {tHC("s1")} {new Date(row.updatedAt).toLocaleString()}
                 {row.updatedBy ? ` by ${row.updatedBy}` : ""}
               </div>
             )}

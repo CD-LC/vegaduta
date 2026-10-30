@@ -103,20 +103,20 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
         <Badge variant="outline">{report.source === "BUILT_IN" ? "Built-in" : "Custom"}</Badge>
         <ToneChip tone={risk.tone} label={risk.label} />
         <Badge variant="secondary">{report.status}</Badge>
-        {report.blocked && <ToneChip tone="bad" label={tHC("hcPlatformadminSkillsecurityPage.s20")} />}
+        {report.blocked && <ToneChip tone="bad" label={tHC("s20")} />}
       </div>
 
       <dl className="grid gap-x-6 gap-y-1 text-xs sm:grid-cols-2">
         <div>
-          <dt className="inline text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s19")} </dt>
+          <dt className="inline text-muted-foreground">{tHC("s19")} </dt>
           <dd className="inline break-all font-mono">{report.contentSha256 || UNAVAILABLE}</dd>
         </div>
         <div>
-          <dt className="inline text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s18")} </dt>
+          <dt className="inline text-muted-foreground">{tHC("s18")} </dt>
           <dd className="inline break-all font-mono">{report.approvedSha256 || "never approved"}</dd>
         </div>
         <div>
-          <dt className="inline text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s17")} </dt>
+          <dt className="inline text-muted-foreground">{tHC("s17")} </dt>
           <dd className="inline">
             {report.approvedBy || UNAVAILABLE}
             {report.approvedAt && (
@@ -125,14 +125,14 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
           </dd>
         </div>
         <div>
-          <dt className="inline text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s16")} </dt>
-          <dd className="inline">{report.attachedAgentIds?.length ?? 0} {tHC("hcPlatformadminSkillsecurityPage.s15")}</dd>
+          <dt className="inline text-muted-foreground">{tHC("s16")} </dt>
+          <dd className="inline">{report.attachedAgentIds?.length ?? 0} {tHC("s15")}</dd>
         </div>
       </dl>
 
       {report.changes?.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s14")}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tHC("s14")}</p>
           <ul className="mt-1 list-disc space-y-0.5 ps-5 text-xs">
             {report.changes.map((c) => (
               <li key={c}>{c}</li>
@@ -143,11 +143,11 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {tHC("hcPlatformadminSkillsecurityPage.s13")}{report.scan?.findings?.length ?? 0}){report.scan?.truncated ? " - list truncated" : ""}
+          {tHC("s13")}{report.scan?.findings?.length ?? 0}){report.scan?.truncated ? " - list truncated" : ""}
         </p>
         {!report.scan?.findings?.length ? (
           <p className="mt-1 text-xs text-muted-foreground">
-            {tHC("hcPlatformadminSkillsecurityPage.s12")}
+            {tHC("s12")}
           </p>
         ) : (
           <div className="mt-1 space-y-1.5">
@@ -172,7 +172,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
 
       {report.stagedScan && (
         <p className="text-xs text-[var(--warning-text)]">
-          {tHC("hcPlatformadminSkillsecurityPage.s11")}{" "}
+          {tHC("s11")}{" "}
           {riskMeta(report.stagedScan.riskLevel).label.toLowerCase()}.
         </p>
       )}
@@ -185,7 +185,7 @@ function ReportPanel({ name, onApproved }: { name: string; onApproved: () => voi
             <div className="flex items-start gap-2 text-xs">
               <Checkbox checked={ack} className="mt-0.5" onCheckedChange={(v) => setAck(v)} id="skill-ack" />
               <label htmlFor="skill-ack">
-                {tHC("hcPlatformadminSkillsecurityPage.s10")}
+                {tHC("s10")}
               </label>
             </div>
           )}
@@ -236,7 +236,7 @@ export default function SkillSecurityPage() {
 
   return (
     <AdminShell
-      title={tHC("hcPlatformadminSkillsecurityPage.s9")}
+      title={tHC("s9")}
       actions={
         <Button variant="outline" size="sm" onClick={() => void load()}>
           <RefreshCw /> Refresh
@@ -244,16 +244,16 @@ export default function SkillSecurityPage() {
       }
     >
       <PageHint>
-        {tHC("hcPlatformadminSkillsecurityPage.s8")}
+        {tHC("s8")}
       </PageHint>
       <InfoNote>
-        {tHC("hcPlatformadminSkillsecurityPage.s7")}
+        {tHC("s7")}
       </InfoNote>
 
       {state === "loading" && <Skeleton className="h-32 w-full" />}
       {state === "off" && (
         <UnavailableNote
-          title={tHC("hcPlatformadminSkillsecurityPage.s6")}
+          title={tHC("s6")}
           reason="app.skills.supply-chain.enabled is false on this core, so there is nothing to review."
         />
       )}
@@ -276,12 +276,12 @@ export default function SkillSecurityPage() {
           </div>
 
           <SectionCard
-            title={tHC("hcPlatformadminSkillsecurityPage.s5")}
+            title={tHC("s5")}
             icon={ShieldAlert}
             subtitle={`${reviews?.length ?? 0} skill(s) waiting on an owner`}
           >
             {reviews && reviews.length === 0 && (
-              <p className="text-sm text-muted-foreground">{tHC("hcPlatformadminSkillsecurityPage.s4")}</p>
+              <p className="text-sm text-muted-foreground">{tHC("s4")}</p>
             )}
             {reviewPg.pageItems.map((r) => {
               const m = riskMeta(r.riskLevel);
@@ -303,7 +303,7 @@ export default function SkillSecurityPage() {
                     <ToneChip tone={m.tone} label={m.label} />
                     {r.approvedAt && (
                       <span className="text-[11px] text-muted-foreground" title={formatExact(r.approvedAt)}>
-                        {tHC("hcPlatformadminSkillsecurityPage.s3")} {formatRelative(r.approvedAt)}
+                        {tHC("s3")} {formatRelative(r.approvedAt)}
                       </span>
                     )}
                   </span>
@@ -323,7 +323,7 @@ export default function SkillSecurityPage() {
 
           {flagged.length > 0 && (
             <SectionCard
-              title={tHC("hcPlatformadminSkillsecurityPage.s2")}
+              title={tHC("s2")}
               icon={FileSearch}
               subtitle="Every skill scanning medium or high, or needing review"
             >
@@ -360,7 +360,7 @@ export default function SkillSecurityPage() {
           )}
 
           {selected && (
-            <SectionCard title={tHC("hcPlatformadminSkillsecurityPage.s1")} icon={FileSearch}>
+            <SectionCard title={tHC("s1")} icon={FileSearch}>
               <ReportPanel name={selected} onApproved={() => void load()} />
             </SectionCard>
           )}

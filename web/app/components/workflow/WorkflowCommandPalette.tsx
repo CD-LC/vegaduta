@@ -172,7 +172,7 @@ export default function WorkflowCommandPalette({
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            aria-label={tHC("hcComponentsWorkflowWorkflowCommandPalette.s5")}
+            aria-label={tHC("s5")}
             className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl"
             initial={{ opacity: 0, scale: 0.97, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -188,12 +188,12 @@ export default function WorkflowCommandPalette({
                 aria-expanded="true"
                 aria-controls="wf-cmd-list"
                 aria-autocomplete="list"
-                aria-label={tHC("hcComponentsWorkflowWorkflowCommandPalette.s4")}
+                aria-label={tHC("s4")}
                 aria-activedescendant={items[active] ? `wf-cmd-opt-${items[active].type}` : undefined}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
-                placeholder={tHC("hcComponentsWorkflowWorkflowCommandPalette.s3")}
+                placeholder={tHC("s3")}
                 className="h-12 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
               <kbd className="hidden rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:inline">
@@ -203,7 +203,7 @@ export default function WorkflowCommandPalette({
             <div id="wf-cmd-list" role="listbox" aria-label="Nodes" className="max-h-[52vh] overflow-y-auto p-1.5">
               {items.length === 0 && (
                 <div role="status" className="px-3 py-8 text-center text-sm text-muted-foreground">
-                  {tHC("hcComponentsWorkflowWorkflowCommandPalette.s2")}{query}&rdquo;.
+                  {tHC("s2")}{query}&rdquo;.
                 </div>
               )}
               {items.map((def, idx) => {
@@ -218,7 +218,7 @@ export default function WorkflowCommandPalette({
                     )}
                     {showGroups && idx === recentCount && (
                       <div className="wf-cmd-group" aria-hidden="true">
-                        {tHC("hcComponentsWorkflowWorkflowCommandPalette.s1")}
+                        {tHC("s1")}
                       </div>
                     )}
                     <button
