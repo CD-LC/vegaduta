@@ -157,6 +157,8 @@ nav:
       - Plugins, apps and mobile: plugins-and-apps.md
   - Architecture:
       - Overview: architecture/overview.md
+      - Database architecture: architecture/database.md
+      - Database reference (generated): architecture/database-reference.md
       - Repository structure: repository-structure.md
       - Core module graph: architecture/core-module-graph.md
       - Agents module decomposition:
