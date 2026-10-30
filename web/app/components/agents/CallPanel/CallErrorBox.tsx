@@ -1,6 +1,5 @@
+"use client";
 import { useTranslations } from "../../../lib/i18n";
-("use client");
-
 interface CallErrorBoxProps {
   callError: string | null;
   pipelineError: string | null;
