@@ -215,9 +215,11 @@ class ApprovalParkedTurnE2ETest {
         // The request row's status flip happens on the executor path: under load it can still
         // read PENDING a moment after approve() returned. Give the propagation a moment instead
         // of asserting on the first read.
+        // Only the two requests this turn parked are asserted: a slow runner can resume the turn
+        // before both flips are visible and record further pending requests of its own.
         assertTrue(
-                harness.awaitRequestStatuses(ApprovalStatus.APPROVED, requests.size()),
-                "all requests landed APPROVED: " + harness.requestStatuses());
+                harness.awaitStatuses(ApprovalStatus.APPROVED, requests),
+                "the parked requests landed APPROVED: " + harness.requestStatuses());
 
         assertAll(
                 () -> assertEquals(1, invoice.executions()),

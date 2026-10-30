@@ -578,7 +578,8 @@ public final class ApprovalTurnHarness implements AutoCloseable {
                                         settingsResolver),
                                 toolCallLogService,
                                 b.guardrailEngine));
-        // The server-side continuation, wired as in production (chat turns through AgentChatService).
+        // The server-side continuation, wired as in production (chat turns through
+        // AgentChatService).
         this.continuationFactory =
                 new ApprovalContinuationFactory(
                         new ObjectMapper(),
@@ -980,6 +981,26 @@ public final class ApprovalTurnHarness implements AutoCloseable {
     /** The status of every approval request recorded so far, oldest first. */
     public List<ApprovalStatus> requestStatuses() {
         return approvals.requests().stream().map(ApprovalRequest::getStatus).toList();
+    }
+
+    /**
+     * Waits (up to 5s) until every one of {@code requests} (the rows already recorded) shows {@code
+     * expectedStatus}, ignoring requests recorded afterwards.
+     */
+    public boolean awaitStatuses(ApprovalStatus expectedStatus, List<ApprovalRequest> requests) {
+        long deadline = System.nanoTime() + 5_000_000_000L;
+        while (System.nanoTime() < deadline) {
+            if (requests.stream().allMatch(r -> r.getStatus() == expectedStatus)) {
+                return true;
+            }
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return false;
     }
 
     /**
