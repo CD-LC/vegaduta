@@ -2,11 +2,13 @@ package com.agenticai.core.approval;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 /**
- * Read-only view of what one person decided in the approval inbox, for features that only COUNT decisions (the
- * preferences-from-behavior loop). It cannot approve, reject or change a request.
+ * Read-only view of what one person decided in the approval inbox, for features that only COUNT
+ * decisions (the preferences-from-behavior loop). It cannot approve, reject or change a request.
  */
 @Service
 public class ApprovalHistoryService {
@@ -17,8 +19,14 @@ public class ApprovalHistoryService {
         this.repository = repository;
     }
 
+    /** One request by id, for read-only views (the approval trace); empty when there is none. */
+    public Optional<ApprovalRequest> find(UUID id) {
+        return repository.findById(id);
+    }
+
     /** Requests {@code subject} decided since {@code since}, newest first, at most 500. */
     public List<ApprovalRequest> decidedBy(String subject, Instant since) {
-        return repository.findTop500ByDecidedByAndDecidedAtAfterOrderByDecidedAtDesc(subject, since);
+        return repository.findTop500ByDecidedByAndDecidedAtAfterOrderByDecidedAtDesc(
+                subject, since);
     }
 }
