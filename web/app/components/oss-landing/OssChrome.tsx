@@ -103,6 +103,9 @@ export function OssFooter() {
   const links = [
     ...resourceLinks(),
     ...COMMUNITY_LINKS,
+    // PeerPush "Get Verified" - the verifier only needs a link back to the
+    // product page on the homepage footer.
+    { label: "PeerPush", href: "https://peerpush.com/p/vegaduta" },
     ...(hosted ? [{ label: "Hosted version", href: hosted }] : []),
   ];
   return (
