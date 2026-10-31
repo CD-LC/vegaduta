@@ -89,8 +89,12 @@ async function ensureAssets(requestId: number): Promise<LoadedAssets> {
     // copies) — observed live as "Can't create a session". q4 is the supported
     // WebGPU-quantized path (~570 MB total via MatMulNBits); only a missing
     // adapter drops to wasm+q8.
+    // wasm path also uses q4, not q8: the quantized decoder+encoder+codec at
+    // q8 still strains the 4 GB wasm heap at session-init (the same
+    // "Can't create a session" failure as fp32, just rarer) and q4 runs on the
+    // wasm EP via MatMulNBits (JSEP) anyway - it is not a WebGPU-only dtype.
     let device: "webgpu" | "wasm" = "wasm";
-    let dtype: "fp16" | "q4" | "q8" = "q8";
+    let dtype: "fp16" | "q4" | "q8" = "q4";
     const gpu = workerScope.navigator?.gpu;
     if (gpu) {
       try {
@@ -105,13 +109,26 @@ async function ensureAssets(requestId: number): Promise<LoadedAssets> {
         // Adapter request failed — stay on the wasm path.
       }
     }
-    const generator = await tf.pipeline("text-to-audio", MODEL_ID, {
-      device,
-      dtype,
-      progress_callback,
-    });
-    assets = { generator };
-    return assets;
+    // Retry ladder: if the chosen dtype's session-create fails (OOM during
+    // graph init on the wasm heap, or a dtype the build can't load), drop to
+    // the next-smaller variant rather than failing the whole download.
+    const dtypeLadder: Array<"fp16" | "q4" | "q8"> =
+      dtype === "fp16" ? ["fp16", "q4", "q8"] : dtype === "q4" ? ["q4", "q8"] : ["q8"];
+    let lastErr: unknown = null;
+    for (const d of dtypeLadder) {
+      try {
+        const generator = await tf.pipeline("text-to-audio", MODEL_ID, {
+          device,
+          dtype: d,
+          progress_callback,
+        });
+        assets = { generator };
+        return assets;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw lastErr;
   })().finally(() => {
     loadInFlight = null;
   });
