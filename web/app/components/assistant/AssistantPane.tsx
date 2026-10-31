@@ -53,6 +53,7 @@ import {
   taskForJob,
 } from "./backgroundWork";
 import { nextTurnId } from "./useAssistantTurn";
+import { sendOrLocalMedia } from "../../lib/edge/localMediaBridge";
 import { useJobActions } from "./useJobActions";
 import FolderPicker from "./FolderPicker";
 import { useWorkspaceFolder } from "./useWorkspaceFolder";
@@ -112,8 +113,7 @@ export default function AssistantPane() {
   const [rightOpen, setRightOpen] = useState(false);
   const [prefs, setPrefs] = useAssistantPrefs();
   const speaking = useSpeaking();
-  // Speech is a browser-wide queue that outlives the page: stop it when the setting turns off (also from
-  // another tab) and when this screen goes away.
+  // Speech is a browser-wide queue that outlives the page: stop it when the setting turns off and when this screen goes away.
   useEffect(() => {
     if (!prefs.speakReplies) stopSpeaking();
   }, [prefs.speakReplies]);
@@ -123,8 +123,7 @@ export default function AssistantPane() {
   const [restoredNote, setRestoredNote] = useState<string | null>(null);
   const [threadError, setThreadError] = useState<string | null>(null);
 
-  // Arriving from an old route: ?prompt= prefills the box (the Playground's deep link), ?from= says
-  // in one line where the page went. Read once; the address bar is not re-read on re-render.
+  // ?prompt= prefills the box, ?from= says where the page went (old routes). Read once.
   const seededRef = useRef(false);
   useEffect(() => {
     if (seededRef.current) return;
@@ -198,11 +197,10 @@ export default function AssistantPane() {
       }
       setThreadError(null);
       setLeftOpen(false);
-      // A thread belongs to the agent it was had with; opening it switches the box to that agent.
+
       const owner = threads.threads.find((x) => x.id === id)?.agentId ?? active.id;
       if (owner !== active.id) picker.select(owner);
       if (isJobThread(id)) {
-        // A thread that began as a hand-off: the request and its card are all there is locally.
         const task = taskForJob(threads.scope, id.slice(JOB_THREAD_PREFIX.length));
         turn.reset(null, task ? jobThreadTurns(task) : []);
         setRestoredNote(task ? t("restoredJob") : t("restoredEmpty"));
@@ -234,7 +232,15 @@ export default function AssistantPane() {
       void quick.start(message, autoAgent ? null : (active?.id ?? null));
       return;
     }
-    void dispatcher.send(message, { background: mode === "background" });
+    void sendOrLocalMedia(
+      message,
+      (m) => dispatcher.send(m, { background: mode === "background" }),
+      (u, a) =>
+        turn.appendTurns(
+          { id: nextTurnId("u"), role: "user", content: u, at: Date.now() },
+          { id: nextTurnId("a"), role: "assistant", content: a, at: Date.now() }
+        )
+    );
   }, [input, composerAttachments.attachments.length, dispatcher, t, mode, quick, autoAgent, active?.id]);
 
   const selectAgent = useCallback(
@@ -242,7 +248,6 @@ export default function AssistantPane() {
       if (turn.sending) return;
       setAutoAgent(id === "");
       if (id) picker.select(id);
-      // Another agent, another conversation: a thread is had with one agent.
       if (id && id !== active?.id) turn.reset(null, []);
     },
     [turn, picker, active?.id]
