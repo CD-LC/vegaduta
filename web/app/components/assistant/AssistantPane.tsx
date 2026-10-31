@@ -53,6 +53,7 @@ import {
   taskForJob,
 } from "./backgroundWork";
 import { nextTurnId } from "./useAssistantTurn";
+import { tryLocalMediaTool } from "../../lib/edge/localMediaBridge";
 import { useJobActions } from "./useJobActions";
 import FolderPicker from "./FolderPicker";
 import { useWorkspaceFolder } from "./useWorkspaceFolder";
@@ -234,7 +235,19 @@ export default function AssistantPane() {
       void quick.start(message, autoAgent ? null : (active?.id ?? null));
       return;
     }
-    void dispatcher.send(message, { background: mode === "background" });
+    // Browser-tool bridge: local_generate_image/audio run in the page, so a
+    // clear media request is executed here rather than sent to a model that
+    // has no such tool (it would only produce a generic refusal).
+    void tryLocalMediaTool(message).then((r) => {
+      if (!r.handled) {
+        void dispatcher.send(message, { background: mode === "background" });
+        return;
+      }
+      turn.appendTurns(
+        { id: nextTurnId("u"), role: "user", content: message, at: Date.now() },
+        { id: nextTurnId("a"), role: "assistant", content: r.reply, at: Date.now() },
+      );
+    });
   }, [input, composerAttachments.attachments.length, dispatcher, t, mode, quick, autoAgent, active?.id]);
 
   const selectAgent = useCallback(
