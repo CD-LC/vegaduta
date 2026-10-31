@@ -100,7 +100,7 @@ ENV HOME=/home/mcprunner
 # other Python can still download one (into its own sandbox).
 # UNVERIFIED in a real image build as of this change (no docker on the dev
 # host): confirm `uvx <pkg requiring >=3.12>` picks 3.12 with no download.
-RUN UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12 \
+RUN UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12.16 \
     && ln -sf "$(UV_PYTHON_INSTALL_DIR=/opt/uv-python UV_PYTHON_PREFERENCE=only-managed uv python find 3.12)" \
         /usr/local/bin/python3.12 \
     && /usr/local/bin/python3.12 --version
