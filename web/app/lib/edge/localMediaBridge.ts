@@ -51,7 +51,7 @@ export async function tryLocalMediaTool(message: string): Promise<LocalMediaResu
  * AssistantPane's diff to one call site. */
 export async function sendOrLocalMedia(
   message: string,
-  send: (m: string) => void,
+  send: (m: string) => unknown,
   appendLocal: (user: string, assistant: string) => void
 ): Promise<void> {
   const r = await tryLocalMediaTool(message);
