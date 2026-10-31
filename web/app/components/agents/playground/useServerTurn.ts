@@ -166,60 +166,60 @@ export function useServerTurn(ctx: PlaygroundContext) {
     try {
       const sendChat = (names: string[] | null | undefined) =>
         api.streamChat(
-        agent.id,
-        userMessage,
-        sessionId,
-        (chunk: string) => {
-          // Selected agent changed mid-stream - see activeAgentIdRef's
-          // comment; don't let a stale token overwrite the new agent's turn.
-          if (activeAgentIdRef.current !== sentAgentId) return;
-          assistantText += chunk;
-          setTurns((t) => {
-            const copy = [...t];
-            copy[copy.length - 1] = { ...copy[copy.length - 1], content: assistantText };
-            return copy;
-          });
-        },
-        sentAttachment,
-        turnRef,
-        inlineAttachments,
-        visionSessionId,
-        { onController: setChatController },
-        // Opt-in step events (sets stepEvents:true on the request) - the
-        // live trace, attached to THIS turn by ref so a stale event from an
-        // already-finalised turn can never land on the next one.
-        // normalizeServerStep never throws: a newer core's event types
-        // (run_started, plan, guardrail, handoff, ...) render generically.
-        {
-          onEvent: (event) => {
+          agent.id,
+          userMessage,
+          sessionId,
+          (chunk: string) => {
+            // Selected agent changed mid-stream - see activeAgentIdRef's
+            // comment; don't let a stale token overwrite the new agent's turn.
             if (activeAgentIdRef.current !== sentAgentId) return;
-            if (!stepEventArrived) {
-              stepEventArrived = true;
-              clearInterval(liveTraceTimer); // fallback poll no longer needed
-            }
-            // Heartbeats are liveness beats (core emits one every
-            // app.chat.sse.step-heartbeat-interval to keep the wire alive
-            // through silent phases). They already did their job - this
-            // dispatch reset the lifecycle's idle timer - so they stop the
-            // fallback poll above but earn no row in the trace.
-            if (event?.type === "heartbeat") return;
-            turnSteps = [...turnSteps, normalizeServerStep(event, turnSteps.length + 1)];
-            const snapshot = turnSteps;
+            assistantText += chunk;
             setTurns((t) => {
               const copy = [...t];
-              const last = copy[copy.length - 1];
-              if (!last || last.ref !== turnRef) return t;
-              copy[copy.length - 1] = { ...last, steps: snapshot };
+              copy[copy.length - 1] = { ...copy[copy.length - 1], content: assistantText };
               return copy;
             });
           },
-        },
-        // Normal chat route (no branching override).
-        undefined,
-        // The Run settings drawer's tool switches: narrows THIS run to these of the agent's tools; null/absent sends
-        // nothing and the run uses the agent's own tools. Never saved to the agent.
-        names
-      );
+          sentAttachment,
+          turnRef,
+          inlineAttachments,
+          visionSessionId,
+          { onController: setChatController },
+          // Opt-in step events (sets stepEvents:true on the request) - the
+          // live trace, attached to THIS turn by ref so a stale event from an
+          // already-finalised turn can never land on the next one.
+          // normalizeServerStep never throws: a newer core's event types
+          // (run_started, plan, guardrail, handoff, ...) render generically.
+          {
+            onEvent: (event) => {
+              if (activeAgentIdRef.current !== sentAgentId) return;
+              if (!stepEventArrived) {
+                stepEventArrived = true;
+                clearInterval(liveTraceTimer); // fallback poll no longer needed
+              }
+              // Heartbeats are liveness beats (core emits one every
+              // app.chat.sse.step-heartbeat-interval to keep the wire alive
+              // through silent phases). They already did their job - this
+              // dispatch reset the lifecycle's idle timer - so they stop the
+              // fallback poll above but earn no row in the trace.
+              if (event?.type === "heartbeat") return;
+              turnSteps = [...turnSteps, normalizeServerStep(event, turnSteps.length + 1)];
+              const snapshot = turnSteps;
+              setTurns((t) => {
+                const copy = [...t];
+                const last = copy[copy.length - 1];
+                if (!last || last.ref !== turnRef) return t;
+                copy[copy.length - 1] = { ...last, steps: snapshot };
+                return copy;
+              });
+            },
+          },
+          // Normal chat route (no branching override).
+          undefined,
+          // The Run settings drawer's tool switches: narrows THIS run to these of the agent's tools; null/absent sends
+          // nothing and the run uses the agent's own tools. Never saved to the agent.
+          names
+        );
       // Stale toolName selections (a tool later removed from the agent, or a
       // selection persisted across agent switches) make core reject the whole
       // turn with a 400 - and the composer's retry loop then fails identically

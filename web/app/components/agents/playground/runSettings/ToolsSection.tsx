@@ -10,13 +10,7 @@ import { Button } from "../../../ui/button";
 import { Skeleton } from "../../../ui/skeleton";
 import { Switch } from "../../../ui/switch";
 import { canEditAgent } from "../../agentAccess";
-import {
-  agentToolNames,
-  agentToolsHref,
-  effectiveRunTools,
-  flipRunTool,
-  toolRows,
-} from "../runSettingsModel";
+import { agentToolNames, agentToolsHref, effectiveRunTools, flipRunTool, toolRows } from "../runSettingsModel";
 import type { PlaygroundAgent } from "../types";
 
 type Available = Array<{ name: string; description?: string | null }>;
@@ -129,7 +123,13 @@ export function ToolsSection({
                 : t("rsToolsSummary", { on: agentNames.length, total: rows.length })}
             </p>
             {narrowed && (
-              <Button type="button" size="sm" variant="outline" onClick={() => onRunToolsChange(null)} data-testid="rs-tools-reset">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onRunToolsChange(null)}
+                data-testid="rs-tools-reset"
+              >
                 {t("rsToolsReset")}
               </Button>
             )}
@@ -155,7 +155,11 @@ export function ToolsSection({
                       </p>
                     )}
                     {!agentHasIt && (
-                      <p id={`${id}-off`} className="m-0 text-[11px] text-muted-foreground" data-testid={`${id}-not-in-agent`}>
+                      <p
+                        id={`${id}-off`}
+                        className="m-0 text-[11px] text-muted-foreground"
+                        data-testid={`${id}-not-in-agent`}
+                      >
                         {t("rsToolsNotInAgent")}
                       </p>
                     )}
