@@ -95,10 +95,20 @@ function Combobox({
           onSearch?.(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === "ArrowDown") { e.preventDefault(); if (!open) setOpen(true); else step(1); }
-          else if (e.key === "ArrowUp") { e.preventDefault(); step(-1); }
-          else if (e.key === "Enter" && open) { e.preventDefault(); choose(shown[active]); }
-          else if (e.key === "Escape") { setOpen(false); setQuery(""); }
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (!open) setOpen(true);
+            else step(1);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            step(-1);
+          } else if (e.key === "Enter" && open) {
+            e.preventDefault();
+            choose(shown[active]);
+          } else if (e.key === "Escape") {
+            setOpen(false);
+            setQuery("");
+          }
         }}
         className="flex h-10 w-full min-w-0 rounded-md border border-control bg-secondary/40 px-3 py-2 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50"
         {...aria}
@@ -110,9 +120,13 @@ function Combobox({
           className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-popover p-1 text-sm text-foreground shadow-lg"
         >
           {loading ? (
-            <li role="presentation" className="px-2 py-1.5 text-muted-foreground">{loadingText}</li>
+            <li role="presentation" className="px-2 py-1.5 text-muted-foreground">
+              {loadingText}
+            </li>
           ) : shown.length === 0 ? (
-            <li role="presentation" className="px-2 py-1.5 text-muted-foreground">{emptyText}</li>
+            <li role="presentation" className="px-2 py-1.5 text-muted-foreground">
+              {emptyText}
+            </li>
           ) : (
             shown.map((o, i) => (
               <li
@@ -121,7 +135,10 @@ function Combobox({
                 role="option"
                 aria-selected={o.value === value}
                 aria-disabled={o.disabled || undefined}
-                onMouseDown={(e) => { e.preventDefault(); choose(o); }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  choose(o);
+                }}
                 onMouseEnter={() => !o.disabled && setActive(i)}
                 className={cn(
                   "cursor-pointer truncate rounded-sm px-2 py-1.5",
