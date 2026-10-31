@@ -164,7 +164,8 @@ export function useServerTurn(ctx: PlaygroundContext) {
 
     let assistantText = "";
     try {
-      const newSessionId = await api.streamChat(
+      const sendChat = (names: string[] | null | undefined) =>
+        api.streamChat(
         agent.id,
         userMessage,
         sessionId,
@@ -217,8 +218,20 @@ export function useServerTurn(ctx: PlaygroundContext) {
         undefined,
         // The Run settings drawer's tool switches: narrows THIS run to these of the agent's tools; null/absent sends
         // nothing and the run uses the agent's own tools. Never saved to the agent.
-        ctx.runToolNames
+        names
       );
+      // Stale toolName selections (a tool later removed from the agent, or a
+      // selection persisted across agent switches) make core reject the whole
+      // turn with a 400 - and the composer's retry loop then fails identically
+      // forever ("pausing retries"). The selection is a nicety, not a
+      // requirement: drop it and send once with the agent's own tools.
+      let newSessionId: string;
+      try {
+        newSessionId = await sendChat(ctx.runToolNames);
+      } catch (err) {
+        if (!ctx.runToolNames || !/toolNames/.test(String((err as Error)?.message ?? err))) throw err;
+        newSessionId = await sendChat(null);
+      }
 
       // One last catch-up poll (fallback path only) - closes the small race
       // between the final tool call's DB write and the next interval tick,
