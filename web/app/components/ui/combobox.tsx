@@ -107,7 +107,7 @@ function Combobox({
         <ul
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-card p-1 text-sm text-foreground shadow-lg"
+          className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-popover p-1 text-sm text-foreground shadow-lg"
         >
           {loading ? (
             <li role="presentation" className="px-2 py-1.5 text-muted-foreground">{loadingText}</li>

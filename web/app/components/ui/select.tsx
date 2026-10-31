@@ -147,7 +147,7 @@ function Select({
         <ul
           id={listId}
           role="listbox"
-          className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-card p-1 text-sm text-foreground shadow-lg animate-[popover-in_0.12s_ease-out_both]"
+          className="absolute left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-popover p-1 text-sm text-foreground shadow-lg animate-[popover-in_0.12s_ease-out_both]"
         >
           {options.map((o, i) => (
             // Keyboard operation lives on the combobox trigger (aria-activedescendant).

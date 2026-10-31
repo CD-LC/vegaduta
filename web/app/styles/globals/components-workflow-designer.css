@@ -242,7 +242,7 @@
   }
 
   .popover-panel {
-    @apply absolute z-30 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] shadow-xl;
+    @apply absolute z-30 rounded-xl border border-[var(--surface-border)] bg-[var(--surface-raised)] shadow-xl;
     transform-origin: top left;
     animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
