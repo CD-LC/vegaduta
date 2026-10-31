@@ -250,10 +250,22 @@ function runLoad(): Promise<void> {
       displayName: EDGE_BRANDING.audioGenModelDisplayName,
       totalBytes: AUDIO_GEN_MODEL_SIZE_BYTES,
     });
-    const requestId = nextRequestId++;
-    const response = await request({ type: "load", requestId }, LOAD_IDLE_TIMEOUT_MS, "load-timeout", true, (p) =>
+    // Session-create failures ("Can't create a session") most often mean a
+    // truncated/corrupt .onnx survived an interrupted download in the shared
+    // transformers.js cache - the weights stay cached even after "delete"
+    // (see deleteAudioGenModel), so without eviction the same bad bytes fail
+    // forever. Evict the musicgen entries once and retry the load clean.
+    let requestId = nextRequestId++;
+    let response = await request({ type: "load", requestId }, LOAD_IDLE_TIMEOUT_MS, "load-timeout", true, (p) =>
       reportChipProgress(p)
     );
+    if (response.type === "error" && /create a session|InitializeState|protobuf/i.test(response.detail || "")) {
+      await evictAudioGenCache();
+      requestId = nextRequestId++;
+      response = await request({ type: "load", requestId }, LOAD_IDLE_TIMEOUT_MS, "load-timeout", true, (p) =>
+        reportChipProgress(p)
+      );
+    }
     if (response.type !== "loaded") {
       const detail = response.type === "error" ? response.detail : "unexpected worker reply";
       const label = alreadyCached ? "Could not start on-device audio generation" : "Download failed";
@@ -345,6 +357,23 @@ export async function generateAudioLocally(prompt: string, durationSeconds?: num
     (): undefined => undefined
   );
   return run;
+}
+
+/** Evicts only this model's entries from the shared transformers.js Cache
+ * API bucket (whisper/kokoro entries are untouched). */
+async function evictAudioGenCache(): Promise<void> {
+  try {
+    const keys = await caches.keys();
+    for (const name of keys) {
+      const cache = await caches.open(name);
+      const reqs = await cache.keys();
+      for (const req of reqs) {
+        if (/musicgen/i.test(req.url)) await cache.delete(req);
+      }
+    }
+  } catch {
+    // Best-effort: if eviction itself fails the retry just fails again.
+  }
 }
 
 export async function deleteAudioGenModel(): Promise<void> {
