@@ -129,7 +129,7 @@ export default function CredentialHelp({ title, steps, href, hrefLabel, pricingH
           // enough to fit it. alignRight (measured on open) swaps the
           // anchor edge so a trigger near the right edge doesn't get its
           // popover clipped off-screen.
-          className={`absolute top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground shadow-lg ${alignRight ? "right-0" : "left-0"}`}
+          className={`absolute top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-popover p-4 text-sm text-muted-foreground shadow-lg ${alignRight ? "right-0" : "left-0"}`}
           ref={panelRef}
           tabIndex={-1}
         >

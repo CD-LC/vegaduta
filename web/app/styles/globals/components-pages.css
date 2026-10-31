@@ -9,7 +9,7 @@
   }
 
   .theme-picker-popover {
-    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-72 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-4 shadow-xl;
+    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-72 rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-raised)] p-4 shadow-xl;
     transform-origin: top right;
     animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -382,7 +382,7 @@
   }
 
   .ask-ai-popover {
-    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[22rem] max-w-[80vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-3.5 shadow-xl;
+    @apply absolute right-0 top-[calc(100%+0.5rem)] z-30 w-[22rem] max-w-[80vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-raised)] p-3.5 shadow-xl;
     transform-origin: top right;
     animation: popover-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -522,7 +522,7 @@
   .setup-alert-popover {
     @apply absolute left-0 top-full z-30 mt-2 w-[22rem] max-w-[90vw] rounded-2xl border p-4 shadow-2xl;
     border-color: var(--surface-border);
-    background: var(--surface-card);
+    background: var(--surface-raised);
   }
 
   .setup-alert-head {

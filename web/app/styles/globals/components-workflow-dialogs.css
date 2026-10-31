@@ -94,7 +94,7 @@
   }
 
   .wf-alerts-popover {
-    @apply absolute right-0 top-[calc(100%+0.375rem)] z-30 w-80 max-w-[90vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-2 shadow-xl;
+    @apply absolute right-0 top-[calc(100%+0.375rem)] z-30 w-80 max-w-[90vw] rounded-xl border border-[var(--surface-border)] bg-[var(--surface-raised)] p-2 shadow-xl;
     transform-origin: top right;
     animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
   }

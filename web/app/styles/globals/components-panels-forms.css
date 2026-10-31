@@ -9,7 +9,7 @@
   .lang-switcher-trigger {
     @apply flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors;
     border-color: var(--surface-border);
-    background-color: var(--surface-card);
+    background-color: var(--surface-raised);
     color: var(--text-secondary);
   }
 
@@ -341,7 +341,7 @@
   }
 
   .select-popover {
-    @apply absolute left-0 right-0 top-[calc(100%+0.375rem)] z-30 max-h-64 overflow-y-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface-card)] p-1.5 shadow-xl;
+    @apply absolute left-0 right-0 top-[calc(100%+0.375rem)] z-30 max-h-64 overflow-y-auto rounded-xl border border-[var(--surface-border)] bg-[var(--surface-raised)] p-1.5 shadow-xl;
     transform-origin: top;
     animation: popover-in 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
   }

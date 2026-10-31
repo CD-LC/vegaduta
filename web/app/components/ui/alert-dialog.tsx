@@ -50,7 +50,7 @@ function AlertDialogContent({ className, ...props }: ComponentProps<typeof Alert
           // AgentsGuide.tsx, globals.css's .modal) so a tall confirmation
           // (long description + footer) scrolls internally instead of being
           // clipped off a short mobile viewport.
-          "fixed left-1/2 top-1/2 z-[101] grid max-h-[85vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-xl border border-border bg-card p-6 text-foreground shadow-2xl " +
+          "fixed left-1/2 top-1/2 z-[101] grid max-h-[85vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-xl border border-border bg-popover p-6 text-foreground shadow-2xl " +
             "animate-[popover-in_0.16s_cubic-bezier(0.16,1,0.3,1)_both]",
           className
         )}
