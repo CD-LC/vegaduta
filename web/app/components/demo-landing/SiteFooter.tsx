@@ -148,6 +148,8 @@ export default function SiteFooter() {
                 // Release artifacts (Setup installers, source tarball, images,
                 // Helm) - public page, same self-contained chrome as /plugins.
                 { label: "Downloads", href: "/downloads" },
+                // PeerPush "Get Verified" - verifier only needs a link back.
+                { label: "PeerPush", href: "https://peerpush.com/p/vegaduta", external: true },
                 { label: "Java Agent SDK", href: docPageHref("javaSdk"), external: true },
                 { label: "Open source", href: REPO_URL, external: true },
                 { label: "Self-host guide", href: docPageHref("installation"), external: true },
