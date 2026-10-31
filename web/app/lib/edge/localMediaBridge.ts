@@ -11,9 +11,7 @@ import { MEDIA_LOCAL_TOOLS } from "./localToolsMedia";
 import { edgeImageGenAvailable, isImageGenModelCached } from "./imagegen";
 import { edgeAudioGenAvailable, isAudioGenModelCached } from "./audiogen";
 
-export type LocalMediaResult =
-  | { handled: true; tool: string; reply: string }
-  | { handled: false };
+export type LocalMediaResult = { handled: true; tool: string; reply: string } | { handled: false };
 
 const IMAGE_RE =
   /\b(generate|create|make|draw|paint|produce|render|show me)\b[^.!?]{0,80}\b(image|picture|photo|drawing|art|illustration|portrait|poster|logo|sketch|wallpaper)\b|\b(image|picture|photo|drawing|illustration|logo|sketch)\s+(of|for|with)\b/i;
