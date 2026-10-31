@@ -89,6 +89,10 @@ export default function WorkflowCanvas({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [run, setRun] = useState<RunState>(EMPTY_RUN);
+  // busy = anything in flight that must freeze the canvas: a live run OR a
+  // draft save/create. Without `saving` here, the AddMenu and step cards stay
+  // editable while the draft POST is in flight - edits could land after the
+  // server stored the draft and silently diverge from what was persisted.
   const [deciding, setDeciding] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const firstRunRef = useRef(false);
@@ -235,7 +239,8 @@ export default function WorkflowCanvas({
   const stop = () => abortRef.current?.abort();
 
   const agentName = (id: unknown) => agents.find((a) => a.id === id)?.name ?? "(pick an agent)";
-  const canRun = def.steps.length > 0 && !readOnly && !outOfBudget && !run.running && !saving;
+  const busy = run.running || saving;
+  const canRun = def.steps.length > 0 && !readOnly && !outOfBudget && !busy;
 
   return (
     <div className="space-y-5">
@@ -302,7 +307,7 @@ export default function WorkflowCanvas({
               Save
             </Button>
             {selected && !readOnly && (
-              <Button variant="ghost" size="sm" onClick={remove} disabled={run.running}>
+              <Button variant="ghost" size="sm" onClick={remove} disabled={busy}>
                 <Trash2 aria-hidden="true" className="me-1 h-3.5 w-3.5 shrink-0" /> Delete
               </Button>
             )}
@@ -321,14 +326,14 @@ export default function WorkflowCanvas({
                       state={st}
                       agents={agents}
                       agentName={agentName}
-                      readOnly={readOnly || run.running}
+                      readOnly={readOnly || busy}
                       onChange={(patch) => updateStep(step.id, patch)}
                       onRemove={step.type === "trigger" ? undefined : () => removeStep(step.id)}
                     />
                     {i < def.steps.length - 1 || step.type !== "output" ? (
                       <div className="flex flex-col items-center justify-center">
                         <ArrowRight aria-hidden="true" className="h-4 w-4 text-muted-foreground shrink-0" />
-                        {!readOnly && !run.running && def.steps.length < 8 && <AddMenu onAdd={(t) => addStep(t, i)} />}
+                        {!readOnly && !busy && def.steps.length < 8 && <AddMenu onAdd={(t) => addStep(t, i)} />}
                       </div>
                     ) : null}
                   </div>
@@ -346,7 +351,7 @@ export default function WorkflowCanvas({
               value={input}
               rows={2}
               maxLength={2000}
-              disabled={readOnly || run.running}
+              disabled={readOnly || busy}
               placeholder={tHC("s15")}
               onChange={(e) => setInput(e.target.value)}
             />
