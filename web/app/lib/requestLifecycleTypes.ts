@@ -17,6 +17,7 @@ export type RequestFailureClass =
   | "absolute-timeout"
   | "connection-refused"
   | "http-error"
+  | "http-client-error"
   | "stream-error"
   | "aborted"
   | "circuit-open"

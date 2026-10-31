@@ -289,7 +289,7 @@ export class RequestLifecycleController<T> {
 
     if (absoluteTimer) clearTimeout(absoluteTimer);
 
-    if (this.circuitBreakerPolicy && lastFailureClass !== "aborted") {
+    if (this.circuitBreakerPolicy && lastFailureClass !== "aborted" && lastFailureClass !== "http-client-error") {
       requestCircuitBreaker.recordFailure(this.target, this.circuitBreakerPolicy);
     }
 
