@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-10-30
+
 ### Changed
 
 - **A first personal install is lean.** With no remembered choices (no
