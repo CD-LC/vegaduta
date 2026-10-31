@@ -48,3 +48,15 @@ export async function tryLocalMediaTool(message: string): Promise<LocalMediaResu
     return { handled: true, tool: toolName, reply: err instanceof Error ? err.message : String(err) };
   }
 }
+
+/** Runs the media bridge, else delegates to the real send. Keeps
+ * AssistantPane's diff to one call site. */
+export async function sendOrLocalMedia(
+  message: string,
+  send: (m: string) => void,
+  appendLocal: (user: string, assistant: string) => void
+): Promise<void> {
+  const r = await tryLocalMediaTool(message);
+  if (!r.handled) return send(message);
+  appendLocal(message, r.reply);
+}

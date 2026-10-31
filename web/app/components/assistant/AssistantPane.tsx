@@ -53,7 +53,7 @@ import {
   taskForJob,
 } from "./backgroundWork";
 import { nextTurnId } from "./useAssistantTurn";
-import { tryLocalMediaTool } from "../../lib/edge/localMediaBridge";
+import { sendOrLocalMedia } from "../../lib/edge/localMediaBridge";
 import { useJobActions } from "./useJobActions";
 import FolderPicker from "./FolderPicker";
 import { useWorkspaceFolder } from "./useWorkspaceFolder";
@@ -113,8 +113,7 @@ export default function AssistantPane() {
   const [rightOpen, setRightOpen] = useState(false);
   const [prefs, setPrefs] = useAssistantPrefs();
   const speaking = useSpeaking();
-  // Speech is a browser-wide queue that outlives the page: stop it when the setting turns off (also from
-  // another tab) and when this screen goes away.
+  // Speech is a browser-wide queue that outlives the page: stop it when the setting turns off and when this screen goes away.
   useEffect(() => {
     if (!prefs.speakReplies) stopSpeaking();
   }, [prefs.speakReplies]);
@@ -235,19 +234,12 @@ export default function AssistantPane() {
       void quick.start(message, autoAgent ? null : (active?.id ?? null));
       return;
     }
-    // Browser-tool bridge: local_generate_image/audio run in the page, so a
-    // clear media request is executed here rather than sent to a model that
-    // has no such tool (it would only produce a generic refusal).
-    void tryLocalMediaTool(message).then((r) => {
-      if (!r.handled) {
-        void dispatcher.send(message, { background: mode === "background" });
-        return;
-      }
+    void sendOrLocalMedia(message, (m) => dispatcher.send(m, { background: mode === "background" }), (u, a) =>
       turn.appendTurns(
-        { id: nextTurnId("u"), role: "user", content: message, at: Date.now() },
-        { id: nextTurnId("a"), role: "assistant", content: r.reply, at: Date.now() },
-      );
-    });
+        { id: nextTurnId("u"), role: "user", content: u, at: Date.now() },
+        { id: nextTurnId("a"), role: "assistant", content: a, at: Date.now() },
+      ),
+    );
   }, [input, composerAttachments.attachments.length, dispatcher, t, mode, quick, autoAgent, active?.id]);
 
   const selectAgent = useCallback(
