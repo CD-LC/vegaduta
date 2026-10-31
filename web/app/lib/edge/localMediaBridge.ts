@@ -55,6 +55,9 @@ export async function sendOrLocalMedia(
   appendLocal: (user: string, assistant: string) => void
 ): Promise<void> {
   const r = await tryLocalMediaTool(message);
-  if (!r.handled) return send(message);
+  if (!r.handled) {
+    send(message);
+    return;
+  }
   appendLocal(message, r.reply);
 }
