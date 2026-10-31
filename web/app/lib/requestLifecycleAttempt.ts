@@ -76,7 +76,8 @@ export function classifyThrown(err: unknown): RequestFailureClass {
     // 4xx is deterministic - retrying the identical request can never pass,
     // and counting it toward the circuit breaker is what turned one stale
     // selection into a 15s "pausing retries" outage for the whole surface.
-    if (typeof httpStatus === "number") return httpStatus >= 400 && httpStatus < 500 ? "http-client-error" : "http-error";
+    if (typeof httpStatus === "number")
+      return httpStatus >= 400 && httpStatus < 500 ? "http-client-error" : "http-error";
     if (msg.includes("stream")) return "stream-error";
   }
   return "unknown";
