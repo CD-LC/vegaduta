@@ -32,19 +32,29 @@ Neither of these can be done from the repository; both cost money and need an id
 
 ### Windows
 
-The workflow signs through **Azure Artifact Signing** (formerly Trusted Signing): Microsoft holds the
-key in an HSM and the service has its own CA, which SmartScreen trusts.
+The `setup-exe-windows` job ships with a signing step for **Azure Artifact Signing** (formerly Trusted
+Signing): Microsoft holds the key in an HSM and the service has its own CA, which SmartScreen trusts.
 
-**Check eligibility first.** Artifact Signing's public identity validation has been limited to certain
-countries and organization types. If your organization is not eligible, use a certificate from a
-code-signing CA (DigiCert, Sectigo, SSL.com and others) with **cloud or HSM signing**: CAs have had to
-keep the private key in hardware since 2023, so a downloadable `.pfx` is no longer issued. Then replace
-the single "Sign the exe" step in `setup-exe-windows` with your provider's action or CLI. The release
-job only needs a signed `vegaduta-setup.exe` and a `signed.txt` that says `true`.
+**It is not available everywhere.** Microsoft's quickstart (checked 2026-11-01) says Public Trust
+certificates are available to *organizations* in the United States, Canada, the European Union, the
+United Kingdom, Australia, New Zealand, Japan, South Korea, Singapore, Switzerland, Norway and Israel,
+and to *individual developers* only in the United States and Canada. **An organization registered in India
+cannot use it for public distribution.** (Its Private Trust certificates have no country limit, but they are
+for internal use and are not trusted by SmartScreen for software you hand to the public.) Confirm the
+current list in the Azure portal's identity-validation country drop-down before spending time on it.
 
-For Artifact Signing: create an Azure subscription, a signing account and a *public trust* certificate
-profile (this is where identity validation happens), then an app registration whose service principal
-holds the certificate-profile signer role on that profile.
+If you are not in a supported country, buy a certificate from a code-signing CA that issues to your
+organization and signs from **cloud or HSM storage**: since 2023 CAs have had to keep the private key in
+hardware, so a downloadable `.pfx` is no longer issued. DigiCert (KeyLocker), SSL.com (eSigner), Sectigo
+and GlobalSign sell this, and Indian resellers exist. Then replace the single "Sign the exe" step in
+`setup-exe-windows` with that provider's action or CLI. The release job only needs a signed
+`vegaduta-setup.exe` and a `signed.txt` that says `true`, so the rest of the pipeline does not change.
+Leave the `AZURE_*` secrets unset and that step is skipped.
+
+For Artifact Signing, where it is available: create an Azure subscription, register the
+`Microsoft.CodeSigning` resource provider, create a signing account, complete public identity validation
+(1 to 20 business days), create a *public trust* certificate profile, then an app registration whose
+service principal holds the certificate-profile signer role on that profile.
 
 ## Repository secrets and variables
 
