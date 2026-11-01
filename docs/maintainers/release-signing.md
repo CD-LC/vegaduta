@@ -32,29 +32,24 @@ Neither of these can be done from the repository; both cost money and need an id
 
 ### Windows
 
-The `setup-exe-windows` job ships with a signing step for **Azure Artifact Signing** (formerly Trusted
-Signing): Microsoft holds the key in an HSM and the service has its own CA, which SmartScreen trusts.
+The `setup-exe-windows` job signs through **DigiCert KeyLocker** (the Software Trust Manager part of
+DigiCert ONE): the private key stays in DigiCert's HSM and the job only sends signing requests, which
+is what the CA rules for code signing now require. It is not Azure Artifact Signing, which Microsoft
+does not offer to organizations in India (its public-trust list is the US, Canada, the EU, the UK,
+Australia, New Zealand, Japan, South Korea, Singapore, Switzerland, Norway and Israel; checked
+2026-11-01 against Microsoft's quickstart).
 
-**It is not available everywhere.** Microsoft's quickstart (checked 2026-11-01) says Public Trust
-certificates are available to *organizations* in the United States, Canada, the European Union, the
-United Kingdom, Australia, New Zealand, Japan, South Korea, Singapore, Switzerland, Norway and Israel,
-and to *individual developers* only in the United States and Canada. **An organization registered in India
-cannot use it for public distribution.** (Its Private Trust certificates have no country limit, but they are
-for internal use and are not trusted by SmartScreen for software you hand to the public.) Confirm the
-current list in the Azure portal's identity-validation country drop-down before spending time on it.
+1. Buy a **KeyLocker code-signing certificate** for your organization (OV or EV; DigiCert validates the
+   organization, which takes days) and note the **keypair alias** DigiCert ONE gives it.
+2. In DigiCert ONE create a **service user** for CI, generate its **API key**, and generate its **client
+   authentication certificate** (a `.p12` file with a password). Treat both like passwords.
+3. Note your account's **host** (shown in DigiCert ONE; for the US region it is
+   `https://clientauth.one.digicert.com`).
+4. Add the secrets and variables below.
 
-If you are not in a supported country, buy a certificate from a code-signing CA that issues to your
-organization and signs from **cloud or HSM storage**: since 2023 CAs have had to keep the private key in
-hardware, so a downloadable `.pfx` is no longer issued. DigiCert (KeyLocker), SSL.com (eSigner), Sectigo
-and GlobalSign sell this, and Indian resellers exist. Then replace the single "Sign the exe" step in
-`setup-exe-windows` with that provider's action or CLI. The release job only needs a signed
-`vegaduta-setup.exe` and a `signed.txt` that says `true`, so the rest of the pipeline does not change.
-Leave the `AZURE_*` secrets unset and that step is skipped.
-
-For Artifact Signing, where it is available: create an Azure subscription, register the
-`Microsoft.CodeSigning` resource provider, create a signing account, complete public identity validation
-(1 to 20 business days), create a *public trust* certificate profile, then an app registration whose
-service principal holds the certificate-profile signer role on that profile.
+The job uses DigiCert's official action in *simple signing* mode (it runs `smctl` directly, with no
+`signtool` or key-storage-provider setup). Another Authenticode signer can replace the single "Sign the
+exe" step; the release job only needs a signed `vegaduta-setup.exe` and a `signed.txt` that says `true`.
 
 ## Repository secrets and variables
 
@@ -70,10 +65,11 @@ service principal holds the certificate-profile signer role on that profile.
 | `APPLE_NOTARY_ISSUER_ID` | secret | the team's Issuer ID |
 | `APPLE_DEVELOPER_ID_INSTALLER_P12` | secret | optional: base64 of the Developer ID Installer `.p12` |
 | `APPLE_INSTALLER_IDENTITY` | secret | optional: `Developer ID Installer: Example Ltd (ABCDE12345)` |
-| `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` | secrets | the app registration |
-| `AZURE_SIGNING_ENDPOINT` | variable | the regional endpoint, for example `https://eus.codesigning.azure.net/` |
-| `AZURE_SIGNING_ACCOUNT` | variable | the signing account name |
-| `AZURE_SIGNING_PROFILE` | variable | the certificate profile name |
+| `SM_API_KEY` | secret | the service user's DigiCert ONE API key |
+| `SM_CLIENT_CERT_FILE_B64` | secret | base64 of the service user's client authentication certificate (`.p12`) |
+| `SM_CLIENT_CERT_PASSWORD` | secret | that certificate's password |
+| `SM_HOST` | variable | your DigiCert ONE host, for example `https://clientauth.one.digicert.com` |
+| `SM_KEYPAIR_ALIAS` | variable | the alias of the KeyLocker keypair to sign with |
 
 What each combination does:
 
@@ -83,7 +79,7 @@ What each combination does:
 | the three `APPLE_*` signing secrets only | app and dmg are Developer ID signed but **not** notarized, so Gatekeeper still warns |
 | signing + `APPLE_NOTARY_*` | signed, notarized, stapled `.dmg`; the README drops the Gatekeeper steps |
 | + the Installer secrets | also a signed, notarized, stapled `.pkg` |
-| all `AZURE_*` | signed, timestamped `.exe`; the README drops the SmartScreen steps |
+| all five `SM_*` values | signed, timestamped `.exe`; the README drops the SmartScreen steps |
 
 `package.sh` refuses a half-configured macOS setup (for example a notary key without a signing
 identity, or an Installer identity without notarization) rather than quietly ship a build that
