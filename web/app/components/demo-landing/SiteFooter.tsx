@@ -151,7 +151,7 @@ export default function SiteFooter() {
                 // PeerPush "Get Verified" - verifier only needs a link back.
                 { label: "PeerPush", href: "https://peerpush.com/p/vegaduta", external: true },
                 { label: "Java Agent SDK", href: docPageHref("javaSdk"), external: true },
-                { label: "Open source", href: REPO_URL, external: true },
+                { label: "Source code", href: REPO_URL, external: true },
                 { label: "Self-host guide", href: docPageHref("installation"), external: true },
               ]}
             />

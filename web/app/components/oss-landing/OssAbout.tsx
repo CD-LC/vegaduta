@@ -16,7 +16,7 @@ export default function OssAbout() {
             About <BrandName />
           </h1>
           <p className="mb-0 mt-3 text-muted-foreground">
-            <BrandName /> is an open-source, multi-tenant platform for building AI agents, wiring them into workflows
+            <BrandName /> is a source-available, multi-tenant platform for building AI agents, wiring them into workflows
             with human approval, grounding them in your own data, and reaching them over the channels your users already
             use. It is self-hostable and released under the {LICENSE_NAME} license.
           </p>
@@ -82,7 +82,7 @@ export default function OssAbout() {
               <a className="text-primary hover:underline" href={commercialUrl() ?? undefined} rel="noopener noreferrer">
                 {commercialUrl()}
               </a>
-              . The open-source project and the hosted offering run the same code.
+              . The source-available project and the hosted offering run the same code.
             </p>
           </section>
         )}

@@ -24,10 +24,10 @@ const H1_OVERRIDES: Record<string, RegExp> = {
   // 2026-09-25: /billing copy changed again - "Open source. Free for
   // everyone." now (re-verified live; same free-mode page).
   // Free or paid mode (PUBLIC_FREE_MODE) - accept either.
-  "/billing": /open source|free for everyone|everything is free|pricing/i,
+  "/billing": /open source|source-available|free for everyone|everything is free|pricing/i,
 };
 const TITLE_OVERRIDES: Record<string, RegExp> = {
-  "/billing": /Free.*open source|Pricing/i,
+  "/billing": /Free.*(open source|source-available)|Pricing/i,
 };
 
 // SE-42: routes of the commercial/classic marketing site. On the OSS site (E2E_SITE_MODE=oss) they 307 to `/`,
