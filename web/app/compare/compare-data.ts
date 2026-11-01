@@ -134,7 +134,7 @@ const VEGA = {
     "A lead agent hands parts of a task to specialist agents, several at once when the team has two or more members, under one shared per-run budget. Each delegation shows up in the run graph.",
   mcp: "MCP in both directions: 20 one-click MCP servers plus any server you point it at, and VegaDūta is itself an MCP server, so other AI clients can call your agents and workflows.",
   source:
-    "Apache-2.0 licence and a Docker Compose self-host stack in the repository. The public repository is not published yet.",
+    "Business Source License 1.1 (source-available, free to self-host) and a Docker Compose self-host stack in the public repository.",
 };
 
 // Rows that are identical on our side on every page (2026-10-03). The "them"
@@ -428,7 +428,7 @@ export const COMPETITORS: Competitor[] = [
       "Visual builder maturity.",
       "A marketplace of tools, models and integrations. VegaDūta's community template gallery and skills registry are much smaller.",
       "Sheer OSS contributor volume and community size.",
-      "A published open-source repository today. VegaDūta's is not public yet.",
+      "A published open-source repository. VegaDūta's code is public too, but source-available under the Business Source License 1.1 rather than an open-source license.",
     ],
     whenToPickThem: [
       "You are building internal AI apps or RAG tools, not customer-facing channel agents.",

@@ -413,7 +413,7 @@ export const DOC_TOPICS: DocTopic[] = [
           "An audit trail records platform actions — the same stream you can watch live on the dashboard.",
           "Built-in tools classified as sensitive wait for a person's confirmation before they run, and per-user daily budgets cap spend.",
           "Workspace single sign-on and SCIM user provisioning are available for connecting your own identity provider. Test them with your provider before a rollout.",
-          "The platform is open source under the Apache-2.0 license and can be self-hosted with Docker Compose.",
+          "The platform is source-available under the Business Source License 1.1 (the SDKs in sdk/ are Apache-2.0) and can be self-hosted with Docker Compose.",
         ],
       },
     ],

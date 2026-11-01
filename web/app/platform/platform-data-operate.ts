@@ -429,7 +429,7 @@ export const OPERATE_TOPICS: HubPage[] = [
     cardBlurb:
       "BSL 1.1 licensed, with desktop installers, a Docker Compose stack and a Helm chart for running the whole platform on your own machines.",
     intro: [
-      "VegaDūta is published under the Business Source License 1.1: free to run, fork and build on - including for production use - with the single restriction that you cannot offer it as a competing hosted service. Each version converts to Apache-2.0 four years after release.",
+      "VegaDūta is published under the Business Source License 1.1: free to run, fork and build on - including for production use - with one restriction on use: you cannot offer it as a competing hosted service (and a \"Powered by VegaDūta\" attribution, where one is displayed, must be kept). Each version converts to Apache-2.0 four years after release.",
       "Self-hosting means your conversations, documents, and credentials stay on infrastructure you control. Install from a signed release artifact - not a source build - unless you choose to build from source yourself.",
     ],
     sections: [
