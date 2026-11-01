@@ -5,7 +5,6 @@ import { Coins } from "lucide-react";
 import { api } from "../../lib/api";
 import type { RunCostStep, RunCostSummary } from "../../lib/api";
 import { useTranslations } from "../../lib/i18n";
-import { isBillingEnabled } from "../../lib/billing-flag";
 import { cn } from "../../lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import BrandText from "../BrandText";
@@ -130,10 +129,10 @@ export default function RunCostCard({
   }
 
   const { summary } = current;
-  // Self-hosted/personal installs have no price table that means anything
-  // (billing off => NEXT_PUBLIC_BILLING_ENABLED unset): the card stays, but
-  // every $ figure becomes the token count it was computed from.
-  const billing = isBillingEnabled();
+  // No $ display anywhere: per-turn cost reads as metered-billing noise on
+  // hosted plans and means nothing on self-hosted/local installs. The card
+  // stays, every figure is the token count it was computed from.
+  const billing = false;
   const steps = recentSteps(summary.steps, MAX_STEPS_SHOWN);
   const hiddenSteps = (Array.isArray(summary.steps) ? summary.steps.length : 0) - steps.length;
   const unpriced = toNumber(summary.unpricedCalls) ?? 0;
@@ -196,7 +195,7 @@ export default function RunCostCard({
           )}
         </dl>
 
-        {billing && unpriced > 0 && (
+        {unpriced > 0 && (
           <p className="mt-2 text-xs text-muted-foreground" data-testid="run-cost-unpriced">
             {unpriced === 1 ? t("unpricedOne") : t("unpricedMany", { count: unpriced })}
           </p>
