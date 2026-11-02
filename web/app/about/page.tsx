@@ -112,26 +112,35 @@ export default function AboutPage() {
       </div>
 
       <div className="mx-auto w-full max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
-        <Link href="/" className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight" aria-label="VegaDūta home">
-          <Image src="/logo-mark.png" alt="" height={32} width={44} className="h-8 w-auto object-contain" style={{ height: 32, width: "auto" }} draggable={false} />
+        <Link
+          href="/"
+          className="brand-name flex items-center gap-2.5 text-lg font-semibold tracking-tight"
+          aria-label="VegaDūta home"
+        >
+          <Image
+            src="/logo-mark.png"
+            alt=""
+            height={32}
+            width={44}
+            className="h-8 w-auto object-contain"
+            style={{ height: 32, width: "auto" }}
+            draggable={false}
+          />
           <span>
             Vega<span className="text-primary">Dūta</span>
           </span>
         </Link>
 
         <header className="mt-8 space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
-            About
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">About</p>
           <h1 className="max-w-3xl text-2xl font-semibold tracking-tight sm:text-4xl">
             You describe the job. <BrandName /> does it, and asks first on the big calls.
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            <BrandName /> is a source-available agentic AI platform. It turns a sentence into a working
-            agent, puts that agent on the channels your customers already use, and wraps everything
-            it does in approvals, budgets and an audit trail. Vega means speed and dūta means
-            messenger: a fast messenger that carries work between you, your customers and your
-            systems.
+            <BrandName /> is a source-available agentic AI platform. It turns a sentence into a working agent, puts that
+            agent on the channels your customers already use, and wraps everything it does in approvals, budgets and an
+            audit trail. Vega means speed and dūta means messenger: a fast messenger that carries work between you, your
+            customers and your systems.
           </p>
         </header>
 
@@ -150,9 +159,9 @@ export default function AboutPage() {
             ))}
           </div>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Developers get the same agents inside VS Code and JetBrains, a code-intelligence
-            service that maps a repository before an agent edits it, and {PLATFORM_FACTS.byokProviders}{" "}
-            model providers to bring their own keys to.{" "}
+            Developers get the same agents inside VS Code and JetBrains, a code-intelligence service that maps a
+            repository before an agent edits it, and {PLATFORM_FACTS.byokProviders} model providers to bring their own
+            keys to.{" "}
             <Link href="/platform" className="text-primary underline-offset-2 hover:underline">
               See the platform in detail
             </Link>
@@ -168,14 +177,11 @@ export default function AboutPage() {
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-border bg-card p-5">
               <Users className="size-5 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">
-                Source-available
-              </h3>
+              <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">Source-available</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                The source code is published under the Business Source License 1.1 - free to run,
-                fork and build on, converting to Apache-2.0 four years after each release.
-                Contributions, bug reports and security disclosures are welcome through the
-                project repository.
+                The source code is published under the Business Source License 1.1 - free to run, fork and build on,
+                converting to Apache-2.0 four years after each release. Contributions, bug reports and security
+                disclosures are welcome through the project repository.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-5">
@@ -184,19 +190,16 @@ export default function AboutPage() {
                 A platform, not a chat wrapper
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Schema-per-tenant data isolation, human approval on consequential actions,
-                per-user budgets, and a full audit trail.
+                Schema-per-tenant data isolation, human approval on consequential actions, per-user budgets, and a full
+                audit trail.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-card p-5">
               <GraduationCap className="size-5 text-primary" aria-hidden="true" />
-              <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">
-                Learn and develop
-              </h3>
+              <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">Learn and develop</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                The free Academy has 280+ lessons, and the console is available in{" "}
-                {PLATFORM_FACTS.interfaceLocales} languages, including all{" "}
-                {PLATFORM_FACTS.indianLanguages} scheduled Indian languages.
+                The free Academy has 280+ lessons, and the console is available in {PLATFORM_FACTS.interfaceLocales}{" "}
+                languages, including all {PLATFORM_FACTS.indianLanguages} scheduled Indian languages.
               </p>
             </div>
           </div>
@@ -204,9 +207,7 @@ export default function AboutPage() {
 
         {/* Honest current state */}
         <section className="mt-12 border-t border-border pt-8">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-            What it is not, yet
-          </h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">What it is not, yet</h2>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             Dozens of integrations, not thousands. MCP servers and HTTP tools cover the rest.{" "}
             <Link href="/compare" className="text-primary underline-offset-2 hover:underline">
@@ -218,13 +219,10 @@ export default function AboutPage() {
 
         {/* Registered company */}
         <section className="mt-10 border-t border-border pt-8">
-          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
-            Operator
-          </h2>
+          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">Operator</h2>
           <div className="mt-4 max-w-3xl space-y-1.5 text-sm leading-relaxed text-muted-foreground sm:text-base">
             <p>
-              <BrandName /> is operated by{" "}
-              <span className="text-foreground">{LEGAL_ENTITY}</span>.
+              <BrandName /> is operated by <span className="text-foreground">{LEGAL_ENTITY}</span>.
             </p>
             {CIN_NUMBER ? <p>CIN: {CIN_NUMBER}</p> : null}
             {DIN_NUMBER ? <p>DIN: {DIN_NUMBER}</p> : null}

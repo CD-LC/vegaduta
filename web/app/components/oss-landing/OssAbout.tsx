@@ -16,9 +16,9 @@ export default function OssAbout() {
             About <BrandName />
           </h1>
           <p className="mb-0 mt-3 text-muted-foreground">
-            <BrandName /> is a source-available, multi-tenant platform for building AI agents, wiring them into workflows
-            with human approval, grounding them in your own data, and reaching them over the channels your users already
-            use. It is self-hostable and released under the {LICENSE_NAME} license.
+            <BrandName /> is a source-available, multi-tenant platform for building AI agents, wiring them into
+            workflows with human approval, grounding them in your own data, and reaching them over the channels your
+            users already use. It is self-hostable and released under the {LICENSE_NAME} license.
           </p>
         </header>
 
