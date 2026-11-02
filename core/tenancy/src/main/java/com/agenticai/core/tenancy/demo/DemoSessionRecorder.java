@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@code TenantProvisioningRecorder}:</b> that class and its methods are
  * package-private in {@code com.agenticai.core.tenancy}, and widening them
  * would mean editing a file that is under active concurrent edit by another
- * workstream (see CLAUDE.md). More importantly the two flows genuinely
+ * workstream (see ENGINEERING-RULES.md). More importantly the two flows genuinely
  * differ at the point that matters: {@code TenantProvisioningRecorder
  * #activate} creates an {@code app_user} row bound to a Keycloak user id,
  * and a demo sandbox has neither. The genuinely shared, expensive,

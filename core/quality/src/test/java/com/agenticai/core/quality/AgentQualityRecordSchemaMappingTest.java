@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Regression coverage for the cross-schema bug tracked in
- * docs/AGENT-COORDINATION.md's carried-forward backlog: {@link
+ * the internal change log's carried-forward backlog: {@link
  * AgentQualityRecord} previously had no {@code schema} on its {@code @Table}
  * (or on its two {@code @ElementCollection} maps' {@code @CollectionTable}s),
  * so Hibernate emitted unqualified SQL that resolved against whatever schema

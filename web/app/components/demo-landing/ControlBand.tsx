@@ -64,7 +64,7 @@ import BrandText from "../BrandText";
 //
 // Beacons: control_why_click / control_compare_click (and sec_control reach)
 // are NEW names — they need core's LandingEventController.ALLOWED_EVENTS
-// (_ORDERED) before they count (core-3 scope; flagged in AGENT-COORDINATION).
+// (_ORDERED) before they count (core-3 scope; flagged in the internal change log).
 // Until then they 204-drop by design — same convention as oss_try_click.
 // ---------------------------------------------------------------------------
 

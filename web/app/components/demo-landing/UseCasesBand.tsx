@@ -48,7 +48,7 @@
 //
 // Beacons: usecases_try_click / usecases_recipe_click are new names — they
 // need adding to core's LandingEventController.ALLOWED_EVENTS(_ORDERED)
-// before they count (core-3 scope; flagged in AGENT-COORDINATION). Until
+// before they count (core-3 scope; flagged in the internal change log). Until
 // then they 204-drop by design — same convention as oss_try_click.
 
 import { Fragment } from "react";

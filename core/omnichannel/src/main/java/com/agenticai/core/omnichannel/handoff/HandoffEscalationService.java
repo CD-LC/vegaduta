@@ -212,7 +212,7 @@ public class HandoffEscalationService {
 
     /**
      * Mirror of the designed {@code HumanHandoffPort.HandoffResult} record
-     * (see docs/AGENT-COORDINATION.md's handoff dependency entry): {@code
+     * (see the internal change log's handoff dependency entry): {@code
      * detail} goes back to the model verbatim, which will paraphrase it to
      * the end customer - so it must always read as something safe to say out
      * loud, never an internal id or operator name.

@@ -247,8 +247,7 @@ nav:
       - Security hardening: engineering/SECURITY-HARDENING.md
       - Open UI gaps: engineering/UI-GAPS-OPEN.md
       - Big files split plan: engineering/BIG-FILES-SPLIT-PLAN.md
-      - Agent brief, next phase: engineering/AGENT-BRIEF-NEXT-PHASE.md
-      - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
+            - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
       - Console i18n parity: engineering/I18N.md
       - Error Prone baseline: engineering/ERROR-PRONE-BASELINE.md
       - Standards audit: engineering/STANDARDS-AUDIT.md
@@ -258,6 +257,6 @@ nav:
       - Releasing: maintainers/releasing.md
       - Dependabot pull requests: maintainers/dependabot-prs.md
       - v1.0.0 definition of done: maintainers/v1.0.0-definition-of-done.md
-      - Agent coordination: maintainers/agent-coordination.md
+      - Change coordination: maintainers/change-coordination.md
       - Releasing the Java Agent SDK: maintainers/releasing-sdk.md
       - Publishing these docs: maintainers/docs-site.md

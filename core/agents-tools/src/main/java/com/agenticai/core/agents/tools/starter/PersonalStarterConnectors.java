@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
  * <p><b>Order.</b> Runs before {@code DynamicMcpConnectionManager.reconnectEnabledOnStartup} (same
  * event, default order), which then connects the enabled rows created here on its own tenant-scoped
  * threads. This class neither hands work to another thread nor connects anything itself, so it
- * carries no tenant across a hop (AGENTS.md rule 12): the iterator sets the tenant for each call and
+ * carries no tenant across a hop (ENGINEERING-RULES.md rule 12): the iterator sets the tenant for each call and
  * clears it after.
  *
  * <p><b>Risk classification.</b> Each starter's tools are declared under {@code mcp__<name>__*} when

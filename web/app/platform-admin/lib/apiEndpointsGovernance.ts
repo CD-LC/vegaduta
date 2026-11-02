@@ -78,7 +78,7 @@ export const platformEndpointsB = {
   // core/platform's PlatformController.java confirms no plan-limits route
   // exists there yet - only PlanLimitsService's *reads* landed with A2-PR1,
   // not a write method or any REST surface. Asked core-platform/the maintainer in
-  // docs/AGENT-COORDINATION-2026-07-18.md §10 to add
+  // the internal change log §10 to add
   // GET /api/platform/plan-limits + PUT /api/platform/plan-limits/{plan}
   // (mirroring the existing getPlatformSettings/updatePlatformSetting
   // pair's shape) plus a PlanLimitsService.update(TenantPlan, ...) write
@@ -156,7 +156,7 @@ export const platformEndpointsB = {
   getAdminTemplatesPending: (): Promise<any[]> => apiFetch(`/api/admin/templates/pending`).then(toJson),
   // Nav/overview badge read of the same queue: quiet, because
   // /api/admin/templates/** is gated by PERM_MANAGE_TEMPLATES and a
-  // platform-admin token can be refused there (see AGENT-COORDINATION.md).
+  // platform-admin token can be refused there (see the internal change log).
   getAdminTemplatesPendingQuiet: (): Promise<any[]> => apiFetch(`/api/admin/templates/pending`).then(toJsonQuiet),
   verifyAdminTemplate: (id: string): Promise<JsonObject> =>
     apiFetch(`/api/admin/templates/${id}/verify`, { method: "POST" }).then(toJson),

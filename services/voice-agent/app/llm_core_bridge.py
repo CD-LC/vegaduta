@@ -238,7 +238,7 @@ class CoreChatBridgeLLM(agents_llm.LLM):
         # main.py:249 as of this change) has NOT been updated to pass
         # `room=ctx.room` - until it is, every stage signal from this bridge
         # is a silent, harmless no-op (see _publish_stage's `room is None`
-        # guard). Flagged in docs/AGENT-COORDINATION-2026-08-06.md as the
+        # guard). Flagged in the internal change log as the
         # required one-line follow-up for whoever next owns main.py.
         self.room = room
         # Whether this deployment's TTS plugin can actually produce audio -
@@ -418,7 +418,7 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
                 "Content-Type": "application/json",
             }
             url = f"{bridge._base_url}/api/agents/{bridge.agent_id}/chat"
-            # Cross-agent contract (2026-08-06, see docs/AGENT-COORDINATION-2026-08-06.md):
+            # Cross-agent contract (2026-08-06, see the internal change log):
             # AgentChatService gained a `forceFastDepth` turn-scoped override (new
             # 8-arg overload; the existing 6-arg overload delegates with
             # forceFastDepth=false, so every caller that doesn't know about this

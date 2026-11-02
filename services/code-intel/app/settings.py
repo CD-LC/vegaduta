@@ -44,7 +44,7 @@ class Settings:
     # core validates against too - see application-security.yml's
     # KEYCLOAK_ISSUER_URI. A prior deploy set this to the internal
     # http://keycloak:8080/... and broke the web console's direct calls.)
-    # No default (AGENTS.md rule 4: a token issuer is never hardcoded to
+    # No default (ENGINEERING-RULES.md rule 4: a token issuer is never hardcoded to
     # localhost): compose and Helm always set it, and with auth_mode=keycloak
     # an empty value makes every token request answer 503 instead of
     # silently trusting a dev issuer.
@@ -53,7 +53,7 @@ class Settings:
     )
     # Extra issuers accepted on the token's `iss` (comma-separated): the
     # dual-issuer window of a domain migration, exactly core's
-    # KEYCLOAK_ADDITIONAL_ISSUERS (AGENTS.md rule 7). The service-specific
+    # KEYCLOAK_ADDITIONAL_ISSUERS (ENGINEERING-RULES.md rule 7). The service-specific
     # name wins; the shared name is what docker-compose passes through.
     keycloak_additional_issuers: str = field(
         default_factory=lambda: os.environ.get(

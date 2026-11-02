@@ -244,7 +244,7 @@ would need a DNS TXT on a domain we own; the project domain is `vegaduta.ai`, no
 the `CD-LC` organization (the portal issues a verification-key repo name and checks it
 exists). Group id and Java package names (`io.vegaduta.agent.*`) intentionally differ: the
 coordinates answer to the namespace we control, the packages keep the product name. Do not
-use `com.agenticai` for published artifacts; it is the retired internal name (AGENTS.md
+use `com.agenticai` for published artifacts; it is the retired internal name (ENGINEERING-RULES.md
 naming rule).
 
 ### 7.2 Repository layout
@@ -261,7 +261,7 @@ examples/sdk/                governed-tools (Spring Boot), langchain4j-quarkus, 
 
 `core/pom.xml` depends on `io.github.cd-lc:*` at the reactor version. CI builds `sdk/java/` first and
 installs it (`mvn -f sdk/java/pom.xml install`), then `core/`; the "one Maven build at a time" rule
-in AGENTS.md still holds. `sdk/java/` gets its own tag prefix (`sdk-v0.1.0`) and release job.
+in ENGINEERING-RULES.md still holds. `sdk/java/` gets its own tag prefix (`sdk-v0.1.0`) and release job.
 
 ### 7.3 Spring AI version for the adapter
 

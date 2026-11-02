@@ -24,8 +24,8 @@ import jakarta.persistence.Table;
  * <p>Read-only from the application's own runtime path in this PR (A2-PR1
  * tasks 1-3, 5); the platform-admin CRUD editor over this table
  * (A2-PR1 task 4) is {@code web-admin}-scoped and out of {@code
- * core-business}'s own scope per this repo's {@code CLAUDE.md} - flagged
- * in {@code AGENT-COORDINATION-2026-07-18.md} for whoever picks up {@code
+ * core-business}'s own scope per this repo's {@code ENGINEERING-RULES.md} - flagged
+ * in {@code the internal change log} for whoever picks up {@code
  * web-admin} next, not built here. The package-private all-args
  * constructor below exists for that future editor's create/update path
  * (mirrors {@code PlatformHostedLlmProviderService#create}'s

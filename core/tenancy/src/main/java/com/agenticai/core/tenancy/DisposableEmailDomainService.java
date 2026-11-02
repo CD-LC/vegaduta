@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
  * needs a real, Playwright-scrapable inbox (mailinator.com) for Keycloak's email-
  * verification step - the disposable-email blocklist has correctly rejected that
  * domain since 2026-07-31, silently blocking the whole signup-dependent E2E
- * surface for a month (docs/AGENT-COORDINATION.md, 2026-08-30 E2E-triage entry).
+ * surface for a month (the internal change log, 2026-08-30 E2E-triage entry).
  * Deliberately exact-match (not a subdomain walk like the blocklist) and set to
  * {@code mailinator.com} ONLY in {@code deploy/.env} (staging) - never in
  * {@code deploy/.env.production} - so production's anti-abuse protection is

@@ -47,7 +47,7 @@ export function isLoopbackUrl(url: string | undefined): boolean {
 }
 
 /**
- * Drops a loopback direct URL when the page origin is not loopback too (AGENTS.md
+ * Drops a loopback direct URL when the page origin is not loopback too (ENGINEERING-RULES.md
  * rule 4: never a localhost browser-facing URL). The caller then uses the core proxy.
  */
 export function resolveDirectUrl(configured: string | undefined, pageHostname: string | undefined): string | undefined {

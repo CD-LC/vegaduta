@@ -15,7 +15,7 @@
     Per-user rolling spend budgets (com.agenticai.core.agents.budget: PerUserBudgetService,
     its tracking advisor and turn reservation guards, the agent BudgetPolicy embeddable) and
     tenant spend caps (com.agenticai.core.agents.spendcap). Cut out of agents; agents depends
-    on this module, never the other way. The chat turn path calls it in-process (AGENTS.md
+    on this module, never the other way. The chat turn path calls it in-process (ENGINEERING-RULES.md
     rule 6). Depends on: chat, providers, security, tenancy, audit.
     See docs/architecture/agents-decomposition/budgets.md.
   </description>

@@ -135,7 +135,7 @@ class PersonalProfileConfigTest {
 
     @Test
     void noValueHardcodesLocalhostAndTheIssuerNeverFallsBackToIt() throws IOException {
-        // AGENTS.md rule 4: a token issuer and browser-facing URL never default to localhost.
+        // ENGINEERING-RULES.md rule 4: a token issuer and browser-facing URL never default to localhost.
         StandardEnvironment env = environment(Map.of());
         int checked = 0;
         for (PropertySource<?> source : env.getPropertySources()) {

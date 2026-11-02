@@ -43,7 +43,7 @@ final class VoiceTurnStream {
      * TTS-synthesis phase (the {@code replyAndAudio} sub-flux built below) - the reliability
      * blueprint's Part 5(d) fix ({@code docs/RELIABILITY-BLUEPRINT-2026-08-06-PART1.md}),
      * specifically the half of it flagged as NOT yet shipped in {@code
-     * docs/AGENT-COORDINATION-2026-08-06.md}'s "Session B — closing entry" ("{@code
+     * the internal change log}'s "Session B — closing entry" ("{@code
      * VoiceCallController#turn}'s explicit absolute ceiling did not [ship], since those are core/
      * changes outside this pass's web+voice-agent scope").
      *

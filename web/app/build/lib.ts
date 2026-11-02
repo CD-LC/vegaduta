@@ -33,7 +33,7 @@ import type {
 const warming = createWarmingTracker();
 export const onWarming = warming.subscribe;
 
-// RULE 0 (CLAUDE.md): no browser-facing URL may point at localhost/127.0.0.1.
+// rule 4 (ENGINEERING-RULES.md): no browser-facing URL may point at localhost/127.0.0.1.
 // This constant used to default to "http://localhost:8091", which — because
 // NEXT_PUBLIC_* is baked into the browser bundle at BUILD time — shipped to
 // production and made every real visitor on the hosted app fetch

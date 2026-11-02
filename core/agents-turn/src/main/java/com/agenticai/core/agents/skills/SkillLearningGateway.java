@@ -64,7 +64,7 @@ public final class SkillLearningGateway {
 
     /**
      * Passes the reply through unchanged and reports how the turn ended. The tenant is captured
-     * here, on the thread that assembled the turn, and travels as data in the outcome (AGENTS.md
+     * here, on the thread that assembled the turn, and travels as data in the outcome (ENGINEERING-RULES.md
      * rule 12): whoever handles it on another thread re-applies it with {@code outcome.scope()}.
      */
     public static Flux<String> observe(

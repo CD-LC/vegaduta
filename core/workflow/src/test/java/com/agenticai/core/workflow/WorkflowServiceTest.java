@@ -41,7 +41,7 @@ import org.springframework.beans.factory.ObjectProvider;
  * wiring, the FREE-tier edit-lock enforcement
  * VEGADUTA-MASTER-ROADMAP-2026-07-19.md §4.1 asked for and which turned out
  * to already be fully built here (6 mutating methods, all gated - see this
- * session's AGENT-COORDINATION-2026-07-18.md Status Log entry). Scoped to
+ * session's the internal change log Status Log entry). Scoped to
  * the edit-lock behavior specifically (via {@link #update} and {@link
  * #enableWebhook}/{@link #disableWebhook} as representative gated methods),
  * not full class coverage - that's a separate, larger effort.

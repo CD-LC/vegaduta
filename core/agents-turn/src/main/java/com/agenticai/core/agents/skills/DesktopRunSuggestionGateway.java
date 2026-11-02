@@ -48,7 +48,7 @@ public final class DesktopRunSuggestionGateway {
         return o != null && o.enabled();
     }
 
-    /** Passes the reply through unchanged; the tenant travels as data in the outcome (AGENTS.md rule 12). */
+    /** Passes the reply through unchanged; the tenant travels as data in the outcome (ENGINEERING-RULES.md rule 12). */
     public static Flux<String> observe(
             Flux<String> turn,
             UUID agentId,

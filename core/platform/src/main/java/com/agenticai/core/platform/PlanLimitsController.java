@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Platform-admin "Plan Limits" editor - {@code /api/platform/plan-limits[/{plan}]} (A2-PR1 task 4,
- * roadmap §8; contract confirmed in {@code docs/AGENT-COORDINATION-2026-07-18.md} §12). Gated by
+ * roadmap §8; contract confirmed in {@code the internal change log} §12). Gated by
  * the same {@code SecurityConfig} {@code .requestMatchers("/api/platform/**")
  * .hasAuthority("ROLE_platform-admin")} rule as every other controller under this path prefix - see
  * {@link PlatformController}'s own javadoc for the same posture - no separate authorization check

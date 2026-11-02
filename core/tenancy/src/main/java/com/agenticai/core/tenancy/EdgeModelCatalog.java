@@ -130,7 +130,7 @@ final class EdgeModelCatalog {
             4096
         ),
         // Appended 2026-09-09 (cross-scope item recorded in
-        // docs/AGENT-COORDINATION.md): the tool-calling model the client's
+        // the internal change log): the tool-calling model the client's
         // AG-UI activity trace depends on. The client-side
         // BUILTIN_FALLBACK_MANIFEST in web/app/lib/edge/tier1.ts already
         // carried this row, so devices that fell back to the baked-in list

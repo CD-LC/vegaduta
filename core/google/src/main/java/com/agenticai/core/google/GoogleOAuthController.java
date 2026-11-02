@@ -64,7 +64,7 @@ public class GoogleOAuthController {
     /**
      * {@code consoleRedirectUri} is the dedicated property when set, else {@code
      * <app.web.public-url>/admin/integrations}; blank when neither is configured (no localhost
-     * default, AGENTS.md rule 4) - {@link #redirectTo} then refuses with a message naming both.
+     * default, ENGINEERING-RULES.md rule 4) - {@link #redirectTo} then refuses with a message naming both.
      */
     public GoogleOAuthController(
             GoogleOAuthService oauthService,

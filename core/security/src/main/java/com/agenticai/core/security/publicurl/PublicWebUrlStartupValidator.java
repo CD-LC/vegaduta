@@ -9,7 +9,7 @@ import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
 /**
- * Fail-fast guard for {@code app.web.public-url} (AGENTS.md rule 4).
+ * Fail-fast guard for {@code app.web.public-url} (ENGINEERING-RULES.md rule 4).
  *
  * <p>The property used to default to {@code http://localhost:3000} in nine separate {@code @Value}
  * placeholders, so a deployment that forgot {@code APP_WEB_PUBLIC_URL} silently mailed {@code
@@ -72,7 +72,7 @@ public class PublicWebUrlStartupValidator implements InitializingBean {
                             + PublicWebUrl.ENV_HINT
                             + " to the public origin of the tenant console (e.g."
                             + " https://app.example.com). There is deliberately no localhost"
-                            + " default (AGENTS.md rule 4).";
+                            + " default (ENGINEERING-RULES.md rule 4).";
             if (securityProfileActive) {
                 throw new IllegalStateException(
                         "Refusing to start under the 'security' profile: " + message);

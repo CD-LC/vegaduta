@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
  * that was verified against live source and needed real test coverage.
  *
  * <p>Standing caveat matching this repo's own convention (see
- * AGENT-COORDINATION-2026-07-18.md / .claude-handoffs/TIER2_HANDOFF.md):
+ * the internal change log / .claude-handoffs/TIER2_HANDOFF.md):
  * written and hand-verified line-by-line against the live
  * {@code AgentService.java}/{@code Agent.java}/{@code TenantContext.java}/
  * {@code EditLockPolicy.java} sources, but this Cowork sandbox has no

@@ -132,7 +132,7 @@ bindings plus `tenant` routing. What it would take, and why I would hold off:
   runtimes (new dependencies: licence review against `scripts/ci/license-allowlist.txt`, SBOM,
   CVE surface); a second listener (gRPC needs HTTP/2 end to end, so a new port or an h2c
   connector plus a proxy rule in Compose, Helm and Caddy); a server interceptor that validates
-  the Keycloak JWT and binds `TenantContext` (a ThreadLocal, AGENTS.md rule 12) on the call
+  the Keycloak JWT and binds `TenantContext` (a ThreadLocal, ENGINEERING-RULES.md rule 12) on the call
   thread; server-streaming for `SendStreamingMessage`; the 5.4 status mapping; tests.
 - **Rough size:** a week of work plus a deploy-surface change. The chat hot path would not
   gain a hop (rule 6): the gRPC service would call `A2aTaskService` in process.

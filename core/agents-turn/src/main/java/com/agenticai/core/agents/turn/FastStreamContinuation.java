@@ -86,7 +86,7 @@ final class FastStreamContinuation {
         // concatWith(Flux.defer(...)) subscribes this pass from there. Subscribe it in the turn's captured
         // scope so the advisors (LlmMetricsAdvisor, RlTrajectoryAdvisor) see the tenant and their
         // llm_call_log / rl_episode writes land in the tenant schema instead of the fail-closed
-        // "tenant_context_missing" one (AGENTS.md rule 12).
+        // "tenant_context_missing" one (ENGINEERING-RULES.md rule 12).
         Flux<String> pass =
                 TenantScopedFlux.subscribeInScope(
                                 t.context.scope(), () -> t.continuationContent(request, transcript))

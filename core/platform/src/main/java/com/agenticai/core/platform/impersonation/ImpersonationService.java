@@ -602,7 +602,7 @@ public class ImpersonationService implements ImpersonationGrantResolver {
     /**
      * {@code <app.web.public-url>/view-as#grant=<grant>} - the grant rides in the fragment so it
      * never reaches a server log or a Referer. Null when the public URL is unset or points at a
-     * local host: a localhost link handed to an operator is always wrong (CLAUDE.md RULE 0).
+     * local host: a localhost link handed to an operator is always wrong (ENGINEERING-RULES.md rule 4).
      */
     String viewUrl(String grant) {
         if (webPublicUrl == null || webPublicUrl.isBlank()) {

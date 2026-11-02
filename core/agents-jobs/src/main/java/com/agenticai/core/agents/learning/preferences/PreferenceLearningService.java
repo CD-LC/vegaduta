@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>Approval patterns are informational only: the proposal says what the person tends to do and points at the agent's
  * autonomy setting, which stays the person's own decision there. Nothing here approves, skips or lowers any approval
- * requirement. Hand-off to the worker always carries the tenant (AGENTS.md rule 12); the chat turn only pays for a
+ * requirement. Hand-off to the worker always carries the tenant (ENGINEERING-RULES.md rule 12); the chat turn only pays for a
  * regex over a short message and a queue offer.
  */
 @Service

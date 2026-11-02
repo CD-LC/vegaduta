@@ -54,7 +54,7 @@ import org.springframework.stereotype.Service;
  * unchanged) and nothing reads a tool log or calls a model.
  *
  * <p>When on, it runs entirely off the request thread. The tenant is captured as data when the turn
- * finishes ({@code TurnOutcome#scope}) and re-applied on the worker (AGENTS.md rule 12); the queue
+ * finishes ({@code TurnOutcome#scope}) and re-applied on the worker (ENGINEERING-RULES.md rule 12); the queue
  * is small and drops work when full, because a missed lesson costs nothing and a stalled chat
  * costs a lot. It also records, for every finished turn that loaded a custom skill, whether that
  * turn went well, which feeds the skill's effectiveness score.

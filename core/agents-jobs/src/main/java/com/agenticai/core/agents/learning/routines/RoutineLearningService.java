@@ -46,7 +46,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>Off unless {@code app.learning.routines.enabled} and {@code app.learning.proposals.enabled} are both true
  * (the personal profile turns both on). It never touches the chat turn's stream: the gateway hands each request to
- * this bean's own bounded single worker, the tenant travelling as data (AGENTS.md rule 12), and a full queue drops
+ * this bean's own bounded single worker, the tenant travelling as data (ENGINEERING-RULES.md rule 12), and a full queue drops
  * the observation. There is no model call: grouping is token similarity, so the cost is a few indexed reads.
  * Proposals still go through {@link LearningProposalService#claimSlot} (per-agent cooldown and daily cap).
  */

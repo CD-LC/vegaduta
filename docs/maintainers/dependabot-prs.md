@@ -50,7 +50,7 @@ git push
 ```
 
 Then run the tests of each service the pull request touches (the table in
-[AGENTS.md](../../AGENTS.md)) and wait for CI. Notes:
+[ENGINEERING-RULES.md](../../ENGINEERING-RULES.md)) and wait for CI. Notes:
 
 - Sign the commit (`-s`): it is a human commit, so the DCO job checks it.
 - Once someone else has pushed to a Dependabot branch, Dependabot no longer rebases it on

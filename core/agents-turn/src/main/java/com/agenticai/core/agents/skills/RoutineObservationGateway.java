@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>It adds no operator to any stream: {@link #observe} only reports that the person made a request. With no
  * observer installed, or one that reports itself disabled (the default), it returns before doing any work. The
- * tenant is captured here, on the calling thread, and travels as data (AGENTS.md rule 12); the observer must hand
+ * tenant is captured here, on the calling thread, and travels as data (ENGINEERING-RULES.md rule 12); the observer must hand
  * the work to its own bounded worker and never block.
  */
 public final class RoutineObservationGateway {

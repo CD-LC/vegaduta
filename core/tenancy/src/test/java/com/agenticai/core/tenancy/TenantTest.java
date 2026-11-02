@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
  * Tenant#cancelPendingUpgrade}), which is the exact mechanism that flips {@code Tenant.plan} on a
  * real payment (the revenue loop VEGADUTA-MASTER-ROADMAP-2026-07-19.md §1 called out as unbuilt -
  * it is not; this class's own logic already does it. See this session's
- * AGENT-COORDINATION-2026-07-18.md Status Log entry). This class covers that state machine
+ * the internal change log Status Log entry). This class covers that state machine
  * directly, no mocks needed - pure entity logic.
  */
 class TenantTest {

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * The one hook the chat turn has into the "preferences from behavior" learning loop. It hands over the person's
  * message at the START of the turn, never touches the reply stream, and costs one volatile read when the loop is
  * off ({@code app.learning.preferences.enabled=false}, the default). The observer must be quick (it runs on the
- * request thread) and do anything real on its own worker with the tenant carried in {@code scope} (AGENTS.md rule 12).
+ * request thread) and do anything real on its own worker with the tenant carried in {@code scope} (ENGINEERING-RULES.md rule 12).
  */
 public final class PreferenceSignalGateway {
 

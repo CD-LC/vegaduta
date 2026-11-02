@@ -64,7 +64,7 @@ public class AtlassianOAuthController {
         this.connector = connector;
         this.connectDispatcher = connectDispatcher;
         // Dedicated property when set, else <app.web.public-url>/tools; blank when neither is
-        // configured (no localhost default, AGENTS.md rule 4) - redirectTo then refuses.
+        // configured (no localhost default, ENGINEERING-RULES.md rule 4) - redirectTo then refuses.
         this.consoleRedirectUri =
                 PublicWebUrl.consoleRedirect(consoleRedirectUri, appPublicUrl, "/tools");
     }

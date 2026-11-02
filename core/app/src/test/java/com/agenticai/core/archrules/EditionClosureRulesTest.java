@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * The edition closure rule (AGENTS.md rule 9, for the lean edition): a bean gated by {@link
+ * The edition closure rule (ENGINEERING-RULES.md rule 9, for the lean edition): a bean gated by {@link
  * ConditionalOnEditionFeature} may be injected only by beans gated by the SAME feature, or through
  * {@code ObjectProvider}, {@code Optional} or a collection. Anything else compiles, unit-tests
  * cleanly and crashes core at startup on the edition that drops the gated bean ("No qualifying bean

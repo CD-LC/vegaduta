@@ -371,6 +371,6 @@ Covered:
 - `eval-harness.md` (this directory) - the standalone golden-dataset eval CLI
   (`com.agenticai.core.quality.eval`, merged from the former `core/eval`
   module): prompt-regression runner, Langfuse mirroring, token baseline
-- `docs/AGENT-COORDINATION-2026-07-18.md` - Eval feature ownership tracking
+- `the internal change log` - Eval feature ownership tracking
 - `docs/BILLING-TIER-STRATEGY-2026-07-27.md` - Plan tier architecture
 - Agent Dashboard Design (Frontend)
