@@ -784,3 +784,4 @@ pgvector, table groups) and `docs/architecture/database-reference.md`
 with tenant Flyway head 674). Two nav entries in `mkdocs.yml`. No code and
 no migrations changed. Verified: `scripts/ci/docs-link-check.sh` reports 0
 broken links. Worktree: /private/tmp/vd-dbdocs.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/agents-studio/src/test` only (Magic Studio planner and controller, sandbox music controller, app-builder controllers and service auth, Redis coding task store, platform query rewriter, face enrollment, demo agent seeder). No production code changed. Worktree: `vegaduta-coverage-wt`.
