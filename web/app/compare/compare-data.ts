@@ -109,14 +109,11 @@ const VEGA = {
   languages:
     "Console in 30 languages, including all 22 scheduled Indian languages. Agents reply in the language the customer writes in. Speech is narrower than the console: agents can use Sarvam speech tools, but spoken-language coverage depends on the speech provider you connect. Sarvam voice in live in-app voice calls is currently Indian English, and phone calls through Twilio use Twilio's relay speech with its default language.",
   upi: "Plans priced for India and payable by UPI.",
-  sandbox:
-    "Anonymous 5-day sandbox at /try — a real tenant, no account, no card.",
+  sandbox: "Anonymous 5-day sandbox at /try — a real tenant, no account, no card.",
   academy:
     "Free Academy with 280+ lessons, from a first agent to running one in production, linked from the console pages they teach.",
-  pricing:
-    "Free tier plus India-priced paid plans, payable by UPI — see the pricing page for current numbers.",
-  behind:
-    "Dozens of integrations rather than hundreds; smaller community; one cloud region today; no SOC 2 yet.",
+  pricing: "Free tier plus India-priced paid plans, payable by UPI — see the pricing page for current numbers.",
+  behind: "Dozens of integrations rather than hundreds; smaller community; one cloud region today; no SOC 2 yet.",
   lab: "Agent Lab replays any run as a graph, re-runs it from a chosen step, removes prompt sections one at a time to show which ones matter, and repeats an input to check consistency. A Request X-ray shows the exact prompt, tools and budget sent to the model. Eval datasets scored by six LLM judges can gate promoting a version to Production.",
   models:
     "Bring your own key for 14 providers (Anthropic, OpenAI, Azure OpenAI, Google Vertex, Gemini, AWS Bedrock, Mistral, DeepSeek, Groq, Grok, OpenRouter, Ollama, Sarvam, Meta) or use the platform-hosted model pool — with per-user daily dollar budgets and a cost tier shown per model in the picker.",
@@ -124,8 +121,7 @@ const VEGA = {
     "Visual builder with 35 node types including human approval, an expression language, data pinning, live run streaming with per-step token and tool-call detail, comments and version diffs; a Temporal durable-execution engine can be switched on per deployment.",
   tools:
     "50+ built-in agent tools, 14 built-in Agent Skills (agent-drafted skills stay off until an admin approves them), and a browser-use fallback for sites with no connector.",
-  crm:
-    "Built-in leads CRM and outreach: a leads pipeline, a bulk-email workflow node, reply and bounce detection, and agents that run on a schedule.",
+  crm: "Built-in leads CRM and outreach: a leads pipeline, a bulk-email workflow node, reply and bounce detection, and agents that run on a schedule.",
   builder:
     "App Studio: describe an app and get a multi-page app with live preview, per-project Postgres roles, self-repairing previews, GitHub import and two-way sync, a template gallery and store-ready mobile builds.",
   senses:
@@ -288,7 +284,8 @@ export const COMPETITORS: Competitor[] = [
         mcp: "MCP Server Trigger and MCP Client nodes, listed on the Starter and Pro plans.",
         source: "Community Edition is free to self-host.",
         models: "Any model over HTTP or AI nodes — no hosted model pool or per-user spend budgets built in.",
-        workflows: "The strongest engine on this page — thousands of integrations and a mature executor. This row is n8n's, honestly.",
+        workflows:
+          "The strongest engine on this page — thousands of integrations and a mature executor. This row is n8n's, honestly.",
         tools: "Thousands of integrations and community nodes — VegaDūta's tool surface is much smaller.",
         crm: "No built-in CRM — though wiring an external CRM and mail tools is exactly what n8n is good at.",
         builder: "No — n8n automates workflows, it does not generate apps.",
@@ -409,10 +406,12 @@ export const COMPETITORS: Competitor[] = [
         mcp: NOT_ASSESSED,
         source: "Open-source Community edition, free to self-host, with all core features in the public repository.",
         models: "Broad provider support is a Dify strength; cloud usage is metered in message credits.",
-        workflows: "A visual pipeline builder for LLM apps and RAG — chatflow blocks rather than a general automation engine.",
+        workflows:
+          "A visual pipeline builder for LLM apps and RAG — chatflow blocks rather than a general automation engine.",
         tools: "A plugin marketplace — a strength VegaDūta has no equivalent of.",
         crm: "Not the product's territory — build it yourself or integrate an external CRM.",
-        builder: "Builds LLM chat/agent apps with simple webapp wrappers — not multi-page deployable apps with their own database roles.",
+        builder:
+          "Builds LLM chat/agent apps with simple webapp wrappers — not multi-page deployable apps with their own database roles.",
         senses: NOT_ASSESSED,
         cites: { source: [DIFY_CITES.official], models: [DIFY_CITES.official] },
       }),
@@ -519,7 +518,8 @@ export const COMPETITORS: Competitor[] = [
         mcp: NOT_ASSESSED,
         source: "Managed cloud product. Self-hosting was not assessed in our research.",
         models: "Models are bundled; AI usage is metered on top of the plan.",
-        workflows: "A conversation-first flow builder with autonomous and AI-task nodes; general-purpose automation is not its aim.",
+        workflows:
+          "A conversation-first flow builder with autonomous and AI-task nodes; general-purpose automation is not its aim.",
         tools: NOT_ASSESSED,
         crm: "No built-in CRM; handoff to external CRMs runs through integrations.",
         builder: "No app-generation feature — the product is agents and flows.",
