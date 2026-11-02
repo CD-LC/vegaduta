@@ -14,8 +14,8 @@ maintainers:
   - name: VegaDuta maintainers
     url: https://github.com/CD-LC/vegaduta
 annotations:
-  licenses: Apache-2.0
-  artifacthub.io/license: Apache-2.0
+  licenses: BUSL-1.1
+  artifacthub.io/license: BUSL-1.1
   artifacthub.io/prerelease: "true"
 dependencies:
   - name: vegaduta-lib

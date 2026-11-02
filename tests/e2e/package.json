@@ -1,7 +1,7 @@
 {
   "name": "vegaduta-e2e",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "BUSL-1.1",
   "private": true,
   "description": "Self-contained Playwright E2E suite for the VegaDuta public web surface (landing, signup, legal, auth handoff). Independent of web/'s dependency tree on purpose - see README.md.",
   "scripts": {
