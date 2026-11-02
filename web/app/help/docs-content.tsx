@@ -176,7 +176,7 @@ export const DOC_TOPICS: DocTopic[] = [
     sections: [
       {
         paras: [
-          "Quick Task is the fastest path from \"I need this done\" to a result: describe a one-off job and run it immediately, without creating and configuring a persistent agent first. Use it for ad-hoc work — a summary, a draft, an extraction — and graduate to a full agent when the same job keeps coming back.",
+          'Quick Task is the fastest path from "I need this done" to a result: describe a one-off job and run it immediately, without creating and configuring a persistent agent first. Use it for ad-hoc work — a summary, a draft, an extraction — and graduate to a full agent when the same job keeps coming back.',
         ],
       },
     ],
@@ -344,7 +344,7 @@ export const DOC_TOPICS: DocTopic[] = [
         heading: "Three ways to look",
         bullets: [
           "Snapshot — capture a single frame and ask about it, like attaching a photo without leaving the conversation. The day-one mode for show-and-ask questions.",
-          "Watch — the agent keeps a low-frame-rate eye on the feed and speaks up when something meaningful changes, so you can give standing instructions like \"tell me when this finishes\".",
+          'Watch — the agent keeps a low-frame-rate eye on the feed and speaks up when something meaningful changes, so you can give standing instructions like "tell me when this finishes".',
           "Live — a continuous real-time session where you and the agent look at the same thing together and talk about it as it changes.",
         ],
       },
@@ -388,9 +388,7 @@ export const DOC_TOPICS: DocTopic[] = [
         ],
       },
       {
-        paras: [
-          "Billing management (invoices, upgrades) is a tenant-admin surface inside the console.",
-        ],
+        paras: ["Billing management (invoices, upgrades) is a tenant-admin surface inside the console."],
       },
     ],
     appLinks: [
@@ -426,7 +424,7 @@ export const DOC_TOPICS: DocTopic[] = [
     sections: [
       {
         paras: [
-          "The Academy is the platform's free learning portal: more than 280 free lessons in a structured, hands-on curriculum that takes you from \"what is an agent?\" through building, grounding, connecting, and evaluating real agents — including a code-intelligence hands-on and a platform-architecture deep dive.",
+          'The Academy is the platform\'s free learning portal: more than 280 free lessons in a structured, hands-on curriculum that takes you from "what is an agent?" through building, grounding, connecting, and evaluating real agents — including a code-intelligence hands-on and a platform-architecture deep dive.',
           "Lessons ladder through tiers — Builder, Operator, Engineer, Architect — so you always know what to learn next. Everything you learn is practised on the real platform: you learn agentic AI by shipping an agent.",
         ],
       },
@@ -445,22 +443,20 @@ export const DOC_TOPICS: DocTopic[] = [
         ],
       },
       {
-        heading: "\"Knowledge upload or search is temporarily disabled.\"",
+        heading: '"Knowledge upload or search is temporarily disabled."',
         paras: [
           "The knowledge service is briefly unavailable; the console gates uploads rather than accepting files it can't process. Try again shortly.",
         ],
       },
       {
-        heading: "\"We'll be back\" screen",
+        heading: '"We\'ll be back" screen',
         paras: [
           "The console can't reach the core service — usually a restart or maintenance window. The page recovers on its own once the service is back.",
         ],
       },
       {
-        heading: "\"I was signed out.\"",
-        paras: [
-          "Idle sessions are ended automatically for security. Sign back in and you're where you left off.",
-        ],
+        heading: '"I was signed out."',
+        paras: ["Idle sessions are ended automatically for security. Sign back in and you're where you left off."],
       },
       {
         heading: "Still stuck?",
