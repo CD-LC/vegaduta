@@ -784,3 +784,4 @@ pgvector, table groups) and `docs/architecture/database-reference.md`
 with tenant Flyway head 674). Two nav entries in `mkdocs.yml`. No code and
 no migrations changed. Verified: `scripts/ci/docs-link-check.sh` reports 0
 broken links. Worktree: /private/tmp/vd-dbdocs.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/billing/src/test` only (Razorpay SDK calls, Stripe HTTP calls, billing email service) plus a test-scope `okhttp-jvm` dependency in `core/billing/pom.xml`. No production code changed. `core/billing` is in the lean personal edition agent's row; this PR touches only new test files and the one pom entry. Worktree: `vegaduta-coverage-wt`.
