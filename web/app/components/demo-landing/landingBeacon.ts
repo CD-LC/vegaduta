@@ -206,6 +206,7 @@ export const LANDING_SECTIONS = [
   // (WhatsUnderneath) and band 13 (ProviderWall), i.e. after most readers
   // had already left.
   "ledger",
+  "platform-edge",
   // 2026-09-12: the category band, immediately after the ledger. The ledger
   // says WHAT the platform is; this says what it is LIKE, against the tools a
   // visitor already knows (n8n/Zapier/Make). That order is deliberate —

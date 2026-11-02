@@ -7,6 +7,9 @@ vi.mock("next/image", () => ({
   default: (props: { alt?: string; src?: string }) => <img alt={props.alt ?? ""} src={String(props.src ?? "")} />,
 }));
 
+// ThemePicker reads the theme context, which these render-only tests do not provide.
+vi.mock("../ThemePicker", () => ({ default: () => null }));
+
 import OssAbout from "./OssAbout";
 import OssLanding from "./OssLanding";
 import { REPO_URL } from "./ossSite";
