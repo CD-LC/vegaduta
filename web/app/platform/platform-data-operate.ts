@@ -25,23 +25,19 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "Run graph: every step of a turn",
-        body:
-          "Each turn in the playground becomes a graph: the user message, the plan, each tool call, guardrail decisions, handoffs to other agents, and the reply. Selecting a step shows its tool name, a shortened preview of its arguments and result, any error, and how long it took. The panel also totals the turn's elapsed time, tool calls, tokens, and estimated cost.",
+        body: "Each turn in the playground becomes a graph: the user message, the plan, each tool call, guardrail decisions, handoffs to other agents, and the reply. Selecting a step shows its tool name, a shortened preview of its arguments and result, any error, and how long it took. The panel also totals the turn's elapsed time, tool calls, tokens, and estimated cost.",
       },
       {
         heading: "Fork from any message",
-        body:
-          "Fork rewinds the conversation to just before a message and sends that message again, edited if you want. Later turns are removed from the live conversation and the original is kept as a snapshot, so you can compare the branch with the original side by side, including which tools each version called. Two limits are stated in the dialog: tool calls the original turn already made are not undone, and snapshots are kept in your browser only, for 24 hours.",
+        body: "Fork rewinds the conversation to just before a message and sends that message again, edited if you want. Later turns are removed from the live conversation and the original is kept as a snapshot, so you can compare the branch with the original side by side, including which tools each version called. Two limits are stated in the dialog: tool calls the original turn already made are not undone, and snapshots are kept in your browser only, for 24 hours.",
       },
       {
         heading: "Prompt knockout: which instructions matter",
-        body:
-          "Knockout splits the system prompt at headings and blank lines, then runs the same questions with one section removed at a time. Questions come from an eval dataset or from probe questions you type in. The unchanged prompt is run several times first to measure the noise floor, and each section is then labelled load-bearing, harmful, or no measurable effect. When there are too few questions to tell a real change from noise, the lab says so instead of labelling.",
+        body: "Knockout splits the system prompt at headings and blank lines, then runs the same questions with one section removed at a time. Questions come from an eval dataset or from probe questions you type in. The unchanged prompt is run several times first to measure the noise floor, and each section is then labelled load-bearing, harmful, or no measurable effect. When there are too few questions to tell a real change from noise, the lab says so instead of labelling.",
       },
       {
         heading: "Consistency, and what lab runs leave out",
-        body:
-          "The consistency check asks one question several times and groups the answers by meaning. Knockout and consistency runs ask the model directly with the agent's prompt, sampling settings, and usual model. They do not use tools, memory, knowledge lookups, guardrails, or caching, and they are not added to the conversation. The lab shows the number of model calls before a run starts, the calls count toward your usage limits, and Free workspaces get smaller run sizes.",
+        body: "The consistency check asks one question several times and groups the answers by meaning. Knockout and consistency runs ask the model directly with the agent's prompt, sampling settings, and usual model. They do not use tools, memory, knowledge lookups, guardrails, or caching, and they are not added to the conversation. The lab shows the number of model calls before a run starts, the calls count toward your usage limits, and Free workspaces get smaller run sizes.",
       },
     ],
     faqs: [
@@ -76,9 +72,7 @@ export const OPERATE_TOPICS: HubPage[] = [
       "Agents see only each skill's name and description until a request matches, then load the full instructions, so adding skills does not lengthen every prompt.",
       "VegaDūta ships 14 built-in skills, and a skill drafted by an agent stays switched off until a workspace admin reviews and enables it.",
     ],
-    citations: [
-      { label: "Anthropic — Agent Skills", href: "https://www.anthropic.com/news/skills" },
-    ],
+    citations: [{ label: "Anthropic — Agent Skills", href: "https://www.anthropic.com/news/skills" }],
     name: "Agent Skills",
     metaTitle: "Agent Skills: SKILL.md Packages for AI Agents | VegaDūta",
     metaDescription:
@@ -94,8 +88,7 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "14 built-in skills",
-        body:
-          "Built-in skills are included with the platform and on for every agent. An admin can switch any of them off. They cannot be edited in place; to customise one, export it, rename it, and upload it as your own.",
+        body: "Built-in skills are included with the platform and on for every agent. An admin can switch any of them off. They cannot be edited in place; to customise one, export it, rename it, and upload it as your own.",
         bullets: [
           "Documents: docx, pdf, pptx, xlsx",
           "Writing: email-writer, meeting-notes, research-report, seo-content",
@@ -105,13 +98,11 @@ export const OPERATE_TOPICS: HubPage[] = [
       },
       {
         heading: "Custom skills: write, upload, export",
-        body:
-          "A custom skill has a name (lowercase letters, numbers and hyphens, up to 64 characters), a description of up to 1,024 characters that decides when agents use it, and its instructions. Upload a skill as a .zip to include bundled files, and export any skill the same way. A saved or imported skill is used by agents from their next message.",
+        body: "A custom skill has a name (lowercase letters, numbers and hyphens, up to 64 characters), a description of up to 1,024 characters that decides when agents use it, and its instructions. Upload a skill as a .zip to include bundled files, and export any skill the same way. A saved or imported skill is used by agents from their next message.",
       },
       {
         heading: "Agent-written skills wait for an admin",
-        body:
-          "Agents can draft a skill, and the platform can propose draft skills from patterns in successful runs. Both arrive switched off and marked as agent drafts. Nothing an agent writes is used by other agents until a workspace admin reads it and enables it. A proposed rewrite of an existing skill is staged the same way: an admin applies it to the live skill or discards it.",
+        body: "Agents can draft a skill, and the platform can propose draft skills from patterns in successful runs. Both arrive switched off and marked as agent drafts. Nothing an agent writes is used by other agents until a workspace admin reads it and enables it. A proposed rewrite of an existing skill is staged the same way: an admin applies it to the live skill or discards it.",
       },
     ],
     faqs: [
@@ -161,13 +152,11 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "How delegation works",
-        body:
-          "Team members are ordinary agents added to the lead agent as collaborators. The lead sees them as tools it can call: ask one member, or delegate to several in parallel. Members answer the lead and cannot hand work on to further agents. Handoffs appear as their own steps in the Agent Lab run graph.",
+        body: "Team members are ordinary agents added to the lead agent as collaborators. The lead sees them as tools it can call: ask one member, or delegate to several in parallel. Members answer the lead and cannot hand work on to further agents. Handoffs appear as their own steps in the Agent Lab run graph.",
       },
       {
         heading: "The limits, stated plainly",
-        body:
-          "Parallel delegation multiplies model calls, so the limits are fixed and shown on the card before you turn a team on.",
+        body: "Parallel delegation multiplies model calls, so the limits are fixed and shown on the card before you turn a team on.",
         bullets: [
           "At most 8 parallel branches per delegation call; extra members wait for a later call",
           "Each branch is stopped after 240 seconds",
@@ -177,8 +166,7 @@ export const OPERATE_TOPICS: HubPage[] = [
       },
       {
         heading: "Presets to start from",
-        body:
-          "Three presets create the member agents for you, using the lead agent's provider and model: a research crew that gathers facts, challenges them, and writes them up; a review pair where one agent drafts and one reviews; and a support triage team that classifies a request, resolves it, and escalates what is left. Existing collaborators are kept when a preset is applied.",
+        body: "Three presets create the member agents for you, using the lead agent's provider and model: a research crew that gathers facts, challenges them, and writes them up; a review pair where one agent drafts and one reviews; and a support triage team that classifies a request, resolves it, and escalates what is left. Existing collaborators are kept when a preset is applied.",
       },
     ],
     faqs: [
@@ -228,23 +216,19 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "Versions, labels, and restore",
-        body:
-          "The version list shows each saved configuration. Promote points the production label at a version, and runs follow the label from then on. Restore makes an older version the current configuration; the restore is itself saved as a new version, so it can be undone. Workflows work the same way: editors run the draft, and live triggers run the version labelled production.",
+        body: "The version list shows each saved configuration. Promote points the production label at a version, and runs follow the label from then on. Restore makes an older version the current configuration; the restore is itself saved as a new version, so it can be undone. Workflows work the same way: editors run the draft, and live triggers run the version labelled production.",
       },
       {
         heading: "Eval datasets and six judges",
-        body:
-          "A dataset is a list of test cases for one agent, optionally with expected answers. You can save a real conversation turn as a case. A run sends every case to the agent and scores the answers with LLM judges for accuracy, faithfulness, helpfulness, relevance, safety, and tone. Runs have a budget cap and can repeat each case to measure how stable the result is.",
+        body: "A dataset is a list of test cases for one agent, optionally with expected answers. You can save a real conversation turn as a case. A run sends every case to the agent and scores the answers with LLM judges for accuracy, faithfulness, helpfulness, relevance, safety, and tone. Runs have a budget cap and can repeat each case to measure how stable the result is.",
       },
       {
         heading: "A promotion gate that accounts for luck",
-        body:
-          "An agent that passes a case once may fail it the next time. The gate can therefore require pass^k: a case counts only if it passes on every one of k repeats. Results are shown with confidence intervals instead of a bare percentage, and two runs can be compared case by case, so a two-point difference on twenty cases is not mistaken for an improvement.",
+        body: "An agent that passes a case once may fail it the next time. The gate can therefore require pass^k: a case counts only if it passes on every one of k repeats. Results are shown with confidence intervals instead of a bare percentage, and two runs can be compared case by case, so a two-point difference on twenty cases is not mistaken for an improvement.",
       },
       {
         heading: "Simulated conversations",
-        body:
-          "Simulation runs a bounded multi-turn conversation between your agent and a persona, built-in or one you write, including adversarial ones. Each persona gets its own isolated run, and each conversation ends with a stated reason such as goal met, maximum turns reached, or no progress.",
+        body: "Simulation runs a bounded multi-turn conversation between your agent and a persona, built-in or one you write, including adversarial ones. Each persona gets its own isolated run, and each conversation ends with a stated reason such as goal met, maximum turns reached, or no progress.",
       },
     ],
     faqs: [
@@ -294,23 +278,19 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "Start from a prompt, a design, or a repository",
-        body:
-          "A project can begin three ways. Describe it in words, optionally with a sketch or screenshot as a design input. Import a Figma frame using your own Figma access token. Or import an existing GitHub repository, after which the studio shows when the branch has changed outside the studio and can pull those commits in.",
+        body: "A project can begin three ways. Describe it in words, optionally with a sketch or screenshot as a design input. Import a Figma frame using your own Figma access token. Or import an existing GitHub repository, after which the studio shows when the branch has changed outside the studio and can pull those commits in.",
       },
       {
         heading: "A repair loop, and a database per project",
-        body:
-          "When a generated change fails to build, the error is fed back to the model for a corrective pass, a fixed number of times, before the studio stops and shows you what went wrong. A project that needs data gets its own database schema with its own database role, so one project's credentials cannot read another's tables.",
+        body: "When a generated change fails to build, the error is fed back to the model for a corrective pass, a fixed number of times, before the studio stops and shows you what went wrong. A project that needs data gets its own database schema with its own database role, so one project's credentials cannot read another's tables.",
       },
       {
         heading: "Publishing, sign-in, and disposable apps",
-        body:
-          "A published app is reached by a link. It can run its own end-user accounts, with sign-up and login that are separate from your VegaDūta console users, and each action can be marked as requiring sign-in. Calls from the app run inside the owner's plan and budget. A project can also be created as disposable: it archives itself after a set time, 72 hours by default, unless you extend it or keep it.",
+        body: "A published app is reached by a link. It can run its own end-user accounts, with sign-up and login that are separate from your VegaDūta console users, and each action can be marked as requiring sign-in. Calls from the app run inside the owner's plan and budget. A project can also be created as disposable: it archives itself after a set time, 72 hours by default, unless you extend it or keep it.",
       },
       {
         heading: "What is not there yet",
-        body:
-          "Custom domains do not serve apps yet. The studio can record a domain and verify that you own it, but published apps are reached through their VegaDūta link today. Phone app store listings are also your own step: the studio provides a readiness checklist, not a submission.",
+        body: "Custom domains do not serve apps yet. The studio can record a domain and verify that you own it, but published apps are reached through their VegaDūta link today. Phone app store listings are also your own step: the studio provides a readiness checklist, not a submission.",
       },
     ],
     faqs: [
@@ -346,8 +326,14 @@ export const OPERATE_TOPICS: HubPage[] = [
       "Every platform action is written to an audit log that workspace admins can read as a live tail, and LLM calls emit OpenTelemetry GenAI spans.",
     ],
     citations: [
-      { label: "OpenTelemetry — Semantic conventions for generative AI", href: "https://opentelemetry.io/docs/specs/semconv/gen-ai/" },
-      { label: "RFC 7644 — System for Cross-domain Identity Management (SCIM) protocol", href: "https://www.rfc-editor.org/rfc/rfc7644" },
+      {
+        label: "OpenTelemetry — Semantic conventions for generative AI",
+        href: "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      },
+      {
+        label: "RFC 7644 — System for Cross-domain Identity Management (SCIM) protocol",
+        href: "https://www.rfc-editor.org/rfc/rfc7644",
+      },
     ],
     name: "Governance",
     metaTitle: "AI Agent Governance: Approvals, Budgets, Audit | VegaDūta",
@@ -364,23 +350,19 @@ export const OPERATE_TOPICS: HubPage[] = [
     sections: [
       {
         heading: "Confirmation before sensitive tools",
-        body:
-          "Built-in tools are classified by what they can do. When an agent is about to call a tool classified as sensitive, the call waits for a person to confirm it, even on an agent set to act autonomously. Approval policies can also be set per tool, including tools that come from MCP servers, and pending approvals appear on the dashboard and in the admin console.",
+        body: "Built-in tools are classified by what they can do. When an agent is about to call a tool classified as sensitive, the call waits for a person to confirm it, even on an agent set to act autonomously. Approval policies can also be set per tool, including tools that come from MCP servers, and pending approvals appear on the dashboard and in the admin console.",
       },
       {
         heading: "Budgets at three levels",
-        body:
-          "A per-user daily budget caps what one person's conversations can spend. A limit on tool calls per turn stops a tool loop from running indefinitely. Multi-agent delegation draws on one shared budget per run, and the run stops with a stated reason when it is used up. Each turn's estimated cost is shown in the run graph.",
+        body: "A per-user daily budget caps what one person's conversations can spend. A limit on tool calls per turn stops a tool loop from running indefinitely. Multi-agent delegation draws on one shared budget per run, and the run stops with a stated reason when it is used up. Each turn's estimated cost is shown in the run graph.",
       },
       {
         heading: "Audit log and traces",
-        body:
-          "Platform actions are written to an audit log, and workspace admins can watch it as a live tail in the admin console. LLM and tool calls emit OpenTelemetry spans that follow the GenAI semantic conventions, carrying the model and token usage, which is what feeds the platform's own tracing.",
+        body: "Platform actions are written to an audit log, and workspace admins can watch it as a live tail in the admin console. LLM and tool calls emit OpenTelemetry spans that follow the GenAI semantic conventions, carrying the model and token usage, which is what feeds the platform's own tracing.",
       },
       {
         heading: "Workspace SSO and SCIM",
-        body:
-          "A workspace can connect its own identity provider for single sign-on and use SCIM to provision and remove users. Both are available. They have not yet been validated against each identity vendor's product, so plan a test with yours before a rollout.",
+        body: "A workspace can connect its own identity provider for single sign-on and use SCIM to provision and remove users. Both are available. They have not yet been validated against each identity vendor's product, so plan a test with yours before a rollout.",
       },
     ],
     faqs: [
@@ -429,29 +411,25 @@ export const OPERATE_TOPICS: HubPage[] = [
     cardBlurb:
       "BSL 1.1 licensed, with desktop installers, a Docker Compose stack and a Helm chart for running the whole platform on your own machines.",
     intro: [
-      "VegaDūta is published under the Business Source License 1.1: free to run, fork and build on - including for production use - with the single restriction that you cannot offer it as a competing hosted service. Each version converts to Apache-2.0 four years after release.",
+      'VegaDūta is published under the Business Source License 1.1: free to run, fork and build on - including for production use - with one restriction on use: you cannot offer it as a competing hosted service (and a "Powered by VegaDūta" attribution, where one is displayed, must be kept). Each version converts to Apache-2.0 four years after release.',
       "Self-hosting means your conversations, documents, and credentials stay on infrastructure you control. Install from a signed release artifact - not a source build - unless you choose to build from source yourself.",
     ],
     sections: [
       {
         heading: "Three supported install paths",
-        body:
-          "Desktop installers for macOS (.dmg), Windows and Linux set up a personal install - one person, local sign-in, a bundled local model. The Docker Compose stack brings up the platform's services together, including the core API, the web console, the knowledge sidecar that handles document extraction and embeddings, Postgres, Valkey, and Keycloak for sign-in. The Helm chart is published as a signed OCI artifact on GHCR for Kubernetes.",
+        body: "Desktop installers for macOS (.dmg), Windows and Linux set up a personal install - one person, local sign-in, a bundled local model. The Docker Compose stack brings up the platform's services together, including the core API, the web console, the knowledge sidecar that handles document extraction and embeddings, Postgres, Valkey, and Keycloak for sign-in. The Helm chart is published as a signed OCI artifact on GHCR for Kubernetes.",
       },
       {
         heading: "Verified artifacts, not source builds",
-        body:
-          "Every release pins its container images to the release tag on GHCR, ships SHA256SUMS and a sigstore bundle, signs the images and the chart with cosign, and includes SBOMs. You can verify what you are running before you run it.",
+        body: "Every release pins its container images to the release tag on GHCR, ships SHA256SUMS and a sigstore bundle, signs the images and the chart with cosign, and includes SBOMs. You can verify what you are running before you run it.",
       },
       {
         heading: "Models: your keys or your hardware",
-        body:
-          "A self-hosted install uses the same bring-your-own-key providers as the hosted service. One of them is Ollama, which points the platform at models running on your own hardware, so an install can work without sending prompts to a hosted model API.",
+        body: "A self-hosted install uses the same bring-your-own-key providers as the hosted service. One of them is Ollama, which points the platform at models running on your own hardware, so an install can work without sending prompts to a hosted model API.",
       },
       {
         heading: "What is not supported yet",
-        body:
-          "The Terraform modules under infra/ are drafts and should not be treated as a supported deployment path. An optional Temporal-based workflow engine is in the code and is off by default.",
+        body: "The Terraform modules under infra/ are drafts and should not be treated as a supported deployment path. An optional Temporal-based workflow engine is in the code and is off by default.",
       },
     ],
     faqs: [
@@ -477,5 +455,6 @@ export const OPERATE_TOPICS: HubPage[] = [
       { href: "/ai/llm-connectors", label: "LLM connectors" },
       { href: "/platform/governance", label: "Governance and cost controls" },
       { href: "/docs", label: "Documentation" },
-    ],  },
+    ],
+  },
 ];

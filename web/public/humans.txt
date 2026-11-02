@@ -1,6 +1,6 @@
 /* TEAM */
 VegaDūta — AI staff, not software.
-Team: VegaDūta contributors (open source, Apache-2.0)
+Team: VegaDūta contributors (source-available under BUSL-1.1; sdk/ is Apache-2.0)
 
 /* SITE */
 Last update: 2026-10-03

@@ -127,17 +127,17 @@ describe("RunCostCard", () => {
     getSessionLlmUsageSummary.mockResolvedValue(summary());
     render(<RunCostCard agentId="a1" sessionId="s1" />);
     const trigger = await screen.findByTestId("run-cost-trigger");
-    expect(trigger.textContent).toContain("$0.012");
+    expect(trigger.textContent).toContain("triggerTokens");
     expect(screen.queryByTestId("run-cost-panel")).toBeNull();
 
     fireEvent.click(trigger);
     expect(await screen.findByTestId("run-cost-panel")).toBeTruthy();
-    expect(screen.getByTestId("run-cost-total").textContent).toBe("$0.012");
+    expect(screen.getByTestId("run-cost-total").textContent).toContain("1,240");
     expect(screen.getByTestId("run-cost-calls").textContent).toBe("2");
     expect(screen.getByTestId("run-cost-tokens").textContent).toBe((1240).toLocaleString());
     const rows = screen.getAllByTestId("run-cost-step");
     expect(rows).toHaveLength(2);
-    expect(rows[0].textContent).toContain("$0.00500");
+    expect(rows[0].textContent).toContain("tok");
     expect(rows[1].textContent).toContain("stepFailed");
     expect(screen.queryByTestId("run-cost-unpriced")).toBeNull();
   });
@@ -201,11 +201,11 @@ describe("RunCostCard", () => {
   it("re-reads the summary when a turn finishes", async () => {
     getSessionLlmUsageSummary.mockResolvedValue(summary({ totalCostUsd: 0.5 }));
     const { rerender } = render(<RunCostCard agentId="a1" sessionId="s1" turnInFlight />);
-    expect((await screen.findByTestId("run-cost-trigger")).textContent).toContain("$0.500");
+    expect((await screen.findByTestId("run-cost-trigger")).textContent).toContain("1,240");
 
     getSessionLlmUsageSummary.mockResolvedValue(summary({ totalCostUsd: 2 }));
     rerender(<RunCostCard agentId="a1" sessionId="s1" turnInFlight={false} />);
-    await waitFor(() => expect(screen.getByTestId("run-cost-trigger").textContent).toContain("$2.00"));
+    await waitFor(() => expect(screen.getByTestId("run-cost-trigger").textContent).toContain("triggerTokens"));
     expect(getSessionLlmUsageSummary).toHaveBeenCalledTimes(2);
   });
 });
@@ -213,7 +213,10 @@ describe("RunCostCard", () => {
 describe("TurnStopNotice", () => {
   it("renders nothing for an ordinary turn or an unknown guardrail reason", () => {
     const { container } = render(
-      <TurnStopNotice steps={[{ type: "guardrail", id: 1, message: "pii scrubbed", origin: "server" }]} message={null} />
+      <TurnStopNotice
+        steps={[{ type: "guardrail", id: 1, message: "pii scrubbed", origin: "server" }]}
+        message={null}
+      />
     );
     expect(container.firstChild).toBeNull();
   });

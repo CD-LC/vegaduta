@@ -422,7 +422,7 @@ services:
     # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
     # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
     # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.50
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -454,7 +454,7 @@ services:
     networks: [data-tier, seaweedfs-metrics]
 
   keycloak-db:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     <<: [*restart, *logging, *nnp]
     environment:
       POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
@@ -772,7 +772,7 @@ services:
     networks: [data-tier, agent-io, observability, mcp-stdio-net]
 
   temporal-postgresql:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -832,7 +832,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.56.0
+    image: temporalio/ui:2.57.0
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -858,7 +858,7 @@ services:
     # Kafka-API event backbone for the `workflow` Spring profile. Redpanda is
     # BSL-1.1 (see NOTICE); any Kafka-compatible broker works via
     # WORKFLOW_KAFKA_BOOTSTRAP_SERVERS in core.env.
-    image: redpandadata/redpanda:v26.2.5
+    image: redpandadata/redpanda:v26.2.6
     profiles: ["events", "temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -888,7 +888,7 @@ services:
 
   # ------------------------------------------------ profile: observability
   valkey-exporter:
-    image: oliver006/redis_exporter:v1.94.0
+    image: oliver006/redis_exporter:v1.96.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -909,7 +909,7 @@ services:
     networks: [data-tier, observability]
 
   loki:
-    image: grafana/loki:3.7.8
+    image: grafana/loki:3.7.9
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command: -config.file=/etc/loki/loki-config.yaml
@@ -994,7 +994,7 @@ services:
     networks: [observability, docker-api]
 
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     command:
@@ -1103,7 +1103,7 @@ services:
   # Self-hosted Langfuse v3 (MIT). Its own Postgres/ClickHouse/Valkey/S3 —
   # never shared with the app's data tier. Timezones MUST be UTC.
   langfuse-postgres:
-    image: postgres:18.4-alpine
+    image: postgres:18.6-alpine
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1129,7 +1129,7 @@ services:
     networks: [observability]
 
   langfuse-clickhouse:
-    image: clickhouse/clickhouse-server:26.9.23.15
+    image: clickhouse/clickhouse-server:26.10.3.7
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     user: "101:101"
@@ -1177,7 +1177,7 @@ services:
     networks: [observability]
 
   langfuse-s3:
-    image: chrislusf/seaweedfs:4.48
+    image: chrislusf/seaweedfs:4.50
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1212,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.66.0
+    image: langfuse/langfuse-worker:4.70.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1268,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.66.0
+    image: langfuse/langfuse:4.70.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1310,7 +1310,7 @@ services:
     # Self-hosted WebRTC SFU (Apache-2.0). Media needs UDP LIVEKIT_RTC_PORT_RANGE_START-_END
     # (default 50000-50100; move it if another process on the host, e.g. adb, holds a port in it) and a
     # reachable public IP; see deploy/livekit/livekit.yaml for TURN.
-    image: livekit/livekit-server:v1.13.10
+    image: livekit/livekit-server:v1.13.11
     profiles: ["voice"]
     <<: [*restart, *logging, *nnp]
     command: --config /etc/livekit.yaml
@@ -1462,7 +1462,7 @@ services:
     # Still plaintext TCP: code-intel's docker client does not load TLS client
     # certs yet. Once it does, switch to DOCKER_TLS_CERTDIR=/certs and
     # tcp://code-intel-docker:2376 with a shared read-only client-cert volume.
-    image: docker:29.9.1-dind
+    image: docker:29.9.2-dind
     profiles: ["code-intel", "builder"]
     <<: [*restart, *logging]
     privileged: true
