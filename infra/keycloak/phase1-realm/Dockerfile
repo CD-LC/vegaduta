@@ -61,7 +61,7 @@
 # line is out of support). This image sets none of the options 26 removed
 # (KC_PROXY, hostname v1), so start-dev --import-realm is unchanged.
 # Digest-pinned (INF-018) - bump tag+digest together via Dependabot.
-FROM quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b
+FROM quay.io/keycloak/keycloak:26.8.1@sha256:3f3c5f8e03c614774b4bd9173b88391fefa4153bfc010d8012d59ad825377332
 COPY infra/keycloak/phase1-realm/agentic-ai-realm.json /opt/keycloak/data/import/agentic-ai-realm.json
 COPY deploy/keycloak/themes/agentic-ai /opt/keycloak/themes/agentic-ai
 
