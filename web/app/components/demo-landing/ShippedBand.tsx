@@ -96,7 +96,10 @@ export default function ShippedBand() {
               <div className="flex items-center justify-between gap-3">
                 <span
                   className="inline-flex size-10 items-center justify-center rounded-xl"
-                  style={{ background: "color-mix(in oklab, var(--mkt-accent) 12%, transparent)", color: "var(--mkt-accent)" }}
+                  style={{
+                    background: "color-mix(in oklab, var(--mkt-accent) 12%, transparent)",
+                    color: "var(--mkt-accent)",
+                  }}
                   aria-hidden="true"
                 >
                   <Icon className="size-5" />

@@ -14,11 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Platform-admin "Plan Limits" editor - {@code /api/platform/plan-limits[/{plan}]} (A2-PR1 task 4,
- * roadmap §8; contract confirmed in {@code the internal change log} §12). Gated by
- * the same {@code SecurityConfig} {@code .requestMatchers("/api/platform/**")
- * .hasAuthority("ROLE_platform-admin")} rule as every other controller under this path prefix - see
- * {@link PlatformController}'s own javadoc for the same posture - no separate authorization check
- * inside this class itself.
+ * roadmap §8; contract confirmed in {@code the internal change log} §12). Gated by the same {@code
+ * SecurityConfig} {@code .requestMatchers("/api/platform/**") .hasAuthority("ROLE_platform-admin")}
+ * rule as every other controller under this path prefix - see {@link PlatformController}'s own
+ * javadoc for the same posture - no separate authorization check inside this class itself.
  *
  * <p>Kept as its own small controller rather than a new method on {@link PlatformController} - that
  * class is long-lived and under active concurrent edits by other work in this repo (see that

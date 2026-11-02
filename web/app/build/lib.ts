@@ -79,10 +79,10 @@ async function call(method: string, path: string, body?: unknown, timeoutMs: num
   // with an honest message rather than fetching a relative URL against the web
   // origin (which would 404 into the Next.js router and read as a mystery).
   if (!APP_BUILDER_CONFIGURED) {
-    throw Object.assign(
-      new Error("App Builder is not available on this deployment."),
-      { status: 0, notConfigured: true }
-    );
+    throw Object.assign(new Error("App Builder is not available on this deployment."), {
+      status: 0,
+      notConfigured: true,
+    });
   }
   const settle = warming.begin();
   const controller = new AbortController();
@@ -115,10 +115,11 @@ async function call(method: string, path: string, body?: unknown, timeoutMs: num
           { status: 0, timeout: true }
         );
       }
-      throw Object.assign(
-        new Error("Can't reach the App Builder service. Check your connection and try again."),
-        { status: 0, network: true, cause: e }
-      );
+      throw Object.assign(new Error("Can't reach the App Builder service. Check your connection and try again."), {
+        status: 0,
+        network: true,
+        cause: e,
+      });
     }
     let data: any = null;
     try {
@@ -347,8 +348,7 @@ export const appBuilder = {
   listTemplates: (): Promise<AppBuilderTemplate[]> => call("GET", "/templates"),
 
   listProjects: (): Promise<AppBuilderProjectSummary[]> => call("GET", "/projects"),
-  getProject: (id: string): Promise<AppBuilderProject> =>
-    call("GET", `/projects/${encodeURIComponent(id)}`),
+  getProject: (id: string): Promise<AppBuilderProject> => call("GET", `/projects/${encodeURIComponent(id)}`),
   createProject: (body: {
     project_id: string;
     template_id: string;
@@ -358,11 +358,9 @@ export const appBuilder = {
     // push the deadline out or make it permanent.
     ephemeral?: boolean;
     ttl_hours?: number;
-  }): Promise<AppBuilderProject> =>
-    call("POST", "/projects", body),
+  }): Promise<AppBuilderProject> => call("POST", "/projects", body),
   // Register an EXISTING repo (no scaffolding; nothing is committed into it).
-  importProject: (body: ImportRepoRequest): Promise<AppBuilderProject> =>
-    call("POST", "/projects/import", body),
+  importProject: (body: ImportRepoRequest): Promise<AppBuilderProject> => call("POST", "/projects/import", body),
   syncStatus: (id: string): Promise<AppBuilderSyncStatus> =>
     call("GET", `/projects/${encodeURIComponent(id)}/sync/status`),
   syncPull: (id: string): Promise<AppBuilderSyncPullResult> =>
@@ -380,19 +378,23 @@ export const appBuilder = {
     call("POST", `/projects/${encodeURIComponent(id)}/archive`),
   extendProject: (id: string, ttl_hours: number): Promise<AppBuilderProject> =>
     call("POST", `/projects/${encodeURIComponent(id)}/extend`, { ttl_hours }),
-  keepProject: (id: string): Promise<AppBuilderProject> =>
-    call("POST", `/projects/${encodeURIComponent(id)}/keep`),
+  keepProject: (id: string): Promise<AppBuilderProject> => call("POST", `/projects/${encodeURIComponent(id)}/keep`),
 
   generate: (
     id: string,
     instruction: string,
     opts?: { context?: string; images?: AppBuilderImage[] }
   ): Promise<AppBuilderGenerateResult> =>
-    call("POST", `/projects/${encodeURIComponent(id)}/generate`, {
-      instruction,
-      context: opts?.context,
-      images: opts?.images,
-    }, LONG_TIMEOUT_MS),
+    call(
+      "POST",
+      `/projects/${encodeURIComponent(id)}/generate`,
+      {
+        instruction,
+        context: opts?.context,
+        images: opts?.images,
+      },
+      LONG_TIMEOUT_MS
+    ),
 
   // The streamed variant of /generate: identical request + final result,
   // but the turn's stages arrive as SSE events while it runs — live stage
@@ -407,10 +409,10 @@ export const appBuilder = {
     onStage?: (stage: AppBuilderGenerateEvent["stage"], event: AppBuilderGenerateEvent) => void
   ): Promise<AppBuilderGenerateResult> => {
     if (!APP_BUILDER_CONFIGURED) {
-      throw Object.assign(
-        new Error("App Builder is not available on this deployment."),
-        { status: 0, notConfigured: true }
-      );
+      throw Object.assign(new Error("App Builder is not available on this deployment."), {
+        status: 0,
+        notConfigured: true,
+      });
     }
     const settle = warming.begin();
     const controller = new AbortController();
@@ -428,19 +430,16 @@ export const appBuilder = {
       if (token) headers.Authorization = `Bearer ${token}`;
       let res: Response;
       try {
-        res = await fetch(
-          `${APP_BUILDER_URL}/projects/${encodeURIComponent(id)}/generate/stream`,
-          {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-              instruction,
-              context: opts?.context,
-              images: opts?.images,
-            }),
-            signal: controller.signal,
-          }
-        );
+        res = await fetch(`${APP_BUILDER_URL}/projects/${encodeURIComponent(id)}/generate/stream`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            instruction,
+            context: opts?.context,
+            images: opts?.images,
+          }),
+          signal: controller.signal,
+        });
       } catch (e) {
         if (timedOut) {
           throw Object.assign(
@@ -451,10 +450,11 @@ export const appBuilder = {
             { status: 0, timeout: true }
           );
         }
-        throw Object.assign(
-          new Error("Can't reach the App Builder service. Check your connection and try again."),
-          { status: 0, network: true, cause: e }
-        );
+        throw Object.assign(new Error("Can't reach the App Builder service. Check your connection and try again."), {
+          status: 0,
+          network: true,
+          cause: e,
+        });
       }
       if (!res.ok) {
         const text = await res.text().catch(() => "");
@@ -554,8 +554,7 @@ export const appBuilder = {
     body: { prompt: string; kind: string; size?: string }
   ): Promise<{ path: string; bytes: number; kind: string; size: string }> =>
     call("POST", `/projects/${encodeURIComponent(id)}/assets/generate`, body, LONG_TIMEOUT_MS),
-  deleteAsset: (id: string, path: string) =>
-    call("DELETE", `/projects/${encodeURIComponent(id)}/assets`, { path }),
+  deleteAsset: (id: string, path: string) => call("DELETE", `/projects/${encodeURIComponent(id)}/assets`, { path }),
 
   // Store-ready mobile (capacitor-app only). Status feeds the checklist;
   // save commits fastlane metadata + capacitor.config via the apply pipeline.

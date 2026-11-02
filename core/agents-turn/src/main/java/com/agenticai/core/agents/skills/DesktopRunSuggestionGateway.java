@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.skills;
 
 import com.agenticai.core.agents.skills.SkillLearningGateway.TurnOutcome;
-import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.TenantScope;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,16 +14,17 @@ import reactor.core.publisher.SignalType;
 /**
  * The chat turn's hook into the desktop-recipe suggestion loop ("this run could be a saved
  * recipe"), the same shape as {@link LessonLearningGateway} so the loops switch independently.
- * Installed once at startup by the suggestion service; with no observer, or one that reports
- * itself disabled ({@code app.learning.desktop-recipes.enabled=false}, the default), {@link
- * #observe} returns the very same {@link Flux} it was given: not one operator is added to the
- * turn.
+ * Installed once at startup by the suggestion service; with no observer, or one that reports itself
+ * disabled ({@code app.learning.desktop-recipes.enabled=false}, the default), {@link #observe}
+ * returns the very same {@link Flux} it was given: not one operator is added to the turn.
  */
 public final class DesktopRunSuggestionGateway {
 
     private static final Logger log = LoggerFactory.getLogger(DesktopRunSuggestionGateway.class);
 
-    /** Receives every finished turn on the thread that finished it; must be quick and never throw. */
+    /**
+     * Receives every finished turn on the thread that finished it; must be quick and never throw.
+     */
     public interface Observer {
         boolean enabled();
 
@@ -38,7 +39,10 @@ public final class DesktopRunSuggestionGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }
@@ -48,7 +52,10 @@ public final class DesktopRunSuggestionGateway {
         return o != null && o.enabled();
     }
 
-    /** Passes the reply through unchanged; the tenant travels as data in the outcome (ENGINEERING-RULES.md rule 12). */
+    /**
+     * Passes the reply through unchanged; the tenant travels as data in the outcome
+     * (ENGINEERING-RULES.md rule 12).
+     */
     public static Flux<String> observe(
             Flux<String> turn,
             UUID agentId,

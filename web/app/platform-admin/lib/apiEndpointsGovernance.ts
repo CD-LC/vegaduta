@@ -1,10 +1,5 @@
 import { apiFetch, toJson, toJsonQuiet, jsonBody } from "./apiCore";
-import type {
-  JsonObject,
-  KillSwitchStatus,
-  PlatformUsersPage,
-  SiteWidePromoResult,
-} from "./apiCore";
+import type { JsonObject, KillSwitchStatus, PlatformUsersPage, SiteWidePromoResult } from "./apiCore";
 import type { PlatformTenantSummary } from "./tenantRoster";
 
 // Platform-admin endpoints, part 2 (budgets, limits, credentials, ...). Split out of api.ts verbatim.
@@ -50,8 +45,7 @@ export const platformEndpointsB = {
   // PUT accepts any SUBSET of those three fields (partial update - omitted
   // fields keep their current value, mirroring the plan-limits editor's
   // upsert semantics rather than a full replace).
-  getChatGenerationSettings: (): Promise<JsonObject> =>
-    apiFetch(`/api/platform/chat-generation-settings`).then(toJson),
+  getChatGenerationSettings: (): Promise<JsonObject> => apiFetch(`/api/platform/chat-generation-settings`).then(toJson),
   updateChatGenerationSettings: (payload: JsonObject): Promise<JsonObject> =>
     apiFetch(`/api/platform/chat-generation-settings`, {
       method: "PUT",
@@ -195,7 +189,8 @@ export const platformEndpointsB = {
   getUnreadNotificationCount: (): Promise<number> => apiFetch(`/api/notifications/unread-count`).then(toJsonQuiet),
   markNotificationRead: (id: string): Promise<null> =>
     apiFetch(`/api/notifications/${id}/read`, { method: "POST" }).then(toJson),
-  markAllNotificationsRead: (): Promise<null> => apiFetch(`/api/notifications/read-all`, { method: "POST" }).then(toJson),
+  markAllNotificationsRead: (): Promise<null> =>
+    apiFetch(`/api/notifications/read-all`, { method: "POST" }).then(toJson),
 
   // Platform-wide kill switch (PlatformController + TenantEmergencyControlService).
   // Stopping suspends EVERY authenticated request for every tenant at
@@ -210,7 +205,8 @@ export const platformEndpointsB = {
       method: "POST",
       ...jsonBody({ reason }),
     }).then(toJson),
-  resumePlatform: (): Promise<JsonObject> => apiFetch(`/api/platform/kill-switch/resume`, { method: "POST" }).then(toJson),
+  resumePlatform: (): Promise<JsonObject> =>
+    apiFetch(`/api/platform/kill-switch/resume`, { method: "POST" }).then(toJson),
 
   // Smart AI governance (PlatformFeatureBudgetService) - the master switch +
   // combined daily USD ceiling over every AI-native platform feature (in-app
@@ -280,7 +276,9 @@ export const platformEndpointsB = {
   // Cross-tenant user administration (PlatformUserController,
   // /api/platform/users/**). Roles are bounded server-side to the tenant-assignable
   // set; platform operators and the caller's own account are refused for every mutation.
-  listPlatformUsers: (params: { q?: string; tenantId?: string; limit?: number; offset?: number } = {}): Promise<PlatformUsersPage> => {
+  listPlatformUsers: (
+    params: { q?: string; tenantId?: string; limit?: number; offset?: number } = {}
+  ): Promise<PlatformUsersPage> => {
     const qs = new URLSearchParams();
     if (params.q) qs.set("q", params.q);
     if (params.tenantId) qs.set("tenantId", params.tenantId);

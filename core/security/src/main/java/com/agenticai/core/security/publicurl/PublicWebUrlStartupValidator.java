@@ -61,10 +61,11 @@ public class PublicWebUrlStartupValidator implements InitializingBean {
     }
 
     /**
-     * @param personalProfileActive one person on one machine: a localhost origin is the correct setting there,
-     *     not a misconfiguration, so it is reported at INFO instead of WARN.
+     * @param personalProfileActive one person on one machine: a localhost origin is the correct
+     *     setting there, not a misconfiguration, so it is reported at INFO instead of WARN.
      */
-    static void validate(boolean securityProfileActive, String appPublicUrl, boolean personalProfileActive) {
+    static void validate(
+            boolean securityProfileActive, String appPublicUrl, boolean personalProfileActive) {
         if (PublicWebUrl.isBlank(appPublicUrl)) {
             String message =
                     PublicWebUrl.PROPERTY
@@ -97,7 +98,7 @@ public class PublicWebUrlStartupValidator implements InitializingBean {
             }
             log.warn(
                     "{} is {} - only a browser on this same machine can follow the links core"
-                        + " generates. Set {} to a public origin for any multi-machine install.",
+                            + " generates. Set {} to a public origin for any multi-machine install.",
                     PublicWebUrl.PROPERTY,
                     appPublicUrl,
                     PublicWebUrl.ENV_HINT);

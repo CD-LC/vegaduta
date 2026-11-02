@@ -5,7 +5,8 @@ import en from "../../../messages/en.json";
 import PowerDial from "./PowerDial";
 
 vi.mock("../../lib/i18n", () => ({
-  useTranslations: () => (key: string) => ((en as unknown as { landing: Record<string, unknown> }).landing[key] as string | undefined) ?? key,
+  useTranslations: () => (key: string) =>
+    ((en as unknown as { landing: Record<string, unknown> }).landing[key] as string | undefined) ?? key,
 }));
 
 afterEach(cleanup);

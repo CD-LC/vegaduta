@@ -36,6 +36,7 @@ SSE parsing mirrors `web/app/lib/api.ts`'s `streamChat` byte-for-byte:
     `AgentPlayground.tsx`/`CallPanel.tsx` already use, just carried across
     many turns server-side instead of React state.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -141,9 +142,7 @@ async def _publish_transcript(
         message["voiced"] = voiced
     payload = json.dumps(message).encode("utf-8")
     try:
-        await room.local_participant.publish_data(
-            payload, reliable=True, topic=_TRANSCRIPT_TOPIC
-        )
+        await room.local_participant.publish_data(payload, reliable=True, topic=_TRANSCRIPT_TOPIC)
     except Exception:
         logger.debug("transcript publish failed (non-fatal): %s", role, exc_info=True)
 
@@ -169,9 +168,7 @@ async def _publish_stage(
         {"stage": stage, "ts": time.time(), "turnId": turn_id, "error": error}
     ).encode("utf-8")
     try:
-        await room.local_participant.publish_data(
-            payload, reliable=True, topic=_STAGE_SIGNAL_TOPIC
-        )
+        await room.local_participant.publish_data(payload, reliable=True, topic=_STAGE_SIGNAL_TOPIC)
     except Exception:
         # Broad by design (see docstring) - a stage-signal hiccup (room not
         # connected yet, data-channel error, etc.) must never surface as a
@@ -345,7 +342,10 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
             # Retained-text parity with a real reply: the transcript panel
             # shows this same canned line once the TTS node has spoken it.
             await _publish_transcript(
-                bridge.room, "agent", canned, turn_id=request_id,
+                bridge.room,
+                "agent",
+                canned,
+                turn_id=request_id,
                 voiced=bridge._tts_voiced,
             )
             return
@@ -472,9 +472,7 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
                 url,
                 json=body,
                 headers=headers,
-                timeout=aiohttp.ClientTimeout(
-                    total=130.0, sock_connect=10, sock_read=100.0
-                ),
+                timeout=aiohttp.ClientTimeout(total=130.0, sock_connect=10, sock_read=100.0),
             ) as resp:
                 if resp.status >= 400:
                     text = await resp.text()
@@ -511,7 +509,10 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
             reply = "".join(self._reply_parts).strip()
             if reply:
                 await _publish_transcript(
-                    bridge.room, "agent", reply, turn_id=request_id,
+                    bridge.room,
+                    "agent",
+                    reply,
+                    turn_id=request_id,
                     voiced=bridge._tts_voiced,
                 )
 
@@ -523,7 +524,7 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
         # slice silently ate real space-only tokens.
         content = line[5:]
         if content.startswith(STREAM_ERROR_MARKER):
-            message = content[len(STREAM_ERROR_MARKER):] or (
+            message = content[len(STREAM_ERROR_MARKER) :] or (
                 "The response was interrupted. Please try again."
             )
             raise APIStatusError(message, status_code=200, request_id=request_id, body=None)
@@ -538,9 +539,7 @@ class _CoreChatBridgeStream(agents_llm.LLMStream):
             # _publish_stage), so a lost task here is no worse than a lost
             # stage signal anywhere else in this file.
             self._first_token_sent = True
-            asyncio.create_task(
-                _publish_stage(self._bridge.room, "generating", turn_id=request_id)
-            )
+            asyncio.create_task(_publish_stage(self._bridge.room, "generating", turn_id=request_id))
         self._reply_parts.append(content)
         self._event_ch.send_nowait(
             agents_llm.ChatChunk(

@@ -79,7 +79,12 @@ export async function deviceEngine(): Promise<DeviceEngineInfo | null> {
     const model = await getTier1RunModel(caps);
     if (model) {
       const m = model as { displayName?: string; id: string };
-      return { tier: 1, runtime: "WebLLM · WebGPU", modelName: m.displayName || m.id, contextWindow: resolveTier1ContextWindow(model) };
+      return {
+        tier: 1,
+        runtime: "WebLLM · WebGPU",
+        modelName: m.displayName || m.id,
+        contextWindow: resolveTier1ContextWindow(model),
+      };
     }
     if ((await tier0Availability()) === "available") {
       return { tier: 0, runtime: "Chrome built-in AI", modelName: "Gemini Nano", contextWindow: 6000 };
@@ -110,8 +115,15 @@ async function silentGet(path: string): Promise<unknown> {
 
 function prettyProvider(name: string): string {
   const map: Record<string, string> = {
-    OPENAI: "OpenAI", ANTHROPIC: "Anthropic", GEMINI: "Google Gemini", GOOGLE: "Google Gemini",
-    MISTRAL: "Mistral", GROQ: "Groq", OPENROUTER: "OpenRouter", DEEPSEEK: "DeepSeek", XAI: "xAI",
+    OPENAI: "OpenAI",
+    ANTHROPIC: "Anthropic",
+    GEMINI: "Google Gemini",
+    GOOGLE: "Google Gemini",
+    MISTRAL: "Mistral",
+    GROQ: "Groq",
+    OPENROUTER: "OpenRouter",
+    DEEPSEEK: "DeepSeek",
+    XAI: "xAI",
   };
   return map[name] || name.charAt(0) + name.slice(1).toLowerCase().replace(/_/g, " ");
 }
@@ -132,23 +144,47 @@ async function lookupCloudRoute(): Promise<CloudRoute> {
   try {
     const quota = (await silentGet("/api/tenant/usage-quota")) as { plan?: string; usesPlatformPool?: boolean };
     if (quota?.plan === "FREE") {
-      return { kind: "platform", label: "VegaDūta platform AI", detail: "Free hosted model pool included with your plan, at no extra charge. Counts toward your monthly fair-use AI tokens." };
+      return {
+        kind: "platform",
+        label: "VegaDūta platform AI",
+        detail:
+          "Free hosted model pool included with your plan, at no extra charge. Counts toward your monthly fair-use AI tokens.",
+      };
     }
-    const providers = (await silentGet("/api/providers").catch((): unknown[] => [])) as { providerName?: string; status?: string }[];
+    const providers = (await silentGet("/api/providers").catch((): unknown[] => [])) as {
+      providerName?: string;
+      status?: string;
+    }[];
     const active = Array.isArray(providers) ? providers.find((p) => p?.status === "ACTIVE" && p.providerName) : null;
     if (active?.providerName) {
       const name = prettyProvider(active.providerName);
-      return { kind: "byok", label: `Your ${name} key`, detail: `Runs on your own ${name} API key (BYOK). Billed by ${name}.` };
+      return {
+        kind: "byok",
+        label: `Your ${name} key`,
+        detail: `Runs on your own ${name} API key (BYOK). Billed by ${name}.`,
+      };
     }
     if (quota?.usesPlatformPool) {
-      return { kind: "platform", label: "VegaDūta platform AI", detail: "Free hosted model pool, at no extra charge. Counts toward your monthly fair-use AI tokens." };
+      return {
+        kind: "platform",
+        label: "VegaDūta platform AI",
+        detail: "Free hosted model pool, at no extra charge. Counts toward your monthly fair-use AI tokens.",
+      };
     }
-    return { kind: "unknown", label: "no provider connected", detail: "No AI provider is connected. Add one under AI models." };
+    return {
+      kind: "unknown",
+      label: "no provider connected",
+      detail: "No AI provider is connected. Add one under AI models.",
+    };
   } catch (e) {
     if (e instanceof Error && e.message === "signed-out") {
       return { kind: "signed-out", label: "sign in to use it", detail: "Sign in to use the cloud model." };
     }
-    return { kind: "unknown", label: "platform or your provider", detail: "Couldn't check which cloud model you're on." };
+    return {
+      kind: "unknown",
+      label: "platform or your provider",
+      detail: "Couldn't check which cloud model you're on.",
+    };
   }
 }
 
@@ -336,7 +372,15 @@ export async function runModel(o: RunOptions): Promise<EngineResult> {
   }
   try {
     const text = await runCloud(o);
-    if (!text.trim()) return { ok: false, text: "", engine: "cloud", modelName: null, error: "The cloud model returned nothing.", triedCloud: true };
+    if (!text.trim())
+      return {
+        ok: false,
+        text: "",
+        engine: "cloud",
+        modelName: null,
+        error: "The cloud model returned nothing.",
+        triedCloud: true,
+      };
     const route = await cloudRoute();
     return { ok: true, text, engine: "cloud", modelName: route.label, triedCloud: true };
   } catch (e) {
@@ -344,8 +388,17 @@ export async function runModel(o: RunOptions): Promise<EngineResult> {
     const timedOut = e instanceof Error && e.name === "TimeoutError";
     const msg = timedOut
       ? "The model took too long to answer. Try a smaller change, or check that the model pool on your install is healthy."
-      : e instanceof Error ? e.message : String(e);
-    return { ok: false, text: "", engine: null, modelName: null, error: deviceError ? `${deviceError} ${msg}` : msg, triedCloud: true };
+      : e instanceof Error
+        ? e.message
+        : String(e);
+    return {
+      ok: false,
+      text: "",
+      engine: null,
+      modelName: null,
+      error: deviceError ? `${deviceError} ${msg}` : msg,
+      triedCloud: true,
+    };
   }
 }
 
@@ -369,7 +422,7 @@ export const EDIT_SYSTEM = [
   "- After the last block, write exactly one line: NOTE: <one plain sentence describing what changed, for a non-technical user - no file names, no jargon>.",
   "- Keep it offline: no external scripts, fonts or frameworks. Plain JavaScript.",
   "- The skeleton script already defines esc(s), load(key, default) and save(key, value) at top level. Use them; NEVER declare const/let/var/function esc, load or save again (that throws a SyntaxError and blanks the app).",
-  "- File upload for end users: use <input type=\"file\"> (add accept=\"image/*\" for photos), read it with FileReader, preview images in an <img>, keep the result in localStorage when small, and show a friendly message for oversized or wrong files. Never post files to made-up URLs.",
+  '- File upload for end users: use <input type="file"> (add accept="image/*" for photos), read it with FileReader, preview images in an <img>, keep the result in localStorage when small, and show a friendly message for oversized or wrong files. Never post files to made-up URLs.',
   "- Use the CSS variables var(--primary) var(--bg) var(--surface) var(--text) var(--muted) var(--radius) for colours. Do not edit the studio:theme block.",
   "- Save user data with localStorage. Keep it touch-friendly (tap targets 44px+).",
   "- Device features are allowed when asked: camera via navigator.mediaDevices.getUserMedia({video:true}), Bluetooth via navigator.bluetooth.requestDevice, vibration via navigator.vibrate, share via navigator.share. Always inside a tap handler and with a graceful fallback if the feature is missing.",
@@ -396,7 +449,7 @@ export const CREATE_SYSTEM = [
   "keep the studio:theme block from the skeleton and use its CSS variables for every colour;",
   "save user data with localStorage; big tap targets; realistic sample content.",
   "When the request needs more than one screen, build MULTIPLE views inside the one file: a <section> per screen and a tiny router (listen to hashchange, or a show(id) helper on nav taps) with a bottom nav bar - never separate files or links to pages that do not exist.",
-  "Out-of-the-box features when asked: file/photo upload via <input type=\"file\"> + FileReader with an image preview; dark mode; search/filter; export as a downloaded file. Device features when asked: camera via navigator.mediaDevices.getUserMedia({video:true}) showing a <video>, Bluetooth via navigator.bluetooth.requestDevice, vibration via navigator.vibrate, share via navigator.share. Always inside a tap handler, always with a friendly fallback if the API is missing.",
+  'Out-of-the-box features when asked: file/photo upload via <input type="file"> + FileReader with an image preview; dark mode; search/filter; export as a downloaded file. Device features when asked: camera via navigator.mediaDevices.getUserMedia({video:true}) showing a <video>, Bluetooth via navigator.bluetooth.requestDevice, vibration via navigator.vibrate, share via navigator.share. Always inside a tap handler, always with a friendly fallback if the API is missing.',
   "If the request mentions connecting an agent or workflow, prefer window.vd.call(alias, text) for names the owner wired in, or add a fetch() POST to the endpoint URL they gave, with clear success/failure feedback. Never create password fields - sign-in is host-rendered via await window.vd.auth.require() when the app needs it.",
   "The skeleton script already defines esc(s), load(key, default) and save(key, value) at top level - use them and never declare esc, load or save again.",
   "Stay under ~300 lines - finish the file, never trail off.",

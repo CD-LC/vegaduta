@@ -38,17 +38,19 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * The "routines from habits" loop. It remembers, per person, the requests they make in chat and as Quick Tasks
- * (scrubbed, short-lived, never a request that needed scrubbing), groups requests that mean the same thing, and
- * when one group shows a rhythm - the same thing on at least 3 distinct days, at about the same time, daily, every
- * weekday or weekly - files a ROUTINE proposal whose payload is a ready scheduled task. The person approves it in
- * the Learned section and {@link RoutineApplier} creates the scheduled task; nothing is scheduled before that.
+ * The "routines from habits" loop. It remembers, per person, the requests they make in chat and as
+ * Quick Tasks (scrubbed, short-lived, never a request that needed scrubbing), groups requests that
+ * mean the same thing, and when one group shows a rhythm - the same thing on at least 3 distinct
+ * days, at about the same time, daily, every weekday or weekly - files a ROUTINE proposal whose
+ * payload is a ready scheduled task. The person approves it in the Learned section and {@link
+ * RoutineApplier} creates the scheduled task; nothing is scheduled before that.
  *
- * <p>Off unless {@code app.learning.routines.enabled} and {@code app.learning.proposals.enabled} are both true
- * (the personal profile turns both on). It never touches the chat turn's stream: the gateway hands each request to
- * this bean's own bounded single worker, the tenant travelling as data (ENGINEERING-RULES.md rule 12), and a full queue drops
- * the observation. There is no model call: grouping is token similarity, so the cost is a few indexed reads.
- * Proposals still go through {@link LearningProposalService#claimSlot} (per-agent cooldown and daily cap).
+ * <p>Off unless {@code app.learning.routines.enabled} and {@code app.learning.proposals.enabled}
+ * are both true (the personal profile turns both on). It never touches the chat turn's stream: the
+ * gateway hands each request to this bean's own bounded single worker, the tenant travelling as
+ * data (ENGINEERING-RULES.md rule 12), and a full queue drops the observation. There is no model
+ * call: grouping is token similarity, so the cost is a few indexed reads. Proposals still go
+ * through {@link LearningProposalService#claimSlot} (per-agent cooldown and daily cap).
  */
 @Service
 @ConditionalOnProperty(
@@ -63,6 +65,7 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
     private static final Duration DOUBLE_SUBMIT = Duration.ofMinutes(2);
     private static final Duration ATTEMPT_MEMORY = Duration.ofHours(24);
     private static final Duration PRUNE_EVERY = Duration.ofHours(1);
+
     /** Above this, a routine and an existing scheduled task are the same thing. */
     static final double SAME_AS_EXISTING = 0.7;
 
@@ -75,8 +78,10 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
     private final int retentionDays;
 
     private final Map<String, Instant> attempted = new ConcurrentHashMap<>();
+
     /** Last retention sweep per tenant: the delete runs in the calling tenant's schema only. */
     private final Map<String, Long> lastPrune = new ConcurrentHashMap<>();
+
     private volatile Executor executor;
     private volatile Clock clock = Clock.systemUTC();
     private final ThreadPoolExecutor ownPool;
@@ -129,7 +134,9 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
         try {
             return ZoneId.of(timezone.trim());
         } catch (RuntimeException e) {
-            log.warn("app.learning.routines.timezone '{}' is not a time zone - using the server's", timezone);
+            log.warn(
+                    "app.learning.routines.timezone '{}' is not a time zone - using the server's",
+                    timezone);
             return ZoneId.systemDefault();
         }
     }
@@ -183,8 +190,10 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
             }
             String text = o.text().replaceAll("\\s+", " ").strip();
             String scrubbed = scrubber.scrub(text);
-            // A request that needed scrubbing was about one specific thing (or held a secret): never kept.
-            if (SkillDraftScrubber.redactions(scrubbed) > 0 || !RoutineDetector.eligible(scrubbed)) {
+            // A request that needed scrubbing was about one specific thing (or held a secret):
+            // never kept.
+            if (SkillDraftScrubber.redactions(scrubbed) > 0
+                    || !RoutineDetector.eligible(scrubbed)) {
                 return;
             }
             Set<String> tokens = RoutineDetector.tokens(scrubbed);
@@ -198,14 +207,23 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
                             subject, o.at().minus(Duration.ofDays(windowDays)));
             for (RoutineObservation r : recent) {
                 if (r.getNormText().equals(norm)
-                        && Duration.between(r.getObservedAt(), o.at()).abs().compareTo(DOUBLE_SUBMIT) < 0) {
+                        && Duration.between(r.getObservedAt(), o.at())
+                                        .abs()
+                                        .compareTo(DOUBLE_SUBMIT)
+                                < 0) {
                     return; // the same request sent twice in a row is one request
                 }
             }
             RoutineObservation saved =
                     observations.save(
                             new RoutineObservation(
-                                    UUID.randomUUID(), subject, o.agentId(), source(o), norm, scrubbed, o.at()));
+                                    UUID.randomUUID(),
+                                    subject,
+                                    o.agentId(),
+                                    source(o),
+                                    norm,
+                                    scrubbed,
+                                    o.at()));
             List<Obs> all = new ArrayList<>(recent.size() + 1);
             all.add(toObs(saved));
             for (RoutineObservation r : recent) {
@@ -231,11 +249,13 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
     }
 
     private void file(String subject, Routine routine) {
-        String key = subject + "|" + routine.agentId() + "|" + routine.cron() + "|" + routine.tokens();
+        String key =
+                subject + "|" + routine.agentId() + "|" + routine.cron() + "|" + routine.tokens();
         Instant now = clock.instant();
         Instant before = attempted.get(key);
         if (before != null && Duration.between(before, now).compareTo(ATTEMPT_MEMORY) < 0) {
-            return; // already filed (or declined) a moment ago; a pattern keeps matching on every new request
+            return; // already filed (or declined) a moment ago; a pattern keeps matching on every
+            // new request
         }
         if (!scheduledTasksReady(routine)) {
             return;
@@ -245,8 +265,10 @@ public class RoutineLearningService implements RoutineObservationGateway.Observe
         }
         Result result = proposals.propose(toProposal(subject, routine));
         if (attempted.size() > 2_000) {
-            attempted.entrySet()
-                    .removeIf(e -> Duration.between(e.getValue(), now).compareTo(ATTEMPT_MEMORY) > 0);
+            attempted
+                    .entrySet()
+                    .removeIf(
+                            e -> Duration.between(e.getValue(), now).compareTo(ATTEMPT_MEMORY) > 0);
         }
         switch (result.outcome()) {
             case PENDING_CAP_REACHED -> {

@@ -33,21 +33,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * No test previously existed for {@link AgentService} at all. This class is
- * deliberately scoped to {@link AgentService#updateModel} only - covering
- * the whole 45KB class is a separate, much larger effort; this is the
- * direct-feedback FREE-tier fix ("disable model selection for free users")
- * that was verified against live source and needed real test coverage.
+ * No test previously existed for {@link AgentService} at all. This class is deliberately scoped to
+ * {@link AgentService#updateModel} only - covering the whole 45KB class is a separate, much larger
+ * effort; this is the direct-feedback FREE-tier fix ("disable model selection for free users") that
+ * was verified against live source and needed real test coverage.
  *
- * <p>Standing caveat matching this repo's own convention (see
- * the internal change log / .claude-handoffs/TIER2_HANDOFF.md):
- * written and hand-verified line-by-line against the live
- * {@code AgentService.java}/{@code Agent.java}/{@code TenantContext.java}/
- * {@code EditLockPolicy.java} sources, but this Cowork sandbox has no
- * Maven/JDK-17 toolchain to actually compile or run it (JDK 11 present, no
- * {@code mvn} binary, no network access on the device bridge - checked
- * directly). Needs a real {@code mvn test -pl core/agents -am} run to
- * confirm it actually compiles and passes.
+ * <p>Standing caveat matching this repo's own convention (see the internal change log /
+ * .claude-handoffs/TIER2_HANDOFF.md): written and hand-verified line-by-line against the live
+ * {@code AgentService.java}/{@code Agent.java}/{@code TenantContext.java}/ {@code
+ * EditLockPolicy.java} sources, but this Cowork sandbox has no Maven/JDK-17 toolchain to actually
+ * compile or run it (JDK 11 present, no {@code mvn} binary, no network access on the device bridge
+ * - checked directly). Needs a real {@code mvn test -pl core/agents -am} run to confirm it actually
+ * compiles and passes.
  */
 class AgentServiceTest {
 
@@ -60,14 +57,17 @@ class AgentServiceTest {
     void setUp() {
         repository = mock(AgentRepository.class);
         tenantLimits = mock(TenantLimits.class);
-        GenerationParamsInferenceService generationParamsInferenceService = mock(GenerationParamsInferenceService.class);
+        GenerationParamsInferenceService generationParamsInferenceService =
+                mock(GenerationParamsInferenceService.class);
         providerModelCatalogService = mock(ProviderModelCatalogService.class);
         ModelModalitiesService modelModalitiesService = mock(ModelModalitiesService.class);
         PromptVersionRepository promptVersionRepository = mock(PromptVersionRepository.class);
         VoiceProviderValidator voiceProviderValidator = mock(VoiceProviderValidator.class);
         VideoProviderValidator videoProviderValidator = mock(VideoProviderValidator.class);
-        TextModelProviderValidator textModelProviderValidator = mock(TextModelProviderValidator.class);
-        TextToSpeechProviderValidator ttsProviderValidator = mock(TextToSpeechProviderValidator.class);
+        TextModelProviderValidator textModelProviderValidator =
+                mock(TextModelProviderValidator.class);
+        TextToSpeechProviderValidator ttsProviderValidator =
+                mock(TextToSpeechProviderValidator.class);
         // Cross-user resource sharing retrofit (Round 2) - a bare mock is
         // sufficient here: AgentService#requireAccess discards this call's
         // return value, and a Mockito mock never throws unless explicitly
@@ -75,24 +75,24 @@ class AgentServiceTest {
         // exercise the sharing feature) behaves exactly as before - access is
         // implicitly always granted.
         ResourceAccessService resourceAccessService = mock(ResourceAccessService.class);
-        service = AgentServiceTestFactory.create(
-            repository,
-            tenantLimits,
-            generationParamsInferenceService,
-            providerModelCatalogService,
-            modelModalitiesService,
-            promptVersionRepository,
-            voiceProviderValidator,
-            videoProviderValidator,
-            textModelProviderValidator,
-            ttsProviderValidator,
-            resourceAccessService,
-            mock(AgentSchemaService.class),
-            "claude-sonnet-5",
-            1024,
-            0.7,
-            1.0
-        );
+        service =
+                AgentServiceTestFactory.create(
+                        repository,
+                        tenantLimits,
+                        generationParamsInferenceService,
+                        providerModelCatalogService,
+                        modelModalitiesService,
+                        promptVersionRepository,
+                        voiceProviderValidator,
+                        videoProviderValidator,
+                        textModelProviderValidator,
+                        ttsProviderValidator,
+                        resourceAccessService,
+                        mock(AgentSchemaService.class),
+                        "claude-sonnet-5",
+                        1024,
+                        0.7,
+                        1.0);
         // save() round-trips its argument, matching what a real JPA save() of an
         // already-persisted (non-new) entity does.
         when(repository.save(any(Agent.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -105,9 +105,15 @@ class AgentServiceTest {
 
     private static Agent newAgent() {
         return new Agent(
-            "Test Agent", "You are helpful.", ProviderName.ANTHROPIC, "claude-sonnet-5",
-            1024, 0.7, 1.0, false, ExperienceMode.ADVANCED
-        );
+                "Test Agent",
+                "You are helpful.",
+                ProviderName.ANTHROPIC,
+                "claude-sonnet-5",
+                1024,
+                0.7,
+                1.0,
+                false,
+                ExperienceMode.ADVANCED);
     }
 
     private UUID stubExistingAgent(Agent agent) {
@@ -122,10 +128,10 @@ class AgentServiceTest {
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.FREE);
         UUID agentId = stubExistingAgent(newAgent());
 
-        TenantLimitExceededException thrown = assertThrows(
-            TenantLimitExceededException.class,
-            () -> service.updateModel(agentId, ProviderName.OPENAI, "gpt-4o")
-        );
+        TenantLimitExceededException thrown =
+                assertThrows(
+                        TenantLimitExceededException.class,
+                        () -> service.updateModel(agentId, ProviderName.OPENAI, "gpt-4o"));
 
         assertTrue(thrown.getMessage().contains("Premium feature"));
         // Rejected before ever touching the catalog or persisting anything.
@@ -138,7 +144,7 @@ class AgentServiceTest {
         TenantContext.set(TenantContext.of("acme", "user-1", Set.of()));
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.PREMIUM);
         when(providerModelCatalogService.findModel(ProviderName.OPENAI, "gpt-4o"))
-            .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
+                .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
         UUID agentId = stubExistingAgent(newAgent());
 
         AgentResponse response = service.updateModel(agentId, ProviderName.OPENAI, "gpt-4o");
@@ -159,10 +165,11 @@ class AgentServiceTest {
         TenantContext.set(TenantContext.of("acme", "user-1", Set.of()));
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.PREMIUM);
         when(providerModelCatalogService.findModel(ProviderName.GEMINI, "some-new-model"))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
         UUID agentId = stubExistingAgent(newAgent());
 
-        AgentResponse response = service.updateModel(agentId, ProviderName.GEMINI, "some-new-model");
+        AgentResponse response =
+                service.updateModel(agentId, ProviderName.GEMINI, "some-new-model");
 
         assertEquals(ProviderName.GEMINI, response.providerName());
         assertEquals("some-new-model", response.model());
@@ -178,10 +185,26 @@ class AgentServiceTest {
         // the now-hidden-for-FREE web picker) and have it persisted.
         TenantContext.set(TenantContext.of("acme", "user-1", Set.of()));
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.FREE);
-        AgentCreateRequest request = new AgentCreateRequest(
-            "Test Agent", "You are helpful.", ProviderName.ANTHROPIC, "claude-sonnet-5",
-            null, null, null, null, null, null, null, null, null, null, null, null, null, null
-        );
+        AgentCreateRequest request =
+                new AgentCreateRequest(
+                        "Test Agent",
+                        "You are helpful.",
+                        ProviderName.ANTHROPIC,
+                        "claude-sonnet-5",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         AgentResponse response = service.create(request);
 
@@ -196,10 +219,26 @@ class AgentServiceTest {
     void createHonorsRequestedProviderModelForAPayingTenant() {
         TenantContext.set(TenantContext.of("acme", "user-1", Set.of()));
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.PREMIUM);
-        AgentCreateRequest request = new AgentCreateRequest(
-            "Test Agent", "You are helpful.", ProviderName.OPENAI, "gpt-4o",
-            null, null, null, null, null, null, null, null, null, null, null, null, null, null
-        );
+        AgentCreateRequest request =
+                new AgentCreateRequest(
+                        "Test Agent",
+                        "You are helpful.",
+                        ProviderName.OPENAI,
+                        "gpt-4o",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
 
         AgentResponse response = service.create(request);
 
@@ -213,7 +252,7 @@ class AgentServiceTest {
         // documented "callers with no HTTP request context... aren't
         // capped" guard (tenantId == null -> TenantPlan.UNLIMITED).
         when(providerModelCatalogService.findModel(ProviderName.OPENAI, "gpt-4o"))
-            .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
+                .thenReturn(Optional.of(mock(ProviderModelResponse.class)));
         UUID agentId = stubExistingAgent(newAgent());
 
         AgentResponse response = service.updateModel(agentId, ProviderName.OPENAI, "gpt-4o");
@@ -257,7 +296,8 @@ class AgentServiceTest {
         verify(repository).save(any(Agent.class));
     }
 
-    // Per-agent run cap (V421) lives outside AgentConfigSnapshot, so copies need it carried explicitly.
+    // Per-agent run cap (V421) lives outside AgentConfigSnapshot, so copies need it carried
+    // explicitly.
 
     @Test
     void duplicateCarriesThePerAgentRunCap() {
@@ -280,9 +320,20 @@ class AgentServiceTest {
         Agent control = newAgent();
         control.setRunBudgetUsd(new java.math.BigDecimal("0.2500"));
         UUID controlId = stubExistingAgent(control);
-        Agent clone = new Agent(
-            "Test Agent [experiment treatment]", "You are helpful.", ProviderName.ANTHROPIC, "claude-sonnet-5",
-            1024, 0.7, 1.0, false, ExperienceMode.ADVANCED, ReasoningDepth.FAST, TuningMode.MANUAL, controlId);
+        Agent clone =
+                new Agent(
+                        "Test Agent [experiment treatment]",
+                        "You are helpful.",
+                        ProviderName.ANTHROPIC,
+                        "claude-sonnet-5",
+                        1024,
+                        0.7,
+                        1.0,
+                        false,
+                        ExperienceMode.ADVANCED,
+                        ReasoningDepth.FAST,
+                        TuningMode.MANUAL,
+                        controlId);
         UUID cloneId = stubExistingAgent(clone);
 
         assertEquals(new java.math.BigDecimal("0.2500"), service.getRunBudgetUsd(cloneId));
@@ -295,14 +346,13 @@ class AgentServiceTest {
         TenantContext.set(TenantContext.of("acme", "user-1", Set.of()));
         when(tenantLimits.plan("acme")).thenReturn(TenantPlan.PREMIUM);
         when(tenantLimits.maxAgents("acme")).thenReturn(Optional.of(5));
-        when(tenantLimits.accountType("acme")).thenReturn(com.agenticai.core.security.AccountType.B2B);
+        when(tenantLimits.accountType("acme"))
+                .thenReturn(com.agenticai.core.security.AccountType.B2B);
         when(repository.count()).thenReturn(5L);
         UUID agentId = stubExistingAgent(newAgent());
 
-        TenantLimitExceededException thrown = assertThrows(
-            TenantLimitExceededException.class,
-            () -> service.duplicate(agentId)
-        );
+        TenantLimitExceededException thrown =
+                assertThrows(TenantLimitExceededException.class, () -> service.duplicate(agentId));
 
         assertTrue(thrown.getMessage().contains("allows up to 5"));
         verify(repository, never()).save(any(Agent.class));

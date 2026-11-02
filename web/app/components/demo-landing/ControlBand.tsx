@@ -87,7 +87,9 @@ export default function ControlBand() {
     <section id="why-vegaduta" className="mkt-band mkt-band--ruled">
       <div className="mkt-band__inner">
         <div className="mkt-head mkt-head--center mkt-reveal">
-          <p className="mkt-eyebrow"><BrandText text={t("wn_eyebrow")} /></p>
+          <p className="mkt-eyebrow">
+            <BrandText text={t("wn_eyebrow")} />
+          </p>
           <h2 className="mkt-h2">
             {t("wn_h2")} <span className="mkt-gradient-text">{t("wn_h2Em")}</span>
           </h2>
@@ -113,9 +115,7 @@ export default function ControlBand() {
                 </li>
               ))}
             </ul>
-            <p className="mkt-small mkt-ink-2 mt-auto border-t border-[var(--mkt-line)] pt-4">
-              {t("wn_keepFoot")}
-            </p>
+            <p className="mkt-small mkt-ink-2 mt-auto border-t border-[var(--mkt-line)] pt-4">{t("wn_keepFoot")}</p>
           </div>
 
           {/* The DIY-agent card — same idea, self-hosted. Concedes the
@@ -127,7 +127,9 @@ export default function ControlBand() {
               </span>
               <span className="mkt-card-title">{t("wn_diyTitle")}</span>
             </div>
-            <p className="mkt-small mkt-ink-2"><BrandText text={t("wn_diyBody")} /></p>
+            <p className="mkt-small mkt-ink-2">
+              <BrandText text={t("wn_diyBody")} />
+            </p>
           </div>
         </div>
 

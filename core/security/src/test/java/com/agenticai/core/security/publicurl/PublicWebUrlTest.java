@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 
 /**
- * ENGINEERING-RULES.md rule 4 in code form: a browser-facing URL never falls back to {@code localhost} - a
- * missing {@code app.web.public-url} is either refused at boot or throws a clear {@link
- * IllegalStateException} naming the variable to set.
+ * ENGINEERING-RULES.md rule 4 in code form: a browser-facing URL never falls back to {@code
+ * localhost} - a missing {@code app.web.public-url} is either refused at boot or throws a clear
+ * {@link IllegalStateException} naming the variable to set.
  */
 class PublicWebUrlTest {
 

@@ -9,14 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The one hook the chat turn and the job submit path have into the "routines from habits" learning loop
- * ({@code app.learning.routines.enabled}). It is a plain static holder, installed once at startup by the loop
- * (same shape as {@link SkillLearningGateway}), because both call sites are not beans.
+ * The one hook the chat turn and the job submit path have into the "routines from habits" learning
+ * loop ({@code app.learning.routines.enabled}). It is a plain static holder, installed once at
+ * startup by the loop (same shape as {@link SkillLearningGateway}), because both call sites are not
+ * beans.
  *
- * <p>It adds no operator to any stream: {@link #observe} only reports that the person made a request. With no
- * observer installed, or one that reports itself disabled (the default), it returns before doing any work. The
- * tenant is captured here, on the calling thread, and travels as data (ENGINEERING-RULES.md rule 12); the observer must hand
- * the work to its own bounded worker and never block.
+ * <p>It adds no operator to any stream: {@link #observe} only reports that the person made a
+ * request. With no observer installed, or one that reports itself disabled (the default), it
+ * returns before doing any work. The tenant is captured here, on the calling thread, and travels as
+ * data (ENGINEERING-RULES.md rule 12); the observer must hand the work to its own bounded worker
+ * and never block.
  */
 public final class RoutineObservationGateway {
 
@@ -27,9 +29,17 @@ public final class RoutineObservationGateway {
 
     public static final String JOB = "job";
 
-    /** One request the person made. {@code text} is raw: the observer scrubs it before storing anything. */
+    /**
+     * One request the person made. {@code text} is raw: the observer scrubs it before storing
+     * anything.
+     */
     public record Observation(
-            UUID agentId, String sessionId, String text, String source, Instant at, TenantScope scope) {}
+            UUID agentId,
+            String sessionId,
+            String text,
+            String source,
+            Instant at,
+            TenantScope scope) {}
 
     /** Receives each request on the calling thread; must return quickly and never throw. */
     public interface Observer {
@@ -46,7 +56,10 @@ public final class RoutineObservationGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }
@@ -69,7 +82,13 @@ public final class RoutineObservationGateway {
         }
         try {
             o.onObservation(
-                    new Observation(agentId, sessionId, text, source, Instant.now(), TenantScope.of(tenant)));
+                    new Observation(
+                            agentId,
+                            sessionId,
+                            text,
+                            source,
+                            Instant.now(),
+                            TenantScope.of(tenant)));
         } catch (RuntimeException e) {
             log.debug("Routine observer failed: {}", e.getMessage());
         }

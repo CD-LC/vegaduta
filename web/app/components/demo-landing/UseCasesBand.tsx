@@ -138,8 +138,17 @@ export default function UseCasesBand() {
                 <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2">
                   {uc.flow.map((node, i) => (
                     <Fragment key={`${node}-${i}`}>
-                      {i > 0 && <ArrowRight className="size-3 shrink-0" style={{ color: "var(--mkt-ink-3)" }} aria-hidden="true" />}
-                      <span className="mkt-badge mkt-ink-3 whitespace-nowrap rounded-full border px-2 py-0.5" style={{ borderColor: "var(--mkt-line)" }}>
+                      {i > 0 && (
+                        <ArrowRight
+                          className="size-3 shrink-0"
+                          style={{ color: "var(--mkt-ink-3)" }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span
+                        className="mkt-badge mkt-ink-3 whitespace-nowrap rounded-full border px-2 py-0.5"
+                        style={{ borderColor: "var(--mkt-line)" }}
+                      >
                         {t(`uc_n_${node}`)}
                       </span>
                     </Fragment>

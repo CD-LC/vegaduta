@@ -247,7 +247,7 @@ nav:
       - Security hardening: engineering/SECURITY-HARDENING.md
       - Open UI gaps: engineering/UI-GAPS-OPEN.md
       - Big files split plan: engineering/BIG-FILES-SPLIT-PLAN.md
-            - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
+      - Configuration reference (generated): engineering/CONFIG-REFERENCE.generated.md
       - Console i18n parity: engineering/I18N.md
       - Error Prone baseline: engineering/ERROR-PRONE-BASELINE.md
       - Standards audit: engineering/STANDARDS-AUDIT.md

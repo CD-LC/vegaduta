@@ -15,9 +15,9 @@ import reactor.core.publisher.SignalType;
  * in plain objects that are not beans, so it reaches the loop through this holder, installed once
  * at startup by the learning service (same shape as {@code TurnJournalGateway}).
  *
- * <p>With no observer installed, or one that reports itself disabled (the default,
- * {@code app.skills.learning.enabled=false}), {@link #observe} returns the very same {@link Flux}
- * instance it was given: not one operator is added to the turn.
+ * <p>With no observer installed, or one that reports itself disabled (the default, {@code
+ * app.skills.learning.enabled=false}), {@link #observe} returns the very same {@link Flux} instance
+ * it was given: not one operator is added to the turn.
  */
 public final class SkillLearningGateway {
 
@@ -37,7 +37,9 @@ public final class SkillLearningGateway {
             boolean cancelled,
             TenantScope scope) {}
 
-    /** Receives every observed turn on the thread that finished it; must be quick and never throw. */
+    /**
+     * Receives every observed turn on the thread that finished it; must be quick and never throw.
+     */
     public interface Observer {
         boolean enabled();
 
@@ -52,7 +54,10 @@ public final class SkillLearningGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }
@@ -64,8 +69,9 @@ public final class SkillLearningGateway {
 
     /**
      * Passes the reply through unchanged and reports how the turn ended. The tenant is captured
-     * here, on the thread that assembled the turn, and travels as data in the outcome (ENGINEERING-RULES.md
-     * rule 12): whoever handles it on another thread re-applies it with {@code outcome.scope()}.
+     * here, on the thread that assembled the turn, and travels as data in the outcome
+     * (ENGINEERING-RULES.md rule 12): whoever handles it on another thread re-applies it with
+     * {@code outcome.scope()}.
      */
     public static Flux<String> observe(
             Flux<String> turn,

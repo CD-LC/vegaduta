@@ -16,7 +16,6 @@ export interface AudioChunkQueueDeps {
   ) => Promise<VoiceChainResult>;
 }
 
-
 // Plays queued audio-chunk events one at a time, in the order they arrived
 // (the backend already guarantees wire order matches playback order - see
 // VoiceCallController#turn's javadoc on flatMapSequential). A chunk with no

@@ -42,10 +42,9 @@ final class VoiceTurnStream {
      * Absolute wall-clock ceiling for {@link VoiceCallController#turn}'s LLM-generation +
      * TTS-synthesis phase (the {@code replyAndAudio} sub-flux built below) - the reliability
      * blueprint's Part 5(d) fix ({@code docs/RELIABILITY-BLUEPRINT-2026-08-06-PART1.md}),
-     * specifically the half of it flagged as NOT yet shipped in {@code
-     * the internal change log}'s "Session B — closing entry" ("{@code
-     * VoiceCallController#turn}'s explicit absolute ceiling did not [ship], since those are core/
-     * changes outside this pass's web+voice-agent scope").
+     * specifically the half of it flagged as NOT yet shipped in {@code the internal change log}'s
+     * "Session B — closing entry" ("{@code VoiceCallController#turn}'s explicit absolute ceiling
+     * did not [ship], since those are core/ changes outside this pass's web+voice-agent scope").
      *
      * <p>The STT leg above already completes synchronously before this Flux is even built, so it
      * isn't covered by this timer - it's bounded separately by each provider's own client-side

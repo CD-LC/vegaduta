@@ -27,8 +27,8 @@ import org.springframework.stereotype.Component;
  * tenant at start-up and gives each its risk classification, so a fresh install has verified tools
  * without the person touching infrastructure.
  *
- * <p><b>Only on a personal install.</b> Active only with {@code app.mcp.starter.enabled=true}, which
- * {@code application-personal.yml} sets; every other shape never loads this class.
+ * <p><b>Only on a personal install.</b> Active only with {@code app.mcp.starter.enabled=true},
+ * which {@code application-personal.yml} sets; every other shape never loads this class.
  *
  * <p><b>Only when there is somewhere to run them.</b> The slim core image has no Node or uv, so a
  * STDIO server can only run in the {@code mcp-stdio-runner} container ({@code
@@ -38,17 +38,16 @@ import org.springframework.stereotype.Component;
  * <p><b>Order.</b> Runs before {@code DynamicMcpConnectionManager.reconnectEnabledOnStartup} (same
  * event, default order), which then connects the enabled rows created here on its own tenant-scoped
  * threads. This class neither hands work to another thread nor connects anything itself, so it
- * carries no tenant across a hop (ENGINEERING-RULES.md rule 12): the iterator sets the tenant for each call and
- * clears it after.
+ * carries no tenant across a hop (ENGINEERING-RULES.md rule 12): the iterator sets the tenant for
+ * each call and clears it after.
  *
- * <p><b>Risk classification.</b> Each starter's tools are declared under {@code mcp__<name>__*} when
- * the starter is registered, and on every later start for as long as the registration is still the
- * catalog's own (so a write that failed once is retried), unless the tenant already holds a row for
- * that pattern. All
- * three are read-only and cannot change anything, so none needs an approval; the output is third-party
- * content, so it taints the turn like every MCP server's ({@link ToolTrustTier#UNTRUSTED_EXTERNAL}),
- * which is what makes a later write in the same turn ask first. An unclassified MCP tool would be both
- * a taint source and a taint sink.
+ * <p><b>Risk classification.</b> Each starter's tools are declared under {@code mcp__<name>__*}
+ * when the starter is registered, and on every later start for as long as the registration is still
+ * the catalog's own (so a write that failed once is retried), unless the tenant already holds a row
+ * for that pattern. All three are read-only and cannot change anything, so none needs an approval;
+ * the output is third-party content, so it taints the turn like every MCP server's ({@link
+ * ToolTrustTier#UNTRUSTED_EXTERNAL}), which is what makes a later write in the same turn ask first.
+ * An unclassified MCP tool would be both a taint source and a taint sink.
  */
 @Component
 @ConditionalOnProperty(name = "app.mcp.starter.enabled", havingValue = "true")
@@ -116,7 +115,8 @@ public class PersonalStarterConnectors {
 
     /** One tenant, with {@code TenantContext} already set by the caller. */
     void seedCurrentTenant() {
-        // Newly registered starters, plus any whose registration is still ours from an earlier start:
+        // Newly registered starters, plus any whose registration is still ours from an earlier
+        // start:
         // a classification that failed to write then (a transient database error) is retried now
         // instead of leaving the tools unclassified for good.
         Set<String> pending = new LinkedHashSet<>();
