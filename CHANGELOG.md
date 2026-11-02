@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
