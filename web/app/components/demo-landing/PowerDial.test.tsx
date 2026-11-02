@@ -14,7 +14,7 @@ describe("PowerDial", () => {
   it("lists the three power sources in order, first one selected, none missing a translation", () => {
     render(<PowerDial />);
     const buttons = screen.getAllByRole("button");
-    expect(buttons.map((b) => b.textContent)).toEqual(["BYOK", "Edge models", "Shared pool"]);
+    expect(buttons.map((b) => b.textContent)).toEqual(["BYOK", "Edge models", "Free shared pool"]);
     expect(buttons[0].getAttribute("aria-pressed")).toBe("true");
     expect(screen.getByTestId("hero-power-dial").textContent).not.toMatch(/heroPower_/);
   });

@@ -132,7 +132,7 @@ async function lookupCloudRoute(): Promise<CloudRoute> {
   try {
     const quota = (await silentGet("/api/tenant/usage-quota")) as { plan?: string; usesPlatformPool?: boolean };
     if (quota?.plan === "FREE") {
-      return { kind: "platform", label: "VegaDūta platform AI", detail: "Hosted model pool included with your plan. Counts toward your monthly AI tokens." };
+      return { kind: "platform", label: "VegaDūta platform AI", detail: "Free hosted model pool included with your plan, at no extra charge. Counts toward your monthly fair-use AI tokens." };
     }
     const providers = (await silentGet("/api/providers").catch((): unknown[] => [])) as { providerName?: string; status?: string }[];
     const active = Array.isArray(providers) ? providers.find((p) => p?.status === "ACTIVE" && p.providerName) : null;
@@ -141,7 +141,7 @@ async function lookupCloudRoute(): Promise<CloudRoute> {
       return { kind: "byok", label: `Your ${name} key`, detail: `Runs on your own ${name} API key (BYOK). Billed by ${name}.` };
     }
     if (quota?.usesPlatformPool) {
-      return { kind: "platform", label: "VegaDūta platform AI", detail: "Hosted model pool. Counts toward your monthly AI tokens." };
+      return { kind: "platform", label: "VegaDūta platform AI", detail: "Free hosted model pool, at no extra charge. Counts toward your monthly fair-use AI tokens." };
     }
     return { kind: "unknown", label: "no provider connected", detail: "No AI provider is connected. Add one under AI models." };
   } catch (e) {
