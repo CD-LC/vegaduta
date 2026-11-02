@@ -22,7 +22,7 @@ export interface PublicPage {
  */
 export const PUBLIC_PAGES: PublicPage[] = [
   { path: "/", title: /VegaD/i, h1: /Eyes\. Ears\. Voice\. Hands\./i },
-  { path: "/billing", title: /free|open source/i, h1: /open source|free for everyone|everything is free/i },
+  { path: "/billing", title: /free|open source|source-available/i, h1: /open source|source-available|free for everyone|everything is free/i },
   { path: "/templates", title: /Community Templates/i, h1: /community has built/i },
   { path: "/plugins", title: /Plugin|Extension|IDE/i, h1: /.+/ },
   { path: "/ai", title: /AI Capabilities/i, h1: /AI stack behind every VegaD/i },

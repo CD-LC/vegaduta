@@ -68,7 +68,7 @@ test.describe("public-auth: OSS site mode routing", () => {
 
   test("the technical public pages render with their own title and h1", async ({ page }) => {
     for (const [path, title, h1] of [
-      ["/", /Open-source platform for AI agents/i, /build, govern and run AI agents/i],
+      ["/", /(Open-source|Source-available) platform for AI agents/i, /build, govern and run AI agents/i],
       ["/about", /About/i, /About VegaD/i],
       ["/privacy", /Privacy/i, /Privacy Policy/i],
       ["/terms", /Terms/i, /Terms of Service/i],

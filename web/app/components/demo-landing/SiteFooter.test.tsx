@@ -37,7 +37,7 @@ describe("classic footer cross-links to the open-source side", () => {
     const links = footerLinks();
     expect(links["Plugins & apps"]).toBe("/plugins");
     expect(links["Java Agent SDK"]).toBe(`${REPO_URL}/blob/main/sdk/java/README.md`);
-    expect(links["Open source"]).toBe(REPO_URL);
+    expect(links["Source code"]).toBe(REPO_URL);
     expect(links["Self-host guide"]).toBe(`${REPO_URL}/blob/main/docs/installation.md`);
     expect(links["footer_helpDocs"]).toBe("/docs");
   });

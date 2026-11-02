@@ -31,7 +31,7 @@ const DESCRIPTION =
 // title/description, a canonical pointing at ITSELF, and the shared hreflang
 // cluster. The copy lives in messages/*.json under seoMeta.billing (en.json is
 // the English source; DESCRIPTION above now feeds only the JSON-LD below).
-const FREE_TITLE = "VegaDūta — Free during launch, open source, everything unlocked";
+const FREE_TITLE = "VegaDūta — Free during launch, source-available, everything unlocked";
 const FREE_DESCRIPTION =
   "Every VegaDūta feature is free for everyone during our launch, built by a small team of developers. No card needed — explore, experiment and run. Pricing will be introduced later, with advance notice.";
 

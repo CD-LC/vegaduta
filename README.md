@@ -1,6 +1,6 @@
 # VegaDūta
 
-**An open-source, multi-tenant platform for building AI agents, wiring them into workflows with human approval, grounding them in your own data, and reaching them over the channels your users already use.**
+**A source-available, multi-tenant platform for building AI agents, wiring them into workflows with human approval, grounding them in your own data, and reaching them over the channels your users already use.**
 
 [![CI](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml/badge.svg)](https://github.com/CD-LC/vegaduta/actions/workflows/codeql.yml)
