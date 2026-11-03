@@ -3165,7 +3165,7 @@ app:
     # min-chars: letters/digits of verbatim prompt text that count as a leak. stream-holdback-chars:
     # stream text held back so a leak split across chunks is caught first (first text arrives that late).
     prompt-leak:
-      mode: ${APP_GUARDRAILS_PROMPT_LEAK_MODE:warn}
+      mode: ${APP_GUARDRAILS_PROMPT_LEAK_MODE:off}
       action: ${APP_GUARDRAILS_PROMPT_LEAK_ACTION:warn}
       min-chars: 60
       stream-holdback-chars: 256

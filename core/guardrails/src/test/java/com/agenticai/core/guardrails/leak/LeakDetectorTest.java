@@ -180,7 +180,8 @@ class LeakDetectorTest {
 
     @Test
     void warnModeArmsPromptButNeverAltersOutputAndReportsWithoutText() {
-        PromptLeakProperties p = new PromptLeakProperties(); // defaults: warn / warn
+        PromptLeakProperties p = new PromptLeakProperties();
+        p.setMode("warn"); // the default is off; warn is opt-in
         List<LeakDetector.Verdict> reports = new ArrayList<>();
         PromptLeakGuard guard = new PromptLeakGuard(p, new PromptLeakReporter(null, null) {
             @Override
@@ -204,5 +205,10 @@ class LeakDetectorTest {
         p.setAction(action);
         p.setStreamHoldbackChars(128);
         return new PromptLeakGuard(p, new PromptLeakReporter(null, null));
+    }
+
+    @Test
+    void theControlIsOffByDefaultBecauseEvenWarnChangesTheSystemPrompt() {
+        org.junit.jupiter.api.Assertions.assertEquals(PromptLeakMode.OFF, new PromptLeakProperties().mode());
     }
 }

@@ -4,7 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * {@code app.guardrails.prompt-leak.*}: the output-side system-prompt leak control (OWASP LLM07).
- * Defaults mean "run and report, never change a reply": {@code mode=warn}, {@code action=warn}.
+ * Defaults mean "off": {@code mode=off}, {@code action=warn}. Even {@code warn} mode changes the system prompt (it appends a
+ * canary block, which defeats provider prompt-prefix caching), so it is opt-in.
  */
 @ConfigurationProperties(prefix = "app.guardrails.prompt-leak")
 public class PromptLeakProperties {
@@ -12,7 +13,7 @@ public class PromptLeakProperties {
     /** Minimum canary entropy, in bytes (128 bits). Smaller configured values are raised to this. */
     public static final int MIN_CANARY_BYTES = 16;
 
-    private String mode = "warn";
+    private String mode = "off";
     private String action = "warn";
     private int minChars = 60;
     private int canaryBytes = 18;
