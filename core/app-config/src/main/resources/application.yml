@@ -3159,6 +3159,16 @@ app:
       attack-scenarios:
         enabled: ${SIMULATION_ATTACK_SCENARIOS_ENABLED:true}
   guardrails:
+    # OWASP LLM07 output-side system-prompt leak control. mode: off (nothing runs) | warn (a per-turn
+    # canary is added to the system prompt, replies are scanned, detections are counted and audited,
+    # replies are never changed) | enforce (also applies action). action: warn | redact | block.
+    # min-chars: letters/digits of verbatim prompt text that count as a leak. stream-holdback-chars:
+    # stream text held back so a leak split across chunks is caught first (first text arrives that late).
+    prompt-leak:
+      mode: ${APP_GUARDRAILS_PROMPT_LEAK_MODE:warn}
+      action: ${APP_GUARDRAILS_PROMPT_LEAK_ACTION:warn}
+      min-chars: 60
+      stream-holdback-chars: 256
     # What a guardrail does when its OWN machinery fails (the tool-policy lookup throws, the
     # injection judge errors or answers nothing, content moderation throws). A violation always
     # blocks; this is about failures. closed (default) refuses the tool call, withholds the tool

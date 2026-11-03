@@ -10,6 +10,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
+- **System-prompt leak control on streamed replies (OWASP LLM07).** A per-turn random canary is appended to the system
+  prompt and the reply stream is scanned for the canary and for long verbatim runs of the prompt (case, spacing,
+  markdown, zero-width characters and look-alike letters normalised; a leak split across chunks is caught). Default
+  `app.guardrails.prompt-leak.mode=warn` only counts and audits; `enforce` with `action=redact|block` rewrites the
+  reply. Paraphrase is not detected, and the buffered (non-streaming) path is not covered yet.
 - **Agent memory can no longer be poisoned from a fetched page (OWASP ASI06 / LLM04).** `remember_fact` and
   `remember_shared_fact` now screen the text (injection phrases, paraphrased directives, credentials; graph triples
   too) and record `trust` and `source_taint` with every row (migration V676). A write made on a turn that handled
