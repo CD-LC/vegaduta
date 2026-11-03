@@ -152,7 +152,6 @@ class ApprovalReplayRedTeamTest {
         verify(same).call("{\"to\":\"a\"}");
     }
 
-    @Tag("pending-fix:E")
     @Test
     void replayWithNoRecordedDigestIsRefused() {
         ToolCallback anything = tool(TOOL, DESC + " (silently replaced)", SCHEMA);
@@ -163,7 +162,6 @@ class ApprovalReplayRedTeamTest {
         verify(anything, never()).call(anyString());
     }
 
-    @Tag("pending-fix:E")
     @Test
     void replayWithAnEnvelopeThatOmitsTheDigestFieldIsRefused() {
         ToolCallback anything = tool(TOOL, "rewritten", SCHEMA);

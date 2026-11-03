@@ -142,7 +142,6 @@ class TaintToSinkRedTeamTest {
 
     // ---- untrusted-sender seed and conversation-level persistence (package B) -----------------------------------
 
-    @Tag("pending-fix:B")
     @Test
     void anUntrustedSenderSeedParksASinkWithNoToolHavingRunYet() {
         RedTeamChain turn = new RedTeamChain("enforce", "");
@@ -151,18 +150,34 @@ class TaintToSinkRedTeamTest {
     }
 
     /**
-     * Taint must outlive the turn that caught it: the next message in the same conversation ("ok, go ahead") starts a
-     * fresh step counter, and its sink call must still need a human. Needs package B's persisted conversation taint;
-     * until then the second turn is clean.
+     * Taint must outlive the turn that caught it: the next message of the same conversation starts a fresh step
+     * counter, and its sink call must still need a human. Exercises the persisted-flag contract ({@code
+     * ConversationTaint} over a store) as {@code ChatTurnPreflight} attaches it; the preflight call site itself is
+     * package B's own test, not covered here.
      */
-    @Tag("pending-fix:B")
     @Test
     void taintFromAnEarlierTurnOfTheSameConversationStillGatesASink() {
+        java.util.Set<String> store = new java.util.HashSet<>();
+        com.agenticai.core.guardrails.taint.ConversationTaintStore persisted =
+                new com.agenticai.core.guardrails.taint.ConversationTaintStore() {
+                    public boolean isTainted(String t, String c) { return store.contains(t + "|" + c); }
+                    public void markTainted(String t, String c) { store.add(t + "|" + c); }
+                };
+        var conversation = new com.agenticai.core.guardrails.taint.ConversationTaint(persisted);
+
         RedTeamChain first = new RedTeamChain("enforce", "");
+        conversation.attach(first.taint.turnTaint(first.stepCounter), "tenant-1", "conv-1");
         first.wrap(RedTeamChain.fakeTool("fetch_web_page", "inject")).call("{}");
+        assertTrue(store.contains("tenant-1|conv-1"), "the taint was not persisted");
 
         RedTeamChain next = new RedTeamChain(first);
+        conversation.attach(next.taint.turnTaint(next.stepCounter), "tenant-1", "conv-1");
         assertParkedAndRecorded(next, RedTeamChain.fakeTool("http_request_write", "x"), "http_request_write", SINK_ARGS);
+
+        RedTeamChain other = new RedTeamChain(first);
+        conversation.attach(other.taint.turnTaint(other.stepCounter), "tenant-1", "conv-2");
+        assertTrue(other.wrap(RedTeamChain.fakeTool("http_request_write", "x")).call(SINK_ARGS).contains("\nx\n"));
+        assertFalse(other.approval.isParked());
     }
 
     @Test

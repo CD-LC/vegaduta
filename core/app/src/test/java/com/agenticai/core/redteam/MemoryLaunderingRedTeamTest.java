@@ -1,6 +1,7 @@
 package com.agenticai.core.redteam;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -11,7 +12,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryProvenance;
 import com.agenticai.core.agents.memory.RememberFactToolCallback;
+import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.knowledge.AddToKnowledgeBaseToolCallback;
 import com.agenticai.core.knowledge.Chunker;
@@ -71,8 +74,38 @@ class MemoryLaunderingRedTeamTest {
         return new AddToKnowledgeBaseToolCallback(ingest, collections, Set.of(collection), UUID.randomUUID(), "s");
     }
 
-    private static RememberFactToolCallback memoryTool(AgentMemoryService memory) {
-        return new RememberFactToolCallback(memory, UUID.randomUUID(), "subject-1");
+    /** The production wiring: the tool reads the turn's own taint through a TurnTaintView. */
+    private static RememberFactToolCallback memoryTool(AgentMemoryService memory, RedTeamChain turn) {
+        var tt = turn.taint.turnTaint(turn.stepCounter);
+        TurnTaintView view = new TurnTaintView() {
+            @Override
+            public boolean isTainted() {
+                return tt != null && tt.isTainted();
+            }
+
+            @Override
+            public List<String> sources() {
+                return tt == null ? List.of() : tt.sources();
+            }
+        };
+        return new RememberFactToolCallback(
+                memory, UUID.randomUUID(), "subject-1", null, null, null, null, RedTeamChain.provider(view));
+    }
+
+    /** Every write the store received, as {text, provenance-or-null}. */
+    private static List<Object[]> writes(AgentMemoryService memory) {
+        return org.mockito.Mockito.mockingDetails(memory).getInvocations().stream()
+                .filter(i -> i.getMethod().getName().equals("remember"))
+                .map(i -> new Object[] {i.getArgument(2), i.getArguments().length > 3 ? i.getArgument(3) : null})
+                .toList();
+    }
+
+    private static void assertNoTrustedWriteOf(AgentMemoryService memory, String text) {
+        for (Object[] w : writes(memory)) {
+            boolean same = String.valueOf(w[0]).equals(text) || String.valueOf(w[0]).contains(INSTRUCTION);
+            MemoryProvenance prov = (MemoryProvenance) w[1];
+            assertFalse(same && (prov == null || !prov.quarantined()), "stored as trusted memory: " + w[0]);
+        }
     }
 
     private static void taintTheTurn(RedTeamChain turn, String payload) {
@@ -88,9 +121,9 @@ class MemoryLaunderingRedTeamTest {
         AgentMemoryService memory = mock(AgentMemoryService.class);
         taintTheTurn(turn, payload);
 
-        String result = turn.wrap(memoryTool(memory)).call(factArgs(payload));
+        String result = turn.wrap(memoryTool(memory, turn)).call(factArgs(payload));
 
-        verify(memory, never()).remember(any(), any(), anyString());
+        assertTrue(writes(memory).isEmpty(), "a parked write must not reach the store");
         assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
         assertEquals(1, turn.recordedApprovals().size());
     }
@@ -111,7 +144,6 @@ class MemoryLaunderingRedTeamTest {
 
     // ---- observe (the shipped default): the write must still not carry tainted text through ------------------------
 
-    @Tag("pending-fix:C")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
     void rememberFactAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(String label, String payload) {
@@ -119,11 +151,10 @@ class MemoryLaunderingRedTeamTest {
         AgentMemoryService memory = mock(AgentMemoryService.class);
         taintTheTurn(turn, payload);
 
-        turn.wrap(memoryTool(memory)).call(factArgs(payload));
+        turn.wrap(memoryTool(memory, turn)).call(factArgs(payload));
 
-        verify(memory, never()).remember(any(), any(), org.mockito.ArgumentMatchers.contains(INSTRUCTION));
-        // A quarantined write is acceptable only if the store was told; a bare remember() of the text is not.
-        verify(memory, never()).remember(any(), any(), org.mockito.ArgumentMatchers.eq(payload));
+        // Refused, or stored QUARANTINED; stored as trusted is the laundering.
+        assertNoTrustedWriteOf(memory, payload);
     }
 
     @Tag("pending-fix:C")
@@ -149,9 +180,9 @@ class MemoryLaunderingRedTeamTest {
         RedTeamChain turn = new RedTeamChain("off", "");
         AgentMemoryService memory = mock(AgentMemoryService.class);
 
-        turn.wrap(memoryTool(memory)).call(factArgs(payload));
+        turn.wrap(memoryTool(memory, turn)).call(factArgs(payload));
 
-        verify(memory, never()).remember(any(), any(), org.mockito.ArgumentMatchers.eq(payload));
+        assertNoTrustedWriteOf(memory, payload);
     }
 
     @org.junit.jupiter.api.Test
@@ -159,9 +190,12 @@ class MemoryLaunderingRedTeamTest {
         RedTeamChain turn = new RedTeamChain("enforce", "");
         AgentMemoryService memory = mock(AgentMemoryService.class);
 
-        String result = turn.wrap(memoryTool(memory)).call(factArgs("Prefers email over WhatsApp"));
+        String result = turn.wrap(memoryTool(memory, turn)).call(factArgs("Prefers email over WhatsApp"));
 
-        verify(memory).remember(any(), any(), org.mockito.ArgumentMatchers.eq("Prefers email over WhatsApp"));
+        assertEquals(1, writes(memory).size());
+        assertEquals("Prefers email over WhatsApp", writes(memory).get(0)[0]);
+        assertTrue(writes(memory).get(0)[1] == null || !((MemoryProvenance) writes(memory).get(0)[1]).quarantined(),
+                "a clean-turn fact must be trusted");
         assertTrue(result.contains("remembered"), result);
     }
 
