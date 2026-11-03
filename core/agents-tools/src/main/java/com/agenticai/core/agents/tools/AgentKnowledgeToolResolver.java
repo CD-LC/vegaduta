@@ -137,6 +137,29 @@ final class AgentKnowledgeToolResolver {
         this.turnTaint = turnTaint;
     }
 
+    /**
+     * The turn's taint for {@code add_to_knowledge_base}, read when the tool runs. Null (no
+     * {@link TurnTaintView} bean, or none for this turn) makes the tool quarantine the write.
+     */
+    private com.agenticai.core.knowledge.KnowledgeWriteTaint knowledgeWriteTaint() {
+        ObjectProvider<TurnTaintView> provider = turnTaint;
+        TurnTaintView view = provider == null ? null : provider.getIfAvailable();
+        if (view == null) {
+            return null;
+        }
+        return new com.agenticai.core.knowledge.KnowledgeWriteTaint() {
+            @Override
+            public boolean isTainted() {
+                return view.isTainted();
+            }
+
+            @Override
+            public List<String> sources() {
+                return view.sources();
+            }
+        };
+    }
+
     private ToolCallback guardAndLog(
             ToolCallback raw,
             UUID agentId,
@@ -233,7 +256,8 @@ final class AgentKnowledgeToolResolver {
                             allowedWriteCollectionIds,
                             agentId,
                             sessionId,
-                            knowledgeProviders.urlIngester().getIfAvailable());
+                            knowledgeProviders.urlIngester().getIfAvailable(),
+                            this::knowledgeWriteTaint);
             tools.add(
                     guardAndLog(
                             addTool,

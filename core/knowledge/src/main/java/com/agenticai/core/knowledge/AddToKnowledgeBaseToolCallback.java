@@ -4,9 +4,11 @@ import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.dto.IngestResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -88,6 +90,16 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * KnowledgeIngestionService}'s {@code source_type} metadata already gives image-vs-text
  * provenance.
  *
+ * <h2>Taint quarantine (ASI06 / LLM04)</h2>
+ *
+ * <p>Whatever the scope, a write made on a turn that handled untrusted content (a fetched page, a
+ * tool result an outsider could have authored) is still attacker-authored when it is retrieved next
+ * month. The turn's taint is read through {@link KnowledgeWriteTaint}; a tainted turn, or one whose
+ * taint cannot be read, stores its chunks {@code QUARANTINED}: kept, but excluded from every
+ * retrieval path until a person approves them (see {@link KnowledgeQuarantineService}). The text is
+ * also screened by {@link MemoryWriteScreen}, which is only a tripwire for the obvious wordings; the
+ * quarantine is the control.
+ *
  * <p><b>Still-open follow-up</b> (ship-conservatively call per this feature's own build note; the
  * {@code knowledge-write}/{@code knowledge-write-access} endpoints that used to be item (1) below
  * now exist): nothing stops a tenant-admin from granting write
@@ -116,6 +128,8 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
     // server-side and runs the exact upload pipeline - how "download that PDF into the
     // knowledge base" actually lands.
     private final KnowledgeUrlIngester urlIngester;
+    // The turn's taint. Null supplier, null result or an exception = unreadable = quarantine.
+    private final Supplier<KnowledgeWriteTaint> turnTaint;
 
     /**
      * @param allowedWriteCollectionIds empty means DENY-ALL - the opposite of {@code
@@ -139,6 +153,23 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
         String sessionId,
         KnowledgeUrlIngester urlIngester
     ) {
+        this(ingestionService, collectionService, allowedWriteCollectionIds, agentId, sessionId, urlIngester, null);
+    }
+
+    /**
+     * @param turnTaint the turn's taint; null (or a supplier that returns null or throws) means the
+     *     taint state is unreadable, so every write is quarantined
+     */
+    public AddToKnowledgeBaseToolCallback(
+        KnowledgeIngestionService ingestionService,
+        KnowledgeCollectionService collectionService,
+        Set<UUID> allowedWriteCollectionIds,
+        UUID agentId,
+        String sessionId,
+        KnowledgeUrlIngester urlIngester,
+        Supplier<KnowledgeWriteTaint> turnTaint
+    ) {
+        this.turnTaint = turnTaint;
         this.ingestionService = ingestionService;
         this.collectionService = collectionService;
         this.allowedWriteCollectionIds = allowedWriteCollectionIds;
@@ -216,10 +247,10 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
                             + ") - summarize it or split it into multiple smaller notes"
                     );
                 }
-                // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): see KnowledgeWriteScreen.
+                // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): see MemoryWriteScreen.
                 // A `url` download is ingested like an upload (binary/extracted), not screened here -
-                // the same posture the human upload flow takes.
-                var refusal = KnowledgeWriteScreen.refusal(content);
+                // it is quarantined instead whenever the turn is tainted.
+                var refusal = MemoryWriteScreen.refusal(content);
                 if (refusal.isPresent()) {
                     log.warn("add_to_knowledge_base refused content for agent {}: screen tripped", agentId);
                     return errorJson(refusal.get());
@@ -262,6 +293,7 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
             String title = titleValue == null || titleValue.toString().isBlank() ? null : titleValue.toString();
 
             String source = buildSource(title);
+            ChunkProvenance provenance = classify();
             if (url != null) {
                 if (urlIngester == null) {
                     return errorJson(
@@ -271,29 +303,60 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
                 // through the exact /upload pipeline: a PDF/DOCX/HTML file gets a document row,
                 // dedup and extraction; plain text lands as a fetched note. The source keeps the
                 // same agent-attribution audit shape as a text note, plus where it came from.
-                KnowledgeUrlIngester.UrlIngestResult result = urlIngester.ingestUrl(
-                    url, collectionId, source + " - fetched from " + url, null, null);
-                return MAPPER.writeValueAsString(Map.of(
-                    "chunksSaved", result.chunkCount(),
-                    "collectionId", collectionId.toString(),
-                    "filename", result.filename(),
-                    "ingestedAs", result.document() ? "document" : "text"
-                ));
+                KnowledgeUrlIngester.UrlIngestResult result = provenance.quarantined()
+                    ? urlIngester.ingestUrl(url, collectionId, source + " - fetched from " + url, null, null, provenance)
+                    : urlIngester.ingestUrl(url, collectionId, source + " - fetched from " + url, null, null);
+                Map<String, Object> out = new java.util.LinkedHashMap<>();
+                out.put("chunksSaved", result.chunkCount());
+                out.put("collectionId", collectionId.toString());
+                out.put("filename", result.filename());
+                out.put("ingestedAs", result.document() ? "document" : "text");
+                addQuarantineNote(out, provenance);
+                return MAPPER.writeValueAsString(out);
             }
             // Same resolution KnowledgeController's /ingest uses (the collection's own V361 chunking
             // config, else Chunker's 150/30 defaults) and the same shared Chunker inside ingest() -
             // this tool is a thin agent-facing front end onto the exact same pipeline, not a
             // differently-tuned one. No per-call override: the model doesn't get to pick chunking.
             Chunker.Settings chunking = collectionService.resolveChunking(collectionId, null, null);
-            IngestResponse response =
-                ingestionService.ingest(source, content, chunking.chunkSize(), chunking.chunkOverlap(), collectionId);
-            return MAPPER.writeValueAsString(Map.of(
-                "chunksSaved", response.chunkCount(),
-                "collectionId", collectionId.toString()
-            ));
+            IngestResponse response = provenance.quarantined()
+                ? ingestionService.ingest(
+                    source, content, chunking.chunkSize(), chunking.chunkOverlap(), collectionId, provenance)
+                : ingestionService.ingest(source, content, chunking.chunkSize(), chunking.chunkOverlap(), collectionId);
+            Map<String, Object> out = new java.util.LinkedHashMap<>();
+            out.put("chunksSaved", response.chunkCount());
+            out.put("collectionId", collectionId.toString());
+            addQuarantineNote(out, provenance);
+            return MAPPER.writeValueAsString(out);
         } catch (Exception e) {
             log.warn("add_to_knowledge_base tool call failed", e);
             return errorJson("Could not save to knowledge base: " + e.getMessage());
+        }
+    }
+
+    /** Fail closed: a tainted turn, or taint that cannot be read, quarantines the write. */
+    private ChunkProvenance classify() {
+        try {
+            KnowledgeWriteTaint taint = turnTaint == null ? null : turnTaint.get();
+            if (taint == null) {
+                return ChunkProvenance.quarantined(List.of("taint-state-unavailable"));
+            }
+            if (taint.isTainted()) {
+                List<String> sources = taint.sources();
+                return ChunkProvenance.quarantined(sources == null || sources.isEmpty() ? List.of("unknown") : sources);
+            }
+            return ChunkProvenance.TRUSTED;
+        } catch (RuntimeException e) {
+            log.warn("Turn taint state unreadable; quarantining knowledge write for agent {}", agentId, e);
+            return ChunkProvenance.quarantined(List.of("taint-state-unavailable"));
+        }
+    }
+
+    private static void addQuarantineNote(Map<String, Object> out, ChunkProvenance provenance) {
+        if (provenance.quarantined()) {
+            out.put("quarantined", true);
+            out.put("note", "Saved for review: this turn handled untrusted content, so the note is not "
+                + "searchable until a person approves it.");
         }
     }
 

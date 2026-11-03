@@ -112,6 +112,23 @@ public class KnowledgeIngestionService {
             int chunkOverlap,
             UUID collectionId,
             UUID documentId) {
+        return ingestFile(
+                filename, content, chunkSize, chunkOverlap, collectionId, documentId, ChunkProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #ingestFile(String, byte[], int, int, UUID, UUID)} for content an agent pulled in on a
+     * turn that handled untrusted content: a QUARANTINED {@code provenance} stores every chunk
+     * excluded from retrieval until a person approves it.
+     */
+    public IngestResponse ingestFile(
+            String filename,
+            byte[] content,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            UUID documentId,
+            ChunkProvenance provenance) {
         if (documentId != null) {
             documentService.markExtracting(documentId);
         }
@@ -124,7 +141,7 @@ public class KnowledgeIngestionService {
                                 ocrProviderConfigService.resolveActive().orElse(null));
         String sourceType = isImageFile(filename) ? SOURCE_TYPE_IMAGE : SOURCE_TYPE_TEXT;
         return ingest(
-                filename, text, chunkSize, chunkOverlap, collectionId, documentId, sourceType);
+                filename, text, chunkSize, chunkOverlap, collectionId, documentId, sourceType, provenance);
     }
 
     private static boolean isImageFile(String filename) {
@@ -155,6 +172,23 @@ public class KnowledgeIngestionService {
     public IngestResponse ingest(
             String source, String text, int chunkSize, int chunkOverlap, UUID collectionId) {
         return ingest(source, text, chunkSize, chunkOverlap, collectionId, null, SOURCE_TYPE_TEXT);
+    }
+
+    /**
+     * {@link #ingest(String, String, int, int, UUID)} with explicit provenance: what an agent tool
+     * writes on a turn that may have read attacker-authored content. A QUARANTINED
+     * {@code provenance} stores the chunks but keeps them out of every retrieval path until a
+     * person approves them (see {@code KnowledgeQuarantineService}).
+     */
+    public IngestResponse ingest(
+            String source,
+            String text,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            ChunkProvenance provenance) {
+        return ingest(
+                source, text, chunkSize, chunkOverlap, collectionId, null, SOURCE_TYPE_TEXT, provenance);
     }
 
     /**
@@ -196,6 +230,20 @@ public class KnowledgeIngestionService {
             UUID collectionId,
             UUID documentId,
             String sourceType) {
+        return ingest(
+                source, text, chunkSize, chunkOverlap, collectionId, documentId, sourceType,
+                ChunkProvenance.TRUSTED);
+    }
+
+    private IngestResponse ingest(
+            String source,
+            String text,
+            int chunkSize,
+            int chunkOverlap,
+            UUID collectionId,
+            UUID documentId,
+            String sourceType,
+            ChunkProvenance provenance) {
         java.util.Optional<KnowledgeCollection> collection =
                 collectionRepository.findById(collectionId);
         String embeddingModel =
@@ -289,8 +337,8 @@ public class KnowledgeIngestionService {
             jdbcTemplate.update(
                     "INSERT INTO "
                             + table
-                            + " (id, source, chunk_index, content, embedding, collection_id, embedding_model, document_id, metadata) "
-                            + "VALUES (?, ?, ?, ?, ?::public.vector, ?, ?, ?, ?::jsonb)",
+                            + " (id, source, chunk_index, content, embedding, collection_id, embedding_model, document_id, trust, source_taint, metadata) "
+                            + "VALUES (?, ?, ?, ?, ?::public.vector, ?, ?, ?, ?, ?, ?::jsonb)",
                     id,
                     source,
                     chunk.index(),
@@ -299,6 +347,8 @@ public class KnowledgeIngestionService {
                     collectionId,
                     embedded.model(),
                     documentId,
+                    provenance.trustName(),
+                    provenance.sourcesJson(),
                     chunkMetadata);
             ids.add(id);
         }

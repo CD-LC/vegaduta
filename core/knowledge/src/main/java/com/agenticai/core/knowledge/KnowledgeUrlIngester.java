@@ -144,6 +144,21 @@ public class KnowledgeUrlIngester {
             String textSource,
             Integer chunkSize,
             Integer chunkOverlap) {
+        return ingestUrl(url, collectionId, textSource, chunkSize, chunkOverlap, ChunkProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #ingestUrl(String, UUID, String, Integer, Integer)} for an agent tool call: a
+     * QUARANTINED {@code provenance} keeps everything the download produces out of retrieval until a
+     * person approves it.
+     */
+    public UrlIngestResult ingestUrl(
+            String url,
+            UUID collectionId,
+            String textSource,
+            Integer chunkSize,
+            Integer chunkOverlap,
+            ChunkProvenance provenance) {
         collectionService.requireExists(collectionId);
         Chunker.Settings chunking =
                 collectionService.resolveChunking(collectionId, chunkSize, chunkOverlap);
@@ -158,17 +173,25 @@ public class KnowledgeUrlIngester {
         String filename = filenameFor(fetched);
 
         if (filename != null && isSupportedDocument(filename)) {
-            return ingestDocument(collectionId, filename, fetched, chunking);
+            return ingestDocument(collectionId, filename, fetched, chunking, provenance);
         }
 
         String text = decodeText(fetched);
         IngestResponse response =
-                ingestionService.ingest(
-                        textSource,
-                        text,
-                        chunking.chunkSize(),
-                        chunking.chunkOverlap(),
-                        collectionId);
+                provenance.quarantined()
+                        ? ingestionService.ingest(
+                                textSource,
+                                text,
+                                chunking.chunkSize(),
+                                chunking.chunkOverlap(),
+                                collectionId,
+                                provenance)
+                        : ingestionService.ingest(
+                                textSource,
+                                text,
+                                chunking.chunkSize(),
+                                chunking.chunkOverlap(),
+                                collectionId);
         return new UrlIngestResult(
                 filename != null ? filename : filenameFromType(fetched, "fetched.txt"),
                 textSource,
@@ -183,7 +206,11 @@ public class KnowledgeUrlIngester {
      * call-for-call.
      */
     private UrlIngestResult ingestDocument(
-            UUID collectionId, String filename, FetchedUrl fetched, Chunker.Settings chunking) {
+            UUID collectionId,
+            String filename,
+            FetchedUrl fetched,
+            Chunker.Settings chunking,
+            ChunkProvenance provenance) {
         String contentHash = KnowledgeDocumentService.sha256Hex(fetched.body());
         documentService.requireNoDuplicate(collectionId, contentHash);
         KnowledgeDocument document =
@@ -196,13 +223,22 @@ public class KnowledgeUrlIngester {
         storeOriginalFile(document, filename, fetched.body(), fetched.contentType());
         try {
             IngestResponse response =
-                    ingestionService.ingestFile(
-                            filename,
-                            fetched.body(),
-                            chunking.chunkSize(),
-                            chunking.chunkOverlap(),
-                            collectionId,
-                            document.getId());
+                    provenance.quarantined()
+                            ? ingestionService.ingestFile(
+                                    filename,
+                                    fetched.body(),
+                                    chunking.chunkSize(),
+                                    chunking.chunkOverlap(),
+                                    collectionId,
+                                    document.getId(),
+                                    provenance)
+                            : ingestionService.ingestFile(
+                                    filename,
+                                    fetched.body(),
+                                    chunking.chunkSize(),
+                                    chunking.chunkOverlap(),
+                                    collectionId,
+                                    document.getId());
             return new UrlIngestResult(
                     filename, filename, response.chunkCount(), document.getId(), true);
         } catch (RuntimeException e) {

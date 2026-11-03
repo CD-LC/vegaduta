@@ -17,9 +17,11 @@ import com.agenticai.core.agents.memory.RememberFactToolCallback;
 import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.knowledge.AddToKnowledgeBaseToolCallback;
+import com.agenticai.core.knowledge.ChunkProvenance;
 import com.agenticai.core.knowledge.Chunker;
 import com.agenticai.core.knowledge.KnowledgeCollectionService;
 import com.agenticai.core.knowledge.KnowledgeIngestionService;
+import com.agenticai.core.knowledge.KnowledgeWriteTaint;
 import com.agenticai.core.knowledge.dto.IngestResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
@@ -66,12 +68,26 @@ class MemoryLaunderingRedTeamTest {
         }
     }
 
-    private static AddToKnowledgeBaseToolCallback kbTool(KnowledgeIngestionService ingest, UUID collection) {
+    private static AddToKnowledgeBaseToolCallback kbTool(KnowledgeIngestionService ingest, UUID collection, RedTeamChain turn) {
         KnowledgeCollectionService collections = mock(KnowledgeCollectionService.class);
         when(collections.resolveChunking(any(), any(), any())).thenReturn(Chunker.Settings.DEFAULTS);
-        when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any()))
-                .thenReturn(new IngestResponse(1, 10, List.of(UUID.randomUUID())));
-        return new AddToKnowledgeBaseToolCallback(ingest, collections, Set.of(collection), UUID.randomUUID(), "s");
+        IngestResponse ok = new IngestResponse(1, 10, List.of(UUID.randomUUID()));
+        when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any())).thenReturn(ok);
+        when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class))).thenReturn(ok);
+        var tt = turn.taint.turnTaint(turn.stepCounter);
+        // The production wiring: the tool reads the turn's own taint (AgentKnowledgeToolResolver adapts a TurnTaintView).
+        return new AddToKnowledgeBaseToolCallback(
+                ingest, collections, Set.of(collection), UUID.randomUUID(), "s", null, () -> new KnowledgeWriteTaint() {
+                    @Override
+                    public boolean isTainted() {
+                        return tt != null && tt.isTainted();
+                    }
+
+                    @Override
+                    public List<String> sources() {
+                        return tt == null ? List.of() : tt.sources();
+                    }
+                });
     }
 
     /** The production wiring: the tool reads the turn's own taint through a TurnTaintView. */
@@ -136,7 +152,7 @@ class MemoryLaunderingRedTeamTest {
         UUID collection = UUID.randomUUID();
         taintTheTurn(turn, payload);
 
-        String result = turn.wrap(kbTool(ingest, collection)).call(kbArgs(collection, payload));
+        String result = turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
 
         verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
         assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
@@ -166,9 +182,13 @@ class MemoryLaunderingRedTeamTest {
         UUID collection = UUID.randomUUID();
         taintTheTurn(turn, payload);
 
-        turn.wrap(kbTool(ingest, collection)).call(kbArgs(collection, payload));
+        turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
 
-        verify(ingest, never()).ingest(anyString(), org.mockito.ArgumentMatchers.eq(payload), anyInt(), anyInt(), any());
+        verify(ingest, never()).ingest(anyString(), org.mockito.ArgumentMatchers.eq(payload), anyInt(), anyInt(), any(UUID.class));
+        // A write that is not refused by the screen must have been stored QUARANTINED.
+        org.mockito.Mockito.mockingDetails(ingest).getInvocations().stream()
+                .filter(i -> i.getMethod().getName().equals("ingest") && i.getArguments().length == 6)
+                .forEach(i -> assertTrue(((ChunkProvenance) i.getArgument(5)).quarantined()));
     }
 
     // ---- clean turn: the write screen looks at the content itself -------------------------------------------------

@@ -38,6 +38,12 @@ class AddToKnowledgeBaseToolCallbackTest {
     private UUID agentId;
     private UUID allowedCollectionId;
 
+    /** Test-only: an explicitly clean turn. Production with no taint source fails closed (quarantine). */
+    private static final java.util.function.Supplier<KnowledgeWriteTaint> CLEAN_TURN = () -> new KnowledgeWriteTaint() {
+        @Override public boolean isTainted() { return false; }
+        @Override public java.util.List<String> sources() { return java.util.List.of(); }
+    };
+
     @BeforeEach
     void setUp() {
         ingestionService = mock(KnowledgeIngestionService.class);
@@ -50,7 +56,8 @@ class AddToKnowledgeBaseToolCallbackTest {
 
     private AddToKnowledgeBaseToolCallback tool(Set<UUID> allowedWriteCollectionIds) {
         return new AddToKnowledgeBaseToolCallback(
-            ingestionService, collectionService, allowedWriteCollectionIds, agentId, "sess-1"
+            ingestionService, collectionService, allowedWriteCollectionIds, agentId, "sess-1", null,
+            CLEAN_TURN
         );
     }
 
@@ -236,7 +243,7 @@ class AddToKnowledgeBaseToolCallbackTest {
             Set<UUID> allowedWriteCollectionIds, KnowledgeUrlIngester urlIngester) {
         return new AddToKnowledgeBaseToolCallback(
             ingestionService, collectionService, allowedWriteCollectionIds, agentId, "sess-1",
-            urlIngester);
+            urlIngester, CLEAN_TURN);
     }
 
     @Test

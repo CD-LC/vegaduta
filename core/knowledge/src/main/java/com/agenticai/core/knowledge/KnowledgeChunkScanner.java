@@ -153,6 +153,7 @@ final class KnowledgeChunkScanner {
             // in public (pinned there by VectorSchemaInitializer).
             String sql = "SELECT id, source, chunk_index, content, collection_id, document_id, embedding OPERATOR(public.<=>) ?::public.vector AS distance FROM "
                 + table + " WHERE embedding_model = ? AND collection_id IN (" + placeholders + ")"
+                + " AND trust = 'TRUSTED'"
                 + (excludeImageSourced ? " AND COALESCE(metadata->>'source_type', '') <> 'image'" : "")
                 + (metadataPredicate != null ? metadataPredicate.sql() : "")
                 + " ORDER BY embedding OPERATOR(public.<=>) ?::public.vector LIMIT ?";
@@ -273,6 +274,7 @@ final class KnowledgeChunkScanner {
             + " FROM " + table + " c JOIN " + collectionTable + " kc ON kc.id = c.collection_id"
             + " WHERE c.content_tsv @@ plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)"
             + " AND c.collection_id IN (" + placeholders + ")"
+            + " AND c.trust = 'TRUSTED'"
             + (excludeImageSourced ? " AND COALESCE(c.metadata->>'source_type', '') <> 'image'" : "")
             + (metadataPredicate != null ? metadataPredicate.sql() : "")
             + " ORDER BY rank DESC LIMIT ?";
