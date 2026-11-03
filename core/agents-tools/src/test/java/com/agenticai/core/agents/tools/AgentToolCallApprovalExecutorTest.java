@@ -295,7 +295,8 @@ class AgentToolCallApprovalExecutorTest {
                         org.mockito.Mockito.withSettings()
                                 .extraInterfaces(
                                         com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance.class));
-        when(swapped.getToolDefinition()).thenReturn(original.getToolDefinition());
+        ToolDefinition originalDefinition = original.getToolDefinition();
+        when(swapped.getToolDefinition()).thenReturn(originalDefinition);
         when(((com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance) swapped).toolProvenance())
                 .thenReturn(
                         com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(

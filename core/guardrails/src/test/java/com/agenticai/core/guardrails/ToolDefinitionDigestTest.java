@@ -72,8 +72,8 @@ class ToolDefinitionDigestTest {
         }
         assertEquals(
             ToolDefinitionDigest.of(def, ToolDefinitionDigest.provenance("srv", "https://a.example.com")),
-            ToolDefinitionDigest.of(new Cb()));
-        assertNotEquals(ToolDefinitionDigest.of(def), ToolDefinitionDigest.of(new Cb()));
+            ToolDefinitionDigest.ofCallback(new Cb()));
+        assertNotEquals(ToolDefinitionDigest.of(def), ToolDefinitionDigest.ofCallback(new Cb()));
     }
 
     @Test

@@ -20,7 +20,7 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  * contract the approver could see is.
  *
  * <p>A callback that knows <i>what executes it</i> (an MCP server) can say so by implementing
- * {@link Provenance}; {@link #of(ToolCallback)} then folds that identity in, so the same
+ * {@link Provenance}; {@link #ofCallback(ToolCallback)} then folds that identity in, so the same
  * name/description/schema served by a different server no longer matches. A callback without it
  * digests exactly as before, so digests recorded earlier stay valid.
  */
@@ -78,7 +78,7 @@ public final class ToolDefinitionDigest {
     }
 
     /** Digest of the callback's definition plus, when it exposes one, its {@link Provenance}. */
-    public static String of(ToolCallback callback) {
+    public static String ofCallback(ToolCallback callback) {
         if (callback == null) {
             return null;
         }

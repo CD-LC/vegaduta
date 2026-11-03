@@ -461,7 +461,7 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                             + "request), so it cannot be checked for changes and was not run. Ask the user to retry "
                             + "the action in chat and approve it again.");
         }
-        String current = ToolDefinitionDigest.of(callback);
+        String current = ToolDefinitionDigest.ofCallback(callback);
         if (!target.toolDigest().equals(current)) {
             throw new AgentToolReplayException(
                     "Tool '"
