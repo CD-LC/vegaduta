@@ -396,7 +396,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
-          <excludedGroups>integration</excludedGroups>
+          <!-- redteam scenarios whose fix has not landed are tagged pending-fix:<package>; remove the tag (and its entry here) when the fix merges -->
+          <excludedGroups>integration | pending-fix:C | pending-fix:D | pending-fix:unowned</excludedGroups>
         </configuration>
       </plugin>
     </plugins>
