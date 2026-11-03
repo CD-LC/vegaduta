@@ -81,7 +81,8 @@ public class FraudAnalysisController {
             }
 
             // Verify the hCaptcha token with hCaptcha servers
-            String clientIp = extractClientIp(httpReq);
+            InetAddress clientAddr = ClientContext.extractClientIp(httpReq);
+            String clientIp = clientAddr.getHostAddress();
             HCaptchaClient.HCaptchaVerifyResponse hcaptchaResponse =
                     hCaptchaClient.verify(req.getToken(), clientIp);
 
@@ -96,15 +97,16 @@ public class FraudAnalysisController {
 
             // Mark nonce as verified
             nonce.setVerifiedAt(Instant.now());
-            try {
-                nonce.setVerifiedByIp(InetAddress.getByName(clientIp));
-            } catch (Exception e) {
-                log.warn("Failed to parse client IP for verification: {}", clientIp);
-            }
+            nonce.setVerifiedByIp(clientAddr);
             challengeNonceRepo.save(nonce);
 
-            // Generate a challenge-pass token (JWT or opaque token in production)
-            String passToken = generateChallengePassToken(tenantId, nonce);
+            // Signed, short-lived, single-use pass bound to tenant + client IP + nonce; the interceptor redeems it.
+            String passToken = abuseDetectionService.issueChallengePass(tenantId, clientAddr, nonce.getId());
+            if (passToken == null) {
+                log.error("Challenge pass not issued: app.encryption.key is not configured");
+                return ResponseEntity.status(503)
+                        .body(Map.of("error", "Challenge verification unavailable"));
+            }
 
             log.info("Challenge verified successfully");
 
@@ -112,7 +114,7 @@ public class FraudAnalysisController {
                 "success", true,
                 "message", "Challenge verified successfully",
                 "challenge_pass_token", passToken,
-                "expires_in", 3600 // 1 hour in seconds
+                "expires_in", abuseDetectionService.challengePassTtlSeconds()
             ));
 
         } catch (HCaptchaClient.HCaptchaException e) {
@@ -138,7 +140,7 @@ public class FraudAnalysisController {
                     .body(Map.of("error", "Missing tenant context"));
         }
 
-        String clientIp = extractClientIp(req);
+        String clientIp = ClientContext.extractClientIp(req).getHostAddress();
 
         return ResponseEntity.ok(Map.of(
             "tenant_id", tenantId.toString(),
@@ -232,34 +234,6 @@ public class FraudAnalysisController {
             return ResponseEntity.status(500)
                     .body(Map.of("error", "Internal server error"));
         }
-    }
-
-    /**
-     * Generate a challenge-pass token (opaque token or JWT in production).
-     */
-    private String generateChallengePassToken(UUID tenantId, ChallengeNonce nonce) {
-        // In production, generate a signed JWT or opaque token that can be validated on next request
-        // For now, return a simple token format: tenant_id.nonce_id.timestamp
-        return tenantId.toString().substring(0, 8) + "." +
-               nonce.getId().substring(0, 8) + "." +
-               System.currentTimeMillis();
-    }
-
-    /**
-     * Extract client IP from request, handling proxies.
-     */
-    private String extractClientIp(HttpServletRequest req) {
-        String xForwardedFor = req.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIp = req.getHeader("X-Real-IP");
-        if (xRealIp != null && !xRealIp.isEmpty()) {
-            return xRealIp;
-        }
-
-        return req.getRemoteAddr();
     }
 
     /**

@@ -121,6 +121,15 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
         }
 
         if (decision == FraudDecision.CHALLENGE) {
+            // A genuine challenge pass (signed, unexpired, single-use, bound to this tenant and IP) downgrades
+            // the challenge to ALLOW; a missing, forged, expired or replayed one does not.
+            String pass = req.getHeader("X-Challenge-Pass");
+            if (pass != null && !pass.isEmpty()
+                && abuseDetectionService.redeemChallengePass(pass, tenantId, clientCtx.ip)) {
+                req.setAttribute("fraudChallengePassed", true);
+                log.info("Challenge pass accepted: {}", clientCtx);
+                return true;
+            }
             String nonce = abuseDetectionService.generateChallengeNonce(tenantId, userId, clientCtx.ip);
 
             res.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -147,12 +156,6 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
         }
 
         // Decision is ALLOW - proceed with request
-        // Store challenge pass token if provided (for tracking verified challenges)
-        String challengePass = req.getHeader("X-Challenge-Pass");
-        if (challengePass != null) {
-            req.setAttribute("fraudChallengePassed", true);
-        }
-
         return true;
     }
 
