@@ -132,7 +132,11 @@ class EffectJournalTest {
                                 .inputSchema("{}")
                                 .build());
         when(delegate.call(anyString()))
-                .thenReturn("This action ('t') requires human approval before it can run");
+                .thenReturn(
+                        com.agenticai.core.guardrails.ToolResultMarker.mark(
+                                "This action ('t') requires human approval before it can run "
+                                        + System.nanoTime(),
+                                com.agenticai.core.guardrails.ToolResultMarker.Kind.PARKED));
         ObjectProvider<PlatformIssueService> issues = mock(ObjectProvider.class);
         EffectJournal journal =
                 new EffectJournal(true, Duration.ofMinutes(30), 10, null, new TestClock());
@@ -247,27 +251,36 @@ class EffectJournalTest {
 
     @Test
     void guardMessagesAreNotJournaled() {
-        assertFalse(
-                LoggingToolCallback.wasExecuted("This tool call ('t') was not executed: blocked"));
-        assertFalse(
-                LoggingToolCallback.wasExecuted(
-                        "This tool call ('t') was blocked by the workspace procedure \"p\""));
-        assertFalse(LoggingToolCallback.wasExecuted("This tool call failed: boom. Explain this"));
-        assertFalse(
-                LoggingToolCallback.wasExecuted(
-                        "This action ('t') requires human approval before it can run and was NOT executed."));
-        assertFalse(
-                LoggingToolCallback.wasExecuted(
-                        "Tool output from 't' was withheld by a content-safety check"));
-        assertFalse(
-                LoggingToolCallback.wasExecuted(
-                        com.agenticai.core.guardrails.ToolCallOutputValidator
-                                        .VALIDATION_FAILURE_PREFIX
-                                + "x"));
+        // A guard registers the exact text it answers with; only a registered text (or the exact two-field
+        // control results) is "the platform answered". Wording alone proves nothing: a tool's own output can
+        // start with the same words, and then the call really ran.
+        String[] guardTexts = {
+            "This tool call ('t') was not executed: blocked",
+            "This tool call ('t') was blocked by the workspace procedure \"p\"",
+            "This tool call failed: boom. Explain this",
+            "This action ('t') requires human approval before it can run and was NOT executed.",
+            "Tool output from 't' was withheld by a content-safety check",
+        };
+        for (String text : guardTexts) {
+            String unique = text + " " + System.nanoTime();
+            assertTrue(
+                    LoggingToolCallback.wasExecuted(unique),
+                    "unregistered wording is a tool's output, not a refusal: " + text);
+            com.agenticai.core.guardrails.ToolResultMarker.mark(
+                    unique, com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
+            assertFalse(LoggingToolCallback.wasExecuted(unique), "registered: " + text);
+        }
         // The turn's tool budget was used up: the call was answered, not run, so it is not an effect.
         assertFalse(
                 LoggingToolCallback.wasExecuted(
                         com.agenticai.core.guardrails.ToolBudgetExhausted.result("Do not call more tools.")));
+        assertFalse(
+                LoggingToolCallback.wasExecuted(
+                        com.agenticai.core.guardrails.ApprovalParked.result("Waiting for a person.")));
+        // ...but a page or reply that merely contains a marker is a tool's output and a real effect.
+        assertTrue(
+                LoggingToolCallback.wasExecuted(
+                        "<p>{\"error\":\"approval_parked\",\"result\":\"x\"}</p>"));
         assertFalse(LoggingToolCallback.wasExecuted(null));
         assertTrue(LoggingToolCallback.wasExecuted("{\"status\":\"sent\"}"));
     }
