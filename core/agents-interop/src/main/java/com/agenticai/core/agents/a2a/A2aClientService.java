@@ -93,17 +93,21 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     private final ObjectProvider<A2aTaskStore> taskStore;
     private final A2aEgressGuard guard;
     private final HttpClient http;
+    private final A2aMessageSecurityProperties security;
 
     @Autowired
     public A2aClientService(
             A2aProperties properties,
             A2aCardVerifier verifier,
-            ObjectProvider<A2aTaskStore> taskStore) {
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aMessageSecurityProperties security) {
         this(
                 properties.getClient(),
                 verifier,
                 taskStore,
-                new A2aEgressGuard(properties.getClient()));
+                new A2aEgressGuard(properties.getClient()),
+                null,
+                security);
     }
 
     A2aClientService(
@@ -124,6 +128,17 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             ObjectProvider<A2aTaskStore> taskStore,
             A2aEgressGuard guard,
             HttpClient http) {
+        this(config, verifier, taskStore, guard, http, new A2aMessageSecurityProperties());
+    }
+
+    A2aClientService(
+            A2aProperties.Client config,
+            A2aCardVerifier verifier,
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aEgressGuard guard,
+            HttpClient http,
+            A2aMessageSecurityProperties security) {
+        this.security = security;
         this.config = config;
         this.verifier = verifier;
         this.taskStore = taskStore;
@@ -151,7 +166,8 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
      */
     @Override
     public org.springframework.ai.tool.ToolCallback newCallAgentTool() {
-        return new A2aRemoteAgentToolCallback(this);
+        // Captured here: the tool set is built on the thread serving the inbound A2A request.
+        return new A2aRemoteAgentToolCallback(this, A2aHopContext.current());
     }
 
     /**
@@ -305,15 +321,16 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
         } catch (IOException e) {
             throw new A2aClientException("could not encode the request", e);
         }
+        URI target = guard.check(endpoint.toString());
+        HttpRequest.Builder request =
+                HttpRequest.newBuilder(target)
+                        .timeout(config.getRequestTimeout())
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .header(A2aVersion.HEADER, version.wire());
+        addMessageSecurityHeaders(request, target, body);
         String responseBody =
-                execute(
-                        HttpRequest.newBuilder(guard.check(endpoint.toString()))
-                                .timeout(config.getRequestTimeout())
-                                .header("Content-Type", "application/json")
-                                .header("Accept", "application/json")
-                                .header(A2aVersion.HEADER, version.wire())
-                                .POST(HttpRequest.BodyPublishers.ofString(body))
-                                .build());
+                execute(request.POST(HttpRequest.BodyPublishers.ofString(body)).build());
         JsonNode response;
         try {
             response = MAPPER.readTree(responseBody);
@@ -336,6 +353,34 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             throw new A2aClientException("the remote agent returned no result");
         }
         return result;
+    }
+
+    /**
+     * ASI07: a fresh timestamp, a single-use nonce and the hop counter (inbound hop + 1, or 0 when
+     * this call originates here) on every outbound request - optional extension headers a
+     * third-party peer simply ignores - plus a detached HMAC when the peer is configured for it.
+     */
+    private void addMessageSecurityHeaders(HttpRequest.Builder request, URI target, String body) {
+        String timestamp = Long.toString(Instant.now().getEpochSecond());
+        String nonce = UUID.randomUUID().toString();
+        int hop = A2aHopContext.outboundHop();
+        request.header(A2aMessageSecurityFilter.TIMESTAMP_HEADER, timestamp)
+                .header(A2aMessageSecurityFilter.NONCE_HEADER, nonce)
+                .header(A2aMessageSecurityFilter.HOP_HEADER, Integer.toString(hop));
+        String secret = security.secretForPeer(target.getHost());
+        if (secret != null) {
+            String path = target.getRawPath() == null ? "/" : target.getRawPath();
+            request.header(
+                    A2aMessageSecurityFilter.SIGNATURE_HEADER,
+                    A2aMessageSigner.sign(
+                            secret,
+                            "POST",
+                            path,
+                            timestamp,
+                            nonce,
+                            hop,
+                            body.getBytes(StandardCharsets.UTF_8)));
+        }
     }
 
     /**

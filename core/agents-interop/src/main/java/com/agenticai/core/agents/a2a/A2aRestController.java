@@ -363,6 +363,22 @@ public class A2aRestController {
             case A2aError.VERSION_NOT_SUPPORTED ->
                     new Mapping(
                             HttpStatus.BAD_REQUEST, "FAILED_PRECONDITION", "VERSION_NOT_SUPPORTED");
+            case A2aError.REPLAY_DETECTED ->
+                    new Mapping(HttpStatus.CONFLICT, "ABORTED", "MESSAGE_REPLAYED");
+            case A2aError.TIMESTAMP_OUT_OF_WINDOW ->
+                    new Mapping(
+                            HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "TIMESTAMP_OUT_OF_WINDOW");
+            case A2aError.HOP_LIMIT_EXCEEDED ->
+                    new Mapping(
+                            HttpStatus.BAD_REQUEST, "FAILED_PRECONDITION", "HOP_LIMIT_EXCEEDED");
+            case A2aError.REPLAY_HEADERS_REQUIRED ->
+                    new Mapping(
+                            HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "REPLAY_HEADERS_REQUIRED");
+            case A2aError.SIGNATURE_INVALID ->
+                    new Mapping(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "SIGNATURE_INVALID");
+            case A2aError.REPLAY_CAPACITY ->
+                    new Mapping(
+                            HttpStatus.TOO_MANY_REQUESTS, "RESOURCE_EXHAUSTED", "REPLAY_CAPACITY");
             case A2aError.PARSE_ERROR, A2aError.INVALID_REQUEST, A2aError.INVALID_PARAMS ->
                     new Mapping(HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "INVALID_ARGUMENT");
             case A2aError.METHOD_NOT_FOUND ->

@@ -26,6 +26,18 @@ public class A2aError extends RuntimeException {
     public static final int CONTENT_TYPE_NOT_SUPPORTED = -32005;
     public static final int VERSION_NOT_SUPPORTED = -32009;
 
+    /**
+     * Platform extension block (-32090..-32095) for message-level protection (OWASP ASI07). The
+     * A2A spec only reserves -32001..-32009; these sit well clear of it and only appear when a
+     * peer opted in by sending the {@code X-A2A-*} headers (or the operator required them).
+     */
+    public static final int REPLAY_DETECTED = -32090;
+    public static final int TIMESTAMP_OUT_OF_WINDOW = -32091;
+    public static final int HOP_LIMIT_EXCEEDED = -32092;
+    public static final int REPLAY_HEADERS_REQUIRED = -32093;
+    public static final int SIGNATURE_INVALID = -32094;
+    public static final int REPLAY_CAPACITY = -32095;
+
     private final int code;
     private final Object data;
 

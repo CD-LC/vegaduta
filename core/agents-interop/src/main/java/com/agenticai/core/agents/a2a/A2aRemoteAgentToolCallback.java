@@ -31,8 +31,16 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
     /** Calls this instance has attempted; an instance is built per resolved tool set, so this is per turn. */
     private final java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
 
+    /** The inbound A2A hop of the turn that built this tool; null when not an A2A turn. */
+    private final Integer inboundHop;
+
     public A2aRemoteAgentToolCallback(A2aClientService client) {
+        this(client, null);
+    }
+
+    public A2aRemoteAgentToolCallback(A2aClientService client, Integer inboundHop) {
         this.client = client;
+        this.inboundHop = inboundHop;
     }
 
     @Override
@@ -84,7 +92,10 @@ public class A2aRemoteAgentToolCallback implements ToolCallback {
             if (url.isBlank() || message.isBlank()) {
                 return "Could not call the remote agent: both agent_card_url and message are required.";
             }
-            A2aClientService.Result result = client.send(url, message);
+            // Tool calls may run on a reactor thread: re-bind the captured hop for the call.
+            final String callUrl = url;
+            A2aClientService.Result result =
+                    A2aHopContext.callWith(inboundHop, () -> client.send(callUrl, message));
             String header = result.success()
                 ? "Reply from remote A2A agent"
                 : "Remote A2A agent did not complete (state: " + safeState(result.state()) + ")";

@@ -230,15 +230,19 @@ public class A2aTaskService {
                     "too many non-blocking tasks in flight; retry later or use a blocking send");
         }
         Optional<TenantContext> captured = TenantContext.current();
+        // The inbound X-A2A-Hop travels with the turn so a forward from it sends hop+1.
+        Integer hop = A2aHopContext.current();
         asyncExecutor.execute(
                 () -> {
                     captured.ifPresent(TenantContext::set);
+                    A2aHopContext.set(hop);
                     try {
                         run(task, null).whenComplete((ignored, err) -> asyncSlots.release());
                     } catch (RuntimeException e) {
                         asyncSlots.release();
                         fail(task, e);
                     } finally {
+                        A2aHopContext.set(null);
                         TenantContext.clear();
                     }
                 });
