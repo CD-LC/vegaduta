@@ -1,0 +1,23 @@
+# "strict" Spring profile - closes the lethal trifecta (private data + untrusted content + egress).
+# Opt-in and additive: nothing here applies unless `strict` is in SPRING_PROFILES_ACTIVE. The base defaults are
+# unchanged (flipping the default posture is an owner decision; taint=observe was decided 2026-10-23).
+# PostureChecks (core/app, package posture) lists every key below; StrictPostureTest fails if one drifts.
+# The env-var overrides of application.yml keep working: the profile only changes their default.
+app:
+  agents:
+    taint:
+      mode: ${APP_AGENTS_TAINT_MODE:enforce}
+  mcp:
+    tool-pinning:
+      mode: ${APP_MCP_TOOL_PINNING_MODE:enforce}
+  tools:
+    classification:
+      unclassified-action: ${TOOL_UNCLASSIFIED_ACTION:require-approval}
+      # No tool skips the confirmation gate.
+      confirmation-gate-exempt-tools: ${TOOL_CONFIRMATION_GATE_EXEMPT:}
+      trifecta-enforcement: ${TOOL_TRIFECTA_ENFORCEMENT:block}
+      # Cover Auto-select agents (the Simple-mode default) too; costs the same live MCP discovery as the tool picker.
+      trifecta-analyse-auto-select: ${TOOL_TRIFECTA_ANALYSE_AUTO_SELECT:true}
+  approvals:
+    expiry:
+      ttl: ${APP_APPROVALS_EXPIRY_TTL:PT24H}
