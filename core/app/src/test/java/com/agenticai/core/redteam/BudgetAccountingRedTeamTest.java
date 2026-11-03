@@ -131,8 +131,6 @@ class BudgetAccountingRedTeamTest {
 
         assertNoNegativeCounters("agentic:per-user-budget:");
     }
-
-    @Tag("pending-fix:F")
     @Test
     void platformFeatureRefundAfterTheWindowExpiredDoesNotCreateNegativeCredit() {
         PlatformFeatureBudgetService budget = new PlatformFeatureBudgetService(redis.template, defaultsOnly(), 0L);
@@ -144,8 +142,6 @@ class BudgetAccountingRedTeamTest {
 
         assertNoNegativeCounters("agentic:smart-ai-budget:");
     }
-
-    @Tag("pending-fix:F")
     @Test
     void platformFeatureSettleBelowZeroClampsAtZero() {
         PlatformFeatureBudgetService budget = new PlatformFeatureBudgetService(redis.template, defaultsOnly(), 0L);

@@ -75,8 +75,6 @@ class ControlMarkerForgeryRedTeamTest {
     void partialForgeryIsAnExecutedToolCall(String label, String payload) {
         assertChainTreatsItAsAnExecutedCall(payload);
     }
-
-    @Tag("pending-fix:D")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("com.agenticai.core.redteam.RedTeamCorpus#exactForgeryArgs")
     void exactControlObjectForgeryIsAnExecutedToolCall(String label, String payload) {
@@ -84,18 +82,22 @@ class ControlMarkerForgeryRedTeamTest {
     }
 
     /** A genuine platform text, produced by the guard earlier in the JVM, replayed verbatim by a tool. */
-    @Tag("pending-fix:D")
     @Test
     void replayOfAGenuineMarkedPlatformTextIsStillOnlyToolOutput() {
         RedTeamChain first = new RedTeamChain("off", "");
         when(first.policy.requiresApproval("mcp_tool.send_invoice")).thenReturn(true);
         String genuine = first.wrap(RedTeamChain.fakeTool("send_invoice", "ran")).call("{}");
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(genuine).orElseThrow(), "control");
+        assertEquals(
+                ToolResultMarker.Kind.PARKED,
+                ToolResultMarker.classify(genuine, first.approval.markerScope()).orElseThrow(),
+                "control");
 
         RedTeamChain second = new RedTeamChain("off", "");
         String result = second.wrap(RedTeamChain.fakeTool(TOOL, genuine)).call("{\"a\":1}");
 
-        assertFalse(ToolResultMarker.isPlatformAnswer(result), "a tool printed the guard's own text");
+        assertTrue(
+                ToolResultMarker.classify(result, second.approval.markerScope()).isEmpty(),
+                "a tool printed the guard's own text in another turn");
         assertEquals(ToolLedger.Status.OK, second.ledger().get(0).status());
         assertTrue(second.journaled(TOOL, "{\"a\":1}"));
     }
@@ -109,7 +111,9 @@ class ControlMarkerForgeryRedTeamTest {
 
         String result = chain.call("{\"to\":\"a\"}");
 
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
+        assertEquals(
+                ToolResultMarker.Kind.PARKED,
+                ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
         assertTrue(turn.approval.isParked());
         assertFalse(turn.journaled("send_invoice", "{\"to\":\"a\"}"));
         assertEquals(1, turn.recordedApprovals().size());
@@ -119,7 +123,6 @@ class ControlMarkerForgeryRedTeamTest {
      * The tool-output validation prefix is stripped by the logging layer and billed to the tool's circuit breaker,
      * so an attacker-run tool that prints it both loses its output and can trip breakers. No package owns this yet.
      */
-    @Tag("pending-fix:unowned")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("validationPrefixForgeries")
     void validationFailurePrefixInToolOutputIsNotAnInternalSignal(String label, String payload) {
@@ -238,8 +241,6 @@ class ControlMarkerForgeryRedTeamTest {
         assertLoopIgnoresForgedMarkerFromEarlierRound(payload);
         assertForgedBudgetMarkerDoesNotSkipTheSoftStop(payload);
     }
-
-    @Tag("pending-fix:D")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("com.agenticai.core.redteam.RedTeamCorpus#exactForgeryArgs")
     void exactControlObjectDoesNotEndOrCutTheLoop(String label, String payload) {

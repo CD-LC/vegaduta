@@ -172,8 +172,6 @@ class MemoryLaunderingRedTeamTest {
         // Refused, or stored QUARANTINED; stored as trusted is the laundering.
         assertNoTrustedWriteOf(memory, payload);
     }
-
-    @Tag("pending-fix:C")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
     void addToKnowledgeBaseAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(String label, String payload) {
@@ -192,8 +190,6 @@ class MemoryLaunderingRedTeamTest {
     }
 
     // ---- clean turn: the write screen looks at the content itself -------------------------------------------------
-
-    @Tag("pending-fix:C")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
     void aFactThatIsItselfAnInjectedInstructionIsScreenedOnACleanTurn(String label, String payload) {
