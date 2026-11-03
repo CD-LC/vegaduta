@@ -1337,12 +1337,47 @@ class AgentMemoryApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories", query={"subjectKey": subject_key})
 
+    def shared_memories(self, agent_id: str, *, subject_key: str) -> List[m.TenantMemoryEntry]:
+        """Shared memories.
+
+        GET /api/agents/{agentId}/memories/shared
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories/shared", query={"subjectKey": subject_key})
+
+    def approve_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: str, idempotency_key: Optional[str] = None) -> None:
+        """Approve shared memory.
+
+        POST /api/agents/{agentId}/memories/shared/{memoryId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/shared/{quote_path(memory_id)}/approve", query={"subjectKey": subject_key}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: str, idempotency_key: Optional[str] = None) -> None:
+        """Reject shared memory.
+
+        POST /api/agents/{agentId}/memories/shared/{memoryId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/shared/{quote_path(memory_id)}/reject", query={"subjectKey": subject_key}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
     def forget_memory(self, agent_id: str, memory_id: str) -> None:
         """Forget memory.
 
         DELETE /api/agents/{agentId}/memories/{memoryId}
         """
         return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}", response="void")
+
+    def approve_memory(self, agent_id: str, memory_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve memory.
+
+        POST /api/agents/{agentId}/memories/{memoryId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_memory(self, agent_id: str, memory_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject memory.
+
+        POST /api/agents/{agentId}/memories/{memoryId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memories/{quote_path(memory_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class AgentPromptPreviewApi:

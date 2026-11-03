@@ -143,6 +143,8 @@ McpServerType = Literal["STDIO", "SSE", "STREAMABLE_HTTP"]
 
 McpUsageStatus = Literal["UNTESTED", "READY", "FAILED", "ACKNOWLEDGED"]
 
+MemoryTrust = Literal["TRUSTED", "QUARANTINED"]
+
 MetaSocialCredentialStatus = Literal["ACTIVE", "INVALID", "DISCONNECTED"]
 
 MetaWhatsAppCredentialStatus = Literal["ACTIVE", "INVALID", "DISCONNECTED"]
@@ -1030,6 +1032,8 @@ class AgentMemoryEntry(TypedDict, total=False):
     createdAt: str
     lastUsedAt: str
     useCount: int
+    trust: MemoryTrust
+    sourceTaint: List[str]
 
 
 class AgentModalitiesView(TypedDict, total=False):
@@ -10295,6 +10299,19 @@ class TenantDeletionController_DeleteTenantRequest(TypedDict, total=False):
 class TenantFeatureFlagController_FeatureFlagEvaluationResponse(TypedDict, total=False):
     key: str
     variant: str
+
+
+class TenantMemoryEntry(TypedDict, total=False):
+    id: str
+    subjectKey: str
+    content: str
+    distance: float
+    createdByAgentId: str
+    createdAt: str
+    lastUsedAt: str
+    useCount: int
+    trust: MemoryTrust
+    sourceTaint: List[str]
 
 
 class TenantSettingsResponse(TypedDict, total=False):

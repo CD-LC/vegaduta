@@ -1563,11 +1563,51 @@ export class AgentMemoryApi {
   }
 
   /**
+   * Shared memories.
+   * `GET /api/agents/{agentId}/memories/shared`
+   */
+  sharedMemories(agentId: string, options: CallOptions<{ subjectKey: string }, HeaderParams> & { query: { subjectKey: string } }): Promise<T.TenantMemoryEntry[]> {
+    return this.http.request<T.TenantMemoryEntry[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared` });
+  }
+
+  /**
+   * Approve shared memory.
+   * `POST /api/agents/{agentId}/memories/shared/{memoryId}/approve`
+   */
+  approveSharedMemory(agentId: string, memoryId: string, options: CallOptions<{ subjectKey: string }, { "Idempotency-Key"?: string }> & { query: { subjectKey: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared/${encodeURIComponent(String(memoryId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject shared memory.
+   * `POST /api/agents/{agentId}/memories/shared/{memoryId}/reject`
+   */
+  rejectSharedMemory(agentId: string, memoryId: string, options: CallOptions<{ subjectKey: string }, { "Idempotency-Key"?: string }> & { query: { subjectKey: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared/${encodeURIComponent(String(memoryId))}/reject`, response: "void" });
+  }
+
+  /**
    * Forget memory.
    * `DELETE /api/agents/{agentId}/memories/{memoryId}`
    */
   forgetMemory(agentId: string, memoryId: string, options?: CallOptions): Promise<void> {
     return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}`, response: "void" });
+  }
+
+  /**
+   * Approve memory.
+   * `POST /api/agents/{agentId}/memories/{memoryId}/approve`
+   */
+  approveMemory(agentId: string, memoryId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject memory.
+   * `POST /api/agents/{agentId}/memories/{memoryId}/reject`
+   */
+  rejectMemory(agentId: string, memoryId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/${encodeURIComponent(String(memoryId))}/reject`, response: "void" });
   }
 }
 

@@ -727,6 +727,8 @@ export interface AgentMemoryEntry {
   createdAt?: string;
   lastUsedAt?: string;
   useCount?: number;
+  trust?: MemoryTrust;
+  sourceTaint?: string[];
 }
 
 export interface AgentModalitiesView {
@@ -5572,6 +5574,8 @@ export interface MemoryProvenanceService_FactSource {
   matched?: boolean;
 }
 
+export type MemoryTrust = "TRUSTED" | "QUARANTINED";
+
 export interface MetaActivationRequest {
   phoneNumberId: string;
   wabaId: string;
@@ -10057,6 +10061,19 @@ export interface TenantDeletionController_DeleteTenantRequest {
 export interface TenantFeatureFlagController_FeatureFlagEvaluationResponse {
   key?: string;
   variant?: string;
+}
+
+export interface TenantMemoryEntry {
+  id?: string;
+  subjectKey?: string;
+  content?: string;
+  distance?: number;
+  createdByAgentId?: string;
+  createdAt?: string;
+  lastUsedAt?: string;
+  useCount?: number;
+  trust?: MemoryTrust;
+  sourceTaint?: string[];
 }
 
 export type TenantPlan = "FREE" | "PREMIUM" | "UNLIMITED";
