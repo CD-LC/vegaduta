@@ -798,3 +798,11 @@ Branch `ccr-d9bcd3ff-ekgsbs` (no PR yet). Touches `core/guardrails` (`ToolResult
 (`PerUserBudget*`), `application.yml` (`app.approvals.recovery.*`), `docs/configuration.md`, `CHANGELOG.md`.
 Wording prefixes ("This tool call (") are no longer read as a refusal by `ToolResultMarker`; producers must call
 `ToolResultMarker.mark`. Take both sides on a merge in `application.yml` / `CHANGELOG.md` / `docs/configuration.md`.
+
+### Phase 0 safety fan-out (Claude cloud session lead, 2026-11-03)
+
+Twelve work packages (A-L) in `docs/architecture/PHASE0-SAFETY-WORKFLOW-2026-11.md`, each in its own worktree with a
+file-ownership list; sub-agents commit locally and do not push, the lead integrates onto `ccr-d9bcd3ff-ekgsbs`. Areas
+claimed: `core/approval`, `core/guardrails`, `core/chat` tool loop, `core/agents-budget`, `core/agents-interop`, `core/app`
+security + new test packages, memory in `core/agents-turn`, taint in `core/agents-tools`, `docs/security`, `docs/compliance`.
+Flyway: V675+ reserved for this effort.
