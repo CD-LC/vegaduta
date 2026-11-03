@@ -35,7 +35,7 @@ Release notes on GitHub are generated from the section for each version.
   Residual: a tool that returns exactly that two-field object is still read as the control result by the tool loop.
 - **An approved action could be lost if the process died between the decision and the run.** The decision is committed
   first and the action runs after, so a crash in between left an approved request nothing ran and nothing reported.
-  Migration V674 records when an approved action started and when it ended, exactly one caller now claims it under a row
+  Migration V675 records when an approved action started and when it ended, exactly one caller now claims it under a row
   lock, and a new sweep (`app.approvals.recovery.*`, on by default) acts on what a dead process left: a never-started
   action is run once if the decision is under an hour old (otherwise closed as not done), and one that started and never
   reported its end is closed as `DEAD_LETTERED` / interrupted and is **not** run again, so a send or charge cannot happen

@@ -89,7 +89,7 @@ public class ApprovalRequest {
      * The {@code decidedBy} of a request nobody decided in time (see {@link ApprovalExpiryProperties}).
      * An expired request is stored as REJECTED by this actor, so it needs no status of its own.
      */
-    // Approved-but-never-executed recovery (migration V674): how far an approved action got.
+    // Approved-but-never-executed recovery (migration V675): how far an approved action got.
     @Column(name = "execution_started_at")
     private Instant executionStartedAt;
 

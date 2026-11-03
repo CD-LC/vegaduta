@@ -794,7 +794,7 @@ Audited every place that states the project license against `LICENSE` (BUSL-1.1;
 
 Branch `ccr-d9bcd3ff-ekgsbs` (no PR yet). Touches `core/guardrails` (`ToolResultMarker`, `ApprovalParked`,
 `ToolBudgetExhausted`, new `PlatformMarkerDocument`), `core/chat` (`ToolLoopMarkers`, `ToolLoopParkedClose`),
-`core/approval` (recovery sweep, execution claim) with tenant migration **V674**, `core/agents-budget`
+`core/approval` (recovery sweep, execution claim) with tenant migration **V675**, `core/agents-budget`
 (`PerUserBudget*`), `application.yml` (`app.approvals.recovery.*`), `docs/configuration.md`, `CHANGELOG.md`.
 Wording prefixes ("This tool call (") are no longer read as a refusal by `ToolResultMarker`; producers must call
 `ToolResultMarker.mark`. Take both sides on a merge in `application.yml` / `CHANGELOG.md` / `docs/configuration.md`.

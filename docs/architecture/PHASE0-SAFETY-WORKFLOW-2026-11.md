@@ -37,7 +37,7 @@ default-flip is decided by the owner; (3) every package below is merged with its
 | G | Client-IP and fraud-challenge fixes | `core/app/.../common/security/{ClientContext,FraudAnalysisController,FraudDetectionInterceptor,AbuseDetectionService}` | - |
 | H | Adversarial red-team suite | new `core/app/src/test/.../redteam/*` (tests only) | writes tests for the post-fix behaviour of A-G |
 | I | Compliance and docs | `docs/security/*`, `docs/compliance/*`, `docs/architecture/ADR-0027-*` | - |
-| J | Real-database verification | `core/app/src/test/.../it/*` (new ITs only), `scripts/ci/*` prerequisites | V674 from the prior fix |
+| J | Real-database verification | `core/app/src/test/.../it/*` (new ITs only), `scripts/ci/*` prerequisites | V675 from the prior fix |
 | K | Output-side system-prompt leak control (LLM07) | new `core/guardrails/.../leak/*`, one wiring class | - |
 | L | A2A replay protection | `core/agents-interop/*` | - |
 

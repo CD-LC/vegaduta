@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 /**
  * Finds approved actions a dead process left half-done. {@link HumanApprovalGateService} commits the decision and only
  * then runs the action, so a crash in between used to leave a request that looked finished and never ran. Two cases,
- * told apart by the markers on the request (migration V674):
+ * told apart by the markers on the request (migration V675):
  *
  * <ul>
  *   <li><b>never started</b> - safe to run, once, if the decision is recent ({@code max-recovery-age}); an older one is
