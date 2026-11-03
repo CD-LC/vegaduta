@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
+- **Approval replay hardening.** A tool-call approval with no recorded definition digest is now refused instead of replayed unchecked (`app.approvals.replay.allow-undigested`, default `false`); the tool digest also covers the MCP server identity when the tool exposes it; form values are merged into an approval payload inside the row-locked decision transaction; a result that cannot be stored after an approved tool ran no longer records the action as failed; a failed agent-job lookup refuses the replay (retryable) instead of running it; startup warns about approvals pending over 7 days while they never expire.
 - Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
 - **`strict` security posture profile.** `SPRING_PROFILES_ACTIVE=...,strict` (`application-strict.yml`) sets taint, MCP tool pinning, unclassified-tool handling, the confirmation-gate exemption list, trifecta enforcement and approval expiry to their fail-closed values; the base defaults are unchanged. At boot a `PostureReport` logs one WARN line listing every permissive governance setting that is active, and `StrictPostureTest` fails if the profile and the checked key list drift apart.
 
