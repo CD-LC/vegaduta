@@ -109,6 +109,16 @@ public class AgentMemoryService {
      * memories for this agent if this insert pushed it over {@code app.memory.limits.agent-max-memories}.
      */
     public UUID remember(UUID agentId, String subjectKey, String content) {
+        return remember(agentId, subjectKey, content, MemoryProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #remember(UUID, String, String)} with explicit provenance. A QUARANTINED row is stored
+     * but never recalled or injected into a prompt until {@link #approve} is called for it.
+     */
+    public UUID remember(UUID agentId, String subjectKey, String content, MemoryProvenance provenance) {
+        MemoryProvenance prov =
+                provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
         float[] embedding = sidecarClient.embedQuery(content);
         String literal = toVectorLiteral(embedding);
         UUID id = UUID.randomUUID();
@@ -117,13 +127,15 @@ public class AgentMemoryService {
         jdbcTemplate.update(
                 "INSERT INTO "
                         + table
-                        + " (id, agent_id, subject_key, content, embedding) VALUES (?, ?, ?, ?,"
-                        + " ?::public.vector)",
+                        + " (id, agent_id, subject_key, content, embedding, trust, source_taint)"
+                        + " VALUES (?, ?, ?, ?, ?::public.vector, ?, ?)",
                 id,
                 agentId,
                 subjectKey,
                 content,
-                literal);
+                literal,
+                prov.trust().name(),
+                prov.sourcesJson());
         pruneOverCap(table, agentId);
         log.debug("Remembered fact for agent {} subject '{}': {}", agentId, subjectKey, content);
         return id;
@@ -194,7 +206,8 @@ public class AgentMemoryService {
                         + " WHERE id IN ("
                         + "SELECT id FROM "
                         + table
-                        + " WHERE agent_id = ? ORDER BY created_at ASC LIMIT ?)",
+                        + " WHERE agent_id = ? ORDER BY (trust = 'QUARANTINED') DESC, created_at ASC"
+                        + " LIMIT ?)",
                 agentId,
                 overflow);
         log.debug(
@@ -232,11 +245,11 @@ public class AgentMemoryService {
         List<AgentMemoryEntry> results =
                 jdbcTemplate.query(
                         "SELECT id, agent_id, subject_key, content, created_at, last_used_at,"
-                                + " use_count, embedding OPERATOR(public.<=>) ?::public.vector AS"
-                                + " distance FROM "
+                                + " use_count, trust, source_taint, embedding OPERATOR(public.<=>)"
+                                + " ?::public.vector AS distance FROM "
                                 + table
-                                + " WHERE agent_id = ? AND subject_key = ? ORDER BY distance ASC"
-                                + " LIMIT ?",
+                                + " WHERE agent_id = ? AND subject_key = ? AND trust = 'TRUSTED'"
+                                + " ORDER BY distance ASC LIMIT ?",
                         (rs, rowNum) ->
                                 new AgentMemoryEntry(
                                         UUID.fromString(rs.getString("id")),
@@ -246,7 +259,9 @@ public class AgentMemoryService {
                                         rs.getDouble("distance"),
                                         rs.getTimestamp("created_at").toInstant(),
                                         rs.getTimestamp("last_used_at").toInstant(),
-                                        rs.getInt("use_count")),
+                                        rs.getInt("use_count"),
+                                MemoryTrust.parse(rs.getString("trust")),
+                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
                         literal,
                         agentId,
                         subjectKey,
@@ -286,7 +301,7 @@ public class AgentMemoryService {
         String table = AgentMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.query(
                 "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " 0.0 AS distance FROM "
+                        + " trust, source_taint, 0.0 AS distance FROM "
                         + table
                         + " WHERE agent_id = ? AND subject_key = ? ORDER BY created_at DESC",
                 (rs, rowNum) ->
@@ -298,7 +313,9 @@ public class AgentMemoryService {
                                 rs.getDouble("distance"),
                                 rs.getTimestamp("created_at").toInstant(),
                                 rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count")),
+                                rs.getInt("use_count"),
+                                MemoryTrust.parse(rs.getString("trust")),
+                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
                 agentId,
                 subjectKey);
     }
@@ -312,7 +329,7 @@ public class AgentMemoryService {
         String table = AgentMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.query(
                 "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " 0.0 AS distance FROM "
+                        + " trust, source_taint, 0.0 AS distance FROM "
                         + table
                         + " WHERE subject_key = ? ORDER BY created_at DESC",
                 (rs, rowNum) ->
@@ -324,7 +341,9 @@ public class AgentMemoryService {
                                 rs.getDouble("distance"),
                                 rs.getTimestamp("created_at").toInstant(),
                                 rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count")),
+                                rs.getInt("use_count"),
+                                MemoryTrust.parse(rs.getString("trust")),
+                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
                 subjectKey);
     }
 
@@ -364,6 +383,32 @@ public class AgentMemoryService {
         return jdbcTemplate.update(
                         "DELETE FROM " + table + " WHERE id = ? AND subject_key = ?",
                         memoryId,
+                        subjectKey)
+                > 0;
+    }
+
+    /**
+     * A person's approval of a QUARANTINED memory: it becomes TRUSTED (recallable) and keeps its
+     * {@code source_taint} as provenance. False when it does not exist for this agent or was already trusted.
+     */
+    public boolean approve(UUID agentId, UUID memoryId) {
+        String table = AgentMemorySchemaSupport.qualifiedTableName();
+        return jdbcTemplate.update(
+                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
+                                + " AND trust = 'QUARANTINED'",
+                        memoryId,
+                        agentId)
+                > 0;
+    }
+
+    /** {@link #approve(UUID, UUID)} restricted to a memory about {@code subjectKey}. */
+    public boolean approve(UUID agentId, UUID memoryId, String subjectKey) {
+        String table = AgentMemorySchemaSupport.qualifiedTableName();
+        return jdbcTemplate.update(
+                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
+                                + " AND subject_key = ? AND trust = 'QUARANTINED'",
+                        memoryId,
+                        agentId,
                         subjectKey)
                 > 0;
     }

@@ -5,6 +5,7 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.RememberFactToolCallback;
 import com.agenticai.core.agents.memory.RememberSharedFactToolCallback;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.codeintel.ApplyCodeChangesToolCallback;
 import com.agenticai.core.codeintel.CodeCalleesToolCallback;
@@ -115,6 +116,13 @@ final class AgentKnowledgeToolResolver {
         this.entityExtractionService = entityExtractionService;
         this.memoryWriteArbitrationService = memoryWriteArbitrationService;
         this.codeIntelClient = codeIntelClient;
+    }
+
+    private volatile ObjectProvider<TurnTaintView> turnTaint;
+
+    /** The turn-taint source memory writes consult; unset or empty means writes are quarantined. */
+    void setTurnTaint(ObjectProvider<TurnTaintView> turnTaint) {
+        this.turnTaint = turnTaint;
     }
 
     private ToolCallback guardAndLog(
@@ -459,7 +467,8 @@ final class AgentKnowledgeToolResolver {
                         graphService,
                         entityExtractionService,
                         memoryWriteArbitrationService,
-                        chatClient);
+                        chatClient,
+                        turnTaint);
         List<ToolCallback> tools = new ArrayList<>();
         tools.add(
                 guardAndLog(
@@ -498,7 +507,8 @@ final class AgentKnowledgeToolResolver {
                             subjectKey,
                             graphService,
                             entityExtractionService,
-                            chatClient);
+                            chatClient,
+                            turnTaint);
             tools.add(
                     guardAndLog(
                             rememberSharedTool,

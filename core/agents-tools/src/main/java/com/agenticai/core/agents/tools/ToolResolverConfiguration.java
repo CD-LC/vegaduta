@@ -5,6 +5,7 @@ import com.agenticai.core.agents.collab.RunBudgetCaps;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.agents.tools.code.CustomCodeToolService;
 import com.agenticai.core.agents.tools.code.ToolSandboxClient;
@@ -322,7 +323,8 @@ class ToolResolverConfiguration {
             EntityExtractionService entityExtractionService,
             MemoryWriteArbitrationService memoryWriteArbitrationService,
             ObjectProvider<CodeIntelClient> codeIntelClient,
-            ObjectProvider<com.agenticai.core.agents.consent.PurposeAccessPolicy> purposePolicy) {
+            ObjectProvider<com.agenticai.core.agents.consent.PurposeAccessPolicy> purposePolicy,
+            ObjectProvider<TurnTaintView> turnTaint) {
         AgentKnowledgeToolResolver resolver =
                 new AgentKnowledgeToolResolver(
                         toolGuard,
@@ -341,6 +343,8 @@ class ToolResolverConfiguration {
                         codeIntelClient);
         // The optional PurposeAccessPolicy (implemented in core/app); absent = no purpose gating.
         resolver.setPurposePolicy(purposePolicy);
+        // Memory writes read the turn's taint through this; no bean = writes are quarantined.
+        resolver.setTurnTaint(turnTaint);
         return resolver;
     }
 

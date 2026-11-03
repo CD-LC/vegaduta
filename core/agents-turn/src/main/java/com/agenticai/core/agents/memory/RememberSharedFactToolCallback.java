@@ -4,13 +4,15 @@ import com.agenticai.core.graphmemory.EntityExtractionService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.json.JsonMappers;
-import com.agenticai.core.knowledge.KnowledgeWriteScreen;
+import com.agenticai.core.knowledge.MemoryWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
@@ -39,6 +41,7 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     private final GraphMemoryService graphMemoryService;
     private final EntityExtractionService entityExtractionService;
     private final ChatClient chatClient;
+    private final ObjectProvider<TurnTaintView> turnTaint;
 
     public RememberSharedFactToolCallback(
             TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey) {
@@ -46,12 +49,19 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     }
 
     public RememberSharedFactToolCallback(
-            TenantMemoryService tenantMemoryService,
-            UUID agentId,
-            String subjectKey,
-            GraphMemoryService graphMemoryService,
-            EntityExtractionService entityExtractionService,
-            ChatClient chatClient) {
+        TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey,
+        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService, ChatClient chatClient
+    ) {
+        this(tenantMemoryService, agentId, subjectKey, graphMemoryService, entityExtractionService, chatClient, null);
+    }
+
+    /** {@code turnTaint} null or empty: taint unreadable, every write is quarantined (fail closed). */
+    public RememberSharedFactToolCallback(
+        TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey,
+        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService, ChatClient chatClient,
+        ObjectProvider<TurnTaintView> turnTaint
+    ) {
+        this.turnTaint = turnTaint;
         this.tenantMemoryService = tenantMemoryService;
         this.agentId = agentId;
         this.subjectKey = subjectKey;
@@ -95,14 +105,19 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             if (factValue == null || factValue.toString().isBlank()) {
                 return "{\"error\": \"fact is required\"}";
             }
-            // Same write screen as remember_fact - and higher stakes here:
-            // one poisoned shared fact is recalled by every agent on the
-            // team for this subject.
-            java.util.Optional<String> refusal = KnowledgeWriteScreen.refusal(factValue.toString());
+            Optional<String> refusal = MemoryWriteScreen.refusal(factValue.toString());
             if (refusal.isPresent()) {
+                log.warn("remember_shared_fact refused by the memory write screen (agent {})", agentId);
                 return errorJson(refusal.get());
             }
-            UUID memoryId = tenantMemoryService.remember(subjectKey, factValue.toString(), agentId);
+            MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
+            UUID memoryId = tenantMemoryService.remember(subjectKey, factValue.toString(), agentId, provenance);
+            if (provenance.quarantined()) {
+                // The shared graph tier has no quarantine state, so a tainted write never reaches it.
+                return "{\"remembered\": true, \"shared\": true, \"quarantined\": true, \"memoryId\": \"" + memoryId
+                    + "\", \"note\": \"Saved for review: this turn handled untrusted content, so the fact is "
+                    + "not recalled until a person approves it.\"}";
+            }
             writeToSharedGraphIfAvailable(factValue.toString());
             return "{\"remembered\": true, \"shared\": true, \"memoryId\": \"" + memoryId + "\"}";
         } catch (Exception e) {
@@ -124,8 +139,8 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             return;
         }
         try {
-            List<GraphTriple> triples =
-                    entityExtractionService.extractTriples(chatClient, fact, agentId);
+            List<GraphTriple> triples = MemoryWriteGate.screenTriples(
+                entityExtractionService.extractTriples(chatClient, fact, agentId));
             graphMemoryService.rememberShared(subjectKey, triples);
         } catch (Exception e) {
             log.warn(

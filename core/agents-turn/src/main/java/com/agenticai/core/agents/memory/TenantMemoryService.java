@@ -340,7 +340,7 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.query(
                 "SELECT id, subject_key, content, created_by_agent_id, created_at, last_used_at,"
-                        + " use_count, 0.0 AS distance FROM "
+                        + " use_count, trust, source_taint, 0.0 AS distance FROM "
                         + table
                         + " WHERE subject_key = ? ORDER BY created_at DESC",
                 (rs, rowNum) ->
@@ -354,7 +354,9 @@ public class TenantMemoryService {
                                         : UUID.fromString(rs.getString("created_by_agent_id")),
                                 rs.getTimestamp("created_at").toInstant(),
                                 rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count")),
+                                rs.getInt("use_count"),
+                                MemoryTrust.parse(rs.getString("trust")),
+                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
                 subjectKey);
     }
 
@@ -394,6 +396,27 @@ public class TenantMemoryService {
                 > 0;
     }
 
+    /**
+     * A person's approval of a QUARANTINED shared fact about {@code subjectKey} (any subject when
+     * null): it becomes TRUSTED and recallable by every sharing agent.
+     */
+    public boolean approveFact(UUID memoryId, String subjectKey) {
+        String table = TenantMemorySchemaSupport.qualifiedTableName();
+        if (subjectKey == null) {
+            return jdbcTemplate.update(
+                            "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ?"
+                                    + " AND trust = 'QUARANTINED'",
+                            memoryId)
+                    > 0;
+        }
+        return jdbcTemplate.update(
+                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
+                                + " AND trust = 'QUARANTINED'",
+                        memoryId,
+                        subjectKey)
+                > 0;
+    }
+
     public boolean forgetFactForSubject(UUID memoryId, String subjectKey) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.update(
@@ -408,6 +431,17 @@ public class TenantMemoryService {
      * tenant-wide cap.
      */
     public UUID remember(String subjectKey, String content, UUID createdByAgentId) {
+        return remember(subjectKey, content, createdByAgentId, MemoryProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #remember(String, String, UUID)} with explicit provenance; a QUARANTINED row is not
+     * recalled until {@link #approveFact} is called for it.
+     */
+    public UUID remember(
+            String subjectKey, String content, UUID createdByAgentId, MemoryProvenance provenance) {
+        MemoryProvenance prov =
+                provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
         if (subjectKey != null && subjectKey.contains(MemoryBlocks.KEY_MARKER)) {
             // Would collide with another subject's memory-block rows (stored as
             // '<subject>#mem:<label>').
@@ -422,13 +456,15 @@ public class TenantMemoryService {
         jdbcTemplate.update(
                 "INSERT INTO "
                         + table
-                        + " (id, subject_key, content, embedding, created_by_agent_id) VALUES (?,"
-                        + " ?, ?, ?::public.vector, ?)",
+                        + " (id, subject_key, content, embedding, created_by_agent_id, trust,"
+                        + " source_taint) VALUES (?, ?, ?, ?::public.vector, ?, ?, ?)",
                 id,
                 subjectKey,
                 content,
                 literal,
-                createdByAgentId);
+                createdByAgentId,
+                prov.trust().name(),
+                prov.sourcesJson());
         pruneOverCap(table);
         log.debug(
                 "Remembered shared fact for subject '{}' (contributed by agent {}): {}",
@@ -508,7 +544,8 @@ public class TenantMemoryService {
                         + table
                         + " WHERE position('"
                         + MemoryBlocks.KEY_MARKER
-                        + "' in subject_key) = 0 ORDER BY created_at ASC LIMIT ?)",
+                        + "' in subject_key) = 0 ORDER BY (trust = 'QUARANTINED') DESC,"
+                        + " created_at ASC LIMIT ?)",
                 overflow);
         log.debug(
                 "Pruned {} oldest shared memories (over the {}-memory tenant-wide cap)",
@@ -542,10 +579,12 @@ public class TenantMemoryService {
         List<TenantMemoryEntry> results =
                 jdbcTemplate.query(
                         "SELECT id, subject_key, content, created_by_agent_id, created_at,"
-                                + " last_used_at, use_count, embedding OPERATOR(public.<=>)"
+                                + " last_used_at, use_count, trust, source_taint,"
+                                + " embedding OPERATOR(public.<=>)"
                                 + " ?::public.vector AS distance FROM "
                                 + table
-                                + " WHERE subject_key = ? ORDER BY distance ASC LIMIT ?",
+                                + " WHERE subject_key = ? AND trust = 'TRUSTED'"
+                                + " ORDER BY distance ASC LIMIT ?",
                         (rs, rowNum) ->
                                 new TenantMemoryEntry(
                                         UUID.fromString(rs.getString("id")),
@@ -558,7 +597,9 @@ public class TenantMemoryService {
                                                         rs.getString("created_by_agent_id")),
                                         rs.getTimestamp("created_at").toInstant(),
                                         rs.getTimestamp("last_used_at").toInstant(),
-                                        rs.getInt("use_count")),
+                                        rs.getInt("use_count"),
+                                MemoryTrust.parse(rs.getString("trust")),
+                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
                         literal,
                         subjectKey,
                         topK);
