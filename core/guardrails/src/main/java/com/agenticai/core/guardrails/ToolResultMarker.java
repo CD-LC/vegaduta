@@ -1,6 +1,5 @@
 package com.agenticai.core.guardrails;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.WeakHashMap;
@@ -41,7 +40,57 @@ public final class ToolResultMarker {
         SANDBOXED
     }
 
-    private static final Map<String, Kind> MARKED = Collections.synchronizedMap(new WeakHashMap<>());
+    /**
+     * Identity of ONE turn for this registry. The registry is keyed by text, and a text is not unique to a turn or a
+     * tenant: two turns whose tools answer with the same words would share a mark, so one turn's refusal text could make
+     * another turn's genuine tool output look like the platform's answer (and hide a real call from the journals). A
+     * mark registered under a scope is visible to readers of that scope only. The scope is compared by identity and held
+     * weakly, so a finished turn's marks are collected with it.
+     *
+     * <p>A turn owns one ({@link TurnApprovalState#markerScope()}). It reaches {@link #mark(String, Kind)} and {@link
+     * #kindOf(String)} through {@link #bind(Scope)} on the thread running the turn's tools (and re-bound on any thread
+     * the work is handed to, like the tenant), or explicitly through the overloads that take it.
+     */
+    public static final class Scope {
+        public Scope() {}
+    }
+
+    /** Marks registered with no scope (producers not migrated, tests): visible to every reader, as before scopes existed. */
+    private static final Scope UNSCOPED = new Scope();
+
+    private static final ThreadLocal<Scope> CURRENT = new ThreadLocal<>();
+
+    /** Text -> scope -> kind. Weak on both the text and the scope. Guarded by its own monitor. */
+    private static final Map<String, Map<Scope, Kind>> MARKED = new WeakHashMap<>();
+
+    /** Makes {@code scope} the ambient scope of the calling thread until the returned handle is closed. */
+    public static Binding bind(Scope scope) {
+        Scope previous = CURRENT.get();
+        if (scope == null) {
+            CURRENT.remove();
+        } else {
+            CURRENT.set(scope);
+        }
+        return () -> {
+            if (previous == null) {
+                CURRENT.remove();
+            } else {
+                CURRENT.set(previous);
+            }
+        };
+    }
+
+    /** The scope bound to the calling thread, or {@code null}. */
+    public static Scope currentScope() {
+        return CURRENT.get();
+    }
+
+    /** Undoes a {@link #bind}. */
+    @FunctionalInterface
+    public interface Binding extends AutoCloseable {
+        @Override
+        void close();
+    }
 
     private ToolResultMarker() {}
 
@@ -63,20 +112,65 @@ public final class ToolResultMarker {
         return kind == null ? result : mark(result, kind);
     }
 
-    /** Registers {@code result} as the platform's answer of {@code kind}; returns {@code result} itself. */
+    /**
+     * As {@link #markGuardOutcome(String, String)} for the turn {@code state} belongs to: the mark is registered under
+     * the turn's {@link TurnApprovalState#markerScope() scope}, and a step-limit answer also sets the turn's
+     * out-of-band budget signal ({@link TurnApprovalState#isBudgetExhausted()}) that the tool loop reads. This is what
+     * {@link GuardedToolCallback} should call.
+     */
+    static String markGuardOutcome(String result, String outcome, TurnApprovalState state) {
+        if (state == null) {
+            return markGuardOutcome(result, outcome);
+        }
+        if (GuardedToolCallback.OUTCOME_STEP_LIMIT.equals(outcome)) {
+            state.markBudgetExhausted();
+        }
+        try (Binding ignored = bind(state.markerScope())) {
+            return markGuardOutcome(result, outcome);
+        }
+    }
+
+    /** Registers {@code result} as the platform's answer of {@code kind} under the ambient scope; returns {@code result} itself. */
     public static String mark(String result, Kind kind) {
+        Scope ambient = CURRENT.get();
+        return mark(result, kind, ambient == null ? UNSCOPED : ambient);
+    }
+
+    /** As {@link #mark(String, Kind)}, visible to readers of {@code scope} only ({@code null} = every reader). */
+    public static String mark(String result, Kind kind, Scope scope) {
         if (result != null && kind != null) {
-            MARKED.put(result, kind);
+            synchronized (MARKED) {
+                MARKED.computeIfAbsent(result, k -> new WeakHashMap<>()).put(scope == null ? UNSCOPED : scope, kind);
+            }
         }
         return result;
     }
 
-    /** The registered kind of exactly this text, or empty when no producer registered it. */
+    /**
+     * The registered kind of exactly this text. Under an ambient scope only that scope's marks and unscoped ones count;
+     * with no scope bound, any mark counts (the pre-scope behaviour, which cross-turn collisions can fool).
+     */
     public static Optional<Kind> kindOf(String result) {
+        return kindOf(result, CURRENT.get());
+    }
+
+    /** As {@link #kindOf(String)} for an explicit {@code scope} ({@code null} = unbound reader). */
+    public static Optional<Kind> kindOf(String result, Scope scope) {
         if (result == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(MARKED.get(result));
+        synchronized (MARKED) {
+            Map<Scope, Kind> marks = MARKED.get(result);
+            if (marks == null || marks.isEmpty()) {
+                return Optional.empty();
+            }
+            if (scope == null) {
+                Kind unscoped = marks.get(UNSCOPED);
+                return Optional.ofNullable(unscoped != null ? unscoped : marks.values().iterator().next());
+            }
+            Kind own = marks.get(scope);
+            return Optional.ofNullable(own != null ? own : marks.get(UNSCOPED));
+        }
     }
 
     /**
@@ -89,6 +183,11 @@ public final class ToolResultMarker {
         }
         if (kindOf(result).isPresent()) {
             return true;
+        }
+        if (CURRENT.get() != null) {
+            // A turn is bound: its platform answers were registered under its scope, so a text that only has the SHAPE
+            // of a control result is a tool's output (any tool can print it).
+            return false;
         }
         return ToolBudgetExhausted.isBudgetExhausted(result) || ApprovalParked.isParked(result);
     }
@@ -103,7 +202,7 @@ public final class ToolResultMarker {
         if (registered.isPresent()) {
             return registered;
         }
-        if (result == null) {
+        if (result == null || CURRENT.get() != null) {
             return Optional.empty();
         }
         if (ToolBudgetExhausted.isBudgetExhausted(result)) {

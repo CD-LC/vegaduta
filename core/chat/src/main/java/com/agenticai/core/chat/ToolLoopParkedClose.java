@@ -84,23 +84,28 @@ final class ToolLoopParkedClose {
         }
         Message last = history.get(history.size() - 1);
         if (!(last instanceof ToolResponseMessage toolResponses)
-                || !ToolLoopMarkers.carriesParkedMarker(toolResponses)) {
+                || !ToolLoopMarkers.parked(ToolLoopRunHooks.transcript(prompt), List.of(toolResponses))) {
             return result;
         }
+        // The decision above is the turn's own state (or, with no signal wired, the flagged content fallback). What
+        // follows only LOCATES the parked call's response: the one that is the guard's marker document, else the first.
         List<ToolResponseMessage.ToolResponse> ordered = new ArrayList<>(toolResponses.getResponses());
+        int parkedAt = 0;
         for (int i = 0; i < ordered.size(); i++) {
-            String data = ordered.get(i).responseData();
-            if (ToolLoopMarkers.isMarkerDocument(data, ArgumentSanitizingToolCallingManager.APPROVAL_PARKED)) {
-                // The parked call's own response becomes the closing reply (clean text for the
-                // person and a legible result for the model's next turn); its id stays so the
-                // call->response pairing still matches.
-                ordered.set(
-                        i,
-                        new ToolResponseMessage.ToolResponse(
-                                ordered.get(i).id(), ordered.get(i).name(), reply(prompts, prompt)));
-                ordered.add(0, ordered.remove(i));
+            if (ToolLoopMarkers.isMarkerDocument(
+                    ordered.get(i).responseData(), ArgumentSanitizingToolCallingManager.APPROVAL_PARKED)) {
+                parkedAt = i;
                 break;
             }
+        }
+        if (!ordered.isEmpty()) {
+            // The parked call's own response becomes the closing reply (clean text for the person and a legible
+            // result for the model's next turn); its id stays so the call->response pairing still matches.
+            ordered.set(
+                    parkedAt,
+                    new ToolResponseMessage.ToolResponse(
+                            ordered.get(parkedAt).id(), ordered.get(parkedAt).name(), reply(prompts, prompt)));
+            ordered.add(0, ordered.remove(parkedAt));
         }
         List<Message> rewritten = new ArrayList<>(history);
         rewritten.set(rewritten.size() - 1, ToolResponseMessage.builder().responses(ordered).build());

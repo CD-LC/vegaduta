@@ -138,6 +138,29 @@ public final class TurnApprovalState {
         return memorySessionId;
     }
 
+    private final java.util.concurrent.atomic.AtomicBoolean budgetExhausted = new java.util.concurrent.atomic.AtomicBoolean();
+
+    /** This turn's identity for {@link ToolResultMarker}: what the guard registers under, what the turn's readers ask under. */
+    private final ToolResultMarker.Scope markerScope = new ToolResultMarker.Scope();
+
+    /**
+     * Records that the guard answered a call of this turn because the tool-call budget was used up. Out-of-band truth the
+     * tool loop reads ({@code core/chat ToolLoopSignals}); a tool's output can never set it. Written by the guard only.
+     */
+    public void markBudgetExhausted() {
+        budgetExhausted.set(true);
+    }
+
+    /** True once the guard has answered a call of this turn with the budget-exhausted result. */
+    public boolean isBudgetExhausted() {
+        return budgetExhausted.get();
+    }
+
+    /** The turn's {@link ToolResultMarker.Scope}: marks registered under it are visible to this turn only. */
+    public ToolResultMarker.Scope markerScope() {
+        return markerScope;
+    }
+
     /** True once a gated call of this turn has been recorded as a pending approval. */
     public boolean isParked() {
         return parkedTool.get() != null;

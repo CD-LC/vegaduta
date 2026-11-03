@@ -181,6 +181,44 @@ public final class ToolLoopTranscript {
         return rounds;
     }
 
+    /** The out-of-band control state of this run's turn; null = none wired (content markers are then the fallback). */
+    private volatile ToolLoopSignals signals;
+
+    /** Set once per run when the loop writes its own budget-exhausted soft stop; the loop's own record, not a read of tool text. */
+    private final java.util.concurrent.atomic.AtomicBoolean softStopSent = new java.util.concurrent.atomic.AtomicBoolean();
+
+    /** Set once per run, the first time a tool output imitating a control marker is logged. */
+    private final java.util.concurrent.atomic.AtomicBoolean forgeryWarned = new java.util.concurrent.atomic.AtomicBoolean();
+
+    /**
+     * Gives this run the out-of-band source the loop decides "parked" and "budget spent" from. With one wired, a tool
+     * response that merely LOOKS like a control marker is plain tool output. Null leaves the (forgeable) content
+     * fallback.
+     */
+    public ToolLoopTranscript signals(ToolLoopSignals signals) {
+        this.signals = signals;
+        return this;
+    }
+
+    /** This run's out-of-band signals, or null. */
+    ToolLoopSignals signals() {
+        return signals;
+    }
+
+    /** True when the loop itself already sent this run its budget-exhausted soft stop. */
+    boolean softStopSent() {
+        return softStopSent.get();
+    }
+
+    void markSoftStopSent() {
+        softStopSent.set(true);
+    }
+
+    /** True exactly once per run: the caller should log the forgery attempt. */
+    boolean firstForgery() {
+        return forgeryWarned.compareAndSet(false, true);
+    }
+
     /** Replaces the transcript with {@code conversation}, the history the next model round is sent. */
     public void record(List<Message> conversation) {
         if (conversation != null) {

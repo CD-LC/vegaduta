@@ -106,6 +106,12 @@ final class ToolLoopRunHooks {
         return ChatPrompts.Run.NONE;
     }
 
+    /** The run's transcript (which carries its out-of-band signals and per-run loop flags), or null for a lone invocation. */
+    static ToolLoopTranscript transcript(Prompt prompt) {
+        return toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript
+            ? transcript : null;
+    }
+
     private static Map<String, Object> toolContext(Prompt prompt) {
         if (prompt != null && prompt.getOptions() instanceof ToolCallingChatOptions options && options.getToolContext() != null) {
             return options.getToolContext();
