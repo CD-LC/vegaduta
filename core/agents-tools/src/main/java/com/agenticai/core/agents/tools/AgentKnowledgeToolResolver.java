@@ -120,6 +120,18 @@ final class AgentKnowledgeToolResolver {
 
     private volatile ObjectProvider<TurnTaintView> turnTaint;
 
+    private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
+
+    /** The taint policy whose per-turn record the write tools read (see {@link TurnTaintViews}). */
+    void setTaintPolicy(ObjectProvider<AgentTaintPolicy> taintPolicy) {
+        this.taintPolicy = taintPolicy;
+    }
+
+    /** The taint of the turn identified by {@code stepCounter}, for a persistent-write tool built for it. */
+    ObjectProvider<TurnTaintView> turnTaintFor(AtomicInteger stepCounter) {
+        return TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint);
+    }
+
     /** The turn-taint source memory writes consult; unset or empty means writes are quarantined. */
     void setTurnTaint(ObjectProvider<TurnTaintView> turnTaint) {
         this.turnTaint = turnTaint;
@@ -468,7 +480,7 @@ final class AgentKnowledgeToolResolver {
                         entityExtractionService,
                         memoryWriteArbitrationService,
                         chatClient,
-                        turnTaint);
+                        turnTaintFor(stepCounter));
         List<ToolCallback> tools = new ArrayList<>();
         tools.add(
                 guardAndLog(
@@ -508,7 +520,7 @@ final class AgentKnowledgeToolResolver {
                             graphService,
                             entityExtractionService,
                             chatClient,
-                            turnTaint);
+                            turnTaintFor(stepCounter));
             tools.add(
                     guardAndLog(
                             rememberSharedTool,

@@ -324,7 +324,8 @@ class ToolResolverConfiguration {
             MemoryWriteArbitrationService memoryWriteArbitrationService,
             ObjectProvider<CodeIntelClient> codeIntelClient,
             ObjectProvider<com.agenticai.core.agents.consent.PurposeAccessPolicy> purposePolicy,
-            ObjectProvider<TurnTaintView> turnTaint) {
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentKnowledgeToolResolver resolver =
                 new AgentKnowledgeToolResolver(
                         toolGuard,
@@ -345,6 +346,8 @@ class ToolResolverConfiguration {
         resolver.setPurposePolicy(purposePolicy);
         // Memory writes read the turn's taint through this; no bean = writes are quarantined.
         resolver.setTurnTaint(turnTaint);
+        // ...and normally read the turn's own record through the taint policy (a TurnTaintView bean is the fallback).
+        resolver.setTaintPolicy(taintPolicy);
         return resolver;
     }
 
