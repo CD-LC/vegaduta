@@ -54,6 +54,7 @@ public final class PostureChecks {
         new Check("app.tools.classification.confirmation-gate", "true", "true", false, is("true")),
         new Check("app.tools.classification.trifecta-overrides-exempt", "true", "true", false, is("true")),
         new Check("app.tools.classification.trifecta-analyse-auto-select", "true", "false", false, is("true")),
+        new Check("app.agents.taint.get-query-is-sink", "true", "false", false, is("true")),
         new Check("app.guardrails.fail-mode", "closed", "closed", false, is("closed")),
         new Check("app.skills.supply-chain.enforce", "true", "true", false, is("true")),
         new Check("app.tool-arg-policies.enabled", "true", "true", false, is("true")),
