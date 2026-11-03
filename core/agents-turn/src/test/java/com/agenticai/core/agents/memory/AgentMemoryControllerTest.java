@@ -84,4 +84,43 @@ class AgentMemoryControllerTest {
         controller.forgetMemory(agentId, memoryId, alice);
         verify(memoryService).forget(agentId, memoryId);
     }
+
+    @Test
+    void aViewerApprovesOnlyTheirOwnQuarantinedMemory() {
+        viewerOnly();
+        when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(true);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(204);
+        verify(memoryService, never()).approve(agentId, memoryId);
+    }
+
+    @Test
+    void aViewerCannotApproveSomeoneElsesMemory() {
+        viewerOnly();
+        when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(false);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(404);
+    }
+
+    @Test
+    void anEditorApprovesAnyQuarantinedMemory() {
+        when(memoryService.approve(agentId, memoryId)).thenReturn(true);
+
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(204);
+    }
+
+    @Test
+    void rejectDeletesTheMemory() {
+        controller.rejectMemory(agentId, memoryId, alice);
+        verify(memoryService).forget(agentId, memoryId);
+    }
+
+    @Test
+    void theSharedPoolIsReviewedByEditorsOnly() {
+        viewerOnly();
+        assertThatThrownBy(() -> controller.sharedMemories(agentId, "alice"))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+        assertThatThrownBy(() -> controller.approveSharedMemory(agentId, memoryId, "alice"))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+    }
 }
