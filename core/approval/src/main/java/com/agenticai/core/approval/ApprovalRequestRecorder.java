@@ -114,7 +114,26 @@ class ApprovalRequestRecorder {
 
     @Transactional
     ApprovalRequest recordApproved(ApprovalRequest request, String decidedBy) {
+        return recordApproved(request, decidedBy, null);
+    }
+
+    /**
+     * Approve, optionally rewriting the payload first. The lock-and-PENDING check comes BEFORE the
+     * rewrite and both sit in one transaction, so a request somebody else decided in the meantime
+     * is refused with its payload untouched. {@code payloadRewrite} maps the current payload JSON
+     * to the new one.
+     */
+    @Transactional
+    ApprovalRequest recordApproved(
+        ApprovalRequest request, String decidedBy, java.util.function.UnaryOperator<String> payloadRewrite
+    ) {
         request = lockPending(request);
+        if (payloadRewrite != null) {
+            String rewritten = payloadRewrite.apply(request.getPayloadJson());
+            if (rewritten != null && !rewritten.equals(request.getPayloadJson())) {
+                request.replacePayloadJson(rewritten);
+            }
+        }
         request.markApproved(decidedBy);
         request = requestRepository.save(request);
         auditLogService.record(

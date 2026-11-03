@@ -97,6 +97,8 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                         new StaticListableBeanFactory().getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         mock(ApplicationEventPublisher.class));
+        // These envelopes carry no tool digest; drift checking is not what this class tests.
+        executor.setAllowUndigested(true);
     }
 
     @AfterEach
@@ -290,6 +292,7 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                         new StaticListableBeanFactory().getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         mock(ApplicationEventPublisher.class));
+        failingExecutor.setAllowUndigested(true);
 
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(
                 () -> failingExecutor.execute(request(",\"memorySessionId\":\"c1:x\"")));

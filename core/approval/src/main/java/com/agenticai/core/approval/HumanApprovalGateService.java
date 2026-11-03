@@ -188,15 +188,20 @@ public class HumanApprovalGateService {
      * approval) is approved exactly as before.
      */
     public ApprovalRequest approve(UUID requestId, String decidedBy, java.util.Map<String, String> formValues) {
-        if (formValues != null && !formValues.isEmpty()) {
-            ApprovalRequest request = getPendingOrThrow(requestId);
-            String merged = mergeFormValues(request.getPayloadJson(), formValues);
-            if (merged != null) {
-                request.replacePayloadJson(merged);
-                requestRepository.save(request);
-            }
+        if (formValues == null || formValues.isEmpty()) {
+            return approve(requestId, decidedBy);
         }
-        return approve(requestId, decidedBy);
+        ApprovalRequest request = getPendingOrThrow(requestId);
+        // The merge happens INSIDE the recorder's row-locked transaction, together with the status
+        // transition: merging before the lock let a request decided in that window have its payload
+        // changed after the fact.
+        request = recorder.recordApproved(request, decidedBy, payload -> {
+            String merged = mergeFormValues(payload, formValues);
+            return merged != null ? merged : payload;
+        });
+        recordRlFeedback(request, true);
+        runIfExecutorRegistered(request, decidedBy);
+        return request;
     }
 
     private String mergeFormValues(String payloadJson, java.util.Map<String, String> formValues) {

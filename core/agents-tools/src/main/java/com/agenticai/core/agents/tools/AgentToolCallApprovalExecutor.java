@@ -140,6 +140,14 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
+    /** {@code app.approvals.replay.allow-undigested}: replay a tool call recorded with no digest. Default off. */
+    private volatile boolean allowUndigested;
+
+    @org.springframework.beans.factory.annotation.Value("${app.approvals.replay.allow-undigested:false}")
+    public void setAllowUndigested(boolean allowUndigested) {
+        this.allowUndigested = allowUndigested;
+    }
+
     public AgentToolCallApprovalExecutor(
             ObjectProvider<AgentToolProvider> agentToolProvider,
             ApprovalRequestRepository requestRepository,
@@ -206,7 +214,9 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         try {
             refuseIfJobTerminal(target);
             String result = invokeTool(request, target);
-            persistExecutionResult(request, result);
+            // The tool HAS run. Storing its result is best-effort: a failure here must never be
+            // reported as a failed action (see persistExecutionResult).
+            boolean resultStored = persistExecutionResult(request, result);
             String noteProblem =
                     appendSessionMemoryNote(
                             request,
@@ -218,11 +228,17 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             // effect). It is surfaced to the approver instead of being only a log line.
             notify(
                     target,
-                    noteProblem == null ? NotificationSeverity.INFO : NotificationSeverity.WARNING,
+                    noteProblem == null && resultStored
+                            ? NotificationSeverity.INFO
+                            : NotificationSeverity.WARNING,
                     "Approved action ran: " + target.toolName(),
                     "Your approved tool call '"
                             + target.toolName()
-                            + "' has been executed. Result:\n"
+                            + "' has been executed"
+                            + (resultStored
+                                    ? ""
+                                    : " (ran, result not stored: the result could not be saved on the approval record)")
+                            + ". Result:\n"
                             + truncate(result, MAX_NOTIFICATION_BODY_CHARS)
                             + (noteProblem == null
                                     ? ""
@@ -340,11 +356,11 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
      * here.
      *
      * <p>Runs INSIDE the envelope's re-asserted {@link TenantContext} so the job read routes to the
-     * right schema. Fail-open on a lookup blip, on a non-job session (console/omnichannel gates
-     * have no job to check), and in contexts without the repository: this is a backstop on top of
-     * the sweep's rejection, and a transient read failure must not turn a legitimately approved
-     * replay into an execution failure. The refusal itself throws {@link AgentToolReplayException},
-     * which is deliberately non-retryable.
+     * right schema. Skipped for a non-job session (console/omnichannel gates have no job to check)
+     * and in contexts without the repository. FAIL-CLOSED on a lookup exception: the replay is
+     * refused with a {@link AgentToolReplayRetryableException} (nothing ran, so the retry job may
+     * try again). The terminal-job refusal itself throws {@link AgentToolReplayException}, which is
+     * deliberately non-retryable.
      */
     private void refuseIfJobTerminal(ReplayTarget target) {
         Optional<UUID> jobId = AgentJobSession.jobIdOf(target.sessionId());
@@ -359,12 +375,19 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         try {
             job = jobs.findById(jobId.get()).orElse(null);
         } catch (RuntimeException lookupFailed) {
+            // Fail closed: a replay of a gated action must not run when its safety precondition
+            // cannot be checked. Retryable - nothing ran, and the lookup may work next time.
             log.warn(
                     "Could not check whether agent job {} is terminal before replaying an approved tool call - "
-                            + "proceeding with the replay",
+                            + "refusing the replay (retryable)",
                     jobId.get(),
                     lookupFailed);
-            return;
+            throw new AgentToolReplayRetryableException(
+                    "Could not verify that agent job "
+                            + jobId.get()
+                            + " is still active (" + lookupFailed.getClass().getSimpleName()
+                            + "), so the approved action was not run. It will be retried.",
+                    lookupFailed);
         }
         if (job != null && job.terminal()) {
             throw new AgentToolReplayException(
@@ -418,14 +441,27 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
      * The approval named a tool; the fingerprint recorded with it says which tool that was. If the
      * tool now resolved under that name has a different definition (its MCP server was swapped or
      * updated since the request), the human never approved <i>this</i> tool, so the replay is
-     * refused and a fresh approval is needed. A request recorded before fingerprints existed has no
-     * digest and replays as before.
+     * refused and a fresh approval is needed. A request with NO recorded digest (a legacy row, or
+     * an envelope whose fingerprint failed) cannot be checked, so it is refused too, unless the
+     * operator opted back in with {@code app.approvals.replay.allow-undigested=true}.
      */
     private void refuseIfToolChanged(ReplayTarget target, ToolCallback callback) {
         if (target.toolDigest() == null) {
-            return;
+            if (allowUndigested) {
+                log.warn(
+                        "Replaying tool '{}' with no recorded definition digest "
+                                + "(app.approvals.replay.allow-undigested=true): drift cannot be detected",
+                        target.toolName());
+                return;
+            }
+            throw new AgentToolReplayException(
+                    "Tool '"
+                            + target.toolName()
+                            + "' was approved without a recorded definition fingerprint (an older or incomplete "
+                            + "request), so it cannot be checked for changes and was not run. Ask the user to retry "
+                            + "the action in chat and approve it again.");
         }
-        String current = ToolDefinitionDigest.of(callback.getToolDefinition());
+        String current = ToolDefinitionDigest.of(callback);
         if (!target.toolDigest().equals(current)) {
             throw new AgentToolReplayException(
                     "Tool '"
@@ -450,12 +486,27 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
      * AgentJobApprovalSweep}'s listener does not care which class raised it, only that the
      * request's execution outcome just became durable.
      */
-    private void persistExecutionResult(ApprovalRequest request, String result) {
-        request.recordExecutionResult(truncate(result, MAX_RESULT_CHARS));
-        requestRepository.save(request);
-        eventPublisher.publishEvent(
-                new ApprovalRequestExecutionRecordedEvent(
-                        this, request.getId(), request.getRequestedBy()));
+    /**
+     * Best-effort: this runs AFTER the tool ran, so a throw here would be recorded as a failed
+     * request (and the agent told "failed") although the action happened, and a retry could repeat
+     * a real side effect. Returns {@code false} for the explicit "ran, result not stored" outcome.
+     */
+    private boolean persistExecutionResult(ApprovalRequest request, String result) {
+        try {
+            request.recordExecutionResult(truncate(result, MAX_RESULT_CHARS));
+            requestRepository.save(request);
+            eventPublisher.publishEvent(
+                    new ApprovalRequestExecutionRecordedEvent(
+                            this, request.getId(), request.getRequestedBy()));
+            return true;
+        } catch (RuntimeException e) {
+            log.error(
+                    "Approved tool call for approval request {} RAN, but its result could not be stored: {}",
+                    request.getId(),
+                    e.toString(),
+                    e);
+            return false;
+        }
     }
 
     /**

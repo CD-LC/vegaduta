@@ -103,6 +103,9 @@ class AgentToolCallApprovalExecutorTest {
                                 .getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         eventPublisher);
+        // Most tests here use digest-less envelopes and are not about drift; the digest tests below
+        // switch this off explicitly (the production default).
+        executor.setAllowUndigested(true);
     }
 
     @AfterEach
@@ -259,6 +262,96 @@ class AgentToolCallApprovalExecutorTest {
         executor.execute(envelopeRequestWithDigest(digest));
 
         verify(tool).call("{\"to\":\"x\"}");
+    }
+
+    @Test
+    void anEnvelopeWithoutAFingerprintIsRefusedByDefault() {
+        executor.setAllowUndigested(false);
+        ToolCallback tool = toolWithDefinition(TOOL_NAME, "whatever it says today");
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(tool));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
+        AgentToolReplayException thrown =
+                assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
+
+        assertTrue(thrown.getMessage().contains("without a recorded definition fingerprint"), thrown.getMessage());
+        assertFalse(thrown instanceof RetryableActionFailure);
+        verify(tool, never()).call(anyString());
+    }
+
+    @Test
+    void aDifferentServerBehindTheSameDefinitionIsRefused() {
+        executor.setAllowUndigested(false);
+        ToolCallback original = toolWithDefinition(TOOL_NAME, "Sends a report");
+        String approvedDigest =
+                com.agenticai.core.guardrails.ToolDefinitionDigest.of(
+                        original.getToolDefinition(),
+                        com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(
+                                "srv-1", "https://mcp.example.com/sse"));
+        ToolCallback swapped =
+                mock(
+                        ToolCallback.class,
+                        org.mockito.Mockito.withSettings()
+                                .extraInterfaces(
+                                        com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance.class));
+        when(swapped.getToolDefinition()).thenReturn(original.getToolDefinition());
+        when(((com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance) swapped).toolProvenance())
+                .thenReturn(
+                        com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(
+                                "srv-1", "https://evil.example.net/sse"));
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(swapped));
+
+        assertThrows(
+                AgentToolReplayException.class,
+                () -> executor.execute(envelopeRequestWithDigest(approvedDigest)));
+        verify(swapped, never()).call(anyString());
+    }
+
+    @Test
+    void aJobLookupThatFailsRefusesTheReplayRetryablyAndRunsNothing() {
+        UUID jobId = UUID.randomUUID();
+        ToolCallback callback = toolNamed(TOOL_NAME);
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(callback));
+        when(agentJobLookup.findById(jobId)).thenThrow(new IllegalStateException("db blip"));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub", "job:" + jobId);
+        AgentToolReplayException thrown =
+                assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
+
+        assertTrue(thrown instanceof RetryableActionFailure);
+        verify(callback, never()).call(anyString());
+    }
+
+    @Test
+    void aResultThatCannotBeStoredNeverTurnsARanActionIntoAFailure() {
+        ToolCallback tool = toolNamed(TOOL_NAME);
+        when(tool.call(anyString())).thenReturn("sent");
+        when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
+                .thenReturn(List.of(tool));
+        when(requestRepository.save(any())).thenThrow(new IllegalStateException("db down"));
+
+        ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
+        org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> executor.execute(request));
+
+        verify(tool).call("{\"to\":\"x\"}");
+        // The agent is told it COMPLETED, and the approver is told the result was not stored.
+        verify(launcher)
+                .afterDecision(
+                        eq(request),
+                        eq(com.agenticai.core.agents.turn.ApprovalContinuation.Outcome.COMPLETED),
+                        eq("sent"));
+        verify(notificationService)
+                .create(
+                        eq("user-sub"),
+                        eq(NotificationCategory.SYSTEM),
+                        anyString(),
+                        org.mockito.ArgumentMatchers.contains("result not stored"),
+                        eq(NotificationSeverity.WARNING),
+                        isNull(),
+                        isNull());
     }
 
     @Test

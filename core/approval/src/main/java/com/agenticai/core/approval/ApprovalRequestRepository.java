@@ -32,6 +32,9 @@ public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest
 
     long countByStatus(ApprovalStatus status);
 
+    /** How many requests in {@code status} were created before {@code cutoff} (the stale-pending startup warning). */
+    long countByStatusAndCreatedAtBefore(ApprovalStatus status, Instant cutoff);
+
     /**
      * The requests one conversation's tool guard recorded ({@code requestedBy} is the {@code
      * "agent:<agentId>:session:<sessionId>"} label) in one state, oldest first. Read when a human
