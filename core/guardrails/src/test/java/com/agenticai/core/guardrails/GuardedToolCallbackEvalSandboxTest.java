@@ -96,7 +96,7 @@ class GuardedToolCallbackEvalSandboxTest {
 
             verify(delegate, never()).call(any(String.class));
             assertTrue(result.contains("send_invoice") && result.contains("NOT executed"), result);
-            assertEquals(java.util.Optional.of(ToolResultMarker.Kind.SANDBOXED), ToolResultMarker.kindOf(result),
+            assertEquals(java.util.Optional.of(ToolResultMarker.Kind.SANDBOXED), ToolResultMarker.kindOf(result, state.markerScope()),
                 "the platform's answer is typed, so the ledger and the journal can tell it from a tool's output");
             assertEquals(List.of("send_invoice"), reg.grant().simulatedTools());
             assertFalse(state.isParked(), "a simulated call is not a held one");

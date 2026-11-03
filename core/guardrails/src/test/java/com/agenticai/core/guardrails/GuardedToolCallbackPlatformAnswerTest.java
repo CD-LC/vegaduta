@@ -125,10 +125,12 @@ class GuardedToolCallbackPlatformAnswerTest {
         when(guardrails.sanitizeToolOutput("fetch_web_page", webPage, null))
                 .thenThrow(new GuardrailViolationException("fetch_web_page", "injection attempt"));
 
-        String result = guard(tool("fetch_web_page", webPage)).call("{}");
+        GuardedToolCallback guarded = guard(tool("fetch_web_page", webPage));
+        String result = guarded.call("{}");
 
         assertTrue(result.contains("withheld by a content-safety check"), result);
-        assertEquals(ToolResultMarker.Kind.WITHHELD, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.WITHHELD,
+                ToolResultMarker.kindOf(result, guarded.turnApprovalState().markerScope()).orElseThrow());
         verify(guardrails).sanitizeToolOutput("fetch_web_page", webPage, null);
     }
 }

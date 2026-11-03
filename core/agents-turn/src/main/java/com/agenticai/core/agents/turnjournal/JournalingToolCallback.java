@@ -39,6 +39,19 @@ final class JournalingToolCallback implements ToolCallback {
         this.approval = approval;
     }
 
+    /**
+     * The turn's marker scope: the state this journal was given, else the one of the guard it wraps directly (a hand-built
+     * chain), else none (then only unscoped marks count).
+     */
+    private ToolResultMarker.Scope markerScope() {
+        if (approval != null) {
+            return approval.markerScope();
+        }
+        return delegate instanceof com.agenticai.core.guardrails.GuardedToolCallback guard
+                ? guard.turnApprovalState().markerScope()
+                : null;
+    }
+
     @Override
     public ToolDefinition getToolDefinition() {
         return delegate.getToolDefinition();
@@ -94,7 +107,7 @@ final class JournalingToolCallback implements ToolCallback {
             recorder.approvalAutoAllowed(name);
         }
         String requestId = approval == null ? null : approval.requestIdFor(name, input);
-        java.util.Optional<ToolResultMarker.Kind> kind = ToolResultMarker.classify(result);
+        java.util.Optional<ToolResultMarker.Kind> kind = ToolResultMarker.classify(result, markerScope());
         TurnRecorder.CallStatus status;
         if (requestId != null || kind.filter(k -> k == ToolResultMarker.Kind.PARKED).isPresent()) {
             recorder.approval(name, "pending", uuidOrNull(requestId));

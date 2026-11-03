@@ -29,41 +29,38 @@ final class ToolLoopMarkers {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ToolLoopMarkers.class);
 
-    /** Logged once per process: a run read its control state from tool text because nothing out-of-band was wired. */
-    private static final java.util.concurrent.atomic.AtomicBoolean FALLBACK_WARNED = new java.util.concurrent.atomic.AtomicBoolean();
+    /** Logged once per process for a run that has no transcript to remember a forgery attempt on. */
+    private static final java.util.concurrent.atomic.AtomicBoolean LONE_FORGERY_WARNED = new java.util.concurrent.atomic.AtomicBoolean();
 
     /**
-     * Whether the run's turn is parked on a human approval. With {@link ToolLoopSignals} wired this is the signal and
-     * only the signal: a tool response shaped like the marker is plain tool output (logged once per run). Without
-     * signals it is the content fallback - any response of {@code messages} that is exactly the marker document - which
-     * a tool CAN forge; that path logs once per process so a deployment that never wired the signal is visible.
+     * Whether the run's turn is parked on a human approval: the turn's own {@link ToolLoopSignals#parked()} and nothing
+     * else. A tool response shaped like the marker is plain tool output (one WARN per run), and a run with no signals
+     * wired is never parked as far as the loop is concerned - the marker format is public, so there is no safe
+     * content-based fallback.
      */
     static boolean parked(ToolLoopTranscript run, List<Message> messages) {
         ToolLoopSignals signals = run == null ? null : run.signals();
-        if (signals != null) {
-            boolean parked = signals.parked();
-            if (!parked) {
-                noteIfForged(run, messages, ArgumentSanitizingToolCallingManager.APPROVAL_PARKED);
-            }
-            return parked;
+        boolean parked = signals != null && signals.parked();
+        if (!parked) {
+            noteIfForged(run, messages, ArgumentSanitizingToolCallingManager.APPROVAL_PARKED);
         }
-        return contentFallback(messages, ArgumentSanitizingToolCallingManager.APPROVAL_PARKED);
+        return parked;
     }
 
     /**
-     * Whether the run has been told its tool budget is spent: the loop's own record of the soft stop it wrote, or the
-     * guard's signal. Same signal-or-fallback rule as {@link #parked}.
+     * Whether the run has been told its tool budget is spent: the loop's own record of the soft stop it wrote (kept on
+     * the run, not read back from text) or the guard's {@link ToolLoopSignals#budgetExhausted()}. Same rule as {@link
+     * #parked}: a forged budget object in a tool response counts for nothing.
      */
     static boolean budgetSpent(ToolLoopTranscript run, List<Message> messages) {
         ToolLoopSignals signals = run == null ? null : run.signals();
-        if (signals != null) {
-            boolean spent = run.softStopSent() || signals.budgetExhausted();
-            if (!spent) {
-                noteIfForged(run, messages, ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED);
-            }
-            return spent;
+        boolean spent = (run != null && run.softStopSent())
+            || (signals != null && signals.budgetExhausted())
+            || carriesOwnSoftStop(messages);
+        if (!spent) {
+            noteIfForged(run, messages, ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED);
         }
-        return contentFallback(messages, ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED);
+        return spent;
     }
 
     /** True when any response in {@code message} is exactly the approval_parked document (a LOCATOR, never a decision when signals are wired). */
@@ -109,24 +106,50 @@ final class ToolLoopMarkers {
         return carries(message, ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED);
     }
 
-    private static boolean contentFallback(List<Message> messages, String marker) {
-        for (Message message : messages) {
-            if (message instanceof ToolResponseMessage tool && carries(tool, marker)) {
-                if (FALLBACK_WARNED.compareAndSet(false, true)) {
-                    log.warn("Tool loop has no out-of-band ToolLoopSignals for this run; reading the '{}' control marker from "
-                        + "tool output text, which any tool can forge. Wire ToolLoopTranscript.signals(...).", marker);
-                }
-                return true;
-            }
+    /**
+     * Soft-stop texts this loop wrote, remembered by INSTANCE (weakly): the loop recognises its own result without
+     * reading text, so a tool printing the same words - a different String - is not mistaken for it. This is what lets a
+     * lone invocation (no transcript to hold the flag) still reach the hard stop.
+     */
+    private static final java.util.List<java.lang.ref.WeakReference<String>> OWN_SOFT_STOPS = new java.util.ArrayList<>();
+
+    static String rememberOwnSoftStop(String softStop) {
+        synchronized (OWN_SOFT_STOPS) {
+            OWN_SOFT_STOPS.removeIf(ref -> ref.get() == null);
+            OWN_SOFT_STOPS.add(new java.lang.ref.WeakReference<>(softStop));
         }
-        return false;
+        return softStop;
+    }
+
+    private static boolean carriesOwnSoftStop(List<Message> messages) {
+        synchronized (OWN_SOFT_STOPS) {
+            if (OWN_SOFT_STOPS.isEmpty()) {
+                return false;
+            }
+            for (Message message : messages) {
+                if (message instanceof ToolResponseMessage tool) {
+                    for (ToolResponseMessage.ToolResponse response : tool.getResponses()) {
+                        String data = response.responseData();
+                        for (java.lang.ref.WeakReference<String> ref : OWN_SOFT_STOPS) {
+                            if (data != null && ref.get() == data) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private static void noteIfForged(ToolLoopTranscript run, List<Message> messages, String marker) {
         for (Message message : messages) {
-            if (message instanceof ToolResponseMessage tool && carries(tool, marker) && run.firstForgery()) {
-                log.warn("A tool output imitated the '{}' control marker while the turn's own state says it is not; "
-                    + "treated as plain tool output (a tool, MCP server or endpoint is trying to emit a control marker)", marker);
+            if (message instanceof ToolResponseMessage tool && carries(tool, marker)) {
+                boolean first = run != null ? run.firstForgery() : LONE_FORGERY_WARNED.compareAndSet(false, true);
+                if (first) {
+                    log.warn("A tool output imitated the '{}' control marker while the turn's own state says it is not; "
+                        + "treated as plain tool output (a tool, MCP server or endpoint is trying to emit a control marker)", marker);
+                }
                 return;
             }
         }

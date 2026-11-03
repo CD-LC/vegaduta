@@ -467,7 +467,8 @@ public class GuardedToolCallback implements ToolCallback {
         long startedAt = System.nanoTime();
         String[] outcome = {OUTCOME_SUCCESS};
         try {
-            return ToolResultMarker.markGuardOutcome(guardedCall(toolName, toolInput, toolContext, outcome), outcome[0]);
+            return ToolResultMarker.markGuardOutcome(
+                guardedCall(toolName, toolInput, toolContext, outcome), outcome[0], turnApprovalState());
         } catch (ToolStepLimitExceededException e) {
             outcome[0] = OUTCOME_STEP_LIMIT;
             throw e;

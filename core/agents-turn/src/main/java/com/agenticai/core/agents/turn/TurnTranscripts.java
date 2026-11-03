@@ -42,6 +42,8 @@ final class TurnTranscripts {
         // tool name that was never offered): it looks it up in the prompt registry for THIS turn's agent and tenant.
         if (context != null) {
             transcript.forPrompts(context.requestedAgentId(), context.scope());
+            // The loop decides "parked" / "budget spent" from the turn's own state, never from what a tool printed.
+            transcript.signals(TurnToolLoopSignals.of(context.approval()));
         }
         return transcript;
     }

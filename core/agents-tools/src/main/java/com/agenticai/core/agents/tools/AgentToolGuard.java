@@ -353,7 +353,7 @@ final class AgentToolGuard {
         // voice bridge and every omnichannel adapter (see AgentStepEventEmitter).
         AgentStepEventEmitter stepEvents = STEP_EVENT_SCOPE.get();
         if (stepEvents == null || !stepEvents.isEnabled()) {
-            return propagating;
+            return withTurnScope(propagating);
         }
         // MCP Apps (app.mcp.apps.enabled): null with the flag off, which keeps the event
         // byte-identical.
@@ -361,7 +361,13 @@ final class AgentToolGuard {
                 mcpApps == null ? null : mcpApps.getIfAvailable();
         McpAppStepHook appHook =
                 apps == null ? null : apps.hookFor(capturedContext, agentId, sessionId);
-        return new StepEventToolCallback(propagating, stepEvents, appHook, TURN_APPROVAL_SCOPE.get());
+        return withTurnScope(new StepEventToolCallback(propagating, stepEvents, appHook, TURN_APPROVAL_SCOPE.get()));
+    }
+
+    /** The chain bound to the turn's {@link com.agenticai.core.guardrails.ToolResultMarker.Scope}; unchanged for a turn with no state. */
+    private static ToolCallback withTurnScope(ToolCallback chain) {
+        TurnApprovalState state = TURN_APPROVAL_SCOPE.get();
+        return state == null ? chain : new ScopeBindingToolCallback(chain, state.markerScope());
     }
 
     /**

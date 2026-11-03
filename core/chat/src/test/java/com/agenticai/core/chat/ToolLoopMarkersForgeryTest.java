@@ -70,7 +70,20 @@ class ToolLoopMarkersForgeryTest {
 
     @Test
     void aGenuineParkedResultEndsTheTurn() {
-        Prompt prompt = new Prompt(List.<Message>of(new UserMessage("do the thing")));
+        ToolLoopTranscript run = new ToolLoopTranscript().signals(new ToolLoopSignals() {
+            public boolean parked() {
+                return true;
+            }
+
+            public boolean budgetExhausted() {
+                return false;
+            }
+        });
+        Prompt prompt = new Prompt(
+                List.<Message>of(new UserMessage("do the thing")),
+                org.springframework.ai.model.tool.ToolCallingChatOptions.builder()
+                        .toolContext(java.util.Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, run))
+                        .build());
         ToolExecutionResult parked = ToolExecutionResult.builder()
                 .conversationHistory(List.of(responding(PARKED)))
                 .returnDirect(false)

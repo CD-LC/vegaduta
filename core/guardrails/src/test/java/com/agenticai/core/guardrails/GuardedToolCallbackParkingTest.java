@@ -207,13 +207,15 @@ class GuardedToolCallbackParkingTest {
     void aParkedOrQueuedResultCarriesTheMarkerTheToolLoopReadsToEndTheTurn() {
         recordingReturns(pending(), pending());
 
-        String parked = guard(tool("send_invoice", "ran")).call("{}");
-        String queued = guard(tool("lookup", "found")).call("{\"q\":\"x\"}");
+        GuardedToolCallback parkingGuard = guard(tool("send_invoice", "ran"));
+        GuardedToolCallback queuingGuard = guard(tool("lookup", "found"));
+        String parked = parkingGuard.call("{}");
+        String queued = queuingGuard.call("{\"q\":\"x\"}");
 
         assertTrue(ApprovalParked.isParked(parked), parked);
         assertTrue(ApprovalParked.isParked(queued), queued);
-        assertTrue(ToolResultMarker.classify(parked).orElseThrow() == ToolResultMarker.Kind.PARKED);
-        assertTrue(ToolResultMarker.isPlatformAnswer(queued));
+        assertTrue(ToolResultMarker.classify(parked, parkingGuard.turnApprovalState().markerScope()).orElseThrow() == ToolResultMarker.Kind.PARKED);
+        assertTrue(ToolResultMarker.kindOf(queued, queuingGuard.turnApprovalState().markerScope()).isPresent());
     }
 
     @Test

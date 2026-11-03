@@ -271,10 +271,11 @@ class EffectJournalTest {
             assertFalse(LoggingToolCallback.wasExecuted(unique), "registered: " + text);
         }
         // The turn's tool budget was used up: the call was answered, not run, so it is not an effect.
-        assertFalse(
+        // The exact control shape alone is a tool's output (public format); the guard registers its real answers.
+        assertTrue(
                 LoggingToolCallback.wasExecuted(
                         com.agenticai.core.guardrails.ToolBudgetExhausted.result("Do not call more tools.")));
-        assertFalse(
+        assertTrue(
                 LoggingToolCallback.wasExecuted(
                         com.agenticai.core.guardrails.ApprovalParked.result("Waiting for a person.")));
         // ...but a page or reply that merely contains a marker is a tool's output and a real effect.

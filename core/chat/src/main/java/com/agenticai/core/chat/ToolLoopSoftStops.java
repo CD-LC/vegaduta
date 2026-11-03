@@ -58,6 +58,7 @@ final class ToolLoopSoftStops {
                 tokensExceeded
                         ? tokens(prompts, objectMapper, prompt)
                         : rounds(prompts, objectMapper, budgetExhaustedMessage, prompt, roundsUsed);
+        ToolLoopMarkers.rememberOwnSoftStop(softStop);
         List<ToolResponseMessage.ToolResponse> responses = new ArrayList<>(calls.size());
         for (AssistantMessage.ToolCall call : calls) {
             responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));

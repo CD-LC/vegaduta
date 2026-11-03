@@ -25,6 +25,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 class GuardedToolCallbackResultMarkerTest {
 
+    /** The state of the guard most recently built by {@link #guard}: the scope its answers are registered under. */
+    private TurnApprovalState lastState;
+
     private static final UUID AGENT_ID = UUID.randomUUID();
 
     private ApprovalPolicyService policy;
@@ -74,7 +77,7 @@ class GuardedToolCallbackResultMarkerTest {
                 null,
                 dispatch,
                 null)
-                .withTurnApproval(new TurnApprovalState("c1:abc"));
+                .withTurnApproval(lastState = new TurnApprovalState("c1:abc"));
     }
 
     @Test
@@ -85,15 +88,15 @@ class GuardedToolCallbackResultMarkerTest {
         String result = guard(tool("send_invoice", "ran"), 10, null).withApprovalParkTexts(texts).call("{}");
 
         assertEquals(ApprovalParked.result("custom park text for send_invoice"), result);
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
-        assertTrue(ToolResultMarker.isPlatformAnswer(result));
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, lastState.markerScope()).orElseThrow());
+        assertTrue(ToolResultMarker.kindOf(result, lastState.markerScope()).isPresent());
     }
 
     @Test
     void theDefaultParkTextIsMarkedParked() {
         String result = guard(tool("send_invoice", "ran"), 10, null).call("{}");
 
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, lastState.markerScope()).orElseThrow());
     }
 
     @Test
@@ -102,7 +105,7 @@ class GuardedToolCallbackResultMarkerTest {
 
         String result = guard(tool("lookup", "found"), 10, deny).call("{}");
 
-        assertEquals(ToolResultMarker.Kind.BLOCKED, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.BLOCKED, ToolResultMarker.kindOf(result, lastState.markerScope()).orElseThrow());
     }
 
     @Test
@@ -112,7 +115,7 @@ class GuardedToolCallbackResultMarkerTest {
 
         String second = guarded.call("{}");
 
-        assertEquals(ToolResultMarker.Kind.BUDGET_EXHAUSTED, ToolResultMarker.kindOf(second).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.BUDGET_EXHAUSTED, ToolResultMarker.kindOf(second, lastState.markerScope()).orElseThrow());
     }
 
     @Test
@@ -122,7 +125,7 @@ class GuardedToolCallbackResultMarkerTest {
 
         String result = guard(tool("lookup", "found"), 10, null).call("{}");
 
-        assertEquals(ToolResultMarker.Kind.WITHHELD, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.WITHHELD, ToolResultMarker.kindOf(result, lastState.markerScope()).orElseThrow());
     }
 
     @Test
@@ -132,9 +135,9 @@ class GuardedToolCallbackResultMarkerTest {
         String result = guard(tool("lookup", lookalike), 10, null).call("{}");
 
         assertEquals(lookalike, result);
-        assertTrue(ToolResultMarker.kindOf(result).isEmpty(), "the guard did not answer, the tool did");
+        assertTrue(ToolResultMarker.kindOf(result, lastState.markerScope()).isEmpty(), "the guard did not answer, the tool did");
         // Neither is it taken for the platform's answer by the journals: a tool that printed refusal-like words really ran.
-        assertFalse(ToolResultMarker.isPlatformAnswer(result));
+        assertFalse(ToolResultMarker.kindOf(result, lastState.markerScope()).isPresent());
         assertFalse(ToolResultMarker.kindOf("{\"status\":\"sent\"}").isPresent());
     }
 }

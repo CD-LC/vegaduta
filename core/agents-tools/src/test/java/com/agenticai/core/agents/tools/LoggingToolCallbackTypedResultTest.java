@@ -142,8 +142,8 @@ class LoggingToolCallbackTypedResultTest {
         // it did the effect journal skipped a call that really ran.
         assertTrue(LoggingToolCallback.wasExecuted("This tool call ('t') was not executed: blocked"));
         assertTrue(LoggingToolCallback.wasExecuted("This action ('t') requires human approval"));
-        // The exact control results are still recognised without a registration.
-        assertFalse(LoggingToolCallback.wasExecuted(com.agenticai.core.guardrails.ApprovalParked.result("Waiting.")));
+        // The exact control shape is public, so without a registration it is a tool's output.
+        assertTrue(LoggingToolCallback.wasExecuted(com.agenticai.core.guardrails.ApprovalParked.result("Waiting.")));
         // ...and a tool output that merely contains the marker is a tool's output.
         assertTrue(LoggingToolCallback.wasExecuted("<p>{\"error\":\"approval_parked\",\"result\":\"x\"}</p>"));
         assertFalse(LoggingToolCallback.wasExecuted(null));

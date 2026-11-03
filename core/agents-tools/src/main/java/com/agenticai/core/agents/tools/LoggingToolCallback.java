@@ -8,7 +8,6 @@ import com.agenticai.core.audit.IssueSeverity;
 import com.agenticai.core.audit.IssueSource;
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.guardrails.GuardrailPrompts;
-import com.agenticai.core.guardrails.ToolCallOutputValidator;
 import com.agenticai.core.guardrails.ToolOutputProperties;
 import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.TurnApprovalState;
@@ -182,13 +181,30 @@ public class LoggingToolCallback implements ToolCallback {
 
     @Override
     public String call(String toolInput) {
-        return loggedCall(toolInput, null);
+        return scopedLoggedCall(toolInput, null);
     }
 
     /** Forwards Spring AI's {@link ToolContext} to the wrapped tool instead of dropping it. */
     @Override
     public String call(String toolInput, ToolContext toolContext) {
-        return loggedCall(toolInput, toolContext);
+        return scopedLoggedCall(toolInput, toolContext);
+    }
+
+    /**
+     * Runs the call with the turn's {@link ToolResultMarker.Scope} bound to this thread, so the platform answers the
+     * chain below registers (and the readers here) are the turn's own and not another turn's identical text.
+     */
+    private String scopedLoggedCall(String toolInput, ToolContext toolContext) {
+        TurnApprovalState state = approvalState;
+        if (state == null && delegate instanceof com.agenticai.core.guardrails.GuardedToolCallback guard) {
+            state = guard.turnApprovalState(); // a hand-built chain: the guard's own turn
+        }
+        if (state == null) {
+            return loggedCall(toolInput, toolContext);
+        }
+        try (ToolResultMarker.Binding ignored = ToolResultMarker.bind(state.markerScope())) {
+            return loggedCall(toolInput, toolContext);
+        }
     }
 
     private String loggedCall(String toolInput, ToolContext toolContext) {
@@ -247,7 +263,10 @@ public class LoggingToolCallback implements ToolCallback {
         Instant startedAt = Instant.now();
         String output = null;
         String error = null;
-        boolean validationFailed = false;
+        // The platform no longer tags a structural-validation failure in the output text, and a tool's text must never
+        // be able to: a tool printing the old "[TOOL_OUTPUT_VALIDATION_FAILED] " prefix used to be stripped and billed
+        // to its circuit breaker. Kept only because the tool_call_log column and the branches below read it.
+        final boolean validationFailed = false;
         boolean toolOriginatedFailure = false;
         // What the model is shown as this call's result, for the turn's tool ledger.
         String shownResult = null;
@@ -262,22 +281,6 @@ public class LoggingToolCallback implements ToolCallback {
                     limit == null
                             ? invoke(toolInput, toolContext)
                             : limit.run(toolName, () -> invoke(toolInput, toolContext));
-            // #815 Gap 1 - GuardedToolCallback (the delegate we're wrapping,
-            // per AgentToolProvider#guardAndLog's wrapping order) tags a
-            // structural-validation failure with this prefix instead of
-            // throwing, since it's a normal tool-result the model should
-            // see and react to. Strip the internal marker here before
-            // either persisting or returning it - a human reading the log
-            // or the model reading its own tool result should see a clean
-            // sentence, and the boolean column is the durable signal for
-            // "this was a validation failure," not the string contents.
-            if (output != null
-                    && output.startsWith(ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX)) {
-                validationFailed = true;
-                output =
-                        output.substring(
-                                ToolCallOutputValidator.VALIDATION_FAILURE_PREFIX.length());
-            }
             // Built-in tools only (no MCP grant): cap what goes back to the model at the same
             // app.tools.output.* limit as everything else (it used to be its own, lower, constant);
             // the output is still persisted to tool_call_log below. MCP results are already

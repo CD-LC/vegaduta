@@ -24,15 +24,12 @@ class ToolResultMarkerTest {
     }
 
     @Test
-    void anExactControlResultIsRecognisedAndClassifiedWithoutRegistration() {
-        assertEquals(
-                Optional.of(ToolResultMarker.Kind.BUDGET_EXHAUSTED),
-                ToolResultMarker.classify(ToolBudgetExhausted.result("Do not call more tools.")));
-        assertEquals(
-                Optional.of(ToolResultMarker.Kind.PARKED),
-                ToolResultMarker.classify(ApprovalParked.result("Waiting for a person.")));
-        assertTrue(ToolResultMarker.isPlatformAnswer(ApprovalParked.result("Waiting for a person.")));
-        assertTrue(ToolResultMarker.isPlatformAnswer(ApprovalParked.fallbackResult("quote \" inside")));
+    void anExactControlResultThatNobodyRegisteredIsATool_sOutput() {
+        // The shape is public: any tool can print it. Only a producer's registration makes a text the platform's answer.
+        assertTrue(ToolResultMarker.classify(ToolBudgetExhausted.result("Do not call more tools.")).isEmpty());
+        assertTrue(ToolResultMarker.classify(ApprovalParked.result("Waiting for a person.")).isEmpty());
+        assertFalse(ToolResultMarker.isPlatformAnswer(ApprovalParked.result("Waiting for a person.")));
+        assertFalse(ToolResultMarker.isPlatformAnswer(ApprovalParked.fallbackResult("quote \" inside")));
     }
 
     @Test

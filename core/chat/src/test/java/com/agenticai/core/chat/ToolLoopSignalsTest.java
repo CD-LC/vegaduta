@@ -177,8 +177,8 @@ class ToolLoopSignalsTest {
     }
 
     @Test
-    void withNoSignalWiredTheFlaggedContentFallbackStillApplies() {
-        // No transcript signals: behaviour is the previous exact-shape content match (documented as forgeable).
+    void withNoSignalWiredAMarkerShapedOutputIsStillOnlyToolOutput() {
+        // The marker format is public, so there is no content fallback: a run nobody wired signals for is never "parked".
         Stub tool = new Stub(TOOL, "ok");
         List<Message> messages = new ArrayList<>();
         messages.add(new UserMessage("go"));
@@ -191,8 +191,8 @@ class ToolLoopSignalsTest {
             new Prompt(messages, ToolCallingChatOptions.builder().toolCallbacks(List.of(tool)).build()),
             responseCalling(TOOL));
 
-        assertTrue(result.returnDirect());
-        assertEquals(0, tool.calls.get());
+        assertFalse(result.returnDirect());
+        assertEquals(1, tool.calls.get());
     }
 
     // --- helpers ---------------------------------------------------------

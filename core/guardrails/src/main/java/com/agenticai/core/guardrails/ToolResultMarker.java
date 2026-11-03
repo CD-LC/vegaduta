@@ -148,7 +148,7 @@ public final class ToolResultMarker {
 
     /**
      * The registered kind of exactly this text. Under an ambient scope only that scope's marks and unscoped ones count;
-     * with no scope bound, any mark counts (the pre-scope behaviour, which cross-turn collisions can fool).
+     * with no scope bound, only unscoped marks count, so a text another turn registered is never taken for this reader's.
      */
     public static Optional<Kind> kindOf(String result) {
         return kindOf(result, CURRENT.get());
@@ -165,8 +165,7 @@ public final class ToolResultMarker {
                 return Optional.empty();
             }
             if (scope == null) {
-                Kind unscoped = marks.get(UNSCOPED);
-                return Optional.ofNullable(unscoped != null ? unscoped : marks.values().iterator().next());
+                return Optional.ofNullable(marks.get(UNSCOPED));
             }
             Kind own = marks.get(scope);
             return Optional.ofNullable(own != null ? own : marks.get(UNSCOPED));
@@ -174,43 +173,25 @@ public final class ToolResultMarker {
     }
 
     /**
-     * True when {@code result} is the platform's answer and not a tool's output: it was {@link #mark registered},
-     * or it is exactly a budget-exhausted or approval-parked control result.
+     * True when {@code result} is the platform's answer and not a tool's output: it was {@link #mark registered} (under
+     * the reader's scope or unscoped). A text that merely has the SHAPE of a control result is NOT recognised: the
+     * shape is public, so any tool can print it; the platform's own answers are registered by the producer.
      */
     public static boolean isPlatformAnswer(String result) {
-        if (result == null) {
-            return false;
-        }
-        if (kindOf(result).isPresent()) {
-            return true;
-        }
-        if (CURRENT.get() != null) {
-            // A turn is bound: its platform answers were registered under its scope, so a text that only has the SHAPE
-            // of a control result is a tool's output (any tool can print it).
-            return false;
-        }
-        return ToolBudgetExhausted.isBudgetExhausted(result) || ApprovalParked.isParked(result);
+        return kindOf(result).isPresent();
     }
 
     /**
-     * The kind of a platform answer, for a reader that needs to tell a parked call from a refused one: the registered
-     * kind, else the kind of an exact control result (a budget-exhausted result is {@link Kind#BUDGET_EXHAUSTED}, a
-     * parked one {@link Kind#PARKED}); empty when {@code result} is a tool's output or an unregistered text.
+     * The kind of a platform answer, for a reader that needs to tell a parked call from a refused one; empty when
+     * {@code result} is a tool's output or an unregistered text (shape alone never counts, see {@link
+     * #isPlatformAnswer}).
      */
     public static Optional<Kind> classify(String result) {
-        Optional<Kind> registered = kindOf(result);
-        if (registered.isPresent()) {
-            return registered;
-        }
-        if (result == null || CURRENT.get() != null) {
-            return Optional.empty();
-        }
-        if (ToolBudgetExhausted.isBudgetExhausted(result)) {
-            return Optional.of(Kind.BUDGET_EXHAUSTED);
-        }
-        if (ApprovalParked.isParked(result)) {
-            return Optional.of(Kind.PARKED);
-        }
-        return Optional.empty();
+        return kindOf(result);
+    }
+
+    /** As {@link #classify(String)} for an explicit {@code scope}; what the journals, which run outside any binding, call. */
+    public static Optional<Kind> classify(String result, Scope scope) {
+        return kindOf(result, scope);
     }
 }
