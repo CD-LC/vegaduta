@@ -2658,6 +2658,7 @@ The Default column is read from the code, not typed: `make config-docs` (`script
 | `fraud-detection.auth.block-threshold` | `10` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 | `fraud-detection.auth.max-attempts` | `5` | shapes that load the module | Configuration thresholds |
 | `fraud-detection.auto-block-duration-minutes` | `60` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
+| `fraud-detection.challenge-pass-ttl-seconds` | `300` | shapes that load the module | Lifetime of the signed single-use challenge-pass token; signed with a key derived from `app.encryption.key`. see source: `core/app/src/main/java/com/agenticai/core/common/security/AbuseDetectionService.java` |
 | `fraud-detection.enforce` | `false` | shapes that load the module | see source: `core/app/src/main/java/com/agenticai/core/common/security/FraudDetectionInterceptor.java` |
 | `fraud-detection.hcaptcha` |  | shapes that load the module | Configuration properties for hCaptcha integration. |
 | `fraud-detection.hcaptcha.enabled` | `true` | shapes that load the module | Group `fraud-detection.hcaptcha`: Configuration properties for hCaptcha integration. (see source: `core/app/src/main/java/com/agenticai/core/common/security/HCaptchaClient.java`) |

@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Security
+
+- Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
