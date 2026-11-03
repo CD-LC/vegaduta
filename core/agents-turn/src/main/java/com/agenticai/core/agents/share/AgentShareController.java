@@ -8,6 +8,7 @@ import com.agenticai.core.agents.turn.AgentChatStreamResponder;
 import com.agenticai.core.agents.turn.ChatLimitsProperties;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.providers.ProviderModelCatalogService;
 import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.security.TenantContext;
@@ -283,6 +284,8 @@ public class AgentShareController {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            // A public share-page visitor is never the owner: their message is outsider-authored.
+            SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:share");
             stream =
                     agentChatService
                             .chat(turnContext, chatTurn)
@@ -399,6 +402,7 @@ public class AgentShareController {
                         TurnContext turnContext =
                                 TurnContext.forEntry(
                                         TenantContext.current().orElse(null), chatTurn);
+                        SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:share");
                         String reply =
                                 agentChatService
                                         .chat(turnContext, chatTurn)

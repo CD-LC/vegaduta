@@ -25,6 +25,7 @@ public final class TurnTaint {
 
     private final List<String> sources = new ArrayList<>(2);
     private final Set<String> reported = new HashSet<>();
+    private final List<Runnable> listeners = new ArrayList<>(1);
     private volatile boolean tainted;
 
     /**
@@ -34,13 +35,46 @@ public final class TurnTaint {
      */
     public boolean mark(String source) {
         String label = source == null || source.isBlank() ? "unknown" : source;
+        boolean first;
+        List<Runnable> fire = List.of();
         synchronized (sources) {
-            boolean first = !tainted;
+            first = !tainted;
             tainted = true;
             if (sources.size() < MAX_SOURCES && !sources.contains(label)) {
                 sources.add(label);
             }
-            return first;
+            if (first) {
+                fire = List.copyOf(listeners);
+                listeners.clear();
+            }
+        }
+        fire.forEach(TurnTaint::runQuietly);
+        return first;
+    }
+
+    /**
+     * Runs {@code action} once, when this turn first becomes tainted - at once if it already is,
+     * otherwise on whichever thread marks it. The action must not rely on thread-local state; a
+     * throw is swallowed so a mark can never fail.
+     */
+    public void onTainted(Runnable action) {
+        if (action == null) {
+            return;
+        }
+        synchronized (sources) {
+            if (!tainted) {
+                listeners.add(action);
+                return;
+            }
+        }
+        runQuietly(action);
+    }
+
+    private static void runQuietly(Runnable action) {
+        try {
+            action.run();
+        } catch (RuntimeException ignored) {
+            // a listener must never break marking
         }
     }
 

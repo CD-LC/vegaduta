@@ -71,6 +71,12 @@ final class ChatTurnPreflight {
     /** DPDP-oriented notice-and-consent step; set by {@link ConsentGateWiring}, null = none. */
     volatile com.agenticai.core.agents.consent.ConversationConsentGate consentGate;
 
+    /**
+     * Conversation-level taint; set by {@link ConversationTaintWiring}, null = per-turn taint
+     * only.
+     */
+    volatile com.agenticai.core.guardrails.taint.ConversationTaint conversationTaint;
+
     ChatTurnPreflight(AgentChatService svc) {
         this.svc = svc;
     }
@@ -182,6 +188,14 @@ final class ChatTurnPreflight {
                         subjectKey,
                         sessionId); // SEC-004: session memory and the cancel flag use only this id
         // (SessionMemoryService#scopedSessionId); events, logs, metrics keep the raw one.
+        // A conversation that has had a tainted turn keeps its poisoned content in the history this
+        // turn is about to replay: start the turn tainted, and flag the conversation as soon as
+        // this turn taints. Captured by value, so a tool thread without a tenant context can write.
+        com.agenticai.core.guardrails.taint.ConversationTaint conversationTaint =
+                this.conversationTaint;
+        if (conversationTaint != null) {
+            conversationTaint.attach(context.taint(), currentTenantId, memorySessionId);
+        }
         Agent liveAgentRow = agentService.getEntity(agentId);
         // C1 versioning: resolve the version this turn pins and - under the
         // versioning_explicit_publish tenant flag - execute the PRODUCTION

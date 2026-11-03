@@ -5,6 +5,7 @@ import com.agenticai.core.agents.tools.classification.ToolClassificationDecision
 import com.agenticai.core.agents.tools.classification.ToolClassificationRegistry;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.guardrails.taint.TaintGate;
 import com.agenticai.core.guardrails.taint.TaintMode;
 import com.agenticai.core.guardrails.taint.ToolTaintClassifier;
@@ -149,6 +150,17 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
         TurnTaint turn = turnTaint(turnKey);
         if (turn != null) {
             turn.mark(source);
+        }
+    }
+
+    /**
+     * {@link #seed(AtomicInteger, String)} for a sender of known standing: a {@link
+     * SenderTrust#TRUSTED} sender (agent owner, tenant member) leaves the turn clean, anyone else
+     * taints it. Fails closed - an unknown sender is untrusted.
+     */
+    public void seed(AtomicInteger turnKey, SenderTrust sender, String source) {
+        if (sender == null || sender == SenderTrust.UNTRUSTED) {
+            seed(turnKey, source);
         }
     }
 

@@ -3,6 +3,7 @@ package com.agenticai.core.agents.share;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -94,6 +95,9 @@ class AgentShareControllerTurnContextTest {
         assertEquals(agentId, context.getValue().requestedAgentId());
         assertEquals(request.getValue().sessionId(), context.getValue().sessionId());
         assertNotNull(context.getValue().requestId());
+        assertTrue(
+                context.getValue().taint().isTainted(),
+                "a share-page visitor is an untrusted sender: the turn starts tainted");
     }
 
     @Test
@@ -127,5 +131,8 @@ class AgentShareControllerTurnContextTest {
                 context.getValue().tenant(),
                 "on the request thread the context IS the ThreadLocal value");
         assertEquals(agentId, context.getValue().requestedAgentId());
+        assertTrue(
+                context.getValue().taint().isTainted(),
+                "a share-page visitor is an untrusted sender: the turn starts tainted");
     }
 }
