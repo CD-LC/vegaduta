@@ -73,7 +73,7 @@ class ExfiltrationRedTeamTest {
         String result = turn.wrap(http).call(get(url));
 
         verify(http, never()).call(anyString());
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow(), url);
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow(), url);
         assertEquals(1, turn.recordedApprovals().size());
     }
 

@@ -115,10 +115,19 @@ public class AgentMemoryController {
     /** Shared-pool facts about a subject, quarantined ones included; EDITOR only. */
     @GetMapping("/shared")
     public List<TenantMemoryEntry> sharedMemories(
-            @PathVariable UUID agentId, @RequestParam String subjectKey) {
+            @PathVariable UUID agentId,
+            @RequestParam String subjectKey,
+            @RequestParam(defaultValue = "100") int limit,
+            @RequestParam(defaultValue = "0") int offset) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         TenantMemoryService service = tenantService();
-        return service == null ? List.of() : service.listFactsForSubject(subjectKey);
+        if (service == null) {
+            return List.of();
+        }
+        List<TenantMemoryEntry> all = service.listFactsForSubject(subjectKey);
+        int from = Math.min(Math.max(offset, 0), all.size());
+        int to = Math.min(from + Math.max(1, Math.min(limit, 500)), all.size());
+        return all.subList(from, to);
     }
 
     @PostMapping("/shared/{memoryId}/approve")

@@ -118,7 +118,7 @@ class AgentMemoryControllerTest {
     @Test
     void theSharedPoolIsReviewedByEditorsOnly() {
         viewerOnly();
-        assertThatThrownBy(() -> controller.sharedMemories(agentId, "alice"))
+        assertThatThrownBy(() -> controller.sharedMemories(agentId, "alice", 100, 0))
                 .isInstanceOf(ResourceAccessDeniedException.class);
         assertThatThrownBy(() -> controller.approveSharedMemory(agentId, memoryId, "alice"))
                 .isInstanceOf(ResourceAccessDeniedException.class);

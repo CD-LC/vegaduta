@@ -925,6 +925,9 @@ Three different limits apply to a turn that uses tools. They count different thi
 | `app.guardrails.prompt-leak.action` | `APP_GUARDRAILS_PROMPT_LEAK_ACTION` | `warn` | with `mode=enforce`: `redact` (replace the leaking span with `[redacted]`), `block` (replace the reply from the leak on with a fixed message and stop the stream) or `warn` |
 | `app.guardrails.prompt-leak.min-chars` | - | `60` | letters and digits, after normalisation, a verbatim prompt overlap must span to count (floor 24). Shorter shared phrases are not leaks |
 | `app.guardrails.prompt-leak.stream-holdback-chars` | - | `256` | characters of stream held back so a split leak is caught before it is sent (floor 128); the first text reaches the client that late. Also `canary-bytes` (18, floor 16), `redaction-marker`, `block-message` |
+| `app.guardrails.prompt-leak.canary-bytes` | - | `18` | random bytes in the per-turn canary token (floor 16 = 128 bits) |
+| `app.guardrails.prompt-leak.redaction-marker` | - | `[redacted]` | text that replaces a leaking span when `mode=enforce` and `action=redact` |
+| `app.guardrails.prompt-leak.block-message` | - | `[This reply was withheld because it contained confidential instructions.]` | the reply that replaces a leaking one when `mode=enforce` and `action=block` |
 | `app.guardrails.step-limit.grace-calls` | `APP_GUARDRAILS_STEP_LIMIT_GRACE_CALLS` | `10` | calls past the ceiling that are answered with the `tool_budget_exhausted` result before the turn is stopped with an error. Parallel calls of the round that crossed the ceiling count here. `0` stops the turn at the first call over |
 | `app.guardrails.step-limit.supervised-divisor` | `APP_GUARDRAILS_STEP_LIMIT_SUPERVISED_DIVISOR` | `2` | a `SUPERVISED` agent gets the ceiling divided by this |
 | `app.guardrails.step-limit.supervised-min-steps` | `APP_GUARDRAILS_STEP_LIMIT_SUPERVISED_MIN_STEPS` | `3` | and never fewer than this, so it can still finish a trivial multi-step task |

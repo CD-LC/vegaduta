@@ -41,7 +41,7 @@ class TaintToSinkRedTeamTest {
         String result = chain.call(args);
 
         verify(raw, never()).call(anyString());
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow(), result);
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow(), result);
         assertTrue(turn.approval.isParked());
         assertNotNull(turn.approval.requestIdFor(sink, args), "the park must be recorded against this exact call");
         assertEquals(1, turn.recordedApprovals().size());
@@ -136,7 +136,7 @@ class TaintToSinkRedTeamTest {
         String queued = turn.wrap(second).call("{\"fact\":\"y\"}");
 
         verify(second, never()).call(anyString());
-        assertTrue(ToolResultMarker.classify(queued).isPresent());
+        assertTrue(ToolResultMarker.classify(queued, turn.approval.markerScope()).isPresent());
         assertEquals(2, turn.recordedApprovals().size(), "the queued call is recorded, not lost");
     }
 

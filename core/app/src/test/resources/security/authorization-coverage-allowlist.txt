@@ -177,3 +177,7 @@ POST /api/assistant/workspace/folders  # MEMBER: creates a folder in the install
 POST /api/devices/capabilities  # HANDLER: X-Device-Token device auth resolved by DeviceAuthResolver in DeviceGatewayController
 POST /api/learning/proposals/{id}/approve  # MEMBER: approves the caller's own proposal; service returns 404 for another subject's (LearningProposalService.approve)
 POST /api/learning/proposals/{id}/reject  # MEMBER: rejects the caller's own proposal; service returns 404 for another subject's (LearningProposalService.reject)
+POST /api/agents/{agentId}/memories/{memoryId}/approve  # HANDLER: AgentMemoryController: the caller's own quarantined memories with VIEWER, any subject's with EDITOR (same check as the DELETE above)
+POST /api/agents/{agentId}/memories/{memoryId}/reject  # HANDLER: AgentMemoryController: delegates to the same check as the DELETE above
+POST /api/agents/{agentId}/memories/shared/{memoryId}/approve  # HANDLER: AgentMemoryController (agentService.requireAccess EDITOR)
+POST /api/agents/{agentId}/memories/shared/{memoryId}/reject  # HANDLER: AgentMemoryController (agentService.requireAccess EDITOR)

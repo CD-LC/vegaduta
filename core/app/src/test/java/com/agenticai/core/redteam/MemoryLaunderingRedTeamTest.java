@@ -140,7 +140,7 @@ class MemoryLaunderingRedTeamTest {
         String result = turn.wrap(memoryTool(memory, turn)).call(factArgs(payload));
 
         assertTrue(writes(memory).isEmpty(), "a parked write must not reach the store");
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
         assertEquals(1, turn.recordedApprovals().size());
     }
 
@@ -155,7 +155,7 @@ class MemoryLaunderingRedTeamTest {
         String result = turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
 
         verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result).orElseThrow());
+        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
     }
 
     // ---- observe (the shipped default): the write must still not carry tainted text through ------------------------
