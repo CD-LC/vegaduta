@@ -10,6 +10,13 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
+- **Spend and quota counters can no longer go negative or live forever; spend controls can fail closed.** The free-tier token
+  quota and the smart-AI feature budget now take refunds the way the per-user budget does (a refund against an expired window
+  is dropped, one larger than the counter stops at zero, so a rolled-back reservation no longer hands out free quota), and every
+  counter write is one atomic script that sets the window expiry when the key has none (no immortal counter after a crash, no
+  window restarted when a counter returns to the amount just added). `app.governance.spend-controls.fail-mode=closed` (default
+  `open`, no change) refuses gated calls with HTTP 503 when Redis fails instead of running them unmetered. The monthly spend cap is
+  documented as a soft cap, and `app.spend-cap.reserve-usd-per-call` (default `0`) optionally pre-reserves per call to bound the overshoot.
 - **System-prompt leak control on streamed replies (OWASP LLM07).** A per-turn random canary is appended to the system
   prompt and the reply stream is scanned for the canary and for long verbatim runs of the prompt (case, spacing,
   markdown, zero-width characters and look-alike letters normalised; a leak split across chunks is caught). Off by default
