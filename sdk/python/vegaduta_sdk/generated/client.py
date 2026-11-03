@@ -5916,6 +5916,46 @@ class KnowledgeIngestionJobApi:
         return self._http.request("GET", f"/api/knowledge/jobs/{quote_path(job_id)}")
 
 
+class KnowledgeQuarantineApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, *, collection_id: Optional[str] = None, limit: Optional[int] = None) -> List[m.KnowledgeQuarantineService_QuarantinedChunk]:
+        """List.
+
+        GET /api/knowledge/quarantine
+        """
+        return self._http.request("GET", "/api/knowledge/quarantine", query={"collectionId": collection_id, "limit": limit})
+
+    def approve_note(self, *, collection_id: str, source: str, idempotency_key: Optional[str] = None) -> None:
+        """Approve note.
+
+        POST /api/knowledge/quarantine/notes/approve
+        """
+        return self._http.request("POST", "/api/knowledge/quarantine/notes/approve", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_note(self, *, collection_id: str, source: str, idempotency_key: Optional[str] = None) -> None:
+        """Reject note.
+
+        POST /api/knowledge/quarantine/notes/reject
+        """
+        return self._http.request("POST", "/api/knowledge/quarantine/notes/reject", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def approve(self, chunk_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/knowledge/quarantine/{chunkId}/approve
+        """
+        return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject(self, chunk_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/knowledge/quarantine/{chunkId}/reject
+        """
+        return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+
 class KnowledgeRagSettingsApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13567,6 +13607,7 @@ class VegadutaClient:
         self.knowledge_collection = KnowledgeCollectionApi(self.http)
         self.knowledge_connector = KnowledgeConnectorApi(self.http)
         self.knowledge_ingestion_job = KnowledgeIngestionJobApi(self.http)
+        self.knowledge_quarantine = KnowledgeQuarantineApi(self.http)
         self.knowledge_rag_settings = KnowledgeRagSettingsApi(self.http)
         self.landing_event = LandingEventApi(self.http)
         self.lead = LeadApi(self.http)

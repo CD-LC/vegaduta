@@ -465,6 +465,9 @@
       "name": "KnowledgeIngestionJob"
     },
     {
+      "name": "KnowledgeQuarantine"
+    },
+    {
       "name": "KnowledgeRagSettings"
     },
     {
@@ -47662,6 +47665,309 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/quarantine": {
+      "get": {
+        "tags": [
+          "KnowledgeQuarantine"
+        ],
+        "summary": "List",
+        "operationId": "KnowledgeQuarantineController_list",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KnowledgeQuarantineService_QuarantinedChunk"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/quarantine/notes/approve": {
+      "post": {
+        "tags": [
+          "KnowledgeQuarantine"
+        ],
+        "summary": "Approve note",
+        "operationId": "KnowledgeQuarantineController_approveNote",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/quarantine/notes/reject": {
+      "post": {
+        "tags": [
+          "KnowledgeQuarantine"
+        ],
+        "summary": "Reject note",
+        "operationId": "KnowledgeQuarantineController_rejectNote",
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/quarantine/{chunkId}/approve": {
+      "post": {
+        "tags": [
+          "KnowledgeQuarantine"
+        ],
+        "summary": "Approve",
+        "operationId": "KnowledgeQuarantineController_approve",
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "tenantApiKey": []
+          }
+        ]
+      }
+    },
+    "/api/knowledge/quarantine/{chunkId}/reject": {
+      "post": {
+        "tags": [
+          "KnowledgeQuarantine"
+        ],
+        "summary": "Reject",
+        "operationId": "KnowledgeQuarantineController_reject",
+        "parameters": [
+          {
+            "name": "chunkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -106126,6 +106432,39 @@
           "PROCESSING",
           "COMPLETE",
           "FAILED"
+        ]
+      },
+      "KnowledgeQuarantineService_QuarantinedChunk": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "collectionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string"
+          },
+          "chunkIndex": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "content": {
+            "type": "string"
+          },
+          "sourceTaint": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "chunkIndex"
         ]
       },
       "KnowledgeReembedJobResponse": {

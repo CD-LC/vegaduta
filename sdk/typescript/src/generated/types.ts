@@ -4605,6 +4605,15 @@ export interface KnowledgeIngestionJobResponse {
 
 export type KnowledgeIngestionJobStatus = "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
 
+export interface KnowledgeQuarantineService_QuarantinedChunk {
+  id?: string;
+  collectionId?: string;
+  source?: string;
+  chunkIndex?: number;
+  content?: string;
+  sourceTaint?: string[];
+}
+
 export interface KnowledgeReembedJobResponse {
   id?: string;
   collectionId?: string;

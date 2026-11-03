@@ -4903,6 +4903,15 @@ class KnowledgeIngestionJobResponse(TypedDict, total=False):
     updatedAt: str
 
 
+class KnowledgeQuarantineService_QuarantinedChunk(TypedDict, total=False):
+    id: str
+    collectionId: str
+    source: str
+    chunkIndex: int
+    content: str
+    sourceTaint: List[str]
+
+
 class KnowledgeReembedJobResponse(TypedDict, total=False):
     id: str
     collectionId: str

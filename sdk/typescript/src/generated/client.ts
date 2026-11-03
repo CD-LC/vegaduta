@@ -6995,6 +6995,54 @@ export class KnowledgeIngestionJobApi {
   }
 }
 
+export class KnowledgeQuarantineApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/knowledge/quarantine`
+   */
+  list(options?: CallOptions<{ collectionId?: string; limit?: number }, HeaderParams>): Promise<T.KnowledgeQuarantineService_QuarantinedChunk[]> {
+    return this.http.request<T.KnowledgeQuarantineService_QuarantinedChunk[]>({ ...options, method: "GET", path: "/api/knowledge/quarantine" });
+  }
+
+  /**
+   * Approve note.
+   * `POST /api/knowledge/quarantine/notes/approve`
+   */
+  approveNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/approve", response: "void" });
+  }
+
+  /**
+   * Reject note.
+   * `POST /api/knowledge/quarantine/notes/reject`
+   */
+  rejectNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/reject", response: "void" });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/knowledge/quarantine/{chunkId}/approve`
+   */
+  approve(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/knowledge/quarantine/{chunkId}/reject`
+   */
+  reject(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/reject`, response: "void" });
+  }
+}
+
 export class KnowledgeRagSettingsApi {
   private readonly http: HttpClient;
 
@@ -16007,6 +16055,7 @@ export class VegadutaClient {
   readonly knowledgeCollection: KnowledgeCollectionApi;
   readonly knowledgeConnector: KnowledgeConnectorApi;
   readonly knowledgeIngestionJob: KnowledgeIngestionJobApi;
+  readonly knowledgeQuarantine: KnowledgeQuarantineApi;
   readonly knowledgeRagSettings: KnowledgeRagSettingsApi;
   readonly landingEvent: LandingEventApi;
   readonly lead: LeadApi;
@@ -16349,6 +16398,7 @@ export class VegadutaClient {
     this.knowledgeCollection = new KnowledgeCollectionApi(this.http);
     this.knowledgeConnector = new KnowledgeConnectorApi(this.http);
     this.knowledgeIngestionJob = new KnowledgeIngestionJobApi(this.http);
+    this.knowledgeQuarantine = new KnowledgeQuarantineApi(this.http);
     this.knowledgeRagSettings = new KnowledgeRagSettingsApi(this.http);
     this.landingEvent = new LandingEventApi(this.http);
     this.lead = new LeadApi(this.http);
