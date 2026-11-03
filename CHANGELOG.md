@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Security
 
+- **Query-string exfiltration after taint.** New `app.agents.taint.get-query-is-sink` (default `false`, `true` in the `strict` profile): on a tainted turn a GET whose URL has a query string, fragment, userinfo, a very long path segment, a non-http(s) scheme or an IP-literal host needs approval even with no `http-get-allow-hosts` set. Search tools that take a query rather than a URL remain uncovered.
 - **Spend and quota counters can no longer go negative or live forever; spend controls can fail closed.** The free-tier token
   quota and the smart-AI feature budget now take refunds the way the per-user budget does (a refund against an expired window
   is dropped, one larger than the counter stops at zero, so a rolled-back reservation no longer hands out free quota), and every

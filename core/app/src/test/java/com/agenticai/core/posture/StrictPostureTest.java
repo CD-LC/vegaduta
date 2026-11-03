@@ -39,6 +39,7 @@ class StrictPostureTest {
             assertThat(c.safe().test(value)).as("%s=%s must be safe under strict", c.key(), value).isTrue();
         }
         assertThat(env.getProperty("app.agents.taint.mode")).isEqualTo("enforce");
+        assertThat(env.getProperty("app.agents.taint.get-query-is-sink")).isEqualTo("true");
         assertThat(env.getProperty("app.mcp.tool-pinning.mode")).isEqualTo("enforce");
         assertThat(env.getProperty("app.tools.classification.unclassified-action")).isEqualTo("require-approval");
         assertThat(env.getProperty("app.tools.classification.confirmation-gate-exempt-tools")).isEmpty();
