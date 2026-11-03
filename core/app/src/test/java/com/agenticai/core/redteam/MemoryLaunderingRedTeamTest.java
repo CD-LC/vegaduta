@@ -73,7 +73,7 @@ class MemoryLaunderingRedTeamTest {
         when(collections.resolveChunking(any(), any(), any())).thenReturn(Chunker.Settings.DEFAULTS);
         IngestResponse ok = new IngestResponse(1, 10, List.of(UUID.randomUUID()));
         when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any())).thenReturn(ok);
-        when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class))).thenReturn(ok);
+        when(ingest.ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class))).thenReturn(ok);
         var tt = turn.taint.turnTaint(turn.stepCounter);
         // The production wiring: the tool reads the turn's own taint (AgentKnowledgeToolResolver adapts a TurnTaintView).
         return new AddToKnowledgeBaseToolCallback(
@@ -187,7 +187,7 @@ class MemoryLaunderingRedTeamTest {
         verify(ingest, never()).ingest(anyString(), org.mockito.ArgumentMatchers.eq(payload), anyInt(), anyInt(), any(UUID.class));
         // A write that is not refused by the screen must have been stored QUARANTINED.
         org.mockito.Mockito.mockingDetails(ingest).getInvocations().stream()
-                .filter(i -> i.getMethod().getName().equals("ingest") && i.getArguments().length == 6)
+                .filter(i -> i.getMethod().getName().equals("ingestWithProvenance"))
                 .forEach(i -> assertTrue(((ChunkProvenance) i.getArgument(5)).quarantined()));
     }
 

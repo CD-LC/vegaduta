@@ -52,7 +52,7 @@ class KnowledgeWriteQuarantineTest {
         agent = UUID.randomUUID();
         IngestResponse ok = new IngestResponse(1, 10, List.of(UUID.randomUUID()));
         when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class))).thenReturn(ok);
-        when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class)))
+        when(ingest.ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class)))
             .thenReturn(ok);
     }
 
@@ -73,7 +73,7 @@ class KnowledgeWriteQuarantineTest {
 
     private ChunkProvenance quarantinedWrite() {
         ArgumentCaptor<ChunkProvenance> prov = ArgumentCaptor.forClass(ChunkProvenance.class);
-        verify(ingest).ingest(anyString(), eq(NOTE), anyInt(), anyInt(), eq(collection), prov.capture());
+        verify(ingest).ingestWithProvenance(anyString(), eq(NOTE), anyInt(), anyInt(), eq(collection), prov.capture());
         verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class));
         return prov.getValue();
     }
@@ -93,7 +93,7 @@ class KnowledgeWriteQuarantineTest {
         String out = tool(turn(false), null).call(args(NOTE));
 
         verify(ingest).ingest(anyString(), eq(NOTE), anyInt(), anyInt(), eq(collection));
-        verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class));
+        verify(ingest, never()).ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class));
         assertFalse(out.contains("quarantined"), out);
         assertTrue(out.contains("chunksSaved"), out);
     }
@@ -110,11 +110,11 @@ class KnowledgeWriteQuarantineTest {
         assertTrue(quarantinedWrite().quarantined());
 
         KnowledgeIngestionService other = mock(KnowledgeIngestionService.class);
-        when(other.ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class)))
+        when(other.ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class)))
             .thenReturn(new IngestResponse(1, 10, List.of()));
         new AddToKnowledgeBaseToolCallback(other, collections, Set.of(collection), agent, "s", null,
             () -> { throw new IllegalStateException("no turn"); }).call(args(NOTE));
-        verify(other).ingest(anyString(), eq(NOTE), anyInt(), anyInt(), eq(collection), any(ChunkProvenance.class));
+        verify(other).ingestWithProvenance(anyString(), eq(NOTE), anyInt(), anyInt(), eq(collection), any(ChunkProvenance.class));
     }
 
     @Test
@@ -123,7 +123,7 @@ class KnowledgeWriteQuarantineTest {
 
         assertTrue(out.contains("not saved"), out);
         verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class));
-        verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class));
+        verify(ingest, never()).ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class));
     }
 
     @Test
@@ -162,7 +162,7 @@ class KnowledgeWriteQuarantineTest {
         KnowledgeIngestionService service = new KnowledgeIngestionService(
             sidecar, jdbc, repo, mock(KnowledgeDocumentService.class), mock(OcrProviderConfigService.class));
 
-        service.ingest("n", NOTE, 150, 30, collection, ChunkProvenance.quarantined(List.of("fetch_web_page")));
+        service.ingestWithProvenance("n", NOTE, 150, 30, collection, ChunkProvenance.quarantined(List.of("fetch_web_page")));
         service.ingest("n2", NOTE, 150, 30, collection);
 
         List<List<Object>> inserts = org.mockito.Mockito.mockingDetails(jdbc).getInvocations().stream()

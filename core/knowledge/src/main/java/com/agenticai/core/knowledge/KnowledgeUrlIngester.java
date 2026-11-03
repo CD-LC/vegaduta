@@ -179,7 +179,7 @@ public class KnowledgeUrlIngester {
         String text = decodeText(fetched);
         IngestResponse response =
                 provenance.quarantined()
-                        ? ingestionService.ingest(
+                        ? ingestionService.ingestWithProvenance(
                                 textSource,
                                 text,
                                 chunking.chunkSize(),

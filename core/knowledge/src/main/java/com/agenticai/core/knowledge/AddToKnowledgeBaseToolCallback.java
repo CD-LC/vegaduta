@@ -320,7 +320,7 @@ public class AddToKnowledgeBaseToolCallback implements ToolCallback {
             // differently-tuned one. No per-call override: the model doesn't get to pick chunking.
             Chunker.Settings chunking = collectionService.resolveChunking(collectionId, null, null);
             IngestResponse response = provenance.quarantined()
-                ? ingestionService.ingest(
+                ? ingestionService.ingestWithProvenance(
                     source, content, chunking.chunkSize(), chunking.chunkOverlap(), collectionId, provenance)
                 : ingestionService.ingest(source, content, chunking.chunkSize(), chunking.chunkOverlap(), collectionId);
             Map<String, Object> out = new java.util.LinkedHashMap<>();

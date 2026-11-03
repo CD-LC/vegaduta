@@ -175,12 +175,13 @@ public class KnowledgeIngestionService {
     }
 
     /**
-     * {@link #ingest(String, String, int, int, UUID)} with explicit provenance: what an agent tool
+     * {@link #ingest(String, String, int, int, UUID)} with explicit provenance (a distinct name: an overload
+     * would make every {@code ingest(..., null)} call site ambiguous): what an agent tool
      * writes on a turn that may have read attacker-authored content. A QUARANTINED
      * {@code provenance} stores the chunks but keeps them out of every retrieval path until a
      * person approves them (see {@code KnowledgeQuarantineService}).
      */
-    public IngestResponse ingest(
+    public IngestResponse ingestWithProvenance(
             String source,
             String text,
             int chunkSize,
