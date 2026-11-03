@@ -105,6 +105,10 @@ class MeteringCharacterisationTest {
             Object[] a = invocation.getArguments();
             if ("reconcileSpendReservationForCall".equals(invocation.getMethod().getName())) {
                 budget.add(new BudgetReconcile((Long) a[3], (Long) a[5], (Long) a[6]));
+            } else if ("chargeUnmeasuredResponse".equals(invocation.getMethod().getName())) {
+                // Text reached the caller but no usage did (a stream cancelled before its usage event): the
+                // reservation is kept as the charge, not released. Captured with no token counts.
+                budget.add(new BudgetReconcile((Long) a[3], null, null));
             } else if ("reconcileSpendReservationForUsage".equals(invocation.getMethod().getName())) {
                 // The Usage-carrying twin (prices reasoning tokens too); same reservation contract.
                 org.springframework.ai.chat.metadata.Usage usage = (org.springframework.ai.chat.metadata.Usage) a[5];
@@ -329,7 +333,7 @@ class MeteringCharacterisationTest {
     // -------------------------------------------------------- cancellation
 
     @Test
-    void aCancelledStreamStillWritesExactlyOneRowAndReleasesTheReservationOnce() throws Exception {
+    void aCancelledStreamStillWritesExactlyOneRowAndSettlesTheReservationOnce() throws Exception {
         ScriptedChatModel model = model(text(usage(100, 20), "one ", "two ", "three"));
 
         rig(model).prompt().user("hello").stream().content().take(1).collectList().block(Duration.ofSeconds(10));
@@ -340,7 +344,10 @@ class MeteringCharacterisationTest {
         assertThat(rows.get(0).success()).as("a cancelled stream is recorded as not successful").isFalse();
         assertThat(freeTier).as("cancel releases the token reservation exactly once").hasSize(1);
         assertThat(freeTier.get(0).reserved()).isEqualTo(FREE_TIER_RESERVED);
+        // Text ("one ") reached the caller before the usage event, so the dollar reservation is charged
+        // (chargeUnmeasuredResponse), not released: cancelling after the text is out is not free.
         assertThat(budget).hasSize(1);
         assertThat(budget.get(0).reserved()).isEqualTo(BUDGET_RESERVED_MICRO_CENTS);
+        assertThat(budget.get(0).prompt()).as("no usage was measured").isNull();
     }
 }
