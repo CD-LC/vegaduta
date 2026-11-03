@@ -73,8 +73,7 @@ class PerUserBudgetServiceTest {
     @SuppressWarnings("unchecked")
     private void verifyRefunded(long microCents) {
         verify(redisTemplate).execute(
-            eq(PerUserBudgetCounters.REFUND_IF_LIVE), org.mockito.ArgumentMatchers.anyList(), eq(Long.toString(-microCents)));
-        verify(valueOps, never()).increment(anyString(), eq(-microCents));
+            eq(com.agenticai.core.security.SpendCounters.REFUND_IF_LIVE), org.mockito.ArgumentMatchers.anyList(), eq(Long.toString(-microCents)));
     }
 
     @Test
@@ -153,25 +152,17 @@ class PerUserBudgetServiceTest {
     }
 
     @Test
-    void recordSpendConvertsUsdToMicroCentsAndSetsExpiryOnFirstWrite() {
-        // $0.01 -> 1,000,000 micro-cents. increment returns exactly that => first write => expiry set.
-        when(valueOps.increment(anyString(), eq(1_000_000L))).thenReturn(1_000_000L);
+    @SuppressWarnings("unchecked")
+    void recordSpendConvertsUsdToMicroCentsAndAddsItThroughTheTtlScript() {
+        // $0.01 -> 1,000,000 micro-cents, one atomic add that also owns the window expiry (86,400 s in millis).
+        SpendCounterMocks.stub(redisTemplate, "", 1_000_000L, 1_000_000L);
 
         service.recordSpend(TENANT, USER, Modality.TEXT, new BigDecimal("0.01"));
 
-        ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
-        verify(valueOps).increment(keyCaptor.capture(), eq(1_000_000L));
-        assertThat(keyCaptor.getValue()).contains(":text:").contains(TENANT).contains(USER);
-        verify(redisTemplate).expire(anyString(), eq(Duration.ofSeconds(86_400)));
-    }
-
-    @Test
-    void recordSpendDoesNotResetExpiryOnSubsequentWrite() {
-        // increment returns a cumulative value != the amount added => not the first write.
-        when(valueOps.increment(anyString(), eq(1_000_000L))).thenReturn(5_000_000L);
-
-        service.recordSpend(TENANT, USER, Modality.TEXT, new BigDecimal("0.01"));
-
+        ArgumentCaptor<java.util.List<String>> keys = ArgumentCaptor.forClass(java.util.List.class);
+        verify(redisTemplate).execute(eq(com.agenticai.core.security.SpendCounters.INCR_WITH_TTL), keys.capture(),
+            eq("1000000"), eq("86400000"));
+        assertThat(keys.getValue().get(0)).contains(":text:").contains(TENANT).contains(USER);
         verify(redisTemplate, never()).expire(anyString(), org.mockito.ArgumentMatchers.any(Duration.class));
     }
 
@@ -180,7 +171,7 @@ class PerUserBudgetServiceTest {
         service.recordSpend(TENANT, USER, Modality.TEXT, BigDecimal.ZERO);
         service.recordSpend(TENANT, USER, Modality.TEXT, new BigDecimal("-0.5"));
 
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -193,22 +184,22 @@ class PerUserBudgetServiceTest {
     @Test
     void recordSpendForCallUsesPricingCatalog() {
         when(pricingCatalog.estimateCostUsd("claude-x", 100L, 50L)).thenReturn(new BigDecimal("0.02"));
-        when(valueOps.increment(anyString(), eq(2_000_000L))).thenReturn(2_000_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 2_000_000L, (Long) (long) (2_000_000L));
 
         service.recordSpendForCall(TENANT, USER, Modality.TEXT, "claude-x", 100L, 50L);
 
-        verify(valueOps).increment(anyString(), eq(2_000_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 2_000_000L);
     }
 
     @Test
     void recordSpendForCallFallsBackWhenCatalogCannotPrice() {
         // Catalog returns null for an unknown hosted model -> fallback 0.00015/1k * 2000 tokens = 0.0003 USD = 30,000 micro-cents.
         when(pricingCatalog.estimateCostUsd("groq-unknown", 1000L, 1000L)).thenReturn(null);
-        when(valueOps.increment(anyString(), eq(30_000L))).thenReturn(30_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 30_000L, (Long) (long) (30_000L));
 
         service.recordSpendForCall(TENANT, USER, Modality.TEXT, "groq-unknown", 1000L, 1000L);
 
-        verify(valueOps).increment(anyString(), eq(30_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 30_000L);
     }
 
     @Test
@@ -219,7 +210,7 @@ class PerUserBudgetServiceTest {
 
         assertThatCode(() -> service.checkBudget(TENANT, USER, Modality.TEXT)).doesNotThrowAnyException();
         service.recordSpend(TENANT, USER, Modality.TEXT, new BigDecimal("0.01"));
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -255,7 +246,7 @@ class PerUserBudgetServiceTest {
         service.creditTopUp(TENANT, USER, Modality.TEXT, new BigDecimal("-1.00"));
         service.creditTopUp(TENANT, USER, Modality.TEXT, null);
 
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -423,17 +414,17 @@ class PerUserBudgetServiceTest {
     @Test
     void checkAndReserveBudgetReservesAtTheFallbackRateAndAllowsWhenUnderCap() {
         // 1000 tokens * fallback $0.00015/1k = $0.00015 = 15,000 micro-cents.
-        when(valueOps.increment(anyString(), eq(15_000L))).thenReturn(15_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 15_000L, (Long) (long) (15_000L));
 
         long reserved = service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 1000L, TenantPlan.FREE);
 
         assertThat(reserved).isEqualTo(15_000L);
-        verify(valueOps).increment(org.mockito.ArgumentMatchers.contains(":text:"), eq(15_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, ":text:", 15_000L);
     }
 
     @Test
     void checkAndReserveBudgetUndoesAndThrowsWhenItWouldExceedTheCap() {
-        when(valueOps.increment(anyString(), eq(15_000L))).thenReturn(TEXT_CAP_MICRO_CENTS + 5_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 15_000L, (Long) (long) (TEXT_CAP_MICRO_CENTS + 5_000L));
 
         assertThatThrownBy(() -> service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 1000L, TenantPlan.FREE))
             .isInstanceOf(PerUserBudgetExhaustedException.class);
@@ -448,12 +439,12 @@ class PerUserBudgetServiceTest {
         long reserved = service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 1000L, TenantPlan.FREE);
 
         assertThat(reserved).isZero();
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
     void checkAndReserveBudgetFailsOpenOnRedisError() {
-        when(valueOps.increment(anyString(), anyLong())).thenThrow(new RuntimeException("redis down"));
+        SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
 
         long reserved = service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 1000L, TenantPlan.FREE);
 
@@ -465,7 +456,7 @@ class PerUserBudgetServiceTest {
         long reserved = service.checkAndReserveBudget(TENANT, USER, Modality.TEXT, 0L, TenantPlan.FREE);
 
         assertThat(reserved).isZero();
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -475,7 +466,7 @@ class PerUserBudgetServiceTest {
 
         service.reconcileSpendReservationForCall(TENANT, USER, Modality.TEXT, 15_000L, "claude-x", 100L, 50L, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(5_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 5_000L);
     }
 
     @Test
@@ -491,7 +482,7 @@ class PerUserBudgetServiceTest {
 
         service.reconcileSpendReservationForCall(TENANT, USER, Modality.TEXT, 15_000L, "claude-x", 100L, 50L, TenantPlan.FREE);
 
-        verify(valueOps, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redisTemplate);
     }
 
     @Test
@@ -504,7 +495,7 @@ class PerUserBudgetServiceTest {
 
         service.reconcileSpendReservationForCall(TENANT, USER, Modality.TEXT, 0L, "claude-x", 100L, 50L, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(20_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 20_000L);
     }
 
     @Test
@@ -536,7 +527,7 @@ class PerUserBudgetServiceTest {
         service.reconcileSpendReservationForUsage(TENANT, USER, Modality.TEXT, 15_000L, "claude-x", usage, TenantPlan.FREE);
 
         // $0.0002 = 20,000 micro-cents actual; reserved 15,000 -> +5,000 delta.
-        verify(valueOps).increment(anyString(), eq(5_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 5_000L);
     }
 
     @Test
@@ -556,7 +547,7 @@ class PerUserBudgetServiceTest {
 
         service.reconcileSpendReservationForUsage(TENANT, USER, Modality.TEXT, 0L, "claude-x", usage, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(20_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 20_000L);
     }
 
     @Test
@@ -567,10 +558,10 @@ class PerUserBudgetServiceTest {
         when(usage.getCompletionTokens()).thenReturn(1000);
         when(usage.getTotalTokens()).thenReturn(2000);
         when(pricingCatalog.estimateCostUsd(null, "groq-unknown", 1000L, 1000L, null, null, null)).thenReturn(null);
-        when(valueOps.increment(anyString(), eq(30_000L))).thenReturn(30_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 30_000L, (Long) (long) (30_000L));
 
         service.recordSpendForUsage(TENANT, USER, Modality.TEXT, "groq-unknown", usage, TenantPlan.FREE);
 
-        verify(valueOps).increment(anyString(), eq(30_000L));
+        SpendCounterMocks.verifyAdded(redisTemplate, "", 30_000L);
     }
 }

@@ -5,6 +5,9 @@ import com.agenticai.core.agents.generation.AgentGenerationProperties;
 import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
+import com.agenticai.core.security.SpendControlsFailMode;
+import com.agenticai.core.security.SpendControlsUnavailableException;
+import com.agenticai.core.security.SpendCounters;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.PlatformSettingsService;
@@ -93,6 +96,14 @@ public class FreeTierUsageLimiterService {
     // setting) - see checkAndReserveTokenBudget's @param maxTokens doc for why
     // this needs to ALSO be enforced here, not just at write time.
     private volatile AgentGenerationProperties generation = new AgentGenerationProperties();
+
+    private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
+
+    /** {@code app.governance.spend-controls.fail-mode}; absent (direct construction) keeps fail-open. */
+    @Autowired(required = false)
+    void useSpendControlsFailMode(SpendControlsFailMode failMode) {
+        this.failMode = failMode;
+    }
 
     @Autowired(required = false)
     void useGenerationProperties(AgentGenerationProperties properties) {
@@ -369,7 +380,7 @@ public class FreeTierUsageLimiterService {
         }
         String monthlyKey = MONTHLY_TOKEN_KEY_PREFIX + tenantId;
 
-        Long monthlyTokens = incrementByAndGet(monthlyKey, MONTHLY_WINDOW, reservation);
+        Long monthlyTokens = incrementByAndGet(monthlyKey, MONTHLY_WINDOW, reservation, true);
         if (monthlyTokens == null) {
             return 0L; // Redis outage - fail open, nothing reserved.
         }
@@ -544,28 +555,25 @@ public class FreeTierUsageLimiterService {
      * changing its own return type under existing callers.
      */
     private Long incrementByAndGet(String key, Duration window, long by) {
-        // 2026-08-08 budget-reconciliation edge-case audit: must fail open
-        // the same way PerUserBudgetService#incrementByAndGet does - EVERY
-        // caller (checkAndReserveTokenBudget's reserve-then-compare AND
-        // reconcileTokenReservation's release-on-error/cancel path, called
-        // from AgentChatService's doOnError handler) treats a null return as
-        // "Redis outage, nothing reserved/released" and fails open. Before
-        // this fix a Redis exception propagated instead of returning null,
-        // which for checkAndReserveTokenBudget meant a Redis blip HARD-FAILED
-        // every hosted-pool turn instead of failing open like the rest of
-        // this class, and for the release path meant a Redis exception thrown
-        // from inside AgentChatService's doOnError callback risked masking
-        // the original error signal delivered to the caller.
+        return incrementByAndGet(key, window, by, false);
+    }
+
+    /**
+     * @param gate true only for {@link #checkAndReserveTokenBudget}'s reservation: with {@code fail-mode=closed} a Redis
+     *     failure there refuses the call ({@link SpendControlsUnavailableException}). Reconcile, refunds and plain usage
+     *     records never throw: the tokens are already spent or the reservation is being given back.
+     *     The TTL and refund atomicity (no negative counter in an expired window) are {@link SpendCounters}'.
+     */
+    private Long incrementByAndGet(String key, Duration window, long by, boolean gate) {
+        // 2026-08-08 budget-reconciliation edge-case audit: must fail open the same way
+        // PerUserBudgetService#incrementByAndGet does - the release-on-error/cancel path runs inside
+        // AgentChatService's doOnError handler and must not mask the original error.
         try {
-            Long count = redisTemplate.opsForValue().increment(key, by);
-            if (count != null && count == by) {
-                // First write to this window (count now equals exactly what we
-                // just added) - set expiry once, on the write that created
-                // the key.
-                redisTemplate.expire(key, window);
-            }
-            return count;
+            return SpendCounters.add(redisTemplate, key, window, by);
         } catch (RuntimeException e) {
+            if (gate && by > 0) {
+                failMode.onGateFailure("free-tier-token-quota", e, log);
+            }
             log.debug("Hosted-pool token counter write failed for '{}' - failing open, same posture as every other write in this class", key, e);
             return null;
         }

@@ -50,17 +50,27 @@ import org.slf4j.Logger;
 public final class GovernanceFailOpenPolicy {
 
     /**
-     * When {@code true} (today's behavior, preserved exactly): a spend/abuse
-     * control whose Redis backend errors lets the request through. When
-     * flipped to {@code false}: {@link #allowOnBackendFailure} returns
-     * {@code false} and callers must treat the limit as exceeded - i.e. a
-     * Redis outage stops metered traffic instead of unmetering it. Flip only
-     * with a review of every caller: fail-closed is right for spend controls,
-     * but blanket fail-closed on e.g. the signup limiter turns a Redis blip
-     * into a signup outage, which is why this starts as one shared constant
-     * and not a silent per-class default.
+     * What a spend control does when its Redis backend errors. {@link #OPEN} is the default and today's behaviour: the
+     * request goes through unmetered. {@link #CLOSED} refuses it. Chosen by {@code app.governance.spend-controls.fail-mode}
+     * through {@link SpendControlsFailMode}; this used to be a compile-time constant. Blanket fail-closed on e.g. the
+     * signup limiter would turn a Redis blip into a signup outage, so only the spend controls read it.
      */
-    public static final boolean SPEND_CONTROLS_FAIL_OPEN = true;
+    public enum Mode {
+        OPEN,
+        CLOSED;
+
+        public static Mode parse(String value) {
+            String v = value == null ? "" : value.trim();
+            if (v.isEmpty() || v.equalsIgnoreCase("open")) {
+                return OPEN;
+            }
+            if (v.equalsIgnoreCase("closed")) {
+                return CLOSED;
+            }
+            throw new IllegalArgumentException(
+                "app.governance.spend-controls.fail-mode must be 'open' or 'closed', got '" + value + "'");
+        }
+    }
 
     private GovernanceFailOpenPolicy() {
     }
@@ -78,14 +88,19 @@ public final class GovernanceFailOpenPolicy {
      *                    limiter's own logger name/level config
      */
     public static boolean allowOnBackendFailure(String controlName, Exception cause, Logger log) {
-        if (SPEND_CONTROLS_FAIL_OPEN) {
+        return allowOnBackendFailure(Mode.OPEN, controlName, cause, log);
+    }
+
+    /** As above with the mode chosen by the caller (normally {@link SpendControlsFailMode#mode()}). */
+    public static boolean allowOnBackendFailure(Mode mode, String controlName, Exception cause, Logger log) {
+        if (mode != Mode.CLOSED) {
             log.warn("GOVERNANCE_FAIL_OPEN control={} backend failure - allowing traffic UNMETERED; "
                 + "if Redis is down, every Redis-backed spend/abuse control is failing open together "
                 + "(see GovernanceFailOpenPolicy)", controlName, cause);
             return true;
         }
         log.error("GOVERNANCE_FAIL_CLOSED control={} backend failure - BLOCKING traffic "
-            + "(SPEND_CONTROLS_FAIL_OPEN=false, see GovernanceFailOpenPolicy)", controlName, cause);
+            + "(app.governance.spend-controls.fail-mode=closed, see GovernanceFailOpenPolicy)", controlName, cause);
         return false;
     }
 }

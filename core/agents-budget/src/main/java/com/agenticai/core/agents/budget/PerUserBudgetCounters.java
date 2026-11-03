@@ -7,6 +7,9 @@ import com.agenticai.core.agents.budget.PerUserBudgetService.Modality;
 import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
+import com.agenticai.core.security.SpendControlsFailMode;
+import com.agenticai.core.security.SpendControlsUnavailableException;
+import com.agenticai.core.security.SpendCounters;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -14,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 /**
  * The Redis side of {@link PerUserBudgetService}: key shapes, fail-open counter reads and writes,
@@ -44,6 +46,7 @@ final class PerUserBudgetCounters {
     // side signal - the exception is the enforcement, the notification
     // is just how a human finds out before polling the console.
     private final ObjectProvider<NotificationService> notificationService;
+    private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
 
     PerUserBudgetCounters(
         StringRedisTemplate redisTemplate, ObjectProvider<NotificationService> notificationService
@@ -106,11 +109,11 @@ final class PerUserBudgetCounters {
             }
             ttlRepair.repairMissingTtl(spendKey, windowSeconds);
             return Long.parseLong(value.trim());
-        } catch (NumberFormatException e) {
-            // Corrupt value - fail open (treat as unspent), same posture as a
-            // Redis outage: never block a turn on a metering-store hiccup.
-            return 0L;
+        } catch (SpendControlsUnavailableException e) {
+            throw e;
         } catch (RuntimeException e) {
+            // NumberFormatException (a corrupt value) is a RuntimeException too: unreadable counts as a failed read.
+            failMode.onGateFailure("per-user-budget", e, log);
             log.debug("Per-user budget read failed - failing open", e);
             return 0L;
         }
@@ -134,9 +137,10 @@ final class PerUserBudgetCounters {
             }
             ttlRepair.repairMissingTtl(creditKeyStr, windowSeconds);
             return Long.parseLong(value.trim());
-        } catch (NumberFormatException e) {
-            return 0L;
+        } catch (SpendControlsUnavailableException e) {
+            throw e;
         } catch (RuntimeException e) {
+            failMode.onGateFailure("per-user-budget-credit", e, log);
             log.debug("Per-user budget credit read failed - failing open (no credit)", e);
             return 0L;
         }
@@ -176,19 +180,22 @@ final class PerUserBudgetCounters {
      * under existing callers.
      */
     Long incrementByAndGet(String key, Duration window, long by) {
-        if (by < 0) {
-            return refund(key, by);
-        }
+        return incrementByAndGet(key, window, by, false);
+    }
+
+    /**
+     * @param gate true when the increment is a reservation that decides whether a call may run: with
+     *     {@code fail-mode=closed} a Redis failure then refuses the call. A refund (negative {@code by}) and a plain
+     *     post-call record are never gates: the money is already spent or the reservation is being given back.
+     *     Atomicity of the TTL and of refunds is {@link SpendCounters}'.
+     */
+    Long incrementByAndGet(String key, Duration window, long by, boolean gate) {
         try {
-            Long count = redisTemplate.opsForValue().increment(key, by);
-            if (count != null && count == by) {
-                // First write to this window (cumulative now equals exactly
-                // what we just added) - set expiry once, same idiom as
-                // FreeTierUsageLimiterService#incrementBy.
-                redisTemplate.expire(key, window);
-            }
-            return count;
+            return SpendCounters.add(redisTemplate, key, window, by);
         } catch (RuntimeException e) {
+            if (gate && by > 0) {
+                failMode.onGateFailure("per-user-budget", e, log);
+            }
             // Fail open - a metering write that didn't land just means this
             // call went uncounted, never a broken turn.
             log.debug("Per-user budget write failed - failing open", e);
@@ -196,29 +203,9 @@ final class PerUserBudgetCounters {
         }
     }
 
-    /**
-     * Takes {@code -by} back out of a window that is still open: a rolled-back reservation, or the unused part of one.
-     * One atomic script, because a plain {@code INCRBY} of a negative number is wrong in two ways. On a key whose window
-     * already expired it creates a fresh negative counter, which is credit the user never paid for: the next window
-     * starts below zero and the cap is exceeded by that much. And a refund larger than what is left drives a live
-     * counter below zero for the same reason. A refund against an expired window is dropped (that window's spend is
-     * gone with its key); one that would overshoot stops at zero. Returns the counter after the refund.
-     */
-    private Long refund(String key, long by) {
-        try {
-            return redisTemplate.execute(REFUND_IF_LIVE, java.util.List.of(key), Long.toString(by));
-        } catch (RuntimeException e) {
-            log.debug("Per-user budget refund failed - failing open", e);
-            return null;
-        }
+    void useFailMode(SpendControlsFailMode failMode) {
+        this.failMode = failMode;
     }
-
-    /** KEEPTTL so a clamp never turns a window with an expiry into one without. */
-    static final DefaultRedisScript<Long> REFUND_IF_LIVE = new DefaultRedisScript<>(
-        "if redis.call('EXISTS', KEYS[1]) == 0 then return 0 end "
-            + "local v = redis.call('INCRBY', KEYS[1], ARGV[1]) "
-            + "if v < 0 then redis.call('SET', KEYS[1], '0', 'KEEPTTL') v = 0 end "
-            + "return v", Long.class);
 
     String budgetMessage(BudgetConfig config, Modality modality, long capMicroCents, String key) {
         BigDecimal capUsd = BigDecimal.valueOf(capMicroCents).divide(MICRO_CENTS_PER_USD, 4, RoundingMode.HALF_UP);

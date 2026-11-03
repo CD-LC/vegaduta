@@ -129,14 +129,12 @@ class PlatformFeatureBudgetServiceTest {
     @Test
     void recordSpendConvertsUsdToMicroCentsAndIncrementsBothBuckets() {
         // $0.01 -> 1,000,000 micro-cents. increment returns exactly that => first write => expiry set.
-        when(valueOps.increment(anyString(), eq(1_000_000L))).thenReturn(1_000_000L);
+        SpendCounterMocks.stub(redisTemplate, "", 1_000_000L, (Long) (long) (1_000_000L));
 
         service.recordSpend(FEATURE, new BigDecimal("0.01"));
 
-        verify(valueOps).increment(eq("agentic:smart-ai-budget:feature:" + FEATURE), eq(1_000_000L));
-        verify(valueOps).increment(eq("agentic:smart-ai-budget:__master__"), eq(1_000_000L));
-        verify(redisTemplate).expire(eq("agentic:smart-ai-budget:feature:" + FEATURE), eq(Duration.ofSeconds(86_400)));
-        verify(redisTemplate).expire(eq("agentic:smart-ai-budget:__master__"), eq(Duration.ofSeconds(86_400)));
+        SpendCounterMocks.verifyAdded(redisTemplate, "agentic:smart-ai-budget:feature:" + FEATURE, 1_000_000L);
+        SpendCounterMocks.verifyAdded(redisTemplate, "agentic:smart-ai-budget:__master__", 1_000_000L);
     }
 
     @Test
@@ -157,8 +155,7 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void failsOpenWhenRedisWriteThrows() {
-        when(valueOps.increment(anyString(), org.mockito.ArgumentMatchers.anyLong()))
-            .thenThrow(new RuntimeException("redis down"));
+        SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
 
         org.assertj.core.api.Assertions.assertThatCode(() -> service.recordSpend(FEATURE, new BigDecimal("0.01")))
             .doesNotThrowAnyException();
@@ -173,8 +170,7 @@ class PlatformFeatureBudgetServiceTest {
 
     /** Real INCRBY/GET semantics over an in-memory map (INCRBY is atomic per key, as in Redis). */
     private void withInMemoryCounters() {
-        when(valueOps.increment(anyString(), org.mockito.ArgumentMatchers.anyLong())).thenAnswer(inv ->
-            counters.computeIfAbsent(inv.getArgument(0), k -> new AtomicLong()).addAndGet(inv.<Long>getArgument(1)));
+        SpendCounterMocks.stubInMemory(redisTemplate, counters);
         when(valueOps.get(anyString())).thenAnswer(inv -> {
             AtomicLong v = counters.get(inv.<String>getArgument(0));
             return v == null ? null : Long.toString(v.get());
@@ -196,7 +192,6 @@ class PlatformFeatureBudgetServiceTest {
         // Held BEFORE the call - this is what a concurrent caller now sees.
         assertThat(counter(FEATURE_BUCKET)).isEqualTo(1_000_000L);
         assertThat(counter(MASTER_BUCKET)).isEqualTo(1_000_000L);
-        verify(redisTemplate).expire(eq(FEATURE_BUCKET), eq(Duration.ofSeconds(86_400)));
     }
 
     @Test
@@ -319,8 +314,7 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void reserveFailsOpenWhenRedisWriteThrows() {
-        when(valueOps.increment(anyString(), org.mockito.ArgumentMatchers.anyLong()))
-            .thenThrow(new RuntimeException("redis down"));
+        SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
 
         PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
 

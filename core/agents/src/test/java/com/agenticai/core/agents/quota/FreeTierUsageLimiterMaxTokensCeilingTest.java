@@ -30,7 +30,7 @@ class FreeTierUsageLimiterMaxTokensCeilingTest {
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
         when(settings.getLong(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
         when(settings.getInt(anyString(), org.mockito.ArgumentMatchers.anyInt())).thenAnswer(inv -> inv.getArgument(1));
-        when(ops.increment(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
+        SpendCounterMocks.stubAll(redis, by -> by);
         FreeTierUsageLimiterService limiter = new FreeTierUsageLimiterService(
             redis, settings, 400_000L, 2, 3, new SimpleMeterRegistry(), 2_000L, 0L, mock(ObjectProvider.class));
 

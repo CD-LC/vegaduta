@@ -115,6 +115,12 @@ public class PerUserBudgetService {
         this.counters = new PerUserBudgetCounters(redisTemplate, notificationService);
     }
 
+    /** {@code app.governance.spend-controls.fail-mode}; absent (direct construction) keeps fail-open. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void useSpendControlsFailMode(com.agenticai.core.security.SpendControlsFailMode failMode) {
+        counters.useFailMode(failMode);
+    }
+
     /** The four cost-bearing modalities, each an independent per-user sub-cap. */
     public enum Modality {
         TEXT,
@@ -303,7 +309,7 @@ public class PerUserBudgetService {
         }
         String spendKey = PerUserBudgetCounters.key(tenantId, userKey, modality);
         Duration window = Duration.ofSeconds(config.windowSeconds());
-        Long newTotal = counters.incrementByAndGet(spendKey, window, reservedMicroCents);
+        Long newTotal = counters.incrementByAndGet(spendKey, window, reservedMicroCents, true);
         if (newTotal == null) {
             return 0L; // Redis outage - fail open, nothing reserved.
         }

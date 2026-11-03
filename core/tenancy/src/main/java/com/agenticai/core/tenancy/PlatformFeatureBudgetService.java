@@ -1,11 +1,15 @@
 package com.agenticai.core.tenancy;
 
+import com.agenticai.core.security.SpendControlsFailMode;
+import com.agenticai.core.security.SpendControlsUnavailableException;
+import com.agenticai.core.security.SpendCounters;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -91,6 +95,7 @@ public class PlatformFeatureBudgetService {
     private static final Logger log = LoggerFactory.getLogger(PlatformFeatureBudgetService.class);
 
     private static final String SPEND_KEY_PREFIX = "agentic:smart-ai-budget:";
+    static final String REASON_STORE_UNAVAILABLE = "budget-store-unavailable";
     private static final String MASTER_BUCKET = "__master__";
     static final long MICRO_CENTS_PER_USD_LITERAL = 100_000_000L;
     private static final BigDecimal MICRO_CENTS_PER_USD = BigDecimal.valueOf(MICRO_CENTS_PER_USD_LITERAL);
@@ -114,6 +119,7 @@ public class PlatformFeatureBudgetService {
     private final PlatformSettingsService platformSettingsService;
     private final long configCacheMs;
     private final AtomicReference<CachedGlobalConfig> cachedGlobalConfig = new AtomicReference<>();
+    private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
 
     public PlatformFeatureBudgetService(
         StringRedisTemplate redisTemplate,
@@ -123,6 +129,17 @@ public class PlatformFeatureBudgetService {
         this.redisTemplate = redisTemplate;
         this.platformSettingsService = platformSettingsService;
         this.configCacheMs = configCacheMs;
+    }
+
+    /**
+     * {@code app.governance.spend-controls.fail-mode}; absent (direct construction) keeps fail-open. In closed mode a
+     * Redis failure on a gating path ({@link #checkBudget}, {@link #reserve}) is reported as a BLOCKED decision with
+     * reason {@value #REASON_STORE_UNAVAILABLE}, not an exception: this class's contract is that a Smart AI feature
+     * degrades to its non-AI behaviour and never surfaces an error to the tenant.
+     */
+    @Autowired(required = false)
+    void useSpendControlsFailMode(SpendControlsFailMode failMode) {
+        this.failMode = failMode;
     }
 
     /** True when the master Smart AI switch is on. Every feature check below implies this. */
@@ -158,13 +175,17 @@ public class PlatformFeatureBudgetService {
         if (!featureConfig.enabled()) {
             return BudgetDecision.blocked("feature-disabled");
         }
-        long featureSpent = currentSpendMicroCents(featureBucketKey(featureKey));
-        if (featureSpent >= featureConfig.dailyCapMicroCents()) {
-            return BudgetDecision.blocked("feature-budget-exhausted");
-        }
-        long masterSpent = currentSpendMicroCents(masterBucketKey());
-        if (masterSpent >= config.masterDailyCapMicroCents()) {
-            return BudgetDecision.blocked("master-budget-exhausted");
+        try {
+            long featureSpent = currentSpendMicroCents(featureBucketKey(featureKey));
+            if (featureSpent >= featureConfig.dailyCapMicroCents()) {
+                return BudgetDecision.blocked("feature-budget-exhausted");
+            }
+            long masterSpent = currentSpendMicroCents(masterBucketKey());
+            if (masterSpent >= config.masterDailyCapMicroCents()) {
+                return BudgetDecision.blocked("master-budget-exhausted");
+            }
+        } catch (SpendControlsUnavailableException unavailable) {
+            return BudgetDecision.blocked(REASON_STORE_UNAVAILABLE);
         }
         return BudgetDecision.granted();
     }
@@ -238,14 +259,27 @@ public class PlatformFeatureBudgetService {
         String featureBucket = featureBucketKey(featureKey);
         String masterBucket = masterBucketKey();
 
-        Long featureTotal = incrementByAndGet(featureBucket, window, estimate);
+        Long featureTotal;
+        try {
+            featureTotal = incrementByAndGet(featureBucket, window, estimate, true);
+        } catch (SpendControlsUnavailableException unavailable) {
+            return Reservation.blocked(featureKey, REASON_STORE_UNAVAILABLE);
+        }
         if (featureTotal != null && featureTotal > featureConfig.dailyCapMicroCents()) {
             incrementByAndGet(featureBucket, window, -estimate);
             return Reservation.blocked(featureKey, "feature-budget-exhausted");
         }
         long featureReserved = featureTotal == null ? 0L : estimate;
 
-        Long masterTotal = incrementByAndGet(masterBucket, window, estimate);
+        Long masterTotal;
+        try {
+            masterTotal = incrementByAndGet(masterBucket, window, estimate, true);
+        } catch (SpendControlsUnavailableException unavailable) {
+            if (featureReserved > 0) {
+                incrementByAndGet(featureBucket, window, -featureReserved);
+            }
+            return Reservation.blocked(featureKey, REASON_STORE_UNAVAILABLE);
+        }
         if (masterTotal != null && masterTotal > config.masterDailyCapMicroCents()) {
             incrementByAndGet(masterBucket, window, -estimate);
             if (featureReserved > 0) {
@@ -265,10 +299,10 @@ public class PlatformFeatureBudgetService {
      * full refund. No-op for a refused reservation or one already settled or
      * released. Never throws.
      *
-     * <p>A window that rolled over between reserve and settle gets the delta
-     * as its first write (and so its expiry) - at worst a new window starts a
-     * few micro-cents negative or positive by one call's estimate error, never
-     * a counter with no TTL.
+     * <p>A window that rolled over between reserve and settle: a positive delta
+     * is that window's first write (and gets its expiry), a negative one (a
+     * refund) is dropped by {@link SpendCounters} rather than creating a
+     * negative counter - never free budget, never a counter with no TTL.
      */
     public void settle(Reservation reservation, BigDecimal actualCostUsd) {
         if (reservation == null || !reservation.allowed() || !reservation.markSettled()) {
@@ -453,11 +487,10 @@ public class PlatformFeatureBudgetService {
         try {
             String value = redisTemplate.opsForValue().get(key);
             return value == null ? 0L : Long.parseLong(value.trim());
-        } catch (NumberFormatException e) {
-            // Corrupt value - fail open (treat as unspent), same posture as a
-            // Redis outage: never block a feature on a metering-store hiccup.
-            return 0L;
         } catch (RuntimeException e) {
+            // A corrupt value (NumberFormatException) counts as a failed read. Open: treat as unspent, never block a
+            // feature on a metering-store hiccup. Closed: throws SpendControlsUnavailableException.
+            failMode.onGateFailure("smart-ai-budget", e, log);
             log.debug("Smart AI budget read failed - failing open", e);
             return 0L;
         }
@@ -471,15 +504,22 @@ public class PlatformFeatureBudgetService {
      * may be negative (undo / refund).
      */
     private Long incrementByAndGet(String key, Duration window, long by) {
+        return incrementByAndGet(key, window, by, false);
+    }
+
+    /**
+     * @param gate true for a {@link #reserve} increment: closed mode then throws
+     *     {@link SpendControlsUnavailableException} for the caller to turn into a blocked reservation. Refunds and
+     *     {@link #settle}/{@link #recordSpend} writes never throw. TTL and refund atomicity are {@link SpendCounters}':
+     *     a negative delta against an expired window used to create a negative counter, i.e. free budget.
+     */
+    private Long incrementByAndGet(String key, Duration window, long by, boolean gate) {
         try {
-            Long count = redisTemplate.opsForValue().increment(key, by);
-            if (count != null && count == by) {
-                // First write to this window - set expiry once, same idiom
-                // as PerUserBudgetService#incrementBy.
-                redisTemplate.expire(key, window);
-            }
-            return count;
+            return SpendCounters.add(redisTemplate, key, window, by);
         } catch (RuntimeException e) {
+            if (gate && by > 0) {
+                failMode.onGateFailure("smart-ai-budget", e, log);
+            }
             log.debug("Smart AI budget write failed - failing open", e);
             return null;
         }

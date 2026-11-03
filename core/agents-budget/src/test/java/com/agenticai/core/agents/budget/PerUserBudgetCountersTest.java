@@ -127,24 +127,11 @@ class PerUserBudgetCountersTest {
     // ---- counter writes -----------------------------------------------------
 
     @Test
-    void incrementSetsTheWindowExpiryOnlyOnTheFirstWrite() {
-        // cumulative == amount added => first write this window.
-        when(valueOps.increment("k", 5L)).thenReturn(5L);
-        counters.incrementBy("k", Duration.ofSeconds(60), 5L);
-        verify(redisTemplate).expire("k", Duration.ofSeconds(60));
-
-        // cumulative != amount added => window already live.
-        when(valueOps.increment("k", 5L)).thenReturn(9L);
-        counters.incrementBy("k", Duration.ofSeconds(60), 5L);
-        verify(redisTemplate).expire("k", Duration.ofSeconds(60)); // still exactly once
-    }
-
-    @Test
     void incrementByAndGetReturnsTheCumulativeOrNullOnOutage() {
-        when(valueOps.increment("k", 7L)).thenReturn(42L);
+        SpendCounterMocks.stub(redisTemplate, "k", 7L, 42L);
         assertThat(counters.incrementByAndGet("k", Duration.ofSeconds(60), 7L)).isEqualTo(42L);
 
-        when(valueOps.increment("k", 7L)).thenThrow(new RuntimeException("redis down"));
+        SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
         assertThat(counters.incrementByAndGet("k", Duration.ofSeconds(60), 7L)).isNull();
     }
 

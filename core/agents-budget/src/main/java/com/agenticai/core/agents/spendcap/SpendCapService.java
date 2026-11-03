@@ -4,6 +4,7 @@ import com.agenticai.core.chat.HostedSpendListener;
 import com.agenticai.core.chat.LlmUsageRollupService;
 import com.agenticai.core.chat.SpendReport;
 import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.security.SpendControlsFailMode;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,6 +67,23 @@ import org.springframework.stereotype.Service;
  * infrastructure fault must not stop every capped tenant's chat. A tenant with
  * no cap never touches Redis or the database here at all.
  *
+ * <p><b>Soft cap, not a hard one.</b> {@link #assertWithinCap} is check-then-act: it reads month-to-date spend, and the
+ * cost of the call lands only after the provider answers (via {@link #onHostedSpend}). N calls that start while the
+ * tenant is just under the cap all pass, so spend can overshoot the cap by up to the cost of the calls in flight, and by
+ * the 30-second config cache and a database-fallback figure cached for up to a minute when Redis is down. For most
+ * tenants that is a rounding error; for an operator who needs a tighter bound, set
+ * {@code app.spend-cap.reserve-usd-per-call} (default 0 = off) to roughly the cost of one call. Each admitted call then
+ * adds that amount to a shared in-flight counter ({@code spendcap:inflight:<tenantId>}, self-expiring after
+ * {@link #INFLIGHT_TTL} so a call that never reports spend cannot hold it forever), {@link #onHostedSpend} takes it
+ * back, and a call is refused when month-to-date plus everything in flight would pass the cap. Overshoot is then bounded
+ * by the calls' real cost above their reserved amount, not by concurrency. Zero-cost and failed calls release their
+ * reservation only through {@link #onHostedSpend}, so a path that never reports leaves it to expire.
+ *
+ * <p><b>Fail mode.</b> With {@code app.governance.spend-controls.fail-mode=closed} a call is refused with
+ * {@code SpendControlsUnavailableException} (HTTP 503) instead of allowed when the cap cannot be evaluated at all
+ * (config lookup failed, or Redis and the database both failed), or when the reservation cannot be made. A Redis
+ * outage that the database can still answer keeps evaluating the cap from the database, in either mode.
+ *
  * <p><b>Alerts.</b> Crossing 80% and 100% fires {@link SpendCapAlertSink}s once
  * per tenant, month and stage. The once-ness is a conditional UPDATE on
  * {@code spend_cap_alert_stage/month}, so it holds across replicas; the sinks
@@ -79,6 +98,8 @@ public class SpendCapService implements HostedSpendListener {
     static final Duration KEY_TTL = Duration.ofDays(40);
     static final Duration CONFIG_TTL = Duration.ofSeconds(30);
     static final Duration DB_FALLBACK_TTL = Duration.ofSeconds(60);
+    static final String INFLIGHT_PREFIX = "spendcap:inflight:";
+    static final Duration INFLIGHT_TTL = Duration.ofSeconds(120);
     static final BigDecimal MAX_CAP_USD = new BigDecimal("1000000");
     static final BigDecimal EIGHTY_PERCENT = new BigDecimal("0.80");
     private static final String HOSTED = ProviderName.PLATFORM_HOSTED.name();
@@ -101,6 +122,19 @@ public class SpendCapService implements HostedSpendListener {
     static final DefaultRedisScript<String> INCR_IF_EXISTS = new DefaultRedisScript<>(
         "if redis.call('EXISTS', KEYS[1]) == 1 then return redis.call('INCRBYFLOAT', KEYS[1], ARGV[1]) end "
             + "return false", String.class);
+
+    /** Adds to the in-flight reservation and gives it a TTL if it has none. Returns the new total. */
+    static final DefaultRedisScript<String> RESERVE_INFLIGHT = new DefaultRedisScript<>(
+        "local v = redis.call('INCRBYFLOAT', KEYS[1], ARGV[1]) "
+            + "if redis.call('PTTL', KEYS[1]) < 0 then redis.call('PEXPIRE', KEYS[1], ARGV[2]) end "
+            + "return v", String.class);
+
+    /** Takes a reservation back; never creates the key and never goes below zero (KEEPTTL on the clamp). */
+    static final DefaultRedisScript<String> RELEASE_INFLIGHT = new DefaultRedisScript<>(
+        "if redis.call('EXISTS', KEYS[1]) == 0 then return false end "
+            + "local v = tonumber(redis.call('INCRBYFLOAT', KEYS[1], ARGV[1])) "
+            + "if v < 0.0000001 then redis.call('SET', KEYS[1], '0', 'KEEPTTL') return '0' end "
+            + "return tostring(v)", String.class);
 
     /** A tenant's stored cap configuration. {@code capUsd} null = no cap. */
     public record TenantCap(UUID tenantId, String schema, String name, BigDecimal capUsd, int alertStage,
@@ -129,6 +163,21 @@ public class SpendCapService implements HostedSpendListener {
     private final Map<String, Cached<Optional<TenantCap>>> configBySchema = new ConcurrentHashMap<>();
     private final Map<String, Cached<BigDecimal>> dbFallback = new ConcurrentHashMap<>();
     private final AtomicLong lastRedisWarnMs = new AtomicLong();
+    private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
+
+    /** {@code app.spend-cap.reserve-usd-per-call}: 0 (default) = no pre-reservation, see the class javadoc. */
+    @Value("${app.spend-cap.reserve-usd-per-call:0}")
+    private volatile BigDecimal reserveUsdPerCall = BigDecimal.ZERO;
+
+    /** {@code app.governance.spend-controls.fail-mode}; absent (direct construction) keeps fail-open. */
+    @Autowired(required = false)
+    void useSpendControlsFailMode(SpendControlsFailMode failMode) {
+        this.failMode = failMode;
+    }
+
+    void useReserveUsdPerCall(BigDecimal reserveUsdPerCall) {
+        this.reserveUsdPerCall = reserveUsdPerCall == null ? BigDecimal.ZERO : reserveUsdPerCall;
+    }
 
     @Autowired
     public SpendCapService(JdbcTemplate jdbc, ObjectProvider<StringRedisTemplate> redis,
@@ -149,20 +198,26 @@ public class SpendCapService implements HostedSpendListener {
     // ------------------------------------------------------------------ enforcement
 
     /**
-     * Pre-call gate for a hosted-pool LLM call.
+     * Pre-call gate for a hosted-pool LLM call. A SOFT cap: check-then-act, so concurrent calls near the cap can
+     * overshoot it unless {@code app.spend-cap.reserve-usd-per-call} is set (see the class javadoc).
      *
-     * @throws SpendCapReachedException when a cap is set and month-to-date hosted spend is at or above it
+     * @throws SpendCapReachedException when a cap is set and month-to-date hosted spend (plus, with a per-call
+     *     reservation, the calls in flight) is at or above it
+     * @throws com.agenticai.core.security.SpendControlsUnavailableException in fail-mode {@code closed} when the cap
+     *     cannot be evaluated
      */
     public void assertWithinCap(String tenantSchema) {
         if (tenantSchema == null || tenantSchema.isBlank()) {
             return;
         }
-        TenantCap cap = configForSchema(tenantSchema).orElse(null);
+        TenantCap cap = configForSchema(tenantSchema, true).orElse(null);
         if (cap == null || cap.capUsd() == null) {
             return;
         }
         BigDecimal mtd = monthToDate(cap);
         if (mtd == null) {
+            failMode.onGateFailure("spend-cap", new IllegalStateException(
+                "Redis and database both failed for tenant " + cap.tenantId()), log);
             log.error("Spend cap for tenant {} could not be evaluated (Redis and database both failed) - "
                 + "ALLOWING this hosted call (fail open)", cap.tenantId());
             return;
@@ -170,6 +225,45 @@ public class SpendCapService implements HostedSpendListener {
         if (mtd.compareTo(cap.capUsd()) >= 0) {
             evaluateAlertsAsync(cap, mtd);
             throw new SpendCapReachedException(cap.capUsd(), scale(mtd), resetsAt());
+        }
+        BigDecimal reserve = reserveUsdPerCall;
+        if (reserve.signum() > 0) {
+            reserveInFlight(cap, mtd, reserve);
+        }
+    }
+
+    /** Adds this call's reservation to the tenant's in-flight total and refuses when month-to-date plus in-flight passes the cap. */
+    private void reserveInFlight(TenantCap cap, BigDecimal mtd, BigDecimal reserve) {
+        StringRedisTemplate r = redis.getIfAvailable();
+        if (r == null) {
+            return;
+        }
+        String key = INFLIGHT_PREFIX + cap.tenantId();
+        BigDecimal inFlight;
+        try {
+            String after = r.execute(RESERVE_INFLIGHT, List.of(key), reserve.toPlainString(),
+                Long.toString(INFLIGHT_TTL.toMillis()));
+            inFlight = after == null ? null : new BigDecimal(after);
+        } catch (RuntimeException e) {
+            failMode.onGateFailure("spend-cap-reservation", e, log);
+            return;
+        }
+        if (inFlight != null && mtd.add(inFlight).compareTo(cap.capUsd()) > 0) {
+            releaseInFlight(cap, reserve);
+            evaluateAlertsAsync(cap, mtd);
+            throw new SpendCapReachedException(cap.capUsd(), scale(mtd), resetsAt());
+        }
+    }
+
+    private void releaseInFlight(TenantCap cap, BigDecimal reserve) {
+        StringRedisTemplate r = redis.getIfAvailable();
+        if (r == null) {
+            return;
+        }
+        try {
+            r.execute(RELEASE_INFLIGHT, List.of(INFLIGHT_PREFIX + cap.tenantId()), reserve.negate().toPlainString());
+        } catch (RuntimeException e) {
+            warnRedis("release", e); // best effort: the reservation expires on its own
         }
     }
 
@@ -186,12 +280,20 @@ public class SpendCapService implements HostedSpendListener {
     /** Counter feed from {@code LlmCallLogService} for every recorded PLATFORM_HOSTED cost. */
     @Override
     public void onHostedSpend(String tenantSchema, BigDecimal costUsd) {
+        BigDecimal reserve = reserveUsdPerCall;
         if (costUsd == null || costUsd.signum() <= 0) {
+            if (reserve.signum() > 0) {
+                configForSchema(tenantSchema).filter(c -> c.capUsd() != null)
+                    .ifPresent(c -> releaseInFlight(c, reserve));
+            }
             return;
         }
         TenantCap cap = configForSchema(tenantSchema).orElse(null);
         if (cap == null || cap.capUsd() == null) {
             return; // nothing to enforce; a cap set later seeds from the database
+        }
+        if (reserve.signum() > 0) {
+            releaseInFlight(cap, reserve);
         }
         String key = key(cap.tenantId(), currentMonth());
         StringRedisTemplate r = redis.getIfAvailable();
@@ -409,6 +511,11 @@ public class SpendCapService implements HostedSpendListener {
     }
 
     Optional<TenantCap> configForSchema(String schema) {
+        return configForSchema(schema, false);
+    }
+
+    /** @param gate true on the pre-call gate: fail-mode closed then refuses instead of treating the tenant as uncapped. */
+    Optional<TenantCap> configForSchema(String schema, boolean gate) {
         Cached<Optional<TenantCap>> cached = configBySchema.get(schema);
         if (cached != null && fresh(cached, CONFIG_TTL)) {
             return cached.value();
@@ -417,6 +524,9 @@ public class SpendCapService implements HostedSpendListener {
         try {
             loaded = loadBySchema(schema);
         } catch (RuntimeException e) {
+            if (gate) {
+                failMode.onGateFailure("spend-cap-config", e, log);
+            }
             log.error("Spend-cap config lookup failed for tenant schema '{}' - treating as uncapped (fail open)", schema, e);
             return Optional.empty();
         }

@@ -138,9 +138,11 @@ class PerUserBudgetUnmeasuredResponseTest {
 
     // ------------------------------------------------------------------ the service
 
+    private StringRedisTemplate redis;
+
     @SuppressWarnings("unchecked")
     private PerUserBudgetService realService(ValueOperations<String, String> ops) {
-        StringRedisTemplate redis = mock(StringRedisTemplate.class);
+        redis = mock(StringRedisTemplate.class);
         when(redis.opsForValue()).thenReturn(ops);
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
         when(settings.getString(anyString(), anyString())).thenAnswer(call -> call.getArgument(1));
@@ -160,7 +162,7 @@ class PerUserBudgetUnmeasuredResponseTest {
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 40L, PLAN);
 
         // Ten tokens at the fallback rate is far under the reservation: nothing is given back, nothing is added.
-        verify(ops, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redis);
     }
 
     @Test
@@ -174,7 +176,7 @@ class PerUserBudgetUnmeasuredResponseTest {
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 4_000_000L, PLAN);
 
-        verify(ops).increment(anyString(), eq(estimateMicroCents - RESERVED));
+        SpendCounterMocks.verifyAdded(redis, "", estimateMicroCents - RESERVED);
     }
 
     @Test
@@ -187,7 +189,7 @@ class PerUserBudgetUnmeasuredResponseTest {
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, 0L, 4_000_000L, PLAN);
 
-        verify(ops).increment(anyString(), eq(expected));
+        SpendCounterMocks.verifyAdded(redis, "", expected);
     }
 
     @Test
@@ -198,6 +200,6 @@ class PerUserBudgetUnmeasuredResponseTest {
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 0L, PLAN);
 
-        verify(ops, never()).increment(anyString(), anyLong());
+        SpendCounterMocks.verifyNothingAdded(redis);
     }
 }

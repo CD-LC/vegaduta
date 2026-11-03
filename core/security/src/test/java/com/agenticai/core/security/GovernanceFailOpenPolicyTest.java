@@ -19,7 +19,30 @@ class GovernanceFailOpenPolicyTest {
 
     @Test
     void theShippedPolicyIsFailOpen() {
-        assertThat(GovernanceFailOpenPolicy.SPEND_CONTROLS_FAIL_OPEN).isTrue();
+        assertThat(new SpendControlsFailMode("open").isClosed()).isFalse();
+        assertThat(new SpendControlsFailMode("").isClosed()).isFalse();
+        assertThat(SpendControlsFailMode.open().isClosed()).isFalse();
+    }
+
+    @Test
+    void closedModeThrowsA503ExceptionAndLogsTheClosedMarker() {
+        Logger log = mock(Logger.class);
+        SpendControlsFailMode mode = new SpendControlsFailMode("CLOSED");
+        Exception redisDown = new IllegalStateException("down");
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> mode.onGateFailure("x", redisDown, log))
+                .isInstanceOf(SpendControlsUnavailableException.class)
+                .hasCause(redisDown);
+        verify(log).error(org.mockito.ArgumentMatchers.contains("GOVERNANCE_FAIL_CLOSED"), eq("x"), eq(redisDown));
+        assertThat(SpendControlsUnavailableException.class
+                .getAnnotation(org.springframework.web.bind.annotation.ResponseStatus.class).value())
+                .isEqualTo(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @Test
+    void anUnknownModeFailsStartup() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> new SpendControlsFailMode("maybe"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

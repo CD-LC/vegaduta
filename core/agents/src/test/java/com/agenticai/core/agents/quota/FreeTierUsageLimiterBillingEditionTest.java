@@ -34,12 +34,13 @@ class FreeTierUsageLimiterBillingEditionTest {
     private static final long LIMIT = 400_000L;
 
     private ValueOperations<String, String> valueOps;
+    private StringRedisTemplate redis;
     private FreeTierUsageLimiterService service;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        StringRedisTemplate redis = mock(StringRedisTemplate.class);
+        redis = mock(StringRedisTemplate.class);
         valueOps = mock(ValueOperations.class);
         when(redis.opsForValue()).thenReturn(valueOps);
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
@@ -51,7 +52,7 @@ class FreeTierUsageLimiterBillingEditionTest {
 
     @Test
     void billingEditionOnStillRejectsOverTheCeiling() {
-        when(valueOps.increment(contains("monthly-tokens"), eq(3000L))).thenReturn(LIMIT + 1);
+        SpendCounterMocks.stub(redis, "monthly-tokens", 3000L, (Long) (long) (LIMIT + 1));
 
         assertThatThrownBy(() -> service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000))
             .isInstanceOf(TenantLimitExceededException.class);
@@ -60,12 +61,12 @@ class FreeTierUsageLimiterBillingEditionTest {
     @Test
     void billingEditionOffNeverRejectsAndKeepsTheUsageCounted() {
         ReflectionTestUtils.setField(service, "billingEdition", false);
-        when(valueOps.increment(contains("monthly-tokens"), eq(3000L))).thenReturn(LIMIT * 10);
+        SpendCounterMocks.stub(redis, "monthly-tokens", 3000L, (Long) (long) (LIMIT * 10));
 
         long reserved = service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000);
 
         assertThat(reserved).isEqualTo(3000L);
         // Counted, and never rolled back.
-        verify(valueOps).increment(contains("monthly-tokens"), eq(3000L));
+        SpendCounterMocks.verifyAdded(redis, "monthly-tokens", 3000L);
     }
 }
