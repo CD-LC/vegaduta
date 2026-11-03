@@ -11,6 +11,7 @@ Release notes on GitHub are generated from the section for each version.
 ### Security
 
 - Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
+- **`strict` security posture profile.** `SPRING_PROFILES_ACTIVE=...,strict` (`application-strict.yml`) sets taint, MCP tool pinning, unclassified-tool handling, the confirmation-gate exemption list, trifecta enforcement and approval expiry to their fail-closed values; the base defaults are unchanged. At boot a `PostureReport` logs one WARN line listing every permissive governance setting that is active, and `StrictPostureTest` fails if the profile and the checked key list drift apart.
 
 ## [0.1.14] - 2026-10-30
 

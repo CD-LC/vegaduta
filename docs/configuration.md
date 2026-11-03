@@ -29,6 +29,7 @@ Profiles switch whole feature areas on or off at boot. Set them with
 | `shape-jobs-core` / `shape-jobs-ingest` | pools of the jobs shape: `ingest` runs only the knowledge pollers, `core` runs the rest. Activate after `shape-jobs`; see [Deployment shapes](deploy/DEPLOYMENT-SHAPES.md). The Helm chart now starts the main jobs pod as plain `shape-jobs` with `APP_SCHEDULING_OFFLOADED_POOLS`; `shape-jobs-core` stays as the hand-run equivalent of offloading `ingest` | `application-shape-jobs-*.yml` |
 | `shape-jobs-pool` | a named pool of the jobs shape (`webhooks`, `intake`, `billing`), chosen by `APP_SCHEDULING_POOL`. Activate after `shape-jobs` | `application-shape-jobs-pool.yml` |
 | `jobs` / `worker` | set by the `app-jobs` / `app-worker` shapes (Flyway off, own HTTP port) | in those modules |
+| `strict` | closes the lethal trifecta: taint `enforce`, MCP tool pinning `enforce`, unclassified tools `require-approval`, empty confirmation-gate exemption list, trifecta enforcement `block` (incl. Auto-select agents), approvals expire after `PT24H`. Add it to the list; the boot log prints one WARN naming every permissive setting still active (`PostureReport`) | `application-strict.yml` |
 | `e2e` | relaxed signup/abuse limits for the Playwright suite only | `application-e2e.yml` |
 
 Defaults by where core runs:
