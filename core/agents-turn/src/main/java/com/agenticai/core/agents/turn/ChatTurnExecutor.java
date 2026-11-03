@@ -347,19 +347,38 @@ final class ChatTurnExecutor {
             List<ChatAttachmentPayload> attachments,
             String experimentVariants,
             AgentStepEventEmitter stepEvents) {
-        return new FastStreamTurn(
-                        this,
-                        context,
-                        agent,
+        // OWASP LLM07: canary in the prompt, leak check on the reply stream. Mode off (the state
+        // until Spring installs the guard) returns the prompt and the stream untouched.
+        com.agenticai.core.guardrails.leak.PromptLeakGuard.Turn leak =
+                (promptLeakGuard != null
+                                ? promptLeakGuard
+                                : com.agenticai.core.guardrails.leak.PromptLeakGuard.shared())
+                        .begin(
+                        systemPrompt,
                         agentId,
                         sessionId,
-                        chatClient,
-                        new FastStreamTurn.Prompt(systemPrompt, history, userMessage, attachments),
-                        tools,
-                        experimentVariants,
-                        stepEvents)
-                .stream();
+                        context == null ? null : context.scope());
+        return leak.guard(
+                new FastStreamTurn(
+                                this,
+                                context,
+                                agent,
+                                agentId,
+                                sessionId,
+                                chatClient,
+                                new FastStreamTurn.Prompt(
+                                        leak.systemPrompt(systemPrompt),
+                                        history,
+                                        userMessage,
+                                        attachments),
+                                tools,
+                                experimentVariants,
+                                stepEvents)
+                        .stream());
     }
+
+    /** Test seam: null means the process-wide guard, read per turn (Spring installs it after boot). */
+    volatile com.agenticai.core.guardrails.leak.PromptLeakGuard promptLeakGuard;
 
     /** See {@link DegradedRetrySignal#flag}. */
     void flagToolsDisabledRetry(Agent agent, AgentStepEventEmitter stepEvents) {
