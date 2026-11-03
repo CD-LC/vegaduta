@@ -92,19 +92,28 @@ class ExfiltrationRedTeamTest {
     }
 
     /**
-     * The documented residual: with no allow-list configured (the default) no GET is a sink, so a tainted turn can
-     * leak through a query string. Not owned by any Phase 0 package.
+     * With no allow-list (the default) no GET is a sink unless {@code app.agents.taint.get-query-is-sink} is on (the
+     * strict profile): then a URL that can carry data (query, fragment, userinfo, odd scheme, IP literal) parks.
      */
-    @Tag("pending-fix:unowned")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("unlistedUrls")
     void getWithAQueryStringAfterTaintParksEvenWithoutAnAllowList(String url) {
         RedTeamChain turn = taintedTurn("");
+        turn.taint.setGetQueryIsSink(true);
         ToolCallback http = RedTeamChain.fakeTool("http_request", "200 OK");
 
         turn.wrap(http).call(get(url));
 
         verify(http, never()).call(anyString());
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("unlistedUrls")
+    void withTheFlagOffTheDefaultResidualRemains(String url) {
+        RedTeamChain turn = taintedTurn("");
+        ToolCallback http = RedTeamChain.fakeTool("http_request", "200 OK");
+
+        assertTrue(turn.wrap(http).call(get(url)).contains("200 OK"), url);
     }
 
     static Stream<Arguments> secrets() {
