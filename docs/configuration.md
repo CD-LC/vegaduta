@@ -1470,6 +1470,12 @@ Spring properties, so the environment variable is the relaxed-binding name (`app
 | `app.edition.tier` | `APP_EDITION_TIER` | unset (every [edition feature](#edition-tier-and-features) on) | `personal` (the Compose stack derives it from `VEGADUTA_EDITION`) |
 | `app.edition.billing-enabled` | `APP_EDITION_BILLING_ENABLED` | `true` | `false` |
 | `app.a2a.enabled` | `APP_A2A_ENABLED` | `true` | `false` |
+| `app.a2a.max-hops` | `APP_A2A_MAX_HOPS` | `4` | lower to forbid deep A2A forwarding chains |
+| `app.a2a.require-replay-protection` | `APP_A2A_REQUIRE_REPLAY_PROTECTION` | `false` (third-party peers send no `X-A2A-*` headers) | `true` once every peer is a VegaDuta instance |
+| `app.a2a.replay-window` | `APP_A2A_REPLAY_WINDOW` | `300s` (clock skew and nonce TTL) | `120s` |
+| `app.a2a.nonce-cache-max-per-tenant` | `APP_A2A_NONCE_CACHE_MAX_PER_TENANT` | `10000` (in-memory mode) | |
+| `app.a2a.signing-secret` / `app.a2a.require-signature` | `APP_A2A_SIGNING_SECRET` / `APP_A2A_REQUIRE_SIGNATURE` | blank / `false` | shared HMAC secret for inbound `X-A2A-Signature` |
+| `app.a2a.signed-peers[n].host` / `.secret` | | none (no outbound signing) | peers that get `X-A2A-Signature` on outbound calls |
 | `resolution.sweep.enabled` | `RESOLUTION_SWEEP_ENABLED` | `true` | `false` |
 | `app.scheduled-tasks.delivery-channels` | `SCHEDULED_TASKS_DELIVERY_CHANNELS` | the shared list | the shared list without `slack` and `a2a` |
 | `app.omnichannel.rate-limit.enabled` | `APP_OMNICHANNEL_RATE_LIMIT_ENABLED` | `false` | `true` |
