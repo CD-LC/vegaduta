@@ -40,6 +40,8 @@ import com.agenticai.core.guardrails.GuardrailViolationLogger;
 import com.agenticai.core.guardrails.impl.JailbreakDetectorGuardrail;
 import com.agenticai.core.guardrails.impl.ProfanityGuardrail;
 import com.agenticai.core.guardrails.moderation.ModerationService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantLimits;
@@ -85,6 +87,8 @@ class SubAgentTurnTest {
     private ChatSpecialistHandoff specialist;
     private SpecialistHandoffService handoffService;
     private final List<ToolCallback> delegateTools = new ArrayList<>();
+    /** The taint each delegate-tool resolution was announced (what its taint gate would be built on). */
+    private final List<TurnTaint> resolvedAgainst = new ArrayList<>();
 
     @BeforeEach
     @SuppressWarnings("unchecked")
@@ -108,9 +112,18 @@ class SubAgentTurnTest {
         when(gateway.resolveClient(any(), any(), any())).thenReturn(chatClient);
         when(gateway.resolveClient(any(), any(com.agenticai.core.chat.gateway.GatewayCallSpec.class))).thenReturn(chatClient);
         toolPort = mock(AgentToolPort.class);
-        when(toolPort.resolveToolsForDelegatedCall(any(), any(), any(), any())).thenAnswer(i -> List.copyOf(delegateTools));
+        when(toolPort.resolveToolsForDelegatedCall(any(), any(), any(), any()))
+                .thenAnswer(
+                        i -> {
+                            resolvedAgainst.add(DelegationTaint.resolving().orElse(null));
+                            return List.copyOf(delegateTools);
+                        });
         when(toolPort.resolveToolsForSpecialistHandoff(any(), any(), any(), any(), any()))
-                .thenAnswer(i -> List.copyOf(delegateTools));
+                .thenAnswer(
+                        i -> {
+                            resolvedAgainst.add(DelegationTaint.resolving().orElse(null));
+                            return List.copyOf(delegateTools);
+                        });
         judge = mock(LlmQualityJudgeService.class);
         ProviderErrorTranslator translator = mock(ProviderErrorTranslator.class);
 
@@ -406,4 +419,94 @@ class SubAgentTurnTest {
         }
     }
 
+
+    // ---- taint inheritance: a sub-turn is never cleaner than the turn that handed it work -------------------------
+
+    private static TurnTaint taintedParent() {
+        TurnTaint parent = new TurnTaint();
+        parent.mark("fetch_web_page");
+        return parent;
+    }
+
+    private boolean startedTainted(String session) {
+        return eventsOf(session).stream().anyMatch(e -> e.summary().contains("guard=taint outcome=inherited"));
+    }
+
+    private boolean startedClean(String session) {
+        return eventsOf(session).stream().anyMatch(e -> e.summary().contains("guard=taint outcome=clean"));
+    }
+
+    @Test
+    void aDelegateOfATaintedTurnStartsTaintedAndItsToolsAreResolvedAgainstThatTaint() {
+        modelAnswers("answer");
+        TurnTaint parent = taintedParent();
+
+        try (DelegationTaint.Scope ignored = DelegationTaint.openCall(parent)) {
+            delegate.delegateCall(TARGET, "q", null, "delegated:tainted");
+        }
+
+        assertTrue(startedTainted("delegated:tainted"), eventsOf("delegated:tainted").toString());
+        TurnTaint child = resolvedAgainst.get(0);
+        assertTrue(child.isTainted(), "the taint gate of the delegate's tools must see the parent's taint");
+        assertEquals(List.of("fetch_web_page"), child.sources());
+    }
+
+    @Test
+    void aDelegateOfACleanTurnStartsClean() {
+        modelAnswers("answer");
+
+        try (DelegationTaint.Scope ignored = DelegationTaint.openCall(new TurnTaint())) {
+            delegate.delegateCall(TARGET, "q", null, "delegated:clean");
+        }
+
+        assertTrue(startedClean("delegated:clean"));
+        assertFalse(resolvedAgainst.get(0).isTainted());
+    }
+
+    @Test
+    void aDelegateOutsideAnyToolCallStartsClean() {
+        modelAnswers("answer");
+
+        delegate.delegateCall(TARGET, "q", null, "delegated:none");
+
+        assertTrue(startedClean("delegated:none"));
+    }
+
+    @Test
+    void theDelegateGetsACopy_soItsOwnTaintDoesNotReachTheParentOrASibling() {
+        modelAnswers("answer");
+        TurnTaint parent = new TurnTaint();
+
+        try (DelegationTaint.Scope ignored = DelegationTaint.openCall(parent)) {
+            delegate.delegateCall(TARGET, "q1", null, "delegated:a");
+            delegate.delegateCall(TARGET, "q2", null, "delegated:b");
+        }
+        resolvedAgainst.get(0).mark("fetch_web_page"); // the first branch reads the web after it started
+
+        assertFalse(parent.isTainted(), "the parent only learns through the delegating tool's own (source) result");
+        assertFalse(resolvedAgainst.get(1).isTainted(), "a sibling that started clean stays clean");
+        assertTrue(startedClean("delegated:b"));
+    }
+
+    @Test
+    void aSpecialistOfATaintedTurnStartsTainted() {
+        modelAnswers("answer");
+
+        try (DelegationTaint.Scope ignored = DelegationTaint.openCall(taintedParent())) {
+            specialist.delegateToSpecialist(HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
+        }
+
+        TurnTaint child = resolvedAgainst.get(0);
+        assertTrue(child.isTainted());
+        assertEquals(List.of("fetch_web_page"), child.sources());
+    }
+
+    @Test
+    void aSpecialistOfACleanTurnStartsClean() {
+        modelAnswers("answer");
+
+        specialist.delegateToSpecialist(HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
+
+        assertFalse(resolvedAgainst.get(0).isTainted());
+    }
 }

@@ -93,6 +93,28 @@ public final class TurnTaint {
         return tainted;
     }
 
+    /**
+     * Starts this (child) turn with what {@code parent} knows at this moment: every source label the
+     * parent recorded, and the tainted flag. A delegated, specialist or team-branch turn calls this
+     * once when it is created, so it can never be cleaner than the turn that handed it work. It is a
+     * copy, not a link: marks the parent or a sibling gets later do not reach this turn, and marks
+     * this turn gets do not reach the parent (the parent reads the child's answer through the
+     * delegating tool, which is itself a taint source). No-op for a null or clean parent.
+     */
+    public void inheritFrom(TurnTaint parent) {
+        if (parent == null || parent == this || !parent.isTainted()) {
+            return;
+        }
+        List<String> inherited = parent.sources();
+        if (inherited.isEmpty()) {
+            mark("delegation");
+            return;
+        }
+        for (String source : inherited) {
+            mark(source);
+        }
+    }
+
     /** Snapshot of the (bounded) sources that tainted this turn, in order of first appearance. */
     public List<String> sources() {
         synchronized (sources) {

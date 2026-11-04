@@ -8,6 +8,9 @@ import com.agenticai.core.agents.turnjournal.TurnRecorder;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.guardrails.GuardrailViolationException;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
+import com.agenticai.core.guardrails.taint.TurnTaint;
+import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
 import java.time.Instant;
 import java.util.List;
@@ -47,7 +50,9 @@ import reactor.core.publisher.Flux;
  * <p>The sub-turn has its own journal record (its own turn id, its own session) whose INTAKE names the parent turn
  * when the calling tool call runs inside a journaled turn ({@link TurnRecorder#currentTurnId()}), so the two can be
  * followed from one to the other. It shares nothing else with the parent: no history, no memory, no approval state
- * (a gated call in the sub-turn parks through the guard chain exactly as before).
+ * (a gated call in the sub-turn parks through the guard chain exactly as before). It does share the delegating
+ * turn's taint, as a copy taken when it starts ({@link DelegationTaint}): a sub-turn is never cleaner than its
+ * parent, so an instruction injected into the parent cannot be laundered through a delegate.
  */
 final class SubAgentTurn {
 
@@ -65,7 +70,16 @@ final class SubAgentTurn {
             List<ToolCallback> tools,
             String experimentVariants,
             String tenantId,
-            String emptyAnswer) {}
+            String emptyAnswer,
+            TurnTaint taint) {
+        /**
+         * The sub-turn's taint: the one its tools were resolved against when the caller provided it, otherwise a
+         * copy of the delegating turn's ({@link DelegationTaint}).
+         */
+        TurnTaint taintOrInherited() {
+            return taint != null ? taint : DelegationTaint.childOfCurrent();
+        }
+    }
 
     private final BufferedTurnCalls calls;
     private final ChatGuardrailGate guardrails;
@@ -95,10 +109,26 @@ final class SubAgentTurn {
 
     /** Runs the sub-turn; the answer, or the refusal / withheld notice the calling agent is shown instead. */
     String run(Request r) {
-        // taint-entry: internal - a delegated sub-turn, not an external entry. Known gap: it does not yet
-        // inherit the delegating turn's taint (docs/security/taint-entry-points.md)
+        // taint-entry: internal - a delegated sub-turn, not an external entry; it starts with a copy of the
+        // delegating turn's taint (DelegationTaint) and so is never cleaner than its parent
         TurnContext turn =
-                TurnContext.fromCurrentThread(r.agentId(), r.sessionId(), null, Instant.now(), null);
+                new TurnContext(
+                        TenantContext.current().orElse(null),
+                        r.agentId(),
+                        r.sessionId(),
+                        UUID.randomUUID().toString(),
+                        Instant.now(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        r.taintOrInherited());
         // What client selection records for a normal turn: a local server's text-only "next step" is checked.
         turn.modelTraits().weakToolCaller(calls.weakToolCaller(r.agent()));
         TurnRecorder journal =
@@ -111,6 +141,8 @@ final class SubAgentTurn {
                         r.tools(),
                         TurnRecorder.currentTurnId());
         journal.guard("sub-agent", r.kind());
+        // Evidence that the sub-turn started no cleaner than the turn that handed it work.
+        journal.guard("taint", turn.taint().isTainted() ? "inherited" : "clean");
 
         TenantPlan plan = r.tenantId() == null || planOf == null ? null : planOf.apply(r.tenantId());
         String refusal =

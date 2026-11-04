@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -396,8 +397,39 @@ public class AgentToolProvider implements AgentToolPort {
      */
     public List<ToolCallback> resolveToolsForDelegatedCall(
             UUID agentId, String sessionId, String userMessage, ChatClient chatClient) {
-        return resolveToolsFor(
-                agentId, sessionId, sessionId, userMessage, chatClient, false, true, null, false);
+        return withChildTaint(
+                () ->
+                        resolveToolsFor(
+                                agentId,
+                                sessionId,
+                                sessionId,
+                                userMessage,
+                                chatClient,
+                                false,
+                                true,
+                                null,
+                                false));
+    }
+
+    /**
+     * Resolves a delegate's tools so that their taint gate shares the sub-turn's own {@code TurnTaint}, which
+     * starts as a copy of the delegating turn's ({@link DelegationTaint}). The sub-turn builder announces its
+     * instance with {@link DelegationTaint#openResolving}; without one (a direct caller) a copy is made here.
+     */
+    private <T> T withChildTaint(java.util.function.Supplier<T> resolve) {
+        com.agenticai.core.guardrails.taint.TurnTaint child =
+                DelegationTaint.resolving().orElseGet(DelegationTaint::childOfCurrent);
+        com.agenticai.core.guardrails.taint.TurnTaint previous = TURN_TAINT_SCOPE.get();
+        TURN_TAINT_SCOPE.set(child);
+        try {
+            return resolve.get();
+        } finally {
+            if (previous == null) {
+                TURN_TAINT_SCOPE.remove();
+            } else {
+                TURN_TAINT_SCOPE.set(previous);
+            }
+        }
     }
 
     /**
@@ -415,16 +447,18 @@ public class AgentToolProvider implements AgentToolPort {
         return crewBrowserToolResolver.withHandoffChain(
                 chain,
                 () ->
-                        resolveToolsFor(
-                                agentId,
-                                sessionId,
-                                sessionId,
-                                userMessage,
-                                chatClient,
-                                true,
-                                true,
-                                null,
-                                false));
+                        withChildTaint(
+                                () ->
+                                        resolveToolsFor(
+                                                agentId,
+                                                sessionId,
+                                                sessionId,
+                                                userMessage,
+                                                chatClient,
+                                                true,
+                                                true,
+                                                null,
+                                                false)));
     }
 
     private List<ToolCallback> resolveToolsFor(

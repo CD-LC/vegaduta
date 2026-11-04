@@ -7,6 +7,7 @@ import com.agenticai.core.agents.turn.DelegateOptions;
 import com.agenticai.core.prompts.PromptContext;
 import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -306,7 +307,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
             for (int i = 0; i < runnable.size(); i++) {
                 Map<String, Object> task = runnable.get(i);
                 int index = i;
-                futures.add(pool.submit(() -> runBranch(runId, index, task)));
+                futures.add(
+                        pool.submit(
+                                DelegationTaint.propagating(() -> runBranch(runId, index, task))));
                 emitter.ifPresent(e -> e.handoff(e.runAgentId(), agentId));
             }
             for (int i = 0; i < futures.size(); i++) {

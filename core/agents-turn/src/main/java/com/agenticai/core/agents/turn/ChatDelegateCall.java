@@ -14,6 +14,8 @@ import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -191,11 +193,17 @@ final class ChatDelegateCall {
                                 agent.getTopP(),
                                 null,
                                 providerOptions(agent.getProviderName(), agent)));
-        List<ToolCallback> tools =
-                DelegateOptions.filter(
-                        options,
-                        agentToolProvider.resolveToolsForDelegatedCall(
-                                agentId, delegatedSessionId, question, chatClient));
+        // The sub-turn starts with a copy of the delegating turn's taint (read now, at the moment of delegation);
+        // the delegate's tools are resolved against that same instance so their taint gate sees it.
+        TurnTaint childTaint = DelegationTaint.childOfCurrent();
+        List<ToolCallback> tools;
+        try (DelegationTaint.Scope ignored = DelegationTaint.openResolving(childTaint)) {
+            tools =
+                    DelegateOptions.filter(
+                            options,
+                            agentToolProvider.resolveToolsForDelegatedCall(
+                                    agentId, delegatedSessionId, question, chatClient));
+        }
         String experimentVariants = this.experimentVariants.apply(tenantId);
 
         // Skills block sits between the agent's own prompt and the forwarded context so the
@@ -254,6 +262,7 @@ final class ChatDelegateCall {
                         tools,
                         experimentVariants,
                         tenantId,
-                        promptsForDelegate.textOrShipped("delegation.empty_answer.collaborator")));
+                        promptsForDelegate.textOrShipped("delegation.empty_answer.collaborator"),
+                        childTaint));
     }
 }

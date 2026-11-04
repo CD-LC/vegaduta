@@ -8,6 +8,7 @@ import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.audit.IssueSeverity;
 import com.agenticai.core.audit.IssueSource;
 import com.agenticai.core.audit.PlatformIssueService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.guardrails.taint.TaintGate;
 import com.agenticai.core.prompts.PromptResolver;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -662,7 +663,10 @@ public class GuardedToolCallback implements ToolCallback {
         String rawOutput;
         // A tool that holds its OWN approval inside call() (a code-workspace run, a channel send) reads this
         // scope to record the request with the conversation it belongs to, so the decision continues the task.
-        try (ToolCallScope.Scope ignored = ToolCallScope.open(toolName, agentId, sessionId, null, callOrigin())) {
+        // The same call is where a delegation tool starts its sub-turn: that turn begins with this turn's taint.
+        try (ToolCallScope.Scope ignored = ToolCallScope.open(toolName, agentId, sessionId, null, callOrigin());
+                DelegationTaint.Scope delegation =
+                        DelegationTaint.openCall(taintGate != null ? taintGate.turn() : null)) {
             rawOutput = toolContext != null ? delegate.call(toolInput, toolContext) : delegate.call(toolInput);
         }
         inDelegate[0] = false;

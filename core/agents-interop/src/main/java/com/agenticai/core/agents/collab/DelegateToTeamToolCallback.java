@@ -5,6 +5,7 @@ import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.prompts.tool.ToolPromptTexts;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -304,7 +305,11 @@ public class DelegateToTeamToolCallback implements ToolCallback {
             for (int i = 0; i < runnable.size(); i++) {
                 Map<String, Object> task = runnable.get(i);
                 int branchIndex = i;
-                futures.add(pool.submit(() -> runBranch(runId, branchIndex, task)));
+                // propagating(): the branch copies the calling turn's taint when it starts
+                futures.add(
+                        pool.submit(
+                                DelegationTaint.propagating(
+                                        () -> runBranch(runId, branchIndex, task))));
                 Object ref = task.get("agent");
                 Member m = ref == null ? null : membersBySlug.get(ref.toString().trim());
                 dispatched.add(m);
@@ -430,7 +435,12 @@ public class DelegateToTeamToolCallback implements ToolCallback {
                                 futures.put(
                                         idx,
                                         repairPool.submit(
-                                                () -> runBranch(runId, sessionIndex, task)));
+                                                DelegationTaint.propagating(
+                                                        () ->
+                                                                runBranch(
+                                                                        runId,
+                                                                        sessionIndex,
+                                                                        task))));
                             }
                             for (Map.Entry<Integer, Future<Map<String, Object>>> en :
                                     futures.entrySet()) {
