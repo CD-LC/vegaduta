@@ -163,6 +163,7 @@ Deferred [Mvc [pattern='/api/knowledge/upload-audio', POST], Ant [pattern='/api/
 Deferred [Mvc [pattern='/api/knowledge/collections', POST], Ant [pattern='/api/knowledge/collections', POST]] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/knowledge/collections/*/reembed', POST], Ant [pattern='/api/knowledge/collections/*/reembed', POST]] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/knowledge/*/eval', POST], Ant [pattern='/api/knowledge/*/eval', POST]] => ------------Y-----YY-
+Deferred [Mvc [pattern='/api/knowledge/quarantine/**'], Ant [pattern='/api/knowledge/quarantine/**']] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/knowledge/collections/**', PUT], Ant [pattern='/api/knowledge/collections/**', PUT]] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/knowledge/collections/**', DELETE], Ant [pattern='/api/knowledge/collections/**', DELETE]] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/knowledge/documents/**', DELETE], Ant [pattern='/api/knowledge/documents/**', DELETE]] => ------------Y-----YY-
