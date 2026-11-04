@@ -3,6 +3,7 @@ package com.agenticai.core.tenancy;
 import com.agenticai.core.security.HotpathCaches;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.TtlCache;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -162,7 +163,7 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
         } catch (SQLException e) {
             log.warn(
                     "Could not verify schema existence for untracked tenant '{}' - {}",
-                    schemaName,
+                    LogSafe.clean(schemaName),
                     failOpenOnSchemaCheckError
                             ? "allowing the request through (fail-open opt-in)"
                             : "refusing the request (fail-closed)",
