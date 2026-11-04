@@ -23,13 +23,13 @@ final class RecentEmbeddings {
     static final int MAX_ENTRIES = 8;
     static final Duration TTL = Duration.ofSeconds(20);
 
-    private record Entry(float[] vector, long atNanos) {}
+    private record Slot(float[] vector, long atNanos) {}
 
     private final ReentrantLock lock = new ReentrantLock();
     private final LongSupplier nanos;
-    private final Map<String, Entry> entries = new LinkedHashMap<>(16, 0.75f, true) {
+    private final Map<String, Slot> entries = new LinkedHashMap<>(16, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Entry> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, Slot> eldest) {
             return size() > MAX_ENTRIES;
         }
     };
@@ -49,7 +49,7 @@ final class RecentEmbeddings {
         String key = tenantId + '\u0000' + text;
         lock.lock();
         try {
-            Entry hit = entries.get(key);
+            Slot hit = entries.get(key);
             if (hit != null) {
                 if (nanos.getAsLong() - hit.atNanos() <= TTL.toNanos()) {
                     return hit.vector();
@@ -63,7 +63,7 @@ final class RecentEmbeddings {
         if (vector != null && vector.length > 0) {
             lock.lock();
             try {
-                entries.put(key, new Entry(vector, nanos.getAsLong()));
+                entries.put(key, new Slot(vector, nanos.getAsLong()));
             } finally {
                 lock.unlock();
             }
