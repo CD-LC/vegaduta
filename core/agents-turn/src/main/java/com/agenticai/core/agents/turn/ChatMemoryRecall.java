@@ -62,6 +62,26 @@ final class ChatMemoryRecall {
         this.recallEnabled = recallEnabled == null ? agentId -> true : recallEnabled;
     }
 
+    /**
+     * {@code memory.write.enabled} for an agent, asked as "off": true = this agent's turns write no memory (the
+     * conversation's rolling summary is not folded). Everything on until {@link ChatServiceParts} wires the catalog.
+     */
+    private volatile java.util.function.Predicate<UUID> writesSwitchedOff = agentId -> false;
+
+    void useWriteSwitch(java.util.function.Predicate<UUID> writesSwitchedOff) {
+        this.writesSwitchedOff = writesSwitchedOff == null ? agentId -> false : writesSwitchedOff;
+    }
+
+    /** Whether the agent's memory writes are switched off; a failing lookup leaves them on. */
+    boolean writesSwitchedOff(UUID agentId) {
+        try {
+            return writesSwitchedOff.test(agentId);
+        } catch (RuntimeException e) {
+            log.debug("Could not read the memory write switch - writes stay on", e);
+            return false;
+        }
+    }
+
     ChatMemoryRecall(
             ObjectProvider<AgentMemoryService> agentMemoryService,
             ObjectProvider<TenantMemoryService> tenantMemoryService,

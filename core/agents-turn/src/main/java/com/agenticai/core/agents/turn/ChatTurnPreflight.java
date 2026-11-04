@@ -188,6 +188,9 @@ final class ChatTurnPreflight {
                         subjectKey,
                         sessionId); // SEC-004: session memory and the cancel flag use only this id
         // (SessionMemoryService#scopedSessionId); events, logs, metrics keep the raw one.
+        // memory.write.enabled: a conversation whose agent has memory writes off gets no rolling-summary fold.
+        com.agenticai.core.agents.memory.SessionWriteSwitch.mark(
+                memorySessionId, svc.memoryRecall.writesSwitchedOff(agentId));
         // A conversation that has had a tainted turn keeps its poisoned content in the history this
         // turn is about to replay: start the turn tainted, and flag the conversation as soon as
         // this turn taints. Captured by value, so a tool thread without a tenant context can write.

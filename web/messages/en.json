@@ -13120,6 +13120,13 @@
           "help": "Raise it for large teams that rely on shared knowledge; it also raises storage and recall cost. This applies to the whole workspace.",
           "label": "Most shared memories"
         }
+      },
+      "write": {
+        "enabled": {
+          "description": "Whether the agent saves anything to memory at all.",
+          "help": "Turn it off to see how the agent behaves with no memory. The remember tools answer that memory is disabled and save nothing, conversation summaries stop being written, and lessons and preferences stop being proposed. Nothing is deleted, and what the agent already knows is still used unless 'Use memory in replies' is also off.",
+          "label": "Save to memory"
+        }
       }
     },
     "providers": {

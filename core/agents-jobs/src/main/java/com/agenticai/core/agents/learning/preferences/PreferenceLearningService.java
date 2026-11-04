@@ -63,6 +63,24 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
 
     private static final int MAX_APPROVAL_PROPOSALS_PER_SCAN = 3;
 
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory;
+
+    /** Lets {@code memory.write.enabled} stop this loop for an agent whose memory writes are off. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setAgentMemory(ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory) {
+        this.memory = memory;
+    }
+
+    private boolean memoryWritesOff(UUID agentId) {
+        try {
+            com.agenticai.core.agents.memory.AgentMemoryService service =
+                    memory == null || agentId == null ? null : memory.getIfAvailable();
+            return service != null && service.writesSwitchedOff(agentId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
     private final PreferenceSignalRepository signals;
     private final LearningProposalService proposals;
     private final ObjectProvider<ApprovalHistoryService> approvals;
@@ -141,6 +159,10 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
     /** Stores one row per signal, then files a proposal for every signal that has now repeated enough. Never throws. */
     void recordAndEvaluate(
             String subject, UUID agentId, String sessionId, String source, Map<String, Signal> found) {
+        if (memoryWritesOff(agentId)) {
+            log.debug("Preference learning skipped for agent {}: memory.write.enabled is off", agentId);
+            return;
+        }
         try {
             Instant now = Instant.now();
             Instant since = now.minus(Duration.ofDays(windowDays));

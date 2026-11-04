@@ -59,6 +59,8 @@ Release notes on GitHub are generated from the section for each version.
 
 - **Measurement seams for agent memory, all behaviour-neutral by default.** (1) New setting `memory.recall.enabled` (tenant and agent scope; platform value `app.memory.limits.recall-enabled`, default `true` = today): switched off, a turn reads and injects no memory blocks, facts or shared facts, and the turn journal (a `memory_recall` GUARD event, written only while `app.turn-journal.enabled`) and `TurnContext.memoryRecall()` record which memory ids and block labels were injected, with counts and approximate tokens, never text. (2) The memory services (agent and tenant memory, the daily memory review) read time from a `memoryClock` bean (system UTC by default; `useClock(..)` in tests). (3) `app.metrics.turn-usage.enabled` (default `false`) keeps an in-process per-session tally of model-call tokens and latency (`TurnUsageCounter`) for evaluation harnesses, fed by the existing LLM metrics advisor with no extra call.
 
+- **`memory.write.enabled`, the write-side counterpart of `memory.recall.enabled`** (tenant and agent scope; platform value `app.memory.limits.write-enabled`, default `true` = unchanged). Switched off, `remember_fact` and `remember_shared_fact` answer that memory is disabled and save nothing, the conversation's rolling summary is not folded, and the lesson and preference learning loops file no proposals; the turn journal records a `memory_write_skipped` event (counts only, never text). It lets an evaluation run the same agent with memory fully off.
+
 ### Fixed
 
 - **A tool's output can no longer pose as the platform's own control result.** The tool loop ended a turn with

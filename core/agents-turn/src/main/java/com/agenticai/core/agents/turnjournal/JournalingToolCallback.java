@@ -25,6 +25,13 @@ final class JournalingToolCallback implements ToolCallback {
     /** The approval decision the journal records for a gated call the offline eval sandbox approved. */
     static final String EVAL_APPROVED = "decided:eval-approved";
 
+    /**
+     * What a memory tool's result carries when {@code memory.write.enabled} skipped its write. A copy of {@code
+     * MemoryWriteSwitch}'s marker (that class lives in the memory package, which depends on this one), pinned equal
+     * by a test.
+     */
+    static final String MEMORY_WRITE_SKIPPED_MARKER = "\"reason\": \"memory_write_disabled\"";
+
     private final ToolCallback delegate;
     private final TurnRecorder recorder;
     private final TurnApprovalState approval;
@@ -120,6 +127,10 @@ final class JournalingToolCallback implements ToolCallback {
             status = TurnRecorder.CallStatus.OK;
         }
         recorder.toolCall(name, input, result, status, millis);
+        if (result != null && result.contains(MEMORY_WRITE_SKIPPED_MARKER)) {
+            // memory.write.enabled is off: the tool wrote nothing. Counts only - the fact's text stays out of the trace.
+            recorder.guard("memory_write_skipped", "tool=" + name + " count=1");
+        }
     }
 
     private static UUID uuidOrNull(String text) {

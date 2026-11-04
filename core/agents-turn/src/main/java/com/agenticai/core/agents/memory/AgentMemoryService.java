@@ -98,6 +98,31 @@ public class AgentMemoryService {
         return !limits.isRecallEnabled();
     }
 
+    /** {@code app.memory.limits.write-enabled} asked as "off" (a mocked service answers the default, on). */
+    public boolean writesSwitchedOffByPlatform() {
+        return !limits.isWriteEnabled();
+    }
+
+    /** The settings-catalog key of the write switch (docs/settings.md). */
+    public static final String WRITE_ENABLED_KEY = "memory.write.enabled";
+
+    /**
+     * {@code memory.write.enabled} for {@code agentId}, asked as "off" so a mocked service answers the default (on):
+     * the agent's, else the workspace's, else the platform's ({@code app.memory.limits.write-enabled}). A failing
+     * lookup leaves writes as the platform value has them.
+     */
+    public boolean writesSwitchedOff(UUID agentId) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return !limits.isWriteEnabled();
+        }
+        try {
+            return !catalog.getBool(WRITE_ENABLED_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return !limits.isWriteEnabled();
+        }
+    }
+
     static final String RECALL_TOP_K_KEY = "memory.recall.agentTopK";
     static final String MAX_MEMORIES_KEY = "memory.agent.maxMemories";
 

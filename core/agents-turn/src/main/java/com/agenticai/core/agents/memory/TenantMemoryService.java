@@ -103,6 +103,20 @@ public class TenantMemoryService {
         this.settings = resolver;
     }
 
+    /** {@code memory.write.enabled} for {@code agentId} (the shared tool writes on an agent's behalf), asked as "off". */
+    public boolean writesSwitchedOff(UUID agentId) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return !limits.isWriteEnabled();
+        }
+        try {
+            return !catalog.getBool(
+                    AgentMemoryService.WRITE_ENABLED_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return !limits.isWriteEnabled();
+        }
+    }
+
     static final String RECALL_TOP_K_KEY = "memory.recall.tenantTopK";
     static final String MAX_MEMORIES_KEY = "memory.tenant.maxMemories";
 

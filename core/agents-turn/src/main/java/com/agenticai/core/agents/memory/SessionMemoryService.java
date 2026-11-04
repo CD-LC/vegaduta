@@ -570,7 +570,7 @@ public class SessionMemoryService {
      */
     private void appendLegacy(String sessionId, String redisKey, String json) {
         redisTemplate.opsForList().rightPush(redisKey, json);
-        SessionSummaryService summariser = folder.activeSummariser();
+        SessionSummaryService summariser = folder.activeSummariser(sessionId);
         if (summariser == null) {
             // Hard storage bound: keep only the newest MAX_STORED_ENTRIES. Cheap (O(entries
             // removed), usually zero) and idempotent - see the constant's javadoc for why this is a fixed ceiling.
@@ -590,7 +590,7 @@ public class SessionMemoryService {
      * error) is rethrown, never replayed. On Redis Cluster its keys are cross-slot: always refused.
      */
     private boolean appendInOneRoundTrip(String sessionId, String redisKey, String json) {
-        SessionSummaryService summariser = folder.activeSummariser();
+        SessionSummaryService summariser = folder.activeSummariser(sessionId);
         Optional<TenantContext> tenant = TenantContext.current();
         SessionAppendScript.Mode mode =
                 summariser == null

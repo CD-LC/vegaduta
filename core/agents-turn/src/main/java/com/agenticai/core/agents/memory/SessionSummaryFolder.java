@@ -216,6 +216,12 @@ final class SessionSummaryFolder {
     }
 
     /** The summariser bean when present AND enabled, else null - the outermost fail-open switch. */
+    SessionSummaryService activeSummariser(String sessionId) {
+        // memory.write.enabled off for this conversation's agent: no fold is claimed, so no summary is written (the
+        // turns past the window are trimmed as when summarising is off).
+        return SessionWriteSwitch.writesOff(sessionId) ? null : activeSummariser();
+    }
+
     SessionSummaryService activeSummariser() {
         try {
             SessionSummaryService summariser =

@@ -2281,6 +2281,9 @@ app:
       # Whether automatic recall puts memory into the prompt. A tenant or an agent can switch it off for itself
       # (setting memory.recall.enabled); writes and extraction are unaffected.
       recall-enabled: ${APP_MEMORY_LIMITS_RECALL_ENABLED:true}
+      # Whether the agent's memory writes happen (remember tools, session summary, lesson/preference learning). A
+      # tenant or an agent can switch it off for itself (setting memory.write.enabled); reads and recall are unaffected.
+      write-enabled: ${APP_MEMORY_LIMITS_WRITE_ENABLED:true}
       # Memories automatic recall injects into a turn, per agent and per tenant.
       agent-recall-top-k: ${APP_MEMORY_LIMITS_AGENT_RECALL_TOP_K:5}
       tenant-recall-top-k: ${APP_MEMORY_LIMITS_TENANT_RECALL_TOP_K:5}

@@ -100,6 +100,10 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     @SuppressWarnings("unchecked")
     public String call(String toolInput) {
         try {
+            if (tenantMemoryService != null && tenantMemoryService.writesSwitchedOff(agentId)) {
+                // memory.write.enabled is off for this agent: say so, write nothing (no shared row, no graph triples).
+                return MemoryWriteSwitch.skippedResult();
+            }
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
             Object factValue = args.get("fact");
             if (factValue == null || factValue.toString().isBlank()) {

@@ -34,6 +34,14 @@ public class MemoryLimitsProperties {
      */
     private boolean recallEnabled = true;
 
+    /**
+     * Whether the agent's memory writes happen at all: the {@code remember_fact} / {@code remember_shared_fact}
+     * tools, the rolling session summary and the learning loops that propose lessons and preferences. On is today's
+     * behaviour; a tenant or an agent can switch it off for itself ({@code memory.write.enabled}), the counterpart
+     * of {@link #isRecallEnabled()} for an evaluation's "memory off" arm. Reads and recall are not affected.
+     */
+    private boolean writeEnabled = true;
+
     /** Memories an agent's automatic recall injects into a turn. */
     private int agentRecallTopK = 5;
 
@@ -73,6 +81,14 @@ public class MemoryLimitsProperties {
 
     public void setRecallEnabled(boolean recallEnabled) {
         this.recallEnabled = recallEnabled;
+    }
+
+    public boolean isWriteEnabled() {
+        return writeEnabled;
+    }
+
+    public void setWriteEnabled(boolean writeEnabled) {
+        this.writeEnabled = writeEnabled;
     }
 
     public int getAgentMaxMemories() {

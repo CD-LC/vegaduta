@@ -326,4 +326,21 @@ class PreferenceLearningServiceTest {
         assertEquals("calendar_create", ApprovalActionLabel.of("mcp_tool.calendar_create"));
         assertEquals("payment", ApprovalActionLabel.of("payment"));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void memoryWritesSwitchedOffRecordsNothing() {
+        PreferenceLearningService svc = service(2);
+        com.agenticai.core.agents.memory.AgentMemoryService memory =
+                mock(com.agenticai.core.agents.memory.AgentMemoryService.class);
+        when(memory.writesSwitchedOff(AGENT)).thenReturn(true);
+        ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> provider = mock(ObjectProvider.class);
+        when(provider.getIfAvailable()).thenReturn(memory);
+        svc.setAgentMemory(provider);
+
+        svc.recordAndEvaluate(ME, AGENT, "s", "chat", PreferenceCatalog.detect("please keep answers short"));
+
+        assertTrue(rows.isEmpty());
+        verify(proposals, never()).propose(any(Proposal.class));
+    }
 }
