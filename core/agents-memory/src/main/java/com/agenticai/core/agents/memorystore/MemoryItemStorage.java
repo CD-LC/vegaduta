@@ -27,6 +27,18 @@ public interface MemoryItemStorage {
 
     List<MemoryItem> listByStatus(UUID agentId, MemoryItemStatus status, int limit);
 
+    /**
+     * An agent's rows, newest first. {@code status} null means every status, {@code kind} null
+     * means every kind (the REST list filters on both).
+     */
+    List<MemoryItem> listByAgent(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit);
+
+    /**
+     * Every row whose {@code subject_keys} contain {@code subjectKey}, across all of the tenant's
+     * agents and every status (the per-user export). Ordered newest first.
+     */
+    List<MemoryItem> listForSubject(String subjectKey, int limit);
+
     List<MemoryItemSource> lineage(UUID itemId);
 
     List<MemoryEvent> events(UUID itemId);
@@ -59,6 +71,15 @@ public interface MemoryItemStorage {
 
     /** Hard delete (erasure); appends the ERASED event. False when the row did not exist. */
     boolean delete(UUID agentId, UUID itemId, MemoryEvent erased);
+
+    /**
+     * Erasure cascade (WP6): deletes the item and every item derived from it (the lineage children
+     * found through {@code memory_item_source}, recursively), each erased row's lineage (FK cascade)
+     * and its event history, and then appends one ERASED tombstone event per erased id, so the log
+     * still shows that something was erased without keeping what it was. Only rows of {@code agentId}
+     * are touched. Returns the erased ids, empty when the root row did not exist.
+     */
+    List<UUID> eraseTree(UUID agentId, UUID itemId, MemoryActor actor, Instant at);
 
     /** Appends an event that is not tied to a row change (a refused proposal). */
     void appendEvent(MemoryEvent event);

@@ -5583,6 +5583,56 @@ export interface MemoryImportDtos_SkippedFact {
   reason?: string;
 }
 
+export interface MemoryItemController_DetailView {
+  item?: MemoryItemController_ItemView;
+  lineage?: MemoryItemController_SourceView[];
+  events?: MemoryItemController_EventView[];
+}
+
+export interface MemoryItemController_EventView {
+  id?: string;
+  event?: string;
+  actorType?: string;
+  actorRef?: string;
+  fromStatus?: string;
+  toStatus?: string;
+  at?: string;
+}
+
+export interface MemoryItemController_ItemView {
+  id?: string;
+  agentId?: string;
+  kind?: string;
+  content?: string;
+  trust?: string;
+  status?: string;
+  writer?: string;
+  sourceType?: string;
+  sourceRef?: string;
+  sourceTaint?: string[];
+  modelGenerated?: boolean;
+  generation?: number;
+  subjectKeys?: string[];
+  version?: number;
+  supersedesId?: string;
+  createdAt?: string;
+  expiresAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+}
+
+export interface MemoryItemController_SourceView {
+  sourceTable?: string;
+  sourceKey?: string;
+  sourceTrust?: string;
+}
+
+export interface MemoryItemExportController_ExportView {
+  exportedAt?: string;
+  subject?: string;
+  items?: MemoryItemController_ItemView[];
+}
+
 export interface MemoryProvenanceService_FactSource {
   agentId?: string;
   sessionId?: string;

@@ -14,7 +14,9 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -335,6 +337,85 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     }
 
     @Override
+    public List<UUID> eraseTree(UUID agentId, UUID itemId, MemoryActor actor, Instant at) {
+        JdbcTemplate jdbc = jdbc();
+        String items = table("memory_item");
+        String sources = table("memory_item_source");
+        String events = table("memory_event");
+        List<UUID> erased = new ArrayList<>();
+        inTransaction(
+                jdbc,
+                () -> {
+                    Integer found =
+                            jdbc.queryForObject(
+                                    "SELECT count(*) FROM " + items + " WHERE id = ? AND agent_id = ?",
+                                    Integer.class,
+                                    itemId,
+                                    agentId);
+                    if (found == null || found == 0) {
+                        return;
+                    }
+                    // Descendants through lineage: rows that name the item (or a descendant) as their
+                    // MEMORY_ITEM source. Restricted to this agent's rows below, so a lineage row
+                    // pointing across agents can never reach another agent's data.
+                    List<UUID> descendants =
+                            jdbc.query(
+                                    "WITH RECURSIVE d(item_id) AS ("
+                                            + " SELECT s.item_id FROM "
+                                            + sources
+                                            + " s WHERE s.source_table = 'memory_item' AND s.source_key = ?"
+                                            + " UNION SELECT s.item_id FROM "
+                                            + sources
+                                            + " s JOIN d ON s.source_table = 'memory_item'"
+                                            + " AND s.source_key = d.item_id::text"
+                                            + ") SELECT item_id FROM d",
+                                    (rs, n) -> rs.getObject(1, UUID.class),
+                                    itemId.toString());
+                    List<UUID> ids = new ArrayList<>();
+                    ids.add(itemId);
+                    ids.addAll(descendants);
+                    String inList =
+                            ids.stream().map(id -> "'" + id + "'").collect(Collectors.joining(","));
+                    // (id, status) of the rows that will go, restricted to this agent.
+                    Map<UUID, String> targets = new LinkedHashMap<>();
+                    jdbc.query(
+                            "SELECT id, status FROM "
+                                    + items
+                                    + " WHERE agent_id = ? AND id IN ("
+                                    + inList
+                                    + ")",
+                            (org.springframework.jdbc.core.RowCallbackHandler)
+                                    rs -> targets.put(rs.getObject("id", UUID.class), rs.getString("status")),
+                            agentId);
+                    if (targets.isEmpty()) {
+                        return;
+                    }
+                    String targetList =
+                            targets.keySet().stream()
+                                    .map(id -> "'" + id + "'")
+                                    .collect(Collectors.joining(","));
+                    // History goes with the row; one ERASED tombstone per id is appended below.
+                    jdbc.update("DELETE FROM " + events + " WHERE item_id IN (" + targetList + ")");
+                    jdbc.update("DELETE FROM " + items + " WHERE id IN (" + targetList + ")");
+                    for (Map.Entry<UUID, String> t : targets.entrySet()) {
+                        insertEvent(
+                                jdbc,
+                                MemoryEvent.of(
+                                        t.getKey(),
+                                        agentId,
+                                        MemoryEvent.Type.ERASED,
+                                        actor,
+                                        MemoryItemStatus.parse(t.getValue()),
+                                        null,
+                                        t.getKey().equals(itemId) ? "ERASED" : "ERASED_DERIVED",
+                                        at));
+                    }
+                    erased.addAll(targets.keySet());
+                });
+        return erased;
+    }
+
+    @Override
     public void appendEvent(MemoryEvent event) {
         JdbcTemplate jdbc = jdbc();
         insertEvent(jdbc, event);
@@ -364,6 +445,42 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                         (rs, n) -> map(rs),
                         agentId,
                         status.name(),
+                        Math.max(1, limit));
+    }
+
+    @Override
+    public List<MemoryItem> listByAgent(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
+        StringBuilder sql =
+                new StringBuilder("SELECT ")
+                        .append(COLUMNS)
+                        .append(" FROM ")
+                        .append(table("memory_item"))
+                        .append(" WHERE agent_id = ?");
+        List<Object> args = new ArrayList<>();
+        args.add(agentId);
+        if (status != null) {
+            sql.append(" AND status = ?");
+            args.add(status.name());
+        }
+        if (kind != null) {
+            sql.append(" AND kind = ?");
+            args.add(kind.name());
+        }
+        sql.append(" ORDER BY created_at DESC LIMIT ?");
+        args.add(Math.max(1, limit));
+        return jdbc().query(sql.toString(), (rs, n) -> map(rs), args.toArray());
+    }
+
+    @Override
+    public List<MemoryItem> listForSubject(String subjectKey, int limit) {
+        return jdbc().query(
+                        "SELECT "
+                                + COLUMNS
+                                + " FROM "
+                                + table("memory_item")
+                                + " WHERE ? = ANY(subject_keys) ORDER BY created_at DESC LIMIT ?",
+                        (rs, n) -> map(rs),
+                        subjectKey,
                         Math.max(1, limit));
     }
 

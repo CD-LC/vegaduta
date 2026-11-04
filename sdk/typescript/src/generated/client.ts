@@ -8197,6 +8197,78 @@ export class MemoryImportApi {
   }
 }
 
+export class MemoryItemApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/memory-items`
+   */
+  list(agentId: string, options?: CallOptions<{ status?: string; kind?: string; limit?: number }, HeaderParams>): Promise<T.MemoryItemController_ItemView[]> {
+    return this.http.request<T.MemoryItemController_ItemView[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items` });
+  }
+
+  /**
+   * Get.
+   * `GET /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  get(agentId: string, itemId: string, options?: CallOptions): Promise<T.MemoryItemController_DetailView> {
+    return this.http.request<T.MemoryItemController_DetailView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}` });
+  }
+
+  /**
+   * Erase.
+   * `DELETE /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  erase(agentId: string, itemId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}`, response: "void" });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/approve`
+   */
+  approve(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/reject`
+   */
+  reject(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/reject`, response: "void" });
+  }
+
+  /**
+   * Revert.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/revert`
+   */
+  revert(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/revert`, response: "void" });
+  }
+}
+
+export class MemoryItemExportApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Export.
+   * `GET /api/memory-items/export`
+   */
+  export(options?: CallOptions<{ limit?: number }, HeaderParams>): Promise<T.MemoryItemExportController_ExportView> {
+    return this.http.request<T.MemoryItemExportController_ExportView>({ ...options, method: "GET", path: "/api/memory-items/export" });
+  }
+}
+
 export class MetaEmbeddedSignupApi {
   private readonly http: HttpClient;
 
@@ -16154,6 +16226,8 @@ export class VegadutaClient {
   readonly mcpToolPin: McpToolPinApi;
   readonly me: MeApi;
   readonly memoryImport: MemoryImportApi;
+  readonly memoryItem: MemoryItemApi;
+  readonly memoryItemExport: MemoryItemExportApi;
   readonly metaEmbeddedSignup: MetaEmbeddedSignupApi;
   readonly metaSocialCredential: MetaSocialCredentialApi;
   readonly metaSocialSend: MetaSocialSendApi;
@@ -16498,6 +16572,8 @@ export class VegadutaClient {
     this.mcpToolPin = new McpToolPinApi(this.http);
     this.me = new MeApi(this.http);
     this.memoryImport = new MemoryImportApi(this.http);
+    this.memoryItem = new MemoryItemApi(this.http);
+    this.memoryItemExport = new MemoryItemExportApi(this.http);
     this.metaEmbeddedSignup = new MetaEmbeddedSignupApi(this.http);
     this.metaSocialCredential = new MetaSocialCredentialApi(this.http);
     this.metaSocialSend = new MetaSocialSendApi(this.http);

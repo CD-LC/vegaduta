@@ -51,6 +51,28 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
     }
 
     @Override
+    public List<MemoryItem> listByAgent(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
+        return items.values().stream()
+                .filter(
+                        i ->
+                                i.agentId().equals(agentId)
+                                        && (status == null || i.status() == status)
+                                        && (kind == null || i.kind() == kind))
+                .sorted(Comparator.comparing(MemoryItem::createdAt).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemoryItem> listForSubject(String subjectKey, int limit) {
+        return items.values().stream()
+                .filter(i -> i.subjectKeys().contains(subjectKey))
+                .sorted(Comparator.comparing(MemoryItem::createdAt).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<MemoryItemSource> lineage(UUID itemId) {
         return lineage.getOrDefault(itemId, List.of());
     }
@@ -143,6 +165,55 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
         lineage.remove(itemId);
         events.add(erased);
         return true;
+    }
+
+    @Override
+    public List<UUID> eraseTree(UUID agentId, UUID itemId, MemoryActor actor, Instant at) {
+        MemoryItem root = items.get(itemId);
+        if (root == null || !root.agentId().equals(agentId)) {
+            return List.of();
+        }
+        // Descendants: items whose lineage names an already-collected id as its memory_item source.
+        Map<UUID, MemoryItem> targets = new LinkedHashMap<>();
+        targets.put(itemId, root);
+        boolean grew = true;
+        while (grew) {
+            grew = false;
+            for (MemoryItem candidate : items.values()) {
+                if (targets.containsKey(candidate.id()) || !candidate.agentId().equals(agentId)) {
+                    continue;
+                }
+                boolean derived =
+                        lineage.getOrDefault(candidate.id(), List.of()).stream()
+                                .anyMatch(
+                                        s ->
+                                                "memory_item".equals(s.sourceTable())
+                                                        && targets.keySet().stream()
+                                                                .map(UUID::toString)
+                                                                .anyMatch(s.sourceKey()::equals));
+                if (derived) {
+                    targets.put(candidate.id(), candidate);
+                    grew = true;
+                }
+            }
+        }
+        events.removeIf(e -> targets.containsKey(e.itemId()));
+        for (Map.Entry<UUID, MemoryItem> t : targets.entrySet()) {
+            items.remove(t.getKey());
+            embeddings.remove(t.getKey());
+            lineage.remove(t.getKey());
+            events.add(
+                    MemoryEvent.of(
+                            t.getKey(),
+                            agentId,
+                            MemoryEvent.Type.ERASED,
+                            actor,
+                            t.getValue().status(),
+                            null,
+                            t.getKey().equals(itemId) ? "ERASED" : "ERASED_DERIVED",
+                            at));
+        }
+        return List.copyOf(targets.keySet());
     }
 
     @Override

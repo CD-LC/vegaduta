@@ -5877,6 +5877,56 @@ class MemoryImportDtos_SkippedFact(TypedDict, total=False):
     reason: str
 
 
+class MemoryItemController_DetailView(TypedDict, total=False):
+    item: MemoryItemController_ItemView
+    lineage: List[MemoryItemController_SourceView]
+    events: List[MemoryItemController_EventView]
+
+
+class MemoryItemController_EventView(TypedDict, total=False):
+    id: str
+    event: str
+    actorType: str
+    actorRef: str
+    fromStatus: str
+    toStatus: str
+    at: str
+
+
+class MemoryItemController_ItemView(TypedDict, total=False):
+    id: str
+    agentId: str
+    kind: str
+    content: str
+    trust: str
+    status: str
+    writer: str
+    sourceType: str
+    sourceRef: str
+    sourceTaint: List[str]
+    modelGenerated: bool
+    generation: int
+    subjectKeys: List[str]
+    version: int
+    supersedesId: str
+    createdAt: str
+    expiresAt: str
+    approvedBy: str
+    approvedAt: str
+
+
+class MemoryItemController_SourceView(TypedDict, total=False):
+    sourceTable: str
+    sourceKey: str
+    sourceTrust: str
+
+
+class MemoryItemExportController_ExportView(TypedDict, total=False):
+    exportedAt: str
+    subject: str
+    items: List[MemoryItemController_ItemView]
+
+
 class MemoryProvenanceService_FactSource(TypedDict, total=False):
     agentId: str
     sessionId: str

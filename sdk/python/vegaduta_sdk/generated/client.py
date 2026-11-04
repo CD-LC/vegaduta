@@ -6938,6 +6938,65 @@ class MemoryImportApi:
         return self._http.request("POST", "/api/memory/import/preview", headers={"Idempotency-Key": idempotency_key}, body=body)
 
 
+class MemoryItemApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, status: Optional[str] = None, kind: Optional[str] = None, limit: Optional[int] = None) -> List[m.MemoryItemController_ItemView]:
+        """List.
+
+        GET /api/agents/{agentId}/memory-items
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memory-items", query={"status": status, "kind": kind, "limit": limit})
+
+    def get(self, agent_id: str, item_id: str) -> m.MemoryItemController_DetailView:
+        """Get.
+
+        GET /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}")
+
+    def erase(self, agent_id: str, item_id: str) -> None:
+        """Erase.
+
+        DELETE /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}", response="void")
+
+    def approve(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/approve
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/reject
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def revert(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Revert.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/revert
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/revert", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+
+class MemoryItemExportApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def export(self, *, limit: Optional[int] = None) -> m.MemoryItemExportController_ExportView:
+        """Export.
+
+        GET /api/memory-items/export
+        """
+        return self._http.request("GET", "/api/memory-items/export", query={"limit": limit})
+
+
 class MetaEmbeddedSignupApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -13697,6 +13756,8 @@ class VegadutaClient:
         self.mcp_tool_pin = McpToolPinApi(self.http)
         self.me = MeApi(self.http)
         self.memory_import = MemoryImportApi(self.http)
+        self.memory_item = MemoryItemApi(self.http)
+        self.memory_item_export = MemoryItemExportApi(self.http)
         self.meta_embedded_signup = MetaEmbeddedSignupApi(self.http)
         self.meta_social_credential = MetaSocialCredentialApi(self.http)
         self.meta_social_send = MetaSocialSendApi(self.http)

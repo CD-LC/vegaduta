@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.memorystore;
 
+import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemorySourceRef;
 import com.agenticai.core.security.TenantContext;
 import java.time.Clock;
@@ -73,6 +74,33 @@ public class MemoryItemReviewService {
 
     public List<MemoryItem> pending(UUID agentId, int limit) {
         return hasTenant() ? storage.listByStatus(agentId, MemoryItemStatus.PENDING, limit) : List.of();
+    }
+
+    /**
+     * An agent's items for the REST list endpoint; {@code status} null = every status, {@code kind}
+     * null = every kind. No trust filtering happens here: the controller decides who may see which
+     * status (a VIEWER only ever asks for ACTIVE, which is TRUSTED by the CHECK constraint).
+     */
+    public List<MemoryItem> list(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
+        return hasTenant() ? storage.listByAgent(agentId, status, kind, limit) : List.of();
+    }
+
+    /** Every item about {@code subjectKey} across the tenant's agents (the per-user export). */
+    public List<MemoryItem> forSubject(String subjectKey, int limit) {
+        if (!hasTenant() || subjectKey == null || subjectKey.isBlank()) {
+            return List.of();
+        }
+        return storage.listForSubject(subjectKey, limit);
+    }
+
+    /** Lineage of an item that belongs to the agent; empty when the item is not the agent's. */
+    public List<MemoryItemSource> lineage(UUID agentId, UUID itemId) {
+        return storage.find(agentId, itemId).isPresent() ? storage.lineage(itemId) : List.of();
+    }
+
+    /** Event history of an item that belongs to the agent; empty when the item is not the agent's. */
+    public List<MemoryEvent> events(UUID agentId, UUID itemId) {
+        return storage.find(agentId, itemId).isPresent() ? storage.events(itemId) : List.of();
     }
 
     // ------------------------------------------------------------------ decisions
@@ -225,6 +253,19 @@ public class MemoryItemReviewService {
                             "KIND=" + item.kind(),
                             clock.instant());
             return storage.delete(agentId, itemId, erased) ? Outcome.done(itemId) : Outcome.refused("NOT_FOUND");
+        });
+    }
+
+    /**
+     * Erasure cascade (WP6): removes the item and everything derived from it, each erased row's
+     * lineage and its event history, leaving one ERASED tombstone per erased id. Unlike
+     * {@link #delete}, a derived summary cannot keep erased content alive. Erasure works with the
+     * feature flags off (ADR-0028 rollout: data is retained but erasable).
+     */
+    public Outcome erase(UUID agentId, UUID itemId, MemoryActor actor) {
+        return guarded(agentId, itemId, actor, "ERASE", item -> {
+            List<UUID> erased = storage.eraseTree(agentId, itemId, actor, clock.instant());
+            return erased.isEmpty() ? Outcome.refused("NOT_FOUND") : Outcome.done(itemId);
         });
     }
 
