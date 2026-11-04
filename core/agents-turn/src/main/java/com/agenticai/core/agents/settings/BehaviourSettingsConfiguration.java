@@ -35,6 +35,7 @@ class BehaviourSettingsConfiguration {
             ObjectProvider<ToolLoopProperties> toolLoop,
             ObjectProvider<RoutingSimpleProperties> routing,
             ObjectProvider<MemoryLimitsProperties> memory,
+            ObjectProvider<com.agenticai.core.agents.memory.EpisodicMemoryProperties> episodic,
             ObjectProvider<GuardrailTuningProperties> guardrails,
             ObjectProvider<AuxiliaryModelProperties> auxiliary) {
         return new BehaviourSettingsCatalog(
@@ -49,7 +50,8 @@ class BehaviourSettingsConfiguration {
                 routing.getIfAvailable(RoutingSimpleProperties::new),
                 memory.getIfAvailable(MemoryLimitsProperties::new),
                 guardrails.getIfAvailable(GuardrailTuningProperties::new),
-                auxiliary.getIfAvailable(AuxiliaryModelProperties::new));
+                auxiliary.getIfAvailable(AuxiliaryModelProperties::new))
+                .withEpisodic(episodic.getIfAvailable(com.agenticai.core.agents.memory.EpisodicMemoryProperties::new));
     }
 
     @Bean

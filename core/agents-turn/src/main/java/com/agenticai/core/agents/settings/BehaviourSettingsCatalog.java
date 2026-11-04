@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.settings;
 
 import com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties;
+import com.agenticai.core.agents.memory.EpisodicMemoryProperties;
 import com.agenticai.core.agents.memory.MemoryLimitsProperties;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ChatCacheProperties;
@@ -48,6 +49,8 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
     private final ToolLoopProperties toolLoop;
     private final RoutingSimpleProperties routing;
     private final MemoryLimitsProperties memory;
+    // Not a constructor parameter: the constructor is at the 12-collaborator ceiling (StructureRulesTest).
+    private EpisodicMemoryProperties episodic = new EpisodicMemoryProperties();
     private final GuardrailTuningProperties guardrails;
     private final AuxiliaryModelProperties auxiliary;
 
@@ -76,6 +79,12 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
         this.memory = memory;
         this.guardrails = guardrails;
         this.auxiliary = auxiliary;
+    }
+
+    /** Supplies the platform level of {@code memory.episodic.enabled}; call before the catalog is registered. */
+    public BehaviourSettingsCatalog withEpisodic(EpisodicMemoryProperties episodic) {
+        this.episodic = episodic == null ? new EpisodicMemoryProperties() : episodic;
+        return this;
     }
 
     private static SettingDefinition.Builder bool(String key, String group, SettingRisk risk, String property, SettingScope... scopes) {
@@ -146,6 +155,8 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
                         .platform(memory::isRecallEnabled).build(),
                 bool("memory.write.enabled", "memory", SettingRisk.LOW, "app.memory.limits.write-enabled", TENANT_AND_AGENT)
                         .platform(memory::isWriteEnabled).build(),
+                bool("memory.episodic.enabled", "memory", SettingRisk.LOW, "app.memory.episodic.enabled", TENANT_AND_AGENT)
+                        .platform(() -> episodic.isEnabled()).build(),
                 integer("memory.recall.agentTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.agent-recall-top-k", TENANT_AND_AGENT)
                         .platform(memory::getAgentRecallTopK).build(),
                 integer("memory.recall.tenantTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.tenant-recall-top-k", TENANT_AND_AGENT)

@@ -42,6 +42,8 @@ public final class BehaviourCatalogFixture {
     public final ToolLoopProperties toolLoop = new ToolLoopProperties();
     public final RoutingSimpleProperties routing = new RoutingSimpleProperties();
     public final MemoryLimitsProperties memory = new MemoryLimitsProperties();
+    public final com.agenticai.core.agents.memory.EpisodicMemoryProperties episodic =
+            new com.agenticai.core.agents.memory.EpisodicMemoryProperties();
     public final GuardrailTuningProperties guardrails = new GuardrailTuningProperties();
     public final AuxiliaryModelProperties auxiliary = new AuxiliaryModelProperties();
     public final InMemorySettingsStore store = new InMemorySettingsStore();
@@ -50,7 +52,7 @@ public final class BehaviourCatalogFixture {
     public BehaviourSettingsCatalog catalog() {
         return new BehaviourSettingsCatalog(
                 approvalContinuation, approvalExpiry, finish, retry, cache, followUp, continuation, toolLoop, routing,
-                memory, guardrails, auxiliary);
+                memory, guardrails, auxiliary).withEpisodic(episodic);
     }
 
     /** The resolver over the properties as they are NOW: call after tuning the property objects. */

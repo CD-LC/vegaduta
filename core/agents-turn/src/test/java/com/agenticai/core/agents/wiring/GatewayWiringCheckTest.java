@@ -104,7 +104,8 @@ class GatewayWiringCheckTest {
                         SkillLearningGateway.class.getSimpleName(),
                         RoutineObservationGateway.class.getSimpleName(),
                         PreferenceSignalGateway.class.getSimpleName(),
-                        LessonLearningGateway.class.getSimpleName()),
+                        LessonLearningGateway.class.getSimpleName(),
+                        com.agenticai.core.agents.skills.EpisodeRecordingGateway.class.getSimpleName()),
                 covered);
         // A new *Gateway holder with install(...) must be added to the check: look for any this list does not know.
         for (Class<?> gateway :
@@ -113,7 +114,8 @@ class GatewayWiringCheckTest {
                         SkillLearningGateway.class,
                         RoutineObservationGateway.class,
                         PreferenceSignalGateway.class,
-                        LessonLearningGateway.class)) {
+                        LessonLearningGateway.class,
+                        com.agenticai.core.agents.skills.EpisodeRecordingGateway.class)) {
             assertTrue(
                     java.util.Arrays.stream(gateway.getMethods()).anyMatch(m -> m.getName().equals("install")),
                     gateway.getSimpleName());

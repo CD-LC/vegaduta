@@ -62,6 +62,7 @@ class BehaviourSettingsGoldenTest {
         f.routing.setMaxClauses(4);
         f.memory.setRecallEnabled(!f.memory.isRecallEnabled());
         f.memory.setWriteEnabled(!f.memory.isWriteEnabled());
+        f.episodic.setEnabled(!f.episodic.isEnabled());
         f.memory.setAgentRecallTopK(11);
         f.memory.setTenantRecallTopK(12);
         f.memory.setAgentMaxMemories(77);
@@ -83,6 +84,7 @@ class BehaviourSettingsGoldenTest {
         expect(4, "routing.simple.maxClauses");
         expect(f.memory.isRecallEnabled(), "memory.recall.enabled");
         expect(f.memory.isWriteEnabled(), "memory.write.enabled");
+        expect(f.episodic.isEnabled(), "memory.episodic.enabled");
         expect(11, "memory.recall.agentTopK");
         expect(12, "memory.recall.tenantTopK");
         expect(77, "memory.agent.maxMemories");

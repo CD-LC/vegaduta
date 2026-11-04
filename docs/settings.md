@@ -771,3 +771,5 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `tool-sandbox.max-memory-mb` | B | safety bound: hard ceiling a tenant's requested memory is clamped into (512 MB); raising it per workspace would raise the host's exposure |
 | `tool-sandbox.max-source-bytes` | B | safety bound: largest tenant-authored program accepted (64 KiB) |
 | `tool-sandbox.max-timeout-ms` | B | safety bound: hard ceiling a tenant's requested timeout is clamped into (15000 ms) |
+| `memory.episodic.enabled` | b | L | T,A | `app.memory.episodic.enabled` | **wired**: agents-jobs `EpisodeRecorder` (ADR-0028 WP4b; platform default off, tenant and agent can only switch it off further; on = after a completed turn one template episode built from verified signals only is filed as a PENDING or QUARANTINED proposal via `MemoryProposalSink`; skipped, with `memory.episode.skipped{reason}` counted, when `memory.write.enabled` is off) |
+| `app.memory.episodic.enabled` | A | `memory.episodic.enabled` |

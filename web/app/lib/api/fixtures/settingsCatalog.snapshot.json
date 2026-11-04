@@ -415,6 +415,20 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.memory.limits.write-enabled"
   }, {
+    "key" : "memory.episodic.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.episodic.enabled.label",
+    "descriptionKey" : "settings.memory.episodic.enabled.description",
+    "helpKey" : "settings.memory.episodic.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.episodic.enabled"
+  }, {
     "key" : "memory.recall.agentTopK",
     "group" : "memory",
     "labelKey" : "settings.memory.recall.agentTopK.label",

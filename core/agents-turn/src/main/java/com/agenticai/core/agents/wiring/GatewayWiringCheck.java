@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.wiring;
 
+import com.agenticai.core.agents.skills.EpisodeRecordingGateway;
 import com.agenticai.core.agents.skills.LessonLearningGateway;
 import com.agenticai.core.agents.skills.PreferenceSignalGateway;
 import com.agenticai.core.agents.skills.RoutineObservationGateway;
@@ -90,7 +91,12 @@ public class GatewayWiringCheck {
                         "lesson learning",
                         "LessonLearningGateway",
                         List.of("app.learning.lessons.enabled", "app.learning.proposals.enabled"),
-                        LessonLearningGateway::installed));
+                        LessonLearningGateway::installed),
+                new Feature(
+                        "episodic recording",
+                        "EpisodeRecordingGateway",
+                        List.of("app.memory.episodic.enabled"),
+                        EpisodeRecordingGateway::installed));
     }
 
     /** One message per feature that is switched on and whose gateway is not installed; empty when all is wired. */

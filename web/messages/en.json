@@ -13085,6 +13085,13 @@
           "label": "Memories given to on-device chat"
         }
       },
+      "episodic": {
+        "enabled": {
+          "description": "Whether the agent may propose a short record of what happened after a turn.",
+          "help": "Records are built only from checked facts (tool results, approval decisions, a person's rating), never from what the agent says about itself, and wait for review before they are used. The platform must also allow it; turning it off here stops new records only.",
+          "label": "Propose episode records"
+        }
+      },
       "graph": {
         "recallMaxFacts": {
           "description": "The most facts an agent is shown from its relationship memory in one lookup.",

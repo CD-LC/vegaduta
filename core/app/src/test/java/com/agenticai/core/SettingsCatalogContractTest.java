@@ -92,7 +92,8 @@ class SettingsCatalogContractTest {
                 new ApprovalContinuationProperties(), new ApprovalExpiryProperties(), new ChatFinishProperties(),
                 new LlmRetryProperties(), new ChatCacheProperties(), new FollowUpProperties(),
                 new ContinuationProperties(), new ToolLoopProperties(), new RoutingSimpleProperties(),
-                new MemoryLimitsProperties(), new GuardrailTuningProperties(), new AuxiliaryModelProperties());
+                new MemoryLimitsProperties(), new GuardrailTuningProperties(), new AuxiliaryModelProperties())
+                .withEpisodic(new com.agenticai.core.agents.memory.EpisodicMemoryProperties());
         registry = new SettingsRegistry(List.of(
                 limits, behaviour, new CollaborationSettings(new CollaborationProperties()),
                 new QualitySettings(new MockEnvironment()),
