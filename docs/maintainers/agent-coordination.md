@@ -789,3 +789,5 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 ### License-information audit (Claude Code, 2026-11-01)
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
+
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/omnichannel/src/test` only (operator inbox and escalation, contact service and controller, agent send/control/query ports, Meta Graph client, WhatsApp QR receive loop, edge relay controller, sandbox channel controller). No production code changed. Worktree: `vegaduta-coverage-wt`.
