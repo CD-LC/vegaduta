@@ -16,6 +16,9 @@ export type MemoryFact = {
   createdAt?: string | null;
   lastUsedAt?: string | null;
   useCount?: number;
+  /** "QUARANTINED": written on a turn that handled untrusted content; never recalled until approved. Absent = TRUSTED (older core). */
+  trust?: "TRUSTED" | "QUARANTINED";
+  sourceTaint?: string[];
 };
 
 export type MemoryOverview = {

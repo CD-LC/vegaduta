@@ -10675,6 +10675,8 @@ export interface UserMemoryController_FactView {
   createdAt?: string;
   lastUsedAt?: string;
   useCount?: number;
+  trust?: string;
+  sourceTaint?: string[];
 }
 
 export interface UserMemoryController_ForgetAllResult {

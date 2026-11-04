@@ -127128,6 +127128,15 @@
             "type": "integer",
             "format": "int32",
             "default": 0
+          },
+          "trust": {
+            "type": "string"
+          },
+          "sourceTaint": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [

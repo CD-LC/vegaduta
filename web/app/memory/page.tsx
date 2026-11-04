@@ -228,6 +228,16 @@ export default function MemoryPage() {
     }
   };
 
+  const approveFact = async (fact: MemoryFact) => {
+    if (!fact.agentId) return;
+    try {
+      await api.approveAgentMemory(fact.agentId, fact.id);
+      refresh();
+    } catch {
+      /* surfaced by toJson */
+    }
+  };
+
   const setActiveProject = async (slug: string | null) => {
     setActiveBusy(true);
     try {
@@ -472,6 +482,7 @@ export default function MemoryPage() {
                           maxChars={data.limits.maxFactChars}
                           onEdit={editFact}
                           onDelete={deleteFact}
+                          onApprove={approveFact}
                         />
                       ))}
                     </ul>

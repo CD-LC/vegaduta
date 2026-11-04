@@ -10906,6 +10906,8 @@ class UserMemoryController_FactView(TypedDict, total=False):
     createdAt: str
     lastUsedAt: str
     useCount: int
+    trust: str
+    sourceTaint: List[str]
 
 
 class UserMemoryController_ForgetAllResult(TypedDict, total=False):

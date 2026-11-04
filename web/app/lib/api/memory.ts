@@ -24,6 +24,11 @@ export const memoryApi = {
     }).then(toJson),
   deleteMemoryFact: (scope: string, id: string) =>
     apiFetch(`/api/memory/facts/${encodeURIComponent(scope)}/${encodeURIComponent(id)}`, { method: "DELETE" }).then(toJson),
+  // Approve a QUARANTINED private fact through the agent-memory endpoint (VIEWER on the agent is
+  // enough for the caller's own subject). Reject is the plain delete. Shared facts have no
+  // user-level approve endpoint (it is EDITOR on the agent and needs the subject key).
+  approveAgentMemory: (agentId: string, memoryId: string) =>
+    apiFetch(`/api/agents/${encodeURIComponent(agentId)}/memories/${encodeURIComponent(memoryId)}/approve`, { method: "POST" }).then(toJson),
   // Add a fact by hand. scope "agent" needs agentId; "shared" ignores it.
   addMemoryFact: (content: string, scope: "agent" | "shared", agentId?: string | null) =>
     apiFetch(`/api/memory/facts`, {
