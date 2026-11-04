@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS memory_tombstone (
     memory_kind       VARCHAR(16)  NOT NULL,   -- agent | shared
     agent_id          UUID,
     original_id       UUID,
-    content_sha256    CHAR(64),
+    content_sha256    VARCHAR(64),
     reason            VARCHAR(64)  NOT NULL,   -- DECAY | QUARANTINE_TTL | MERGED_INTO:<id>
     actor             VARCHAR(64)  NOT NULL,   -- system:memory-consolidation
     score_at_delete   NUMERIC(4,3),
