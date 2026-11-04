@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "id": "s05-multi-hop",
+  "category": "multi-hop",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 105,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Ravi is my accountant",
+          "plants": [
+            "f-role"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 4,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "My accountant's number is +91 00000 12345",
+          "plants": [
+            "f-phone"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Remind me to buy milk",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-role",
+      "key": "accountant_name",
+      "value": "Ravi is the user's accountant",
+      "match": "Ravi",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-phone",
+      "key": "accountant_phone",
+      "value": "Accountant's number is +91 00000 12345",
+      "match": "00000 12345",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 4
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s3",
+      "type": "MULTI_HOP",
+      "prompt": "Call Ravi's number",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "accountant_name",
+        "accountant_phone"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "00000 12345"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}

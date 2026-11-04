@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "id": "s06-abstention",
+  "category": "abstention",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 106,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "I like masala tea in the evening",
+          "plants": [
+            "f-tea"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 2,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Suggest a weekend trek near Pune",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-tea",
+      "key": "tea_pref",
+      "value": "Likes masala tea in the evening",
+      "match": "masala tea",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s2",
+      "type": "ABSTENTION",
+      "prompt": "What's my blood group?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "blood_group"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [
+          "O+",
+          "A+",
+          "B+",
+          "AB+",
+          "O-",
+          "A-",
+          "B-",
+          "AB-"
+        ],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    }
+  ]
+}

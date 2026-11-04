@@ -1,0 +1,800 @@
+{
+  "schema_version": 1,
+  "id": "persona-p2-solo-founder",
+  "category": "persona",
+  "persona": {
+    "id": "p2-solo-founder",
+    "name": "Solo founder",
+    "language": "en",
+    "description": "Product decisions, investor names, deadlines that move"
+  },
+  "seed": 202,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "My lead investor is Anil Kapoor at Northwind Capital",
+          "plants": [
+            "f00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Always give me status updates as exactly three bullets",
+          "plants": [
+            "f02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "We launch on 15 March",
+          "plants": [
+            "f03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite tea: Assam CTC",
+          "plants": [
+            "d00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite colour: maroon",
+          "plants": [
+            "d06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite festival: Holi",
+          "plants": [
+            "d12"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "The product codename is Project Kestrel",
+          "plants": [
+            "f01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Meera Rao is my CTO",
+          "plants": [
+            "f05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Our Q3 MRR target is 8 lakh",
+          "plants": [
+            "f07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite dish: Poha",
+          "plants": [
+            "d01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "shoe size: size 8",
+          "plants": [
+            "d07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "cousin's city: Indore",
+          "plants": [
+            "d13"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 10,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Meera's email is meera@kestrel.example.test",
+          "plants": [
+            "f06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Runway is 14 months at current burn",
+          "plants": [
+            "f09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "commute: metro",
+          "plants": [
+            "d02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "phone model: Nokia-demo",
+          "plants": [
+            "d08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "vehicle: Splendor",
+          "plants": [
+            "d14"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 30,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Launch slipped, new date is 2 April",
+          "plants": [
+            "f04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Pro plan is priced at 1999 per month",
+          "plants": [
+            "f10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pet: Moti",
+          "plants": [
+            "d03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "wake-up time: 7:00",
+          "plants": [
+            "d09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "TV show: Scam 1992",
+          "plants": [
+            "d15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "We raised the Q3 MRR target to 12 lakh",
+          "plants": [
+            "f08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Board meets on the first Monday of the month",
+          "plants": [
+            "f11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "hobby: sketching",
+          "plants": [
+            "d04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gym day: Tuesday",
+          "plants": [
+            "d10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite sweet: rasgulla",
+          "plants": [
+            "d16"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 45,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "music: jazz",
+          "plants": [
+            "d05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "current book: Gitanjali",
+          "plants": [
+            "d11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "weekend spot: Marine Drive",
+          "plants": [
+            "d17"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f00",
+      "key": "lead_investor",
+      "value": "Lead investor is Anil Kapoor at Northwind Capital",
+      "match": "Anil Kapoor",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f01",
+      "key": "product_name",
+      "value": "Product codename is Project Kestrel",
+      "match": "Kestrel",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f02",
+      "key": "update_style",
+      "value": "Status updates as exactly three bullets",
+      "match": "Three bullets:",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p3"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    },
+    {
+      "id": "f03",
+      "key": "launch_date",
+      "value": "Launch date is 15 March",
+      "match": "15 March",
+      "planted_in": "s1",
+      "superseded_by": "f04",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f04",
+      "key": "launch_date",
+      "value": "Launch date moved to 2 April",
+      "match": "2 April",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p4"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f05",
+      "key": "cto_name",
+      "value": "Meera Rao is the CTO",
+      "match": "Meera Rao",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f06",
+      "key": "cto_email",
+      "value": "CTO email is meera@kestrel.example.test",
+      "match": "meera@kestrel.example.test",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f07",
+      "key": "mrr_target",
+      "value": "Q3 MRR target is 8 lakh",
+      "match": "8 lakh",
+      "planted_in": "s2",
+      "superseded_by": "f08",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f08",
+      "key": "mrr_target",
+      "value": "Q3 MRR target is 12 lakh",
+      "match": "12 lakh",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p7"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "f09",
+      "key": "runway",
+      "value": "Runway is 14 months",
+      "match": "14 months",
+      "planted_in": "s3",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p8"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f10",
+      "key": "pro_price",
+      "value": "Pro plan costs 1999 per month",
+      "match": "1999",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f11",
+      "key": "board_day",
+      "value": "Board meets on the first Monday",
+      "match": "first Monday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d00",
+      "key": "misc_fav_tea",
+      "value": "favourite tea: Assam CTC",
+      "match": "Assam CTC",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d01",
+      "key": "misc_fav_dish",
+      "value": "favourite dish: Poha",
+      "match": "Poha",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d02",
+      "key": "misc_commute",
+      "value": "commute: metro",
+      "match": "metro",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d03",
+      "key": "misc_pet_name",
+      "value": "pet: Moti",
+      "match": "Moti",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d04",
+      "key": "misc_hobby",
+      "value": "hobby: sketching",
+      "match": "sketching",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d05",
+      "key": "misc_music",
+      "value": "music: jazz",
+      "match": "jazz",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d06",
+      "key": "misc_colour",
+      "value": "favourite colour: maroon",
+      "match": "maroon",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d07",
+      "key": "misc_shoe",
+      "value": "shoe size: size 8",
+      "match": "size 8",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d08",
+      "key": "misc_phone",
+      "value": "phone model: Nokia-demo",
+      "match": "Nokia-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d09",
+      "key": "misc_wake",
+      "value": "wake-up time: 7:00",
+      "match": "7:00",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d10",
+      "key": "misc_gym",
+      "value": "gym day: Tuesday",
+      "match": "Tuesday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d11",
+      "key": "misc_book",
+      "value": "current book: Gitanjali",
+      "match": "Gitanjali",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d12",
+      "key": "misc_festival",
+      "value": "favourite festival: Holi",
+      "match": "Holi",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d13",
+      "key": "misc_cousin",
+      "value": "cousin's city: Indore",
+      "match": "Indore",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d14",
+      "key": "misc_vehicle",
+      "value": "vehicle: Splendor",
+      "match": "Splendor",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d15",
+      "key": "misc_show",
+      "value": "TV show: Scam 1992",
+      "match": "Scam 1992",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d16",
+      "key": "misc_sweet",
+      "value": "favourite sweet: rasgulla",
+      "match": "rasgulla",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d17",
+      "key": "misc_spot",
+      "value": "weekend spot: Marine Drive",
+      "match": "Marine Drive",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Who is my lead investor?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "lead_investor"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Anil Kapoor"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is the product codename?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "product_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Kestrel"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p3",
+      "after": "s6",
+      "type": "PREFERENCE",
+      "prompt": "Give me a status update",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "update_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "Three bullets:"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p4",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "When is the launch?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "launch_date"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "2 April"
+        ],
+        "none": [
+          "15 March"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p5",
+      "after": "s6",
+      "type": "MULTI_HOP",
+      "prompt": "Email my CTO",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "cto_name",
+        "cto_email"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "meera@kestrel.example.test"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p6",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my co-founder's salary?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "cofounder_salary"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    },
+    {
+      "id": "p7",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "What is the Q3 MRR target?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "mrr_target"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "12 lakh"
+        ],
+        "none": [
+          "8 lakh"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p8",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "How much runway do we have?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "runway"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "14 months"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}

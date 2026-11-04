@@ -385,3 +385,22 @@ The attacker payloads are data in `core/quality/src/main/resources/eval/redteam/
 (core/app already depends on core/quality), so the red-team tests and the section 4.4 poisoning replay attack
 the same strings. `RedTeamCorpusDataTest` pins the counts (36 marker forgeries, 24 injection styles per
 instruction): removing or weakening a scenario fails that test and must be a deliberate edit.
+
+## Addendum C: what the first implementation covers (core/quality `memeval`)
+
+Built: JSON dataset model and loader (`MemoryScenario`, `MemoryScenarioLoader`, `ScenarioValidator`; keys are snake_case,
+the probe expectations sit under `expect` to stay under the 12-parameter constructor rule, files are one JSON object
+per scenario rather than JSONL); 8 personas (30 facts and 6 sessions each, English, Hindi, Hinglish), S1-S15 and 12
+mistake-correction cases under `eval/memory/`; scorers for M1-M4, H1-H5 and the C1-C4 inputs (`MemoryScorer`);
+aggregation with Wilson, paired bootstrap and the sign test (`MemoryScorecards`); the G1-G11 evaluator with Holm over
+the two gain claims (G1, G4) (`MemoryScorecardGate`); a deterministic `MemoryEvalSubject` interface with an in-memory
+reference subject whose `Quirk`s model one defect each (`InMemoryReferenceSubject`); `MemoryEvalCli` (JSON report).
+
+Interpretation choices where the doc is silent: a gate that cannot be decided is `UNPROVEN`, never `PASS`; G3 `WARN`
+blocks SHIP (the gate script requires G2 and G3 to be `PASS`); CI tier needs 60 probes, nightly 120; rates pool probes
+across repeats (repeats are not independent, so upper bounds are slightly optimistic); G7 notes when the attack corpus is
+below 150.
+
+Not built: the runner against the platform (fresh tenant and user per case, `Clock` advance, recall trace), LLM judge
+scoring, the full poisoning corpus replay from `RedTeamCorpusData` (S11-S13 are hand-written), `AgentShareMemoryToggleRequest`
+sharing in S14, the async-hop part of S15, LongMemEval/LoCoMo adapters, N1-N3, the 40-case mistake set (12 shipped).

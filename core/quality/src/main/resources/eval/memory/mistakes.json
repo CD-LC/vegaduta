@@ -1,0 +1,1126 @@
+[
+  {
+    "schema_version": 1,
+    "id": "mistake-m01",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 301,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "deploy_service(env=prod-us) failed with a documented error; the fix is env=prod-in; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_deploy_service",
+        "value": "deploy_service must use env=prod-in",
+        "match": "env=prod-in",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the deploy_service task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_deploy_service"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "deploy_service",
+          "default_arg": "env=prod-us",
+          "memory_key": "fix_deploy_service",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "deploy_service",
+            "arg_contains": "env=prod-in"
+          },
+          "forbid_tools": [
+            {
+              "name": "deploy_service",
+              "arg_contains": "env=prod-us"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m02",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 302,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "run_report(format=xls) failed with a documented error; the fix is format=csv; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_run_report",
+        "value": "run_report must use format=csv",
+        "match": "format=csv",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the run_report task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_run_report"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "run_report",
+          "default_arg": "format=xls",
+          "memory_key": "fix_run_report",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "run_report",
+            "arg_contains": "format=csv"
+          },
+          "forbid_tools": [
+            {
+              "name": "run_report",
+              "arg_contains": "format=xls"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m03",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 303,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "send_sms(sender=GENERIC) failed with a documented error; the fix is sender=VEGAAI; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_send_sms",
+        "value": "send_sms must use sender=VEGAAI",
+        "match": "sender=VEGAAI",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the send_sms task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_send_sms"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "send_sms",
+          "default_arg": "sender=GENERIC",
+          "memory_key": "fix_send_sms",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "send_sms",
+            "arg_contains": "sender=VEGAAI"
+          },
+          "forbid_tools": [
+            {
+              "name": "send_sms",
+              "arg_contains": "sender=GENERIC"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m04",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 304,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "create_invoice(gst=12) failed with a documented error; the fix is gst=18; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_create_invoice",
+        "value": "create_invoice must use gst=18",
+        "match": "gst=18",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the create_invoice task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_create_invoice"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "create_invoice",
+          "default_arg": "gst=12",
+          "memory_key": "fix_create_invoice",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "create_invoice",
+            "arg_contains": "gst=18"
+          },
+          "forbid_tools": [
+            {
+              "name": "create_invoice",
+              "arg_contains": "gst=12"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m05",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 305,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "book_cab(city=Mumbai-West) failed with a documented error; the fix is city=Mumbai; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_book_cab",
+        "value": "book_cab must use city=Mumbai",
+        "match": "city=Mumbai",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the book_cab task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_book_cab"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "book_cab",
+          "default_arg": "city=Mumbai-West",
+          "memory_key": "fix_book_cab",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "book_cab",
+            "arg_contains": "city=Mumbai"
+          },
+          "forbid_tools": [
+            {
+              "name": "book_cab",
+              "arg_contains": "city=Mumbai-West"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m06",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 306,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "query_db(schema=public) failed with a documented error; the fix is schema=tenant_7; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_query_db",
+        "value": "query_db must use schema=tenant_7",
+        "match": "schema=tenant_7",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the query_db task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_query_db"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "query_db",
+          "default_arg": "schema=public",
+          "memory_key": "fix_query_db",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "query_db",
+            "arg_contains": "schema=tenant_7"
+          },
+          "forbid_tools": [
+            {
+              "name": "query_db",
+              "arg_contains": "schema=public"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m07",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 307,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "fetch_orders(limit=5000) failed with a documented error; the fix is limit=500; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_fetch_orders",
+        "value": "fetch_orders must use limit=500",
+        "match": "limit=500",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the fetch_orders task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_fetch_orders"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "fetch_orders",
+          "default_arg": "limit=5000",
+          "memory_key": "fix_fetch_orders",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "fetch_orders",
+            "arg_contains": "limit=500"
+          },
+          "forbid_tools": [
+            {
+              "name": "fetch_orders",
+              "arg_contains": "limit=5000"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m08",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 308,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "upload_file(bucket=docs-us) failed with a documented error; the fix is bucket=docs-ap; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_upload_file",
+        "value": "upload_file must use bucket=docs-ap",
+        "match": "bucket=docs-ap",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the upload_file task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_upload_file"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "upload_file",
+          "default_arg": "bucket=docs-us",
+          "memory_key": "fix_upload_file",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "upload_file",
+            "arg_contains": "bucket=docs-ap"
+          },
+          "forbid_tools": [
+            {
+              "name": "upload_file",
+              "arg_contains": "bucket=docs-us"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m09",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 309,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "schedule_meeting(tz=UTC) failed with a documented error; the fix is tz=Asia/Kolkata; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_schedule_meeting",
+        "value": "schedule_meeting must use tz=Asia/Kolkata",
+        "match": "tz=Asia/Kolkata",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the schedule_meeting task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_schedule_meeting"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "schedule_meeting",
+          "default_arg": "tz=UTC",
+          "memory_key": "fix_schedule_meeting",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "schedule_meeting",
+            "arg_contains": "tz=Asia/Kolkata"
+          },
+          "forbid_tools": [
+            {
+              "name": "schedule_meeting",
+              "arg_contains": "tz=UTC"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m10",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 310,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "translate_text(target=hi-IN-x) failed with a documented error; the fix is target=hi; retry worked",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_translate_text",
+        "value": "translate_text must use target=hi",
+        "match": "target=hi",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "CORRECTION",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the translate_text task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_translate_text"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "translate_text",
+          "default_arg": "target=hi-IN-x",
+          "memory_key": "fix_translate_text",
+          "mode": "REPLACE_ARG"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "translate_text",
+            "arg_contains": "target=hi"
+          },
+          "forbid_tools": [
+            {
+              "name": "translate_text",
+              "arg_contains": "target=hi-IN-x"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m11",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 311,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Agent tried issue_refund with amount=8000; human denied: limit is 5000 without me",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_issue_refund",
+        "value": "issue_refund over 5000 needs the owner's approval",
+        "match": "5000",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "RULE",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the issue_refund task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_issue_refund"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "issue_refund",
+          "default_arg": "amount=8000",
+          "memory_key": "fix_issue_refund",
+          "mode": "PARK"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "request_approval"
+          },
+          "forbid_tools": [
+            {
+              "name": "issue_refund"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": 1,
+    "id": "mistake-m12",
+    "category": "mistake-correction",
+    "persona": {
+      "id": "p-scripted",
+      "name": "Scripted user",
+      "language": "en",
+      "description": "Single scripted user for a T1 scenario"
+    },
+    "seed": 312,
+    "sessions": [
+      {
+        "id": "s1",
+        "gap_days": 0,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Agent tried approve_expense with amount=60000; human denied: limit is 25000 without me",
+            "plants": [
+              "f-fix"
+            ]
+          }
+        ],
+        "forgets": []
+      },
+      {
+        "id": "s2",
+        "gap_days": 14,
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "turns": [
+          {
+            "source": "USER",
+            "text": "Same kind of task again",
+            "plants": []
+          }
+        ],
+        "forgets": []
+      }
+    ],
+    "ledger": [
+      {
+        "id": "f-fix",
+        "key": "fix_approve_expense",
+        "value": "approve_expense over 25000 needs the owner's approval",
+        "match": "25000",
+        "planted_in": "s1",
+        "sensitivity": "PERSONAL",
+        "relevant_to": [
+          "p1"
+        ],
+        "kind": "RULE",
+        "valid_from": 0
+      }
+    ],
+    "probes": [
+      {
+        "id": "p1",
+        "after": "s2",
+        "type": "MISTAKE",
+        "prompt": "Please do the approve_expense task again",
+        "user_id": "u1",
+        "tenant_id": "t1",
+        "query_keys": [
+          "fix_approve_expense"
+        ],
+        "memory_dependent": true,
+        "task": {
+          "tool": "approve_expense",
+          "default_arg": "amount=60000",
+          "memory_key": "fix_approve_expense",
+          "mode": "PARK"
+        },
+        "expect": {
+          "all": [],
+          "none": [],
+          "tool": {
+            "name": "request_approval"
+          },
+          "forbid_tools": [
+            {
+              "name": "approve_expense"
+            }
+          ],
+          "abstain": false
+        }
+      }
+    ]
+  }
+]

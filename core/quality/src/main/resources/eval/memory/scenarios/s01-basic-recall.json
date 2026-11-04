@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "id": "s01-basic-recall",
+  "category": "basic-recall",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 101,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "My daughter's name is Anaya, she is allergic to peanuts",
+          "plants": [
+            "f-name",
+            "f-allergy"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 2,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "What's a good book for a long train ride?",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-name",
+      "key": "daughter_name",
+      "value": "User's daughter is named Anaya",
+      "match": "Anaya",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f-allergy",
+      "key": "daughter_allergy",
+      "value": "Anaya is allergic to peanuts",
+      "match": "peanut",
+      "planted_in": "s1",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s2",
+      "type": "DIRECT_RECALL",
+      "prompt": "Plan a snack for my daughter",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "daughter_allergy"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "peanut"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    }
+  ]
+}
