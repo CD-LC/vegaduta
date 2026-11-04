@@ -262,6 +262,17 @@ at 0.5 so injected text cannot argue its way up. Rank = `(1 - cosine_distance) *
 
 **As built in WP4c** (wiring gaps; every piece is flag-gated and fails closed): `SidecarMemoryEmbedder` and `KnowledgeMemoryContentScreen` live in `agents-turn` (which now depends on `agents-memory`; the store still does not depend on the turn path), only under `app.memory.unified.enabled=true`. The embedder is `AgentMemoryService.embedShared`, backed by a 20-second, 8-entry, tenant-keyed `RecentEmbeddings`, which `queryEmbedding` also uses, so one turn embeds the user message once; no tenant means no caching. The screen maps `MemoryWriteScreen.refusal` to the fixed code `WRITE_SCREEN` (a throwing screen rejects). `TurnOutcome` gained a `TurnTaintSnapshot` (read-only, taken in `doFinally` from `TurnContext.taint()`, set only for the episode observer; absent or unreadable means QUARANTINED via `MemoryWriteGate.classifyView`); with `app.agents.taint.mode=off` nothing marks the record, so episodes then file as clean. `VerifiedEpisodeSignals` counts approvals decided by a person (label `agent:<id>:session:<sessionId>`, created since the turn began; expiry and `system:` deciders excluded) and derives ACCEPTED/REJECTED from attributed `turn_feedback` rows (conflicting or neutral gives none). Feedback normally comes after the recorder has run and the episode text is not revised afterwards.
 
+**As built in WP5b** (nightly consolidation sweep, flags OFF): `MemoryConsolidationSweep` and
+`MemoryConsolidationService` in `agents-jobs` (`agents.learning.consolidation`), gated by
+`app.memory.consolidation.enabled`, claim each subject once a day in `memory_consolidation_runs`
+(tenant V683) and plan with the pure WP5a `ConsolidationPlanner` over the agent- and shared-tier
+fact stores - no model call; merge groups come from `MemoryReviewDetector`, summaries are only
+reported. Facts reach the sweep through the read-only `ConsolidationFactSource` port, so approve,
+rewrite and delete are structurally unreachable (`ConsolidationSurfaceTest`); with
+`app.memory.consolidation.apply.enabled` on, an earned plan marks forgets and merge drops forgotten
+through hash-only `memory_tombstone` rows - the only mutation it can make. Recall-side filtering of
+tombstoned rows, restore windows and the model summariser step are later work packages.
+
 ### 8. Retrieval API (port)
 
 ```java

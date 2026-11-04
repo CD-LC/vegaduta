@@ -806,3 +806,14 @@ file-ownership list; sub-agents commit locally and do not push, the lead integra
 claimed: `core/approval`, `core/guardrails`, `core/chat` tool loop, `core/agents-budget`, `core/agents-interop`, `core/app`
 security + new test packages, memory in `core/agents-turn`, taint in `core/agents-tools`, `docs/security`, `docs/compliance`.
 Flyway: V675+ reserved for this effort.
+
+### Unified-memory WP5b: nightly consolidation sweep (Devin subagent, 2026-11-04)
+
+Branch `ccr-wp5b` (worktree `/tmp/vd-wp5b`), off `ccr-d9bcd3ff-ekgsbs`. New package
+`core/agents-jobs/.../agents/learning/consolidation` (sweep, service, read-only
+`ConsolidationFactSource` port + adapter, run/tombstone entities and repositories, tombstone
+writer), tenant migration **V683** (`memory_consolidation_runs`, `memory_tombstone`),
+`core/agents-jobs/pom.xml` (agents-memory edge), `docs/configuration.md`, `CHANGELOG.md`,
+`docs/architecture/core-module-graph.md`, ADR-0028 "as built" note. Known: WP4c introduced a
+package cycle `memorystore -> tenancy -> ... -> agents.memory -> memorystore` that
+`StructureRulesTest` now flags - pre-existing on the base branch, not from this change.
