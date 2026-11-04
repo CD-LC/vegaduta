@@ -5,6 +5,7 @@ import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryBlocks;
 import com.agenticai.core.agents.memory.QueryEmbedding;
+import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
@@ -24,6 +25,9 @@ import org.springframework.beans.factory.ObjectProvider;
 final class ChatMemoryRecall {
 
     private static final Logger log = LoggerFactory.getLogger(AgentChatService.class);
+
+    /** The settings-catalog key of the recall switch (docs/settings.md). */
+    static final String RECALL_ENABLED_KEY = "memory.recall.enabled";
 
     private final ObjectProvider<AgentMemoryService> agentMemoryService;
     private final ObjectProvider<TenantMemoryService> tenantMemoryService;
@@ -45,6 +49,17 @@ final class ChatMemoryRecall {
 
     void usePrompts(java.util.function.Function<UUID, ResolvedDirectives> prompts) {
         this.prompts = prompts == null ? ResolvedDirectives.DEFAULTS_FOR_AGENT : prompts;
+    }
+
+    /**
+     * {@code memory.recall.enabled} for an agent: the per-agent (and workspace, and platform {@code
+     * app.memory.limits.recall-enabled}) switch for putting memory into the prompt. Everything on until {@link
+     * ChatServiceParts} wires the settings catalog, which is also the answer of a hand-built instance.
+     */
+    private volatile java.util.function.Predicate<UUID> recallEnabled = agentId -> true;
+
+    void useRecallSwitch(java.util.function.Predicate<UUID> recallEnabled) {
+        this.recallEnabled = recallEnabled == null ? agentId -> true : recallEnabled;
     }
 
     ChatMemoryRecall(
@@ -94,7 +109,11 @@ final class ChatMemoryRecall {
      * always-in-context blocks (persona, profile, notes), which ride in the same string but are not
      * taint-worthy on their own.
      */
-    record MemoryRecall(String block, int recalledFacts) {
+    record MemoryRecall(String block, int recalledFacts, TurnMemoryRecall.Trace trace) {
+
+        MemoryRecall(String block, int recalledFacts) {
+            this(block, recalledFacts, null);
+        }
 
         /** Whether any private or shared fact was recalled into {@link #block()}. */
         boolean hasRecalledFacts() {
@@ -123,6 +142,11 @@ final class ChatMemoryRecall {
             String userMessage,
             AgentStepEventEmitter stepEvents,
             ResolvedDirectives pd) {
+        if (!recallSwitchedOn(agentId)) {
+            // Memory recall is off for this agent: nothing is read and nothing is injected. The trace says so, so a turn
+            // that did not look is not mistaken for one that found nothing.
+            return new MemoryRecall(null, 0, TurnMemoryRecall.Trace.disabled());
+        }
         StringBuilder block = new StringBuilder();
         boolean hasUserBlocks = false;
         boolean report = stepEvents != null && stepEvents.isEnabled() && memoryEventsEnabled();
@@ -130,6 +154,8 @@ final class ChatMemoryRecall {
         int privateFacts = 0;
         int sharedFacts = 0;
         List<UUID> factIds = new ArrayList<>();
+        List<UUID> privateIds = new ArrayList<>();
+        List<UUID> sharedIds = new ArrayList<>();
 
         // User-editable always-in-context blocks (persona / user_profile / project_notes), item 11.
         // Empty unless the user wrote some, so simple requests gain no tokens.
@@ -186,7 +212,11 @@ final class ChatMemoryRecall {
                             pd.textOrShipped(
                                     "memory.recall.private", java.util.Map.of("facts", factList)));
                     privateFacts = memories.size();
-                    memories.forEach(m -> factIds.add(m.id()));
+                    memories.forEach(
+                            m -> {
+                                factIds.add(m.id());
+                                privateIds.add(m.id());
+                            });
                 }
             } catch (Exception e) {
                 log.warn(
@@ -229,7 +259,11 @@ final class ChatMemoryRecall {
                                         "memory.recall.shared",
                                         java.util.Map.of("facts", sharedFactList)));
                         sharedFacts = sharedMemories.size();
-                        sharedMemories.forEach(m -> factIds.add(m.id()));
+                        sharedMemories.forEach(
+                                m -> {
+                                    factIds.add(m.id());
+                                    sharedIds.add(m.id());
+                                });
                     }
                 }
             } catch (Exception e) {
@@ -243,7 +277,8 @@ final class ChatMemoryRecall {
         }
 
         if (block.isEmpty()) {
-            return new MemoryRecall(null, 0);
+            return new MemoryRecall(
+                    null, 0, new TurnMemoryRecall.Trace(true, List.of(), List.of(), List.of(), 0));
         }
         if (report) {
             try {
@@ -259,9 +294,30 @@ final class ChatMemoryRecall {
         }
         // Only trim when user blocks were prepended (their separator can trail). With none, the
         // text is byte-for-byte what it was before blocks existed.
+        String text = hasUserBlocks ? block.toString().strip() : block.toString();
+        // Block labels are known only on a step-event turn (the labelled render is what reports them); otherwise the
+        // trace names the blocks as one unlabelled group, so their presence is still visible.
+        List<String> traceBlocks =
+                !hasUserBlocks ? List.of() : usedBlockLabels.isEmpty() ? List.of("memory_blocks") : usedBlockLabels;
         return new MemoryRecall(
-                hasUserBlocks ? block.toString().strip() : block.toString(),
-                privateFacts + sharedFacts);
+                text,
+                privateFacts + sharedFacts,
+                new TurnMemoryRecall.Trace(
+                        true,
+                        privateIds,
+                        sharedIds,
+                        traceBlocks,
+                        SessionMemoryService.estimateTokens(text)));
+    }
+
+    /** The switch's answer; a failing lookup leaves recall on, as it is without the switch. */
+    private boolean recallSwitchedOn(UUID agentId) {
+        try {
+            return recallEnabled.test(agentId);
+        } catch (RuntimeException e) {
+            log.debug("Could not read the memory recall switch - recall stays on", e);
+            return true;
+        }
     }
 
     private boolean memoryEventsEnabled() {

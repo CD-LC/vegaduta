@@ -27,6 +27,13 @@ public class MemoryLimitsProperties {
     /** Stored shared memories one tenant keeps (memory blocks excluded); the oldest are pruned past it. */
     private int tenantMaxMemories = 300;
 
+    /**
+     * Whether automatic memory recall (blocks, the agent's facts, the shared facts) is put into the prompt at all. On
+     * is today's behaviour; a tenant or an agent can switch it off for itself ({@code memory.recall.enabled}), which is
+     * how an evaluation runs the same agent with and without memory. Writes and extraction are not affected.
+     */
+    private boolean recallEnabled = true;
+
     /** Memories an agent's automatic recall injects into a turn. */
     private int agentRecallTopK = 5;
 
@@ -58,6 +65,14 @@ public class MemoryLimitsProperties {
 
     public void setEdgeMemoryMaxFacts(int edgeMemoryMaxFacts) {
         this.edgeMemoryMaxFacts = Math.max(1, edgeMemoryMaxFacts);
+    }
+
+    public boolean isRecallEnabled() {
+        return recallEnabled;
+    }
+
+    public void setRecallEnabled(boolean recallEnabled) {
+        this.recallEnabled = recallEnabled;
     }
 
     public int getAgentMaxMemories() {

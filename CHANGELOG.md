@@ -53,6 +53,10 @@ Release notes on GitHub are generated from the section for each version.
 - Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
 - **`strict` security posture profile.** `SPRING_PROFILES_ACTIVE=...,strict` (`application-strict.yml`) sets taint, MCP tool pinning, unclassified-tool handling, the confirmation-gate exemption list, trifecta enforcement and approval expiry to their fail-closed values; the base defaults are unchanged. At boot a `PostureReport` logs one WARN line listing every permissive governance setting that is active, and `StrictPostureTest` fails if the profile and the checked key list drift apart.
 
+### Added
+
+- **Measurement seams for agent memory, all behaviour-neutral by default.** (1) New setting `memory.recall.enabled` (tenant and agent scope; platform value `app.memory.limits.recall-enabled`, default `true` = today): switched off, a turn reads and injects no memory blocks, facts or shared facts, and the turn journal (a `memory_recall` GUARD event, written only while `app.turn-journal.enabled`) and `TurnContext.memoryRecall()` record which memory ids and block labels were injected, with counts and approximate tokens, never text. (2) The memory services (agent and tenant memory, the daily memory review) read time from a `memoryClock` bean (system UTC by default; `useClock(..)` in tests). (3) `app.metrics.turn-usage.enabled` (default `false`) keeps an in-process per-session tally of model-call tokens and latency (`TurnUsageCounter`) for evaluation harnesses, fed by the existing LLM metrics advisor with no extra call.
+
 ### Fixed
 
 - **A tool's output can no longer pose as the platform's own control result.** The tool loop ended a turn with

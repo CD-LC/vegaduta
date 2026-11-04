@@ -82,6 +82,15 @@ public class TenantMemoryService {
         this.limits = limits == null ? new MemoryLimitsProperties() : limits;
     }
 
+    private volatile java.time.Clock clock = java.time.Clock.systemUTC();
+
+    /** The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control time. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void useClock(
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock") java.time.Clock clock) {
+        this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
+    }
+
     private volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
@@ -252,7 +261,7 @@ public class TenantMemoryService {
                             + " WHERE id = ?",
                     content,
                     literal,
-                    Timestamp.from(Instant.now()),
+                    Timestamp.from(clock.instant()),
                     existing.get(0));
         }
     }
@@ -684,7 +693,7 @@ public class TenantMemoryService {
     private void touchUsage(String table, List<UUID> ids) {
         String placeholders = ids.stream().map(id -> "?").collect(Collectors.joining(","));
         Object[] params = new Object[ids.size() + 1];
-        params[0] = Timestamp.from(Instant.now());
+        params[0] = Timestamp.from(clock.instant());
         for (int i = 0; i < ids.size(); i++) {
             params[i + 1] = ids.get(i);
         }

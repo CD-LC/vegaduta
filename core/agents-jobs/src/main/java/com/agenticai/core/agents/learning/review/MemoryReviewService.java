@@ -55,6 +55,15 @@ public class MemoryReviewService {
     private final Settings settings;
     private final int maxSubjects;
 
+    private volatile java.time.Clock clock = java.time.Clock.systemUTC();
+
+    /** The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control the review day and ages. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void useClock(
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock") java.time.Clock clock) {
+        this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
+    }
+
     public MemoryReviewService(
             LearningProposalService proposals,
             LearningReviewRunRepository runs,
@@ -120,7 +129,7 @@ public class MemoryReviewService {
         }
         int filed = 0;
         try {
-            for (Finding f : MemoryReviewDetector.detect(collect(subject), Instant.now(), settings)) {
+            for (Finding f : MemoryReviewDetector.detect(collect(subject), clock.instant(), settings)) {
                 Proposal p = toProposal(subject, f);
                 if (p != null && proposals.propose(p).created()) {
                     filed++;
@@ -229,7 +238,7 @@ public class MemoryReviewService {
         return one.length() > MAX_SNIPPET ? one.substring(0, MAX_SNIPPET - 3) + "..." : one;
     }
 
-    private static LocalDate today() {
-        return LocalDate.now(ZoneOffset.UTC);
+    private LocalDate today() {
+        return LocalDate.now(clock.withZone(ZoneOffset.UTC));
     }
 }

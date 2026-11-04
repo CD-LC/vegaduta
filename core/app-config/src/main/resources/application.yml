@@ -2278,6 +2278,9 @@ app:
       agent-max-memories: ${APP_MEMORY_LIMITS_AGENT_MAX_MEMORIES:50}
       # Shared memories one tenant keeps (memory blocks excluded); the oldest are pruned past it.
       tenant-max-memories: ${APP_MEMORY_LIMITS_TENANT_MAX_MEMORIES:300}
+      # Whether automatic recall puts memory into the prompt. A tenant or an agent can switch it off for itself
+      # (setting memory.recall.enabled); writes and extraction are unaffected.
+      recall-enabled: ${APP_MEMORY_LIMITS_RECALL_ENABLED:true}
       # Memories automatic recall injects into a turn, per agent and per tenant.
       agent-recall-top-k: ${APP_MEMORY_LIMITS_AGENT_RECALL_TOP_K:5}
       tenant-recall-top-k: ${APP_MEMORY_LIMITS_TENANT_RECALL_TOP_K:5}

@@ -142,6 +142,8 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
                         .platform(routing::getMaxClauses).build(),
 
                 // ---- memory
+                bool("memory.recall.enabled", "memory", SettingRisk.LOW, "app.memory.limits.recall-enabled", TENANT_AND_AGENT)
+                        .platform(memory::isRecallEnabled).build(),
                 integer("memory.recall.agentTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.agent-recall-top-k", TENANT_AND_AGENT)
                         .platform(memory::getAgentRecallTopK).build(),
                 integer("memory.recall.tenantTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.tenant-recall-top-k", TENANT_AND_AGENT)

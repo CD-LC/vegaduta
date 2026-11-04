@@ -178,6 +178,58 @@ public final class TurnRecorder {
         record(TurnEventType.GUARD, TurnHashChain.sha256(name + ":" + outcome), "guard=" + name + " outcome=" + outcome);
     }
 
+    /** How many fact ids one journal event carries; the summary column is 512 characters, a UUID takes 37. */
+    private static final int MAX_IDS_PER_EVENT = 6;
+
+    /**
+     * What the memory recall injected into this turn's prompt: counts, approximate tokens and the fact ids, never the
+     * text. Written as GUARD events named {@code memory_recall} (the counts and the first ids) and, past
+     * {@value #MAX_IDS_PER_EVENT} ids, {@code memory_recall_ids} continuations, so no new event type or migration is
+     * needed. {@code enabled=false} says the agent has memory recall switched off ({@code memory.recall.enabled}).
+     */
+    public void memoryRecall(
+            boolean enabled,
+            int privateFacts,
+            int sharedFacts,
+            int blocks,
+            long approxTokens,
+            List<UUID> factIds) {
+        if (!active()) {
+            return;
+        }
+        List<UUID> ids = factIds == null ? List.of() : factIds;
+        String outcome =
+                "enabled=" + enabled
+                        + " private=" + privateFacts
+                        + " shared=" + sharedFacts
+                        + " blocks=" + blocks
+                        + " approxTokens=" + approxTokens;
+        record(
+                TurnEventType.GUARD,
+                TurnHashChain.sha256("memory_recall:" + outcome),
+                "guard=memory_recall " + outcome,
+                idsField(ids, 0));
+        for (int from = MAX_IDS_PER_EVENT; from < ids.size(); from += MAX_IDS_PER_EVENT) {
+            record(
+                    TurnEventType.GUARD,
+                    TurnHashChain.sha256("memory_recall_ids:" + from),
+                    "guard=memory_recall_ids from=" + from,
+                    idsField(ids, from));
+        }
+    }
+
+    private static String idsField(List<UUID> ids, int from) {
+        if (from >= ids.size()) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder(" ids=");
+        int to = Math.min(ids.size(), from + MAX_IDS_PER_EVENT);
+        for (int i = from; i < to; i++) {
+            out.append(i == from ? "" : ",").append(ids.get(i));
+        }
+        return out.toString();
+    }
+
     public void modelCall(String provider, String model, String route) {
         record(
                 TurnEventType.MODEL_CALL,

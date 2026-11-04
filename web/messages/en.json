@@ -13103,6 +13103,11 @@
           "help": "More memories give more context but use more tokens.",
           "label": "Agent memories recalled per turn"
         },
+        "enabled": {
+          "description": "Whether remembered facts and memory blocks are put into the agent's prompt at all.",
+          "help": "Turn it off to see how the agent answers without any memory. Nothing is deleted, and what the agent saves is unchanged; only recall into the prompt stops.",
+          "label": "Use memory in replies"
+        },
         "tenantTopK": {
           "description": "How many memories shared across the workspace are looked up for each message.",
           "help": "More memories give more context but use more tokens.",

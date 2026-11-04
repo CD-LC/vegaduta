@@ -1113,6 +1113,8 @@ lean on (the notes say which).
 |---|---|---|---|
 | `app.memory.limits.agent-max-memories` | `APP_MEMORY_LIMITS_AGENT_MAX_MEMORIES` | `50` | long-term memories one agent keeps across every subject; the oldest are pruned past it |
 | `app.memory.limits.tenant-max-memories` | `APP_MEMORY_LIMITS_TENANT_MAX_MEMORIES` | `300` | shared memories one tenant keeps (memory blocks excluded); the oldest are pruned past it |
+| `app.memory.limits.recall-enabled` | `APP_MEMORY_LIMITS_RECALL_ENABLED` | `true` | whether automatic memory recall (blocks, the agent's facts, shared facts) is put into the prompt; a workspace or an agent can switch it off for itself with the setting `memory.recall.enabled` (writes and extraction are unaffected) |
+| `app.metrics.turn-usage.enabled` | `APP_METRICS_TURN_USAGE_ENABLED` | `false` | keeps an in-process per-session tally of model calls (prompt/completion/total tokens, call latency) that an evaluation harness in the same JVM reads through `TurnUsageCounter`; no extra call or network hop, nothing recorded while off |
 | `app.memory.limits.agent-recall-top-k` | `APP_MEMORY_LIMITS_AGENT_RECALL_TOP_K` | `5` | memories an agent's automatic recall puts into a turn |
 | `app.memory.limits.tenant-recall-top-k` | `APP_MEMORY_LIMITS_TENANT_RECALL_TOP_K` | `5` | shared memories a turn's automatic recall puts into it |
 | `app.memory.limits.session-max-stored-entries` | `APP_MEMORY_LIMITS_SESSION_MAX_STORED_ENTRIES` | `400` | turns kept in a session's Redis list: the hard storage bound, and the ceiling of the replay window `app.chat.history-max-turns` (the platform setting that edits the window still validates against 400; see the guide's note on history) |

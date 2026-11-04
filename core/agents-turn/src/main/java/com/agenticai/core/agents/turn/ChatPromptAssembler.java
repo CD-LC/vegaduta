@@ -416,6 +416,10 @@ final class ChatPromptAssembler {
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
         ChatMemoryRecall.MemoryRecall recalled =
                 joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
+        // Which memories went into this prompt (ids and counts, never text), for the turn journal and an eval harness.
+        if (recalled != null && recalled.trace() != null) {
+            context.memoryRecall().record(recalled.trace());
+        }
         // Untrusted-content taint (app.agents.taint.mode): auto-injected retrieval enters the
         // model's context without crossing a tool boundary, so nothing upstream of this point
         // could mark the turn - a poisoned memory or an untrusted-delimited block piped in as the

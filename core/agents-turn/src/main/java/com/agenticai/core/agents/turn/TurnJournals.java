@@ -56,12 +56,34 @@ final class TurnJournals {
                 parentTurnId,
                 runToolNames(context));
         recordApprovalDecision(recorder, context);
+        recordMemoryRecall(recorder, context);
         return recorder;
     }
 
     /** The run-scoped tool selection the turn was narrowed to, or null when it was not (see {@code ChatTurnRequest#toolNames}). */
     static List<String> runToolNames(TurnContext context) {
         return context == null || context.approval() == null ? null : context.approval().runToolNames();
+    }
+
+    /**
+     * What memory recall injected into this turn's prompt (ids and counts, never text), when the turn went through the
+     * recall stage; nothing otherwise (a delegated turn, or one that failed before assembly).
+     */
+    static void recordMemoryRecall(TurnRecorder recorder, TurnContext context) {
+        if (recorder == null || !recorder.active() || context == null) {
+            return;
+        }
+        TurnMemoryRecall.Trace trace = context.memoryRecall().trace();
+        if (trace == null) {
+            return;
+        }
+        recorder.memoryRecall(
+                trace.enabled(),
+                trace.privateFacts(),
+                trace.sharedFacts(),
+                trace.blocks(),
+                trace.approxTokens(),
+                trace.factIds());
     }
 
     /** The human's decision on the gated call this turn continues from, or nothing on an ordinary turn. */

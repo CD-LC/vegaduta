@@ -97,6 +97,21 @@ final class ChatServiceParts {
                         context.tenantMemoryService(),
                         agentService,
                         () -> svc.memoryStepEventsEnabled);
+        // memory.recall.enabled: the tenant's / agent's switch for putting memory into the prompt; the platform value
+        // (app.memory.limits.recall-enabled, default on) answers when there is no catalog or no override.
+        com.agenticai.core.agents.tunables.BehaviourSettings recallBehaviour = timeouts.behaviour();
+        org.springframework.beans.factory.ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService>
+                recallPlatform = context.agentMemoryService();
+        this.memoryRecall.useRecallSwitch(
+                agentId ->
+                        recallBehaviour.bool(
+                                ChatMemoryRecall.RECALL_ENABLED_KEY,
+                                null,
+                                agentId,
+                                () -> {
+                                    com.agenticai.core.agents.memory.AgentMemoryService memory = recallPlatform.getIfAvailable();
+                                    return memory == null || !memory.recallSwitchedOffByPlatform();
+                                }));
         this.turns =
                 new ChatTurnExecutor(
                         credentialResolver,

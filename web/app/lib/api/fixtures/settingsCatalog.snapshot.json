@@ -387,6 +387,20 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.routing.simple.max-clauses"
   }, {
+    "key" : "memory.recall.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.recall.enabled.label",
+    "descriptionKey" : "settings.memory.recall.enabled.description",
+    "helpKey" : "settings.memory.recall.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : true,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.limits.recall-enabled"
+  }, {
     "key" : "memory.recall.agentTopK",
     "group" : "memory",
     "labelKey" : "settings.memory.recall.agentTopK.label",

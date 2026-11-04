@@ -74,6 +74,9 @@ import org.slf4j.MDC;
  *     into the prompt) marks it here, and tool resolution adopts this exact instance as the turn's
  *     taint state so the {@code TaintGate} built for each tool sees the marks. The sixth mutable
  *     member
+ * @param memoryRecall what the memory recall put into this turn's prompt (ids and counts, never text), set by
+ *     the prompt assembler and read by the turn journal and an eval harness; never null. The seventh mutable
+ *     member
  */
 public record TurnContext(
         TenantContext tenant,
@@ -91,7 +94,46 @@ public record TurnContext(
         TurnRuntime runtime,
         UUID turnId,
         AgentStepEventEmitter stepEvents,
-        TurnTaint taint) {
+        TurnTaint taint,
+        TurnMemoryRecall memoryRecall) {
+
+    /** Every field but the memory-recall trace, which a fresh context starts without (empty, see {@link TurnMemoryRecall}). */
+    public TurnContext(
+            TenantContext tenant,
+            UUID requestedAgentId,
+            String sessionId,
+            String requestId,
+            Instant startedAt,
+            Instant deadline,
+            TurnReservationGuards budget,
+            TurnApprovalState approval,
+            ApprovalContinuation continuation,
+            TurnReplyOutcome reply,
+            TurnToolActivity toolActivity,
+            TurnModelTraits modelTraits,
+            TurnRuntime runtime,
+            UUID turnId,
+            AgentStepEventEmitter stepEvents,
+            TurnTaint taint) {
+        this(
+                tenant,
+                requestedAgentId,
+                sessionId,
+                requestId,
+                startedAt,
+                deadline,
+                budget,
+                approval,
+                continuation,
+                reply,
+                toolActivity,
+                modelTraits,
+                runtime,
+                turnId,
+                stepEvents,
+                taint,
+                null);
+    }
 
     /**
      * Every field but the step-event emitter, which a fresh context starts without (the disabled
@@ -293,6 +335,7 @@ public record TurnContext(
         turnId = turnId == null ? UUID.randomUUID() : turnId;
         stepEvents = stepEvents == null ? AgentStepEventEmitter.disabled() : stepEvents;
         taint = taint == null ? new TurnTaint() : taint;
+        memoryRecall = memoryRecall == null ? new TurnMemoryRecall() : memoryRecall;
         if (deadline != null && deadline.isBefore(startedAt)) {
             throw new IllegalArgumentException(
                     "deadline " + deadline + " is before start " + startedAt);
@@ -465,7 +508,8 @@ public record TurnContext(
                 runtime,
                 turnId,
                 stepEvents,
-                taint);
+                taint,
+                memoryRecall);
     }
 
     /**
@@ -489,7 +533,8 @@ public record TurnContext(
                 runtime,
                 turnId,
                 stepEvents,
-                taint);
+                taint,
+                memoryRecall);
     }
 
     /**
@@ -516,7 +561,8 @@ public record TurnContext(
                 runtime,
                 turnId,
                 stepEvents,
-                taint);
+                taint,
+                memoryRecall);
     }
 
     /**
@@ -545,7 +591,8 @@ public record TurnContext(
                 runtime,
                 turnId,
                 stepEvents,
-                taint);
+                taint,
+                memoryRecall);
     }
 
     /**
@@ -571,6 +618,7 @@ public record TurnContext(
                 runtime,
                 turnId,
                 emitter,
-                taint);
+                taint,
+                memoryRecall);
     }
 }

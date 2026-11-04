@@ -166,6 +166,7 @@ L low, M medium, H high, S security. **Use site** is the code that must consult 
 | `chat.toolLoop.resultClearing.thresholdChars` | i 500-200000 | L | T,A | `app.chat.tools.result-clearing.threshold-chars` | **wired**: as above |
 | `routing.simple.maxChars` | i 0-2000 | L | T,A | `app.routing.simple.max-chars` | **wired**: agents-turn `QueryComplexityClassifier` |
 | `routing.simple.maxClauses` | i 1-10 | L | T,A | `app.routing.simple.max-clauses` | **wired**: agents-turn `QueryComplexityClassifier` |
+| `memory.recall.enabled` | b | L | T,A | `app.memory.limits.recall-enabled` | **wired**: agents-turn `ChatMemoryRecall` (switched off = no blocks, facts or shared facts read or injected for the agent's turns; the turn journal and `TurnContext.memoryRecall()` record `enabled=false`; writes unaffected) |
 | `memory.recall.agentTopK` | i 1-50 | L | T,A | `app.memory.limits.agent-recall-top-k` | **wired**: agents-turn `AgentMemoryService` |
 | `memory.recall.tenantTopK` | i 1-50 | L | T,A | `app.memory.limits.tenant-recall-top-k` | **wired**: agents-turn `TenantMemoryService` for the chat turn's shared recall (per agent); other callers without an agent (agents-tools `AgentKnowledgeToolResolver`) read the workspace value |
 | `memory.agent.maxMemories` | i 1-5000 | M | T,A | `app.memory.limits.agent-max-memories` | **wired**: agents-turn `AgentMemoryService` |
@@ -613,12 +614,14 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `app.memory.blocks.enabled` | B | feature switch: whether memory blocks are read and given to agents (true); the size limits of blocks are separate properties and a workspace-level on/off was not requested |
 | `app.memory.import.enabled` | B | feature switch: lets a member import memory facts exported from another assistant (also needs self-service memory); an operator opt-in to an import surface |
 | `app.memory.limits.agent-max-memories` | A | `memory.agent.maxMemories` |
+| `app.memory.limits.recall-enabled` | A | `memory.recall.enabled` |
 | `app.memory.limits.agent-recall-top-k` | A | `memory.recall.agentTopK` |
 | `app.memory.limits.edge-memory-max-facts` | A | `memory.edge.maxFacts` |
 | `app.memory.limits.session-fold-batch` | B | sizing constant: out-of-window turns folded into the rolling summary at a time (40); one summarisation call per batch, a cost and quality trade-off inside the platform |
 | `app.memory.limits.session-max-stored-entries` | B | storage bound: turns kept in a session's Redis list (400): the hard storage bound and the ceiling of the replay window; raising it per workspace would raise Redis usage |
 | `app.memory.limits.tenant-max-memories` | A | `memory.tenant.maxMemories` |
 | `app.memory.limits.tenant-recall-top-k` | A | `memory.recall.tenantTopK` |
+| `app.metrics.turn-usage.enabled` | B | feature switch: an in-process per-session token and latency tally for evaluation harnesses (off); an operator/engineering diagnostic, not a workspace behaviour |
 | `app.models.context-windows.<model-id>` | B | model data: overrides the catalog's context window for one model; reference data about the model, the same for every workspace |
 | `app.models.default-preference-keywords` | B | algorithm constant: keywords that rank models when choosing a default (`flash`, `mini`, `haiku`, ...); selection heuristic of the model catalog |
 | `app.models.defaults.<provider>` | B | model data: the default model for each provider (what new agents get); platform-curated catalog data |

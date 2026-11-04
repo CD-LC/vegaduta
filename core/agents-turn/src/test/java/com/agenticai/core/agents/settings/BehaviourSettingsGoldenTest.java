@@ -60,6 +60,7 @@ class BehaviourSettingsGoldenTest {
         f.toolLoop.getResultClearing().setThresholdChars(12_345);
         f.routing.setMaxChars(321);
         f.routing.setMaxClauses(4);
+        f.memory.setRecallEnabled(!f.memory.isRecallEnabled());
         f.memory.setAgentRecallTopK(11);
         f.memory.setTenantRecallTopK(12);
         f.memory.setAgentMaxMemories(77);
@@ -79,6 +80,7 @@ class BehaviourSettingsGoldenTest {
         expect(12_345, "chat.toolLoop.resultClearing.thresholdChars");
         expect(321, "routing.simple.maxChars");
         expect(4, "routing.simple.maxClauses");
+        expect(f.memory.isRecallEnabled(), "memory.recall.enabled");
         expect(11, "memory.recall.agentTopK");
         expect(12, "memory.recall.tenantTopK");
         expect(77, "memory.agent.maxMemories");

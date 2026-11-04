@@ -194,7 +194,8 @@ public class LlmMetricsAdvisor implements CallAdvisor, StreamAdvisor {
                                 new GenAiSpanRecorder(genAiAttributeNames, langfuseUserId),
                                 new LlmCallLogSink(callLogService),
                                 micrometerMetrics,
-                                cacheTokenMetrics);
+                                cacheTokenMetrics,
+                                new TurnUsageSink());
         this.observer = new LlmCallObserver(providerName, model, pricingCatalog, sinks);
         this.streamFinalizer = new StreamFinalizer(metrics, observer, model);
     }
