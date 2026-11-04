@@ -545,7 +545,7 @@ public class TenantMemoryService {
                         + " WHERE position('"
                         + MemoryBlocks.KEY_MARKER
                         + "' in subject_key) = 0 ORDER BY (trust = 'QUARANTINED') DESC,"
-                        + " created_at ASC LIMIT ?)",
+                        + " last_used_at ASC, use_count ASC, created_at ASC LIMIT ?)",
                 overflow);
         log.debug(
                 "Pruned {} oldest shared memories (over the {}-memory tenant-wide cap)",
@@ -639,9 +639,9 @@ public class TenantMemoryService {
     }
 
     /**
-     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before
-     * {@code cutoff} in the current tenant's schema, oldest first, and returns how many went. The
-     * caller loops until it returns less than {@code limit}.
+     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before {@code cutoff} in
+     * the tenant's schema, oldest first, returning how many went; the caller loops until fewer than {@code limit}.
+     * Block rows ({@value MemoryBlocks#KEY_MARKER}) are spared as in {@link #pruneOverCap}; only erasure removes them.
      */
     public int purgeCreatedBefore(java.time.Instant cutoff, int limit) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
@@ -651,7 +651,7 @@ public class TenantMemoryService {
                                 + table
                                 + " WHERE id IN (SELECT id FROM "
                                 + table
-                                + " WHERE created_at < ? ORDER BY created_at LIMIT ?)",
+                                + " WHERE created_at < ? AND position('" + MemoryBlocks.KEY_MARKER + "' in subject_key) = 0 ORDER BY created_at LIMIT ?)",
                         java.sql.Timestamp.from(cutoff),
                         limit);
         log.info("Retention purge removed {} tenant-memory rows older than {}", deleted, cutoff);

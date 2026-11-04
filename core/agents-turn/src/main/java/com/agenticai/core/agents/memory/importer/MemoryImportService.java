@@ -50,8 +50,10 @@ import org.springframework.web.server.ResponseStatusException;
  * may run, else 404) and embedding all behave exactly as for a hand-added fact. Every fact is re-screened
  * and re-deduped here; the client's preview is never trusted.
  *
- * <p>The memory tables carry no provenance column, so "imported from &lt;source&gt;" is recorded as an audit
- * log entry per import (counts + source, never the fact text). Gated by {@code app.memory.import.enabled}
+ * <p>The memory tables' provenance columns (V676: {@code trust} and {@code source_taint}, see {@code
+ * MemoryProvenance}) record whether a row is recallable and what tainted its turn, but have no field for the
+ * import source, so "imported from
+ * &lt;source&gt;" is recorded as an audit log entry per import (counts + source, never the fact text). Gated by {@code app.memory.import.enabled}
  * (default true) and, like the facts endpoint it reuses, by {@code app.memory.self-service.enabled}:
  * either off = 404.
  */
@@ -329,7 +331,7 @@ public class MemoryImportService {
         }
     }
 
-    /** The only provenance the memory tables allow: an audit entry per import. Never throws, never carries fact text. */
+    /** The import source is not a provenance value the memory tables store: an audit entry per import carries it. Never throws, never carries fact text. */
     private void recordAudit(String subject, String source, int saved, int skippedCount) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse("unknown");
         log.info("Memory import: tenant={} source={} saved={} skipped={}", tenantId, source, saved, skippedCount);

@@ -228,6 +228,7 @@ public class SessionMemoryService {
         this.prompts = prompts == null ? PromptResolver.defaultsOnly() : prompts;
     }
 
+    void configureSummaryTaint(com.agenticai.core.guardrails.taint.ConversationTaintStore s, boolean skip) { folder.setTaintStore(s); folder.setSkipUntrustedSummary(skip); }
     private String summaryPreamble() {
         String text = prompts.text(SUMMARY_PREAMBLE_KEY);
         return (text == null ? SUMMARY_PREAMBLE : text + "\n");
@@ -489,7 +490,7 @@ public class SessionMemoryService {
         } else {
             redisTemplate.opsForList().trim(redisKey, 0, keep - 1);
         }
-        redisTemplate.delete(summaryKey(sessionId));
+        folder.dropSummary(sessionId);
         redisTemplate.delete(foldMarkerKey(sessionId));
         return keep;
     }
@@ -509,7 +510,7 @@ public class SessionMemoryService {
     public void replaceHistory(String sessionId, List<ChatTurn> turns) {
         String redisKey = key(sessionId);
         redisTemplate.delete(redisKey);
-        redisTemplate.delete(summaryKey(sessionId));
+        folder.dropSummary(sessionId);
         redisTemplate.delete(foldMarkerKey(sessionId));
         if (turns == null || turns.isEmpty()) {
             return;
@@ -572,8 +573,7 @@ public class SessionMemoryService {
         SessionSummaryService summariser = folder.activeSummariser();
         if (summariser == null) {
             // Hard storage bound: keep only the newest MAX_STORED_ENTRIES. Cheap (O(entries
-            // removed), usually
-            // zero) and idempotent - see the constant's javadoc for why this is a fixed ceiling.
+            // removed), usually zero) and idempotent - see the constant's javadoc for why this is a fixed ceiling.
             redisTemplate.opsForList().trim(redisKey, -limits.getSessionMaxStoredEntries(), -1);
         } else {
             folder.foldTurnsThatLeftTheWindow(sessionId, redisKey, summariser);
