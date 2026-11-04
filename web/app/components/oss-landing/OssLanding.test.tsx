@@ -8,7 +8,7 @@ vi.mock("next/image", () => ({
 }));
 
 // ThemePicker reads the theme context, which these render-only tests do not provide.
-vi.mock("../ThemePicker", () => ({ default: () => null }));
+vi.mock("../ThemePicker", () => ({ default: (): null => null }));
 
 import OssAbout from "./OssAbout";
 import OssLanding from "./OssLanding";
