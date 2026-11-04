@@ -33,7 +33,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
 | agents-interop | kernel | 68 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
 | agents-jobs | kernel | 181 | agents, agents-browser, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
-| agents-memory | kernel | 10 | agents, settings |  |
+| agents-memory | kernel | 18 | agents, settings |  |
 | agents-studio | kernel | 102 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 302 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-turn | kernel | 425 | agents, agents-budget, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
