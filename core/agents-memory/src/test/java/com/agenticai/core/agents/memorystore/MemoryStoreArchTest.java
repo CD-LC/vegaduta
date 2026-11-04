@@ -1,5 +1,7 @@
 package com.agenticai.core.agents.memorystore;
 
+import static com.tngtech.archunit.core.domain.AccessTarget.Predicates.declaredIn;
+import static com.tngtech.archunit.core.domain.JavaCall.Predicates.target;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -48,6 +50,46 @@ class MemoryStoreArchTest {
                 .dependOnClassesThat()
                 .resideInAPackage("com.agenticai.core.agents.memorystore..")
                 .check(SPI);
+    }
+
+    /**
+     * Promotion to TRUSTED + ACTIVE has one door: {@code MemoryItemReviewService.approve}. Nothing that
+     * writes proposals, recalls, records or consolidates may reference the review service (only it, the
+     * configuration and a REST controller may), and only the review service calls {@code
+     * MemoryItemStorage.activate}. The same is checked for classes outside this module in the app
+     * module's {@code MemoryPromotionRulesTest}.
+     */
+    @Test
+    void onlyTheReviewServiceCanPromote() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(MemoryItemReviewService.class.getName())
+                .and()
+                .doNotHaveFullyQualifiedName(MemoryItemReviewService.class.getName() + "$Outcome")
+                .and()
+                .doNotHaveSimpleName("MemoryStoreConfiguration")
+                .and()
+                .haveSimpleNameNotEndingWith("Controller")
+                .should()
+                .dependOnClassesThat()
+                .haveFullyQualifiedName(MemoryItemReviewService.class.getName())
+                .check(STORE);
+    }
+
+    @Test
+    void onlyTheReviewServiceCallsActivate() {
+        noClasses()
+                .that()
+                .doNotHaveFullyQualifiedName(MemoryItemReviewService.class.getName())
+                .and()
+                .doNotHaveFullyQualifiedName(JdbcMemoryItemStorage.class.getName())
+                .should()
+                .callMethodWhere(target(declaredIn(MemoryItemStorage.class)).and(target(nameActivate())))
+                .check(STORE);
+    }
+
+    private static com.tngtech.archunit.base.DescribedPredicate<com.tngtech.archunit.core.domain.properties.HasName> nameActivate() {
+        return com.tngtech.archunit.core.domain.properties.HasName.Predicates.name("activate");
     }
 
     @Test

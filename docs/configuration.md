@@ -3697,3 +3697,9 @@ prefixes under `management.metrics.distribution.percentiles-histogram`, `managem
 | `app.memory.decay.dry-run-days` | `APP_MEMORY_DECAY_DRY_RUN_DAYS` | `7` | days after consolidation was enabled for a tenant during which plans are propose-only |
 | `app.memory.decay.max-usd-per-tenant-per-night` | `APP_MEMORY_DECAY_MAX_USD_PER_TENANT_PER_NIGHT` | `0.50` | summariser spend ceiling per tenant per night (USD), on top of the hosted-spend cap |
 | `app.memory.decay.max-usd-per-run` | `APP_MEMORY_DECAY_MAX_USD_PER_RUN` | `5.00` | summariser spend ceiling for one whole sweep run (USD) |
+| `app.memory.unified.max-generation` | `APP_MEMORY_UNIFIED_MAX_GENERATION` | `2` | deepest generation a stored item may have (0 human or raw event, 1 a model summarised events, 2 a model summarised model output); a proposal or an approval past it is refused. ADR-0028 names this `app.memory.max-generation`; it lives under `unified` so it binds with the other store settings |
+| `app.memory.unified.max-item-chars` | `APP_MEMORY_UNIFIED_MAX_ITEM_CHARS` | `1200` | longest text of one unified-memory item |
+| `app.memory.unified.max-items-per-agent` | `APP_MEMORY_UNIFIED_MAX_ITEMS_PER_AGENT` | `2000` | most PENDING plus ACTIVE items one agent holds; a proposal beyond it is refused |
+| `app.memory.unified.max-pending-per-agent` | `APP_MEMORY_UNIFIED_MAX_PENDING_PER_AGENT` | `100` | most items waiting for human review per agent; a full queue refuses new proposals instead of dropping old ones |
+| `app.memory.unified.max-writes-per-hour-per-agent` | `APP_MEMORY_UNIFIED_MAX_WRITES_PER_HOUR_PER_AGENT` | `60` | most proposals one agent may create in a rolling hour |
+| `app.memory.unified.episodic-ttl-days` | `APP_MEMORY_UNIFIED_EPISODIC_TTL_DAYS` | `90` | days an EPISODIC item lives before it expires and stops being recalled |

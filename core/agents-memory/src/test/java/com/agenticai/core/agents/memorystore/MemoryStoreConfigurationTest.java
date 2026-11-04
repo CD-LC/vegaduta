@@ -31,6 +31,32 @@ class MemoryStoreConfigurationTest {
     }
 
     @Test
+    void theStoreBackedSinkReplacesThePlaceholderOnlyWhenThePlatformFlagIsOn() {
+        runner.withPropertyValues("app.memory.unified.enabled=true")
+                .run(
+                        ctx -> {
+                            assertThat(ctx.getBean(MemoryProposalSink.class)).isInstanceOf(StoreMemoryProposalSink.class);
+                            assertThat(ctx.getBeansOfType(MemoryProposalSink.class)).hasSize(1);
+                        });
+        runner.run(ctx -> assertThat(ctx.getBeansOfType(MemoryProposalSink.class)).hasSize(1));
+    }
+
+    @Test
+    void theStoreStartsWithoutADatabaseAndRecallsNothing() {
+        runner.run(
+                ctx -> {
+                    assertThat(ctx.getBean(MemoryItemStore.class).kinds())
+                            .doesNotContain(com.agenticai.core.agents.memory.spi.MemoryKind.SEMANTIC);
+                    assertThat(ctx).hasSingleBean(MemoryItemReviewService.class);
+                    assertThat(
+                                    ctx.getBean(MemoryItemStore.class)
+                                            .recall(new MemoryRecallRequest(UUID.randomUUID(), "u", "q", Set.of(), 1, 1))
+                                            .items())
+                            .isEmpty();
+                });
+    }
+
+    @Test
     void platformFlagAloneTurnsTheGateOn() {
         runner.withPropertyValues("app.memory.unified.enabled=true")
                 .run(ctx -> assertThat(ctx.getBean(MemoryUnifiedGate.class).enabled(UUID.randomUUID())).isTrue());

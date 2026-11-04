@@ -1,0 +1,478 @@
+package com.agenticai.core.agents.memorystore;
+
+import com.agenticai.core.agents.memory.spi.MemoryKind;
+import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
+import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.tenancy.TenantSchemaResolver;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+/**
+ * Raw-JDBC implementation over the tenant tables of V681 (the vector type has no Hibernate
+ * mapping; same reasoning as {@code agent_memory}). Table names are schema-qualified from the
+ * tenant of the calling thread, exactly as the other raw-JDBC memory services do, and a thread
+ * without a tenant fails closed instead of falling back to the shared schema.
+ *
+ * <p>Statements that must be atomic (a row change plus its event, an insert plus its lineage) run in
+ * one {@link TransactionTemplate} on the JDBC data source. The INSERT here has no trust or status
+ * parameter: it writes {@code QUARANTINED} and {@code PENDING} literally, so no caller can create a
+ * promoted row through it.
+ */
+public class JdbcMemoryItemStorage implements MemoryItemStorage {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
+
+    private static final String COLUMNS =
+            "id, agent_id, kind, content, trust, status, writer, source_type, source_ref, turn_id, source_taint,"
+                    + " model_generated, generation, subject_keys, version, supersedes_id, created_at, expires_at,"
+                    + " approved_by, approved_at";
+
+    private final ObjectProvider<JdbcTemplate> jdbcProvider;
+
+    public JdbcMemoryItemStorage(ObjectProvider<JdbcTemplate> jdbcProvider) {
+        this.jdbcProvider = jdbcProvider;
+    }
+
+    // ------------------------------------------------------------------ plumbing
+
+    private JdbcTemplate jdbc() {
+        JdbcTemplate jdbc = jdbcProvider.getIfAvailable();
+        if (jdbc == null) {
+            throw new IllegalStateException("no JDBC access for the memory store");
+        }
+        return jdbc;
+    }
+
+    /** The tenant schema of this thread, quoted; throws without a tenant (never the shared schema). */
+    static String schema() {
+        String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+        if (tenant == null || tenant.isBlank()) {
+            throw new IllegalStateException("no tenant bound to this thread");
+        }
+        return "\"" + TenantSchemaResolver.currentSchemaName().replace("\"", "\"\"") + "\"";
+    }
+
+    private static String table(String name) {
+        return schema() + "." + name;
+    }
+
+    private void inTransaction(JdbcTemplate jdbc, Runnable work) {
+        new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()))
+                .executeWithoutResult(status -> work.run());
+    }
+
+    private static Timestamp ts(Instant instant) {
+        return instant == null ? null : Timestamp.from(instant);
+    }
+
+    private static String vector(float[] embedding) {
+        if (embedding == null || embedding.length != MemoryEmbedder.DIMENSION) {
+            throw new IllegalArgumentException("embedding must have " + MemoryEmbedder.DIMENSION + " dimensions");
+        }
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < embedding.length; i++) {
+            if (!Float.isFinite(embedding[i])) {
+                throw new IllegalArgumentException("embedding has a non-finite value");
+            }
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(embedding[i]);
+        }
+        return sb.append(']').toString();
+    }
+
+    static String taintJson(List<String> taint) {
+        if (taint == null || taint.isEmpty()) {
+            return null;
+        }
+        try {
+            return MAPPER.writeValueAsString(taint);
+        } catch (Exception e) {
+            throw new IllegalStateException("cannot serialise source taint", e);
+        }
+    }
+
+    static List<String> parseTaint(String json) {
+        if (json == null || json.isBlank()) {
+            return List.of();
+        }
+        try {
+            return MAPPER.readValue(json, STRINGS);
+        } catch (Exception e) {
+            // Unreadable taint is treated as tainted: the marker keeps the row from being trusted unreviewed.
+            return List.of("unparseable");
+        }
+    }
+
+    private static List<String> subjects(ResultSet rs) throws SQLException {
+        Array array = rs.getArray("subject_keys");
+        if (array == null) {
+            return List.of();
+        }
+        Object[] values = (Object[]) array.getArray();
+        return Arrays.stream(values).map(String::valueOf).collect(Collectors.toList());
+    }
+
+    private static Instant instant(ResultSet rs, String column) throws SQLException {
+        Timestamp t = rs.getTimestamp(column);
+        return t == null ? null : t.toInstant();
+    }
+
+    private static MemoryItem map(ResultSet rs) throws SQLException {
+        return new MemoryItem(
+                rs.getObject("id", UUID.class),
+                rs.getObject("agent_id", UUID.class),
+                MemoryKind.valueOf(rs.getString("kind")),
+                rs.getString("content"),
+                MemoryTrustLevel.parse(rs.getString("trust")),
+                MemoryItemStatus.parse(rs.getString("status")),
+                MemoryWriter.parse(rs.getString("writer")),
+                rs.getString("source_type"),
+                rs.getString("source_ref"),
+                rs.getString("turn_id"),
+                parseTaint(rs.getString("source_taint")),
+                rs.getBoolean("model_generated"),
+                rs.getInt("generation"),
+                subjects(rs),
+                rs.getInt("version"),
+                rs.getObject("supersedes_id", UUID.class),
+                instant(rs, "created_at"),
+                instant(rs, "expires_at"),
+                rs.getString("approved_by"),
+                instant(rs, "approved_at"));
+    }
+
+    private static void insertEvent(JdbcTemplate jdbc, MemoryEvent e) {
+        jdbc.update(
+                "INSERT INTO "
+                        + table("memory_event")
+                        + " (id, item_id, agent_id, event, actor_type, actor_ref, from_status, to_status, reason, at)"
+                        + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                e.id(),
+                e.itemId(),
+                e.agentId(),
+                e.event().name(),
+                e.actor().type().name(),
+                e.actor().ref(),
+                e.fromStatus() == null ? null : e.fromStatus().name(),
+                e.toStatus() == null ? null : e.toStatus().name(),
+                e.reason(),
+                ts(e.at()));
+    }
+
+    // ------------------------------------------------------------------ writes
+
+    @Override
+    public void insertPending(MemoryItem item, float[] embedding, List<MemoryItemSource> lineage, MemoryEvent created) {
+        if (item.status() != MemoryItemStatus.PENDING || item.trust() != MemoryTrustLevel.QUARANTINED) {
+            throw new IllegalArgumentException("only PENDING + QUARANTINED rows can be inserted");
+        }
+        JdbcTemplate jdbc = jdbc();
+        String vector = vector(embedding);
+        String items = table("memory_item");
+        String sources = table("memory_item_source");
+        inTransaction(
+                jdbc,
+                () -> {
+                    jdbc.update(
+                            "INSERT INTO "
+                                    + items
+                                    + " (id, agent_id, kind, content, embedding, trust, status, writer, source_type,"
+                                    + " source_ref, turn_id, source_taint, model_generated, generation, subject_keys,"
+                                    + " version, supersedes_id, created_at, expires_at)"
+                                    + " VALUES (?, ?, ?, ?, ?::public.vector, 'QUARANTINED', 'PENDING', ?, ?, ?, ?, ?,"
+                                    + " ?, ?, ?, ?, ?, ?, ?)",
+                            (PreparedStatement ps) -> {
+                                int i = 1;
+                                ps.setObject(i++, item.id());
+                                ps.setObject(i++, item.agentId());
+                                ps.setString(i++, item.kind().name());
+                                ps.setString(i++, item.content());
+                                ps.setString(i++, vector);
+                                ps.setString(i++, item.writer().name());
+                                ps.setString(i++, item.sourceType());
+                                ps.setString(i++, item.sourceRef());
+                                ps.setString(i++, item.turnId());
+                                ps.setString(i++, taintJson(item.sourceTaint()));
+                                ps.setBoolean(i++, item.modelGenerated());
+                                ps.setInt(i++, item.generation());
+                                ps.setArray(
+                                        i++,
+                                        ps.getConnection().createArrayOf("text", item.subjectKeys().toArray()));
+                                ps.setInt(i++, item.version());
+                                ps.setObject(i++, item.supersedesId());
+                                ps.setTimestamp(i++, ts(item.createdAt()));
+                                ps.setTimestamp(i, ts(item.expiresAt()));
+                            });
+                    for (MemoryItemSource s : lineage) {
+                        jdbc.update(
+                                "INSERT INTO "
+                                        + sources
+                                        + " (item_id, source_table, source_key, source_trust) VALUES (?, ?, ?, ?)"
+                                        + " ON CONFLICT DO NOTHING",
+                                item.id(),
+                                s.sourceTable(),
+                                s.sourceKey(),
+                                s.sourceTrust().name());
+                    }
+                    insertEvent(jdbc, created);
+                });
+    }
+
+    @Override
+    public boolean activate(
+            UUID agentId,
+            UUID itemId,
+            String approvedBy,
+            Instant at,
+            MemoryEvent approved,
+            UUID supersedes,
+            MemoryEvent predecessorEvent) {
+        if (approvedBy == null || approvedBy.isBlank()) {
+            throw new IllegalArgumentException("approvedBy is required");
+        }
+        JdbcTemplate jdbc = jdbc();
+        String items = table("memory_item");
+        boolean[] done = new boolean[1];
+        inTransaction(
+                jdbc,
+                () -> {
+                    int rows =
+                            jdbc.update(
+                                    "UPDATE "
+                                            + items
+                                            + " SET trust = 'TRUSTED', status = 'ACTIVE', approved_by = ?, approved_at = ?"
+                                            + " WHERE id = ? AND agent_id = ? AND status = 'PENDING' AND trust = 'QUARANTINED'",
+                                    approvedBy,
+                                    ts(at),
+                                    itemId,
+                                    agentId);
+                    if (rows != 1) {
+                        return;
+                    }
+                    done[0] = true;
+                    insertEvent(jdbc, approved);
+                    if (supersedes != null
+                            && jdbc.update(
+                                            "UPDATE "
+                                                    + items
+                                                    + " SET status = 'SUPERSEDED' WHERE id = ? AND agent_id = ?"
+                                                    + " AND status = 'ACTIVE'",
+                                            supersedes,
+                                            agentId)
+                                    == 1
+                            && predecessorEvent != null) {
+                        insertEvent(jdbc, predecessorEvent);
+                    }
+                });
+        return done[0];
+    }
+
+    @Override
+    public boolean transition(
+            UUID agentId, UUID itemId, Set<MemoryItemStatus> from, MemoryItemStatus to, MemoryEvent event) {
+        if (to == MemoryItemStatus.ACTIVE) {
+            throw new IllegalArgumentException("ACTIVE is reachable only through activate()");
+        }
+        JdbcTemplate jdbc = jdbc();
+        String items = table("memory_item");
+        String inList = from.stream().map(s -> "'" + s.name() + "'").collect(Collectors.joining(","));
+        boolean[] done = new boolean[1];
+        inTransaction(
+                jdbc,
+                () -> {
+                    int rows =
+                            jdbc.update(
+                                    "UPDATE "
+                                            + items
+                                            + " SET status = ? WHERE id = ? AND agent_id = ? AND status IN ("
+                                            + inList
+                                            + ")",
+                                    to.name(),
+                                    itemId,
+                                    agentId);
+                    if (rows == 1) {
+                        done[0] = true;
+                        insertEvent(jdbc, event);
+                    }
+                });
+        return done[0];
+    }
+
+    @Override
+    public boolean delete(UUID agentId, UUID itemId, MemoryEvent erased) {
+        JdbcTemplate jdbc = jdbc();
+        String items = table("memory_item");
+        boolean[] done = new boolean[1];
+        inTransaction(
+                jdbc,
+                () -> {
+                    if (jdbc.update("DELETE FROM " + items + " WHERE id = ? AND agent_id = ?", itemId, agentId) == 1) {
+                        done[0] = true;
+                        insertEvent(jdbc, erased);
+                    }
+                });
+        return done[0];
+    }
+
+    @Override
+    public void appendEvent(MemoryEvent event) {
+        JdbcTemplate jdbc = jdbc();
+        insertEvent(jdbc, event);
+    }
+
+    // ------------------------------------------------------------------ reads
+
+    @Override
+    public Optional<MemoryItem> find(UUID agentId, UUID itemId) {
+        List<MemoryItem> rows =
+                jdbc().query(
+                                "SELECT " + COLUMNS + " FROM " + table("memory_item") + " WHERE id = ? AND agent_id = ?",
+                                (rs, n) -> map(rs),
+                                itemId,
+                                agentId);
+        return rows.stream().findFirst();
+    }
+
+    @Override
+    public List<MemoryItem> listByStatus(UUID agentId, MemoryItemStatus status, int limit) {
+        return jdbc().query(
+                        "SELECT "
+                                + COLUMNS
+                                + " FROM "
+                                + table("memory_item")
+                                + " WHERE agent_id = ? AND status = ? ORDER BY created_at DESC LIMIT ?",
+                        (rs, n) -> map(rs),
+                        agentId,
+                        status.name(),
+                        Math.max(1, limit));
+    }
+
+    @Override
+    public List<MemoryItemSource> lineage(UUID itemId) {
+        return jdbc().query(
+                        "SELECT source_table, source_key, source_trust FROM "
+                                + table("memory_item_source")
+                                + " WHERE item_id = ? ORDER BY source_table, source_key",
+                        (rs, n) ->
+                                new MemoryItemSource(
+                                        rs.getString("source_table"),
+                                        rs.getString("source_key"),
+                                        MemoryTrustLevel.parse(rs.getString("source_trust"))),
+                        itemId);
+    }
+
+    @Override
+    public List<MemoryEvent> events(UUID itemId) {
+        return jdbc().query(
+                        "SELECT id, item_id, agent_id, event, actor_type, actor_ref, from_status, to_status, reason, at FROM "
+                                + table("memory_event")
+                                + " WHERE item_id = ? ORDER BY at, id",
+                        (rs, n) ->
+                                new MemoryEvent(
+                                        rs.getObject("id", UUID.class),
+                                        rs.getObject("item_id", UUID.class),
+                                        rs.getObject("agent_id", UUID.class),
+                                        MemoryEvent.Type.valueOf(rs.getString("event")),
+                                        new MemoryActor(
+                                                MemoryActor.Type.valueOf(rs.getString("actor_type")),
+                                                rs.getString("actor_ref")),
+                                        nullableStatus(rs.getString("from_status")),
+                                        nullableStatus(rs.getString("to_status")),
+                                        rs.getString("reason"),
+                                        instant(rs, "at")),
+                        itemId);
+    }
+
+    private static MemoryItemStatus nullableStatus(String value) {
+        return value == null ? null : MemoryItemStatus.parse(value);
+    }
+
+    @Override
+    public int countByStatus(UUID agentId, MemoryItemStatus status) {
+        Integer n =
+                jdbc().queryForObject(
+                                "SELECT count(*) FROM " + table("memory_item") + " WHERE agent_id = ? AND status = ?",
+                                Integer.class,
+                                agentId,
+                                status.name());
+        return n == null ? 0 : n;
+    }
+
+    @Override
+    public int countLive(UUID agentId) {
+        Integer n =
+                jdbc().queryForObject(
+                                "SELECT count(*) FROM "
+                                        + table("memory_item")
+                                        + " WHERE agent_id = ? AND status IN ('PENDING', 'ACTIVE')",
+                                Integer.class,
+                                agentId);
+        return n == null ? 0 : n;
+    }
+
+    @Override
+    public int countCreatedSince(UUID agentId, Instant since) {
+        Integer n =
+                jdbc().queryForObject(
+                                "SELECT count(*) FROM "
+                                        + table("memory_event")
+                                        + " WHERE agent_id = ? AND event = 'CREATED' AND at >= ?",
+                                Integer.class,
+                                agentId,
+                                ts(since));
+        return n == null ? 0 : n;
+    }
+
+    @Override
+    public List<Recalled> recall(
+            UUID agentId, MemoryKind kind, String subjectKey, float[] embedding, int limit, Instant now) {
+        String vector = vector(embedding);
+        boolean bySubject = subjectKey != null;
+        List<Object> args = new ArrayList<>();
+        args.add(vector);
+        args.add(agentId);
+        args.add(kind.name());
+        args.add(ts(now));
+        if (bySubject) {
+            args.add(subjectKey);
+        }
+        args.add(vector);
+        args.add(Math.max(1, limit));
+        // The ACTIVE + TRUSTED predicate is repeated here on purpose: the partial index is a speed-up,
+        // not the guarantee.
+        String sql =
+                "SELECT "
+                        + COLUMNS
+                        + ", importance, (embedding <=> ?::public.vector) AS distance FROM "
+                        + table("memory_item")
+                        + " WHERE agent_id = ? AND kind = ? AND status = 'ACTIVE' AND trust = 'TRUSTED'"
+                        + " AND (expires_at IS NULL OR expires_at > ?)"
+                        + (bySubject ? " AND ? = ANY(subject_keys)" : "")
+                        + " ORDER BY (1 - (embedding <=> ?::public.vector)) * (0.6 + 0.4 * importance) DESC,"
+                        + " created_at DESC LIMIT ?";
+        return jdbc().query(
+                        sql,
+                        (rs, n) -> new Recalled(map(rs), rs.getDouble("distance"), rs.getDouble("importance")),
+                        args.toArray());
+    }
+}

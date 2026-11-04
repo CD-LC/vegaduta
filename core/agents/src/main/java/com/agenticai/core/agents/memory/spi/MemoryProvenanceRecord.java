@@ -18,6 +18,23 @@ public record MemoryProvenanceRecord(MemoryTrustLevel trust, List<String> source
         sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
     }
 
+    /**
+     * The provenance of an item derived from {@code sources}: the meet of their trust and the
+     * ordered union of their taint. No sources is QUARANTINED (nothing to inherit trust from).
+     */
+    public static MemoryProvenanceRecord derive(java.util.Collection<MemoryProvenanceRecord> sources, String writer) {
+        if (sources == null || sources.isEmpty()) {
+            return new MemoryProvenanceRecord(MemoryTrustLevel.QUARANTINED, List.of(), writer);
+        }
+        java.util.Set<String> taint = new java.util.LinkedHashSet<>();
+        java.util.List<MemoryTrustLevel> levels = new java.util.ArrayList<>();
+        for (MemoryProvenanceRecord source : sources) {
+            levels.add(source.trust());
+            taint.addAll(source.sourceTaint());
+        }
+        return new MemoryProvenanceRecord(MemoryTrustLevel.meet(levels), List.copyOf(taint), writer);
+    }
+
     public boolean quarantined() {
         return trust != MemoryTrustLevel.TRUSTED;
     }

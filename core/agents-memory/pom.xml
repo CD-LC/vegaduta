@@ -17,7 +17,9 @@
     every registered MemoryRecallSource under one token budget, and the proposal policy/sink
     (proposals only, never ACTIVE). Depends on agents (the memory.spi ports) and nothing in the
     turn path: it must not depend on agents-turn, which depends on the spi instead and
-    contributes SemanticMemorySource. No tables yet (V681/V682 come with WP3).
+    contributes SemanticMemorySource. WP3 adds the store for the new kinds (tables V681/V682, raw JDBC
+    in the tenant schema): MemoryItemStore (recall source), StoreMemoryProposalSink (PENDING or QUARANTINED
+    rows only) and MemoryItemReviewService (the only path to TRUSTED + ACTIVE, human actor required).
   </description>
 
   <dependencies>
@@ -31,9 +33,36 @@
       <groupId>com.agenticai</groupId>
       <artifactId>settings</artifactId>
     </dependency>
+    <!-- TenantContext (fail-closed tenant check) and TenantSchemaResolver (the tenant schema the raw-JDBC
+         tables are qualified with). Neither depends on agents-memory. -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>tenancy</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>

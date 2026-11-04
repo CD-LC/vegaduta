@@ -12,4 +12,20 @@ public enum MemoryTrustLevel {
     public static MemoryTrustLevel parse(String stored) {
         return TRUSTED.name().equals(stored) ? TRUSTED : QUARANTINED;
     }
+
+    /**
+     * The lowest trust of the given levels: TRUSTED only if every one is TRUSTED, so a derived item
+     * is never more trusted than its least trusted source. Empty input is QUARANTINED (fail closed).
+     */
+    public static MemoryTrustLevel meet(java.util.Collection<MemoryTrustLevel> levels) {
+        if (levels == null || levels.isEmpty()) {
+            return QUARANTINED;
+        }
+        for (MemoryTrustLevel level : levels) {
+            if (level != TRUSTED) {
+                return QUARANTINED;
+            }
+        }
+        return TRUSTED;
+    }
 }

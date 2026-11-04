@@ -31,6 +31,27 @@ public class MemoryUnifiedProperties {
     /** Most items one prompt receives. */
     private int maxItems = 8;
 
+    /**
+     * Deepest generation a stored item may have (0 = human or raw event, 1 = a model summarised
+     * events, 2 = a model summarised model output). A proposal or approval beyond it is refused.
+     */
+    private int maxGeneration = 2;
+
+    /** Longest item text, in characters. */
+    private int maxItemChars = 1200;
+
+    /** Most PENDING plus ACTIVE items one agent holds; a proposal beyond it is refused. */
+    private int maxItemsPerAgent = 2000;
+
+    /** Most PENDING items one agent holds; a full queue refuses new proposals instead of dropping old ones. */
+    private int maxPendingPerAgent = 100;
+
+    /** Most proposals one agent may create in a rolling hour. */
+    private int maxWritesPerHourPerAgent = 60;
+
+    /** Days an EPISODIC item lives before it expires. */
+    private int episodicTtlDays = 90;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -69,5 +90,53 @@ public class MemoryUnifiedProperties {
 
     public void setMaxItems(int maxItems) {
         this.maxItems = Math.max(0, maxItems);
+    }
+
+    public int getMaxGeneration() {
+        return maxGeneration;
+    }
+
+    public void setMaxGeneration(int maxGeneration) {
+        this.maxGeneration = Math.max(0, Math.min(8, maxGeneration));
+    }
+
+    public int getMaxItemChars() {
+        return maxItemChars;
+    }
+
+    public void setMaxItemChars(int maxItemChars) {
+        this.maxItemChars = Math.max(1, maxItemChars);
+    }
+
+    public int getMaxItemsPerAgent() {
+        return maxItemsPerAgent;
+    }
+
+    public void setMaxItemsPerAgent(int maxItemsPerAgent) {
+        this.maxItemsPerAgent = Math.max(0, maxItemsPerAgent);
+    }
+
+    public int getMaxPendingPerAgent() {
+        return maxPendingPerAgent;
+    }
+
+    public void setMaxPendingPerAgent(int maxPendingPerAgent) {
+        this.maxPendingPerAgent = Math.max(0, maxPendingPerAgent);
+    }
+
+    public int getMaxWritesPerHourPerAgent() {
+        return maxWritesPerHourPerAgent;
+    }
+
+    public void setMaxWritesPerHourPerAgent(int maxWritesPerHourPerAgent) {
+        this.maxWritesPerHourPerAgent = Math.max(0, maxWritesPerHourPerAgent);
+    }
+
+    public int getEpisodicTtlDays() {
+        return episodicTtlDays;
+    }
+
+    public void setEpisodicTtlDays(int episodicTtlDays) {
+        this.episodicTtlDays = Math.max(1, episodicTtlDays);
     }
 }
