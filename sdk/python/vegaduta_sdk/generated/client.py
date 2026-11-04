@@ -1337,12 +1337,12 @@ class AgentMemoryApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories", query={"subjectKey": subject_key})
 
-    def shared_memories(self, agent_id: str, *, subject_key: str) -> List[m.TenantMemoryEntry]:
+    def shared_memories(self, agent_id: str, *, subject_key: str, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.TenantMemoryEntry]:
         """Shared memories.
 
         GET /api/agents/{agentId}/memories/shared
         """
-        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories/shared", query={"subjectKey": subject_key})
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories/shared", query={"subjectKey": subject_key, "limit": limit, "offset": offset})
 
     def approve_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: str, idempotency_key: Optional[str] = None) -> None:
         """Approve shared memory.
@@ -5924,6 +5924,8 @@ class KnowledgeQuarantineApi:
         """List.
 
         GET /api/knowledge/quarantine
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("GET", "/api/knowledge/quarantine", query={"collectionId": collection_id, "limit": limit})
 
@@ -5931,6 +5933,8 @@ class KnowledgeQuarantineApi:
         """Approve note.
 
         POST /api/knowledge/quarantine/notes/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/knowledge/quarantine/notes/approve", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
 
@@ -5938,6 +5942,8 @@ class KnowledgeQuarantineApi:
         """Reject note.
 
         POST /api/knowledge/quarantine/notes/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", "/api/knowledge/quarantine/notes/reject", query={"collectionId": collection_id, "source": source}, headers={"Idempotency-Key": idempotency_key}, response="void")
 
@@ -5945,6 +5951,8 @@ class KnowledgeQuarantineApi:
         """Approve.
 
         POST /api/knowledge/quarantine/{chunkId}/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
 
@@ -5952,6 +5960,8 @@ class KnowledgeQuarantineApi:
         """Reject.
 
         POST /api/knowledge/quarantine/{chunkId}/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
         return self._http.request("POST", f"/api/knowledge/quarantine/{quote_path(chunk_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
 

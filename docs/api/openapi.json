@@ -11155,11 +11155,39 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
           }
         ],
         "responses": {
           "200": {
             "description": "Successful response.",
+            "headers": {
+              "X-Has-More": {
+                "$ref": "#/components/headers/X-Has-More"
+              },
+              "X-Total-Count": {
+                "$ref": "#/components/headers/X-Total-Count"
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -47708,6 +47736,15 @@
             }
           }
         ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -47774,6 +47811,15 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."
@@ -47836,6 +47882,15 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."
@@ -47890,6 +47945,15 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."
@@ -47947,6 +48011,15 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "x-permissions": {
+          "anyOf": [
+            "PERM_MANAGE_AGENTS"
+          ]
+        },
+        "x-roles": [
+          "tenant-admin"
+        ],
+        "description": "Requires PERM_MANAGE_AGENTS (or the tenant-admin role).",
         "responses": {
           "204": {
             "description": "Successful response."

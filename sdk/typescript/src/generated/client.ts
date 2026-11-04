@@ -1566,7 +1566,7 @@ export class AgentMemoryApi {
    * Shared memories.
    * `GET /api/agents/{agentId}/memories/shared`
    */
-  sharedMemories(agentId: string, options: CallOptions<{ subjectKey: string }, HeaderParams> & { query: { subjectKey: string } }): Promise<T.TenantMemoryEntry[]> {
+  sharedMemories(agentId: string, options: CallOptions<{ subjectKey: string; limit?: number; offset?: number }, HeaderParams> & { query: { subjectKey: string; limit?: number; offset?: number } }): Promise<T.TenantMemoryEntry[]> {
     return this.http.request<T.TenantMemoryEntry[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared` });
   }
 
@@ -7005,6 +7005,8 @@ export class KnowledgeQuarantineApi {
   /**
    * List.
    * `GET /api/knowledge/quarantine`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
   list(options?: CallOptions<{ collectionId?: string; limit?: number }, HeaderParams>): Promise<T.KnowledgeQuarantineService_QuarantinedChunk[]> {
     return this.http.request<T.KnowledgeQuarantineService_QuarantinedChunk[]>({ ...options, method: "GET", path: "/api/knowledge/quarantine" });
@@ -7013,6 +7015,8 @@ export class KnowledgeQuarantineApi {
   /**
    * Approve note.
    * `POST /api/knowledge/quarantine/notes/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
   approveNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/approve", response: "void" });
@@ -7021,6 +7025,8 @@ export class KnowledgeQuarantineApi {
   /**
    * Reject note.
    * `POST /api/knowledge/quarantine/notes/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
   rejectNote(options: CallOptions<{ collectionId: string; source: string }, { "Idempotency-Key"?: string }> & { query: { collectionId: string; source: string } }): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: "/api/knowledge/quarantine/notes/reject", response: "void" });
@@ -7029,6 +7035,8 @@ export class KnowledgeQuarantineApi {
   /**
    * Approve.
    * `POST /api/knowledge/quarantine/{chunkId}/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
   approve(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/approve`, response: "void" });
@@ -7037,6 +7045,8 @@ export class KnowledgeQuarantineApi {
   /**
    * Reject.
    * `POST /api/knowledge/quarantine/{chunkId}/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
   reject(chunkId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/knowledge/quarantine/${encodeURIComponent(String(chunkId))}/reject`, response: "void" });
