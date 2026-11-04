@@ -3676,3 +3676,24 @@ prefixes under `management.metrics.distribution.percentiles-histogram`, `managem
 | `app.memory.unified.total-tokens` | `APP_MEMORY_UNIFIED_TOTAL_TOKENS` | `800` | token cap for all recalled unified-memory text in one prompt |
 | `app.memory.unified.per-item-tokens` | `APP_MEMORY_UNIFIED_PER_ITEM_TOKENS` | `120` | token cap for one recalled item; longer text is cut at a sentence boundary or dropped |
 | `app.memory.unified.max-items` | `APP_MEMORY_UNIFIED_MAX_ITEMS` | `8` | most unified-memory items one prompt receives |
+| `app.memory.decay.half-life-days` | `APP_MEMORY_DECAY_HALF_LIFE_DAYS` | `45` | half-life H of the recency term of a fact's salience (design 03 section 3); a fact untouched for H days has recency 0.5. Pure decision logic only: nothing reads it until the consolidation sweep ships |
+| `app.memory.decay.half-life-days-by-kind` | `APP_MEMORY_DECAY_HALF_LIFE_DAYS_BY_KIND` | `preference=120, episodic=21, task-context=7` | per-kind half-life overrides (days), keys case-insensitive |
+| `app.memory.decay.frequency-saturation` | `APP_MEMORY_DECAY_FREQUENCY_SATURATION` | `20` | uses at which the frequency term reaches 1 |
+| `app.memory.decay.weights.importance` | `APP_MEMORY_DECAY_WEIGHTS_IMPORTANCE` | `0.45` | weight wI of the importance term of salience S |
+| `app.memory.decay.weights.recency` | `APP_MEMORY_DECAY_WEIGHTS_RECENCY` | `0.35` | weight wR of the recency term |
+| `app.memory.decay.weights.frequency` | `APP_MEMORY_DECAY_WEIGHTS_FREQUENCY` | `0.20` | weight wF of the frequency term |
+| `app.memory.decay.forget-threshold` | `APP_MEMORY_DECAY_FORGET_THRESHOLD` | `0.12` | effective salience below this makes an unpinned, old-enough fact a forget candidate |
+| `app.memory.decay.summarise-threshold` | `APP_MEMORY_DECAY_SUMMARISE_THRESHOLD` | `0.30` | effective salience between forget and this folds a fact into a summary |
+| `app.memory.decay.min-age-days` | `APP_MEMORY_DECAY_MIN_AGE_DAYS` | `14` | nothing younger (since creation) is forgotten, merged or summarised |
+| `app.memory.decay.quarantine-factor` | `APP_MEMORY_DECAY_QUARANTINE_FACTOR` | `0.5` | multiplier on salience of QUARANTINED rows |
+| `app.memory.decay.quarantine-ttl-days` | `APP_MEMORY_DECAY_QUARANTINE_TTL_DAYS` | `30` | never-approved QUARANTINED rows older than this are always forget candidates |
+| `app.memory.decay.max-fraction-forgotten` | `APP_MEMORY_DECAY_MAX_FRACTION_FORGOTTEN` | `0.30` | circuit breaker: most of a subject's rows one night's plan may remove; hitting it marks the plan propose-only |
+| `app.memory.decay.max-forget-per-subject-per-night` | `APP_MEMORY_DECAY_MAX_FORGET_PER_SUBJECT_PER_NIGHT` | `25` | most rows forgotten outright per subject per night |
+| `app.memory.decay.max-summaries-per-subject` | `APP_MEMORY_DECAY_MAX_SUMMARIES_PER_SUBJECT` | `3` | most summaries planned per subject per night |
+| `app.memory.decay.summary-batch-size` | `APP_MEMORY_DECAY_SUMMARY_BATCH_SIZE` | `12` | most source rows folded into one summary |
+| `app.memory.decay.max-generation` | `APP_MEMORY_DECAY_MAX_GENERATION` | `3` | highest lineage generation of a derived row; inputs that would exceed it are not summarised again |
+| `app.memory.decay.protect-person-authored` | `APP_MEMORY_DECAY_PROTECT_PERSON_AUTHORED` | `true` | person-authored facts are never planned for forget, merge or summarise |
+| `app.memory.decay.mix-trust-batches` | `APP_MEMORY_DECAY_MIX_TRUST_BATCHES` | `false` | summarise TRUSTED and QUARANTINED sources together; the result is then QUARANTINED |
+| `app.memory.decay.dry-run-days` | `APP_MEMORY_DECAY_DRY_RUN_DAYS` | `7` | days after consolidation was enabled for a tenant during which plans are propose-only |
+| `app.memory.decay.max-usd-per-tenant-per-night` | `APP_MEMORY_DECAY_MAX_USD_PER_TENANT_PER_NIGHT` | `0.50` | summariser spend ceiling per tenant per night (USD), on top of the hosted-spend cap |
+| `app.memory.decay.max-usd-per-run` | `APP_MEMORY_DECAY_MAX_USD_PER_RUN` | `5.00` | summariser spend ceiling for one whole sweep run (USD) |

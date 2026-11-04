@@ -2,6 +2,7 @@ package com.agenticai.core.agents.memorystore;
 
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
 import com.agenticai.core.agents.memory.spi.MemoryRecallSource;
+import com.agenticai.core.agents.memorystore.decay.DecayProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * composer is a bean that no turn code calls yet, and every flag defaults off.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(MemoryUnifiedProperties.class)
+@EnableConfigurationProperties({MemoryUnifiedProperties.class, DecayProperties.class})
 class MemoryStoreConfiguration {
 
     @Bean

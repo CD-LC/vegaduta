@@ -10,6 +10,7 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Added
 
+- **Memory decay and consolidation planning, WP5a (pure logic, no behaviour change).** `core/agents-memory` package `agents.memorystore.decay`: `MemorySalience` (S = wI*importance + wR*0.5^(age/H) + wF*frequency, pinned = 1, quarantined x0.5), `ConsolidationPlanner` (pure FORGET / MERGE / SUMMARISE plan: never touches pinned or person-authored rows, 30% per-subject-per-night circuit breaker, TRUSTED and QUARANTINED planned in separate batches, derived trust = lowest of inputs, lineage generation cap, 7-day dry run) and the `ConsolidationBudget` port with a USD-ceiling implementation. Configured by `app.memory.decay.*`; nothing calls it until the consolidation sweep ships.
 - **Unified agent memory, WP2: ports and a dark module (no behaviour change).** New kernel ports `agents.memory.spi` (`MemoryRecallSource` read port that only yields TRUSTED items, `MemoryProposalSink` write port that can only create PENDING or QUARANTINED proposals), new module `core/agents-memory` (package `agents.memorystore`; feature gate, `MemoryRecallComposer` merging sources under an 800-token budget, proposal policy) and `SemanticMemorySource` in `agents-turn` exposing the existing TRUSTED `agent_memory`/`tenant_memory` rows. Flags `app.memory.unified.*` default OFF and nothing in the chat prompt calls the composer yet. ADR-0028 now claims Flyway V681/V682.
 
 ### Security
