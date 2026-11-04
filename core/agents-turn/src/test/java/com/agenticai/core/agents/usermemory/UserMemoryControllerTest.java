@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.usermemory;
 
+import com.agenticai.core.agents.memory.MemoryTrust;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -407,5 +408,35 @@ class UserMemoryControllerTest {
             c.editFact("agent", id, new UserMemoryController.ContentRequest("new text"), alice).getStatusCode());
         verify(agent, never()).listAllForSubject(anyString());
         verify(graph, never()).forgetFactText(anyString(), any(), anyString(), any());
+    }
+
+    @Test
+    void overviewAndExportLabelEveryFactWithItsTrustAndKeepQuarantinedOnesVisible() {
+        UserMemoryController c = controller();
+        UUID agentId = UUID.randomUUID();
+        UUID trusted = UUID.randomUUID();
+        UUID held = UUID.randomUUID();
+        UUID heldShared = UUID.randomUUID();
+        Instant now = Instant.now();
+        when(tenant.listBlocks("alice")).thenReturn(List.of());
+        when(agent.listAllForSubject("alice")).thenReturn(List.of(
+            new AgentMemoryEntry(trusted, agentId, "alice", "likes tea", 0, now, now, 0),
+            new AgentMemoryEntry(held, agentId, "alice", "wire money", 0, now, now, 0,
+                MemoryTrust.QUARANTINED, List.of("web:evil.example"))));
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(
+            new TenantMemoryEntry(heldShared, "alice", "odd", 0, agentId, now, now, 0, MemoryTrust.QUARANTINED, List.of("tool:fetch"))));
+
+        for (List<UserMemoryController.FactView> facts : List.of(c.overview(alice).facts(), c.export(alice).getBody().facts())) {
+            assertEquals(3, facts.size());
+            UserMemoryController.FactView t = facts.stream().filter(f -> f.id().equals(trusted)).findFirst().orElseThrow();
+            UserMemoryController.FactView q = facts.stream().filter(f -> f.id().equals(held)).findFirst().orElseThrow();
+            UserMemoryController.FactView qs = facts.stream().filter(f -> f.id().equals(heldShared)).findFirst().orElseThrow();
+            assertEquals("TRUSTED", t.trust());
+            assertTrue(t.sourceTaint().isEmpty());
+            assertEquals("QUARANTINED", q.trust());
+            assertEquals(List.of("web:evil.example"), q.sourceTaint());
+            assertEquals("QUARANTINED", qs.trust());
+            assertEquals("shared", qs.scope());
+        }
     }
 }

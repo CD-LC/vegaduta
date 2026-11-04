@@ -376,7 +376,7 @@ public class RagEvalService {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_chunks");
         try {
             Long n = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM " + table + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT NULL", Long.class, collectionId
+                "SELECT COUNT(*) FROM " + table + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT NULL AND trust = 'TRUSTED'", Long.class, collectionId
             );
             return n == null ? 0L : n;
         } catch (DataAccessException e) {

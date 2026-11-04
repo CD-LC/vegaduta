@@ -4,6 +4,7 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryBlocks;
+import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
@@ -96,8 +97,25 @@ public class UserMemoryController {
     public record BlockView(String label, String content, Instant updatedAt) {
     }
 
-    /** {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). */
-    public record FactView(UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount) {
+    /**
+     * {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). {@code trust} is
+     * "TRUSTED" or "QUARANTINED": a quarantined fact was written on a turn that handled untrusted content,
+     * is never recalled into a prompt, and waits for the person to approve or reject it (the agent-memory
+     * approve/reject endpoints). {@code sourceTaint} names the kinds of untrusted source, empty when trusted.
+     */
+    public record FactView(
+        UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount,
+        String trust, List<String> sourceTaint
+    ) {
+        public FactView {
+            trust = trust == null ? MemoryTrust.QUARANTINED.name() : trust;
+            sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
+        }
+
+        /** A fact the person just typed in: trusted by construction. */
+        public FactView(UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount) {
+            this(id, scope, agentId, content, createdAt, lastUsedAt, useCount, MemoryTrust.TRUSTED.name(), List.of());
+        }
     }
 
     public record Limits(int maxCharsPerBlock, int maxProjectBlocks, int maxFactChars) {
@@ -150,12 +168,14 @@ public class UserMemoryController {
         List<FactView> facts = new ArrayList<>();
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
-                facts.add(new FactView(m.id(), "agent", m.agentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount()));
+                facts.add(new FactView(m.id(), "agent", m.agentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount(),
+                    m.trust().name(), m.sourceTaint()));
             }
         }
         if (tenant != null) {
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
-                facts.add(new FactView(m.id(), "shared", m.createdByAgentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount()));
+                facts.add(new FactView(m.id(), "shared", m.createdByAgentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount(),
+                    m.trust().name(), m.sourceTaint()));
             }
         }
         facts.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));

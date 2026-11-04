@@ -145,7 +145,12 @@ public class ContactPrivacyService {
         if (agent != null) {
             List<Map<String, Object>> facts = new ArrayList<>();
             for (AgentMemoryEntry e : agent.listAllForSubject(externalId)) {
-                facts.add(Map.of("agentId", e.agentId(), "content", e.content(), "createdAt", e.createdAt()));
+                facts.add(
+                        Map.of(
+                                "agentId", e.agentId(),
+                                "content", e.content(),
+                                "createdAt", e.createdAt(),
+                                "trust", e.trust().name()));
             }
             data.put("agentMemory", facts);
         } else {
@@ -155,7 +160,11 @@ public class ContactPrivacyService {
         if (tenant != null) {
             List<Map<String, Object>> facts = new ArrayList<>();
             for (TenantMemoryEntry e : tenant.listFactsForSubject(externalId)) {
-                facts.add(Map.of("content", e.content(), "createdAt", e.createdAt()));
+                facts.add(
+                        Map.of(
+                                "content", e.content(),
+                                "createdAt", e.createdAt(),
+                                "trust", e.trust().name()));
             }
             data.put("sharedMemory", facts);
         }
@@ -176,7 +185,7 @@ public class ContactPrivacyService {
             data.put(
                     "derivedKnowledgeChunks",
                     jdbc.queryForList(
-                            "SELECT id, collection_id, source, content FROM knowledge_chunks"
+                            "SELECT id, collection_id, source, content, trust FROM knowledge_chunks"
                                     + " WHERE source LIKE ?",
                             derivedChunkPattern(String.valueOf(session.get().get("session_id")))));
         }

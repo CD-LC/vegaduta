@@ -6,6 +6,7 @@ import com.agenticai.core.agents.learning.LearningProposalApplyException;
 import com.agenticai.core.agents.learning.LearningProposalKind;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.skills.learning.SkillDraftScrubber;
@@ -30,6 +31,10 @@ import org.springframework.stereotype.Component;
  * checked against its owner. A "merge" rewrites the kept fact with the approved (possibly edited) text and
  * forgets the others; a "drop" forgets. Nothing is touched unless every fact it names still exists and still
  * belongs to the person, so a proposal that went stale is refused, never half applied.
+ *
+ * <p>Only TRUSTED facts are visible to an apply ({@code agentTier}/{@code sharedTier}): a proposal that names a
+ * QUARANTINED fact (hand-crafted, or filed before it was quarantined) is refused as stale, so a merge can never
+ * rewrite a TRUSTED row from a quarantined one nor silently drop a row still awaiting the person's review.
  *
  * <p>Like the Memory page, with {@code app.graph-memory.user-forget-sync.enabled} on, graph edges that only the
  * removed or rewritten wording supported are invalidated afterwards, best effort.
@@ -163,7 +168,7 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
     private Map<UUID, String> agentTier(String subject, UUID agentId) throws LearningProposalApplyException {
         Map<UUID, String> out = new HashMap<>();
         for (AgentMemoryEntry e : requireAgent().listAllForSubject(subject)) {
-            if (Objects.equals(e.agentId(), agentId)) {
+            if (e.trust() == MemoryTrust.TRUSTED && Objects.equals(e.agentId(), agentId)) {
                 out.put(e.id(), e.content());
             }
         }
@@ -173,6 +178,9 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
     private Map<UUID, String> sharedTier(String subject) throws LearningProposalApplyException {
         Map<UUID, String> out = new HashMap<>();
         for (TenantMemoryEntry e : requireTenant().listFactsForSubject(subject)) {
+            if (e.trust() != MemoryTrust.TRUSTED) {
+                continue;
+            }
             out.put(e.id(), e.content());
         }
         return out;

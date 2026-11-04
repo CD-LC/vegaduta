@@ -3,6 +3,7 @@ package com.agenticai.core.agents.memory.importer;
 import com.agenticai.core.agents.core.AgentNotFoundException;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.Capacity;
@@ -139,10 +140,18 @@ public class MemoryImportService {
         List<TenantMemoryEntry> sharedFacts = tenant == null ? List.of() : tenant.listFactsForSubject(subject);
         List<AgentMemoryEntry> agentFacts = agent == null ? List.of() : agent.listAllForSubject(subject);
         Map<String, String> existing = new HashMap<>();
+        // Duplicate detection looks at TRUSTED rows only: a quarantined twin is not something the person
+        // has accepted, so it must not swallow their own paste (it stays listed on the Memory page for review).
         for (TenantMemoryEntry m : sharedFacts) {
+            if (m.trust() != MemoryTrust.TRUSTED) {
+                continue;
+            }
             existing.putIfAbsent(MemoryImportParser.dedupeKey(m.content()), m.content());
         }
         for (AgentMemoryEntry m : agentFacts) {
+            if (m.trust() != MemoryTrust.TRUSTED) {
+                continue;
+            }
             existing.putIfAbsent(MemoryImportParser.dedupeKey(m.content()), m.content());
         }
 
@@ -234,6 +243,9 @@ public class MemoryImportService {
                 if (SCOPE_SHARED.equals(scope)) {
                     if (tenant != null) {
                         for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
+                            if (m.trust() != MemoryTrust.TRUSTED) {
+                                continue; // see preview(): only accepted facts count as duplicates
+                            }
                             keys.add(MemoryImportParser.dedupeKey(m.content()));
                         }
                     }
@@ -242,6 +254,9 @@ public class MemoryImportService {
                         existingAgentKeys = new HashMap<>();
                         if (agent != null) {
                             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
+                                if (m.trust() != MemoryTrust.TRUSTED) {
+                                    continue;
+                                }
                                 existingAgentKeys.computeIfAbsent(m.agentId(), k -> new HashSet<>())
                                     .add(MemoryImportParser.dedupeKey(m.content()));
                             }

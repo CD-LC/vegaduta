@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.memory.importer;
 
+import com.agenticai.core.agents.memory.MemoryTrust;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -305,5 +306,45 @@ class MemoryImportServiceTest {
         assertEquals("claude", MemoryImportService.normalizeSource("claude"));
         assertEquals("other", MemoryImportService.normalizeSource("<script>"));
         assertEquals("other", MemoryImportService.normalizeSource(null));
+    }
+
+    private static TenantMemoryEntry quarantinedShared(String content) {
+        return new TenantMemoryEntry(
+            UUID.randomUUID(), "alice", content, 0.0, null, Instant.now(), Instant.now(), 0, MemoryTrust.QUARANTINED, List.of("web:x"));
+    }
+
+    private static AgentMemoryEntry quarantinedPrivate(UUID agentId, String content) {
+        return new AgentMemoryEntry(
+            UUID.randomUUID(), agentId, "alice", content, 0.0, Instant.now(), Instant.now(), 0, MemoryTrust.QUARANTINED, List.of("web:x"));
+    }
+
+    @Test
+    void aQuarantinedTwinIsNotADuplicateSoThePersonsOwnPasteIsKept() {
+        MemoryImportService s = service();
+        UUID agentId = UUID.randomUUID();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared("Lives in Pune.")));
+        when(agent.listAllForSubject("alice")).thenReturn(List.of(quarantinedPrivate(agentId, "Likes green tea")));
+
+        PreviewResponse r = s.preview("alice", new PreviewRequest("- Lives in pune\n- Likes green tea", null));
+
+        assertEquals(2, r.stats().kept());
+        assertEquals(0, r.stats().duplicates());
+        // The quarantined row still occupies a slot, so capacity is not overstated.
+        assertEquals(49, r.capacity().sharedRemaining());
+    }
+
+    @Test
+    void importDoesNotSkipAFactBecauseAQuarantinedRowHasTheSameText() {
+        MemoryImportService s = service();
+        UUID agentId = UUID.randomUUID();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared("Lives in Pune.")));
+        when(agent.listAllForSubject("alice")).thenReturn(List.of(quarantinedPrivate(agentId, "Prefers Kotlin")));
+
+        ImportResponse r = s.importFacts("alice", new ImportRequest(List.of(
+            new ImportFact("lives in pune", "shared", null),
+            new ImportFact("prefers kotlin", "agent", agentId)), "claude"));
+
+        assertEquals(2, r.saved());
+        assertTrue(r.skipped().isEmpty());
     }
 }

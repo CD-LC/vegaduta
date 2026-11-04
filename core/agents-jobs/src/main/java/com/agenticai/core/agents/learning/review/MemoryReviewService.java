@@ -7,6 +7,7 @@ import com.agenticai.core.agents.learning.review.MemoryReviewDetector.Finding;
 import com.agenticai.core.agents.learning.review.MemoryReviewDetector.Settings;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
+import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.skills.learning.SkillDraftScrubber;
@@ -135,11 +136,15 @@ public class MemoryReviewService {
         return filed;
     }
 
+    /** TRUSTED facts only: a QUARANTINED row waits for the person's approval on the Memory page and is never a merge input. */
     private List<MemoryFactRef> collect(String subject) {
         List<MemoryFactRef> facts = new ArrayList<>();
         AgentMemoryService agent = agentMemory.getIfAvailable();
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
+                if (m.trust() != MemoryTrust.TRUSTED) {
+                    continue; // quarantined rows are never consolidated, so they cannot launder into a TRUSTED one
+                }
                 facts.add(new MemoryFactRef(
                         MemoryFactRef.AGENT, m.id(), m.agentId(), m.content(), m.createdAt(), later(m.createdAt(), m.lastUsedAt())));
             }
@@ -147,6 +152,9 @@ public class MemoryReviewService {
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
+                if (m.trust() != MemoryTrust.TRUSTED) {
+                    continue;
+                }
                 facts.add(new MemoryFactRef(
                         MemoryFactRef.SHARED, m.id(), m.createdByAgentId(), m.content(), m.createdAt(), later(m.createdAt(), m.lastUsedAt())));
             }
