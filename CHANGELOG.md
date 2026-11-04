@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Unified agent memory, WP2: ports and a dark module (no behaviour change).** New kernel ports `agents.memory.spi` (`MemoryRecallSource` read port that only yields TRUSTED items, `MemoryProposalSink` write port that can only create PENDING or QUARANTINED proposals), new module `core/agents-memory` (package `agents.memorystore`; feature gate, `MemoryRecallComposer` merging sources under an 800-token budget, proposal policy) and `SemanticMemorySource` in `agents-turn` exposing the existing TRUSTED `agent_memory`/`tenant_memory` rows. Flags `app.memory.unified.*` default OFF and nothing in the chat prompt calls the composer yet. ADR-0028 now claims Flyway V681/V682.
+
 ### Security
 
 - **Scratchpad agent pad is now per user; parent chunks carry trust (V680).** An `agent`-scope scratchpad note used to be readable by every user of the agent. It now has a `subject_key` (the caller, as in `agent_memory`): `scratchpad_write/read/list/delete` only reach the caller's own agent-pad notes, the note cap and eviction are per caller, a turn with no identified user can only use the session pad, and `DELETE /api/memory` and contact erasure now delete the subject's scratchpad notes. Existing agent-pad notes have no known owner: they are kept but no longer returned to the model (operators still see them on `GET /api/agents/{id}/scratchpad`). Scratchpad review endpoints take an optional `subject`. `knowledge_parent_chunk` gains `trust`/`source_taint`: parents of a quarantined document are quarantined, only TRUSTED parents are returned with a retrieved child, and approving or rejecting held chunks releases or drops their parents. Not done: approving a quarantined memory fact still does not write the graph.

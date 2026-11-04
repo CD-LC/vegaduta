@@ -121,7 +121,7 @@ the invariants):
    AND source_taint <> '[]'` requires `approved_by IS NOT NULL`). Approval of a derived item does not
    approve its sources, and approving a source does not re-trust already-derived items; they must be
    re-derived or approved on their own.
-4. **Generation cap.** `generation > app.agents.memory.max-generation` (default 2) is not stored as
+4. **Generation cap.** `generation > app.memory.max-generation` (default 2) is not stored as
    `ACTIVE`, and a `model_generated` item is excluded as *input* to further distillation unless a human
    re-confirmed it (`approved_by` set). This breaks the learn-from-own-output feedback loop in the threat
    model.
@@ -136,18 +136,19 @@ the invariants):
 ### 5. Schema and Flyway plan
 
 Tenant schema only (nothing in `controlplane/`). Raw JDBC tables, no Hibernate mapping, as `agent_memory` (V18).
-The highest version in the tree is **V678** (`tenant/V678__scratchpad_and_data_table_row_trust.sql`); this plan **claims V679
-and V680** and must re-check `bash scripts/ci/flyway-lint.sh` and `docs/maintainers/agent-coordination.md` at
+V678 and V680 are taken (`tenant/V678__scratchpad_and_data_table_row_trust.sql` and the V680 scratchpad/parent-chunk trust
+migration) and V679 is reserved by another work stream; this plan **claims V681
+and V682** (the next free tenant versions) and must re-check `bash scripts/ci/flyway-lint.sh` and `docs/maintainers/agent-coordination.md` at
 implementation time. New files only; V18, V44, V77, V676, V677 are not touched.
 
-**`tenant/V679__unified_memory_items.sql`**:
+**`tenant/V681__unified_memory_items.sql`**:
 
 ```sql
 CREATE TABLE memory_item (
   id UUID PRIMARY KEY,
   agent_id UUID NOT NULL REFERENCES agent(id) ON DELETE CASCADE,
   kind VARCHAR(16) NOT NULL,                 -- EPISODIC | PROCEDURAL | SELF_MODEL (SEMANTIC stays in agent_memory)
-  content TEXT NOT NULL,                     -- <= app.agents.memory.max-item-chars (1200)
+  content TEXT NOT NULL,                     -- <= app.memory.max-item-chars (1200)
   summary VARCHAR(280),
   embedding vector(384) NOT NULL,            -- same dimension as agent_memory
   attrs JSONB NOT NULL DEFAULT '{}',         -- closed per-kind schema validated in code (task_class, outcome)
@@ -206,7 +207,7 @@ CREATE INDEX idx_memory_event_item ON memory_event(item_id, at);
 CREATE INDEX idx_memory_event_agent ON memory_event(agent_id, at DESC);
 ```
 
-**`tenant/V680__memory_competence.sql`**: `memory_competence(agent_id UUID FK agent ON DELETE CASCADE, task_class
+**`tenant/V682__memory_competence.sql`**: `memory_competence(agent_id UUID FK agent ON DELETE CASCADE, task_class
 VARCHAR(96), attempts, verified_success, verified_failure, human_accepted, human_rejected, unknown_outcome INT
 DEFAULT 0, last_outcome_at, updated_at, PRIMARY KEY (agent_id, task_class))`.
 
@@ -255,6 +256,8 @@ at 0.5 so injected text cannot argue its way up. Rank = `(1 - cosine_distance) *
   (`UniqueBeanNamesTest`); constructors stay under 12 parameters; the controller is API-shape only and jobs/worker
   beans use `ObjectProvider` for anything optional (`ShapeInjectionPointsTest`).
 
+**As built in WP2** (ports and a dark module, no tables): the spi in `agents` is `MemoryKind`, `MemoryTrustLevel`, `MemoryProvenanceRecord`, `MemoryItemView` (rejects non-TRUSTED provenance at construction), `MemoryRecallRequest`/`MemoryRecallResult`, `MemoryRecallSource` (read port), `MemoryWriteProposal`, `MemoryProposalStatus` (`PENDING`, `QUARANTINED` only), `MemoryProposalReceipt` and `MemoryProposalSink` (write port). `core/agents-memory` holds `MemoryUnifiedGate` (platform AND every `MemoryFlagOverride` bean; lower levels can only veto), `MemoryRecallComposer` (merge, de-duplicate, per-item and total token budget) and `MemoryProposalPolicy`. `SemanticMemorySource` in `agents-turn` exposes the existing TRUSTED `agent_memory`/`tenant_memory` rows. Nothing calls the composer from the chat path yet. Settings-backed tenant/agent overrides, kind soft shares and the store-backed sink arrive with WP3/WP4.
+
 ### 8. Retrieval API (port)
 
 ```java
@@ -276,7 +279,7 @@ public record MemoryItemView(UUID id, MemoryKind kind, String text, TrustLevel t
 
 ### 9. Prompt injection budget
 
-One budget governs all memory text in a prompt, replacing independent ones. Keys under `app.agents.memory.prompt.*`
+One budget governs all memory text in a prompt, replacing independent ones. Keys under `app.memory.prompt.*`
 (code defaults): `total-tokens` 800 (including `MemoryBlocks` and recalled facts), `per-item-tokens` 120
 (truncate at a sentence boundary or drop), `max-items` 8, soft shares semantic 0.40 / episodic 0.30 /
 procedural 0.25 / self 0.05 (unused share flows on in that order).
@@ -313,13 +316,13 @@ per Phase 0 rules):
 
 | Key | Default | Effect when false |
 |---|---|---|
-| `app.agents.memory.unified.enabled` | `false` | Platform kill switch: no unified recall, propose, jobs or endpoints (404). Semantic path as today |
-| `app.agents.memory.unified.kinds` | `[]` | Subset of `episodic,procedural,self-model` enabled (empty = none) |
-| `app.agents.memory.recorder.enabled` | `false` | No episodic recording |
-| `app.agents.memory.distiller.enabled` | `false` | No procedural / self-assessment proposals |
-| `app.agents.memory.competence.enabled` | `false` | No counter job, no competence line |
-| `app.agents.memory.max-generation` | `2` | |
-| `app.agents.memory.auto-promote.enabled` | `false` | Never auto-approves anything |
+| `app.memory.unified.enabled` | `false` | Platform kill switch: no unified recall, propose, jobs or endpoints (404). Semantic path as today |
+| `app.memory.unified.kinds` | `[]` | Subset of `episodic,procedural,self-model` enabled (empty = none) |
+| `app.memory.recorder.enabled` | `false` | No episodic recording |
+| `app.memory.distiller.enabled` | `false` | No procedural / self-assessment proposals |
+| `app.memory.competence.enabled` | `false` | No counter job, no competence line |
+| `app.memory.max-generation` | `2` | |
+| `app.memory.auto-promote.enabled` | `false` | Never auto-approves anything |
 
 Resolution is platform -> tenant -> agent with AND semantics (any level false -> off) via `SettingsResolver`
 (exists). Lower levels can only turn things off; only the platform level can turn a kind on. `strict` pins
@@ -367,14 +370,14 @@ console is a separate package.
 
 ### 14. Rollout
 
-1. **1a, flags OFF everywhere:** spi, module, V679/V680, services, controller, adapter, tests; merged dark.
+1. **1a, flags OFF everywhere:** spi, module, V681/V682, services, controller, adapter, tests; merged dark.
    `scripts/ci/boot-check.sh` on api, migrate-only, jobs and worker shapes.
 2. **Gate:** Phase 0 packages B (taint persisted) and C (quarantine, write screen) merged and verified, and
    package H extended with memory cases. Without B the gate quarantines every agent write.
 3. **1b:** `kinds=episodic` in one dogfood tenant, `PENDING` default, no distiller. Watch queue size, approval
    rate, recall latency, injected tokens. **1c** (owner decision): distiller and competence per agent, still human-approved.
 4. **Rollback of the feature:** `unified.enabled=false` (bounded by the settings TTL), then `POST /rollback` for
-   the data. V679/V680 are additive and stay applied; dropping the tables would be a new later migration.
+   the data. V681/V682 are additive and stay applied; dropping the tables would be a new later migration.
 
 ## Acceptance tests (each must fail on the old behaviour)
 
@@ -441,7 +444,7 @@ Architecture: the `app` module tests named in `AGENTS.md` rule 14 and a regenera
 - This is a design. Items named as existing (`MemoryWriteGate`, `MemoryTrust`, `TurnTaintView`, V676/V677,
   `AgentMemoryService` methods, `MemoryBlocks`, `HistoryTokenEstimator`, `pre-turn-max-wait`,
   `/api/agents/{agentId}/memories`) were read on 2026-11-04; nothing was compiled or run.
-- V679/V680 free was checked against file listings only, not other agents' unmerged work.
+- V681/V682 free was checked against file listings only, not other agents' unmerged work.
 - Whether `agents-memory` satisfies `ModuleBoundaryRulesTest`, and whether `agents-turn` can depend on the spi
   without a cycle in the frozen `archunit_store`, is unchecked; the first PR must run the `app` module tests.
 - Package B's `TurnTaintView` implementation was not found and is assumed unmerged. `CallerSessionIds`

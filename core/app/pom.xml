@@ -99,6 +99,10 @@
     </dependency>
     <dependency>
       <groupId>com.agenticai</groupId>
+      <artifactId>agents-memory</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.agenticai</groupId>
       <artifactId>approval</artifactId>
     </dependency>
     <dependency>

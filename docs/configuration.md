@@ -3671,3 +3671,8 @@ Spring Boot keys these maps by meter-name prefix (written in the YAML as `slo.[a
 prefixes under `management.metrics.distribution.percentiles-histogram`, `management.metrics.distribution.minimum-expected-value` and
 `management.metrics.distribution.maximum-expected-value`. They are in the `latency-histograms` profile file; see source:
 `core/app-config/src/main/resources/application-latency-histograms.yml` for the values.
+| `app.memory.unified.enabled` | `APP_MEMORY_UNIFIED_ENABLED` | `false` | platform kill switch of the unified agent memory (ADR-0028): off means no unified recall and no proposals; a tenant or agent level can only switch it off further (AND semantics), never on. Nothing in the chat prompt uses it yet |
+| `app.memory.unified.kinds` | `APP_MEMORY_UNIFIED_KINDS` | empty | non-semantic kinds the platform allows (`episodic`, `procedural`, `self-model`); empty means none, semantic memory is unaffected |
+| `app.memory.unified.total-tokens` | `APP_MEMORY_UNIFIED_TOTAL_TOKENS` | `800` | token cap for all recalled unified-memory text in one prompt |
+| `app.memory.unified.per-item-tokens` | `APP_MEMORY_UNIFIED_PER_ITEM_TOKENS` | `120` | token cap for one recalled item; longer text is cut at a sentence boundary or dropped |
+| `app.memory.unified.max-items` | `APP_MEMORY_UNIFIED_MAX_ITEMS` | `8` | most unified-memory items one prompt receives |

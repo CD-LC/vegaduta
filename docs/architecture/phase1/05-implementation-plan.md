@@ -19,7 +19,7 @@ Status: proposal for review. No code is written. Inputs: `01-memory-inventory.md
 | 0 | Fix inventory gaps that are bugs today: scratchpad subject column + taint gate (G5), session summary taint flag (G8), `knowledge_parent_chunk` trust (G7), `purgeCreatedBefore` spares `#mem:` blocks (G9), stale comment in `MemoryImportService` | Phase 0 merged | claim via `flyway-lint.sh` |
 | 1 | Seams for measurement: per-agent memory on/off switch with recall trace, injectable `Clock`, per-turn token/latency counter | none | none |
 | 2 | Ports `agents.memory.spi` in kernel; new module `core/agents-memory`; `SemanticMemorySource` adapter over `agent_memory`/`tenant_memory`/graph | 1 | none |
-| 3 | `memory_item`, `memory_item_source`, `memory_event` (ADR V679) and `memory_competence` (V680); service, trust CHECKs, lineage, generation cap | 2 | V679, V680 (re-check numbers) |
+| 3 | `memory_item`, `memory_item_source`, `memory_event` (ADR V681) and `memory_competence` (V682); service, trust CHECKs, lineage, generation cap | 2 | V681, V682 (re-check numbers) |
 | 4 | Episodic write path (post-turn, proposals only) and recall merge inside the existing pre-turn read; 800-token prompt budget | 3 | none |
 | 5 | Salience/decay (`MemorySalience`), `MemoryConsolidationSweep` in dry-run (7 days, proposals only), circuit breaker, cost caps | 3, 4 | none |
 | 6 | Privacy: `/api/memory` patch/activity/restore/export/erase, tombstones, erasure cascade over lineage incl. graph sync, retention classes | 3 | with 3 or own |
