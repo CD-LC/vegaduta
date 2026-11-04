@@ -1,6 +1,8 @@
 package com.agenticai.core.agents.skills;
 
+import com.agenticai.core.agents.memory.TurnTaintSnapshot;
 import com.agenticai.core.agents.skills.SkillLearningGateway.TurnOutcome;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import java.time.Instant;
@@ -43,6 +45,20 @@ public final class EpisodeRecordingGateway {
 
     public static Flux<String> observe(
             Flux<String> turn, UUID agentId, String sessionId, Instant startedAt, Optional<TenantContext> tenant) {
+        return observe(turn, agentId, sessionId, startedAt, tenant, null);
+    }
+
+    /**
+     * As above, and when the turn ends the outcome carries a {@link TurnTaintSnapshot} of {@code taint}, read at that
+     * moment so marks made during the turn count. A null record yields the unreadable (fail-closed) snapshot.
+     */
+    public static Flux<String> observe(
+            Flux<String> turn,
+            UUID agentId,
+            String sessionId,
+            Instant startedAt,
+            Optional<TenantContext> tenant,
+            TurnTaint taint) {
         Observer o = observer;
         if (o == null || !o.enabled()) {
             return turn;
@@ -59,7 +75,8 @@ public final class EpisodeRecordingGateway {
                                 startedAt,
                                 signal == SignalType.ON_COMPLETE,
                                 signal == SignalType.CANCEL,
-                                scope));
+                                scope,
+                                TurnTaintSnapshot.of(taint)));
                     } catch (RuntimeException e) {
                         log.debug("Episode observer failed: {}", e.getMessage());
                     }

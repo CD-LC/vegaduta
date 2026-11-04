@@ -75,6 +75,7 @@ COPY agents-tools/pom.xml agents-tools/
 COPY agents-turn/pom.xml agents-turn/
 COPY agents-browser/pom.xml agents-browser/
 COPY agents-budget/pom.xml agents-budget/
+COPY agents-memory/pom.xml agents-memory/
 COPY agents-chatport/pom.xml agents-chatport/
 COPY agentspi/pom.xml agentspi/
 COPY agents-interop/pom.xml agents-interop/

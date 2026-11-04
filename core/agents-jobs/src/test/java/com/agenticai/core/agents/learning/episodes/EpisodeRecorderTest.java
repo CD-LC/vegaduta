@@ -14,7 +14,8 @@ import com.agenticai.core.agents.learning.episodes.EpisodeSignalSource.HumanVerd
 import com.agenticai.core.agents.learning.episodes.EpisodeSignalSource.Signals;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.EpisodicMemoryProperties;
-import com.agenticai.core.agents.memory.TurnTaintView;
+import com.agenticai.core.agents.memory.TurnTaintSnapshot;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
@@ -55,7 +56,7 @@ class EpisodeRecorderTest {
     private final MeterRegistry meters = new SimpleMeterRegistry();
     private final BlockingQueue<MemoryWriteProposal> proposals = new LinkedBlockingQueue<>();
     private final AtomicReference<String> tenantSeenBySink = new AtomicReference<>();
-    private final AtomicReference<TurnTaintView> taintView = new AtomicReference<>();
+    private final AtomicReference<TurnTaintSnapshot> taintView = new AtomicReference<>();
     private final AtomicReference<AgentMemoryService> memoryService = new AtomicReference<>();
     private final AtomicReference<SettingsResolver> resolver = new AtomicReference<>();
     private final AtomicReference<EpisodeSignalSource> signals = new AtomicReference<>();
@@ -95,7 +96,6 @@ class EpisodeRecorderTest {
                 props,
                 toolCalls,
                 provider(sinkRef),
-                provider(taintView),
                 provider(memoryService),
                 provider(resolver),
                 provider(signals),
@@ -113,16 +113,21 @@ class EpisodeRecorderTest {
         return new ToolCallLog(AGENT, "s1", tool, "{}", "ok", error, START.plusSeconds(1), START.plusSeconds(2));
     }
 
-    private static TurnOutcome turn(boolean completed, boolean cancelled) {
+    /** The outcome carries the taint snapshot the test set; none set means the 8-argument form (no taint state). */
+    private TurnOutcome turn(boolean completed, boolean cancelled) {
         TenantScope scope = TenantScope.of(TenantContext.of("acme", "alice", Set.of()));
-        return new TurnOutcome(AGENT, "s1", "my secret message", "the model says it succeeded", START, completed, cancelled, scope);
+        TurnTaintSnapshot snapshot = taintView.get();
+        return snapshot == null
+                ? new TurnOutcome(AGENT, "s1", "my secret message", "the model says it succeeded", START, completed, cancelled, scope)
+                : new TurnOutcome(AGENT, "s1", "my secret message", "the model says it succeeded", START, completed, cancelled, scope, snapshot);
     }
 
-    private static TurnTaintView taint(boolean tainted) {
-        TurnTaintView v = mock(TurnTaintView.class);
-        when(v.isTainted()).thenReturn(tainted);
-        when(v.sources()).thenReturn(tainted ? List.of("fetch_web_page") : List.of());
-        return v;
+    private static TurnTaintSnapshot taint(boolean tainted) {
+        TurnTaint t = new TurnTaint();
+        if (tainted) {
+            t.mark("fetch_web_page");
+        }
+        return TurnTaintSnapshot.of(t);
     }
 
     private MemoryWriteProposal next() throws InterruptedException {
@@ -167,16 +172,23 @@ class EpisodeRecorderTest {
     }
 
     @Test
-    void anUnreadableOrMissingTaintViewIsQuarantined() throws Exception {
+    void anUnreadableOrMissingTaintSnapshotIsQuarantined() throws Exception {
         taintView.set(null);
         recorder.onTurn(turn(true, false));
         assertEquals(MemoryTrustLevel.QUARANTINED, next().provenance().trust());
 
-        TurnTaintView throwing = mock(TurnTaintView.class);
-        when(throwing.isTainted()).thenThrow(new IllegalStateException("boom"));
-        taintView.set(throwing);
+        taintView.set(TurnTaintSnapshot.of(null));
         recorder.onTurn(turn(true, false));
         assertEquals(MemoryTrustLevel.QUARANTINED, next().provenance().trust());
+    }
+
+    @Test
+    void aCleanSnapshotYieldsATrustedSourceSoTheSinkFilesItPending() throws Exception {
+        taintView.set(taint(false));
+        recorder.onTurn(turn(true, false));
+        MemoryWriteProposal p = next();
+        assertEquals(MemoryTrustLevel.TRUSTED, p.provenance().trust());
+        assertEquals(List.of(), p.provenance().sourceTaint());
     }
 
     @Test

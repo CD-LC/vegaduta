@@ -21,8 +21,19 @@ public final class MemoryWriteGate {
     private MemoryWriteGate() {}
 
     public static MemoryProvenance classify(ObjectProvider<TurnTaintView> taint) {
+        TurnTaintView view;
         try {
-            TurnTaintView view = taint == null ? null : taint.getIfAvailable();
+            view = taint == null ? null : taint.getIfAvailable();
+        } catch (RuntimeException e) {
+            log.warn("Turn taint state unreadable; quarantining memory write", e);
+            return new MemoryProvenance(MemoryTrust.QUARANTINED, List.of(UNAVAILABLE));
+        }
+        return classifyView(view);
+    }
+
+    /** As {@link #classify(ObjectProvider)} for a view already in hand (a null view is unreadable: quarantined). */
+    public static MemoryProvenance classifyView(TurnTaintView view) {
+        try {
             if (view == null) {
                 return new MemoryProvenance(MemoryTrust.QUARANTINED, List.of(UNAVAILABLE));
             }

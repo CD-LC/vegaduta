@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -266,7 +267,19 @@ public class AgentMemoryService {
 
     /** A shareable, lazily computed embedding of {@code query}; see {@link QueryEmbedding}. */
     public QueryEmbedding queryEmbedding(String query) {
-        return new QueryEmbedding(query, sidecarClient::embedQuery);
+        return new QueryEmbedding(query, this::embedShared);
+    }
+
+    private final RecentEmbeddings recentEmbeddings = new RecentEmbeddings();
+
+    /**
+     * The same sidecar query embedding {@link #queryEmbedding} uses, shared for a few seconds per tenant and text, so
+     * the unified-memory store's embedder ({@code SidecarMemoryEmbedder}) does not embed the user message a second time
+     * in the same turn. Callers must not modify the returned array.
+     */
+    public float[] embedShared(String text) {
+        String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+        return recentEmbeddings.get(tenant, text, sidecarClient::embedQuery);
     }
 
     /**

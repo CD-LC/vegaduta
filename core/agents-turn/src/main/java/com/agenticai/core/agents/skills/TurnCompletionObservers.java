@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.skills;
 
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.security.TenantContext;
 import java.time.Instant;
 import java.util.Optional;
@@ -33,9 +34,24 @@ public final class TurnCompletionObservers {
             String userMessage,
             Instant startedAt,
             Optional<TenantContext> tenant) {
+        return observe(turn, agentId, sessionId, userMessage, startedAt, tenant, null);
+    }
+
+    /**
+     * As above; {@code taint} is the turn's record, snapshotted when the turn ends for the episodic recorder (null =
+     * unreadable, so an episode is quarantined).
+     */
+    public static Flux<String> observe(
+            Flux<String> turn,
+            UUID agentId,
+            String sessionId,
+            String userMessage,
+            Instant startedAt,
+            Optional<TenantContext> tenant,
+            TurnTaint taint) {
         turn = SkillLearningGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
         turn = LessonLearningGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
-        turn = EpisodeRecordingGateway.observe(turn, agentId, sessionId, startedAt, tenant);
+        turn = EpisodeRecordingGateway.observe(turn, agentId, sessionId, startedAt, tenant, taint);
         return DesktopRunSuggestionGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
     }
 }

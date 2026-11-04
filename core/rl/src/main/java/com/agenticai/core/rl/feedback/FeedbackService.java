@@ -117,6 +117,16 @@ public class FeedbackService {
     }
 
     /**
+     * What people said about one session's turns since {@code since}, newest first, at most 20 rows. A read-only view for
+     * the episodic recorder (ADR-0028), which derives an accepted/rejected verdict from it and never changes feedback.
+     */
+    @Transactional(readOnly = true)
+    public java.util.List<TurnFeedback> recentForSession(UUID agentId, String sessionId, Instant since) {
+        return feedbackRepository.findTop20ByAgentIdAndSessionIdAndCreatedAtGreaterThanEqualOrderByCreatedAtDesc(
+                agentId, sessionId, since);
+    }
+
+    /**
      * The turn exists but someone else had it. The controller answers 404, the same as a turn that
      * does not exist, so turn references cannot be probed.
      */

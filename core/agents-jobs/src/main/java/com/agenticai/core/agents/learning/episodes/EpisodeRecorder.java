@@ -6,7 +6,6 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.EpisodicMemoryProperties;
 import com.agenticai.core.agents.memory.MemoryProvenance;
 import com.agenticai.core.agents.memory.MemoryWriteGate;
-import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
@@ -49,8 +48,9 @@ import org.springframework.stereotype.Service;
  *       skip ({@code memory.episode.skipped}).
  *   <li>The outcome comes from verified signals only ({@link EpisodeComposer}); the text is screened with {@link
  *       MemoryWriteScreen}; zero model calls.
- *   <li>A tainted or unreadable turn is classified on the finishing thread by {@link MemoryWriteGate} (fail closed) and
- *       the proposal carries QUARANTINED provenance.
+ *   <li>A tainted or unreadable turn is classified on the finishing thread by {@link MemoryWriteGate} from the
+ *       {@link com.agenticai.core.agents.memory.TurnTaintSnapshot} the outcome carries (fail closed: none, or an
+ *       unreadable one, means QUARANTINED); a clean turn files a PENDING proposal.
  *   <li>Everything after a cheap admission check runs on a small bounded worker with the tenant re-applied (AGENTS.md
  *       rule 12); a full queue drops the episode, and no failure reaches the turn.
  * </ul>
@@ -68,7 +68,6 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
     private final EpisodicMemoryProperties props;
     private final ToolCallLogService toolCalls;
     private final ObjectProvider<MemoryProposalSink> sink;
-    private final ObjectProvider<TurnTaintView> taint;
     private final ObjectProvider<AgentMemoryService> memory;
     private final ObjectProvider<SettingsResolver> settings;
     private final ObjectProvider<EpisodeSignalSource> signalSource;
@@ -80,7 +79,6 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             EpisodicMemoryProperties props,
             ToolCallLogService toolCalls,
             ObjectProvider<MemoryProposalSink> sink,
-            ObjectProvider<TurnTaintView> taint,
             ObjectProvider<AgentMemoryService> memory,
             ObjectProvider<SettingsResolver> settings,
             ObjectProvider<EpisodeSignalSource> signalSource,
@@ -88,7 +86,6 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         this.props = props;
         this.toolCalls = toolCalls;
         this.sink = sink;
-        this.taint = taint;
         this.memory = memory;
         this.settings = settings;
         this.signalSource = signalSource;
@@ -149,9 +146,9 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             skipped("write_disabled");
             return;
         }
-        // Taint is read here, on the finishing thread, where the turn's record is still reachable; the worker never
-        // asks. No view, an unreadable view or a tainted turn all come back QUARANTINED.
-        MemoryProvenance classified = MemoryWriteGate.classify(taint);
+        // The turn's taint travels on the outcome as a snapshot taken when the turn ended; the worker never asks the
+        // live record. No snapshot, an unreadable one or a tainted turn all come back QUARANTINED.
+        MemoryProvenance classified = MemoryWriteGate.classifyView(o.taint());
         String user = o.scope().context().map(TenantContext::getSubject).orElse(null);
         EpisodeLimiter.Verdict verdict = limiter.tryAcquire(o.agentId(), user);
         if (verdict != EpisodeLimiter.Verdict.OK) {

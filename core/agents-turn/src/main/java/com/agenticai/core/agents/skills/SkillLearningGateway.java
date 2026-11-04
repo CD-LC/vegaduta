@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.skills;
 
+import com.agenticai.core.agents.memory.TurnTaintSnapshot;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import java.time.Instant;
@@ -35,7 +36,22 @@ public final class SkillLearningGateway {
             Instant startedAt,
             boolean completed,
             boolean cancelled,
-            TenantScope scope) {}
+            TenantScope scope,
+            TurnTaintSnapshot taint) {
+
+        /** An outcome that carries no taint state (null: unreadable, so a memory writer must fail closed). */
+        public TurnOutcome(
+                UUID agentId,
+                String sessionId,
+                String userMessage,
+                String answer,
+                Instant startedAt,
+                boolean completed,
+                boolean cancelled,
+                TenantScope scope) {
+            this(agentId, sessionId, userMessage, answer, startedAt, completed, cancelled, scope, null);
+        }
+    }
 
     /** Receives every observed turn on the thread that finished it; must be quick and never throw. */
     public interface Observer {
