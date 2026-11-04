@@ -9,10 +9,11 @@ import type { MemoryBlock, MemoryAgent } from "./memoryTypes";
  *  notes      - tell assistants about you and your projects (what they are told)
  *  assistants - choose which assistants may read those notes (who is told)
  *  facts      - what assistants have learned on their own (what they saved)
+ *  items      - the unified-memory store per assistant: review queue, active, tombstoned (ADR-0028 WP6)
  *  import     - bring memory and chat history in from elsewhere
  *  privacy    - download or erase everything
  */
-export const MEMORY_TABS = ["notes", "assistants", "facts", "import", "privacy"] as const;
+export const MEMORY_TABS = ["notes", "assistants", "facts", "items", "import", "privacy"] as const;
 export type MemoryTab = (typeof MEMORY_TABS)[number];
 
 export function isMemoryTab(value: unknown): value is MemoryTab {

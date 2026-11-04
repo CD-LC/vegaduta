@@ -60,4 +60,6 @@ export type MemoryAgent = {
   shareMemoryWithTenant?: boolean;
   /** false: core rejects every settings change for this agent (AgentResponse.editable). Absent = allowed. */
   editable?: boolean;
+  /** Caller's share level on the agent (AgentResponse.accessLevel). EDITOR can review unified-memory items; absent on an older core. */
+  accessLevel?: "EDITOR" | "VIEWER" | "RUNNER" | null;
 };

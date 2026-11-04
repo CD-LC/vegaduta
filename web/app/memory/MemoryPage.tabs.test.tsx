@@ -6,13 +6,18 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import en from "../../messages/en.json";
 
 vi.mock("../lib/i18n", () => ({
-  useTranslations: (namespace: string) => (key: string, values?: Record<string, unknown>): string => {
-    const template = (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key] ?? `${namespace}.${key}`;
-    return template.replace(/\{(\w+)\}/g, (match, name) => (values && name in values ? String(values[name]) : match));
-  },
+  useTranslations:
+    (namespace: string) =>
+    (key: string, values?: Record<string, unknown>): string => {
+      const template =
+        (en as unknown as Record<string, Record<string, string>>)[namespace]?.[key] ?? `${namespace}.${key}`;
+      return template.replace(/\{(\w+)\}/g, (match, name) => (values && name in values ? String(values[name]) : match));
+    },
   useLocale: () => "en-GB",
 }));
-vi.mock("../components/AppShell", () => ({ default: ({ children }: any): React.ReactElement => <div>{children}</div> }));
+vi.mock("../components/AppShell", () => ({
+  default: ({ children }: any): React.ReactElement => <div>{children}</div>,
+}));
 vi.mock("../components/ax/PageHeader", () => ({ default: ({ title }: any) => <h1>{title}</h1> }));
 vi.mock("../components/RouteTransition", () => ({ usePageReady: () => {} }));
 vi.mock("../lib/academyUrl", () => ({
@@ -35,6 +40,8 @@ const api = vi.hoisted(() => ({
   deleteMemoryFact: vi.fn(),
 }));
 vi.mock("../lib/api", () => ({ api }));
+// The items tab keys off the tenant-level memory.unified.enabled effective setting; off in these tests.
+vi.mock("../lib/api/settings", () => ({ settingsApi: { getEffective: vi.fn(async () => ({ values: {} })) } }));
 
 import MemoryPage from "./page";
 
@@ -46,8 +53,22 @@ function overview(over: Record<string, unknown> = {}) {
     activeProjectEnabled: false,
     blocks: [{ label: "persona", content: "Be brief" }],
     facts: [
-      { id: "f1", scope: "shared", content: "likes tea", createdAt: "2026-09-01T00:00:00Z", lastUsedAt: null as string | null, useCount: 0 },
-      { id: "f2", scope: "shared", content: "uses Mac", createdAt: "2026-09-02T00:00:00Z", lastUsedAt: null as string | null, useCount: 0 },
+      {
+        id: "f1",
+        scope: "shared",
+        content: "likes tea",
+        createdAt: "2026-09-01T00:00:00Z",
+        lastUsedAt: null as string | null,
+        useCount: 0,
+      },
+      {
+        id: "f2",
+        scope: "shared",
+        content: "uses Mac",
+        createdAt: "2026-09-02T00:00:00Z",
+        lastUsedAt: null as string | null,
+        useCount: 0,
+      },
     ],
     limits: { maxCharsPerBlock: 1200, maxProjectBlocks: 20, maxFactChars: 2000 },
     ...over,
@@ -141,7 +162,11 @@ describe("Memory page tabs", () => {
     fireEvent.change(box, { target: { value: "half-written thought" } });
     fireEvent.click(screen.getByRole("tab", { name: /Learned facts/ }));
     fireEvent.click(screen.getByRole("tab", { name: /Your notes/ }));
-    await waitFor(() => expect((within(panel("notes")).getAllByRole("textbox")[0] as HTMLTextAreaElement).value).toBe("half-written thought"));
+    await waitFor(() =>
+      expect((within(panel("notes")).getAllByRole("textbox")[0] as HTMLTextAreaElement).value).toBe(
+        "half-written thought"
+      )
+    );
   });
 
   it("gives every tab a panel that names it, for screen readers", async () => {
