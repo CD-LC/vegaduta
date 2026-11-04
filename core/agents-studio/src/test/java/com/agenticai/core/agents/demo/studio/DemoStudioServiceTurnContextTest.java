@@ -108,6 +108,8 @@ class DemoStudioServiceTurnContextTest {
         assertEquals(chatSessionId, context.getValue().sessionId());
         assertEquals(DemoSessionService.actorSubject(sessionUuid), request.getValue().subjectKey());
         assertNotNull(context.getValue().requestId());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                context.getValue().taint().isTainted(), "a demo visitor is anonymous");
     }
 
     @Test

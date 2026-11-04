@@ -3,6 +3,7 @@ package com.agenticai.core.agents.agui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -70,5 +71,7 @@ class AgUiRunControllerTurnContextTest {
         assertEquals("thread-1", context.getValue().sessionId());
         assertEquals("user-1", request.getValue().subjectKey());
         assertNotNull(context.getValue().requestId());
+        assertTrue(context.getValue().taint().isTainted(), "an AG-UI client is not a known tenant member");
+        assertEquals(List.of("inbound:ag_ui"), context.getValue().taint().sources());
     }
 }

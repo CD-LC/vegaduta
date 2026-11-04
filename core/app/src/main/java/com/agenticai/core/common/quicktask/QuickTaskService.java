@@ -451,6 +451,8 @@ public class QuickTaskService {
                             .build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            // taint-entry: trusted - a signed-in tenant member typed this task in the console
+            // (docs/security/taint-entry-points.md)
             // Stage 4 (Chat file upload) added trailing attachmentKey/attachmentMimeType
             // params to AgentChatService.chat() - null/null here, same reasoning as
             // every other non-Playground caller (see DiscordWebhookController's comment):

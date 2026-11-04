@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -117,5 +118,38 @@ class WorkflowNodeTurnContextTest extends WorkflowNodeExecutorCharacterizationTe
         run(node("supervisor", supervisorConfig()), "wifi down");
 
         assertNull(captureTurnContext().tenant());
+    }
+
+    @Test
+    void agentNodeTurnsAreTaintedInBothBranches() {
+        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenReturn(Flux.just("ok"));
+        run(node("agent", Map.of("agentId", AGENT.toString())), "from a webhook");
+        TurnContext plain = captureTurnContext();
+        assertTrue(plain.taint().isTainted(), "workflow input may be outsider content");
+        assertEquals(List.of("inbound:workflow"), plain.taint().sources());
+    }
+
+    @Test
+    void agentNodeLiveStreamTurnIsTainted() {
+        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenReturn(Flux.just("ok"));
+        NodeStreamSink sink = mock(NodeStreamSink.class);
+        when(sink.isLive()).thenReturn(true);
+        NodeStreamContext.bind(sink);
+
+        run(node("agent", Map.of("agentId", AGENT.toString())), "from a webhook");
+
+        assertTrue(captureTurnContext().taint().isTainted());
+    }
+
+    @Test
+    void supervisorNodeTurnIsTainted() {
+        when(chat.chat(any(TurnContext.class), any(ChatTurnRequest.class)))
+                .thenReturn(Flux.just("tech"));
+
+        run(node("supervisor", supervisorConfig()), "wifi down");
+
+        assertTrue(captureTurnContext().taint().isTainted());
     }
 }

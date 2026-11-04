@@ -6,6 +6,7 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.prompts.PromptSlot;
 import com.agenticai.core.security.TenantContext;
@@ -135,6 +136,8 @@ class SupervisorNodeHandler implements NodeHandler {
                     ChatTurnRequest.builder(agentId, runId, runId, routingPrompt).build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+            // The routing prompt embeds the node's upstream input: same provenance as an agent node.
+            SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:workflow");
             reply =
                     agentChatService
                             .chat(turnContext, chatTurn)

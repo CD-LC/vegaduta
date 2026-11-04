@@ -14,6 +14,7 @@ import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.quality.QueryComplexityClassifier;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
 import com.agenticai.core.workflow.dto.WorkflowNodeDto;
@@ -227,6 +228,10 @@ class AgentNodeHandler implements NodeHandler {
                                 false);
                 TurnContext turnContext =
                         TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+                // A workflow's input is whatever its trigger or an upstream node produced (webhook
+                // body, fetched page, form, channel message): outsider content unless proven
+                // otherwise, and nothing here proves it (docs/security/taint-entry-points.md).
+                SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:workflow");
                 reply =
                         agentChatService
                                 .chat(turnContext, chatTurn)
@@ -244,6 +249,10 @@ class AgentNodeHandler implements NodeHandler {
                                 .build();
                 TurnContext turnContext =
                         TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+                // A workflow's input is whatever its trigger or an upstream node produced (webhook
+                // body, fetched page, form, channel message): outsider content unless proven
+                // otherwise, and nothing here proves it (docs/security/taint-entry-points.md).
+                SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:workflow");
                 reply =
                         agentChatService
                                 .chat(turnContext, chatTurn)

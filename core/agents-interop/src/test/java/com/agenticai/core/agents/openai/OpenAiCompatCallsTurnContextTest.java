@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -91,5 +92,21 @@ class OpenAiCompatCallsTurnContextTest {
         ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
         verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
         assertNull(context.getValue().tenant());
+    }
+
+    @Test
+    void anOpenAiCompatibleCallersTurnIsTaintedBeforeAnyToolRuns() {
+        TenantContext.set(TenantContext.of("tenant-a", "user-1", Set.of("USER")));
+
+        calls.runAgent(
+                AGENT_ID,
+                "oai-3",
+                new OpenAiCompatCalls.Caller("user-1", "tenant-a", Optional.empty()),
+                "hi");
+
+        ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
+        verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
+        assertTrue(context.getValue().taint().isTainted(), "the API key may be shared with end users");
+        assertEquals(java.util.List.of("inbound:openai_compat"), context.getValue().taint().sources());
     }
 }

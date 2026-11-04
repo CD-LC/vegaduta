@@ -15,6 +15,7 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.guardrails.ContentGuardrailType;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantContext;
@@ -646,7 +647,10 @@ public class DemoStudioService {
      * demo tenant that call put on this thread.
      */
     private static TurnContext demoTurnContext(ChatTurnRequest turn) {
-        return TurnContext.forEntry(TenantContext.current().orElse(null), turn);
+        TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
+        // Anonymous visitor of the public demo studio.
+        SenderTrust.UNTRUSTED.seed(context.taint(), "inbound:demo_studio");
+        return context;
     }
 
     // ------------------------------------------------------------------

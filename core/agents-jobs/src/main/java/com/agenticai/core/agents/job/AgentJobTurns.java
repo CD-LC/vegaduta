@@ -12,6 +12,7 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
@@ -359,12 +360,13 @@ final class AgentJobTurns {
                                         messageText)
                                 .suppressAgentTools(true)
                                 .build();
+                TurnContext repairContext =
+                        TurnContext.forEntry(TenantContext.current().orElse(null), textOnlyTurn)
+                                .withDeadline(deadlineAt);
+                // taint-entry: by job origin - see trustOf (docs/security/taint-entry-points.md)
+                trustOf(job).seed(repairContext.taint(), "inbound:job_" + originOf(job));
                 return agentChatService
-                        .chat(
-                                TurnContext.forEntry(
-                                                TenantContext.current().orElse(null), textOnlyTurn)
-                                        .withDeadline(deadlineAt),
-                                textOnlyTurn)
+                        .chat(repairContext, textOnlyTurn)
                         .collect(Collectors.joining())
                         .block(remaining);
             } catch (IllegalStateException blockFailure) {
@@ -411,6 +413,8 @@ final class AgentJobTurns {
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn)
                             .withDeadline(deadlineAt);
+            // taint-entry: by job origin - see trustOf (docs/security/taint-entry-points.md)
+            trustOf(job).seed(turnContext.taint(), "inbound:job_" + originOf(job));
             return agentChatService
                     .chat(turnContext, chatTurn)
                     .collect(Collectors.joining())
@@ -424,5 +428,24 @@ final class AgentJobTurns {
             }
             throw blockFailure;
         }
+    }
+
+    /**
+     * Who authored what this job's turns act on. Only a job a tenant member submitted ({@code API})
+     * or the owner's own schedule fired ({@code SCHEDULE}, the owner's prompt) is trusted. An event
+     * trigger carries a payload an outsider produced, an approved sentinel proposal was derived
+     * from observed content, and an unknown or missing origin cannot be vouched for: all untrusted.
+     */
+    static SenderTrust trustOf(AgentJob job) {
+        AgentJobOrigin origin = job == null ? null : job.getOrigin();
+        return origin == AgentJobOrigin.API || origin == AgentJobOrigin.SCHEDULE
+                ? SenderTrust.TRUSTED
+                : SenderTrust.UNTRUSTED;
+    }
+
+    private static String originOf(AgentJob job) {
+        return job == null || job.getOrigin() == null
+                ? "unknown"
+                : job.getOrigin().name().toLowerCase(java.util.Locale.ROOT);
     }
 }

@@ -3,6 +3,7 @@ package com.agenticai.core.agents.demo;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
@@ -232,6 +233,8 @@ public class DemoChatController {
                                 TurnContext turnContext =
                                         TurnContext.forEntry(
                                                 TenantContext.current().orElse(null), chatTurn);
+                                // Anonymous visitor of the public demo sandbox.
+                                SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:demo_chat");
                                 return agentChatService
                                         .chat(turnContext, chatTurn)
                                         .collect(Collectors.joining())

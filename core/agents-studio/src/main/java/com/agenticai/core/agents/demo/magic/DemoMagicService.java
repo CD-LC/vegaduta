@@ -8,6 +8,7 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.agentspi.HostedImageModel;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantContext;
@@ -413,11 +414,7 @@ public class DemoMagicService {
                             () ->
                                     agentChatService
                                             .chat(
-                                                    // ADR-0022 stage 4: the demo tenant set by
-                                                    // inDemoTenantContext just above.
-                                                    TurnContext.forEntry(
-                                                            TenantContext.current().orElse(null),
-                                                            turn),
+                                                    demoTurnContext(turn),
                                                     turn)
                                             .collect(Collectors.joining())
                                             .block(TURN_TIMEOUT));
@@ -481,5 +478,15 @@ public class DemoMagicService {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 unavailable", e);
         }
+    }
+
+    /**
+     * ADR-0022 stage 4: built inside {@code inDemoTenantContext}, so the context carries the demo
+     * tenant. The visitor is anonymous, so the turn is outsider content.
+     */
+    private static TurnContext demoTurnContext(ChatTurnRequest turn) {
+        TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
+        SenderTrust.UNTRUSTED.seed(context.taint(), "inbound:demo_magic");
+        return context;
     }
 }

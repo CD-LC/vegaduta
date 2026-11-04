@@ -159,6 +159,8 @@ public class ReplayTurnRunner {
                         .build();
         // The request id is generated HERE: it is the key of the sandbox grant, so nothing a client sends
         // can ever name it.
+        // taint-entry: trusted - an admin's replay of a recorded turn; tools are simulated or held by the
+        // sandbox grant, never run for real (docs/security/taint-entry-points.md)
         TurnContext context =
                 new TurnContext(
                         tenant,

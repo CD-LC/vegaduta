@@ -158,6 +158,8 @@ public final class AgentChatStreamResponder {
         // ADR-0022 stage 4: this HTTP entry builds the turn context from the tenant
         // TenantContextFilter put on this request thread.
         TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
+        // taint-entry: trusted - the console chat endpoint, reached only by an authenticated tenant
+        // member who passed requireAccess(RUNNER) (docs/security/taint-entry-points.md)
         // Routines-from-habits loop (app.learning.routines.enabled, off by default). Observed HERE,
         // at
         // the console's own chat entry, and nowhere deeper: the turn dispatcher also serves job

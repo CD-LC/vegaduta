@@ -95,6 +95,8 @@ final class SubAgentTurn {
 
     /** Runs the sub-turn; the answer, or the refusal / withheld notice the calling agent is shown instead. */
     String run(Request r) {
+        // taint-entry: internal - a delegated sub-turn, not an external entry. Known gap: it does not yet
+        // inherit the delegating turn's taint (docs/security/taint-entry-points.md)
         TurnContext turn =
                 TurnContext.fromCurrentThread(r.agentId(), r.sessionId(), null, Instant.now(), null);
         // What client selection records for a normal turn: a local server's text-only "next step" is checked.
