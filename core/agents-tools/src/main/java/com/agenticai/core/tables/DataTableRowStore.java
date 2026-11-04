@@ -51,7 +51,8 @@ public class DataTableRowStore {
     @SuppressWarnings("unchecked")
     public Map<UUID, Long> countsByTable() {
         List<Object[]> rows = entityManager
-            .createNativeQuery("SELECT CAST(table_id AS text), count(*) FROM data_table_row GROUP BY table_id")
+            .createNativeQuery(
+                "SELECT CAST(table_id AS text), count(*) FROM data_table_row WHERE trust = 'TRUSTED' GROUP BY table_id")
             .getResultList();
         Map<UUID, Long> out = new HashMap<>();
         for (Object[] r : rows) {
@@ -63,15 +64,23 @@ public class DataTableRowStore {
     @Transactional(readOnly = true)
     public Optional<DataTableRow> find(UUID tableId, UUID rowId) {
         DataTableRow row = entityManager.find(DataTableRow.class, rowId);
-        return row != null && tableId.equals(row.getTableId()) ? Optional.of(row) : Optional.empty();
+        // A row held for review is invisible here: this is the path a by-id update takes.
+        return row != null && tableId.equals(row.getTableId()) && !row.isQuarantined()
+            ? Optional.of(row)
+            : Optional.empty();
     }
 
     @Transactional
     public List<DataTableRow> insertAll(UUID tableId, List<Map<String, Object>> rows) {
+        return insertAll(tableId, rows, RowTrust.TRUSTED);
+    }
+
+    @Transactional
+    public List<DataTableRow> insertAll(UUID tableId, List<Map<String, Object>> rows, RowTrust trust) {
         List<DataTableRow> saved = new ArrayList<>(rows.size());
         int n = 0;
         for (Map<String, Object> data : rows) {
-            DataTableRow row = new DataTableRow(tableId, data);
+            DataTableRow row = new DataTableRow(tableId, data, trust);
             entityManager.persist(row);
             saved.add(row);
             if (++n % 200 == 0) {
@@ -115,6 +124,50 @@ public class DataTableRowStore {
         return q.executeUpdate();
     }
 
+    /** Every row of the table, held ones included: the row cap must not be dodged by quarantined writes. */
+    @Transactional(readOnly = true)
+    public long countAll(UUID tableId) {
+        Query q = entityManager.createNativeQuery(
+            "SELECT count(*) FROM data_table_row r WHERE r.table_id = CAST(:tableId AS uuid)");
+        q.setParameter("tableId", tableId.toString());
+        return ((Number) q.getSingleResult()).longValue();
+    }
+
+    /** Rows held for review in one table, oldest first. */
+    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
+    public List<DataTableRow> selectQuarantined(UUID tableId, int limit) {
+        Query q = entityManager.createNativeQuery(
+            "SELECT r.* FROM data_table_row r WHERE r.table_id = CAST(:tableId AS uuid) AND r.trust <> 'TRUSTED' "
+                + "ORDER BY r.created_at LIMIT :lim",
+            DataTableRow.class);
+        q.setParameter("tableId", tableId.toString());
+        q.setParameter("lim", limit);
+        return (List<DataTableRow>) q.getResultList();
+    }
+
+    /** Makes one held row readable; false when it is not a held row of this table. */
+    @Transactional
+    public boolean approveQuarantined(UUID tableId, UUID rowId) {
+        Query q = entityManager.createNativeQuery(
+            "UPDATE data_table_row SET trust = 'TRUSTED' WHERE id = CAST(:id AS uuid) "
+                + "AND table_id = CAST(:tableId AS uuid) AND trust <> 'TRUSTED'");
+        q.setParameter("id", rowId.toString());
+        q.setParameter("tableId", tableId.toString());
+        return q.executeUpdate() > 0;
+    }
+
+    /** Deletes one held row; never touches a trusted one. */
+    @Transactional
+    public boolean rejectQuarantined(UUID tableId, UUID rowId) {
+        Query q = entityManager.createNativeQuery(
+            "DELETE FROM data_table_row WHERE id = CAST(:id AS uuid) "
+                + "AND table_id = CAST(:tableId AS uuid) AND trust <> 'TRUSTED'");
+        q.setParameter("id", rowId.toString());
+        q.setParameter("tableId", tableId.toString());
+        return q.executeUpdate() > 0;
+    }
+
     /** Rows of the table whose {@code column} holds a value (used to refuse a type change that would orphan data). */
     @Transactional(readOnly = true)
     public long countWithValue(UUID tableId, String column) {
@@ -151,7 +204,8 @@ public class DataTableRowStore {
     // ------------------------------------------------------------------
 
     private static String scope(Where where) {
-        return "r.table_id = CAST(:tableId AS uuid)" + (where.isEmpty() ? "" : " AND (" + where.sql() + ")");
+        // Rows held for review (trust <> TRUSTED) are part of no read, update or delete.
+        return "r.table_id = CAST(:tableId AS uuid) AND r.trust = 'TRUSTED'" + (where.isEmpty() ? "" : " AND (" + where.sql() + ")");
     }
 
     private static void bind(Query q, UUID tableId, Where where) {

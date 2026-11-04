@@ -27,6 +27,10 @@ public final class DataTableDtos {
     public record RowView(UUID id, Map<String, Object> data, Instant createdAt, Instant updatedAt) {
     }
 
+    /** A row held for review: written by an agent on a turn that handled untrusted content. */
+    public record QuarantinedRowView(UUID id, Map<String, Object> data, List<String> sourceTaint, Instant createdAt) {
+    }
+
     public record RowPage(List<RowView> items, long total, int limit, int offset) {
     }
 

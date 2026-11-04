@@ -478,10 +478,13 @@ class ToolResolverConfiguration {
     AgentDataTableToolResolver agentDataTableToolResolver(
             AgentToolGuard toolGuard,
             AgentService agentService,
-            ObjectProvider<com.agenticai.core.tables.DataTableService> dataTables) {
+            ObjectProvider<com.agenticai.core.tables.DataTableService> dataTables,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentDataTableToolResolver resolver =
                 new AgentDataTableToolResolver(toolGuard, agentService);
         resolver.setDataTables(dataTables);
+        resolver.setTaint(taintPolicy, turnTaint);
         return resolver;
     }
 
@@ -544,12 +547,17 @@ class ToolResolverConfiguration {
                     scratchpadService,
             ObjectProvider<com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties>
                     scratchpadProperties,
-            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour) {
-        return new AgentScratchpadToolResolver(
-                toolGuard,
-                scratchpadService,
-                scratchpadProperties.getIfAvailable(
-                        com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties::new),
-                behaviour);
+            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
+        AgentScratchpadToolResolver resolver =
+                new AgentScratchpadToolResolver(
+                        toolGuard,
+                        scratchpadService,
+                        scratchpadProperties.getIfAvailable(
+                                com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties::new),
+                        behaviour);
+        resolver.setTaint(taintPolicy, turnTaint);
+        return resolver;
     }
 }

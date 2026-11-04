@@ -296,4 +296,69 @@ class AgentScratchpadServiceTest {
         assertThatThrownBy(() -> service.delete(AGENT, SESSION, "k"))
                 .isInstanceOf(IllegalStateException.class);
     }
+
+    // ------------------------------------------------------------------ quarantine
+
+    private static final com.agenticai.core.agents.memory.MemoryProvenance TAINTED =
+            new com.agenticai.core.agents.memory.MemoryProvenance(
+                    com.agenticai.core.agents.memory.MemoryTrust.QUARANTINED, List.of("fetch_web_page"));
+
+    @Test
+    void aTaintedWriteIsStoredQuarantinedWithItsSources() {
+        ScratchpadNote note = service.write(AGENT, SESSION, "k", "body", TAINTED).note();
+
+        assertThat(note.isQuarantined()).isTrue();
+        assertThat(note.getSourceTaint()).containsExactly("fetch_web_page");
+    }
+
+    @Test
+    void aTaintedWriteCannotOverwriteATrustedNote() {
+        ScratchpadNote trusted = new ScratchpadNote(AGENT, SESSION, "k", "the real plan", 13);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k"))
+                .thenReturn(Optional.of(trusted));
+
+        assertThatThrownBy(() -> service.write(AGENT, SESSION, "k", "attacker text", TAINTED))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("trusted");
+
+        assertThat(trusted.getBody()).isEqualTo("the real plan");
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void aTaintedWriteNeverEvictsToMakeRoom() {
+        when(repository.countByAgentIdAndSessionId(AGENT, SESSION))
+                .thenReturn((long) properties.getMaxNotes());
+
+        assertThatThrownBy(() -> service.write(AGENT, SESSION, "k", "body", TAINTED))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(repository, never()).delete(any(ScratchpadNote.class));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void aQuarantinedNoteIsNotReadable() {
+        ScratchpadNote held = new ScratchpadNote(AGENT, null, "k", "b", 1, TAINTED);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "k"))
+                .thenReturn(Optional.of(held));
+
+        assertThat(service.read(AGENT, null, "k")).isEmpty();
+    }
+
+    @Test
+    void approveMakesAHeldNoteReadableAndRejectDeletesOnlyHeldNotes() {
+        ScratchpadNote held = new ScratchpadNote(AGENT, null, "held", "b", 1, TAINTED);
+        ScratchpadNote trusted = new ScratchpadNote(AGENT, null, "ok", "b", 1);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "held"))
+                .thenReturn(Optional.of(held));
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "ok"))
+                .thenReturn(Optional.of(trusted));
+
+        assertThat(service.reject(AGENT, null, "ok")).isFalse();
+        verify(repository, never()).delete(trusted);
+        assertThat(service.approve(AGENT, null, "held")).isTrue();
+        assertThat(held.isQuarantined()).isFalse();
+        assertThat(service.approve(AGENT, null, "ok")).isFalse();
+    }
 }

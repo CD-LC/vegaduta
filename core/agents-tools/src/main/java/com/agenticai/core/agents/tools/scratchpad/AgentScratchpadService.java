@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.scratchpad;
 
+import com.agenticai.core.agents.memory.MemoryProvenance;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -72,6 +73,23 @@ public class AgentScratchpadService {
      */
     @Transactional
     public WriteResult write(UUID agentId, UUID sessionId, String key, String body) {
+        return write(agentId, sessionId, key, body, MemoryProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #write(UUID, UUID, String, String)} with the provenance the turn's taint decided. A
+     * QUARANTINED note is stored but hidden from {@link #read} and {@link #list} until a person approves
+     * it. Two things a quarantined write may not do, because both would let a tainted turn damage what
+     * was trusted: overwrite a TRUSTED note (the old text would be destroyed or silently replaced by
+     * attacker text), or evict a note to make room.
+     *
+     * @throws IllegalArgumentException as {@link #write(UUID, UUID, String, String)}, plus the two
+     *     refusals above
+     */
+    @Transactional
+    public WriteResult write(
+            UUID agentId, UUID sessionId, String key, String body, MemoryProvenance provenance) {
+        MemoryProvenance prov = provenance == null ? MemoryProvenance.TRUSTED : provenance;
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
@@ -91,13 +109,21 @@ public class AgentScratchpadService {
                 repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
         if (existing.isPresent()) {
             ScratchpadNote note = existing.get();
-            note.update(body, byteSize);
+            if (prov.quarantined() && !note.isQuarantined()) {
+                throw new IllegalArgumentException(
+                        "Scratchpad note '"
+                                + key
+                                + "' is trusted and this turn handled untrusted content, so it cannot be"
+                                + " overwritten from here - save the new text under a different key (it is"
+                                + " held for review) or ask the user");
+            }
+            note.update(body, byteSize, prov);
             return new WriteResult(repository.save(note), null, 0);
         }
         int expiredRemoved = sweepExpired(agentId, sessionId);
         String evictedKey = null;
         if (repository.countByAgentIdAndSessionId(agentId, sessionId) >= properties.getMaxNotes()) {
-            if (!properties.isEvictOldestOnCap()) {
+            if (prov.quarantined() || !properties.isEvictOldestOnCap()) {
                 throw new IllegalArgumentException(
                         "Scratchpad already holds "
                                 + properties.getMaxNotes()
@@ -117,7 +143,7 @@ public class AgentScratchpadService {
             repository.delete(oldest);
         }
         ScratchpadNote saved =
-                repository.save(new ScratchpadNote(agentId, sessionId, key, body, byteSize));
+                repository.save(new ScratchpadNote(agentId, sessionId, key, body, byteSize, prov));
         return new WriteResult(saved, evictedKey, expiredRemoved);
     }
 
@@ -146,7 +172,10 @@ public class AgentScratchpadService {
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
-        return repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
+        // A note held for review is invisible here: this is the model's read path.
+        return repository
+                .findByAgentIdAndSessionIdAndKey(agentId, sessionId, key)
+                .filter(note -> !note.isQuarantined());
     }
 
     /**
@@ -203,5 +232,45 @@ public class AgentScratchpadService {
                     "Scratchpad key must match ^[a-zA-Z0-9_.-]{1,64}$ (letters, digits, '_', '.', '-'; 1-64 chars), got: "
                             + key);
         }
+    }
+
+    /** Notes of this agent held for review (any pad), newest first. */
+    @Transactional(readOnly = true)
+    public List<QuarantinedNoteView> listQuarantined(UUID agentId) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        return repository.findQuarantined(agentId).stream().map(QuarantinedNoteView::of).toList();
+    }
+
+    /** Makes a held note readable. False when there is no held note under that key in the scope. */
+    @Transactional
+    public boolean approve(UUID agentId, UUID sessionId, String key) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        validateKey(key);
+        Optional<ScratchpadNote> held =
+                repository
+                        .findByAgentIdAndSessionIdAndKey(agentId, sessionId, key)
+                        .filter(ScratchpadNote::isQuarantined);
+        held.ifPresent(
+                note -> {
+                    note.approve();
+                    repository.save(note);
+                });
+        return held.isPresent();
+    }
+
+    /** Deletes a held note. Never touches a trusted one. */
+    @Transactional
+    public boolean reject(UUID agentId, UUID sessionId, String key) {
+        requireEnabled();
+        Objects.requireNonNull(agentId, "agentId must not be null");
+        validateKey(key);
+        Optional<ScratchpadNote> held =
+                repository
+                        .findByAgentIdAndSessionIdAndKey(agentId, sessionId, key)
+                        .filter(ScratchpadNote::isQuarantined);
+        held.ifPresent(repository::delete);
+        return held.isPresent();
     }
 }

@@ -45,6 +45,17 @@ final class AgentScratchpadToolResolver {
         this.behaviour = behaviour;
     }
 
+    private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint;
+
+    /** The taint source a note write consults (see {@link TurnTaintViews}); unset means writes are held. */
+    void setTaint(
+            ObjectProvider<AgentTaintPolicy> taintPolicy,
+            ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint) {
+        this.taintPolicy = taintPolicy;
+        this.turnTaint = turnTaint;
+    }
+
     /** Platform flag AND any tenant/agent override through the behaviour catalog ({@code tools.scratchpad.enabled}). */
     boolean enabled(UUID agentId) {
         if (properties == null || !properties.isEnabled()) {
@@ -78,7 +89,12 @@ final class AgentScratchpadToolResolver {
         for (ScratchpadToolCallback.Kind kind : ScratchpadToolCallback.Kind.values()) {
             out.add(
                     toolGuard.guardAndLog(
-                            new ScratchpadToolCallback(service, kind, agentId, sessionId),
+                            new ScratchpadToolCallback(
+                                    service,
+                                    kind,
+                                    agentId,
+                                    sessionId,
+                                    TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint)),
                             agentId,
                             sessionId,
                             stepCounter,

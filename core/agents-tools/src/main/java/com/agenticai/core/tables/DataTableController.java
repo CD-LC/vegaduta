@@ -153,6 +153,31 @@ public class DataTableController {
         service.deleteRow(table, rowId);
     }
 
+    // ---- rows held for review (written by an agent on a turn that handled untrusted content)
+
+    @GetMapping("/{table}/quarantine")
+    public List<DataTableDtos.QuarantinedRowView> quarantined(
+        @PathVariable String table, @RequestParam(defaultValue = "50") int limit
+    ) {
+        return service.quarantinedRows(table, limit);
+    }
+
+    /** Makes the held row readable; 404 when no row of that table is held under that id. */
+    @PostMapping("/{table}/quarantine/{rowId}/approve")
+    public ResponseEntity<Void> approveQuarantined(@PathVariable String table, @PathVariable UUID rowId) {
+        return service.approveQuarantinedRow(table, rowId)
+            ? ResponseEntity.noContent().build()
+            : ResponseEntity.notFound().build();
+    }
+
+    /** Deletes the held row; 404 when no row of that table is held under that id. */
+    @PostMapping("/{table}/quarantine/{rowId}/reject")
+    public ResponseEntity<Void> rejectQuarantined(@PathVariable String table, @PathVariable UUID rowId) {
+        return service.rejectQuarantinedRow(table, rowId)
+            ? ResponseEntity.noContent().build()
+            : ResponseEntity.notFound().build();
+    }
+
     // ---- CSV
 
     /** Multipart CSV appended to an existing table (headers matched to columns). */

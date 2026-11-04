@@ -188,7 +188,7 @@ final class DataTableAccess {
     }
 
     void requireRoom(Caps caps, DataTable t, int adding) {
-        long current = rows.count(t.getId(), Where.none());
+        long current = rows.countAll(t.getId());
         if (current + adding > caps.rowsPerTable()) {
             throw limit(
                     caps,

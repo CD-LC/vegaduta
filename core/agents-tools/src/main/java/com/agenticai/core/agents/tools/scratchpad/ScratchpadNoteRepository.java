@@ -59,8 +59,15 @@ public interface ScratchpadNoteRepository extends JpaRepository<ScratchpadNote, 
      */
     @Query(
             "select n from ScratchpadNote n where n.agentId = :agentId"
+                    + " and n.trust = 'TRUSTED'"
                     + " and (n.sessionId = :sessionId or n.sessionId is null)"
                     + " order by n.updatedAt desc")
     List<ScratchpadNote> findVisible(
             @Param("agentId") UUID agentId, @Param("sessionId") UUID sessionId);
+
+    /** Notes held for review (written on a turn that handled untrusted content), newest first. */
+    @Query(
+            "select n from ScratchpadNote n where n.agentId = :agentId and n.trust = 'QUARANTINED'"
+                    + " order by n.updatedAt desc")
+    List<ScratchpadNote> findQuarantined(@Param("agentId") UUID agentId);
 }
