@@ -25,6 +25,12 @@
       <groupId>com.agenticai</groupId>
       <artifactId>agents</artifactId>
     </dependency>
+    <!-- SettingsResolver and SettingsContributor for the memory.unified.enabled tenant/agent levels (settings depends
+         only on security and audit). -->
+    <dependency>
+      <groupId>com.agenticai</groupId>
+      <artifactId>settings</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>

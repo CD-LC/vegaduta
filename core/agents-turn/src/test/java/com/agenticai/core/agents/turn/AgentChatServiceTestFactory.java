@@ -128,6 +128,7 @@ final class AgentChatServiceTestFactory {
                         visionSessionService,
                         null,
                         null,
+                        null,
                         null),
                 new ChatRoutingFacade(null, null, null, null, null),
                 new ChatTimeouts(streamIdleTimeout, bufferedTurnTimeout, bufferedKeepAliveInterval));

@@ -915,6 +915,20 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.skills.prompt.max-block-chars"
   }, {
+    "key" : "memory.unified.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.unified.enabled.label",
+    "descriptionKey" : "settings.memory.unified.enabled.description",
+    "helpKey" : "settings.memory.unified.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.unified.enabled"
+  }, {
     "key" : "chat.semanticCache.similarityThreshold",
     "group" : "chat",
     "labelKey" : "settings.chat.semanticCache.similarityThreshold.label",

@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+- **Unified memory recall in the chat prompt (ADR-0028 WP4a), off by default.** New setting `memory.unified.enabled` (tenant and agent scope; platform value `app.memory.unified.enabled`, default `false`): platform AND tenant AND agent, any level can only switch it off. While on and `memory.recall.enabled` is on, a turn adds one delimited block of recalled TRUSTED memory items, labelled by kind, within the 800-token memory budget (the always-in-context memory blocks are charged first), and the turn's memory trace (`TurnContext.memoryRecall()`) records the injected item ids, kinds and counts, never text. Quarantined or pending items are never injected; any failure in unified recall yields no block and a `degraded` trace note, never a failed turn. With the flag off the prompt is byte-identical to before.
+
 ### Added
 
 - **Memory decay and consolidation planning, WP5a (pure logic, no behaviour change).** `core/agents-memory` package `agents.memorystore.decay`: `MemorySalience` (S = wI*importance + wR*0.5^(age/H) + wF*frequency, pinned = 1, quarantined x0.5), `ConsolidationPlanner` (pure FORGET / MERGE / SUMMARISE plan: never touches pinned or person-authored rows, 30% per-subject-per-night circuit breaker, TRUSTED and QUARANTINED planned in separate batches, derived trust = lowest of inputs, lineage generation cap, 7-day dry run) and the `ConsolidationBudget` port with a USD-ceiling implementation. Configured by `app.memory.decay.*`; nothing calls it until the consolidation sweep ships.

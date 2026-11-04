@@ -104,6 +104,8 @@ class SettingsCatalogContractTest {
                 new com.agenticai.core.agents.tools.scratchpad.ScratchpadSettings(
                         new com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties()),
                 new SkillPromptSettings(),
+                new com.agenticai.core.agents.memorystore.MemoryUnifiedSettings(
+                        new com.agenticai.core.agents.memorystore.MemoryUnifiedProperties()),
                 new ProductControlsCatalog(
                         new SemanticCacheProperties(), new ChatLimitsProperties(), new FollowUpProperties(),
                         new MemoryLimitsProperties(), new ToolLedgerProperties())));

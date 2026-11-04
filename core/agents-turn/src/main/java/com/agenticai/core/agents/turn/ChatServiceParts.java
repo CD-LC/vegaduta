@@ -97,6 +97,7 @@ final class ChatServiceParts {
                         context.tenantMemoryService(),
                         agentService,
                         () -> svc.memoryStepEventsEnabled);
+        this.memoryRecall.useUnifiedRecall(context.unifiedMemoryRecall());
         // memory.recall.enabled: the tenant's / agent's switch for putting memory into the prompt; the platform value
         // (app.memory.limits.recall-enabled, default on) answers when there is no catalog or no override.
         com.agenticai.core.agents.tunables.BehaviourSettings recallBehaviour = timeouts.behaviour();

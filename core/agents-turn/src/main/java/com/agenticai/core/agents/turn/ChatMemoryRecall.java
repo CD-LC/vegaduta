@@ -8,10 +8,15 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.spi.MemoryRecallRequest;
+import com.agenticai.core.agents.memory.spi.MemoryRecallResult;
+import com.agenticai.core.agents.memory.spi.UnifiedMemoryRecall;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import org.slf4j.Logger;
@@ -79,6 +84,63 @@ final class ChatMemoryRecall {
         } catch (RuntimeException e) {
             log.debug("Could not read the memory write switch - writes stay on", e);
             return false;
+        }
+    }
+
+    /** The unified recall (ADR-0028), absent until wired and when the memory-store module is not on the classpath. */
+    private volatile ObjectProvider<UnifiedMemoryRecall> unifiedRecall;
+
+    void useUnifiedRecall(ObjectProvider<UnifiedMemoryRecall> unifiedRecall) {
+        this.unifiedRecall = unifiedRecall;
+    }
+
+    /** What the unified recall added to one turn: the rendered block, the items in it, a degraded note. */
+    private record Unified(String text, List<TurnMemoryRecall.UnifiedItem> items, String note) {
+        static final Unified NONE = new Unified(null, List.of(), null);
+    }
+
+    /**
+     * Unified recall for the turn: nothing unless a {@link UnifiedMemoryRecall} bean exists and its gate is on for the
+     * agent (it answers "disabled" otherwise). Called in-process on the turn's own thread, so the tenant is set. Any
+     * failure yields no block and a {@code degraded:error} note, never a failed turn.
+     *
+     * @param usedTokens tokens the always-in-context memory blocks already took of the shared budget (charged first)
+     * @param legacyIds ids of facts the legacy path already injected, so none appears twice
+     */
+    private Unified recallUnified(
+            UUID agentId, String subjectKey, String userMessage, long usedTokens, Set<UUID> legacyIds) {
+        ObjectProvider<UnifiedMemoryRecall> provider = unifiedRecall;
+        if (provider == null) {
+            return Unified.NONE;
+        }
+        try {
+            UnifiedMemoryRecall recall = provider.getIfAvailable();
+            if (recall == null) {
+                return Unified.NONE;
+            }
+            long remaining = recall.totalTokens() - usedTokens;
+            if (remaining <= 0) {
+                return Unified.NONE;
+            }
+            MemoryRecallResult result =
+                    recall.compose(
+                            new MemoryRecallRequest(
+                                    agentId, subjectKey, userMessage, Set.of(), 0, (int) remaining));
+            if (result == null || UnifiedMemoryRecall.DISABLED.equals(result.degradedReason())) {
+                return Unified.NONE;
+            }
+            String note = result.degradedReason() == null ? null : "degraded:" + result.degradedReason();
+            UnifiedMemoryBlock.Rendered rendered =
+                    UnifiedMemoryBlock.render(result.items(), (int) remaining, legacyIds);
+            return rendered == null
+                    ? new Unified(null, List.of(), note)
+                    : new Unified(rendered.text(), rendered.items(), note);
+        } catch (Exception e) {
+            log.warn(
+                    "Unified memory recall failed for agent {} - continuing without it",
+                    LogSafe.clean(agentId),
+                    e);
+            return new Unified(null, List.of(), "degraded:error");
         }
     }
 
@@ -169,6 +231,7 @@ final class ChatMemoryRecall {
         }
         StringBuilder block = new StringBuilder();
         boolean hasUserBlocks = false;
+        long blockTokens = 0;
         boolean report = stepEvents != null && stepEvents.isEnabled() && memoryEventsEnabled();
         List<String> usedBlockLabels = List.of();
         int privateFacts = 0;
@@ -203,6 +266,7 @@ final class ChatMemoryRecall {
                     blocks = MemoryBlocks.withNotesHeader(blocks, pd.text(MemoryBlocks.NOTES_KEY));
                     block.append(blocks).append("\n\n");
                     hasUserBlocks = true;
+                    blockTokens = SessionMemoryService.estimateTokens(blocks);
                 }
             } catch (Exception e) {
                 log.warn(
@@ -296,9 +360,21 @@ final class ChatMemoryRecall {
             }
         }
 
+        // Unified memory (default OFF: no bean call result, no text, no trace fields). Its items are TRUSTED-only and,
+        // like the legacy facts, auto-injected, so they count as recalled facts for taint marking.
+        Unified unified = recallUnified(agentId, subjectKey, userMessage, blockTokens, new HashSet<>(factIds));
+        if (unified.text() != null) {
+            if (!block.isEmpty()) {
+                block.append("\n\n");
+            }
+            block.append(unified.text());
+        }
         if (block.isEmpty()) {
             return new MemoryRecall(
-                    null, 0, new TurnMemoryRecall.Trace(true, List.of(), List.of(), List.of(), 0));
+                    null,
+                    0,
+                    new TurnMemoryRecall.Trace(true, List.of(), List.of(), List.of(), 0)
+                            .withUnified(unified.items(), unified.note()));
         }
         if (report) {
             try {
@@ -321,13 +397,14 @@ final class ChatMemoryRecall {
                 !hasUserBlocks ? List.of() : usedBlockLabels.isEmpty() ? List.of("memory_blocks") : usedBlockLabels;
         return new MemoryRecall(
                 text,
-                privateFacts + sharedFacts,
+                privateFacts + sharedFacts + unified.items().size(),
                 new TurnMemoryRecall.Trace(
-                        true,
-                        privateIds,
-                        sharedIds,
-                        traceBlocks,
-                        SessionMemoryService.estimateTokens(text)));
+                                true,
+                                privateIds,
+                                sharedIds,
+                                traceBlocks,
+                                SessionMemoryService.estimateTokens(text))
+                        .withUnified(unified.items(), unified.note()));
     }
 
     /** The switch's answer; a failing lookup leaves recall on, as it is without the switch. */

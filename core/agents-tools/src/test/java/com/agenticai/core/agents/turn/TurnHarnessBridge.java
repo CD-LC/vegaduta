@@ -330,6 +330,7 @@ public final class TurnHarnessBridge {
                         mock(VisionSessionService.class),
                         null,
                         null,
+                        null,
                         null);
         ChatTimeouts timeouts =
                 new ChatTimeouts(

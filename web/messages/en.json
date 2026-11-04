@@ -13127,6 +13127,13 @@
           "help": "Turn it off to see how the agent behaves with no memory. The remember tools answer that memory is disabled and save nothing, conversation summaries stop being written, and lessons and preferences stop being proposed. Nothing is deleted, and what the agent already knows is still used unless 'Use memory in replies' is also off.",
           "label": "Save to memory"
         }
+      },
+      "unified": {
+        "enabled": {
+          "description": "Whether the agent may use the unified memory in replies: recalled notes of every kind, in one budgeted block.",
+          "help": "This can only switch the feature off for your workspace or this agent; the platform operator decides whether it exists at all. Off means the agent uses the memory it has today and nothing else changes.",
+          "label": "Unified memory"
+        }
       }
     },
     "providers": {

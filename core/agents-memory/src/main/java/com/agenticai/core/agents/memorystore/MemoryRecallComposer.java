@@ -6,6 +6,7 @@ import com.agenticai.core.agents.memory.spi.MemoryRecallRequest;
 import com.agenticai.core.agents.memory.spi.MemoryRecallResult;
 import com.agenticai.core.agents.memory.spi.MemoryRecallSource;
 import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
+import com.agenticai.core.agents.memory.spi.UnifiedMemoryRecall;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -27,9 +28,9 @@ import org.springframework.beans.factory.ObjectProvider;
  * empty. A source that throws is skipped and reported in {@code degradedReason}; the turn goes on
  * without it.
  */
-public class MemoryRecallComposer {
+public class MemoryRecallComposer implements UnifiedMemoryRecall {
 
-    static final String DISABLED = "disabled";
+    static final String DISABLED = UnifiedMemoryRecall.DISABLED;
 
     private static final Logger log = LoggerFactory.getLogger(MemoryRecallComposer.class);
 
@@ -44,6 +45,12 @@ public class MemoryRecallComposer {
         this.sources = sources;
     }
 
+    @Override
+    public int totalTokens() {
+        return properties.getTotalTokens();
+    }
+
+    @Override
     public MemoryRecallResult compose(MemoryRecallRequest request) {
         if (request == null || request.agentId() == null || !gate.enabled(request.agentId())) {
             return MemoryRecallResult.empty(DISABLED);
