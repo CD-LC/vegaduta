@@ -107,6 +107,8 @@ class SettingsCatalogContractTest {
                 new SkillPromptSettings(),
                 new com.agenticai.core.agents.memorystore.MemoryUnifiedSettings(
                         new com.agenticai.core.agents.memorystore.MemoryUnifiedProperties()),
+                new com.agenticai.core.agents.memorystore.CompetenceSettings(
+                        new com.agenticai.core.agents.memorystore.CompetenceProperties()),
                 new ProductControlsCatalog(
                         new SemanticCacheProperties(), new ChatLimitsProperties(), new FollowUpProperties(),
                         new MemoryLimitsProperties(), new ToolLedgerProperties())));

@@ -223,6 +223,52 @@ class MemoryItemSchemaIT {
         jdbc.update("DELETE FROM memory_competence");
     }
 
+    @Test
+    void competenceWriterIsAtomicUnderConcurrencyAndCapsTaskClasses() throws Exception {
+        jdbc.update("DELETE FROM memory_competence");
+        StaticListableBeanFactory b = new StaticListableBeanFactory();
+        b.addBean("jdbc", jdbc);
+        com.agenticai.core.agents.memorystore.CompetenceProperties cp = new com.agenticai.core.agents.memorystore.CompetenceProperties();
+        cp.setEnabled(true);
+        cp.setMaxTaskClassesPerAgent(3);
+        var tracker = new com.agenticai.core.agents.memorystore.CompetenceTracker(
+                cp,
+                new com.agenticai.core.agents.memorystore.CompetenceGate(cp, b.getBeanProvider(com.agenticai.core.settings.SettingsResolver.class)),
+                new com.agenticai.core.agents.memorystore.JdbcCompetenceStorage(b.getBeanProvider(JdbcTemplate.class)),
+                b.getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class),
+                Clock.systemUTC());
+        int threads = 16;
+        int per = 40;
+        java.util.concurrent.ExecutorService pool = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        java.util.List<java.util.concurrent.Future<?>> fs = new java.util.ArrayList<>();
+        for (int t = 0; t < threads; t++) {
+            final int tt = t;
+            fs.add(pool.submit(() -> {
+                TenantContext.set(TenantContext.of(SCHEMA, "it-user", Set.of()));
+                for (int i = 0; i < per; i++) {
+                    // 8 distinct classes contend for 3 slots; plus one hot class
+                    String cls = i % 2 == 0 ? "hot" : "cls_" + ((tt + i) % 8);
+                    tracker.record(new com.agenticai.core.agents.memory.spi.VerifiedOutcome(agentId, cls,
+                            i % 4 == 0 ? com.agenticai.core.agents.memory.spi.VerifiedOutcome.Signal.TOOL_ERROR
+                                    : com.agenticai.core.agents.memory.spi.VerifiedOutcome.Signal.TOOL_SUCCESS));
+                }
+                TenantContext.clear();
+            }));
+        }
+        for (var f : fs) {
+            f.get(60, java.util.concurrent.TimeUnit.SECONDS);
+        }
+        pool.shutdownNow();
+        assertThat(jdbc.queryForObject("SELECT sum(attempts) FROM memory_competence WHERE agent_id = ?", Integer.class, agentId))
+                .isEqualTo(threads * per);
+        assertThat(jdbc.queryForObject("SELECT sum(verified_success + verified_failure) FROM memory_competence WHERE agent_id = ?",
+                Integer.class, agentId)).isEqualTo(threads * per);
+        // at most 3 real classes (hot may or may not be one of them) plus the overflow row
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM memory_competence WHERE agent_id = ? AND task_class <> '_overflow'",
+                Integer.class, agentId)).isLessThanOrEqualTo(3);
+        jdbc.update("DELETE FROM memory_competence");
+    }
+
     // ------------------------------------------------------------------ partial indexes
 
     @Test

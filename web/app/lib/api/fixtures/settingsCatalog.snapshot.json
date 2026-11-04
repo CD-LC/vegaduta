@@ -943,6 +943,20 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.memory.unified.enabled"
   }, {
+    "key" : "memory.competence.enabled",
+    "group" : "memory",
+    "labelKey" : "settings.memory.competence.enabled.label",
+    "descriptionKey" : "settings.memory.competence.enabled.description",
+    "helpKey" : "settings.memory.competence.enabled.help",
+    "type" : "bool",
+    "risk" : "low",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : false,
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.memory.competence.enabled"
+  }, {
     "key" : "chat.semanticCache.similarityThreshold",
     "group" : "chat",
     "labelKey" : "settings.chat.semanticCache.similarityThreshold.label",

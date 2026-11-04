@@ -16,12 +16,14 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.EpisodicMemoryProperties;
 import com.agenticai.core.agents.memory.TurnTaintSnapshot;
 import com.agenticai.core.guardrails.taint.TurnTaint;
+import com.agenticai.core.agents.memory.spi.CompetenceRecorder;
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
 import com.agenticai.core.agents.memory.spi.MemoryProposalStatus;
 import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
 import com.agenticai.core.agents.memory.spi.MemoryWriteProposal;
+import com.agenticai.core.agents.memory.spi.VerifiedOutcome;
 import com.agenticai.core.agents.skills.SkillLearningGateway.TurnOutcome;
 import com.agenticai.core.agents.tools.ToolCallLog;
 import com.agenticai.core.agents.tools.ToolCallLogService;
@@ -60,6 +62,8 @@ class EpisodeRecorderTest {
     private final AtomicReference<AgentMemoryService> memoryService = new AtomicReference<>();
     private final AtomicReference<SettingsResolver> resolver = new AtomicReference<>();
     private final AtomicReference<EpisodeSignalSource> signals = new AtomicReference<>();
+    private final AtomicReference<CompetenceRecorder> competence = new AtomicReference<>();
+    private final BlockingQueue<VerifiedOutcome> outcomes = new LinkedBlockingQueue<>();
     private MemoryProposalSink sink;
     private EpisodeRecorder recorder;
 
@@ -99,6 +103,7 @@ class EpisodeRecorderTest {
                 provider(memoryService),
                 provider(resolver),
                 provider(signals),
+                provider(competence),
                 providerOf(meters));
     }
 
@@ -347,5 +352,49 @@ class EpisodeRecorderTest {
         resolver.set(r);
         recorder.onTurn(turn(true, false));
         assertEquals(1.0, skipped("flag_off"));
+    }
+
+    @Test
+    void theVerifiedOutcomeFeedsTheCompetenceRecorder() throws Exception {
+        taintView.set(taint(false));
+        competence.set(outcomes::add);
+        recorder.onTurn(turn(true, false));
+        assertNotNull(next());
+        VerifiedOutcome o = outcomes.poll(5, TimeUnit.SECONDS);
+        assertNotNull(o);
+        assertEquals(AGENT, o.agentId());
+        assertEquals("tools:lookup_order", o.taskClass());
+        assertEquals(VerifiedOutcome.Signal.TOOL_SUCCESS, o.signal());
+    }
+
+    @Test
+    void aFailingCompetenceRecorderNeverBreaksTheEpisode() throws Exception {
+        taintView.set(taint(false));
+        competence.set(x -> {
+            throw new IllegalStateException("db down");
+        });
+        recorder.onTurn(turn(true, false));
+        assertNotNull(next());
+    }
+
+    @Test
+    void aScreenRefusedTurnIsNotCounted() throws Exception {
+        taintView.set(taint(false));
+        competence.set(outcomes::add);
+        when(toolCalls.findSince(any(), any(), any())).thenReturn(List.of(call("xoxb-1234567890-abcdefghij", null)));
+        recorder.onTurn(turn(true, false));
+        assertEquals(null, outcomes.poll(300, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    void theSignalMappingKeepsApprovalDenialApartFromAHumanRating() {
+        assertEquals(VerifiedOutcome.Signal.APPROVAL_GRANTED,
+                EpisodeRecorder.signalOf(EpisodeComposer.Outcome.VERIFIED_SUCCESS, 0, new Signals(1, 0, null)));
+        assertEquals(VerifiedOutcome.Signal.APPROVAL_DENIED,
+                EpisodeRecorder.signalOf(EpisodeComposer.Outcome.HUMAN_REJECTED, 1, new Signals(0, 1, null)));
+        assertEquals(VerifiedOutcome.Signal.HUMAN_REJECTED,
+                EpisodeRecorder.signalOf(EpisodeComposer.Outcome.HUMAN_REJECTED, 1, new Signals(0, 0, HumanVerdict.REJECTED)));
+        assertEquals(VerifiedOutcome.Signal.UNKNOWN,
+                EpisodeRecorder.signalOf(EpisodeComposer.Outcome.UNKNOWN, 0, Signals.NONE));
     }
 }

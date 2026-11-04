@@ -24,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * then it is the store-backed sink. It still checks the per-agent gate on every call.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({MemoryUnifiedProperties.class, DecayProperties.class})
+@EnableConfigurationProperties({MemoryUnifiedProperties.class, DecayProperties.class, CompetenceProperties.class})
 class MemoryStoreConfiguration {
 
     @Bean
@@ -42,6 +42,42 @@ class MemoryStoreConfiguration {
     @Bean
     MemoryUnifiedSettings memoryUnifiedSettings(MemoryUnifiedProperties properties) {
         return new MemoryUnifiedSettings(properties);
+    }
+
+    @Bean
+    CompetenceSettings competenceSettings(CompetenceProperties properties) {
+        return new CompetenceSettings(properties);
+    }
+
+    @Bean
+    CompetenceGate competenceGate(CompetenceProperties properties, ObjectProvider<SettingsResolver> settings) {
+        return new CompetenceGate(properties, settings);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CompetenceStorage.class)
+    CompetenceStorage competenceStorage(ObjectProvider<JdbcTemplate> jdbc) {
+        return new JdbcCompetenceStorage(jdbc);
+    }
+
+    /** The competence writer; a no-op until {@code app.memory.competence.enabled} and the tenant/agent setting allow it. */
+    @Bean
+    CompetenceTracker competenceTracker(
+            CompetenceProperties properties,
+            CompetenceGate gate,
+            CompetenceStorage storage,
+            ObjectProvider<MeterRegistry> meters) {
+        return new CompetenceTracker(properties, gate, storage, meters, Clock.systemUTC());
+    }
+
+    /** SELF_MODEL recall from the competence counters; empty unless unified recall, the kind and competence are all on. */
+    @Bean
+    SelfModelRecallSource selfModelRecallSource(
+            MemoryUnifiedProperties unified,
+            MemoryUnifiedGate gate,
+            CompetenceProperties properties,
+            CompetenceTracker tracker) {
+        return new SelfModelRecallSource(unified, gate, properties, tracker);
     }
 
     @Bean

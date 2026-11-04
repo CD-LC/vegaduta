@@ -6,12 +6,14 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.EpisodicMemoryProperties;
 import com.agenticai.core.agents.memory.MemoryProvenance;
 import com.agenticai.core.agents.memory.MemoryWriteGate;
+import com.agenticai.core.agents.memory.spi.CompetenceRecorder;
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
 import com.agenticai.core.agents.memory.spi.MemoryProvenanceRecord;
 import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
 import com.agenticai.core.agents.memory.spi.MemoryWriteProposal;
+import com.agenticai.core.agents.memory.spi.VerifiedOutcome;
 import com.agenticai.core.agents.skills.EpisodeRecordingGateway;
 import com.agenticai.core.agents.skills.SkillLearningGateway.TurnOutcome;
 import com.agenticai.core.agents.tools.ToolCallLog;
@@ -71,6 +73,7 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
     private final ObjectProvider<AgentMemoryService> memory;
     private final ObjectProvider<SettingsResolver> settings;
     private final ObjectProvider<EpisodeSignalSource> signalSource;
+    private final ObjectProvider<CompetenceRecorder> competence;
     private final ObjectProvider<MeterRegistry> meters;
     private final EpisodeLimiter limiter;
     private final ExecutorService pool;
@@ -82,6 +85,7 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             ObjectProvider<AgentMemoryService> memory,
             ObjectProvider<SettingsResolver> settings,
             ObjectProvider<EpisodeSignalSource> signalSource,
+            ObjectProvider<CompetenceRecorder> competence,
             ObjectProvider<MeterRegistry> meters) {
         this.props = props;
         this.toolCalls = toolCalls;
@@ -89,6 +93,7 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         this.memory = memory;
         this.settings = settings;
         this.signalSource = signalSource;
+        this.competence = competence;
         this.meters = meters;
         this.limiter = new EpisodeLimiter(
                 props.getMaxPerAgentPerHour(),
@@ -201,6 +206,9 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
                 skipped("screen_refused");
                 return;
             }
+            // WP9: the same verified outcome feeds the SELF_MODEL competence counters. The tracker is a no-op while
+            // memory.competence.enabled is off, so this is independent of the proposal sink and its result.
+            recordCompetence(o, episode, calls.size(), signals);
             MemoryProvenanceRecord provenance = new MemoryProvenanceRecord(
                     classified.quarantined() ? MemoryTrustLevel.QUARANTINED : MemoryTrustLevel.TRUSTED,
                     classified.sourceTaint(),
@@ -216,6 +224,32 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             skipped("failure");
             log.warn("Episode not recorded for agent {}: {}", o.agentId(), e.getMessage());
         }
+    }
+
+    private void recordCompetence(TurnOutcome o, Episode episode, int toolCalls, Signals signals) {
+        try {
+            CompetenceRecorder recorder = competence.getIfAvailable();
+            if (recorder != null) {
+                recorder.record(new VerifiedOutcome(
+                        o.agentId(), episode.taskClass(), signalOf(episode.outcome(), toolCalls, signals)));
+            }
+        } catch (RuntimeException e) {
+            count("memory.competence.skipped", "failure");
+            log.debug("Competence outcome not recorded: {}", e.getMessage());
+        }
+    }
+
+    /** Maps the episode outcome back to the evidence behind it; only platform-observed or human-decided signals. */
+    static VerifiedOutcome.Signal signalOf(EpisodeComposer.Outcome outcome, int toolCalls, Signals signals) {
+        return switch (outcome) {
+            case VERIFIED_SUCCESS -> toolCalls > 0 ? VerifiedOutcome.Signal.TOOL_SUCCESS : VerifiedOutcome.Signal.APPROVAL_GRANTED;
+            case VERIFIED_FAILURE -> VerifiedOutcome.Signal.TOOL_ERROR;
+            case HUMAN_ACCEPTED -> VerifiedOutcome.Signal.HUMAN_ACCEPTED;
+            case HUMAN_REJECTED -> signals.verdict() == EpisodeSignalSource.HumanVerdict.REJECTED
+                    ? VerifiedOutcome.Signal.HUMAN_REJECTED
+                    : VerifiedOutcome.Signal.APPROVAL_DENIED;
+            case UNKNOWN -> VerifiedOutcome.Signal.UNKNOWN;
+        };
     }
 
     private Signals signalsOf(TurnOutcome o) {
