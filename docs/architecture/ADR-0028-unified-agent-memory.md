@@ -136,11 +136,11 @@ the invariants):
 ### 5. Schema and Flyway plan
 
 Tenant schema only (nothing in `controlplane/`). Raw JDBC tables, no Hibernate mapping, as `agent_memory` (V18).
-The highest version in the tree is **V677** (`tenant/V677__knowledge_chunk_trust.sql`); this plan **claims V678
-and V679** and must re-check `bash scripts/ci/flyway-lint.sh` and `docs/maintainers/agent-coordination.md` at
+The highest version in the tree is **V678** (`tenant/V678__scratchpad_and_data_table_row_trust.sql`); this plan **claims V679
+and V680** and must re-check `bash scripts/ci/flyway-lint.sh` and `docs/maintainers/agent-coordination.md` at
 implementation time. New files only; V18, V44, V77, V676, V677 are not touched.
 
-**`tenant/V678__unified_memory_items.sql`**:
+**`tenant/V679__unified_memory_items.sql`**:
 
 ```sql
 CREATE TABLE memory_item (
@@ -206,7 +206,7 @@ CREATE INDEX idx_memory_event_item ON memory_event(item_id, at);
 CREATE INDEX idx_memory_event_agent ON memory_event(agent_id, at DESC);
 ```
 
-**`tenant/V679__memory_competence.sql`**: `memory_competence(agent_id UUID FK agent ON DELETE CASCADE, task_class
+**`tenant/V680__memory_competence.sql`**: `memory_competence(agent_id UUID FK agent ON DELETE CASCADE, task_class
 VARCHAR(96), attempts, verified_success, verified_failure, human_accepted, human_rejected, unknown_outcome INT
 DEFAULT 0, last_outcome_at, updated_at, PRIMARY KEY (agent_id, task_class))`.
 
@@ -367,14 +367,14 @@ console is a separate package.
 
 ### 14. Rollout
 
-1. **1a, flags OFF everywhere:** spi, module, V678/V679, services, controller, adapter, tests; merged dark.
+1. **1a, flags OFF everywhere:** spi, module, V679/V680, services, controller, adapter, tests; merged dark.
    `scripts/ci/boot-check.sh` on api, migrate-only, jobs and worker shapes.
 2. **Gate:** Phase 0 packages B (taint persisted) and C (quarantine, write screen) merged and verified, and
    package H extended with memory cases. Without B the gate quarantines every agent write.
 3. **1b:** `kinds=episodic` in one dogfood tenant, `PENDING` default, no distiller. Watch queue size, approval
    rate, recall latency, injected tokens. **1c** (owner decision): distiller and competence per agent, still human-approved.
 4. **Rollback of the feature:** `unified.enabled=false` (bounded by the settings TTL), then `POST /rollback` for
-   the data. V678/V679 are additive and stay applied; dropping the tables would be a new later migration.
+   the data. V679/V680 are additive and stay applied; dropping the tables would be a new later migration.
 
 ## Acceptance tests (each must fail on the old behaviour)
 
@@ -441,7 +441,7 @@ Architecture: the `app` module tests named in `AGENTS.md` rule 14 and a regenera
 - This is a design. Items named as existing (`MemoryWriteGate`, `MemoryTrust`, `TurnTaintView`, V676/V677,
   `AgentMemoryService` methods, `MemoryBlocks`, `HistoryTokenEstimator`, `pre-turn-max-wait`,
   `/api/agents/{agentId}/memories`) were read on 2026-11-04; nothing was compiled or run.
-- V678/V679 free was checked against file listings only, not other agents' unmerged work.
+- V679/V680 free was checked against file listings only, not other agents' unmerged work.
 - Whether `agents-memory` satisfies `ModuleBoundaryRulesTest`, and whether `agents-turn` can depend on the spi
   without a cycle in the frozen `archunit_store`, is unchecked; the first PR must run the `app` module tests.
 - Package B's `TurnTaintView` implementation was not found and is assumed unmerged. `CallerSessionIds`
