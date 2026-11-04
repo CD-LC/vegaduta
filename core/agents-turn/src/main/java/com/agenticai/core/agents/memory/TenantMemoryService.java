@@ -205,113 +205,13 @@ public class TenantMemoryService {
      * slug that must already have a note.
      */
     public void putBlock(String subjectKey, String rawLabel, String content) {
-        String label = MemoryBlocks.normalizeLabel(rawLabel);
-        if (label == null || (!activeProjectEnabled && MemoryBlocks.ACTIVE_PROJECT.equals(label))) {
-            throw new IllegalArgumentException("Unknown memory block label.");
-        }
-        if (content == null || content.isBlank()) {
-            deleteBlock(subjectKey, label);
-            return;
-        }
-        if (MemoryBlocks.ACTIVE_PROJECT.equals(label)) {
-            content = requireExistingProjectSlug(subjectKey, content);
-        }
-        if (content.length() > maxCharsPerBlock) {
-            throw new IllegalArgumentException(
-                    "A memory block can hold at most " + maxCharsPerBlock + " characters.");
-        }
-        String key = MemoryBlocks.storageKey(subjectKey, label);
-        if (key == null) {
-            throw new IllegalArgumentException("Memory block cannot be stored for this user.");
-        }
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
-        List<UUID> existing =
-                jdbcTemplate.query(
-                        "SELECT id FROM " + table + " WHERE subject_key = ?",
-                        (rs, rowNum) -> UUID.fromString(rs.getString("id")),
-                        key);
-        if (existing.isEmpty() && MemoryBlocks.isProjectLabel(label)) {
-            Integer projects =
-                    jdbcTemplate.queryForObject(
-                            "SELECT COUNT(*) FROM " + table + " WHERE starts_with(subject_key, ?)",
-                            Integer.class,
-                            MemoryBlocks.storagePrefix(subjectKey) + MemoryBlocks.PROJECT_PREFIX);
-            if (projects != null && projects >= maxProjectBlocks) {
-                throw new IllegalArgumentException(
-                        "You can keep at most " + maxProjectBlocks + " project notes.");
-            }
-        }
-        // Embedding is NOT NULL on the table; blocks are always-in-context so it is never queried.
-        String literal = toVectorLiteral(sidecarClient.embedQuery(content));
-        if (existing.isEmpty()) {
-            jdbcTemplate.update(
-                    "INSERT INTO "
-                            + table
-                            + " (id, subject_key, content, embedding, created_by_agent_id) "
-                            + "VALUES (?, ?, ?, ?::public.vector, NULL)",
-                    UUID.randomUUID(),
-                    key,
-                    content,
-                    literal);
-        } else {
-            jdbcTemplate.update(
-                    "UPDATE "
-                            + table
-                            + " SET content = ?, embedding = ?::public.vector, last_used_at = ?"
-                            + " WHERE id = ?",
-                    content,
-                    literal,
-                    Timestamp.from(clock.instant()),
-                    existing.get(0));
-        }
-    }
-
-    /**
-     * Validates an {@code active_project} value: a legal slug whose {@code project:<slug>} note
-     * exists. Returns the slug.
-     */
-    private String requireExistingProjectSlug(String subjectKey, String content) {
-        String slug = MemoryBlocks.activeProjectSlug(content);
-        String projectKey =
-                slug == null
-                        ? null
-                        : MemoryBlocks.storageKey(subjectKey, MemoryBlocks.PROJECT_PREFIX + slug);
-        if (projectKey == null) {
-            throw new IllegalArgumentException("Choose one of your project notes to make active.");
-        }
-        Integer found =
-                jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM "
-                                + TenantMemorySchemaSupport.qualifiedTableName()
-                                + " WHERE subject_key = ?",
-                        Integer.class,
-                        projectKey);
-        if (found == null || found == 0) {
-            throw new IllegalArgumentException(
-                    "There is no project note named '" + slug + "'. Add the note first.");
-        }
-        return slug;
+        TenantMemoryBlockWrites.putBlock(
+                jdbcTemplate, sidecarClient, clock, activeProjectEnabled, maxCharsPerBlock, maxProjectBlocks,
+                subjectKey, rawLabel, content);
     }
 
     public void deleteBlock(String subjectKey, String rawLabel) {
-        String label = MemoryBlocks.normalizeLabel(rawLabel);
-        String key = label == null ? null : MemoryBlocks.storageKey(subjectKey, label);
-        if (key == null) {
-            return;
-        }
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
-        jdbcTemplate.update("DELETE FROM " + table + " WHERE subject_key = ?", key);
-        if (MemoryBlocks.isProjectLabel(label)) {
-            // A deleted project cannot stay the active one: drop the pointer only if it points
-            // here.
-            String activeKey = MemoryBlocks.storageKey(subjectKey, MemoryBlocks.ACTIVE_PROJECT);
-            if (activeKey != null) {
-                jdbcTemplate.update(
-                        "DELETE FROM " + table + " WHERE subject_key = ? AND content = ?",
-                        activeKey,
-                        label.substring(MemoryBlocks.PROJECT_PREFIX.length()));
-            }
-        }
+        TenantMemoryBlockWrites.deleteBlock(jdbcTemplate, subjectKey, rawLabel);
     }
 
     /**
@@ -706,7 +606,7 @@ public class TenantMemoryService {
                 params);
     }
 
-    private static String toVectorLiteral(float[] embedding) {
+    static String toVectorLiteral(float[] embedding) {
         List<Double> boxed =
                 IntStream.range(0, embedding.length)
                         .mapToDouble(i -> embedding[i])

@@ -578,12 +578,12 @@ public class DemoStudioService {
         moderation.check(session, Map.of("mission", text));
         AgentStepEventEmitter stepEvents = AgentStepEventEmitter.active(STEP_HEARTBEAT);
         String subject = DemoSessionService.actorSubject(session.getId());
-        ChatTurnRequest turn = studioTurn(agentId, chatSessionId, subject, text, stepEvents);
+        ChatTurnRequest turn = DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
         Flux<String> tokens =
                 demoSessionService.inDemoTenantContextAs(
                         session,
                         owned.creator().getId(),
-                        () -> agentChatService.chat(demoTurnContext(turn), turn));
+                        () -> agentChatService.chat(DemoStudioTurns.demoTurnContext(turn), turn));
         return Flux.merge(
                 tokens.doFinally(signal -> stepEvents.complete()).timeout(missionTimeout),
                 stepEvents.asFlux());
@@ -608,49 +608,15 @@ public class DemoStudioService {
                 mission.length() > MAX_MISSION_CHARS
                         ? mission.substring(0, MAX_MISSION_CHARS)
                         : mission;
-        ChatTurnRequest turn = studioTurn(agentId, chatSessionId, subject, text, stepEvents);
+        ChatTurnRequest turn = DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
         return demoSessionService.inDemoTenantContextAs(
                 session,
                 owned.creator().getId(),
                 () ->
                         agentChatService
-                                .chat(demoTurnContext(turn), turn)
+                                .chat(DemoStudioTurns.demoTurnContext(turn), turn)
                                 .collect(Collectors.joining())
                                 .block(missionTimeout));
-    }
-
-    /** The studio's turn shape: empty attachment and extra-tool lists, live step events. */
-    private static ChatTurnRequest studioTurn(
-            UUID agentId,
-            String chatSessionId,
-            String subject,
-            String text,
-            AgentStepEventEmitter stepEvents) {
-        return new ChatTurnRequest(
-                agentId,
-                chatSessionId,
-                subject,
-                text,
-                null,
-                null,
-                List.of(),
-                List.of(),
-                null,
-                null,
-                false,
-                stepEvents,
-                false);
-    }
-
-    /**
-     * ADR-0022 stage 4: built inside {@code inDemoTenantContextAs}, so the turn context carries the
-     * demo tenant that call put on this thread.
-     */
-    private static TurnContext demoTurnContext(ChatTurnRequest turn) {
-        TurnContext context = TurnContext.forEntry(TenantContext.current().orElse(null), turn);
-        // Anonymous visitor of the public demo studio.
-        SenderTrust.UNTRUSTED.seed(context.taint(), "inbound:demo_studio");
-        return context;
     }
 
     // ------------------------------------------------------------------

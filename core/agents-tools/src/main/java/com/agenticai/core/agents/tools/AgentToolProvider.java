@@ -397,7 +397,7 @@ public class AgentToolProvider implements AgentToolPort {
      */
     public List<ToolCallback> resolveToolsForDelegatedCall(
             UUID agentId, String sessionId, String userMessage, ChatClient chatClient) {
-        return withChildTaint(
+        return ToolOfferPolicy.withChildTaint(
                 () ->
                         resolveToolsFor(
                                 agentId,
@@ -409,27 +409,6 @@ public class AgentToolProvider implements AgentToolPort {
                                 true,
                                 null,
                                 false));
-    }
-
-    /**
-     * Resolves a delegate's tools so that their taint gate shares the sub-turn's own {@code TurnTaint}, which
-     * starts as a copy of the delegating turn's ({@link DelegationTaint}). The sub-turn builder announces its
-     * instance with {@link DelegationTaint#openResolving}; without one (a direct caller) a copy is made here.
-     */
-    private <T> T withChildTaint(java.util.function.Supplier<T> resolve) {
-        com.agenticai.core.guardrails.taint.TurnTaint child =
-                DelegationTaint.resolving().orElseGet(DelegationTaint::childOfCurrent);
-        com.agenticai.core.guardrails.taint.TurnTaint previous = TURN_TAINT_SCOPE.get();
-        TURN_TAINT_SCOPE.set(child);
-        try {
-            return resolve.get();
-        } finally {
-            if (previous == null) {
-                TURN_TAINT_SCOPE.remove();
-            } else {
-                TURN_TAINT_SCOPE.set(previous);
-            }
-        }
     }
 
     /**
@@ -447,7 +426,7 @@ public class AgentToolProvider implements AgentToolPort {
         return crewBrowserToolResolver.withHandoffChain(
                 chain,
                 () ->
-                        withChildTaint(
+                        ToolOfferPolicy.withChildTaint(
                                 () ->
                                         resolveToolsFor(
                                                 agentId,
@@ -523,7 +502,7 @@ public class AgentToolProvider implements AgentToolPort {
         // no turn context.
         ReasoningDepth depth =
                 effectiveDepth != null ? effectiveDepth : agentService.getReasoningDepth(agentId);
-        boolean rigorous = depth == ReasoningDepth.RIGOROUS && hasVerifiableUserIntent(userMessage);
+        boolean rigorous = depth == ReasoningDepth.RIGOROUS && ToolOfferPolicy.hasVerifiableUserIntent(userMessage);
         // The continuation turn after an approval carries the tools its conversation already used
         // (see ToolResolver#alwaysRelevant); the turn's approval state is on this thread only for
         // the duration of the context overload of resolveToolsFor.
@@ -540,40 +519,10 @@ public class AgentToolProvider implements AgentToolPort {
                         allowDelegation,
                         mainChatTurn,
                         List.of(),
-                        mainChatTurn && turnApproval != null ? keptOnOffer(turnApproval) : Set.of(),
+                        mainChatTurn && turnApproval != null ? ToolOfferPolicy.keptOnOffer(turnApproval) : Set.of(),
                         forceToolDeferral),
                 applyRelevanceSelection,
                 stableToolSet);
-    }
-
-    /**
-     * The tools relevance selection must not trim on a main chat turn: the tools the conversation
-     * already used (the continuation after an approval, a short follow-up) and the tools the person
-     * picked for this run ({@code ChatRequest.toolNames}) - a tool they switched on is not dropped
-     * for failing to match the message. Keeping a tool from being trimmed only keeps it in the
-     * list; the run's own narrowing still removes whatever it did not name, and nothing here adds a
-     * tool the agent does not resolve.
-     */
-    private static Set<String> keptOnOffer(TurnApprovalState state) {
-        if (state.runToolNames() == null || state.runToolNames().isEmpty()) {
-            return state.stickyTools();
-        }
-        Set<String> names = new java.util.HashSet<>(state.stickyTools());
-        names.addAll(state.runToolNames());
-        return names;
-    }
-
-    // Duplicated literal, not shared via a constant: core/agents cannot depend
-    // on core/workflow (dependency runs the other way - workflow calls
-    // AgentChatService.chat, not vice versa), and this module boundary is the
-    // right one to keep. See the placeholder's real definitions at
-    // WorkflowExecutionEngine#execute and WorkflowRunWorkflowImpl#run.
-    private static final String WORKFLOW_NO_INPUT_PLACEHOLDER = "Workflow started manually.";
-
-    private static boolean hasVerifiableUserIntent(String userMessage) {
-        return userMessage != null
-                && !userMessage.isBlank()
-                && !WORKFLOW_NO_INPUT_PLACEHOLDER.equals(userMessage.trim());
     }
 
     /**

@@ -254,16 +254,16 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                         version,
                         version == A2aVersion.V1_0 ? "SendMessage" : "message/send",
                         params);
-        JsonNode node = unwrap(result);
-        if (!isTask(node)) {
+        JsonNode node = A2aResultParsing.unwrap(result);
+        if (!A2aResultParsing.isTask(node)) {
             // A bare Message reply: the remote answered inline, there is no task to poll.
-            String text = cap(partsText(node.path("parts")));
+            String text = cap(A2aResultParsing.partsText(node.path("parts")));
             return new Result(local.id(), null, "completed", text, true);
         }
         String remoteId = node.path("id").asText(null);
         Instant deadline = Instant.now().plus(config.getMaxWait());
-        String state = state(node);
-        while (isActive(state)) {
+        String state = A2aResultParsing.state(node);
+        while (A2aResultParsing.isActive(state)) {
             if (remoteId == null) {
                 throw new A2aClientException("the remote agent returned a task without an id");
             }
@@ -283,7 +283,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             getParams.put("id", remoteId);
             try {
                 node =
-                        unwrap(
+                        A2aResultParsing.unwrap(
                                 rpc(
                                         endpoint,
                                         version,
@@ -294,13 +294,13 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                 cancelQuietly(endpoint, version, remoteId);
                 throw e;
             }
-            state = state(node);
+            state = A2aResultParsing.state(node);
         }
         if (state.equals("input-required") || state.equals("auth-required")) {
             // A one-shot tool cannot answer the remote's question; do not leave its task dangling.
             cancelQuietly(endpoint, version, remoteId);
         }
-        String text = cap(taskText(node));
+        String text = cap(A2aResultParsing.taskText(node));
         boolean success = state.equals("completed");
         if (!success && text.isBlank()) {
             text = "The remote agent ended in state \"" + sanitizeRemoteText(state, 24) + "\".";
@@ -408,7 +408,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             return "";
         }
         String flat = text.replaceAll("[\\p{Cntrl}\\p{Cf}]+", " ").replace('"', '\'').strip();
-        return trim(flat, max);
+        return A2aResultParsing.trim(flat, max);
     }
 
     private void cancelQuietly(URI endpoint, A2aVersion version, String remoteId) {
@@ -553,80 +553,13 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
 
     // ------------------------------------------------------------ parsing
 
-    /**
-     * 1.0 wraps in {@code {"task"|"message": ...}}; 0.3 sends the object bare. Tolerates either
-     * from either.
-     */
-    private static JsonNode unwrap(JsonNode result) {
-        if (result.has("task") && result.get("task").isObject()) {
-            return result.get("task");
-        }
-        if (result.has("message") && result.get("message").isObject() && !result.has("parts")) {
-            return result.get("message");
-        }
-        return result;
-    }
-
-    private static boolean isTask(JsonNode node) {
-        return "task".equals(node.path("kind").asText(null))
-                || node.has("status") && !node.has("parts");
-    }
-
-    /**
-     * Normalises {@code TASK_STATE_INPUT_REQUIRED} / {@code input-required} to {@code
-     * input-required}.
-     */
-    static String state(JsonNode task) {
-        String raw = task.path("status").path("state").asText("");
-        String s = raw.toLowerCase(Locale.ROOT).replace("task_state_", "").replace('_', '-');
-        return s.equals("cancelled") ? "canceled" : s;
-    }
-
-    private static boolean isActive(String state) {
-        return state.isEmpty()
-                || state.equals("submitted")
-                || state.equals("working")
-                || state.equals("unspecified")
-                || state.equals("unknown");
-    }
-
-    private static String taskText(JsonNode task) {
-        StringBuilder text = new StringBuilder();
-        JsonNode artifacts = task.path("artifacts");
-        if (artifacts.isArray()) {
-            for (JsonNode artifact : artifacts) {
-                text.append(partsText(artifact.path("parts")));
-            }
-        }
-        if (text.toString().isBlank()) {
-            text.setLength(0);
-            text.append(partsText(task.path("status").path("message").path("parts")));
-        }
-        return text.toString();
-    }
-
-    private static String partsText(JsonNode parts) {
-        StringBuilder text = new StringBuilder();
-        if (parts.isArray()) {
-            for (JsonNode part : parts) {
-                if (part.hasNonNull("text")) {
-                    text.append(part.get("text").asText());
-                }
-                // file/data parts are deliberately dropped: only text reaches the model.
-            }
-        }
-        return text.toString();
-    }
-
     private String cap(String text) {
-        return trim(text, config.getMaxResultChars());
+        return A2aResultParsing.trim(text, config.getMaxResultChars());
     }
 
-    private static String trim(String text, int max) {
-        if (text == null) {
-            return "";
-        }
-        return text.length() <= max ? text : text.substring(0, max) + "... [truncated]";
+    /** Test seam; see {@link A2aResultParsing#state}. */
+    static String state(JsonNode task) {
+        return A2aResultParsing.state(task);
     }
 
     // ------------------------------------------------------------ local task
