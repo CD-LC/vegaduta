@@ -17154,6 +17154,14 @@
             }
           },
           {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
@@ -17237,6 +17245,14 @@
             }
           },
           {
+            "name": "subject",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
@@ -17312,6 +17328,14 @@
           },
           {
             "name": "session",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subject",
             "in": "query",
             "required": false,
             "schema": {
@@ -117630,6 +117654,9 @@
             "type": "string",
             "format": "uuid"
           },
+          "subjectKey": {
+            "type": "string"
+          },
           "body": {
             "type": "string"
           },
@@ -121404,6 +121431,9 @@
             "format": "date-time"
           },
           "body": {
+            "type": "string"
+          },
+          "subjectKey": {
             "type": "string"
           }
         },
@@ -127707,6 +127737,15 @@
           "sharedErased": {
             "type": "boolean",
             "default": false
+          },
+          "otherStoreRows": {
+            "type": "integer",
+            "format": "int32",
+            "default": 0
+          },
+          "otherStoresErased": {
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -127715,7 +127754,9 @@
           "graphEntities",
           "graphErased",
           "agentErased",
-          "sharedErased"
+          "sharedErased",
+          "otherStoreRows",
+          "otherStoresErased"
         ]
       },
       "UserMemoryController_Limits": {

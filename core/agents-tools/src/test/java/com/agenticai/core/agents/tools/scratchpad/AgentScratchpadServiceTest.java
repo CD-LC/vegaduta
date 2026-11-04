@@ -31,6 +31,8 @@ class AgentScratchpadServiceTest {
 
     private static final UUID AGENT = UUID.randomUUID();
     private static final UUID SESSION = UUID.randomUUID();
+    private static final String ALICE = "alice";
+    private static final String BOB = "bob";
 
     @BeforeEach
     void setUp() {
@@ -127,10 +129,12 @@ class AgentScratchpadServiceTest {
 
     @Test
     void writeWithNullSessionIsAnAgentLongTermNote() {
-        ScratchpadNote note = service.write(AGENT, null, "k", "body").note();
+        ScratchpadNote note = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
         assertThat(note.getSessionId()).isNull();
-        verify(repository).findByAgentIdAndSessionIdAndKey(eq(AGENT), isNull(), eq("k"));
-        verify(repository).countByAgentIdAndSessionId(eq(AGENT), isNull());
+        assertThat(note.getSubjectKey()).isEqualTo(ALICE);
+        verify(repository)
+                .findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(eq(AGENT), eq(ALICE), eq("k"));
+        verify(repository).countByAgentIdAndSessionIdIsNullAndSubjectKey(eq(AGENT), eq(ALICE));
     }
 
     @Test
@@ -149,11 +153,11 @@ class AgentScratchpadServiceTest {
 
     @Test
     void readPassesThroughScopeAndKey() {
-        ScratchpadNote note = new ScratchpadNote(AGENT, null, "k", "b", 1);
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "k"))
+        ScratchpadNote note = new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
                 .thenReturn(Optional.of(note));
-        assertThat(service.read(AGENT, null, "k")).containsSame(note);
-        assertThat(service.read(AGENT, null, "missing")).isEmpty();
+        assertThat(service.read(AGENT, null, ALICE, "k")).containsSame(note);
+        assertThat(service.read(AGENT, null, ALICE, "missing")).isEmpty();
     }
 
     // ------------------------------------------------------------------ cap
@@ -223,7 +227,7 @@ class AgentScratchpadServiceTest {
     @Test
     void agentScopeDoesNotSweepWithDefaultTtl() {
         // agent-note-ttl defaults to 0 (never): no sweep runs on the long-term pad.
-        service.write(AGENT, null, "k", "body");
+        service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED);
 
         verify(repository, never())
                 .deleteByAgentIdAndSessionIdAndUpdatedAtBefore(any(), any(), any());
@@ -235,7 +239,7 @@ class AgentScratchpadServiceTest {
         when(repository.deleteByAgentIdAndSessionIdAndUpdatedAtBefore(eq(AGENT), isNull(), any()))
                 .thenReturn(1L);
 
-        AgentScratchpadService.WriteResult result = service.write(AGENT, null, "k", "body");
+        AgentScratchpadService.WriteResult result = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED);
 
         assertThat(result.expiredRemoved()).isEqualTo(1);
     }
@@ -259,7 +263,7 @@ class AgentScratchpadServiceTest {
         // The session scope is full, but the agent-long-term scope is not -
         // a null-session write must still pass.
         when(repository.countByAgentIdAndSessionId(AGENT, SESSION)).thenReturn(200L);
-        ScratchpadNote note = service.write(AGENT, null, "k", "body").note();
+        ScratchpadNote note = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
         assertThat(note.getSessionId()).isNull();
     }
 
@@ -268,15 +272,16 @@ class AgentScratchpadServiceTest {
     @Test
     void listReturnsSessionAndLongTermNotes() {
         ScratchpadNote sessionNote = new ScratchpadNote(AGENT, SESSION, "s", "b", 1);
-        ScratchpadNote longTerm = new ScratchpadNote(AGENT, null, "l", "b", 1);
-        when(repository.findVisible(AGENT, SESSION)).thenReturn(List.of(sessionNote, longTerm));
-        assertThat(service.list(AGENT, SESSION)).containsExactly(sessionNote, longTerm);
+        ScratchpadNote longTerm = new ScratchpadNote(AGENT, null, ALICE, "l", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findVisibleTo(AGENT, SESSION, ALICE)).thenReturn(List.of(sessionNote, longTerm));
+        assertThat(service.list(AGENT, SESSION, ALICE)).containsExactly(sessionNote, longTerm);
     }
 
     @Test
     void deleteReportsWhetherANoteExisted() {
-        when(repository.deleteByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k")).thenReturn(1L);
-        when(repository.deleteByAgentIdAndSessionIdAndKey(AGENT, SESSION, "gone")).thenReturn(0L);
+        ScratchpadNote note = new ScratchpadNote(AGENT, SESSION, "k", "b", 1);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k"))
+                .thenReturn(Optional.of(note));
         assertThat(service.delete(AGENT, SESSION, "k")).isTrue();
         assertThat(service.delete(AGENT, SESSION, "gone")).isFalse();
     }
@@ -337,26 +342,135 @@ class AgentScratchpadServiceTest {
 
     @Test
     void aQuarantinedNoteIsNotReadable() {
-        ScratchpadNote held = new ScratchpadNote(AGENT, null, "k", "b", 1, TAINTED);
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "k"))
+        ScratchpadNote held = new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, TAINTED);
+        when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
                 .thenReturn(Optional.of(held));
 
-        assertThat(service.read(AGENT, null, "k")).isEmpty();
+        assertThat(service.read(AGENT, null, ALICE, "k")).isEmpty();
     }
 
     @Test
     void approveMakesAHeldNoteReadableAndRejectDeletesOnlyHeldNotes() {
-        ScratchpadNote held = new ScratchpadNote(AGENT, null, "held", "b", 1, TAINTED);
-        ScratchpadNote trusted = new ScratchpadNote(AGENT, null, "ok", "b", 1);
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "held"))
-                .thenReturn(Optional.of(held));
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, null, "ok"))
-                .thenReturn(Optional.of(trusted));
+        ScratchpadNote held = new ScratchpadNote(AGENT, null, ALICE, "held", "b", 1, TAINTED);
+        ScratchpadNote trusted = new ScratchpadNote(AGENT, null, ALICE, "ok", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "held"))
+                .thenReturn(List.of(held));
+        when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "ok"))
+                .thenReturn(List.of(trusted));
 
         assertThat(service.reject(AGENT, null, "ok")).isFalse();
         verify(repository, never()).delete(trusted);
         assertThat(service.approve(AGENT, null, "held")).isTrue();
         assertThat(held.isQuarantined()).isFalse();
         assertThat(service.approve(AGENT, null, "ok")).isFalse();
+    }
+
+    // ------------------------------------------------------- G5: per-user agent pad
+
+    @Test
+    void anAgentPadWriteWithoutAnIdentifiedCallerIsRefused() {
+        for (String subject : new String[] {null, "", "  "}) {
+            assertThatThrownBy(
+                            () -> service.write(AGENT, null, subject, "k", "body", NoteTrust.TRUSTED))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("no identified user");
+        }
+        verify(repository, never()).save(any());
+        // the session pad still works for an anonymous turn
+        assertThat(service.write(AGENT, SESSION, null, "k", "body", NoteTrust.TRUSTED).note().getKey())
+                .isEqualTo("k");
+    }
+
+    @Test
+    void anAgentPadReadAndDeleteOnlyReachTheCallersOwnNotes() {
+        ScratchpadNote alices = new ScratchpadNote(AGENT, null, ALICE, "k", "alice secret", 12, NoteTrust.TRUSTED);
+        when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
+                .thenReturn(Optional.of(alices));
+
+        assertThat(service.read(AGENT, null, ALICE, "k")).containsSame(alices);
+        // Bob's lookup is keyed on Bob, so Alice's row is never the one the repository returns.
+        assertThat(service.read(AGENT, null, BOB, "k")).isEmpty();
+        assertThat(service.read(AGENT, null, null, "k")).isEmpty();
+        assertThat(service.delete(AGENT, null, BOB, "k")).isFalse();
+        verify(repository, never()).delete(any(ScratchpadNote.class));
+        assertThat(service.delete(AGENT, null, ALICE, "k")).isTrue();
+        verify(repository).delete(alices);
+    }
+
+    @Test
+    void aLegacyNoOwnerAgentPadNoteIsNeverReturnedToTheModel() {
+        ScratchpadNote legacy = new ScratchpadNote(AGENT, null, "k", "who wrote me", 12);
+        // even if a repository handed it back, ownership fails closed
+        when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
+                .thenReturn(Optional.of(legacy));
+        assertThat(service.read(AGENT, null, ALICE, "k")).isEmpty();
+        assertThatThrownBy(() -> service.write(AGENT, null, ALICE, "k", "x", NoteTrust.TRUSTED))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("another user");
+    }
+
+    @Test
+    void listIsScopedToTheCallerAndNeverUsesTheOperatorQuery() {
+        service.list(AGENT, SESSION, ALICE);
+        verify(repository).findVisibleTo(AGENT, SESSION, ALICE);
+        service.list(AGENT, SESSION, null);
+        verify(repository).findVisibleTo(AGENT, SESSION, "");
+        verify(repository, never()).findVisible(any(), any());
+    }
+
+    @Test
+    void theNoteCapAndEvictionArePerCaller() {
+        properties.setMaxNotes(2);
+        when(repository.countByAgentIdAndSessionIdIsNullAndSubjectKey(AGENT, ALICE)).thenReturn(2L);
+        ScratchpadNote oldest = new ScratchpadNote(AGENT, null, ALICE, "old", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findFirstByAgentIdAndSessionIdIsNullAndSubjectKeyOrderByUpdatedAtAsc(AGENT, ALICE))
+                .thenReturn(Optional.of(oldest));
+
+        assertThat(service.write(AGENT, null, ALICE, "new", "b", NoteTrust.TRUSTED).evictedKey())
+                .isEqualTo("old");
+        // Bob has room even though Alice is full
+        assertThat(service.write(AGENT, null, BOB, "new", "b", NoteTrust.TRUSTED).evictedKey()).isNull();
+    }
+
+    @Test
+    void aSessionNoteOwnedByAnotherSubjectCannotBeOverwrittenAndALegacyOneIsClaimed() {
+        ScratchpadNote bobs = new ScratchpadNote(AGENT, SESSION, BOB, "k", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k")).thenReturn(Optional.of(bobs));
+        assertThatThrownBy(() -> service.write(AGENT, SESSION, ALICE, "k", "x", NoteTrust.TRUSTED))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        ScratchpadNote legacy = new ScratchpadNote(AGENT, SESSION, "l", "b", 1);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "l")).thenReturn(Optional.of(legacy));
+        service.write(AGENT, SESSION, ALICE, "l", "x", NoteTrust.TRUSTED);
+        assertThat(legacy.getSubjectKey()).isEqualTo(ALICE);
+    }
+
+    @Test
+    void erasureDeletesBySubjectEvenWhenTheScratchpadIsDisabled() {
+        properties.setEnabled(false);
+        when(repository.deleteBySubjectKey(ALICE)).thenReturn(3L);
+
+        assertThat(service.eraseSubject(ALICE)).isEqualTo(3);
+        assertThat(service.eraseSubject(" ")).isZero();
+        assertThat(service.eraseSubject(null)).isZero();
+        verify(repository, never()).deleteBySubjectKey("");
+        com.agenticai.core.agents.tools.ScratchpadSubjectEraser eraser =
+                new com.agenticai.core.agents.tools.ScratchpadSubjectEraser(service);
+        assertThat(eraser.store()).isEqualTo("scratchpad");
+        assertThat(eraser.eraseSubject(ALICE)).isEqualTo(3);
+    }
+
+    @Test
+    void approvingAnAmbiguousAgentPadKeyNeedsTheOwner() {
+        ScratchpadNote a = new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, TAINTED);
+        ScratchpadNote b = new ScratchpadNote(AGENT, null, BOB, "k", "b", 1, TAINTED);
+        when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "k")).thenReturn(List.of(a, b));
+
+        assertThatThrownBy(() -> service.approve(AGENT, null, "k"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("pass subject");
+        assertThat(service.approve(AGENT, null, "k", BOB)).isTrue();
+        assertThat(b.isQuarantined()).isFalse();
+        assertThat(a.isQuarantined()).isTrue();
     }
 }

@@ -4,6 +4,7 @@ import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
+import com.agenticai.core.agents.memory.SubjectDataEraser;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.audit.AuditLogService;
@@ -95,6 +96,7 @@ public class ContactPrivacyService {
     private final ObjectProvider<TenantMemoryService> tenantMemory;
     private final ObjectProvider<GraphMemoryService> graphMemory;
     private final ObjectProvider<SessionMemoryService> sessionMemory;
+    private final ObjectProvider<SubjectDataEraser> otherStores;
 
     public ContactPrivacyService(
             JdbcTemplate jdbc,
@@ -103,7 +105,8 @@ public class ContactPrivacyService {
             ObjectProvider<AgentMemoryService> agentMemory,
             ObjectProvider<TenantMemoryService> tenantMemory,
             ObjectProvider<GraphMemoryService> graphMemory,
-            ObjectProvider<SessionMemoryService> sessionMemory) {
+            ObjectProvider<SessionMemoryService> sessionMemory,
+            ObjectProvider<SubjectDataEraser> otherStores) {
         this.jdbc = jdbc;
         this.audit = audit;
         this.ledger = ledger;
@@ -111,6 +114,7 @@ public class ContactPrivacyService {
         this.tenantMemory = tenantMemory;
         this.graphMemory = graphMemory;
         this.sessionMemory = sessionMemory;
+        this.otherStores = otherStores;
     }
 
     // ------------------------------------------------------------------ export
@@ -251,6 +255,10 @@ public class ContactPrivacyService {
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
             step("sharedMemory", erased, failures, () -> (long) tenant.forgetAllForSubject(externalId));
+        }
+        for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
+            // Per-user stores owned by modules this one reaches through the port (the agent scratchpad).
+            step(store.store(), erased, failures, () -> (long) store.eraseSubject(externalId));
         }
         GraphMemoryService graph = graphMemory.getIfAvailable();
         if (graph != null) {

@@ -7763,6 +7763,7 @@ export interface QuarantinedNoteView {
   key?: string;
   scope?: string;
   sessionId?: string;
+  subjectKey?: string;
   body?: string;
   sourceTaint?: string[];
   updatedAt?: string;
@@ -8822,6 +8823,7 @@ export interface ScratchpadNoteView {
   byteSize?: number;
   updatedAt?: string;
   body?: string;
+  subjectKey?: string;
 }
 
 export interface SearchRequest {
@@ -10702,6 +10704,8 @@ export interface UserMemoryController_ForgetAllResult {
   graphErased?: boolean;
   agentErased?: boolean;
   sharedErased?: boolean;
+  otherStoreRows?: number;
+  otherStoresErased?: boolean;
 }
 
 export interface UserMemoryController_Limits {

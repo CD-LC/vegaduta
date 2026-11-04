@@ -57,15 +57,18 @@ public class AgentScratchpadQuarantineController {
 
     /**
      * Makes the held note readable. {@code sessionId} is the {@code sessionId} the list returned (omit it
-     * for the agent-long-term pad). 404 when no held note matches.
+     * for the agent-long-term pad). {@code subject} is the owner the list returned: agent-pad notes are per
+     * user, so it is required once two users hold a held note under the same key (400 otherwise). 404 when
+     * no held note matches.
      */
     @PostMapping("/{key}/approve")
     public ResponseEntity<Void> approve(
             @PathVariable UUID agentId,
             @PathVariable String key,
-            @RequestParam(required = false) UUID sessionId) {
+            @RequestParam(required = false) UUID sessionId,
+            @RequestParam(required = false) String subject) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        return found(call(() -> scratchpadService.approve(agentId, sessionId, key)));
+        return found(call(() -> scratchpadService.approve(agentId, sessionId, key, subject)));
     }
 
     /** Deletes the held note; 404 when no held note matches. Never touches a trusted note. */
@@ -73,9 +76,10 @@ public class AgentScratchpadQuarantineController {
     public ResponseEntity<Void> reject(
             @PathVariable UUID agentId,
             @PathVariable String key,
-            @RequestParam(required = false) UUID sessionId) {
+            @RequestParam(required = false) UUID sessionId,
+            @RequestParam(required = false) String subject) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
-        return found(call(() -> scratchpadService.reject(agentId, sessionId, key)));
+        return found(call(() -> scratchpadService.reject(agentId, sessionId, key, subject)));
     }
 
     private static ResponseEntity<Void> found(boolean existed) {

@@ -47,6 +47,10 @@ export type ForgetAllResult = {
   graphEntities: number;
   /** false: the linked-facts (graph) erase failed; the stored rows are gone regardless. */
   graphErased: boolean;
+  /** Rows removed from per-user stores kept elsewhere (the agent scratchpad); absent on older cores. */
+  otherStoreRows?: number;
+  /** false: one of those stores failed to erase. */
+  otherStoresErased?: boolean;
 };
 
 /** The slice of an agent this surface needs (GET /api/agents rows carry more). */

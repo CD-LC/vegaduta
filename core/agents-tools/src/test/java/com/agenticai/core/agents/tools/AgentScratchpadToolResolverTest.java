@@ -48,7 +48,7 @@ class AgentScratchpadToolResolverTest {
             AgentScratchpadToolResolver resolver, UUID agentId, String sessionId) {
         return resolver
                 .resolveScratchpadTools(
-                        agentId, sessionId, new AtomicInteger(), null, null, false)
+                        agentId, sessionId, "alice", new AtomicInteger(), null, null, false)
                 .stream()
                 .map(t -> t.getToolDefinition().name())
                 .toList();

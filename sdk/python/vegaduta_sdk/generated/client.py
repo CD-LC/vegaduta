@@ -1496,12 +1496,12 @@ class AgentScratchpadApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad", query={"session": session})
 
-    def read(self, agent_id: str, key: str, *, session: Optional[str] = None) -> m.ScratchpadNoteView:
+    def read(self, agent_id: str, key: str, *, session: Optional[str] = None, subject: Optional[str] = None) -> m.ScratchpadNoteView:
         """Read.
 
         GET /api/agents/{agentId}/scratchpad/{key}
         """
-        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session, "subject": subject})
 
 
 class AgentScratchpadQuarantineApi:
@@ -1515,23 +1515,23 @@ class AgentScratchpadQuarantineApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine", query={"limit": limit, "offset": offset})
 
-    def approve(self, agent_id: str, key: str, *, session_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+    def approve(self, agent_id: str, key: str, *, session_id: Optional[str] = None, subject: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Approve.
 
         POST /api/agents/{agentId}/scratchpad-quarantine/{key}/approve
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/approve", query={"sessionId": session_id}, headers={"Idempotency-Key": idempotency_key}, response="void")
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/approve", query={"sessionId": session_id, "subject": subject}, headers={"Idempotency-Key": idempotency_key}, response="void")
 
-    def reject(self, agent_id: str, key: str, *, session_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+    def reject(self, agent_id: str, key: str, *, session_id: Optional[str] = None, subject: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Reject.
 
         POST /api/agents/{agentId}/scratchpad-quarantine/{key}/reject
 
         Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
         """
-        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/reject", query={"sessionId": session_id}, headers={"Idempotency-Key": idempotency_key}, response="void")
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/reject", query={"sessionId": session_id, "subject": subject}, headers={"Idempotency-Key": idempotency_key}, response="void")
 
 
 class AgentSessionLlmRequestApi:

@@ -46,6 +46,10 @@ class UserMemoryControllerTest {
     private final ObjectProvider<TenantMemoryService> tenantProvider = mock(ObjectProvider.class);
     private final GraphMemoryService graph = mock(GraphMemoryService.class);
     private final ObjectProvider<GraphMemoryService> graphProvider = mock(ObjectProvider.class);
+    private final ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> otherStoreProvider =
+        mock(ObjectProvider.class);
+    private final com.agenticai.core.agents.memory.SubjectDataEraser scratchpad =
+        mock(com.agenticai.core.agents.memory.SubjectDataEraser.class);
     private final AgentService agentService = mock(AgentService.class);
     private final Principal alice = () -> "alice";
 
@@ -61,9 +65,11 @@ class UserMemoryControllerTest {
         when(agentProvider.getIfAvailable()).thenReturn(agent);
         when(tenantProvider.getIfAvailable()).thenReturn(tenant);
         when(graphProvider.getIfAvailable()).thenReturn(graph);
+        when(scratchpad.store()).thenReturn("scratchpad");
+        when(otherStoreProvider.orderedStream()).thenAnswer(inv -> java.util.stream.Stream.of(scratchpad));
         when(tenant.blocksEnabled()).thenReturn(true);
         return new UserMemoryController(
-            agentProvider, tenantProvider, graphProvider, agentService,
+            agentProvider, tenantProvider, graphProvider, otherStoreProvider, agentService,
             new UserMemoryFactService(agentProvider, tenantProvider, agentService, selfService, 25, 50),
             selfService, graphForgetSync);
     }
@@ -77,7 +83,7 @@ class UserMemoryControllerTest {
 
     @Test
     void overviewReportsUnavailableWithoutMemoryBeans() {
-        UserMemoryController c = new UserMemoryController(agentProvider, tenantProvider, graphProvider, agentService,
+        UserMemoryController c = new UserMemoryController(agentProvider, tenantProvider, graphProvider, otherStoreProvider, agentService,
             new UserMemoryFactService(agentProvider, tenantProvider, agentService, true, 25, 50), true, false);
         UserMemoryController.MemoryOverview o = c.overview(alice);
         assertFalse(o.available());
@@ -225,13 +231,28 @@ class UserMemoryControllerTest {
         when(agent.forgetAllForSubject("alice")).thenReturn(4);
         when(tenant.forgetAllForSubject("alice")).thenReturn(3);
         when(graph.eraseSubject("alice")).thenReturn(2);
+        when(scratchpad.eraseSubject("alice")).thenReturn(5);
         UserMemoryController.ForgetAllResult r = c.forgetAll(true, alice);
+        assertEquals(5, r.otherStoreRows(), "scratchpad notes owned by the caller are erased too");
+        assertTrue(r.otherStoresErased());
+        verify(scratchpad).eraseSubject("alice");
         assertEquals(4, r.agentFacts());
         assertEquals(3, r.sharedAndBlocks());
         assertEquals(2, r.graphEntities());
         assertTrue(r.graphErased());
         assertTrue(r.agentErased());
         assertTrue(r.sharedErased());
+    }
+
+    @Test
+    void forgetAllReportsAFailedScratchpadEraseWithoutSkippingTheRest() {
+        UserMemoryController c = controller();
+        when(scratchpad.eraseSubject("alice")).thenThrow(new RuntimeException("db hiccup"));
+        when(agent.forgetAllForSubject("alice")).thenReturn(1);
+        UserMemoryController.ForgetAllResult r = c.forgetAll(true, alice);
+        assertFalse(r.otherStoresErased());
+        assertEquals(0, r.otherStoreRows());
+        assertEquals(1, r.agentFacts());
     }
 
     @Test

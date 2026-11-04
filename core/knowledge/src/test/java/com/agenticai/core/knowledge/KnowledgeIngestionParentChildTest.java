@@ -87,6 +87,20 @@ class KnowledgeIngestionParentChildTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void parentsOfAQuarantinedIngestionAreWrittenWithTheChildrensTrust() {
+        KnowledgeRagSettingsService settings = mock(KnowledgeRagSettingsService.class);
+        when(settings.parentChildIngestSettings(collectionId)).thenReturn(Optional.of(new ParentChildChunker.Settings(10, 20)));
+        ParentChunkStore store = mock(ParentChunkStore.class);
+        service.setParentChild(settings, store);
+        ChunkProvenance held = ChunkProvenance.quarantined(List.of("fetch_web_page"));
+
+        service.ingestWithProvenance("note", TEXT, 150, 30, collectionId, held);
+
+        verify(store).insertAll(eq(collectionId), eq((UUID) null), any(List.class), eq(held));
+    }
+
+    @Test
     void flatIngestionIsUnchangedWhenTheCollectionDidNotOptIn() {
         KnowledgeRagSettingsService settings = mock(KnowledgeRagSettingsService.class);
         when(settings.parentChildIngestSettings(collectionId)).thenReturn(Optional.empty());
@@ -96,7 +110,7 @@ class KnowledgeIngestionParentChildTest {
         service.ingest("doc.md", TEXT, 150, 30, collectionId);
 
         assertEquals(Chunker.chunk(TEXT, new Chunker.Settings(150, 30)), embeddedPieces);
-        verify(store, never()).insertAll(any(), any(), any());
+        verify(store, never()).insertAll(any(), any(), any(), any());
         for (Object[] row : insertedChunks) {
             assertEquals("{\"source_type\":\"text\"}", row[row.length - 1]);
         }
@@ -120,7 +134,7 @@ class KnowledgeIngestionParentChildTest {
 
         // The parents are persisted once each, with this collection and no document (raw text ingest).
         ArgumentCaptor<List<ParentChunkStore.ParentRow>> rows = ArgumentCaptor.forClass(List.class);
-        verify(store).insertAll(eq(collectionId), eq((UUID) null), rows.capture());
+        verify(store).insertAll(eq(collectionId), eq((UUID) null), rows.capture(), eq(ChunkProvenance.TRUSTED));
         assertEquals(2, rows.getValue().size());
         assertEquals(expected.get(0).text(), rows.getValue().get(0).content());
         assertEquals(1, rows.getValue().get(1).index());

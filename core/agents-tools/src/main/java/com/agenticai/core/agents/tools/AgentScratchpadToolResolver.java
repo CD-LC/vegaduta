@@ -73,6 +73,7 @@ final class AgentScratchpadToolResolver {
     List<ToolCallback> resolveScratchpadTools(
             UUID agentId,
             String sessionId,
+            String subjectKey,
             AtomicInteger stepCounter,
             String userMessage,
             ChatClient chatClient,
@@ -94,6 +95,7 @@ final class AgentScratchpadToolResolver {
                                     kind,
                                     agentId,
                                     sessionId,
+                                    subjectKey,
                                     TurnTaintViews.sources(
                                             TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
                             agentId,

@@ -130,7 +130,8 @@ abstract class DpdpControlsFixture {
                         provider(agentMemory),
                         provider(tenantMemory),
                         provider(graph),
-                        provider(sessionMemory));
+                        provider(sessionMemory),
+                        noErasers());
         gate = new ConsentGateService(jdbc, policies, ledger, contacts, audit);
         retention = new RetentionPolicyService(jdbc);
         purger = new RetentionPurger(jdbc, retention, audit, storage, provider(agentMemory), provider(tenantMemory));
@@ -180,6 +181,12 @@ abstract class DpdpControlsFixture {
     }
 
     @SuppressWarnings("unchecked")
+    protected static ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> noErasers() {
+        ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> p = mock(ObjectProvider.class);
+        when(p.orderedStream()).thenAnswer(inv -> java.util.stream.Stream.empty());
+        return p;
+    }
+
     protected static <T> ObjectProvider<T> provider(T value) {
         ObjectProvider<T> p = mock(ObjectProvider.class);
         when(p.getIfAvailable()).thenReturn(value);

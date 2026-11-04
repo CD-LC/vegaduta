@@ -1758,7 +1758,7 @@ export class AgentScratchpadApi {
    * Read.
    * `GET /api/agents/{agentId}/scratchpad/{key}`
    */
-  read(agentId: string, key: string, options?: CallOptions<{ session?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
+  read(agentId: string, key: string, options?: CallOptions<{ session?: string; subject?: string }, HeaderParams>): Promise<T.ScratchpadNoteView> {
     return this.http.request<T.ScratchpadNoteView>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad/${encodeURIComponent(String(key))}` });
   }
 }
@@ -1784,7 +1784,7 @@ export class AgentScratchpadQuarantineApi {
    *
    * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
-  approve(agentId: string, key: string, options?: CallOptions<{ sessionId?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+  approve(agentId: string, key: string, options?: CallOptions<{ sessionId?: string; subject?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/approve`, response: "void" });
   }
 
@@ -1794,7 +1794,7 @@ export class AgentScratchpadQuarantineApi {
    *
    * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
    */
-  reject(agentId: string, key: string, options?: CallOptions<{ sessionId?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+  reject(agentId: string, key: string, options?: CallOptions<{ sessionId?: string; subject?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/reject`, response: "void" });
   }
 }

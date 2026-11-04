@@ -292,8 +292,18 @@ class ToolSourceConfiguration {
     @Bean
     @Order(305)
     ToolSource scratchpadToolSource(AgentScratchpadToolResolver scratchpad) {
-        return ToolSource.ofResolver(
-                "scratchpad", ToolSource.Kind.BUILT_IN, scratchpad::resolveScratchpadTools);
+        return ToolSource.of(
+                "scratchpad",
+                ToolSource.Kind.BUILT_IN,
+                ctx ->
+                        scratchpad.resolveScratchpadTools(
+                                ctx.agentId(),
+                                ctx.sessionId(),
+                                ctx.subjectKey(),
+                                ctx.stepCounter(),
+                                ctx.userMessage(),
+                                ctx.chatClient(),
+                                ctx.rigorous()));
     }
 
     /**

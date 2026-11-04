@@ -1,5 +1,6 @@
 package com.agenticai.core.knowledge.rag;
 
+import com.agenticai.core.knowledge.ChunkProvenance;
 import com.agenticai.core.knowledge.KnowledgeSchemaSupport;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,23 +39,32 @@ public class ParentChunkStore {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    /** Persists parents for one ingestion. {@code documentId} may be null (raw text ingest). */
-    public void insertAll(UUID collectionId, UUID documentId, List<ParentRow> parents) {
+    /**
+     * Persists parents for one ingestion. {@code documentId} may be null (raw text ingest). The parents
+     * take the trust of the children written with them ({@code provenance}, V680): a parent holds the
+     * children's text, so a QUARANTINED document's parents are QUARANTINED too and never handed to the model.
+     */
+    public void insertAll(UUID collectionId, UUID documentId, List<ParentRow> parents, ChunkProvenance provenance) {
         if (parents.isEmpty()) {
             return;
         }
+        ChunkProvenance prov = provenance == null ? ChunkProvenance.quarantined(List.of("unknown")) : provenance;
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_parent_chunk");
         jdbcTemplate.batchUpdate(
-            "INSERT INTO " + table + " (id, collection_id, document_id, parent_index, content) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO " + table
+                + " (id, collection_id, document_id, parent_index, content, trust, source_taint) VALUES (?, ?, ?, ?, ?, ?, ?)",
             parents.stream()
-                .map(p -> new Object[] {p.id(), collectionId, documentId, p.index(), p.content()})
+                .map(p -> new Object[] {
+                    p.id(), collectionId, documentId, p.index(), p.content(), prov.trustName(), prov.sourcesJson()
+                })
                 .collect(Collectors.toList())
         );
     }
 
     /**
      * For each given chunk id that is a child of a stored parent, its {@link ParentExpander.ParentLink}.
-     * Chunks without a parent (flat chunks) are simply absent from the map.
+     * Chunks without a parent (flat chunks) are simply absent from the map, and so are chunks whose parent is
+     * QUARANTINED (V680): the child is returned alone rather than expanded with text a person has not approved.
      */
     public Map<UUID, ParentExpander.ParentLink> linksFor(Collection<UUID> chunkIds) {
         if (chunkIds == null || chunkIds.isEmpty()) {
@@ -66,7 +76,7 @@ public class ParentChunkStore {
         String sql = "SELECT c.id AS chunk_id, p.id AS parent_id, p.content AS parent_content, "
             + "(c.metadata->>'child_start')::int AS child_start, (c.metadata->>'child_end')::int AS child_end "
             + "FROM " + chunks + " c JOIN " + parents + " p ON p.id = (c.metadata->>'parent_id')::uuid "
-            + "WHERE c.id = ANY(?::uuid[])";
+            + "WHERE c.id = ANY(?::uuid[]) AND p.trust = 'TRUSTED'";
         try {
             Map<UUID, ParentExpander.ParentLink> out = new HashMap<>();
             jdbcTemplate.query(sql, rs -> {

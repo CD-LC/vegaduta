@@ -113,7 +113,18 @@ class PersistentWriteLaunderingRedTeamTest {
                         && java.util.Objects.equals(n.getSessionId(), i.getArgument(1))
                         && n.getKey().equals(i.getArgument(2)))
                 .findFirst());
-        when(repo.findVisible(any(), any())).thenAnswer(i -> store.stream().filter(n -> !n.isQuarantined()).toList());
+        when(repo.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(any(), any(), any())).thenAnswer(i -> store.stream()
+                .filter(n -> n.getAgentId().equals(i.getArgument(0))
+                        && n.getSessionId() == null
+                        && java.util.Objects.equals(n.getSubjectKey(), i.getArgument(1))
+                        && n.getKey().equals(i.getArgument(2)))
+                .findFirst());
+        when(repo.findVisibleTo(any(), any(), any())).thenAnswer(i -> store.stream()
+                .filter(n -> !n.isQuarantined())
+                .filter(n -> n.getSessionId() == null
+                        ? java.util.Objects.equals(n.getSubjectKey(), i.getArgument(2))
+                        : java.util.Objects.equals(n.getSessionId(), i.getArgument(1)))
+                .toList());
         ScratchpadProperties props = new ScratchpadProperties();
         props.setEnabled(true);
         return new AgentScratchpadService(repo, props);
@@ -121,7 +132,12 @@ class PersistentWriteLaunderingRedTeamTest {
 
     private static ScratchpadToolCallback pad(
             AgentScratchpadService svc, ScratchpadToolCallback.Kind kind, UUID agent, RedTeamChain turn) {
-        return new ScratchpadToolCallback(svc, kind, agent, (String) null, viewOf(turn));
+        return pad(svc, kind, agent, "alice", turn);
+    }
+
+    private static ScratchpadToolCallback pad(
+            AgentScratchpadService svc, ScratchpadToolCallback.Kind kind, UUID agent, String subject, RedTeamChain turn) {
+        return new ScratchpadToolCallback(svc, kind, agent, (String) null, subject, viewOf(turn));
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
@@ -209,6 +225,35 @@ class PersistentWriteLaunderingRedTeamTest {
         String read = turn.wrap(pad(svc, ScratchpadToolCallback.Kind.READ, agent, turn))
                 .call(json(Map.of("key", "todo", "scope", "agent")));
         assertTrue(read.contains("buy milk"), read);
+    }
+
+    @Test
+    void anAgentPadNoteIsNotReadableListedOrDeletableByAnotherUserOfTheSameAgent() {
+        AgentScratchpadService svc = service();
+        UUID agent = UUID.randomUUID();
+        RedTeamChain alice = new RedTeamChain("enforce", "");
+        String written = alice.wrap(pad(svc, ScratchpadToolCallback.Kind.WRITE, agent, "alice", alice))
+                .call(json(Map.of("key", "secret", "body", "my favourite colour is green", "scope", "agent")));
+        assertTrue(written.contains("\"written\":true"), written);
+
+        RedTeamChain bob = new RedTeamChain("enforce", "");
+        String read = bob.wrap(pad(svc, ScratchpadToolCallback.Kind.READ, agent, "bob", bob))
+                .call(json(Map.of("key", "secret", "scope", "agent")));
+        String list = bob.wrap(pad(svc, ScratchpadToolCallback.Kind.LIST, agent, "bob", bob))
+                .call(json(Map.of("scope", "agent")));
+        String del = bob.wrap(pad(svc, ScratchpadToolCallback.Kind.DELETE, agent, "bob", bob))
+                .call(json(Map.of("key", "secret", "scope", "agent")));
+        assertFalse(read.contains("green"), read);
+        assertFalse(list.contains("secret"), list);
+        assertFalse(del.contains("\"deleted\":true"), del);
+        // and a turn with no identified user gets nothing from the agent pad
+        String anon = alice.wrap(pad(svc, ScratchpadToolCallback.Kind.READ, agent, null, alice))
+                .call(json(Map.of("key", "secret", "scope", "agent")));
+        assertFalse(anon.contains("green"), anon);
+        RedTeamChain aliceLater = new RedTeamChain("enforce", "");
+        String still = aliceLater.wrap(pad(svc, ScratchpadToolCallback.Kind.READ, agent, "alice", aliceLater))
+                .call(json(Map.of("key", "secret", "scope", "agent")));
+        assertTrue(still.contains("green"), still);
     }
 
     // ---- data tables ---------------------------------------------------------------------------------------------

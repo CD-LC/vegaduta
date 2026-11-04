@@ -70,24 +70,24 @@ class ScratchpadToolCallbackTest {
     private static AgentScratchpadService fake() {
         AgentScratchpadService svc = mock(AgentScratchpadService.class);
         Map<String, ScratchpadNote> store = new LinkedHashMap<>();
-        when(svc.write(any(), any(), any(), any(), any()))
+        when(svc.write(any(), any(), any(), any(), any(), any()))
                 .thenAnswer(
                         inv -> {
                             ScratchpadNote n =
                                     note(
                                             inv.getArgument(1),
-                                            inv.getArgument(2),
-                                            inv.getArgument(3));
-                            store.put(storeKey(inv.getArgument(1), inv.getArgument(2)), n);
+                                            inv.getArgument(3),
+                                            inv.getArgument(4));
+                            store.put(storeKey(inv.getArgument(1), inv.getArgument(3)), n);
                             return new AgentScratchpadService.WriteResult(n, null, 0);
                         });
-        when(svc.read(any(), any(), any()))
+        when(svc.read(any(), any(), any(), any()))
                 .thenAnswer(
                         inv ->
                                 Optional.ofNullable(
                                         store.get(
-                                                storeKey(inv.getArgument(1), inv.getArgument(2)))));
-        when(svc.list(any(), any()))
+                                                storeKey(inv.getArgument(1), inv.getArgument(3)))));
+        when(svc.list(any(), any(), any()))
                 .thenAnswer(
                         inv -> {
                             UUID session = inv.getArgument(1);
@@ -101,10 +101,10 @@ class ScratchpadToolCallbackTest {
                             }
                             return out;
                         });
-        when(svc.delete(any(), any(), any()))
+        when(svc.delete(any(), any(), any(), any()))
                 .thenAnswer(
                         inv ->
-                                store.remove(storeKey(inv.getArgument(1), inv.getArgument(2)))
+                                store.remove(storeKey(inv.getArgument(1), inv.getArgument(3)))
                                         != null);
         return svc;
     }
@@ -228,7 +228,7 @@ class ScratchpadToolCallbackTest {
 
     @Test
     void serviceRefusalsAreErrorJsonTheModelCanFix() throws Exception {
-        when(service.write(any(), any(), any(), any(), any()))
+        when(service.write(any(), any(), any(), any(), any(), any()))
                 .thenThrow(new IllegalStateException("note is over the 8192-byte cap"));
         JsonNode w =
                 call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"too big\"}");
@@ -299,6 +299,7 @@ class ScratchpadToolCallbackTest {
                                                 ScratchpadToolCallback.Kind.LIST,
                                                 AGENT,
                                                 (UUID) null,
+                                                "alice",
                                                 CLEAN)
                                         .call("{}"));
         assertThat(agentRows.path("count").asInt()).isEqualTo(1);
@@ -325,7 +326,7 @@ class ScratchpadToolCallbackTest {
                         note(ScratchpadToolCallback.sessionUuid(SESSION), "k", "v"),
                         "stale-note",
                         1);
-        when(service.write(any(), any(), any(), any(), any())).thenReturn(result);
+        when(service.write(any(), any(), any(), any(), any(), any())).thenReturn(result);
         JsonNode w = call(ScratchpadToolCallback.Kind.WRITE, "{\"key\":\"k\",\"body\":\"v\"}");
         assertThat(w.path("written").asBoolean()).isTrue();
         assertThat(w.path("evicted_key").asText()).isEqualTo("stale-note");
@@ -349,7 +350,7 @@ class ScratchpadToolCallbackTest {
                                                 taint(true))
                                         .call("{\"key\":\"plan\",\"body\":\"the user prefers email\"}"));
         org.mockito.Mockito.verify(service)
-                .write(any(), any(), org.mockito.ArgumentMatchers.eq("plan"), any(), captor.capture());
+                .write(any(), any(), any(), org.mockito.ArgumentMatchers.eq("plan"), any(), captor.capture());
         assertThat(captor.getValue().quarantined()).isTrue();
         assertThat(captor.getValue().sourceTaint()).containsExactly("fetch_web_page");
         assertThat(out.path("quarantined").asBoolean()).isTrue();
@@ -364,7 +365,7 @@ class ScratchpadToolCallbackTest {
         new ScratchpadToolCallback(
                         service, ScratchpadToolCallback.Kind.WRITE, AGENT, SESSION, none)
                 .call("{\"key\":\"k\",\"body\":\"a note\"}");
-        org.mockito.Mockito.verify(service).write(any(), any(), any(), any(), captor.capture());
+        org.mockito.Mockito.verify(service).write(any(), any(), any(), any(), any(), captor.capture());
         assertThat(captor.getValue().quarantined()).isTrue();
     }
 
@@ -378,5 +379,21 @@ class ScratchpadToolCallbackTest {
         assertThat(out.has("error")).isTrue();
         org.mockito.Mockito.verify(service, org.mockito.Mockito.never())
                 .write(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void theCallersSubjectKeyIsPassedToEveryServiceCall() throws Exception {
+        for (ScratchpadToolCallback.Kind kind : ScratchpadToolCallback.Kind.values()) {
+            new ScratchpadToolCallback(service, kind, AGENT, SESSION, "alice", CLEAN)
+                    .call("{\"key\":\"k\",\"body\":\"v\",\"scope\":\"agent\"}");
+        }
+        org.mockito.Mockito.verify(service)
+                .write(any(), any(), org.mockito.ArgumentMatchers.eq("alice"), any(), any(), any());
+        org.mockito.Mockito.verify(service)
+                .read(any(), any(), org.mockito.ArgumentMatchers.eq("alice"), any());
+        org.mockito.Mockito.verify(service)
+                .list(any(), any(), org.mockito.ArgumentMatchers.eq("alice"));
+        org.mockito.Mockito.verify(service)
+                .delete(any(), any(), org.mockito.ArgumentMatchers.eq("alice"), any());
     }
 }

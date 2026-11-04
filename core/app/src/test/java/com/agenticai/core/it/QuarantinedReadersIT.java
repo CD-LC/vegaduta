@@ -88,7 +88,15 @@ class QuarantinedReadersIT {
                         provider(agentMemory),
                         provider(tenantMemory),
                         provider(mock(GraphMemoryService.class)),
-                        provider(null));
+                        provider(null),
+                        noErasers());
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> noErasers() {
+        ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> p = mock(ObjectProvider.class);
+        when(p.orderedStream()).thenAnswer(inv -> java.util.stream.Stream.empty());
+        return p;
     }
 
     @BeforeEach

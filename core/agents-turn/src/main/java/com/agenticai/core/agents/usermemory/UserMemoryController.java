@@ -6,6 +6,7 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryBlocks;
 import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
+import com.agenticai.core.agents.memory.SubjectDataEraser;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.security.TenantContext;
@@ -71,6 +72,7 @@ public class UserMemoryController {
     private final ObjectProvider<AgentMemoryService> agentMemoryService;
     private final ObjectProvider<TenantMemoryService> tenantMemoryService;
     private final ObjectProvider<GraphMemoryService> graphMemoryService;
+    private final ObjectProvider<SubjectDataEraser> otherStores;
     private final AgentService agentService;
     private final UserMemoryFactService facts;
     private final boolean selfServiceEnabled;
@@ -80,6 +82,7 @@ public class UserMemoryController {
         ObjectProvider<AgentMemoryService> agentMemoryService,
         ObjectProvider<TenantMemoryService> tenantMemoryService,
         ObjectProvider<GraphMemoryService> graphMemoryService,
+        ObjectProvider<SubjectDataEraser> otherStores,
         AgentService agentService,
         UserMemoryFactService facts,
         @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
@@ -88,6 +91,7 @@ public class UserMemoryController {
         this.agentMemoryService = agentMemoryService;
         this.tenantMemoryService = tenantMemoryService;
         this.graphMemoryService = graphMemoryService;
+        this.otherStores = otherStores;
         this.agentService = agentService;
         this.facts = facts;
         this.selfServiceEnabled = selfServiceEnabled;
@@ -145,7 +149,8 @@ public class UserMemoryController {
      * three before telling the user everything is gone.
      */
     public record ForgetAllResult(
-        int agentFacts, int sharedAndBlocks, int graphEntities, boolean graphErased, boolean agentErased, boolean sharedErased
+        int agentFacts, int sharedAndBlocks, int graphEntities, boolean graphErased, boolean agentErased, boolean sharedErased,
+        int otherStoreRows, boolean otherStoresErased
     ) {
     }
 
@@ -194,7 +199,7 @@ public class UserMemoryController {
 
     /**
      * Forgets everything about the caller: every agent's private facts, the shared facts, the editable
-     * blocks and (when graph memory is on) the graph entities. Needs {@code confirm=true} so a stray
+     * blocks, the agent scratchpad notes the caller owns and (when graph memory is on) the graph entities. Needs {@code confirm=true} so a stray
      * DELETE on the collection cannot wipe it.
      */
     @DeleteMapping
@@ -241,12 +246,26 @@ public class UserMemoryController {
                 log.warn("Self-service forget-all: graph erase failed", e);
             }
         }
+        // Per-user data kept by modules this one cannot depend on (the agent scratchpad), through SubjectDataEraser.
+        int otherRows = 0;
+        boolean otherErased = true;
+        if (otherStores != null) {
+            for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
+                try {
+                    otherRows += store.eraseSubject(subject);
+                } catch (Exception e) {
+                    otherErased = false;
+                    log.warn("Self-service forget-all: {} erase failed", store.store(), e);
+                }
+            }
+        }
         // The durable trace of a full self-erasure: which tenant, who (hashed, never the raw key) and what went.
         log.info("Self-service forget-all: tenant={} subject#={} agentFacts={} (ok={}) sharedAndBlocks={} (ok={}) "
-                + "graphEntities={} (ok={})",
+                + "graphEntities={} (ok={}) otherStores={} (ok={})",
             TenantContext.current().map(TenantContext::getTenantId).orElse("unknown"), subjectFingerprint(subject),
-            agentFacts, agentErased, sharedAndBlocks, sharedErased, graphEntities, graphErased);
-        return new ForgetAllResult(agentFacts, sharedAndBlocks, graphEntities, graphErased, agentErased, sharedErased);
+            agentFacts, agentErased, sharedAndBlocks, sharedErased, graphEntities, graphErased, otherRows, otherErased);
+        return new ForgetAllResult(
+            agentFacts, sharedAndBlocks, graphEntities, graphErased, agentErased, sharedErased, otherRows, otherErased);
     }
 
     /** First 12 hex chars of SHA-256(subject): enough to correlate log lines, not to recover the identity. */

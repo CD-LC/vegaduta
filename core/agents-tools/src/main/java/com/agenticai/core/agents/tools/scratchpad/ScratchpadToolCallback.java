@@ -85,16 +85,34 @@ public final class ScratchpadToolCallback implements ToolCallback {
      */
     private final Supplier<List<String>> turnTaint;
 
+    /**
+     * The caller of the turn (the same subject key {@code remember_fact} scopes by); the agent pad is
+     * kept per caller. Null/blank = no identified caller: only the session pad is usable.
+     */
+    private final String subjectKey;
+
+    /** A callback with no caller identity: the agent pad refuses every call (fail closed). */
     public ScratchpadToolCallback(
             AgentScratchpadService service,
             Kind kind,
             UUID agentId,
             String sessionId,
             Supplier<List<String>> turnTaint) {
+        this(service, kind, agentId, sessionId, null, turnTaint);
+    }
+
+    public ScratchpadToolCallback(
+            AgentScratchpadService service,
+            Kind kind,
+            UUID agentId,
+            String sessionId,
+            String subjectKey,
+            Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
         this.sessionUuid = sessionUuid(sessionId);
+        this.subjectKey = subjectKey;
         this.turnTaint = turnTaint;
     }
 
@@ -104,11 +122,13 @@ public final class ScratchpadToolCallback implements ToolCallback {
             Kind kind,
             UUID agentId,
             UUID sessionUuid,
+            String subjectKey,
             Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
         this.sessionUuid = sessionUuid;
+        this.subjectKey = subjectKey;
         this.turnTaint = turnTaint;
     }
 
@@ -192,7 +212,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
                     }
                     NoteTrust provenance = NoteTrust.of(turnTaint);
                     AgentScratchpadService.WriteResult result =
-                            service.write(agentId, scope.sessionId(), key, text, provenance);
+                            service.write(agentId, scope.sessionId(), subjectKey, key, text, provenance);
                     ScratchpadNote note = result.note();
                     out.put("written", true)
                             .put("key", note.getKey())
@@ -225,7 +245,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
                 case READ -> {
                     String key = requiredKey(a);
                     Scope scope = scopeOf(a);
-                    Optional<ScratchpadNote> found = service.read(agentId, scope.sessionId(), key);
+                    Optional<ScratchpadNote> found = service.read(agentId, scope.sessionId(), subjectKey, key);
                     if (found.isEmpty()) {
                         out.put("found", false)
                                 .put("key", key)
@@ -255,10 +275,10 @@ public final class ScratchpadToolCallback implements ToolCallback {
                         // list(agentId, session) already merges the session pad and the
                         // agent-long-term pad, newest-updated first; a null session lists the
                         // long-term pad alone.
-                        listed = service.list(agentId, sessionUuid);
+                        listed = service.list(agentId, sessionUuid, subjectKey);
                     } else {
                         Scope s = scopeOf(a);
-                        listed = service.list(agentId, s.sessionId());
+                        listed = service.list(agentId, s.sessionId(), subjectKey);
                         if ("session".equals(s.name())) {
                             // The merged read still applies: a session-scoped list keeps only this
                             // session's rows, not the agent pad findVisible adds.
@@ -279,7 +299,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
                 case DELETE -> {
                     String key = requiredKey(a);
                     Scope scope = scopeOf(a);
-                    boolean deleted = service.delete(agentId, scope.sessionId(), key);
+                    boolean deleted = service.delete(agentId, scope.sessionId(), subjectKey, key);
                     out.put("deleted", deleted).put("key", key).put("scope", scope.name());
                     if (!deleted) {
                         out.put(

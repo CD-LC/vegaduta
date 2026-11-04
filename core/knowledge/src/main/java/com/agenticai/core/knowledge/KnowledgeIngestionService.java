@@ -318,7 +318,7 @@ public class KnowledgeIngestionService {
         String metadataJson = toMetadataJson(sourceType);
 
         if (parentChildPlan != null) {
-            parentChunkStore.insertAll(collectionId, documentId, parentChildPlan.parentRows());
+            parentChunkStore.insertAll(collectionId, documentId, parentChildPlan.parentRows(), provenance);
         }
 
         List<UUID> ids = new ArrayList<>();

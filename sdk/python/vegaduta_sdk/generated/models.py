@@ -8046,6 +8046,7 @@ class QuarantinedNoteView(TypedDict, total=False):
     key: str
     scope: str
     sessionId: str
+    subjectKey: str
     body: str
     sourceTaint: List[str]
     updatedAt: str
@@ -9087,6 +9088,7 @@ class ScratchpadNoteView(TypedDict, total=False):
     byteSize: int
     updatedAt: str
     body: str
+    subjectKey: str
 
 
 class _SearchRequestRequired(TypedDict):
@@ -10933,6 +10935,8 @@ class UserMemoryController_ForgetAllResult(TypedDict, total=False):
     graphErased: bool
     agentErased: bool
     sharedErased: bool
+    otherStoreRows: int
+    otherStoresErased: bool
 
 
 class UserMemoryController_Limits(TypedDict, total=False):

@@ -68,6 +68,12 @@ public class ScratchpadNote {
     @Column(name = "source_taint", columnDefinition = "TEXT")
     private String sourceTaint;
 
+    // Owner of an agent-pad note (V680): the caller's subject key, as agent_memory.subject_key. NULL on rows
+    // that predate the column (author unknown: not returned to the model) and on session-pad notes written
+    // without an identified caller.
+    @Column(name = "subject_key", columnDefinition = "TEXT")
+    private String subjectKey;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -89,7 +95,19 @@ public class ScratchpadNote {
             String body,
             int byteSize,
             NoteTrust provenance) {
+        this(agentId, sessionId, null, key, body, byteSize, provenance);
+    }
+
+    public ScratchpadNote(
+            UUID agentId,
+            UUID sessionId,
+            String subjectKey,
+            String key,
+            String body,
+            int byteSize,
+            NoteTrust provenance) {
         applyProvenance(provenance);
+        this.subjectKey = subjectKey;
         this.agentId = agentId;
         this.sessionId = sessionId;
         this.key = key;
@@ -144,6 +162,18 @@ public class ScratchpadNote {
     /** Null means agent-long-term: the note is not tied to any one session. */
     public UUID getSessionId() {
         return sessionId;
+    }
+
+    /** Owner (subject key) of the note; null for rows that predate V680. */
+    public String getSubjectKey() {
+        return subjectKey;
+    }
+
+    /** A caller writing into a legacy no-owner session note takes it over. */
+    void claim(String subjectKey) {
+        if (this.subjectKey == null) {
+            this.subjectKey = subjectKey;
+        }
     }
 
     public String getKey() {
