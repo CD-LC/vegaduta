@@ -1763,6 +1763,42 @@ export class AgentScratchpadApi {
   }
 }
 
+export class AgentScratchpadQuarantineApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/agents/{agentId}/scratchpad-quarantine`
+   */
+  list(agentId: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.QuarantinedNoteView[]> {
+    return this.http.request<T.QuarantinedNoteView[]>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine` });
+  }
+
+  /**
+   * Approve.
+   * `POST /api/agents/{agentId}/scratchpad-quarantine/{key}/approve`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  approve(agentId: string, key: string, options?: CallOptions<{ sessionId?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject.
+   * `POST /api/agents/{agentId}/scratchpad-quarantine/{key}/reject`
+   *
+   * Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+   */
+  reject(agentId: string, key: string, options?: CallOptions<{ sessionId?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/scratchpad-quarantine/${encodeURIComponent(String(key))}/reject`, response: "void" });
+  }
+}
+
 export class AgentSessionLlmRequestApi {
   private readonly http: HttpClient;
 
@@ -4110,6 +4146,34 @@ export class DataTableApi {
    */
   importCsv(table: string, body: FormData, options?: CallOptions): Promise<T.DataTableDtos_ImportResult> {
     return this.http.request<T.DataTableDtos_ImportResult>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/import`, body, bodyType: "multipart" });
+  }
+
+  /**
+   * Quarantined.
+   * `GET /api/data-tables/{table}/quarantine`
+   */
+  quarantined(table: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.DataTableDtos_QuarantinedRowView[]> {
+    return this.http.request<T.DataTableDtos_QuarantinedRowView[]>({ ...options, method: "GET", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine` });
+  }
+
+  /**
+   * Approve quarantined.
+   * `POST /api/data-tables/{table}/quarantine/{rowId}/approve`
+   *
+   * Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+   */
+  approveQuarantined(table: string, rowId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine/${encodeURIComponent(String(rowId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Reject quarantined.
+   * `POST /api/data-tables/{table}/quarantine/{rowId}/reject`
+   *
+   * Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+   */
+  rejectQuarantined(table: string, rowId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/data-tables/${encodeURIComponent(String(table))}/quarantine/${encodeURIComponent(String(rowId))}/reject`, response: "void" });
   }
 
   /**
@@ -15951,6 +16015,7 @@ export class VegadutaClient {
   readonly agentRuntimeLimits: AgentRuntimeLimitsApi;
   readonly agentSchedule: AgentScheduleApi;
   readonly agentScratchpad: AgentScratchpadApi;
+  readonly agentScratchpadQuarantine: AgentScratchpadQuarantineApi;
   readonly agentSessionLlmRequest: AgentSessionLlmRequestApi;
   readonly agentSessionLlmUsage: AgentSessionLlmUsageApi;
   readonly agentSettings: AgentSettingsApi;
@@ -16294,6 +16359,7 @@ export class VegadutaClient {
     this.agentRuntimeLimits = new AgentRuntimeLimitsApi(this.http);
     this.agentSchedule = new AgentScheduleApi(this.http);
     this.agentScratchpad = new AgentScratchpadApi(this.http);
+    this.agentScratchpadQuarantine = new AgentScratchpadQuarantineApi(this.http);
     this.agentSessionLlmRequest = new AgentSessionLlmRequestApi(this.http);
     this.agentSessionLlmUsage = new AgentSessionLlmUsageApi(this.http);
     this.agentSettings = new AgentSettingsApi(this.http);

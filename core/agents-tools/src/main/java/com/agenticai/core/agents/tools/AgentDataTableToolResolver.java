@@ -86,7 +86,9 @@ final class AgentDataTableToolResolver {
             out.add(
                     toolGuard.guardAndLog(
                             new DataTableWriteToolCallback(
-                                    service, TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint)),
+                                    service,
+                                    TurnTaintViews.sources(
+                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
                             agentId,
                             sessionId,
                             stepCounter,
@@ -120,7 +122,9 @@ final class AgentDataTableToolResolver {
                         rigorous),
                 toolGuard.guardAndLog(
                         new DataTableWriteToolCallback(
-                                service, TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint)),
+                                service,
+                                    TurnTaintViews.sources(
+                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
                         agentId,
                         sessionId,
                         stepCounter,

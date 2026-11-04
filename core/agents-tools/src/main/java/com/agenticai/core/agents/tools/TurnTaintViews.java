@@ -37,6 +37,19 @@ final class TurnTaintViews {
 
     private TurnTaintViews() {}
 
+    /**
+     * What tainted the turn behind {@code view}, or null when it is clean, for write tools whose packages
+     * must not depend on the memory package. A missing or throwing taint state is reported as tainted (the
+     * same fail-closed reading as {@code MemoryWriteGate}).
+     */
+    static java.util.function.Supplier<List<String>> sources(ObjectProvider<TurnTaintView> view) {
+        return () -> {
+            com.agenticai.core.agents.memory.MemoryProvenance p =
+                    com.agenticai.core.agents.memory.MemoryWriteGate.classify(view);
+            return p.quarantined() ? p.sourceTaint() : null;
+        };
+    }
+
     static ObjectProvider<TurnTaintView> forTurn(
             ObjectProvider<AgentTaintPolicy> policies,
             AtomicInteger turnKey,

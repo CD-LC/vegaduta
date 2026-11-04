@@ -6,8 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import com.agenticai.core.agents.memory.MemoryProvenance;
-import com.agenticai.core.agents.memory.MemoryTrust;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,6 +29,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "agent_scratchpad")
 public class ScratchpadNote {
+
+    private static final String TRUSTED = "TRUSTED";
+    private static final String QUARANTINED = "QUARANTINED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -61,7 +62,7 @@ public class ScratchpadNote {
     // TRUSTED (readable) or QUARANTINED (written on a turn that handled untrusted content, hidden from
     // every read until a person approves it); see V678.
     @Column(name = "trust", nullable = false, length = 16)
-    private String trust = MemoryTrust.TRUSTED.name();
+    private String trust = TRUSTED;
 
     // JSON array of what tainted the turn that wrote a quarantined note.
     @Column(name = "source_taint", columnDefinition = "TEXT")
@@ -78,7 +79,7 @@ public class ScratchpadNote {
     }
 
     public ScratchpadNote(UUID agentId, UUID sessionId, String key, String body, int byteSize) {
-        this(agentId, sessionId, key, body, byteSize, MemoryProvenance.TRUSTED);
+        this(agentId, sessionId, key, body, byteSize, NoteTrust.TRUSTED);
     }
 
     public ScratchpadNote(
@@ -87,7 +88,7 @@ public class ScratchpadNote {
             String key,
             String body,
             int byteSize,
-            MemoryProvenance provenance) {
+            NoteTrust provenance) {
         applyProvenance(provenance);
         this.agentId = agentId;
         this.sessionId = sessionId;
@@ -101,39 +102,35 @@ public class ScratchpadNote {
 
     /** Overwrites the note content. Always bumps {@code updatedAt} - it is the list ordering. */
     public void update(String body, int byteSize) {
-        update(body, byteSize, MemoryProvenance.TRUSTED);
+        update(body, byteSize, NoteTrust.TRUSTED);
     }
 
     /** Overwrites the content and re-stamps its provenance: the new body is what the new trust describes. */
-    public void update(String body, int byteSize, MemoryProvenance provenance) {
+    public void update(String body, int byteSize, NoteTrust provenance) {
         this.body = body;
         this.byteSize = byteSize;
         applyProvenance(provenance);
         this.updatedAt = Instant.now();
     }
 
-    private void applyProvenance(MemoryProvenance provenance) {
-        MemoryProvenance p = provenance == null ? MemoryProvenance.TRUSTED : provenance;
-        this.trust = p.trust().name();
+    private void applyProvenance(NoteTrust provenance) {
+        NoteTrust p = provenance == null ? NoteTrust.TRUSTED : provenance;
+        this.trust = p.quarantined() ? QUARANTINED : TRUSTED;
         this.sourceTaint = p.sourcesJson();
     }
 
     /** True while the note is held for review: read paths must not return it. Unknown values count as held. */
     public boolean isQuarantined() {
-        return MemoryTrust.parse(trust) == MemoryTrust.QUARANTINED;
-    }
-
-    public MemoryTrust getTrust() {
-        return MemoryTrust.parse(trust);
+        return !TRUSTED.equals(trust);
     }
 
     public java.util.List<String> getSourceTaint() {
-        return MemoryProvenance.parseSources(sourceTaint);
+        return NoteTrust.parseSources(sourceTaint);
     }
 
     /** A person approved the held note: it becomes readable (its source_taint stays as provenance). */
     public void approve() {
-        this.trust = MemoryTrust.TRUSTED.name();
+        this.trust = TRUSTED;
     }
 
     public UUID getId() {

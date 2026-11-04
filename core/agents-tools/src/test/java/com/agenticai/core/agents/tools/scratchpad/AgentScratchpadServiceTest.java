@@ -299,9 +299,7 @@ class AgentScratchpadServiceTest {
 
     // ------------------------------------------------------------------ quarantine
 
-    private static final com.agenticai.core.agents.memory.MemoryProvenance TAINTED =
-            new com.agenticai.core.agents.memory.MemoryProvenance(
-                    com.agenticai.core.agents.memory.MemoryTrust.QUARANTINED, List.of("fetch_web_page"));
+    private static final NoteTrust TAINTED = new NoteTrust(true, List.of("fetch_web_page"));
 
     @Test
     void aTaintedWriteIsStoredQuarantinedWithItsSources() {

@@ -1,8 +1,5 @@
 package com.agenticai.core.agents.tools.scratchpad;
 
-import com.agenticai.core.agents.memory.MemoryProvenance;
-import com.agenticai.core.agents.memory.MemoryWriteGate;
-import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.MemoryWriteScreen;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.beans.factory.ObjectProvider;
+import java.util.function.Supplier;
 
 /**
  * The four {@code scratchpad_*} tools over {@link AgentScratchpadService}: an agent's private
@@ -83,17 +80,17 @@ public final class ScratchpadToolCallback implements ToolCallback {
     private final UUID sessionUuid;
 
     /**
-     * The taint of the turn this callback was built for (see {@link MemoryWriteGate}): a note written on
-     * a tainted turn is held for review, and with no readable taint state it is held too.
+     * What tainted the turn this callback was built for (null result = clean): a note written on a
+     * tainted turn is held for review, and with no readable taint state it is held too.
      */
-    private final ObjectProvider<TurnTaintView> turnTaint;
+    private final Supplier<List<String>> turnTaint;
 
     public ScratchpadToolCallback(
             AgentScratchpadService service,
             Kind kind,
             UUID agentId,
             String sessionId,
-            ObjectProvider<TurnTaintView> turnTaint) {
+            Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
@@ -107,7 +104,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
             Kind kind,
             UUID agentId,
             UUID sessionUuid,
-            ObjectProvider<TurnTaintView> turnTaint) {
+            Supplier<List<String>> turnTaint) {
         this.service = service;
         this.kind = kind;
         this.agentId = agentId;
@@ -193,7 +190,7 @@ public final class ScratchpadToolCallback implements ToolCallback {
                         log.warn("scratchpad_write refused by the memory write screen (agent {})", agentId);
                         return error(refusal.get());
                     }
-                    MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
+                    NoteTrust provenance = NoteTrust.of(turnTaint);
                     AgentScratchpadService.WriteResult result =
                             service.write(agentId, scope.sessionId(), key, text, provenance);
                     ScratchpadNote note = result.note();

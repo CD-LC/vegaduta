@@ -43,6 +43,22 @@ final class AgentBackgroundJobToolResolver {
         this.factory = factory;
     }
 
+    private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint;
+
+    /** The taint source a job hand-off consults (see {@link TurnTaintViews}); unset means the job is marked. */
+    void setTaint(
+            ObjectProvider<AgentTaintPolicy> taintPolicy,
+            ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint) {
+        this.taintPolicy = taintPolicy;
+        this.turnTaint = turnTaint;
+    }
+
+    /** What tainted this turn (null = clean), read lazily when the tool is called. */
+    private java.util.function.Supplier<List<String>> taintSources(AtomicInteger stepCounter) {
+        return TurnTaintViews.sources(TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint));
+    }
+
     /**
      * Tools for a real turn (or an approval-replay lookup): job service present, agent opted in,
      * not inside a job.
@@ -57,7 +73,7 @@ final class AgentBackgroundJobToolResolver {
         if (agentId == null || AgentJobSession.isJobSession(sessionId)) {
             return List.of();
         }
-        ToolCallback tool = buildIfEnabled(agentId);
+        ToolCallback tool = buildIfEnabled(agentId, stepCounter);
         if (tool == null || !allowList(agentId).contains(BackgroundJobToolFactory.TOOL_NAME)) {
             return List.of();
         }
@@ -74,7 +90,7 @@ final class AgentBackgroundJobToolResolver {
             String userMessage,
             ChatClient chatClient,
             boolean rigorous) {
-        ToolCallback tool = buildIfEnabled(agentId);
+        ToolCallback tool = buildIfEnabled(agentId, stepCounter);
         if (tool == null) {
             return List.of();
         }
@@ -83,13 +99,13 @@ final class AgentBackgroundJobToolResolver {
                         tool, agentId, sessionId, stepCounter, userMessage, chatClient, rigorous));
     }
 
-    private ToolCallback buildIfEnabled(UUID agentId) {
+    private ToolCallback buildIfEnabled(UUID agentId, AtomicInteger stepCounter) {
         ObjectProvider<BackgroundJobToolFactory> provider = factory;
         if (provider == null) {
             return null;
         }
         BackgroundJobToolFactory f = provider.getIfAvailable();
-        return f == null ? null : f.createIfEnabled(agentId);
+        return f == null ? null : f.createIfEnabled(agentId, taintSources(stepCounter));
     }
 
     private Set<String> allowList(UUID agentId) {

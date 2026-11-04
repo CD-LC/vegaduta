@@ -2656,6 +2656,13 @@ export interface DataTableDtos_ImportResult {
   table?: DataTableDtos_TableView;
 }
 
+export interface DataTableDtos_QuarantinedRowView {
+  id?: string;
+  data?: Record<string, unknown>;
+  sourceTaint?: string[];
+  createdAt?: string;
+}
+
 export interface DataTableDtos_RowPage {
   items?: DataTableDtos_RowView[];
   total?: number;
@@ -7750,6 +7757,15 @@ export interface QualitySummaryResponse {
   feedbackByType?: Record<string, string>;
   turnNumber?: number;
   evaluatedAt?: string;
+}
+
+export interface QuarantinedNoteView {
+  key?: string;
+  scope?: string;
+  sessionId?: string;
+  body?: string;
+  sourceTaint?: string[];
+  updatedAt?: string;
 }
 
 export type QuickTaskChannel = "WHATSAPP" | "SMS" | "CALL" | "LOG";

@@ -2959,6 +2959,13 @@ class DataTableDtos_ImportResult(TypedDict, total=False):
     table: DataTableDtos_TableView
 
 
+class DataTableDtos_QuarantinedRowView(TypedDict, total=False):
+    id: str
+    data: Dict[str, Any]
+    sourceTaint: List[str]
+    createdAt: str
+
+
 class DataTableDtos_RowPage(TypedDict, total=False):
     items: List[DataTableDtos_RowView]
     total: int
@@ -8033,6 +8040,15 @@ class QualitySummaryResponse(TypedDict, total=False):
     feedbackByType: Dict[str, str]
     turnNumber: int
     evaluatedAt: str
+
+
+class QuarantinedNoteView(TypedDict, total=False):
+    key: str
+    scope: str
+    sessionId: str
+    body: str
+    sourceTaint: List[str]
+    updatedAt: str
 
 
 class _QuickTaskPreviewRequestRequired(TypedDict):

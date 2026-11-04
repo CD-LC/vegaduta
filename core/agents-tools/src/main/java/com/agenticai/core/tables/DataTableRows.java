@@ -102,8 +102,7 @@ final class DataTableRows {
                     new QuarantinedRowView(
                             r.getId(),
                             r.getData(),
-                            com.agenticai.core.agents.memory.MemoryProvenance.parseSources(
-                                    r.getSourceTaint()),
+                            RowTrust.parseSources(r.getSourceTaint()),
                             r.getCreatedAt()));
         }
         return out;

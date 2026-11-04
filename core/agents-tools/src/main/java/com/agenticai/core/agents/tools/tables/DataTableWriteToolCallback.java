@@ -1,8 +1,5 @@
 package com.agenticai.core.agents.tools.tables;
 
-import com.agenticai.core.agents.memory.MemoryProvenance;
-import com.agenticai.core.agents.memory.MemoryWriteGate;
-import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.knowledge.MemoryWriteScreen;
 import com.agenticai.core.tables.DataTableDtos.RowView;
 import com.agenticai.core.tables.DataTableDtos.UpsertResult;
@@ -18,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import org.springframework.beans.factory.ObjectProvider;
+import java.util.function.Supplier;
 
 /**
  * {@code data_table_write} - the WRITE half of the agent Data Tables pair: insert one or a few
@@ -41,12 +38,12 @@ public class DataTableWriteToolCallback implements ToolCallback {
     private final DataTableService service;
 
     /**
-     * The taint of the turn this callback was built for (see {@link MemoryWriteGate}): rows inserted on a
-     * tainted turn are held for review, and with no readable taint state they are held too.
+     * What tainted the turn this callback was built for (null result = clean): rows inserted on a tainted
+     * turn are held for review, and with no readable taint state they are held too.
      */
-    private final ObjectProvider<TurnTaintView> turnTaint;
+    private final Supplier<List<String>> turnTaint;
 
-    public DataTableWriteToolCallback(DataTableService service, ObjectProvider<TurnTaintView> turnTaint) {
+    public DataTableWriteToolCallback(DataTableService service, Supplier<List<String>> turnTaint) {
         this.service = service;
         this.turnTaint = turnTaint;
     }
@@ -67,15 +64,19 @@ public class DataTableWriteToolCallback implements ToolCallback {
     }
 
     /** What the turn's taint decides for a write; {@code held} rows are hidden until a person approves. */
-    private record Verdict(RowTrust trust, MemoryProvenance provenance) {
+    private record Verdict(RowTrust trust) {
         boolean held() {
-            return provenance.quarantined();
+            return trust.quarantined();
         }
     }
 
     private Verdict verdict() {
-        MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
-        return new Verdict(new RowTrust(provenance.quarantined(), provenance.sourcesJson()), provenance);
+        try {
+            List<String> sources = turnTaint == null ? List.of("taint-state-unavailable") : turnTaint.get();
+            return new Verdict(sources == null ? RowTrust.TRUSTED : RowTrust.held(sources));
+        } catch (RuntimeException e) {
+            return new Verdict(RowTrust.held(List.of("taint-state-unavailable")));
+        }
     }
 
     private static void markHeld(Map<String, Object> out, Verdict v) {

@@ -83,6 +83,7 @@ Deferred [Mvc [pattern='/api/agents/*/procedures', POST], Ant [pattern='/api/age
 Deferred [Mvc [pattern='/api/agents/*/procedures/**', POST], Ant [pattern='/api/agents/*/procedures/**', POST]] => -------------Y-----Y-
 Deferred [Mvc [pattern='/api/agents/*/procedures/**', DELETE], Ant [pattern='/api/agents/*/procedures/**', DELETE]] => -------------Y-----Y-
 Deferred [Mvc [pattern='/api/agents/*/improvements/*/accept', POST], Ant [pattern='/api/agents/*/improvements/*/accept', POST]] => -------------Y-----Y-
+Deferred [Mvc [pattern='/api/agents/*/scratchpad-quarantine/**', POST], Ant [pattern='/api/agents/*/scratchpad-quarantine/**', POST]] => ------------Y-----YY-
 Deferred [Mvc [pattern='/api/moderation/review/*/approve', POST], Ant [pattern='/api/moderation/review/*/approve', POST]] => -------------Y-----YY
 Deferred [Mvc [pattern='/api/moderation/review/*/block', POST], Ant [pattern='/api/moderation/review/*/block', POST]] => -------------Y-----YY
 Deferred [Mvc [pattern='/api/moderation/review/*/escalate', POST], Ant [pattern='/api/moderation/review/*/escalate', POST]] => -------------Y-----YY

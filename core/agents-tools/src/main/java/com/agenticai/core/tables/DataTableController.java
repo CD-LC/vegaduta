@@ -156,10 +156,10 @@ public class DataTableController {
     // ---- rows held for review (written by an agent on a turn that handled untrusted content)
 
     @GetMapping("/{table}/quarantine")
-    public List<DataTableDtos.QuarantinedRowView> quarantined(
-        @PathVariable String table, @RequestParam(defaultValue = "50") int limit
+    public ResponseEntity<List<DataTableDtos.QuarantinedRowView>> quarantined(
+        @PathVariable String table, @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset
     ) {
-        return service.quarantinedRows(table, limit);
+        return ListPaging.window(service.quarantinedRows(table, 500), limit, offset, 50, 500);
     }
 
     /** Makes the held row readable; 404 when no row of that table is held under that id. */

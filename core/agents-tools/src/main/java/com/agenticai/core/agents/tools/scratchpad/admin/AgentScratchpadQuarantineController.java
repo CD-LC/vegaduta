@@ -4,6 +4,7 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.tools.scratchpad.AgentScratchpadService;
 import com.agenticai.core.agents.tools.scratchpad.QuarantinedNoteView;
 import com.agenticai.core.sharing.PermissionLevel;
+import com.agenticai.core.tenancy.ListPaging;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Review of scratchpad notes held because the turn that wrote them had handled untrusted content (see
  * {@link AgentScratchpadService#write(UUID, UUID, String, String,
- * com.agenticai.core.agents.memory.MemoryProvenance)}). A held note is attacker-authored text until a
+ * com.agenticai.core.agents.tools.scratchpad.NoteTrust)}). A held note is attacker-authored text until a
  * person approves it: approving makes {@code scratchpad_read} / {@code scratchpad_list} return it,
  * rejecting deletes it. Reading the list needs VIEWER on the agent; approving and rejecting need EDITOR
  * (the same level as the agent's other memory approve / reject endpoints) and the {@code
@@ -42,10 +43,13 @@ public class AgentScratchpadQuarantineController {
     }
 
     @GetMapping
-    public List<QuarantinedNoteView> list(@PathVariable UUID agentId) {
+    public ResponseEntity<List<QuarantinedNoteView>> list(
+            @PathVariable UUID agentId,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         try {
-            return scratchpadService.listQuarantined(agentId);
+            return ListPaging.window(scratchpadService.listQuarantined(agentId), limit, offset, 50, 500);
         } catch (IllegalStateException disabled) {
             throw disabled();
         }

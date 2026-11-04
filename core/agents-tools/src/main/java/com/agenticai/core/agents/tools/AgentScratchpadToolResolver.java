@@ -94,7 +94,8 @@ final class AgentScratchpadToolResolver {
                                     kind,
                                     agentId,
                                     sessionId,
-                                    TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint)),
+                                    TurnTaintViews.sources(
+                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
                             agentId,
                             sessionId,
                             stepCounter,

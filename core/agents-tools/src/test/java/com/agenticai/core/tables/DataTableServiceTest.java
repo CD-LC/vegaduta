@@ -383,7 +383,7 @@ class DataTableServiceTest {
 
     @Test
     void upsertPatchesEveryMatchingRowWithoutTouchingTheKey() {
-        when(rows.countAll(eq(TABLE_ID))).thenReturn(2L);
+        when(rows.count(eq(TABLE_ID), any(Where.class))).thenReturn(2L);
         when(rows.update(eq(TABLE_ID), any(Where.class), anyString(), anyList())).thenReturn(2);
         DataTableRow existing = new DataTableRow(TABLE_ID, Map.of("email", "a@b.co", "qty", 1L));
         when(rows.select(eq(TABLE_ID), any(Where.class), anyString(), anyInt(), anyInt()))

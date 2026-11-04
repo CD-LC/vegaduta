@@ -2,7 +2,9 @@ package com.agenticai.core.agents.tools.backgroundjob;
 
 import com.agenticai.core.agents.job.AgentJobService;
 import com.agenticai.core.agents.tools.scheduling.BackgroundJobToolFactory;
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -26,7 +28,13 @@ public class BackgroundJobToolCallbackFactory implements BackgroundJobToolFactor
 
     @Override
     public ToolCallback createIfEnabled(UUID agentId) {
+        // No taint source supplied: unreadable taint, so the job is marked tainted (fail closed).
+        return createIfEnabled(agentId, null);
+    }
+
+    @Override
+    public ToolCallback createIfEnabled(UUID agentId, Supplier<List<String>> taintSources) {
         AgentJobService svc = jobService == null ? null : jobService.getIfAvailable();
-        return svc == null ? null : new BackgroundJobToolCallback(svc, agentId);
+        return svc == null ? null : new BackgroundJobToolCallback(svc, agentId, taintSources);
     }
 }

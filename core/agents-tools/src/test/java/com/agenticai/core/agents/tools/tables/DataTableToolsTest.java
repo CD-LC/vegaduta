@@ -287,16 +287,8 @@ class DataTableToolsTest {
 
     // ---- taint: rows written on a turn that handled untrusted content are held for review
 
-    @SuppressWarnings("unchecked")
-    private static org.springframework.beans.factory.ObjectProvider<
-                    com.agenticai.core.agents.memory.TurnTaintView>
-            taint(boolean tainted) {
-        var view = mock(com.agenticai.core.agents.memory.TurnTaintView.class);
-        when(view.isTainted()).thenReturn(tainted);
-        when(view.sources()).thenReturn(tainted ? List.of("fetch_web_page") : List.of());
-        var provider = mock(org.springframework.beans.factory.ObjectProvider.class);
-        when(provider.getIfAvailable()).thenReturn(view);
-        return provider;
+    private static java.util.function.Supplier<List<String>> taint(boolean tainted) {
+        return () -> tainted ? List.of("fetch_web_page") : null;
     }
 
     private static final String INSERT =
@@ -319,9 +311,7 @@ class DataTableToolsTest {
 
     @Test
     void aRowInsertedWhenTheTaintStateIsUnreadableIsHeld() {
-        @SuppressWarnings("unchecked")
-        var none = mock(org.springframework.beans.factory.ObjectProvider.class);
-        when(none.getIfAvailable()).thenReturn(null);
+        java.util.function.Supplier<List<String>> none = null;
         var unknown = new DataTableWriteToolCallback(service, none);
         when(service.insertRow(eq("orders"), anyMap(), any(RowTrust.class)))
                 .thenReturn(new RowView(UUID.randomUUID(), Map.of(), Instant.now(), Instant.now()));

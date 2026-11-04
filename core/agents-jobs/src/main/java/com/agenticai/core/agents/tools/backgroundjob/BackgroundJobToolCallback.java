@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.tools.backgroundjob;
 
 import com.agenticai.core.agents.job.AgentJobService;
+import com.agenticai.core.agents.job.JobTaintMarker;
 import com.agenticai.core.agents.job.dto.AgentJobResponse;
 import com.agenticai.core.agents.job.dto.AgentJobStartRequest;
 import com.agenticai.core.json.JsonMappers;
@@ -9,8 +10,10 @@ import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
@@ -49,9 +52,17 @@ public class BackgroundJobToolCallback implements ToolCallback {
     private final AgentJobService jobService;
     private final UUID agentId;
 
-    public BackgroundJobToolCallback(AgentJobService jobService, UUID agentId) {
+    /**
+     * What tainted the turn this callback was built for, or null when that turn is clean. A tainted turn
+     * (or one whose taint cannot be read) hands its taint to the job through {@link JobTaintMarker}.
+     */
+    private final Supplier<List<String>> taintSources;
+
+    public BackgroundJobToolCallback(
+            AgentJobService jobService, UUID agentId, Supplier<List<String>> taintSources) {
         this.jobService = jobService;
         this.agentId = agentId;
+        this.taintSources = taintSources;
     }
 
     @Override
@@ -96,6 +107,11 @@ public class BackgroundJobToolCallback implements ToolCallback {
                     args.hasNonNull("turns") && args.get("turns").isInt()
                             ? args.get("turns").asInt()
                             : null;
+
+            List<String> tainted = taintSources == null ? List.of("taint-state-unavailable") : taintSources.get();
+            if (tainted != null) {
+                goal = JobTaintMarker.mark(goal, tainted);
+            }
 
             AgentJobResponse job =
                     jobService.submit(

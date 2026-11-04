@@ -1504,6 +1504,36 @@ class AgentScratchpadApi:
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad/{quote_path(key)}", query={"session": session})
 
 
+class AgentScratchpadQuarantineApi:
+    def __init__(self, http: HttpClient) -> None:
+        self._http = http
+
+    def list(self, agent_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.QuarantinedNoteView]:
+        """List.
+
+        GET /api/agents/{agentId}/scratchpad-quarantine
+        """
+        return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine", query={"limit": limit, "offset": offset})
+
+    def approve(self, agent_id: str, key: str, *, session_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+        """Approve.
+
+        POST /api/agents/{agentId}/scratchpad-quarantine/{key}/approve
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/approve", query={"sessionId": session_id}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject(self, agent_id: str, key: str, *, session_id: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
+        """Reject.
+
+        POST /api/agents/{agentId}/scratchpad-quarantine/{key}/reject
+
+        Requires PERM_MANAGE_AGENTS (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/scratchpad-quarantine/{quote_path(key)}/reject", query={"sessionId": session_id}, headers={"Idempotency-Key": idempotency_key}, response="void")
+
+
 class AgentSessionLlmRequestApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
@@ -3477,6 +3507,31 @@ class DataTableApi:
         Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
         """
         return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/import", body=body, body_type="multipart")
+
+    def quarantined(self, table: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.DataTableDtos_QuarantinedRowView]:
+        """Quarantined.
+
+        GET /api/data-tables/{table}/quarantine
+        """
+        return self._http.request("GET", f"/api/data-tables/{quote_path(table)}/quarantine", query={"limit": limit, "offset": offset})
+
+    def approve_quarantined(self, table: str, row_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve quarantined.
+
+        POST /api/data-tables/{table}/quarantine/{rowId}/approve
+
+        Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/quarantine/{quote_path(row_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def reject_quarantined(self, table: str, row_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Reject quarantined.
+
+        POST /api/data-tables/{table}/quarantine/{rowId}/reject
+
+        Requires PERM_MANAGE_WORKFLOWS_ADMIN (or the tenant-admin role).
+        """
+        return self._http.request("POST", f"/api/data-tables/{quote_path(table)}/quarantine/{quote_path(row_id)}/reject", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def rows(self, table: str, *, filter: Optional[str] = None, sort: Optional[str] = None, limit: Optional[int] = None, offset: Optional[int] = None) -> m.DataTableDtos_RowPage:
         """Rows.
@@ -13503,6 +13558,7 @@ class VegadutaClient:
         self.agent_runtime_limits = AgentRuntimeLimitsApi(self.http)
         self.agent_schedule = AgentScheduleApi(self.http)
         self.agent_scratchpad = AgentScratchpadApi(self.http)
+        self.agent_scratchpad_quarantine = AgentScratchpadQuarantineApi(self.http)
         self.agent_session_llm_request = AgentSessionLlmRequestApi(self.http)
         self.agent_session_llm_usage = AgentSessionLlmUsageApi(self.http)
         self.agent_settings = AgentSettingsApi(self.http)

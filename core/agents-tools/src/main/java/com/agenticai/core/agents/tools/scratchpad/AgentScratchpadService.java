@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.tools.scratchpad;
 
-import com.agenticai.core.agents.memory.MemoryProvenance;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
@@ -73,7 +72,7 @@ public class AgentScratchpadService {
      */
     @Transactional
     public WriteResult write(UUID agentId, UUID sessionId, String key, String body) {
-        return write(agentId, sessionId, key, body, MemoryProvenance.TRUSTED);
+        return write(agentId, sessionId, key, body, NoteTrust.TRUSTED);
     }
 
     /**
@@ -88,8 +87,8 @@ public class AgentScratchpadService {
      */
     @Transactional
     public WriteResult write(
-            UUID agentId, UUID sessionId, String key, String body, MemoryProvenance provenance) {
-        MemoryProvenance prov = provenance == null ? MemoryProvenance.TRUSTED : provenance;
+            UUID agentId, UUID sessionId, String key, String body, NoteTrust provenance) {
+        NoteTrust prov = provenance == null ? NoteTrust.TRUSTED : provenance;
         requireEnabled();
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);

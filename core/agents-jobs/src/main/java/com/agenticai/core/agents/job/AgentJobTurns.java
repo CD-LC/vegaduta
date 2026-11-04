@@ -415,6 +415,10 @@ final class AgentJobTurns {
                             .withDeadline(deadlineAt);
             // taint-entry: by job origin - see trustOf (docs/security/taint-entry-points.md)
             trustOf(job).seed(turnContext.taint(), "inbound:job_" + originOf(job));
+            // A goal handed over by a tainted turn (continue_in_background) keeps that taint here.
+            if (!JobTaintMarker.sources(job.getGoal()).isEmpty()) {
+                turnContext.taint().mark("job:tainted-origin");
+            }
             return agentChatService
                     .chat(turnContext, chatTurn)
                     .collect(Collectors.joining())

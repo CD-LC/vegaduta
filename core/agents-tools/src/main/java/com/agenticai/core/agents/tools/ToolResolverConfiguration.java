@@ -505,10 +505,13 @@ class ToolResolverConfiguration {
             AgentToolGuard toolGuard,
             AgentService agentService,
             ObjectProvider<com.agenticai.core.agents.tools.scheduling.BackgroundJobToolFactory>
-                    factory) {
+                    factory,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentBackgroundJobToolResolver resolver =
                 new AgentBackgroundJobToolResolver(toolGuard, agentService);
         resolver.setFactory(factory);
+        resolver.setTaint(taintPolicy, turnTaint);
         return resolver;
     }
 
