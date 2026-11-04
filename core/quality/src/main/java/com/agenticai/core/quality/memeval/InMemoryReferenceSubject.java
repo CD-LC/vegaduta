@@ -58,7 +58,16 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
         /** Every write is stored twice. */
         DUPLICATES_FACTS,
         /** Recall adds a large latency (a network hop on the hot path). */
-        SLOW_RECALL
+        SLOW_RECALL,
+        /** S14: an explicit share is not honoured, so a teammate never sees the shared fact (a recall miss). */
+        IGNORES_SHARES,
+        /** S14: an explicit share reaches users of other tenants (the share scope is not the tenant). */
+        SHARING_IGNORES_TENANT,
+        /**
+         * S15: the consolidation job runs on a pooled thread that still holds the previous session's
+         * tenant scope, so it re-homes other tenants' memory rows into the tenant that just finished.
+         */
+        CONSOLIDATION_HOP_LOSES_TENANT
     }
 
     private static final int OVER_RECALL_CAP = 12;
@@ -95,6 +104,7 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
         private final MemoryArm arm;
         private final Map<String, Fact> facts;
         private final List<StoreItem> store = new ArrayList<>();
+        private final Set<String> sharedFactIds = new java.util.HashSet<>();
 
         Exec(MemoryScenario scenario, MemoryArm arm) {
             this.scenario = scenario;
@@ -119,7 +129,21 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
             if (arm == MemoryArm.M && !quirks.contains(Quirk.IGNORES_FORGET)) {
                 store.removeIf(item -> session.forgets().contains(item.factId()));
             }
+            if (arm == MemoryArm.M && !quirks.contains(Quirk.IGNORES_SHARES)) {
+                sharedFactIds.addAll(session.shares());
+            }
+            if (arm == MemoryArm.M && quirks.contains(Quirk.CONSOLIDATION_HOP_LOSES_TENANT)) {
+                consolidateOnStaleThread(session);
+            }
             return costs;
+        }
+
+        /** The S15 defect: rows of any other tenant are re-homed under the tenant of the session that just ended. */
+        private void consolidateOnStaleThread(Session session) {
+            store.replaceAll(item -> Objects.equals(item.tenantId(), session.tenantId())
+                ? item
+                : new StoreItem(item.factId(), item.key(), item.text(), session.userId(), session.tenantId(),
+                    item.flaggedConflict()));
         }
 
         private void write(Fact fact, Session session) {
@@ -170,8 +194,7 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
                 int idx = scenario.sessionIndex(probe.after());
                 for (Fact f : scenario.liveFacts(idx)) {
                     if (f.relevantTo().contains(probe.id())
-                        && Objects.equals(scenario.ownerUser(f), probe.userId())
-                        && Objects.equals(scenario.ownerTenant(f), probe.tenantId())) {
+                        && scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
                         out.add(new InjectedItem(f.id(), f.key(), f.value(), probe.userId(), probe.tenantId()));
                     }
                 }
@@ -181,8 +204,10 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
             boolean crossTenant = quirks.contains(Quirk.LEAKS_ACROSS_TENANTS);
             boolean crossUser = crossTenant || quirks.contains(Quirk.LEAKS_ACROSS_USERS);
             for (StoreItem item : store) {
-                boolean tenantOk = crossTenant || Objects.equals(item.tenantId(), probe.tenantId());
-                boolean userOk = crossUser || Objects.equals(item.userId(), probe.userId());
+                boolean shared = item.factId() != null && sharedFactIds.contains(item.factId());
+                boolean tenantOk = crossTenant || Objects.equals(item.tenantId(), probe.tenantId())
+                    || (shared && quirks.contains(Quirk.SHARING_IGNORES_TENANT));
+                boolean userOk = crossUser || shared || Objects.equals(item.userId(), probe.userId());
                 boolean topicOk = overRecall || probe.queryKeys().contains(item.key());
                 if (tenantOk && userOk && topicOk && out.size() < (overRecall ? OVER_RECALL_CAP : 64)) {
                     out.add(new InjectedItem(item.factId(), item.key(), item.text(), item.userId(), item.tenantId()));

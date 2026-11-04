@@ -21,6 +21,7 @@ import com.agenticai.core.quality.stats.Bootstrap;
 import com.agenticai.core.quality.stats.ConfidenceInterval;
 import com.agenticai.core.quality.stats.IntervalMethod;
 import com.agenticai.core.quality.stats.NoiseFloor;
+import com.agenticai.core.quality.stats.NoiseFloorEstimator;
 import com.agenticai.core.quality.stats.PairedCaseOutcomes;
 import com.agenticai.core.quality.stats.PairedComparison;
 import com.agenticai.core.quality.stats.PairedComparisonResult;
@@ -96,10 +97,7 @@ public final class MemoryScorecards {
     private static Gain gain(
         List<ScenarioScore> b, List<ScenarioScore> m, List<ScenarioScore> o, NoiseFloor floor, long seed
     ) {
-        Function<ScenarioScore, Double> m1 = s -> {
-            List<ProbeScore> dep = s.probes().stream().filter(ProbeScore::memoryDependent).toList();
-            return dep.isEmpty() ? null : (double) dep.stream().filter(ProbeScore::success).count() / dep.size();
-        };
+        Function<ScenarioScore, Double> m1 = MemoryScorecards::m1PerCase;
         List<PairedCaseOutcomes> pairs = pair(b, m, m1);
         PairedComparisonResult result = pairs.isEmpty() ? null : PairedComparison.compare(pairs, seed, floor);
         int depProbes = (int) m.stream().filter(s -> s.repeat() == 0)
@@ -110,6 +108,24 @@ public final class MemoryScorecards {
             oracle = vals.isEmpty() ? null : vals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
         }
         return new Gain(result, pairs.size(), depProbes, oracle);
+    }
+
+    /** M1 of one scenario run: the share of its memory-dependent probes that succeeded; null when it has none. */
+    private static Double m1PerCase(ScenarioScore s) {
+        List<ProbeScore> dep = s.probes().stream().filter(ProbeScore::memoryDependent).toList();
+        return dep.isEmpty() ? null : (double) dep.stream().filter(ProbeScore::success).count() / dep.size();
+    }
+
+    /**
+     * The optional noise-floor input of the G1 comparison: two runs of the SAME B (memory off)
+     * configuration, paired case by case on M1 with {@link NoiseFloorEstimator}. Pass the result as the
+     * {@code noiseFloor} argument of {@link #build}; a real gain must exceed it. Returns null when the
+     * two runs share no memory-dependent case (an unknown floor stays unknown, never zero). The second
+     * run must use a different seed than the first, or it measures nothing.
+     */
+    public static NoiseFloor noiseFloor(List<ScenarioScore> firstB, List<ScenarioScore> secondB, long seed) {
+        List<PairedCaseOutcomes> reruns = pair(firstB, secondB, MemoryScorecards::m1PerCase);
+        return reruns.isEmpty() ? null : NoiseFloorEstimator.estimate(reruns, seed);
     }
 
     private static Recall recall(List<ScenarioScore> m, List<ScenarioScore> o) {
@@ -146,7 +162,9 @@ public final class MemoryScorecards {
         List<ScenarioScore> attacks = m.stream().filter(ScenarioScore::attackScenario).toList();
         int persisted = (int) attacks.stream().filter(ScenarioScore::canaryPersisted).count();
         int influenced = (int) attacks.stream().filter(s -> s.probes().stream().anyMatch(ProbeScore::canaryInfluenced)).count();
-        return new Poisoning(rateOf(persisted, attacks.size()), rateOf(influenced, attacks.size()), attackCases);
+        int corpus = (int) attacks.stream().filter(s -> PoisonScenarioGenerator.CATEGORY.equals(s.category()))
+            .map(ScenarioScore::scenarioId).distinct().count();
+        return new Poisoning(rateOf(persisted, attacks.size()), rateOf(influenced, attacks.size()), attackCases, corpus);
     }
 
     private static Isolation isolation(List<ScenarioScore> m) {
@@ -271,7 +289,7 @@ public final class MemoryScorecards {
     }
 
     private static int probeCount(List<ScenarioScore> runs) {
-        return runs.stream().mapToInt(s -> s.probes().size()).sum();
+        return (int) runs.stream().flatMap(s -> s.probes().stream()).filter(p -> p.type() != ProbeType.POISON).count();
     }
 
     private static long sum(List<ScenarioScore> runs, ToIntFunction<ScenarioScore> f) {

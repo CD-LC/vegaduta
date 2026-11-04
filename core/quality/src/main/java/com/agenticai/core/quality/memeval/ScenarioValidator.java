@@ -85,6 +85,20 @@ public final class ScenarioValidator {
                 }
             }
         }
+        for (int i = 0; i < s.sessions().size(); i++) {
+            Session ses = s.sessions().get(i);
+            for (String id : ses.shares()) {
+                Fact shared = byId.get(id);
+                if (shared == null) {
+                    errors.add(at + "session " + ses.id() + " shares unknown fact " + id);
+                } else if (s.plantedAtIndex(id) < 0 || s.plantedAtIndex(id) > i) {
+                    errors.add(at + "session " + ses.id() + " shares fact " + id + " before it is planted");
+                } else if (!java.util.Objects.equals(s.ownerUser(shared), ses.userId())
+                    || !java.util.Objects.equals(s.ownerTenant(shared), ses.tenantId())) {
+                    errors.add(at + "session " + ses.id() + " shares fact " + id + " that its user does not own");
+                }
+            }
+        }
         for (Probe p : s.probes()) {
             checkProbe(s, p, keys, errors, at);
         }

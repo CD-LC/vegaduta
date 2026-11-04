@@ -5,6 +5,7 @@ import com.agenticai.core.quality.memeval.MemoryScorecardGate.Context;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Report;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Tier;
 import com.agenticai.core.quality.memeval.MemoryScorer.ScenarioScore;
+import com.agenticai.core.quality.stats.NoiseFloor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,7 +26,7 @@ import java.util.List;
  * <p>Usage (from core/quality): {@code mvn -o exec:java
  * -Dexec.mainClass=com.agenticai.core.quality.memeval.MemoryEvalCli -Dexec.args="--subject good"}.
  * Options: {@code --subject good|bad}, {@code --repeats N} (3), {@code --tier ci|nightly} (ci),
- * {@code --default-on}, {@code --seed N}, {@code --out PATH}
+ * {@code --default-on}, {@code --noise-floor} (optional B-vs-B control run fed to G1), {@code --seed N}, {@code --out PATH}
  * (default {@code target/memory-eval/memory-scorecard.json}). Exit code: 0 SHIP, 3 SHIP DARK, 1 NO-SHIP.
  * Only the in-memory reference subject runs here; the runner against the platform is a separate work package.
  */
@@ -38,21 +39,52 @@ public final class MemoryEvalCli {
     private MemoryEvalCli() {}
 
     /** Scorecard and verdict of one pipeline run. */
-    public record Result(MemoryScorecard scorecard, Report report) {}
+    public record Result(MemoryScorecard scorecard, Report report, NoiseFloor noiseFloor) {
+        public Result(MemoryScorecard scorecard, Report report) {
+            this(scorecard, report, null);
+        }
+    }
 
     public static Result run(
         MemoryEvalSubject subject, List<MemoryScenario> scenarios, int repeats, long seed, Context ctx
     ) {
-        List<MemoryRun> runs = MemoryEvalRunner.runAll(
-            subject, scenarios, List.of(MemoryArm.B, MemoryArm.M, MemoryArm.ORACLE), repeats, seed);
+        return run(subject, scenarios, repeats, seed, ctx, false);
+    }
+
+    /**
+     * {@code measureNoiseFloor} adds the optional control run of doc section 5: the B arm a second time
+     * with a different seed, paired with the first on M1, and the resulting {@link NoiseFloor} is handed
+     * to the G1 comparison, so a gain smaller than rerun-to-rerun disagreement cannot pass. Off by
+     * default: a deterministic subject has a floor of zero and the run costs a third of the arms again.
+     * For a real model it is the nightly's job (set bars from the observed noise floor).
+     */
+    public static Result run(
+        MemoryEvalSubject subject, List<MemoryScenario> scenarios, int repeats, long seed, Context ctx,
+        boolean measureNoiseFloor
+    ) {
         java.util.Map<String, MemoryScenario> byId = new java.util.HashMap<>();
         scenarios.forEach(s -> byId.put(s.id(), s));
+        List<ScenarioScore> scores = score(byId, MemoryEvalRunner.runAll(
+            subject, scenarios, List.of(MemoryArm.B, MemoryArm.M, MemoryArm.ORACLE), repeats, seed));
+        NoiseFloor floor = null;
+        if (measureNoiseFloor) {
+            List<ScenarioScore> firstB = scores.stream().filter(s -> s.arm() == MemoryArm.B).toList();
+            List<ScenarioScore> secondB = score(byId, MemoryEvalRunner.runAll(
+                subject, scenarios, List.of(MemoryArm.B), repeats, seed ^ NOISE_FLOOR_SEED_MIX));
+            floor = MemoryScorecards.noiseFloor(firstB, secondB, seed);
+        }
+        MemoryScorecard card = MemoryScorecards.build(subject.name(), scores, MemoryScorecards.TokenPrices.DEFAULT, floor, seed);
+        return new Result(card, MemoryScorecardGate.evaluate(card, ctx), floor);
+    }
+
+    private static final long NOISE_FLOOR_SEED_MIX = 0x9E3779B97F4A7C15L;
+
+    private static List<ScenarioScore> score(java.util.Map<String, MemoryScenario> byId, List<MemoryRun> runs) {
         List<ScenarioScore> scores = new ArrayList<>();
         for (MemoryRun r : runs) {
             scores.add(MemoryScorer.score(byId.get(r.scenarioId()), r));
         }
-        MemoryScorecard card = MemoryScorecards.build(subject.name(), scores, seed);
-        return new Result(card, MemoryScorecardGate.evaluate(card, ctx));
+        return scores;
     }
 
     /** Addendum A document plus the full scorecard under an extra {@code scorecard} key (ignored by the script). */
@@ -72,6 +104,9 @@ public final class MemoryEvalCli {
             n.put("detail", g.detail());
         }
         root.set("scorecard", JSON.valueToTree(result.scorecard()));
+        if (result.noiseFloor() != null) {
+            root.set("noiseFloor", JSON.valueToTree(result.noiseFloor()));
+        }
         try {
             return JSON.writeValueAsString(root);
         } catch (IOException e) {
@@ -98,6 +133,7 @@ public final class MemoryEvalCli {
         int repeats = 3;
         Tier tier = Tier.CI;
         boolean defaultOn = false;
+        boolean noiseFloor = false;
         long seed = 20261104L;
         Path out = Path.of(DEFAULT_OUT);
         for (int i = 0; i < args.length; i++) {
@@ -106,6 +142,7 @@ public final class MemoryEvalCli {
                 case "--repeats" -> repeats = Integer.parseInt(args[++i]);
                 case "--tier" -> tier = Tier.valueOf(args[++i].toUpperCase(java.util.Locale.ROOT));
                 case "--default-on" -> defaultOn = true;
+                case "--noise-floor" -> noiseFloor = true;
                 case "--seed" -> seed = Long.parseLong(args[++i]);
                 case "--out" -> out = Path.of(args[++i]);
                 default -> throw new IllegalArgumentException("unknown option " + args[i]);
@@ -113,7 +150,7 @@ public final class MemoryEvalCli {
         }
         MemoryEvalSubject s = subject.equals("bad") ? badSubject() : InMemoryReferenceSubject.good();
         Context ctx = (tier == Tier.CI ? Context.ci() : Context.nightly()).withDefaultOn(defaultOn);
-        Result result = run(s, MemoryScenarioLoader.loadAll(), repeats, seed, ctx);
+        Result result = run(s, MemoryScenarioLoader.loadAll(), repeats, seed, ctx, noiseFloor);
         if (out.getParent() != null) {
             Files.createDirectories(out.getParent());
         }

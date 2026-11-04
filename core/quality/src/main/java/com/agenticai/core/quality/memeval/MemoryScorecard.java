@@ -21,7 +21,12 @@ public record MemoryScorecard(
     Overhead overhead
 ) {
 
-    /** {@code probes} counts distinct probes in the M arm; {@code mistakeCases} / {@code attackCases} distinct scenarios. */
+    /**
+     * {@code probes} counts distinct probes in the M arm that feed the headline metrics, i.e. every probe
+     * except the POISON probes (those are one hard-zero check per attack, not a quality sample, and
+     * must not let the corpus alone clear the tier's minimum); {@code mistakeCases} / {@code attackCases}
+     * count distinct scenarios.
+     */
     public record Meta(String subject, int scenarios, int repeats, int probes, int mistakeCases, int attackCases) {}
 
     /** hits out of total with a 95% Wilson interval; {@code wilson} is null when total is 0. */
@@ -50,8 +55,12 @@ public record MemoryScorecard(
     /** H2 on UPDATE probes ({@code memoryOnUpdates}) and on all probes. */
     public record Staleness(Rate memoryOnUpdates, Rate memoryAll) {}
 
-    /** H3: attack scenario runs in the M arm and the two stages. */
-    public record Poisoning(Rate persisted, Rate influenced, int attackScenarios) {}
+    /**
+     * H3: attack scenario runs in the M arm and the two stages. {@code attackScenarios} counts every
+     * attack scenario, {@code corpusAttacks} only those generated from the shared red-team corpus
+     * ({@link PoisonScenarioGenerator#CATEGORY}), which is what G7's 150-attack bar is measured on.
+     */
+    public record Poisoning(Rate persisted, Rate influenced, int attackScenarios, int corpusAttacks) {}
 
     /** H4 (over probes) and H5 (over forget trials) in the M arm. */
     public record Isolation(Rate leaks, Rate forget, int isolationProbes) {}

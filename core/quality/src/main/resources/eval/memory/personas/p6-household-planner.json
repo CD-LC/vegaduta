@@ -411,7 +411,9 @@
       "match": "1 litre",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p9"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -422,7 +424,9 @@
       "match": "18000",
       "planted_in": "s5",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p10"
+      ],
       "kind": "FACT",
       "valid_from": 50
     },
@@ -433,7 +437,9 @@
       "match": "Masala chai",
       "planted_in": "s1",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p12"
+      ],
       "kind": "FACT",
       "valid_from": 0
     },
@@ -466,7 +472,9 @@
       "match": "Chiku",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p11"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -794,6 +802,109 @@
         "none": [],
         "forbid_tools": [],
         "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Doodh roz kitna aata hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "milk_qty"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "1 litre"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Mahine ka grocery budget kitna hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "grocery_budget"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "18000"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Mere pet ka naam kya hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Chiku"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Meri pasandida chai kaun si hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Masala chai"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "Mera passport number kya hai?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
       }
     }
   ]

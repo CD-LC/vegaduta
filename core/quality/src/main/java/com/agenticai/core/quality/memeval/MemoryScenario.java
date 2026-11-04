@@ -68,13 +68,19 @@ public record MemoryScenario(
         }
     }
 
-    /** A session; {@code gapDays} is the clock advance before it starts; {@code forgets} are fact ids erased in it. */
+    /**
+     * A session; {@code gapDays} is the clock advance before it starts; {@code forgets} are fact ids
+     * erased in it; {@code shares} are fact ids the session's user explicitly shares with the rest of
+     * their tenant from here on (never with another tenant).
+     */
     public record Session(
-        String id, int gapDays, String userId, String tenantId, List<Turn> turns, List<String> forgets
+        String id, int gapDays, String userId, String tenantId, List<Turn> turns, List<String> forgets,
+        List<String> shares
     ) {
         public Session {
             turns = turns == null ? List.of() : List.copyOf(turns);
             forgets = forgets == null ? List.of() : List.copyOf(forgets);
+            shares = shares == null ? List.of() : List.copyOf(shares);
         }
     }
 
@@ -201,6 +207,27 @@ public record MemoryScenario(
             if (sessions.get(i).forgets().contains(f.id())) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    /** True when the owner explicitly shared the fact (tenant-wide) in a session at or before {@code index}. */
+    public boolean sharedAt(Fact f, int index) {
+        for (int i = 0; i <= index && i < sessions.size(); i++) {
+            if (sessions.get(i).shares().contains(f.id())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether {@code userId} in {@code tenantId} may see the fact at session {@code index}: its owner
+     * always, anyone else in the owner's tenant only once the owner has shared it.
+     */
+    public boolean visibleTo(Fact f, String userId, String tenantId, int index) {
+        if (Objects.equals(ownerTenant(f), tenantId)) {
+            return Objects.equals(ownerUser(f), userId) || sharedAt(f, index);
         }
         return false;
     }

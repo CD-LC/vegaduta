@@ -29,8 +29,18 @@ public final class MemoryScenarioLoader {
 
     private MemoryScenarioLoader() {}
 
-    /** The shipped dataset (manifest order). */
+    /**
+     * The whole dataset: the hand-written files in manifest order, then the poisoning scenarios
+     * {@link PoisonScenarioGenerator} derives from the shared red-team corpus.
+     */
     public static List<MemoryScenario> loadAll() {
+        List<MemoryScenario> out = new ArrayList<>(loadManifest());
+        out.addAll(PoisonScenarioGenerator.generate());
+        return List.copyOf(out);
+    }
+
+    /** Only the hand-written files listed in {@code eval/memory/manifest.json}. */
+    public static List<MemoryScenario> loadManifest() {
         try (InputStream in = open(MANIFEST)) {
             JsonNode manifest = MAPPER.readTree(in);
             requireVersion(manifest.path("schema_version").asInt(-1), MANIFEST);

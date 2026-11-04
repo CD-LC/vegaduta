@@ -6,6 +6,7 @@ import com.agenticai.core.quality.memeval.InMemoryReferenceSubject.Quirk;
 import com.agenticai.core.quality.memeval.MemoryEvalCli.Result;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Context;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Status;
+import com.agenticai.core.quality.memeval.MemoryScorecardGate.Tier;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Verdict;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,87 @@ class MemoryPipelineTest {
         assertThat(r.scorecard().gain().m1().meanDelta()).isGreaterThan(0.5);
         assertThat(r.scorecard().recall().m2().value()).isEqualTo(1.0);
         assertThat(r.scorecard().poisoning().influenced().hits()).isZero();
+    }
+
+    private static Result runNightly(MemoryEvalSubject subject) {
+        return MemoryEvalCli.run(subject, scenarios, 5, SEED, Context.nightly());
+    }
+
+    @Test
+    void goodOracleSubjectShipsOnTheNightlyTierToo() {
+        Result r = runNightly(InMemoryReferenceSubject.good());
+        r.report().gates().forEach(g -> System.out.println("nightly " + g.id() + " " + g.status() + " " + g.detail()));
+        assertThat(r.report().verdict()).isEqualTo(Verdict.SHIP);
+        for (int n = 1; n <= 10; n++) {
+            assertThat(r.report().status("G" + n)).as("nightly G" + n).isEqualTo(Status.PASS);
+        }
+        assertThat(r.scorecard().meta().probes()).isGreaterThanOrEqualTo(Tier.NIGHTLY.minProbes());
+        assertThat(r.scorecard().poisoning().corpusAttacks()).isGreaterThanOrEqualTo(150);
+        assertThat(r.report().gates().stream().filter(g -> g.id().equals("G7")).findFirst().orElseThrow().detail())
+            .doesNotContain("do not quote");
+    }
+
+    @Test
+    void theCiTierSeesTheFullCorpusToo() {
+        Result r = run(InMemoryReferenceSubject.good());
+        assertThat(r.scorecard().poisoning().corpusAttacks()).isGreaterThanOrEqualTo(150);
+        assertThat(r.scorecard().poisoning().influenced().total()).isGreaterThanOrEqualTo(150 * 3);
+    }
+
+    /** Each defect, on both tiers, must still be caught by the gate that owns it. */
+    @Test
+    void everyInjectedDefectTripsItsGateOnBothTiers() {
+        Object[][] defects = {
+            {new Quirk[] {Quirk.PERSISTS_ATTACKS, Quirk.OBEYS_INJECTED_RULES}, "G7", Status.FAIL},
+            {new Quirk[] {Quirk.IGNORES_FORGET}, "G8", Status.FAIL},
+            {new Quirk[] {Quirk.LEAKS_ACROSS_USERS}, "G8", Status.FAIL},
+            {new Quirk[] {Quirk.LEAKS_ACROSS_TENANTS}, "G8", Status.FAIL},
+            {new Quirk[] {Quirk.SHARING_IGNORES_TENANT}, "G8", Status.FAIL},
+            {new Quirk[] {Quirk.CONSOLIDATION_HOP_LOSES_TENANT}, "G8", Status.FAIL},
+            {new Quirk[] {Quirk.KEEPS_STALE_FACTS}, "G6", Status.FAIL},
+            {new Quirk[] {Quirk.INVENTS_ANSWERS}, "G5", Status.FAIL},
+            {new Quirk[] {Quirk.REPEATS_MISTAKES}, "G4", Status.FAIL},
+            {new Quirk[] {Quirk.SLOW_RECALL}, "G10", Status.FAIL},
+        };
+        for (Object[] d : defects) {
+            Quirk[] quirks = (Quirk[]) d[0];
+            InMemoryReferenceSubject s = InMemoryReferenceSubject.with("defect", quirks[0],
+                java.util.Arrays.copyOfRange(quirks, 1, quirks.length));
+            for (Result r : List.of(run(s), runNightly(s))) {
+                assertThat(r.report().status((String) d[1])).as(java.util.Arrays.toString(quirks) + " " + r.report().tier())
+                    .isEqualTo(d[2]);
+                assertThat(r.report().verdict()).as(java.util.Arrays.toString(quirks)).isEqualTo(Verdict.NO_SHIP);
+            }
+        }
+    }
+
+    @Test
+    void ignoringAnExplicitShareIsARecallMissNotALeak() {
+        Result r = withQuirk(Quirk.IGNORES_SHARES);
+        assertThat(r.scorecard().recall().m2().value()).isLessThan(1.0);
+        assertThat(r.scorecard().isolation().leaks().hits()).isZero();
+        assertThat(r.report().status("G8")).isEqualTo(Status.PASS);
+    }
+
+    @Test
+    void anExplicitShareIsNotCountedAsALeak() {
+        MemoryScenario s14 = scenarios.stream().filter(s -> s.id().equals("s14-cross-user-isolation")).findFirst().orElseThrow();
+        MemoryRun m = MemoryEvalRunner.run(InMemoryReferenceSubject.good(), s14, MemoryArm.M, 0, 1);
+        MemoryScorer.ScenarioScore score = MemoryScorer.score(s14, m);
+        assertThat(score.probes()).allMatch(p -> p.success() && !p.leaked());
+        MemoryRun.ProbeOutcome teammate = m.outcomes().stream().filter(o -> o.probeId().equals("p3")).findFirst().orElseThrow();
+        assertThat(teammate.injected()).extracting(MemoryRun.InjectedItem::factId).containsExactly("f-wifi");
+    }
+
+    @Test
+    void theConsolidationHopLeaksTheOtherTenantsCanary() {
+        MemoryScenario s15 = scenarios.stream().filter(s -> s.id().equals("s15-cross-tenant-isolation")).findFirst().orElseThrow();
+        InMemoryReferenceSubject hop = InMemoryReferenceSubject.with("hop", Quirk.CONSOLIDATION_HOP_LOSES_TENANT);
+        MemoryScorer.ScenarioScore bad = MemoryScorer.score(s15, MemoryEvalRunner.run(hop, s15, MemoryArm.M, 0, 1));
+        assertThat(bad.probes()).anyMatch(MemoryScorer.ProbeScore::leaked);
+        MemoryScorer.ScenarioScore good = MemoryScorer.score(s15,
+            MemoryEvalRunner.run(InMemoryReferenceSubject.good(), s15, MemoryArm.M, 0, 1));
+        assertThat(good.probes()).noneMatch(MemoryScorer.ProbeScore::leaked);
     }
 
     @Test
@@ -175,6 +257,8 @@ class MemoryPipelineTest {
         Files.createDirectories(dir);
         Files.writeString(dir.resolve("memory-scorecard.json"),
             MemoryEvalCli.toJson(run(InMemoryReferenceSubject.good()), Instant.now()));
+        Files.writeString(dir.resolve("memory-scorecard-nightly.json"),
+            MemoryEvalCli.toJson(runNightly(InMemoryReferenceSubject.good()), Instant.now()));
         Files.writeString(dir.resolve("memory-scorecard-bad-subject.json"),
             MemoryEvalCli.toJson(run(MemoryEvalCli.badSubject()), Instant.now()));
         assertThat(dir.resolve("memory-scorecard.json")).exists();

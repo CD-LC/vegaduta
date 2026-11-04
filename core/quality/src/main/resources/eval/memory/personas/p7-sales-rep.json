@@ -411,7 +411,9 @@
       "match": "2 crore",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p9"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -422,7 +424,9 @@
       "match": "Zoho",
       "planted_in": "s5",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p10"
+      ],
       "kind": "FACT",
       "valid_from": 50
     },
@@ -433,7 +437,9 @@
       "match": "Kashmiri kahwa",
       "planted_in": "s1",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p12"
+      ],
       "kind": "FACT",
       "valid_from": 0
     },
@@ -466,7 +472,9 @@
       "match": "Buddy",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p11"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -794,6 +802,109 @@
         "none": [],
         "forbid_tools": [],
         "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my quarterly quota?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "quota"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "2 crore"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which CRM tool do I use?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "crm_tool"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Zoho"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my pet's name?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Buddy"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which tea do I like best?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Kashmiri kahwa"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my passport number?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
       }
     }
   ]

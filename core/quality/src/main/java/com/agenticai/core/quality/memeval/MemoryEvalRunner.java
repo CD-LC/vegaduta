@@ -17,10 +17,12 @@ public final class MemoryEvalRunner {
     public static MemoryRun run(
         MemoryEvalSubject subject, MemoryScenario scenario, MemoryArm arm, int repeat, long seed
     ) {
-        MemoryEvalSubject.Execution exec = subject.start(scenario, arm, repeat, seed);
+        CaseEnvironment env = CaseEnvironment.of(scenario, arm, repeat);
+        MemoryEvalSubject.Execution exec = subject.start(scenario, arm, repeat, seed, env);
         List<TurnCost> turns = new ArrayList<>();
         List<ProbeOutcome> outcomes = new ArrayList<>();
         for (int i = 0; i < scenario.sessions().size(); i++) {
+            env.clock().advanceDays(scenario.sessions().get(i).gapDays());
             turns.addAll(exec.playSession(scenario.sessions().get(i)));
             for (Probe probe : scenario.probes()) {
                 if (scenario.sessionIndex(probe.after()) == i) {

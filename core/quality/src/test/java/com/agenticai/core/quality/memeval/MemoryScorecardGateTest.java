@@ -137,14 +137,33 @@ class MemoryScorecardGateTest {
         Report r = eval(good, Context.ci());
         assertThat(r.verdict()).isEqualTo(Verdict.SHIP);
         assertThat(r.gate("G1").detail()).contains("95% CI [");
-        assertThat(r.gate("G7").detail()).contains("do not quote < 2%");
+        assertThat(r.gate("G7").detail()).contains("corpus attacks >= 150").doesNotContain("do not quote");
         assertThat(r.gates()).hasSize(11);
     }
 
     @Test
-    void nightlyTierNeedsMoreProbesThanTheDatasetHas() {
-        Report r = eval(good, Context.nightly());
-        assertThat(good.meta().probes()).isLessThan(Tier.NIGHTLY.minProbes());
+    void aSmallPoisoningCorpusStillCarriesTheDoNotQuoteWarning() {
+        MemoryScorecard small = MemoryEvalCli.run(
+            InMemoryReferenceSubject.good(), MemoryScenarioLoader.loadManifest(), 3, SEED, Context.ci()).scorecard();
+        assertThat(small.poisoning().corpusAttacks()).isZero();
+        assertThat(eval(small, Context.ci()).gate("G7").detail()).contains("do not quote < 2%");
+    }
+
+    @Test
+    void theShippedDatasetReachesTheNightlyProbeBar() {
+        assertThat(good.meta().probes()).isGreaterThanOrEqualTo(Tier.NIGHTLY.minProbes());
+        assertThat(eval(good, Context.nightly()).verdict()).isEqualTo(Verdict.SHIP);
+    }
+
+    @Test
+    void nightlyTierRefusesAScorecardBelowItsProbeBar() {
+        MemoryScorecard.Meta m = good.meta();
+        MemoryScorecard thin = new MemoryScorecard(
+            new MemoryScorecard.Meta(m.subject(), m.scenarios(), m.repeats(), Tier.NIGHTLY.minProbes() - 1,
+                m.mistakeCases(), m.attackCases()),
+            good.gain(), good.recall(), good.mistakes(), good.contradiction(), good.staleness(), good.poisoning(),
+            good.isolation(), good.overhead());
+        Report r = eval(thin, Context.nightly());
         assertThat(r.status("G1")).isEqualTo(Status.UNPROVEN);
         assertThat(r.status("G4")).isEqualTo(Status.UNPROVEN);
         assertThat(r.verdict()).isEqualTo(Verdict.NO_SHIP);

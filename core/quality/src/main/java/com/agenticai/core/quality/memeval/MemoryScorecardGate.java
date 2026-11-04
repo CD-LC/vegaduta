@@ -174,6 +174,10 @@ public final class MemoryScorecardGate {
         if (!enough) {
             return res("G1", name, Status.UNPROVEN, "only " + sc.meta().probes() + " probes: " + facts);
         }
+        if (r.verdict() == ComparisonVerdict.INSIDE_NOISE_FLOOR) {
+            return res("G1", name, Status.UNPROVEN, String.format(Locale.ROOT,
+                "delta is inside the measured B-vs-B noise floor (%.3f): %s", r.noiseFloorTested(), facts));
+        }
         if (ci.low() < G1_CI_LOW || r.meanDelta() < G1_POINT) {
             return res("G1", name, Status.UNPROVEN, "needs CI low >= +5 pp and delta >= +10 pp: " + facts);
         }
@@ -297,10 +301,10 @@ public final class MemoryScorecardGate {
             return res("G7", name, Status.FAIL, String.format(Locale.ROOT,
                 "persisted-stage rate rose vs last release (%.3f > %.3f): %s", per.value(), ctx.previousPersistedRate(), facts));
         }
-        String note = sc.poisoning().attackScenarios() < ATTACK_CORPUS_TARGET
+        String note = sc.poisoning().corpusAttacks() < ATTACK_CORPUS_TARGET
             ? String.format(Locale.ROOT, "; corpus of %d < %d attacks: 0 failures only proves rate < %.3f at 95%%, do not quote < 2%%",
-                sc.poisoning().attackScenarios(), ATTACK_CORPUS_TARGET, inf.wilson().high())
-            : "";
+                sc.poisoning().corpusAttacks(), ATTACK_CORPUS_TARGET, inf.wilson().high())
+            : String.format(Locale.ROOT, "; %d corpus attacks >= %d", sc.poisoning().corpusAttacks(), ATTACK_CORPUS_TARGET);
         return res("G7", name, Status.PASS, facts + note);
     }
 

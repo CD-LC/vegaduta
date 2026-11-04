@@ -411,7 +411,9 @@
       "match": "1-2 PM",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p9"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -422,7 +424,9 @@
       "match": "audit committee",
       "planted_in": "s5",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p10"
+      ],
       "kind": "FACT",
       "valid_from": 50
     },
@@ -433,7 +437,9 @@
       "match": "Oolong",
       "planted_in": "s1",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p12"
+      ],
       "kind": "FACT",
       "valid_from": 0
     },
@@ -466,7 +472,9 @@
       "match": "Zoro",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p11"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -794,6 +802,109 @@
         "none": [],
         "forbid_tools": [],
         "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which hour should I keep free for lunch?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "lunch_block"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "1-2 PM"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which committee do I chair?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "committee"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "audit committee"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my pet's name?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Zoro"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which tea do I like best?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Oolong"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my passport number?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
       }
     }
   ]

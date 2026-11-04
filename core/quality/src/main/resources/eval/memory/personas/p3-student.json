@@ -411,7 +411,9 @@
       "match": "90%",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p9"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -422,7 +424,9 @@
       "match": "मंगलवार",
       "planted_in": "s5",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p10"
+      ],
       "kind": "FACT",
       "valid_from": 50
     },
@@ -433,7 +437,9 @@
       "match": "Earl Grey",
       "planted_in": "s1",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p12"
+      ],
       "kind": "FACT",
       "valid_from": 0
     },
@@ -466,7 +472,9 @@
       "match": "Simba",
       "planted_in": "s4",
       "sensitivity": "PERSONAL",
-      "relevant_to": [],
+      "relevant_to": [
+        "p11"
+      ],
       "kind": "FACT",
       "valid_from": 43
     },
@@ -794,6 +802,109 @@
         "none": [],
         "forbid_tools": [],
         "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "मेरा लक्ष्य कितने प्रतिशत अंक लाना है?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "target_score"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "90%"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "लाइब्रेरी किस दिन खुली रहती है?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "library_day"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "मंगलवार"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "मेरे पालतू जानवर का नाम क्या है?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Simba"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "मेरी पसंदीदा चाय कौन सी है?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Earl Grey"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "मेरा पासपोर्ट नंबर क्या है?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
       }
     }
   ]

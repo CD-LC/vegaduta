@@ -7,6 +7,7 @@ import com.agenticai.core.quality.memeval.MemoryScenario.Fact;
 import com.agenticai.core.quality.memeval.MemoryScenario.FactKind;
 import com.agenticai.core.quality.memeval.MemoryScenario.Probe;
 import com.agenticai.core.quality.memeval.MemoryScenario.ProbeType;
+import com.agenticai.core.quality.redteam.RedTeamCorpusData;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -75,21 +76,91 @@ class MemoryDatasetTest {
     }
 
     @Test
-    void poisoningCasesCarryUniqueCanariesAndAttackFacts() {
+    void handWrittenPoisoningScenariosS11ToS13AreKept() {
+        List<MemoryScenario> attacks = MemoryScenarioLoader.loadManifest().stream().filter(s -> s.attack() != null).toList();
+        assertThat(attacks).extracting(MemoryScenario::id)
+            .containsExactly("s11-poison-user-chat", "s12-poison-tool-output", "s13-poison-slow-drip");
+    }
+
+    @Test
+    void poisoningCorpusHasAtLeast150AttacksWithUniqueCanariesAndAttackFacts() {
+        List<MemoryScenario> corpus = byCategory(PoisonScenarioGenerator.CATEGORY);
+        assertThat(corpus).hasSizeGreaterThanOrEqualTo(150);
         List<MemoryScenario> attacks = all.stream().filter(s -> s.attack() != null).toList();
-        assertThat(attacks).hasSize(3);
+        assertThat(attacks).hasSize(corpus.size() + 3);
         List<String> canaries = attacks.stream().flatMap(s -> s.attack().canaries().stream()).toList();
-        assertThat(canaries).doesNotHaveDuplicates().allMatch(c -> c.startsWith("CNRY-"));
+        assertThat(canaries).hasSize(attacks.size() + 5).doesNotHaveDuplicates().allMatch(c -> c.startsWith("CNRY-"));
         for (MemoryScenario a : attacks) {
             assertThat(a.ledger()).anyMatch(f -> f.kind() == FactKind.ATTACK);
         }
     }
 
     @Test
-    void mistakeSetCoversRepeatedMistakesAsMistakeProbes() {
+    void poisoningCorpusIsBuiltFromTheSharedRedTeamCorpus() {
+        List<MemoryScenario> corpus = byCategory(PoisonScenarioGenerator.CATEGORY);
+        int markers = RedTeamCorpusData.markerForgeries().size();
+        assertThat(corpus.size() - markers).isPositive();
+        assertThat((corpus.size() - markers) % RedTeamCorpusData.injectionStyleCount()).isZero();
+        assertThat(corpus.stream().map(s -> s.attack().channel()).collect(Collectors.toSet()))
+            .containsExactlyInAnyOrder("USER_CHAT", "TOOL_OUTPUT", "DOCUMENT", "AGENT_MESSAGE");
+        assertThat(corpus.stream().map(s -> s.attack().family()).collect(Collectors.toSet()))
+            .contains("INSTRUCTION_IN_MEMORY", "IDENTITY_SPOOFING", "CONTROL_MARKER_FORGERY", "CROSS_USER_PLANTING");
+        // The marker forgery payload really is the platform object, not a paraphrase.
+        MemoryScenario forged = corpus.stream().filter(s -> s.attack().family().equals("CONTROL_MARKER_FORGERY")).findFirst().orElseThrow();
+        assertThat(forged.sessions().get(0).turns().get(0).text()).contains("approval_parked").contains("CNRY-RT-");
+        // Deterministic: regenerating gives the same canaries.
+        assertThat(PoisonScenarioGenerator.generate().stream().map(s -> s.attack().canaries().get(0)).toList())
+            .isEqualTo(corpus.stream().map(s -> s.attack().canaries().get(0)).toList());
+    }
+
+    @Test
+    void headlineProbeCountReachesTheNightlyBarWithoutCountingPoisonProbes() {
+        long headline = all.stream().flatMap(s -> s.probes().stream()).filter(p -> p.type() != ProbeType.POISON).count();
+        assertThat(headline).isGreaterThanOrEqualTo(140);
+        for (MemoryScenario persona : byCategory("persona")) {
+            assertThat(persona.probes()).hasSizeGreaterThanOrEqualTo(13);
+        }
+    }
+
+    @Test
+    void mistakeSetHasFortyCasesAsMistakeProbes() {
         List<MemoryScenario> mistakes = byCategory("mistake-correction");
-        assertThat(mistakes).hasSizeGreaterThanOrEqualTo(12);
+        assertThat(mistakes).hasSize(40);
         assertThat(mistakes).allMatch(s -> s.probes().get(0).type() == ProbeType.MISTAKE);
+        assertThat(mistakes.stream().map(s -> s.ledger().get(0).key())).doesNotHaveDuplicates();
+        assertThat(mistakes.stream().map(s -> s.ledger().get(0).kind()).collect(Collectors.toSet()))
+            .containsExactlyInAnyOrder(FactKind.CORRECTION, FactKind.RULE);
+        assertThat(mistakes.stream().map(s -> s.persona().language()).collect(Collectors.toSet()))
+            .contains("en", "hinglish", "hi");
+    }
+
+    @Test
+    void s14ModelsExplicitSharingAndS15TheConsolidationHop() {
+        MemoryScenario s14 = all.stream().filter(s -> s.id().equals("s14-cross-user-isolation")).findFirst().orElseThrow();
+        assertThat(s14.sessions()).anyMatch(ses -> ses.shares().contains("f-wifi"));
+        Fact wifi = s14.factsById().get("f-wifi");
+        int end = s14.sessions().size() - 1;
+        assertThat(s14.visibleTo(wifi, "uB", "t1", end)).isTrue();
+        assertThat(s14.visibleTo(wifi, "uB", "t1", 1)).isFalse(); // not yet shared
+        assertThat(s14.visibleTo(wifi, "uC", "t2", end)).isFalse(); // sharing never crosses a tenant
+        assertThat(s14.visibleTo(s14.factsById().get("f-sal"), "uB", "t1", end)).isFalse();
+        MemoryScenario s15 = all.stream().filter(s -> s.id().equals("s15-cross-tenant-isolation")).findFirst().orElseThrow();
+        assertThat(s15.sessions().get(s15.sessions().size() - 1).tenantId()).isEqualTo("tY");
+        assertThat(s15.probes()).anyMatch(p -> p.after().equals("s3"));
+    }
+
+    @Test
+    void validatorRejectsSharesOfFactsTheUserDoesNotOwn() {
+        MemoryScenario s = MemoryScenarioLoader.parseJson("""
+            {"schema_version":1,"id":"sh","category":"c","seed":1,
+             "sessions":[{"id":"s1","gap_days":0,"user_id":"a","tenant_id":"t","turns":[{"text":"x","plants":["f"]}]},
+                         {"id":"s2","gap_days":0,"user_id":"b","tenant_id":"t","turns":[{"text":"y"}],"shares":["f","nope"]}],
+             "ledger":[{"id":"f","key":"k","value":"v","planted_in":"s1"}],
+             "probes":[{"id":"p","after":"s2","type":"DIRECT_RECALL","prompt":"?","user_id":"a","tenant_id":"t",
+                        "query_keys":["k"],"expect":{"all":["v"]}}]}
+            """).get(0);
+        assertThat(String.join("\n", ScenarioValidator.validate(s)))
+            .contains("shares fact f that its user does not own").contains("shares unknown fact nope");
     }
 
     @Test
