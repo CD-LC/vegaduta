@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.turn;
 
-import static com.agenticai.core.agents.turn.AgentChatService.INTERRUPTED_REPLY_MARKER;
 import static com.agenticai.core.agents.turn.ChatPromptDirectives.containsFabricatedGenerationUrl;
 
 import com.agenticai.core.agents.core.Agent;
@@ -513,7 +512,7 @@ final class ChatTurnExecutor {
      *   <li><b>complete</b> - runs {@code onCompleteFullAnswer} (the caller's pre-existing
      *       audit/persist/quality-judge body) exactly as before;
      *   <li><b>error/cancel</b> - persists whatever partial answer exists, suffixed with {@link
-     *       #INTERRUPTED_REPLY_MARKER}. Persistence-only: the error itself still propagates to the
+     *       AgentChatService#INTERRUPTED_REPLY_MARKER}. Persistence-only: the error itself still propagates to the
      *       client unchanged, and a token-less failure (the retryable pre-stream shape the fallback
      *       branches above handle) persists nothing, so hosted-chain rungs that fail over cleanly
      *       write no phantom turns.
@@ -555,61 +554,15 @@ final class ChatTurnExecutor {
             StringBuilder accumulated,
             Consumer<String> onCompleteFullAnswer,
             Supplier<ToolLedger> toolRecord) {
-        AtomicBoolean assistantTurnPersisted = new AtomicBoolean(false);
-        return stream.doOnNext(accumulated::append)
-                .doOnComplete(
-                        () -> {
-                            if (!accumulated.isEmpty()
-                                    && assistantTurnPersisted.compareAndSet(false, true)) {
-                                onCompleteFullAnswer.accept(accumulated.toString());
-                            }
-                        })
-                .doOnError(
-                        e -> {
-                            log.error(
-                                    "Chat stream failed for agent {} session {}",
-                                    agentId,
-                                    sessionId,
-                                    e);
-                            persistInterruptedAssistantTurn(
-                                    memorySessionId,
-                                    accumulated,
-                                    assistantTurnPersisted,
-                                    toolRecord);
-                        })
-                .doOnCancel(
-                        () ->
-                                persistInterruptedAssistantTurn(
-                                        memorySessionId,
-                                        accumulated,
-                                        assistantTurnPersisted,
-                                        toolRecord));
-    }
-
-    /**
-     * The error/cancel half of {@link #withAssistantTurnPersistence}: persist the partial answer
-     * once, marked, and never let a persistence failure (e.g. Redis down at the exact moment the
-     * stream died) mask the original stream error on its way to the client.
-     */
-    private void persistInterruptedAssistantTurn(
-            String sessionId,
-            StringBuilder accumulated,
-            AtomicBoolean assistantTurnPersisted,
-            Supplier<ToolLedger> toolRecord) {
-        String partial = accumulated.toString();
-        if (partial.isEmpty() || !assistantTurnPersisted.compareAndSet(false, true)) {
-            return;
-        }
-        try {
-            sessionMemoryService.appendTurn(
-                    sessionId,
-                    ChatTurn.assistant(partial + INTERRUPTED_REPLY_MARKER, toolRecord.get()));
-        } catch (RuntimeException persistFailure) {
-            log.warn(
-                    "Could not persist interrupted assistant turn for session {}",
-                    sessionId,
-                    persistFailure);
-        }
+        return AssistantTurnPersistence.wrap(
+                sessionMemoryService,
+                stream,
+                agentId,
+                sessionId,
+                memorySessionId,
+                accumulated,
+                onCompleteFullAnswer,
+                toolRecord);
     }
 
     /**

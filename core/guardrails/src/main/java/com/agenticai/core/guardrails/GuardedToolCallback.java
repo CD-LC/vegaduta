@@ -12,9 +12,7 @@ import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.guardrails.taint.TaintGate;
 import com.agenticai.core.prompts.PromptResolver;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,7 +166,7 @@ public class GuardedToolCallback implements ToolCallback {
     private final TenantGuardrailRuleEvaluator tenantRuleEvaluator;
     private final com.agenticai.core.guardrails.procedures.ProcedureGuardEvaluator procedureGuard;
     private final ToolDispatchGate dispatchGate;
-    private final MeterRegistry meterRegistry;
+    private final GuardedCallMetrics metrics;
 
     public GuardedToolCallback(
         ToolCallback delegate,
@@ -268,7 +266,7 @@ public class GuardedToolCallback implements ToolCallback {
         MeterRegistry meterRegistry
     ) {
         this.dispatchGate = dispatchGate;
-        this.meterRegistry = meterRegistry;
+        this.metrics = new GuardedCallMetrics(meterRegistry);
         this.delegate = delegate;
         this.stepCounter = stepCounter;
         this.maxStepsPerTurn = maxStepsPerTurn;
@@ -475,10 +473,10 @@ public class GuardedToolCallback implements ToolCallback {
             throw e;
         } catch (RuntimeException e) {
             outcome[0] = OUTCOME_ERROR;
-            recordError(toolName, e);
+            metrics.recordError(toolName, e);
             throw e;
         } finally {
-            recordTiming(toolName, outcome[0], System.nanoTime() - startedAt);
+            metrics.recordTiming(toolName, outcome[0], System.nanoTime() - startedAt);
         }
     }
 
@@ -732,13 +730,7 @@ public class GuardedToolCallback implements ToolCallback {
         } catch (RuntimeException e) {
             log.debug("Could not note the auto-allowed read-only call '{}' on the turn", toolName, e);
         }
-        if (meterRegistry != null) {
-            try {
-                meterRegistry.counter(ReadOnlyAutoAllow.METRIC).increment();
-            } catch (RuntimeException e) {
-                log.debug("Could not record {}", ReadOnlyAutoAllow.METRIC, e);
-            }
-        }
+        metrics.readOnlyAutoAllowed();
         ReadOnlyAutoAllow.Audit audit = readOnlyAutoAllowAudit;
         if (audit != null) {
             try {
@@ -778,34 +770,6 @@ public class GuardedToolCallback implements ToolCallback {
             }
             log.warn("Tool dispatch gate failed for tool '{}' - allowing the call (fail-open)", toolName, e);
             return ToolDispatchGate.Verdict.allow();
-        }
-    }
-
-    private void recordTiming(String toolName, String outcome, long elapsedNanos) {
-        if (meterRegistry == null) {
-            return;
-        }
-        try {
-            Timer.builder(CALL_TIMER)
-                .description("Agent tool calls through the guardrail wrapper, by tool and outcome")
-                .tag("tool", toolName)
-                .tag("outcome", outcome)
-                .register(meterRegistry)
-                .record(elapsedNanos, TimeUnit.NANOSECONDS);
-        } catch (RuntimeException e) {
-            log.debug("Could not record {} for tool '{}'", CALL_TIMER, toolName, e);
-        }
-    }
-
-    private void recordError(String toolName, RuntimeException error) {
-        if (meterRegistry == null) {
-            return;
-        }
-        try {
-            meterRegistry.counter(ERROR_COUNTER, "tool", toolName, "exception", error.getClass().getSimpleName())
-                .increment();
-        } catch (RuntimeException e) {
-            log.debug("Could not record {} for tool '{}'", ERROR_COUNTER, toolName, e);
         }
     }
 
