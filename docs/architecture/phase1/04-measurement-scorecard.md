@@ -337,3 +337,51 @@ C1/C3.
   in section 9.
 - Licensing and consent for any real-trace derived cases.
 - Whether `eval.yml` / `eval-pr-gate.yml` exist outside this checkout (section 1).
+
+## Addendum A: `memory-scorecard.json` schema and gate script
+
+Contract between the gate evaluator (`MemoryScorecardGate`, core/quality `memeval`) and
+`scripts/ci/memory-scorecard-gate.sh`. Machine-readable form:
+[memory-scorecard.schema.json](memory-scorecard.schema.json) (the script checks the fields below with `jq`;
+the schema file is the reference, not a runtime dependency).
+
+```json
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-01T02:00:00Z",
+  "verdict": "SHIP | SHIP DARK | NO-SHIP",
+  "memoryDefaultOn": false,
+  "gates": [
+    {"id": "G1", "name": "Gain", "status": "PASS | FAIL | WARN | UNPROVEN", "detail": "optional, free text"}
+  ]
+}
+```
+
+- `gates[].id` is `G1`..`G11` as in section 6. A gate missing from the report counts as `UNPROVEN`.
+- `memoryDefaultOn` says whether the feature under evaluation ships on by default (needed for the
+  "G1 fails with memory default-on" rule); absent means `false`.
+- The script does not trust `verdict`: it recomputes it from `gates` with the section 7 rules (hard gates
+  G4-G8 and G10 must be `PASS`; G2 and G3 must be `PASS`; G1 or G9 not `PASS` gives SHIP DARK unless G1 fails
+  with `memoryDefaultOn`; G11 may warn) and rejects a report whose `verdict` disagrees.
+
+Exit codes of `scripts/ci/memory-scorecard-gate.sh [--max-age-days N] <report>`:
+
+| Code | Meaning |
+|---|---|
+| 0 | SHIP |
+| 3 | SHIP DARK (distinct on purpose: not green, not red; the feature stays flag-off) |
+| 1 | NO-SHIP |
+| 2 | report unreadable, wrong `schemaVersion`, unknown status, or `verdict` inconsistent with `gates` |
+| 4 | `--max-age-days` given and the report is older than that or has no usable `generatedAt` |
+
+Self-test: `bash scripts/ci/test-memory-scorecard-gate.sh` (fixtures in `scripts/ci/testdata/memory-scorecard/`).
+Workflow: `.github/workflows/memory-eval.yml` (nightly + manual). It is not yet in `make gates` (section 8: only
+the fast T0/T1 checks belong there).
+
+## Addendum B: shared red-team corpus data
+
+The attacker payloads are data in `core/quality/src/main/resources/eval/redteam/corpus.json`, loaded by
+`com.agenticai.core.quality.redteam.RedTeamCorpusData`. `core/app`'s test-only `RedTeamCorpus` reads from it
+(core/app already depends on core/quality), so the red-team tests and the section 4.4 poisoning replay attack
+the same strings. `RedTeamCorpusDataTest` pins the counts (36 marker forgeries, 24 injection styles per
+instruction): removing or weakening a scenario fails that test and must be a deliberate edit.

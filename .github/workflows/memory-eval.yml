@@ -1,0 +1,101 @@
+name: Memory eval (nightly scorecard gate)
+
+# Nightly (and on demand) memory-evaluation job, tier T2-lite of docs/architecture/phase1/04-measurement-scorecard.md
+# section 8: runs the deterministic memeval + shared red-team corpus tests in core/quality (mock/fake model only:
+# no provider keys, no billed calls, no secrets), then the ship / no-ship gate over the scorecard report.
+#
+# Gate exit codes (scripts/ci/memory-scorecard-gate.sh): 0 SHIP, 3 SHIP DARK (job passes with a notice, the
+# feature stays flag-off), 1 NO-SHIP, 2 invalid report, 4 stale report. Anything but 0 or 3 fails the job.
+#
+# The report is read from MEMORY_SCORECARD_JSON (default below). Until the memeval gate evaluator emits it the
+# gate step logs a warning and is skipped; flip REQUIRE_SCORECARD to "true" once it does, so a missing report
+# fails the job instead.
+#
+# The real-model personas, B vs M vs Oracle arms and judge calibration of the section 8 nightly are NOT wired
+# here; they need a model budget decision (section 12) first.
+
+on:
+  schedule:
+    - cron: "23 4 * * *" # nightly 04:23 UTC (after load-nightly 02:41 and e2e 03:17)
+  workflow_dispatch:
+    inputs:
+      scorecard_path:
+        description: Scorecard JSON to gate, relative to the repository root (empty = the default)
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: memory-eval-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "21"
+  MEMORY_SCORECARD_JSON: core/quality/target/memory-eval/memory-scorecard.json
+  REQUIRE_SCORECARD: "false"
+
+jobs:
+  memory-eval:
+    name: memeval tests and scorecard gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Gate script self-test
+        run: bash scripts/ci/test-memory-scorecard-gate.sh
+
+      # -am builds the modules quality depends on; -Dtest limits the run to the memory eval and the shared
+      # red-team corpus, and a missing package (memeval not merged yet) is not a failure.
+      - name: memeval and red-team corpus tests
+        working-directory: core
+        run: >-
+          mvn -B -ntp -pl quality -am test
+          -Dtest='**/memeval/**/*Test,RedTeamCorpusDataTest'
+          -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Scorecard gate
+        id: gate
+        env:
+          INPUT_PATH: ${{ inputs.scorecard_path }}
+        run: |
+          report="${INPUT_PATH:-$MEMORY_SCORECARD_JSON}"
+          if [ ! -f "$report" ]; then
+            if [ "$REQUIRE_SCORECARD" = "true" ]; then
+              echo "::error::no scorecard at $report"
+              exit 1
+            fi
+            echo "::warning::no scorecard at $report; gate skipped (REQUIRE_SCORECARD is false)"
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "found=true" >> "$GITHUB_OUTPUT"
+          echo "report=$report" >> "$GITHUB_OUTPUT"
+          rc=0
+          bash scripts/ci/memory-scorecard-gate.sh "$report" || rc=$?
+          case "$rc" in
+            0) echo "::notice::memory scorecard verdict: SHIP" ;;
+            3) echo "::notice::memory scorecard verdict: SHIP DARK (feature stays off by default)" ;;
+            1) echo "::error::memory scorecard verdict: NO-SHIP" ;;
+            2) echo "::error::memory scorecard is invalid or inconsistent" ;;
+            *) echo "::error::memory scorecard gate failed with exit code $rc" ;;
+          esac
+          if [ "$rc" -eq 0 ] || [ "$rc" -eq 3 ]; then exit 0; fi
+          exit "$rc"
+
+      - name: Upload scorecard
+        if: ${{ always() && steps.gate.outputs.found == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: memory-scorecard
+          path: ${{ steps.gate.outputs.report }}
+          if-no-files-found: warn
+          retention-days: 30
