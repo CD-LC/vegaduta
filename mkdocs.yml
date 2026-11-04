@@ -239,6 +239,7 @@ nav:
       - DPDP obligations and controls: compliance/dpdp-obligations.md
       - Authorization: security/authorization.md
       - OWASP agentic-AI mapping: security/owasp-mapping.md
+      - Taint entry points: security/taint-entry-points.md
       - Scan reports and dashboards: security/scanning.md
   - Engineering:
       - Flyway versioning: engineering/FLYWAY-VERSIONING.md

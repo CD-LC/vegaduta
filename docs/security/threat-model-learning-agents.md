@@ -22,6 +22,8 @@ this branch and are **not verified**. STRIDE is used as a checklist, not as a cl
 | Taint | Records that a turn read untrusted content; `observe` by default, so it gates nothing | `app.agents.taint.mode`, `core/agents-tools/.../AgentTaintPolicy.java` |
 | Erasure | Per-contact erase reaches agent memory, shared memory, graph entities and KB chunks written for that contact; does not reach backups, provider copies or logs | [dpdp-obligations.md](../compliance/dpdp-obligations.md) section 4.5 |
 
+Entry-by-entry taint seeding: [taint-entry-points.md](taint-entry-points.md).
+
 Planned, not verified: persisted conversation taint and seeding (package B), memory provenance,
 quarantine and write screen (package C), out-of-band control markers (D), the adversarial suite (H).
 
