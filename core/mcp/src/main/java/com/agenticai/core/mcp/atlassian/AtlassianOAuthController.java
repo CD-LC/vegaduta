@@ -5,9 +5,10 @@ import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.publicurl.PublicWebUrl;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.net.URI;
+import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -19,10 +20,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Three surfaces, same split-by-path-prefix reasoning as {@code XOAuthController}/{@code
@@ -64,7 +61,7 @@ public class AtlassianOAuthController {
         this.connector = connector;
         this.connectDispatcher = connectDispatcher;
         // Dedicated property when set, else <app.web.public-url>/tools; blank when neither is
-        // configured (no localhost default, AGENTS.md rule 4) - redirectTo then refuses.
+        // configured (no localhost default, ENGINEERING-RULES.md rule 4) - redirectTo then refuses.
         this.consoleRedirectUri =
                 PublicWebUrl.consoleRedirect(consoleRedirectUri, appPublicUrl, "/tools");
     }

@@ -20,7 +20,7 @@ spring:
           # inside Docker - see that property's comment for why the two
           # must be allowed to differ.
           #
-          # NO usable default on purpose (AGENTS.md rule 4: a token issuer never
+          # NO usable default on purpose (ENGINEERING-RULES.md rule 4: a token issuer never
           # falls back to localhost). With the `security` profile active and
           # KEYCLOAK_ISSUER_URI unset in keycloak mode (the default), start-up
           # fails in SecurityConfig.jwtDecoder() - the intended, fail-closed

@@ -57,7 +57,7 @@ class.
 - **REST.** No controller moved, so no path changed.
 - **Configuration.** Same property keys (`app.per-user-budget.config-cache-ms`,
   `app.platform-llm.premium-multiplier`, `app.platform-llm.unlimited-multiplier`).
-- **Hot path (AGENTS.md rule 6).** Same classes, same in-process calls, same threads. The split
+- **Hot path (ENGINEERING-RULES.md rule 6).** Same classes, same in-process calls, same threads. The split
   is a compile-time boundary only; no network hop and no new blocking call.
 - **Tenancy (rule 12).** `SpendCapService`'s alert executor keeps its entry in
   `core/app/src/test/resources/archrules/async-hop-allowlist.txt` under the unchanged

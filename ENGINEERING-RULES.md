@@ -1,20 +1,17 @@
-# AGENTS.md
+# Engineering rules
 
-> **⚠ Repository history rewritten (2026-10-19).** `main` was force-pushed to a
-> clean linear history; the old repository's merged-in commit history was
-> removed (content unchanged). If your local checkout predates this:
-> **`git fetch origin && git reset --hard origin/main`** — do NOT `git pull`,
-> do NOT push from a stale clone, and do NOT merge any other remote, fork or
-> branch back into `main` without asking first; that re-imports the old
-> history. Remove this notice once all active checkouts have reset.
+> **Notice (2026-10-19).** `main` was rewritten to a clean linear history (content
+> unchanged). If your local checkout predates this, run
+> **`git fetch origin && git reset --hard origin/main`**; do not `git pull`, push from a
+> stale clone, or merge another remote or branch back into `main` without asking, because
+> that re-imports the old history. Remove this notice once all checkouts have reset.
 
-Instructions for AI coding agents (and humans in a hurry) working in this
-repository. Read this before editing. Human contributors: the full guide is
-[CONTRIBUTING.md](CONTRIBUTING.md).
+The rules every contributor must know before editing this repository. The full
+contribution guide is [CONTRIBUTING.md](CONTRIBUTING.md).
 
-> **More than one agent works here at once.** Before you push, merge, tag, release or deploy,
-> read [docs/maintainers/agent-coordination.md](docs/maintainers/agent-coordination.md), claim your
-> area there, and log what you did.
+> **Several people work here at once.** Before you push, merge, tag, release or deploy,
+> read [docs/maintainers/change-coordination.md](docs/maintainers/change-coordination.md) and
+> log what you did.
 
 ## Layout
 

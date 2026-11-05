@@ -58,3 +58,7 @@ python_files = ["pytest_adapter.py"]
 # service's runtime deps (PyJWT, psycopg) still runs cleanly.
 python_version = "3.12"
 ignore_missing_imports = true
+
+# Long literals (fixtures, SQL, expected strings) read better unwrapped in tests.
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E501"]

@@ -202,7 +202,7 @@ spring:
                 # opened during the container's current uptime (that needs a
                 # verified-safe restart/reaper mechanism, deliberately not
                 # shipped yet - see the same incident's notes in
-                # docs/AGENT-COORDINATION-2026-07-18.md for why: the MCP
+                # the internal change log for why: the MCP
                 # Java SDK's exact respawn behavior after this bean's
                 # subprocess dies is unverified, and AgentToolProvider.java's
                 # own comment on this exact connection documents the stdio

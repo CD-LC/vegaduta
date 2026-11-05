@@ -1613,7 +1613,7 @@ services:
     # single-user and stays on the loopback port; agent traffic is
     # service-to-service over agent-io. `nnp` only: third-party image that
     # may start as root.
-    image: ghcr.io/tashfeenahmed/freellmapi:latest
+    image: ghcr.io/tashfeenahmed/freellmapi:latest@sha256:3b744d6714737f2d0c8fe90cdd8517966f22acf615d44cc222c792d40ef9b0a9
     profiles: ["freellmapi"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1646,7 +1646,7 @@ services:
     # endpoint via HINDSIGHT_API_LLM_BASE_URL - e.g. pair it with the
     # `freellmapi` profile for a fully key-free local stack. `nnp` only:
     # third-party image that may start as root.
-    image: ghcr.io/vectorize-io/hindsight:latest
+    image: ghcr.io/vectorize-io/hindsight:latest@sha256:50311d02b4d5d2b7c5242bd336edf8735df8374eaad496a92f49c83b37d2aa06
     profiles: ["hindsight"]
     <<: [*restart, *logging, *nnp]
     environment:
