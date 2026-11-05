@@ -500,7 +500,7 @@ arms except `memory.recall.enabled` and `memory.write.enabled` (B and ORACLE: bo
 5. *Trace source.* The `Trace` object the journal's `memory_recall` events are written from, not the persisted event rows.
 6. *Not covered:* graph memory (needs LLM triple extraction), `memory.recall.agentTopK`/budget variants, the HTTP/Keycloak path, a real
    human reviewer, the periodic review job, decay through the clock (rows' `created_at` comes from the database clock, so gaps do not age rows).
-7. *Switch reads are made inside a transaction* (defect D1 below); the recall itself runs outside one.
+7. *Switch reads are made exactly as production makes them*, outside a transaction (defect D1 below, fixed); the harness no longer wraps them.
 
 **First real result (seed 20261105, 243 scenarios, answerer `extractive`, compliant).** Both tiers: **NO-SHIP**, because G6 fails.
 
@@ -528,14 +528,15 @@ recalled nothing; about 7.7 database statements and 3.8 ms (p50) per recall.
   the pgvector operator unless `public` is on the search_path, so any recall on a connection with only the tenant schema (inside a
   transaction) failed with "operator does not exist" and degraded to nothing. Now `OPERATOR(public.<=>)`, like the legacy store;
   `JdbcMemoryItemRecallSqlTest`.
-- **Open, D1: tenant and agent behaviour overrides are invisible to reads outside a transaction.** `JdbcSettingsStore` reads
-  `setting_override` unqualified through a plain `JdbcTemplate`; without a transaction the connection's search_path is `public`, so
-  `SettingsResolver.get` returns the platform value although `SettingsService.set` stored the override in the tenant schema (inside a
-  transaction it resolves correctly). `PlatformMemoryEvalIT.settingsOverrideVisibilityOutsideAndInsideATransaction` prints both
-  (`outside: true, inside: false`). If the production chat turn also reads outside a transaction, `memory.recall.enabled`,
-  `memory.write.enabled` and every other tenant/agent override is silently ignored there. Not fixed: the right fix (schema-qualify
-  in the store, or read inside a tenant-scoped transaction) needs a decision on the `settings` -> `tenancy` dependency and the hot-path
-  query budget; the eval works around it for the switches only.
+- **Fixed, D1: tenant and agent behaviour overrides were invisible to reads outside a transaction, in production too.** `JdbcSettingsStore`
+  read `setting_override` unqualified through a plain pooled `JdbcTemplate`; without a transaction the connection's search_path is `public`
+  (Hibernate's tenant connection provider only serves JPA), so `SettingsResolver.get` returned the platform value although
+  `SettingsService.set` had stored the override in the tenant schema. The real chat turn reads settings on its pre-turn thread
+  (`ChatPromptAssembler.supplyPreTurn` -> `ChatMemoryRecall` -> `BehaviourSettings` -> `SettingsResolver`) with the tenant bound and no
+  transaction, so every tenant and agent override (`memory.recall.enabled`, `memory.write.enabled`, `memory.unified.enabled`, all other
+  behaviour settings) was ignored on the hot path; `SettingsTenantReadIT` (full application boot, production `DataSource`, no test
+  wrapper) failed before the fix with "tenant a outside a transaction: expected false but was true". The store now qualifies its tables
+  with the tenant schema (`TenantSchemaSource`), no extra query per turn. The eval's transaction wrapper around the switch reads is removed.
 - **Open, G6: no supersession.** A corrected fact is stored next to the old one, the block carries no dates, and both are recalled; stale
   values reach the answer in half of the update probes. The same cause shows as duplicate storage (G11 WARN).
 - **Open, G3: precision 0.113.** Recall returns up to top-k lines whatever their similarity (plus the unified semantic source repeating

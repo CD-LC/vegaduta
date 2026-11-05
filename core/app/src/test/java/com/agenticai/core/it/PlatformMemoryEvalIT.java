@@ -167,9 +167,9 @@ class PlatformMemoryEvalIT extends UnifiedMemoryBootBase {
     @Autowired com.agenticai.core.settings.SettingsResolver resolver;
 
     /**
-     * Pins the suspected defect behind the eval's transaction wrapper: a tenant-scope override written through the real
-     * settings service is invisible to the resolver outside a transaction (it reads {@code public}) and visible inside one.
-     * Informational about the outside case; it fails only if the override is not visible inside a transaction either.
+     * The arm switches are read exactly as production reads them, with no transaction around the read (defect D1, fixed: the
+     * settings store qualifies its tables with the tenant schema). A tenant-scope override written through the real settings
+     * service must be visible to the resolver both outside and inside a transaction; see also {@code SettingsTenantReadIT}.
      */
     @Test
     @Order(0)
@@ -187,6 +187,7 @@ class PlatformMemoryEvalIT extends UnifiedMemoryBootBase {
             Object inside = tx.execute(st -> resolver.get("memory.recall.enabled", com.agenticai.core.settings.SettingContext.forAgent(agent)).value());
             System.out.println("SETTINGS VISIBILITY outside a transaction: " + outside + ", inside: " + inside);
             assertThat(inside).as("a tenant override is visible inside a transaction").isEqualTo(false);
+            assertThat(outside).as("a tenant override is visible outside a transaction (the chat turn's read)").isEqualTo(false);
         } finally {
             com.agenticai.core.security.TenantContext.clear();
             w.dropTenant(schema);
@@ -206,8 +207,6 @@ class PlatformMemoryEvalIT extends UnifiedMemoryBootBase {
         }
         assertThat(tiers).as("-Dmemeval.tier must be ci, nightly or both").isNotEmpty();
         PlatformEvalWorld world = world();
-        com.agenticai.core.agents.turn.PlatformRecallBridge.useRecallSwitch(chat,
-                agentId -> tx.execute(st -> resolver.getBool("memory.recall.enabled", agentId)));
         try {
             for (Tier tier : tiers) {
                 runTier(world, tier, which);

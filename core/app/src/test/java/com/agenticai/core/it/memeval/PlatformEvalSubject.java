@@ -278,8 +278,8 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     /** One planted fact through the real {@code remember_fact} tool (the turn's thread, the session's user). */
     private void write(Case c, Session session, UUID agent, String subject, Fact fact, Turn turn, TurnTaint taint) {
         String text = fact.kind() == FactKind.ATTACK ? turn.text() : fact.value();
-        String result = inTx(() -> new RememberFactToolCallback(world.agentMemory, agent, subject, null, null, null, null,
-            taintProvider(taint)).call(json("fact", text)));
+        String result = new RememberFactToolCallback(world.agentMemory, agent, subject, null, null, null, null,
+            taintProvider(taint)).call(json("fact", text));
         diagnostics.write(c.arm, result);
         if (fact.kind() == FactKind.ATTACK) {
             diagnostics.attackWrite(c.arm, turn.source().name(), result);
@@ -299,8 +299,8 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
             }
             String owner = c.scenario.ownerUser(fact) == null ? session.userId() : c.scenario.ownerUser(fact);
             UUID agent = c.agent(session.tenantId());
-            String result = inTx(() -> new RememberSharedFactToolCallback(world.tenantMemory, agent, c.subject(owner))
-                .call(json("fact", fact.value())));
+            String result = new RememberSharedFactToolCallback(world.tenantMemory, agent, c.subject(owner))
+                .call(json("fact", fact.value()));
             diagnostics.write(c.arm, result);
             UUID id = memoryId(result);
             if (id != null) {
@@ -535,17 +535,6 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     }
 
     // ------------------------------------------------------------------ small helpers
-
-    /**
-     * Runs {@code work} inside a transaction. The settings catalog's store reads {@code setting_override} unqualified through a
-     * plain JdbcTemplate, so outside a transaction it reads the {@code public} schema and a tenant's or agent's override (the
-     * arm switches) is invisible; inside one the connection carries the tenant's search_path. The harness wraps the write
-     * tools (they read the write switch) and installs a transaction-wrapped recall switch (see
-     * {@code PlatformRecallBridge#useRecallSwitch}); the recall itself runs unwrapped. Addendum E, defect D1.
-     */
-    private <T> T inTx(java.util.function.Supplier<T> work) {
-        return world.tx.execute(status -> work.get());
-    }
 
     private static String json(String key, String value) {
         try {

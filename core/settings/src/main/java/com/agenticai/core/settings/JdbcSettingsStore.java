@@ -1,6 +1,7 @@
 package com.agenticai.core.settings;
 
 import com.agenticai.core.json.JsonMappers;
+import com.agenticai.core.security.TenantSchemaSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
@@ -10,14 +11,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 /**
  * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code setting_override_history} of the
- * current tenant's schema (unqualified: the connection's search path is the tenant, exactly as for every other
- * tenant table). Table names are constants, never built from input.
+ * current tenant's schema. The tables are schema-qualified with the tenant bound to the calling thread
+ * ({@link TenantSchemaSource}), like the other raw-JDBC tenant stores: this class gets its connection from the plain pool, so
+ * outside a transaction (the chat turn reads settings on a pre-turn thread, without one) the search_path is {@code public}
+ * and an unqualified read would silently ignore every tenant and agent override (scorecard Addendum E, defect D1). Without a
+ * {@link TenantSchemaSource} (unit tests, a hand-built store on a connection that already points at the tenant) the names stay
+ * unqualified. Table names are constants and the schema is a sanitised, quoted identifier, never raw input.
  */
 @Component
 public class JdbcSettingsStore implements SettingsStore {
@@ -52,9 +59,34 @@ public class JdbcSettingsStore implements SettingsStore {
                             instant(rs, "created_at"));
 
     private final JdbcTemplate jdbc;
+    private final ObjectProvider<TenantSchemaSource> schemas;
 
-    public JdbcSettingsStore(JdbcTemplate jdbc) {
+    @Autowired
+    public JdbcSettingsStore(JdbcTemplate jdbc, ObjectProvider<TenantSchemaSource> schemas) {
         this.jdbc = jdbc;
+        this.schemas = schemas;
+    }
+
+    /** A store on a connection whose search_path already is the tenant (tests): table names stay unqualified. */
+    public JdbcSettingsStore(JdbcTemplate jdbc) {
+        this(jdbc, null);
+    }
+
+    /** {@code "<tenant schema>".<name>} for the calling thread's tenant, or the bare name without a schema source. */
+    String table(String name) {
+        TenantSchemaSource source = schemas == null ? null : schemas.getIfAvailable();
+        if (source == null) {
+            return name;
+        }
+        return "\"" + source.currentSchemaName().replace("\"", "\"\"") + "\"." + name;
+    }
+
+    private String overrides() {
+        return table("setting_override");
+    }
+
+    private String history() {
+        return table("setting_override_history");
     }
 
     private static java.time.Instant instant(ResultSet rs, String column) throws SQLException {
@@ -89,7 +121,7 @@ public class JdbcSettingsStore implements SettingsStore {
         for (SettingOverride o :
                 jdbc.query(
                         "SELECT scope, scope_id, setting_key, value::text AS value, version, updated_by, updated_at"
-                                + " FROM setting_override WHERE scope = ? AND scope_id = ?",
+                                + " FROM " + overrides() + " WHERE scope = ? AND scope_id = ?",
                         ROW,
                         scope.json(),
                         scopeId)) {
@@ -112,7 +144,7 @@ public class JdbcSettingsStore implements SettingsStore {
     public Optional<SettingOverride> find(SettingScope scope, String scopeId, String key) {
         return jdbc.query(
                         "SELECT scope, scope_id, setting_key, value::text AS value, version, updated_by, updated_at"
-                                + " FROM setting_override WHERE scope = ? AND scope_id = ? AND setting_key = ?",
+                                + " FROM " + overrides() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                         ROW,
                         scope.json(),
                         scopeId,
@@ -133,7 +165,7 @@ public class JdbcSettingsStore implements SettingsStore {
                 "setting:" + scope.json() + ':' + scopeId + ':' + key);
         Integer v =
                 jdbc.queryForObject(
-                        "SELECT COALESCE(MAX(version), 0) FROM setting_override_history"
+                        "SELECT COALESCE(MAX(version), 0) FROM " + history()
                                 + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                         Integer.class,
                         scope.json(),
@@ -145,7 +177,7 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void saveCurrent(SettingOverride row) {
         jdbc.update(
-                "INSERT INTO setting_override (scope, scope_id, setting_key, value, version, updated_by, updated_at)"
+                "INSERT INTO " + overrides() + " (scope, scope_id, setting_key, value, version, updated_by, updated_at)"
                         + " VALUES (?, ?, ?, ?::jsonb, ?, ?, ?)"
                         + " ON CONFLICT (scope, scope_id, setting_key) DO UPDATE SET value = EXCLUDED.value,"
                         + " version = EXCLUDED.version, updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at",
@@ -161,7 +193,7 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void deleteCurrent(SettingScope scope, String scopeId, String key) {
         jdbc.update(
-                "DELETE FROM setting_override WHERE scope = ? AND scope_id = ? AND setting_key = ?",
+                "DELETE FROM " + overrides() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                 scope.json(),
                 scopeId,
                 key);
@@ -170,7 +202,7 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void appendHistory(SettingHistoryEntry e) {
         jdbc.update(
-                "INSERT INTO setting_override_history (scope, scope_id, setting_key, version, action, value,"
+                "INSERT INTO " + history() + " (scope, scope_id, setting_key, version, action, value,"
                         + " previous_value, reason, actor, created_at) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)",
                 e.scope().json(),
                 e.scopeId(),
@@ -189,7 +221,7 @@ public class JdbcSettingsStore implements SettingsStore {
         return jdbc.query(
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
-                        + " FROM setting_override_history WHERE scope = ? AND scope_id = ? AND setting_key = ?"
+                        + " FROM " + history() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?"
                         + " ORDER BY version DESC, id DESC LIMIT ?",
                 HISTORY_ROW,
                 scope.json(),
@@ -207,7 +239,7 @@ public class JdbcSettingsStore implements SettingsStore {
         return jdbc.query(
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
-                        + " FROM setting_override_history" + where
+                        + " FROM " + history() + where
                         + " ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
                 HISTORY_ROW,
                 args.toArray());
@@ -217,7 +249,7 @@ public class JdbcSettingsStore implements SettingsStore {
     public long historyCount(SettingScope scope, String scopeId, java.time.Instant since) {
         java.util.List<Object> args = new java.util.ArrayList<>();
         String where = historyFilter(scope, scopeId, since, args);
-        Long n = jdbc.queryForObject("SELECT COUNT(*) FROM setting_override_history" + where, Long.class, args.toArray());
+        Long n = jdbc.queryForObject("SELECT COUNT(*) FROM " + history() + where, Long.class, args.toArray());
         return n == null ? 0 : n;
     }
 

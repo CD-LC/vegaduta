@@ -75,13 +75,13 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | sarvam | vendor | 46 | agents, agentspi, crypto, providers, security, speech, storage, tenancy | Sarvam AI (LLM, STT/TTS, translate) |
 | sdlc | kernel | 44 | crypto, security, tenancy |  |
 | secrets | kernel | 15 | audit, crypto |  |
-| security | kernel | 101 | json |  |
+| security | kernel | 102 | json |  |
 | settings | kernel | 33 | audit, json, security |  |
 | sharing | kernel | 13 | admin, audit, security |  |
 | speech | kernel | 11 | (none) |  |
 | storage | kernel | 9 | security |  |
 | templates | kernel | 44 | agents, agents-turn, audit, security, tenancy, workflow |  |
-| tenancy | kernel | 232 | admin, audit, billing, dbauth, security, storage |  |
+| tenancy | kernel | 233 | admin, audit, billing, dbauth, security, storage |  |
 | voice | kernel | 38 | agents, agents-turn, crypto, **elevenlabs** (test), json, providers, **sarvam** (test), security, speech, storage |  |
 | workflow | kernel | 283 | admin, agents, agents-browser, agents-tools, agents-turn, approval, audit, chat, crypto, devices, documentgen, eventbus, **google** (test), guardrails, json, knowledge, omnichannel, providers, quality, security, sharing, tenancy, voice, workflow-expression |  |
 | workflow-expression | kernel | 23 | json |  |

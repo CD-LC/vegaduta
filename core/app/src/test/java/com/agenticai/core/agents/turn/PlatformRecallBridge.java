@@ -16,16 +16,6 @@ public final class PlatformRecallBridge {
 
     private PlatformRecallBridge() {}
 
-    /**
-     * Replaces how the recall asks "is memory recall on for this agent". The eval installs the real settings catalog's answer
-     * read inside a transaction, because the catalog's store reads unqualified tables and outside a transaction sees
-     * {@code public} instead of the tenant (Addendum E, defect D1); everything else of the recall stays as wired.
-     */
-    public static void useRecallSwitch(Object chatService, java.util.function.Predicate<UUID> recallEnabled) {
-        AgentChatService target = AopTestUtils.getUltimateTargetObject(chatService);
-        target.memoryRecall.useRecallSwitch(recallEnabled);
-    }
-
     public static Recall recall(Object chatService, UUID agentId, String subject, String userMessage) {
         AgentChatService target = AopTestUtils.getUltimateTargetObject(chatService);
         ChatMemoryRecall.MemoryRecall r = target.memoryRecall.recallMemoryFacts(agentId, subject, userMessage, null);
