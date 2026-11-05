@@ -5,7 +5,6 @@ import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -244,7 +243,7 @@ public class SessionMemoryService {
     }
 
     private final StringRedisTemplate redisTemplate;
-    private final ObjectMapper objectMapper;
+    final ObjectMapper objectMapper;
     private final Duration sessionTtl;
 
     /**
@@ -293,7 +292,7 @@ public class SessionMemoryService {
                         sessionTtl,
                         summaryService,
                         windowSettings,
-                        this::deserializeForSummary,
+                        codec::deserializeForSummary,
                         this::limits,
                         this::summaryPreamble);
         this.owners = new SessionOwnerRecords(redisTemplate, sessionTtl);
@@ -333,7 +332,7 @@ public class SessionMemoryService {
     }
 
     /** The ledger limits of the calling thread's tenant. */
-    private ToolLedgerProperties toolLedger() {
+    ToolLedgerProperties toolLedger() {
         return ToolLedgerOverrides.effective(toolLedger, ledgerSettings);
     }
 
@@ -412,7 +411,7 @@ public class SessionMemoryService {
         List<ChatTurn> turns =
                 ToolLedgerReplay.modelView(
                         raw.stream()
-                                .map(this::deserialize)
+                                .map(codec::deserialize)
                                 .filter(java.util.Objects::nonNull)
                                 .toList(),
                         toolLedger());
@@ -475,7 +474,7 @@ public class SessionMemoryService {
         if (raw == null) {
             return List.of();
         }
-        return raw.stream().map(this::deserialize).filter(java.util.Objects::nonNull).toList();
+        return raw.stream().map(codec::deserialize).filter(java.util.Objects::nonNull).toList();
     }
 
     /**
@@ -537,7 +536,7 @@ public class SessionMemoryService {
         int from = Math.max(0, turns.size() - limits.getSessionMaxStoredEntries());
         List<String> serialized = new ArrayList<>(turns.size() - from);
         for (ChatTurn turn : turns.subList(from, turns.size())) {
-            serialized.add(serialize(turn));
+            serialized.add(codec.serialize(turn));
         }
         redisTemplate.opsForList().rightPushAll(redisKey, serialized);
         redisTemplate.expire(redisKey, sessionTtl);
@@ -563,7 +562,7 @@ public class SessionMemoryService {
      * throwing - history is lost for the outage window, the turn is not.
      */
     public void appendTurn(String sessionId, ChatTurn turn) {
-        String json = serialize(turn);
+        String json = codec.serialize(turn);
         String redisKey = key(sessionId);
         try {
             if (!singleRoundTripAppend
@@ -609,6 +608,8 @@ public class SessionMemoryService {
      * so the caller falls back to the legacy sequence. Any other failure (timeout, connection, Lua
      * error) is rethrown, never replayed. On Redis Cluster its keys are cross-slot: always refused.
      */
+    private final SessionMemoryCodec codec = new SessionMemoryCodec(this);
+
     private boolean appendInOneRoundTrip(String sessionId, String redisKey, String json) {
         SessionSummaryService summariser = folder.activeSummariser(sessionId);
         Optional<TenantContext> tenant = TenantContext.current();
@@ -686,36 +687,6 @@ public class SessionMemoryService {
      */
     public boolean isOwnedBy(String sessionId, String tenantId, String subject) {
         return owners.isOwnedBy(sessionId, tenantId, subject);
-    }
-
-    private String serialize(ChatTurn turn) {
-        try {
-            return objectMapper.writeValueAsString(turn);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize chat turn", e);
-        }
-    }
-
-    /**
-     * A stored turn as the rolling summary reads it: the tool record folded into the text, so what
-     * a turn did with its tools survives into the summary instead of leaving with the turn.
-     */
-    private ChatTurn deserializeForSummary(String json) {
-        ChatTurn turn = deserialize(json);
-        if (turn == null || turn.tools() == null) {
-            return turn;
-        }
-        return ToolLedgerReplay.modelView(turn, toolLedger(), true).orElse(turn);
-    }
-
-    private ChatTurn deserialize(String json) {
-        try {
-            return objectMapper.readValue(json, ChatTurn.class);
-        } catch (JsonProcessingException e) {
-            // A corrupt/unreadable entry shouldn't take down the whole conversation history.
-            log.warn("Skipping unreadable chat turn in session history", e);
-            return null;
-        }
     }
 
     // ---- SEC-004: server-derived, owner-scoped memory ids ------------------

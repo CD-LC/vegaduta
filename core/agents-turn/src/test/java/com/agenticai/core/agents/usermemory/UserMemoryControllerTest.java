@@ -10,76 +10,29 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
-import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryCapExceededException;
 import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
-import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
-import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 @SuppressWarnings("unchecked")
-class UserMemoryControllerTest {
-
-    private final AgentMemoryService agent = mock(AgentMemoryService.class);
-    private final TenantMemoryService tenant = mock(TenantMemoryService.class);
-    private final ObjectProvider<AgentMemoryService> agentProvider = mock(ObjectProvider.class);
-    private final ObjectProvider<TenantMemoryService> tenantProvider = mock(ObjectProvider.class);
-    private final GraphMemoryService graph = mock(GraphMemoryService.class);
-    private final ObjectProvider<GraphMemoryService> graphProvider = mock(ObjectProvider.class);
-    private final ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser>
-            otherStoreProvider = mock(ObjectProvider.class);
-    private final com.agenticai.core.agents.memory.SubjectDataEraser scratchpad =
-            mock(com.agenticai.core.agents.memory.SubjectDataEraser.class);
-    private final AgentService agentService = mock(AgentService.class);
-    private final Principal alice = () -> "alice";
-
-    private UserMemoryController controller() {
-        return controller(true);
-    }
-
-    private UserMemoryController controller(boolean selfService) {
-        return controller(selfService, false);
-    }
-
-    private UserMemoryController controller(boolean selfService, boolean graphForgetSync) {
-        when(agentProvider.getIfAvailable()).thenReturn(agent);
-        when(tenantProvider.getIfAvailable()).thenReturn(tenant);
-        when(graphProvider.getIfAvailable()).thenReturn(graph);
-        when(scratchpad.store()).thenReturn("scratchpad");
-        when(otherStoreProvider.orderedStream())
-                .thenAnswer(inv -> java.util.stream.Stream.of(scratchpad));
-        when(tenant.blocksEnabled()).thenReturn(true);
-        return new UserMemoryController(
-                agentProvider,
-                tenantProvider,
-                graphProvider,
-                otherStoreProvider,
-                agentService,
-                new UserMemoryFactService(
-                        agentProvider, tenantProvider, agentService, selfService, 25, 50),
-                selfService,
-                graphForgetSync);
-    }
+class UserMemoryControllerTest extends UserMemoryControllerTestBase {
 
     @Test
     void anonymousCallerIsRejected() {
@@ -652,95 +605,4 @@ class UserMemoryControllerTest {
     // ------------------------------------------------------------------ approve a quarantined
     // shared fact
 
-    private TenantMemoryEntry quarantinedShared(UUID id, UUID createdBy) {
-        Instant now = Instant.now();
-        return new TenantMemoryEntry(
-                id,
-                "alice",
-                "shared fact",
-                0,
-                createdBy,
-                now,
-                now,
-                0,
-                MemoryTrust.QUARANTINED,
-                List.of("tool:fetch"));
-    }
-
-    @Test
-    void anEditorOfTheWritingAgentApprovesTheirOwnQuarantinedSharedFact() {
-        UUID id = UUID.randomUUID();
-        UUID writer = UUID.randomUUID();
-        UserMemoryController c = controller();
-        when(tenant.listFactsForSubject("alice"))
-                .thenReturn(List.of(quarantinedShared(id, writer)));
-        when(tenant.approveFact(id, "alice")).thenReturn(true);
-
-        assertEquals(HttpStatus.NO_CONTENT, c.approveSharedFact(id, alice).getStatusCode());
-
-        verify(agentService).requireAccess(writer, PermissionLevel.EDITOR);
-        verify(tenant).approveFact(id, "alice");
-    }
-
-    @Test
-    void approvingASharedFactWithoutEditorOnTheWritingAgentIsDeniedAndApprovesNothing() {
-        UUID id = UUID.randomUUID();
-        UUID writer = UUID.randomUUID();
-        UserMemoryController c = controller();
-        when(tenant.listFactsForSubject("alice"))
-                .thenReturn(List.of(quarantinedShared(id, writer)));
-        doThrow(new ResourceAccessDeniedException())
-                .when(agentService)
-                .requireAccess(writer, PermissionLevel.EDITOR);
-
-        assertThrows(ResourceAccessDeniedException.class, () -> c.approveSharedFact(id, alice));
-        verify(tenant, never()).approveFact(any(), any());
-    }
-
-    @Test
-    void aSharedFactWithNoRecordedWriterCannotBeApprovedHere() {
-        UUID id = UUID.randomUUID();
-        UserMemoryController c = controller();
-        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared(id, null)));
-
-        ResponseStatusException e =
-                assertThrows(ResponseStatusException.class, () -> c.approveSharedFact(id, alice));
-        assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-        verify(tenant, never()).approveFact(any(), any());
-    }
-
-    @Test
-    void approvingSomeoneElsesTrustedOrMissingSharedFactIs404() {
-        UUID id = UUID.randomUUID();
-        UserMemoryController c = controller();
-        Instant now = Instant.now();
-        when(tenant.listFactsForSubject("alice"))
-                .thenReturn(
-                        List.of(
-                                new TenantMemoryEntry(
-                                        id,
-                                        "alice",
-                                        "already trusted",
-                                        0,
-                                        UUID.randomUUID(),
-                                        now,
-                                        now,
-                                        0)));
-
-        assertEquals(HttpStatus.NOT_FOUND, c.approveSharedFact(id, alice).getStatusCode());
-        assertEquals(
-                HttpStatus.NOT_FOUND,
-                c.approveSharedFact(UUID.randomUUID(), alice).getStatusCode());
-        verify(tenant, never()).approveFact(any(), any());
-    }
-
-    @Test
-    void approvingASharedFactNeedsASignedInCaller() {
-        UserMemoryController c = controller();
-        ResponseStatusException e =
-                assertThrows(
-                        ResponseStatusException.class,
-                        () -> c.approveSharedFact(UUID.randomUUID(), null));
-        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
-    }
 }

@@ -1,8 +1,6 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
-import com.agenticai.core.security.logging.LogSafe;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,8 +42,8 @@ public class TenantMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(TenantMemoryService.class);
 
-    private final SidecarClient sidecarClient;
-    private final JdbcTemplate jdbcTemplate;
+    final SidecarClient sidecarClient;
+    final JdbcTemplate jdbcTemplate;
     private final boolean blocksEnabled;
     private final int maxCharsPerBlock;
     private final int maxProjectBlocks;
@@ -86,7 +84,7 @@ public class TenantMemoryService {
         this.limits = limits == null ? new MemoryLimitsProperties() : limits;
     }
 
-    private volatile java.time.Clock clock = java.time.Clock.systemUTC();
+    volatile java.time.Clock clock = java.time.Clock.systemUTC();
 
     /**
      * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
@@ -99,7 +97,7 @@ public class TenantMemoryService {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
-    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones =
+    volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones =
             com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
 
     /**
@@ -592,39 +590,26 @@ public class TenantMemoryService {
 
     /**
      * {@link #recall(String, String, int)} with an embedding the caller may share with other
-     * recalls of the same text: the sidecar is asked at most once for all of them.
+     * recalls of the same text; see {@link TenantMemoryReads#recall}.
      */
     public List<TenantMemoryEntry> recall(
             String subjectKey, String query, int topK, QueryEmbedding embedding) {
-        float[] queryVector = embedding.vector();
-        String literal = toVectorLiteral(queryVector);
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
+        return reads.recall(subjectKey, query, topK, embedding);
+    }
 
-        List<TenantMemoryEntry> results =
-                jdbcTemplate.query(
-                        // codeql[java/sql-injection]
-                        "SELECT id, subject_key, content, created_by_agent_id, created_at,"
-                                + " last_used_at, use_count, trust, source_taint,"
-                                + " embedding OPERATOR(public.<=>)"
-                                + " ?::public.vector AS distance FROM "
-                                + table
-                                + " WHERE subject_key = ? AND trust = 'TRUSTED' AND superseded_by IS NULL"
-                                + tombstones.excludeSharedFacts(table)
-                                + " ORDER BY distance ASC, updated_at DESC LIMIT ?",
-                        TenantMemoryFactRows.entryMapper(),
-                        literal,
-                        subjectKey,
-                        topK);
+    /** Default-topK recall that shares {@code embedding}; see {@link TenantMemoryReads#recall}. */
+    public List<TenantMemoryEntry> recall(
+            String subjectKey, String query, QueryEmbedding embedding) {
+        return reads.recall(subjectKey, query, embedding, null);
+    }
 
-        if (!results.isEmpty()) {
-            touchUsage(table, results.stream().map(TenantMemoryEntry::id).toList());
-        }
-        log.debug(
-                "Recalled {} shared memories for subject '{}' (query='{}')",
-                results.size(),
-                LogSafe.clean(subjectKey),
-                LogSafe.clean(query));
-        return results;
+    /**
+     * As {@link #recall(String, String, QueryEmbedding)} for the shared recall made on behalf of
+     * {@code agentId}.
+     */
+    public List<TenantMemoryEntry> recall(
+            String subjectKey, String query, QueryEmbedding embedding, UUID agentId) {
+        return reads.recall(subjectKey, query, embedding, agentId);
     }
 
     /**
@@ -635,73 +620,19 @@ public class TenantMemoryService {
         return recall(subjectKey, query, recallTopK(null));
     }
 
-    /** Default-topK recall that shares {@code embedding}; see {@link QueryEmbedding}. */
-    public List<TenantMemoryEntry> recall(
-            String subjectKey, String query, QueryEmbedding embedding) {
-        return recall(subjectKey, query, embedding, null);
-    }
-
     /**
-     * As {@link #recall(String, String, QueryEmbedding)} for the shared recall made on behalf of
-     * {@code agentId}: how many facts it returns follows that agent's (or its tenant's) {@code
-     * memory.recall.tenantTopK}.
-     */
-    public List<TenantMemoryEntry> recall(
-            String subjectKey, String query, QueryEmbedding embedding, UUID agentId) {
-        return recall(subjectKey, query, recallTopK(agentId), embedding);
-    }
-
-    /**
-     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before
-     * {@code cutoff} in the tenant's schema, oldest first, returning how many went; the caller
-     * loops until fewer than {@code limit}. Block rows ({@value MemoryBlocks#KEY_MARKER}) are
-     * spared as in {@link #pruneOverCap}; only erasure removes them.
+     * Deletes facts created before {@code cutoff} (retention), oldest first, at most {@code limit}.
      */
     public int purgeCreatedBefore(java.time.Instant cutoff, int limit) {
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
-        int deleted =
-                jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "DELETE FROM "
-                                + table
-                                + " WHERE id IN (SELECT id FROM "
-                                + table
-                                + " WHERE created_at < ? AND position('"
-                                + MemoryBlocks.KEY_MARKER
-                                + "' in subject_key) = 0 ORDER BY created_at LIMIT ?)",
-                        java.sql.Timestamp.from(cutoff),
-                        limit);
-        log.info("Retention purge removed {} tenant-memory rows older than {}", deleted, cutoff);
-        return deleted;
+        return reads.purgeCreatedBefore(cutoff, limit);
     }
 
-    /**
-     * #815 Governance follow-up parity with {@link AgentMemoryService#forgetAllForSubject} -
-     * deletes every shared memory this tenant holds about one subject, for the same data-subject
-     * erasure reasoning. Returns the number of rows deleted.
-     */
+    /** Data-subject erasure: every shared-memory row about {@code subjectKey}. */
     public int forgetAllForSubject(String subjectKey) {
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
-        // Also sweeps this subject's user-visible memory blocks (subject_key =
-        // '<subject>#mem:<label>').
-        int deleted =
-                jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "DELETE FROM "
-                                + table
-                                + " WHERE subject_key = ? OR starts_with(subject_key, ?)",
-                        subjectKey,
-                        MemoryBlocks.storagePrefix(subjectKey));
-        log.info(
-                "Erased {} shared tenant-memory rows for subject key (data-subject erasure"
-                        + " request)",
-                deleted);
-        return deleted;
+        return reads.forgetAllForSubject(subjectKey);
     }
 
-    private void touchUsage(String table, List<UUID> ids) {
-        TenantMemoryFactRows.touchUsage(jdbcTemplate, table, Timestamp.from(clock.instant()), ids);
-    }
+    private final TenantMemoryReads reads = new TenantMemoryReads(this);
 
     static String toVectorLiteral(float[] embedding) {
         List<Double> boxed =

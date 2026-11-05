@@ -30,7 +30,6 @@ import com.agenticai.core.quality.memeval.MemoryScenario.TurnSource;
 import com.agenticai.core.quality.memeval.PlatformMemoryEvalSubject;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -93,8 +92,8 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     }
 
     private static final MemoryActor REVIEWER = MemoryActor.human("memeval-reviewer");
-    private static final ObjectMapper JSON = new ObjectMapper();
-    private static final String UNANSWERED = "unanswered";
+    static final ObjectMapper JSON = new ObjectMapper();
+    static final String UNANSWERED = "unanswered";
 
     /**
      * {@code -Dmemeval.trace=true} prints one line per probe (question, answer, tools, injected
@@ -114,11 +113,11 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     private static final boolean NAME_REPLACED_FACT =
             !"false".equalsIgnoreCase(System.getProperty("memeval.replaces", "true"));
 
-    private final PlatformEvalWorld world;
+    final PlatformEvalWorld world;
     private final ProbeAnswerer answerer;
     private final Assumptions assumptions;
-    private final PlatformEvalDiagnostics diagnostics = new PlatformEvalDiagnostics();
-    private final Map<String, Case> cases = new HashMap<>();
+    final PlatformEvalDiagnostics diagnostics = new PlatformEvalDiagnostics();
+    final Map<String, Case> cases = new HashMap<>();
     private final ExecutorService probePool =
             Executors.newFixedThreadPool(
                     2,
@@ -157,9 +156,9 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
      * What the harness knows about one stored row (the platform knows none of it: it is the ledger
      * mapping).
      */
-    private record RowInfo(String factId, String key, boolean shared) {}
+    record RowInfo(String factId, String key, boolean shared) {}
 
-    private static final class Case {
+    static final class Case {
         final MemoryScenario scenario;
         final MemoryArm arm;
         final CaseEnvironment env;
@@ -196,7 +195,7 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         }
     }
 
-    private Case of(CaseEnvironment env) {
+    Case of(CaseEnvironment env) {
         Case c = cases.get(env.identity().runKey());
         if (c == null) {
             throw new IllegalStateException("no provisioned case for " + env.identity().runKey());
@@ -328,7 +327,9 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         String replaces =
                 NAME_REPLACED_FACT && fact.kind() != FactKind.ATTACK ? replacedText(c, fact) : null;
         String input =
-                replaces == null ? json("fact", text) : json("fact", text, "replaces", replaces);
+                replaces == null
+                        ? PlatformEvalSubjectOps.json("fact", text)
+                        : PlatformEvalSubjectOps.json("fact", text, "replaces", replaces);
         String result =
                 new RememberFactToolCallback(
                                 world.agentMemory,
@@ -344,7 +345,7 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         if (fact.kind() == FactKind.ATTACK) {
             diagnostics.attackWrite(c.arm, turn.source().name(), result);
         }
-        UUID id = memoryId(result);
+        UUID id = PlatformEvalSubjectOps.memoryId(result);
         if (id != null) {
             c.rows.put(id, new RowInfo(fact.id(), fact.key(), false));
         }
@@ -381,9 +382,9 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
             UUID agent = c.agent(session.tenantId());
             String result =
                     new RememberSharedFactToolCallback(world.tenantMemory, agent, c.subject(owner))
-                            .call(json("fact", fact.value()));
+                            .call(PlatformEvalSubjectOps.json("fact", fact.value()));
             diagnostics.write(c.arm, result);
-            UUID id = memoryId(result);
+            UUID id = PlatformEvalSubjectOps.memoryId(result);
             if (id != null) {
                 c.rows.put(id, new RowInfo(fact.id(), fact.key(), true));
             }
@@ -439,7 +440,7 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         long deadline = System.nanoTime() + (writesOn ? 2_000_000_000L : 150_000_000L);
         List<MemoryItem> items = world.review.forSubject(subject, 500);
         while (items.size() <= before && System.nanoTime() < deadline) {
-            sleep(20);
+            PlatformEvalSubjectOps.sleep(20);
             items = world.review.forSubject(subject, 500);
         }
         if (!writesOn) {
@@ -600,77 +601,12 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
      * The ceiling arm: the ledger's valid, visible, relevant facts go straight into the prompt (the
      * platform recall is off).
      */
-    private void injectOracle(
-            Case c, Probe probe, List<InjectedItem> injected, List<RecalledLine> lines) {
-        int idx = c.scenario.sessionIndex(probe.after());
-        for (Fact f : c.scenario.liveFacts(idx)) {
-            if (f.relevantTo().contains(probe.id())
-                    && c.scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
-                injected.add(
-                        new InjectedItem(
-                                f.id(), f.key(), f.value(), probe.userId(), probe.tenantId()));
-                lines.add(new RecalledLine(f.value(), "oracle"));
-            }
-        }
-    }
-
-    /**
-     * One recalled id as the scorers want it: the row is looked up in every schema of the case, so
-     * the user and tenant are where the row REALLY lives (a row of another tenant is reported under
-     * that tenant), not where it was asked for.
-     */
-    private InjectedItem resolve(Case c, Probe probe, String preferredTable, UUID id) {
-        List<String> tables = new ArrayList<>(List.of(preferredTable));
-        for (String t : List.of("agent_memory", "tenant_memory", "memory_item")) {
-            if (!tables.contains(t)) {
-                tables.add(
-                        t); // unified recall also serves legacy facts (the semantic source), so an
-                // id may live in any of them
-            }
-        }
-        for (String table : tables) {
-            String userColumn = "memory_item".equals(table) ? "subject_keys[1]" : "subject_key";
-            for (Map.Entry<String, String> e : c.schemaByTenant.entrySet()) {
-                List<Map<String, Object>> rows =
-                        world.jdbc.queryForList(
-                                "SELECT "
-                                        + userColumn
-                                        + " AS subject, content FROM "
-                                        + e.getValue()
-                                        + "."
-                                        + table
-                                        + " WHERE id = ?",
-                                id);
-                if (rows.isEmpty()) {
-                    continue;
-                }
-                Object subject = rows.get(0).get("subject");
-                RowInfo info = c.rows.get(id);
-                String key =
-                        info != null
-                                ? info.key()
-                                : "memory_item".equals(table) ? "episode" : "unknown";
-                return new InjectedItem(
-                        info == null ? null : info.factId(),
-                        key,
-                        String.valueOf(rows.get(0).get("content")),
-                        c.env.identity().logicalUser(subject == null ? null : subject.toString()),
-                        e.getKey());
-            }
-        }
-        diagnostics.note(
-                "recalled id "
-                        + id
-                        + " is in no memory table of the case (synthetic item, e.g. the self-model line)");
-        return new InjectedItem(null, UNANSWERED, "", probe.userId(), probe.tenantId());
-    }
-
-    // ------------------------------------------------------------------ store
+    private final PlatformEvalSubjectOps ops = new PlatformEvalSubjectOps(this);
 
     @Override
     protected List<StoreItem> readStore(CaseEnvironment env) {
         Case c = of(env);
-        List<StoreItem> out = snapshot(c);
+        List<StoreItem> out = ops.snapshot(c);
         c.schemaByTenant.values().forEach(world::dropTenant);
         cases.remove(env.identity().runKey());
         return out;
@@ -680,94 +616,16 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
      * Every memory row of every tenant of the case: private facts, shared facts and unified items,
      * in logical ids.
      */
+    private void injectOracle(
+            Case c, Probe probe, List<InjectedItem> injected, List<RecalledLine> lines) {
+        ops.injectOracle(c, probe, injected, lines);
+    }
+
+    private InjectedItem resolve(Case c, Probe probe, String preferredTable, UUID id) {
+        return ops.resolve(c, probe, preferredTable, id);
+    }
+
     private List<StoreItem> snapshot(Case c) {
-        List<StoreItem> out = new ArrayList<>();
-        for (Map.Entry<String, String> e : c.schemaByTenant.entrySet()) {
-            String schema = e.getValue();
-            add(
-                    out,
-                    c,
-                    e.getKey(),
-                    world.jdbc.queryForList(
-                            "SELECT id, subject_key AS subject, content FROM "
-                                    + schema
-                                    + ".agent_memory ORDER BY created_at, id"),
-                    "fact");
-            add(
-                    out,
-                    c,
-                    e.getKey(),
-                    world.jdbc.queryForList(
-                            "SELECT id, subject_key AS subject, content FROM "
-                                    + schema
-                                    + ".tenant_memory"
-                                    + " WHERE position('#mem:' in subject_key) = 0 ORDER BY created_at, id"),
-                    "shared");
-            add(
-                    out,
-                    c,
-                    e.getKey(),
-                    world.jdbc.queryForList(
-                            "SELECT id, subject_keys[1] AS subject, content FROM "
-                                    + schema
-                                    + ".memory_item ORDER BY created_at, id"),
-                    "episode");
-        }
-        return out;
-    }
-
-    private void add(
-            List<StoreItem> out,
-            Case c,
-            String logicalTenant,
-            List<Map<String, Object>> rows,
-            String kind) {
-        for (Map<String, Object> row : rows) {
-            UUID id = UUID.fromString(row.get("id").toString());
-            RowInfo info = c.rows.get(id);
-            Object subject = row.get("subject");
-            out.add(
-                    new StoreItem(
-                            info == null ? null : info.factId(),
-                            info == null ? kind : info.key(),
-                            String.valueOf(row.get("content")),
-                            c.env.identity()
-                                    .logicalUser(subject == null ? null : subject.toString()),
-                            logicalTenant,
-                            false));
-        }
-    }
-
-    // ------------------------------------------------------------------ small helpers
-
-    private static String json(String... keyValues) {
-        try {
-            Map<String, String> map = new LinkedHashMap<>();
-            for (int i = 0; i + 1 < keyValues.length; i += 2) {
-                map.put(keyValues[i], keyValues[i + 1]);
-            }
-            return JSON.writeValueAsString(map);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static UUID memoryId(String toolResult) {
-        try {
-            JsonNode node = JSON.readTree(toolResult);
-            return node.hasNonNull("memoryId")
-                    ? UUID.fromString(node.get("memoryId").asText())
-                    : null;
-        } catch (com.fasterxml.jackson.core.JsonProcessingException | IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    private static void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        return ops.snapshot(c);
     }
 }

@@ -41,7 +41,7 @@ final class AgentToolGuard {
     private final GuardrailService guardrailService;
     private final ApprovalPolicyService approvalPolicyService;
     private final HumanApprovalGateService approvalGateService;
-    private final int maxToolCallsPerTurn;
+    final int maxToolCallsPerTurn;
     private final ObjectProvider<ToolCallVerifierService> toolCallVerifierService;
     private final ObjectProvider<PlatformIssueService> issueService;
     private final ObjectProvider<TenantGuardrailRuleEvaluator> tenantGuardrailRuleEvaluator;
@@ -278,7 +278,7 @@ final class AgentToolGuard {
         // Dispatch plumbing can never be replayed by an approval (replay resolves tools by exact
         // name without deferral), so a post-park call to one is refused without an approval row.
         core.withQueueExcludedTools(QUEUE_EXCLUDED_TOOLS);
-        core.withStepLimits(stepLimits(runtime));
+        core.withStepLimits(AgentToolGuardSupport.stepLimits(this, runtime));
         core.withPrompts(prompts());
         if (governance != null && gateMode == ApprovalGateMode.GATE_UNLESS_READ_ONLY) {
             core.withReadOnlyAutoAllowAudit(governance.readOnlyAutoAllowAudit());
@@ -286,7 +286,7 @@ final class AgentToolGuard {
         if (rigorous) {
             core.withConversationTail(conversationTail());
         }
-        core.withOutputLimits(outputLimits(runtime));
+        core.withOutputLimits(AgentToolGuardSupport.outputLimits(this, runtime));
         // Untrusted-content taint gate (app.agents.taint.mode). Null when the layer is absent or
         // off,
         // which leaves the chain exactly as it was; the TurnTaint behind it is shared by every tool
@@ -317,7 +317,7 @@ final class AgentToolGuard {
                         com.agenticai.core.guardrails.toolargs.ToolArgPolicyCallback policy) {
                     // A refusal spends the turn's step budget; past the ceiling it answers like the
                     // guard does.
-                    policy.withStepLimits(stepLimits(runtime));
+                    policy.withStepLimits(AgentToolGuardSupport.stepLimits(this, runtime));
                     policy.withPrompts(prompts());
                 }
                 guarded = withPolicy;
@@ -346,12 +346,12 @@ final class AgentToolGuard {
                                 // same key.
                                 turnIdFor(stepCounter),
                                 governance != null ? governance.meterRegistry() : null)
-                        .withOutputLimits(outputLimits(runtime))
+                        .withOutputLimits(AgentToolGuardSupport.outputLimits(this, runtime))
                         .withToolTimeout(
                                 runtime != null && runtime.hasToolTimeout()
                                         ? runtime.toolTimeout()
                                         : null,
-                                toolTimeoutMessage())
+                                AgentToolGuardSupport.toolTimeoutMessage(this))
                         .withActivity(TURN_ACTIVITY_SCOPE.get())
                         .withPrompts(prompts())
                         .withLedger(
@@ -509,7 +509,7 @@ final class AgentToolGuard {
      * hand-built fixtures = every agent runs under the guard's own constructor settings, as before
      * the resolver existed).
      */
-    private volatile ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> runtimeResolver;
+    volatile ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> runtimeResolver;
 
     void setRuntimeResolver(
             ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> provider) {
@@ -517,55 +517,20 @@ final class AgentToolGuard {
     }
 
     /** The module defaults, shared by every guard built without the beans (hand-built fixtures). */
-    private static final ToolStepLimitProperties DEFAULT_STEP_LIMITS =
-            new ToolStepLimitProperties();
+    static final ToolStepLimitProperties DEFAULT_STEP_LIMITS = new ToolStepLimitProperties();
 
-    private static final ToolOutputProperties DEFAULT_OUTPUT_LIMITS = new ToolOutputProperties();
+    static final ToolOutputProperties DEFAULT_OUTPUT_LIMITS = new ToolOutputProperties();
 
-    private ToolStepLimitProperties stepLimits() {
-        ObjectProvider<ToolStepLimitProperties> provider = stepLimitProperties;
-        ToolStepLimitProperties configured = provider == null ? null : provider.getIfAvailable();
-        return configured != null ? configured : DEFAULT_STEP_LIMITS;
-    }
-
-    /**
-     * The step limits of a turn: the platform's, with the grace the turn's runtime settings
-     * resolved for the tenant and the agent ({@code agent.steps.graceCalls}) when they carry one.
-     */
-    private ToolStepLimitProperties stepLimits(
-            com.agenticai.core.agents.runtime.AgentRuntimeSettings runtime) {
-        ToolStepLimitProperties base = stepLimits();
-        return runtime != null
-                        && runtime.hasGraceCalls()
-                        && runtime.graceCalls() != base.getGraceCalls()
-                ? base.withGraceCalls(runtime.graceCalls())
-                : base;
-    }
-
-    private ToolOutputProperties outputLimits() {
+    ToolOutputProperties outputLimits() {
         ObjectProvider<ToolOutputProperties> provider = outputProperties;
         ToolOutputProperties configured = provider == null ? null : provider.getIfAvailable();
         return configured != null ? configured : DEFAULT_OUTPUT_LIMITS;
     }
 
-    /**
-     * The tool-output cap for a turn of the agent: the agent's own default cap with the operator's
-     * per-tool caps kept.
-     */
-    private ToolOutputProperties outputLimits(
-            com.agenticai.core.agents.runtime.AgentRuntimeSettings runtime) {
-        ToolOutputProperties base = outputLimits();
-        return runtime == null ? base : base.withMaxChars(runtime.toolOutputMaxChars());
-    }
-
-    private com.agenticai.core.agents.runtime.AgentRuntime runtimeResolver() {
-        ObjectProvider<com.agenticai.core.agents.runtime.AgentRuntime> provider = runtimeResolver;
-        return provider == null ? null : provider.getIfAvailable();
-    }
-
-    private String toolTimeoutMessage() {
-        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtimeResolver();
-        return resolver == null ? null : resolver.toolTimeoutMessage();
+    ToolStepLimitProperties stepLimits() {
+        ObjectProvider<ToolStepLimitProperties> provider = stepLimitProperties;
+        ToolStepLimitProperties configured = provider == null ? null : provider.getIfAvailable();
+        return configured != null ? configured : DEFAULT_STEP_LIMITS;
     }
 
     /**
@@ -581,7 +546,8 @@ final class AgentToolGuard {
                 && agentId.equals(scope.agentId())) {
             return scope.settings();
         }
-        com.agenticai.core.agents.runtime.AgentRuntime resolver = runtimeResolver();
+        com.agenticai.core.agents.runtime.AgentRuntime resolver =
+                AgentToolGuardSupport.runtimeResolver(this);
         if (resolver == null) {
             return null;
         }
@@ -619,41 +585,18 @@ final class AgentToolGuard {
     }
 
     /**
-     * Data-governance audit fix (2026-07-20) - turns {@link TenantContext#getExternalTriggerId()}
-     * into the typed {@code UUID} {@link LoggingToolCallback} persists on {@code
-     * tool_call_log.mcp_grant_id}. Defensive, not authoritative: a malformed/non-UUID
-     * externalTriggerId (a future non-MCP caller of this same generic seam, e.g. a workflow webhook
-     * token) degrades to "not attributed" rather than ever throwing out of this per-tool-call hot
-     * path - see this field's own javadoc on TenantContext.
+     * Data-governance audit fix (2026-07-20); see {@link AgentToolGuardSupport#extractMcpGrantId}.
      */
     private UUID extractMcpGrantId(TenantContext capturedContext) {
-        if (capturedContext == null || capturedContext.getExternalTriggerId() == null) {
-            return null;
-        }
-        try {
-            return UUID.fromString(capturedContext.getExternalTriggerId());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        return AgentToolGuardSupport.extractMcpGrantId(capturedContext);
     }
 
     /**
-     * #815 Governance follow-up - see {@code AgentAutonomyTier}'s javadoc. {@code SEMI_AUTONOMOUS}
-     * returns the tenant-configured {@code maxToolCallsPerTurn} unchanged (today's exact behavior);
-     * {@code SUPERVISED} is tighter and {@code FULLY_AUTONOMOUS} looser, by {@code
-     * app.guardrails.step-limit.supervised-divisor} / {@code supervised-min-steps} / {@code
-     * autonomous-multiplier} (defaults: half, floored at 3 so a supervised agent can still complete
-     * a trivial multi-step task; double). The ceiling counts CALLS across the whole turn; see
-     * {@link ToolStepLimitProperties} for how it relates to the tool loop's per-invocation round
-     * cap.
+     * #815 Governance follow-up - see {@code AgentAutonomyTier}'s javadoc and {@link
+     * AgentToolGuardSupport#effectiveMaxStepsFor}.
      */
     private int effectiveMaxStepsFor(AgentAutonomyTier tier) {
-        ToolStepLimitProperties limits = stepLimits();
-        return switch (tier) {
-            case SUPERVISED -> limits.supervisedCeiling(maxToolCallsPerTurn);
-            case SEMI_AUTONOMOUS -> maxToolCallsPerTurn;
-            case FULLY_AUTONOMOUS -> limits.autonomousCeiling(maxToolCallsPerTurn);
-        };
+        return AgentToolGuardSupport.effectiveMaxStepsFor(this, tier);
     }
 
     /**

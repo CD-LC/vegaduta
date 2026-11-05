@@ -53,8 +53,8 @@ public class AgentMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(AgentMemoryService.class);
 
-    private final SidecarClient sidecarClient;
-    private final JdbcTemplate jdbcTemplate;
+    final SidecarClient sidecarClient;
+    final JdbcTemplate jdbcTemplate;
 
     public AgentMemoryService(SidecarClient sidecarClient, JdbcTemplate jdbcTemplate) {
         this.sidecarClient = sidecarClient;
@@ -73,7 +73,7 @@ public class AgentMemoryService {
         this.limits = limits == null ? new MemoryLimitsProperties() : limits;
     }
 
-    private volatile java.time.Clock clock = java.time.Clock.systemUTC();
+    volatile java.time.Clock clock = java.time.Clock.systemUTC();
 
     /**
      * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
@@ -102,7 +102,7 @@ public class AgentMemoryService {
                         : guard;
     }
 
-    private volatile FactSupersession supersession;
+    volatile FactSupersession supersession;
 
     /**
      * {@code app.memory.supersession.*} (V685); absent (hand-built) or disabled: every fact is a
@@ -140,7 +140,7 @@ public class AgentMemoryService {
         return supersession != null;
     }
 
-    private volatile com.agenticai.core.settings.SettingsResolver settings;
+    volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
      * The settings catalog, so a tenant's or an agent's {@code memory.recall.agentTopK} and {@code
@@ -505,246 +505,75 @@ public class AgentMemoryService {
         return recall(agentId, subjectKey, query, recallTopK(agentId), embedding);
     }
 
-    /**
-     * Every live memory this agent has for this subject, most recent first - for a future
-     * admin/debug UI panel and the edge endpoint. A fact a newer one superseded (V685) is left out;
-     * {@link #listAllForSubject} lists those too.
-     */
+    private final AgentMemorySubjectOps subjectOps = new AgentMemorySubjectOps(this);
+
     public List<AgentMemoryEntry> listAll(UUID agentId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.query(
-                // codeql[java/sql-injection]
-                "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " trust, source_taint, 0.0 AS distance FROM "
-                        + table
-                        + " WHERE agent_id = ? AND subject_key = ? AND superseded_by IS NULL ORDER BY created_at DESC",
-                AgentMemoryRows.entryMapper(),
-                agentId,
-                subjectKey);
+        return subjectOps.listAll(agentId, subjectKey);
     }
 
-    /**
-     * Every private memory any agent holds about this subject, newest first - the signed-in user's
-     * own view of what they have been remembered as (gap-analysis item 11). Not agent-scoped on
-     * purpose: the owner sees all of it in one place; each row still carries its {@code agentId}.
-     * Includes the facts a newer one superseded (V685), flagged by {@link
-     * AgentMemoryEntry#supersededAt()}: this is the list behind the Memory page, the export and the
-     * erasure, which must see everything that is stored.
-     */
+    /** All of this subject's memories across every agent (admin/erasure reads); newest first. */
     public List<AgentMemoryEntry> listAllForSubject(String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.query(
-                // codeql[java/sql-injection]
-                "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " trust, source_taint, superseded_at, 0.0 AS distance FROM "
-                        + table
-                        + " WHERE subject_key = ? ORDER BY created_at DESC",
-                AgentMemoryRows.entryMapper(),
-                subjectKey);
+        return subjectOps.listAllForSubject(subjectKey);
     }
 
-    /**
-     * Up to {@code limit} distinct people (subject keys) who have a private memory in the current
-     * tenant. For background reviews that walk every person; not for request paths.
-     */
+    /** Every distinct subject key this agent has stored (cap {@code limit}). */
     public List<String> listSubjects(int limit) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.queryForList(
-                // codeql[java/sql-injection]
-                "SELECT DISTINCT subject_key FROM " + table + " LIMIT ?",
-                String.class,
-                Math.max(1, limit));
+        return subjectOps.listSubjects(limit);
     }
 
     /**
      * Re-embeds and rewrites one memory owned by {@code subjectKey}; false when it is not theirs.
      */
     public boolean updateForSubject(UUID memoryId, String subjectKey, String content) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        String literal = toVectorLiteral(sidecarClient.embedQuery(content));
-        return jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "UPDATE "
-                                + table
-                                + " SET content = ?, embedding = ?::public.vector WHERE id = ? AND"
-                                + " subject_key = ?",
-                        content,
-                        literal,
-                        memoryId,
-                        subjectKey)
-                > 0;
+        return subjectOps.updateForSubject(memoryId, subjectKey, content);
     }
 
-    /** Deletes one memory only if it belongs to {@code subjectKey}; false when it is not theirs. */
+    /** Forgets one memory only if it belongs to {@code subjectKey}; false when it is not theirs. */
     public boolean forgetForSubject(UUID memoryId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "DELETE FROM " + table + " WHERE id = ? AND subject_key = ?",
-                        memoryId,
-                        subjectKey)
-                > 0;
+        return subjectOps.forgetForSubject(memoryId, subjectKey);
     }
 
-    /**
-     * A person's approval of a QUARANTINED memory: it becomes TRUSTED (recallable) and keeps its
-     * {@code source_taint} as provenance. False when it does not exist for this agent or was
-     * already trusted.
-     */
+    /** Marks a suggested memory TRUSTED: a person confirmed it. */
     public boolean approve(UUID agentId, UUID memoryId) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        boolean approved =
-                jdbcTemplate.update(
-                                // codeql[java/sql-injection]
-                                "UPDATE "
-                                        + table
-                                        + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
-                                        + " AND trust = 'QUARANTINED'",
-                                memoryId,
-                                agentId)
-                        > 0;
-        if (approved) {
-            afterApproval(agentId, memoryId);
-        }
-        return approved;
+        return subjectOps.approve(agentId, memoryId);
     }
 
-    /** {@link #approve(UUID, UUID)} restricted to a memory about {@code subjectKey}. */
+    /**
+     * Person-scoped {@link #approve(UUID, UUID)}: refuses to trust a memory not about {@code
+     * subjectKey} (data-subject portal surface).
+     */
     public boolean approve(UUID agentId, UUID memoryId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        boolean approved =
-                jdbcTemplate.update(
-                                // codeql[java/sql-injection]
-                                "UPDATE "
-                                        + table
-                                        + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
-                                        + " AND subject_key = ? AND trust = 'QUARANTINED'",
-                                memoryId,
-                                agentId,
-                                subjectKey)
-                        > 0;
-        if (approved) {
-            afterApproval(agentId, memoryId);
-        }
-        return approved;
+        return subjectOps.approve(agentId, memoryId, subjectKey);
     }
 
-    /**
-     * A person approved a fact: it now replaces the facts it was parked against (V685), then it is
-     * offered to the graph.
-     */
-    private void afterApproval(UUID agentId, UUID memoryId) {
-        FactSupersession sup = supersession;
-        if (sup != null) {
-            sup.applyPending(
-                    AgentMemorySchemaSupport.qualifiedTableName(), memoryId, clock.instant());
-        }
-        syncApprovedToGraph(agentId, memoryId);
-    }
-
-    private volatile ApprovedFactGraphSync graphSync;
-
-    /**
-     * Mirrors an approved fact into the knowledge graph (G6); absent in hand-built instances, then
-     * approval is vector-only.
-     */
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    /** Wires the approved-fact graph mirror (ADR-0028 stage 2); null keeps vector-only writes. */
     public void setGraphSync(ApprovedFactGraphSync graphSync) {
-        this.graphSync = graphSync;
+        subjectOps.setGraphSync(graphSync);
     }
 
-    /**
-     * After an approval has committed: offers the fact to the graph, unless writes are switched off
-     * for the agent. Best-effort and fail-open (see {@link ApprovedFactGraphSync}); never changes
-     * the approval's result.
-     */
-    private void syncApprovedToGraph(UUID agentId, UUID memoryId) {
-        ApprovedFactGraphSync sync = graphSync;
-        if (sync == null || writesSwitchedOff(agentId)) {
-            return;
-        }
-        try {
-            jdbcTemplate.query(
-                    // codeql[java/sql-injection]
-                    "SELECT subject_key, content FROM "
-                            + AgentMemorySchemaSupport.qualifiedTableName()
-                            + " WHERE id = ?",
-                    rs -> {
-                        sync.agentFactApproved(
-                                agentId,
-                                rs.getString("subject_key"),
-                                memoryId,
-                                rs.getString("content"));
-                    },
-                    memoryId);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Could not offer approved memory {} to the graph; the approval stands",
-                    memoryId,
-                    e);
-        }
-    }
-
+    /** Forgets one of this agent's memories; false when it is not this agent's. */
     public void forget(UUID agentId, UUID memoryId) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        jdbcTemplate.update(
-                // codeql[java/sql-injection]
-                "DELETE FROM " + table + " WHERE id = ? AND agent_id = ?", memoryId, agentId);
+        subjectOps.forget(agentId, memoryId);
     }
 
     /** Deletes one of this agent's memories only if it is about {@code subjectKey}. */
     public boolean forget(UUID agentId, UUID memoryId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "DELETE FROM "
-                                + table
-                                + " WHERE id = ? AND agent_id = ? AND subject_key = ?",
-                        memoryId,
-                        agentId,
-                        subjectKey)
-                > 0;
+        return subjectOps.forget(agentId, memoryId, subjectKey);
     }
 
     /**
-     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before
-     * {@code cutoff} in the current tenant's schema, oldest first, and returns how many went. The
-     * caller loops until it returns less than {@code limit}.
+     * Deletes facts created before {@code cutoff} (retention), oldest first, at most {@code limit}.
      */
     public int purgeCreatedBefore(java.time.Instant cutoff, int limit) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        int deleted =
-                jdbcTemplate.update(
-                        // codeql[java/sql-injection]
-                        "DELETE FROM "
-                                + table
-                                + " WHERE id IN (SELECT id FROM "
-                                + table
-                                + " WHERE created_at < ? ORDER BY created_at LIMIT ?)",
-                        java.sql.Timestamp.from(cutoff),
-                        limit);
-        log.info("Retention purge removed {} agent-memory rows older than {}", deleted, cutoff);
-        return deleted;
+        return subjectOps.purgeCreatedBefore(cutoff, limit);
     }
 
     /**
-     * #815 Governance follow-up (PII handling review / data-subject erasure) - deletes every memory
-     * this TENANT's agents hold about one subject, across ALL agents, not just whichever agent
-     * currently handles that subject's conversations. Necessary because {@code subjectKey} scoping
-     * is {@code (agentId, subjectKey)}, and {@code ChannelSessionService#rebindAgent} means the
-     * same real person may have left memories under more than one agent over time - a single-agent
-     * {@link #forget} sweep would silently leave those behind. Returns the number of rows deleted,
-     * purely for the caller to log/report - callers should not branch on it.
+     * Data-subject erasure: every agent-memory row about {@code subjectKey}, whichever agent wrote
+     * it.
      */
     public int forgetAllForSubject(String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        int deleted =
-                // codeql[java/sql-injection]
-                jdbcTemplate.update("DELETE FROM " + table + " WHERE subject_key = ?", subjectKey);
-        log.info(
-                "Erased {} agent-memory rows for subject key (data-subject erasure request)",
-                deleted);
-        return deleted;
+        return subjectOps.forgetAllForSubject(subjectKey);
     }
 
     private void touchUsage(String table, List<UUID> ids) {
@@ -764,7 +593,7 @@ public class AgentMemoryService {
                 params);
     }
 
-    private static String toVectorLiteral(float[] embedding) {
+    static String toVectorLiteral(float[] embedding) {
         List<Double> boxed =
                 IntStream.range(0, embedding.length)
                         .mapToDouble(i -> embedding[i])

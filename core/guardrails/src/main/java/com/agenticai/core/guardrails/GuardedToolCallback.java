@@ -5,8 +5,6 @@ import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.approval.ToolCallOrigin;
 import com.agenticai.core.approval.ToolCallScope;
-import com.agenticai.core.audit.IssueSeverity;
-import com.agenticai.core.audit.IssueSource;
 import com.agenticai.core.audit.PlatformIssueService;
 import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.guardrails.taint.TaintGate;
@@ -132,29 +130,28 @@ public class GuardedToolCallback implements ToolCallback {
         }
     }
 
-    private static final ToolOutputProperties DEFAULT_OUTPUT_LIMITS = new ToolOutputProperties();
-    private static final ToolStepLimitProperties DEFAULT_STEP_LIMITS =
-            new ToolStepLimitProperties();
+    static final ToolOutputProperties DEFAULT_OUTPUT_LIMITS = new ToolOutputProperties();
+    static final ToolStepLimitProperties DEFAULT_STEP_LIMITS = new ToolStepLimitProperties();
 
-    private final ToolCallback delegate;
+    final ToolCallback delegate;
     private final AtomicInteger stepCounter;
     private final int maxStepsPerTurn;
     private final GuardrailService guardrailService;
     private final ApprovalPolicyService approvalPolicyService;
-    private final HumanApprovalGateService approvalGateService;
-    private final UUID agentId;
-    private final String sessionId;
+    final HumanApprovalGateService approvalGateService;
+    final UUID agentId;
+    final String sessionId;
     private final ToolCallVerifierService verifierService;
     private final boolean rigorousVerification;
     private final ChatClient verifierChatClient;
     private final String userMessage;
-    private volatile ConversationTailSource conversationTail;
+    volatile ConversationTailSource conversationTail;
     private final ApprovalGateMode approvalGateMode;
-    private final PlatformIssueService issueService;
-    private final TenantGuardrailRuleEvaluator tenantRuleEvaluator;
+    final PlatformIssueService issueService;
+    final TenantGuardrailRuleEvaluator tenantRuleEvaluator;
     private final com.agenticai.core.guardrails.procedures.ProcedureGuardEvaluator procedureGuard;
-    private final ToolDispatchGate dispatchGate;
-    private final GuardedCallMetrics metrics;
+    final ToolDispatchGate dispatchGate;
+    final GuardedCallMetrics metrics;
 
     public GuardedToolCallback(
             ToolCallback delegate,
@@ -312,13 +309,13 @@ public class GuardedToolCallback implements ToolCallback {
      * The output cap shared by every tool; null = the module defaults (see {@link
      * ToolOutputProperties}).
      */
-    private volatile ToolOutputProperties outputLimits;
+    volatile ToolOutputProperties outputLimits;
 
     /**
      * What happens past the step ceiling; null = the module defaults (see {@link
      * ToolStepLimitProperties}).
      */
-    private volatile ToolStepLimitProperties stepLimits;
+    volatile ToolStepLimitProperties stepLimits;
 
     /**
      * Sets the tool-output cap ({@code app.tools.output.*}); a setter for the same reason as {@link
@@ -335,21 +332,11 @@ public class GuardedToolCallback implements ToolCallback {
         return this;
     }
 
-    private ToolOutputProperties outputLimits() {
-        ToolOutputProperties configured = outputLimits;
-        return configured != null ? configured : DEFAULT_OUTPUT_LIMITS;
-    }
-
-    private ToolStepLimitProperties stepLimits() {
-        ToolStepLimitProperties configured = stepLimits;
-        return configured != null ? configured : DEFAULT_STEP_LIMITS;
-    }
-
     /**
      * Where a read-only call let through under SUPERVISED is reported for the audit log; null = not
      * audited (the journal and log still record it).
      */
-    private volatile ReadOnlyAutoAllow.Audit readOnlyAutoAllowAudit;
+    volatile ReadOnlyAutoAllow.Audit readOnlyAutoAllowAudit;
 
     /**
      * Sets the audit sink for {@link ApprovalGateMode#GATE_UNLESS_READ_ONLY} calls; a setter for
@@ -370,7 +357,7 @@ public class GuardedToolCallback implements ToolCallback {
      * Texts and limits for a held call; null = the module defaults (see {@link
      * ApprovalParkProperties}).
      */
-    private volatile ApprovalParkProperties parkTexts;
+    volatile ApprovalParkProperties parkTexts;
 
     /**
      * Shares {@code state} with the rest of the turn, so the turn loop can ask whether the turn is
@@ -411,11 +398,7 @@ public class GuardedToolCallback implements ToolCallback {
         return this;
     }
 
-    private volatile java.util.Set<String> queueExcludedTools = java.util.Set.of();
-
-    private boolean queueRecords(String toolName) {
-        return !queueExcludedTools.contains(toolName);
-    }
+    volatile java.util.Set<String> queueExcludedTools = java.util.Set.of();
 
     /**
      * Where the texts this class hands the model come from (the prompt registry, {@link
@@ -431,9 +414,9 @@ public class GuardedToolCallback implements ToolCallback {
         return this;
     }
 
-    private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
+    volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
-    private String text(String key, String... nameValuePairs) {
+    String text(String key, String... nameValuePairs) {
         return GuardrailPrompts.text(prompts, key, agentId, nameValuePairs);
     }
 
@@ -450,37 +433,7 @@ public class GuardedToolCallback implements ToolCallback {
         return FALLBACK_STATES.computeIfAbsent(stepCounter, k -> new TurnApprovalState(null));
     }
 
-    private static final ApprovalParkProperties DEFAULT_PARK_TEXTS = new ApprovalParkProperties();
-
-    /**
-     * Where this turn's tool calls come from, for a tool that records its own approval: the goal
-     * and conversation identity when the turn knows them, otherwise only the scoped history id
-     * (such a request is recorded but its task is not continued), or {@code null} when the turn
-     * knows nothing.
-     */
-    private ToolCallOrigin callOrigin() {
-        TurnApprovalState state = turnApprovalState();
-        ApprovalParkProperties texts = parkTexts != null ? parkTexts : DEFAULT_PARK_TEXTS;
-        ToolCallOrigin origin = state.origin(texts.getMaxGoalChars(), texts.getGoalCutMarker());
-        if (origin != null) {
-            return origin;
-        }
-        return state.memorySessionId() == null
-                ? null
-                : ToolCallOrigin.ofMemorySession(state.memorySessionId());
-    }
-
-    private ApprovalParking parking() {
-        ApprovalParkProperties texts = parkTexts;
-        return new ApprovalParking(
-                delegate,
-                approvalGateService,
-                agentId,
-                sessionId,
-                turnApprovalState(),
-                texts != null ? texts : new ApprovalParkProperties(),
-                prompts);
-    }
+    static final ApprovalParkProperties DEFAULT_PARK_TEXTS = new ApprovalParkProperties();
 
     @Override
     public ToolDefinition getToolDefinition() {
@@ -502,52 +455,12 @@ public class GuardedToolCallback implements ToolCallback {
         return timedCall(toolInput, toolContext);
     }
 
-    private String timedCall(String toolInput, ToolContext toolContext) {
-        String toolName = delegate.getToolDefinition().name();
-        long startedAt = System.nanoTime();
-        String[] outcome = {OUTCOME_SUCCESS};
-        try {
-            return ToolResultMarker.markGuardOutcome(
-                    guardedCall(toolName, toolInput, toolContext, outcome),
-                    outcome[0],
-                    turnApprovalState());
-        } catch (ToolStepLimitExceededException e) {
-            outcome[0] = OUTCOME_STEP_LIMIT;
-            throw e;
-        } catch (RuntimeException e) {
-            outcome[0] = OUTCOME_ERROR;
-            metrics.recordError(toolName, e);
-            throw e;
-        } finally {
-            metrics.recordTiming(toolName, outcome[0], System.nanoTime() - startedAt);
-        }
-    }
-
     private String guardedCall(
             String toolName, String toolInput, ToolContext toolContext, String[] outcome) {
-        // inDelegate[0] is true only while the raw tool executes: an exception
-        // thrown then is the TOOL's own failure and passes through unwrapped.
-        // A RuntimeException from any surrounding check (approval-policy read,
-        // procedure guard, verifier, output cap/sanitization) is platform
-        // machinery failing around a tool that never ran - tagged
-        // ToolInfrastructureException so LoggingToolCallback's per-tool circuit
-        // breaker is billed only for failures the tool actually owns (one shared
-        // outage must not trip the breakers of every healthy tool).
-        boolean[] inDelegate = {false};
-        try {
-            return guardedCallBody(toolName, toolInput, toolContext, outcome, inDelegate);
-        } catch (RuntimeException e) {
-            if (inDelegate[0]
-                    || e instanceof ToolStepLimitExceededException
-                    || e instanceof GuardrailViolationException
-                    || e instanceof ToolInfrastructureException) {
-                throw e;
-            }
-            throw new ToolInfrastructureException(toolName, e);
-        }
+        return support.guardedCall(toolName, toolInput, toolContext, outcome);
     }
 
-    private String guardedCallBody(
+    String guardedCallBody(
             String toolName,
             String toolInput,
             ToolContext toolContext,
@@ -849,28 +762,39 @@ public class GuardedToolCallback implements ToolCallback {
      * the turn (the turn journal reads it) and sent to the audit sink. None of it may fail the
      * call.
      */
+
+    /**
+     * Where this turn's tool calls come from, for a tool that records its own approval; see {@link
+     * GuardedToolCallbackSupport#callOrigin}.
+     */
+    private ToolCallOrigin callOrigin() {
+        return support.callOrigin();
+    }
+
+    private ApprovalParking parking() {
+        return support.parking();
+    }
+
+    private String timedCall(String toolInput, ToolContext toolContext) {
+        return support.timedCall(toolInput, toolContext);
+    }
+
+    private ToolOutputProperties outputLimits() {
+        return support.outputLimits();
+    }
+
+    private ToolStepLimitProperties stepLimits() {
+        return support.stepLimits();
+    }
+
+    private boolean queueRecords(String toolName) {
+        return support.queueRecords(toolName);
+    }
+
+    private final GuardedToolCallbackSupport support = new GuardedToolCallbackSupport(this);
+
     private void recordReadOnlyAutoAllowed(String toolName, String toolInput) {
-        log.info(
-                "Agent {} (session {}): '{}' {}",
-                agentId,
-                sessionId,
-                toolName,
-                ReadOnlyAutoAllow.NOTE);
-        try {
-            turnApprovalState().markAutoAllowedReadOnly(toolName, toolInput);
-        } catch (RuntimeException e) {
-            log.debug(
-                    "Could not note the auto-allowed read-only call '{}' on the turn", toolName, e);
-        }
-        metrics.readOnlyAutoAllowed();
-        ReadOnlyAutoAllow.Audit audit = readOnlyAutoAllowAudit;
-        if (audit != null) {
-            try {
-                audit.autoAllowed(toolName, agentId, sessionId, ReadOnlyAutoAllow.NOTE);
-            } catch (RuntimeException e) {
-                log.warn("Could not audit the auto-allowed read-only call '{}'", toolName, e);
-            }
-        }
+        support.recordReadOnlyAutoAllowed(toolName, toolInput);
     }
 
     /**
@@ -878,12 +802,7 @@ public class GuardedToolCallback implements ToolCallback {
      * memory id.
      */
     private ToolCallVerifierService.ConversationTail verifierConversationTail() {
-        ConversationTailSource source = conversationTail;
-        String memorySessionId = turnApprovalState().memorySessionId();
-        if (source == null || memorySessionId == null) {
-            return null;
-        }
-        return (maxMessages, maxChars) -> source.tail(memorySessionId, maxMessages, maxChars);
+        return support.verifierConversationTail();
     }
 
     /**
@@ -892,82 +811,22 @@ public class GuardedToolCallback implements ToolCallback {
      * way to switch the policy off.
      */
     private ToolDispatchGate.Verdict checkDispatchGate(String toolName) {
-        if (dispatchGate == null) {
-            return ToolDispatchGate.Verdict.allow();
-        }
-        try {
-            ToolDispatchGate.Verdict verdict = dispatchGate.check(toolName);
-            return verdict != null ? verdict : ToolDispatchGate.Verdict.allow();
-        } catch (RuntimeException e) {
-            if (GuardrailSettings.failClosed(agentId)) {
-                log.warn(
-                        "Tool dispatch gate failed for tool '{}' - refusing the call (fail-closed)",
-                        toolName,
-                        e);
-                return ToolDispatchGate.Verdict.deny(text(GuardrailPrompts.DISPATCH_CHECK_FAILED));
-            }
-            log.warn(
-                    "Tool dispatch gate failed for tool '{}' - allowing the call (fail-open)",
-                    toolName,
-                    e);
-            return ToolDispatchGate.Verdict.allow();
-        }
+        return support.checkDispatchGate(toolName);
     }
 
     /**
-     * Applies this tenant's own {@link GuardrailRule} rows to a tool result.
-     *
-     * <p>A BLOCK match is raised as a {@link GuardrailViolationException} so it lands in exactly
-     * the same soft-stop path as a compiled-in pattern match (withheld from the model, recorded as
-     * a platform issue, the turn continues); a REDACT match returns the rewritten text. Anything
-     * that goes wrong inside the evaluator already fails open there, so this method has no error
-     * handling of its own beyond the null-evaluator case.
+     * Applies this tenant's own {@link GuardrailRule} rows to a tool result; see {@link
+     * GuardedToolCallbackSupport#applyTenantRules}.
      */
     private String applyTenantRules(String toolName, String sanitized) {
-        if (tenantRuleEvaluator == null || sanitized == null || sanitized.isEmpty()) {
-            return sanitized;
-        }
-        TenantGuardrailRuleEvaluator.Outcome outcome = tenantRuleEvaluator.apply(sanitized, true);
-        if (outcome.blocked()) {
-            log.warn(
-                    "Tenant guardrail rule '{}' blocked output from tool '{}'",
-                    outcome.blockedByRuleName(),
-                    toolName);
-            throw new GuardrailViolationException(
-                    toolName,
-                    text(
-                            GuardrailPrompts.TENANT_RULE_MATCHED,
-                            "rule",
-                            outcome.blockedByRuleName()));
-        }
-        return outcome.text();
+        return support.applyTenantRules(toolName, sanitized);
     }
 
     /**
-     * A {@link GuardrailViolationException} is a soft stop, same posture as every other stop
-     * condition in {@link #call} except the step-limit (which is a deliberate runaway-loop
-     * hard-stop, see this class's own javadoc): the flagged output is still withheld from the model
-     * either way, but a false positive now costs one tool result instead of the whole turn.
-     * Best-effort recorded on the admin Issues portal so a recurring false positive on the same
-     * tool is triaged like any other platform issue, rather than only ever appearing in application
-     * logs.
+     * Records a false-positive on the Issues portal and explains it to the model; see {@link
+     * GuardedToolCallbackSupport#recordAndExplain}.
      */
     private String recordAndExplain(String toolName, GuardrailViolationException e) {
-        if (issueService != null) {
-            try {
-                issueService.record(
-                        IssueSource.GUARDRAIL_FALSE_POSITIVE,
-                        toolName,
-                        IssueSeverity.WARNING,
-                        "Guardrail blocked output from tool '" + toolName + "'",
-                        e.getMessage());
-            } catch (RuntimeException recordingFailure) {
-                log.warn(
-                        "Failed to record platform issue for guardrail violation on tool '{}'",
-                        toolName,
-                        recordingFailure);
-            }
-        }
-        return text(GuardrailPrompts.OUTPUT_WITHHELD, "tool", toolName, "reason", e.getMessage());
+        return support.recordAndExplain(toolName, e);
     }
 }

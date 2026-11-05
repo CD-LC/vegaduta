@@ -6,14 +6,9 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.sql.Array;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +34,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
+    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
 
     static final String COLUMNS =
             "id, agent_id, kind, content, trust, status, writer, source_type, source_ref, turn_id, source_taint,"
@@ -94,91 +89,6 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 .executeWithoutResult(status -> work.run());
     }
 
-    private static Timestamp ts(Instant instant) {
-        return instant == null ? null : Timestamp.from(instant);
-    }
-
-    private static String vector(float[] embedding) {
-        if (embedding == null || embedding.length != MemoryEmbedder.DIMENSION) {
-            throw new IllegalArgumentException(
-                    "embedding must have " + MemoryEmbedder.DIMENSION + " dimensions");
-        }
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < embedding.length; i++) {
-            if (!Float.isFinite(embedding[i])) {
-                throw new IllegalArgumentException("embedding has a non-finite value");
-            }
-            if (i > 0) {
-                sb.append(',');
-            }
-            sb.append(embedding[i]);
-        }
-        return sb.append(']').toString();
-    }
-
-    static String taintJson(List<String> taint) {
-        if (taint == null || taint.isEmpty()) {
-            return null;
-        }
-        try {
-            return MAPPER.writeValueAsString(taint);
-        } catch (Exception e) {
-            throw new IllegalStateException("cannot serialise source taint", e);
-        }
-    }
-
-    static List<String> parseTaint(String json) {
-        if (json == null || json.isBlank()) {
-            return List.of();
-        }
-        try {
-            return MAPPER.readValue(json, STRINGS);
-        } catch (Exception e) {
-            // Unreadable taint is treated as tainted: the marker keeps the row from being trusted
-            // unreviewed.
-            return List.of("unparseable");
-        }
-    }
-
-    private static List<String> subjects(ResultSet rs) throws SQLException {
-        Array array = rs.getArray("subject_keys");
-        if (array == null) {
-            return List.of();
-        }
-        Object[] values = (Object[]) array.getArray();
-        return Arrays.stream(values).map(String::valueOf).collect(Collectors.toList());
-    }
-
-    private static Instant instant(ResultSet rs, String column) throws SQLException {
-        Timestamp t = rs.getTimestamp(column);
-        return t == null ? null : t.toInstant();
-    }
-
-    static MemoryItem map(ResultSet rs) throws SQLException {
-        return new MemoryItem(
-                rs.getObject("id", UUID.class),
-                rs.getObject("agent_id", UUID.class),
-                MemoryKind.valueOf(rs.getString("kind")),
-                rs.getString("content"),
-                MemoryTrustLevel.parse(rs.getString("trust")),
-                MemoryItemStatus.parse(rs.getString("status")),
-                MemoryWriter.parse(rs.getString("writer")),
-                rs.getString("source_type"),
-                rs.getString("source_ref"),
-                rs.getString("turn_id"),
-                parseTaint(rs.getString("source_taint")),
-                rs.getBoolean("model_generated"),
-                rs.getInt("generation"),
-                subjects(rs),
-                rs.getInt("version"),
-                rs.getObject("supersedes_id", UUID.class),
-                instant(rs, "created_at"),
-                instant(rs, "expires_at"),
-                rs.getString("approved_by"),
-                instant(rs, "approved_at"),
-                rs.getBoolean("pinned"));
-    }
-
     private static void insertEvent(JdbcTemplate jdbc, MemoryEvent e) {
         jdbc.update(
                 // codeql[java/sql-injection]
@@ -195,7 +105,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 e.fromStatus() == null ? null : e.fromStatus().name(),
                 e.toStatus() == null ? null : e.toStatus().name(),
                 e.reason(),
-                ts(e.at()));
+                MemoryItemRows.ts(e.at()));
     }
 
     // ------------------------------------------------------------------ writes
@@ -211,7 +121,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
             throw new IllegalArgumentException("only PENDING + QUARANTINED rows can be inserted");
         }
         JdbcTemplate jdbc = jdbc();
-        String vector = vector(embedding);
+        String vector = MemoryItemRows.vector(embedding);
         String items = table("memory_item");
         String sources = table("memory_item_source");
         inTransaction(
@@ -237,7 +147,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                 ps.setString(i++, item.sourceType());
                                 ps.setString(i++, item.sourceRef());
                                 ps.setString(i++, item.turnId());
-                                ps.setString(i++, taintJson(item.sourceTaint()));
+                                ps.setString(i++, MemoryItemRows.taintJson(item.sourceTaint()));
                                 ps.setBoolean(i++, item.modelGenerated());
                                 ps.setInt(i++, item.generation());
                                 ps.setArray(
@@ -247,8 +157,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                                         "text", item.subjectKeys().toArray()));
                                 ps.setInt(i++, item.version());
                                 ps.setObject(i++, item.supersedesId());
-                                ps.setTimestamp(i++, ts(item.createdAt()));
-                                ps.setTimestamp(i, ts(item.expiresAt()));
+                                ps.setTimestamp(i++, MemoryItemRows.ts(item.createdAt()));
+                                ps.setTimestamp(i, MemoryItemRows.ts(item.expiresAt()));
                             });
                     for (MemoryItemSource s : lineage) {
                         jdbc.update(
@@ -292,7 +202,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                             + " SET trust = 'TRUSTED', status = 'ACTIVE', approved_by = ?, approved_at = ?"
                                             + " WHERE id = ? AND agent_id = ? AND status = 'PENDING' AND trust = 'QUARANTINED'",
                                     approvedBy,
-                                    ts(at),
+                                    MemoryItemRows.ts(at),
                                     itemId,
                                     agentId);
                     if (rows != 1) {
@@ -510,7 +420,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                         + " FROM "
                                         + table("memory_item")
                                         + " WHERE id = ? AND agent_id = ?",
-                                (rs, n) -> map(rs),
+                                (rs, n) -> MemoryItemRows.map(rs),
                                 itemId,
                                 agentId);
         return rows.stream().findFirst();
@@ -525,7 +435,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                 + " FROM "
                                 + table("memory_item")
                                 + " WHERE agent_id = ? AND status = ? ORDER BY created_at DESC LIMIT ?",
-                        (rs, n) -> map(rs),
+                        (rs, n) -> MemoryItemRows.map(rs),
                         agentId,
                         status.name(),
                         Math.max(1, limit));
@@ -553,7 +463,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         sql.append(" ORDER BY created_at DESC LIMIT ?");
         args.add(Math.max(1, limit));
         // codeql[java/sql-injection]
-        return jdbc().query(sql.toString(), (rs, n) -> map(rs), args.toArray());
+        return jdbc().query(sql.toString(), (rs, n) -> MemoryItemRows.map(rs), args.toArray());
     }
 
     @Override
@@ -565,7 +475,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                 + " FROM "
                                 + table("memory_item")
                                 + " WHERE ? = ANY(subject_keys) ORDER BY created_at DESC LIMIT ?",
-                        (rs, n) -> map(rs),
+                        (rs, n) -> MemoryItemRows.map(rs),
                         subjectKey,
                         Math.max(1, limit));
     }
@@ -602,15 +512,11 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                                 MemoryActor.Type.valueOf(
                                                         rs.getString("actor_type")),
                                                 rs.getString("actor_ref")),
-                                        nullableStatus(rs.getString("from_status")),
-                                        nullableStatus(rs.getString("to_status")),
+                                        MemoryItemRows.nullableStatus(rs.getString("from_status")),
+                                        MemoryItemRows.nullableStatus(rs.getString("to_status")),
                                         rs.getString("reason"),
-                                        instant(rs, "at")),
+                                        MemoryItemRows.instant(rs, "at")),
                         itemId);
-    }
-
-    private static MemoryItemStatus nullableStatus(String value) {
-        return value == null ? null : MemoryItemStatus.parse(value);
     }
 
     @Override
@@ -650,7 +556,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                         + " WHERE agent_id = ? AND event = 'CREATED' AND at >= ?",
                                 Integer.class,
                                 agentId,
-                                ts(since));
+                                MemoryItemRows.ts(since));
         return n == null ? 0 : n;
     }
 
@@ -662,13 +568,13 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
             float[] embedding,
             int limit,
             Instant now) {
-        String vector = vector(embedding);
+        String vector = MemoryItemRows.vector(embedding);
         boolean bySubject = subjectKey != null;
         List<Object> args = new ArrayList<>();
         args.add(vector);
         args.add(agentId);
         args.add(kind.name());
-        args.add(ts(now));
+        args.add(MemoryItemRows.ts(now));
         if (bySubject) {
             args.add(subjectKey);
         }
@@ -697,7 +603,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                         sql,
                         (rs, n) ->
                                 new Recalled(
-                                        map(rs),
+                                        MemoryItemRows.map(rs),
                                         rs.getDouble("distance"),
                                         rs.getDouble("importance")),
                         args.toArray());

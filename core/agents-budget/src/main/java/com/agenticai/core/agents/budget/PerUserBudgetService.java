@@ -76,8 +76,8 @@ public class PerUserBudgetService {
     public static final String KEY_FALLBACK_USD_PER_1K =
             "platform.budget.per-user.fallback-usd-per-1k-tokens";
 
-    private final StringRedisTemplate redisTemplate;
-    private final LlmPricingCatalog pricingCatalog;
+    final StringRedisTemplate redisTemplate;
+    final LlmPricingCatalog pricingCatalog;
     // Per-plan tier (§4 precedence: per-user -> per-tenant -> per-plan ->
     // global). Same multiplier convention FreeTierUsageLimiterService already
     // established for this exact "scale the FREE-tier default per plan"
@@ -87,10 +87,10 @@ public class PerUserBudgetService {
     // specific ones) means one admin-tunable pair of knobs governs both the
     // message/token count gate AND this dollar gate's plan scaling. The
     // multipliers, defaults and snapshot cache live in the resolver.
-    private final PerUserBudgetConfigResolver configResolver;
+    final PerUserBudgetConfigResolver configResolver;
 
     /** Redis counters, TTL repair and the exhaustion bell. */
-    private final PerUserBudgetCounters counters;
+    final PerUserBudgetCounters counters;
 
     public PerUserBudgetService(
             StringRedisTemplate redisTemplate,
@@ -189,7 +189,7 @@ public class PerUserBudgetService {
     }
 
     /** Base per-modality cap plus any live paid top-up credit for this window. */
-    private long effectiveCapMicroCents(
+    long effectiveCapMicroCents(
             BudgetConfig config, Modality modality, String tenantId, String userKey) {
         return config.capMicroCents(modality)
                 + counters.currentCreditMicroCents(
@@ -478,6 +478,97 @@ public class PerUserBudgetService {
                 knownPlan);
     }
 
+    /**
+     * A model writes about four characters per token; used only when the provider reported no usage
+     * at all.
+     */
+    static final double CHARS_PER_TOKEN = 4.0;
+
+    private final PerUserBudgetAdminOps adminOps = new PerUserBudgetAdminOps(this);
+
+    /**
+     * Current effective status of a (tenant, user, modality) window; see {@link
+     * PerUserBudgetAdminOps#status}.
+     */
+    public BudgetStatus status(String tenantId, String userKey, Modality modality) {
+        return adminOps.status(tenantId, userKey, modality);
+    }
+
+    /**
+     * A response that was produced and shown but came back without usage metadata; see {@link
+     * PerUserBudgetAdminOps#chargeUnmeasuredResponse}.
+     */
+    public void chargeUnmeasuredResponse(
+            String tenantId,
+            String userKey,
+            Modality modality,
+            long reservedMicroCents,
+            long receivedChars,
+            TenantPlan knownPlan) {
+        adminOps.chargeUnmeasuredResponse(
+                tenantId, userKey, modality, reservedMicroCents, receivedChars, knownPlan);
+    }
+
+    /** The output-token estimate for {@code receivedChars} of text, priced at the fallback rate. */
+    BigDecimal estimateCostForChars(
+            String tenantId, String userKey, long receivedChars, TenantPlan knownPlan) {
+        return adminOps.estimateCostForChars(tenantId, userKey, receivedChars, knownPlan);
+    }
+
+    /**
+     * Full-release convenience for {@link #reconcileSpendReservationForCall} when a turn ends with
+     * NO usage at all to report.
+     */
+    public void releaseSpendReservation(
+            String tenantId,
+            String userKey,
+            Modality modality,
+            long reservedMicroCents,
+            TenantPlan knownPlan) {
+        adminOps.releaseSpendReservation(
+                tenantId, userKey, modality, reservedMicroCents, knownPlan);
+    }
+
+    /**
+     * PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §4 P2 - credits {@code usdAmount} of PAID budget to
+     * the CURRENT window for this (tenant, user, modality); see {@link
+     * PerUserBudgetAdminOps#creditTopUp}.
+     */
+    public void creditTopUp(
+            String tenantId, String userKey, Modality modality, BigDecimal usdAmount) {
+        adminOps.creditTopUp(tenantId, userKey, modality, usdAmount);
+    }
+
+    /** Current effective global config - what the admin GET endpoint returns. */
+    public BudgetConfig currentGlobalConfig() {
+        return adminOps.currentGlobalConfig();
+    }
+
+    /**
+     * Admin write path - upserts each provided (non-null) field as its {@code platform_setting}
+     * row, then busts the snapshot cache so the change is live on the next turn. Nulls leave that
+     * field's row untouched (partial update).
+     */
+    public BudgetConfig updateGlobalConfig(
+            Boolean enabled,
+            BigDecimal dailyUsd,
+            Integer windowSeconds,
+            Map<Modality, Integer> splitPct,
+            BigDecimal fallbackUsdPer1kTokens,
+            String updatedBy) {
+        return adminOps.updateGlobalConfig(
+                enabled, dailyUsd, windowSeconds, splitPct, fallbackUsdPer1kTokens, updatedBy);
+    }
+
+    /**
+     * Proactive keyspace sweep, called once a day by {@code DailyQuotaResetScheduler}'s idempotent
+     * run; see {@link PerUserBudgetAdminOps#repairAllMissingTtls}. Returns the number of counters
+     * repaired.
+     */
+    public int repairAllMissingTtls() {
+        return adminOps.repairAllMissingTtls();
+    }
+
     private BigDecimal costForUsage(
             String tenantId,
             String userKey,
@@ -485,8 +576,7 @@ public class PerUserBudgetService {
             String model,
             Usage usage,
             TenantPlan knownPlan) {
-        return PerUserBudgetUsageCost.costForUsage(
-                pricingCatalog, configResolver, tenantId, userKey, model, usage, knownPlan);
+        return adminOps.costForUsage(tenantId, userKey, modality, model, usage, knownPlan);
     }
 
     /**
@@ -517,163 +607,14 @@ public class PerUserBudgetService {
             BigDecimal actualCost,
             TenantPlan knownPlan,
             boolean keepReservation) {
-        long actualMicroCents =
-                actualCost == null || actualCost.signum() <= 0
-                        ? 0L
-                        : actualCost
-                                .multiply(MICRO_CENTS_PER_USD)
-                                .setScale(0, RoundingMode.HALF_UP)
-                                .longValueExact();
-        long delta = actualMicroCents - reservedMicroCents;
-        if (keepReservation && delta < 0) {
-            return;
-        }
-        if (delta == 0) {
-            return;
-        }
-        BudgetConfig config = configResolver.resolveConfig(tenantId, userKey, knownPlan);
-        counters.incrementBy(
-                PerUserBudgetCounters.key(tenantId, userKey, modality),
-                Duration.ofSeconds(config.windowSeconds()),
-                delta);
-    }
-
-    /**
-     * A model writes about four characters per token; used only when the provider reported no usage
-     * at all.
-     */
-    static final double CHARS_PER_TOKEN = 4.0;
-
-    /**
-     * A response that was produced and shown but came back without usage metadata (a provider that
-     * omits it, a stream cancelled before the usage event). Releasing the reservation here, as a
-     * zero-token call would, made the call free: a user could cancel every stream after the text
-     * was out and spend nothing. The reservation is kept as the charge, raised to the size of what
-     * was actually received if that is more; with no reservation (a sibling call of the same turn)
-     * the received text is charged at the fallback rate.
-     */
-    public void chargeUnmeasuredResponse(
-            String tenantId,
-            String userKey,
-            Modality modality,
-            long reservedMicroCents,
-            long receivedChars,
-            TenantPlan knownPlan) {
-        if (tenantId == null || receivedChars <= 0) {
-            return;
-        }
-        BigDecimal estimated = estimateCostForChars(tenantId, userKey, receivedChars, knownPlan);
-        if (reservedMicroCents > 0) {
-            applySpendDelta(
-                    tenantId, userKey, modality, reservedMicroCents, estimated, knownPlan, true);
-        } else {
-            recordSpend(tenantId, userKey, modality, estimated, knownPlan);
-        }
-    }
-
-    /** The output-token estimate for {@code receivedChars} of text, priced at the fallback rate. */
-    BigDecimal estimateCostForChars(
-            String tenantId, String userKey, long receivedChars, TenantPlan knownPlan) {
-        long tokens = (long) Math.ceil(receivedChars / CHARS_PER_TOKEN);
-        return configResolver
-                .resolveConfig(tenantId, userKey, knownPlan)
-                .fallbackUsdPer1kTokens()
-                .multiply(BigDecimal.valueOf(tokens))
-                .divide(BigDecimal.valueOf(1000), 8, RoundingMode.HALF_UP);
-    }
-
-    /**
-     * Full-release convenience for {@link #reconcileSpendReservationForCall} when a turn ends with
-     * NO usage at all to report (the whole provider-chain attempt failed before any model produced
-     * usage metadata) - equivalent to calling it with null tokens, spelled out separately so {@code
-     * FreeTierChatClientService}'s failure-path call sites don't need to fabricate a model name for
-     * a call that never happened.
-     */
-    public void releaseSpendReservation(
-            String tenantId,
-            String userKey,
-            Modality modality,
-            long reservedMicroCents,
-            TenantPlan knownPlan) {
-        reconcileSpendReservationForCall(
-                tenantId, userKey, modality, reservedMicroCents, null, null, null, knownPlan);
-    }
-
-    // ---- P2 paid top-up / overage -----------------------------------------
-
-    /**
-     * PLATFORM-ADMIN-GOVERNANCE-AND-CONTROLS.md §4 P2 - credits {@code usdAmount} of PAID budget to
-     * the CURRENT window for this (tenant, user, modality). Adds to a separate credit counter that
-     * {@link #checkBudget} folds into the effective cap, so the next turn passes the gate without a
-     * plan change; the credit expires with the window (aligned to the spend counter's remaining TTL
-     * when one exists, otherwise the configured window length) so unused top-up never carries
-     * silently into the next day.
-     *
-     * <p>Called only from the payment-confirm path (a successful, signature- verified top-up
-     * payment), never from the chat hot path. Unlike the metering reads/writes elsewhere in this
-     * class, this deliberately does <b>not</b> fail open: by the time it runs the customer has
-     * already been charged, so a Redis failure here must surface to the caller (which can then
-     * reconcile / retry) rather than silently swallow paid credit. A null/non-positive amount, or
-     * one that rounds below one micro-cent, is a no-op.
-     *
-     * <p>If a failure ever does land between the {@code INCRBY} below and its {@code EXPIRE} (e.g.
-     * this JVM dies mid-call, after the caller already saw success from a prior partial retry),
-     * {@link PerUserBudgetCounters#currentCreditMicroCents} self-heals it on its next read the same
-     * way it does for the spend counter - see {@code PerUserBudgetTtlRepair#repairMissingTtl}'s
-     * javadoc.
-     */
-    public void creditTopUp(
-            String tenantId, String userKey, Modality modality, BigDecimal usdAmount) {
-        if (tenantId == null || modality == null || usdAmount == null || usdAmount.signum() <= 0) {
-            return;
-        }
-        long microCents =
-                usdAmount
-                        .multiply(MICRO_CENTS_PER_USD)
-                        .setScale(0, RoundingMode.HALF_UP)
-                        .longValueExact();
-        if (microCents <= 0) {
-            return;
-        }
-        String creditKey = PerUserBudgetCounters.creditKey(tenantId, userKey, modality);
-        redisTemplate.opsForValue().increment(creditKey, microCents);
-        // Align the credit's expiry to the spend window in progress so top-up
-        // and spend reset together; if no spend counter exists yet (nothing
-        // spent this window), fall back to a fresh full window.
-        Long spendTtl =
-                counters.remainingWindowSeconds(
-                        PerUserBudgetCounters.key(tenantId, userKey, modality));
-        long ttlSeconds =
-                (spendTtl != null && spendTtl > 0)
-                        ? spendTtl
-                        : configResolver.resolveConfig(tenantId, userKey).windowSeconds();
-        redisTemplate.expire(creditKey, Duration.ofSeconds(ttlSeconds));
-        log.info(
-                "Credited ${} per-user {} top-up for tenant '{}'",
-                usdAmount.toPlainString(),
-                modality.name().toLowerCase(java.util.Locale.ROOT),
-                tenantId);
-    }
-
-    /**
-     * Current effective status of a (tenant, user, modality) window - the effective cap (base +
-     * live top-up credit), spend so far, remaining headroom (never negative), and seconds to reset.
-     * Used by the top-up confirm response so a client can immediately show the restored budget.
-     */
-    public BudgetStatus status(String tenantId, String userKey, Modality modality) {
-        BudgetConfig config = configResolver.resolveConfig(tenantId, userKey);
-        long cap = effectiveCapMicroCents(config, modality, tenantId, userKey);
-        long spent =
-                counters.currentSpendMicroCents(
-                        tenantId, userKey, modality, config.windowSeconds());
-        long remaining = Math.max(0L, cap - spent);
-        return new BudgetStatus(
-                modality.name().toLowerCase(java.util.Locale.ROOT),
-                PerUserBudgetCounters.microCentsToUsd(cap),
-                PerUserBudgetCounters.microCentsToUsd(spent),
-                PerUserBudgetCounters.microCentsToUsd(remaining),
-                counters.remainingWindowSeconds(
-                        PerUserBudgetCounters.key(tenantId, userKey, modality)));
+        adminOps.applySpendDelta(
+                tenantId,
+                userKey,
+                modality,
+                reservedMicroCents,
+                actualCost,
+                knownPlan,
+                keepReservation);
     }
 
     /** Snapshot of a per-user window's dollar state, all amounts in USD. */
@@ -683,61 +624,6 @@ public class PerUserBudgetService {
             BigDecimal spentUsd,
             BigDecimal remainingUsd,
             Long resetSeconds) {}
-
-    // ---- config read/write (admin surface) -------------------------------
-
-    /** Current effective global config - what the admin GET endpoint returns. */
-    public BudgetConfig currentGlobalConfig() {
-        return configResolver.loadGlobalConfig();
-    }
-
-    /**
-     * Admin write path - upserts each provided (non-null) field as its {@code platform_setting}
-     * row, then busts the snapshot cache so the change is live on the next turn without a redeploy.
-     * Nulls leave that field's row untouched (partial update), mirroring {@code
-     * PlatformLlmTaskService#upsert}'s optional-field posture.
-     */
-    public BudgetConfig updateGlobalConfig(
-            Boolean enabled,
-            BigDecimal dailyUsd,
-            Integer windowSeconds,
-            Map<Modality, Integer> splitPct,
-            BigDecimal fallbackUsdPer1kTokens,
-            String updatedBy) {
-        return configResolver.updateGlobalConfig(
-                enabled, dailyUsd, windowSeconds, splitPct, fallbackUsdPer1kTokens, updatedBy);
-    }
-
-    /**
-     * Proactive keyspace sweep, called once a day by {@code DailyQuotaResetScheduler}'s idempotent
-     * run - same purpose as {@link FreeTierUsageLimiterService#repairAllMissingTtls}: unlike the
-     * lazy repair inside {@link PerUserBudgetCounters#currentSpendMicroCents}/{@link
-     * PerUserBudgetCounters#currentCreditMicroCents} (which only fixes a counter the next time
-     * something happens to read that exact key), this walks every existing spend and paid-credit
-     * counter, across every modality and tenant/user, and repairs any that lost its TTL. Uses
-     * {@code SCAN} (cursor-based, incremental) rather than {@code KEYS} - verify-pass fix: {@code
-     * KEYS} is O(N) over the ENTIRE keyspace of the Redis DB (not just matching keys) and blocks
-     * Redis's single-threaded event loop for its full duration, stalling every other tenant's live
-     * rate-limiting/session traffic on a shared instance; {@code SCAN} walks the same keyspace
-     * incrementally without that blocking cost. Returns the number of counters repaired.
-     */
-    public int repairAllMissingTtls() {
-        int repaired = 0;
-        try {
-            // Verify-pass fix: this call was unprotected - a transient
-            // failure reading platform config (platformSettingsService) would
-            // throw out of this method entirely, aborting the sweep before
-            // either prefix was even attempted and, when called from
-            // DailyQuotaResetScheduler, propagating up to the caller.
-            int windowSeconds = configResolver.effectiveGlobalConfig().windowSeconds();
-            repaired += counters.repairAllPrefixes(windowSeconds);
-        } catch (RuntimeException e) {
-            log.debug(
-                    "Per-user budget TTL repair sweep failed to load config - leaving for the next lazy read to retry",
-                    e);
-        }
-        return repaired;
-    }
 
     /**
      * Effective, resolved budget config. {@code splitPct} is each modality's cap as a percentage of

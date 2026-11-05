@@ -6,7 +6,6 @@ import com.agenticai.core.chat.SpendReport;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.SpendControlsFailMode;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
@@ -16,19 +15,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -103,8 +98,8 @@ public class SpendCapService implements HostedSpendListener {
     static final BigDecimal MAX_CAP_USD = new BigDecimal("1000000");
     static final BigDecimal EIGHTY_PERCENT = new BigDecimal("0.80");
     private static final String HOSTED = ProviderName.PLATFORM_HOSTED.name();
-    private static final String SYSTEM_ACTOR = "system:spend-cap";
-    private static final long WARN_INTERVAL_MS = 60_000L;
+    static final String SYSTEM_ACTOR = "system:spend-cap";
+    static final long WARN_INTERVAL_MS = 60_000L;
 
     static final String SQL_BY_SCHEMA =
             "SELECT id, schema_name, name, spend_cap_usd, spend_cap_alert_stage, "
@@ -177,20 +172,21 @@ public class SpendCapService implements HostedSpendListener {
     /** Roster columns; {@code monthToDateUsd} null when it could not be determined. */
     public record RosterCap(BigDecimal capUsd, BigDecimal monthToDateUsd, Boolean blocked) {}
 
-    private record Cached<T>(T value, Instant loadedAt) {}
+    record Cached<T>(T value, Instant loadedAt) {}
 
-    private final JdbcTemplate jdbc;
+    final JdbcTemplate jdbc;
     private final ObjectProvider<StringRedisTemplate> redis;
     private final LlmUsageRollupService rollupService;
     private final ObjectProvider<SpendCapAlertSink> alertSinks;
-    private final Clock clock;
+    final Clock clock;
     private final Executor alertExecutor;
 
-    private final Map<String, Cached<Optional<TenantCap>>> configBySchema =
-            new ConcurrentHashMap<>();
+    final Map<String, Cached<Optional<TenantCap>>> configBySchema = new ConcurrentHashMap<>();
+    private final SpendCapSupport support = new SpendCapSupport(this);
+
     private final Map<String, Cached<BigDecimal>> dbFallback = new ConcurrentHashMap<>();
-    private final AtomicLong lastRedisWarnMs = new AtomicLong();
-    private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
+    final AtomicLong lastRedisWarnMs = new AtomicLong();
+    volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
 
     /**
      * {@code app.spend-cap.reserve-usd-per-call}: 0 (default) = no pre-reservation, see the class
@@ -218,7 +214,13 @@ public class SpendCapService implements HostedSpendListener {
             ObjectProvider<StringRedisTemplate> redis,
             LlmUsageRollupService rollupService,
             ObjectProvider<SpendCapAlertSink> alertSinks) {
-        this(jdbc, redis, rollupService, alertSinks, Clock.systemUTC(), boundedAlertExecutor());
+        this(
+                jdbc,
+                redis,
+                rollupService,
+                alertSinks,
+                Clock.systemUTC(),
+                SpendCapSupport.boundedAlertExecutor());
     }
 
     SpendCapService(
@@ -252,7 +254,7 @@ public class SpendCapService implements HostedSpendListener {
         if (tenantSchema == null || tenantSchema.isBlank()) {
             return;
         }
-        TenantCap cap = configForSchema(tenantSchema, true).orElse(null);
+        TenantCap cap = support.configForSchema(tenantSchema, true).orElse(null);
         if (cap == null || cap.capUsd() == null) {
             return;
         }
@@ -271,7 +273,8 @@ public class SpendCapService implements HostedSpendListener {
         }
         if (mtd.compareTo(cap.capUsd()) >= 0) {
             evaluateAlertsAsync(cap, mtd);
-            throw new SpendCapReachedException(cap.capUsd(), scale(mtd), resetsAt());
+            throw new SpendCapReachedException(
+                    cap.capUsd(), SpendCapSupport.scale(mtd), resetsAt());
         }
         BigDecimal reserve = reserveUsdPerCall;
         if (reserve.signum() > 0) {
@@ -305,7 +308,8 @@ public class SpendCapService implements HostedSpendListener {
         if (inFlight != null && mtd.add(inFlight).compareTo(cap.capUsd()) > 0) {
             releaseInFlight(cap, reserve);
             evaluateAlertsAsync(cap, mtd);
-            throw new SpendCapReachedException(cap.capUsd(), scale(mtd), resetsAt());
+            throw new SpendCapReachedException(
+                    cap.capUsd(), SpendCapSupport.scale(mtd), resetsAt());
         }
     }
 
@@ -320,7 +324,7 @@ public class SpendCapService implements HostedSpendListener {
                     List.of(INFLIGHT_PREFIX + cap.tenantId()),
                     reserve.negate().toPlainString());
         } catch (RuntimeException e) {
-            warnRedis("release", e); // best effort: the reservation expires on its own
+            support.warnRedis("release", e); // best effort: the reservation expires on its own
         }
     }
 
@@ -343,13 +347,13 @@ public class SpendCapService implements HostedSpendListener {
         BigDecimal reserve = reserveUsdPerCall;
         if (costUsd == null || costUsd.signum() <= 0) {
             if (reserve.signum() > 0) {
-                configForSchema(tenantSchema)
+                support.configForSchema(tenantSchema)
                         .filter(c -> c.capUsd() != null)
                         .ifPresent(c -> releaseInFlight(c, reserve));
             }
             return;
         }
-        TenantCap cap = configForSchema(tenantSchema).orElse(null);
+        TenantCap cap = support.configForSchema(tenantSchema).orElse(null);
         if (cap == null || cap.capUsd() == null) {
             return; // nothing to enforce; a cap set later seeds from the database
         }
@@ -364,12 +368,12 @@ public class SpendCapService implements HostedSpendListener {
                 String value = r.execute(INCR_IF_EXISTS, List.of(key), costUsd.toPlainString());
                 after = value == null ? null : new BigDecimal(value);
             } catch (RuntimeException e) {
-                warnRedis("increment", e);
+                support.warnRedis("increment", e);
             }
         }
         if (after == null) {
             // Key absent or Redis down: the fallback figure is stale by at most this call.
-            dbFallback.remove(fallbackKey(cap.tenantId()));
+            dbFallback.remove(support.fallbackKey(cap.tenantId()));
             return;
         }
         evaluateAlertsAsync(cap, after);
@@ -379,13 +383,13 @@ public class SpendCapService implements HostedSpendListener {
 
     /** Current state for the platform and tenant endpoints. Fresh config read (no cache). */
     public Optional<CapStatus> status(UUID tenantId) {
-        Optional<TenantCap> cap = loadById(tenantId);
-        return cap.map(c -> statusOf(c, monthToDate(c)));
+        Optional<TenantCap> cap = support.loadById(tenantId);
+        return cap.map(c -> support.statusOf(c, monthToDate(c)));
     }
 
     /** Tenant-facing variant keyed by the caller's schema. */
     public Optional<CapStatus> statusForSchema(String tenantSchema) {
-        return loadBySchema(tenantSchema).map(c -> statusOf(c, monthToDate(c)));
+        return support.loadBySchema(tenantSchema).map(c -> support.statusOf(c, monthToDate(c)));
     }
 
     /**
@@ -397,14 +401,14 @@ public class SpendCapService implements HostedSpendListener {
      */
     public Optional<CapStatus> updateCap(UUID tenantId, BigDecimal capUsd) {
         BigDecimal normalized = validateCap(capUsd);
-        Optional<TenantCap> before = loadById(tenantId);
+        Optional<TenantCap> before = support.loadById(tenantId);
         if (before.isEmpty()) {
             return Optional.empty();
         }
         jdbc.update(SQL_SET_CAP, normalized, tenantId);
         configBySchema.remove(before.get().schema());
-        dbFallback.remove(fallbackKey(tenantId));
-        TenantCap after = loadById(tenantId).orElseThrow();
+        dbFallback.remove(support.fallbackKey(tenantId));
+        TenantCap after = support.loadById(tenantId).orElseThrow();
         BigDecimal mtd = monthToDate(after);
         if (after.capUsd() != null && mtd != null) {
             int claimed = claimStage(after, mtd);
@@ -419,19 +423,19 @@ public class SpendCapService implements HostedSpendListener {
                                 monthStart());
             }
         }
-        return Optional.of(statusOf(after, mtd));
+        return Optional.of(support.statusOf(after, mtd));
     }
 
     /** Roster columns for every capped tenant (others are absent = no cap). */
     public Map<UUID, RosterCap> rosterCaps() {
         Map<UUID, RosterCap> out = new HashMap<>();
-        for (TenantCap cap : jdbc.query(SQL_ALL_CAPPED, (rs, n) -> map(rs))) {
+        for (TenantCap cap : jdbc.query(SQL_ALL_CAPPED, (rs, n) -> SpendCapSupport.map(rs))) {
             BigDecimal mtd = monthToDate(cap);
             out.put(
                     cap.tenantId(),
                     new RosterCap(
                             cap.capUsd(),
-                            mtd == null ? null : scale(mtd),
+                            mtd == null ? null : SpendCapSupport.scale(mtd),
                             mtd == null ? null : mtd.compareTo(cap.capUsd()) >= 0));
         }
         return out;
@@ -473,10 +477,10 @@ public class SpendCapService implements HostedSpendListener {
                 }
                 return seeded;
             } catch (RuntimeException e) {
-                warnRedis("read", e);
+                support.warnRedis("read", e);
             }
         }
-        String fk = fallbackKey(cap.tenantId());
+        String fk = support.fallbackKey(cap.tenantId());
         Cached<BigDecimal> cached = dbFallback.get(fk);
         if (cached != null && fresh(cached, DB_FALLBACK_TTL)) {
             return cached.value();
@@ -560,7 +564,7 @@ public class SpendCapService implements HostedSpendListener {
         }
         log.info(
                 "Tenant {} crossed {}% of its monthly hosted spend cap (${} of ${})",
-                cap.tenantId(), stage, scale(mtd), cap.capUsd());
+                cap.tenantId(), stage, SpendCapSupport.scale(mtd), cap.capUsd());
         SpendCapAlertSink.Alert alert =
                 new SpendCapAlertSink.Alert(
                         cap.tenantId(),
@@ -568,7 +572,7 @@ public class SpendCapService implements HostedSpendListener {
                         cap.name(),
                         stage,
                         cap.capUsd(),
-                        scale(mtd),
+                        SpendCapSupport.scale(mtd),
                         month);
         alertSinks
                 .orderedStream()
@@ -597,87 +601,17 @@ public class SpendCapService implements HostedSpendListener {
         return mtd.compareTo(capUsd.multiply(EIGHTY_PERCENT)) >= 0 ? 80 : 0;
     }
 
-    private int effectiveStage(TenantCap cap) {
+    int effectiveStage(TenantCap cap) {
         return monthStart().equals(cap.alertMonth()) ? cap.alertStage() : 0;
     }
 
     // ------------------------------------------------------------------ helpers
 
-    private CapStatus statusOf(TenantCap cap, BigDecimal mtd) {
-        BigDecimal shown = mtd == null ? null : scale(mtd);
-        BigDecimal percent =
-                cap.capUsd() == null || mtd == null
-                        ? null
-                        : mtd.multiply(BigDecimal.valueOf(100))
-                                .divide(cap.capUsd(), 1, RoundingMode.HALF_UP);
-        boolean blocked = cap.capUsd() != null && mtd != null && mtd.compareTo(cap.capUsd()) >= 0;
-        return new CapStatus(
-                cap.tenantId(),
-                cap.capUsd(),
-                shown,
-                percent,
-                effectiveStage(cap),
-                blocked,
-                monthStart());
-    }
-
-    Optional<TenantCap> configForSchema(String schema) {
-        return configForSchema(schema, false);
-    }
-
-    /**
-     * @param gate true on the pre-call gate: fail-mode closed then refuses instead of treating the
-     *     tenant as uncapped.
-     */
-    Optional<TenantCap> configForSchema(String schema, boolean gate) {
-        Cached<Optional<TenantCap>> cached = configBySchema.get(schema);
-        if (cached != null && fresh(cached, CONFIG_TTL)) {
-            return cached.value();
-        }
-        Optional<TenantCap> loaded;
-        try {
-            loaded = loadBySchema(schema);
-        } catch (RuntimeException e) {
-            if (gate) {
-                failMode.onGateFailure("spend-cap-config", e, log);
-            }
-            log.error(
-                    "Spend-cap config lookup failed for tenant schema '{}' - treating as uncapped (fail open)",
-                    schema,
-                    e);
-            return Optional.empty();
-        }
-        if (configBySchema.size() > 50_000) {
-            configBySchema.clear();
-        }
-        configBySchema.put(schema, new Cached<>(loaded, clock.instant()));
-        return loaded;
-    }
-
-    private Optional<TenantCap> loadBySchema(String schema) {
-        return jdbc.query(SQL_BY_SCHEMA, (rs, n) -> map(rs), schema).stream().findFirst();
-    }
-
-    private Optional<TenantCap> loadById(UUID tenantId) {
-        return jdbc.query(SQL_BY_ID, (rs, n) -> map(rs), tenantId).stream().findFirst();
-    }
-
-    private static TenantCap map(java.sql.ResultSet rs) throws java.sql.SQLException {
-        Date month = rs.getDate("spend_cap_alert_month");
-        return new TenantCap(
-                rs.getObject("id", UUID.class),
-                rs.getString("schema_name"),
-                rs.getString("name"),
-                rs.getBigDecimal("spend_cap_usd"),
-                rs.getInt("spend_cap_alert_stage"),
-                month == null ? null : month.toLocalDate());
-    }
-
-    private boolean fresh(Cached<?> cached, Duration ttl) {
+    boolean fresh(Cached<?> cached, Duration ttl) {
         return cached.loadedAt().plus(ttl).isAfter(clock.instant());
     }
 
-    private YearMonth currentMonth() {
+    YearMonth currentMonth() {
         return YearMonth.now(clock.withZone(ZoneOffset.UTC));
     }
 
@@ -693,27 +627,7 @@ public class SpendCapService implements HostedSpendListener {
         return KEY_PREFIX + tenantId + ":" + month;
     }
 
-    private String fallbackKey(UUID tenantId) {
-        return tenantId + ":" + currentMonth();
-    }
-
-    private static BigDecimal scale(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_UP);
-    }
-
-    private void warnRedis(String op, RuntimeException e) {
-        long now = clock.millis();
-        long last = lastRedisWarnMs.get();
-        if (now - last >= WARN_INTERVAL_MS && lastRedisWarnMs.compareAndSet(last, now)) {
-            log.warn(
-                    "Spend-cap Redis {} failed ({}) - using the database figure (cached {}s)",
-                    op,
-                    e.getClass().getSimpleName(),
-                    DB_FALLBACK_TTL.toSeconds());
-        }
-    }
-
-    private static <T> T asTenant(String schema, Supplier<T> work) {
+    static <T> T asTenant(String schema, Supplier<T> work) {
         Optional<TenantContext> previous = TenantContext.current();
         try {
             TenantContext.set(TenantContext.of(schema, SYSTEM_ACTOR, Set.of()));
@@ -725,21 +639,5 @@ public class SpendCapService implements HostedSpendListener {
                 TenantContext.clear();
             }
         }
-    }
-
-    private static Executor boundedAlertExecutor() {
-        return TenantAwareExecutors.newThreadPool(
-                1,
-                1,
-                0L,
-                TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(200),
-                TenantAwareExecutors.threadFactory("spend-cap-alerts", true),
-                new ThreadPoolExecutor.AbortPolicy());
-    }
-
-    /** Test seam: visible snapshot of the config cache size. */
-    int cachedConfigCount() {
-        return new ArrayList<>(configBySchema.keySet()).size();
     }
 }

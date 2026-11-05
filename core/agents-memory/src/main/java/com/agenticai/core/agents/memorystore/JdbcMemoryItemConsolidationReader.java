@@ -57,7 +57,7 @@ public class JdbcMemoryItemConsolidationReader implements MemoryItemConsolidatio
                             java.sql.Timestamp used = rs.getTimestamp("last_used_at");
                             Instant lastUsed = used == null ? null : used.toInstant();
                             return new Row(
-                                    JdbcMemoryItemStorage.map(rs),
+                                    MemoryItemRows.map(rs),
                                     rs.getDouble("importance"),
                                     rs.getBoolean("pinned"),
                                     rs.getInt("use_count"),

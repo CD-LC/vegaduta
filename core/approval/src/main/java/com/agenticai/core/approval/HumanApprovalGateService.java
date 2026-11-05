@@ -4,7 +4,6 @@ import com.agenticai.core.rl.feedback.FeedbackService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.Instant;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,25 +49,25 @@ public class HumanApprovalGateService {
     private static final Logger log = LoggerFactory.getLogger(HumanApprovalGateService.class);
 
     private final ApprovalPolicyService policyService;
-    private final ApprovalRequestRepository requestRepository;
-    private final ApprovalActionExecutorRegistry executorRegistry;
-    private final ApprovalRequestRecorder recorder;
+    final ApprovalRequestRepository requestRepository;
+    final ApprovalActionExecutorRegistry executorRegistry;
+    final ApprovalRequestRecorder recorder;
     private final FeedbackService feedbackService;
     private final ObjectMapper objectMapper;
 
     // Autonomy/Guardrails Strategy Stage C retry-with-backoff config - see
     // application.yml's app.approvals.retry.* block for the tunable
     // defaults and their rationale.
-    private final int maxRetryAttempts;
-    private final long baseDelaySeconds;
-    private final long maxDelaySeconds;
+    final int maxRetryAttempts;
+    final long baseDelaySeconds;
+    final long maxDelaySeconds;
 
     /**
      * Where the end of every approval is reported so the conversation that asked for the action can
      * carry on (see {@link ApprovalOutcomePort}). Absent in a context without the turn path: the
      * decision then only runs (or refuses) the action, as before.
      */
-    private volatile ApprovalOutcomePort outcomePort;
+    volatile ApprovalOutcomePort outcomePort;
 
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setOutcomePort(ApprovalOutcomePort outcomePort) {
@@ -183,7 +182,7 @@ public class HumanApprovalGateService {
     }
 
     public ApprovalRequest approve(UUID requestId, String decidedBy) {
-        ApprovalRequest request = getPendingOrThrow(requestId);
+        ApprovalRequest request = retrySupport.getPendingOrThrow(requestId);
         request = recorder.recordApproved(request, decidedBy);
         recordRlFeedback(request, true);
         runIfExecutorRegistered(request, decidedBy);
@@ -203,7 +202,7 @@ public class HumanApprovalGateService {
         if (formValues == null || formValues.isEmpty()) {
             return approve(requestId, decidedBy);
         }
-        ApprovalRequest request = getPendingOrThrow(requestId);
+        ApprovalRequest request = retrySupport.getPendingOrThrow(requestId);
         // The merge happens INSIDE the recorder's row-locked transaction, together with the status
         // transition: merging before the lock let a request decided in that window have its payload
         // changed after the fact.
@@ -250,7 +249,7 @@ public class HumanApprovalGateService {
     }
 
     public ApprovalRequest reject(UUID requestId, String decidedBy, String reason) {
-        ApprovalRequest request = getPendingOrThrow(requestId);
+        ApprovalRequest request = retrySupport.getPendingOrThrow(requestId);
         request = recorder.recordRejected(request, decidedBy, reason);
         recordRlFeedback(request, false);
         notifyExecutorOfRejection(request, decidedBy, reason);
@@ -267,7 +266,7 @@ public class HumanApprovalGateService {
      * the request was decided first.
      */
     public ApprovalRequest expire(UUID requestId, String reason) {
-        ApprovalRequest request = getPendingOrThrow(requestId);
+        ApprovalRequest request = retrySupport.getPendingOrThrow(requestId);
         request = recorder.recordExpired(request, reason);
         notifyExecutorOfRejection(request, ApprovalRequest.EXPIRY_ACTOR, reason);
         return request;
@@ -296,7 +295,7 @@ public class HumanApprovalGateService {
                                         request.getActionType(),
                                         e.getMessage());
                             }
-                            reportOutcome(
+                            retrySupport.reportOutcome(
                                     executor, request, ApprovalOutcomePort.Outcome.DENIED, reason);
                         });
     }
@@ -552,11 +551,11 @@ public class HumanApprovalGateService {
         try {
             executor.execute(request);
         } catch (RuntimeException e) {
-            recordFailureAndMaybeScheduleRetry(request, e, decidedBy);
+            retrySupport.recordFailureAndMaybeScheduleRetry(request, e, decidedBy);
             throw e;
         }
         recorder.recordExecutionFinished(request);
-        reportOutcome(
+        retrySupport.reportOutcome(
                 executor,
                 request,
                 ApprovalOutcomePort.Outcome.COMPLETED,
@@ -601,7 +600,7 @@ public class HumanApprovalGateService {
         if (!recorder.recordNeverRan(request, reason)) {
             return false;
         }
-        reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
+        retrySupport.reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
         return true;
     }
 
@@ -615,7 +614,7 @@ public class HumanApprovalGateService {
         if (!recorder.recordInterrupted(request, reason)) {
             return false;
         }
-        reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
+        retrySupport.reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, reason);
         return true;
     }
 
@@ -625,117 +624,13 @@ public class HumanApprovalGateService {
      * decision and the action already took effect, so nothing thrown here may change either. A
      * request that did not come from an agent turn is ignored by the port.
      */
-    private void reportOutcome(
-            ApprovalActionExecutor executor,
-            ApprovalRequest request,
-            ApprovalOutcomePort.Outcome outcome,
-            String text) {
-        ApprovalOutcomePort port = outcomePort;
-        if (port == null || executor.reportsOutcomeItself()) {
-            return;
-        }
-        try {
-            port.afterDecision(request, outcome, text);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Could not report the {} outcome of approval request {} (action type '{}') to its conversation: {}",
-                    outcome,
-                    request.getId(),
-                    request.getActionType(),
-                    e.getMessage());
-        }
-    }
-
-    private void reportOutcome(
-            ApprovalRequest request, ApprovalOutcomePort.Outcome outcome, String text) {
-        executorRegistry
-                .find(request.getActionType())
-                .ifPresent(executor -> reportOutcome(executor, request, outcome, text));
-    }
-
     /**
-     * Autonomy/Guardrails Strategy Stage C - called only by {@code RetryFailedActionsJob} (via
-     * {@code TenantSchemaIterator}, so {@code TenantContext} is already correctly set for this
-     * request's tenant before this method runs), never by a live synchronous caller. Unlike {@link
-     * #runExecutor}, this deliberately does NOT rethrow - a scheduled job has no HTTP caller
-     * waiting to see a 5xx, and letting one request's exception propagate would abort the whole
-     * batch for every other tenant/request {@code RetryFailedActionsJob} still needs to process.
+     * Autonomy/Guardrails Strategy Stage C - called only by {@code RetryFailedActionsJob}; see
+     * {@link HumanApprovalGateRetry#retryExecution}.
      */
     public void retryExecution(ApprovalRequest request) {
-        ApprovalActionExecutor executor =
-                executorRegistry.find(request.getActionType()).orElse(null);
-        if (executor == null) {
-            log.warn(
-                    "Action type '{}' has no registered executor - retry for request {} abandoned",
-                    request.getActionType(),
-                    request.getId());
-            recorder.recordNoExecutorRegistered(request, ApprovalRequestRecorder.RETRY_JOB_ACTOR);
-            return;
-        }
-        try {
-            executor.execute(request);
-            recorder.recordRetrySucceeded(request);
-            reportOutcome(
-                    executor,
-                    request,
-                    ApprovalOutcomePort.Outcome.COMPLETED,
-                    request.getExecutionResult());
-        } catch (RuntimeException e) {
-            recordFailureAndMaybeScheduleRetry(request, e, ApprovalRequestRecorder.RETRY_JOB_ACTOR);
-        }
+        retrySupport.retryExecution(request);
     }
 
-    /**
-     * Branches a failed {@link ApprovalActionExecutor#execute} call three ways: retryable and under
-     * the attempt cap schedules another try with exponential backoff; retryable but exhausted
-     * dead-letters the request (terminal - {@code RetryFailedActionsJob} never revisits a
-     * dead-lettered row); anything else (the pre-Stage-C behavior) fails permanently on the first
-     * attempt, unchanged.
-     */
-    private void recordFailureAndMaybeScheduleRetry(
-            ApprovalRequest request, RuntimeException e, String decidedBy) {
-        if (!(e instanceof RetryableActionFailure)) {
-            recorder.recordExecutionFailed(request, decidedBy, e.getMessage());
-            reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, failureText(e));
-            return;
-        }
-        if (request.getRetryCount() >= maxRetryAttempts) {
-            recorder.recordDeadLettered(request, e.getMessage());
-            // The last attempt failed: the call is over, which is what the conversation should
-            // hear. A
-            // failure that will be retried is not the end of the call and is not reported.
-            reportOutcome(request, ApprovalOutcomePort.Outcome.FAILED, failureText(e));
-            return;
-        }
-        Instant nextRetryAt =
-                Instant.now().plusSeconds(backoffDelaySeconds(request.getRetryCount() + 1));
-        recorder.recordRetryScheduled(request, e.getMessage(), nextRetryAt);
-    }
-
-    /**
-     * Exponential backoff, capped at {@link #maxDelaySeconds}: attempt 1 -> {@code
-     * baseDelaySeconds}, attempt 2 -> {@code baseDelaySeconds * 2}, attempt 3 -> {@code * 4}, and
-     * so on. The shift is capped at 20 purely to keep the intermediate {@code long} from ever
-     * overflowing before the {@code Math.min} clamp runs - {@code maxDelaySeconds} is what actually
-     * bounds the real delay in practice.
-     */
-    private long backoffDelaySeconds(int attemptNumber) {
-        long delay = baseDelaySeconds * (1L << Math.min(attemptNumber - 1, 20));
-        return Math.min(delay, maxDelaySeconds);
-    }
-
-    private static String failureText(RuntimeException e) {
-        return e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-    }
-
-    private ApprovalRequest getPendingOrThrow(UUID id) {
-        ApprovalRequest request =
-                requestRepository
-                        .findById(id)
-                        .orElseThrow(() -> new ApprovalRequestNotFoundException(id));
-        if (request.getStatus() != ApprovalStatus.PENDING) {
-            throw new ApprovalRequestAlreadyDecidedException(id, request.getStatus());
-        }
-        return request;
-    }
+    private final HumanApprovalGateRetry retrySupport = new HumanApprovalGateRetry(this);
 }

@@ -13,7 +13,6 @@ import jakarta.persistence.EntityManagerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -63,15 +62,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 class ApprovalRecoveryIT {
 
     private static final String DATABASE = "approval_recovery_it";
-    private static final String SCHEMA = "tenant_it_approval_rec";
+    static final String SCHEMA = "tenant_it_approval_rec";
 
     private static DataSource dataSource;
-    private static JdbcTemplate jdbc;
+    static JdbcTemplate jdbc;
     private static TransactionTemplate tx;
     private static EntityManagerFactory emf;
     private static ApprovalRequestRepository repo;
     private static Object recorder;
-
     private static final List<UUID> BACKFILL_IDS = new ArrayList<>();
     private static UUID backfillPending;
     private static UUID backfillApproved;
@@ -114,7 +112,9 @@ class ApprovalRecoveryIT {
                         .target(MigrationVersion.fromVersion("673"))
                         .load();
         before.migrate();
-        assertThat(columnExists("execution_started_at")).as("column before V675").isFalse();
+        assertThat(ApprovalRecoveryFixtures.columnExists("execution_started_at"))
+                .as("column before V675")
+                .isFalse();
 
         backfillCreatedAt =
                 Instant.now()
@@ -129,22 +129,24 @@ class ApprovalRecoveryIT {
 
         // Apply V675 (and anything after it) on the populated schema.
         PlatformMigrations.strictTenantFlyway(dataSource, SCHEMA).migrate();
-        assertThat(columnExists("execution_started_at")).isTrue();
-        assertThat(columnExists("execution_completed_at")).isTrue();
+        assertThat(ApprovalRecoveryFixtures.columnExists("execution_started_at")).isTrue();
+        assertThat(ApprovalRecoveryFixtures.columnExists("execution_completed_at")).isTrue();
 
-        assertThat(completedAt(backfillApproved))
+        assertThat(ApprovalRecoveryFixtures.completedAt(backfillApproved))
                 .as("approved legacy row")
                 .isEqualTo(backfillDecidedAt);
-        assertThat(completedAt(backfillRejected))
+        assertThat(ApprovalRecoveryFixtures.completedAt(backfillRejected))
                 .as("rejected legacy row")
                 .isEqualTo(backfillDecidedAt);
-        assertThat(completedAt(backfillFailed))
+        assertThat(ApprovalRecoveryFixtures.completedAt(backfillFailed))
                 .as("failed legacy row")
                 .isEqualTo(backfillDecidedAt);
-        assertThat(completedAt(backfillApprovedNoDecidedAt))
+        assertThat(ApprovalRecoveryFixtures.completedAt(backfillApprovedNoDecidedAt))
                 .as("no decided_at: falls back to created_at")
                 .isEqualTo(backfillCreatedAt);
-        assertThat(completedAt(backfillPending)).as("PENDING stays untouched").isNull();
+        assertThat(ApprovalRecoveryFixtures.completedAt(backfillPending))
+                .as("PENDING stays untouched")
+                .isNull();
         assertThat(
                         jdbc.queryForObject(
                                 "SELECT count(*) FROM approval_request WHERE execution_started_at IS NOT NULL",
@@ -334,7 +336,7 @@ class ApprovalRecoveryIT {
                                             () -> {
                                                 boolean won = claim(firstCopy);
                                                 firstHoldsLock.countDown();
-                                                await(releaseFirst);
+                                                ApprovalRecoveryFixtures.await(releaseFirst);
                                                 return won;
                                             }));
             assertThat(firstHoldsLock.await(10, TimeUnit.SECONDS)).isTrue();
@@ -486,7 +488,7 @@ class ApprovalRecoveryIT {
                                             () -> {
                                                 boolean won = interrupted(sweepCopy, "sweep");
                                                 holds.countDown();
-                                                await(release);
+                                                ApprovalRecoveryFixtures.await(release);
                                                 return won;
                                             }));
             assertThat(holds.await(10, TimeUnit.SECONDS)).isTrue();
@@ -613,17 +615,6 @@ class ApprovalRecoveryIT {
         return tx.execute(status -> body.get());
     }
 
-    private static void await(CountDownLatch latch) {
-        try {
-            if (!latch.await(30, TimeUnit.SECONDS)) {
-                throw new IllegalStateException("latch timeout");
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    /** A fresh, detached copy as the database holds it now. */
     private static ApprovalRequest load(UUID id) {
         return repo.findById(id).orElseThrow();
     }
@@ -648,15 +639,11 @@ class ApprovalRecoveryIT {
                 "UPDATE approval_request SET status = ?, decided_at = ?, execution_started_at = ?,"
                         + " execution_completed_at = ? WHERE id = ?",
                 status.name(),
-                ts(decidedAt),
-                ts(startedAt),
-                ts(completedAt),
+                ApprovalRecoveryFixtures.ts(decidedAt),
+                ApprovalRecoveryFixtures.ts(startedAt),
+                ApprovalRecoveryFixtures.ts(completedAt),
                 id);
         return id;
-    }
-
-    private static Timestamp ts(Instant i) {
-        return i == null ? null : Timestamp.from(i);
     }
 
     private static UUID insertLegacy(String status, Instant decidedAt) {
@@ -666,28 +653,8 @@ class ApprovalRecoveryIT {
                         + " decided_at, retry_count) VALUES (?, 'it.legacy', 'legacy', '{}', ?, 'it-user', ?, ?, 0)",
                 id,
                 status,
-                ts(backfillCreatedAt),
-                ts(decidedAt));
+                ApprovalRecoveryFixtures.ts(backfillCreatedAt),
+                ApprovalRecoveryFixtures.ts(decidedAt));
         return id;
-    }
-
-    private static Instant completedAt(UUID id) {
-        Timestamp t =
-                jdbc.queryForObject(
-                        "SELECT execution_completed_at FROM approval_request WHERE id = ?",
-                        Timestamp.class,
-                        id);
-        return t == null ? null : t.toInstant();
-    }
-
-    private static boolean columnExists(String column) {
-        Integer n =
-                jdbc.queryForObject(
-                        "SELECT count(*) FROM information_schema.columns WHERE table_schema = ? AND table_name = 'approval_request'"
-                                + " AND column_name = ?",
-                        Integer.class,
-                        SCHEMA,
-                        column);
-        return n != null && n == 1;
     }
 }
