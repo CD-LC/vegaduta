@@ -81,6 +81,29 @@ public interface MemoryItemStorage {
      */
     List<UUID> eraseTree(UUID agentId, UUID itemId, MemoryActor actor, Instant at);
 
+    /**
+     * Subject erasure (DPDP, ADR-0028 section 12): runs {@link #eraseTree} for every item whose
+     * {@code subject_keys} name {@code subjectKey}, across all of the tenant's agents and every status, until none is
+     * left. Each tree (the item, everything derived from it, their lineage and history) goes in one unit of work and
+     * leaves one content-free ERASED tombstone event per id. Works with every feature flag off. Returns the erased ids.
+     */
+    default List<UUID> eraseSubject(String subjectKey, MemoryActor actor, Instant at) {
+        List<UUID> erased = new java.util.ArrayList<>();
+        if (subjectKey == null || subjectKey.isBlank()) {
+            return erased;
+        }
+        while (true) {
+            List<MemoryItem> batch = listForSubject(subjectKey, 500);
+            int before = erased.size();
+            for (MemoryItem item : batch) {
+                erased.addAll(eraseTree(item.agentId(), item.id(), actor, at));
+            }
+            if (batch.isEmpty() || erased.size() == before) {
+                return erased;
+            }
+        }
+    }
+
     /** Appends an event that is not tied to a row change (a refused proposal). */
     void appendEvent(MemoryEvent event);
 

@@ -91,6 +91,16 @@ final class ExternalPostgres {
         return dataSourceFor(name, schema);
     }
 
+    /**
+     * A fresh, empty database with pgvector and AGE installed and NO schema on the search path, for a full
+     * application boot (Flyway creates the control plane and the tenant schemas itself). Returns its data source so the
+     * caller can hand the URL and credentials to Spring.
+     */
+    static DriverManagerDataSource bootDatabase(String name) {
+        freshDatabase(name, "public");
+        return dataSourceFor(name, null);
+    }
+
     static DriverManagerDataSource dataSourceFor(String database, String schemaOrNull) {
         String url = baseUrl();
         int slash = url.indexOf('/', "jdbc:postgresql://".length());

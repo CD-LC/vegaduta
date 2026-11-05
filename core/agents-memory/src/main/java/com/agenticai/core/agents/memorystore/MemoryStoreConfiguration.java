@@ -96,6 +96,12 @@ class MemoryStoreConfiguration {
         return new JdbcMemoryItemStorage(jdbc);
     }
 
+    /** Subject erasure over the store; never flag-gated (erasure works with the feature off). */
+    @Bean
+    MemoryItemErasure memoryItemErasure(ObjectProvider<MemoryItemStorage> storage) {
+        return new MemoryItemErasure(storage);
+    }
+
     @Bean
     MemoryContentScreen basicMemoryContentScreen(MemoryUnifiedProperties properties) {
         return new BasicMemoryContentScreen(properties);
