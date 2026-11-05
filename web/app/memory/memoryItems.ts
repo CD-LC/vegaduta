@@ -46,7 +46,9 @@ export function isActive(item: Pick<MemoryItem, "status">): boolean {
 }
 
 /** Kinds the API documents today; a forward-compatible labelKey() covers anything newer. */
-export const ITEM_KINDS = ["EPISODIC", "SEMANTIC", "PROCEDURAL", "SELF_MODEL"] as const;
+// SEMANTIC is intentionally absent: the memory-items API 400s on it
+// (semantic items live on the agent-memory endpoints, not this surface).
+export const ITEM_KINDS = ["EPISODIC", "PROCEDURAL", "SELF_MODEL"] as const;
 
 /** `labelKey("kind", "SELF_MODEL")` -> "kind_SELF_MODEL"; a missing value maps to the `kind_other` fallback key. */
 export function labelKey(prefix: string, value: string | null | undefined): string {
