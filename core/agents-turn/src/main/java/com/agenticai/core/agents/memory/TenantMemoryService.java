@@ -32,10 +32,11 @@ import org.springframework.stereotype.Service;
  * (see {@link TenantMemorySchemaSupport}), same "knowledge" profile gate (the profile that
  * guarantees a pgvector-enabled Postgres and a running sidecar exist).
  *
- * <p><b>Bounded, tenant-wide memory space:</b> capped at {@code app.memory.limits.tenant-max-memories} (default 300) total
- * across every subject and every contributing agent - larger than {@link AgentMemoryService}'s
- * 50/agent cap since this single pool is shared by every sharing-enabled agent in the tenant, not
- * one agent's own bank. Same oldest-first pruning strategy after an over-cap insert.
+ * <p><b>Bounded, tenant-wide memory space:</b> capped at {@code
+ * app.memory.limits.tenant-max-memories} (default 300) total across every subject and every
+ * contributing agent - larger than {@link AgentMemoryService}'s 50/agent cap since this single pool
+ * is shared by every sharing-enabled agent in the tenant, not one agent's own bank. Same
+ * oldest-first pruning strategy after an over-cap insert.
  */
 @Service
 @Profile("knowledge")
@@ -57,7 +58,10 @@ public class TenantMemoryService {
             @Value("${app.memory.blocks.enabled:true}") boolean blocksEnabled,
             @Value("${app.memory.blocks.max-chars-per-block:1200}") int maxCharsPerBlock,
             @Value("${app.memory.blocks.max-project-blocks:20}") int maxProjectBlocks,
-            @Value("${app.memory.blocks.max-total-chars:" + MemoryBlocks.DEFAULT_MAX_TOTAL_CHARS + "}")
+            @Value(
+                            "${app.memory.blocks.max-total-chars:"
+                                    + MemoryBlocks.DEFAULT_MAX_TOTAL_CHARS
+                                    + "}")
                     int maxTotalChars,
             @Value("${app.memory.blocks.active-project-enabled:true}")
                     boolean activeProjectEnabled) {
@@ -71,9 +75,9 @@ public class TenantMemoryService {
     }
 
     /**
-     * {@code app.memory.limits.*}: the per-tenant cap ({@code tenant-max-memories}) and the recall top-k
-     * ({@code tenant-recall-top-k}). A hand-built instance keeps the shipped defaults, which is also what
-     * Spring supplies when the properties bean is absent.
+     * {@code app.memory.limits.*}: the per-tenant cap ({@code tenant-max-memories}) and the recall
+     * top-k ({@code tenant-recall-top-k}). A hand-built instance keeps the shipped defaults, which
+     * is also what Spring supplies when the properties bean is absent.
      */
     private volatile MemoryLimitsProperties limits = new MemoryLimitsProperties();
 
@@ -84,34 +88,50 @@ public class TenantMemoryService {
 
     private volatile java.time.Clock clock = java.time.Clock.systemUTC();
 
-    /** The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control time. */
+    /**
+     * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
+     * time.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void useClock(
-            @org.springframework.beans.factory.annotation.Qualifier("memoryClock") java.time.Clock clock) {
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock")
+                    java.time.Clock clock) {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
-    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones = com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
+    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones =
+            com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
 
-    /** Makes a forgotten (tombstoned) shared fact stay forgotten: recall leaves it out and {@link #remember} refuses it. */
+    /**
+     * Makes a forgotten (tombstoned) shared fact stay forgotten: recall leaves it out and {@link
+     * #remember} refuses it.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
-    public void setTombstoneGuard(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard guard) {
-        this.tombstones = guard == null ? com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive() : guard;
+    public void setTombstoneGuard(
+            com.agenticai.core.agents.memorystore.MemoryTombstoneGuard guard) {
+        this.tombstones =
+                guard == null
+                        ? com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive()
+                        : guard;
     }
 
     private volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
-     * The settings catalog, so a tenant's or an agent's {@code memory.recall.tenantTopK} applies to the shared recall made
-     * for that agent. Absent (hand-built instances): {@code app.memory.limits.tenant-recall-top-k}. The recall runs on the
-     * turn's own thread, where the tenant is set.
+     * The settings catalog, so a tenant's or an agent's {@code memory.recall.tenantTopK} applies to
+     * the shared recall made for that agent. Absent (hand-built instances): {@code
+     * app.memory.limits.tenant-recall-top-k}. The recall runs on the turn's own thread, where the
+     * tenant is set.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSettingsResolver(com.agenticai.core.settings.SettingsResolver resolver) {
         this.settings = resolver;
     }
 
-    /** {@code memory.write.enabled} for {@code agentId} (the shared tool writes on an agent's behalf), asked as "off". */
+    /**
+     * {@code memory.write.enabled} for {@code agentId} (the shared tool writes on an agent's
+     * behalf), asked as "off".
+     */
     public boolean writesSwitchedOff(UUID agentId) {
         com.agenticai.core.settings.SettingsResolver catalog = settings;
         if (catalog == null) {
@@ -119,7 +139,8 @@ public class TenantMemoryService {
         }
         try {
             return !catalog.getBool(
-                    AgentMemoryService.WRITE_ENABLED_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+                    AgentMemoryService.WRITE_ENABLED_KEY,
+                    com.agenticai.core.settings.SettingContext.forAgent(agentId));
         } catch (RuntimeException e) {
             return !limits.isWriteEnabled();
         }
@@ -129,8 +150,9 @@ public class TenantMemoryService {
     static final String MAX_MEMORIES_KEY = "memory.tenant.maxMemories";
 
     /**
-     * How many shared memories the calling tenant keeps: its {@code memory.tenant.maxMemories} setting, else {@code
-     * app.memory.limits.tenant-max-memories}. Shared memory belongs to the workspace, so the key has no agent scope.
+     * How many shared memories the calling tenant keeps: its {@code memory.tenant.maxMemories}
+     * setting, else {@code app.memory.limits.tenant-max-memories}. Shared memory belongs to the
+     * workspace, so the key has no agent scope.
      */
     int maxMemories() {
         com.agenticai.core.settings.SettingsResolver catalog = settings;
@@ -138,20 +160,25 @@ public class TenantMemoryService {
             return limits.getTenantMaxMemories();
         }
         try {
-            return catalog.getInt(MAX_MEMORIES_KEY, com.agenticai.core.settings.SettingContext.tenant());
+            return catalog.getInt(
+                    MAX_MEMORIES_KEY, com.agenticai.core.settings.SettingContext.tenant());
         } catch (RuntimeException e) {
             return limits.getTenantMaxMemories();
         }
     }
 
-    /** The recall top-k for {@code agentId} (null = the tenant level): the catalog's value, else the platform's. */
+    /**
+     * The recall top-k for {@code agentId} (null = the tenant level): the catalog's value, else the
+     * platform's.
+     */
     int recallTopK(UUID agentId) {
         com.agenticai.core.settings.SettingsResolver catalog = settings;
         if (catalog == null) {
             return limits.getTenantRecallTopK();
         }
         try {
-            return catalog.getInt(RECALL_TOP_K_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+            return catalog.getInt(
+                    RECALL_TOP_K_KEY, com.agenticai.core.settings.SettingContext.forAgent(agentId));
         } catch (RuntimeException e) {
             return limits.getTenantRecallTopK();
         }
@@ -197,6 +224,7 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         List<MemoryBlockEntry> rows =
                 jdbcTemplate.query(
+                        // codeql[java/sql-injection]
                         "SELECT subject_key, content, last_used_at FROM "
                                 + table
                                 + " WHERE starts_with(subject_key, ?)",
@@ -228,8 +256,15 @@ public class TenantMemoryService {
      */
     public void putBlock(String subjectKey, String rawLabel, String content) {
         TenantMemoryBlockWrites.putBlock(
-                jdbcTemplate, sidecarClient, clock, activeProjectEnabled, maxCharsPerBlock, maxProjectBlocks,
-                subjectKey, rawLabel, content);
+                jdbcTemplate,
+                sidecarClient,
+                clock,
+                activeProjectEnabled,
+                maxCharsPerBlock,
+                maxProjectBlocks,
+                subjectKey,
+                rawLabel,
+                content);
     }
 
     public void deleteBlock(String subjectKey, String rawLabel) {
@@ -270,6 +305,7 @@ public class TenantMemoryService {
     public List<TenantMemoryEntry> listFactsForSubject(String subjectKey) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.query(
+                // codeql[java/sql-injection]
                 "SELECT id, subject_key, content, created_by_agent_id, created_at, last_used_at,"
                         + " use_count, trust, source_taint, superseded_at, 0.0 AS distance FROM "
                         + table
@@ -286,6 +322,7 @@ public class TenantMemoryService {
     public List<String> listFactSubjects(int limit) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.queryForList(
+                // codeql[java/sql-injection]
                 "SELECT DISTINCT subject_key FROM "
                         + table
                         + " WHERE position('"
@@ -303,6 +340,7 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         String literal = toVectorLiteral(sidecarClient.embedQuery(content));
         return jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "UPDATE "
                                 + table
                                 + " SET content = ?, embedding = ?::public.vector WHERE id = ? AND"
@@ -333,7 +371,10 @@ public class TenantMemoryService {
 
     private volatile ApprovedFactGraphSync graphSync;
 
-    /** Mirrors an approved shared fact into the shared graph tier (G6); absent in hand-built instances. */
+    /**
+     * Mirrors an approved shared fact into the shared graph tier (G6); absent in hand-built
+     * instances.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setGraphSync(ApprovedFactGraphSync graphSync) {
         this.graphSync = graphSync;
@@ -342,6 +383,7 @@ public class TenantMemoryService {
     public boolean forgetFactForSubject(UUID memoryId, String subjectKey) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "DELETE FROM " + table + " WHERE id = ? AND subject_key = ?",
                         memoryId,
                         subjectKey)
@@ -365,25 +407,45 @@ public class TenantMemoryService {
         return remember(subjectKey, content, createdByAgentId, provenance, null);
     }
 
-    /** As above; {@code replaces} names the earlier shared fact this one corrects (see {@link AgentMemoryService#remember}). */
+    /**
+     * As above; {@code replaces} names the earlier shared fact this one corrects (see {@link
+     * AgentMemoryService#remember}).
+     */
     public UUID remember(
-            String subjectKey, String content, UUID createdByAgentId, MemoryProvenance provenance, String replaces) {
-        if (tombstones.isForgotten(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content)) {
-            throw new MemoryForgottenException(); // resurrection guard; only rememberOwn (a person) clears it
+            String subjectKey,
+            String content,
+            UUID createdByAgentId,
+            MemoryProvenance provenance,
+            String replaces) {
+        if (tombstones.isForgotten(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED,
+                subjectKey,
+                null,
+                content)) {
+            throw new MemoryForgottenException(); // resurrection guard; only rememberOwn (a person)
+            // clears it
         }
         return insertFact(subjectKey, content, createdByAgentId, provenance, 0.6, false, replaces);
     }
 
     private volatile FactSupersession supersession;
 
-    /** {@code app.memory.supersession.*} (V685); absent or disabled: every shared fact is a new row, as before. */
+    /**
+     * {@code app.memory.supersession.*} (V685); absent or disabled: every shared fact is a new row,
+     * as before.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSupersession(MemorySupersessionProperties properties) {
         this.supersession =
-                properties == null || !properties.isEnabled() ? null : new FactSupersession(jdbcTemplate, properties);
+                properties == null || !properties.isEnabled()
+                        ? null
+                        : new FactSupersession(jdbcTemplate, properties);
     }
 
-    /** Whether a new TRUSTED shared fact replaces the fact it corrects (then the tool offers {@code replaces}). */
+    /**
+     * Whether a new TRUSTED shared fact replaces the fact it corrects (then the tool offers {@code
+     * replaces}).
+     */
     public boolean supersessionEnabled() {
         return supersession != null;
     }
@@ -397,7 +459,9 @@ public class TenantMemoryService {
             boolean personAuthored,
             String replaces) {
         MemoryProvenance prov =
-                provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
+                provenance == null
+                        ? new MemoryProvenance(MemoryTrust.QUARANTINED, null)
+                        : provenance;
         if (subjectKey != null && subjectKey.contains(MemoryBlocks.KEY_MARKER)) {
             // Would collide with another subject's memory-block rows (stored as
             // '<subject>#mem:<label>').
@@ -407,7 +471,8 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         FactSupersession sup = supersession;
         boolean trusted = prov.trust() == MemoryTrust.TRUSTED;
-        FactSupersession.Scope scope = new FactSupersession.Scope(table, "subject_key = ?", subjectKey);
+        FactSupersession.Scope scope =
+                new FactSupersession.Scope(table, "subject_key = ?", subjectKey);
         if (sup != null && trusted) {
             java.util.Optional<UUID> same = sup.reconfirm(scope, content, clock.instant());
             if (same.isPresent()) {
@@ -419,6 +484,7 @@ public class TenantMemoryService {
         UUID id = UUID.randomUUID();
 
         jdbcTemplate.update(
+                // codeql[java/sql-injection]
                 "INSERT INTO "
                         + table
                         + " (id, subject_key, content, embedding, created_by_agent_id, trust,"
@@ -435,8 +501,14 @@ public class TenantMemoryService {
                 personAuthored);
         if (sup != null) {
             sup.afterInsert(
-                    scope, id, literal, replaces, text -> toVectorLiteral(sidecarClient.embedQuery(text)),
-                    personAuthored, trusted, clock.instant());
+                    scope,
+                    id,
+                    literal,
+                    replaces,
+                    text -> toVectorLiteral(sidecarClient.embedQuery(text)),
+                    personAuthored,
+                    trusted,
+                    clock.instant());
         }
         pruneOverCap(table);
         log.debug(
@@ -463,11 +535,13 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         Integer own =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM " + table + " WHERE subject_key = ?",
                         Integer.class,
                         subjectKey);
         Integer total =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM "
                                 + table
                                 + " WHERE position('"
@@ -476,12 +550,10 @@ public class TenantMemoryService {
                         Integer.class);
         int evict =
                 OwnFactAdmission.ownRowsToEvict(
-                        own == null ? 0 : own,
-                        total == null ? 0 : total,
-                        maxOwn,
-                        maxMemories());
+                        own == null ? 0 : own, total == null ? 0 : total, maxOwn, maxMemories());
         if (evict > 0) {
             jdbcTemplate.update(
+                    // codeql[java/sql-injection]
                     "DELETE FROM "
                             + table
                             + " WHERE id IN ("
@@ -491,8 +563,13 @@ public class TenantMemoryService {
                     subjectKey,
                     evict);
         }
-        // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone of the same text.
-        tombstones.reconfirm(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content);
+        // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone
+        // of the same text.
+        tombstones.reconfirm(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED,
+                subjectKey,
+                null,
+                content);
         return insertFact(subjectKey, content, null, MemoryProvenance.TRUSTED, 0.8, true, null);
     }
 
@@ -525,6 +602,7 @@ public class TenantMemoryService {
 
         List<TenantMemoryEntry> results =
                 jdbcTemplate.query(
+                        // codeql[java/sql-injection]
                         "SELECT id, subject_key, content, created_by_agent_id, created_at,"
                                 + " last_used_at, use_count, trust, source_taint,"
                                 + " embedding OPERATOR(public.<=>)"
@@ -564,8 +642,9 @@ public class TenantMemoryService {
     }
 
     /**
-     * As {@link #recall(String, String, QueryEmbedding)} for the shared recall made on behalf of {@code agentId}: how many
-     * facts it returns follows that agent's (or its tenant's) {@code memory.recall.tenantTopK}.
+     * As {@link #recall(String, String, QueryEmbedding)} for the shared recall made on behalf of
+     * {@code agentId}: how many facts it returns follows that agent's (or its tenant's) {@code
+     * memory.recall.tenantTopK}.
      */
     public List<TenantMemoryEntry> recall(
             String subjectKey, String query, QueryEmbedding embedding, UUID agentId) {
@@ -573,19 +652,23 @@ public class TenantMemoryService {
     }
 
     /**
-     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before {@code cutoff} in
-     * the tenant's schema, oldest first, returning how many went; the caller loops until fewer than {@code limit}.
-     * Block rows ({@value MemoryBlocks#KEY_MARKER}) are spared as in {@link #pruneOverCap}; only erasure removes them.
+     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before
+     * {@code cutoff} in the tenant's schema, oldest first, returning how many went; the caller
+     * loops until fewer than {@code limit}. Block rows ({@value MemoryBlocks#KEY_MARKER}) are
+     * spared as in {@link #pruneOverCap}; only erasure removes them.
      */
     public int purgeCreatedBefore(java.time.Instant cutoff, int limit) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         int deleted =
                 jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "DELETE FROM "
                                 + table
                                 + " WHERE id IN (SELECT id FROM "
                                 + table
-                                + " WHERE created_at < ? AND position('" + MemoryBlocks.KEY_MARKER + "' in subject_key) = 0 ORDER BY created_at LIMIT ?)",
+                                + " WHERE created_at < ? AND position('"
+                                + MemoryBlocks.KEY_MARKER
+                                + "' in subject_key) = 0 ORDER BY created_at LIMIT ?)",
                         java.sql.Timestamp.from(cutoff),
                         limit);
         log.info("Retention purge removed {} tenant-memory rows older than {}", deleted, cutoff);
@@ -603,6 +686,7 @@ public class TenantMemoryService {
         // '<subject>#mem:<label>').
         int deleted =
                 jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "DELETE FROM "
                                 + table
                                 + " WHERE subject_key = ? OR starts_with(subject_key, ?)",

@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * The shared window-counter scripts against a real Redis (skipped without {@code redis-server}). These are the
- * behaviours a mocked template cannot show: whether the TTL is really attached in the same step as the add, and whether
- * a refund can ever leave a negative counter.
+ * The shared window-counter scripts against a real Redis (skipped without {@code redis-server}).
+ * These are the behaviours a mocked template cannot show: whether the TTL is really attached in the
+ * same step as the add, and whether a refund can ever leave a negative counter.
  */
 class SpendCountersRedisTest {
 
@@ -43,7 +43,8 @@ class SpendCountersRedisTest {
     void theFirstAddCreatesTheKeyWithTheWindowExpiry() {
         assertThat(SpendCounters.add(redis, "k", WINDOW, 500L)).isEqualTo(500L);
 
-        assertThat(redis.getExpire("k", java.util.concurrent.TimeUnit.MILLISECONDS)).isBetween(1L, 3_600_000L);
+        assertThat(redis.getExpire("k", java.util.concurrent.TimeUnit.MILLISECONDS))
+                .isBetween(1L, 3_600_000L);
     }
 
     @Test
@@ -54,7 +55,9 @@ class SpendCountersRedisTest {
 
         assertThat(SpendCounters.add(redis, "immortal", WINDOW, 100L)).isEqualTo(800L);
 
-        assertThat(redis.getExpire("immortal")).as("the add must repair the missing TTL").isPositive();
+        assertThat(redis.getExpire("immortal"))
+                .as("the add must repair the missing TTL")
+                .isPositive();
     }
 
     @Test
@@ -69,7 +72,8 @@ class SpendCountersRedisTest {
 
     @Test
     void aCounterReturningToExactlyTheAmountAddedDoesNotRestartItsWindow() {
-        // The old rule "set the TTL when the result equals the amount added" restarted the window here.
+        // The old rule "set the TTL when the result equals the amount added" restarted the window
+        // here.
         SpendCounters.add(redis, "k", WINDOW, 400L);
         redis.expire("k", Duration.ofSeconds(100));
         SpendCounters.add(redis, "k", WINDOW, 300L);
@@ -78,7 +82,9 @@ class SpendCountersRedisTest {
         Long total = SpendCounters.add(redis, "k", WINDOW, 300L);
 
         assertThat(total).isEqualTo(700L);
-        assertThat(redis.getExpire("k")).as("the original window keeps running").isLessThanOrEqualTo(100L);
+        assertThat(redis.getExpire("k"))
+                .as("the original window keeps running")
+                .isLessThanOrEqualTo(100L);
     }
 
     @Test
@@ -100,8 +106,11 @@ class SpendCountersRedisTest {
 
     @Test
     void thePerUserCountersGetTheSameAtomicTtlOnThePositivePath() {
-        PerUserBudgetCounters counters = new PerUserBudgetCounters(redis, org.mockito.Mockito.mock(
-            org.springframework.beans.factory.ObjectProvider.class));
+        PerUserBudgetCounters counters =
+                new PerUserBudgetCounters(
+                        redis,
+                        org.mockito.Mockito.mock(
+                                org.springframework.beans.factory.ObjectProvider.class));
         redis.opsForValue().set("pu", "10");
 
         counters.incrementByAndGet("pu", WINDOW, 5L);

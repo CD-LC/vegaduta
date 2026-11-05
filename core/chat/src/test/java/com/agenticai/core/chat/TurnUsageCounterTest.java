@@ -66,7 +66,8 @@ class TurnUsageCounterTest {
                         null,
                         "m",
                         new LlmCallObservation.Attribution(null, "sess", null, null, null),
-                        new LlmCallObservation.Tokens(10L, 5L, 15L, CacheTokenAccounting.ABSENT, null, null),
+                        new LlmCallObservation.Tokens(
+                                10L, 5L, 15L, CacheTokenAccounting.ABSENT, null, null),
                         null,
                         true,
                         false,

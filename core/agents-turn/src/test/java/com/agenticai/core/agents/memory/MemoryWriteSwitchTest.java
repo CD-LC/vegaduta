@@ -20,7 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/** memory.write.enabled: unchanged by default; off = the remember tools answer "disabled" and write nothing. */
+/**
+ * memory.write.enabled: unchanged by default; off = the remember tools answer "disabled" and write
+ * nothing.
+ */
 class MemoryWriteSwitchTest {
 
     private final SidecarClient sidecar = mock(SidecarClient.class);
@@ -38,7 +41,8 @@ class MemoryWriteSwitchTest {
     }
 
     private void writesOff() {
-        when(settings.getBool(AgentMemoryService.WRITE_ENABLED_KEY, SettingContext.forAgent(agentId)))
+        when(settings.getBool(
+                        AgentMemoryService.WRITE_ENABLED_KEY, SettingContext.forAgent(agentId)))
                 .thenReturn(false);
         agentMemory.setSettingsResolver(settings);
         tenantMemory.setSettingsResolver(settings);
@@ -49,10 +53,13 @@ class MemoryWriteSwitchTest {
         assertThat(agentMemory.writesSwitchedOff(agentId)).isFalse();
         assertThat(tenantMemory.writesSwitchedOff(agentId)).isFalse();
 
-        String out = new RememberFactToolCallback(agentMemory, agentId, "alice").call("{\"fact\":\"Prefers tea\"}");
+        String out =
+                new RememberFactToolCallback(agentMemory, agentId, "alice")
+                        .call("{\"fact\":\"Prefers tea\"}");
 
         assertThat(out).contains("\"remembered\": true");
-        verify(jdbc).update(org.mockito.ArgumentMatchers.contains("INSERT INTO"), any(Object[].class));
+        verify(jdbc)
+                .update(org.mockito.ArgumentMatchers.contains("INSERT INTO"), any(Object[].class));
     }
 
     @Test
@@ -71,11 +78,22 @@ class MemoryWriteSwitchTest {
         GraphMemoryService graph = mock(GraphMemoryService.class);
         EntityExtractionService extractor = mock(EntityExtractionService.class);
 
-        String out = new RememberFactToolCallback(
-                        agentMemory, agentId, "alice", graph, extractor, null, mock(ChatClient.class), null)
-                .call("{\"fact\":\"Prefers tea\"}");
+        String out =
+                new RememberFactToolCallback(
+                                agentMemory,
+                                agentId,
+                                "alice",
+                                graph,
+                                extractor,
+                                null,
+                                mock(ChatClient.class),
+                                null)
+                        .call("{\"fact\":\"Prefers tea\"}");
 
-        assertThat(out).contains("\"skipped\": true").contains(MemoryWriteSwitch.REASON).doesNotContain("tea");
+        assertThat(out)
+                .contains("\"skipped\": true")
+                .contains(MemoryWriteSwitch.REASON)
+                .doesNotContain("tea");
         assertThat(MemoryWriteSwitch.isSkippedResult(out)).isTrue();
         verify(jdbc, never()).update(anyString(), any(Object[].class));
         verifyNoInteractions(sidecar, graph, extractor);
@@ -85,8 +103,9 @@ class MemoryWriteSwitchTest {
     void offMakesRememberSharedFactAnswerDisabledAndWriteNothing() {
         writesOff();
 
-        String out = new RememberSharedFactToolCallback(tenantMemory, agentId, "alice")
-                .call("{\"fact\":\"On the Enterprise plan\"}");
+        String out =
+                new RememberSharedFactToolCallback(tenantMemory, agentId, "alice")
+                        .call("{\"fact\":\"On the Enterprise plan\"}");
 
         assertThat(MemoryWriteSwitch.isSkippedResult(out)).isTrue();
         verify(jdbc, never()).update(anyString(), any(Object[].class));
@@ -94,7 +113,8 @@ class MemoryWriteSwitchTest {
 
     @Test
     void aFailingLookupLeavesWritesAsThePlatformHasThem() {
-        when(settings.getBool(anyString(), any(SettingContext.class))).thenThrow(new IllegalStateException("down"));
+        when(settings.getBool(anyString(), any(SettingContext.class)))
+                .thenThrow(new IllegalStateException("down"));
         agentMemory.setSettingsResolver(settings);
 
         assertThat(agentMemory.writesSwitchedOff(agentId)).isFalse();

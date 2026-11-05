@@ -25,9 +25,10 @@ public interface BackgroundJobToolFactory {
     ToolCallback createIfEnabled(UUID agentId);
 
     /**
-     * As {@link #createIfEnabled(UUID)}, for a turn whose taint the caller can read: {@code taintSources}
-     * returns what tainted the turn, or null when it is clean. A job started from a tainted turn keeps
-     * that taint (a goal written after reading hostile content must not become a clean autonomous run).
+     * As {@link #createIfEnabled(UUID)}, for a turn whose taint the caller can read: {@code
+     * taintSources} returns what tainted the turn, or null when it is clean. A job started from a
+     * tainted turn keeps that taint (a goal written after reading hostile content must not become a
+     * clean autonomous run).
      */
     default ToolCallback createIfEnabled(UUID agentId, Supplier<List<String>> taintSources) {
         return createIfEnabled(agentId);

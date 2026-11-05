@@ -1,16 +1,6 @@
 package com.agenticai.core.common.security;
 
 import com.agenticai.core.tenancy.AllowUnlockedSchedule;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +11,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Core fraud detection service: analyzes requests for suspicious patterns and issues fraud
@@ -343,9 +340,12 @@ public class AbuseDetectionService {
         if (cp == null) {
             synchronized (this) {
                 if (challengePass == null) {
-                    Duration ttl = challengePassTtlSeconds > 0
-                        ? Duration.ofSeconds(challengePassTtlSeconds) : ChallengePass.DEFAULT_TTL;
-                    challengePass = new ChallengePass(encryptionKey, java.time.Clock.systemUTC(), ttl);
+                    Duration ttl =
+                            challengePassTtlSeconds > 0
+                                    ? Duration.ofSeconds(challengePassTtlSeconds)
+                                    : ChallengePass.DEFAULT_TTL;
+                    challengePass =
+                            new ChallengePass(encryptionKey, java.time.Clock.systemUTC(), ttl);
                 }
                 cp = challengePass;
             }
@@ -354,8 +354,8 @@ public class AbuseDetectionService {
     }
 
     /**
-     * Issue the signed, short-lived, single-use pass for a solved challenge, bound to tenant, client IP and nonce.
-     * Null when no signing key is configured.
+     * Issue the signed, short-lived, single-use pass for a solved challenge, bound to tenant,
+     * client IP and nonce. Null when no signing key is configured.
      */
     public String issueChallengePass(UUID tenantId, InetAddress clientIp, String nonceId) {
         return challengePass().issue(tenantId, clientIp, nonceId);

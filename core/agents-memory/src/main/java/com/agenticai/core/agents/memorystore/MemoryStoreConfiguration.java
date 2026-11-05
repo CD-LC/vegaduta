@@ -59,7 +59,8 @@ class MemoryStoreConfiguration {
     }
 
     @Bean
-    CompetenceGate competenceGate(CompetenceProperties properties, ObjectProvider<SettingsResolver> settings) {
+    CompetenceGate competenceGate(
+            CompetenceProperties properties, ObjectProvider<SettingsResolver> settings) {
         return new CompetenceGate(properties, settings);
     }
 
@@ -69,7 +70,10 @@ class MemoryStoreConfiguration {
         return new JdbcCompetenceStorage(jdbc);
     }
 
-    /** The competence writer; a no-op until {@code app.memory.competence.enabled} and the tenant/agent setting allow it. */
+    /**
+     * The competence writer; a no-op until {@code app.memory.competence.enabled} and the
+     * tenant/agent setting allow it.
+     */
     @Bean
     CompetenceTracker competenceTracker(
             CompetenceProperties properties,
@@ -79,7 +83,10 @@ class MemoryStoreConfiguration {
         return new CompetenceTracker(properties, gate, storage, meters, Clock.systemUTC());
     }
 
-    /** SELF_MODEL recall from the competence counters; empty unless unified recall, the kind and competence are all on. */
+    /**
+     * SELF_MODEL recall from the competence counters; empty unless unified recall, the kind and
+     * competence are all on.
+     */
     @Bean
     SelfModelRecallSource selfModelRecallSource(
             MemoryUnifiedProperties unified,
@@ -100,24 +107,30 @@ class MemoryStoreConfiguration {
     }
 
     /**
-     * Makes a tombstone mean forgotten: recall leaves out rows whose content hash is tombstoned. On when
-     * {@code app.memory.tombstone.enforce=true}; unset it follows {@code app.memory.consolidation.enabled}, the only
-     * writer of tombstones, so with every memory flag off no recall statement changes.
+     * Makes a tombstone mean forgotten: recall leaves out rows whose content hash is tombstoned. On
+     * when {@code app.memory.tombstone.enforce=true}; unset it follows {@code
+     * app.memory.consolidation.enabled}, the only writer of tombstones, so with every memory flag
+     * off no recall statement changes.
      */
     @Bean
     MemoryTombstoneGuard memoryTombstoneGuard(
-            @Value("${app.memory.tombstone.enforce:${app.memory.consolidation.enabled:false}}") boolean enforce,
+            @Value("${app.memory.tombstone.enforce:${app.memory.consolidation.enabled:false}}")
+                    boolean enforce,
             ObjectProvider<JdbcTemplate> jdbc) {
         return new MemoryTombstoneGuard(enforce, jdbc);
     }
 
     @Bean
     @ConditionalOnMissingBean(MemoryItemStorage.class)
-    MemoryItemStorage memoryItemStorage(ObjectProvider<JdbcTemplate> jdbc, MemoryTombstoneGuard tombstones) {
+    MemoryItemStorage memoryItemStorage(
+            ObjectProvider<JdbcTemplate> jdbc, MemoryTombstoneGuard tombstones) {
         return new JdbcMemoryItemStorage(jdbc, tombstones);
     }
 
-    /** Read-only view of the unified store for the nightly consolidation (it holds no storage or review reference). */
+    /**
+     * Read-only view of the unified store for the nightly consolidation (it holds no storage or
+     * review reference).
+     */
     @Bean
     MemoryItemConsolidationReader memoryItemConsolidationReader(ObjectProvider<JdbcTemplate> jdbc) {
         return new JdbcMemoryItemConsolidationReader(jdbc);
@@ -166,7 +179,14 @@ class MemoryStoreConfiguration {
             ObjectProvider<MeterRegistry> meters,
             MemoryTombstoneGuard tombstones) {
         return new StoreMemoryProposalSink(
-                properties, gate, storage, embedder, screens.orderedStream().toList(), meters, Clock.systemUTC(), tombstones);
+                properties,
+                gate,
+                storage,
+                embedder,
+                screens.orderedStream().toList(),
+                meters,
+                Clock.systemUTC(),
+                tombstones);
     }
 
     @Bean

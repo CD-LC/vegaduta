@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.memory;
 
 /**
- * An automated writer (the agent's {@code remember_fact} tools) tried to save a fact whose exact text
- * was forgotten for this person: a tombstone for it exists. Only the person re-adding it by hand, on
- * the Memory page, brings it back. Carries no fact text.
+ * An automated writer (the agent's {@code remember_fact} tools) tried to save a fact whose exact
+ * text was forgotten for this person: a tombstone for it exists. Only the person re-adding it by
+ * hand, on the Memory page, brings it back. Carries no fact text.
  */
 public class MemoryForgottenException extends RuntimeException {
 

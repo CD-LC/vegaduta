@@ -7,7 +7,10 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-/** The port raw-JDBC modules without a tenancy dependency (settings) use to name the tenant's tables. */
+/**
+ * The port raw-JDBC modules without a tenancy dependency (settings) use to name the tenant's
+ * tables.
+ */
 class TenantSchemaResolverSourceTest {
 
     @AfterEach

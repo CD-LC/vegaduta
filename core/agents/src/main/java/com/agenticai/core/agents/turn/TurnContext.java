@@ -74,9 +74,9 @@ import org.slf4j.MDC;
  *     into the prompt) marks it here, and tool resolution adopts this exact instance as the turn's
  *     taint state so the {@code TaintGate} built for each tool sees the marks. The sixth mutable
  *     member
- * @param memoryRecall what the memory recall put into this turn's prompt (ids and counts, never text), set by
- *     the prompt assembler and read by the turn journal and an eval harness; never null. The seventh mutable
- *     member
+ * @param memoryRecall what the memory recall put into this turn's prompt (ids and counts, never
+ *     text), set by the prompt assembler and read by the turn journal and an eval harness; never
+ *     null. The seventh mutable member
  */
 public record TurnContext(
         TenantContext tenant,
@@ -97,7 +97,10 @@ public record TurnContext(
         TurnTaint taint,
         TurnMemoryRecall memoryRecall) {
 
-    /** Every field but the memory-recall trace, which a fresh context starts without (empty, see {@link TurnMemoryRecall}). */
+    /**
+     * Every field but the memory-recall trace, which a fresh context starts without (empty, see
+     * {@link TurnMemoryRecall}).
+     */
     public TurnContext(
             TenantContext tenant,
             UUID requestedAgentId,

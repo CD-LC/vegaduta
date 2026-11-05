@@ -4,10 +4,10 @@ import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.StepJournal;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.DelegateOptions;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.prompts.PromptContext;
 import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.guardrails.taint.DelegationTaint;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -33,8 +33,8 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  *
  * <p><b>Isolation:</b> every worker runs {@code AgentChatService#delegateCall} - a throwaway
  * session {@code delegated:subtasks:<runId>:<i>}, no history, no memory, the depth-1 cap (a
- * delegated turn never resolves delegation tools, so a worker cannot fan out again), and the
- * worker tool set below. Workers see only their brief plus a short directive.
+ * delegated turn never resolves delegation tools, so a worker cannot fan out again), and the worker
+ * tool set below. Workers see only their brief plus a short directive.
  *
  * <p><b>Worker tools:</b> the agent's normal tools minus {@link #workerMayUse the excluded set}:
  * every delegation tool, {@code schedule_task}, {@code request_human}, {@code coding_task} and the
@@ -66,7 +66,10 @@ public class RunSubtasksToolCallback implements ToolCallback {
                     "coding_task",
                     "local_shell");
 
-    /** Prompt-registry keys of the worker's directive: the standing text, and the sentence added when a role was given. */
+    /**
+     * Prompt-registry keys of the worker's directive: the standing text, and the sentence added
+     * when a role was given.
+     */
     static final String WORKER_DIRECTIVE_KEY = "delegation.swarm_worker";
 
     static final String WORKER_ROLE_KEY = "delegation.swarm_worker.role";
@@ -86,13 +89,16 @@ public class RunSubtasksToolCallback implements ToolCallback {
     private final String journalRunId;
     private volatile long branchTimeoutSeconds;
 
-    /** The prompt registry the worker directive is read from; the shipped text until {@link #withPromptResolver}. */
+    /**
+     * The prompt registry the worker directive is read from; the shipped text until {@link
+     * #withPromptResolver}.
+     */
     private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
     /**
-     * Reads the worker directive from the prompt registry for the calling agent (the one whose turn runs the workers)
-     * and its tenant, so an override of {@code delegation.swarm_worker} applies to every worker; called by the factory
-     * right after construction. Null keeps the shipped text.
+     * Reads the worker directive from the prompt registry for the calling agent (the one whose turn
+     * runs the workers) and its tenant, so an override of {@code delegation.swarm_worker} applies
+     * to every worker; called by the factory right after construction. Null keeps the shipped text.
      */
     RunSubtasksToolCallback withPromptResolver(PromptResolver resolver) {
         if (resolver != null) {
@@ -101,28 +107,41 @@ public class RunSubtasksToolCallback implements ToolCallback {
         return this;
     }
 
-    /** The worker's system addendum; the tenant is the one {@link #runBranch} has applied to the thread. */
+    /**
+     * The worker's system addendum; the tenant is the one {@link #runBranch} has applied to the
+     * thread.
+     */
     private String workerDirective(String role) {
         PromptContext context = PromptContext.forAgent(agentId);
         String directive = prompts.resolve(WORKER_DIRECTIVE_KEY, context).textOrNull();
         if (directive == null) {
-            // a switched-off or unreadable directive must not leave a worker with no instructions at all
+            // a switched-off or unreadable directive must not leave a worker with no instructions
+            // at all
             directive = PromptResolver.defaultsOnly().text(WORKER_DIRECTIVE_KEY, context);
         }
         if (role == null) {
             return directive;
         }
-        String roleSentence = prompts.resolve(WORKER_ROLE_KEY, context.withVariable("role", role)).textOrNull();
+        String roleSentence =
+                prompts.resolve(WORKER_ROLE_KEY, context.withVariable("role", role)).textOrNull();
         if (roleSentence == null) {
-            roleSentence = PromptResolver.defaultsOnly().text(WORKER_ROLE_KEY, context.withVariable("role", role));
+            roleSentence =
+                    PromptResolver.defaultsOnly()
+                            .text(WORKER_ROLE_KEY, context.withVariable("role", role));
         }
         return directive + " " + roleSentence;
     }
 
-    /** Branch, answer and role bounds ({@code app.agents.collaboration.*}); the shipped defaults until {@link #withLimits}. */
+    /**
+     * Branch, answer and role bounds ({@code app.agents.collaboration.*}); the shipped defaults
+     * until {@link #withLimits}.
+     */
     private volatile CollaborationProperties limits = new CollaborationProperties();
 
-    /** Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right after construction. */
+    /**
+     * Applies the bound {@code app.agents.collaboration.*} settings; called by the factory right
+     * after construction.
+     */
     RunSubtasksToolCallback withLimits(CollaborationProperties limits) {
         this.limits = limits;
         this.branchTimeoutSeconds = limits.getBranchTimeoutSeconds();
@@ -130,28 +149,40 @@ public class RunSubtasksToolCallback implements ToolCallback {
         return this;
     }
 
-    /** The worker-count and timeout bounds as the settings catalog resolves them; the platform values until {@link #withSettings}. */
-    private volatile ResolvedCollaborationLimits resolvedLimits = ResolvedCollaborationLimits.platformOnly(limits);
+    /**
+     * The worker-count and timeout bounds as the settings catalog resolves them; the platform
+     * values until {@link #withSettings}.
+     */
+    private volatile ResolvedCollaborationLimits resolvedLimits =
+            ResolvedCollaborationLimits.platformOnly(limits);
 
-    /** The bounds in force; the platform's own when no view was set (an instance made without its field initialisers). */
+    /**
+     * The bounds in force; the platform's own when no view was set (an instance made without its
+     * field initialisers).
+     */
     private ResolvedCollaborationLimits limitsView() {
         ResolvedCollaborationLimits view = resolvedLimits;
         return view != null ? view : ResolvedCollaborationLimits.platformOnly(limits);
     }
 
     /**
-     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the settings catalog for the
-     * calling agent and the tenant captured at construction; called by the factory right after {@link #withLimits}. A null
-     * resolver keeps the platform values (and the constructor's timeout, the test seam).
+     * Reads {@code delegation.maxBranches} and {@code delegation.branchTimeoutSeconds} through the
+     * settings catalog for the calling agent and the tenant captured at construction; called by the
+     * factory right after {@link #withLimits}. A null resolver keeps the platform values (and the
+     * constructor's timeout, the test seam).
      */
     RunSubtasksToolCallback withSettings(com.agenticai.core.settings.SettingsResolver settings) {
         if (settings != null) {
-            this.resolvedLimits = new ResolvedCollaborationLimits(limits, settings, agentId, capturedContext);
+            this.resolvedLimits =
+                    new ResolvedCollaborationLimits(limits, settings, agentId, capturedContext);
         }
         return this;
     }
 
-    /** Seconds one worker may run: the catalog's value when wired, else the platform's (or the test seam's) own. */
+    /**
+     * Seconds one worker may run: the catalog's value when wired, else the platform's (or the test
+     * seam's) own.
+     */
     private long workerTimeoutSeconds() {
         ResolvedCollaborationLimits resolved = limitsView();
         return resolved.usesSettings() ? resolved.branchTimeoutSeconds() : branchTimeoutSeconds;
@@ -174,7 +205,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
                 new CollaborationProperties().getBranchTimeoutSeconds());
     }
 
-    /** Test seam: the per-worker limit is a constructor value so a timeout can be exercised fast. */
+    /**
+     * Test seam: the per-worker limit is a constructor value so a timeout can be exercised fast.
+     */
     RunSubtasksToolCallback(
             AgentChatService agentChatService,
             UUID agentId,
@@ -238,7 +271,8 @@ public class RunSubtasksToolCallback implements ToolCallback {
                     },
                     "required": ["tasks"]
                 }
-                """.formatted(limitsView().maxBranches()))
+                """
+                                .formatted(limitsView().maxBranches()))
                 .build();
     }
 
@@ -301,7 +335,8 @@ public class RunSubtasksToolCallback implements ToolCallback {
         // shutdownNow() in the finally, not close(): close() would block on a worker that ignores
         // interrupts past the timeout (same lifecycle as DelegateToTeamToolCallback).
         @SuppressWarnings("java:S2095")
-        ExecutorService pool = TenantAwareExecutors.newVirtualThreadPerTaskExecutor("run-subtasks-tool-callback-");
+        ExecutorService pool =
+                TenantAwareExecutors.newVirtualThreadPerTaskExecutor("run-subtasks-tool-callback-");
         try {
             List<Future<Map<String, Object>>> futures = new ArrayList<>();
             for (int i = 0; i < runnable.size(); i++) {
@@ -373,7 +408,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
 
     private String label(int index, Map<String, Object> task) {
         String role = roleOf(task);
-        return role == null ? "subtask-" + (index + 1) : "subtask-" + (index + 1) + " (" + role + ")";
+        return role == null
+                ? "subtask-" + (index + 1)
+                : "subtask-" + (index + 1) + " (" + role + ")";
     }
 
     /** The result entry every outcome starts from: 1-based task number and the role, if given. */
@@ -408,7 +445,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
             String step =
                     stepJournal == null
                             ? null
-                            : "subtasks:" + DelegateToTeamToolCallback.branchHash("subtask:" + (role == null ? "" : role), brief, null);
+                            : "subtasks:"
+                                    + DelegateToTeamToolCallback.branchHash(
+                                            "subtask:" + (role == null ? "" : role), brief, null);
             if (step != null) {
                 var done = stepJournal.findCompletedResult(journalRunId, step);
                 if (done.isPresent()) {
@@ -445,7 +484,9 @@ public class RunSubtasksToolCallback implements ToolCallback {
         } catch (Exception e) {
             log.warn("run_subtasks worker {} (agent {}) failed", index, agentId, e);
             out.put("status", "error");
-            out.put("error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
+            out.put(
+                    "error",
+                    e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage());
             out.put("ms", System.currentTimeMillis() - started);
             return out;
         } finally {

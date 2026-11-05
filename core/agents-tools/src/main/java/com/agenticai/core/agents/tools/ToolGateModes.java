@@ -9,8 +9,7 @@ import java.util.UUID;
 /** Maps an autonomy tier and tool to the approval gate mode, for {@link AgentToolGuard}. */
 final class ToolGateModes {
 
-    private ToolGateModes() {
-    }
+    private ToolGateModes() {}
 
     static ApprovalGateMode resolve(
             AgentToolGovernance governance, AgentAutonomyTier tier, String toolName, UUID agentId) {

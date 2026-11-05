@@ -12,9 +12,10 @@ public interface CompetenceStorage {
     String OVERFLOW_CLASS = "_overflow";
 
     /**
-     * Atomically adds one outcome: inserts the (agent, class) row or increments it in a single statement, so concurrent
-     * writers never lose a count. When the agent already has {@code maxClasses} classes (not counting the overflow row)
-     * and {@code outcome.taskClass()} is not one of them, the outcome lands on {@link #OVERFLOW_CLASS}.
+     * Atomically adds one outcome: inserts the (agent, class) row or increments it in a single
+     * statement, so concurrent writers never lose a count. When the agent already has {@code
+     * maxClasses} classes (not counting the overflow row) and {@code outcome.taskClass()} is not
+     * one of them, the outcome lands on {@link #OVERFLOW_CLASS}.
      */
     void add(VerifiedOutcome outcome, int maxClasses, Instant now);
 

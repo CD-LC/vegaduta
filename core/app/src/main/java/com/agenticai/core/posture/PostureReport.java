@@ -8,8 +8,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
- * Evaluates {@link PostureChecks} against the running environment once at construction, logs one WARN line
- * listing every permissive setting, and exposes the result read-only. Nothing here changes behaviour.
+ * Evaluates {@link PostureChecks} against the running environment once at construction, logs one
+ * WARN line listing every permissive setting, and exposes the result read-only. Nothing here
+ * changes behaviour.
  */
 @Component
 public class PostureReport {
@@ -36,13 +37,19 @@ public class PostureReport {
             }
         }
         this.permissive = List.copyOf(found);
-        this.posture = found.isEmpty() ? Posture.STRICT
-            : corePermissive == core ? Posture.PERMISSIVE : Posture.MIXED;
+        this.posture =
+                found.isEmpty()
+                        ? Posture.STRICT
+                        : corePermissive == core ? Posture.PERMISSIVE : Posture.MIXED;
         if (found.isEmpty()) {
             log.info("Security posture STRICT: no permissive governance setting is active.");
         } else {
-            log.warn("Security posture {}: {} permissive setting(s) active: {}. Activate the 'strict' Spring "
-                + "profile to close them.", posture, found.size(), String.join("; ", found));
+            log.warn(
+                    "Security posture {}: {} permissive setting(s) active: {}. Activate the 'strict' Spring "
+                            + "profile to close them.",
+                    posture,
+                    found.size(),
+                    String.join("; ", found));
         }
     }
 
@@ -54,7 +61,10 @@ public class PostureReport {
         return posture;
     }
 
-    /** Each permissive setting as {@code key=value (strict: value)}; empty when {@link #posture()} is STRICT. */
+    /**
+     * Each permissive setting as {@code key=value (strict: value)}; empty when {@link #posture()}
+     * is STRICT.
+     */
     public List<String> permissiveSettings() {
         return permissive;
     }

@@ -97,6 +97,7 @@ public class AgentTaintPolicy implements ToolTaintClassifier {
      * out is a sink even with no allow-list. Setter-injected so the constructor is unchanged.
      */
     private volatile boolean getQueryIsSink;
+
     private final ObjectProvider<ToolClassificationRegistry> registry;
     private final ObjectProvider<MeterRegistry> meters;
     private final ObjectProvider<AuditLogService> audit;

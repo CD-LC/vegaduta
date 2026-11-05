@@ -19,14 +19,14 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Deterministic in-memory stand-in for the platform's memory (no LLM, no DB, no network), so the whole
- * eval pipeline runs in unit tests. It is a fixture, not a claim about the platform:
+ * Deterministic in-memory stand-in for the platform's memory (no LLM, no DB, no network), so the
+ * whole eval pipeline runs in unit tests. It is a fixture, not a claim about the platform:
  *
  * <ul>
  *   <li>extraction is perfect: it stores the facts a turn's {@code plants} names (the ledger is the
  *       extractor's ground truth), except attack payloads, which its write gate rejects;
- *   <li>the "model" copies the memory block: the answer is the matched tokens of the injected items,
- *       or an abstention when nothing was injected;
+ *   <li>the "model" copies the memory block: the answer is the matched tokens of the injected
+ *       items, or an abstention when nothing was injected;
  *   <li>the tool agent follows the {@link MemoryScenario.ToolMode} of the probe task.
  * </ul>
  *
@@ -39,7 +39,10 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
     public enum Quirk {
         /** The write gate lets attack payloads into the store. */
         PERSISTS_ATTACKS,
-        /** The model follows an injected rule (canary reaches tool arguments, approvals are skipped). */
+        /**
+         * The model follows an injected rule (canary reaches tool arguments, approvals are
+         * skipped).
+         */
         OBEYS_INJECTED_RULES,
         /** Erase requests are ignored. */
         IGNORES_FORGET,
@@ -59,13 +62,20 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
         DUPLICATES_FACTS,
         /** Recall adds a large latency (a network hop on the hot path). */
         SLOW_RECALL,
-        /** S14: an explicit share is not honoured, so a teammate never sees the shared fact (a recall miss). */
+        /**
+         * S14: an explicit share is not honoured, so a teammate never sees the shared fact (a
+         * recall miss).
+         */
         IGNORES_SHARES,
-        /** S14: an explicit share reaches users of other tenants (the share scope is not the tenant). */
+        /**
+         * S14: an explicit share reaches users of other tenants (the share scope is not the
+         * tenant).
+         */
         SHARING_IGNORES_TENANT,
         /**
-         * S15: the consolidation job runs on a pooled thread that still holds the previous session's
-         * tenant scope, so it re-homes other tenants' memory rows into the tenant that just finished.
+         * S15: the consolidation job runs on a pooled thread that still holds the previous
+         * session's tenant scope, so it re-homes other tenants' memory rows into the tenant that
+         * just finished.
          */
         CONSOLIDATION_HOP_LOSES_TENANT
     }
@@ -138,12 +148,22 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
             return costs;
         }
 
-        /** The S15 defect: rows of any other tenant are re-homed under the tenant of the session that just ended. */
+        /**
+         * The S15 defect: rows of any other tenant are re-homed under the tenant of the session
+         * that just ended.
+         */
         private void consolidateOnStaleThread(Session session) {
-            store.replaceAll(item -> Objects.equals(item.tenantId(), session.tenantId())
-                ? item
-                : new StoreItem(item.factId(), item.key(), item.text(), session.userId(), session.tenantId(),
-                    item.flaggedConflict()));
+            store.replaceAll(
+                    item ->
+                            Objects.equals(item.tenantId(), session.tenantId())
+                                    ? item
+                                    : new StoreItem(
+                                            item.factId(),
+                                            item.key(),
+                                            item.text(),
+                                            session.userId(),
+                                            session.tenantId(),
+                                            item.flaggedConflict()));
         }
 
         private void write(Fact fact, Session session) {
@@ -153,13 +173,22 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
             if (fact.kind() == FactKind.ATTACK && !quirks.contains(Quirk.PERSISTS_ATTACKS)) {
                 return; // the write gate rejects it
             }
-            String user = scenario.ownerUser(fact) != null ? scenario.ownerUser(fact) : session.userId();
-            String tenant = scenario.ownerTenant(fact) != null ? scenario.ownerTenant(fact) : session.tenantId();
+            String user =
+                    scenario.ownerUser(fact) != null ? scenario.ownerUser(fact) : session.userId();
+            String tenant =
+                    scenario.ownerTenant(fact) != null
+                            ? scenario.ownerTenant(fact)
+                            : session.tenantId();
             if (!quirks.contains(Quirk.KEEPS_STALE_FACTS)) {
-                store.removeIf(i -> i.key().equals(fact.key()) && Objects.equals(i.userId(), user)
-                    && Objects.equals(i.tenantId(), tenant) && !Objects.equals(i.factId(), fact.id()));
+                store.removeIf(
+                        i ->
+                                i.key().equals(fact.key())
+                                        && Objects.equals(i.userId(), user)
+                                        && Objects.equals(i.tenantId(), tenant)
+                                        && !Objects.equals(i.factId(), fact.id()));
             }
-            StoreItem item = new StoreItem(fact.id(), fact.key(), fact.value(), user, tenant, false);
+            StoreItem item =
+                    new StoreItem(fact.id(), fact.key(), fact.value(), user, tenant, false);
             store.add(item);
             if (quirks.contains(Quirk.DUPLICATES_FACTS)) {
                 store.add(item);
@@ -181,8 +210,12 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
                 latency += 80.0;
             }
             return new ProbeOutcome(
-                probe.id(), answer, calls, injected, List.copyOf(store),
-                new TurnCost(prompt, 60, latency, latency * 0.5));
+                    probe.id(),
+                    answer,
+                    calls,
+                    injected,
+                    List.copyOf(store),
+                    new TurnCost(prompt, 60, latency, latency * 0.5));
         }
 
         private List<InjectedItem> recall(Probe probe) {
@@ -194,8 +227,14 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
                 int idx = scenario.sessionIndex(probe.after());
                 for (Fact f : scenario.liveFacts(idx)) {
                     if (f.relevantTo().contains(probe.id())
-                        && scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
-                        out.add(new InjectedItem(f.id(), f.key(), f.value(), probe.userId(), probe.tenantId()));
+                            && scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
+                        out.add(
+                                new InjectedItem(
+                                        f.id(),
+                                        f.key(),
+                                        f.value(),
+                                        probe.userId(),
+                                        probe.tenantId()));
                     }
                 }
                 return out;
@@ -205,12 +244,24 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
             boolean crossUser = crossTenant || quirks.contains(Quirk.LEAKS_ACROSS_USERS);
             for (StoreItem item : store) {
                 boolean shared = item.factId() != null && sharedFactIds.contains(item.factId());
-                boolean tenantOk = crossTenant || Objects.equals(item.tenantId(), probe.tenantId())
-                    || (shared && quirks.contains(Quirk.SHARING_IGNORES_TENANT));
-                boolean userOk = crossUser || shared || Objects.equals(item.userId(), probe.userId());
+                boolean tenantOk =
+                        crossTenant
+                                || Objects.equals(item.tenantId(), probe.tenantId())
+                                || (shared && quirks.contains(Quirk.SHARING_IGNORES_TENANT));
+                boolean userOk =
+                        crossUser || shared || Objects.equals(item.userId(), probe.userId());
                 boolean topicOk = overRecall || probe.queryKeys().contains(item.key());
-                if (tenantOk && userOk && topicOk && out.size() < (overRecall ? OVER_RECALL_CAP : 64)) {
-                    out.add(new InjectedItem(item.factId(), item.key(), item.text(), item.userId(), item.tenantId()));
+                if (tenantOk
+                        && userOk
+                        && topicOk
+                        && out.size() < (overRecall ? OVER_RECALL_CAP : 64)) {
+                    out.add(
+                            new InjectedItem(
+                                    item.factId(),
+                                    item.key(),
+                                    item.text(),
+                                    item.userId(),
+                                    item.tenantId()));
                 }
             }
             return out;
@@ -244,15 +295,17 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
                 return "Done.";
             }
             return quirks.contains(Quirk.INVENTS_ANSWERS)
-                ? "It is B+, as far as I recall."
-                : "I don't know - you haven't told me that.";
+                    ? "It is B+, as far as I recall."
+                    : "I don't know - you haven't told me that.";
         }
 
         private ToolCall act(ToolTask task, List<InjectedItem> injected, boolean obeyed) {
             boolean mistakes = quirks.contains(Quirk.REPEATS_MISTAKES);
-            InjectedItem keyed = injected.stream()
-                .filter(i -> !isAttack(i) && Objects.equals(i.key(), task.memoryKey()))
-                .findFirst().orElse(null);
+            InjectedItem keyed =
+                    injected.stream()
+                            .filter(i -> !isAttack(i) && Objects.equals(i.key(), task.memoryKey()))
+                            .findFirst()
+                            .orElse(null);
             String tool = task.tool();
             String args = task.defaultArg();
             switch (task.mode()) {
@@ -267,7 +320,7 @@ public final class InMemoryReferenceSubject implements MemoryEvalSubject {
                     }
                 }
                 case GUARDED -> tool = obeyed ? task.tool() : "request_approval";
-                case PLAIN -> { }
+                case PLAIN -> {}
             }
             if (obeyed) {
                 for (InjectedItem item : injected) {

@@ -73,20 +73,23 @@ public final class ConsolidationPlanner {
         // 1. Forget.
         List<ItemSnapshot> forgettable = new ArrayList<>();
         for (ItemSnapshot s : active) {
-            if (touchable(s, now) && (isTtlExpired(s, now) || eff.get(s.id()) < props.getForgetThreshold())) {
+            if (touchable(s, now)
+                    && (isTtlExpired(s, now) || eff.get(s.id()) < props.getForgetThreshold())) {
                 forgettable.add(s);
             }
         }
-        forgettable.sort(Comparator.comparing((ItemSnapshot s) -> !isTtlExpired(s, now))
-                .thenComparing(s -> eff.get(s.id()))
-                .thenComparing(ItemSnapshot::id));
+        forgettable.sort(
+                Comparator.comparing((ItemSnapshot s) -> !isTtlExpired(s, now))
+                        .thenComparing(s -> eff.get(s.id()))
+                        .thenComparing(ItemSnapshot::id));
         int forgets = 0;
         for (ItemSnapshot s : forgettable) {
             if (forgets >= props.getMaxForgetPerSubjectPerNight() || !st.fits(1)) {
                 st.deferred++;
                 continue;
             }
-            ForgetReason reason = isTtlExpired(s, now) ? ForgetReason.QUARANTINE_TTL : ForgetReason.DECAY;
+            ForgetReason reason =
+                    isTtlExpired(s, now) ? ForgetReason.QUARANTINE_TTL : ForgetReason.DECAY;
             st.forgets.get(s.trust()).add(new Forget(s.id(), eff.get(s.id()), reason));
             st.claim(s.id(), 1);
             forgets++;
@@ -99,7 +102,8 @@ public final class ConsolidationPlanner {
             ids.sort(null);
             groups.add(ids);
         }
-        groups.sort(Comparator.comparing((List<UUID> g) -> g.isEmpty() ? new UUID(0, 0) : g.get(0)));
+        groups.sort(
+                Comparator.comparing((List<UUID> g) -> g.isEmpty() ? new UUID(0, 0) : g.get(0)));
         for (List<UUID> ids : groups) {
             planMerge(ids, byId, now, st);
         }
@@ -115,7 +119,13 @@ public final class ConsolidationPlanner {
             }
         }
         return new ConsolidationPlan(
-                req.subjectKey(), isDryRun(req.consolidationEnabledSince(), now), st.tripped, total, cap, st.deferred, batches);
+                req.subjectKey(),
+                isDryRun(req.consolidationEnabledSince(), now),
+                st.tripped,
+                total,
+                cap,
+                st.deferred,
+                batches);
     }
 
     /** True while consolidation has been enabled for fewer than {@code dry-run-days} (or never). */
@@ -140,12 +150,13 @@ public final class ConsolidationPlanner {
             return;
         }
         // Keeper: pinned first, then higher trust, then most recently used, most used, oldest, id.
-        members.sort(Comparator.comparing((ItemSnapshot s) -> !s.pinned())
-                .thenComparing(s -> s.trust() != MemoryTrustLevel.TRUSTED)
-                .thenComparing(ConsolidationPlanner::lastTouched, Comparator.reverseOrder())
-                .thenComparing(ItemSnapshot::uses, Comparator.reverseOrder())
-                .thenComparing(ItemSnapshot::createdAt)
-                .thenComparing(ItemSnapshot::id));
+        members.sort(
+                Comparator.comparing((ItemSnapshot s) -> !s.pinned())
+                        .thenComparing(s -> s.trust() != MemoryTrustLevel.TRUSTED)
+                        .thenComparing(ConsolidationPlanner::lastTouched, Comparator.reverseOrder())
+                        .thenComparing(ItemSnapshot::uses, Comparator.reverseOrder())
+                        .thenComparing(ItemSnapshot::createdAt)
+                        .thenComparing(ItemSnapshot::id));
         ItemSnapshot keeper = members.get(0);
         if (st.claimed.contains(keeper.id())) {
             return;
@@ -180,7 +191,8 @@ public final class ConsolidationPlanner {
         }
     }
 
-    private void planSummaries(List<ItemSnapshot> active, Map<UUID, Double> eff, Instant now, State st) {
+    private void planSummaries(
+            List<ItemSnapshot> active, Map<UUID, Double> eff, Instant now, State st) {
         Map<String, List<ItemSnapshot>> groups = new TreeMap<>();
         for (ItemSnapshot s : active) {
             double e = eff.get(s.id());
@@ -189,15 +201,23 @@ public final class ConsolidationPlanner {
             boolean genOk = s.generation() + 1 <= props.getMaxGeneration();
             if (band && modelOk && genOk && touchable(s, now) && !st.claimed.contains(s.id())) {
                 String trustKey = props.isMixTrustBatches() ? "*" : s.trust().name();
-                String key = trustKey + "|" + s.agentId() + "|" + s.kind().toLowerCase(java.util.Locale.ROOT);
+                String key =
+                        trustKey
+                                + "|"
+                                + s.agentId()
+                                + "|"
+                                + s.kind().toLowerCase(java.util.Locale.ROOT);
                 groups.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
             }
         }
         int made = 0;
         for (List<ItemSnapshot> g : groups.values()) {
-            g.sort(Comparator.comparing((ItemSnapshot s) -> eff.get(s.id())).thenComparing(ItemSnapshot::id));
+            g.sort(
+                    Comparator.comparing((ItemSnapshot s) -> eff.get(s.id()))
+                            .thenComparing(ItemSnapshot::id));
             for (int from = 0; from < g.size(); from += props.getSummaryBatchSize()) {
-                List<ItemSnapshot> chunk = g.subList(from, Math.min(g.size(), from + props.getSummaryBatchSize()));
+                List<ItemSnapshot> chunk =
+                        g.subList(from, Math.min(g.size(), from + props.getSummaryBatchSize()));
                 if (chunk.size() < 2) {
                     continue;
                 }
@@ -207,11 +227,16 @@ public final class ConsolidationPlanner {
                 }
                 MemoryTrustLevel trust = meet(chunk);
                 int gen = chunk.stream().mapToInt(ItemSnapshot::generation).max().orElse(0) + 1;
-                double imp = Math.max(
-                        0d, chunk.stream().mapToDouble(ItemSnapshot::importance).max().orElse(0) - 0.1);
+                double imp =
+                        Math.max(
+                                0d,
+                                chunk.stream().mapToDouble(ItemSnapshot::importance).max().orElse(0)
+                                        - 0.1);
                 List<UUID> ids = chunk.stream().map(ItemSnapshot::id).toList();
                 ItemSnapshot first = chunk.get(0);
-                st.summaries.get(trust).add(new Summarise(ids, first.agentId(), first.kind(), trust, gen, imp));
+                st.summaries
+                        .get(trust)
+                        .add(new Summarise(ids, first.agentId(), first.kind(), trust, gen, imp));
                 for (UUID id : ids) {
                     st.claim(id, 1);
                 }
@@ -250,7 +275,9 @@ public final class ConsolidationPlanner {
     }
 
     private static Instant lastTouched(ItemSnapshot s) {
-        return s.lastUsedAt() != null && s.lastUsedAt().isAfter(s.createdAt()) ? s.lastUsedAt() : s.createdAt();
+        return s.lastUsedAt() != null && s.lastUsedAt().isAfter(s.createdAt())
+                ? s.lastUsedAt()
+                : s.createdAt();
     }
 
     /** Mutable accumulator for one planning call. */

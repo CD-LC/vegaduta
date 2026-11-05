@@ -12,9 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The whole "forget" surface of the consolidation apply path: append one tombstone row marking a
- * fact forgotten. There is intentionally no update or delete method - a tombstone is the only
- * mark the job may leave, the fact row itself is untouched (deletion and undo are a later work
- * package), and nothing here can raise a row's trust or status.
+ * fact forgotten. There is intentionally no update or delete method - a tombstone is the only mark
+ * the job may leave, the fact row itself is untouched (deletion and undo are a later work package),
+ * and nothing here can raise a row's trust or status.
  */
 @Component
 public class MemoryTombstoneWriter {
@@ -35,7 +35,11 @@ public class MemoryTombstoneWriter {
     /** Marks {@code fact} forgotten; returns the tombstone id. The fact row is never modified. */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UUID markForgotten(
-            String subjectKey, ConsolidationFactSource.Fact fact, String reason, Double score, Instant at) {
+            String subjectKey,
+            ConsolidationFactSource.Fact fact,
+            String reason,
+            Double score,
+            Instant at) {
         String r = reason == null || reason.isBlank() ? REASON_DECAY : reason;
         if (r.length() > 64) {
             r = r.substring(0, 64);
@@ -58,8 +62,11 @@ public class MemoryTombstoneWriter {
 
     private static String sha256(String content) {
         try {
-            byte[] d = MessageDigest.getInstance("SHA-256")
-                    .digest((content == null ? "" : content).getBytes(StandardCharsets.UTF_8));
+            byte[] d =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(
+                                    (content == null ? "" : content)
+                                            .getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder(64);
             for (byte b : d) {
                 sb.append(String.format("%02x", b));

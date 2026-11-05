@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import java.util.function.Supplier;
 
 /**
  * The four {@code scratchpad_*} tools over {@link AgentScratchpadService}: an agent's private
@@ -86,8 +86,8 @@ public final class ScratchpadToolCallback implements ToolCallback {
     private final Supplier<List<String>> turnTaint;
 
     /**
-     * The caller of the turn (the same subject key {@code remember_fact} scopes by); the agent pad is
-     * kept per caller. Null/blank = no identified caller: only the session pad is usable.
+     * The caller of the turn (the same subject key {@code remember_fact} scopes by); the agent pad
+     * is kept per caller. Null/blank = no identified caller: only the session pad is usable.
      */
     private final String subjectKey;
 
@@ -207,12 +207,15 @@ public final class ScratchpadToolCallback implements ToolCallback {
                     String text = a.path("body").asText();
                     Optional<String> refusal = MemoryWriteScreen.refusal(text);
                     if (refusal.isPresent()) {
-                        log.warn("scratchpad_write refused by the memory write screen (agent {})", agentId);
+                        log.warn(
+                                "scratchpad_write refused by the memory write screen (agent {})",
+                                agentId);
                         return error(refusal.get());
                     }
                     NoteTrust provenance = NoteTrust.of(turnTaint);
                     AgentScratchpadService.WriteResult result =
-                            service.write(agentId, scope.sessionId(), subjectKey, key, text, provenance);
+                            service.write(
+                                    agentId, scope.sessionId(), subjectKey, key, text, provenance);
                     ScratchpadNote note = result.note();
                     out.put("written", true)
                             .put("key", note.getKey())
@@ -245,7 +248,8 @@ public final class ScratchpadToolCallback implements ToolCallback {
                 case READ -> {
                     String key = requiredKey(a);
                     Scope scope = scopeOf(a);
-                    Optional<ScratchpadNote> found = service.read(agentId, scope.sessionId(), subjectKey, key);
+                    Optional<ScratchpadNote> found =
+                            service.read(agentId, scope.sessionId(), subjectKey, key);
                     if (found.isEmpty()) {
                         out.put("found", false)
                                 .put("key", key)

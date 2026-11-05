@@ -4,9 +4,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Optional port for the human-decided signals of a turn that the tool-call log does not carry: approval decisions and an
- * explicit rating. No implementation ships with WP4b, so without a bean these are simply absent (the outcome then rests on
- * tool status alone, or is UNKNOWN). An implementation must return only what a person decided, never a model's claim.
+ * Optional port for the human-decided signals of a turn that the tool-call log does not carry:
+ * approval decisions and an explicit rating. No implementation ships with WP4b, so without a bean
+ * these are simply absent (the outcome then rests on tool status alone, or is UNKNOWN). An
+ * implementation must return only what a person decided, never a model's claim.
  */
 public interface EpisodeSignalSource {
 
@@ -16,7 +17,10 @@ public interface EpisodeSignalSource {
         REJECTED
     }
 
-    /** Approval decisions taken during the turn, and the human rating if one was given (null = none). */
+    /**
+     * Approval decisions taken during the turn, and the human rating if one was given (null =
+     * none).
+     */
     record Signals(int approved, int rejected, HumanVerdict verdict) {
         public static final Signals NONE = new Signals(0, 0, null);
 

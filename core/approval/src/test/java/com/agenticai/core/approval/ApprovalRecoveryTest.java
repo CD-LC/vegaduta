@@ -30,9 +30,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 
 /**
- * A decision is committed before the approved action runs, so a process that died in between left an approved request
- * that nothing ran and nothing reported. Real gate, real recorder and real entity over a mocked repository: one caller
- * runs the action, a never-started one is recovered once, a started-but-unfinished one is reported and never re-run.
+ * A decision is committed before the approved action runs, so a process that died in between left
+ * an approved request that nothing ran and nothing reported. Real gate, real recorder and real
+ * entity over a mocked repository: one caller runs the action, a never-started one is recovered
+ * once, a started-but-unfinished one is reported and never re-run.
  */
 class ApprovalRecoveryTest {
 
@@ -54,25 +55,43 @@ class ApprovalRecoveryTest {
         ApprovalActionExecutorRegistry registry = mock(ApprovalActionExecutorRegistry.class);
         when(registry.find(anyString())).thenReturn(Optional.of(executor));
         when(repository.save(any(ApprovalRequest.class))).thenAnswer(call -> call.getArgument(0));
-        recorder = new ApprovalRequestRecorder(
-            repository, audit, mock(ApplicationEventPublisher.class), mock(WorkflowEventPublisher.class));
-        gate = new HumanApprovalGateService(
-            mock(ApprovalPolicyService.class), repository, registry, recorder, mock(FeedbackService.class),
-            new ObjectMapper(), 5, 30, 3600);
+        recorder =
+                new ApprovalRequestRecorder(
+                        repository,
+                        audit,
+                        mock(ApplicationEventPublisher.class),
+                        mock(WorkflowEventPublisher.class));
+        gate =
+                new HumanApprovalGateService(
+                        mock(ApprovalPolicyService.class),
+                        repository,
+                        registry,
+                        recorder,
+                        mock(FeedbackService.class),
+                        new ObjectMapper(),
+                        5,
+                        30,
+                        3600);
         gate.setOutcomePort(outcomes);
 
         TenantSchemaIterator schemas = mock(TenantSchemaIterator.class);
-        doAnswer(call -> {
-            Consumer<String> perSchema = call.getArgument(0);
-            perSchema.accept("t_one");
-            return null;
-        }).when(schemas).forEachActiveTenantSchema(any());
+        doAnswer(
+                        call -> {
+                            Consumer<String> perSchema = call.getArgument(0);
+                            perSchema.accept("t_one");
+                            return null;
+                        })
+                .when(schemas)
+                .forEachActiveTenantSchema(any());
         properties = new ApprovalRecoveryProperties();
-        job = new ApprovalRecoveryJob(properties, schemas, repository, gate, mock(PgAdvisoryJobLock.class));
+        job =
+                new ApprovalRecoveryJob(
+                        properties, schemas, repository, gate, mock(PgAdvisoryJobLock.class));
     }
 
     private ApprovalRequest approved() throws Exception {
-        ApprovalRequest request = new ApprovalRequest("mcp_tool.send", "send it", "{}", "agent:a:session:s");
+        ApprovalRequest request =
+                new ApprovalRequest("mcp_tool.send", "send it", "{}", "agent:a:session:s");
         Field id = ApprovalRequest.class.getDeclaredField("id");
         id.setAccessible(true);
         id.set(request, UUID.randomUUID());
@@ -98,7 +117,8 @@ class ApprovalRecoveryTest {
 
     @Test
     void aLiveDecisionClaimsTheActionRunsItOnceAndMarksItFinished() throws Exception {
-        ApprovalRequest request = new ApprovalRequest("mcp_tool.send", "send it", "{}", "agent:a:session:s");
+        ApprovalRequest request =
+                new ApprovalRequest("mcp_tool.send", "send it", "{}", "agent:a:session:s");
         Field id = ApprovalRequest.class.getDeclaredField("id");
         id.setAccessible(true);
         id.set(request, UUID.randomUUID());
@@ -129,8 +149,10 @@ class ApprovalRecoveryTest {
     void anApprovalNobodyStartedIsRunOnceBySweep() throws Exception {
         ApprovalRequest request = approved();
         decidedAgo(request, Duration.ofMinutes(10));
-        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class))).thenReturn(List.of(request));
-        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class))).thenReturn(List.of());
+        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(request));
+        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of());
 
         int handled = job.sweep(Instant.now());
 
@@ -148,8 +170,10 @@ class ApprovalRecoveryTest {
     void anApprovalTooOldToActOnIsClosedNotRun() throws Exception {
         ApprovalRequest request = approved();
         decidedAgo(request, Duration.ofHours(5));
-        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class))).thenReturn(List.of(request));
-        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class))).thenReturn(List.of());
+        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of(request));
+        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of());
 
         job.sweep(Instant.now());
 
@@ -157,10 +181,19 @@ class ApprovalRecoveryTest {
         assertThat(request.getStatus()).isEqualTo(ApprovalStatus.DEAD_LETTERED);
         assertThat(request.getExecutionError()).isEqualTo(ApprovalRecoveryJob.STALE_REASON);
         assertThat(request.getExecutionCompletedAt()).isNotNull();
-        verify(audit).record(
-            ApprovalRequestRecorder.RECOVERY_ACTOR, "mcp_tool.send", "approval_request",
-            request.getId().toString(), AuditOutcome.FAILURE, ApprovalRecoveryJob.STALE_REASON);
-        verify(outcomes).afterDecision(request, ApprovalOutcomePort.Outcome.FAILED, ApprovalRecoveryJob.STALE_REASON);
+        verify(audit)
+                .record(
+                        ApprovalRequestRecorder.RECOVERY_ACTOR,
+                        "mcp_tool.send",
+                        "approval_request",
+                        request.getId().toString(),
+                        AuditOutcome.FAILURE,
+                        ApprovalRecoveryJob.STALE_REASON);
+        verify(outcomes)
+                .afterDecision(
+                        request,
+                        ApprovalOutcomePort.Outcome.FAILED,
+                        ApprovalRecoveryJob.STALE_REASON);
     }
 
     @Test
@@ -171,8 +204,9 @@ class ApprovalRecoveryTest {
         decidedAgo(fine, Duration.ofMinutes(10));
         doThrow(new IllegalStateException("boom")).when(executor).execute(failing);
         when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class)))
-            .thenReturn(List.of(failing, fine));
-        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class))).thenReturn(List.of());
+                .thenReturn(List.of(failing, fine));
+        when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of());
 
         job.sweep(Instant.now());
 
@@ -181,16 +215,18 @@ class ApprovalRecoveryTest {
         assertThat(fine.getExecutionCompletedAt()).isNotNull();
     }
 
-    // ------------------------------------------------------------------ started, end never recorded
+    // ------------------------------------------------------------------ started, end never
+    // recorded
 
     @Test
     void anActionThatStartedAndNeverFinishedIsReportedAndNeverRunAgain() throws Exception {
         ApprovalRequest request = approved();
         decidedAgo(request, Duration.ofHours(2));
         startedAgo(request, Duration.ofHours(1));
-        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class))).thenReturn(List.of());
+        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of());
         when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class)))
-            .thenReturn(List.of(request));
+                .thenReturn(List.of(request));
 
         int handled = job.sweep(Instant.now());
 
@@ -198,7 +234,11 @@ class ApprovalRecoveryTest {
         verify(executor, never()).execute(any());
         assertThat(request.getStatus()).isEqualTo(ApprovalStatus.DEAD_LETTERED);
         assertThat(request.getExecutionError()).isEqualTo(ApprovalRecoveryJob.INTERRUPTED_REASON);
-        verify(outcomes).afterDecision(request, ApprovalOutcomePort.Outcome.FAILED, ApprovalRecoveryJob.INTERRUPTED_REASON);
+        verify(outcomes)
+                .afterDecision(
+                        request,
+                        ApprovalOutcomePort.Outcome.FAILED,
+                        ApprovalRecoveryJob.INTERRUPTED_REASON);
 
         // Closed: a second sweep, or a late finish from the original run, changes nothing.
         job.sweep(Instant.now());
@@ -212,9 +252,10 @@ class ApprovalRecoveryTest {
         ApprovalRequest request = approved();
         startedAgo(request, Duration.ofHours(1));
         request.markExecutionCompleted();
-        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class))).thenReturn(List.of());
+        when(repository.findApprovedNeverStarted(any(Instant.class), any(Pageable.class)))
+                .thenReturn(List.of());
         when(repository.findApprovedStartedNeverFinished(any(Instant.class), any(Pageable.class)))
-            .thenReturn(List.of(request));
+                .thenReturn(List.of(request));
 
         int handled = job.sweep(Instant.now());
 
@@ -229,9 +270,17 @@ class ApprovalRecoveryTest {
         decidedAgo(request, Duration.ofMinutes(10));
         ApprovalActionExecutorRegistry empty = mock(ApprovalActionExecutorRegistry.class);
         when(empty.find(anyString())).thenReturn(Optional.empty());
-        HumanApprovalGateService noExecutor = new HumanApprovalGateService(
-            mock(ApprovalPolicyService.class), repository, empty, recorder, mock(FeedbackService.class),
-            new ObjectMapper(), 5, 30, 3600);
+        HumanApprovalGateService noExecutor =
+                new HumanApprovalGateService(
+                        mock(ApprovalPolicyService.class),
+                        repository,
+                        empty,
+                        recorder,
+                        mock(FeedbackService.class),
+                        new ObjectMapper(),
+                        5,
+                        30,
+                        3600);
 
         noExecutor.runUnstartedApproval(request);
 

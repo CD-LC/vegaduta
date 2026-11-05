@@ -22,7 +22,10 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-/** The last-used stamp a recall writes comes from the memory clock: the system clock by default, a pinned one in a test. */
+/**
+ * The last-used stamp a recall writes comes from the memory clock: the system clock by default, a
+ * pinned one in a test.
+ */
 @SuppressWarnings("unchecked")
 class MemoryClockTest {
 
@@ -40,7 +43,14 @@ class MemoryClockTest {
                 .thenReturn(
                         List.of(
                                 new AgentMemoryEntry(
-                                        factId, agentId, "alice", "likes tea", 0.1, Instant.EPOCH, Instant.EPOCH, 0)));
+                                        factId,
+                                        agentId,
+                                        "alice",
+                                        "likes tea",
+                                        0.1,
+                                        Instant.EPOCH,
+                                        Instant.EPOCH,
+                                        0)));
     }
 
     @Test
@@ -50,7 +60,8 @@ class MemoryClockTest {
 
         service.recall(agentId, "alice", "tea?", service.queryEmbedding("tea?"));
 
-        verify(jdbc).update(contains("SET last_used_at = ?"), eq(Timestamp.from(PINNED)), eq(factId));
+        verify(jdbc)
+                .update(contains("SET last_used_at = ?"), eq(Timestamp.from(PINNED)), eq(factId));
     }
 
     @Test

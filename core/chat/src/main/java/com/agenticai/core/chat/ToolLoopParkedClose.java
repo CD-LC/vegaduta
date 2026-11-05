@@ -34,8 +34,8 @@ final class ToolLoopParkedClose {
     /**
      * The tool result for a call queued behind an undecided approval: the {@code approval_parked}
      * marker (so a history scan still reads this turn as parked) with a machine-readable result -
-     * the same shape {@code GuardedToolCallback} writes for calls it parks itself. No English of its
-     * own beyond the fixed marker payload.
+     * the same shape {@code GuardedToolCallback} writes for calls it parks itself. No English of
+     * its own beyond the fixed marker payload.
      */
     static String queuedResult() {
         return "{\"error\":\"approval_parked\",\"result\":\"queued behind the approval\"}";
@@ -69,12 +69,14 @@ final class ToolLoopParkedClose {
 
     /**
      * If the round just executed parked the turn (a {@link ToolResponseMessage} carrying the {@code
-     * approval_parked} marker), swap the result for a direct close: the parked call's response leads
-     * the list with the platform's fixed reply text (which is also what {@code buildGenerations}
-     * hands the caller), the remaining responses keep their real data, and {@code returnDirect}
-     * ends the loop so no model call runs after a park. Untouched results pass through.
+     * approval_parked} marker), swap the result for a direct close: the parked call's response
+     * leads the list with the platform's fixed reply text (which is also what {@code
+     * buildGenerations} hands the caller), the remaining responses keep their real data, and {@code
+     * returnDirect} ends the loop so no model call runs after a park. Untouched results pass
+     * through.
      */
-    static ToolExecutionResult close(PromptResolver prompts, Prompt prompt, ToolExecutionResult result) {
+    static ToolExecutionResult close(
+            PromptResolver prompts, Prompt prompt, ToolExecutionResult result) {
         if (result == null || result.returnDirect()) {
             return result;
         }
@@ -84,31 +86,41 @@ final class ToolLoopParkedClose {
         }
         Message last = history.get(history.size() - 1);
         if (!(last instanceof ToolResponseMessage toolResponses)
-                || !ToolLoopMarkers.parked(ToolLoopRunHooks.transcript(prompt), List.of(toolResponses))) {
+                || !ToolLoopMarkers.parked(
+                        ToolLoopRunHooks.transcript(prompt), List.of(toolResponses))) {
             return result;
         }
-        // The decision above is the turn's own state (or, with no signal wired, the flagged content fallback). What
-        // follows only LOCATES the parked call's response: the one that is the guard's marker document, else the first.
-        List<ToolResponseMessage.ToolResponse> ordered = new ArrayList<>(toolResponses.getResponses());
+        // The decision above is the turn's own state (or, with no signal wired, the flagged content
+        // fallback). What
+        // follows only LOCATES the parked call's response: the one that is the guard's marker
+        // document, else the first.
+        List<ToolResponseMessage.ToolResponse> ordered =
+                new ArrayList<>(toolResponses.getResponses());
         int parkedAt = 0;
         for (int i = 0; i < ordered.size(); i++) {
             if (ToolLoopMarkers.isMarkerDocument(
-                    ordered.get(i).responseData(), ArgumentSanitizingToolCallingManager.APPROVAL_PARKED)) {
+                    ordered.get(i).responseData(),
+                    ArgumentSanitizingToolCallingManager.APPROVAL_PARKED)) {
                 parkedAt = i;
                 break;
             }
         }
         if (!ordered.isEmpty()) {
-            // The parked call's own response becomes the closing reply (clean text for the person and a legible
-            // result for the model's next turn); its id stays so the call->response pairing still matches.
+            // The parked call's own response becomes the closing reply (clean text for the person
+            // and a legible
+            // result for the model's next turn); its id stays so the call->response pairing still
+            // matches.
             ordered.set(
                     parkedAt,
                     new ToolResponseMessage.ToolResponse(
-                            ordered.get(parkedAt).id(), ordered.get(parkedAt).name(), reply(prompts, prompt)));
+                            ordered.get(parkedAt).id(),
+                            ordered.get(parkedAt).name(),
+                            reply(prompts, prompt)));
             ordered.add(0, ordered.remove(parkedAt));
         }
         List<Message> rewritten = new ArrayList<>(history);
-        rewritten.set(rewritten.size() - 1, ToolResponseMessage.builder().responses(ordered).build());
+        rewritten.set(
+                rewritten.size() - 1, ToolResponseMessage.builder().responses(ordered).build());
         return ToolExecutionResult.builder()
                 .conversationHistory(rewritten)
                 .returnDirect(true)

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.agenticai.core.guardrails.taint.DelegationTaint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
@@ -502,7 +501,9 @@ public class AgentToolProvider implements AgentToolPort {
         // no turn context.
         ReasoningDepth depth =
                 effectiveDepth != null ? effectiveDepth : agentService.getReasoningDepth(agentId);
-        boolean rigorous = depth == ReasoningDepth.RIGOROUS && ToolOfferPolicy.hasVerifiableUserIntent(userMessage);
+        boolean rigorous =
+                depth == ReasoningDepth.RIGOROUS
+                        && ToolOfferPolicy.hasVerifiableUserIntent(userMessage);
         // The continuation turn after an approval carries the tools its conversation already used
         // (see ToolResolver#alwaysRelevant); the turn's approval state is on this thread only for
         // the duration of the context overload of resolveToolsFor.
@@ -519,7 +520,9 @@ public class AgentToolProvider implements AgentToolPort {
                         allowDelegation,
                         mainChatTurn,
                         List.of(),
-                        mainChatTurn && turnApproval != null ? ToolOfferPolicy.keptOnOffer(turnApproval) : Set.of(),
+                        mainChatTurn && turnApproval != null
+                                ? ToolOfferPolicy.keptOnOffer(turnApproval)
+                                : Set.of(),
                         forceToolDeferral),
                 applyRelevanceSelection,
                 stableToolSet);

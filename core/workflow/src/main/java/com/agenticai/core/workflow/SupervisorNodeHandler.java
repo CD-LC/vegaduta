@@ -25,14 +25,20 @@ import org.springframework.stereotype.Component;
 @Component
 class SupervisorNodeHandler implements NodeHandler {
 
-    /** Registry keys of the routing request (default text: {@code prompts/en/workflow.supervisor.*.md}). */
+    /**
+     * Registry keys of the routing request (default text: {@code
+     * prompts/en/workflow.supervisor.*.md}).
+     */
     static final String ROUTE_KEY = "workflow.supervisor.route";
 
     static final String INSTRUCTIONS_KEY = "workflow.supervisor.instructions";
 
     private final PromptSlot prompts = new PromptSlot();
 
-    /** The prompt registry, so a tenant or agent override of the routing request applies; absent = shipped text. */
+    /**
+     * The prompt registry, so a tenant or agent override of the routing request applies; absent =
+     * shipped text.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setPromptResolver(PromptResolver resolver) {
         prompts.use(resolver);
@@ -110,16 +116,20 @@ class SupervisorNodeHandler implements NodeHandler {
         }
         String instructionsBlock =
                 instructions != null
-                        ? prompts.text(INSTRUCTIONS_KEY, agentId, Map.of("instructions", instructions))
+                        ? prompts.text(
+                                INSTRUCTIONS_KEY, agentId, Map.of("instructions", instructions))
                         : "";
         String routingPrompt =
                 prompts.text(
                         ROUTE_KEY,
                         agentId,
                         Map.of(
-                                "routes", routesBlock.toString(),
-                                "instructions", instructionsBlock,
-                                "input", input == null ? "null" : input));
+                                "routes",
+                                routesBlock.toString(),
+                                "instructions",
+                                instructionsBlock,
+                                "input",
+                                input == null ? "null" : input));
 
         List<String> logLines = new ArrayList<>();
         logLines.add(
@@ -136,7 +146,8 @@ class SupervisorNodeHandler implements NodeHandler {
                     ChatTurnRequest.builder(agentId, runId, runId, routingPrompt).build();
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
-            // The routing prompt embeds the node's upstream input: same provenance as an agent node.
+            // The routing prompt embeds the node's upstream input: same provenance as an agent
+            // node.
             SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:workflow");
             reply =
                     agentChatService

@@ -131,6 +131,7 @@ final class AgentChatServiceTestFactory {
                         null,
                         null),
                 new ChatRoutingFacade(null, null, null, null, null),
-                new ChatTimeouts(streamIdleTimeout, bufferedTurnTimeout, bufferedKeepAliveInterval));
+                new ChatTimeouts(
+                        streamIdleTimeout, bufferedTurnTimeout, bufferedKeepAliveInterval));
     }
 }

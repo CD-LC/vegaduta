@@ -1,8 +1,9 @@
 package com.agenticai.core.agents.memorystore;
 
 /**
- * Wilson score lower bound (95%, two-sided). A small local copy: {@code core/quality} has the same formula but pulls in
- * the chat and provider stacks, which this memory module must not depend on. Tested against the same reference values.
+ * Wilson score lower bound (95%, two-sided). A small local copy: {@code core/quality} has the same
+ * formula but pulls in the chat and provider stacks, which this memory module must not depend on.
+ * Tested against the same reference values.
  */
 final class CompetenceStats {
 

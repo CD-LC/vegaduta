@@ -12,9 +12,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * With no override, the value a use site gets from the catalog IS the value of the property object it used to read:
- * wiring a key must change nothing until somebody sets it. The properties are moved off their defaults first, so a catalog
- * that quietly answered a default of its own would fail here.
+ * With no override, the value a use site gets from the catalog IS the value of the property object
+ * it used to read: wiring a key must change nothing until somebody sets it. The properties are
+ * moved off their defaults first, so a catalog that quietly answered a default of its own would
+ * fail here.
  */
 class BehaviourSettingsGoldenTest {
 
@@ -29,7 +30,8 @@ class BehaviourSettingsGoldenTest {
 
     private void expect(Object expected, String key) {
         TenantContext.set(TenantContext.of("tenant-a", "u", Set.of()));
-        for (SettingContext ctx : new SettingContext[] {SettingContext.tenant(), SettingContext.forAgent(AGENT)}) {
+        for (SettingContext ctx :
+                new SettingContext[] {SettingContext.tenant(), SettingContext.forAgent(AGENT)}) {
             SettingValue resolved = f.resolver().get(key, ctx);
             Object value = resolved.value();
             if (expected instanceof Duration d) {

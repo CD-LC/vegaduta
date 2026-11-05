@@ -215,7 +215,10 @@ class A2aMessageSecurityFilterTest {
                     pool.submit(
                             () -> {
                                 start.await();
-                                if (nonces.claim("tenant-a", "race-nonce-01", Duration.ofSeconds(300))
+                                if (nonces.claim(
+                                                "tenant-a",
+                                                "race-nonce-01",
+                                                Duration.ofSeconds(300))
                                         == A2aNonceStore.Outcome.ACCEPTED) {
                                     wins.incrementAndGet();
                                 }
@@ -285,7 +288,9 @@ class A2aMessageSecurityFilterTest {
                 resp,
                 (rq, rs) -> {
                     try {
-                        seen[0] = new String(rq.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                        seen[0] =
+                                new String(
+                                        rq.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
                     } catch (java.io.IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -384,7 +389,8 @@ class A2aMessageSecurityFilterTest {
     void signerRoundTripAndPeerLookup() {
         String sig = A2aMessageSigner.sign(SECRET, "POST", PATH, "1", "n", 0, new byte[] {1});
         assertTrue(A2aMessageSigner.verify(SECRET, sig, "post", PATH, "1", "n", 0, new byte[] {1}));
-        assertFalse(A2aMessageSigner.verify(SECRET, sig, "POST", PATH, "1", "n", 0, new byte[] {2}));
+        assertFalse(
+                A2aMessageSigner.verify(SECRET, sig, "POST", PATH, "1", "n", 0, new byte[] {2}));
         assertNull(props.secretForPeer("peer.example"));
         A2aMessageSecurityProperties.SignedPeer p = new A2aMessageSecurityProperties.SignedPeer();
         p.setHost("Peer.Example");

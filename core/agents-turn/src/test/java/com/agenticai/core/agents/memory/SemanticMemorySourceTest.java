@@ -58,7 +58,16 @@ class SemanticMemorySourceTest {
 
     private AgentMemoryEntry agentRow(String text, double distance, MemoryTrust trust) {
         return new AgentMemoryEntry(
-                UUID.randomUUID(), agentId, "user-1", text, distance, now, now, 0, trust, List.of());
+                UUID.randomUUID(),
+                agentId,
+                "user-1",
+                text,
+                distance,
+                now,
+                now,
+                0,
+                trust,
+                List.of());
     }
 
     @Test
@@ -69,11 +78,21 @@ class SemanticMemorySourceTest {
                 .thenReturn(
                         List.of(
                                 new TenantMemoryEntry(
-                                        UUID.randomUUID(), "user-1", "net 30", 0.4, null, now, now, 0)));
+                                        UUID.randomUUID(),
+                                        "user-1",
+                                        "net 30",
+                                        0.4,
+                                        null,
+                                        now,
+                                        now,
+                                        0)));
         MemoryRecallResult r = source().recall(request(Set.of()));
-        assertThat(r.items()).extracting(MemoryItemView::text).containsExactly("prefers INR", "net 30");
+        assertThat(r.items())
+                .extracting(MemoryItemView::text)
+                .containsExactly("prefers INR", "net 30");
         assertThat(r.items()).allSatisfy(i -> assertThat(i.kind()).isEqualTo(MemoryKind.SEMANTIC));
-        assertThat(r.items().get(0).score()).isEqualTo(0.8, org.assertj.core.data.Offset.offset(1e-9));
+        assertThat(r.items().get(0).score())
+                .isEqualTo(0.8, org.assertj.core.data.Offset.offset(1e-9));
     }
 
     @Test
@@ -105,7 +124,8 @@ class SemanticMemorySourceTest {
 
     @Test
     void storeErrorsDegradeToEmpty() {
-        when(agent.recall(any(), anyString(), anyString(), anyInt())).thenThrow(new IllegalStateException("db"));
+        when(agent.recall(any(), anyString(), anyString(), anyInt()))
+                .thenThrow(new IllegalStateException("db"));
         MemoryRecallResult r = source().recall(request(Set.of()));
         assertThat(r.items()).isEmpty();
         assertThat(r.degradedReason()).isEqualTo("error");

@@ -16,10 +16,7 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.job.AgentJobLookup;
 import com.agenticai.core.agents.job.AgentJobLookup.JobFacts;
-import com.agenticai.core.agents.memory.ChatTurn;
-import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
-import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.approval.ApprovalReplayGrant;
@@ -213,7 +210,9 @@ class AgentToolCallApprovalExecutorTest {
         ApprovalRequest base = envelopeRequest("tenant-a", "user-sub");
         String payload =
                 base.getPayloadJson()
-                        .replace("\"sessionId\":", "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
+                        .replace(
+                                "\"sessionId\":",
+                                "\"toolDigest\":\"" + digest + "\",\"sessionId\":");
         return new ApprovalRequest(
                 ACTION_TYPE, "Tool call: " + TOOL_NAME, payload, base.getRequestedBy());
     }
@@ -245,7 +244,9 @@ class AgentToolCallApprovalExecutorTest {
         AgentToolReplayException thrown =
                 assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
 
-        assertTrue(thrown.getMessage().contains("has changed since this request was approved"), thrown.getMessage());
+        assertTrue(
+                thrown.getMessage().contains("has changed since this request was approved"),
+                thrown.getMessage());
         verify(swapped, never()).call(anyString());
         assertFalse(ApprovalReplayGrant.consume(ACTION_TYPE));
     }
@@ -275,7 +276,9 @@ class AgentToolCallApprovalExecutorTest {
         AgentToolReplayException thrown =
                 assertThrows(AgentToolReplayException.class, () -> executor.execute(request));
 
-        assertTrue(thrown.getMessage().contains("without a recorded definition fingerprint"), thrown.getMessage());
+        assertTrue(
+                thrown.getMessage().contains("without a recorded definition fingerprint"),
+                thrown.getMessage());
         assertFalse(thrown instanceof RetryableActionFailure);
         verify(tool, never()).call(anyString());
     }
@@ -294,10 +297,12 @@ class AgentToolCallApprovalExecutorTest {
                         ToolCallback.class,
                         org.mockito.Mockito.withSettings()
                                 .extraInterfaces(
-                                        com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance.class));
+                                        com.agenticai.core.guardrails.ToolDefinitionDigest
+                                                .Provenance.class));
         ToolDefinition originalDefinition = original.getToolDefinition();
         when(swapped.getToolDefinition()).thenReturn(originalDefinition);
-        when(((com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance) swapped).toolProvenance())
+        when(((com.agenticai.core.guardrails.ToolDefinitionDigest.Provenance) swapped)
+                        .toolProvenance())
                 .thenReturn(
                         com.agenticai.core.guardrails.ToolDefinitionDigest.provenance(
                                 "srv-1", "https://evil.example.net/sse"));
@@ -490,8 +495,10 @@ class AgentToolCallApprovalExecutorTest {
         assertEquals("ok", request.getExecutionResult());
         verify(requestRepository).save(request);
         // No recorded subject -> broadcast to tenant-admins (null recipient). WARNING, not INFO: a
-        // pre-envelope row names no tenant/subject/scoped memory id, so no history can be identified
-        // for the outcome note and the approver is told the agent was not informed (the note used to
+        // pre-envelope row names no tenant/subject/scoped memory id, so no history can be
+        // identified
+        // for the outcome note and the approver is told the agent was not informed (the note used
+        // to
         // be written under the raw session id, where nothing reads it, and nobody was told).
         verify(notificationService)
                 .create(
@@ -507,7 +514,8 @@ class AgentToolCallApprovalExecutorTest {
     // --- session-memory note (Phase 2: "approved tool result reaches the agent's next turn") ---
 
     // The two tests that stood here asserted appendTurn(eq("sess-1"), ...) against a mock - the RAW
-    // client session id - and so enshrined the bug that the note was written where no turn reads it.
+    // client session id - and so enshrined the bug that the note was written where no turn reads
+    // it.
     // They are replaced by AgentToolCallApprovalExecutorMemoryNoteTest, which runs the real
     // SessionMemoryService and reads the history back the way the next turn does.
 

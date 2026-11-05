@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Merges the results of every registered {@link MemoryRecallSource} into one list under the
- * prompt budget (ADR-0028 section 9: 800 tokens, 120 per item, 8 items by default). Nothing here
- * renders text; callers get ids, kinds, text and scores. Sources only return TRUSTED items, so no
+ * Merges the results of every registered {@link MemoryRecallSource} into one list under the prompt
+ * budget (ADR-0028 section 9: 800 tokens, 120 per item, 8 items by default). Nothing here renders
+ * text; callers get ids, kinds, text and scores. Sources only return TRUSTED items, so no
  * spotlighting is applied at this layer.
  *
  * <p>With the platform flag off, or a lower level vetoing, no source is called and the result is
@@ -40,11 +40,16 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
     private final MemoryRecallProperties relevance;
 
     public MemoryRecallComposer(
-            MemoryUnifiedProperties properties, MemoryUnifiedGate gate, ObjectProvider<MemoryRecallSource> sources) {
+            MemoryUnifiedProperties properties,
+            MemoryUnifiedGate gate,
+            ObjectProvider<MemoryRecallSource> sources) {
         this(properties, gate, sources, MemoryRecallProperties.off());
     }
 
-    /** {@code relevance}: the similarity floor ({@code app.memory.recall.min-similarity}); null = no floor. */
+    /**
+     * {@code relevance}: the similarity floor ({@code app.memory.recall.min-similarity}); null = no
+     * floor.
+     */
     public MemoryRecallComposer(
             MemoryUnifiedProperties properties,
             MemoryUnifiedGate gate,
@@ -83,13 +88,15 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
                         allowed,
                         maxItems,
                         budget);
-        sources.orderedStream().forEach(source -> collect(source, forSources, allowed, merged, degraded));
+        sources.orderedStream()
+                .forEach(source -> collect(source, forSources, allowed, merged, degraded));
 
         merged.sort(
                 Comparator.comparingDouble(MemoryItemView::score)
                         .reversed()
                         .thenComparing(v -> v.id().toString()));
-        return fit(merged, maxItems, budget, degraded.isEmpty() ? null : String.join(",", degraded));
+        return fit(
+                merged, maxItems, budget, degraded.isEmpty() ? null : String.join(",", degraded));
     }
 
     private Set<MemoryKind> allowedKinds(MemoryRecallRequest request) {
@@ -122,9 +129,12 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
                 degraded.add(source.name() + ":" + result.degradedReason());
             }
             for (MemoryItemView item : result.items()) {
-                // Defence in depth: a view is TRUSTED by construction, and a kind we did not ask for is dropped.
-                if (item.provenance().trust() == MemoryTrustLevel.TRUSTED && allowed.contains(item.kind())) {
-                    // The floor is against unrelated lines; the self-model line is derived, not matched to the message.
+                // Defence in depth: a view is TRUSTED by construction, and a kind we did not ask
+                // for is dropped.
+                if (item.provenance().trust() == MemoryTrustLevel.TRUSTED
+                        && allowed.contains(item.kind())) {
+                    // The floor is against unrelated lines; the self-model line is derived, not
+                    // matched to the message.
                     if (item.kind() == MemoryKind.SELF_MODEL || relevance.passes(item.score())) {
                         into.add(item);
                     }
@@ -136,7 +146,8 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
         }
     }
 
-    private MemoryRecallResult fit(List<MemoryItemView> sorted, int maxItems, int budget, String degradedReason) {
+    private MemoryRecallResult fit(
+            List<MemoryItemView> sorted, int maxItems, int budget, String degradedReason) {
         List<MemoryItemView> kept = new ArrayList<>();
         Set<UUID> seen = new HashSet<>();
         int used = 0;
@@ -154,7 +165,8 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
             kept.add(
                     text.equals(item.text())
                             ? item
-                            : new MemoryItemView(item.id(), item.kind(), text, item.score(), item.provenance()));
+                            : new MemoryItemView(
+                                    item.id(), item.kind(), text, item.score(), item.provenance()));
             used += tokens;
         }
         return new MemoryRecallResult(kept, used, dropped, degradedReason);

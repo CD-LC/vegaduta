@@ -409,7 +409,8 @@ final class AdminIntegrationRules {
                 // already gated for below - explicitly ROLE_tenant-admin
                 // rather than left to fall
                 // through to plain anyRequest().authenticated().
-                // How callers may authenticate to /mcp (OAuth settings, allowed origins): admin view.
+                // How callers may authenticate to /mcp (OAuth settings, allowed origins): admin
+                // view.
                 .requestMatchers(HttpMethod.GET, "/api/mcpserver/grants/auth-options")
                 .hasAuthority("PERM_MANAGE_INTEGRATIONS")
                 .requestMatchers(HttpMethod.GET, "/api/mcpserver/grants/*/tool-calls")

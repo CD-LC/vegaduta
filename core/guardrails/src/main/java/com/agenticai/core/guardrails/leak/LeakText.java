@@ -9,6 +9,7 @@ import java.util.Locale;
  * match can be cut out of the raw text.
  *
  * <p>The reduction ("compact" form) keeps only letters and digits and drops everything else:
+ *
  * <ul>
  *   <li>NFKC normalisation per code point (full-width and mathematical-alphabet letters, ligatures
  *       and similar fold to plain letters);
@@ -17,6 +18,7 @@ import java.util.Locale;
  *   <li>a small table of Cyrillic and Greek look-alikes folds to Latin;
  *   <li>case is folded; whitespace, punctuation and markdown ({@code * _ # > ` |}) are dropped.
  * </ul>
+ *
  * Dropping spaces too means a reply with different spacing, line breaks, bullets or inserted
  * zero-width characters still compacts to the same string as the prompt.
  *
@@ -57,7 +59,8 @@ final class LeakText {
                     || type == Character.COMBINING_SPACING_MARK) {
                 continue;
             }
-            String folded = Normalizer.normalize(new String(Character.toChars(cp)), Normalizer.Form.NFKC);
+            String folded =
+                    Normalizer.normalize(new String(Character.toChars(cp)), Normalizer.Form.NFKC);
             for (int k = 0; k < folded.length(); k++) {
                 char c = fold(folded.charAt(k));
                 if (!Character.isLetterOrDigit(c)) {

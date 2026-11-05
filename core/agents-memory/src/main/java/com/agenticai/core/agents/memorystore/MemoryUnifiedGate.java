@@ -19,7 +19,8 @@ public class MemoryUnifiedGate {
     private final MemoryUnifiedProperties properties;
     private final ObjectProvider<MemoryFlagOverride> overrides;
 
-    public MemoryUnifiedGate(MemoryUnifiedProperties properties, ObjectProvider<MemoryFlagOverride> overrides) {
+    public MemoryUnifiedGate(
+            MemoryUnifiedProperties properties, ObjectProvider<MemoryFlagOverride> overrides) {
         this.properties = properties;
         this.overrides = overrides;
     }

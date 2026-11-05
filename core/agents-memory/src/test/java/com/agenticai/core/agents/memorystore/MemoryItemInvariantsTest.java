@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-/** The V681 CHECK constraints as service-level rules (the database side is {@code MemoryItemSchemaIT}). */
+/**
+ * The V681 CHECK constraints as service-level rules (the database side is {@code
+ * MemoryItemSchemaIT}).
+ */
 class MemoryItemInvariantsTest {
 
     private static MemoryItem item(

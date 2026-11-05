@@ -30,7 +30,9 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-/** Fail-closed mode and the optional per-call pre-reservation of the (otherwise soft) monthly cap. */
+/**
+ * Fail-closed mode and the optional per-call pre-reservation of the (otherwise soft) monthly cap.
+ */
 class SpendCapFailModeAndReservationTest {
 
     private static final Instant NOW = Instant.parse("2026-10-09T12:00:00Z");
@@ -56,10 +58,19 @@ class SpendCapFailModeAndReservationTest {
         when(redis.getIfAvailable()).thenReturn(redisTemplate);
         ObjectProvider<SpendCapAlertSink> sinks = mock(ObjectProvider.class);
         when(sinks.orderedStream()).thenAnswer(inv -> Stream.<SpendCapAlertSink>empty());
-        SpendCapService.TenantCap row = new SpendCapService.TenantCap(TENANT, SCHEMA, "Acme",
-            new BigDecimal("100.00"), 0, null);
-        when(jdbc.query(anyString(), any(RowMapper.class), anyString())).thenAnswer(inv -> List.of(row));
-        service = new SpendCapService(jdbc, redis, rollup, sinks, Clock.fixed(NOW, ZoneOffset.UTC), Runnable::run);
+        SpendCapService.TenantCap row =
+                new SpendCapService.TenantCap(
+                        TENANT, SCHEMA, "Acme", new BigDecimal("100.00"), 0, null);
+        when(jdbc.query(anyString(), any(RowMapper.class), anyString()))
+                .thenAnswer(inv -> List.of(row));
+        service =
+                new SpendCapService(
+                        jdbc,
+                        redis,
+                        rollup,
+                        sinks,
+                        Clock.fixed(NOW, ZoneOffset.UTC),
+                        Runnable::run);
     }
 
     // ------------------------------------------------------------------ fail mode
@@ -81,15 +92,19 @@ class SpendCapFailModeAndReservationTest {
         redisAndDatabaseDown();
         service.useSpendControlsFailMode(SpendControlsFailMode.closed());
 
-        assertThrows(SpendControlsUnavailableException.class, () -> service.assertWithinCap(SCHEMA));
+        assertThrows(
+                SpendControlsUnavailableException.class, () -> service.assertWithinCap(SCHEMA));
     }
 
     @Test
     void closedRefusesWhenTheCapConfigCannotBeRead() {
-        when(jdbc.query(anyString(), any(RowMapper.class), anyString())).thenThrow(new IllegalStateException("db down"));
+        when(jdbc.query(anyString(), any(RowMapper.class), anyString()))
+                .thenThrow(new IllegalStateException("db down"));
         service.useSpendControlsFailMode(SpendControlsFailMode.closed());
 
-        assertThrows(SpendControlsUnavailableException.class, () -> service.assertWithinCap("tenant_other"));
+        assertThrows(
+                SpendControlsUnavailableException.class,
+                () -> service.assertWithinCap("tenant_other"));
     }
 
     @Test
@@ -106,11 +121,12 @@ class SpendCapFailModeAndReservationTest {
         when(ops.get(KEY)).thenReturn("10.00");
         service.useReserveUsdPerCall(new BigDecimal("1.00"));
         when(redisTemplate.execute(any(RedisScript.class), anyList(), any(Object[].class)))
-            .thenThrow(new IllegalStateException("redis down"));
+                .thenThrow(new IllegalStateException("redis down"));
 
         assertDoesNotThrow(() -> service.assertWithinCap(SCHEMA)); // open: skipped
         service.useSpendControlsFailMode(SpendControlsFailMode.closed());
-        assertThrows(SpendControlsUnavailableException.class, () -> service.assertWithinCap(SCHEMA));
+        assertThrows(
+                SpendControlsUnavailableException.class, () -> service.assertWithinCap(SCHEMA));
     }
 
     // ------------------------------------------------------------------ reservation
@@ -122,15 +138,17 @@ class SpendCapFailModeAndReservationTest {
 
         service.assertWithinCap(SCHEMA);
 
-        verify(redisTemplate, never()).execute(any(RedisScript.class), anyList(), any(Object[].class));
+        verify(redisTemplate, never())
+                .execute(any(RedisScript.class), anyList(), any(Object[].class));
     }
 
     @Test
     void aCallThatFitsAfterItsReservationIsAdmitted() {
         when(ops.get(KEY)).thenReturn("95.00");
         service.useReserveUsdPerCall(new BigDecimal("1.00"));
-        when(redisTemplate.execute(eq(SpendCapService.RESERVE_INFLIGHT), anyList(), eq("1.00"), anyString()))
-            .thenReturn("4.00"); // 95 + 4 in flight (including this call) = 99 <= 100
+        when(redisTemplate.execute(
+                        eq(SpendCapService.RESERVE_INFLIGHT), anyList(), eq("1.00"), anyString()))
+                .thenReturn("4.00"); // 95 + 4 in flight (including this call) = 99 <= 100
 
         assertDoesNotThrow(() -> service.assertWithinCap(SCHEMA));
     }
@@ -139,8 +157,9 @@ class SpendCapFailModeAndReservationTest {
     void aCallThatWouldPushSpendPlusInFlightOverTheCapIsRefusedAndGivesItsReservationBack() {
         when(ops.get(KEY)).thenReturn("95.00");
         service.useReserveUsdPerCall(new BigDecimal("1.00"));
-        when(redisTemplate.execute(eq(SpendCapService.RESERVE_INFLIGHT), anyList(), eq("1.00"), anyString()))
-            .thenReturn("6.00"); // 95 + 6 > 100: five other calls are already in flight
+        when(redisTemplate.execute(
+                        eq(SpendCapService.RESERVE_INFLIGHT), anyList(), eq("1.00"), anyString()))
+                .thenReturn("6.00"); // 95 + 6 > 100: five other calls are already in flight
 
         assertThrows(SpendCapReachedException.class, () -> service.assertWithinCap(SCHEMA));
 

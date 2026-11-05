@@ -219,7 +219,13 @@ export default function FactRow({
                     {t("quarantinedApprove")}
                   </Button>
                 )}
-                <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => setConfirmDelete(true)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={busy}
+                  onClick={() => setConfirmDelete(true)}
+                >
                   {t("quarantinedReject")}
                 </Button>
               </div>

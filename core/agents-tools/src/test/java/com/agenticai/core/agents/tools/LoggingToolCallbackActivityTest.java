@@ -1,6 +1,5 @@
 package com.agenticai.core.agents.tools;
 
-import com.agenticai.core.guardrails.ToolResultMarker;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.turn.TurnToolActivity;
-import com.agenticai.core.audit.PlatformIssueService;
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
@@ -37,13 +36,19 @@ class LoggingToolCallbackActivityTest {
     private static ToolCallback tool(String name, Function<String, String> body) {
         ToolCallback delegate = mock(ToolCallback.class);
         when(delegate.getToolDefinition())
-                .thenReturn(ToolDefinition.builder().name(name).description("d").inputSchema("{}").build());
+                .thenReturn(
+                        ToolDefinition.builder()
+                                .name(name)
+                                .description("d")
+                                .inputSchema("{}")
+                                .build());
         when(delegate.call(any(String.class))).thenAnswer(inv -> body.apply(inv.getArgument(0)));
         return delegate;
     }
 
     @SuppressWarnings("unchecked")
-    private LoggingToolCallback wrap(ToolCallback delegate, EffectJournal journal, boolean durable) {
+    private LoggingToolCallback wrap(
+            ToolCallback delegate, EffectJournal journal, boolean durable) {
         ToolCircuitBreakerService breaker = mock(ToolCircuitBreakerService.class);
         return new LoggingToolCallback(
                         delegate,
@@ -68,11 +73,17 @@ class LoggingToolCallbackActivityTest {
     void aCallIsInFlightWhileTheToolRunsAndFinishesAsExecuted() {
         AtomicInteger inFlightInsideTheTool = new AtomicInteger(-1);
         AtomicReference<String> runningTool = new AtomicReference<>();
-        LoggingToolCallback logged = wrap(tool("get_order", args -> {
-            inFlightInsideTheTool.set(activity.inFlightCount());
-            runningTool.set(activity.snapshot().inFlight().get(0));
-            return "{\"id\":7}";
-        }), null, false);
+        LoggingToolCallback logged =
+                wrap(
+                        tool(
+                                "get_order",
+                                args -> {
+                                    inFlightInsideTheTool.set(activity.inFlightCount());
+                                    runningTool.set(activity.snapshot().inFlight().get(0));
+                                    return "{\"id\":7}";
+                                }),
+                        null,
+                        false);
 
         logged.call("{}");
 
@@ -86,10 +97,16 @@ class LoggingToolCallbackActivityTest {
     void aDurableToolTheJournalRecordedFinishesAsJournaledAndItsRepeatAsReplayed() {
         EffectJournal journal = journal();
         AtomicInteger sent = new AtomicInteger();
-        LoggingToolCallback logged = wrap(tool("send_email", args -> {
-            sent.incrementAndGet();
-            return "{\"sent\":true}";
-        }), journal, true);
+        LoggingToolCallback logged =
+                wrap(
+                        tool(
+                                "send_email",
+                                args -> {
+                                    sent.incrementAndGet();
+                                    return "{\"sent\":true}";
+                                }),
+                        journal,
+                        true);
 
         logged.call("{\"to\":\"a@b.c\"}");
         logged.call("{\"to\":\"a@b.c\"}");
@@ -98,12 +115,16 @@ class LoggingToolCallbackActivityTest {
         assertEquals(1, sent.get(), "the second identical call never reached the provider");
         assertEquals(1, tally.journaled());
         assertEquals(1, tally.replayed());
-        assertEquals(0, tally.unjournaled(), "its effect is on record, so a repeat is served from the journal");
+        assertEquals(
+                0,
+                tally.unjournaled(),
+                "its effect is on record, so a repeat is served from the journal");
     }
 
     @Test
     void aDurableToolWithNoJournalIsExecutedButNotProtected() {
-        LoggingToolCallback logged = wrap(tool("send_email", args -> "{\"sent\":true}"), null, true);
+        LoggingToolCallback logged =
+                wrap(tool("send_email", args -> "{\"sent\":true}"), null, true);
 
         logged.call("{}");
 
@@ -114,9 +135,16 @@ class LoggingToolCallbackActivityTest {
 
     @Test
     void aToolThatThrowsFinishesAsFailedBecauseItMayHaveActedFirst() {
-        LoggingToolCallback logged = wrap(tool("send_email", args -> {
-            throw new IllegalStateException("connection reset after the provider accepted it");
-        }), journal(), true);
+        LoggingToolCallback logged =
+                wrap(
+                        tool(
+                                "send_email",
+                                args -> {
+                                    throw new IllegalStateException(
+                                            "connection reset after the provider accepted it");
+                                }),
+                        journal(),
+                        true);
 
         assertThrows(IllegalStateException.class, () -> logged.call("{}"));
 
@@ -128,15 +156,27 @@ class LoggingToolCallbackActivityTest {
 
     @Test
     void aCallAGuardAnsweredInsteadIsNotRunAndLeavesNothingBehind() {
-        LoggingToolCallback refused = wrap(
-                tool("delete_all", args -> ToolResultMarker.mark(
-                        "This tool call (delete_all) needs approval before it can run." + System.nanoTime(),
-                        ToolResultMarker.Kind.BLOCKED)),
-                journal(),
-                true);
-        LoggingToolCallback overBudget = wrap(tool("get_order", args -> {
-            throw new ToolStepLimitExceededException(UUID.randomUUID(), "session-1", 15);
-        }), null, false);
+        LoggingToolCallback refused =
+                wrap(
+                        tool(
+                                "delete_all",
+                                args ->
+                                        ToolResultMarker.mark(
+                                                "This tool call (delete_all) needs approval before it can run."
+                                                        + System.nanoTime(),
+                                                ToolResultMarker.Kind.BLOCKED)),
+                        journal(),
+                        true);
+        LoggingToolCallback overBudget =
+                wrap(
+                        tool(
+                                "get_order",
+                                args -> {
+                                    throw new ToolStepLimitExceededException(
+                                            UUID.randomUUID(), "session-1", 15);
+                                }),
+                        null,
+                        false);
 
         refused.call("{}");
         assertThrows(ToolStepLimitExceededException.class, () -> overBudget.call("{}"));
@@ -151,14 +191,15 @@ class LoggingToolCallbackActivityTest {
     void aCallWithNoActivityAttachedBehavesAsBefore() {
         ToolCallback delegate = tool("get_order", args -> "ok");
         @SuppressWarnings("unchecked")
-        LoggingToolCallback plain = new LoggingToolCallback(
-                delegate,
-                mock(ToolCallLogRepository.class),
-                UUID.randomUUID(),
-                "session-1",
-                mock(ObjectProvider.class),
-                mock(ToolCircuitBreakerService.class),
-                null);
+        LoggingToolCallback plain =
+                new LoggingToolCallback(
+                        delegate,
+                        mock(ToolCallLogRepository.class),
+                        UUID.randomUUID(),
+                        "session-1",
+                        mock(ObjectProvider.class),
+                        mock(ToolCircuitBreakerService.class),
+                        null);
 
         assertEquals("ok", plain.call("{}"));
     }

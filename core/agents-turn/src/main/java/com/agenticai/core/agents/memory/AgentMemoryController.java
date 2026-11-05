@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <p>Memories written on a turn that handled untrusted content are listed with {@code trust =
  * QUARANTINED} and are never recalled until a person approves them ({@code POST
- * /{memoryId}/approve}) or rejects them ({@code POST /{memoryId}/reject}, or the plain delete).
- * The same permission bar applies as for delete: EDITOR for anyone's, VIEWER for the caller's
- * own. The tenant-wide shared pool is reviewed under {@code /shared}, which takes EDITOR because
- * an approved shared fact reaches every sharing agent.
+ * /{memoryId}/approve}) or rejects them ({@code POST /{memoryId}/reject}, or the plain delete). The
+ * same permission bar applies as for delete: EDITOR for anyone's, VIEWER for the caller's own. The
+ * tenant-wide shared pool is reviewed under {@code /shared}, which takes EDITOR because an approved
+ * shared fact reaches every sharing agent.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/memories")
@@ -88,7 +88,10 @@ public class AgentMemoryController {
         return ResponseEntity.noContent().build();
     }
 
-    /** Approves a QUARANTINED memory so it is recalled from now on; 404 when there is nothing to approve. */
+    /**
+     * Approves a QUARANTINED memory so it is recalled from now on; 404 when there is nothing to
+     * approve.
+     */
     @PostMapping("/{memoryId}/approve")
     public ResponseEntity<Void> approveMemory(
             @PathVariable UUID agentId, @PathVariable UUID memoryId, Principal principal) {
@@ -131,8 +134,9 @@ public class AgentMemoryController {
     }
 
     /**
-     * Approves a quarantined shared fact; EDITOR. {@code subjectKey} is optional: without it the approval is
-     * subject-agnostic (any subject's fact), with it the fact must be about that subject.
+     * Approves a quarantined shared fact; EDITOR. {@code subjectKey} is optional: without it the
+     * approval is subject-agnostic (any subject's fact), with it the fact must be about that
+     * subject.
      */
     @PostMapping("/shared/{memoryId}/approve")
     public ResponseEntity<Void> approveSharedMemory(

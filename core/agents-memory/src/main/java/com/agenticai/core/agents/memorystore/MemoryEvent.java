@@ -55,6 +55,7 @@ public record MemoryEvent(
             MemoryItemStatus to,
             String reason,
             Instant at) {
-        return new MemoryEvent(UUID.randomUUID(), itemId, agentId, event, actor, from, to, reason, at);
+        return new MemoryEvent(
+                UUID.randomUUID(), itemId, agentId, event, actor, from, to, reason, at);
     }
 }

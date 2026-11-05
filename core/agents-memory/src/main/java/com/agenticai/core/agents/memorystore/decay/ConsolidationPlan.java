@@ -48,7 +48,10 @@ public record ConsolidationPlan(
      * named, never changed.
      */
     public record Batch(
-            MemoryTrustLevel trustClass, List<Forget> forgets, List<Merge> merges, List<Summarise> summaries) {
+            MemoryTrustLevel trustClass,
+            List<Forget> forgets,
+            List<Merge> merges,
+            List<Summarise> summaries) {
 
         public Batch {
             forgets = List.copyOf(forgets);

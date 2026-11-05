@@ -1,16 +1,14 @@
 package com.agenticai.core.agents.a2a;
 
 /**
- * A JSON-RPC 2.0 error the A2A endpoint will serialize as
- * {@code {"jsonrpc":"2.0","id":...,"error":{"code","message","data"?}}} with
- * HTTP 200 - the JSON-RPC binding puts failures in the envelope, never in the
- * HTTP status (a 4xx/5xx would be read by A2A clients as a TRANSPORT failure and
- * retried, which is exactly wrong for "no such task").
+ * A JSON-RPC 2.0 error the A2A endpoint will serialize as {@code
+ * {"jsonrpc":"2.0","id":...,"error":{"code","message","data"?}}} with HTTP 200 - the JSON-RPC
+ * binding puts failures in the envelope, never in the HTTP status (a 4xx/5xx would be read by A2A
+ * clients as a TRANSPORT failure and retried, which is exactly wrong for "no such task").
  *
- * <p>Codes are the standard JSON-RPC set plus the A2A-specific block the spec
- * reserves from {@code -32001} down. Only the ones this server can actually
- * produce are defined - see {@link A2aTaskState}'s javadoc for the same
- * "advertise what you do, not what the spec lists" reasoning.
+ * <p>Codes are the standard JSON-RPC set plus the A2A-specific block the spec reserves from {@code
+ * -32001} down. Only the ones this server can actually produce are defined - see {@link
+ * A2aTaskState}'s javadoc for the same "advertise what you do, not what the spec lists" reasoning.
  */
 public class A2aError extends RuntimeException {
 
@@ -27,11 +25,12 @@ public class A2aError extends RuntimeException {
     public static final int VERSION_NOT_SUPPORTED = -32009;
 
     /**
-     * Platform extension block (-32090..-32095) for message-level protection (OWASP ASI07). The
-     * A2A spec only reserves -32001..-32009; these sit well clear of it and only appear when a
-     * peer opted in by sending the {@code X-A2A-*} headers (or the operator required them).
+     * Platform extension block (-32090..-32095) for message-level protection (OWASP ASI07). The A2A
+     * spec only reserves -32001..-32009; these sit well clear of it and only appear when a peer
+     * opted in by sending the {@code X-A2A-*} headers (or the operator required them).
      */
     public static final int REPLAY_DETECTED = -32090;
+
     public static final int TIMESTAMP_OUT_OF_WINDOW = -32091;
     public static final int HOP_LIMIT_EXCEEDED = -32092;
     public static final int REPLAY_HEADERS_REQUIRED = -32093;
@@ -81,26 +80,33 @@ public class A2aError extends RuntimeException {
     }
 
     /**
-     * Same envelope for "never existed", "expired from the in-memory store"
-     * and "belongs to a different tenant/user" - see {@link A2aTaskStore#find}
-     * for why those three are deliberately indistinguishable to a caller.
+     * Same envelope for "never existed", "expired from the in-memory store" and "belongs to a
+     * different tenant/user" - see {@link A2aTaskStore#find} for why those three are deliberately
+     * indistinguishable to a caller.
      */
     public static A2aError taskNotFound(String taskId) {
         return new A2aError(TASK_NOT_FOUND, "Task not found", java.util.Map.of("taskId", taskId));
     }
 
     public static A2aError taskNotCancelable(String taskId, A2aTaskState state) {
-        return new A2aError(TASK_NOT_CANCELABLE, "Task cannot be canceled: it is already " + state.name().toLowerCase(java.util.Locale.ROOT),
-            java.util.Map.of("taskId", taskId));
+        return new A2aError(
+                TASK_NOT_CANCELABLE,
+                "Task cannot be canceled: it is already "
+                        + state.name().toLowerCase(java.util.Locale.ROOT),
+                java.util.Map.of("taskId", taskId));
     }
 
-    /** Spec 3.3.4/13: an operation the Agent Card does not advertise (e.g. SubscribeToTask without streaming resubscribe). */
+    /**
+     * Spec 3.3.4/13: an operation the Agent Card does not advertise (e.g. SubscribeToTask without
+     * streaming resubscribe).
+     */
     public static A2aError unsupportedOperation(String operation) {
         return new A2aError(UNSUPPORTED_OPERATION, "Unsupported operation: " + operation);
     }
 
     public static A2aError pushNotificationsNotSupported() {
-        return new A2aError(PUSH_NOTIFICATION_NOT_SUPPORTED, "Push notifications are not supported");
+        return new A2aError(
+                PUSH_NOTIFICATION_NOT_SUPPORTED, "Push notifications are not supported");
     }
 
     public static A2aError contentTypeNotSupported(String detail) {
@@ -108,7 +114,9 @@ public class A2aError extends RuntimeException {
     }
 
     public static A2aError versionNotSupported(String requested) {
-        return new A2aError(VERSION_NOT_SUPPORTED, "Version not supported: " + requested,
-            java.util.Map.of("supported", java.util.List.of("0.3", "1.0")));
+        return new A2aError(
+                VERSION_NOT_SUPPORTED,
+                "Version not supported: " + requested,
+                java.util.Map.of("supported", java.util.List.of("0.3", "1.0")));
     }
 }

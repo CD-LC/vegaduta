@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,17 +24,15 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 /**
- * Covers {@link PlatformFeatureBudgetService}'s contract: the master switch
- * gates every feature, each feature's own switch/cap is independent of every
- * other feature's, the shared master cap can still stop a feature under its
- * own cap, spend is recorded in micro-cents into BOTH buckets with a one-shot
- * window expiry, and any Redis error fails OPEN (never blocks a feature).
- * {@code configCacheMs=0} so every call re-reads the (mocked) settings fresh.
+ * Covers {@link PlatformFeatureBudgetService}'s contract: the master switch gates every feature,
+ * each feature's own switch/cap is independent of every other feature's, the shared master cap can
+ * still stop a feature under its own cap, spend is recorded in micro-cents into BOTH buckets with a
+ * one-shot window expiry, and any Redis error fails OPEN (never blocks a feature). {@code
+ * configCacheMs=0} so every call re-reads the (mocked) settings fresh.
  *
- * <p>The reservation block (2026-09-28) backs the Redis counters with an
- * in-memory {@link AtomicLong} map so {@code INCRBY}'s atomic
- * return-the-new-total semantics are real - including under a genuinely
- * concurrent burst, which is the race {@code reserve} exists to close.
+ * <p>The reservation block (2026-09-28) backs the Redis counters with an in-memory {@link
+ * AtomicLong} map so {@code INCRBY}'s atomic return-the-new-total semantics are real - including
+ * under a genuinely concurrent burst, which is the race {@code reserve} exists to close.
  */
 class PlatformFeatureBudgetServiceTest {
 
@@ -57,10 +54,12 @@ class PlatformFeatureBudgetServiceTest {
         valueOps = mock(ValueOperations.class);
         when(redisTemplate.opsForValue()).thenReturn(valueOps);
         settings = mock(PlatformSettingsService.class);
-        // Return each getter's own supplied default -> the effective config is the in-code defaults.
+        // Return each getter's own supplied default -> the effective config is the in-code
+        // defaults.
         when(settings.getString(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(1));
         when(settings.getInt(anyString(), anyInt())).thenAnswer(inv -> inv.getArgument(1));
-        when(settings.getBoolean(anyString(), org.mockito.ArgumentMatchers.anyBoolean())).thenAnswer(inv -> inv.getArgument(1));
+        when(settings.getBoolean(anyString(), org.mockito.ArgumentMatchers.anyBoolean()))
+                .thenAnswer(inv -> inv.getArgument(1));
         service = new PlatformFeatureBudgetService(redisTemplate, settings, 0L);
     }
 
@@ -73,7 +72,8 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void blocksWhenMasterSwitchOff() {
-        when(settings.getString(eq(PlatformFeatureBudgetService.KEY_ENABLED), anyString())).thenReturn("false");
+        when(settings.getString(eq(PlatformFeatureBudgetService.KEY_ENABLED), anyString()))
+                .thenReturn("false");
 
         PlatformFeatureBudgetService.BudgetDecision decision = service.checkBudget(FEATURE);
 
@@ -83,8 +83,10 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void blocksWhenFeatureSwitchOff() {
-        when(settings.getBoolean(eq("platform.smart-ai.feature." + FEATURE + ".enabled"), org.mockito.ArgumentMatchers.anyBoolean()))
-            .thenReturn(false);
+        when(settings.getBoolean(
+                        eq("platform.smart-ai.feature." + FEATURE + ".enabled"),
+                        org.mockito.ArgumentMatchers.anyBoolean()))
+                .thenReturn(false);
 
         PlatformFeatureBudgetService.BudgetDecision decision = service.checkBudget(FEATURE);
 
@@ -94,8 +96,12 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void blocksWhenFeatureCapExhausted() {
-        when(valueOps.get(anyString())).thenAnswer(inv ->
-            ((String) inv.getArgument(0)).contains("feature:" + FEATURE) ? Long.toString(FEATURE_CAP_MICRO_CENTS) : null);
+        when(valueOps.get(anyString()))
+                .thenAnswer(
+                        inv ->
+                                ((String) inv.getArgument(0)).contains("feature:" + FEATURE)
+                                        ? Long.toString(FEATURE_CAP_MICRO_CENTS)
+                                        : null);
 
         PlatformFeatureBudgetService.BudgetDecision decision = service.checkBudget(FEATURE);
 
@@ -105,8 +111,12 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void blocksWhenMasterCapExhaustedEvenIfFeatureUnderCap() {
-        when(valueOps.get(anyString())).thenAnswer(inv ->
-            ((String) inv.getArgument(0)).contains("__master__") ? Long.toString(MASTER_CAP_MICRO_CENTS) : null);
+        when(valueOps.get(anyString()))
+                .thenAnswer(
+                        inv ->
+                                ((String) inv.getArgument(0)).contains("__master__")
+                                        ? Long.toString(MASTER_CAP_MICRO_CENTS)
+                                        : null);
 
         PlatformFeatureBudgetService.BudgetDecision decision = service.checkBudget(FEATURE);
 
@@ -116,11 +126,16 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void featuresAreIndependent() {
-        // "copilot" is exhausted; the FEATURE constant's own bucket and the master bucket are empty.
-        when(valueOps.get(anyString())).thenAnswer(inv -> {
-            String key = inv.getArgument(0);
-            return key.contains("feature:copilot") ? Long.toString(FEATURE_CAP_MICRO_CENTS) : null;
-        });
+        // "copilot" is exhausted; the FEATURE constant's own bucket and the master bucket are
+        // empty.
+        when(valueOps.get(anyString()))
+                .thenAnswer(
+                        inv -> {
+                            String key = inv.getArgument(0);
+                            return key.contains("feature:copilot")
+                                    ? Long.toString(FEATURE_CAP_MICRO_CENTS)
+                                    : null;
+                        });
 
         assertThat(service.checkBudget("copilot").allowed()).isFalse();
         assertThat(service.checkBudget(FEATURE).allowed()).isTrue();
@@ -128,13 +143,16 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void recordSpendConvertsUsdToMicroCentsAndIncrementsBothBuckets() {
-        // $0.01 -> 1,000,000 micro-cents. increment returns exactly that => first write => expiry set.
+        // $0.01 -> 1,000,000 micro-cents. increment returns exactly that => first write => expiry
+        // set.
         SpendCounterMocks.stub(redisTemplate, "", 1_000_000L, (Long) (long) (1_000_000L));
 
         service.recordSpend(FEATURE, new BigDecimal("0.01"));
 
-        SpendCounterMocks.verifyAdded(redisTemplate, "agentic:smart-ai-budget:feature:" + FEATURE, 1_000_000L);
-        SpendCounterMocks.verifyAdded(redisTemplate, "agentic:smart-ai-budget:__master__", 1_000_000L);
+        SpendCounterMocks.verifyAdded(
+                redisTemplate, "agentic:smart-ai-budget:feature:" + FEATURE, 1_000_000L);
+        SpendCounterMocks.verifyAdded(
+                redisTemplate, "agentic:smart-ai-budget:__master__", 1_000_000L);
     }
 
     @Test
@@ -157,8 +175,9 @@ class PlatformFeatureBudgetServiceTest {
     void failsOpenWhenRedisWriteThrows() {
         SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
 
-        org.assertj.core.api.Assertions.assertThatCode(() -> service.recordSpend(FEATURE, new BigDecimal("0.01")))
-            .doesNotThrowAnyException();
+        org.assertj.core.api.Assertions.assertThatCode(
+                        () -> service.recordSpend(FEATURE, new BigDecimal("0.01")))
+                .doesNotThrowAnyException();
     }
 
     // ---- atomic reservation --------------------------------------------------
@@ -171,10 +190,12 @@ class PlatformFeatureBudgetServiceTest {
     /** Real INCRBY/GET semantics over an in-memory map (INCRBY is atomic per key, as in Redis). */
     private void withInMemoryCounters() {
         SpendCounterMocks.stubInMemory(redisTemplate, counters);
-        when(valueOps.get(anyString())).thenAnswer(inv -> {
-            AtomicLong v = counters.get(inv.<String>getArgument(0));
-            return v == null ? null : Long.toString(v.get());
-        });
+        when(valueOps.get(anyString()))
+                .thenAnswer(
+                        inv -> {
+                            AtomicLong v = counters.get(inv.<String>getArgument(0));
+                            return v == null ? null : Long.toString(v.get());
+                        });
     }
 
     private long counter(String key) {
@@ -186,7 +207,8 @@ class PlatformFeatureBudgetServiceTest {
     void reserveHoldsTheEstimateInBothWindowsBeforeTheCall() {
         withInMemoryCounters();
 
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isTrue();
         // Held BEFORE the call - this is what a concurrent caller now sees.
@@ -201,7 +223,8 @@ class PlatformFeatureBudgetServiceTest {
         // "allowed" and let a $0.01 call overshoot.
         counters.put(FEATURE_BUCKET, new AtomicLong(FEATURE_CAP_MICRO_CENTS - 500_000L));
 
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isFalse();
         assertThat(r.reason()).isEqualTo("feature-budget-exhausted");
@@ -215,7 +238,8 @@ class PlatformFeatureBudgetServiceTest {
         withInMemoryCounters();
         counters.put(MASTER_BUCKET, new AtomicLong(MASTER_CAP_MICRO_CENTS - 1L));
 
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isFalse();
         assertThat(r.reason()).isEqualTo("master-budget-exhausted");
@@ -226,7 +250,8 @@ class PlatformFeatureBudgetServiceTest {
     @Test
     void settleReconcilesTheReservationToTheActualCostExactlyOnce() {
         withInMemoryCounters();
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         service.settle(r, new BigDecimal("0.004"));
         service.settle(r, new BigDecimal("0.004")); // second settle is a no-op
@@ -239,7 +264,8 @@ class PlatformFeatureBudgetServiceTest {
     @Test
     void settleAboveTheEstimateRecordsTheFullActualCost() {
         withInMemoryCounters();
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.001"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.001"));
 
         service.settle(r, new BigDecimal("0.003"));
 
@@ -251,7 +277,8 @@ class PlatformFeatureBudgetServiceTest {
     @Test
     void releaseRefundsAReservationWhoseCallNeverHappened() {
         withInMemoryCounters();
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         service.release(r);
 
@@ -263,7 +290,8 @@ class PlatformFeatureBudgetServiceTest {
     void refusedReservationIsNeverSettled() {
         withInMemoryCounters();
         counters.put(FEATURE_BUCKET, new AtomicLong(FEATURE_CAP_MICRO_CENTS));
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         service.settle(r, new BigDecimal("0.01"));
 
@@ -293,10 +321,12 @@ class PlatformFeatureBudgetServiceTest {
         List<Future<PlatformFeatureBudgetService.Reservation>> futures = new ArrayList<>();
         try {
             for (int i = 0; i < callers; i++) {
-                futures.add(pool.submit(() -> {
-                    go.await();
-                    return service.reserve(FEATURE, new BigDecimal("0.05"));
-                }));
+                futures.add(
+                        pool.submit(
+                                () -> {
+                                    go.await();
+                                    return service.reserve(FEATURE, new BigDecimal("0.05"));
+                                }));
             }
             go.countDown();
             int granted = 0;
@@ -316,18 +346,22 @@ class PlatformFeatureBudgetServiceTest {
     void reserveFailsOpenWhenRedisWriteThrows() {
         SpendCounterMocks.stubAllThrow(redisTemplate, new RuntimeException("redis down"));
 
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isTrue();
-        org.assertj.core.api.Assertions.assertThatCode(() -> service.settle(r, new BigDecimal("0.01")))
-            .doesNotThrowAnyException();
+        org.assertj.core.api.Assertions.assertThatCode(
+                        () -> service.settle(r, new BigDecimal("0.01")))
+                .doesNotThrowAnyException();
     }
 
     @Test
     void reserveHonoursTheMasterAndFeatureSwitchesWithoutTouchingRedis() {
-        when(settings.getString(eq(PlatformFeatureBudgetService.KEY_ENABLED), anyString())).thenReturn("false");
+        when(settings.getString(eq(PlatformFeatureBudgetService.KEY_ENABLED), anyString()))
+                .thenReturn("false");
 
-        PlatformFeatureBudgetService.Reservation r = service.reserve(FEATURE, new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve(FEATURE, new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isFalse();
         assertThat(r.reason()).isEqualTo("smart-ai-disabled");
@@ -336,12 +370,28 @@ class PlatformFeatureBudgetServiceTest {
 
     @Test
     void updateGlobalConfigUpsertsProvidedFieldsOnly() {
-        service.updateGlobalConfig(false, new BigDecimal("5.00"), null, null, "admin@staging.example.com");
+        service.updateGlobalConfig(
+                false, new BigDecimal("5.00"), null, null, "admin@staging.example.com");
 
-        verify(settings).update(PlatformFeatureBudgetService.KEY_ENABLED, "false", "admin@staging.example.com");
-        verify(settings).update(PlatformFeatureBudgetService.KEY_MASTER_DAILY_USD, "5.00", "admin@staging.example.com");
-        verify(settings, org.mockito.Mockito.never()).update(eq(PlatformFeatureBudgetService.KEY_WINDOW_SECONDS), anyString(), anyString());
+        verify(settings)
+                .update(
+                        PlatformFeatureBudgetService.KEY_ENABLED,
+                        "false",
+                        "admin@staging.example.com");
+        verify(settings)
+                .update(
+                        PlatformFeatureBudgetService.KEY_MASTER_DAILY_USD,
+                        "5.00",
+                        "admin@staging.example.com");
         verify(settings, org.mockito.Mockito.never())
-            .update(eq(PlatformFeatureBudgetService.KEY_DEFAULT_FEATURE_DAILY_USD), anyString(), anyString());
+                .update(
+                        eq(PlatformFeatureBudgetService.KEY_WINDOW_SECONDS),
+                        anyString(),
+                        anyString());
+        verify(settings, org.mockito.Mockito.never())
+                .update(
+                        eq(PlatformFeatureBudgetService.KEY_DEFAULT_FEATURE_DAILY_USD),
+                        anyString(),
+                        anyString());
     }
 }

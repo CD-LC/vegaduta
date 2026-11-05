@@ -30,14 +30,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * The daily memory review: reads one person's remembered facts, finds near-duplicates, contradictions and facts
- * nobody has used for a while ({@link MemoryReviewDetector}) and files each as a CONSOLIDATION proposal for the
- * person to approve ({@link MemoryConsolidationApplier} performs it). Nothing is changed here.
+ * The daily memory review: reads one person's remembered facts, finds near-duplicates,
+ * contradictions and facts nobody has used for a while ({@link MemoryReviewDetector}) and files
+ * each as a CONSOLIDATION proposal for the person to approve ({@link MemoryConsolidationApplier}
+ * performs it). Nothing is changed here.
  *
- * <p>No model call: similarity is word overlap, and a merged note is the more informative of the notes, which
- * the person can reword before approving. One run per person per day (claimed in {@code learning_review_runs}),
- * at most {@code app.learning.review.max-per-run} proposals a run, plus the proposal store's own pending cap.
- * Runs on the scheduler thread of the sweep, never on a chat turn. Needs the tenant context to be set.
+ * <p>No model call: similarity is word overlap, and a merged note is the more informative of the
+ * notes, which the person can reword before approving. One run per person per day (claimed in
+ * {@code learning_review_runs}), at most {@code app.learning.review.max-per-run} proposals a run,
+ * plus the proposal store's own pending cap. Runs on the scheduler thread of the sweep, never on a
+ * chat turn. Needs the tenant context to be set.
  */
 @Service
 @ConditionalOnProperty(
@@ -57,10 +59,14 @@ public class MemoryReviewService {
 
     private volatile java.time.Clock clock = java.time.Clock.systemUTC();
 
-    /** The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control the review day and ages. */
+    /**
+     * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
+     * the review day and ages.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void useClock(
-            @org.springframework.beans.factory.annotation.Qualifier("memoryClock") java.time.Clock clock) {
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock")
+                    java.time.Clock clock) {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
@@ -87,7 +93,10 @@ public class MemoryReviewService {
         this.maxSubjects = Math.max(1, maxSubjects);
     }
 
-    /** Reviews everyone in the current tenant who has not been reviewed today; returns proposals filed. */
+    /**
+     * Reviews everyone in the current tenant who has not been reviewed today; returns proposals
+     * filed.
+     */
     public int reviewTenant() {
         AgentMemoryService agent = agentMemory.getIfAvailable();
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
@@ -129,7 +138,8 @@ public class MemoryReviewService {
         }
         int filed = 0;
         try {
-            for (Finding f : MemoryReviewDetector.detect(collect(subject), clock.instant(), settings)) {
+            for (Finding f :
+                    MemoryReviewDetector.detect(collect(subject), clock.instant(), settings)) {
                 Proposal p = toProposal(subject, f);
                 if (p != null && proposals.propose(p).created()) {
                     filed++;
@@ -145,17 +155,27 @@ public class MemoryReviewService {
         return filed;
     }
 
-    /** TRUSTED facts only: a QUARANTINED row waits for the person's approval on the Memory page and is never a merge input. */
+    /**
+     * TRUSTED facts only: a QUARANTINED row waits for the person's approval on the Memory page and
+     * is never a merge input.
+     */
     private List<MemoryFactRef> collect(String subject) {
         List<MemoryFactRef> facts = new ArrayList<>();
         AgentMemoryService agent = agentMemory.getIfAvailable();
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
                 if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
-                    continue; // quarantined rows are never consolidated, so they cannot launder into a TRUSTED one
+                    continue; // quarantined rows are never consolidated, so they cannot launder
+                    // into a TRUSTED one
                 }
-                facts.add(new MemoryFactRef(
-                        MemoryFactRef.AGENT, m.id(), m.agentId(), m.content(), m.createdAt(), later(m.createdAt(), m.lastUsedAt())));
+                facts.add(
+                        new MemoryFactRef(
+                                MemoryFactRef.AGENT,
+                                m.id(),
+                                m.agentId(),
+                                m.content(),
+                                m.createdAt(),
+                                later(m.createdAt(), m.lastUsedAt())));
             }
         }
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
@@ -164,8 +184,14 @@ public class MemoryReviewService {
                 if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
                     continue;
                 }
-                facts.add(new MemoryFactRef(
-                        MemoryFactRef.SHARED, m.id(), m.createdByAgentId(), m.content(), m.createdAt(), later(m.createdAt(), m.lastUsedAt())));
+                facts.add(
+                        new MemoryFactRef(
+                                MemoryFactRef.SHARED,
+                                m.id(),
+                                m.createdByAgentId(),
+                                m.content(),
+                                m.createdAt(),
+                                later(m.createdAt(), m.lastUsedAt())));
             }
         }
         return facts;
@@ -175,14 +201,18 @@ public class MemoryReviewService {
         return a == null ? b : b == null || a.isAfter(b) ? a : b;
     }
 
-    /** Null when the finding involves text the scrubber would alter: such a note is left for the person to handle. */
+    /**
+     * Null when the finding involves text the scrubber would alter: such a note is left for the
+     * person to handle.
+     */
     static Proposal toProposal(String subject, Finding f) {
         SkillDraftScrubber scrub = SkillDraftScrubber.basic();
         boolean merge = f.keep() != null;
         if (merge && !scrub.scrub(f.keep().content()).equals(f.keep().content())) {
             return null;
         }
-        // The proposal store strips and truncates the body, and an approval without an edit writes that body
+        // The proposal store strips and truncates the body, and an approval without an edit writes
+        // that body
         // over the kept fact. A fact the store would change is never offered for merge.
         if (merge
                 && (!f.keep().content().equals(f.keep().content().strip())
@@ -201,7 +231,11 @@ public class MemoryReviewService {
                         merge ? f.keep().id() : null,
                         dropIds,
                         hashesOf(f, merge));
-        String dropped = '"' + snippet(f.dropped().get(0).content()) + '"' + (dropIds.size() > 1 ? " and " + (dropIds.size() - 1) + " more" : "");
+        String dropped =
+                '"'
+                        + snippet(f.dropped().get(0).content())
+                        + '"'
+                        + (dropIds.size() > 1 ? " and " + (dropIds.size() - 1) + " more" : "");
         String title;
         String body;
         switch (f.type()) {
@@ -221,7 +255,14 @@ public class MemoryReviewService {
         Map<String, Object> evidence = new LinkedHashMap<>();
         evidence.put("signal", f.type().name().toLowerCase(Locale.ROOT));
         evidence.put("replaced", f.dropped().stream().map(d -> snippet(d.content())).toList());
-        return new Proposal(subject, agentId, LearningProposalKind.CONSOLIDATION, title, body, payload.toMap(), evidence);
+        return new Proposal(
+                subject,
+                agentId,
+                LearningProposalKind.CONSOLIDATION,
+                title,
+                body,
+                payload.toMap(),
+                evidence);
     }
 
     private static Map<UUID, String> hashesOf(Finding f, boolean merge) {

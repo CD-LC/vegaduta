@@ -6,13 +6,14 @@ import java.util.List;
 /**
  * Carries the taint of the turn that handed work to a background job into the job's own turns.
  *
- * <p>A job's first turn sees only its goal and starts with a clean {@code TurnTaint}, so a goal written by a
- * model that had read a hostile page would turn that page's instruction into the "user's" task of an
- * autonomous run, with every taint gate (approval of sinks, memory quarantine) switched off for it. The
- * {@code continue_in_background} tool therefore prefixes the goal with a marker when its own turn was
- * tainted (or its taint was unreadable), and {@link AgentJobTurns} marks each of the job's turns tainted
- * when it finds the marker. The direction is fail-safe: a forged marker can only ADD taint to a job.
- * The marker stays visible in the goal, so the person watching the Jobs page sees where it came from.
+ * <p>A job's first turn sees only its goal and starts with a clean {@code TurnTaint}, so a goal
+ * written by a model that had read a hostile page would turn that page's instruction into the
+ * "user's" task of an autonomous run, with every taint gate (approval of sinks, memory quarantine)
+ * switched off for it. The {@code continue_in_background} tool therefore prefixes the goal with a
+ * marker when its own turn was tainted (or its taint was unreadable), and {@link AgentJobTurns}
+ * marks each of the job's turns tainted when it finds the marker. The direction is fail-safe: a
+ * forged marker can only ADD taint to a job. The marker stays visible in the goal, so the person
+ * watching the Jobs page sees where it came from.
  */
 public final class JobTaintMarker {
 
@@ -31,7 +32,11 @@ public final class JobTaintMarker {
                         .stream()
                                 .limit(MAX_SOURCES)
                                 .map(s -> s == null ? "unknown" : s.replaceAll("[\\],\\r\\n]", "_"))
-                                .map(s -> s.length() > MAX_SOURCE_CHARS ? s.substring(0, MAX_SOURCE_CHARS) : s)
+                                .map(
+                                        s ->
+                                                s.length() > MAX_SOURCE_CHARS
+                                                        ? s.substring(0, MAX_SOURCE_CHARS)
+                                                        : s)
                                 .toList();
         return PREFIX
                 + " "

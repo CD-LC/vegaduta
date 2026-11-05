@@ -46,7 +46,10 @@ final class AgentBackgroundJobToolResolver {
     private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
     private volatile ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint;
 
-    /** The taint source a job hand-off consults (see {@link TurnTaintViews}); unset means the job is marked. */
+    /**
+     * The taint source a job hand-off consults (see {@link TurnTaintViews}); unset means the job is
+     * marked.
+     */
     void setTaint(
             ObjectProvider<AgentTaintPolicy> taintPolicy,
             ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint) {

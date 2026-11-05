@@ -53,7 +53,8 @@ class MemoryConsolidationWiringTest {
         }
     }
 
-    private final ApplicationContextRunner runner = new ApplicationContextRunner().withUserConfiguration(Wiring.class);
+    private final ApplicationContextRunner runner =
+            new ApplicationContextRunner().withUserConfiguration(Wiring.class);
 
     private static int count(org.springframework.context.ApplicationContext ctx) {
         return ctx.getBeanNamesForType(MemoryConsolidationService.class).length
@@ -67,12 +68,15 @@ class MemoryConsolidationWiringTest {
 
     @Test
     void flagOnCreatesServiceAndSweep() {
-        runner.withPropertyValues("app.memory.consolidation.enabled=true").run(ctx -> assertEquals(2, count(ctx)));
+        runner.withPropertyValues("app.memory.consolidation.enabled=true")
+                .run(ctx -> assertEquals(2, count(ctx)));
     }
 
-    private static boolean applyEnabled(org.springframework.context.ApplicationContext ctx) throws Exception {
+    private static boolean applyEnabled(org.springframework.context.ApplicationContext ctx)
+            throws Exception {
         MemoryConsolidationService s = ctx.getBean(MemoryConsolidationService.class);
-        java.lang.reflect.Field f = MemoryConsolidationService.class.getDeclaredField("applyEnabled");
+        java.lang.reflect.Field f =
+                MemoryConsolidationService.class.getDeclaredField("applyEnabled");
         f.setAccessible(true);
         return f.getBoolean(s);
     }
@@ -81,9 +85,13 @@ class MemoryConsolidationWiringTest {
     void applyIsOffUnlessAutoApplyOrItsOlderAliasIsSet() {
         runner.withPropertyValues("app.memory.consolidation.enabled=true")
                 .run(ctx -> org.junit.jupiter.api.Assertions.assertFalse(applyEnabled(ctx)));
-        runner.withPropertyValues("app.memory.consolidation.enabled=true", "app.memory.consolidation.auto-apply=true")
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.auto-apply=true")
                 .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
-        runner.withPropertyValues("app.memory.consolidation.enabled=true", "app.memory.consolidation.apply.enabled=true")
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.apply.enabled=true")
                 .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
         runner.withPropertyValues(
                         "app.memory.consolidation.enabled=true",

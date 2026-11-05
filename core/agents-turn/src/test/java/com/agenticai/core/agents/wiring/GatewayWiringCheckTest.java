@@ -46,8 +46,18 @@ class GatewayWiringCheckTest {
         List<String> problems = new GatewayWiringCheck(env, false).problems();
 
         assertEquals(2, problems.size(), problems.toString());
-        assertTrue(problems.stream().anyMatch(p -> p.contains("turn journal") && p.contains("TurnJournalGateway")));
-        assertTrue(problems.stream().anyMatch(p -> p.contains("skill learning") && p.contains("SkillLearningGateway")));
+        assertTrue(
+                problems.stream()
+                        .anyMatch(
+                                p ->
+                                        p.contains("turn journal")
+                                                && p.contains("TurnJournalGateway")));
+        assertTrue(
+                problems.stream()
+                        .anyMatch(
+                                p ->
+                                        p.contains("skill learning")
+                                                && p.contains("SkillLearningGateway")));
     }
 
     @Test
@@ -72,7 +82,8 @@ class GatewayWiringCheckTest {
     @Test
     void aFeatureNeedsAllItsFlagsToBeOn() {
         // The learning beans are conditional on BOTH flags; one alone switches nothing on.
-        MockEnvironment env = new MockEnvironment().withProperty("app.learning.routines.enabled", "true");
+        MockEnvironment env =
+                new MockEnvironment().withProperty("app.learning.routines.enabled", "true");
         assertTrue(new GatewayWiringCheck(env, false).problems().isEmpty());
 
         env.withProperty("app.learning.proposals.enabled", "true");
@@ -83,11 +94,14 @@ class GatewayWiringCheckTest {
 
     @Test
     void strictModeRefusesToStartAndTheDefaultOnlyLogs() {
-        MockEnvironment env = new MockEnvironment().withProperty("app.turn-journal.enabled", "true");
+        MockEnvironment env =
+                new MockEnvironment().withProperty("app.turn-journal.enabled", "true");
 
         new GatewayWiringCheck(env, false).onReady(); // logs an ERROR, does not throw
         IllegalStateException refused =
-                assertThrows(IllegalStateException.class, () -> new GatewayWiringCheck(env, true).onReady());
+                assertThrows(
+                        IllegalStateException.class,
+                        () -> new GatewayWiringCheck(env, true).onReady());
         assertTrue(refused.getMessage().contains("TurnJournalGateway"), refused.getMessage());
     }
 
@@ -105,9 +119,11 @@ class GatewayWiringCheckTest {
                         RoutineObservationGateway.class.getSimpleName(),
                         PreferenceSignalGateway.class.getSimpleName(),
                         LessonLearningGateway.class.getSimpleName(),
-                        com.agenticai.core.agents.skills.EpisodeRecordingGateway.class.getSimpleName()),
+                        com.agenticai.core.agents.skills.EpisodeRecordingGateway.class
+                                .getSimpleName()),
                 covered);
-        // A new *Gateway holder with install(...) must be added to the check: look for any this list does not know.
+        // A new *Gateway holder with install(...) must be added to the check: look for any this
+        // list does not know.
         for (Class<?> gateway :
                 List.of(
                         TurnJournalGateway.class,
@@ -117,7 +133,8 @@ class GatewayWiringCheckTest {
                         LessonLearningGateway.class,
                         com.agenticai.core.agents.skills.EpisodeRecordingGateway.class)) {
             assertTrue(
-                    java.util.Arrays.stream(gateway.getMethods()).anyMatch(m -> m.getName().equals("install")),
+                    java.util.Arrays.stream(gateway.getMethods())
+                            .anyMatch(m -> m.getName().equals("install")),
                     gateway.getSimpleName());
         }
     }

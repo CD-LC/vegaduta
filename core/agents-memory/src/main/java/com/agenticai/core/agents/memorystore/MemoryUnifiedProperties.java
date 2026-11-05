@@ -43,7 +43,10 @@ public class MemoryUnifiedProperties {
     /** Most PENDING plus ACTIVE items one agent holds; a proposal beyond it is refused. */
     private int maxItemsPerAgent = 2000;
 
-    /** Most PENDING items one agent holds; a full queue refuses new proposals instead of dropping old ones. */
+    /**
+     * Most PENDING items one agent holds; a full queue refuses new proposals instead of dropping
+     * old ones.
+     */
     private int maxPendingPerAgent = 100;
 
     /** Most proposals one agent may create in a rolling hour. */
@@ -65,7 +68,10 @@ public class MemoryUnifiedProperties {
     }
 
     public void setKinds(Set<MemoryKind> kinds) {
-        this.kinds = kinds == null || kinds.isEmpty() ? EnumSet.noneOf(MemoryKind.class) : EnumSet.copyOf(kinds);
+        this.kinds =
+                kinds == null || kinds.isEmpty()
+                        ? EnumSet.noneOf(MemoryKind.class)
+                        : EnumSet.copyOf(kinds);
     }
 
     public int getTotalTokens() {

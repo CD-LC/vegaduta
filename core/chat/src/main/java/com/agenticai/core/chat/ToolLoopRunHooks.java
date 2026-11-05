@@ -10,12 +10,12 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 
 /**
- * The per-run hooks {@link ArgumentSanitizingToolCallingManager} applies after a tool round when the
- * request's tool context carries them: the run's {@link ToolLoopHistoryTransform} (token-budget
+ * The per-run hooks {@link ArgumentSanitizingToolCallingManager} applies after a tool round when
+ * the request's tool context carries them: the run's {@link ToolLoopHistoryTransform} (token-budget
  * tool-result clearing and compaction, {@code app.context.compaction.*}) and its {@link
- * ToolLoopTranscript} (the real conversation, handed back to the turn). A request without the keys -
- * every request of a caller that does not use them - is unaffected, and a hook that fails never costs
- * the turn.
+ * ToolLoopTranscript} (the real conversation, handed back to the turn). A request without the keys
+ * - every request of a caller that does not use them - is unaffected, and a hook that fails never
+ * costs the turn.
  */
 final class ToolLoopRunHooks {
 
@@ -23,42 +23,57 @@ final class ToolLoopRunHooks {
 
     private ToolLoopRunHooks() {}
 
-    /** The history after the run's own transform, or {@code history} when there is none or it fails. */
+    /**
+     * The history after the run's own transform, or {@code history} when there is none or it fails.
+     */
     static List<Message> transform(Prompt prompt, List<Message> history) {
-        if (!(toolContext(prompt).get(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY) instanceof ToolLoopHistoryTransform transform)) {
+        if (!(toolContext(prompt).get(ToolLoopHistoryTransform.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopHistoryTransform transform)) {
             return history;
         }
         try {
-            List<Message> transformed = transform.transform(history, ((ToolCallingChatOptions) prompt.getOptions()).getModel());
+            List<Message> transformed =
+                    transform.transform(
+                            history, ((ToolCallingChatOptions) prompt.getOptions()).getModel());
             return transformed != null ? transformed : history;
         } catch (RuntimeException e) {
-            log.warn("Tool-loop history transform failed; sending the history unchanged: {}", e.toString());
+            log.warn(
+                    "Tool-loop history transform failed; sending the history unchanged: {}",
+                    e.toString());
             return history;
         }
     }
 
-    /** Hands {@code history}, what the next round is sent, to the run's transcript when it has one. */
+    /**
+     * Hands {@code history}, what the next round is sent, to the run's transcript when it has one.
+     */
     static void record(Prompt prompt, List<Message> history) {
-        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript) {
             transcript.record(history);
         }
     }
 
-    /** Rounds earlier passes of the same run already spent, carried by the run's transcript; 0 for a lone invocation. */
+    /**
+     * Rounds earlier passes of the same run already spent, carried by the run's transcript; 0 for a
+     * lone invocation.
+     */
     static int roundsSpentBefore(Prompt prompt) {
-        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript) {
             return transcript.roundsSpentBefore();
         }
         return 0;
     }
 
     /**
-     * Adds this round's prompt size ({@code chatResponse} usage) to the run's token budget and answers
-     * whether the run is now over it. A request without a transcript, or a run without a cap, is never
-     * over; a response that reports no usage counts nothing.
+     * Adds this round's prompt size ({@code chatResponse} usage) to the run's token budget and
+     * answers whether the run is now over it. A request without a transcript, or a run without a
+     * cap, is never over; a response that reports no usage counts nothing.
      */
     static boolean overPromptBudget(Prompt prompt, ChatResponse chatResponse) {
-        if (!(toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript)) {
+        if (!(toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript)) {
             return false;
         }
         Long cap = transcript.maxPromptTokens();
@@ -73,15 +88,22 @@ final class ToolLoopRunHooks {
         }
         long used = transcript.addPromptTokens(promptTokens);
         if (used > cap) {
-            log.warn("Run exceeded its prompt-token budget (used={} cap={}) - stopping the tool loop", used, cap);
+            log.warn(
+                    "Run exceeded its prompt-token budget (used={} cap={}) - stopping the tool loop",
+                    used,
+                    cap);
             return true;
         }
         return false;
     }
 
-    /** The round cap this run asked for through its transcript, or {@code fallback} when it asked for none. */
+    /**
+     * The round cap this run asked for through its transcript, or {@code fallback} when it asked
+     * for none.
+     */
     static int maxRounds(Prompt prompt, int fallback) {
-        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript) {
             Integer own = transcript.maxRounds();
             if (own != null) {
                 return own;
@@ -90,30 +112,43 @@ final class ToolLoopRunHooks {
         return fallback;
     }
 
-    /** {@code base} with the run's own clearing switch and threshold applied, or {@code base} when it asked for none. */
+    /**
+     * {@code base} with the run's own clearing switch and threshold applied, or {@code base} when
+     * it asked for none.
+     */
     static ToolResultClearing clearing(Prompt prompt, ToolResultClearing base) {
-        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
-            return base.withOverrides(transcript.clearingEnabled(), transcript.clearingThresholdChars());
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript) {
+            return base.withOverrides(
+                    transcript.clearingEnabled(), transcript.clearingThresholdChars());
         }
         return base;
     }
 
     /** The agent and tenant the run says its loop text is for, or {@link ChatPrompts.Run#NONE}. */
     static ChatPrompts.Run promptRun(Prompt prompt) {
-        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript) {
+        if (toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                instanceof ToolLoopTranscript transcript) {
             return transcript.promptRun();
         }
         return ChatPrompts.Run.NONE;
     }
 
-    /** The run's transcript (which carries its out-of-band signals and per-run loop flags), or null for a lone invocation. */
+    /**
+     * The run's transcript (which carries its out-of-band signals and per-run loop flags), or null
+     * for a lone invocation.
+     */
     static ToolLoopTranscript transcript(Prompt prompt) {
-        return toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY) instanceof ToolLoopTranscript transcript
-            ? transcript : null;
+        return toolContext(prompt).get(ToolLoopTranscript.TOOL_CONTEXT_KEY)
+                        instanceof ToolLoopTranscript transcript
+                ? transcript
+                : null;
     }
 
     private static Map<String, Object> toolContext(Prompt prompt) {
-        if (prompt != null && prompt.getOptions() instanceof ToolCallingChatOptions options && options.getToolContext() != null) {
+        if (prompt != null
+                && prompt.getOptions() instanceof ToolCallingChatOptions options
+                && options.getToolContext() != null) {
             return options.getToolContext();
         }
         return Map.of();

@@ -43,7 +43,8 @@ class MemoryRecallComposerTest {
     }
 
     private static MemoryItemView item(MemoryKind kind, String text, double score) {
-        return new MemoryItemView(UUID.randomUUID(), kind, text, score, MemoryProvenanceRecord.TRUSTED);
+        return new MemoryItemView(
+                UUID.randomUUID(), kind, text, score, MemoryProvenanceRecord.TRUSTED);
     }
 
     private MemoryRecallRequest request() {
@@ -71,9 +72,10 @@ class MemoryRecallComposerTest {
     @Test
     void aThrowingLevelFailsClosed() {
         props.setEnabled(true);
-        override = a -> {
-            throw new IllegalStateException("settings down");
-        };
+        override =
+                a -> {
+                    throw new IllegalStateException("settings down");
+                };
         MemoryRecallComposer c = composer();
         assertThat(c.compose(request()).degradedReason()).isEqualTo(MemoryRecallComposer.DISABLED);
     }
@@ -83,7 +85,8 @@ class MemoryRecallComposerTest {
         props.setEnabled(true);
         MemoryItemView low = item(MemoryKind.SEMANTIC, "low", 0.2);
         MemoryItemView high = item(MemoryKind.SEMANTIC, "high", 0.9);
-        when(source.recall(any())).thenReturn(new MemoryRecallResult(List.of(low, high, high), 0, 0, null));
+        when(source.recall(any()))
+                .thenReturn(new MemoryRecallResult(List.of(low, high, high), 0, 0, null));
         MemoryRecallComposer c = composer();
         MemoryRecallResult r = c.compose(request());
         assertThat(r.items()).extracting(MemoryItemView::text).containsExactly("high", "low");
@@ -96,14 +99,20 @@ class MemoryRecallComposerTest {
         when(other.name()).thenReturn("other");
         when(other.kinds()).thenReturn(Set.of(MemoryKind.SEMANTIC));
         when(other.recall(any()))
-                .thenReturn(new MemoryRecallResult(List.of(item(MemoryKind.SEMANTIC, "b", 0.5)), 0, 0, null));
+                .thenReturn(
+                        new MemoryRecallResult(
+                                List.of(item(MemoryKind.SEMANTIC, "b", 0.5)), 0, 0, null));
         when(source.name()).thenReturn("fake");
         when(source.kinds()).thenReturn(Set.of(MemoryKind.SEMANTIC));
         when(source.recall(any()))
-                .thenReturn(new MemoryRecallResult(List.of(item(MemoryKind.SEMANTIC, "a", 0.7)), 0, 0, null));
+                .thenReturn(
+                        new MemoryRecallResult(
+                                List.of(item(MemoryKind.SEMANTIC, "a", 0.7)), 0, 0, null));
         MemoryUnifiedGate gate = new MemoryUnifiedGate(props, provider(override));
         MemoryRecallComposer c = new MemoryRecallComposer(props, gate, provider(source, other));
-        assertThat(c.compose(request()).items()).extracting(MemoryItemView::text).containsExactly("a", "b");
+        assertThat(c.compose(request()).items())
+                .extracting(MemoryItemView::text)
+                .containsExactly("a", "b");
     }
 
     @Test
@@ -159,7 +168,9 @@ class MemoryRecallComposerTest {
                                 0,
                                 null));
         MemoryRecallResult r = composer().compose(request());
-        assertThat(r.items()).extracting(MemoryItemView::text).containsExactly("Short first sentence.");
+        assertThat(r.items())
+                .extracting(MemoryItemView::text)
+                .containsExactly("Short first sentence.");
         assertThat(r.dropped()).isEqualTo(1);
     }
 
@@ -168,8 +179,10 @@ class MemoryRecallComposerTest {
         props.setEnabled(true);
         MemoryItemView episodic = item(MemoryKind.EPISODIC, "yesterday", 0.9);
         MemoryItemView semantic = item(MemoryKind.SEMANTIC, "likes INR", 0.5);
-        when(source.recall(any())).thenReturn(new MemoryRecallResult(List.of(episodic, semantic), 0, 0, null));
-        assertThat(composer().compose(request()).items()).extracting(MemoryItemView::kind)
+        when(source.recall(any()))
+                .thenReturn(new MemoryRecallResult(List.of(episodic, semantic), 0, 0, null));
+        assertThat(composer().compose(request()).items())
+                .extracting(MemoryItemView::kind)
                 .containsExactly(MemoryKind.SEMANTIC);
 
         props.setKinds(Set.of(MemoryKind.EPISODIC));

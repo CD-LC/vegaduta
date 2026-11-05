@@ -24,8 +24,8 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * REST surface of the unified-memory store (ADR-0028 WP6): the review queue and privacy operations
  * over {@code memory_item}. No LLM call happens here; reads are projections of the store, decisions
- * go through {@link MemoryItemReviewService} (the only path to TRUSTED + ACTIVE) and erasure through
- * its lineage cascade.
+ * go through {@link MemoryItemReviewService} (the only path to TRUSTED + ACTIVE) and erasure
+ * through its lineage cascade.
  *
  * <p>Authorization mirrors {@code AgentMemoryController}, through the {@link MemoryAgentAccess}
  * port (the adapter lives in agents-turn; this package must not reach {@code agents.core}, see the
@@ -36,11 +36,11 @@ import org.springframework.web.server.ResponseStatusException;
  * as the human actor in {@code memory_event}.
  *
  * <p>Flag gating: reads answer 404 while {@link MemoryUnifiedGate#enabled} is off for the agent
- * (the same platform AND tenant AND agent flags as the write path, all default OFF), so the
- * surface stays dark with the feature. Decisions and erasure are NOT gated: a person must always
- * be able to review and erase, even with the platform switch off (ADR-0028 rollout: data is
- * retained but erasable), matching {@link MemoryItemReviewService}, which never consults the flags. Edit
- * and pin create or change recall-relevant state, so they ARE gated: 404 while the feature is dark.
+ * (the same platform AND tenant AND agent flags as the write path, all default OFF), so the surface
+ * stays dark with the feature. Decisions and erasure are NOT gated: a person must always be able to
+ * review and erase, even with the platform switch off (ADR-0028 rollout: data is retained but
+ * erasable), matching {@link MemoryItemReviewService}, which never consults the flags. Edit and pin
+ * create or change recall-relevant state, so they ARE gated: 404 while the feature is dark.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/memory-items")
@@ -53,7 +53,9 @@ public class MemoryItemController {
     private final MemoryItemReviewService review;
 
     public MemoryItemController(
-            ObjectProvider<MemoryAgentAccess> access, MemoryUnifiedGate gate, MemoryItemReviewService review) {
+            ObjectProvider<MemoryAgentAccess> access,
+            MemoryUnifiedGate gate,
+            MemoryItemReviewService review) {
         this.access = access;
         this.gate = gate;
         this.review = review;
@@ -118,7 +120,13 @@ public class MemoryItemController {
     }
 
     public record EventView(
-            UUID id, String event, String actorType, String actorRef, String fromStatus, String toStatus, Instant at) {
+            UUID id,
+            String event,
+            String actorType,
+            String actorRef,
+            String fromStatus,
+            String toStatus,
+            Instant at) {
 
         static EventView of(MemoryEvent e) {
             return new EventView(
@@ -132,7 +140,9 @@ public class MemoryItemController {
         }
     }
 
-    /** The item plus its lineage and event history; the two latter are populated for EDITOR only. */
+    /**
+     * The item plus its lineage and event history; the two latter are populated for EDITOR only.
+     */
     public record DetailView(ItemView item, List<SourceView> lineage, List<EventView> events) {}
 
     /**
@@ -167,8 +177,7 @@ public class MemoryItemController {
     public ResponseEntity<DetailView> get(@PathVariable UUID agentId, @PathVariable UUID itemId) {
         access().requireViewer(agentId);
         requireEnabled(agentId);
-        return review
-                .get(agentId, itemId)
+        return review.get(agentId, itemId)
                 .map(
                         item -> {
                             boolean editor = access().isEditor(agentId);
@@ -179,40 +188,49 @@ public class MemoryItemController {
                             }
                             List<SourceView> lineage =
                                     editor
-                                            ? review.lineage(agentId, itemId).stream().map(SourceView::of).toList()
+                                            ? review.lineage(agentId, itemId).stream()
+                                                    .map(SourceView::of)
+                                                    .toList()
                                             : List.of();
                             List<EventView> events =
                                     editor
-                                            ? review.events(agentId, itemId).stream().map(EventView::of).toList()
+                                            ? review.events(agentId, itemId).stream()
+                                                    .map(EventView::of)
+                                                    .toList()
                                             : List.of();
-                            return ResponseEntity.ok(new DetailView(ItemView.of(item), lineage, events));
+                            return ResponseEntity.ok(
+                                    new DetailView(ItemView.of(item), lineage, events));
                         })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /** PENDING to TRUSTED + ACTIVE; EDITOR, recorded as the approver. */
     @PostMapping("/{itemId}/approve")
-    public ResponseEntity<Void> approve(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> approve(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         return decide(agentId, itemId, principal, review::approve);
     }
 
     /** PENDING to REJECTED; EDITOR. */
     @PostMapping("/{itemId}/reject")
-    public ResponseEntity<Void> reject(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> reject(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         return decide(agentId, itemId, principal, review::reject);
     }
 
     /** ACTIVE to REVERTED: recall stops returning it at once; EDITOR. */
     @PostMapping("/{itemId}/revert")
-    public ResponseEntity<Void> revert(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> revert(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         return decide(agentId, itemId, principal, review::revert);
     }
 
     /**
-     * Edit = a NEW version, never an in-place change: a new PENDING row (version + 1, {@code supersedesId} set, writer
-     * HUMAN, re-screened and re-embedded, taint and generation kept, the old row in its lineage) that needs its own
-     * approval. Answers 200 with the new version. 404 while the feature is dark, 400 for blank text, 404 for an
-     * unknown item, 409 when the item is not PENDING or ACTIVE, 422 when the text fails the content screen. EDITOR.
+     * Edit = a NEW version, never an in-place change: a new PENDING row (version + 1, {@code
+     * supersedesId} set, writer HUMAN, re-screened and re-embedded, taint and generation kept, the
+     * old row in its lineage) that needs its own approval. Answers 200 with the new version. 404
+     * while the feature is dark, 400 for blank text, 404 for an unknown item, 409 when the item is
+     * not PENDING or ACTIVE, 422 when the text fails the content screen. EDITOR.
      */
     @PatchMapping("/{itemId}")
     public ResponseEntity<ItemView> edit(
@@ -223,9 +241,11 @@ public class MemoryItemController {
         access().requireEditor(agentId);
         requireEnabled(agentId);
         if (body == null || !StringUtils.hasText(body.content())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Memory text cannot be empty.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Memory text cannot be empty.");
         }
-        MemoryItemReviewService.Outcome outcome = review.edit(agentId, itemId, body.content().strip(), actor(principal));
+        MemoryItemReviewService.Outcome outcome =
+                review.edit(agentId, itemId, body.content().strip(), actor(principal));
         if (!outcome.ok()) {
             return refusal(outcome);
         }
@@ -234,9 +254,13 @@ public class MemoryItemController {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT).build());
     }
 
-    /** Pins an ACTIVE item so consolidation never forgets it; a person only (an agent has no route here). EDITOR. */
+    /**
+     * Pins an ACTIVE item so consolidation never forgets it; a person only (an agent has no route
+     * here). EDITOR.
+     */
     @PostMapping("/{itemId}/pin")
-    public ResponseEntity<Void> pin(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> pin(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         access().requireEditor(agentId);
         requireEnabled(agentId);
         return decide(agentId, itemId, principal, review::pin);
@@ -244,18 +268,20 @@ public class MemoryItemController {
 
     /** Clears a pin. EDITOR. */
     @DeleteMapping("/{itemId}/pin")
-    public ResponseEntity<Void> unpin(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> unpin(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         access().requireEditor(agentId);
         requireEnabled(agentId);
         return decide(agentId, itemId, principal, review::unpin);
     }
 
     /**
-     * Erasure with the lineage cascade: the item, every item derived from it, and each erased
-     * row's lineage and event history go; one ERASED tombstone per erased id stays. EDITOR.
+     * Erasure with the lineage cascade: the item, every item derived from it, and each erased row's
+     * lineage and event history go; one ERASED tombstone per erased id stays. EDITOR.
      */
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<Void> erase(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+    public ResponseEntity<Void> erase(
+            @PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
         return decide(agentId, itemId, principal, review::erase);
     }
 
@@ -265,7 +291,8 @@ public class MemoryItemController {
         MemoryItemReviewService.Outcome run(UUID agentId, UUID itemId, MemoryActor actor);
     }
 
-    private ResponseEntity<Void> decide(UUID agentId, UUID itemId, Principal principal, Decision op) {
+    private ResponseEntity<Void> decide(
+            UUID agentId, UUID itemId, Principal principal, Decision op) {
         access().requireEditor(agentId);
         MemoryItemReviewService.Outcome outcome = op.run(agentId, itemId, actor(principal));
         if (outcome.ok()) {
@@ -298,7 +325,8 @@ public class MemoryItemController {
 
     private void requireEnabled(UUID agentId) {
         if (!gate.enabled(agentId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unified memory is not enabled for this agent.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Unified memory is not enabled for this agent.");
         }
     }
 
@@ -313,7 +341,8 @@ public class MemoryItemController {
         try {
             return MemoryItemStatus.valueOf(value.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown memory item status.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Unknown memory item status.");
         }
     }
 
@@ -325,7 +354,8 @@ public class MemoryItemController {
             MemoryKind kind = MemoryKind.valueOf(value.trim().toUpperCase());
             if (kind == MemoryKind.SEMANTIC) {
                 throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "SEMANTIC memory is listed by the agent-memory endpoints.");
+                        HttpStatus.BAD_REQUEST,
+                        "SEMANTIC memory is listed by the agent-memory endpoints.");
             }
             return kind;
         } catch (IllegalArgumentException e) {

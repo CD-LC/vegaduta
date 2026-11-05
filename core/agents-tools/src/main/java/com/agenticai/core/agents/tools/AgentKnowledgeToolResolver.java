@@ -127,7 +127,10 @@ final class AgentKnowledgeToolResolver {
         this.taintPolicy = taintPolicy;
     }
 
-    /** The taint of the turn identified by {@code stepCounter}, for a persistent-write tool built for it. */
+    /**
+     * The taint of the turn identified by {@code stepCounter}, for a persistent-write tool built
+     * for it.
+     */
     ObjectProvider<TurnTaintView> turnTaintFor(AtomicInteger stepCounter) {
         return TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint);
     }
@@ -138,8 +141,8 @@ final class AgentKnowledgeToolResolver {
     }
 
     /**
-     * The turn's taint for {@code add_to_knowledge_base}, read when the tool runs. Null (no
-     * {@link TurnTaintView} bean, or none for this turn) makes the tool quarantine the write.
+     * The turn's taint for {@code add_to_knowledge_base}, read when the tool runs. Null (no {@link
+     * TurnTaintView} bean, or none for this turn) makes the tool quarantine the write.
      */
     private com.agenticai.core.knowledge.KnowledgeWriteTaint knowledgeWriteTaint(
             AtomicInteger stepCounter) {

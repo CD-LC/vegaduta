@@ -39,12 +39,23 @@ class ApprovalFormValuesRaceTest {
         ApprovalActionExecutorRegistry registry = mock(ApprovalActionExecutorRegistry.class);
         when(registry.find(anyString())).thenReturn(Optional.empty());
         when(repository.save(any(ApprovalRequest.class))).thenAnswer(call -> call.getArgument(0));
-        ApprovalRequestRecorder recorder = new ApprovalRequestRecorder(
-            repository, mock(AuditLogService.class), mock(ApplicationEventPublisher.class),
-            mock(WorkflowEventPublisher.class));
-        gate = new HumanApprovalGateService(
-            mock(ApprovalPolicyService.class), repository, registry, recorder, mock(FeedbackService.class),
-            new ObjectMapper(), 5, 30, 3600);
+        ApprovalRequestRecorder recorder =
+                new ApprovalRequestRecorder(
+                        repository,
+                        mock(AuditLogService.class),
+                        mock(ApplicationEventPublisher.class),
+                        mock(WorkflowEventPublisher.class));
+        gate =
+                new HumanApprovalGateService(
+                        mock(ApprovalPolicyService.class),
+                        repository,
+                        registry,
+                        recorder,
+                        mock(FeedbackService.class),
+                        new ObjectMapper(),
+                        5,
+                        30,
+                        3600);
     }
 
     private ApprovalRequest request(UUID id) throws Exception {
@@ -59,13 +70,14 @@ class ApprovalFormValuesRaceTest {
     void aRequestDecidedBeforeTheLockKeepsItsPayload() throws Exception {
         UUID id = UUID.randomUUID();
         ApprovalRequest staleView = request(id); // what the unlocked read saw: PENDING
-        ApprovalRequest lockedRow = request(id); // what the locked read sees: someone got there first
+        ApprovalRequest lockedRow =
+                request(id); // what the locked read sees: someone got there first
         lockedRow.markRejected("other-admin", "no");
         when(repository.findById(id)).thenReturn(Optional.of(staleView));
         when(repository.findByIdForUpdate(id)).thenReturn(Optional.of(lockedRow));
 
         assertThatThrownBy(() -> gate.approve(id, "admin", Map.of("reason", "because")))
-            .isInstanceOf(ApprovalRequestAlreadyDecidedException.class);
+                .isInstanceOf(ApprovalRequestAlreadyDecidedException.class);
 
         assertThat(staleView.getPayloadJson()).isEqualTo(PAYLOAD);
         assertThat(lockedRow.getPayloadJson()).isEqualTo(PAYLOAD);

@@ -12,10 +12,8 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.agents.auxiliary.AuxiliaryModelProperties;
 import com.agenticai.core.agents.auxiliary.AuxiliaryModelResolver;
 import com.agenticai.core.agents.core.AgentService;
-import com.agenticai.core.agents.turn.AgentServiceAuxiliaryAgentModels;
-import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
-import org.springframework.beans.factory.ObjectProvider;
 import com.agenticai.core.agents.hosted.FreeTierChatClientService;
+import com.agenticai.core.agents.turn.AgentServiceAuxiliaryAgentModels;
 import com.agenticai.core.chat.ChatClientRegistry;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
@@ -26,6 +24,7 @@ import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -36,11 +35,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Prod 2026-10-05 (R1): the hourly improvement sweep called a Vertex key the provider had refused, 24 failed calls a
- * day for two weeks. Its calls (this class's background completion) must not reach a provider that is cooling down,
- * must use a working alternative when there is one, and a person-driven completion is unchanged.
+ * Prod 2026-10-05 (R1): the hourly improvement sweep called a Vertex key the provider had refused,
+ * 24 failed calls a day for two weeks. Its calls (this class's background completion) must not
+ * reach a provider that is cooling down, must use a working alternative when there is one, and a
+ * person-driven completion is unchanged.
  */
 class AssistServiceBackgroundTest {
 
@@ -59,18 +60,30 @@ class AssistServiceBackgroundTest {
         when(limits.plan("t1")).thenReturn(TenantPlan.PREMIUM);
         when(limits.usesPlatformPool("t1", TenantPlan.PREMIUM)).thenReturn(false);
         client = mock(ChatClient.class, Answers.RETURNS_DEEP_STUBS);
-        when(client.prompt().system(anyString()).user(anyString()).call().content()).thenReturn(" done ");
-        service = new AssistService(auxiliary(resolver, catalog), mock(ChatClientRegistry.class), gateway, limits,
-            mock(FreeTierChatClientService.class), 1024);
+        when(client.prompt().system(anyString()).user(anyString()).call().content())
+                .thenReturn(" done ");
+        service =
+                new AssistService(
+                        auxiliary(resolver, catalog),
+                        mock(ChatClientRegistry.class),
+                        gateway,
+                        limits,
+                        mock(FreeTierChatClientService.class),
+                        1024);
         TenantContext.set(TenantContext.of("t1", "u1", Set.of()));
     }
 
-
-    private static AuxiliaryModelResolver auxiliary(ProviderCredentialResolver credentials, ProviderModelCatalogService catalog) {
+    private static AuxiliaryModelResolver auxiliary(
+            ProviderCredentialResolver credentials, ProviderModelCatalogService catalog) {
         @SuppressWarnings("unchecked")
         ObjectProvider<TenantAiModelPreferenceService> noPreferences = mock(ObjectProvider.class);
         return new AuxiliaryModelResolver(
-            new AuxiliaryModelProperties(), credentials, catalog, new AgentServiceAuxiliaryAgentModels(mock(AgentService.class)), noPreferences, "claude-x");
+                new AuxiliaryModelProperties(),
+                credentials,
+                catalog,
+                new AgentServiceAuxiliaryAgentModels(mock(AgentService.class)),
+                noPreferences,
+                "claude-x");
     }
 
     @AfterEach
@@ -80,10 +93,12 @@ class AssistServiceBackgroundTest {
 
     @Test
     void aBackgroundCompletionUsesTheWorkingAlternativeAndThatProvidersDefaultModel() {
-        ProviderCredentialResolver.ResolvedProvider openRouter = new ProviderCredentialResolver.ResolvedProvider(
-            ProviderName.OPENROUTER, "or-key", "deepseek/deepseek-chat", false);
+        ProviderCredentialResolver.ResolvedProvider openRouter =
+                new ProviderCredentialResolver.ResolvedProvider(
+                        ProviderName.OPENROUTER, "or-key", "deepseek/deepseek-chat", false);
         when(resolver.resolveBest(true)).thenReturn(openRouter);
-        when(catalog.defaultModelFor(ProviderName.OPENROUTER)).thenReturn(Optional.of("openai/gpt-4o-mini"));
+        when(catalog.defaultModelFor(ProviderName.OPENROUTER))
+                .thenReturn(Optional.of("openai/gpt-4o-mini"));
         when(gateway.resolveClient(anyString(), any(GatewayCallSpec.class))).thenReturn(client);
 
         assertEquals("done", service.completeInBackground("system", "user"));
@@ -97,20 +112,26 @@ class AssistServiceBackgroundTest {
 
     @Test
     void aBackgroundCompletionAgainstACoolingDownProviderMakesNoCallAtAll() {
-        when(resolver.resolveBest(true)).thenThrow(new ProviderCoolingDownException(
-            ProviderName.GOOGLE_VERTEX, Instant.now(), Duration.ofHours(6)));
+        when(resolver.resolveBest(true))
+                .thenThrow(
+                        new ProviderCoolingDownException(
+                                ProviderName.GOOGLE_VERTEX, Instant.now(), Duration.ofHours(6)));
 
-        assertThrows(ProviderCoolingDownException.class, () -> service.completeInBackground("system", "user"));
+        assertThrows(
+                ProviderCoolingDownException.class,
+                () -> service.completeInBackground("system", "user"));
 
         verify(gateway, never()).resolveClient(anyString(), any(GatewayCallSpec.class));
     }
 
     @Test
     void aPersonDrivenCompletionStillResolvesWithoutTheCooldown() {
-        ProviderCredentialResolver.ResolvedProvider vertex = new ProviderCredentialResolver.ResolvedProvider(
-            ProviderName.GOOGLE_VERTEX, "key", null, true);
+        ProviderCredentialResolver.ResolvedProvider vertex =
+                new ProviderCredentialResolver.ResolvedProvider(
+                        ProviderName.GOOGLE_VERTEX, "key", null, true);
         when(resolver.resolveBest(false)).thenReturn(vertex);
-        when(catalog.defaultModelFor(ProviderName.GOOGLE_VERTEX)).thenReturn(Optional.of("gemini-2.0-flash-001"));
+        when(catalog.defaultModelFor(ProviderName.GOOGLE_VERTEX))
+                .thenReturn(Optional.of("gemini-2.0-flash-001"));
         when(gateway.resolveClient(anyString(), any(GatewayCallSpec.class))).thenReturn(client);
 
         assertEquals("done", service.complete("system", "user"));
@@ -121,10 +142,12 @@ class AssistServiceBackgroundTest {
 
     @Test
     void theMemoryExtractionPortUsesTheBackgroundClientAndSkipsACoolingDownProvider() {
-        ProviderCredentialResolver.ResolvedProvider openRouter = new ProviderCredentialResolver.ResolvedProvider(
-            ProviderName.OPENROUTER, "or-key", "deepseek/deepseek-chat", false);
+        ProviderCredentialResolver.ResolvedProvider openRouter =
+                new ProviderCredentialResolver.ResolvedProvider(
+                        ProviderName.OPENROUTER, "or-key", "deepseek/deepseek-chat", false);
         when(resolver.resolveBest(true)).thenReturn(openRouter);
-        when(catalog.defaultModelFor(ProviderName.OPENROUTER)).thenReturn(Optional.of("openai/gpt-4o-mini"));
+        when(catalog.defaultModelFor(ProviderName.OPENROUTER))
+                .thenReturn(Optional.of("openai/gpt-4o-mini"));
         when(gateway.resolveClient(anyString(), any(GatewayCallSpec.class))).thenReturn(client);
         com.agenticai.core.agents.memory.MemoryExtractionChatClients port = service;
 
@@ -132,8 +155,10 @@ class AssistServiceBackgroundTest {
         verify(resolver).resolveBest(true);
         verify(resolver, never()).resolveBest(false);
 
-        when(resolver.resolveBest(true)).thenThrow(new ProviderCoolingDownException(
-            ProviderName.OPENROUTER, Instant.now(), Duration.ofHours(1)));
+        when(resolver.resolveBest(true))
+                .thenThrow(
+                        new ProviderCoolingDownException(
+                                ProviderName.OPENROUTER, Instant.now(), Duration.ofHours(1)));
         assertThrows(ProviderCoolingDownException.class, port::forBackgroundExtraction);
     }
 }

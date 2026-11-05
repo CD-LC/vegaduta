@@ -41,20 +41,24 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * The episodic write path (ADR-0028 WP4b): after a turn, files one compact "what happened" episode as a PENDING or
- * QUARANTINED proposal through {@link MemoryProposalSink}, and nothing else. It cannot create an ACTIVE or TRUSTED row.
+ * The episodic write path (ADR-0028 WP4b): after a turn, files one compact "what happened" episode
+ * as a PENDING or QUARANTINED proposal through {@link MemoryProposalSink}, and nothing else. It
+ * cannot create an ACTIVE or TRUSTED row.
  *
  * <ul>
- *   <li>Off unless {@code app.memory.episodic.enabled=true} (the bean does not exist otherwise) AND the tenant/agent
- *       setting {@code memory.episodic.enabled} allows it; {@code memory.write.enabled} off skips it too and counts the
- *       skip ({@code memory.episode.skipped}).
- *   <li>The outcome comes from verified signals only ({@link EpisodeComposer}); the text is screened with {@link
- *       MemoryWriteScreen}; zero model calls.
- *   <li>A tainted or unreadable turn is classified on the finishing thread by {@link MemoryWriteGate} from the
- *       {@link com.agenticai.core.agents.memory.TurnTaintSnapshot} the outcome carries (fail closed: none, or an
- *       unreadable one, means QUARANTINED); a clean turn files a PENDING proposal.
- *   <li>Everything after a cheap admission check runs on a small bounded worker with the tenant re-applied (AGENTS.md
- *       rule 12); a full queue drops the episode, and no failure reaches the turn.
+ *   <li>Off unless {@code app.memory.episodic.enabled=true} (the bean does not exist otherwise) AND
+ *       the tenant/agent setting {@code memory.episodic.enabled} allows it; {@code
+ *       memory.write.enabled} off skips it too and counts the skip ({@code
+ *       memory.episode.skipped}).
+ *   <li>The outcome comes from verified signals only ({@link EpisodeComposer}); the text is
+ *       screened with {@link MemoryWriteScreen}; zero model calls.
+ *   <li>A tainted or unreadable turn is classified on the finishing thread by {@link
+ *       MemoryWriteGate} from the {@link com.agenticai.core.agents.memory.TurnTaintSnapshot} the
+ *       outcome carries (fail closed: none, or an unreadable one, means QUARANTINED); a clean turn
+ *       files a PENDING proposal.
+ *   <li>Everything after a cheap admission check runs on a small bounded worker with the tenant
+ *       re-applied (AGENTS.md rule 12); a full queue drops the episode, and no failure reaches the
+ *       turn.
  * </ul>
  */
 @Service
@@ -95,19 +99,21 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         this.signalSource = signalSource;
         this.competence = competence;
         this.meters = meters;
-        this.limiter = new EpisodeLimiter(
-                props.getMaxPerAgentPerHour(),
-                props.getMaxPerUserPerHour(),
-                props.getMaxPerAgentPerDay(),
-                System::currentTimeMillis);
-        this.pool = TenantAwareExecutors.newThreadPool(
-                1,
-                1,
-                30,
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(props.getQueueSize()),
-                TenantAwareExecutors.numberedThreadFactory("episode-recorder-", true),
-                new ThreadPoolExecutor.AbortPolicy());
+        this.limiter =
+                new EpisodeLimiter(
+                        props.getMaxPerAgentPerHour(),
+                        props.getMaxPerUserPerHour(),
+                        props.getMaxPerAgentPerDay(),
+                        System::currentTimeMillis);
+        this.pool =
+                TenantAwareExecutors.newThreadPool(
+                        1,
+                        1,
+                        30,
+                        TimeUnit.SECONDS,
+                        new ArrayBlockingQueue<>(props.getQueueSize()),
+                        TenantAwareExecutors.numberedThreadFactory("episode-recorder-", true),
+                        new ThreadPoolExecutor.AbortPolicy());
     }
 
     @PostConstruct
@@ -126,7 +132,10 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         return props.isEnabled();
     }
 
-    /** Runs on the thread that finished the turn: cheap checks and a hand-off, nothing else. Never throws. */
+    /**
+     * Runs on the thread that finished the turn: cheap checks and a hand-off, nothing else. Never
+     * throws.
+     */
     @Override
     public void onTurn(TurnOutcome o) {
         try {
@@ -140,7 +149,11 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
     }
 
     private void admit(TurnOutcome o) {
-        if (o == null || o.agentId() == null || o.sessionId() == null || o.cancelled() || o.scope().isEmpty()) {
+        if (o == null
+                || o.agentId() == null
+                || o.sessionId() == null
+                || o.cancelled()
+                || o.scope().isEmpty()) {
             return;
         }
         if (!props.isEnabled() || !agentAllows(o)) {
@@ -151,7 +164,8 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             skipped("write_disabled");
             return;
         }
-        // The turn's taint travels on the outcome as a snapshot taken when the turn ended; the worker never asks the
+        // The turn's taint travels on the outcome as a snapshot taken when the turn ended; the
+        // worker never asks the
         // live record. No snapshot, an unreadable one or a tainted turn all come back QUARANTINED.
         MemoryProvenance classified = MemoryWriteGate.classifyView(o.taint());
         String user = o.scope().context().map(TenantContext::getSubject).orElse(null);
@@ -173,7 +187,8 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
             return true; // platform flag already true
         }
         try {
-            return o.scope().get(() -> resolver.getBool(SETTING_KEY, SettingContext.forAgent(o.agentId())));
+            return o.scope()
+                    .get(() -> resolver.getBool(SETTING_KEY, SettingContext.forAgent(o.agentId())));
         } catch (RuntimeException e) {
             return false; // unreadable level counts as off
         }
@@ -196,25 +211,43 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
                 skipped("no_sink");
                 return;
             }
-            List<ToolCallLog> calls = toolCalls.findSince(o.agentId(), o.sessionId(), o.startedAt()).stream()
-                    .filter(c -> c.getStartedAt() != null && !c.getStartedAt().isBefore(o.startedAt()))
-                    .toList();
+            List<ToolCallLog> calls =
+                    toolCalls.findSince(o.agentId(), o.sessionId(), o.startedAt()).stream()
+                            .filter(
+                                    c ->
+                                            c.getStartedAt() != null
+                                                    && !c.getStartedAt().isBefore(o.startedAt()))
+                            .toList();
             Signals signals = signalsOf(o);
-            Episode episode = EpisodeComposer.compose(calls, signals, !o.completed(), props.getMaxChars());
+            Episode episode =
+                    EpisodeComposer.compose(calls, signals, !o.completed(), props.getMaxChars());
             Optional<String> refusal = MemoryWriteScreen.refusal(episode.text());
             if (refusal.isPresent()) {
                 skipped("screen_refused");
                 return;
             }
-            // WP9: the same verified outcome feeds the SELF_MODEL competence counters. The tracker is a no-op while
-            // memory.competence.enabled is off, so this is independent of the proposal sink and its result.
+            // WP9: the same verified outcome feeds the SELF_MODEL competence counters. The tracker
+            // is a no-op while
+            // memory.competence.enabled is off, so this is independent of the proposal sink and its
+            // result.
             recordCompetence(o, episode, calls.size(), signals);
-            MemoryProvenanceRecord provenance = new MemoryProvenanceRecord(
-                    classified.quarantined() ? MemoryTrustLevel.QUARANTINED : MemoryTrustLevel.TRUSTED,
-                    classified.sourceTaint(),
-                    WRITER);
-            Optional<MemoryProposalReceipt> receipt = target.propose(new MemoryWriteProposal(
-                    o.agentId(), user, MemoryKind.EPISODIC, episode.text(), provenance, null, false));
+            MemoryProvenanceRecord provenance =
+                    new MemoryProvenanceRecord(
+                            classified.quarantined()
+                                    ? MemoryTrustLevel.QUARANTINED
+                                    : MemoryTrustLevel.TRUSTED,
+                            classified.sourceTaint(),
+                            WRITER);
+            Optional<MemoryProposalReceipt> receipt =
+                    target.propose(
+                            new MemoryWriteProposal(
+                                    o.agentId(),
+                                    user,
+                                    MemoryKind.EPISODIC,
+                                    episode.text(),
+                                    provenance,
+                                    null,
+                                    false));
             if (receipt.isEmpty()) {
                 skipped("sink_refused");
             } else {
@@ -230,8 +263,11 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         try {
             CompetenceRecorder recorder = competence.getIfAvailable();
             if (recorder != null) {
-                recorder.record(new VerifiedOutcome(
-                        o.agentId(), episode.taskClass(), signalOf(episode.outcome(), toolCalls, signals)));
+                recorder.record(
+                        new VerifiedOutcome(
+                                o.agentId(),
+                                episode.taskClass(),
+                                signalOf(episode.outcome(), toolCalls, signals)));
             }
         } catch (RuntimeException e) {
             count("memory.competence.skipped", "failure");
@@ -239,15 +275,23 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
         }
     }
 
-    /** Maps the episode outcome back to the evidence behind it; only platform-observed or human-decided signals. */
-    static VerifiedOutcome.Signal signalOf(EpisodeComposer.Outcome outcome, int toolCalls, Signals signals) {
+    /**
+     * Maps the episode outcome back to the evidence behind it; only platform-observed or
+     * human-decided signals.
+     */
+    static VerifiedOutcome.Signal signalOf(
+            EpisodeComposer.Outcome outcome, int toolCalls, Signals signals) {
         return switch (outcome) {
-            case VERIFIED_SUCCESS -> toolCalls > 0 ? VerifiedOutcome.Signal.TOOL_SUCCESS : VerifiedOutcome.Signal.APPROVAL_GRANTED;
+            case VERIFIED_SUCCESS ->
+                    toolCalls > 0
+                            ? VerifiedOutcome.Signal.TOOL_SUCCESS
+                            : VerifiedOutcome.Signal.APPROVAL_GRANTED;
             case VERIFIED_FAILURE -> VerifiedOutcome.Signal.TOOL_ERROR;
             case HUMAN_ACCEPTED -> VerifiedOutcome.Signal.HUMAN_ACCEPTED;
-            case HUMAN_REJECTED -> signals.verdict() == EpisodeSignalSource.HumanVerdict.REJECTED
-                    ? VerifiedOutcome.Signal.HUMAN_REJECTED
-                    : VerifiedOutcome.Signal.APPROVAL_DENIED;
+            case HUMAN_REJECTED ->
+                    signals.verdict() == EpisodeSignalSource.HumanVerdict.REJECTED
+                            ? VerifiedOutcome.Signal.HUMAN_REJECTED
+                            : VerifiedOutcome.Signal.APPROVAL_DENIED;
             case UNKNOWN -> VerifiedOutcome.Signal.UNKNOWN;
         };
     }
@@ -255,7 +299,10 @@ public class EpisodeRecorder implements EpisodeRecordingGateway.Observer {
     private Signals signalsOf(TurnOutcome o) {
         try {
             EpisodeSignalSource source = signalSource.getIfAvailable();
-            Signals s = source == null ? null : source.signalsFor(o.agentId(), o.sessionId(), o.startedAt());
+            Signals s =
+                    source == null
+                            ? null
+                            : source.signalsFor(o.agentId(), o.sessionId(), o.startedAt());
             return s == null ? Signals.NONE : s;
         } catch (RuntimeException e) {
             return Signals.NONE;

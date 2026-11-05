@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Review of quarantined knowledge-base writes (see {@link KnowledgeQuarantineService}). The permission
- * model is the one every knowledge write already has: reads are open to members, and the POSTs below
- * fall under the {@code /api/knowledge/**} writes that need MANAGE_AGENTS (see {@code Permission}).
+ * Review of quarantined knowledge-base writes (see {@link KnowledgeQuarantineService}). The
+ * permission model is the one every knowledge write already has: reads are open to members, and the
+ * POSTs below fall under the {@code /api/knowledge/**} writes that need MANAGE_AGENTS (see {@code
+ * Permission}).
  */
 @RestController
 @RequestMapping("/api/knowledge/quarantine")
@@ -31,32 +32,39 @@ public class KnowledgeQuarantineController {
 
     @GetMapping
     public List<KnowledgeQuarantineService.QuarantinedChunk> list(
-            @RequestParam(required = false) UUID collectionId, @RequestParam(defaultValue = "50") int limit) {
+            @RequestParam(required = false) UUID collectionId,
+            @RequestParam(defaultValue = "50") int limit) {
         return service.list(collectionId, Math.min(limit, MAX_LIMIT));
     }
 
     /** Makes the chunk retrievable; 404 when nothing was quarantined under that id. */
     @PostMapping("/{chunkId}/approve")
     public ResponseEntity<Void> approve(@PathVariable UUID chunkId) {
-        return service.approve(chunkId) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return service.approve(chunkId)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     /** Deletes the quarantined chunk; 404 when nothing was quarantined under that id. */
     @PostMapping("/{chunkId}/reject")
     public ResponseEntity<Void> reject(@PathVariable UUID chunkId) {
-        return service.reject(chunkId) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return service.reject(chunkId)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     /** Approves every quarantined chunk of one saved note (a note can span several chunks). */
     @PostMapping("/notes/approve")
-    public ResponseEntity<Void> approveNote(@RequestParam UUID collectionId, @RequestParam String source) {
+    public ResponseEntity<Void> approveNote(
+            @RequestParam UUID collectionId, @RequestParam String source) {
         return service.approveNote(collectionId, source) > 0
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
 
     @PostMapping("/notes/reject")
-    public ResponseEntity<Void> rejectNote(@RequestParam UUID collectionId, @RequestParam String source) {
+    public ResponseEntity<Void> rejectNote(
+            @RequestParam UUID collectionId, @RequestParam String source) {
         return service.rejectNote(collectionId, source) > 0
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();

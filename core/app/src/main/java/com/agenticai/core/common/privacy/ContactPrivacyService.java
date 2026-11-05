@@ -119,7 +119,8 @@ public class ContactPrivacyService {
 
     // ------------------------------------------------------------------ export
 
-    public ExportReport export(String channelName, String externalId, boolean includeLeads, String actor) {
+    public ExportReport export(
+            String channelName, String externalId, boolean includeLeads, String actor) {
         String channel = channel(channelName);
         requireExternalId(externalId);
         Map<String, Object> data = new LinkedHashMap<>();
@@ -158,7 +159,8 @@ public class ContactPrivacyService {
             }
             data.put("agentMemory", facts);
         } else {
-            notIncluded.add("Agent memory was not exported: the memory service is not active here.");
+            notIncluded.add(
+                    "Agent memory was not exported: the memory service is not active here.");
         }
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
@@ -180,7 +182,8 @@ public class ContactPrivacyService {
         SessionMemoryService history = sessionMemory.getIfAvailable();
         if (history != null && session.isPresent()) {
             List<Map<String, Object>> turns = new ArrayList<>();
-            for (ChatTurn t : history.getFullHistory(String.valueOf(session.get().get("session_id")))) {
+            for (ChatTurn t :
+                    history.getFullHistory(String.valueOf(session.get().get("session_id")))) {
                 turns.add(Map.of("role", String.valueOf(t.role()), "content", t.content()));
             }
             data.put("liveConversationWindow", turns);
@@ -210,7 +213,8 @@ public class ContactPrivacyService {
 
     // ------------------------------------------------------------------ erase
 
-    public ErasureReport erase(String channelName, String externalId, EraseOptions options, String actor) {
+    public ErasureReport erase(
+            String channelName, String externalId, EraseOptions options, String actor) {
         String channel = channel(channelName);
         requireExternalId(externalId);
         Map<String, Long> erased = new LinkedHashMap<>();
@@ -250,20 +254,33 @@ public class ContactPrivacyService {
         }
         AgentMemoryService agent = agentMemory.getIfAvailable();
         if (agent != null) {
-            step("agentMemory", erased, failures, () -> (long) agent.forgetAllForSubject(externalId));
+            step(
+                    "agentMemory",
+                    erased,
+                    failures,
+                    () -> (long) agent.forgetAllForSubject(externalId));
         }
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
-            step("sharedMemory", erased, failures, () -> (long) tenant.forgetAllForSubject(externalId));
+            step(
+                    "sharedMemory",
+                    erased,
+                    failures,
+                    () -> (long) tenant.forgetAllForSubject(externalId));
         }
         for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
-            // Per-user stores owned by modules this one reaches through the port (the agent scratchpad).
+            // Per-user stores owned by modules this one reaches through the port (the agent
+            // scratchpad).
             step(store.store(), erased, failures, () -> (long) store.eraseSubject(externalId));
         }
         GraphMemoryService graph = graphMemory.getIfAvailable();
         if (graph != null) {
             // eraseSubject deliberately does not fail open; a failure lands in `failures`.
-            step("graphMemoryEntities", erased, failures, () -> (long) graph.eraseSubject(externalId));
+            step(
+                    "graphMemoryEntities",
+                    erased,
+                    failures,
+                    () -> (long) graph.eraseSubject(externalId));
         }
         step(
                 "contactRecords",
@@ -292,7 +309,11 @@ public class ContactPrivacyService {
             step("crmLeads", erased, failures, () -> deleteLeads(channel, externalId));
         }
         if (!options.keepConsentProof()) {
-            step("consentRecords", erased, failures, () -> (long) ledger.deleteFor(channel, externalId));
+            step(
+                    "consentRecords",
+                    erased,
+                    failures,
+                    () -> (long) ledger.deleteFor(channel, externalId));
         }
         // The session row last: contact rows point at it, and a retried erasure can still find
         // the session key if an earlier step failed.
@@ -341,7 +362,8 @@ public class ContactPrivacyService {
         long run();
     }
 
-    private static void step(String name, Map<String, Long> erased, List<String> failures, Step step) {
+    private static void step(
+            String name, Map<String, Long> erased, List<String> failures, Step step) {
         try {
             erased.put(name, step.run());
         } catch (RuntimeException e) {
@@ -386,10 +408,14 @@ public class ContactPrivacyService {
         if (digits == null) {
             return 0;
         }
-        return jdbc.update("DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
+        return jdbc.update(
+                "DELETE FROM lead WHERE regexp_replace(phone, '\\D', '', 'g') = ?", digits);
     }
 
-    /** {@code AddToKnowledgeBaseToolCallback#buildSource} stamps ", session <id>, at " in the source. */
+    /**
+     * {@code AddToKnowledgeBaseToolCallback#buildSource} stamps ", session <id>, at " in the
+     * source.
+     */
     static String derivedChunkPattern(String sessionKey) {
         String escaped = sessionKey.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
         return "Agent memory: %(written by agent %, session " + escaped + ", at %";
@@ -402,7 +428,9 @@ public class ContactPrivacyService {
     }
 
     static String mask(String externalId) {
-        return externalId.length() >= 4 ? "***" + externalId.substring(externalId.length() - 4) : "***";
+        return externalId.length() >= 4
+                ? "***" + externalId.substring(externalId.length() - 4)
+                : "***";
     }
 
     private static String channel(String name) {
@@ -421,6 +449,7 @@ public class ContactPrivacyService {
 
     /** Used by the consent gate on withdrawal. */
     ErasureReport eraseOnWithdrawal(String channel, String externalId) {
-        return erase(channel, externalId, new EraseOptions(false, true), "system:consent-withdrawal");
+        return erase(
+                channel, externalId, new EraseOptions(false, true), "system:consent-withdrawal");
     }
 }

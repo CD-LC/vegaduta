@@ -23,7 +23,9 @@ class TurnToolLoopSignalsTest {
 
         mine.markBudgetExhausted();
         assertTrue(signals.budgetExhausted());
-        assertFalse(TurnToolLoopSignals.of(theirs).budgetExhausted(), "a concurrent turn is unaffected");
+        assertFalse(
+                TurnToolLoopSignals.of(theirs).budgetExhausted(),
+                "a concurrent turn is unaffected");
     }
 
     @Test

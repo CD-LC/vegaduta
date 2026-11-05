@@ -13,12 +13,9 @@ import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
-import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.guardrails.ContentGuardrailType;
-import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.ExperienceMode;
-import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.demo.DemoSession;
 import com.agenticai.core.tenancy.demo.DemoSessionService;
 import java.time.Duration;
@@ -578,7 +575,8 @@ public class DemoStudioService {
         moderation.check(session, Map.of("mission", text));
         AgentStepEventEmitter stepEvents = AgentStepEventEmitter.active(STEP_HEARTBEAT);
         String subject = DemoSessionService.actorSubject(session.getId());
-        ChatTurnRequest turn = DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
+        ChatTurnRequest turn =
+                DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
         Flux<String> tokens =
                 demoSessionService.inDemoTenantContextAs(
                         session,
@@ -608,7 +606,8 @@ public class DemoStudioService {
                 mission.length() > MAX_MISSION_CHARS
                         ? mission.substring(0, MAX_MISSION_CHARS)
                         : mission;
-        ChatTurnRequest turn = DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
+        ChatTurnRequest turn =
+                DemoStudioTurns.studioTurn(agentId, chatSessionId, subject, text, stepEvents);
         return demoSessionService.inDemoTenantContextAs(
                 session,
                 owned.creator().getId(),

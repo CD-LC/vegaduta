@@ -10,10 +10,11 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Builds the compact episode text from VERIFIED signals only (ADR-0028 section 3): tool status, approval decisions, a
- * human verdict, and whether the platform saw the turn error out. It never reads the user's message or the model's
- * answer, so there is no model claim of success and no free text to carry an injection; the only strings that come from
- * outside the platform are tool names, which are reduced to {@code [a-z0-9_.-]} and bounded. Pure and deterministic.
+ * Builds the compact episode text from VERIFIED signals only (ADR-0028 section 3): tool status,
+ * approval decisions, a human verdict, and whether the platform saw the turn error out. It never
+ * reads the user's message or the model's answer, so there is no model claim of success and no free
+ * text to carry an injection; the only strings that come from outside the platform are tool names,
+ * which are reduced to {@code [a-z0-9_.-]} and bounded. Pure and deterministic.
  */
 final class EpisodeComposer {
 
@@ -33,16 +34,33 @@ final class EpisodeComposer {
 
     private EpisodeComposer() {}
 
-    static Episode compose(List<ToolCallLog> calls, Signals signals, boolean turnErrored, int maxChars) {
+    static Episode compose(
+            List<ToolCallLog> calls, Signals signals, boolean turnErrored, int maxChars) {
         List<ToolCallLog> list = calls == null ? List.of() : calls;
         Signals sig = signals == null ? Signals.NONE : signals;
         String taskClass = taskClass(list);
         int failedFinal = unresolvedFailures(list);
         Outcome outcome = outcome(list.size(), failedFinal, sig, turnErrored);
-        String text = "Episode (" + taskClass + "): outcome=" + outcome + "; tool calls=" + list.size()
-                + ", unresolved failures=" + failedFinal + "; approvals approved=" + sig.approved() + ", rejected="
-                + sig.rejected() + "; human verdict=" + (sig.verdict() == null ? "none" : sig.verdict().name().toLowerCase(Locale.ROOT))
-                + "; turn " + (turnErrored ? "errored" : "completed") + ".";
+        String text =
+                "Episode ("
+                        + taskClass
+                        + "): outcome="
+                        + outcome
+                        + "; tool calls="
+                        + list.size()
+                        + ", unresolved failures="
+                        + failedFinal
+                        + "; approvals approved="
+                        + sig.approved()
+                        + ", rejected="
+                        + sig.rejected()
+                        + "; human verdict="
+                        + (sig.verdict() == null
+                                ? "none"
+                                : sig.verdict().name().toLowerCase(Locale.ROOT))
+                        + "; turn "
+                        + (turnErrored ? "errored" : "completed")
+                        + ".";
         if (text.length() > maxChars) {
             text = text.substring(0, Math.max(1, maxChars));
         }
@@ -69,14 +87,18 @@ final class EpisodeComposer {
     private static int unresolvedFailures(List<ToolCallLog> calls) {
         Map<String, Boolean> lastFailed = new HashMap<>();
         calls.stream()
-                .sorted(java.util.Comparator.comparing(
-                        ToolCallLog::getStartedAt, java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder())))
+                .sorted(
+                        java.util.Comparator.comparing(
+                                ToolCallLog::getStartedAt,
+                                java.util.Comparator.nullsFirst(
+                                        java.util.Comparator.naturalOrder())))
                 .forEach(c -> lastFailed.put(safeName(c.getToolName()), failed(c)));
         return (int) lastFailed.values().stream().filter(Boolean::booleanValue).count();
     }
 
     static boolean failed(ToolCallLog c) {
-        return c.isValidationFailed() || (c.getErrorMessage() != null && !c.getErrorMessage().isBlank());
+        return c.isValidationFailed()
+                || (c.getErrorMessage() != null && !c.getErrorMessage().isBlank());
     }
 
     static String taskClass(List<ToolCallLog> calls) {

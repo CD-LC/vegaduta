@@ -11,11 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
-import java.util.function.Supplier;
 
 /**
  * {@code data_table_write} - the WRITE half of the agent Data Tables pair: insert one or a few
@@ -38,8 +38,8 @@ public class DataTableWriteToolCallback implements ToolCallback {
     private final DataTableService service;
 
     /**
-     * What tainted the turn this callback was built for (null result = clean): rows inserted on a tainted
-     * turn are held for review, and with no readable taint state they are held too.
+     * What tainted the turn this callback was built for (null result = clean): rows inserted on a
+     * tainted turn are held for review, and with no readable taint state they are held too.
      */
     private final Supplier<List<String>> turnTaint;
 
@@ -48,7 +48,9 @@ public class DataTableWriteToolCallback implements ToolCallback {
         this.turnTaint = turnTaint;
     }
 
-    /** Refuses a cell that is itself an injected directive, a credential or an exfiltration channel. */
+    /**
+     * Refuses a cell that is itself an injected directive, a credential or an exfiltration channel.
+     */
     private static void screen(Object value) {
         if (value instanceof CharSequence text) {
             MemoryWriteScreen.refusal(text.toString())
@@ -63,7 +65,10 @@ public class DataTableWriteToolCallback implements ToolCallback {
         }
     }
 
-    /** What the turn's taint decides for a write; {@code held} rows are hidden until a person approves. */
+    /**
+     * What the turn's taint decides for a write; {@code held} rows are hidden until a person
+     * approves.
+     */
     private record Verdict(RowTrust trust) {
         boolean held() {
             return trust.quarantined();
@@ -72,7 +77,8 @@ public class DataTableWriteToolCallback implements ToolCallback {
 
     private Verdict verdict() {
         try {
-            List<String> sources = turnTaint == null ? List.of("taint-state-unavailable") : turnTaint.get();
+            List<String> sources =
+                    turnTaint == null ? List.of("taint-state-unavailable") : turnTaint.get();
             return new Verdict(sources == null ? RowTrust.TRUSTED : RowTrust.held(sources));
         } catch (RuntimeException e) {
             return new Verdict(RowTrust.held(List.of("taint-state-unavailable")));
@@ -199,8 +205,10 @@ public class DataTableWriteToolCallback implements ToolCallback {
                         }
                         screen(values);
                         if (verdict().held()) {
-                            // Changing a trusted row in place cannot be held for review without hiding the
-                            // trusted row, and attacker text must not replace trusted data unreviewed.
+                            // Changing a trusted row in place cannot be held for review without
+                            // hiding the
+                            // trusted row, and attacker text must not replace trusted data
+                            // unreviewed.
                             throw heldTurn("change");
                         }
                         // confirmAll is never passed through from a model: an empty filter is

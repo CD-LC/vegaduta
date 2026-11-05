@@ -22,7 +22,9 @@ public interface ConsolidationBudget {
     /** Outcome of asking to spend. Anything but {@link #ALLOWED} means skip the model step. */
     enum Decision {
         ALLOWED,
-        /** Tenant hosted-spend cap reached: skip model work for the tenant tonight (BUDGET_SKIPPED). */
+        /**
+         * Tenant hosted-spend cap reached: skip model work for the tenant tonight (BUDGET_SKIPPED).
+         */
         TENANT_CAP_REACHED,
         /** Per-user cap reached: skip this subject only. */
         SUBJECT_CAP_REACHED,
@@ -32,10 +34,14 @@ public interface ConsolidationBudget {
         RUN_CEILING
     }
 
-    /** Ask before one model call whose cost is at most {@code estimatedUsd}. Reserves on ALLOWED. */
+    /**
+     * Ask before one model call whose cost is at most {@code estimatedUsd}. Reserves on ALLOWED.
+     */
     Decision tryReserve(String tenantSchema, String subjectKey, BigDecimal estimatedUsd);
 
-    /** After the call: replace the reservation with the actual cost (null or negative: release it). */
+    /**
+     * After the call: replace the reservation with the actual cost (null or negative: release it).
+     */
     void settle(String tenantSchema, BigDecimal reservedUsd, BigDecimal actualUsd);
 
     /** The existing cap services, seen through the two questions the budget needs. */

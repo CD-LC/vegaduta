@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A note held for review (written on a turn that handled untrusted content), as the reviewer sees it.
- * A plain record, not the entity, so REST code never touches JPA. {@code sessionId} is null for the
- * agent-long-term pad; approve and reject address a note by {@code (sessionId, key)} plus, on the agent pad, its owner {@code subjectKey}.
+ * A note held for review (written on a turn that handled untrusted content), as the reviewer sees
+ * it. A plain record, not the entity, so REST code never touches JPA. {@code sessionId} is null for
+ * the agent-long-term pad; approve and reject address a note by {@code (sessionId, key)} plus, on
+ * the agent pad, its owner {@code subjectKey}.
  */
 public record QuarantinedNoteView(
         String key,

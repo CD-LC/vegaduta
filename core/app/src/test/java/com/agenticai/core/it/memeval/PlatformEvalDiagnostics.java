@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * What the real-platform run observed besides the scorecard: write outcomes (saved, quarantined, refused by the write
- * screen, skipped by the write switch), the scripted reviewer's decisions, and the overhead counters of the recall (time,
- * database statements, block tokens). Reported under the {@code platform} key of the scorecard JSON, per arm.
+ * What the real-platform run observed besides the scorecard: write outcomes (saved, quarantined,
+ * refused by the write screen, skipped by the write switch), the scripted reviewer's decisions, and
+ * the overhead counters of the recall (time, database statements, block tokens). Reported under the
+ * {@code platform} key of the scorecard JSON, per arm.
  */
 public final class PlatformEvalDiagnostics {
 
@@ -50,7 +51,9 @@ public final class PlatformEvalDiagnostics {
         return arms.computeIfAbsent(a, k -> new Arm());
     }
 
-    /** Classifies the JSON the {@code remember_fact} / {@code remember_shared_fact} tool returned. */
+    /**
+     * Classifies the JSON the {@code remember_fact} / {@code remember_shared_fact} tool returned.
+     */
     public synchronized void write(MemoryArm a, String toolResult) {
         Arm arm = arm(a);
         try {
@@ -71,7 +74,10 @@ public final class PlatformEvalDiagnostics {
         }
     }
 
-    /** Outcome of an attack payload's write by delivery channel: [refused by the write screen, quarantined, saved TRUSTED, other]. */
+    /**
+     * Outcome of an attack payload's write by delivery channel: [refused by the write screen,
+     * quarantined, saved TRUSTED, other].
+     */
     public synchronized void attackWrite(MemoryArm a, String channel, String toolResult) {
         int[] counts = arm(a).attackWrites.computeIfAbsent(channel, k -> new int[4]);
         try {
@@ -102,7 +108,13 @@ public final class PlatformEvalDiagnostics {
         arm(a).proposalsHeld++;
     }
 
-    public synchronized void recall(MemoryArm a, double ms, long statements, long blockTokens, int recalledFacts, boolean ingestion) {
+    public synchronized void recall(
+            MemoryArm a,
+            double ms,
+            long statements,
+            long blockTokens,
+            int recalledFacts,
+            boolean ingestion) {
         Arm arm = arm(a);
         arm.recalls++;
         arm.statements += statements;
@@ -150,20 +162,31 @@ public final class PlatformEvalDiagnostics {
             n.put("proposalsHeldBackByScriptedReviewer", a.proposalsHeld);
             n.put("episodesRecordedWithWriteSwitchOff", a.episodesDespiteWriteOff);
             ObjectNode atk = n.putObject("attackPayloadWritesByChannel");
-            a.attackWrites.forEach((ch, c) -> {
-                ObjectNode o = atk.putObject(ch);
-                o.put("refusedByWriteScreen", c[0]);
-                o.put("quarantined", c[1]);
-                o.put("savedTrusted", c[2]);
-                o.put("other", c[3]);
-            });
+            a.attackWrites.forEach(
+                    (ch, c) -> {
+                        ObjectNode o = atk.putObject(ch);
+                        o.put("refusedByWriteScreen", c[0]);
+                        o.put("quarantined", c[1]);
+                        o.put("savedTrusted", c[2]);
+                        o.put("other", c[3]);
+                    });
             n.put("recalls", a.recalls);
             n.put("probes", a.probes);
-            n.put("meanBlockTokensPerRecall", a.recalls == 0 ? 0 : round(a.blockTokens / (double) a.recalls));
-            n.put("meanRecalledFactsPerRecall", a.recalls == 0 ? 0 : round(a.recalledFacts / (double) a.recalls));
-            n.put("meanInjectedItemsPerProbe", a.probes == 0 ? 0 : round(a.injectedItems / (double) a.probes));
-            n.put("dbStatementsPerRecall", a.recalls == 0 ? 0 : round(a.statements / (double) a.recalls));
-            n.put("dbStatementsPerProbeRecall", a.probeRecalls == 0 ? 0 : round(a.probeStatements / (double) a.probeRecalls));
+            n.put(
+                    "meanBlockTokensPerRecall",
+                    a.recalls == 0 ? 0 : round(a.blockTokens / (double) a.recalls));
+            n.put(
+                    "meanRecalledFactsPerRecall",
+                    a.recalls == 0 ? 0 : round(a.recalledFacts / (double) a.recalls));
+            n.put(
+                    "meanInjectedItemsPerProbe",
+                    a.probes == 0 ? 0 : round(a.injectedItems / (double) a.probes));
+            n.put(
+                    "dbStatementsPerRecall",
+                    a.recalls == 0 ? 0 : round(a.statements / (double) a.recalls));
+            n.put(
+                    "dbStatementsPerProbeRecall",
+                    a.probeRecalls == 0 ? 0 : round(a.probeStatements / (double) a.probeRecalls));
             n.put("recallMsP50", round(percentile(a.recallMs, 0.50)));
             n.put("recallMsP95", round(percentile(a.recallMs, 0.95)));
             n.put("probeRecallMsP95", round(percentile(a.probeRecallMs, 0.95)));

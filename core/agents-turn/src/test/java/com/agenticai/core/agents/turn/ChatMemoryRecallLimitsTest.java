@@ -32,9 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * {@code app.memory.recall.min-similarity} and {@code max-items} in the chat turn's recall: unrelated lines are not injected,
- * one turn injects at most the cap across the private, shared and unified lines (closest first), the always-in-context
- * blocks are never touched, and with no limits (or both off) the block is exactly what it was.
+ * {@code app.memory.recall.min-similarity} and {@code max-items} in the chat turn's recall:
+ * unrelated lines are not injected, one turn injects at most the cap across the private, shared and
+ * unified lines (closest first), the always-in-context blocks are never touched, and with no limits
+ * (or both off) the block is exactly what it was.
  */
 @SuppressWarnings("unchecked")
 class ChatMemoryRecallLimitsTest {
@@ -57,16 +58,38 @@ class ChatMemoryRecallLimitsTest {
     }
 
     private static AgentMemoryEntry fact(String text, double similarity) {
-        return new AgentMemoryEntry(UUID.randomUUID(), UUID.randomUUID(), "alice", text, 1.0 - similarity, Instant.now(), Instant.now(), 0);
+        return new AgentMemoryEntry(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "alice",
+                text,
+                1.0 - similarity,
+                Instant.now(),
+                Instant.now(),
+                0);
     }
 
     private static TenantMemoryEntry shared(String text, double similarity) {
-        return new TenantMemoryEntry(UUID.randomUUID(), "alice", text, 1.0 - similarity, UUID.randomUUID(), Instant.now(), Instant.now(), 0);
+        return new TenantMemoryEntry(
+                UUID.randomUUID(),
+                "alice",
+                text,
+                1.0 - similarity,
+                UUID.randomUUID(),
+                Instant.now(),
+                Instant.now(),
+                0);
     }
 
     private void stores(List<AgentMemoryEntry> mine, List<TenantMemoryEntry> theirs) {
-        when(agentMemory.recall(eq(agentId), eq("alice"), eq("q"), nullable(QueryEmbedding.class))).thenReturn(mine);
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class))).thenReturn(theirs);
+        when(agentMemory.recall(eq(agentId), eq("alice"), eq("q"), nullable(QueryEmbedding.class)))
+                .thenReturn(mine);
+        when(tenant.recall(
+                        anyString(),
+                        anyString(),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
+                .thenReturn(theirs);
     }
 
     private void limits(double minSimilarity, int maxItems) {
@@ -83,7 +106,9 @@ class ChatMemoryRecallLimitsTest {
 
     @Test
     void aLineBelowTheFloorIsNotInjected() {
-        stores(List.of(fact("likes tea", 0.80), fact("shop closes at 9", 0.05)), List.of(shared("on the gold plan", 0.10)));
+        stores(
+                List.of(fact("likes tea", 0.80), fact("shop closes at 9", 0.05)),
+                List.of(shared("on the gold plan", 0.10)));
         limits(0.20, 0);
 
         String block = block();
@@ -103,25 +128,34 @@ class ChatMemoryRecallLimitsTest {
 
     @Test
     void withNoLimitsTheBlockIsWhatItWas() {
-        stores(List.of(fact("likes tea", 0.80), fact("shop closes at 9", 0.05)), List.of(shared("on the gold plan", 0.10)));
+        stores(
+                List.of(fact("likes tea", 0.80), fact("shop closes at 9", 0.05)),
+                List.of(shared("on the gold plan", 0.10)));
         String without = block(); // recallLimits() on a mock is null: no floor, no cap
 
         limits(0.0, 0); // the shipped "off" values
 
         assertEquals(without, block());
-        assertTrue(without.contains("likes tea") && without.contains("shop closes at 9") && without.contains("gold plan"));
+        assertTrue(
+                without.contains("likes tea")
+                        && without.contains("shop closes at 9")
+                        && without.contains("gold plan"));
     }
 
     @Test
     void aTurnInjectsAtMostTheCapAcrossPrivateAndSharedClosestFirst() {
-        stores(List.of(fact("mine-high", 0.90), fact("mine-low", 0.50)),
+        stores(
+                List.of(fact("mine-high", 0.90), fact("mine-low", 0.50)),
                 List.of(shared("shared-high", 0.80), shared("shared-mid", 0.60)));
         limits(0.0, 3);
 
         ChatMemoryRecall.MemoryRecall r = recall.recallMemoryFacts(agentId, "alice", "q", null);
 
         assertEquals(3, r.recalledFacts());
-        assertTrue(r.block().contains("mine-high") && r.block().contains("shared-high") && r.block().contains("shared-mid"));
+        assertTrue(
+                r.block().contains("mine-high")
+                        && r.block().contains("shared-high")
+                        && r.block().contains("shared-mid"));
         assertFalse(r.block().contains("mine-low"));
         assertEquals(1, r.trace().privateFactIds().size());
         assertEquals(2, r.trace().sharedFactIds().size());
@@ -157,7 +191,8 @@ class ChatMemoryRecallLimitsTest {
     }
 
     private static MemoryItemView episode(String text) {
-        return new MemoryItemView(UUID.randomUUID(), MemoryKind.EPISODIC, text, 0.9, MemoryProvenanceRecord.TRUSTED);
+        return new MemoryItemView(
+                UUID.randomUUID(), MemoryKind.EPISODIC, text, 0.9, MemoryProvenanceRecord.TRUSTED);
     }
 
     private Fake unified() {
@@ -178,7 +213,10 @@ class ChatMemoryRecallLimitsTest {
 
         ChatMemoryRecall.MemoryRecall r = recall.recallMemoryFacts(agentId, "alice", "q", null);
 
-        assertEquals(1 + 2, fake.last.maxItems()); // room for one new item, plus the two legacy ids it may repeat
+        assertEquals(
+                1 + 2,
+                fake.last.maxItems()); // room for one new item, plus the two legacy ids it may
+        // repeat
         assertEquals(3, r.recalledFacts());
         assertTrue(r.block().contains("episode one"));
         assertFalse(r.block().contains("episode two"));

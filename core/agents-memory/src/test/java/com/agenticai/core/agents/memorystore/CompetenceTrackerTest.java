@@ -32,7 +32,8 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 
 class CompetenceTrackerTest {
 
-    private static final Clock CLOCK = Clock.fixed(Instant.parse("2026-11-04T10:00:00Z"), ZoneOffset.UTC);
+    private static final Clock CLOCK =
+            Clock.fixed(Instant.parse("2026-11-04T10:00:00Z"), ZoneOffset.UTC);
 
     private final UUID agent = UUID.randomUUID();
     private final CompetenceProperties props = new CompetenceProperties();
@@ -41,12 +42,13 @@ class CompetenceTrackerTest {
     private CompetenceTracker tracker;
 
     private CompetenceTracker build() {
-        tracker = new CompetenceTracker(
-                props,
-                new CompetenceGate(props, beans.getBeanProvider(SettingsResolver.class)),
-                storage,
-                beans.getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class),
-                CLOCK);
+        tracker =
+                new CompetenceTracker(
+                        props,
+                        new CompetenceGate(props, beans.getBeanProvider(SettingsResolver.class)),
+                        storage,
+                        beans.getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class),
+                        CLOCK);
         return tracker;
     }
 
@@ -100,15 +102,29 @@ class CompetenceTrackerTest {
         tracker.record(new VerifiedOutcome(agent, "class_0", Signal.TOOL_ERROR));
         List<CompetenceRow> rows = storage.rows(agent);
         assertThat(rows).hasSize(4);
-        assertThat(rows).extracting(CompetenceRow::taskClass).contains("class_0", "class_1", "class_2", "_overflow");
-        assertThat(rows.stream().filter(r -> r.taskClass().equals("_overflow")).findFirst().orElseThrow().attempts())
+        assertThat(rows)
+                .extracting(CompetenceRow::taskClass)
+                .contains("class_0", "class_1", "class_2", "_overflow");
+        assertThat(
+                        rows.stream()
+                                .filter(r -> r.taskClass().equals("_overflow"))
+                                .findFirst()
+                                .orElseThrow()
+                                .attempts())
                 .isEqualTo(7);
-        assertThat(rows.stream().filter(r -> r.taskClass().equals("class_0")).findFirst().orElseThrow().attempts())
+        assertThat(
+                        rows.stream()
+                                .filter(r -> r.taskClass().equals("class_0"))
+                                .findFirst()
+                                .orElseThrow()
+                                .attempts())
                 .isEqualTo(2);
         // another agent has its own budget
         UUID other = UUID.randomUUID();
         tracker.record(new VerifiedOutcome(other, "class_9", Signal.TOOL_SUCCESS));
-        assertThat(storage.rows(other)).extracting(CompetenceRow::taskClass).containsExactly("class_9");
+        assertThat(storage.rows(other))
+                .extracting(CompetenceRow::taskClass)
+                .containsExactly("class_9");
     }
 
     @Test
@@ -120,13 +136,21 @@ class CompetenceTrackerTest {
         CountDownLatch go = new CountDownLatch(1);
         List<Future<?>> done = new ArrayList<>();
         for (int t = 0; t < threads; t++) {
-            done.add(pool.submit(() -> {
-                go.await();
-                for (int i = 0; i < perThread; i++) {
-                    tracker.record(new VerifiedOutcome(agent, "hot", i % 2 == 0 ? Signal.TOOL_SUCCESS : Signal.TOOL_ERROR));
-                }
-                return null;
-            }));
+            done.add(
+                    pool.submit(
+                            () -> {
+                                go.await();
+                                for (int i = 0; i < perThread; i++) {
+                                    tracker.record(
+                                            new VerifiedOutcome(
+                                                    agent,
+                                                    "hot",
+                                                    i % 2 == 0
+                                                            ? Signal.TOOL_SUCCESS
+                                                            : Signal.TOOL_ERROR));
+                                }
+                                return null;
+                            }));
         }
         go.countDown();
         for (Future<?> f : done) {
@@ -155,25 +179,46 @@ class CompetenceTrackerTest {
         InMemorySettingsStore store = new InMemorySettingsStore();
         SettingsProperties noCache = new SettingsProperties();
         noCache.setCacheTtl(Duration.ZERO);
-        SettingsResolver resolver = new DefaultSettingsResolver(
-                new SettingsRegistry(List.of(new CompetenceSettings(platform))), store, List.of(), noCache, null);
+        SettingsResolver resolver =
+                new DefaultSettingsResolver(
+                        new SettingsRegistry(List.of(new CompetenceSettings(platform))),
+                        store,
+                        List.of(),
+                        noCache,
+                        null);
         beans.addBean("resolver", resolver);
         TenantContext.set(TenantContext.of("tenant-a", "u", Set.of()));
-        CompetenceGate gate = new CompetenceGate(platform, beans.getBeanProvider(SettingsResolver.class));
+        CompetenceGate gate =
+                new CompetenceGate(platform, beans.getBeanProvider(SettingsResolver.class));
         assertThat(gate.enabled(agent)).isTrue();
 
-        store.saveCurrent(new SettingOverride(
-                SettingScope.AGENT, agent.toString(), CompetenceSettings.ENABLED_KEY, false, 1, "admin", Instant.now()));
+        store.saveCurrent(
+                new SettingOverride(
+                        SettingScope.AGENT,
+                        agent.toString(),
+                        CompetenceSettings.ENABLED_KEY,
+                        false,
+                        1,
+                        "admin",
+                        Instant.now()));
         assertThat(gate.enabled(agent)).isFalse();
         assertThat(gate.enabled(UUID.randomUUID())).isTrue();
 
-        store.saveCurrent(new SettingOverride(
-                SettingScope.TENANT, "", CompetenceSettings.ENABLED_KEY, false, 1, "admin", Instant.now()));
+        store.saveCurrent(
+                new SettingOverride(
+                        SettingScope.TENANT,
+                        "",
+                        CompetenceSettings.ENABLED_KEY,
+                        false,
+                        1,
+                        "admin",
+                        Instant.now()));
         assertThat(gate.enabled(UUID.randomUUID())).isFalse();
 
         platform.setEnabled(false);
         assertThat(gate.enabled(agent)).isFalse();
-        assertThat(new CompetenceSettings(platform).definitions().get(0).platformValue()).isEqualTo(false);
+        assertThat(new CompetenceSettings(platform).definitions().get(0).platformValue())
+                .isEqualTo(false);
     }
 
     @Test
@@ -184,7 +229,17 @@ class CompetenceTrackerTest {
         tracker.record(new VerifiedOutcome(agent, "chat", Signal.TOOL_SUCCESS));
         storage.failing = true;
         tracker.record(new VerifiedOutcome(agent, "chat", Signal.TOOL_SUCCESS));
-        assertThat(meters.find("memory.competence.outcome").tag("result", "recorded").counter().count()).isEqualTo(1.0);
-        assertThat(meters.find("memory.competence.outcome").tag("result", "failed").counter().count()).isEqualTo(1.0);
+        assertThat(
+                        meters.find("memory.competence.outcome")
+                                .tag("result", "recorded")
+                                .counter()
+                                .count())
+                .isEqualTo(1.0);
+        assertThat(
+                        meters.find("memory.competence.outcome")
+                                .tag("result", "failed")
+                                .counter()
+                                .count())
+                .isEqualTo(1.0);
     }
 }

@@ -50,12 +50,18 @@ class LeakDetectorTest {
         assertThat(c.token()).matches("[A-Za-z0-9_-]{22,}");
         assertThat(c.token()).isNotEqualTo(PromptCanary.generate(1).token());
         String armed = c.appendTo("base");
-        assertThat(armed).startsWith("base").contains(c.token()).contains("BEGIN CONFIDENTIAL CANARY");
+        assertThat(armed)
+                .startsWith("base")
+                .contains(c.token())
+                .contains("BEGIN CONFIDENTIAL CANARY");
     }
 
     @Test
     void canaryCaughtWhole() {
-        assertThat(detector(PromptLeakAction.WARN).leaks("Sure! The marker is " + canary.token() + ".")).isTrue();
+        assertThat(
+                        detector(PromptLeakAction.WARN)
+                                .leaks("Sure! The marker is " + canary.token() + "."))
+                .isTrue();
         assertThat(detector(PromptLeakAction.WARN).leaks("Nothing to see here.")).isFalse();
     }
 
@@ -63,7 +69,10 @@ class LeakDetectorTest {
     void canarySplitAcrossChunksIsRedactedBeforeItLeaves() {
         String reply = "Sure, here it is: " + canary.token() + " - anything else?";
         String out = stream(detector(PromptLeakAction.REDACT), chunks(reply, 3));
-        assertThat(out).doesNotContain(canary.token()).contains("[redacted]").contains("anything else?");
+        assertThat(out)
+                .doesNotContain(canary.token())
+                .contains("[redacted]")
+                .contains("anything else?");
     }
 
     @Test
@@ -111,7 +120,8 @@ class LeakDetectorTest {
         String homoglyph = frag.replace('a', 'а').replace('e', 'е').replace('o', 'о');
         String fullwidth = frag.replace("Northwind", "Ｎｏｒｔｈｗｉｎｄ");
         String markdown = "**" + frag.replace(" ", "**\n> *") + "**";
-        for (String variant : List.of(zeroWidth, homoglyph, fullwidth, markdown, frag.toUpperCase())) {
+        for (String variant :
+                List.of(zeroWidth, homoglyph, fullwidth, markdown, frag.toUpperCase())) {
             assertThat(detector(PromptLeakAction.WARN).leaks(variant)).as(variant).isTrue();
         }
         String spacedCanary = String.join(" ​", canary.token().split(""));
@@ -120,7 +130,8 @@ class LeakDetectorTest {
 
     @Test
     void shortCommonPhraseIsNotALeak() {
-        String reply = "As a helpful assistant I can say: you are a helpful assistant, and always greet the customer.";
+        String reply =
+                "As a helpful assistant I can say: you are a helpful assistant, and always greet the customer.";
         assertThat(detector(PromptLeakAction.WARN).leaks(reply)).isFalse();
     }
 
@@ -128,9 +139,17 @@ class LeakDetectorTest {
     void blockStopsStreamAndReplacesTheRest() {
         PromptLeakGuard guard = enforce("block");
         PromptLeakGuard.Turn turn = guard.begin(PROMPT, UUID.randomUUID(), "s", null);
-        String reply = "Here: " + PROMPT.substring(0, 150) + " and a lot more text that must not arrive. ".repeat(10);
-        String out = String.join("", turn.guard(Flux.fromIterable(chunks(reply, 7))).collectList().block());
-        assertThat(out).contains("withheld").doesNotContain("Northwind").doesNotContain("must not arrive");
+        String reply =
+                "Here: "
+                        + PROMPT.substring(0, 150)
+                        + " and a lot more text that must not arrive. ".repeat(10);
+        String out =
+                String.join(
+                        "", turn.guard(Flux.fromIterable(chunks(reply, 7))).collectList().block());
+        assertThat(out)
+                .contains("withheld")
+                .doesNotContain("Northwind")
+                .doesNotContain("must not arrive");
     }
 
     @Test
@@ -138,7 +157,9 @@ class LeakDetectorTest {
         PromptLeakGuard guard = enforce("redact");
         PromptLeakGuard.Turn turn = guard.begin(PROMPT, UUID.randomUUID(), "s", null);
         String reply = "Sure. " + PROMPT.substring(0, 130) + " Done.";
-        String out = String.join("", turn.guard(Flux.fromIterable(chunks(reply, 6))).collectList().block());
+        String out =
+                String.join(
+                        "", turn.guard(Flux.fromIterable(chunks(reply, 6))).collectList().block());
         assertThat(out).doesNotContain("Northwind").contains("[redacted]").endsWith("Done.");
     }
 
@@ -150,7 +171,11 @@ class LeakDetectorTest {
         Throwable err =
                 org.assertj.core.api.Assertions.catchThrowable(
                         () ->
-                                turn.guard(Flux.concat(Flux.just("short reply"), Flux.<String>error(new IllegalStateException("boom"))))
+                                turn.guard(
+                                                Flux.concat(
+                                                        Flux.just("short reply"),
+                                                        Flux.<String>error(
+                                                                new IllegalStateException("boom"))))
                                         .doOnNext(got::add)
                                         .blockLast());
         assertThat(String.join("", got)).isEqualTo("short reply");
@@ -162,12 +187,16 @@ class LeakDetectorTest {
         PromptLeakProperties p = new PromptLeakProperties();
         p.setMode("off");
         List<LeakDetector.Verdict> reports = new ArrayList<>();
-        PromptLeakGuard guard = new PromptLeakGuard(p, new PromptLeakReporter(null, null) {
-            @Override
-            public void report(UUID a, String s, PromptLeakMode m, LeakDetector.Verdict v) {
-                reports.add(v);
-            }
-        });
+        PromptLeakGuard guard =
+                new PromptLeakGuard(
+                        p,
+                        new PromptLeakReporter(null, null) {
+                            @Override
+                            public void report(
+                                    UUID a, String s, PromptLeakMode m, LeakDetector.Verdict v) {
+                                reports.add(v);
+                            }
+                        });
         PromptLeakGuard.Turn turn = guard.begin(PROMPT, UUID.randomUUID(), "s", null);
         assertThat(turn).isSameAs(guard.begin("other", null, null, null));
         assertThat(turn.active()).isFalse();
@@ -183,16 +212,22 @@ class LeakDetectorTest {
         PromptLeakProperties p = new PromptLeakProperties();
         p.setMode("warn"); // the default is off; warn is opt-in
         List<LeakDetector.Verdict> reports = new ArrayList<>();
-        PromptLeakGuard guard = new PromptLeakGuard(p, new PromptLeakReporter(null, null) {
-            @Override
-            public void report(UUID a, String s, PromptLeakMode m, LeakDetector.Verdict v) {
-                reports.add(v);
-            }
-        });
+        PromptLeakGuard guard =
+                new PromptLeakGuard(
+                        p,
+                        new PromptLeakReporter(null, null) {
+                            @Override
+                            public void report(
+                                    UUID a, String s, PromptLeakMode m, LeakDetector.Verdict v) {
+                                reports.add(v);
+                            }
+                        });
         PromptLeakGuard.Turn turn = guard.begin(PROMPT, UUID.randomUUID(), "s", null);
         assertThat(turn.systemPrompt(PROMPT)).startsWith(PROMPT).contains("CONFIDENTIAL CANARY");
         String reply = "Here: " + PROMPT.substring(0, 150);
-        String out = String.join("", turn.guard(Flux.fromIterable(chunks(reply, 9))).collectList().block());
+        String out =
+                String.join(
+                        "", turn.guard(Flux.fromIterable(chunks(reply, 9))).collectList().block());
         assertThat(out).isEqualTo(reply);
         assertThat(reports).hasSize(1);
         assertThat(reports.get(0).toString()).doesNotContain("Northwind");
@@ -209,6 +244,7 @@ class LeakDetectorTest {
 
     @Test
     void theControlIsOffByDefaultBecauseEvenWarnChangesTheSystemPrompt() {
-        org.junit.jupiter.api.Assertions.assertEquals(PromptLeakMode.OFF, new PromptLeakProperties().mode());
+        org.junit.jupiter.api.Assertions.assertEquals(
+                PromptLeakMode.OFF, new PromptLeakProperties().mode());
     }
 }

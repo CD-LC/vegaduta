@@ -2,9 +2,9 @@ package com.agenticai.core.agents.memorystore;
 
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
-import com.agenticai.core.agents.memory.spi.MemoryProvenanceRecord;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
 import com.agenticai.core.agents.memory.spi.MemoryProposalStatus;
+import com.agenticai.core.agents.memory.spi.MemoryProvenanceRecord;
 import com.agenticai.core.agents.memory.spi.MemorySourceRef;
 import com.agenticai.core.agents.memory.spi.MemoryWriteProposal;
 import com.agenticai.core.security.TenantContext;
@@ -33,10 +33,10 @@ import org.springframework.beans.factory.ObjectProvider;
  * elsewhere, and the platform must allow the kind); a tenant on the thread; the content screens;
  * the per-agent bounds (pending queue, items, writes per hour); then lineage: sources that are
  * {@code memory_item} rows are read from the store (a caller cannot claim better trust than the
- * source has), the derivation takes the lowest source trust, the union of taint and
- * {@code max(generation) + 1}, and a model-generated source that no human confirmed, or a
- * generation past {@code max-generation}, refuses the proposal. A refusal appends a REFUSED event
- * (reason code only, never text) and bumps {@code memory_write_refused_total}.
+ * source has), the derivation takes the lowest source trust, the union of taint and {@code
+ * max(generation) + 1}, and a model-generated source that no human confirmed, or a generation past
+ * {@code max-generation}, refuses the proposal. A refusal appends a REFUSED event (reason code
+ * only, never text) and bumps {@code memory_write_refused_total}.
  *
  * <p>The bounds are read-then-insert, not atomic: two concurrent proposals can overshoot a limit by
  * a few. They protect the review queue from flooding, not an invariant.
@@ -70,10 +70,21 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
             List<MemoryContentScreen> screens,
             ObjectProvider<MeterRegistry> meters,
             Clock clock) {
-        this(properties, gate, storage, embedder, screens, meters, clock, MemoryTombstoneGuard.inactive());
+        this(
+                properties,
+                gate,
+                storage,
+                embedder,
+                screens,
+                meters,
+                clock,
+                MemoryTombstoneGuard.inactive());
     }
 
-    /** With the tombstone guard: a proposal whose exact text the consolidation forgot for this agent is refused (FORGOTTEN). */
+    /**
+     * With the tombstone guard: a proposal whose exact text the consolidation forgot for this agent
+     * is refused (FORGOTTEN).
+     */
     public StoreMemoryProposalSink(
             MemoryUnifiedProperties properties,
             MemoryUnifiedGate gate,
@@ -108,7 +119,10 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
         if (!properties.getKinds().contains(proposal.kind())) {
             return refused(proposal, "KIND_DISABLED", false);
         }
-        if (TenantContext.current().map(TenantContext::getTenantId).filter(t -> !t.isBlank()).isEmpty()) {
+        if (TenantContext.current()
+                .map(TenantContext::getTenantId)
+                .filter(t -> !t.isBlank())
+                .isEmpty()) {
             return refused(proposal, "NO_TENANT", false);
         }
         try {
@@ -127,12 +141,17 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
             }
         }
         if (tombstones.isForgotten(
-                MemoryTombstoneGuard.KIND_ITEM, MemoryTombstoneGuard.itemSubject(p.agentId()), p.agentId(), p.text())) {
-            // Resurrection guard: this exact text was forgotten for the agent; a person can still add it by hand.
+                MemoryTombstoneGuard.KIND_ITEM,
+                MemoryTombstoneGuard.itemSubject(p.agentId()),
+                p.agentId(),
+                p.text())) {
+            // Resurrection guard: this exact text was forgotten for the agent; a person can still
+            // add it by hand.
             return refused(p, "FORGOTTEN", true);
         }
         Instant now = clock.instant();
-        if (storage.countByStatus(p.agentId(), MemoryItemStatus.PENDING) >= properties.getMaxPendingPerAgent()) {
+        if (storage.countByStatus(p.agentId(), MemoryItemStatus.PENDING)
+                >= properties.getMaxPendingPerAgent()) {
             return refused(p, "PENDING_QUEUE_FULL", true);
         }
         if (storage.countLive(p.agentId()) >= properties.getMaxItemsPerAgent()) {
@@ -143,7 +162,8 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
             return refused(p, "RATE_LIMIT", true);
         }
 
-        // Lineage: memory_item sources come from the store, others from the caller (fail closed on trust).
+        // Lineage: memory_item sources come from the store, others from the caller (fail closed on
+        // trust).
         Map<String, MemoryItemSource> lineage = new LinkedHashMap<>();
         List<MemoryTrustPolicy.SourceFacts> facts = new ArrayList<>();
         Set<String> subjects = new LinkedHashSet<>();
@@ -210,16 +230,26 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
                         1,
                         null,
                         now,
-                        p.kind() == MemoryKind.EPISODIC ? now.plus(Duration.ofDays(properties.getEpisodicTtlDays())) : null);
+                        p.kind() == MemoryKind.EPISODIC
+                                ? now.plus(Duration.ofDays(properties.getEpisodicTtlDays()))
+                                : null);
         MemoryEvent created =
                 MemoryEvent.of(
                         id,
                         p.agentId(),
                         MemoryEvent.Type.CREATED,
-                        derived ? MemoryActor.system("distiller") : MemoryActor.agent(p.agentId().toString()),
+                        derived
+                                ? MemoryActor.system("distiller")
+                                : MemoryActor.agent(p.agentId().toString()),
                         null,
                         MemoryItemStatus.PENDING,
-                        "KIND=" + p.kind() + ";VERDICT=" + verdict + ";SOURCES=" + lineage.size() + ";GENERATION="
+                        "KIND="
+                                + p.kind()
+                                + ";VERDICT="
+                                + verdict
+                                + ";SOURCES="
+                                + lineage.size()
+                                + ";GENERATION="
                                 + derivation.generation(),
                         now);
         storage.insertPending(item, embedding, List.copyOf(lineage.values()), created);

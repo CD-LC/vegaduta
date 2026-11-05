@@ -90,7 +90,8 @@ class AgentMemoryControllerTest {
         viewerOnly();
         when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(true);
 
-        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(204);
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(204);
         verify(memoryService, never()).approve(agentId, memoryId);
     }
 
@@ -99,14 +100,16 @@ class AgentMemoryControllerTest {
         viewerOnly();
         when(memoryService.approve(agentId, memoryId, "alice")).thenReturn(false);
 
-        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(404);
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(404);
     }
 
     @Test
     void anEditorApprovesAnyQuarantinedMemory() {
         when(memoryService.approve(agentId, memoryId)).thenReturn(true);
 
-        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value()).isEqualTo(204);
+        assertThat(controller.approveMemory(agentId, memoryId, alice).getStatusCode().value())
+                .isEqualTo(204);
     }
 
     @Test
@@ -135,10 +138,12 @@ class AgentMemoryControllerTest {
         when(tenants.getIfAvailable()).thenReturn(tenant);
         AgentMemoryController c = new AgentMemoryController(agentService, agents, tenants);
 
-        assertThat(c.approveSharedMemory(agentId, memoryId, null).getStatusCode().value()).isEqualTo(204);
+        assertThat(c.approveSharedMemory(agentId, memoryId, null).getStatusCode().value())
+                .isEqualTo(204);
         verify(tenant).approveFact(memoryId, null);
 
         when(tenant.approveFact(memoryId, "bob")).thenReturn(false);
-        assertThat(c.approveSharedMemory(agentId, memoryId, "bob").getStatusCode().value()).isEqualTo(404);
+        assertThat(c.approveSharedMemory(agentId, memoryId, "bob").getStatusCode().value())
+                .isEqualTo(404);
     }
 }

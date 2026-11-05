@@ -14,10 +14,14 @@ import java.util.UUID;
  */
 public interface MemoryAgentAccess {
 
-    /** Throws {@code ResourceAccessDeniedException} (a 404) unless the caller may view the agent. */
+    /**
+     * Throws {@code ResourceAccessDeniedException} (a 404) unless the caller may view the agent.
+     */
     void requireViewer(UUID agentId);
 
-    /** Throws {@code ResourceAccessDeniedException} (a 404) unless the caller may edit the agent. */
+    /**
+     * Throws {@code ResourceAccessDeniedException} (a 404) unless the caller may edit the agent.
+     */
     void requireEditor(UUID agentId);
 
     /** EDITOR-or-higher check that answers false instead of throwing on denial. */

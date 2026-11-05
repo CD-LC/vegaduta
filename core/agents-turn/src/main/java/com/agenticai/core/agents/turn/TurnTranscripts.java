@@ -12,37 +12,52 @@ import java.util.UUID;
  */
 final class TurnTranscripts {
 
-    private static final String TOOL_LOOP_MAX_PROMPT_TOKENS_KEY = "chat.toolLoop.maxPromptTokensPerTurn";
+    private static final String TOOL_LOOP_MAX_PROMPT_TOKENS_KEY =
+            "chat.toolLoop.maxPromptTokensPerTurn";
 
     private TurnTranscripts() {}
 
-    /** As {@link ChatTurnExecutor#newTranscript(TurnContext)} for the agent that answers (the routed one when an experiment chose a variant). */
+    /**
+     * As {@link ChatTurnExecutor#newTranscript(TurnContext)} for the agent that answers (the routed
+     * one when an experiment chose a variant).
+     */
     static com.agenticai.core.chat.ToolLoopTranscript create(
             ChatTurnExecutor turns, TurnContext context, UUID agentId) {
-        com.agenticai.core.chat.ToolLoopTranscript transcript = new com.agenticai.core.chat.ToolLoopTranscript();
+        com.agenticai.core.chat.ToolLoopTranscript transcript =
+                new com.agenticai.core.chat.ToolLoopTranscript();
         if (context != null) {
-            // null = the tool loop's own (platform) value; set only when the catalog answers for this tenant and agent.
+            // null = the tool loop's own (platform) value; set only when the catalog answers for
+            // this tenant and agent.
             transcript.resultClearing(
                     turns.behaviour.boolOrNull(
-                            ChatTurnExecutor.TOOL_RESULT_CLEARING_ENABLED_KEY, context.scope(), agentId),
+                            ChatTurnExecutor.TOOL_RESULT_CLEARING_ENABLED_KEY,
+                            context.scope(),
+                            agentId),
                     turns.behaviour.integerOrNull(
-                            ChatTurnExecutor.TOOL_RESULT_CLEARING_THRESHOLD_KEY, context.scope(), agentId));
-            // Cumulative prompt-token cap for this run (chat.toolLoop.maxPromptTokensPerTurn); null = uncapped.
+                            ChatTurnExecutor.TOOL_RESULT_CLEARING_THRESHOLD_KEY,
+                            context.scope(),
+                            agentId));
+            // Cumulative prompt-token cap for this run (chat.toolLoop.maxPromptTokensPerTurn); null
+            // = uncapped.
             Integer tokenCap =
                     turns.behaviour.integerOrNull(
                             TOOL_LOOP_MAX_PROMPT_TOKENS_KEY, context.scope(), agentId);
             transcript.promptTokenBudget(tokenCap == null ? null : tokenCap.longValue());
         }
         com.agenticai.core.agents.runtime.AgentRuntime resolver = turns.runtime;
-        com.agenticai.core.agents.runtime.AgentRuntimeSettings settings = context == null ? null : context.runtimeSettings();
+        com.agenticai.core.agents.runtime.AgentRuntimeSettings settings =
+                context == null ? null : context.runtimeSettings();
         if (resolver != null && settings != null) {
             transcript.limitRounds(resolver.toolLoopRounds(settings));
         }
-        // The tool loop writes text of its own (the "tool budget used up" result, the closing reply, the answer to a
-        // tool name that was never offered): it looks it up in the prompt registry for THIS turn's agent and tenant.
+        // The tool loop writes text of its own (the "tool budget used up" result, the closing
+        // reply, the answer to a
+        // tool name that was never offered): it looks it up in the prompt registry for THIS turn's
+        // agent and tenant.
         if (context != null) {
             transcript.forPrompts(context.requestedAgentId(), context.scope());
-            // The loop decides "parked" / "budget spent" from the turn's own state, never from what a tool printed.
+            // The loop decides "parked" / "budget spent" from the turn's own state, never from what
+            // a tool printed.
             transcript.signals(TurnToolLoopSignals.of(context.approval()));
         }
         return transcript;

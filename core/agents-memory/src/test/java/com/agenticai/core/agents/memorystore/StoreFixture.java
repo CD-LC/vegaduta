@@ -30,16 +30,21 @@ class StoreFixture {
 
     StoreFixture() {
         props.setEnabled(true);
-        props.setKinds(EnumSet.of(MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL));
+        props.setKinds(
+                EnumSet.of(MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL));
         StaticListableBeanFactory flags = new StaticListableBeanFactory();
         flags.addBean("o", (MemoryFlagOverride) id -> overrideAllows);
         gate = new MemoryUnifiedGate(props, flags.getBeanProvider(MemoryFlagOverride.class));
         StaticListableBeanFactory emb = new StaticListableBeanFactory();
         emb.addBean("e", (MemoryEmbedder) t -> embedder.embed(t));
         var embProvider = emb.getBeanProvider(MemoryEmbedder.class);
-        var noMeters = new StaticListableBeanFactory().getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class);
+        var noMeters =
+                new StaticListableBeanFactory()
+                        .getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class);
         List<MemoryContentScreen> screens = List.of(new BasicMemoryContentScreen(props));
-        sink = new StoreMemoryProposalSink(props, gate, storage, embProvider, screens, noMeters, clock);
+        sink =
+                new StoreMemoryProposalSink(
+                        props, gate, storage, embProvider, screens, noMeters, clock);
         review = new MemoryItemReviewService(props, storage, embProvider, screens, clock);
         store = new MemoryItemStore(props, gate, storage, embProvider, clock);
         TenantContext.set(TenantContext.of("tenant_a", "tester", Set.of()));
@@ -57,7 +62,8 @@ class StoreFixture {
     }
 
     MemoryWriteProposal proposal(MemoryKind kind, String text) {
-        return new MemoryWriteProposal(agent, "user-1", kind, text, MemoryProvenanceRecord.TRUSTED, null, false);
+        return new MemoryWriteProposal(
+                agent, "user-1", kind, text, MemoryProvenanceRecord.TRUSTED, null, false);
     }
 
     /** Proposes and human-approves an item; returns its id. */

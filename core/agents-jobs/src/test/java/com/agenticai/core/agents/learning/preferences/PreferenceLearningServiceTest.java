@@ -19,8 +19,8 @@ import com.agenticai.core.agents.learning.LearningProposalService.Proposal;
 import com.agenticai.core.agents.learning.LearningProposalService.Result;
 import com.agenticai.core.agents.learning.LearningProposalStatus;
 import com.agenticai.core.agents.learning.LearningProposalView;
-import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalHistoryService;
+import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalStatus;
 import com.agenticai.core.rl.feedback.TurnFeedbackRecordedEvent;
 import com.agenticai.core.security.TenantContext;
@@ -56,7 +56,8 @@ class PreferenceLearningServiceTest {
                             rows.add(inv.getArgument(0));
                             return inv.getArgument(0);
                         });
-        when(signals.countBySubjectAndSignalKeyAndCreatedAtAfter(anyString(), anyString(), any(Instant.class)))
+        when(signals.countBySubjectAndSignalKeyAndCreatedAtAfter(
+                        anyString(), anyString(), any(Instant.class)))
                 .thenAnswer(
                         inv ->
                                 rows.stream()
@@ -72,8 +73,10 @@ class PreferenceLearningServiceTest {
                             ((Runnable) inv.getArgument(0)).run();
                             return true;
                         });
-        when(proposals.list(anyString(), any(), any())).thenAnswer(inv -> statusFilter(inv.getArgument(1)));
-        when(proposals.propose(any(Proposal.class))).thenReturn(new Result(Outcome.CREATED, mock(LearningProposal.class)));
+        when(proposals.list(anyString(), any(), any()))
+                .thenAnswer(inv -> statusFilter(inv.getArgument(1)));
+        when(proposals.propose(any(Proposal.class)))
+                .thenReturn(new Result(Outcome.CREATED, mock(LearningProposal.class)));
         approvalRepo = mock(ApprovalHistoryService.class);
     }
 
@@ -102,7 +105,17 @@ class PreferenceLearningServiceTest {
 
     private static LearningProposalView existing(String body, LearningProposalStatus status) {
         return new LearningProposalView(
-                UUID.randomUUID(), null, "PREFERENCE", "t", body, "{}", "{}", status.name(), Instant.now(), null, true);
+                UUID.randomUUID(),
+                null,
+                "PREFERENCE",
+                "t",
+                body,
+                "{}",
+                "{}",
+                status.name(),
+                Instant.now(),
+                null,
+                true);
     }
 
     // ------------------------------------------------------------------ style requests
@@ -120,7 +133,8 @@ class PreferenceLearningServiceTest {
     void thirdRepeatFilesOnePreferenceWithEvidenceAndNoQuote() {
         PreferenceLearningService s = service(3);
         for (int i = 0; i < 3; i++) {
-            s.recordAndEvaluate(ME, AGENT, "s" + i, "chat", PreferenceCatalog.detect("shorter please"));
+            s.recordAndEvaluate(
+                    ME, AGENT, "s" + i, "chat", PreferenceCatalog.detect("shorter please"));
         }
         Proposal p = filed(1).getValue();
         assertEquals(ME, p.subject());
@@ -139,7 +153,8 @@ class PreferenceLearningServiceTest {
         s.recordAndEvaluate(ME, AGENT, null, "chat", PreferenceCatalog.detect("shorter"));
         s.recordAndEvaluate(ME, AGENT, null, "chat", PreferenceCatalog.detect("no emojis"));
         verify(proposals, never()).propose(any());
-        s.recordAndEvaluate(ME, AGENT, null, "feedback", PreferenceCatalog.detect("no emojis please"));
+        s.recordAndEvaluate(
+                ME, AGENT, null, "feedback", PreferenceCatalog.detect("no emojis please"));
         assertEquals("Does not want emojis in replies", filed(1).getValue().body());
     }
 
@@ -163,7 +178,8 @@ class PreferenceLearningServiceTest {
 
     @Test
     void aFailureNeverEscapesTheWorker() {
-        when(signals.save(any(PreferenceSignal.class))).thenThrow(new IllegalStateException("db down"));
+        when(signals.save(any(PreferenceSignal.class)))
+                .thenThrow(new IllegalStateException("db down"));
         service(2).recordAndEvaluate(ME, AGENT, null, "chat", PreferenceCatalog.detect("shorter"));
         verify(proposals, never()).propose(any());
     }
@@ -196,7 +212,8 @@ class PreferenceLearningServiceTest {
     @Test
     void aFeedbackCommentCountsAsASignalAndAPlainOneDoesNot() {
         PreferenceLearningService s = service(3);
-        s.onFeedback(new TurnFeedbackRecordedEvent(this, ME, AGENT, "s", "way too long, be concise"));
+        s.onFeedback(
+                new TurnFeedbackRecordedEvent(this, ME, AGENT, "s", "way too long, be concise"));
         s.onFeedback(new TurnFeedbackRecordedEvent(this, ME, AGENT, "s", "great job"));
         s.onFeedback(new TurnFeedbackRecordedEvent(this, null, AGENT, "s", "shorter"));
         assertEquals(1, rows.size());
@@ -234,7 +251,11 @@ class PreferenceLearningServiceTest {
         for (int i = 0; i < 5; i++) {
             rowsIn.add(decision("a", ApprovalStatus.APPROVED, 30));
         }
-        rowsIn.add(decision("a", ApprovalStatus.REJECTED, 30)); // one rejection breaks "always approves"
+        rowsIn.add(
+                decision(
+                        "a",
+                        ApprovalStatus.REJECTED,
+                        30)); // one rejection breaks "always approves"
         for (int i = 0; i < 5; i++) {
             rowsIn.add(decision("b", ApprovalStatus.APPROVED, 0)); // decided at creation: automatic
         }
@@ -249,12 +270,19 @@ class PreferenceLearningServiceTest {
         List<ApprovalRequest> rowsIn = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             rowsIn.add(decision("send_mail", ApprovalStatus.REJECTED, 20));
-            rowsIn.add(decision("calendar", ApprovalStatus.EXECUTION_FAILED, 20)); // approved, then failed to run
+            rowsIn.add(
+                    decision(
+                            "calendar",
+                            ApprovalStatus.EXECUTION_FAILED,
+                            20)); // approved, then failed to run
         }
         var patterns = PreferenceLearningService.approvalPatterns(rowsIn, 3);
         assertEquals(2, patterns.size());
-        assertTrue(patterns.stream().anyMatch(p -> p.actionType().equals("send_mail") && !p.approves()));
-        assertTrue(patterns.stream().anyMatch(p -> p.actionType().equals("calendar") && p.approves()));
+        assertTrue(
+                patterns.stream()
+                        .anyMatch(p -> p.actionType().equals("send_mail") && !p.approves()));
+        assertTrue(
+                patterns.stream().anyMatch(p -> p.actionType().equals("calendar") && p.approves()));
     }
 
     @Test
@@ -263,8 +291,7 @@ class PreferenceLearningServiceTest {
         for (int i = 0; i < 3; i++) {
             decided.add(decision("mcp_tool.calendar_create", ApprovalStatus.APPROVED, 45));
         }
-        when(approvalRepo.decidedBy(eq(ME), any(Instant.class)))
-                .thenReturn(decided);
+        when(approvalRepo.decidedBy(eq(ME), any(Instant.class))).thenReturn(decided);
         service(3).scanApprovals(ME, AGENT);
         Proposal p = filed(1).getValue();
         assertEquals(LearningProposalKind.PREFERENCE, p.kind());
@@ -283,8 +310,7 @@ class PreferenceLearningServiceTest {
                 decided.add(decision(type, ApprovalStatus.APPROVED, 45));
             }
         }
-        when(approvalRepo.decidedBy(eq(ME), any(Instant.class)))
-                .thenReturn(decided);
+        when(approvalRepo.decidedBy(eq(ME), any(Instant.class))).thenReturn(decided);
         service(3).scanApprovals(ME, AGENT);
         filed(3);
     }
@@ -301,14 +327,17 @@ class PreferenceLearningServiceTest {
         assertTrue(p.title().startsWith("You approved \"Search the web\" 6 times"), p.title());
         assertFalse(p.title().contains("mcp_tool"), p.title());
         assertFalse(p.body().contains("mcp_tool"), p.body());
-        assertEquals("mcp_tool.web_search", p.evidence().get("actionType")); // the exact name stays in the evidence
+        assertEquals(
+                "mcp_tool.web_search",
+                p.evidence().get("actionType")); // the exact name stays in the evidence
     }
 
     @Test
     void aProposalFiledWithTheRawNameBeforeIsNotFiledAgain() {
-        known.add(existing(
-                "Usually approves \"mcp_tool.web_search\" requests when asked (informational: approvals are still asked for)",
-                LearningProposalStatus.PENDING));
+        known.add(
+                existing(
+                        "Usually approves \"mcp_tool.web_search\" requests when asked (informational: approvals are still asked for)",
+                        LearningProposalStatus.PENDING));
         List<ApprovalRequest> decided = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             decided.add(decision("mcp_tool.web_search", ApprovalStatus.APPROVED, 45));
@@ -322,7 +351,9 @@ class PreferenceLearningServiceTest {
     void actionLabelsCoverBuiltInMcpAndUnknownNames() {
         assertEquals("Search the web", ApprovalActionLabel.of("mcp_tool.web_search"));
         assertEquals("Open a web page", ApprovalActionLabel.of("fetch_web_page"));
-        assertEquals("create_issue (github)", ApprovalActionLabel.of("mcp_tool.mcp__github__create_issue"));
+        assertEquals(
+                "create_issue (github)",
+                ApprovalActionLabel.of("mcp_tool.mcp__github__create_issue"));
         assertEquals("calendar_create", ApprovalActionLabel.of("mcp_tool.calendar_create"));
         assertEquals("payment", ApprovalActionLabel.of("payment"));
     }
@@ -334,11 +365,13 @@ class PreferenceLearningServiceTest {
         com.agenticai.core.agents.memory.AgentMemoryService memory =
                 mock(com.agenticai.core.agents.memory.AgentMemoryService.class);
         when(memory.writesSwitchedOff(AGENT)).thenReturn(true);
-        ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> provider = mock(ObjectProvider.class);
+        ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> provider =
+                mock(ObjectProvider.class);
         when(provider.getIfAvailable()).thenReturn(memory);
         svc.setAgentMemory(provider);
 
-        svc.recordAndEvaluate(ME, AGENT, "s", "chat", PreferenceCatalog.detect("please keep answers short"));
+        svc.recordAndEvaluate(
+                ME, AGENT, "s", "chat", PreferenceCatalog.detect("please keep answers short"));
 
         assertTrue(rows.isEmpty());
         verify(proposals, never()).propose(any(Proposal.class));

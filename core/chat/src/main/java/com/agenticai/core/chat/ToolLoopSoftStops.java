@@ -12,10 +12,10 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolExecutionResult;
 
 /**
- * The soft-stop tool-result bodies the tool loop returns instead of executing past a limit
- * (rounds spent, cumulative prompt-token budget spent). Factored out of
- * {@link ArgumentSanitizingToolCallingManager} for size; the body is one ordered JSON object so
- * the model sees the same {@code tool_budget_exhausted} contract whichever limit trips first.
+ * The soft-stop tool-result bodies the tool loop returns instead of executing past a limit (rounds
+ * spent, cumulative prompt-token budget spent). Factored out of {@link
+ * ArgumentSanitizingToolCallingManager} for size; the body is one ordered JSON object so the model
+ * sees the same {@code tool_budget_exhausted} contract whichever limit trips first.
  */
 final class ToolLoopSoftStops {
 
@@ -27,16 +27,27 @@ final class ToolLoopSoftStops {
             String budgetExhaustedMessage,
             Prompt prompt,
             int roundsUsed) {
-        String instruction = ChatPrompts.textWithConfiguredAlias(
-            prompts, ChatPrompts.TOOL_BUDGET_ROUNDS, ToolLoopRunHooks.promptRun(prompt), budgetExhaustedMessage,
-            "rounds", String.valueOf(roundsUsed));
+        String instruction =
+                ChatPrompts.textWithConfiguredAlias(
+                        prompts,
+                        ChatPrompts.TOOL_BUDGET_ROUNDS,
+                        ToolLoopRunHooks.promptRun(prompt),
+                        budgetExhaustedMessage,
+                        "rounds",
+                        String.valueOf(roundsUsed));
         return body(objectMapper, instruction);
     }
 
-    /** The run's cumulative prompt-token budget is spent: same marker JSON, a token worded instruction. */
+    /**
+     * The run's cumulative prompt-token budget is spent: same marker JSON, a token worded
+     * instruction.
+     */
     static String tokens(PromptResolver prompts, ObjectMapper objectMapper, Prompt prompt) {
-        String instruction = ChatPrompts.text(
-            prompts, ChatPrompts.TOOL_BUDGET_TOKENS, ToolLoopRunHooks.promptRun(prompt));
+        String instruction =
+                ChatPrompts.text(
+                        prompts,
+                        ChatPrompts.TOOL_BUDGET_TOKENS,
+                        ToolLoopRunHooks.promptRun(prompt));
         return body(objectMapper, instruction);
     }
 
@@ -64,7 +75,10 @@ final class ToolLoopSoftStops {
             responses.add(new ToolResponseMessage.ToolResponse(call.id(), call.name(), softStop));
         }
         history.add(ToolResponseMessage.builder().responses(responses).build());
-        return ToolExecutionResult.builder().conversationHistory(history).returnDirect(false).build();
+        return ToolExecutionResult.builder()
+                .conversationHistory(history)
+                .returnDirect(false)
+                .build();
     }
 
     /**
@@ -94,7 +108,10 @@ final class ToolLoopSoftStops {
                                     : ""));
         }
         history.add(ToolResponseMessage.builder().responses(responses).build());
-        return ToolExecutionResult.builder().conversationHistory(history).returnDirect(true).build();
+        return ToolExecutionResult.builder()
+                .conversationHistory(history)
+                .returnDirect(true)
+                .build();
     }
 
     private static String body(ObjectMapper objectMapper, String instruction) {

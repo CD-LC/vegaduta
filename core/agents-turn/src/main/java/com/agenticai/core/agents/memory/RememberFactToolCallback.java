@@ -13,10 +13,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * Exposes {@link AgentMemoryService#remember} as a native Spring AI tool, the same "plain
@@ -54,12 +54,22 @@ public class RememberFactToolCallback implements ToolCallback {
     }
 
     public RememberFactToolCallback(
-        AgentMemoryService memoryService, UUID agentId, String subjectKey,
-        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService,
-        MemoryWriteArbitrationService memoryWriteArbitrationService, ChatClient chatClient
-    ) {
-        this(memoryService, agentId, subjectKey, graphMemoryService, entityExtractionService,
-            memoryWriteArbitrationService, chatClient, null);
+            AgentMemoryService memoryService,
+            UUID agentId,
+            String subjectKey,
+            GraphMemoryService graphMemoryService,
+            EntityExtractionService entityExtractionService,
+            MemoryWriteArbitrationService memoryWriteArbitrationService,
+            ChatClient chatClient) {
+        this(
+                memoryService,
+                agentId,
+                subjectKey,
+                graphMemoryService,
+                entityExtractionService,
+                memoryWriteArbitrationService,
+                chatClient,
+                null);
     }
 
     /**
@@ -67,11 +77,14 @@ public class RememberFactToolCallback implements ToolCallback {
      *     taint state is unreadable, so every write is quarantined (fail closed)
      */
     public RememberFactToolCallback(
-        AgentMemoryService memoryService, UUID agentId, String subjectKey,
-        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService,
-        MemoryWriteArbitrationService memoryWriteArbitrationService, ChatClient chatClient,
-        ObjectProvider<TurnTaintView> turnTaint
-    ) {
+            AgentMemoryService memoryService,
+            UUID agentId,
+            String subjectKey,
+            GraphMemoryService graphMemoryService,
+            EntityExtractionService entityExtractionService,
+            MemoryWriteArbitrationService memoryWriteArbitrationService,
+            ChatClient chatClient,
+            ObjectProvider<TurnTaintView> turnTaint) {
         this.turnTaint = turnTaint;
         this.memoryService = memoryService;
         this.agentId = agentId;
@@ -82,7 +95,10 @@ public class RememberFactToolCallback implements ToolCallback {
         this.chatClient = chatClient;
     }
 
-    /** Longest {@code replaces} honoured; a fact is a short statement, anything longer is not one copied from memory. */
+    /**
+     * Longest {@code replaces} honoured; a fact is a short statement, anything longer is not one
+     * copied from memory.
+     */
     static final int MAX_REPLACES_CHARS = 1000;
 
     /** The shipped schema: one {@code fact} property. */
@@ -129,7 +145,10 @@ public class RememberFactToolCallback implements ToolCallback {
                                 + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
                                 + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
                                 + "this for one-off details that only matter to the current message.")
-                .inputSchema(memoryService != null && memoryService.supersessionEnabled() ? SCHEMA_WITH_REPLACES : SCHEMA)
+                .inputSchema(
+                        memoryService != null && memoryService.supersessionEnabled()
+                                ? SCHEMA_WITH_REPLACES
+                                : SCHEMA)
                 .build();
     }
 
@@ -138,7 +157,8 @@ public class RememberFactToolCallback implements ToolCallback {
     public String call(String toolInput) {
         try {
             if (memoryService != null && memoryService.writesSwitchedOff(agentId)) {
-                // memory.write.enabled is off for this agent: say so, write nothing (no vector row, no graph triples).
+                // memory.write.enabled is off for this agent: say so, write nothing (no vector row,
+                // no graph triples).
                 return MemoryWriteSwitch.skippedResult();
             }
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
@@ -154,23 +174,33 @@ public class RememberFactToolCallback implements ToolCallback {
             MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
             Object replaces = args.get("replaces");
             if (replaces != null && replaces.toString().length() > MAX_REPLACES_CHARS) {
-                replaces = null; // not a fact copied from the known facts; the automatic rules still apply
+                replaces =
+                        null; // not a fact copied from the known facts; the automatic rules still
+                // apply
             }
             UUID memoryId =
                     replaces == null
-                            ? memoryService.remember(agentId, subjectKey, factValue.toString(), provenance)
+                            ? memoryService.remember(
+                                    agentId, subjectKey, factValue.toString(), provenance)
                             : memoryService.remember(
-                                    agentId, subjectKey, factValue.toString(), provenance, replaces.toString());
+                                    agentId,
+                                    subjectKey,
+                                    factValue.toString(),
+                                    provenance,
+                                    replaces.toString());
             if (provenance.quarantined()) {
                 // Graph memory has no quarantine state, so a tainted write never reaches it.
-                return "{\"remembered\": true, \"quarantined\": true, \"memoryId\": \"" + memoryId
-                    + "\", \"note\": \"Saved for review: this turn handled untrusted content, so the fact is "
-                    + "not recalled until a person approves it.\"}";
+                return "{\"remembered\": true, \"quarantined\": true, \"memoryId\": \""
+                        + memoryId
+                        + "\", \"note\": \"Saved for review: this turn handled untrusted content, so the fact is "
+                        + "not recalled until a person approves it.\"}";
             }
             writeToGraphIfAvailable(factValue.toString());
             return "{\"remembered\": true, \"memoryId\": \"" + memoryId + "\"}";
         } catch (MemoryForgottenException e) {
-            return "{\"remembered\": false, \"forgotten\": true, \"note\": \"" + MemoryForgottenException.TOOL_NOTE + "\"}";
+            return "{\"remembered\": false, \"forgotten\": true, \"note\": \""
+                    + MemoryForgottenException.TOOL_NOTE
+                    + "\"}";
         } catch (Exception e) {
             log.warn("remember_fact tool call failed", e);
             return errorJson("Failed to remember fact: " + e.getMessage());
@@ -196,8 +226,9 @@ public class RememberFactToolCallback implements ToolCallback {
             return;
         }
         try {
-            List<GraphTriple> triples = MemoryWriteGate.screenTriples(
-                entityExtractionService.extractTriples(chatClient, fact, agentId));
+            List<GraphTriple> triples =
+                    MemoryWriteGate.screenTriples(
+                            entityExtractionService.extractTriples(chatClient, fact, agentId));
             if (memoryWriteArbitrationService != null) {
                 memoryWriteArbitrationService.arbitrateAndWrite(
                         chatClient, graphMemoryService, agentId, subjectKey, triples);

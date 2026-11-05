@@ -53,8 +53,9 @@ public class BackgroundJobToolCallback implements ToolCallback {
     private final UUID agentId;
 
     /**
-     * What tainted the turn this callback was built for, or null when that turn is clean. A tainted turn
-     * (or one whose taint cannot be read) hands its taint to the job through {@link JobTaintMarker}.
+     * What tainted the turn this callback was built for, or null when that turn is clean. A tainted
+     * turn (or one whose taint cannot be read) hands its taint to the job through {@link
+     * JobTaintMarker}.
      */
     private final Supplier<List<String>> taintSources;
 
@@ -108,7 +109,8 @@ public class BackgroundJobToolCallback implements ToolCallback {
                             ? args.get("turns").asInt()
                             : null;
 
-            List<String> tainted = taintSources == null ? List.of("taint-state-unavailable") : taintSources.get();
+            List<String> tainted =
+                    taintSources == null ? List.of("taint-state-unavailable") : taintSources.get();
             if (tainted != null) {
                 goal = JobTaintMarker.mark(goal, tainted);
             }

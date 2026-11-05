@@ -20,10 +20,10 @@ import org.mockito.invocation.Invocation;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * The SQL shape and rules of {@link FactSupersession} against a mocked JdbcTemplate: what may be replaced (live, TRUSTED),
- * by whom (a typed or pinned row only by a person), in which order a named fact is resolved, and that a parked
- * (quarantined) write changes nothing until approval. The behaviour against a real database is
- * {@code FactSupersessionIT} (core/app).
+ * The SQL shape and rules of {@link FactSupersession} against a mocked JdbcTemplate: what may be
+ * replaced (live, TRUSTED), by whom (a typed or pinned row only by a person), in which order a
+ * named fact is resolved, and that a parked (quarantined) write changes nothing until approval. The
+ * behaviour against a real database is {@code FactSupersessionIT} (core/app).
  */
 class FactSupersessionTest {
 
@@ -35,10 +35,13 @@ class FactSupersessionTest {
     private final FactSupersession sup = new FactSupersession(jdbc, settings);
     private final UUID agent = UUID.randomUUID();
     private final UUID newId = UUID.randomUUID();
-    private final FactSupersession.Scope scope = new FactSupersession.Scope(TABLE, "agent_id = ? AND subject_key = ?", agent, "alice");
+    private final FactSupersession.Scope scope =
+            new FactSupersession.Scope(TABLE, "agent_id = ? AND subject_key = ?", agent, "alice");
 
     private List<Invocation> calls(String method) {
-        return mockingDetails(jdbc).getInvocations().stream().filter(i -> i.getMethod().getName().equals(method)).toList();
+        return mockingDetails(jdbc).getInvocations().stream()
+                .filter(i -> i.getMethod().getName().equals(method))
+                .toList();
     }
 
     private static String sql(Invocation i) {
@@ -67,7 +70,8 @@ class FactSupersessionTest {
     @Test
     void sameTextToldAgainIsReconfirmedNotStoredTwice() {
         UUID existing = UUID.randomUUID();
-        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class))).thenReturn(List.of(existing));
+        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class)))
+                .thenReturn(List.of(existing));
 
         Optional<UUID> same = sup.reconfirm(scope, "I live in  PUNE", NOW);
 
@@ -93,7 +97,12 @@ class FactSupersessionTest {
         assertThat(sql(queries.get(0))).contains("NOT person_authored AND NOT pinned");
         assertThat(sql(queries.get(1))).doesNotContain("person_authored");
         // both only ever look at live TRUSTED rows other than the new one
-        queries.forEach(q -> assertThat(sql(q)).contains("trust = 'TRUSTED'").contains("superseded_by IS NULL").contains("id <> ?"));
+        queries.forEach(
+                q ->
+                        assertThat(sql(q))
+                                .contains("trust = 'TRUSTED'")
+                                .contains("superseded_by IS NULL")
+                                .contains("id <> ?"));
     }
 
     @Test
@@ -114,10 +123,17 @@ class FactSupersessionTest {
                 .thenReturn(List.of(named)) // the exact-text lookup
                 .thenReturn(List.of()); // the automatic rule
 
-        List<UUID> out = sup.candidates(scope, newId, "[1,0]", "User lives in Pune", t -> {
-            embedded.incrementAndGet();
-            return "[0,1]";
-        }, false);
+        List<UUID> out =
+                sup.candidates(
+                        scope,
+                        newId,
+                        "[1,0]",
+                        "User lives in Pune",
+                        t -> {
+                            embedded.incrementAndGet();
+                            return "[0,1]";
+                        },
+                        false);
 
         assertThat(out).containsExactly(named);
         assertThat(embedded).hasValue(0);
@@ -133,10 +149,17 @@ class FactSupersessionTest {
                 .thenReturn(List.of(close)) // the closest fact
                 .thenReturn(List.of()); // the automatic rule
 
-        List<UUID> out = sup.candidates(scope, newId, "[1,0]", "lives somewhere", t -> {
-            embedded.incrementAndGet();
-            return "[0,1]";
-        }, false);
+        List<UUID> out =
+                sup.candidates(
+                        scope,
+                        newId,
+                        "[1,0]",
+                        "lives somewhere",
+                        t -> {
+                            embedded.incrementAndGet();
+                            return "[0,1]";
+                        },
+                        false);
 
         assertThat(out).containsExactly(close);
         assertThat(embedded).hasValue(1);
@@ -148,9 +171,11 @@ class FactSupersessionTest {
     @Test
     void aFactBothNamedAndNearIsReportedOnce() {
         UUID both = UUID.randomUUID();
-        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class))).thenReturn(List.of(both));
+        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class)))
+                .thenReturn(List.of(both));
 
-        assertThat(sup.candidates(scope, newId, "[1,0]", "x", t -> "[1,0]", false)).containsExactly(both);
+        assertThat(sup.candidates(scope, newId, "[1,0]", "x", t -> "[1,0]", false))
+                .containsExactly(both);
     }
 
     @Test
@@ -162,8 +187,11 @@ class FactSupersessionTest {
         assertThat(sup.supersede(TABLE, newId, List.of(a, b), NOW)).isEqualTo(2);
 
         Invocation update = calls("update").get(0);
-        assertThat(sql(update)).contains("SET superseded_by = ?, superseded_at = ?")
-                .contains("superseded_by IS NULL").contains("trust = 'TRUSTED'").contains("id IN (?,?)");
+        assertThat(sql(update))
+                .contains("SET superseded_by = ?, superseded_at = ?")
+                .contains("superseded_by IS NULL")
+                .contains("trust = 'TRUSTED'")
+                .contains("id IN (?,?)");
         assertThat(args(update)).contains(newId, a, b);
     }
 
@@ -177,20 +205,24 @@ class FactSupersessionTest {
     @Test
     void aQuarantinedWriteOnlyParksWhatItWouldReplace() {
         UUID a = UUID.randomUUID();
-        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class))).thenReturn(List.of(a));
+        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class)))
+                .thenReturn(List.of(a));
 
         sup.afterInsert(scope, newId, "[1,0]", null, t -> "[1,0]", false, false, NOW);
 
         List<String> updates = calls("update").stream().map(FactSupersessionTest::sql).toList();
         assertThat(updates).hasSize(1);
-        assertThat(updates.get(0)).contains("SET supersedes_ids = ?::uuid[]").doesNotContain("superseded_by");
+        assertThat(updates.get(0))
+                .contains("SET supersedes_ids = ?::uuid[]")
+                .doesNotContain("superseded_by");
         assertThat(args(calls("update").get(0))).contains("{" + a + "}", newId);
     }
 
     @Test
     void aTrustedWriteSupersedesInThatSamePass() {
         UUID a = UUID.randomUUID();
-        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class))).thenReturn(List.of(a));
+        when(jdbc.queryForList(anyString(), eq(UUID.class), any(Object[].class)))
+                .thenReturn(List.of(a));
 
         sup.afterInsert(scope, newId, "[1,0]", null, t -> "[1,0]", false, true, NOW);
 
@@ -204,8 +236,10 @@ class FactSupersessionTest {
         sup.applyPending(TABLE, newId, NOW);
 
         List<Invocation> updates = calls("update");
-        assertThat(sql(updates.get(0))).contains("SET superseded_by = ?, superseded_at = ?")
-                .contains("superseded_by IS NULL").contains("trust = 'TRUSTED'")
+        assertThat(sql(updates.get(0)))
+                .contains("SET superseded_by = ?, superseded_at = ?")
+                .contains("superseded_by IS NULL")
+                .contains("trust = 'TRUSTED'")
                 .contains("unnest(supersedes_ids)");
         assertThat(sql(updates.get(1))).contains("SET supersedes_ids = NULL");
     }

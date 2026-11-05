@@ -8,12 +8,13 @@ import java.util.Map;
 
 /**
  * The structured tool result every layer hands the model once this turn is parked on a human
- * approval: {@code {"error":"approval_parked","result":"<what the model should do>"}}. A JSON object
- * (Gemini replays every tool result as one) whose {@code error} value is the marker the tool loop in
- * {@code core/chat} recognises ({@code ArgumentSanitizingToolCallingManager.APPROVAL_PARKED}: a turn
- * that parked must end, so the loop answers the model's next round with the budget-exhausted result
- * instead of queueing more calls behind a decision that may never come). The two modules cannot
- * share a class, so the string is repeated there and a test pins that the two agree.
+ * approval: {@code {"error":"approval_parked","result":"<what the model should do>"}}. A JSON
+ * object (Gemini replays every tool result as one) whose {@code error} value is the marker the tool
+ * loop in {@code core/chat} recognises ({@code
+ * ArgumentSanitizingToolCallingManager.APPROVAL_PARKED}: a turn that parked must end, so the loop
+ * answers the model's next round with the budget-exhausted result instead of queueing more calls
+ * behind a decision that may never come). The two modules cannot share a class, so the string is
+ * repeated there and a test pins that the two agree.
  */
 public final class ApprovalParked {
 
@@ -37,12 +38,16 @@ public final class ApprovalParked {
     }
 
     /**
-     * The same JSON written by hand, for the case the serializer fails (unreachable for a map of strings). It carries
-     * no English of its own: the instruction is the caller's text.
+     * The same JSON written by hand, for the case the serializer fails (unreachable for a map of
+     * strings). It carries no English of its own: the instruction is the caller's text.
      */
     static String fallbackResult(String instruction) {
-        return "{\"error\":\"" + MARKER + "\",\"result\":\""
-                + new String(JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction))) + "\"}";
+        return "{\"error\":\""
+                + MARKER
+                + "\",\"result\":\""
+                + new String(
+                        JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction)))
+                + "\"}";
     }
 
     /** True when {@code toolResult} is a parked-turn result (from this class or the tool loop). */

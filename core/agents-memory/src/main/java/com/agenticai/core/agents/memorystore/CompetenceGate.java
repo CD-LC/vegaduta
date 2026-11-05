@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Platform AND (tenant, agent via the settings resolver): competence counting is on for an agent only if every level
- * says so. No resolver bean means the platform flag decides; an unreadable level counts as off (fail closed).
+ * Platform AND (tenant, agent via the settings resolver): competence counting is on for an agent
+ * only if every level says so. No resolver bean means the platform flag decides; an unreadable
+ * level counts as off (fail closed).
  */
 public class CompetenceGate {
 
@@ -18,7 +19,8 @@ public class CompetenceGate {
     private final CompetenceProperties properties;
     private final ObjectProvider<SettingsResolver> settings;
 
-    public CompetenceGate(CompetenceProperties properties, ObjectProvider<SettingsResolver> settings) {
+    public CompetenceGate(
+            CompetenceProperties properties, ObjectProvider<SettingsResolver> settings) {
         this.properties = properties;
         this.settings = settings;
     }
@@ -31,7 +33,9 @@ public class CompetenceGate {
             SettingsResolver resolver = settings.getIfAvailable();
             return resolver == null
                     || (resolver.getBool(CompetenceSettings.ENABLED_KEY, SettingContext.tenant())
-                            && resolver.getBool(CompetenceSettings.ENABLED_KEY, SettingContext.forAgent(agentId)));
+                            && resolver.getBool(
+                                    CompetenceSettings.ENABLED_KEY,
+                                    SettingContext.forAgent(agentId)));
         } catch (RuntimeException e) {
             log.warn("Competence flag level unreadable; treating as off", e);
             return false;

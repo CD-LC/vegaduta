@@ -97,7 +97,9 @@ class A2aTaskServiceTurnContextTest {
 
         ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
         verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
-        assertTrue(context.getValue().taint().isTainted(), "a remote peer's message is outsider content");
+        assertTrue(
+                context.getValue().taint().isTainted(),
+                "a remote peer's message is outsider content");
         assertEquals(java.util.List.of("inbound:a2a"), context.getValue().taint().sources());
     }
 }

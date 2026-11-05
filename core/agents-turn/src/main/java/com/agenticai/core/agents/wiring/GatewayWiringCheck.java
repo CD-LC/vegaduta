@@ -18,19 +18,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
- * Checks, once the application is ready, that every process-wide {@code *Gateway} a switched-on feature needs was
- * actually installed.
+ * Checks, once the application is ready, that every process-wide {@code *Gateway} a switched-on
+ * feature needs was actually installed.
  *
- * <p>The chat turn is assembled from plain objects that are not beans, so it reaches the learning loops and the turn
- * journal through static holders ({@code SkillLearningGateway}, {@code TurnJournalGateway}, ...) that the feature's own
- * bean installs when it starts. A holder nobody installed is a silent no-op by design, which is also how a
- * mis-assembled deployment (the flag is on, the bean is missing: a profile, a module left out, a changed condition)
- * ends up with a feature that is switched on and does nothing, with no log line to say so. This turns that into an
- * ERROR naming the feature, the flag and the holder, or - with {@code app.wiring.strict-gateways=true} - into a failed
- * start.
+ * <p>The chat turn is assembled from plain objects that are not beans, so it reaches the learning
+ * loops and the turn journal through static holders ({@code SkillLearningGateway}, {@code
+ * TurnJournalGateway}, ...) that the feature's own bean installs when it starts. A holder nobody
+ * installed is a silent no-op by design, which is also how a mis-assembled deployment (the flag is
+ * on, the bean is missing: a profile, a module left out, a changed condition) ends up with a
+ * feature that is switched on and does nothing, with no log line to say so. This turns that into an
+ * ERROR naming the feature, the flag and the holder, or - with {@code
+ * app.wiring.strict-gateways=true} - into a failed start.
  *
- * <p>The features and the flags that switch them on are listed in {@link #standardFeatures()}; a test pins that every
- * holder with an {@code install} method is covered.
+ * <p>The features and the flags that switch them on are listed in {@link #standardFeatures()}; a
+ * test pins that every holder with an {@code install} method is covered.
  */
 @Component
 public class GatewayWiringCheck {
@@ -42,11 +43,12 @@ public class GatewayWiringCheck {
      *
      * @param name the feature, for the message
      * @param gateway the holder's simple class name, for the message
-     * @param properties the flags that must all be {@code true} for the feature to be on (the same list the feature's
-     *     bean is conditional on)
+     * @param properties the flags that must all be {@code true} for the feature to be on (the same
+     *     list the feature's bean is conditional on)
      * @param installed whether the holder has what the feature needs
      */
-    public record Feature(String name, String gateway, List<String> properties, BooleanSupplier installed) {}
+    public record Feature(
+            String name, String gateway, List<String> properties, BooleanSupplier installed) {}
 
     private final Environment environment;
     private final boolean strict;
@@ -64,7 +66,10 @@ public class GatewayWiringCheck {
         this.features = List.copyOf(features);
     }
 
-    /** Every gateway a feature of the chat turn depends on, with the flags that switch the feature on. */
+    /**
+     * Every gateway a feature of the chat turn depends on, with the flags that switch the feature
+     * on.
+     */
     public static List<Feature> standardFeatures() {
         return List.of(
                 new Feature(
@@ -85,7 +90,9 @@ public class GatewayWiringCheck {
                 new Feature(
                         "preference learning",
                         "PreferenceSignalGateway",
-                        List.of("app.learning.proposals.enabled", "app.learning.preferences.enabled"),
+                        List.of(
+                                "app.learning.proposals.enabled",
+                                "app.learning.preferences.enabled"),
                         PreferenceSignalGateway::installed),
                 new Feature(
                         "lesson learning",
@@ -99,7 +106,10 @@ public class GatewayWiringCheck {
                         EpisodeRecordingGateway::installed));
     }
 
-    /** One message per feature that is switched on and whose gateway is not installed; empty when all is wired. */
+    /**
+     * One message per feature that is switched on and whose gateway is not installed; empty when
+     * all is wired.
+     */
     public List<String> problems() {
         List<String> problems = new ArrayList<>();
         for (Feature feature : features) {
@@ -129,7 +139,9 @@ public class GatewayWiringCheck {
         }
         if (strict && !problems.isEmpty()) {
             throw new IllegalStateException(
-                    "app.wiring.strict-gateways=true and " + problems.size() + " gateway(s) are not wired: "
+                    "app.wiring.strict-gateways=true and "
+                            + problems.size()
+                            + " gateway(s) are not wired: "
                             + String.join(" | ", problems));
         }
     }

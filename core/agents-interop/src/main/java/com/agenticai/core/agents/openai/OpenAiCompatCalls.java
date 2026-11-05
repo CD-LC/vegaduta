@@ -197,7 +197,8 @@ final class OpenAiCompatCalls {
                         false);
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
-        // The key behind this endpoint is routinely embedded in an application used by end users, so
+        // The key behind this endpoint is routinely embedded in an application used by end users,
+        // so
         // the prompt is outsider content (docs/security/taint-entry-points.md).
         SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:openai_compat");
         return agentChatService.chat(turnContext, chatTurn);

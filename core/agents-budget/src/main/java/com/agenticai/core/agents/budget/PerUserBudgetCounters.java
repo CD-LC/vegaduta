@@ -37,7 +37,11 @@ final class PerUserBudgetCounters {
     // namespace from KEY_PREFIX (note the "-credit" segment) so the two never
     // collide and each expires independently with the window.
     private static final String CREDIT_KEY_PREFIX = "agentic:per-user-budget-credit:";
-    /** Blank/absent user identity (some channels have no stable subject) - meter under a per-tenant bucket rather than letting the call escape the gate entirely. */
+
+    /**
+     * Blank/absent user identity (some channels have no stable subject) - meter under a per-tenant
+     * bucket rather than letting the call escape the gate entirely.
+     */
     private static final String ANONYMOUS_USER_KEY = "_anon";
 
     private final StringRedisTemplate redisTemplate;
@@ -49,33 +53,39 @@ final class PerUserBudgetCounters {
     private volatile SpendControlsFailMode failMode = SpendControlsFailMode.open();
 
     PerUserBudgetCounters(
-        StringRedisTemplate redisTemplate, ObjectProvider<NotificationService> notificationService
-    ) {
+            StringRedisTemplate redisTemplate,
+            ObjectProvider<NotificationService> notificationService) {
         this.redisTemplate = redisTemplate;
         this.ttlRepair = new PerUserBudgetTtlRepair(redisTemplate);
         this.notificationService = notificationService;
     }
 
     /**
-     * Notifications (Tier-3): fires the tenant bell once per
-     * (tenant,user,modality) budget window when a cap is hit - the audit's
-     * "budget alerts require polling the console" gap. The dedupe matters:
-     * {@link PerUserBudgetService#checkBudget}/{@code checkAndReserveBudget} throw on EVERY
-     * gated call and a retrying user would otherwise mint a notification
-     * per retry, so an NX Redis key under the same window TTL does the
-     * "once per window" - a Redis outage fails OPEN on the notification
-     * side (worst case one extra bell), never on the enforcement side.
-     * Recipient is null (broadcast to tenant-admins): {@code userKey} is a
-     * billing identity, not guaranteed to be the approver's Keycloak
-     * subject, and a mis-targeted silent bell is worse than a shared one.
+     * Notifications (Tier-3): fires the tenant bell once per (tenant,user,modality) budget window
+     * when a cap is hit - the audit's "budget alerts require polling the console" gap. The dedupe
+     * matters: {@link PerUserBudgetService#checkBudget}/{@code checkAndReserveBudget} throw on
+     * EVERY gated call and a retrying user would otherwise mint a notification per retry, so an NX
+     * Redis key under the same window TTL does the "once per window" - a Redis outage fails OPEN on
+     * the notification side (worst case one extra bell), never on the enforcement side. Recipient
+     * is null (broadcast to tenant-admins): {@code userKey} is a billing identity, not guaranteed
+     * to be the approver's Keycloak subject, and a mis-targeted silent bell is worse than a shared
+     * one.
      */
     void notifyBudgetExhausted(
-        String spendKey, long windowSeconds, String tenantId, String userKey, Modality modality, long capMicroCents
-    ) {
+            String spendKey,
+            long windowSeconds,
+            String tenantId,
+            String userKey,
+            Modality modality,
+            long capMicroCents) {
         try {
-            Boolean firstThisWindow = redisTemplate.opsForValue().setIfAbsent(
-                spendKey + ":notified", "1",
-                java.time.Duration.ofSeconds(Math.max(windowSeconds, 60)));
+            Boolean firstThisWindow =
+                    redisTemplate
+                            .opsForValue()
+                            .setIfAbsent(
+                                    spendKey + ":notified",
+                                    "1",
+                                    java.time.Duration.ofSeconds(Math.max(windowSeconds, 60)));
             if (!Boolean.TRUE.equals(firstThisWindow)) {
                 return;
             }
@@ -83,12 +93,21 @@ final class PerUserBudgetCounters {
             if (service == null) {
                 return;
             }
-            service.create(null, NotificationCategory.BILLING,
-                modality.name().toLowerCase(java.util.Locale.ROOT) + " budget exhausted",
-                "The per-user " + modality.name().toLowerCase(java.util.Locale.ROOT) + " budget cap ($"
-                    + microCentsToUsd(capMicroCents) + ") is exhausted for this window"
-                    + " (user '" + userKey + "'). Top up credit or wait for the window to reset.",
-                NotificationSeverity.WARNING, null, null);
+            service.create(
+                    null,
+                    NotificationCategory.BILLING,
+                    modality.name().toLowerCase(java.util.Locale.ROOT) + " budget exhausted",
+                    "The per-user "
+                            + modality.name().toLowerCase(java.util.Locale.ROOT)
+                            + " budget cap ($"
+                            + microCentsToUsd(capMicroCents)
+                            + ") is exhausted for this window"
+                            + " (user '"
+                            + userKey
+                            + "'). Top up credit or wait for the window to reset.",
+                    NotificationSeverity.WARNING,
+                    null,
+                    null);
         } catch (RuntimeException notifyFailure) {
             // Best-effort: a bell-write or Redis failure must never change
             // the budget decision - the exception is the enforcement.
@@ -96,11 +115,11 @@ final class PerUserBudgetCounters {
     }
 
     /**
-     * @param windowSeconds the configured window length, used only if this
-     *     read discovers the counter has lost its TTL - see {@code
-     *     PerUserBudgetTtlRepair#repairMissingTtl}.
+     * @param windowSeconds the configured window length, used only if this read discovers the
+     *     counter has lost its TTL - see {@code PerUserBudgetTtlRepair#repairMissingTtl}.
      */
-    long currentSpendMicroCents(String tenantId, String userKey, Modality modality, int windowSeconds) {
+    long currentSpendMicroCents(
+            String tenantId, String userKey, Modality modality, int windowSeconds) {
         String spendKey = key(tenantId, userKey, modality);
         try {
             String value = redisTemplate.opsForValue().get(spendKey);
@@ -112,7 +131,8 @@ final class PerUserBudgetCounters {
         } catch (SpendControlsUnavailableException e) {
             throw e;
         } catch (RuntimeException e) {
-            // NumberFormatException (a corrupt value) is a RuntimeException too: unreadable counts as a failed read.
+            // NumberFormatException (a corrupt value) is a RuntimeException too: unreadable counts
+            // as a failed read.
             failMode.onGateFailure("per-user-budget", e, log);
             log.debug("Per-user budget read failed - failing open", e);
             return 0L;
@@ -120,15 +140,14 @@ final class PerUserBudgetCounters {
     }
 
     /**
-     * Live paid top-up credit for this window (micro-cents). Fails open to 0
-     * on any Redis error or corrupt value, identical posture to {@link
-     * #currentSpendMicroCents} - a metering-read hiccup must never manufacture
-     * phantom credit nor block a turn.
+     * Live paid top-up credit for this window (micro-cents). Fails open to 0 on any Redis error or
+     * corrupt value, identical posture to {@link #currentSpendMicroCents} - a metering-read hiccup
+     * must never manufacture phantom credit nor block a turn.
      *
-     * @param windowSeconds see {@link #currentSpendMicroCents}'s parameter of
-     *     the same name.
+     * @param windowSeconds see {@link #currentSpendMicroCents}'s parameter of the same name.
      */
-    long currentCreditMicroCents(String tenantId, String userKey, Modality modality, int windowSeconds) {
+    long currentCreditMicroCents(
+            String tenantId, String userKey, Modality modality, int windowSeconds) {
         String creditKeyStr = creditKey(tenantId, userKey, modality);
         try {
             String value = redisTemplate.opsForValue().get(creditKeyStr);
@@ -149,7 +168,7 @@ final class PerUserBudgetCounters {
     /** The keyspace sweep behind {@link PerUserBudgetService#repairAllMissingTtls}. */
     int repairAllPrefixes(int windowSeconds) {
         return ttlRepair.repairPrefix(KEY_PREFIX, windowSeconds)
-            + ttlRepair.repairPrefix(CREDIT_KEY_PREFIX, windowSeconds);
+                + ttlRepair.repairPrefix(CREDIT_KEY_PREFIX, windowSeconds);
     }
 
     static BigDecimal microCentsToUsd(long microCents) {
@@ -171,23 +190,23 @@ final class PerUserBudgetCounters {
     }
 
     /**
-     * Same shape as {@link #incrementBy}, but returns the resulting
-     * cumulative value ({@code null} on a Redis outage) so a caller can
-     * compare it against a cap atomically - {@link PerUserBudgetService#checkAndReserveBudget}'s
-     * reserve-then-compare step needs the post-increment total; {@link
-     * #incrementBy}'s existing purely-additive callers don't, so it stays a
-     * thin wrapper around this rather than changing its own return type
-     * under existing callers.
+     * Same shape as {@link #incrementBy}, but returns the resulting cumulative value ({@code null}
+     * on a Redis outage) so a caller can compare it against a cap atomically - {@link
+     * PerUserBudgetService#checkAndReserveBudget}'s reserve-then-compare step needs the
+     * post-increment total; {@link #incrementBy}'s existing purely-additive callers don't, so it
+     * stays a thin wrapper around this rather than changing its own return type under existing
+     * callers.
      */
     Long incrementByAndGet(String key, Duration window, long by) {
         return incrementByAndGet(key, window, by, false);
     }
 
     /**
-     * @param gate true when the increment is a reservation that decides whether a call may run: with
-     *     {@code fail-mode=closed} a Redis failure then refuses the call. A refund (negative {@code by}) and a plain
-     *     post-call record are never gates: the money is already spent or the reservation is being given back.
-     *     Atomicity of the TTL and of refunds is {@link SpendCounters}'.
+     * @param gate true when the increment is a reservation that decides whether a call may run:
+     *     with {@code fail-mode=closed} a Redis failure then refuses the call. A refund (negative
+     *     {@code by}) and a plain post-call record are never gates: the money is already spent or
+     *     the reservation is being given back. Atomicity of the TTL and of refunds is {@link
+     *     SpendCounters}'.
      */
     Long incrementByAndGet(String key, Duration window, long by, boolean gate) {
         try {
@@ -208,11 +227,15 @@ final class PerUserBudgetCounters {
     }
 
     String budgetMessage(BudgetConfig config, Modality modality, long capMicroCents, String key) {
-        BigDecimal capUsd = BigDecimal.valueOf(capMicroCents).divide(MICRO_CENTS_PER_USD, 4, RoundingMode.HALF_UP);
+        BigDecimal capUsd =
+                BigDecimal.valueOf(capMicroCents)
+                        .divide(MICRO_CENTS_PER_USD, 4, RoundingMode.HALF_UP);
         String modalityLabel = modality.name().toLowerCase(java.util.Locale.ROOT);
         if (capMicroCents <= 0) {
-            return "Your " + modalityLabel + " budget is not included in your plan (pay-per-use only). "
-                + "Upgrade or top up to continue.";
+            return "Your "
+                    + modalityLabel
+                    + " budget is not included in your plan (pay-per-use only). "
+                    + "Upgrade or top up to continue.";
         }
         String remaining = "";
         try {
@@ -223,8 +246,13 @@ final class PerUserBudgetCounters {
         } catch (RuntimeException ignored) {
             // best-effort only
         }
-        return "Daily " + modalityLabel + " budget reached ($" + capUsd.toPlainString() + " per user)."
-            + remaining + " Top up or upgrade to continue.";
+        return "Daily "
+                + modalityLabel
+                + " budget reached ($"
+                + capUsd.toPlainString()
+                + " per user)."
+                + remaining
+                + " Top up or upgrade to continue.";
     }
 
     private static String humanizeSeconds(long seconds) {
@@ -241,12 +269,25 @@ final class PerUserBudgetCounters {
 
     static String key(String tenantId, String userKey, Modality modality) {
         String subject = (userKey == null || userKey.isBlank()) ? ANONYMOUS_USER_KEY : userKey;
-        return KEY_PREFIX + modality.name().toLowerCase(java.util.Locale.ROOT) + ":" + tenantId + ":" + subject;
+        return KEY_PREFIX
+                + modality.name().toLowerCase(java.util.Locale.ROOT)
+                + ":"
+                + tenantId
+                + ":"
+                + subject;
     }
 
-    /** Companion of {@link #key} for the P2 paid top-up credit counter - same (tenant, user, modality) shape, distinct namespace. */
+    /**
+     * Companion of {@link #key} for the P2 paid top-up credit counter - same (tenant, user,
+     * modality) shape, distinct namespace.
+     */
     static String creditKey(String tenantId, String userKey, Modality modality) {
         String subject = (userKey == null || userKey.isBlank()) ? ANONYMOUS_USER_KEY : userKey;
-        return CREDIT_KEY_PREFIX + modality.name().toLowerCase(java.util.Locale.ROOT) + ":" + tenantId + ":" + subject;
+        return CREDIT_KEY_PREFIX
+                + modality.name().toLowerCase(java.util.Locale.ROOT)
+                + ":"
+                + tenantId
+                + ":"
+                + subject;
     }
 }

@@ -49,7 +49,6 @@ import com.agenticai.core.sharing.ResourceAccessService;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -64,12 +63,13 @@ import org.springframework.beans.factory.ObjectProvider;
 import reactor.core.publisher.Flux;
 
 /**
- * A delegated call ({@link ChatDelegateCall}) and a specialist handoff ({@link ChatSpecialistHandoff}) run the same
- * stages a buffered turn has: screening of the question, the delegate's own content guardrails, model-level hooks, the
- * turn journal and the continuation policy. They used to be a bare model call, so asking the main agent to delegate
- * skipped every one of them. REAL delegate classes over a REAL {@link SubAgentTurn}, {@link BufferedTurnCalls},
- * {@link ChatGuardrailGate} and {@link ContentGuardrailEngine}; the model client, the agent store and the hook
- * runtime are the doubles.
+ * A delegated call ({@link ChatDelegateCall}) and a specialist handoff ({@link
+ * ChatSpecialistHandoff}) run the same stages a buffered turn has: screening of the question, the
+ * delegate's own content guardrails, model-level hooks, the turn journal and the continuation
+ * policy. They used to be a bare model call, so asking the main agent to delegate skipped every one
+ * of them. REAL delegate classes over a REAL {@link SubAgentTurn}, {@link BufferedTurnCalls},
+ * {@link ChatGuardrailGate} and {@link ContentGuardrailEngine}; the model client, the agent store
+ * and the hook runtime are the doubles.
  */
 class SubAgentTurnTest {
 
@@ -87,7 +87,11 @@ class SubAgentTurnTest {
     private ChatSpecialistHandoff specialist;
     private SpecialistHandoffService handoffService;
     private final List<ToolCallback> delegateTools = new ArrayList<>();
-    /** The taint each delegate-tool resolution was announced (what its taint gate would be built on). */
+
+    /**
+     * The taint each delegate-tool resolution was announced (what its taint gate would be built
+     * on).
+     */
     private final List<TurnTaint> resolvedAgainst = new ArrayList<>();
 
     @BeforeEach
@@ -110,7 +114,9 @@ class SubAgentTurnTest {
         when(credentials.resolveActiveKey(any())).thenReturn("key");
         LlmGatewayService gateway = mock(LlmGatewayService.class);
         when(gateway.resolveClient(any(), any(), any())).thenReturn(chatClient);
-        when(gateway.resolveClient(any(), any(com.agenticai.core.chat.gateway.GatewayCallSpec.class))).thenReturn(chatClient);
+        when(gateway.resolveClient(
+                        any(), any(com.agenticai.core.chat.gateway.GatewayCallSpec.class)))
+                .thenReturn(chatClient);
         toolPort = mock(AgentToolPort.class);
         when(toolPort.resolveToolsForDelegatedCall(any(), any(), any(), any()))
                 .thenAnswer(
@@ -133,7 +139,9 @@ class SubAgentTurnTest {
                         providerOf(realEngine()),
                         providerOf(new GuardrailViolationLogger(mock(AuditLogService.class))),
                         new AgentGuardrailService(
-                                mock(TenantLimits.class), mock(AgentRepository.class), mock(ResourceAccessService.class)));
+                                mock(TenantLimits.class),
+                                mock(AgentRepository.class),
+                                mock(ResourceAccessService.class)));
         turns =
                 new ChatTurnExecutor(
                         credentials,
@@ -155,16 +163,35 @@ class SubAgentTurnTest {
                         judge,
                         translator);
         ChatPromptDirectives.DirectiveGates gates =
-                new ChatPromptDirectives.DirectiveGates(() -> true, () -> false, () -> true, () -> false, () -> false);
+                new ChatPromptDirectives.DirectiveGates(
+                        () -> true, () -> false, () -> true, () -> false, () -> false);
         ResourceAccessService access = mock(ResourceAccessService.class);
         delegate =
                 new ChatDelegateCall(
-                        agentService, access, credentials, gateway, toolPort, judge, translator, turns, tenant -> null,
-                        gates, subTurn);
+                        agentService,
+                        access,
+                        credentials,
+                        gateway,
+                        toolPort,
+                        judge,
+                        translator,
+                        turns,
+                        tenant -> null,
+                        gates,
+                        subTurn);
         specialist =
                 new ChatSpecialistHandoff(
-                        agentService, access, credentials, gateway, toolPort, judge, translator, turns, tenant -> null,
-                        gates, subTurn);
+                        agentService,
+                        access,
+                        credentials,
+                        gateway,
+                        toolPort,
+                        judge,
+                        translator,
+                        turns,
+                        tenant -> null,
+                        gates,
+                        subTurn);
         handoffService = mock(SpecialistHandoffService.class);
         specialist.setHandoffService(handoffService);
         when(handoffService.findSpecialist(any()))
@@ -187,7 +214,8 @@ class SubAgentTurnTest {
                         .call()
                         .content())
                 .thenReturn(answer);
-        // Stubbing a deep-stub chain records prompt() invocations; clear them so verify(never()) means something.
+        // Stubbing a deep-stub chain records prompt() invocations; clear them so verify(never())
+        // means something.
         org.mockito.Mockito.clearInvocations(chatClient);
     }
 
@@ -199,7 +227,8 @@ class SubAgentTurnTest {
     }
 
     private static ContentGuardrailEngine realEngine() {
-        List<ContentGuardrail> guardrails = List.of(new ProfanityGuardrail(), new JailbreakDetectorGuardrail());
+        List<ContentGuardrail> guardrails =
+                List.of(new ProfanityGuardrail(), new JailbreakDetectorGuardrail());
         return new ContentGuardrailEngine(
                 new ObjectProvider<>() {
                     @Override
@@ -211,7 +240,8 @@ class SubAgentTurnTest {
 
     private List<TurnEvent> eventsOf(String session) {
         List<TurnSummary> found = journal.listBySession(TARGET, session, 5);
-        assertEquals(1, found.size(), "the sub-turn has its own journal record, found by its session");
+        assertEquals(
+                1, found.size(), "the sub-turn has its own journal record, found by its session");
         return journal.read(TARGET, found.get(0).turnId());
     }
 
@@ -224,8 +254,13 @@ class SubAgentTurnTest {
         assertEquals("the collaborator's answer", result);
         List<TurnEvent> events = eventsOf("delegated:one");
         assertEquals(TurnEventType.INTAKE, events.get(0).type());
-        assertTrue(events.stream().anyMatch(e -> e.summary().contains("guard=sub-agent outcome=delegate")), events.toString());
-        assertTrue(events.stream().anyMatch(e -> e.type() == TurnEventType.MODEL_CALL), events.toString());
+        assertTrue(
+                events.stream()
+                        .anyMatch(e -> e.summary().contains("guard=sub-agent outcome=delegate")),
+                events.toString());
+        assertTrue(
+                events.stream().anyMatch(e -> e.type() == TurnEventType.MODEL_CALL),
+                events.toString());
         TurnEvent last = events.get(events.size() - 1);
         assertEquals(TurnEventType.COMMIT, last.type());
         assertTrue(last.summary().contains("status=completed"), last.summary());
@@ -243,7 +278,10 @@ class SubAgentTurnTest {
         assertFalse(result.contains("should never be used"));
         verify(chatClient, never()).prompt();
         List<TurnEvent> events = eventsOf("delegated:in");
-        assertTrue(events.stream().anyMatch(e -> e.summary().contains("guard=inbound outcome=refused")), events.toString());
+        assertTrue(
+                events.stream()
+                        .anyMatch(e -> e.summary().contains("guard=inbound outcome=refused")),
+                events.toString());
         assertTrue(events.get(events.size() - 1).summary().contains("status=refused"));
         verify(judge, never()).sampleAsync(any(), any(), any(), any(), any());
     }
@@ -255,10 +293,19 @@ class SubAgentTurnTest {
 
         String result = delegate.delegateCall(TARGET, "how do you feel", null, "delegated:out");
 
-        assertFalse(result.contains("damn"), "the violating answer must not reach the calling agent: " + result);
+        assertFalse(
+                result.contains("damn"),
+                "the violating answer must not reach the calling agent: " + result);
         assertTrue(result.contains("withheld"), result);
         List<TurnEvent> events = eventsOf("delegated:out");
-        assertTrue(events.stream().anyMatch(e -> e.summary().contains("guard=outbound-enforced outcome=withheld")), events.toString());
+        assertTrue(
+                events.stream()
+                        .anyMatch(
+                                e ->
+                                        e.summary()
+                                                .contains(
+                                                        "guard=outbound-enforced outcome=withheld")),
+                events.toString());
     }
 
     @Test
@@ -275,7 +322,9 @@ class SubAgentTurnTest {
 
         assertEquals("a workspace hook stopped this request", result);
         verify(chatClient, never()).prompt();
-        assertTrue(eventsOf("delegated:hook").stream().anyMatch(e -> e.summary().contains("guard=hook-before-model")));
+        assertTrue(
+                eventsOf("delegated:hook").stream()
+                        .anyMatch(e -> e.summary().contains("guard=hook-before-model")));
     }
 
     @Test
@@ -283,8 +332,7 @@ class SubAgentTurnTest {
         AgentHookRuntime runtime = mock(AgentHookRuntime.class);
         HookRun run = mock(HookRun.class);
         when(runtime.beginRun(any(), any(), any())).thenReturn(run);
-        when(run.wrap(any()))
-                .thenAnswer(i -> Flux.just("[redacted by hook]"));
+        when(run.wrap(any())).thenAnswer(i -> Flux.just("[redacted by hook]"));
         hookRuntime = runtime;
         modelAnswers("the secret is 1234");
 
@@ -295,7 +343,8 @@ class SubAgentTurnTest {
 
     @Test
     void aReplyThatStopsAtAnAnnouncedStepIsContinuedLikeOnAnyOtherTurn() {
-        com.agenticai.core.agents.turn.ContinuationProperties properties = new ContinuationProperties();
+        com.agenticai.core.agents.turn.ContinuationProperties properties =
+                new ContinuationProperties();
         properties.setHeuristicScope(ContinuationProperties.Scope.ALL_MODELS);
         turns.continuation = new TurnContinuation(properties);
         turns.maxContinuations = 2;
@@ -311,13 +360,16 @@ class SubAgentTurnTest {
 
     @Test
     void aFrontierModelsAnnouncedStepIsAnAnswerAndALocalServersIsContinued() {
-        ContinuationProperties properties = new ContinuationProperties(); // wording check: listed providers only
+        ContinuationProperties properties =
+                new ContinuationProperties(); // wording check: listed providers only
         turns.continuation = new TurnContinuation(properties);
         turns.maxContinuations = 2;
         delegateTools.add(new FixedTool("lookup", "{}"));
         stubToolTurn("Let me create the pom.xml:", "Done. The pom.xml is created.");
 
-        assertEquals("Let me create the pom.xml:", delegate.delegateCall(TARGET, "set up the build", null, "delegated:f1"));
+        assertEquals(
+                "Let me create the pom.xml:",
+                delegate.delegateCall(TARGET, "set up the build", null, "delegated:f1"));
 
         properties.setHeuristicProviders(Set.of(ProviderName.OPENAI));
         stubToolTurn("Let me create the pom.xml:", "Done. The pom.xml is created.");
@@ -340,19 +392,28 @@ class SubAgentTurnTest {
 
         when(agent.getEnabledGuardrails()).thenReturn(Set.of());
         modelAnswers("the specialist's answer");
-        assertEquals("the specialist's answer", specialist.delegateToSpecialist(chain, "billing", "invoice status", null));
-        verify(handoffService, org.mockito.Mockito.times(2)).recordHandoffOutcome(any(), eq(com.agenticai.core.agents.crew.HandoffStatus.SUCCESS), any());
+        assertEquals(
+                "the specialist's answer",
+                specialist.delegateToSpecialist(chain, "billing", "invoice status", null));
+        verify(handoffService, org.mockito.Mockito.times(2))
+                .recordHandoffOutcome(
+                        any(), eq(com.agenticai.core.agents.crew.HandoffStatus.SUCCESS), any());
     }
 
     @Test
     void aSubTurnStartedByAToolCallNamesTheJournaledTurnThatCalledIt() {
         modelAnswers("child answer");
-        TurnRecorder parent = TurnRecorder.start(journal, UUID.randomUUID(), UUID.randomUUID(), "parent-session");
+        TurnRecorder parent =
+                TurnRecorder.start(journal, UUID.randomUUID(), UUID.randomUUID(), "parent-session");
         ToolCallback delegating =
                 new ToolCallback() {
                     @Override
                     public ToolDefinition getToolDefinition() {
-                        return ToolDefinition.builder().name("ask_agent_x").description("d").inputSchema("{}").build();
+                        return ToolDefinition.builder()
+                                .name("ask_agent_x")
+                                .description("d")
+                                .inputSchema("{}")
+                                .build();
                     }
 
                     @Override
@@ -377,7 +438,9 @@ class SubAgentTurnTest {
         assertTrue(journal.listBySession(TARGET, "delegated:off", 5).isEmpty());
     }
 
-    /** The journaled turns, whatever session they ran in (the specialist's session id is generated). */
+    /**
+     * The journaled turns, whatever session they ran in (the specialist's session id is generated).
+     */
     private List<String> committedStatuses() {
         return journal.turnIds().stream()
                 .map(id -> journal.read(TARGET, id))
@@ -394,15 +457,17 @@ class SubAgentTurnTest {
     }
 
     /**
-     * A model that answers the next scripted reply on each call, whatever the fluent request looks like (the first
-     * pass and a continuation pass build different requests).
+     * A model that answers the next scripted reply on each call, whatever the fluent request looks
+     * like (the first pass and a continuation pass build different requests).
      */
     private void stubToolTurn(String... replies) {
         ChatClient.ChatClientRequestSpec spec =
                 mock(ChatClient.ChatClientRequestSpec.class, org.mockito.Mockito.RETURNS_SELF);
         ChatClient.CallResponseSpec call = mock(ChatClient.CallResponseSpec.class);
-        java.util.concurrent.atomic.AtomicInteger next = new java.util.concurrent.atomic.AtomicInteger();
-        when(call.content()).thenAnswer(i -> replies[Math.min(next.getAndIncrement(), replies.length - 1)]);
+        java.util.concurrent.atomic.AtomicInteger next =
+                new java.util.concurrent.atomic.AtomicInteger();
+        when(call.content())
+                .thenAnswer(i -> replies[Math.min(next.getAndIncrement(), replies.length - 1)]);
         when(spec.call()).thenReturn(call);
         org.mockito.Mockito.doReturn(spec).when(chatClient).prompt();
     }
@@ -419,8 +484,8 @@ class SubAgentTurnTest {
         }
     }
 
-
-    // ---- taint inheritance: a sub-turn is never cleaner than the turn that handed it work -------------------------
+    // ---- taint inheritance: a sub-turn is never cleaner than the turn that handed it work
+    // -------------------------
 
     private static TurnTaint taintedParent() {
         TurnTaint parent = new TurnTaint();
@@ -429,11 +494,13 @@ class SubAgentTurnTest {
     }
 
     private boolean startedTainted(String session) {
-        return eventsOf(session).stream().anyMatch(e -> e.summary().contains("guard=taint outcome=inherited"));
+        return eventsOf(session).stream()
+                .anyMatch(e -> e.summary().contains("guard=taint outcome=inherited"));
     }
 
     private boolean startedClean(String session) {
-        return eventsOf(session).stream().anyMatch(e -> e.summary().contains("guard=taint outcome=clean"));
+        return eventsOf(session).stream()
+                .anyMatch(e -> e.summary().contains("guard=taint outcome=clean"));
     }
 
     @Test
@@ -447,7 +514,9 @@ class SubAgentTurnTest {
 
         assertTrue(startedTainted("delegated:tainted"), eventsOf("delegated:tainted").toString());
         TurnTaint child = resolvedAgainst.get(0);
-        assertTrue(child.isTainted(), "the taint gate of the delegate's tools must see the parent's taint");
+        assertTrue(
+                child.isTainted(),
+                "the taint gate of the delegate's tools must see the parent's taint");
         assertEquals(List.of("fetch_web_page"), child.sources());
     }
 
@@ -481,9 +550,13 @@ class SubAgentTurnTest {
             delegate.delegateCall(TARGET, "q1", null, "delegated:a");
             delegate.delegateCall(TARGET, "q2", null, "delegated:b");
         }
-        resolvedAgainst.get(0).mark("fetch_web_page"); // the first branch reads the web after it started
+        resolvedAgainst
+                .get(0)
+                .mark("fetch_web_page"); // the first branch reads the web after it started
 
-        assertFalse(parent.isTainted(), "the parent only learns through the delegating tool's own (source) result");
+        assertFalse(
+                parent.isTainted(),
+                "the parent only learns through the delegating tool's own (source) result");
         assertFalse(resolvedAgainst.get(1).isTainted(), "a sibling that started clean stays clean");
         assertTrue(startedClean("delegated:b"));
     }
@@ -493,7 +566,8 @@ class SubAgentTurnTest {
         modelAnswers("answer");
 
         try (DelegationTaint.Scope ignored = DelegationTaint.openCall(taintedParent())) {
-            specialist.delegateToSpecialist(HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
+            specialist.delegateToSpecialist(
+                    HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
         }
 
         TurnTaint child = resolvedAgainst.get(0);
@@ -505,7 +579,8 @@ class SubAgentTurnTest {
     void aSpecialistOfACleanTurnStartsClean() {
         modelAnswers("answer");
 
-        specialist.delegateToSpecialist(HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
+        specialist.delegateToSpecialist(
+                HandoffChain.root("parent-session", UUID.randomUUID()), "billing", "q", null);
 
         assertFalse(resolvedAgainst.get(0).isTainted());
     }

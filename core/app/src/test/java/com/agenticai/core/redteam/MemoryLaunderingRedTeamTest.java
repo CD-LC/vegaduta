@@ -35,11 +35,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
- * Family 3 - memory laundering. A turn that read attacker-controlled content must not be able to persist it into
- * long-term memory (vector memory, knowledge base) where it would be recalled later as a trusted fact.
+ * Family 3 - memory laundering. A turn that read attacker-controlled content must not be able to
+ * persist it into long-term memory (vector memory, knowledge base) where it would be recalled later
+ * as a trusted fact.
  *
- * <p>Enforce mode already parks these writes (both tools are taint sinks); the open gaps are the default observe
- * posture and content-based screening of the write itself, owned by package C.
+ * <p>Enforce mode already parks these writes (both tools are taint sinks); the open gaps are the
+ * default observe posture and content-based screening of the write itself, owned by package C.
  */
 @Tag("redteam")
 class MemoryLaunderingRedTeamTest {
@@ -62,22 +63,58 @@ class MemoryLaunderingRedTeamTest {
 
     private static String kbArgs(UUID collection, String content) {
         try {
-            return MAPPER.writeValueAsString(java.util.Map.of("content", content, "collection_id", collection.toString()));
+            return MAPPER.writeValueAsString(
+                    java.util.Map.of("content", content, "collection_id", collection.toString()));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private static AddToKnowledgeBaseToolCallback kbTool(KnowledgeIngestionService ingest, UUID collection, RedTeamChain turn) {
+    private static AddToKnowledgeBaseToolCallback kbTool(
+            KnowledgeIngestionService ingest, UUID collection, RedTeamChain turn) {
         KnowledgeCollectionService collections = mock(KnowledgeCollectionService.class);
-        when(collections.resolveChunking(any(), any(), any())).thenReturn(Chunker.Settings.DEFAULTS);
+        when(collections.resolveChunking(any(), any(), any()))
+                .thenReturn(Chunker.Settings.DEFAULTS);
         IngestResponse ok = new IngestResponse(1, 10, List.of(UUID.randomUUID()));
         when(ingest.ingest(anyString(), anyString(), anyInt(), anyInt(), any())).thenReturn(ok);
-        when(ingest.ingestWithProvenance(anyString(), anyString(), anyInt(), anyInt(), any(UUID.class), any(ChunkProvenance.class))).thenReturn(ok);
+        when(ingest.ingestWithProvenance(
+                        anyString(),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        any(UUID.class),
+                        any(ChunkProvenance.class)))
+                .thenReturn(ok);
         var tt = turn.taint.turnTaint(turn.stepCounter);
-        // The production wiring: the tool reads the turn's own taint (AgentKnowledgeToolResolver adapts a TurnTaintView).
+        // The production wiring: the tool reads the turn's own taint (AgentKnowledgeToolResolver
+        // adapts a TurnTaintView).
         return new AddToKnowledgeBaseToolCallback(
-                ingest, collections, Set.of(collection), UUID.randomUUID(), "s", null, () -> new KnowledgeWriteTaint() {
+                ingest,
+                collections,
+                Set.of(collection),
+                UUID.randomUUID(),
+                "s",
+                null,
+                () ->
+                        new KnowledgeWriteTaint() {
+                            @Override
+                            public boolean isTainted() {
+                                return tt != null && tt.isTainted();
+                            }
+
+                            @Override
+                            public List<String> sources() {
+                                return tt == null ? List.of() : tt.sources();
+                            }
+                        });
+    }
+
+    /** The production wiring: the tool reads the turn's own taint through a TurnTaintView. */
+    private static RememberFactToolCallback memoryTool(
+            AgentMemoryService memory, RedTeamChain turn) {
+        var tt = turn.taint.turnTaint(turn.stepCounter);
+        TurnTaintView view =
+                new TurnTaintView() {
                     @Override
                     public boolean isTainted() {
                         return tt != null && tt.isTainted();
@@ -87,48 +124,49 @@ class MemoryLaunderingRedTeamTest {
                     public List<String> sources() {
                         return tt == null ? List.of() : tt.sources();
                     }
-                });
-    }
-
-    /** The production wiring: the tool reads the turn's own taint through a TurnTaintView. */
-    private static RememberFactToolCallback memoryTool(AgentMemoryService memory, RedTeamChain turn) {
-        var tt = turn.taint.turnTaint(turn.stepCounter);
-        TurnTaintView view = new TurnTaintView() {
-            @Override
-            public boolean isTainted() {
-                return tt != null && tt.isTainted();
-            }
-
-            @Override
-            public List<String> sources() {
-                return tt == null ? List.of() : tt.sources();
-            }
-        };
+                };
         return new RememberFactToolCallback(
-                memory, UUID.randomUUID(), "subject-1", null, null, null, null, RedTeamChain.provider(view));
+                memory,
+                UUID.randomUUID(),
+                "subject-1",
+                null,
+                null,
+                null,
+                null,
+                RedTeamChain.provider(view));
     }
 
     /** Every write the store received, as {text, provenance-or-null}. */
     private static List<Object[]> writes(AgentMemoryService memory) {
         return org.mockito.Mockito.mockingDetails(memory).getInvocations().stream()
                 .filter(i -> i.getMethod().getName().equals("remember"))
-                .map(i -> new Object[] {i.getArgument(2), i.getArguments().length > 3 ? i.getArgument(3) : null})
+                .map(
+                        i ->
+                                new Object[] {
+                                    i.getArgument(2),
+                                    i.getArguments().length > 3 ? i.getArgument(3) : null
+                                })
                 .toList();
     }
 
     private static void assertNoTrustedWriteOf(AgentMemoryService memory, String text) {
         for (Object[] w : writes(memory)) {
-            boolean same = String.valueOf(w[0]).equals(text) || String.valueOf(w[0]).contains(INSTRUCTION);
+            boolean same =
+                    String.valueOf(w[0]).equals(text) || String.valueOf(w[0]).contains(INSTRUCTION);
             MemoryProvenance prov = (MemoryProvenance) w[1];
-            assertFalse(same && (prov == null || !prov.quarantined()), "stored as trusted memory: " + w[0]);
+            assertFalse(
+                    same && (prov == null || !prov.quarantined()),
+                    "stored as trusted memory: " + w[0]);
         }
     }
 
     private static void taintTheTurn(RedTeamChain turn, String payload) {
-        turn.wrap(RedTeamChain.fakeTool("fetch_web_page", payload)).call("{\"url\":\"https://blog.example\"}");
+        turn.wrap(RedTeamChain.fakeTool("fetch_web_page", payload))
+                .call("{\"url\":\"https://blog.example\"}");
     }
 
-    // ---- enforce mode: parked, nothing written --------------------------------------------------------------------
+    // ---- enforce mode: parked, nothing written
+    // --------------------------------------------------------------------
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
@@ -140,7 +178,9 @@ class MemoryLaunderingRedTeamTest {
         String result = turn.wrap(memoryTool(memory, turn)).call(factArgs(payload));
 
         assertTrue(writes(memory).isEmpty(), "a parked write must not reach the store");
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
+        assertEquals(
+                ToolResultMarker.Kind.PARKED,
+                ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
         assertEquals(1, turn.recordedApprovals().size());
     }
 
@@ -152,17 +192,22 @@ class MemoryLaunderingRedTeamTest {
         UUID collection = UUID.randomUUID();
         taintTheTurn(turn, payload);
 
-        String result = turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
+        String result =
+                turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
 
         verify(ingest, never()).ingest(anyString(), anyString(), anyInt(), anyInt(), any());
-        assertEquals(ToolResultMarker.Kind.PARKED, ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
+        assertEquals(
+                ToolResultMarker.Kind.PARKED,
+                ToolResultMarker.classify(result, turn.approval.markerScope()).orElseThrow());
     }
 
-    // ---- observe (the shipped default): the write must still not carry tainted text through ------------------------
+    // ---- observe (the shipped default): the write must still not carry tainted text through
+    // ------------------------
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
-    void rememberFactAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(String label, String payload) {
+    void rememberFactAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(
+            String label, String payload) {
         RedTeamChain turn = new RedTeamChain("observe", "");
         AgentMemoryService memory = mock(AgentMemoryService.class);
         taintTheTurn(turn, payload);
@@ -172,9 +217,11 @@ class MemoryLaunderingRedTeamTest {
         // Refused, or stored QUARANTINED; stored as trusted is the laundering.
         assertNoTrustedWriteOf(memory, payload);
     }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
-    void addToKnowledgeBaseAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(String label, String payload) {
+    void addToKnowledgeBaseAfterTaintIsRefusedOrQuarantinedEvenInObserveMode(
+            String label, String payload) {
         RedTeamChain turn = new RedTeamChain("observe", "");
         KnowledgeIngestionService ingest = mock(KnowledgeIngestionService.class);
         UUID collection = UUID.randomUUID();
@@ -182,17 +229,25 @@ class MemoryLaunderingRedTeamTest {
 
         turn.wrap(kbTool(ingest, collection, turn)).call(kbArgs(collection, payload));
 
-        verify(ingest, never()).ingest(anyString(), org.mockito.ArgumentMatchers.eq(payload), anyInt(), anyInt(), any(UUID.class));
+        verify(ingest, never())
+                .ingest(
+                        anyString(),
+                        org.mockito.ArgumentMatchers.eq(payload),
+                        anyInt(),
+                        anyInt(),
+                        any(UUID.class));
         // A write that is not refused by the screen must have been stored QUARANTINED.
         org.mockito.Mockito.mockingDetails(ingest).getInvocations().stream()
                 .filter(i -> i.getMethod().getName().equals("ingestWithProvenance"))
                 .forEach(i -> assertTrue(((ChunkProvenance) i.getArgument(5)).quarantined()));
     }
 
-    // ---- clean turn: the write screen looks at the content itself -------------------------------------------------
+    // ---- clean turn: the write screen looks at the content itself
+    // -------------------------------------------------
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("injections")
-    void aFactThatIsItselfAnInjectedInstructionIsScreenedOnACleanTurn(String label, String payload) {
+    void aFactThatIsItselfAnInjectedInstructionIsScreenedOnACleanTurn(
+            String label, String payload) {
         RedTeamChain turn = new RedTeamChain("off", "");
         AgentMemoryService memory = mock(AgentMemoryService.class);
 
@@ -206,11 +261,14 @@ class MemoryLaunderingRedTeamTest {
         RedTeamChain turn = new RedTeamChain("enforce", "");
         AgentMemoryService memory = mock(AgentMemoryService.class);
 
-        String result = turn.wrap(memoryTool(memory, turn)).call(factArgs("Prefers email over WhatsApp"));
+        String result =
+                turn.wrap(memoryTool(memory, turn)).call(factArgs("Prefers email over WhatsApp"));
 
         assertEquals(1, writes(memory).size());
         assertEquals("Prefers email over WhatsApp", writes(memory).get(0)[0]);
-        assertTrue(writes(memory).get(0)[1] == null || !((MemoryProvenance) writes(memory).get(0)[1]).quarantined(),
+        assertTrue(
+                writes(memory).get(0)[1] == null
+                        || !((MemoryProvenance) writes(memory).get(0)[1]).quarantined(),
                 "a clean-turn fact must be trusted");
         assertTrue(result.contains("remembered"), result);
     }

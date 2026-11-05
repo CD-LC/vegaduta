@@ -5,15 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * An in-process tally of the model calls (tokens, latency) made for each chat session, so an evaluation harness running
- * in the same JVM can read what one turn cost: {@link #peek} before and after, or {@link #drain} after each turn. It is
- * fed by the existing {@link LlmMetricsAdvisor} observation (no extra call, no network hop) and is OFF unless
- * {@code app.metrics.turn-usage.enabled=true}; while off, nothing is recorded and the advisor pays one null check.
+ * An in-process tally of the model calls (tokens, latency) made for each chat session, so an
+ * evaluation harness running in the same JVM can read what one turn cost: {@link #peek} before and
+ * after, or {@link #drain} after each turn. It is fed by the existing {@link LlmMetricsAdvisor}
+ * observation (no extra call, no network hop) and is OFF unless {@code
+ * app.metrics.turn-usage.enabled=true}; while off, nothing is recorded and the advisor pays one
+ * null check.
  *
- * <p>One model call spans the whole tool loop of a turn (see {@link LlmMetricsAdvisor}), so {@code modelLatencyMs} is
- * model plus tool time; {@link Totals#wallMs()} is first call start to last call end. Tokens are as reported by the
- * provider ({@code null} reports count as 0, and {@code callsWithoutUsage} says how many). Bounded: past
- * {@link #MAX_SESSIONS} sessions the least recently used tally is dropped.
+ * <p>One model call spans the whole tool loop of a turn (see {@link LlmMetricsAdvisor}), so {@code
+ * modelLatencyMs} is model plus tool time; {@link Totals#wallMs()} is first call start to last call
+ * end. Tokens are as reported by the provider ({@code null} reports count as 0, and {@code
+ * callsWithoutUsage} says how many). Bounded: past {@link #MAX_SESSIONS} sessions the least
+ * recently used tally is dropped.
  */
 public final class TurnUsageCounter {
 
@@ -36,7 +39,10 @@ public final class TurnUsageCounter {
 
         static final Totals EMPTY = new Totals(0, 0, 0, 0, 0, 0, 0, 0, null, null);
 
-        /** Wall-clock milliseconds from the first call's start to the last call's end; 0 with no calls. */
+        /**
+         * Wall-clock milliseconds from the first call's start to the last call's end; 0 with no
+         * calls.
+         */
         public long wallMs() {
             return firstStartedAt == null || lastFinishedAt == null
                     ? 0
@@ -57,7 +63,10 @@ public final class TurnUsageCounter {
         return active;
     }
 
-    /** Installs (or, with null, removes) the process-wide counter; done by the configuration and by tests. */
+    /**
+     * Installs (or, with null, removes) the process-wide counter; done by the configuration and by
+     * tests.
+     */
     public static void install(TurnUsageCounter counter) {
         active = counter;
     }
@@ -92,7 +101,8 @@ public final class TurnUsageCounter {
                 new Totals(
                         t.calls() + 1,
                         t.failedCalls() + (success ? 0 : 1),
-                        t.callsWithoutUsage() + (promptTokens == null && completionTokens == null ? 1 : 0),
+                        t.callsWithoutUsage()
+                                + (promptTokens == null && completionTokens == null ? 1 : 0),
                         t.promptTokens() + p,
                         t.completionTokens() + c,
                         t.totalTokens() + total,

@@ -6,8 +6,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * Client context: metadata extracted from a request for fraud detection analysis.
- * Captures IP, User-Agent, TLS fingerprint, authentication state, etc.
+ * Client context: metadata extracted from a request for fraud detection analysis. Captures IP,
+ * User-Agent, TLS fingerprint, authentication state, etc.
  */
 public class ClientContext {
     public final UUID tenantId;
@@ -18,8 +18,13 @@ public class ClientContext {
     public final String sessionId; // Session identifier for rate limiting
     public final long requestTimestamp;
 
-    public ClientContext(UUID tenantId, InetAddress ip, String userAgent, String tlsFingerprint,
-                        UUID userId, String sessionId) {
+    public ClientContext(
+            UUID tenantId,
+            InetAddress ip,
+            String userAgent,
+            String tlsFingerprint,
+            UUID userId,
+            String sessionId) {
         this.tenantId = tenantId;
         this.ip = ip;
         this.userAgent = userAgent != null ? userAgent : "unknown";
@@ -30,8 +35,8 @@ public class ClientContext {
     }
 
     /**
-     * Extract client context from an HTTP request.
-     * The client IP is the container-resolved peer address; forwarding headers are not trusted.
+     * Extract client context from an HTTP request. The client IP is the container-resolved peer
+     * address; forwarding headers are not trusted.
      */
     public static ClientContext fromRequest(HttpServletRequest req, UUID tenantId, UUID userId) {
         InetAddress ip = extractClientIp(req);
@@ -43,10 +48,11 @@ public class ClientContext {
     }
 
     /**
-     * The container-resolved peer address only. {@code server.forward-headers-strategy=native} with the Tomcat
-     * remote-ip valve (application.yml) already replaces {@code getRemoteAddr()} with the real client address when,
-     * and only when, the direct peer is a trusted proxy, so X-Forwarded-For / X-Real-IP are never read here: they
-     * are client-controlled. The value is parsed as a literal IP, never resolved as a hostname (no DNS lookup).
+     * The container-resolved peer address only. {@code server.forward-headers-strategy=native} with
+     * the Tomcat remote-ip valve (application.yml) already replaces {@code getRemoteAddr()} with
+     * the real client address when, and only when, the direct peer is a trusted proxy, so
+     * X-Forwarded-For / X-Real-IP are never read here: they are client-controlled. The value is
+     * parsed as a literal IP, never resolved as a hostname (no DNS lookup).
      */
     static InetAddress extractClientIp(HttpServletRequest req) {
         InetAddress ip = parseLiteralIp(req.getRemoteAddr());
@@ -54,12 +60,13 @@ public class ClientContext {
     }
 
     private static final Pattern IPV4 =
-        Pattern.compile("^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$");
+            Pattern.compile("^(25[0-5]|2[0-4]\\d|1?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}$");
     private static final Pattern IPV6_CHARS = Pattern.compile("^[0-9a-fA-F:.]+$");
 
     /**
-     * Parse an IPv4/IPv6 literal without ever touching DNS; null for anything else (hostnames, junk, null).
-     * {@code InetAddress.getByName} only skips the resolver for literals, so the syntax is checked first.
+     * Parse an IPv4/IPv6 literal without ever touching DNS; null for anything else (hostnames,
+     * junk, null). {@code InetAddress.getByName} only skips the resolver for literals, so the
+     * syntax is checked first.
      */
     static InetAddress parseLiteralIp(String raw) {
         if (raw == null) {
@@ -74,7 +81,9 @@ public class ClientContext {
             s = s.substring(0, zone);
         }
         boolean v6 = s.indexOf(':') >= 0;
-        if (s.isEmpty() || s.length() > 45 || !(v6 ? IPV6_CHARS.matcher(s).matches() : IPV4.matcher(s).matches())) {
+        if (s.isEmpty()
+                || s.length() > 45
+                || !(v6 ? IPV6_CHARS.matcher(s).matches() : IPV4.matcher(s).matches())) {
             return null;
         }
         try {
@@ -109,11 +118,16 @@ public class ClientContext {
 
     @Override
     public String toString() {
-        return "ClientContext{" +
-                "tenantId=" + tenantId +
-                ", ip=" + ip +
-                ", userId=" + userId +
-                ", userAgent='" + (userAgent.length() > 50 ? userAgent.substring(0, 50) + "..." : userAgent) + '\'' +
-                '}';
+        return "ClientContext{"
+                + "tenantId="
+                + tenantId
+                + ", ip="
+                + ip
+                + ", userId="
+                + userId
+                + ", userAgent='"
+                + (userAgent.length() > 50 ? userAgent.substring(0, 50) + "..." : userAgent)
+                + '\''
+                + '}';
     }
 }

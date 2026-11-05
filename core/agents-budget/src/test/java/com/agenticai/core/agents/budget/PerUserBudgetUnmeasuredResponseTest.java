@@ -38,9 +38,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import reactor.core.publisher.Flux;
 
 /**
- * A response that was produced and shown but came back with no usage metadata (a provider that omits it, a stream
- * cancelled before its usage event) used to release the whole reservation, so the call cost nothing. The user could
- * cancel every stream after the text was out and never spend budget. It is now charged for what was received.
+ * A response that was produced and shown but came back with no usage metadata (a provider that
+ * omits it, a stream cancelled before its usage event) used to release the whole reservation, so
+ * the call cost nothing. The user could cancel every stream after the text was out and never spend
+ * budget. It is now charged for what was received.
  */
 class PerUserBudgetUnmeasuredResponseTest {
 
@@ -57,7 +58,9 @@ class PerUserBudgetUnmeasuredResponseTest {
     @BeforeEach
     void setUpAdvisor() {
         budget = mock(PerUserBudgetService.class);
-        advisor = new PerUserBudgetTrackingAdvisor(budget, TENANT, USER, Modality.TEXT, "hosted-x", RESERVED, PLAN);
+        advisor =
+                new PerUserBudgetTrackingAdvisor(
+                        budget, TENANT, USER, Modality.TEXT, "hosted-x", RESERVED, PLAN);
     }
 
     private static ChatClientResponse answer(String text, Usage usage) {
@@ -65,10 +68,11 @@ class PerUserBudgetUnmeasuredResponseTest {
         if (usage != null) {
             metadata.usage(usage);
         }
-        ChatResponse chat = ChatResponse.builder()
-            .generations(List.of(new Generation(new AssistantMessage(text))))
-            .metadata(metadata.build())
-            .build();
+        ChatResponse chat =
+                ChatResponse.builder()
+                        .generations(List.of(new Generation(new AssistantMessage(text))))
+                        .metadata(metadata.build())
+                        .build();
         return ChatClientResponse.builder().chatResponse(chat).build();
     }
 
@@ -83,8 +87,11 @@ class PerUserBudgetUnmeasuredResponseTest {
     void textWithNoUsageKeepsTheReservationAsTheChargeInsteadOfReleasingIt() {
         stream(answer("x".repeat(4_000), null));
 
-        verify(budget).chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 4_000L, PLAN);
-        verify(budget, never()).reconcileSpendReservationForUsage(anyString(), anyString(), any(), anyLong(), anyString(), any(), any());
+        verify(budget)
+                .chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 4_000L, PLAN);
+        verify(budget, never())
+                .reconcileSpendReservationForUsage(
+                        anyString(), anyString(), any(), anyLong(), anyString(), any(), any());
     }
 
     @Test
@@ -110,11 +117,20 @@ class PerUserBudgetUnmeasuredResponseTest {
         stream(answer("x".repeat(4_000), new DefaultUsage(1_200, 0)));
 
         ArgumentCaptor<Usage> usage = ArgumentCaptor.forClass(Usage.class);
-        verify(budget).reconcileSpendReservationForUsage(
-            eq(TENANT), eq(USER), eq(Modality.TEXT), eq(RESERVED), eq("hosted-x"), usage.capture(), eq(PLAN));
+        verify(budget)
+                .reconcileSpendReservationForUsage(
+                        eq(TENANT),
+                        eq(USER),
+                        eq(Modality.TEXT),
+                        eq(RESERVED),
+                        eq("hosted-x"),
+                        usage.capture(),
+                        eq(PLAN));
         assertThat(usage.getValue().getPromptTokens()).isEqualTo(1_200);
         assertThat(usage.getValue().getCompletionTokens()).isEqualTo(1_000);
-        verify(budget, never()).chargeUnmeasuredResponse(anyString(), anyString(), any(), anyLong(), anyLong(), any());
+        verify(budget, never())
+                .chargeUnmeasuredResponse(
+                        anyString(), anyString(), any(), anyLong(), anyLong(), any());
     }
 
     @Test
@@ -122,8 +138,15 @@ class PerUserBudgetUnmeasuredResponseTest {
         stream(answer("short", new DefaultUsage(1_200, 300)));
 
         ArgumentCaptor<Usage> usage = ArgumentCaptor.forClass(Usage.class);
-        verify(budget).reconcileSpendReservationForUsage(
-            eq(TENANT), eq(USER), eq(Modality.TEXT), eq(RESERVED), eq("hosted-x"), usage.capture(), eq(PLAN));
+        verify(budget)
+                .reconcileSpendReservationForUsage(
+                        eq(TENANT),
+                        eq(USER),
+                        eq(Modality.TEXT),
+                        eq(RESERVED),
+                        eq("hosted-x"),
+                        usage.capture(),
+                        eq(PLAN));
         assertThat(usage.getValue().getCompletionTokens()).isEqualTo(300);
     }
 
@@ -131,9 +154,18 @@ class PerUserBudgetUnmeasuredResponseTest {
     void nothingReceivedStillReleasesTheReservation() {
         stream(answer("", null));
 
-        verify(budget, never()).chargeUnmeasuredResponse(anyString(), anyString(), any(), anyLong(), anyLong(), any());
-        verify(budget).reconcileSpendReservationForUsage(
-            eq(TENANT), eq(USER), eq(Modality.TEXT), eq(RESERVED), eq("hosted-x"), isNull(), eq(PLAN));
+        verify(budget, never())
+                .chargeUnmeasuredResponse(
+                        anyString(), anyString(), any(), anyLong(), anyLong(), any());
+        verify(budget)
+                .reconcileSpendReservationForUsage(
+                        eq(TENANT),
+                        eq(USER),
+                        eq(Modality.TEXT),
+                        eq(RESERVED),
+                        eq("hosted-x"),
+                        isNull(),
+                        eq(PLAN));
     }
 
     // ------------------------------------------------------------------ the service
@@ -150,7 +182,14 @@ class PerUserBudgetUnmeasuredResponseTest {
         TenantLimits limits = mock(TenantLimits.class);
         when(limits.plan(anyString())).thenReturn(TenantPlan.FREE);
         return new PerUserBudgetService(
-            redis, settings, mock(LlmPricingCatalog.class), 0L, limits, 2, 3, mock(ObjectProvider.class));
+                redis,
+                settings,
+                mock(LlmPricingCatalog.class),
+                0L,
+                limits,
+                2,
+                3,
+                mock(ObjectProvider.class));
     }
 
     @Test
@@ -161,7 +200,8 @@ class PerUserBudgetUnmeasuredResponseTest {
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 40L, PLAN);
 
-        // Ten tokens at the fallback rate is far under the reservation: nothing is given back, nothing is added.
+        // Ten tokens at the fallback rate is far under the reservation: nothing is given back,
+        // nothing is added.
         SpendCounterMocks.verifyNothingAdded(redis);
     }
 
@@ -171,7 +211,8 @@ class PerUserBudgetUnmeasuredResponseTest {
         ValueOperations<String, String> ops = mock(ValueOperations.class);
         PerUserBudgetService service = realService(ops);
         BigDecimal estimate = service.estimateCostForChars(TENANT, USER, 4_000_000L, PLAN);
-        long estimateMicroCents = estimate.multiply(PerUserBudgetService.MICRO_CENTS_PER_USD).longValue();
+        long estimateMicroCents =
+                estimate.multiply(PerUserBudgetService.MICRO_CENTS_PER_USD).longValue();
         assertThat(estimateMicroCents).isGreaterThan(RESERVED);
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, RESERVED, 4_000_000L, PLAN);
@@ -184,8 +225,10 @@ class PerUserBudgetUnmeasuredResponseTest {
     void withNoReservationTheReceivedTextIsRecordedAtTheFallbackRate() {
         ValueOperations<String, String> ops = mock(ValueOperations.class);
         PerUserBudgetService service = realService(ops);
-        long expected = service.estimateCostForChars(TENANT, USER, 4_000_000L, PLAN)
-            .multiply(PerUserBudgetService.MICRO_CENTS_PER_USD).longValue();
+        long expected =
+                service.estimateCostForChars(TENANT, USER, 4_000_000L, PLAN)
+                        .multiply(PerUserBudgetService.MICRO_CENTS_PER_USD)
+                        .longValue();
 
         service.chargeUnmeasuredResponse(TENANT, USER, Modality.TEXT, 0L, 4_000_000L, PLAN);
 

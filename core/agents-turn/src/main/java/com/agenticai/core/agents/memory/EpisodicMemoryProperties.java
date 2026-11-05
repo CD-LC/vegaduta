@@ -3,9 +3,10 @@ package com.agenticai.core.agents.memory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * {@code app.memory.episodic.*}: the platform level of the episodic write path (ADR-0028 WP4b). Off by default; a
- * tenant or an agent can only switch it off further ({@code memory.episodic.enabled}). The recorder makes no model
- * call: an episode is a template over verified signals, filed as a PENDING or QUARANTINED proposal.
+ * {@code app.memory.episodic.*}: the platform level of the episodic write path (ADR-0028 WP4b). Off
+ * by default; a tenant or an agent can only switch it off further ({@code
+ * memory.episodic.enabled}). The recorder makes no model call: an episode is a template over
+ * verified signals, filed as a PENDING or QUARANTINED proposal.
  */
 @ConfigurationProperties(prefix = "app.memory.episodic")
 public class EpisodicMemoryProperties {

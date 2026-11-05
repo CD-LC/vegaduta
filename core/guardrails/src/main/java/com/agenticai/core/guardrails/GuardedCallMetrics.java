@@ -33,13 +33,18 @@ final class GuardedCallMetrics {
         }
         try {
             Timer.builder(GuardedToolCallback.CALL_TIMER)
-                .description("Agent tool calls through the guardrail wrapper, by tool and outcome")
-                .tag("tool", toolName)
-                .tag("outcome", outcome)
-                .register(meterRegistry)
-                .record(elapsedNanos, TimeUnit.NANOSECONDS);
+                    .description(
+                            "Agent tool calls through the guardrail wrapper, by tool and outcome")
+                    .tag("tool", toolName)
+                    .tag("outcome", outcome)
+                    .register(meterRegistry)
+                    .record(elapsedNanos, TimeUnit.NANOSECONDS);
         } catch (RuntimeException e) {
-            log.debug("Could not record {} for tool '{}'", GuardedToolCallback.CALL_TIMER, toolName, e);
+            log.debug(
+                    "Could not record {} for tool '{}'",
+                    GuardedToolCallback.CALL_TIMER,
+                    toolName,
+                    e);
         }
     }
 
@@ -48,11 +53,20 @@ final class GuardedCallMetrics {
             return;
         }
         try {
-            meterRegistry.counter(
-                    GuardedToolCallback.ERROR_COUNTER, "tool", toolName, "exception", error.getClass().getSimpleName())
-                .increment();
+            meterRegistry
+                    .counter(
+                            GuardedToolCallback.ERROR_COUNTER,
+                            "tool",
+                            toolName,
+                            "exception",
+                            error.getClass().getSimpleName())
+                    .increment();
         } catch (RuntimeException e) {
-            log.debug("Could not record {} for tool '{}'", GuardedToolCallback.ERROR_COUNTER, toolName, e);
+            log.debug(
+                    "Could not record {} for tool '{}'",
+                    GuardedToolCallback.ERROR_COUNTER,
+                    toolName,
+                    e);
         }
     }
 }

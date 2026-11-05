@@ -14,7 +14,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/** The recorder exists only when {@code app.memory.episodic.enabled=true}; otherwise no bean and no hook on the turn. */
+/**
+ * The recorder exists only when {@code app.memory.episodic.enabled=true}; otherwise no bean and no
+ * hook on the turn.
+ */
 class EpisodeRecorderWiringTest {
 
     @Configuration
@@ -40,10 +43,13 @@ class EpisodeRecorderWiringTest {
 
     @Test
     void offByDefaultThereIsNoBeanAndNoGateway() {
-        new ApplicationContextRunner().withUserConfiguration(Wiring.class).run(ctx -> {
-            assertTrue(ctx.getBeansOfType(EpisodeRecorder.class).isEmpty());
-            assertFalse(EpisodeRecordingGateway.installed());
-        });
+        new ApplicationContextRunner()
+                .withUserConfiguration(Wiring.class)
+                .run(
+                        ctx -> {
+                            assertTrue(ctx.getBeansOfType(EpisodeRecorder.class).isEmpty());
+                            assertFalse(EpisodeRecordingGateway.installed());
+                        });
     }
 
     @Test
@@ -51,9 +57,10 @@ class EpisodeRecorderWiringTest {
         new ApplicationContextRunner()
                 .withUserConfiguration(Wiring.class)
                 .withPropertyValues("app.memory.episodic.enabled=true")
-                .run(ctx -> {
-                    assertTrue(ctx.getBeansOfType(EpisodeRecorder.class).size() == 1);
-                    assertTrue(EpisodeRecordingGateway.installed());
-                });
+                .run(
+                        ctx -> {
+                            assertTrue(ctx.getBeansOfType(EpisodeRecorder.class).size() == 1);
+                            assertTrue(EpisodeRecordingGateway.installed());
+                        });
     }
 }

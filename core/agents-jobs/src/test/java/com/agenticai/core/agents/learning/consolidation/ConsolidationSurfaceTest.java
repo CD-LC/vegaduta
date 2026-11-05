@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 /**
  * The structural half of "consolidation can never promote" (phase 1 design 03, section 5): the
  * sweep's only view of memory is the read-only {@link ConsolidationFactSource} port, and its only
- * write is a tombstone insert. No class in this package may take the memory services (whose
- * {@code approve}/{@code forget}/{@code update} methods would grant or delete), the unified store's
+ * write is a tombstone insert. No class in this package may take the memory services (whose {@code
+ * approve}/{@code forget}/{@code update} methods would grant or delete), the unified store's
  * review/storage types, or declare mutating methods of its own.
  */
 class ConsolidationSurfaceTest {
@@ -53,12 +53,17 @@ class ConsolidationSurfaceTest {
     void theProposalFilerHoldsOnlyTheProposalSink() {
         for (java.lang.reflect.Field f : ConsolidationProposalFiler.class.getDeclaredFields()) {
             if (!java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
-                assertEquals("org.springframework.beans.factory.ObjectProvider", f.getType().getName());
+                assertEquals(
+                        "org.springframework.beans.factory.ObjectProvider", f.getType().getName());
             }
         }
-        for (java.lang.reflect.Constructor<?> c : ConsolidationProposalFiler.class.getDeclaredConstructors()) {
+        for (java.lang.reflect.Constructor<?> c :
+                ConsolidationProposalFiler.class.getDeclaredConstructors()) {
             assertEquals(1, c.getParameterCount());
-            assertTrue(c.getGenericParameterTypes()[0].getTypeName().endsWith("<com.agenticai.core.agents.memory.spi.MemoryProposalSink>"),
+            assertTrue(
+                    c.getGenericParameterTypes()[0]
+                            .getTypeName()
+                            .endsWith("<com.agenticai.core.agents.memory.spi.MemoryProposalSink>"),
                     "the filer's only dependency is the write port that can only create PENDING rows");
         }
     }
@@ -75,15 +80,22 @@ class ConsolidationSurfaceTest {
 
     @Test
     void serviceAndSweepCannotReachTheMemoryWriteSurface() {
-        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class, ConsolidationProposalFiler.class, MemoryItemConsolidationSource.class)) {
+        for (Class<?> type :
+                List.of(
+                        MemoryConsolidationService.class,
+                        MemoryConsolidationSweep.class,
+                        ConsolidationProposalFiler.class,
+                        MemoryItemConsolidationSource.class)) {
             for (java.lang.reflect.Constructor<?> c : type.getDeclaredConstructors()) {
                 for (Class<?> p : c.getParameterTypes()) {
-                    assertTrue(FORBIDDEN.stream().noneMatch(p.getName()::endsWith),
+                    assertTrue(
+                            FORBIDDEN.stream().noneMatch(p.getName()::endsWith),
                             type.getSimpleName() + " takes " + p.getName());
                 }
             }
             for (java.lang.reflect.Field f : type.getDeclaredFields()) {
-                assertTrue(FORBIDDEN.stream().noneMatch(f.getType().getName()::endsWith),
+                assertTrue(
+                        FORBIDDEN.stream().noneMatch(f.getType().getName()::endsWith),
                         type.getSimpleName() + " holds " + f.getType().getName());
             }
         }
@@ -92,10 +104,16 @@ class ConsolidationSurfaceTest {
     @Test
     void onlyTheAdapterTouchesTheFactServices() {
         // Every other class in this package must reach memory through ConsolidationFactSource.
-        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class, ConsolidationProposalFiler.class, MemoryItemConsolidationSource.class)) {
+        for (Class<?> type :
+                List.of(
+                        MemoryConsolidationService.class,
+                        MemoryConsolidationSweep.class,
+                        ConsolidationProposalFiler.class,
+                        MemoryItemConsolidationSource.class)) {
             for (Method m : type.getDeclaredMethods()) {
                 for (Class<?> p : m.getParameterTypes()) {
-                    assertTrue(FORBIDDEN.stream().noneMatch(p.getName()::endsWith),
+                    assertTrue(
+                            FORBIDDEN.stream().noneMatch(p.getName()::endsWith),
                             type.getSimpleName() + "." + m.getName() + " takes " + p.getName());
                 }
             }

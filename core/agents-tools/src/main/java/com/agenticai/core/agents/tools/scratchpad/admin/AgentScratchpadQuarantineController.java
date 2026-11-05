@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Review of scratchpad notes held because the turn that wrote them had handled untrusted content (see
- * {@link AgentScratchpadService#write(UUID, UUID, String, String,
- * com.agenticai.core.agents.tools.scratchpad.NoteTrust)}). A held note is attacker-authored text until a
- * person approves it: approving makes {@code scratchpad_read} / {@code scratchpad_list} return it,
- * rejecting deletes it. Reading the list needs VIEWER on the agent; approving and rejecting need EDITOR
- * (the same level as the agent's other memory approve / reject endpoints) and the {@code
- * PERM_MANAGE_AGENTS} bundle at the edge.
+ * Review of scratchpad notes held because the turn that wrote them had handled untrusted content
+ * (see {@link AgentScratchpadService#write(UUID, UUID, String, String,
+ * com.agenticai.core.agents.tools.scratchpad.NoteTrust)}). A held note is attacker-authored text
+ * until a person approves it: approving makes {@code scratchpad_read} / {@code scratchpad_list}
+ * return it, rejecting deletes it. Reading the list needs VIEWER on the agent; approving and
+ * rejecting need EDITOR (the same level as the agent's other memory approve / reject endpoints) and
+ * the {@code PERM_MANAGE_AGENTS} bundle at the edge.
  *
  * <p>A separate base path, not a sub-path of {@code /scratchpad}, because a note key may be any
  * {@code [a-zA-Z0-9_.-]} name and must never be shadowed by a route.
@@ -49,17 +49,18 @@ public class AgentScratchpadQuarantineController {
             @RequestParam(required = false) Long offset) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
         try {
-            return ListPaging.window(scratchpadService.listQuarantined(agentId), limit, offset, 50, 500);
+            return ListPaging.window(
+                    scratchpadService.listQuarantined(agentId), limit, offset, 50, 500);
         } catch (IllegalStateException disabled) {
             throw disabled();
         }
     }
 
     /**
-     * Makes the held note readable. {@code sessionId} is the {@code sessionId} the list returned (omit it
-     * for the agent-long-term pad). {@code subject} is the owner the list returned: agent-pad notes are per
-     * user, so it is required once two users hold a held note under the same key (400 otherwise). 404 when
-     * no held note matches.
+     * Makes the held note readable. {@code sessionId} is the {@code sessionId} the list returned
+     * (omit it for the agent-long-term pad). {@code subject} is the owner the list returned:
+     * agent-pad notes are per user, so it is required once two users hold a held note under the
+     * same key (400 otherwise). 404 when no held note matches.
      */
     @PostMapping("/{key}/approve")
     public ResponseEntity<Void> approve(

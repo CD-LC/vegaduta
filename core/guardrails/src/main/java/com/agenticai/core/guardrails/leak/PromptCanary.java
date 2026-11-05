@@ -11,8 +11,8 @@ import java.util.Base64;
  * URL-safe Base64 without padding. A fresh token per turn means a token seen in one reply says
  * nothing about the next and cannot be pre-registered by an attacker.
  *
- * <p>What it proves: the model reproduced text from the end of its prompt. What it does not: a model
- * that leaks the start of a prompt but not its end, or paraphrases it, never emits the token.
+ * <p>What it proves: the model reproduced text from the end of its prompt. What it does not: a
+ * model that leaks the start of a prompt but not its end, or paraphrases it, never emits the token.
  */
 public final class PromptCanary {
 

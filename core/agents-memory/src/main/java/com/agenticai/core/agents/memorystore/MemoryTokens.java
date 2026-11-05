@@ -28,7 +28,10 @@ final class MemoryTokens {
         return (int) Math.min(Integer.MAX_VALUE, dense + (other + 3) / 4);
     }
 
-    /** Text cut to at most {@code maxTokens}, at a sentence boundary when one fits; null when nothing fits. */
+    /**
+     * Text cut to at most {@code maxTokens}, at a sentence boundary when one fits; null when
+     * nothing fits.
+     */
     static String truncate(String text, int maxTokens) {
         if (estimate(text) <= maxTokens) {
             return text;
@@ -41,7 +44,10 @@ final class MemoryTokens {
             return null;
         }
         String head = text.substring(0, end);
-        int sentence = Math.max(Math.max(head.lastIndexOf(". "), head.lastIndexOf("! ")), head.lastIndexOf("? "));
+        int sentence =
+                Math.max(
+                        Math.max(head.lastIndexOf(". "), head.lastIndexOf("! ")),
+                        head.lastIndexOf("? "));
         if (sentence > 0) {
             return head.substring(0, sentence + 1);
         }

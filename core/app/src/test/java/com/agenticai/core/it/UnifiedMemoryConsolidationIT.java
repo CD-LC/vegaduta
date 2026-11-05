@@ -43,12 +43,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /**
- * Consolidation of the unified store and enforcement of tombstones (ADR-0028 WP5c), end to end on a real Postgres with
- * the real tenant Flyway: merges and summaries of {@code memory_item} rows are filed as PENDING proposals with lineage
- * (also with the circuit breaker tripped), only a person's approval supersedes the sources, forgotten items are hidden
- * from recall and cannot be re-proposed, and the legacy shared tier gets the same recall exclusion and resurrection
- * guard (importer). Items are seeded as ACTIVE rows (human-approved, aged by SQL); the clock of the consolidation moves
- * forward one scenario at a time. Needs {@code -Dvegaduta.it.pg.url} like the other unified-memory ITs.
+ * Consolidation of the unified store and enforcement of tombstones (ADR-0028 WP5c), end to end on a
+ * real Postgres with the real tenant Flyway: merges and summaries of {@code memory_item} rows are
+ * filed as PENDING proposals with lineage (also with the circuit breaker tripped), only a person's
+ * approval supersedes the sources, forgotten items are hidden from recall and cannot be
+ * re-proposed, and the legacy shared tier gets the same recall exclusion and resurrection guard
+ * (importer). Items are seeded as ACTIVE rows (human-approved, aged by SQL); the clock of the
+ * consolidation moves forward one scenario at a time. Needs {@code -Dvegaduta.it.pg.url} like the
+ * other unified-memory ITs.
  */
 @TestPropertySource(
         properties = {
@@ -84,7 +86,8 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
     @Autowired JdbcTemplate jdbc;
     @MockitoSpyBean SidecarClient sidecar;
 
-    private static final UnifiedMemoryJourneyIT.MutableClock CLOCK = new UnifiedMemoryJourneyIT.MutableClock(Instant.now());
+    private static final UnifiedMemoryJourneyIT.MutableClock CLOCK =
+            new UnifiedMemoryJourneyIT.MutableClock(Instant.now());
     private static boolean worldReady;
 
     @AfterEach
@@ -107,8 +110,15 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
     }
 
     private int count(String table, String where, Object... args) {
-        Integer n = jdbc.queryForObject("SELECT count(*) FROM " + A + "." + table + (where.isEmpty() ? "" : " WHERE " + where),
-                Integer.class, args);
+        Integer n =
+                jdbc.queryForObject(
+                        "SELECT count(*) FROM "
+                                + A
+                                + "."
+                                + table
+                                + (where.isEmpty() ? "" : " WHERE " + where),
+                        Integer.class,
+                        args);
         return n == null ? 0 : n;
     }
 
@@ -116,20 +126,37 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         return jdbc.queryForObject(sql.replace("{A}", A), String.class, args);
     }
 
-    /** An ACTIVE, TRUSTED, human-approved item aged by SQL (what a person's approval leaves behind). */
+    /**
+     * An ACTIVE, TRUSTED, human-approved item aged by SQL (what a person's approval leaves behind).
+     */
     private UUID item(UUID agent, MemoryKind kind, String text, int ageDays, double importance) {
         UUID id = UUID.randomUUID();
-        jdbc.update("INSERT INTO " + A + ".memory_item (id, agent_id, kind, content, embedding, trust, status, writer,"
-                + " source_type, model_generated, generation, importance, created_at, approved_by, approved_at)"
-                + " VALUES (?, ?, ?, ?, ?::public.vector, 'TRUSTED', 'ACTIVE', 'AGENT', 'UNKNOWN', false, 0, ?,"
-                + " now() - make_interval(days => ?), 'seed', now() - make_interval(days => ?))",
-                id, agent, kind.name(), text, vector(text), importance, ageDays, ageDays);
+        jdbc.update(
+                "INSERT INTO "
+                        + A
+                        + ".memory_item (id, agent_id, kind, content, embedding, trust, status, writer,"
+                        + " source_type, model_generated, generation, importance, created_at, approved_by, approved_at)"
+                        + " VALUES (?, ?, ?, ?, ?::public.vector, 'TRUSTED', 'ACTIVE', 'AGENT', 'UNKNOWN', false, 0, ?,"
+                        + " now() - make_interval(days => ?), 'seed', now() - make_interval(days => ?))",
+                id,
+                agent,
+                kind.name(),
+                text,
+                vector(text),
+                importance,
+                ageDays,
+                ageDays);
         return id;
     }
 
     private void fresh(UUID agent, MemoryKind kind, int n) {
         for (int i = 0; i < n; i++) {
-            item(agent, kind, "fresh " + kind.name().toLowerCase() + " note " + UUID.randomUUID(), 1, 0.5);
+            item(
+                    agent,
+                    kind,
+                    "fresh " + kind.name().toLowerCase() + " note " + UUID.randomUUID(),
+                    1,
+                    0.5);
         }
     }
 
@@ -143,29 +170,56 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
     }
 
     private int runColumn(UUID agent, String column) {
-        Integer n = jdbc.queryForObject("SELECT " + column + " FROM " + A + ".memory_consolidation_runs WHERE subject = ?"
-                + " ORDER BY run_date DESC LIMIT 1", Integer.class, "item:" + agent);
+        Integer n =
+                jdbc.queryForObject(
+                        "SELECT "
+                                + column
+                                + " FROM "
+                                + A
+                                + ".memory_consolidation_runs WHERE subject = ?"
+                                + " ORDER BY run_date DESC LIMIT 1",
+                        Integer.class,
+                        "item:" + agent);
         return n == null ? 0 : n;
     }
 
     private List<UUID> pending(UUID agent, String sourceType) {
-        return jdbc.queryForList("SELECT id FROM " + A + ".memory_item WHERE agent_id = ? AND status = 'PENDING' AND source_type = ?",
-                UUID.class, agent, sourceType);
+        return jdbc.queryForList(
+                "SELECT id FROM "
+                        + A
+                        + ".memory_item WHERE agent_id = ? AND status = 'PENDING' AND source_type = ?",
+                UUID.class,
+                agent,
+                sourceType);
     }
 
     private String status(UUID id) {
-        return jdbc.queryForObject("SELECT status FROM " + A + ".memory_item WHERE id = ?", String.class, id);
+        return jdbc.queryForObject(
+                "SELECT status FROM " + A + ".memory_item WHERE id = ?", String.class, id);
     }
 
-    // ------------------------------------------------------------------ merge proposal, approval supersedes
+    // ------------------------------------------------------------------ merge proposal, approval
+    // supersedes
 
     @Test
     @Order(1)
     void aMergeIsFiledAsAPendingProposalWithLineageAndOnlyAPersonsApprovalSupersedesTheSources() {
         world();
         UUID agent = agent("umc-merge");
-        UUID keep = item(agent, MemoryKind.PROCEDURAL, "alice checks espresso machine settings", 40, 0.5);
-        UUID dup = item(agent, MemoryKind.PROCEDURAL, "alice checks espresso machine settings twice daily", 41, 0.5);
+        UUID keep =
+                item(
+                        agent,
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings",
+                        40,
+                        0.5);
+        UUID dup =
+                item(
+                        agent,
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings twice daily",
+                        41,
+                        0.5);
         fresh(agent, MemoryKind.PROCEDURAL, 8);
 
         MemoryConsolidationService.Report r = consolidation.consolidateTenant();
@@ -174,11 +228,22 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         assertThat(runColumn(agent, "merges")).isEqualTo(1);
         assertThat(runColumn(agent, "proposals")).isEqualTo(1);
         List<UUID> proposals = pending(agent, "CONSOL_MERGE");
-        assertThat(proposals).as("the merge is a proposal for a person, never an ACTIVE row").hasSize(1);
+        assertThat(proposals)
+                .as("the merge is a proposal for a person, never an ACTIVE row")
+                .hasSize(1);
         UUID proposal = proposals.get(0);
-        assertThat(str("SELECT trust || '/' || status || '/' || writer FROM {A}.memory_item WHERE id = ?::uuid", proposal.toString()))
+        assertThat(
+                        str(
+                                "SELECT trust || '/' || status || '/' || writer FROM {A}.memory_item WHERE id = ?::uuid",
+                                proposal.toString()))
                 .isEqualTo("QUARANTINED/PENDING/DISTILLER");
-        assertThat(jdbc.queryForList("SELECT source_key FROM " + A + ".memory_item_source WHERE item_id = ?", String.class, proposal))
+        assertThat(
+                        jdbc.queryForList(
+                                "SELECT source_key FROM "
+                                        + A
+                                        + ".memory_item_source WHERE item_id = ?",
+                                String.class,
+                                proposal))
                 .containsExactlyInAnyOrder(keep.toString(), dup.toString());
         assertThat(status(keep)).as("the sweep changed nothing").isEqualTo("ACTIVE");
         assertThat(status(dup)).isEqualTo("ACTIVE");
@@ -193,25 +258,60 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         assertThat(review.approve(agent, proposal, REVIEWER).ok()).isTrue();
 
         assertThat(status(proposal)).isEqualTo("ACTIVE");
-        assertThat(status(keep)).as("approval, by a human, supersedes the sources").isEqualTo("SUPERSEDED");
+        assertThat(status(keep))
+                .as("approval, by a human, supersedes the sources")
+                .isEqualTo("SUPERSEDED");
         assertThat(status(dup)).isEqualTo("SUPERSEDED");
-        assertThat(jdbc.queryForList("SELECT actor_ref FROM " + A + ".memory_event WHERE item_id = ? AND event = 'EDITED'",
-                String.class, keep)).containsExactly("reviewer-1");
-        List<UUID> recalled = recall.compose(new MemoryRecallRequest(agent, "alice", "alice checks espresso machine settings",
-                Set.of(), 0, 800)).items().stream().map(v -> v.id()).toList();
+        assertThat(
+                        jdbc.queryForList(
+                                "SELECT actor_ref FROM "
+                                        + A
+                                        + ".memory_event WHERE item_id = ? AND event = 'EDITED'",
+                                String.class,
+                                keep))
+                .containsExactly("reviewer-1");
+        List<UUID> recalled =
+                recall
+                        .compose(
+                                new MemoryRecallRequest(
+                                        agent,
+                                        "alice",
+                                        "alice checks espresso machine settings",
+                                        Set.of(),
+                                        0,
+                                        800))
+                        .items()
+                        .stream()
+                        .map(v -> v.id())
+                        .toList();
         assertThat(recalled).contains(proposal).doesNotContain(keep, dup);
-        assertThat(count("memory_item_source", "item_id = ?", proposal)).as("lineage survives").isEqualTo(2);
+        assertThat(count("memory_item_source", "item_id = ?", proposal))
+                .as("lineage survives")
+                .isEqualTo(2);
     }
 
-    // ------------------------------------------------------------------ summary proposal, rejection leaves sources
+    // ------------------------------------------------------------------ summary proposal,
+    // rejection leaves sources
 
     @Test
     @Order(2)
     void staleItemsAreFiledAsASummaryProposalAndRejectingItLeavesTheSourcesActive() {
         world();
         UUID agent = agent("umc-summary");
-        UUID one = item(agent, MemoryKind.EPISODIC, "episode about the quarterly roadmap meeting", 50, 0.5);
-        UUID two = item(agent, MemoryKind.EPISODIC, "episode about the annual budget workshop", 52, 0.5);
+        UUID one =
+                item(
+                        agent,
+                        MemoryKind.EPISODIC,
+                        "episode about the quarterly roadmap meeting",
+                        50,
+                        0.5);
+        UUID two =
+                item(
+                        agent,
+                        MemoryKind.EPISODIC,
+                        "episode about the annual budget workshop",
+                        52,
+                        0.5);
         fresh(agent, MemoryKind.EPISODIC, 10);
 
         consolidation.consolidateTenant();
@@ -219,8 +319,15 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         assertThat(runColumn(agent, "summaries")).isEqualTo(1);
         assertThat(runColumn(agent, "proposals")).isEqualTo(1);
         UUID proposal = pending(agent, "CONSOL_SUMMARY").get(0);
-        assertThat(str("SELECT content FROM {A}.memory_item WHERE id = ?::uuid", proposal.toString())).startsWith("Summary of 2 notes: ");
-        assertThat(str("SELECT trust || '/' || status || '/' || generation FROM {A}.memory_item WHERE id = ?::uuid", proposal.toString()))
+        assertThat(
+                        str(
+                                "SELECT content FROM {A}.memory_item WHERE id = ?::uuid",
+                                proposal.toString()))
+                .startsWith("Summary of 2 notes: ");
+        assertThat(
+                        str(
+                                "SELECT trust || '/' || status || '/' || generation FROM {A}.memory_item WHERE id = ?::uuid",
+                                proposal.toString()))
                 .isEqualTo("QUARANTINED/PENDING/1");
         assertThat(count("memory_item_source", "item_id = ?", proposal)).isEqualTo(2);
 
@@ -229,13 +336,17 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         assertThat(status(two)).isEqualTo("ACTIVE");
     }
 
-    // ------------------------------------------------------------------ breaker trips: proposals filed, nothing applied
+    // ------------------------------------------------------------------ breaker trips: proposals
+    // filed, nothing applied
 
     @Test
     @Order(3)
     void whenTheBreakerTripsTheMergesThatFitAreStillFiledAndNothingIsApplied() {
         world();
-        CLOCK.advance(Duration.ofDays(10)); // past the dry-run window: the plan may auto-apply unless the breaker trips
+        CLOCK.advance(
+                Duration.ofDays(
+                        10)); // past the dry-run window: the plan may auto-apply unless the breaker
+        // trips
         UUID agent = agent("umc-breaker");
         for (int i = 0; i < 4; i++) {
             item(agent, MemoryKind.PROCEDURAL, "forgettable zx" + i + " qv" + i, 300, 0.01);
@@ -254,14 +365,22 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         consolidation.consolidateTenant();
 
         assertThat(runColumn(agent, "forgets")).isEqualTo(4);
-        assertThat(runColumn(agent, "tombstoned")).as("the breaker tripped: nothing applied").isZero();
-        assertThat(count("memory_consolidation_runs", "subject = ? AND mode = 'dry_run'", "item:" + agent)).isEqualTo(1);
+        assertThat(runColumn(agent, "tombstoned"))
+                .as("the breaker tripped: nothing applied")
+                .isZero();
+        assertThat(
+                        count(
+                                "memory_consolidation_runs",
+                                "subject = ? AND mode = 'dry_run'",
+                                "item:" + agent))
+                .isEqualTo(1);
         assertThat(runColumn(agent, "proposals")).isEqualTo(2);
         assertThat(pending(agent, "CONSOL_MERGE")).hasSize(2);
         assertThat(count("memory_tombstone", "subject_key = ?", "item:" + agent)).isZero();
     }
 
-    // ------------------------------------------------------------------ forgotten item: hidden from recall, cannot be re-proposed
+    // ------------------------------------------------------------------ forgotten item: hidden
+    // from recall, cannot be re-proposed
 
     @Test
     @Order(4)
@@ -269,23 +388,65 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         world();
         CLOCK.advance(Duration.ofDays(1));
         UUID agent = agent("umc-forget");
-        UUID forgettable = item(agent, MemoryKind.PROCEDURAL, "obsolete runbook step zephyr quokka", 300, 0.01);
+        UUID forgettable =
+                item(
+                        agent,
+                        MemoryKind.PROCEDURAL,
+                        "obsolete runbook step zephyr quokka",
+                        300,
+                        0.01);
         UUID live = item(agent, MemoryKind.PROCEDURAL, "current runbook step walnut", 3, 0.5);
         fresh(agent, MemoryKind.PROCEDURAL, 8);
-        assertThat(recall.compose(new MemoryRecallRequest(agent, "alice", "obsolete runbook step zephyr quokka", Set.of(), 0, 800))
-                .items()).extracting(v -> v.id()).as("recallable before the sweep").contains(forgettable);
+        assertThat(
+                        recall.compose(
+                                        new MemoryRecallRequest(
+                                                agent,
+                                                "alice",
+                                                "obsolete runbook step zephyr quokka",
+                                                Set.of(),
+                                                0,
+                                                800))
+                                .items())
+                .extracting(v -> v.id())
+                .as("recallable before the sweep")
+                .contains(forgettable);
 
         consolidation.consolidateTenant();
 
         assertThat(runColumn(agent, "tombstoned")).isEqualTo(1);
-        assertThat(count("memory_tombstone", "subject_key = ? AND memory_kind = 'item' AND reason = 'DECAY'", "item:" + agent))
+        assertThat(
+                        count(
+                                "memory_tombstone",
+                                "subject_key = ? AND memory_kind = 'item' AND reason = 'DECAY'",
+                                "item:" + agent))
                 .isEqualTo(1);
-        assertThat(status(forgettable)).as("the row is not deleted or changed, only hidden").isEqualTo("ACTIVE");
-        assertThat(recall.compose(new MemoryRecallRequest(agent, "alice", "obsolete runbook step zephyr quokka", Set.of(), 0, 800))
-                .items()).extracting(v -> v.id()).doesNotContain(forgettable).contains(live);
+        assertThat(status(forgettable))
+                .as("the row is not deleted or changed, only hidden")
+                .isEqualTo("ACTIVE");
+        assertThat(
+                        recall.compose(
+                                        new MemoryRecallRequest(
+                                                agent,
+                                                "alice",
+                                                "obsolete runbook step zephyr quokka",
+                                                Set.of(),
+                                                0,
+                                                800))
+                                .items())
+                .extracting(v -> v.id())
+                .doesNotContain(forgettable)
+                .contains(live);
 
-        StoreMemoryProposalSink.Outcome again = sink.proposeDetailed(new MemoryWriteProposal(agent, "alice", MemoryKind.PROCEDURAL,
-                "obsolete runbook step zephyr quokka", MemoryProvenanceRecord.TRUSTED, null, false));
+        StoreMemoryProposalSink.Outcome again =
+                sink.proposeDetailed(
+                        new MemoryWriteProposal(
+                                agent,
+                                "alice",
+                                MemoryKind.PROCEDURAL,
+                                "obsolete runbook step zephyr quokka",
+                                MemoryProvenanceRecord.TRUSTED,
+                                null,
+                                false));
         assertThat(again.accepted()).as("resurrection guard on the unified store").isFalse();
         assertThat(again.refusal()).isEqualTo("FORGOTTEN");
 
@@ -295,7 +456,8 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         assertThat(count("memory_tombstone", "subject_key = ?", "item:" + agent)).isEqualTo(1);
     }
 
-    // ------------------------------------------------------------------ shared tier: recall exclusion + importer guard
+    // ------------------------------------------------------------------ shared tier: recall
+    // exclusion + importer guard
 
     @Test
     @Order(5)
@@ -303,24 +465,50 @@ class UnifiedMemoryConsolidationIT extends UnifiedMemoryBootBase {
         world();
         doAnswer(i -> embed(i.getArgument(0))).when(sidecar).embedQuery(anyString());
         String text = "Frank likes jazz records";
-        jdbc.update("INSERT INTO " + A + ".tenant_memory (id, subject_key, content, embedding, trust) VALUES (?, 'frank', ?,"
-                + " ?::public.vector, 'TRUSTED')", UUID.randomUUID(), text, vector(text));
-        assertThat(tenantMemory.recall("frank", text, 10)).extracting(TenantMemoryEntry::content).contains(text);
+        jdbc.update(
+                "INSERT INTO "
+                        + A
+                        + ".tenant_memory (id, subject_key, content, embedding, trust) VALUES (?, 'frank', ?,"
+                        + " ?::public.vector, 'TRUSTED')",
+                UUID.randomUUID(),
+                text,
+                vector(text));
+        assertThat(tenantMemory.recall("frank", text, 10))
+                .extracting(TenantMemoryEntry::content)
+                .contains(text);
 
-        jdbc.update("INSERT INTO " + A + ".memory_tombstone (id, subject_key, memory_kind, content_sha256, reason, actor, deleted_at)"
-                + " VALUES (?, 'frank', 'shared', encode(sha256(convert_to(?, 'UTF8')), 'hex'), 'DECAY', 'system:memory-consolidation', now())",
-                UUID.randomUUID(), text);
+        jdbc.update(
+                "INSERT INTO "
+                        + A
+                        + ".memory_tombstone (id, subject_key, memory_kind, content_sha256, reason, actor, deleted_at)"
+                        + " VALUES (?, 'frank', 'shared', encode(sha256(convert_to(?, 'UTF8')), 'hex'), 'DECAY', 'system:memory-consolidation', now())",
+                UUID.randomUUID(),
+                text);
 
-        assertThat(tenantMemory.recall("frank", text, 10)).as("a tombstone makes the fact forgotten").extracting(TenantMemoryEntry::content)
+        assertThat(tenantMemory.recall("frank", text, 10))
+                .as("a tombstone makes the fact forgotten")
+                .extracting(TenantMemoryEntry::content)
                 .doesNotContain(text);
 
-        var blocked = importer.importFacts("frank", new ImportRequest(List.of(new ImportFact(text, "shared", null)), "chatgpt"));
+        var blocked =
+                importer.importFacts(
+                        "frank",
+                        new ImportRequest(
+                                List.of(new ImportFact(text, "shared", null)), "chatgpt"));
         assertThat(blocked.saved()).isZero();
         assertThat(blocked.skipped()).extracting(s -> s.reason()).containsExactly("forgotten");
 
-        var confirmed = importer.importFacts("frank", new ImportRequest(List.of(new ImportFact(text, "shared", null, true)), "chatgpt"));
+        var confirmed =
+                importer.importFacts(
+                        "frank",
+                        new ImportRequest(
+                                List.of(new ImportFact(text, "shared", null, true)), "chatgpt"));
         assertThat(confirmed.saved()).isEqualTo(1);
-        assertThat(count("memory_tombstone", "subject_key = 'frank'")).as("the person's re-confirmation clears it").isZero();
-        assertThat(tenantMemory.recall("frank", text, 10)).extracting(TenantMemoryEntry::content).contains(text);
+        assertThat(count("memory_tombstone", "subject_key = 'frank'"))
+                .as("the person's re-confirmation clears it")
+                .isZero();
+        assertThat(tenantMemory.recall("frank", text, 10))
+                .extracting(TenantMemoryEntry::content)
+                .contains(text);
     }
 }

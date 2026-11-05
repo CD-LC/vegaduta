@@ -45,15 +45,19 @@ public record MemoryItem(
     public static final int MAX_GENERATION = 8;
 
     /**
-     * {@code source_type} of a PENDING proposal the nightly consolidation filed to replace several items by one (a merge
-     * keeps one text, a summary folds several). Approving it supersedes its lineage sources (see
-     * {@code MemoryItemReviewService#approve}); nothing else marks a row this way.
+     * {@code source_type} of a PENDING proposal the nightly consolidation filed to replace several
+     * items by one (a merge keeps one text, a summary folds several). Approving it supersedes its
+     * lineage sources (see {@code MemoryItemReviewService#approve}); nothing else marks a row this
+     * way.
      */
     public static final String SOURCE_CONSOLIDATION_MERGE = "CONSOL_MERGE";
 
     public static final String SOURCE_CONSOLIDATION_SUMMARY = "CONSOL_SUMMARY";
 
-    /** An unpinned item (every row starts that way; only a person pins, see {@link MemoryItemReviewService#pin}). */
+    /**
+     * An unpinned item (every row starts that way; only a person pins, see {@link
+     * MemoryItemReviewService#pin}).
+     */
     public MemoryItem(
             UUID id,
             UUID agentId,
@@ -75,9 +79,28 @@ public record MemoryItem(
             Instant expiresAt,
             String approvedBy,
             Instant approvedAt) {
-        this(id, agentId, kind, content, trust, status, writer, sourceType, sourceRef, turnId, sourceTaint,
-                modelGenerated, generation, subjectKeys, version, supersedesId, createdAt, expiresAt, approvedBy,
-                approvedAt, false);
+        this(
+                id,
+                agentId,
+                kind,
+                content,
+                trust,
+                status,
+                writer,
+                sourceType,
+                sourceRef,
+                turnId,
+                sourceTaint,
+                modelGenerated,
+                generation,
+                subjectKeys,
+                version,
+                supersedesId,
+                createdAt,
+                expiresAt,
+                approvedBy,
+                approvedAt,
+                false);
     }
 
     public MemoryItem {
@@ -98,13 +121,17 @@ public record MemoryItem(
             throw new IllegalArgumentException("an ACTIVE item must be TRUSTED");
         }
         if (trust == MemoryTrustLevel.TRUSTED && !sourceTaint.isEmpty() && approvedBy == null) {
-            throw new IllegalArgumentException("a TRUSTED item with source taint needs an approver");
+            throw new IllegalArgumentException(
+                    "a TRUSTED item with source taint needs an approver");
         }
-        if (kind == MemoryKind.PROCEDURAL && status == MemoryItemStatus.ACTIVE && approvedBy == null) {
+        if (kind == MemoryKind.PROCEDURAL
+                && status == MemoryItemStatus.ACTIVE
+                && approvedBy == null) {
             throw new IllegalArgumentException("an ACTIVE PROCEDURAL item needs an approver");
         }
         if (generation < 0 || generation > MAX_GENERATION) {
-            throw new IllegalArgumentException("generation must be between 0 and " + MAX_GENERATION);
+            throw new IllegalArgumentException(
+                    "generation must be between 0 and " + MAX_GENERATION);
         }
     }
 
@@ -179,7 +206,10 @@ public record MemoryItem(
         return expiresAt != null && !expiresAt.isAfter(now);
     }
 
-    /** True once a human approved it; the only way a model-generated item becomes usable as distiller input. */
+    /**
+     * True once a human approved it; the only way a model-generated item becomes usable as
+     * distiller input.
+     */
     public boolean humanConfirmed() {
         return approvedBy != null;
     }

@@ -26,15 +26,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * The booted application as the memory eval sees it: the real beans of the memory pipeline plus the tenant lifecycle the
- * eval needs (a fresh tenant schema per case, dropped after it). The beans are public fields the IT fills from the
- * Spring context, so the harness classes need no Spring wiring of their own.
+ * The booted application as the memory eval sees it: the real beans of the memory pipeline plus the
+ * tenant lifecycle the eval needs (a fresh tenant schema per case, dropped after it). The beans are
+ * public fields the IT fills from the Spring context, so the harness classes need no Spring wiring
+ * of their own.
  *
- * <p><b>Tenant provisioning is a clone, not a Flyway run.</b> The first tenant is migrated by the real tenant Flyway
- * (275 migrations); every later one is created with {@code CREATE TABLE ... (LIKE template INCLUDING ALL)} for each
- * table of that template, in one statement, because a Flyway run per (case, arm, repeat) would be hours. A clone has the
- * columns, defaults, check constraints and indexes of the migrated schema but NOT its foreign keys, triggers or
- * functions, so anything that relies on those (for example the history tables' immutability triggers) is not exercised.
+ * <p><b>Tenant provisioning is a clone, not a Flyway run.</b> The first tenant is migrated by the
+ * real tenant Flyway (275 migrations); every later one is created with {@code CREATE TABLE ...
+ * (LIKE template INCLUDING ALL)} for each table of that template, in one statement, because a
+ * Flyway run per (case, arm, repeat) would be hours. A clone has the columns, defaults, check
+ * constraints and indexes of the migrated schema but NOT its foreign keys, triggers or functions,
+ * so anything that relies on those (for example the history tables' immutability triggers) is not
+ * exercised.
  */
 public final class PlatformEvalWorld {
 
@@ -68,10 +71,12 @@ public final class PlatformEvalWorld {
         if (!failed.isEmpty()) {
             throw new IllegalStateException("tenant schemas that failed to migrate: " + failed);
         }
-        templateTables = jdbc.queryForList(
-            "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'"
-                + " AND table_name <> 'flyway_schema_history' ORDER BY table_name",
-            String.class, TEMPLATE_SCHEMA);
+        templateTables =
+                jdbc.queryForList(
+                        "SELECT table_name FROM information_schema.tables WHERE table_schema = ? AND table_type = 'BASE TABLE'"
+                                + " AND table_name <> 'flyway_schema_history' ORDER BY table_name",
+                        String.class,
+                        TEMPLATE_SCHEMA);
     }
 
     /** A new, empty, ACTIVE tenant with the template's tables. */
@@ -79,11 +84,19 @@ public final class PlatformEvalWorld {
         ensureTemplate();
         requireSafe(schema);
         TenantContext.clear();
-        jdbc.execute("DO $$ DECLARE t text; BEGIN EXECUTE 'CREATE SCHEMA " + schema + "'; "
-            + "FOR t IN SELECT table_name FROM information_schema.tables WHERE table_schema = '" + TEMPLATE_SCHEMA
-            + "' AND table_type = 'BASE TABLE' AND table_name <> 'flyway_schema_history' LOOP "
-            + "EXECUTE format('CREATE TABLE " + schema + ".%I (LIKE " + TEMPLATE_SCHEMA + ".%I INCLUDING ALL)', t, t); "
-            + "END LOOP; END $$");
+        jdbc.execute(
+                "DO $$ DECLARE t text; BEGIN EXECUTE 'CREATE SCHEMA "
+                        + schema
+                        + "'; "
+                        + "FOR t IN SELECT table_name FROM information_schema.tables WHERE table_schema = '"
+                        + TEMPLATE_SCHEMA
+                        + "' AND table_type = 'BASE TABLE' AND table_name <> 'flyway_schema_history' LOOP "
+                        + "EXECUTE format('CREATE TABLE "
+                        + schema
+                        + ".%I (LIKE "
+                        + TEMPLATE_SCHEMA
+                        + ".%I INCLUDING ALL)', t, t); "
+                        + "END LOOP; END $$");
         registerTenant(schema);
     }
 
@@ -97,7 +110,14 @@ public final class PlatformEvalWorld {
 
     private void registerTenant(String schema) {
         if (tenants.findBySchemaName(schema).isEmpty()) {
-            Tenant tenant = new Tenant(schema, TenantPlan.FREE, schema, "agentic-ai", AccountType.B2B, ExperienceMode.SIMPLE);
+            Tenant tenant =
+                    new Tenant(
+                            schema,
+                            TenantPlan.FREE,
+                            schema,
+                            "agentic-ai",
+                            AccountType.B2B,
+                            ExperienceMode.SIMPLE);
             tenant.markActive();
             tenants.save(tenant);
         }
@@ -107,12 +127,22 @@ public final class PlatformEvalWorld {
     public UUID newAgent(String schema, String name, boolean shareMemoryWithTenant) {
         TenantContext.set(TenantContext.of(schema, "memeval-setup", Set.of(ROLE_TENANT_ADMIN)));
         try {
-            return tx.execute(status -> {
-                Agent agent = new Agent(name, "You are helpful.", ProviderName.OPENAI, "gpt-4o-mini", 1024, 0.2, 1.0, true,
-                    ExperienceMode.SIMPLE);
-                agent.setShareMemoryWithTenant(shareMemoryWithTenant);
-                return agents.save(agent).getId();
-            });
+            return tx.execute(
+                    status -> {
+                        Agent agent =
+                                new Agent(
+                                        name,
+                                        "You are helpful.",
+                                        ProviderName.OPENAI,
+                                        "gpt-4o-mini",
+                                        1024,
+                                        0.2,
+                                        1.0,
+                                        true,
+                                        ExperienceMode.SIMPLE);
+                        agent.setShareMemoryWithTenant(shareMemoryWithTenant);
+                        return agents.save(agent).getId();
+                    });
         } finally {
             TenantContext.clear();
         }

@@ -8,9 +8,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Reads the memory lines out of the prompt block a chat turn builds ({@code ChatMemoryRecall}): legacy facts are
- * {@code "- text"} lines under the private and the shared header, unified items are {@code "- [kind] text"} lines
- * between the recalled-notes markers. Anything else (headers, the notes preamble) is framing, not memory.
+ * Reads the memory lines out of the prompt block a chat turn builds ({@code ChatMemoryRecall}):
+ * legacy facts are {@code "- text"} lines under the private and the shared header, unified items
+ * are {@code "- [kind] text"} lines between the recalled-notes markers. Anything else (headers, the
+ * notes preamble) is framing, not memory.
  */
 public final class RecalledLines {
 

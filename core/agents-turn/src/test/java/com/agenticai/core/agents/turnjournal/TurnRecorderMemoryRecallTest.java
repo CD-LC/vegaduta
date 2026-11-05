@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-/** The recall trace is journaled as ids and counts, across as many events as the summary column needs. */
+/**
+ * The recall trace is journaled as ids and counts, across as many events as the summary column
+ * needs.
+ */
 class TurnRecorderMemoryRecallTest {
 
     private final UUID agent = UUID.randomUUID();
@@ -26,7 +29,10 @@ class TurnRecorderMemoryRecallTest {
         assertEquals(1, events.size());
         assertEquals(TurnEventType.GUARD, events.get(0).type());
         String summary = events.get(0).summary();
-        assertTrue(summary.startsWith("guard=memory_recall enabled=true private=1 shared=1 blocks=2 approxTokens=123"), summary);
+        assertTrue(
+                summary.startsWith(
+                        "guard=memory_recall enabled=true private=1 shared=1 blocks=2 approxTokens=123"),
+                summary);
         assertTrue(summary.contains(a + "," + b), summary);
     }
 

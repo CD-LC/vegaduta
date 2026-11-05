@@ -8,16 +8,20 @@ import java.util.UUID;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
- * How a turn depth starts and wraps its turn journal record (ADR-0020), so the streamed depth, the buffered depths
- * and the delegated turns record the same thing the same way: one INTAKE, the tools wrapped, and - on the turn that
- * continues a task after a human decided a gated call - the decision as an APPROVAL event that names the approval
- * request, which is the same id the {@code pending} APPROVAL event of the turn that was parked carries.
+ * How a turn depth starts and wraps its turn journal record (ADR-0020), so the streamed depth, the
+ * buffered depths and the delegated turns record the same thing the same way: one INTAKE, the tools
+ * wrapped, and - on the turn that continues a task after a human decided a gated call - the
+ * decision as an APPROVAL event that names the approval request, which is the same id the {@code
+ * pending} APPROVAL event of the turn that was parked carries.
  */
 final class TurnJournals {
 
     private TurnJournals() {}
 
-    /** A buffered depth's record: INTAKE and, on an approval continuation, the decision; NOOP while the journal is off. */
+    /**
+     * A buffered depth's record: INTAKE and, on an approval continuation, the decision; NOOP while
+     * the journal is off.
+     */
     static TurnRecorder begin(
             TurnContext context,
             UUID agentId,
@@ -36,8 +40,8 @@ final class TurnJournals {
     }
 
     /**
-     * Starts the record of a buffered or delegated turn. {@code parentTurnId} is the journaled turn whose tool call
-     * started this one, or null.
+     * Starts the record of a buffered or delegated turn. {@code parentTurnId} is the journaled turn
+     * whose tool call started this one, or null.
      */
     static TurnRecorder begin(
             TurnContext context,
@@ -48,7 +52,8 @@ final class TurnJournals {
             List<ToolCallback> tools,
             UUID parentTurnId) {
         TurnRecorder recorder =
-                TurnJournalGateway.begin(agentId, context == null ? null : context.turnId(), sessionId);
+                TurnJournalGateway.begin(
+                        agentId, context == null ? null : context.turnId(), sessionId);
         recorder.intake(
                 userMessage,
                 attachments,
@@ -60,14 +65,20 @@ final class TurnJournals {
         return recorder;
     }
 
-    /** The run-scoped tool selection the turn was narrowed to, or null when it was not (see {@code ChatTurnRequest#toolNames}). */
+    /**
+     * The run-scoped tool selection the turn was narrowed to, or null when it was not (see {@code
+     * ChatTurnRequest#toolNames}).
+     */
     static List<String> runToolNames(TurnContext context) {
-        return context == null || context.approval() == null ? null : context.approval().runToolNames();
+        return context == null || context.approval() == null
+                ? null
+                : context.approval().runToolNames();
     }
 
     /**
-     * What memory recall injected into this turn's prompt (ids and counts, never text), when the turn went through the
-     * recall stage; nothing otherwise (a delegated turn, or one that failed before assembly).
+     * What memory recall injected into this turn's prompt (ids and counts, never text), when the
+     * turn went through the recall stage; nothing otherwise (a delegated turn, or one that failed
+     * before assembly).
      */
     static void recordMemoryRecall(TurnRecorder recorder, TurnContext context) {
         if (recorder == null || !recorder.active() || context == null) {
@@ -86,7 +97,10 @@ final class TurnJournals {
                 trace.factIds());
     }
 
-    /** The human's decision on the gated call this turn continues from, or nothing on an ordinary turn. */
+    /**
+     * The human's decision on the gated call this turn continues from, or nothing on an ordinary
+     * turn.
+     */
     static void recordApprovalDecision(TurnRecorder recorder, TurnContext context) {
         ApprovalContinuation continuation = context == null ? null : context.continuation();
         if (continuation == null || !recorder.active()) {
@@ -97,6 +111,8 @@ final class TurnJournals {
                         ? "unknown"
                         : continuation.outcome().name().toLowerCase(Locale.ROOT);
         recorder.approval(
-                String.valueOf(continuation.toolName()), "decided:" + outcome, continuation.requestId());
+                String.valueOf(continuation.toolName()),
+                "decided:" + outcome,
+                continuation.requestId());
     }
 }

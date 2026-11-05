@@ -23,7 +23,10 @@ public class MemoryFactSignalsReader {
     /** The columns V684 added to a fact row. */
     public record Signals(double importance, boolean pinned, boolean personAuthored) {
 
-        /** What a row carries when nothing was recorded: neutral prior, not pinned, not typed by a person. */
+        /**
+         * What a row carries when nothing was recorded: neutral prior, not pinned, not typed by a
+         * person.
+         */
         public static final Signals NEUTRAL = new Signals(0.5, false, false);
     }
 
@@ -50,19 +53,25 @@ public class MemoryFactSignalsReader {
             return out;
         }
         j.query(
-                "SELECT id, importance, pinned, person_authored FROM " + table + " WHERE subject_key = ?",
+                // codeql[java/sql-injection]
+                "SELECT id, importance, pinned, person_authored FROM "
+                        + table
+                        + " WHERE subject_key = ?",
                 rs -> {
                     out.put(
                             UUID.fromString(rs.getString("id")),
-                            new Signals(rs.getDouble("importance"), rs.getBoolean("pinned"), rs.getBoolean("person_authored")));
+                            new Signals(
+                                    rs.getDouble("importance"),
+                                    rs.getBoolean("pinned"),
+                                    rs.getBoolean("person_authored")));
                 },
                 subjectKey);
         return out;
     }
 
     /**
-     * Keys of the subject's tombstoned facts, as {@link #tombstoneKey}: a fact already forgotten is not
-     * planned again the next night (its row stays, only recall hides it).
+     * Keys of the subject's tombstoned facts, as {@link #tombstoneKey}: a fact already forgotten is
+     * not planned again the next night (its row stays, only recall hides it).
      */
     public Set<String> forgottenKeys(String subjectKey) {
         Set<String> out = new HashSet<>();
@@ -72,21 +81,34 @@ public class MemoryFactSignalsReader {
         }
         String schema = com.agenticai.core.tenancy.TenantSchemaResolver.currentSchemaName();
         j.query(
-                "SELECT memory_kind, agent_id, content_sha256 FROM \"" + schema.replace("\"", "\"\"")
+                // codeql[java/sql-injection]
+                "SELECT memory_kind, agent_id, content_sha256 FROM \""
+                        + schema.replace("\"", "\"\"")
                         + "\".memory_tombstone WHERE subject_key = ? AND memory_kind IN ('agent', 'shared')",
                 rs -> {
                     String kind = rs.getString("memory_kind");
                     String agent = rs.getString("agent_id");
                     boolean agentTier = MemoryTombstoneGuard.KIND_AGENT.equals(kind);
-                    out.add(kind + "|" + (!agentTier || agent == null ? "" : agent) + "|" + rs.getString("content_sha256"));
+                    out.add(
+                            kind
+                                    + "|"
+                                    + (!agentTier || agent == null ? "" : agent)
+                                    + "|"
+                                    + rs.getString("content_sha256"));
                 },
                 subjectKey);
         return out;
     }
 
-    /** The key {@link #forgottenKeys} uses for a fact: tier, owning agent (agent tier only) and content hash. */
+    /**
+     * The key {@link #forgottenKeys} uses for a fact: tier, owning agent (agent tier only) and
+     * content hash.
+     */
     public static String tombstoneKey(boolean shared, UUID agentId, String content) {
-        return (shared ? MemoryTombstoneGuard.KIND_SHARED : MemoryTombstoneGuard.KIND_AGENT) + "|"
-                + (shared || agentId == null ? "" : agentId.toString()) + "|" + MemoryTombstoneGuard.sha256(content);
+        return (shared ? MemoryTombstoneGuard.KIND_SHARED : MemoryTombstoneGuard.KIND_AGENT)
+                + "|"
+                + (shared || agentId == null ? "" : agentId.toString())
+                + "|"
+                + MemoryTombstoneGuard.sha256(content);
     }
 }

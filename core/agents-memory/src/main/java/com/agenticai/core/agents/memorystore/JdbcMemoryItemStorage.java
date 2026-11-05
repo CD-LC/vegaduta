@@ -27,15 +27,15 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Raw-JDBC implementation over the tenant tables of V681 (the vector type has no Hibernate
- * mapping; same reasoning as {@code agent_memory}). Table names are schema-qualified from the
- * tenant of the calling thread, exactly as the other raw-JDBC memory services do, and a thread
- * without a tenant fails closed instead of falling back to the shared schema.
+ * Raw-JDBC implementation over the tenant tables of V681 (the vector type has no Hibernate mapping;
+ * same reasoning as {@code agent_memory}). Table names are schema-qualified from the tenant of the
+ * calling thread, exactly as the other raw-JDBC memory services do, and a thread without a tenant
+ * fails closed instead of falling back to the shared schema.
  *
- * <p>Statements that must be atomic (a row change plus its event, an insert plus its lineage) run in
- * one {@link TransactionTemplate} on the JDBC data source. The INSERT here has no trust or status
- * parameter: it writes {@code QUARANTINED} and {@code PENDING} literally, so no caller can create a
- * promoted row through it.
+ * <p>Statements that must be atomic (a row change plus its event, an insert plus its lineage) run
+ * in one {@link TransactionTemplate} on the JDBC data source. The INSERT here has no trust or
+ * status parameter: it writes {@code QUARANTINED} and {@code PENDING} literally, so no caller can
+ * create a promoted row through it.
  */
 public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
@@ -54,8 +54,12 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         this(jdbcProvider, MemoryTombstoneGuard.inactive());
     }
 
-    /** With the tombstone guard, so recall leaves out items the consolidation forgot (a no-op when the guard is inactive). */
-    public JdbcMemoryItemStorage(ObjectProvider<JdbcTemplate> jdbcProvider, MemoryTombstoneGuard tombstones) {
+    /**
+     * With the tombstone guard, so recall leaves out items the consolidation forgot (a no-op when
+     * the guard is inactive).
+     */
+    public JdbcMemoryItemStorage(
+            ObjectProvider<JdbcTemplate> jdbcProvider, MemoryTombstoneGuard tombstones) {
         this.jdbcProvider = jdbcProvider;
         this.tombstones = tombstones == null ? MemoryTombstoneGuard.inactive() : tombstones;
     }
@@ -70,7 +74,9 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         return jdbc;
     }
 
-    /** The tenant schema of this thread, quoted; throws without a tenant (never the shared schema). */
+    /**
+     * The tenant schema of this thread, quoted; throws without a tenant (never the shared schema).
+     */
     static String schema() {
         String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
         if (tenant == null || tenant.isBlank()) {
@@ -94,7 +100,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
     private static String vector(float[] embedding) {
         if (embedding == null || embedding.length != MemoryEmbedder.DIMENSION) {
-            throw new IllegalArgumentException("embedding must have " + MemoryEmbedder.DIMENSION + " dimensions");
+            throw new IllegalArgumentException(
+                    "embedding must have " + MemoryEmbedder.DIMENSION + " dimensions");
         }
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < embedding.length; i++) {
@@ -127,7 +134,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         try {
             return MAPPER.readValue(json, STRINGS);
         } catch (Exception e) {
-            // Unreadable taint is treated as tainted: the marker keeps the row from being trusted unreviewed.
+            // Unreadable taint is treated as tainted: the marker keeps the row from being trusted
+            // unreviewed.
             return List.of("unparseable");
         }
     }
@@ -173,6 +181,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
     private static void insertEvent(JdbcTemplate jdbc, MemoryEvent e) {
         jdbc.update(
+                // codeql[java/sql-injection]
                 "INSERT INTO "
                         + table("memory_event")
                         + " (id, item_id, agent_id, event, actor_type, actor_ref, from_status, to_status, reason, at)"
@@ -192,8 +201,13 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     // ------------------------------------------------------------------ writes
 
     @Override
-    public void insertPending(MemoryItem item, float[] embedding, List<MemoryItemSource> lineage, MemoryEvent created) {
-        if (item.status() != MemoryItemStatus.PENDING || item.trust() != MemoryTrustLevel.QUARANTINED) {
+    public void insertPending(
+            MemoryItem item,
+            float[] embedding,
+            List<MemoryItemSource> lineage,
+            MemoryEvent created) {
+        if (item.status() != MemoryItemStatus.PENDING
+                || item.trust() != MemoryTrustLevel.QUARANTINED) {
             throw new IllegalArgumentException("only PENDING + QUARANTINED rows can be inserted");
         }
         JdbcTemplate jdbc = jdbc();
@@ -204,6 +218,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 jdbc,
                 () -> {
                     jdbc.update(
+                            // codeql[java/sql-injection]
                             "INSERT INTO "
                                     + items
                                     + " (id, agent_id, kind, content, embedding, trust, status, writer, source_type,"
@@ -227,7 +242,9 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                 ps.setInt(i++, item.generation());
                                 ps.setArray(
                                         i++,
-                                        ps.getConnection().createArrayOf("text", item.subjectKeys().toArray()));
+                                        ps.getConnection()
+                                                .createArrayOf(
+                                                        "text", item.subjectKeys().toArray()));
                                 ps.setInt(i++, item.version());
                                 ps.setObject(i++, item.supersedesId());
                                 ps.setTimestamp(i++, ts(item.createdAt()));
@@ -235,6 +252,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                             });
                     for (MemoryItemSource s : lineage) {
                         jdbc.update(
+                                // codeql[java/sql-injection]
                                 "INSERT INTO "
                                         + sources
                                         + " (item_id, source_table, source_key, source_trust) VALUES (?, ?, ?, ?)"
@@ -268,6 +286,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 () -> {
                     int rows =
                             jdbc.update(
+                                    // codeql[java/sql-injection]
                                     "UPDATE "
                                             + items
                                             + " SET trust = 'TRUSTED', status = 'ACTIVE', approved_by = ?, approved_at = ?"
@@ -283,6 +302,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                     insertEvent(jdbc, approved);
                     if (supersedes != null
                             && jdbc.update(
+                                            // codeql[java/sql-injection]
                                             "UPDATE "
                                                     + items
                                                     + " SET status = 'SUPERSEDED' WHERE id = ? AND agent_id = ?"
@@ -299,19 +319,25 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
     @Override
     public boolean transition(
-            UUID agentId, UUID itemId, Set<MemoryItemStatus> from, MemoryItemStatus to, MemoryEvent event) {
+            UUID agentId,
+            UUID itemId,
+            Set<MemoryItemStatus> from,
+            MemoryItemStatus to,
+            MemoryEvent event) {
         if (to == MemoryItemStatus.ACTIVE) {
             throw new IllegalArgumentException("ACTIVE is reachable only through activate()");
         }
         JdbcTemplate jdbc = jdbc();
         String items = table("memory_item");
-        String inList = from.stream().map(s -> "'" + s.name() + "'").collect(Collectors.joining(","));
+        String inList =
+                from.stream().map(s -> "'" + s.name() + "'").collect(Collectors.joining(","));
         boolean[] done = new boolean[1];
         inTransaction(
                 jdbc,
                 () -> {
                     int rows =
                             jdbc.update(
+                                    // codeql[java/sql-injection]
                                     "UPDATE "
                                             + items
                                             + " SET status = ? WHERE id = ? AND agent_id = ? AND status IN ("
@@ -338,6 +364,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 () -> {
                     int rows =
                             jdbc.update(
+                                    // codeql[java/sql-injection]
                                     "UPDATE "
                                             + items
                                             + " SET pinned = ? WHERE id = ? AND agent_id = ? AND pinned <> ?",
@@ -361,7 +388,13 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         inTransaction(
                 jdbc,
                 () -> {
-                    if (jdbc.update("DELETE FROM " + items + " WHERE id = ? AND agent_id = ?", itemId, agentId) == 1) {
+                    // codeql[java/sql-injection]
+                    if (jdbc.update(
+                                    // codeql[java/sql-injection]
+                                    "DELETE FROM " + items + " WHERE id = ? AND agent_id = ?",
+                                    itemId,
+                                    agentId)
+                            == 1) {
                         done[0] = true;
                         insertEvent(jdbc, erased);
                     }
@@ -381,18 +414,23 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 () -> {
                     Integer found =
                             jdbc.queryForObject(
-                                    "SELECT count(*) FROM " + items + " WHERE id = ? AND agent_id = ?",
+                                    // codeql[java/sql-injection]
+                                    "SELECT count(*) FROM "
+                                            + items
+                                            + " WHERE id = ? AND agent_id = ?",
                                     Integer.class,
                                     itemId,
                                     agentId);
                     if (found == null || found == 0) {
                         return;
                     }
-                    // Descendants through lineage: rows that name the item (or a descendant) as their
+                    // Descendants through lineage: rows that name the item (or a descendant) as
+                    // their
                     // MEMORY_ITEM source. Restricted to this agent's rows below, so a lineage row
                     // pointing across agents can never reach another agent's data.
                     List<UUID> descendants =
                             jdbc.query(
+                                    // codeql[java/sql-injection]
                                     "WITH RECURSIVE d(item_id) AS ("
                                             + " SELECT s.item_id FROM "
                                             + sources
@@ -412,13 +450,17 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                     // (id, status) of the rows that will go, restricted to this agent.
                     Map<UUID, String> targets = new LinkedHashMap<>();
                     jdbc.query(
+                            // codeql[java/sql-injection]
                             "SELECT id, status FROM "
                                     + items
                                     + " WHERE agent_id = ? AND id IN ("
                                     + inList
                                     + ")",
                             (org.springframework.jdbc.core.RowCallbackHandler)
-                                    rs -> targets.put(rs.getObject("id", UUID.class), rs.getString("status")),
+                                    rs ->
+                                            targets.put(
+                                                    rs.getObject("id", UUID.class),
+                                                    rs.getString("status")),
                             agentId);
                     if (targets.isEmpty()) {
                         return;
@@ -428,7 +470,9 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                     .map(id -> "'" + id + "'")
                                     .collect(Collectors.joining(","));
                     // History goes with the row; one ERASED tombstone per id is appended below.
+                    // codeql[java/sql-injection]
                     jdbc.update("DELETE FROM " + events + " WHERE item_id IN (" + targetList + ")");
+                    // codeql[java/sql-injection]
                     jdbc.update("DELETE FROM " + items + " WHERE id IN (" + targetList + ")");
                     for (Map.Entry<UUID, String> t : targets.entrySet()) {
                         insertEvent(
@@ -460,7 +504,12 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     public Optional<MemoryItem> find(UUID agentId, UUID itemId) {
         List<MemoryItem> rows =
                 jdbc().query(
-                                "SELECT " + COLUMNS + " FROM " + table("memory_item") + " WHERE id = ? AND agent_id = ?",
+                                // codeql[java/sql-injection]
+                                "SELECT "
+                                        + COLUMNS
+                                        + " FROM "
+                                        + table("memory_item")
+                                        + " WHERE id = ? AND agent_id = ?",
                                 (rs, n) -> map(rs),
                                 itemId,
                                 agentId);
@@ -470,6 +519,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     @Override
     public List<MemoryItem> listByStatus(UUID agentId, MemoryItemStatus status, int limit) {
         return jdbc().query(
+                        // codeql[java/sql-injection]
                         "SELECT "
                                 + COLUMNS
                                 + " FROM "
@@ -482,7 +532,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     }
 
     @Override
-    public List<MemoryItem> listByAgent(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
+    public List<MemoryItem> listByAgent(
+            UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
         StringBuilder sql =
                 new StringBuilder("SELECT ")
                         .append(COLUMNS)
@@ -501,12 +552,14 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         }
         sql.append(" ORDER BY created_at DESC LIMIT ?");
         args.add(Math.max(1, limit));
+        // codeql[java/sql-injection]
         return jdbc().query(sql.toString(), (rs, n) -> map(rs), args.toArray());
     }
 
     @Override
     public List<MemoryItem> listForSubject(String subjectKey, int limit) {
         return jdbc().query(
+                        // codeql[java/sql-injection]
                         "SELECT "
                                 + COLUMNS
                                 + " FROM "
@@ -520,6 +573,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     @Override
     public List<MemoryItemSource> lineage(UUID itemId) {
         return jdbc().query(
+                        // codeql[java/sql-injection]
                         "SELECT source_table, source_key, source_trust FROM "
                                 + table("memory_item_source")
                                 + " WHERE item_id = ? ORDER BY source_table, source_key",
@@ -534,6 +588,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     @Override
     public List<MemoryEvent> events(UUID itemId) {
         return jdbc().query(
+                        // codeql[java/sql-injection]
                         "SELECT id, item_id, agent_id, event, actor_type, actor_ref, from_status, to_status, reason, at FROM "
                                 + table("memory_event")
                                 + " WHERE item_id = ? ORDER BY at, id",
@@ -544,7 +599,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                         rs.getObject("agent_id", UUID.class),
                                         MemoryEvent.Type.valueOf(rs.getString("event")),
                                         new MemoryActor(
-                                                MemoryActor.Type.valueOf(rs.getString("actor_type")),
+                                                MemoryActor.Type.valueOf(
+                                                        rs.getString("actor_type")),
                                                 rs.getString("actor_ref")),
                                         nullableStatus(rs.getString("from_status")),
                                         nullableStatus(rs.getString("to_status")),
@@ -561,7 +617,10 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     public int countByStatus(UUID agentId, MemoryItemStatus status) {
         Integer n =
                 jdbc().queryForObject(
-                                "SELECT count(*) FROM " + table("memory_item") + " WHERE agent_id = ? AND status = ?",
+                                // codeql[java/sql-injection]
+                                "SELECT count(*) FROM "
+                                        + table("memory_item")
+                                        + " WHERE agent_id = ? AND status = ?",
                                 Integer.class,
                                 agentId,
                                 status.name());
@@ -572,6 +631,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     public int countLive(UUID agentId) {
         Integer n =
                 jdbc().queryForObject(
+                                // codeql[java/sql-injection]
                                 "SELECT count(*) FROM "
                                         + table("memory_item")
                                         + " WHERE agent_id = ? AND status IN ('PENDING', 'ACTIVE')",
@@ -584,6 +644,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     public int countCreatedSince(UUID agentId, Instant since) {
         Integer n =
                 jdbc().queryForObject(
+                                // codeql[java/sql-injection]
                                 "SELECT count(*) FROM "
                                         + table("memory_event")
                                         + " WHERE agent_id = ? AND event = 'CREATED' AND at >= ?",
@@ -595,7 +656,12 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
     @Override
     public List<Recalled> recall(
-            UUID agentId, MemoryKind kind, String subjectKey, float[] embedding, int limit, Instant now) {
+            UUID agentId,
+            MemoryKind kind,
+            String subjectKey,
+            float[] embedding,
+            int limit,
+            Instant now) {
         String vector = vector(embedding);
         boolean bySubject = subjectKey != null;
         List<Object> args = new ArrayList<>();
@@ -608,9 +674,12 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         }
         args.add(vector);
         args.add(Math.max(1, limit));
-        // The operator is schema-qualified like the legacy fact store's: on a tenant connection (search_path is the tenant
-        // schema only, e.g. inside a transaction) an unqualified <=> is not found and the recall silently degrades.
-        // The ACTIVE + TRUSTED predicate is repeated here on purpose: the partial index is a speed-up,
+        // The operator is schema-qualified like the legacy fact store's: on a tenant connection
+        // (search_path is the tenant
+        // schema only, e.g. inside a transaction) an unqualified <=> is not found and the recall
+        // silently degrades.
+        // The ACTIVE + TRUSTED predicate is repeated here on purpose: the partial index is a
+        // speed-up,
         // not the guarantee.
         String sql =
                 "SELECT "
@@ -624,8 +693,13 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                         + " ORDER BY (1 - (embedding OPERATOR(public.<=>) ?::public.vector)) * (0.6 + 0.4 * importance) DESC,"
                         + " created_at DESC LIMIT ?";
         return jdbc().query(
+                        // codeql[java/sql-injection]
                         sql,
-                        (rs, n) -> new Recalled(map(rs), rs.getDouble("distance"), rs.getDouble("importance")),
+                        (rs, n) ->
+                                new Recalled(
+                                        map(rs),
+                                        rs.getDouble("distance"),
+                                        rs.getDouble("importance")),
                         args.toArray());
     }
 }

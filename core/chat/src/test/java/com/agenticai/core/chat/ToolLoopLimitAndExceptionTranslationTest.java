@@ -257,24 +257,29 @@ class ToolLoopLimitAndExceptionTranslationTest {
                                                         + "\",\"result\":\"waiting on approval\"}")))
                         .build());
 
-        // The turn's own state says it is parked (the guard set it when it recorded the approval): the marker text in
+        // The turn's own state says it is parked (the guard set it when it recorded the approval):
+        // the marker text in
         // the history is only what the model sees, not what the loop decides from.
-        ToolLoopTranscript run = new ToolLoopTranscript().signals(new ToolLoopSignals() {
-            public boolean parked() {
-                return true;
-            }
+        ToolLoopTranscript run =
+                new ToolLoopTranscript()
+                        .signals(
+                                new ToolLoopSignals() {
+                                    public boolean parked() {
+                                        return true;
+                                    }
 
-            public boolean budgetExhausted() {
-                return false;
-            }
-        });
+                                    public boolean budgetExhausted() {
+                                        return false;
+                                    }
+                                });
         ToolExecutionResult result =
                 manager.executeToolCalls(
                         new Prompt(
                                 history,
                                 ToolCallingChatOptions.builder()
                                         .toolCallbacks(List.of(tool))
-                                        .toolContext(Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, run))
+                                        .toolContext(
+                                                Map.of(ToolLoopTranscript.TOOL_CONTEXT_KEY, run))
                                         .build()),
                         responseCalling(TOOL));
 

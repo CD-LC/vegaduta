@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
  * conversation, immediately and whichever thread marked it.
  *
  * <p>Tenant and conversation id are captured as plain strings when the turn is attached, so the
- * write that happens when a tool thread taints the turn needs no thread-local tenant context.
- * Fails closed: a store that cannot be read taints the turn; a store that cannot be written is
- * logged (the current turn is tainted regardless).
+ * write that happens when a tool thread taints the turn needs no thread-local tenant context. Fails
+ * closed: a store that cannot be read taints the turn; a store that cannot be written is logged
+ * (the current turn is tainted regardless).
  */
 public final class ConversationTaint {
 

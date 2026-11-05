@@ -42,7 +42,8 @@ class MemoryItemReviewServiceTest {
         assertThat(row.trust()).isEqualTo(MemoryTrustLevel.TRUSTED);
         assertThat(row.approvedBy()).isEqualTo("alice");
         assertThat(row.approvedAt()).isEqualTo(f.clock.instant());
-        assertThat(f.storage.events(id)).extracting(MemoryEvent::event)
+        assertThat(f.storage.events(id))
+                .extracting(MemoryEvent::event)
                 .containsExactly(MemoryEvent.Type.CREATED, MemoryEvent.Type.APPROVED);
     }
 
@@ -51,7 +52,11 @@ class MemoryItemReviewServiceTest {
         UUID id = pending(MemoryKind.EPISODIC, "e");
         for (MemoryActor bad :
                 new MemoryActor[] {
-                    MemoryActor.agent("agent-1"), MemoryActor.system("distiller"), MemoryActor.human(null), MemoryActor.human(" "), null
+                    MemoryActor.agent("agent-1"),
+                    MemoryActor.system("distiller"),
+                    MemoryActor.human(null),
+                    MemoryActor.human(" "),
+                    null
                 }) {
             assertThat(f.review.approve(f.agent, id, bad).refusal()).isEqualTo("NOT_HUMAN");
             assertThat(f.review.reject(f.agent, id, bad).refusal()).isEqualTo("NOT_HUMAN");
@@ -64,14 +69,14 @@ class MemoryItemReviewServiceTest {
     @Test
     void aTaintedItemCanBeApprovedOnlyWithAnApproverOnTheRow() {
         UUID id =
-                f.sink
-                        .propose(
+                f.sink.propose(
                                 new MemoryWriteProposal(
                                         f.agent,
                                         "u",
                                         MemoryKind.EPISODIC,
                                         "from a web page",
-                                        new MemoryProvenanceRecord(MemoryTrustLevel.TRUSTED, List.of("web"), null),
+                                        new MemoryProvenanceRecord(
+                                                MemoryTrustLevel.TRUSTED, List.of("web"), null),
                                         null,
                                         false))
                         .orElseThrow()
@@ -87,8 +92,7 @@ class MemoryItemReviewServiceTest {
         UUID src = f.active(MemoryKind.EPISODIC, "episode");
         UUID pendingSrc = pending(MemoryKind.EPISODIC, "other episode");
         UUID derived =
-                f.sink
-                        .propose(
+                f.sink.propose(
                                 new MemoryWriteProposal(
                                         f.agent,
                                         "user-1",
@@ -98,8 +102,10 @@ class MemoryItemReviewServiceTest {
                                         null,
                                         true,
                                         List.of(
-                                                com.agenticai.core.agents.memory.spi.MemorySourceRef.item(src),
-                                                com.agenticai.core.agents.memory.spi.MemorySourceRef.item(pendingSrc))))
+                                                com.agenticai.core.agents.memory.spi.MemorySourceRef
+                                                        .item(src),
+                                                com.agenticai.core.agents.memory.spi.MemorySourceRef
+                                                        .item(pendingSrc))))
                         .orElseThrow()
                         .id();
         assertThat(f.review.approve(f.agent, derived, alice).ok()).isTrue();
@@ -119,25 +125,46 @@ class MemoryItemReviewServiceTest {
 
     @Test
     void approvalRefusesPastTheGenerationCapAndExpiredItems() {
-        UUID id = pending(MemoryKind.EPISODIC, "model written"); // modelGenerated=false -> generation 0
+        UUID id =
+                pending(
+                        MemoryKind.EPISODIC,
+                        "model written"); // modelGenerated=false -> generation 0
         f.props.setMaxGeneration(0);
         assertThat(f.review.approve(f.agent, id, alice).ok()).isTrue();
         MemoryWriteProposal model =
-                new MemoryWriteProposal(f.agent, "u", MemoryKind.EPISODIC, "m", null, null, true); // generation 1
+                new MemoryWriteProposal(
+                        f.agent, "u", MemoryKind.EPISODIC, "m", null, null, true); // generation 1
         // cap 0 refuses a model-written proposal outright
-        assertThat(f.sink.proposeDetailed(model).refusal()).isEqualTo(MemoryTrustPolicy.GENERATION_CAP);
+        assertThat(f.sink.proposeDetailed(model).refusal())
+                .isEqualTo(MemoryTrustPolicy.GENERATION_CAP);
         f.props.setMaxGeneration(1);
         UUID gen1 = f.sink.propose(model).orElseThrow().id();
         f.props.setMaxGeneration(0);
-        assertThat(f.review.approve(f.agent, gen1, alice).refusal()).isEqualTo(MemoryTrustPolicy.GENERATION_CAP);
+        assertThat(f.review.approve(f.agent, gen1, alice).refusal())
+                .isEqualTo(MemoryTrustPolicy.GENERATION_CAP);
 
         f.props.setMaxGeneration(2);
         UUID soon = pending(MemoryKind.EPISODIC, "will expire");
         f.props.setEpisodicTtlDays(1);
         MemoryItem row = f.storage.items.get(soon);
         MemoryItem expired =
-                MemoryItem.pending(row.id(), row.agentId(), row.kind(), row.content(), row.writer(), null, null, null,
-                        List.of(), false, 0, row.subjectKeys(), 1, null, row.createdAt(), f.clock.instant().minusSeconds(1));
+                MemoryItem.pending(
+                        row.id(),
+                        row.agentId(),
+                        row.kind(),
+                        row.content(),
+                        row.writer(),
+                        null,
+                        null,
+                        null,
+                        List.of(),
+                        false,
+                        0,
+                        row.subjectKeys(),
+                        1,
+                        null,
+                        row.createdAt(),
+                        f.clock.instant().minusSeconds(1));
         f.storage.put(expired, StoreFixture.vector("x"));
         assertThat(f.review.approve(f.agent, soon, alice).refusal()).isEqualTo("EXPIRED");
     }
@@ -152,7 +179,9 @@ class MemoryItemReviewServiceTest {
         UUID b = f.active(MemoryKind.EPISODIC, "b");
         assertThat(f.review.revert(f.agent, b, alice).ok()).isTrue();
         assertThat(f.storage.items.get(b).status()).isEqualTo(MemoryItemStatus.REVERTED);
-        assertThat(f.storage.events(b)).extracting(MemoryEvent::event).contains(MemoryEvent.Type.REVERTED);
+        assertThat(f.storage.events(b))
+                .extracting(MemoryEvent::event)
+                .contains(MemoryEvent.Type.REVERTED);
         assertThat(f.review.revert(f.agent, a, alice).refusal()).isEqualTo("NOT_ACTIVE");
     }
 
@@ -167,7 +196,9 @@ class MemoryItemReviewServiceTest {
         assertThat(next.writer()).isEqualTo(MemoryWriter.HUMAN);
         assertThat(next.status()).isEqualTo(MemoryItemStatus.PENDING);
         assertThat(next.trust()).isEqualTo(MemoryTrustLevel.QUARANTINED);
-        assertThat(f.storage.lineage(next.id())).extracting(MemoryItemSource::sourceKey).containsExactly(id.toString());
+        assertThat(f.storage.lineage(next.id()))
+                .extracting(MemoryItemSource::sourceKey)
+                .containsExactly(id.toString());
         // the old ACTIVE row is untouched until the new version is approved
         assertThat(f.storage.items.get(id).status()).isEqualTo(MemoryItemStatus.ACTIVE);
         assertThat(f.storage.items.get(id).content()).isEqualTo("old steps");
@@ -178,7 +209,8 @@ class MemoryItemReviewServiceTest {
     @Test
     void editingAPendingItemSupersedesItAtOnceAndIsRescreened() {
         UUID id = pending(MemoryKind.EPISODIC, "draft");
-        assertThat(f.review.edit(f.agent, id, "x".repeat(5000), alice).refusal()).isEqualTo("SCREEN_TOO_LONG");
+        assertThat(f.review.edit(f.agent, id, "x".repeat(5000), alice).refusal())
+                .isEqualTo("SCREEN_TOO_LONG");
         assertThat(f.storage.items.get(id).status()).isEqualTo(MemoryItemStatus.PENDING);
         assertThat(f.review.edit(f.agent, id, "final", alice).ok()).isTrue();
         assertThat(f.storage.items.get(id).status()).isEqualTo(MemoryItemStatus.SUPERSEDED);
@@ -196,11 +228,15 @@ class MemoryItemReviewServiceTest {
         assertThat(f.storage.items.get(id).pinned()).isTrue();
         // pinning again is a no-op success: no second event
         assertThat(f.review.pin(f.agent, id, alice).ok()).isTrue();
-        assertThat(f.storage.events(id)).extracting(MemoryEvent::event).containsOnlyOnce(MemoryEvent.Type.PINNED);
+        assertThat(f.storage.events(id))
+                .extracting(MemoryEvent::event)
+                .containsOnlyOnce(MemoryEvent.Type.PINNED);
 
         assertThat(f.review.unpin(f.agent, id, alice).ok()).isTrue();
         assertThat(f.storage.items.get(id).pinned()).isFalse();
-        assertThat(f.storage.events(id)).extracting(MemoryEvent::event).contains(MemoryEvent.Type.UNPINNED);
+        assertThat(f.storage.events(id))
+                .extracting(MemoryEvent::event)
+                .contains(MemoryEvent.Type.UNPINNED);
         assertThat(f.storage.events.toString()).doesNotContain("Priya").doesNotContain("forever");
     }
 
@@ -227,7 +263,9 @@ class MemoryItemReviewServiceTest {
         UUID id = f.active(MemoryKind.EPISODIC, "secret fact about Priya");
         assertThat(f.review.delete(f.agent, id, alice).ok()).isTrue();
         assertThat(f.storage.items).doesNotContainKey(id);
-        assertThat(f.storage.events(id)).extracting(MemoryEvent::event).contains(MemoryEvent.Type.ERASED);
+        assertThat(f.storage.events(id))
+                .extracting(MemoryEvent::event)
+                .contains(MemoryEvent.Type.ERASED);
         assertThat(f.storage.events.toString()).doesNotContain("Priya").doesNotContain("secret");
         assertThat(f.review.delete(f.agent, id, alice).refusal()).isEqualTo("NOT_FOUND");
     }

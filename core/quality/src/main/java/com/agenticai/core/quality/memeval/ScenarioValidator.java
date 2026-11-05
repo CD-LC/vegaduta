@@ -59,12 +59,17 @@ public final class ScenarioValidator {
         for (Fact f : s.ledger()) {
             int planted = plantCount.getOrDefault(f.id(), 0);
             if (planted != 1) {
-                errors.add(at + "fact " + f.id() + " is planted " + planted + " times (expected 1)");
+                errors.add(
+                        at + "fact " + f.id() + " is planted " + planted + " times (expected 1)");
             }
             if (f.plantedIn() == null || s.sessionIndex(f.plantedIn()) < 0) {
                 errors.add(at + "fact " + f.id() + " planted_in unknown session " + f.plantedIn());
             } else if (s.plantedAtIndex(f.id()) != s.sessionIndex(f.plantedIn())) {
-                errors.add(at + "fact " + f.id() + " planted_in disagrees with the turn that plants it");
+                errors.add(
+                        at
+                                + "fact "
+                                + f.id()
+                                + " planted_in disagrees with the turn that plants it");
             }
             for (String r : f.relevantTo()) {
                 if (!probeIds.contains(r)) {
@@ -92,10 +97,22 @@ public final class ScenarioValidator {
                 if (shared == null) {
                     errors.add(at + "session " + ses.id() + " shares unknown fact " + id);
                 } else if (s.plantedAtIndex(id) < 0 || s.plantedAtIndex(id) > i) {
-                    errors.add(at + "session " + ses.id() + " shares fact " + id + " before it is planted");
+                    errors.add(
+                            at
+                                    + "session "
+                                    + ses.id()
+                                    + " shares fact "
+                                    + id
+                                    + " before it is planted");
                 } else if (!java.util.Objects.equals(s.ownerUser(shared), ses.userId())
-                    || !java.util.Objects.equals(s.ownerTenant(shared), ses.tenantId())) {
-                    errors.add(at + "session " + ses.id() + " shares fact " + id + " that its user does not own");
+                        || !java.util.Objects.equals(s.ownerTenant(shared), ses.tenantId())) {
+                    errors.add(
+                            at
+                                    + "session "
+                                    + ses.id()
+                                    + " shares fact "
+                                    + id
+                                    + " that its user does not own");
                 }
             }
         }
@@ -107,7 +124,8 @@ public final class ScenarioValidator {
                 errors.add(at + "attack has no canary");
             }
             for (String c : s.attack().canaries()) {
-                boolean planted = s.ledger().stream().anyMatch(f -> EvalText.contains(f.value(), c));
+                boolean planted =
+                        s.ledger().stream().anyMatch(f -> EvalText.contains(f.value(), c));
                 if (!planted) {
                     errors.add(at + "canary " + c + " is not in any ledger payload");
                 }
@@ -116,7 +134,8 @@ public final class ScenarioValidator {
         return errors;
     }
 
-    private static void checkProbe(MemoryScenario s, Probe p, Set<String> keys, List<String> errors, String at) {
+    private static void checkProbe(
+            MemoryScenario s, Probe p, Set<String> keys, List<String> errors, String at) {
         if (s.sessionIndex(p.after()) < 0) {
             errors.add(at + "probe " + p.id() + " is after unknown session " + p.after());
         }
@@ -129,17 +148,28 @@ public final class ScenarioValidator {
         if (p.type() != ProbeType.ABSTENTION && p.type() != ProbeType.FORGET) {
             for (String k : p.queryKeys()) {
                 if (!keys.contains(k)) {
-                    errors.add(at + "probe " + p.id() + " queries key '" + k + "' absent from the ledger");
+                    errors.add(
+                            at
+                                    + "probe "
+                                    + p.id()
+                                    + " queries key '"
+                                    + k
+                                    + "' absent from the ledger");
                 }
             }
         }
-        if (p.expect().all().isEmpty() && p.expect().none().isEmpty() && p.expect().tool() == null
-            && p.expect().forbidTools().isEmpty() && !p.expect().abstain() && p.storeCheck() == null) {
+        if (p.expect().all().isEmpty()
+                && p.expect().none().isEmpty()
+                && p.expect().tool() == null
+                && p.expect().forbidTools().isEmpty()
+                && !p.expect().abstain()
+                && p.storeCheck() == null) {
             errors.add(at + "probe " + p.id() + " asserts nothing");
         }
     }
 
-    private static void checkChain(MemoryScenario s, Fact f, Map<String, Fact> byId, List<String> errors, String at) {
+    private static void checkChain(
+            MemoryScenario s, Fact f, Map<String, Fact> byId, List<String> errors, String at) {
         Set<String> seen = new HashSet<>();
         Fact cur = f;
         while (cur.supersededBy() != null) {
@@ -149,20 +179,35 @@ public final class ScenarioValidator {
             }
             Fact next = byId.get(cur.supersededBy());
             if (next == null) {
-                errors.add(at + "fact " + cur.id() + " superseded_by unknown fact " + cur.supersededBy());
+                errors.add(
+                        at
+                                + "fact "
+                                + cur.id()
+                                + " superseded_by unknown fact "
+                                + cur.supersededBy());
                 return;
             }
             if (!next.key().equals(cur.key())) {
-                errors.add(at + "fact " + cur.id() + " is superseded by a fact with a different key");
+                errors.add(
+                        at + "fact " + cur.id() + " is superseded by a fact with a different key");
             }
             if (s.plantedAtIndex(next.id()) < s.plantedAtIndex(cur.id())) {
-                errors.add(at + "fact " + next.id() + " supersedes " + cur.id() + " but is planted earlier");
+                errors.add(
+                        at
+                                + "fact "
+                                + next.id()
+                                + " supersedes "
+                                + cur.id()
+                                + " but is planted earlier");
             }
             cur = next;
         }
     }
 
-    /** Dataset-level: scenario ids unique, canaries unique across scenarios, every scenario consistent. */
+    /**
+     * Dataset-level: scenario ids unique, canaries unique across scenarios, every scenario
+     * consistent.
+     */
     public static List<String> validateDataset(List<MemoryScenario> all) {
         List<String> errors = new ArrayList<>();
         Set<String> ids = new HashSet<>();

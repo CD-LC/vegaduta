@@ -127,7 +127,7 @@ class AgentNodeHandler implements NodeHandler {
                             + (agent.knowledgeBaseEnabled()
                                     ? "long-term knowledge base search is ON for this agent."
                                     : "long-term knowledge base search is OFF for this agent -"
-                                          + " answering from the model + this conversation only."));
+                                            + " answering from the model + this conversation only."));
             logLines.add(
                     "Tools: "
                             + (agent.allowedToolNames() == null

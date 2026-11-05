@@ -8,9 +8,9 @@ import com.agenticai.core.settings.SettingsContributor;
 import java.util.List;
 
 /**
- * Settings-catalog entry {@code memory.unified.enabled} (ADR-0028 section 11). The platform value is
- * {@code app.memory.unified.enabled} (default false); a tenant or an agent can only switch unified recall off for
- * itself, because {@link MemoryUnifiedGate} ANDs every level.
+ * Settings-catalog entry {@code memory.unified.enabled} (ADR-0028 section 11). The platform value
+ * is {@code app.memory.unified.enabled} (default false); a tenant or an agent can only switch
+ * unified recall off for itself, because {@link MemoryUnifiedGate} ANDs every level.
  */
 public class MemoryUnifiedSettings implements SettingsContributor {
 

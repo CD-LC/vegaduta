@@ -7,7 +7,6 @@ import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.Capacity;
-import com.agenticai.core.agents.memorystore.MemoryTombstoneGuard;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportFact;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportRequest;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportResponse;
@@ -16,6 +15,7 @@ import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewRequest
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewResponse;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.PreviewStats;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.SkippedFact;
+import com.agenticai.core.agents.memorystore.MemoryTombstoneGuard;
 import com.agenticai.core.agents.usermemory.UserMemoryController;
 import com.agenticai.core.agents.usermemory.UserMemoryFactService;
 import com.agenticai.core.audit.AuditLogService;
@@ -41,22 +41,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * "Bring your memory from another assistant" (ChatGPT / Claude / Gemini): the user pastes that assistant's own
- * answer to a "list everything you remember about me" prompt; this turns it into reviewable facts and saves
- * the ones the user keeps. Deterministic - there is no model call anywhere in this path.
+ * "Bring your memory from another assistant" (ChatGPT / Claude / Gemini): the user pastes that
+ * assistant's own answer to a "list everything you remember about me" prompt; this turns it into
+ * reviewable facts and saves the ones the user keeps. Deterministic - there is no model call
+ * anywhere in this path.
  *
  * <p>{@link #preview} has no side effects. {@link #importFacts} saves each selected fact through
- * {@link UserMemoryFactService#addFact} - the very method behind {@code POST /api/memory/facts} - so the
- * per-caller caps ({@code app.memory.self-service.*}), scope rules, agent authorization (an agent the caller
- * may run, else 404) and embedding all behave exactly as for a hand-added fact. Every fact is re-screened
- * and re-deduped here; the client's preview is never trusted.
+ * {@link UserMemoryFactService#addFact} - the very method behind {@code POST /api/memory/facts} -
+ * so the per-caller caps ({@code app.memory.self-service.*}), scope rules, agent authorization (an
+ * agent the caller may run, else 404) and embedding all behave exactly as for a hand-added fact.
+ * Every fact is re-screened and re-deduped here; the client's preview is never trusted.
  *
- * <p>The memory tables' provenance columns (V676: {@code trust} and {@code source_taint}, see {@code
- * MemoryProvenance}) record whether a row is recallable and what tainted its turn, but have no field for the
- * import source, so "imported from
- * &lt;source&gt;" is recorded as an audit log entry per import (counts + source, never the fact text). Gated by {@code app.memory.import.enabled}
- * (default true) and, like the facts endpoint it reuses, by {@code app.memory.self-service.enabled}:
- * either off = 404.
+ * <p>The memory tables' provenance columns (V676: {@code trust} and {@code source_taint}, see
+ * {@code MemoryProvenance}) record whether a row is recallable and what tainted its turn, but have
+ * no field for the import source, so "imported from &lt;source&gt;" is recorded as an audit log
+ * entry per import (counts + source, never the fact text). Gated by {@code
+ * app.memory.import.enabled} (default true) and, like the facts endpoint it reuses, by {@code
+ * app.memory.self-service.enabled}: either off = 404.
  */
 @Service
 public class MemoryImportService {
@@ -67,12 +68,15 @@ public class MemoryImportService {
     static final String SCOPE_SHARED = "shared";
     static final String SCOPE_AGENT = "agent";
     static final String AUDIT_ACTION = "MEMORY_IMPORT";
+
     /** Rejected lines listed in a preview; the rest are only counted. */
     static final int MAX_LISTED_REJECTED = 50;
+
     private static final int DUPLICATE_DISPLAY_CHARS = 200;
 
     /** Skip reason codes of {@code POST /api/memory/import} beyond the parser's own. */
     static final String S_EMPTY = "empty";
+
     static final String S_INVALID_SCOPE = "invalid_scope";
     static final String S_AGENT_REQUIRED = "agent_required";
     static final String S_DUPLICATE = "duplicate";
@@ -95,7 +99,10 @@ public class MemoryImportService {
     private final int maxSharedFacts;
     private volatile MemoryTombstoneGuard tombstones = MemoryTombstoneGuard.inactive();
 
-    /** Resurrection guard: an import skips a fact whose text was forgotten unless the person re-confirms it. */
+    /**
+     * Resurrection guard: an import skips a fact whose text was forgotten unless the person
+     * re-confirms it.
+     */
     @Autowired(required = false)
     public void setTombstoneGuard(MemoryTombstoneGuard guard) {
         this.tombstones = guard == null ? MemoryTombstoneGuard.inactive() : guard;
@@ -103,17 +110,16 @@ public class MemoryImportService {
 
     @Autowired
     public MemoryImportService(
-        ObjectProvider<AgentMemoryService> agentMemoryService,
-        ObjectProvider<TenantMemoryService> tenantMemoryService,
-        UserMemoryFactService factService,
-        ObjectProvider<AuditLogService> auditLogService,
-        @Value("${app.memory.import.enabled:true}") boolean enabled,
-        @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
-        @Value("${app.memory.import.max-facts:200}") int maxFacts,
-        @Value("${app.memory.import.max-chars:20000}") int maxChars,
-        @Value("${app.memory.self-service.max-facts-per-agent:25}") int maxFactsPerAgent,
-        @Value("${app.memory.self-service.max-shared-facts:50}") int maxSharedFacts
-    ) {
+            ObjectProvider<AgentMemoryService> agentMemoryService,
+            ObjectProvider<TenantMemoryService> tenantMemoryService,
+            UserMemoryFactService factService,
+            ObjectProvider<AuditLogService> auditLogService,
+            @Value("${app.memory.import.enabled:true}") boolean enabled,
+            @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
+            @Value("${app.memory.import.max-facts:200}") int maxFacts,
+            @Value("${app.memory.import.max-chars:20000}") int maxChars,
+            @Value("${app.memory.self-service.max-facts-per-agent:25}") int maxFactsPerAgent,
+            @Value("${app.memory.self-service.max-shared-facts:50}") int maxSharedFacts) {
         this.agentMemoryService = agentMemoryService;
         this.tenantMemoryService = tenantMemoryService;
         this.factService = factService;
@@ -126,33 +132,45 @@ public class MemoryImportService {
         this.maxSharedFacts = Math.max(0, maxSharedFacts);
     }
 
-    /** The configured limits; 404 when the feature is off, so the page can hide the card before the user tries it. */
+    /**
+     * The configured limits; 404 when the feature is off, so the page can hide the card before the
+     * user tries it.
+     */
     public MemoryImportDtos.ImportLimits limits() {
         requireEnabled();
         return new MemoryImportDtos.ImportLimits(maxFacts, maxChars);
     }
 
-    /** Parses and screens the paste and flags repeats of what the caller already has. Writes nothing. */
+    /**
+     * Parses and screens the paste and flags repeats of what the caller already has. Writes
+     * nothing.
+     */
     public PreviewResponse preview(String subject, PreviewRequest request) {
         requireEnabled();
         String text = request == null ? null : request.text();
         if (text == null || text.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Paste the other assistant's answer first.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Paste the other assistant's answer first.");
         }
         if (text.length() > maxChars) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "That paste is too long. Paste at most " + maxChars + " characters.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "That paste is too long. Paste at most " + maxChars + " characters.");
         }
         AgentMemoryService agent = agentMemoryService.getIfAvailable();
         TenantMemoryService tenant = tenantMemoryService.getIfAvailable();
         if (agent == null && tenant == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Memory is not available.");
         }
-        List<TenantMemoryEntry> sharedFacts = tenant == null ? List.of() : tenant.listFactsForSubject(subject);
-        List<AgentMemoryEntry> agentFacts = agent == null ? List.of() : agent.listAllForSubject(subject);
+        List<TenantMemoryEntry> sharedFacts =
+                tenant == null ? List.of() : tenant.listFactsForSubject(subject);
+        List<AgentMemoryEntry> agentFacts =
+                agent == null ? List.of() : agent.listAllForSubject(subject);
         Map<String, String> existing = new HashMap<>();
-        // Duplicate detection looks at TRUSTED rows only: a quarantined twin is not something the person
-        // has accepted, so it must not swallow their own paste (it stays listed on the Memory page for review).
+        // Duplicate detection looks at TRUSTED rows only: a quarantined twin is not something the
+        // person
+        // has accepted, so it must not swallow their own paste (it stays listed on the Memory page
+        // for review).
         for (TenantMemoryEntry m : sharedFacts) {
             if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
                 continue;
@@ -166,7 +184,8 @@ public class MemoryImportService {
             existing.putIfAbsent(MemoryImportParser.dedupeKey(m.content()), m.content());
         }
 
-        MemoryImportParser.ParseResult parsed = MemoryImportParser.parse(text, maxFacts, MemoryImportParser.DEFAULT_MAX_FACT_CHARS);
+        MemoryImportParser.ParseResult parsed =
+                MemoryImportParser.parse(text, maxFacts, MemoryImportParser.DEFAULT_MAX_FACT_CHARS);
         List<PreviewFact> facts = new ArrayList<>();
         int kept = 0;
         int duplicates = parsed.pasteDuplicates();
@@ -190,20 +209,31 @@ public class MemoryImportService {
                 facts.add(new PreviewFact(c.index(), c.text(), SCOPE_SHARED, null, null));
             }
         }
-        Capacity capacity = new Capacity(tenant == null ? 0 : Math.max(0, maxSharedFacts - sharedFacts.size()), maxFactsPerAgent);
-        return new PreviewResponse(facts, new PreviewStats(parsed.lines(), kept, duplicates, rejected), capacity,
-            normalizeSource(request.sourceHint()));
+        Capacity capacity =
+                new Capacity(
+                        tenant == null ? 0 : Math.max(0, maxSharedFacts - sharedFacts.size()),
+                        maxFactsPerAgent);
+        return new PreviewResponse(
+                facts,
+                new PreviewStats(parsed.lines(), kept, duplicates, rejected),
+                capacity,
+                normalizeSource(request.sourceHint()));
     }
 
-    /** Saves the selected facts one by one; a fact that cannot be saved is reported in {@code skipped}, never fatal. */
+    /**
+     * Saves the selected facts one by one; a fact that cannot be saved is reported in {@code
+     * skipped}, never fatal.
+     */
     public ImportResponse importFacts(String subject, ImportRequest request) {
         requireEnabled();
         List<ImportFact> requested = request == null ? null : request.facts();
         if (requested == null || requested.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose at least one memory to import.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Choose at least one memory to import.");
         }
         if (requested.size() > maxFacts) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Import at most " + maxFacts + " memories at a time.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Import at most " + maxFacts + " memories at a time.");
         }
         String source = normalizeSource(request.source());
         AgentMemoryService agent = agentMemoryService.getIfAvailable();
@@ -213,7 +243,8 @@ public class MemoryImportService {
         }
         // Dedupe keys per target: "shared" or "agent:<id>". Existing rows are loaded lazily, once.
         Map<String, Set<String>> keysByTarget = new HashMap<>();
-        // A target that already refused (cap reached, agent not runnable) refuses the rest without more writes.
+        // A target that already refused (cap reached, agent not runnable) refuses the rest without
+        // more writes.
         Map<String, String> blockedTargets = new HashMap<>();
         Map<UUID, Set<String>> existingAgentKeys = null;
         Principal caller = () -> subject;
@@ -221,7 +252,9 @@ public class MemoryImportService {
         List<SkippedFact> skipped = new ArrayList<>();
         for (ImportFact f : requested) {
             String scope = f == null || f.scope() == null ? "" : f.scope();
-            MemoryImportParser.Screened screened = MemoryImportParser.screen(f == null ? null : f.text(), MemoryImportParser.DEFAULT_MAX_FACT_CHARS);
+            MemoryImportParser.Screened screened =
+                    MemoryImportParser.screen(
+                            f == null ? null : f.text(), MemoryImportParser.DEFAULT_MAX_FACT_CHARS);
             if (f == null || f.text() == null || f.text().isBlank()) {
                 skipped.add(new SkippedFact("", S_EMPTY));
                 continue;
@@ -248,13 +281,18 @@ public class MemoryImportService {
                 skipped.add(new SkippedFact(display(screened.text()), blocked));
                 continue;
             }
-            // Resurrection guard, before the duplicate check: a forgotten fact still has its (hidden) row, which would
-            // otherwise read as a duplicate and swallow both the refusal and the person's explicit re-confirmation.
-            boolean forgotten = tombstones.isForgotten(
-                    SCOPE_SHARED.equals(scope) ? MemoryTombstoneGuard.KIND_SHARED : MemoryTombstoneGuard.KIND_AGENT,
-                    subject,
-                    f.agentId(),
-                    screened.text());
+            // Resurrection guard, before the duplicate check: a forgotten fact still has its
+            // (hidden) row, which would
+            // otherwise read as a duplicate and swallow both the refusal and the person's explicit
+            // re-confirmation.
+            boolean forgotten =
+                    tombstones.isForgotten(
+                            SCOPE_SHARED.equals(scope)
+                                    ? MemoryTombstoneGuard.KIND_SHARED
+                                    : MemoryTombstoneGuard.KIND_AGENT,
+                            subject,
+                            f.agentId(),
+                            screened.text());
             if (forgotten && !Boolean.TRUE.equals(f.confirmForgotten())) {
                 skipped.add(new SkippedFact(display(screened.text()), S_FORGOTTEN));
                 continue;
@@ -279,8 +317,9 @@ public class MemoryImportService {
                                 if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
                                     continue;
                                 }
-                                existingAgentKeys.computeIfAbsent(m.agentId(), k -> new HashSet<>())
-                                    .add(MemoryImportParser.dedupeKey(m.content()));
+                                existingAgentKeys
+                                        .computeIfAbsent(m.agentId(), k -> new HashSet<>())
+                                        .add(MemoryImportParser.dedupeKey(m.content()));
                             }
                         }
                     }
@@ -294,18 +333,25 @@ public class MemoryImportService {
                 continue;
             }
             try {
-                // Same path as POST /api/memory/facts: caps, scope rules, agent authz (404) and dedicated embedding.
-                factService.addFact(new UserMemoryController.FactCreateRequest(screened.text(), scope, f.agentId()), caller);
+                // Same path as POST /api/memory/facts: caps, scope rules, agent authz (404) and
+                // dedicated embedding.
+                factService.addFact(
+                        new UserMemoryController.FactCreateRequest(
+                                screened.text(), scope, f.agentId()),
+                        caller);
                 saved++;
                 keys.add(key);
             } catch (ResponseStatusException e) {
                 String reason = reasonFor(e.getStatusCode().value(), scope);
-                if (S_LIMIT.equals(reason) || S_AGENT_UNAVAILABLE.equals(reason) || S_UNAVAILABLE.equals(reason)) {
+                if (S_LIMIT.equals(reason)
+                        || S_AGENT_UNAVAILABLE.equals(reason)
+                        || S_UNAVAILABLE.equals(reason)) {
                     blockedTargets.put(target, reason);
                 }
                 skipped.add(new SkippedFact(display(screened.text()), reason));
             } catch (AgentNotFoundException | ResourceAccessDeniedException e) {
-                // Same answer for "no such agent" and "not yours" so the import cannot probe for agent ids.
+                // Same answer for "no such agent" and "not yours" so the import cannot probe for
+                // agent ids.
                 blockedTargets.put(target, S_AGENT_UNAVAILABLE);
                 skipped.add(new SkippedFact(display(screened.text()), S_AGENT_UNAVAILABLE));
             } catch (RuntimeException e) {
@@ -338,7 +384,9 @@ public class MemoryImportService {
         if (text == null) {
             return "";
         }
-        return text.length() > DUPLICATE_DISPLAY_CHARS ? text.substring(0, DUPLICATE_DISPLAY_CHARS) + "…" : text;
+        return text.length() > DUPLICATE_DISPLAY_CHARS
+                ? text.substring(0, DUPLICATE_DISPLAY_CHARS) + "…"
+                : text;
     }
 
     private static String shorten(String text) {
@@ -351,15 +399,34 @@ public class MemoryImportService {
         }
     }
 
-    /** The import source is not a provenance value the memory tables store: an audit entry per import carries it. Never throws, never carries fact text. */
+    /**
+     * The import source is not a provenance value the memory tables store: an audit entry per
+     * import carries it. Never throws, never carries fact text.
+     */
     private void recordAudit(String subject, String source, int saved, int skippedCount) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse("unknown");
-        log.info("Memory import: tenant={} source={} saved={} skipped={}", tenantId, source, saved, skippedCount);
+        log.info(
+                "Memory import: tenant={} source={} saved={} skipped={}",
+                tenantId,
+                source,
+                saved,
+                skippedCount);
         try {
             AuditLogService audit = auditLogService.getIfAvailable();
             if (audit != null) {
-                audit.record(subject, AUDIT_ACTION, "Memory", null, AuditOutcome.SUCCESS,
-                    "Imported " + saved + " memories from " + source + " (" + skippedCount + " skipped).");
+                audit.record(
+                        subject,
+                        AUDIT_ACTION,
+                        "Memory",
+                        null,
+                        AuditOutcome.SUCCESS,
+                        "Imported "
+                                + saved
+                                + " memories from "
+                                + source
+                                + " ("
+                                + skippedCount
+                                + " skipped).");
             }
         } catch (RuntimeException e) {
             log.warn("Memory import: audit entry could not be written", e);

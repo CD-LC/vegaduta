@@ -9,7 +9,10 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/** A throw-away {@code redis-server} on a free port. {@link #start} returns null when the binary is not installed. */
+/**
+ * A throw-away {@code redis-server} on a free port. {@link #start} returns null when the binary is
+ * not installed.
+ */
 final class LocalRedis implements AutoCloseable {
 
     private final Process process;
@@ -25,7 +28,10 @@ final class LocalRedis implements AutoCloseable {
 
     static boolean binaryAvailable() {
         try {
-            Process p = new ProcessBuilder("redis-server", "--version").redirectErrorStream(true).start();
+            Process p =
+                    new ProcessBuilder("redis-server", "--version")
+                            .redirectErrorStream(true)
+                            .start();
             return p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0;
         } catch (IOException | InterruptedException e) {
             return false;
@@ -38,12 +44,24 @@ final class LocalRedis implements AutoCloseable {
             port = s.getLocalPort();
         }
         Path dir = Files.createTempDirectory("redteam-redis");
-        Process p = new ProcessBuilder("redis-server", "--port", String.valueOf(port), "--bind", "127.0.0.1",
-                        "--save", "", "--appendonly", "no", "--dir", dir.toString())
-                .redirectErrorStream(true)
-                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                .start();
-        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", port));
+        Process p =
+                new ProcessBuilder(
+                                "redis-server",
+                                "--port",
+                                String.valueOf(port),
+                                "--bind",
+                                "127.0.0.1",
+                                "--save",
+                                "",
+                                "--appendonly",
+                                "no",
+                                "--dir",
+                                dir.toString())
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                        .start();
+        LettuceConnectionFactory f =
+                new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", port));
         f.afterPropertiesSet();
         LocalRedis r = new LocalRedis(p, f);
         for (int i = 0; i < 50; i++) {

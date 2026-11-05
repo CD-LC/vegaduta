@@ -239,7 +239,8 @@ public class DemoShareController {
                                         TurnContext.forEntry(
                                                 TenantContext.current().orElse(null), chatTurn);
                                 // Anonymous visitor of a shared demo sandbox.
-                                SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:demo_share");
+                                SenderTrust.UNTRUSTED.seed(
+                                        turnContext.taint(), "inbound:demo_share");
                                 return agentChatService
                                         .chat(turnContext, chatTurn)
                                         .collect(Collectors.joining())

@@ -8,10 +8,10 @@ import java.util.UUID;
 import java.util.function.LongSupplier;
 
 /**
- * Rolling-window caps on episode proposals: per agent per hour, per agent and user per hour, per agent per day. In
- * process and bounded (least recently used keys are forgotten), so a restart or an evicted key only makes the cap more
- * lenient for one window; the store's own pending cap is the hard bound. A permit is consumed only when all three
- * windows have room.
+ * Rolling-window caps on episode proposals: per agent per hour, per agent and user per hour, per
+ * agent per day. In process and bounded (least recently used keys are forgotten), so a restart or
+ * an evicted key only makes the cap more lenient for one window; the store's own pending cap is the
+ * hard bound. A permit is consumed only when all three windows have room.
  */
 final class EpisodeLimiter {
 
@@ -31,12 +31,13 @@ final class EpisodeLimiter {
     private final int perAgentDay;
     private final LongSupplier clock;
 
-    private final Map<String, Deque<Long>> windows = new LinkedHashMap<>(64, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, Deque<Long>> eldest) {
-            return size() > MAX_KEYS;
-        }
-    };
+    private final Map<String, Deque<Long>> windows =
+            new LinkedHashMap<>(64, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Deque<Long>> eldest) {
+                    return size() > MAX_KEYS;
+                }
+            };
 
     EpisodeLimiter(int perAgentHour, int perUserHour, int perAgentDay, LongSupplier clock) {
         this.perAgentHour = perAgentHour;

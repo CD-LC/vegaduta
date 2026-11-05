@@ -1,41 +1,31 @@
 package com.agenticai.core.agents.tools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import com.agenticai.core.agents.job.AgentJobLookup;
-import com.agenticai.core.agents.job.AgentJobLookup.JobFacts;
 import com.agenticai.core.agents.memory.ChatTurn;
-import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.approval.ApprovalReplayGrant;
 import com.agenticai.core.approval.ApprovalRequest;
-import com.agenticai.core.approval.ApprovalRequestExecutionRecordedEvent;
 import com.agenticai.core.approval.ApprovalRequestRepository;
 import com.agenticai.core.approval.RetryableActionFailure;
-import com.agenticai.core.audit.NotificationCategory;
 import com.agenticai.core.audit.NotificationService;
-import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.security.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +34,10 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 
-/** {@link AgentToolCallApprovalExecutor}: the parked task is continued (or told of a denial) after a decision. */
+/**
+ * {@link AgentToolCallApprovalExecutor}: the parked task is continued (or told of a denial) after a
+ * decision.
+ */
 class AgentToolCallApprovalExecutorContinuationTest {
 
     private static final UUID AGENT_ID = UUID.randomUUID();
@@ -146,6 +139,7 @@ class AgentToolCallApprovalExecutorContinuationTest {
                         "agent:" + AGENT_ID + ":session:" + sessionId);
         return request;
     }
+
     // ------------------------------------------------------ the task is continued after a decision
 
     @Test
@@ -172,7 +166,8 @@ class AgentToolCallApprovalExecutorContinuationTest {
 
         assertThrows(RuntimeException.class, () -> executor.execute(request));
 
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.FAILED, "transport exploded");
+        verify(launcher)
+                .afterDecision(request, ApprovalContinuation.Outcome.FAILED, "transport exploded");
     }
 
     @Test
@@ -187,7 +182,8 @@ class AgentToolCallApprovalExecutorContinuationTest {
         when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
                 .thenReturn(List.of(callback));
 
-        assertThrows(Transient.class, () -> executor.execute(envelopeRequest("tenant-a", "user-sub")));
+        assertThrows(
+                Transient.class, () -> executor.execute(envelopeRequest("tenant-a", "user-sub")));
 
         verify(launcher, never()).afterDecision(any(), any(), any());
     }
@@ -198,7 +194,8 @@ class AgentToolCallApprovalExecutorContinuationTest {
         when(callback.call(anyString())).thenReturn("ok");
         when(toolProvider.resolveToolCandidatesFor(any(), anyString(), anyString()))
                 .thenReturn(List.of(callback));
-        when(launcher.afterDecision(any(), any(), any())).thenThrow(new IllegalStateException("boom"));
+        when(launcher.afterDecision(any(), any(), any()))
+                .thenThrow(new IllegalStateException("boom"));
         ApprovalRequest request = envelopeRequest("tenant-a", "user-sub");
 
         org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> executor.execute(request));
@@ -213,7 +210,9 @@ class AgentToolCallApprovalExecutorContinuationTest {
 
         executor.onRejected(request, "admin-sub", "Not before the audit");
 
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.DENIED, "Not before the audit");
+        verify(launcher)
+                .afterDecision(
+                        request, ApprovalContinuation.Outcome.DENIED, "Not before the audit");
         verify(sessionMemoryService)
                 .appendTurn(
                         anyString(),
@@ -221,11 +220,28 @@ class AgentToolCallApprovalExecutorContinuationTest {
                                 turn ->
                                         ChatTurn.isToolRecordOnly(turn)
                                                 && turn.tools().entries().get(0).status()
-                                                        == com.agenticai.core.agents.turn.ToolLedger.Status.NOT_RUN
-                                                && turn.tools().entries().get(0).result().contains("DENIED by admin-sub")
-                                                && turn.tools().entries().get(0).result().contains("Not before the audit")
-                                                && turn.tools().entries().get(0).result().contains("did not run")
-                                                && turn.tools().entries().get(0).approval().contains("admin-sub")));
+                                                        == com.agenticai.core.agents.turn.ToolLedger
+                                                                .Status.NOT_RUN
+                                                && turn.tools()
+                                                        .entries()
+                                                        .get(0)
+                                                        .result()
+                                                        .contains("DENIED by admin-sub")
+                                                && turn.tools()
+                                                        .entries()
+                                                        .get(0)
+                                                        .result()
+                                                        .contains("Not before the audit")
+                                                && turn.tools()
+                                                        .entries()
+                                                        .get(0)
+                                                        .result()
+                                                        .contains("did not run")
+                                                && turn.tools()
+                                                        .entries()
+                                                        .get(0)
+                                                        .approval()
+                                                        .contains("admin-sub")));
         // The tool never ran, and the decider's own context is untouched.
         verify(toolProvider, never()).resolveToolCandidatesFor(any(), anyString(), anyString());
         assertEquals("caller-tenant", TenantContext.current().orElseThrow().getTenantId());
@@ -237,7 +253,8 @@ class AgentToolCallApprovalExecutorContinuationTest {
 
         executor.onRejected(request, "admin-sub", null);
 
-        verify(launcher).afterDecision(request, ApprovalContinuation.Outcome.DENIED, "no reason was given");
+        verify(launcher)
+                .afterDecision(request, ApprovalContinuation.Outcome.DENIED, "no reason was given");
     }
 
     @Test

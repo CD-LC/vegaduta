@@ -8,13 +8,14 @@ import java.util.UUID;
 import reactor.core.publisher.Flux;
 
 /**
- * The turn-completion observers a dispatched turn's reply stream is wrapped in, in one
- * place so the dispatcher stays readable:
+ * The turn-completion observers a dispatched turn's reply stream is wrapped in, in one place so the
+ * dispatcher stays readable:
  *
  * <ul>
  *   <li>skill learning ({@code app.skills.learning.enabled}) reports how the turn ended;
  *   <li>lessons ({@code app.learning.lessons.enabled}) reads mistakes and corrections;
- *   <li>episodic recording ({@code app.memory.episodic.enabled}) files a verified-signals episode as a proposal;
+ *   <li>episodic recording ({@code app.memory.episodic.enabled}) files a verified-signals episode
+ *       as a proposal;
  *   <li>desktop-recipe suggestion ({@code app.learning.desktop-recipes.enabled}) offers a
  *       multi-step {@code local_desktop_*} run for one-click save.
  * </ul>
@@ -38,8 +39,8 @@ public final class TurnCompletionObservers {
     }
 
     /**
-     * As above; {@code taint} is the turn's record, snapshotted when the turn ends for the episodic recorder (null =
-     * unreadable, so an episode is quarantined).
+     * As above; {@code taint} is the turn's record, snapshotted when the turn ends for the episodic
+     * recorder (null = unreadable, so an episode is quarantined).
      */
     public static Flux<String> observe(
             Flux<String> turn,
@@ -49,9 +50,14 @@ public final class TurnCompletionObservers {
             Instant startedAt,
             Optional<TenantContext> tenant,
             TurnTaint taint) {
-        turn = SkillLearningGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
-        turn = LessonLearningGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
+        turn =
+                SkillLearningGateway.observe(
+                        turn, agentId, sessionId, userMessage, startedAt, tenant);
+        turn =
+                LessonLearningGateway.observe(
+                        turn, agentId, sessionId, userMessage, startedAt, tenant);
         turn = EpisodeRecordingGateway.observe(turn, agentId, sessionId, startedAt, tenant, taint);
-        return DesktopRunSuggestionGateway.observe(turn, agentId, sessionId, userMessage, startedAt, tenant);
+        return DesktopRunSuggestionGateway.observe(
+                turn, agentId, sessionId, userMessage, startedAt, tenant);
     }
 }

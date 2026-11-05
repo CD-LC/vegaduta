@@ -325,7 +325,8 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                 ToolLoopMarkers.collectUnavailableNames(toolResponses, refusedNames);
             }
         }
-        // Control state comes from the turn's out-of-band signals when the run has them; tool text is only the
+        // Control state comes from the turn's out-of-band signals when the run has them; tool text
+        // is only the
         // explicit, flagged fallback (ToolLoopMarkers).
         ToolLoopTranscript run = ToolLoopRunHooks.transcript(prompt);
         boolean softStopAlreadySent = ToolLoopMarkers.budgetSpent(run, invocation);

@@ -52,12 +52,14 @@ public final class PromptLeakGuard {
             return Turn.NOOP;
         }
         PromptCanary canary = PromptCanary.generate(props.canaryBytes());
-        PromptLeakAction action = mode == PromptLeakMode.ENFORCE ? props.action() : PromptLeakAction.WARN;
+        PromptLeakAction action =
+                mode == PromptLeakMode.ENFORCE ? props.action() : PromptLeakAction.WARN;
         LeakDetector detector = new LeakDetector(systemPrompt, canary, props, action);
         return new Turn(canary.appendTo(systemPrompt), detector, this, agentId, sessionId, scope);
     }
 
-    private void report(UUID agentId, String sessionId, TenantScope scope, LeakDetector.Verdict verdict) {
+    private void report(
+            UUID agentId, String sessionId, TenantScope scope, LeakDetector.Verdict verdict) {
         if (reporter == null) {
             return;
         }

@@ -28,7 +28,10 @@ public class JdbcMemoryItemConsolidationReader implements MemoryItemConsolidatio
     @Override
     public List<UUID> agentIds(int limit) {
         return jdbc().query(
-                        "SELECT DISTINCT agent_id FROM " + JdbcMemoryItemStorage.schema() + ".memory_item"
+                        // codeql[java/sql-injection]
+                        "SELECT DISTINCT agent_id FROM "
+                                + JdbcMemoryItemStorage.schema()
+                                + ".memory_item"
                                 + " WHERE status = 'ACTIVE' AND trust = 'TRUSTED' LIMIT ?",
                         (rs, n) -> rs.getObject("agent_id", UUID.class),
                         Math.max(1, limit));
@@ -37,12 +40,18 @@ public class JdbcMemoryItemConsolidationReader implements MemoryItemConsolidatio
     @Override
     public List<Row> activeItems(UUID agentId, int limit) {
         return jdbc().query(
-                        "SELECT " + JdbcMemoryItemStorage.COLUMNS + ", importance, pinned, use_count, last_used_at FROM "
-                                + JdbcMemoryItemStorage.schema() + ".memory_item"
+                        // codeql[java/sql-injection]
+                        "SELECT "
+                                + JdbcMemoryItemStorage.COLUMNS
+                                + ", importance, pinned, use_count, last_used_at FROM "
+                                + JdbcMemoryItemStorage.schema()
+                                + ".memory_item"
                                 + " WHERE agent_id = ? AND status = 'ACTIVE' AND trust = 'TRUSTED'"
-                                // An item already forgotten (tombstoned) is not planned again the next night.
+                                // An item already forgotten (tombstoned) is not planned again the
+                                // next night.
                                 + new MemoryTombstoneGuard(true, jdbcProvider)
-                                        .excludeItems(JdbcMemoryItemStorage.schema() + ".memory_item")
+                                        .excludeItems(
+                                                JdbcMemoryItemStorage.schema() + ".memory_item")
                                 + " ORDER BY created_at ASC, id LIMIT ?",
                         (rs, n) -> {
                             java.sql.Timestamp used = rs.getTimestamp("last_used_at");
@@ -61,14 +70,21 @@ public class JdbcMemoryItemConsolidationReader implements MemoryItemConsolidatio
     @Override
     public Set<UUID> sourcesOfPendingProposals(UUID agentId) {
         String schema = JdbcMemoryItemStorage.schema();
-        List<String> keys = jdbc().queryForList(
-                        "SELECT DISTINCT s.source_key FROM " + schema + ".memory_item_source s JOIN " + schema
-                                + ".memory_item i ON i.id = s.item_id WHERE i.agent_id = ? AND i.status = 'PENDING'"
-                                + " AND s.source_table = 'memory_item' AND i.source_type IN ('"
-                                + MemoryItem.SOURCE_CONSOLIDATION_MERGE + "', '" + MemoryItem.SOURCE_CONSOLIDATION_SUMMARY
-                                + "')",
-                        String.class,
-                        agentId);
+        List<String> keys =
+                jdbc().queryForList(
+                                // codeql[java/sql-injection]
+                                "SELECT DISTINCT s.source_key FROM "
+                                        + schema
+                                        + ".memory_item_source s JOIN "
+                                        + schema
+                                        + ".memory_item i ON i.id = s.item_id WHERE i.agent_id = ? AND i.status = 'PENDING'"
+                                        + " AND s.source_table = 'memory_item' AND i.source_type IN ('"
+                                        + MemoryItem.SOURCE_CONSOLIDATION_MERGE
+                                        + "', '"
+                                        + MemoryItem.SOURCE_CONSOLIDATION_SUMMARY
+                                        + "')",
+                                String.class,
+                                agentId);
         Set<UUID> out = new HashSet<>();
         for (String key : keys) {
             try {

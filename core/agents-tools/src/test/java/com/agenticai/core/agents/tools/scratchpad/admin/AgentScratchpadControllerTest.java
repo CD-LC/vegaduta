@@ -87,7 +87,8 @@ class AgentScratchpadControllerTest {
         when(scratchpadService.readView(any(), any(), eq("k"), any())).thenReturn(found);
 
         assertThat(controller.read(AGENT, "k", null, null).getBody().body()).isEqualTo("body text");
-        when(scratchpadService.readView(any(), any(), eq("gone"), any())).thenReturn(Optional.empty());
+        when(scratchpadService.readView(any(), any(), eq("gone"), any()))
+                .thenReturn(Optional.empty());
         assertThatThrownBy(() -> controller.read(AGENT, "gone", null, null))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())

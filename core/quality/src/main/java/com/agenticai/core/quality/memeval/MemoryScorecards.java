@@ -41,9 +41,10 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 /**
- * Builds a {@link MemoryScorecard} from per-run {@link ScenarioScore}s. Rates pool probes (or facts)
- * across repeats and report Wilson intervals; A/B differences pair the arms on the same scenario and
- * use {@link PairedComparison} with the scenario as the independent unit (scorecard doc sections 5-6).
+ * Builds a {@link MemoryScorecard} from per-run {@link ScenarioScore}s. Rates pool probes (or
+ * facts) across repeats and report Wilson intervals; A/B differences pair the arms on the same
+ * scenario and use {@link PairedComparison} with the scenario as the independent unit (scorecard
+ * doc sections 5-6).
  */
 public final class MemoryScorecards {
 
@@ -62,8 +63,11 @@ public final class MemoryScorecards {
 
     /** {@code noiseFloor} (from a B-vs-B rerun) is passed to the M1 comparison when known. */
     public static MemoryScorecard build(
-        String subject, List<ScenarioScore> scores, TokenPrices prices, NoiseFloor noiseFloor, long seed
-    ) {
+            String subject,
+            List<ScenarioScore> scores,
+            TokenPrices prices,
+            NoiseFloor noiseFloor,
+            long seed) {
         Map<MemoryArm, List<ScenarioScore>> byArm = new EnumMap<>(MemoryArm.class);
         for (ScenarioScore s : scores) {
             byArm.computeIfAbsent(s.arm(), a -> new ArrayList<>()).add(s);
@@ -85,97 +89,170 @@ public final class MemoryScorecards {
                 attackCases.add(s.scenarioId());
             }
         }
-        Meta meta = new Meta(subject, distinct(m), repeats, probeCount(m) / repeats, mistakeCases.size(), attackCases.size());
+        Meta meta =
+                new Meta(
+                        subject,
+                        distinct(m),
+                        repeats,
+                        probeCount(m) / repeats,
+                        mistakeCases.size(),
+                        attackCases.size());
         return new MemoryScorecard(
-            meta, gain(b, m, o, noiseFloor, seed), recall(m, o), mistakes(b, m, seed),
-            contradiction(b, m, seed), staleness(m), poisoning(m, attackCases.size()), isolation(m),
-            overhead(b, m, prices, seed));
+                meta,
+                gain(b, m, o, noiseFloor, seed),
+                recall(m, o),
+                mistakes(b, m, seed),
+                contradiction(b, m, seed),
+                staleness(m),
+                poisoning(m, attackCases.size()),
+                isolation(m),
+                overhead(b, m, prices, seed));
     }
 
     // ---- sections ----
 
     private static Gain gain(
-        List<ScenarioScore> b, List<ScenarioScore> m, List<ScenarioScore> o, NoiseFloor floor, long seed
-    ) {
+            List<ScenarioScore> b,
+            List<ScenarioScore> m,
+            List<ScenarioScore> o,
+            NoiseFloor floor,
+            long seed) {
         Function<ScenarioScore, Double> m1 = MemoryScorecards::m1PerCase;
         List<PairedCaseOutcomes> pairs = pair(b, m, m1);
-        PairedComparisonResult result = pairs.isEmpty() ? null : PairedComparison.compare(pairs, seed, floor);
-        int depProbes = (int) m.stream().filter(s -> s.repeat() == 0)
-            .flatMap(s -> s.probes().stream()).filter(ProbeScore::memoryDependent).count();
+        PairedComparisonResult result =
+                pairs.isEmpty() ? null : PairedComparison.compare(pairs, seed, floor);
+        int depProbes =
+                (int)
+                        m.stream()
+                                .filter(s -> s.repeat() == 0)
+                                .flatMap(s -> s.probes().stream())
+                                .filter(ProbeScore::memoryDependent)
+                                .count();
         Double oracle = null;
         if (!o.isEmpty()) {
             List<Double> vals = o.stream().map(m1).filter(java.util.Objects::nonNull).toList();
-            oracle = vals.isEmpty() ? null : vals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+            oracle =
+                    vals.isEmpty()
+                            ? null
+                            : vals.stream().mapToDouble(Double::doubleValue).average().orElse(0);
         }
         return new Gain(result, pairs.size(), depProbes, oracle);
     }
 
-    /** M1 of one scenario run: the share of its memory-dependent probes that succeeded; null when it has none. */
+    /**
+     * M1 of one scenario run: the share of its memory-dependent probes that succeeded; null when it
+     * has none.
+     */
     private static Double m1PerCase(ScenarioScore s) {
         List<ProbeScore> dep = s.probes().stream().filter(ProbeScore::memoryDependent).toList();
-        return dep.isEmpty() ? null : (double) dep.stream().filter(ProbeScore::success).count() / dep.size();
+        return dep.isEmpty()
+                ? null
+                : (double) dep.stream().filter(ProbeScore::success).count() / dep.size();
     }
 
     /**
      * The optional noise-floor input of the G1 comparison: two runs of the SAME B (memory off)
-     * configuration, paired case by case on M1 with {@link NoiseFloorEstimator}. Pass the result as the
-     * {@code noiseFloor} argument of {@link #build}; a real gain must exceed it. Returns null when the
-     * two runs share no memory-dependent case (an unknown floor stays unknown, never zero). The second
-     * run must use a different seed than the first, or it measures nothing.
+     * configuration, paired case by case on M1 with {@link NoiseFloorEstimator}. Pass the result as
+     * the {@code noiseFloor} argument of {@link #build}; a real gain must exceed it. Returns null
+     * when the two runs share no memory-dependent case (an unknown floor stays unknown, never
+     * zero). The second run must use a different seed than the first, or it measures nothing.
      */
-    public static NoiseFloor noiseFloor(List<ScenarioScore> firstB, List<ScenarioScore> secondB, long seed) {
+    public static NoiseFloor noiseFloor(
+            List<ScenarioScore> firstB, List<ScenarioScore> secondB, long seed) {
         List<PairedCaseOutcomes> reruns = pair(firstB, secondB, MemoryScorecards::m1PerCase);
         return reruns.isEmpty() ? null : NoiseFloorEstimator.estimate(reruns, seed);
     }
 
     private static Recall recall(List<ScenarioScore> m, List<ScenarioScore> o) {
         return new Recall(
-            fracRate(m, p -> p.recall()), fracRate(m, p -> p.retrieverRecall()),
-            o.isEmpty() ? null : fracRate(o, p -> p.recall()), fracRate(m, p -> p.precision()));
+                fracRate(m, p -> p.recall()),
+                fracRate(m, p -> p.retrieverRecall()),
+                o.isEmpty() ? null : fracRate(o, p -> p.recall()),
+                fracRate(m, p -> p.precision()));
     }
 
     private static Mistakes mistakes(List<ScenarioScore> b, List<ScenarioScore> m, long seed) {
-        Function<ScenarioScore, Double> perCase = s -> {
-            List<ProbeScore> ps = s.probes().stream().filter(p -> p.type() == ProbeType.MISTAKE).toList();
-            return ps.isEmpty() ? null : (double) ps.stream().filter(ProbeScore::mistakeRepeated).count() / ps.size();
-        };
+        Function<ScenarioScore, Double> perCase =
+                s -> {
+                    List<ProbeScore> ps =
+                            s.probes().stream().filter(p -> p.type() == ProbeType.MISTAKE).toList();
+                    return ps.isEmpty()
+                            ? null
+                            : (double) ps.stream().filter(ProbeScore::mistakeRepeated).count()
+                                    / ps.size();
+                };
         Predicate<ProbeScore> mistake = p -> p.type() == ProbeType.MISTAKE;
         return new Mistakes(
-            rate(b, mistake, ProbeScore::mistakeRepeated), rate(m, mistake, ProbeScore::mistakeRepeated),
-            compare(pair(b, m, perCase), seed));
+                rate(b, mistake, ProbeScore::mistakeRepeated),
+                rate(m, mistake, ProbeScore::mistakeRepeated),
+                compare(pair(b, m, perCase), seed));
     }
 
-    private static Contradiction contradiction(List<ScenarioScore> b, List<ScenarioScore> m, long seed) {
-        Function<ScenarioScore, Double> perCase = s ->
-            s.probes().isEmpty() ? null : (double) s.probes().stream().filter(ProbeScore::contradiction).count() / s.probes().size();
+    private static Contradiction contradiction(
+            List<ScenarioScore> b, List<ScenarioScore> m, long seed) {
+        Function<ScenarioScore, Double> perCase =
+                s ->
+                        s.probes().isEmpty()
+                                ? null
+                                : (double)
+                                                s.probes().stream()
+                                                        .filter(ProbeScore::contradiction)
+                                                        .count()
+                                        / s.probes().size();
         return new Contradiction(
-            rate(b, p -> true, ProbeScore::contradiction), rate(m, p -> true, ProbeScore::contradiction),
-            compare(pair(b, m, perCase), seed));
+                rate(b, p -> true, ProbeScore::contradiction),
+                rate(m, p -> true, ProbeScore::contradiction),
+                compare(pair(b, m, perCase), seed));
     }
 
     private static Staleness staleness(List<ScenarioScore> m) {
         return new Staleness(
-            rate(m, p -> p.type() == ProbeType.UPDATE, ProbeScore::stale), rate(m, p -> true, ProbeScore::stale));
+                rate(m, p -> p.type() == ProbeType.UPDATE, ProbeScore::stale),
+                rate(m, p -> true, ProbeScore::stale));
     }
 
     private static Poisoning poisoning(List<ScenarioScore> m, int attackCases) {
         List<ScenarioScore> attacks = m.stream().filter(ScenarioScore::attackScenario).toList();
         int persisted = (int) attacks.stream().filter(ScenarioScore::canaryPersisted).count();
-        int influenced = (int) attacks.stream().filter(s -> s.probes().stream().anyMatch(ProbeScore::canaryInfluenced)).count();
-        int corpus = (int) attacks.stream().filter(s -> PoisonScenarioGenerator.CATEGORY.equals(s.category()))
-            .map(ScenarioScore::scenarioId).distinct().count();
-        return new Poisoning(rateOf(persisted, attacks.size()), rateOf(influenced, attacks.size()), attackCases, corpus);
+        int influenced =
+                (int)
+                        attacks.stream()
+                                .filter(
+                                        s ->
+                                                s.probes().stream()
+                                                        .anyMatch(ProbeScore::canaryInfluenced))
+                                .count();
+        int corpus =
+                (int)
+                        attacks.stream()
+                                .filter(s -> PoisonScenarioGenerator.CATEGORY.equals(s.category()))
+                                .map(ScenarioScore::scenarioId)
+                                .distinct()
+                                .count();
+        return new Poisoning(
+                rateOf(persisted, attacks.size()),
+                rateOf(influenced, attacks.size()),
+                attackCases,
+                corpus);
     }
 
     private static Isolation isolation(List<ScenarioScore> m) {
         int forgetHits = m.stream().mapToInt(s -> s.forget().hit()).sum();
         int forgetTotal = m.stream().mapToInt(s -> s.forget().total()).sum();
-        int isolationProbes = (int) m.stream().flatMap(s -> s.probes().stream())
-            .filter(p -> p.type() == ProbeType.ISOLATION).count();
-        return new Isolation(rate(m, p -> true, ProbeScore::leaked), rateOf(forgetHits, forgetTotal), isolationProbes);
+        int isolationProbes =
+                (int)
+                        m.stream()
+                                .flatMap(s -> s.probes().stream())
+                                .filter(p -> p.type() == ProbeType.ISOLATION)
+                                .count();
+        return new Isolation(
+                rate(m, p -> true, ProbeScore::leaked),
+                rateOf(forgetHits, forgetTotal),
+                isolationProbes);
     }
 
-    private static Overhead overhead(List<ScenarioScore> b, List<ScenarioScore> m, TokenPrices prices, long seed) {
+    private static Overhead overhead(
+            List<ScenarioScore> b, List<ScenarioScore> m, TokenPrices prices, long seed) {
         long turnsB = sum(b, s -> s.cost().turns());
         long turnsM = sum(m, s -> s.cost().turns());
         double tokB = tokens(b);
@@ -187,12 +264,18 @@ public final class MemoryScorecards {
         Double perSuccB = succB == 0 ? null : tokB / succB;
         Double perSuccM = succM == 0 ? null : tokM / succM;
         Double ratio = perSuccB == null || perSuccM == null ? null : perSuccM / perSuccB;
-        Tokens tokens = new Tokens(
-            perTurnB, perTurnM, perTurnB == 0 ? 0 : perTurnM / perTurnB - 1.0,
-            perSuccB, perSuccM, ratio, ratioInterval(b, m, seed),
-            succB == 0 ? null : dollars(b, prices) / succB, succM == 0 ? null : dollars(m, prices) / succM);
-        Latency latency = new Latency(
-            p95(b, false), p95(m, false), p95Nullable(b), p95Nullable(m));
+        Tokens tokens =
+                new Tokens(
+                        perTurnB,
+                        perTurnM,
+                        perTurnB == 0 ? 0 : perTurnM / perTurnB - 1.0,
+                        perSuccB,
+                        perSuccM,
+                        ratio,
+                        ratioInterval(b, m, seed),
+                        succB == 0 ? null : dollars(b, prices) / succB,
+                        succM == 0 ? null : dollars(m, prices) / succM);
+        Latency latency = new Latency(p95(b, false), p95(m, false), p95Nullable(b), p95Nullable(m));
         return new Overhead(tokens, latency, growth(m));
     }
 
@@ -214,7 +297,11 @@ public final class MemoryScorecards {
             items += s.store().items();
             maxPerUser = Math.max(maxPerUser, (s.store().items() + users - 1) / users);
         }
-        return new Growth(runs == 0 ? 0 : perUserPer100 / runs, bytes, items == 0 ? 0 : (double) dup / items, maxPerUser);
+        return new Growth(
+                runs == 0 ? 0 : perUserPer100 / runs,
+                bytes,
+                items == 0 ? 0 : (double) dup / items,
+                maxPerUser);
     }
 
     // ---- helpers ----
@@ -223,7 +310,8 @@ public final class MemoryScorecards {
         return new Rate(hits, total, total == 0 ? null : WilsonInterval.forProportion(hits, total));
     }
 
-    private static Rate rate(List<ScenarioScore> runs, Predicate<ProbeScore> applies, Predicate<ProbeScore> hit) {
+    private static Rate rate(
+            List<ScenarioScore> runs, Predicate<ProbeScore> applies, Predicate<ProbeScore> hit) {
         int h = 0;
         int t = 0;
         for (ScenarioScore s : runs) {
@@ -251,10 +339,12 @@ public final class MemoryScorecards {
         return rateOf(h, t);
     }
 
-    /** Pairs arms on the scenario; repeat i of B with repeat i of M. Scenarios without a value in an arm are dropped. */
+    /**
+     * Pairs arms on the scenario; repeat i of B with repeat i of M. Scenarios without a value in an
+     * arm are dropped.
+     */
     static List<PairedCaseOutcomes> pair(
-        List<ScenarioScore> b, List<ScenarioScore> m, Function<ScenarioScore, Double> value
-    ) {
+            List<ScenarioScore> b, List<ScenarioScore> m, Function<ScenarioScore, Double> value) {
         Map<String, List<Double>> bv = values(b, value);
         Map<String, List<Double>> mv = values(m, value);
         List<PairedCaseOutcomes> out = new ArrayList<>();
@@ -267,7 +357,8 @@ public final class MemoryScorecards {
         return out;
     }
 
-    private static Map<String, List<Double>> values(List<ScenarioScore> runs, Function<ScenarioScore, Double> value) {
+    private static Map<String, List<Double>> values(
+            List<ScenarioScore> runs, Function<ScenarioScore, Double> value) {
         Map<String, TreeMap<Integer, Double>> tmp = new LinkedHashMap<>();
         for (ScenarioScore s : runs) {
             Double v = value.apply(s);
@@ -289,7 +380,11 @@ public final class MemoryScorecards {
     }
 
     private static int probeCount(List<ScenarioScore> runs) {
-        return (int) runs.stream().flatMap(s -> s.probes().stream()).filter(p -> p.type() != ProbeType.POISON).count();
+        return (int)
+                runs.stream()
+                        .flatMap(s -> s.probes().stream())
+                        .filter(p -> p.type() != ProbeType.POISON)
+                        .count();
     }
 
     private static long sum(List<ScenarioScore> runs, ToIntFunction<ScenarioScore> f) {
@@ -311,7 +406,10 @@ public final class MemoryScorecards {
     private static double dollars(List<ScenarioScore> runs, TokenPrices p) {
         double d = 0;
         for (ScenarioScore s : runs) {
-            d += (s.cost().promptTokens() * p.inputPerMTok() + s.cost().completionTokens() * p.outputPerMTok()) / 1e6;
+            d +=
+                    (s.cost().promptTokens() * p.inputPerMTok()
+                                    + s.cost().completionTokens() * p.outputPerMTok())
+                            / 1e6;
         }
         return d;
     }
@@ -341,8 +439,12 @@ public final class MemoryScorecards {
         return runs.stream().anyMatch(s -> !s.cost().ttftMs().isEmpty()) ? p95(runs, true) : null;
     }
 
-    /** Bootstrap over scenarios of (cost per success in M) / (cost per success in B); null without enough data. */
-    private static ConfidenceInterval ratioInterval(List<ScenarioScore> b, List<ScenarioScore> m, long seed) {
+    /**
+     * Bootstrap over scenarios of (cost per success in M) / (cost per success in B); null without
+     * enough data.
+     */
+    private static ConfidenceInterval ratioInterval(
+            List<ScenarioScore> b, List<ScenarioScore> m, long seed) {
         Map<String, double[]> perCase = new LinkedHashMap<>();
         accumulate(perCase, b, 0);
         accumulate(perCase, m, 2);
@@ -366,10 +468,12 @@ public final class MemoryScorecards {
             }
             reps[r] = sm == 0 ? Double.MAX_VALUE : sb == 0 ? 0.0 : (tm / sm) / (tb / sb);
         }
-        return Bootstrap.intervalFromReplicates(reps, WilsonInterval.DEFAULT_CONFIDENCE_LEVEL, IntervalMethod.PAIRED_BOOTSTRAP);
+        return Bootstrap.intervalFromReplicates(
+                reps, WilsonInterval.DEFAULT_CONFIDENCE_LEVEL, IntervalMethod.PAIRED_BOOTSTRAP);
     }
 
-    private static void accumulate(Map<String, double[]> into, List<ScenarioScore> runs, int offset) {
+    private static void accumulate(
+            Map<String, double[]> into, List<ScenarioScore> runs, int offset) {
         for (ScenarioScore s : runs) {
             double[] c = into.computeIfAbsent(s.scenarioId(), k -> new double[4]);
             c[offset] += s.cost().promptTokens() + s.cost().completionTokens();

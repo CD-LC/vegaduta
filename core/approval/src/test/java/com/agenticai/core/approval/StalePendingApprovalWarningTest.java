@@ -22,10 +22,13 @@ class StalePendingApprovalWarningTest {
 
     @SuppressWarnings("unchecked")
     private StalePendingApprovalWarning warning(Duration ttl) {
-        doAnswer(call -> {
-            ((Consumer<String>) call.getArgument(0)).accept("tenant_a");
-            return null;
-        }).when(iterator).forEachActiveTenantSchema(any());
+        doAnswer(
+                        call -> {
+                            ((Consumer<String>) call.getArgument(0)).accept("tenant_a");
+                            return null;
+                        })
+                .when(iterator)
+                .forEachActiveTenantSchema(any());
         ApprovalExpiryProperties properties = new ApprovalExpiryProperties();
         properties.setTtl(ttl);
         return new StalePendingApprovalWarning(properties, iterator, repository);
@@ -33,8 +36,9 @@ class StalePendingApprovalWarningTest {
 
     @Test
     void findsPendingRequestsOlderThanSevenDaysWhenTheTtlIsZero() {
-        when(repository.countByStatusAndCreatedAtBefore(eq(ApprovalStatus.PENDING), eq(NOW.minus(Duration.ofDays(7)))))
-            .thenReturn(3L);
+        when(repository.countByStatusAndCreatedAtBefore(
+                        eq(ApprovalStatus.PENDING), eq(NOW.minus(Duration.ofDays(7)))))
+                .thenReturn(3L);
 
         assertThat(warning(Duration.ZERO).warnIfStale(NOW)).isEqualTo(3);
     }
@@ -48,7 +52,8 @@ class StalePendingApprovalWarningTest {
 
     @Test
     void aFailingCountNeverPropagates() {
-        when(repository.countByStatusAndCreatedAtBefore(any(), any())).thenThrow(new IllegalStateException("db down"));
+        when(repository.countByStatusAndCreatedAtBefore(any(), any()))
+                .thenThrow(new IllegalStateException("db down"));
 
         assertThat(warning(Duration.ZERO).warnIfStale(NOW)).isZero();
     }

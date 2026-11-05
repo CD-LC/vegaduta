@@ -106,7 +106,9 @@ class OpenAiCompatCallsTurnContextTest {
 
         ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
         verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
-        assertTrue(context.getValue().taint().isTainted(), "the API key may be shared with end users");
-        assertEquals(java.util.List.of("inbound:openai_compat"), context.getValue().taint().sources());
+        assertTrue(
+                context.getValue().taint().isTainted(), "the API key may be shared with end users");
+        assertEquals(
+                java.util.List.of("inbound:openai_compat"), context.getValue().taint().sources());
     }
 }

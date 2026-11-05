@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-/** Test double with the same observable semantics as {@link JdbcCompetenceStorage} (counting, cap, overflow). */
+/**
+ * Test double with the same observable semantics as {@link JdbcCompetenceStorage} (counting, cap,
+ * overflow).
+ */
 final class InMemoryCompetenceStorage implements CompetenceStorage {
 
     private final Map<UUID, Map<String, int[]>> byAgent = new LinkedHashMap<>();
@@ -21,7 +24,8 @@ final class InMemoryCompetenceStorage implements CompetenceStorage {
         if (failing) {
             throw new IllegalStateException("db down");
         }
-        Map<String, int[]> rows = byAgent.computeIfAbsent(outcome.agentId(), k -> new LinkedHashMap<>());
+        Map<String, int[]> rows =
+                byAgent.computeIfAbsent(outcome.agentId(), k -> new LinkedHashMap<>());
         String cls = outcome.taskClass();
         long distinct = rows.keySet().stream().filter(c -> !OVERFLOW_CLASS.equals(c)).count();
         if (!rows.containsKey(cls) && distinct >= maxClasses) {
@@ -43,9 +47,22 @@ final class InMemoryCompetenceStorage implements CompetenceStorage {
         }
         List<CompetenceRow> out = new ArrayList<>();
         byAgent.getOrDefault(agentId, Map.of())
-                .forEach((cls, c) -> out.add(
-                        new CompetenceRow(cls, c[0], c[1], c[2], c[3], c[4], c[5], last.get(agentId).get(cls))));
-        out.sort(Comparator.comparingInt(CompetenceRow::attempts).reversed().thenComparing(CompetenceRow::taskClass));
+                .forEach(
+                        (cls, c) ->
+                                out.add(
+                                        new CompetenceRow(
+                                                cls,
+                                                c[0],
+                                                c[1],
+                                                c[2],
+                                                c[3],
+                                                c[4],
+                                                c[5],
+                                                last.get(agentId).get(cls))));
+        out.sort(
+                Comparator.comparingInt(CompetenceRow::attempts)
+                        .reversed()
+                        .thenComparing(CompetenceRow::taskClass));
         return out;
     }
 }

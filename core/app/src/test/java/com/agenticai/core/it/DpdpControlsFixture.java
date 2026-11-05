@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -43,8 +42,8 @@ import reactor.core.publisher.Flux;
 /**
  * Shared wiring for the DPDP-control integration tests: two migrated tenant schemas on a real
  * Postgres, each selected per statement from the {@link TenantContext} (the same mechanism the
- * app's tenant-routing datasource uses), so a service that reached across tenants would show up as a
- * row changed or read in the other schema. Graph memory (Apache AGE), the session-history store
+ * app's tenant-routing datasource uses), so a service that reached across tenants would show up as
+ * a row changed or read in the other schema. Graph memory (Apache AGE), the session-history store
  * (Redis) and object storage are mocked: what is asserted for them is that the erase / purge path
  * calls them, not their own behaviour, which their own tests cover.
  *
@@ -58,8 +57,10 @@ abstract class DpdpControlsFixture {
     protected static final String B = "tenant_it_dpdp_b";
     protected static final String CHANNEL = "WHATSAPP";
     protected static final String CONTACT = "+919876543210";
-    protected static final String NOTICE_EN = "We process your messages and name to answer support questions.";
-    protected static final String NOTICE_HI = "हम सहायता प्रश्नों के उत्तर देने के लिए आपके संदेशों को संसाधित करते हैं।";
+    protected static final String NOTICE_EN =
+            "We process your messages and name to answer support questions.";
+    protected static final String NOTICE_HI =
+            "हम सहायता प्रश्नों के उत्तर देने के लिए आपके संदेशों को संसाधित करते हैं।";
 
     protected static JdbcTemplate jdbc;
 
@@ -90,7 +91,8 @@ abstract class DpdpControlsFixture {
         @Override
         public Connection getConnection() throws SQLException {
             Connection c = super.getConnection();
-            String schema = TenantContext.current().map(TenantContext::getTenantId).orElse("public");
+            String schema =
+                    TenantContext.current().map(TenantContext::getTenantId).orElse("public");
             try (Statement st = c.createStatement()) {
                 st.execute("SET search_path TO \"" + schema + "\", public");
             }
@@ -134,7 +136,14 @@ abstract class DpdpControlsFixture {
                         noErasers());
         gate = new ConsentGateService(jdbc, policies, ledger, contacts, audit);
         retention = new RetentionPolicyService(jdbc);
-        purger = new RetentionPurger(jdbc, retention, audit, storage, provider(agentMemory), provider(tenantMemory));
+        purger =
+                new RetentionPurger(
+                        jdbc,
+                        retention,
+                        audit,
+                        storage,
+                        provider(agentMemory),
+                        provider(tenantMemory));
         purposes = new PurposeService(jdbc, policies);
         auditExport = new AuditExportService(jdbc, audit);
 
@@ -181,8 +190,10 @@ abstract class DpdpControlsFixture {
     }
 
     @SuppressWarnings("unchecked")
-    protected static ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> noErasers() {
-        ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> p = mock(ObjectProvider.class);
+    protected static ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser>
+            noErasers() {
+        ObjectProvider<com.agenticai.core.agents.memory.SubjectDataEraser> p =
+                mock(ObjectProvider.class);
         when(p.orderedStream()).thenAnswer(inv -> java.util.stream.Stream.empty());
         return p;
     }
@@ -200,14 +211,24 @@ abstract class DpdpControlsFixture {
 
     protected static String sha256Hex(String s) {
         try {
-            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8)));
+            return java.util.HexFormat.of()
+                    .formatHex(
+                            java.security.MessageDigest.getInstance("SHA-256")
+                                    .digest(s.getBytes(StandardCharsets.UTF_8)));
         } catch (java.security.NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
         }
     }
 
     protected static ConsentPolicyService.Request request(boolean enabled, String enNotice) {
-        return new ConsentPolicyService.Request(enabled, "support", "en", Map.of("en", enNotice, "hi", NOTICE_HI), Map.of(), Map.of(), null);
+        return new ConsentPolicyService.Request(
+                enabled,
+                "support",
+                "en",
+                Map.of("en", enNotice, "hi", NOTICE_HI),
+                Map.of(),
+                Map.of(),
+                null);
     }
 
     protected void enableConsent(UUID agent) {
@@ -215,13 +236,28 @@ abstract class DpdpControlsFixture {
     }
 
     protected static int count(String table, String externalId) {
-        return jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE external_id = ?", Integer.class, externalId);
+        return jdbc.queryForObject(
+                "SELECT count(*) FROM " + table + " WHERE external_id = ?",
+                Integer.class,
+                externalId);
     }
 
     protected static void wipe() {
-        for (String t : List.of("privacy_consent_record", "privacy_purpose_tag", "privacy_retention_policy", "privacy_consent_policy",
-                "channel_message_log", "channel_contact", "channel_session", "agent_memory", "tenant_memory", "knowledge_chunks",
-                "knowledge_collection", "voice_call_recording", "lead")) {
+        for (String t :
+                List.of(
+                        "privacy_consent_record",
+                        "privacy_purpose_tag",
+                        "privacy_retention_policy",
+                        "privacy_consent_policy",
+                        "channel_message_log",
+                        "channel_contact",
+                        "channel_session",
+                        "agent_memory",
+                        "tenant_memory",
+                        "knowledge_chunks",
+                        "knowledge_collection",
+                        "voice_call_recording",
+                        "lead")) {
             jdbc.update("DELETE FROM " + t);
         }
         jdbc.update("DELETE FROM agent");
@@ -234,68 +270,144 @@ abstract class DpdpControlsFixture {
     }
 
     protected static void insertAgent(UUID id) {
-        jdbc.update("INSERT INTO agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
-                + " knowledge_base_enabled, created_at, updated_at) VALUES (?, 'it', 'x', 'OPENAI', 'gpt-4o-mini', 256, 0.2, false, now(), now())", id);
+        jdbc.update(
+                "INSERT INTO agent (id, name, system_prompt, provider_name, model, max_tokens, temperature,"
+                        + " knowledge_base_enabled, created_at, updated_at) VALUES (?, 'it', 'x', 'OPENAI', 'gpt-4o-mini', 256, 0.2, false, now(), now())",
+                id);
     }
 
     protected static UUID collection(String name) {
         UUID id = UUID.randomUUID();
-        jdbc.update("INSERT INTO knowledge_collection (id, name, embedding_model) VALUES (?, ?, 'minilm-l6-v2')", id, name);
+        jdbc.update(
+                "INSERT INTO knowledge_collection (id, name, embedding_model) VALUES (?, ?, 'minilm-l6-v2')",
+                id,
+                name);
         return id;
     }
 
-    /** An agent, and the contact's session with two recent and two older (but < 365 days) messages. */
+    /**
+     * An agent, and the contact's session with two recent and two older (but < 365 days) messages.
+     */
     protected static void seedBase(UUID agent, String sessionKey) {
         insertAgent(agent);
         UUID sessionRow = UUID.randomUUID();
-        jdbc.update("INSERT INTO channel_session (id, channel, external_id, session_id, agent_id, created_at, last_message_at,"
-                + " paired, pairing_notice_sent, ai_disclosure_sent) VALUES (?, ?, ?, ?, ?, now(), now(), true, true, true)",
-                sessionRow, CHANNEL, CONTACT, sessionKey, agent);
+        jdbc.update(
+                "INSERT INTO channel_session (id, channel, external_id, session_id, agent_id, created_at, last_message_at,"
+                        + " paired, pairing_notice_sent, ai_disclosure_sent) VALUES (?, ?, ?, ?, ?, now(), now(), true, true, true)",
+                sessionRow,
+                CHANNEL,
+                CONTACT,
+                sessionKey,
+                agent);
         for (int i = 0; i < 4; i++) {
-            jdbc.update("INSERT INTO channel_message_log (id, channel, external_id, channel_session_id, body, created_at)"
-                    + " VALUES (?, ?, ?, ?, ?, now() - (? * interval '1 day'))", UUID.randomUUID(), CHANNEL, CONTACT, sessionRow, "message " + i, i);
+            jdbc.update(
+                    "INSERT INTO channel_message_log (id, channel, external_id, channel_session_id, body, created_at)"
+                            + " VALUES (?, ?, ?, ?, ?, now() - (? * interval '1 day'))",
+                    UUID.randomUUID(),
+                    CHANNEL,
+                    CONTACT,
+                    sessionRow,
+                    "message " + i,
+                    i);
         }
     }
 
     /** Expired and fresh rows of every retention class on top of {@link #seedBase}. */
     protected static void seedOldData(UUID agent, Instant old) {
         // seedBase left four fresh messages; turn two of them into expired ones.
-        jdbc.update("UPDATE channel_message_log SET created_at = ? WHERE body IN ('message 0', 'message 1')", java.sql.Timestamp.from(old));
+        jdbc.update(
+                "UPDATE channel_message_log SET created_at = ? WHERE body IN ('message 0', 'message 1')",
+                java.sql.Timestamp.from(old));
         for (String kind : List.of("old", "new")) {
-            java.sql.Timestamp at = java.sql.Timestamp.from("old".equals(kind) ? old : Instant.now());
-            jdbc.update("INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
-                    + " VALUES (?, ?, ?, ?, array_fill(0.1::float4, ARRAY[384])::vector, ?)", UUID.randomUUID(), agent, "s-" + kind, kind + " fact", at);
-            jdbc.update("INSERT INTO tenant_memory (id, subject_key, content, embedding, created_at)"
-                    + " VALUES (?, ?, ?, array_fill(0.1::float4, ARRAY[384])::vector, ?)", UUID.randomUUID(), "s-" + kind, kind + " shared fact", at);
-            jdbc.update("INSERT INTO voice_call_recording (id, agent_id, room_name, object_key, status, started_at, created_at, updated_at)"
-                    + " VALUES (?, ?, ?, ?, 'COMPLETED', ?, ?, ?)", UUID.randomUUID(), agent, "room-" + kind, "recordings/" + kind + ".ogg", at, at, at);
+            java.sql.Timestamp at =
+                    java.sql.Timestamp.from("old".equals(kind) ? old : Instant.now());
+            jdbc.update(
+                    "INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
+                            + " VALUES (?, ?, ?, ?, array_fill(0.1::float4, ARRAY[384])::vector, ?)",
+                    UUID.randomUUID(),
+                    agent,
+                    "s-" + kind,
+                    kind + " fact",
+                    at);
+            jdbc.update(
+                    "INSERT INTO tenant_memory (id, subject_key, content, embedding, created_at)"
+                            + " VALUES (?, ?, ?, array_fill(0.1::float4, ARRAY[384])::vector, ?)",
+                    UUID.randomUUID(),
+                    "s-" + kind,
+                    kind + " shared fact",
+                    at);
+            jdbc.update(
+                    "INSERT INTO voice_call_recording (id, agent_id, room_name, object_key, status, started_at, created_at, updated_at)"
+                            + " VALUES (?, ?, ?, ?, 'COMPLETED', ?, ?, ?)",
+                    UUID.randomUUID(),
+                    agent,
+                    "room-" + kind,
+                    "recordings/" + kind + ".ogg",
+                    at,
+                    at,
+                    at);
         }
     }
 
     /** Everything an erasure of CONTACT should reach, plus bystanders it must not. */
     protected static void seedContactData(UUID agent, String sessionKey) {
         UUID coll = collection("agent-notes");
-        chunk(coll, "Agent memory: note (written by agent " + agent + ", session " + sessionKey + ", at 2026-10-01T00:00:00Z)");
-        chunk(coll, "Agent memory: other (written by agent " + agent + ", session other-session, at 2026-10-01T00:00:00Z)");
+        chunk(
+                coll,
+                "Agent memory: note (written by agent "
+                        + agent
+                        + ", session "
+                        + sessionKey
+                        + ", at 2026-10-01T00:00:00Z)");
+        chunk(
+                coll,
+                "Agent memory: other (written by agent "
+                        + agent
+                        + ", session other-session, at 2026-10-01T00:00:00Z)");
         chunk(coll, "handbook.pdf");
-        jdbc.update("INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
-                + " VALUES (?, ?, ?, 'prefers Hindi', array_fill(0.1::float4, ARRAY[384])::vector, now())", UUID.randomUUID(), agent, CONTACT);
-        jdbc.update("INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
-                + " VALUES (?, ?, 'someone-else', 'other', array_fill(0.1::float4, ARRAY[384])::vector, now())", UUID.randomUUID(), agent);
-        jdbc.update("INSERT INTO tenant_memory (id, subject_key, content, embedding, created_at)"
-                + " VALUES (?, ?, 'lives in Pune', array_fill(0.1::float4, ARRAY[384])::vector, now())", UUID.randomUUID(), CONTACT);
-        jdbc.update("INSERT INTO channel_contact (id, channel, identifier, identifier_digits, display_name, source, created_at)"
-                + " VALUES (?, ?, ?, '919876543210', 'Priya', 'IMPORT', now())", UUID.randomUUID(), CHANNEL, CONTACT);
-        jdbc.update("INSERT INTO lead (id, name, phone, stage, score, created_at, updated_at) VALUES (?, 'Priya', '+91 98765 43210', 'NEW', 0, now(), now())", UUID.randomUUID());
+        jdbc.update(
+                "INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
+                        + " VALUES (?, ?, ?, 'prefers Hindi', array_fill(0.1::float4, ARRAY[384])::vector, now())",
+                UUID.randomUUID(),
+                agent,
+                CONTACT);
+        jdbc.update(
+                "INSERT INTO agent_memory (id, agent_id, subject_key, content, embedding, created_at)"
+                        + " VALUES (?, ?, 'someone-else', 'other', array_fill(0.1::float4, ARRAY[384])::vector, now())",
+                UUID.randomUUID(),
+                agent);
+        jdbc.update(
+                "INSERT INTO tenant_memory (id, subject_key, content, embedding, created_at)"
+                        + " VALUES (?, ?, 'lives in Pune', array_fill(0.1::float4, ARRAY[384])::vector, now())",
+                UUID.randomUUID(),
+                CONTACT);
+        jdbc.update(
+                "INSERT INTO channel_contact (id, channel, identifier, identifier_digits, display_name, source, created_at)"
+                        + " VALUES (?, ?, ?, '919876543210', 'Priya', 'IMPORT', now())",
+                UUID.randomUUID(),
+                CHANNEL,
+                CONTACT);
+        jdbc.update(
+                "INSERT INTO lead (id, name, phone, stage, score, created_at, updated_at) VALUES (?, 'Priya', '+91 98765 43210', 'NEW', 0, now(), now())",
+                UUID.randomUUID());
     }
 
     protected static void chunk(UUID collection, String source) {
-        jdbc.update("INSERT INTO knowledge_chunks (id, source, chunk_index, content, embedding, embedding_model, collection_id)"
-                + " VALUES (?, ?, 0, 'c', array_fill(0.1::float4, ARRAY[768])::vector, 'minilm-l6-v2', ?)", UUID.randomUUID(), source, collection);
+        jdbc.update(
+                "INSERT INTO knowledge_chunks (id, source, chunk_index, content, embedding, embedding_model, collection_id)"
+                        + " VALUES (?, ?, 0, 'c', array_fill(0.1::float4, ARRAY[768])::vector, 'minilm-l6-v2', ?)",
+                UUID.randomUUID(),
+                source,
+                collection);
     }
 
     protected static void insertAudit(String actor, Instant at, String detail) {
-        jdbc.update("INSERT INTO audit_log_entry (id, actor_id, action_type, target_type, target_id, outcome, detail, created_at)"
-                + " VALUES (?, ?, 'test.action', 't', 'x', 'SUCCESS', ?, ?)", UUID.randomUUID(), actor, detail, java.sql.Timestamp.from(at));
+        jdbc.update(
+                "INSERT INTO audit_log_entry (id, actor_id, action_type, target_type, target_id, outcome, detail, created_at)"
+                        + " VALUES (?, ?, 'test.action', 't', 'x', 'SUCCESS', ?, ?)",
+                UUID.randomUUID(),
+                actor,
+                detail,
+                java.sql.Timestamp.from(at));
     }
 }

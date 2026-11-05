@@ -10,8 +10,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * A throwaway {@code redis-server} on a free port for tests that must run the real Lua scripts. {@link #start()} skips
- * the calling test class (assumption) when no {@code redis-server} binary is on the PATH.
+ * A throwaway {@code redis-server} on a free port for tests that must run the real Lua scripts.
+ * {@link #start()} skips the calling test class (assumption) when no {@code redis-server} binary is
+ * on the PATH.
  */
 public final class LocalRedis {
 
@@ -26,10 +27,22 @@ public final class LocalRedis {
         try (ServerSocket socket = new ServerSocket(0)) {
             port = socket.getLocalPort();
         }
-        r.server = new ProcessBuilder("redis-server", "--port", Integer.toString(port), "--save", "", "--appendonly",
-            "no", "--bind", "127.0.0.1").redirectErrorStream(true)
-            .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
-        r.factory = new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", port));
+        r.server =
+                new ProcessBuilder(
+                                "redis-server",
+                                "--port",
+                                Integer.toString(port),
+                                "--save",
+                                "",
+                                "--appendonly",
+                                "no",
+                                "--bind",
+                                "127.0.0.1")
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                        .start();
+        r.factory =
+                new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", port));
         r.factory.afterPropertiesSet();
         r.template = new StringRedisTemplate(r.factory);
         r.template.afterPropertiesSet();

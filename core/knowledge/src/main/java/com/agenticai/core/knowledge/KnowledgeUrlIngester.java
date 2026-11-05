@@ -144,13 +144,14 @@ public class KnowledgeUrlIngester {
             String textSource,
             Integer chunkSize,
             Integer chunkOverlap) {
-        return ingestUrl(url, collectionId, textSource, chunkSize, chunkOverlap, ChunkProvenance.TRUSTED);
+        return ingestUrl(
+                url, collectionId, textSource, chunkSize, chunkOverlap, ChunkProvenance.TRUSTED);
     }
 
     /**
      * {@link #ingestUrl(String, UUID, String, Integer, Integer)} for an agent tool call: a
-     * QUARANTINED {@code provenance} keeps everything the download produces out of retrieval until a
-     * person approves it.
+     * QUARANTINED {@code provenance} keeps everything the download produces out of retrieval until
+     * a person approves it.
      */
     public UrlIngestResult ingestUrl(
             String url,

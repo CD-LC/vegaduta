@@ -28,7 +28,8 @@ class VerifiedEpisodeSignalsTest {
 
     private final AgentJobApprovalLookup approvals = mock(AgentJobApprovalLookup.class);
     private final FeedbackService feedback = mock(FeedbackService.class);
-    private final AtomicReference<AgentJobApprovalLookup> approvalRef = new AtomicReference<>(approvals);
+    private final AtomicReference<AgentJobApprovalLookup> approvalRef =
+            new AtomicReference<>(approvals);
     private final AtomicReference<FeedbackService> feedbackRef = new AtomicReference<>(feedback);
     private final VerifiedEpisodeSignals signals =
             new VerifiedEpisodeSignals(provider(approvalRef), provider(feedbackRef));
@@ -57,9 +58,7 @@ class VerifiedEpisodeSignalsTest {
     }
 
     private void feedbackIs(TurnFeedback... rows) {
-        when(feedback.recentForSession(
-                        any(), any(), any()))
-                .thenReturn(List.of(rows));
+        when(feedback.recentForSession(any(), any(), any())).thenReturn(List.of(rows));
     }
 
     @Test
@@ -70,7 +69,14 @@ class VerifiedEpisodeSignalsTest {
         ApprovalRequest failedAfterApproval = approved("alice");
         failedAfterApproval.markExecutionFailed("HTTP 500");
         when(approvals.findTop20ByRequestedByOrderByCreatedAtDesc(LABEL))
-                .thenReturn(List.of(approved("alice"), failedAfterApproval, rejected("bob"), pending, expired, approved("system:auto")));
+                .thenReturn(
+                        List.of(
+                                approved("alice"),
+                                failedAfterApproval,
+                                rejected("bob"),
+                                pending,
+                                expired,
+                                approved("system:auto")));
 
         Signals s = signals.signalsFor(AGENT, "s1", SINCE);
 
@@ -81,7 +87,8 @@ class VerifiedEpisodeSignalsTest {
 
     @Test
     void requestsFromBeforeTheTurnAreIgnored() {
-        when(approvals.findTop20ByRequestedByOrderByCreatedAtDesc(LABEL)).thenReturn(List.of(approved("alice")));
+        when(approvals.findTop20ByRequestedByOrderByCreatedAtDesc(LABEL))
+                .thenReturn(List.of(approved("alice")));
         assertEquals(Signals.NONE, signals.signalsFor(AGENT, "s1", Instant.now().plusSeconds(60)));
     }
 
@@ -102,18 +109,22 @@ class VerifiedEpisodeSignalsTest {
         feedbackIs(fb(FeedbackSignal.RATING, (short) 3, "alice"));
         assertNull(signals.signalsFor(AGENT, "s1", SINCE).verdict());
 
-        feedbackIs(fb(FeedbackSignal.THUMBS_UP, null, "alice"), fb(FeedbackSignal.THUMBS_DOWN, null, "alice"));
+        feedbackIs(
+                fb(FeedbackSignal.THUMBS_UP, null, "alice"),
+                fb(FeedbackSignal.THUMBS_DOWN, null, "alice"));
         assertNull(signals.signalsFor(AGENT, "s1", SINCE).verdict());
 
         feedbackIs(fb(FeedbackSignal.THUMBS_UP, null, null));
-        assertNull(signals.signalsFor(AGENT, "s1", SINCE).verdict(), "feedback not attributable to a person");
+        assertNull(
+                signals.signalsFor(AGENT, "s1", SINCE).verdict(),
+                "feedback not attributable to a person");
     }
 
     @Test
     void anyFailureOrMissingStoreYieldsNoSignalsNeverAGuess() {
-        when(approvals.findTop20ByRequestedByOrderByCreatedAtDesc(LABEL)).thenThrow(new IllegalStateException("db down"));
-        when(feedback.recentForSession(
-                        any(), any(), any()))
+        when(approvals.findTop20ByRequestedByOrderByCreatedAtDesc(LABEL))
+                .thenThrow(new IllegalStateException("db down"));
+        when(feedback.recentForSession(any(), any(), any()))
                 .thenThrow(new IllegalStateException("db down"));
         assertEquals(Signals.NONE, signals.signalsFor(AGENT, "s1", SINCE));
 

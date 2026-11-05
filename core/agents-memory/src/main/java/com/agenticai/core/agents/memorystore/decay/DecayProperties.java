@@ -11,8 +11,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * here switches consolidation on; that is {@code app.memory.consolidation.enabled}, owned by the
  * sweep that arrives with the persistence work package.
  *
- * <p>Setters clamp rather than throw so a bad override degrades to the nearest sane value instead of
- * failing startup. The safety limits can be tightened to zero but never made unlimited.
+ * <p>Setters clamp rather than throw so a bad override degrades to the nearest sane value instead
+ * of failing startup. The safety limits can be tightened to zero but never made unlimited.
  */
 @ConfigurationProperties(prefix = "app.memory.decay")
 public class DecayProperties {
@@ -52,7 +52,9 @@ public class DecayProperties {
     /** Most source rows folded into one summary. */
     private int summaryBatchSize = 12;
 
-    /** Highest lineage generation a derived row may have; inputs that would exceed it are skipped. */
+    /**
+     * Highest lineage generation a derived row may have; inputs that would exceed it are skipped.
+     */
     private int maxGeneration = 3;
 
     /** Unapproved QUARANTINED rows older than this are always forget candidates. */
@@ -115,11 +117,12 @@ public class DecayProperties {
     public void setHalfLifeDaysByKind(Map<String, Double> m) {
         Map<String, Double> copy = new HashMap<>();
         if (m != null) {
-            m.forEach((k, v) -> {
-                if (k != null && v != null && v > 0) {
-                    copy.put(k.toLowerCase(Locale.ROOT), v);
-                }
-            });
+            m.forEach(
+                    (k, v) -> {
+                        if (k != null && v != null && v > 0) {
+                            copy.put(k.toLowerCase(Locale.ROOT), v);
+                        }
+                    });
         }
         this.halfLifeDaysByKind = copy;
     }

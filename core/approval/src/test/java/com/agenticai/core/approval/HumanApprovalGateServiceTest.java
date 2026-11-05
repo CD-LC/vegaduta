@@ -26,19 +26,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 /**
- * {@link HumanApprovalGateService} is, per its own javadoc, "the single
- * entry point every action that might need human sign-off goes through" -
- * every channel send, every gated tool call, every sensitive workflow node
- * routes through here. Had zero test coverage before this suite despite
- * being the platform's central safety gate, with real documented history
- * of a subtle bug (an earlier version silently never executed
- * auto-approved actions at all - see this class's javadoc) that only a
- * behavioral test like the ones below would have caught immediately.
+ * {@link HumanApprovalGateService} is, per its own javadoc, "the single entry point every action
+ * that might need human sign-off goes through" - every channel send, every gated tool call, every
+ * sensitive workflow node routes through here. Had zero test coverage before this suite despite
+ * being the platform's central safety gate, with real documented history of a subtle bug (an
+ * earlier version silently never executed auto-approved actions at all - see this class's javadoc)
+ * that only a behavioral test like the ones below would have caught immediately.
  *
- * <p>{@link ApprovalRequest} is mocked rather than constructed for cases
- * needing a specific {@code id}/{@code status}/{@code retryCount} - those
- * fields are normally populated by JPA on persist, which never happens in
- * a pure unit test, so controlling them via stubbing is simpler and more
+ * <p>{@link ApprovalRequest} is mocked rather than constructed for cases needing a specific {@code
+ * id}/{@code status}/{@code retryCount} - those fields are normally populated by JPA on persist,
+ * which never happens in a pure unit test, so controlling them via stubbing is simpler and more
  * direct than reflection.
  */
 class HumanApprovalGateServiceTest {
@@ -54,7 +51,8 @@ class HumanApprovalGateServiceTest {
     private static final long BASE_DELAY_SECONDS = 10;
     private static final long MAX_DELAY_SECONDS = 100;
 
-    private static final class RetryableTestFailure extends RuntimeException implements RetryableActionFailure {
+    private static final class RetryableTestFailure extends RuntimeException
+            implements RetryableActionFailure {
         RetryableTestFailure(String message) {
             super(message);
         }
@@ -68,9 +66,17 @@ class HumanApprovalGateServiceTest {
         recorder = mock(ApprovalRequestRecorder.class);
         when(recorder.claimExecution(org.mockito.ArgumentMatchers.any())).thenReturn(true);
         feedbackService = mock(FeedbackService.class);
-        gateService = new HumanApprovalGateService(
-            policyService, requestRepository, executorRegistry, recorder, feedbackService, new ObjectMapper(),
-            MAX_RETRY_ATTEMPTS, BASE_DELAY_SECONDS, MAX_DELAY_SECONDS);
+        gateService =
+                new HumanApprovalGateService(
+                        policyService,
+                        requestRepository,
+                        executorRegistry,
+                        recorder,
+                        feedbackService,
+                        new ObjectMapper(),
+                        MAX_RETRY_ATTEMPTS,
+                        BASE_DELAY_SECONDS,
+                        MAX_DELAY_SECONDS);
     }
 
     private ApprovalRequest mockRequest(UUID id, ApprovalStatus status, int retryCount) {
@@ -88,10 +94,12 @@ class HumanApprovalGateServiceTest {
     void evaluateAutoApprovesWhenPolicyDoesNotRequireApproval() {
         when(policyService.requiresApproval("channel.whatsapp.send")).thenReturn(false);
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         when(executorRegistry.find(anyString())).thenReturn(Optional.empty());
 
-        ApprovalEvaluation result = gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1");
+        ApprovalEvaluation result =
+                gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1");
 
         assertTrue(result.approved());
         assertNull(result.pendingRequestId());
@@ -103,9 +111,11 @@ class HumanApprovalGateServiceTest {
         UUID pendingId = UUID.randomUUID();
         when(policyService.requiresApproval("channel.whatsapp.send")).thenReturn(true);
         ApprovalRequest request = mockRequest(pendingId, ApprovalStatus.PENDING, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
 
-        ApprovalEvaluation result = gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1");
+        ApprovalEvaluation result =
+                gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1");
 
         assertFalse(result.approved());
         assertEquals(pendingId, result.pendingRequestId());
@@ -119,7 +129,8 @@ class HumanApprovalGateServiceTest {
     void evaluateAutoApprovedRunsTheRegisteredExecutor() {
         when(policyService.requiresApproval(any())).thenReturn(false);
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         when(executorRegistry.find("channel.whatsapp.send")).thenReturn(Optional.of(executor));
 
@@ -136,11 +147,15 @@ class HumanApprovalGateServiceTest {
         // nothing actually performs it.
         when(policyService.requiresApproval(any())).thenReturn(false);
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         when(executorRegistry.find(any())).thenReturn(Optional.empty());
 
-        ApprovalEvaluation result = assertDoesNotThrow(
-            () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
+        ApprovalEvaluation result =
+                assertDoesNotThrow(
+                        () ->
+                                gateService.evaluate(
+                                        "channel.whatsapp.send", "summary", "{}", "user-1"));
 
         assertTrue(result.approved());
         verify(recorder).recordNoExecutorRegistered(request, "user-1");
@@ -152,14 +167,19 @@ class HumanApprovalGateServiceTest {
     void nonRetryableExecutorFailureIsRecordedAndPropagatedToTheCaller() {
         when(policyService.requiresApproval(any())).thenReturn(false);
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         RuntimeException boom = new RuntimeException("channel API returned 401");
         org.mockito.Mockito.doThrow(boom).when(executor).execute(request);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
-        RuntimeException thrown = assertThrows(RuntimeException.class,
-            () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
+        RuntimeException thrown =
+                assertThrows(
+                        RuntimeException.class,
+                        () ->
+                                gateService.evaluate(
+                                        "channel.whatsapp.send", "summary", "{}", "user-1"));
 
         assertEquals("channel API returned 401", thrown.getMessage());
         verify(recorder).recordExecutionFailed(request, "user-1", "channel API returned 401");
@@ -171,14 +191,16 @@ class HumanApprovalGateServiceTest {
     void retryableExecutorFailureUnderCapSchedulesRetryAndStillPropagates() {
         when(policyService.requiresApproval(any())).thenReturn(false);
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, 0);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         RetryableTestFailure transientFailure = new RetryableTestFailure("timed out");
         org.mockito.Mockito.doThrow(transientFailure).when(executor).execute(request);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
-        assertThrows(RetryableTestFailure.class,
-            () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
+        assertThrows(
+                RetryableTestFailure.class,
+                () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
 
         verify(recorder).recordRetryScheduled(eq(request), eq("timed out"), any(Instant.class));
         verify(recorder, never()).recordExecutionFailed(any(), any(), any());
@@ -188,16 +210,20 @@ class HumanApprovalGateServiceTest {
     @Test
     void retryableExecutorFailureAtAttemptCapIsDeadLetteredInsteadOfRetried() {
         when(policyService.requiresApproval(any())).thenReturn(false);
-        // retryCount already at the cap - this attempt must dead-letter, not schedule another retry.
-        ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, MAX_RETRY_ATTEMPTS);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+        // retryCount already at the cap - this attempt must dead-letter, not schedule another
+        // retry.
+        ApprovalRequest request =
+                mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, MAX_RETRY_ATTEMPTS);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         RetryableTestFailure transientFailure = new RetryableTestFailure("still failing");
         org.mockito.Mockito.doThrow(transientFailure).when(executor).execute(request);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
-        assertThrows(RetryableTestFailure.class,
-            () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
+        assertThrows(
+                RetryableTestFailure.class,
+                () -> gateService.evaluate("channel.whatsapp.send", "summary", "{}", "user-1"));
 
         verify(recorder).recordDeadLettered(request, "still failing");
         verify(recorder, never()).recordRetryScheduled(any(), any(), any());
@@ -224,24 +250,29 @@ class HumanApprovalGateServiceTest {
         assertBackoffWithinExpectedWindow(4, MAX_DELAY_SECONDS);
     }
 
-    private void assertBackoffWithinExpectedWindow(int currentRetryCount, long expectedDelaySeconds) {
-        ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, currentRetryCount);
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(request);
+    private void assertBackoffWithinExpectedWindow(
+            int currentRetryCount, long expectedDelaySeconds) {
+        ApprovalRequest request =
+                mockRequest(UUID.randomUUID(), ApprovalStatus.APPROVED, currentRetryCount);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(request);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         org.mockito.Mockito.doThrow(new RetryableTestFailure("x")).when(executor).execute(request);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
         Instant before = Instant.now();
-        assertThrows(RetryableTestFailure.class,
-            () -> gateService.evaluate("channel.whatsapp.send", "s", "{}", "u"));
+        assertThrows(
+                RetryableTestFailure.class,
+                () -> gateService.evaluate("channel.whatsapp.send", "s", "{}", "u"));
 
         ArgumentCaptor<Instant> captor = ArgumentCaptor.forClass(Instant.class);
         verify(recorder).recordRetryScheduled(eq(request), eq("x"), captor.capture());
         long actualDelaySeconds = captor.getValue().getEpochSecond() - before.getEpochSecond();
         // A couple of seconds of tolerance for wall-clock time elapsed
         // between "before" and the code's own Instant.now() call.
-        assertTrue(Math.abs(actualDelaySeconds - expectedDelaySeconds) <= 2,
-            "expected ~" + expectedDelaySeconds + "s, got " + actualDelaySeconds + "s");
+        assertTrue(
+                Math.abs(actualDelaySeconds - expectedDelaySeconds) <= 2,
+                "expected ~" + expectedDelaySeconds + "s, got " + actualDelaySeconds + "s");
     }
 
     // --- approve() ---------------------------------------------------------
@@ -267,7 +298,8 @@ class HumanApprovalGateServiceTest {
         UUID id = UUID.randomUUID();
         when(requestRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ApprovalRequestNotFoundException.class, () -> gateService.approve(id, "admin-1"));
+        assertThrows(
+                ApprovalRequestNotFoundException.class, () -> gateService.approve(id, "admin-1"));
     }
 
     @Test
@@ -276,7 +308,9 @@ class HumanApprovalGateServiceTest {
         ApprovalRequest alreadyApproved = mockRequest(id, ApprovalStatus.APPROVED, 0);
         when(requestRepository.findById(id)).thenReturn(Optional.of(alreadyApproved));
 
-        assertThrows(ApprovalRequestAlreadyDecidedException.class, () -> gateService.approve(id, "admin-1"));
+        assertThrows(
+                ApprovalRequestAlreadyDecidedException.class,
+                () -> gateService.approve(id, "admin-1"));
     }
 
     @Test
@@ -285,7 +319,9 @@ class HumanApprovalGateServiceTest {
         ApprovalRequest alreadyRejected = mockRequest(id, ApprovalStatus.REJECTED, 0);
         when(requestRepository.findById(id)).thenReturn(Optional.of(alreadyRejected));
 
-        assertThrows(ApprovalRequestAlreadyDecidedException.class, () -> gateService.approve(id, "admin-1"));
+        assertThrows(
+                ApprovalRequestAlreadyDecidedException.class,
+                () -> gateService.approve(id, "admin-1"));
     }
 
     // --- reject() ------------------------------------------------------------
@@ -336,7 +372,8 @@ class HumanApprovalGateServiceTest {
         when(recorder.recordRejected(pending, "admin-1", "no")).thenReturn(rejected);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         org.mockito.Mockito.doThrow(new RuntimeException("run table unavailable"))
-            .when(executor).onRejected(any(), any(), any());
+                .when(executor)
+                .onRejected(any(), any(), any());
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
         ApprovalRequest result = assertDoesNotThrow(() -> gateService.reject(id, "admin-1", "no"));
@@ -349,7 +386,9 @@ class HumanApprovalGateServiceTest {
         UUID id = UUID.randomUUID();
         when(requestRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(ApprovalRequestNotFoundException.class, () -> gateService.reject(id, "admin-1", "no"));
+        assertThrows(
+                ApprovalRequestNotFoundException.class,
+                () -> gateService.reject(id, "admin-1", "no"));
     }
 
     @Test
@@ -358,7 +397,9 @@ class HumanApprovalGateServiceTest {
         ApprovalRequest deadLettered = mockRequest(id, ApprovalStatus.DEAD_LETTERED, 3);
         when(requestRepository.findById(id)).thenReturn(Optional.of(deadLettered));
 
-        assertThrows(ApprovalRequestAlreadyDecidedException.class, () -> gateService.reject(id, "admin-1", "no"));
+        assertThrows(
+                ApprovalRequestAlreadyDecidedException.class,
+                () -> gateService.reject(id, "admin-1", "no"));
     }
 
     // --- approval decision -> RL reward loop --------------------------------
@@ -371,8 +412,11 @@ class HumanApprovalGateServiceTest {
         when(request.getId()).thenReturn(id);
         when(request.getStatus()).thenReturn(status);
         when(request.getActionType()).thenReturn("workflow.node.approval");
-        when(request.getPayloadJson()).thenReturn(
-            "{\"workflowName\":\"My Flow\",\"runId\":\"" + runId + "\",\"nodeId\":\"n1\",\"adminOnly\":false}");
+        when(request.getPayloadJson())
+                .thenReturn(
+                        "{\"workflowName\":\"My Flow\",\"runId\":\""
+                                + runId
+                                + "\",\"nodeId\":\"n1\",\"adminOnly\":false}");
         when(request.getRetryCount()).thenReturn(0);
         return request;
     }
@@ -430,7 +474,8 @@ class HumanApprovalGateServiceTest {
         when(requestRepository.findById(id)).thenReturn(Optional.of(pending));
         when(recorder.recordApproved(pending, "admin-1")).thenReturn(approved);
         org.mockito.Mockito.doThrow(new RuntimeException("rl db down"))
-            .when(feedbackService).recordApprovalDecision(any(), anyBoolean());
+                .when(feedbackService)
+                .recordApprovalDecision(any(), anyBoolean());
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
@@ -448,10 +493,12 @@ class HumanApprovalGateServiceTest {
         // NOTHING may execute at record time; the replay executor only ever
         // runs later, via approve()'s executor lookup.
         ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.PENDING, 0);
-        when(recorder.recordNew("mcp.tool.dangerous_action", "summary", "{}", "user-1", false)).thenReturn(request);
+        when(recorder.recordNew("mcp.tool.dangerous_action", "summary", "{}", "user-1", false))
+                .thenReturn(request);
 
-        ApprovalRequest result = gateService.recordToolCallForApproval(
-            "mcp.tool.dangerous_action", "summary", "{}", "user-1");
+        ApprovalRequest result =
+                gateService.recordToolCallForApproval(
+                        "mcp.tool.dangerous_action", "summary", "{}", "user-1");
 
         assertEquals(request, result);
         verify(recorder).recordNew("mcp.tool.dangerous_action", "summary", "{}", "user-1", false);
@@ -462,7 +509,8 @@ class HumanApprovalGateServiceTest {
 
     @Test
     void retryExecutionSuccessRecordsRetrySucceeded() {
-        ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 2);
+        ApprovalRequest request =
+                mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 2);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
@@ -476,23 +524,30 @@ class HumanApprovalGateServiceTest {
     void retryExecutionFailureNeverPropagatesToTheCaller() {
         // Unlike evaluate()/approve(), a scheduled job has no HTTP caller
         // waiting - one request's failure must never abort the whole batch.
-        ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 1);
+        ApprovalRequest request =
+                mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 1);
         ApprovalActionExecutor executor = mock(ApprovalActionExecutor.class);
-        org.mockito.Mockito.doThrow(new RuntimeException("still broken")).when(executor).execute(request);
+        org.mockito.Mockito.doThrow(new RuntimeException("still broken"))
+                .when(executor)
+                .execute(request);
         when(executorRegistry.find(any())).thenReturn(Optional.of(executor));
 
         assertDoesNotThrow(() -> gateService.retryExecution(request));
 
-        verify(recorder).recordExecutionFailed(request, ApprovalRequestRecorder.RETRY_JOB_ACTOR, "still broken");
+        verify(recorder)
+                .recordExecutionFailed(
+                        request, ApprovalRequestRecorder.RETRY_JOB_ACTOR, "still broken");
     }
 
     @Test
     void retryExecutionWithNoRegisteredExecutorRecordsAndReturnsWithoutThrowing() {
-        ApprovalRequest request = mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 1);
+        ApprovalRequest request =
+                mockRequest(UUID.randomUUID(), ApprovalStatus.EXECUTION_FAILED, 1);
         when(executorRegistry.find(any())).thenReturn(Optional.empty());
 
         assertDoesNotThrow(() -> gateService.retryExecution(request));
 
-        verify(recorder).recordNoExecutorRegistered(request, ApprovalRequestRecorder.RETRY_JOB_ACTOR);
+        verify(recorder)
+                .recordNoExecutorRegistered(request, ApprovalRequestRecorder.RETRY_JOB_ACTOR);
     }
 }

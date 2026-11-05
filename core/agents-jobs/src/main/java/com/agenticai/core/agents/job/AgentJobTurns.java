@@ -68,9 +68,9 @@ final class AgentJobTurns {
     }
 
     /**
-     * Builds the first turn of a job RESUMED after an approval park from the decisions it was parked
-     * on (see {@link AgentJobApprovalResumption}). Optional setter like the journal: null (unit tests,
-     * slim contexts) => a resumed job re-sends its goal, as before.
+     * Builds the first turn of a job RESUMED after an approval park from the decisions it was
+     * parked on (see {@link AgentJobApprovalResumption}). Optional setter like the journal: null
+     * (unit tests, slim contexts) => a resumed job re-sends its goal, as before.
      */
     void setApprovalResume(AgentJobApprovalResumption approvalResume) {
         this.approvalResume = approvalResume;
@@ -113,11 +113,12 @@ final class AgentJobTurns {
      * ceiling is checked at TURN BOUNDARIES, and retrofitting both into a straight-line call later
      * would mean rewriting the error handling around it.
      *
-     * <p><b>The per-job tool-call ceiling is checked at turn boundaries AND inside each turn.</b> The
-     * boundary check ({@link #guardBeforeTurn}) refuses a turn once the job is out of calls; inside the
-     * turn the job's remaining budget rides on the request as a cap ({@link ChatTurnRequest#caps()}), which
-     * the turn's runtime settings apply on top of the agent's own ceiling (a cap can lower it, never raise
-     * it), so a turn cannot spend more than the job has left.
+     * <p><b>The per-job tool-call ceiling is checked at turn boundaries AND inside each turn.</b>
+     * The boundary check ({@link #guardBeforeTurn}) refuses a turn once the job is out of calls;
+     * inside the turn the job's remaining budget rides on the request as a cap ({@link
+     * ChatTurnRequest#caps()}), which the turn's runtime settings apply on top of the agent's own
+     * ceiling (a cap can lower it, never raise it), so a turn cannot spend more than the job has
+     * left.
      */
     String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue)
             throws InterruptedException {
@@ -126,10 +127,11 @@ final class AgentJobTurns {
 
     /**
      * @param resumedFromPark the job was parked on a human approval and this run follows the
-     *     decision: its FIRST turn is the approval continuation (the goal restated with the
-     *     decided calls' results) instead of the bare goal
+     *     decision: its FIRST turn is the approval continuation (the goal restated with the decided
+     *     calls' results) instead of the bare goal
      */
-    String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue, boolean resumedFromPark)
+    String runTurns(
+            AgentJob job, Instant deadlineAt, boolean orphanRequeue, boolean resumedFromPark)
             throws InterruptedException {
         String lastResult = null;
         // Each park buys exactly ONE more turn. Without this, a resumed job
@@ -263,7 +265,11 @@ final class AgentJobTurns {
                     resume == null
                             ? runOneTurn(job, deadlineAt, goal, false)
                             : runOneTurn(
-                                    job, deadlineAt, resume.message(), false, resume.continuation());
+                                    job,
+                                    deadlineAt,
+                                    resume.message(),
+                                    false,
+                                    resume.continuation());
             if (journaling) {
                 journal.complete(runId, stepId, StepJournal.KIND_TURN, lastResult);
             }
@@ -271,10 +277,14 @@ final class AgentJobTurns {
         return lastResult;
     }
 
-    /** Tool calls the job may still make, at least one (a job with none left never reaches a turn: see {@link #guardBeforeTurn}). */
+    /**
+     * Tool calls the job may still make, at least one (a job with none left never reaches a turn:
+     * see {@link #guardBeforeTurn}).
+     */
     private int remainingToolCalls(AgentJob job) {
         // Counted per turn, from this job's own rows. Deliberately NOT cached on this object: one
-        // AgentJobTurns serves every concurrent job, so any per-job state held in a field leaks across jobs.
+        // AgentJobTurns serves every concurrent job, so any per-job state held in a field leaks
+        // across jobs.
         long used =
                 toolCallLogRepository.countByAgentIdAndSessionId(
                         job.getAgentId(), job.getSessionId());
@@ -403,8 +413,10 @@ final class AgentJobTurns {
                                     messageText)
                             .extraTools(extraTools)
                             .continuation(continuation)
-                            // The job's remaining tool budget limits the turn's OWN calls, not just the next
-                            // turn boundary: a turn may make no more than the job has left (and never more than
+                            // The job's remaining tool budget limits the turn's OWN calls, not just
+                            // the next
+                            // turn boundary: a turn may make no more than the job has left (and
+                            // never more than
                             // the agent allows - a cap only tightens).
                             .caps(RuntimeLimits.capToolSteps(remainingToolCalls(job)))
                             .build();

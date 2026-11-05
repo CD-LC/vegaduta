@@ -26,8 +26,8 @@ import org.mockito.ArgumentCaptor;
 
 /**
  * The gate tells the conversation that asked for an action how the action ended ({@link
- * ApprovalOutcomePort}), whichever executor ran it, and records an action a tool gated ITSELF on with
- * the conversation it came from ({@link HumanApprovalGateService#evaluateInTurn}).
+ * ApprovalOutcomePort}), whichever executor ran it, and records an action a tool gated ITSELF on
+ * with the conversation it came from ({@link HumanApprovalGateService#evaluateInTurn}).
  */
 class HumanApprovalGateOutcomeTest {
 
@@ -41,7 +41,8 @@ class HumanApprovalGateOutcomeTest {
     private ApprovalActionExecutor executor;
     private HumanApprovalGateService gate;
 
-    private static final class Retryable extends RuntimeException implements RetryableActionFailure {
+    private static final class Retryable extends RuntimeException
+            implements RetryableActionFailure {
         Retryable(String message) {
             super(message);
         }
@@ -57,8 +58,17 @@ class HumanApprovalGateOutcomeTest {
         port = mock(ApprovalOutcomePort.class);
         executor = mock(ApprovalActionExecutor.class);
         when(registry.find(ACTION)).thenReturn(Optional.of(executor));
-        gate = new HumanApprovalGateService(
-            policyService, requestRepository, registry, recorder, mock(FeedbackService.class), new ObjectMapper(), 2, 10, 100);
+        gate =
+                new HumanApprovalGateService(
+                        policyService,
+                        requestRepository,
+                        registry,
+                        recorder,
+                        mock(FeedbackService.class),
+                        new ObjectMapper(),
+                        2,
+                        10,
+                        100);
         gate.setOutcomePort(port);
     }
 
@@ -94,11 +104,14 @@ class HumanApprovalGateOutcomeTest {
     @Test
     void aFailureThatWillNotBeRetriedIsReportedFailedWithItsMessage() {
         ApprovalRequest request = request(ApprovalStatus.PENDING, 0, null);
-        org.mockito.Mockito.doThrow(new IllegalStateException("code-intel said no")).when(executor).execute(request);
+        org.mockito.Mockito.doThrow(new IllegalStateException("code-intel said no"))
+                .when(executor)
+                .execute(request);
 
         assertThrows(IllegalStateException.class, () -> gate.approve(request.getId(), "admin"));
 
-        verify(port).afterDecision(request, ApprovalOutcomePort.Outcome.FAILED, "code-intel said no");
+        verify(port)
+                .afterDecision(request, ApprovalOutcomePort.Outcome.FAILED, "code-intel said no");
     }
 
     @Test
@@ -141,7 +154,9 @@ class HumanApprovalGateOutcomeTest {
 
         verify(executor, never()).execute(any());
         verify(port).afterDecision(rejected, ApprovalOutcomePort.Outcome.DENIED, "not now");
-        verify(port).afterDecision(expired, ApprovalOutcomePort.Outcome.DENIED, "nobody decided in time");
+        verify(port)
+                .afterDecision(
+                        expired, ApprovalOutcomePort.Outcome.DENIED, "nobody decided in time");
     }
 
     @Test
@@ -159,7 +174,8 @@ class HumanApprovalGateOutcomeTest {
     @Test
     void aPortThatThrowsNeverChangesTheDecision() {
         ApprovalRequest request = request(ApprovalStatus.PENDING, 0, "done");
-        when(port.afterDecision(any(), any(), any())).thenThrow(new IllegalStateException("redis down"));
+        when(port.afterDecision(any(), any(), any()))
+                .thenThrow(new IllegalStateException("redis down"));
 
         gate.approve(request.getId(), "admin");
 
@@ -181,7 +197,8 @@ class HumanApprovalGateOutcomeTest {
     private ApprovalRequest recorded() {
         ApprovalRequest saved = mock(ApprovalRequest.class);
         when(saved.getId()).thenReturn(UUID.randomUUID());
-        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean())).thenReturn(saved);
+        when(recorder.recordNew(anyString(), anyString(), anyString(), anyString(), anyBoolean()))
+                .thenReturn(saved);
         return saved;
     }
 
@@ -190,33 +207,49 @@ class HumanApprovalGateOutcomeTest {
         when(policyService.requiresApproval(ACTION)).thenReturn(true);
         recorded();
 
-        ApprovalEvaluation result = gate.evaluateInTurn(ACTION, "run_in_code_workspace", "s", "{\"command\":\"x\"}", "user-1");
+        ApprovalEvaluation result =
+                gate.evaluateInTurn(
+                        ACTION, "run_in_code_workspace", "s", "{\"command\":\"x\"}", "user-1");
 
         assertFalse(result.approved());
         verify(recorder).recordNew(ACTION, "s", "{\"command\":\"x\"}", "user-1", false);
     }
 
     @Test
-    void insideAToolCallThePendingRequestCarriesTheConversationNextToItsOwnFields() throws Exception {
+    void insideAToolCallThePendingRequestCarriesTheConversationNextToItsOwnFields()
+            throws Exception {
         UUID agent = UUID.randomUUID();
         UUID requested = UUID.randomUUID();
         when(policyService.requiresApproval(ACTION)).thenReturn(true);
         ApprovalRequest saved = recorded();
-        ToolCallOrigin origin = new ToolCallOrigin("c1:scoped", "Run the tests", requested, "subject-key");
+        ToolCallOrigin origin =
+                new ToolCallOrigin("c1:scoped", "Run the tests", requested, "subject-key");
 
         ApprovalEvaluation result;
-        try (ToolCallScope.Scope ignored = ToolCallScope.open("run_in_code_workspace", agent, "sess-1", null, origin)) {
-            result = gate.evaluateInTurn(ACTION, "ignored", "summary", "{\"command\":\"x\",\"adminOnly\":true}", "user-1");
+        try (ToolCallScope.Scope ignored =
+                ToolCallScope.open("run_in_code_workspace", agent, "sess-1", null, origin)) {
+            result =
+                    gate.evaluateInTurn(
+                            ACTION,
+                            "ignored",
+                            "summary",
+                            "{\"command\":\"x\",\"adminOnly\":true}",
+                            "user-1");
         }
 
         ArgumentCaptor<String> payload = ArgumentCaptor.forClass(String.class);
-        verify(recorder).recordNew(eq(ACTION), eq("summary"), payload.capture(), eq("user-1"), eq(false));
+        verify(recorder)
+                .recordNew(eq(ACTION), eq("summary"), payload.capture(), eq("user-1"), eq(false));
         JsonNode json = new ObjectMapper().readTree(payload.getValue());
         JsonNode replay = json.path("replay");
         assertFalse(result.approved());
         assertEquals(saved.getId(), result.pendingRequestId());
-        assertEquals("x", json.path("command").asText(), "the action's own fields stay at the top level");
-        assertTrue(json.path("adminOnly").asBoolean(), "so the admin-only rule reads them unchanged");
+        assertEquals(
+                "x",
+                json.path("command").asText(),
+                "the action's own fields stay at the top level");
+        assertTrue(
+                json.path("adminOnly").asBoolean(), "so the admin-only rule reads them unchanged");
         assertEquals("run_in_code_workspace", replay.path("toolName").asText());
         assertEquals(agent.toString(), replay.path("agentId").asText());
         assertEquals(requested.toString(), replay.path("requestedAgentId").asText());
@@ -235,7 +268,8 @@ class HumanApprovalGateOutcomeTest {
         ToolCallOrigin origin = new ToolCallOrigin("c1:scoped", "goal", UUID.randomUUID(), "k");
 
         ApprovalEvaluation result;
-        try (ToolCallScope.Scope ignored = ToolCallScope.open("t", UUID.randomUUID(), "s", null, origin)) {
+        try (ToolCallScope.Scope ignored =
+                ToolCallScope.open("t", UUID.randomUUID(), "s", null, origin)) {
             result = gate.evaluateInTurn(ACTION, "t", "summary", "{\"a\":1}", "user-1");
         }
 
@@ -249,7 +283,8 @@ class HumanApprovalGateOutcomeTest {
         recorded();
         ToolCallOrigin origin = new ToolCallOrigin("c1:scoped", "goal", UUID.randomUUID(), "k");
 
-        try (ToolCallScope.Scope ignored = ToolCallScope.open("t", UUID.randomUUID(), "s", null, origin)) {
+        try (ToolCallScope.Scope ignored =
+                ToolCallScope.open("t", UUID.randomUUID(), "s", null, origin)) {
             assertNotNull(gate.evaluateInTurn(ACTION, "t", "summary", "[1,2]", "user-1"));
         }
 

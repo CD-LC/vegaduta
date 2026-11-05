@@ -19,7 +19,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
-/** The tenant and agent levels of {@code memory.unified.enabled}: platform AND tenant AND agent, any level vetoes. */
+/**
+ * The tenant and agent levels of {@code memory.unified.enabled}: platform AND tenant AND agent, any
+ * level vetoes.
+ */
 class SettingsMemoryFlagOverrideTest {
 
     private static final String TENANT = "tenant-a";
@@ -38,7 +41,11 @@ class SettingsMemoryFlagOverrideTest {
         noCache.setCacheTtl(Duration.ZERO);
         SettingsResolver resolver =
                 new DefaultSettingsResolver(
-                        new SettingsRegistry(List.of(new MemoryUnifiedSettings(props))), store, List.of(), noCache, null);
+                        new SettingsRegistry(List.of(new MemoryUnifiedSettings(props))),
+                        store,
+                        List.of(),
+                        noCache,
+                        null);
         return new ApplicationContextRunner()
                 .withUserConfiguration(MemoryStoreConfiguration.class)
                 .withBean(SettingsResolver.class, () -> resolver)
@@ -47,7 +54,15 @@ class SettingsMemoryFlagOverrideTest {
 
     private void set(SettingScope scope, String scopeId, boolean value) {
         TenantContext.set(TenantContext.of(TENANT, "u", Set.of()));
-        store.saveCurrent(new SettingOverride(scope, scopeId, MemoryUnifiedSettings.ENABLED_KEY, value, 1, "admin", Instant.now()));
+        store.saveCurrent(
+                new SettingOverride(
+                        scope,
+                        scopeId,
+                        MemoryUnifiedSettings.ENABLED_KEY,
+                        value,
+                        1,
+                        "admin",
+                        Instant.now()));
     }
 
     private boolean gate(boolean platform) {

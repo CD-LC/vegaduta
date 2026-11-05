@@ -21,8 +21,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
 /**
- * G6: approving a quarantined fact offers it to the graph AFTER the approval committed; the graph part is
- * fail-open, so the approval's result never depends on it. JdbcTemplate is mocked, as in
+ * G6: approving a quarantined fact offers it to the graph AFTER the approval committed; the graph
+ * part is fail-open, so the approval's result never depends on it. JdbcTemplate is mocked, as in
  * {@link MemoryQuarantineTest}.
  */
 class MemoryApproveGraphSyncTest {
@@ -45,15 +45,17 @@ class MemoryApproveGraphSyncTest {
     }
 
     /** The row the post-approval SELECT reads. */
-    private void rowIs(String sqlPart, String subject, String content, UUID createdBy) throws Exception {
+    private void rowIs(String sqlPart, String subject, String content, UUID createdBy)
+            throws Exception {
         ResultSet rs = mock(ResultSet.class);
         when(rs.getString("subject_key")).thenReturn(subject);
         when(rs.getString("content")).thenReturn(content);
         when(rs.getObject("created_by_agent_id", UUID.class)).thenReturn(createdBy);
-        doAnswer(inv -> {
-                    inv.<RowCallbackHandler>getArgument(1).processRow(rs);
-                    return null;
-                })
+        doAnswer(
+                        inv -> {
+                            inv.<RowCallbackHandler>getArgument(1).processRow(rs);
+                            return null;
+                        })
                 .when(jdbc)
                 .query(contains(sqlPart), any(RowCallbackHandler.class), eq(id));
     }
@@ -70,7 +72,8 @@ class MemoryApproveGraphSyncTest {
 
     @Test
     void theSubjectScopedApproveAlsoSyncs() throws Exception {
-        when(jdbc.update(contains("SET trust = 'TRUSTED'"), eq(id), eq(agentId), eq("alice"))).thenReturn(1);
+        when(jdbc.update(contains("SET trust = 'TRUSTED'"), eq(id), eq(agentId), eq("alice")))
+                .thenReturn(1);
         rowIs("SELECT subject_key, content", "alice", "fact", null);
 
         assertThat(agentMemory.approve(agentId, id, "alice")).isTrue();
@@ -90,7 +93,10 @@ class MemoryApproveGraphSyncTest {
         when(jdbc.update(contains("SET trust = 'TRUSTED'"), eq(id), eq(agentId))).thenReturn(1);
         doThrow(new IllegalStateException("db hiccup"))
                 .when(jdbc)
-                .query(contains("SELECT subject_key, content"), any(RowCallbackHandler.class), eq(id));
+                .query(
+                        contains("SELECT subject_key, content"),
+                        any(RowCallbackHandler.class),
+                        eq(id));
 
         assertThat(agentMemory.approve(agentId, id)).isTrue();
         verify(sync, never()).agentFactApproved(any(), any(), any(), any());
@@ -112,7 +118,8 @@ class MemoryApproveGraphSyncTest {
         AgentMemoryService plain = new AgentMemoryService(sidecar, jdbc);
         when(jdbc.update(contains("SET trust = 'TRUSTED'"), eq(id), eq(agentId))).thenReturn(1);
         assertThat(plain.approve(agentId, id)).isTrue();
-        verify(jdbc, never()).query(anyString(), any(RowCallbackHandler.class), any(Object[].class));
+        verify(jdbc, never())
+                .query(anyString(), any(RowCallbackHandler.class), any(Object[].class));
     }
 
     @Test
@@ -140,7 +147,10 @@ class MemoryApproveGraphSyncTest {
         when(jdbc.update(contains("SET trust = 'TRUSTED'"), eq(id), eq("alice"))).thenReturn(1);
         doThrow(new IllegalStateException("db hiccup"))
                 .when(jdbc)
-                .query(contains("SELECT subject_key, content"), any(RowCallbackHandler.class), eq(id));
+                .query(
+                        contains("SELECT subject_key, content"),
+                        any(RowCallbackHandler.class),
+                        eq(id));
         assertThat(tenantMemory.approveFact(id, "alice")).isTrue();
     }
 

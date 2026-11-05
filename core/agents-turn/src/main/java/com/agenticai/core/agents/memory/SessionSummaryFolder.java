@@ -27,9 +27,9 @@ final class SessionSummaryFolder {
     private static final Logger log = LoggerFactory.getLogger(SessionMemoryService.class);
 
     /**
-     * Sibling flag of the summary key: present (value {@code 1}) when the rolling summary was folded from a
-     * tainted conversation or untrusted text. Own prefix, like the summary's, so a caller-supplied id cannot
-     * address another session's flag.
+     * Sibling flag of the summary key: present (value {@code 1}) when the rolling summary was
+     * folded from a tainted conversation or untrusted text. Own prefix, like the summary's, so a
+     * caller-supplied id cannot address another session's flag.
      */
     static final String UNTRUSTED_KEY_PREFIX = "agentic:session-summary-untrusted:";
 
@@ -46,16 +46,22 @@ final class SessionSummaryFolder {
     private final HistoryWindowSettings windowSettings;
     private final Function<String, ChatTurn> deserializer;
 
-    /** The storage bound and fold batch in force ({@code app.memory.limits.*}); read per call, so a rebind is seen. */
+    /**
+     * The storage bound and fold batch in force ({@code app.memory.limits.*}); read per call, so a
+     * rebind is seen.
+     */
     private final java.util.function.Supplier<MemoryLimitsProperties> limits;
 
     /**
-     * Where the conversation-level taint flag is read ({@code null} = none wired: taint mode off or a hand-built
-     * service). Set by {@link SessionMemoryService#setConversationTaintStore}.
+     * Where the conversation-level taint flag is read ({@code null} = none wired: taint mode off or
+     * a hand-built service). Set by {@link SessionMemoryService#setConversationTaintStore}.
      */
     private volatile ConversationTaintStore taintStore;
 
-    /** True = a summary written from untrusted input is skipped on replay; false (default) = replayed Spotlight-wrapped. */
+    /**
+     * True = a summary written from untrusted input is skipped on replay; false (default) =
+     * replayed Spotlight-wrapped.
+     */
     private volatile boolean skipUntrustedSummary;
 
     /** Drops the summary and its untrusted flag (rewind, branch switch). */
@@ -72,7 +78,10 @@ final class SessionSummaryFolder {
         this.skipUntrustedSummary = skip;
     }
 
-    /** The line that opens the replayed summary (with its line break); the registry's, see the service. */
+    /**
+     * The line that opens the replayed summary (with its line break); the registry's, see the
+     * service.
+     */
     private final java.util.function.Supplier<String> preamble;
 
     SessionSummaryFolder(
@@ -166,15 +175,14 @@ final class SessionSummaryFolder {
     }
 
     /**
-     * True when the stored summary was folded from untrusted input. Reads the sibling flag key (refreshing its TTL
-     * with the summary's). Fails CLOSED: a flag that cannot be read counts as untrusted. A summary with no flag key
-     * (written before the flag existed, or from clean input) is trusted.
+     * True when the stored summary was folded from untrusted input. Reads the sibling flag key
+     * (refreshing its TTL with the summary's). Fails CLOSED: a flag that cannot be read counts as
+     * untrusted. A summary with no flag key (written before the flag existed, or from clean input)
+     * is trusted.
      */
     boolean readSummaryUntrusted(String sessionId) {
         try {
-            return redisTemplate
-                            .opsForValue()
-                            .getAndExpire(untrustedKey(sessionId), sessionTtl)
+            return redisTemplate.opsForValue().getAndExpire(untrustedKey(sessionId), sessionTtl)
                     != null;
         } catch (RuntimeException e) {
             log.warn(
@@ -186,10 +194,11 @@ final class SessionSummaryFolder {
     }
 
     /**
-     * Whether a fold now must be treated as built from untrusted input: the conversation has had a tainted turn,
-     * its flag cannot be read (fail closed), the summary being extended was already untrusted (the flag only
-     * grows), or any turn being folded trips {@link MemoryWriteScreen}. No taint store wired = the conversation
-     * taint feature is off, so only the previous flag and the screen count.
+     * Whether a fold now must be treated as built from untrusted input: the conversation has had a
+     * tainted turn, its flag cannot be read (fail closed), the summary being extended was already
+     * untrusted (the flag only grows), or any turn being folded trips {@link MemoryWriteScreen}. No
+     * taint store wired = the conversation taint feature is off, so only the previous flag and the
+     * screen count.
      */
     boolean foldInputUntrusted(
             String sessionId, Optional<TenantContext> tenant, List<ChatTurn> turns) {
@@ -212,12 +221,16 @@ final class SessionSummaryFolder {
             }
         }
         return turns.stream()
-                .anyMatch(t -> t.content() != null && MemoryWriteScreen.refusal(t.content()).isPresent());
+                .anyMatch(
+                        t ->
+                                t.content() != null
+                                        && MemoryWriteScreen.refusal(t.content()).isPresent());
     }
 
     /** The summariser bean when present AND enabled, else null - the outermost fail-open switch. */
     SessionSummaryService activeSummariser(String sessionId) {
-        // memory.write.enabled off for this conversation's agent: no fold is claimed, so no summary is written (the
+        // memory.write.enabled off for this conversation's agent: no fold is claimed, so no summary
+        // is written (the
         // turns past the window are trimmed as when summarising is off).
         return SessionWriteSwitch.writesOff(sessionId) ? null : activeSummariser();
     }
@@ -356,7 +369,9 @@ final class SessionSummaryFolder {
                             + " trim",
                     LogSafe.clean(sessionId),
                     e);
-            redisTemplate.opsForList().trim(redisKey, -limits.get().getSessionMaxStoredEntries(), -1);
+            redisTemplate
+                    .opsForList()
+                    .trim(redisKey, -limits.get().getSessionMaxStoredEntries(), -1);
         }
     }
 
@@ -371,16 +386,16 @@ final class SessionSummaryFolder {
     }
 
     /**
-     * As {@link #writeSummary(String, String)}, recording whether the summary was built from untrusted input. The
-     * model's output is screened as well ({@link MemoryWriteScreen}): a summary that carries a directive or a
-     * credential shape is stored but flagged. The flag key is written BEFORE the summary so a reader can never
-     * see an untrusted summary without its flag; a clean fold removes the flag (its input already included the
-     * previous flag, so a clean fold means the whole chain is clean).
+     * As {@link #writeSummary(String, String)}, recording whether the summary was built from
+     * untrusted input. The model's output is screened as well ({@link MemoryWriteScreen}): a
+     * summary that carries a directive or a credential shape is stored but flagged. The flag key is
+     * written BEFORE the summary so a reader can never see an untrusted summary without its flag; a
+     * clean fold removes the flag (its input already included the previous flag, so a clean fold
+     * means the whole chain is clean).
      */
     void writeSummary(String sessionId, String summary, boolean inputUntrusted) {
         try {
-            boolean untrusted =
-                    inputUntrusted || MemoryWriteScreen.refusal(summary).isPresent();
+            boolean untrusted = inputUntrusted || MemoryWriteScreen.refusal(summary).isPresent();
             String flagKey = untrustedKey(sessionId);
             if (untrusted) {
                 redisTemplate.opsForValue().set(flagKey, "1", sessionTtl);

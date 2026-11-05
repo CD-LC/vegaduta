@@ -5,13 +5,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 
-/** Trust and taint sources recorded with one memory row (columns {@code trust}, {@code source_taint}). */
+/**
+ * Trust and taint sources recorded with one memory row (columns {@code trust}, {@code
+ * source_taint}).
+ */
 public record MemoryProvenance(MemoryTrust trust, List<String> sourceTaint) {
 
     private static final ObjectMapper MAPPER = JsonMappers.plain();
 
     /** A person-authored or clean-turn write. */
-    public static final MemoryProvenance TRUSTED = new MemoryProvenance(MemoryTrust.TRUSTED, List.of());
+    public static final MemoryProvenance TRUSTED =
+            new MemoryProvenance(MemoryTrust.TRUSTED, List.of());
 
     public MemoryProvenance {
         trust = trust == null ? MemoryTrust.QUARANTINED : trust;

@@ -29,17 +29,51 @@ class ConsolidationPlannerTest {
     static final Instant LONG_AGO = NOW.minus(Duration.ofDays(1000));
 
     final DecayProperties props = new DecayProperties();
-    final ConsolidationPlanner planner = new ConsolidationPlanner(props, Clock.fixed(NOW, ZoneOffset.UTC));
+    final ConsolidationPlanner planner =
+            new ConsolidationPlanner(props, Clock.fixed(NOW, ZoneOffset.UTC));
 
     static ItemSnapshot row(long n, MemoryTrustLevel trust, double imp, long ageDays) {
-        return new ItemSnapshot(new UUID(0, n), AGENT, "episodic", trust, ItemSnapshot.Status.ACTIVE, false, false, imp,
-                0, NOW.minus(Duration.ofDays(ageDays)), null, List.of(), 0, false, false);
+        return new ItemSnapshot(
+                new UUID(0, n),
+                AGENT,
+                "episodic",
+                trust,
+                ItemSnapshot.Status.ACTIVE,
+                false,
+                false,
+                imp,
+                0,
+                NOW.minus(Duration.ofDays(ageDays)),
+                null,
+                List.of(),
+                0,
+                false,
+                false);
     }
 
-    static ItemSnapshot with(ItemSnapshot s, boolean pinned, boolean person, int gen, boolean model, boolean reconf) {
-        return new ItemSnapshot(s.id(), s.agentId(), s.kind(), s.trust(), s.status(), pinned, person, s.importance(),
-                s.uses(), s.createdAt(), s.lastUsedAt(),
-                gen > 0 ? List.of(new UUID(9, 9)) : List.of(), gen, model, reconf);
+    static ItemSnapshot with(
+            ItemSnapshot s,
+            boolean pinned,
+            boolean person,
+            int gen,
+            boolean model,
+            boolean reconf) {
+        return new ItemSnapshot(
+                s.id(),
+                s.agentId(),
+                s.kind(),
+                s.trust(),
+                s.status(),
+                pinned,
+                person,
+                s.importance(),
+                s.uses(),
+                s.createdAt(),
+                s.lastUsedAt(),
+                gen > 0 ? List.of(new UUID(9, 9)) : List.of(),
+                gen,
+                model,
+                reconf);
     }
 
     ConsolidationPlan plan(List<ItemSnapshot> items) {
@@ -112,7 +146,8 @@ class ConsolidationPlannerTest {
     @Test
     void summariseBandBatchesTrustedAndQuarantinedSeparately() {
         List<ItemSnapshot> items = new ArrayList<>(healthy(30));
-        // importance .45 idle ~ forever: S = .2025 -> in band; quarantined x.5 = .10 (forget band) so
+        // importance .45 idle ~ forever: S = .2025 -> in band; quarantined x.5 = .10 (forget band)
+        // so
         // use importance .8: trusted S=.36 not in band; choose per-trust importance for band.
         for (int i = 0; i < 4; i++) {
             items.add(row(100 + i, MemoryTrustLevel.TRUSTED, 0.5, 900));
@@ -127,8 +162,8 @@ class ConsolidationPlannerTest {
                 assertThat(x.sourceIds()).hasSize(4);
             }
         }
-        assertThat(s.stream().map(Summarise::trust)).containsExactlyInAnyOrder(
-                MemoryTrustLevel.TRUSTED, MemoryTrustLevel.QUARANTINED);
+        assertThat(s.stream().map(Summarise::trust))
+                .containsExactlyInAnyOrder(MemoryTrustLevel.TRUSTED, MemoryTrustLevel.QUARANTINED);
     }
 
     @Test
@@ -183,15 +218,24 @@ class ConsolidationPlannerTest {
         List<ItemSnapshot> items = new ArrayList<>(healthy(10));
         ItemSnapshot trusted = row(1, MemoryTrustLevel.TRUSTED, 0.9, 40);
         ItemSnapshot quarantined = row(2, MemoryTrustLevel.QUARANTINED, 0.9, 20);
-        ItemSnapshot pinnedDup = with(row(3, MemoryTrustLevel.TRUSTED, 0.9, 40), true, false, 0, false, false);
+        ItemSnapshot pinnedDup =
+                with(row(3, MemoryTrustLevel.TRUSTED, 0.9, 40), true, false, 0, false, false);
         items.addAll(List.of(trusted, quarantined, pinnedDup));
-        ConsolidationPlan p = plan(items, List.of(Set.of(trusted.id(), quarantined.id())), NOW.minus(Duration.ofDays(30)));
+        ConsolidationPlan p =
+                plan(
+                        items,
+                        List.of(Set.of(trusted.id(), quarantined.id())),
+                        NOW.minus(Duration.ofDays(30)));
         assertThat(merges(p)).hasSize(1);
         assertThat(merges(p).get(0).keepId()).isEqualTo(trusted.id());
         assertThat(merges(p).get(0).dropIds()).containsExactly(quarantined.id());
         assertThat(p.batches().get(0).trustClass()).isEqualTo(MemoryTrustLevel.QUARANTINED);
 
-        ConsolidationPlan q = plan(items, List.of(Set.of(trusted.id(), pinnedDup.id())), NOW.minus(Duration.ofDays(30)));
+        ConsolidationPlan q =
+                plan(
+                        items,
+                        List.of(Set.of(trusted.id(), pinnedDup.id())),
+                        NOW.minus(Duration.ofDays(30)));
         assertThat(merges(q)).hasSize(1);
         assertThat(merges(q).get(0).keepId()).isEqualTo(pinnedDup.id());
         assertThat(merges(q).get(0).dropIds()).containsExactly(trusted.id());
@@ -235,17 +279,40 @@ class ConsolidationPlannerTest {
     @Test
     void nonActiveRowsAreIgnored() {
         ItemSnapshot s = row(1, MemoryTrustLevel.TRUSTED, 0, 900);
-        ItemSnapshot pending = new ItemSnapshot(s.id(), AGENT, "x", MemoryTrustLevel.TRUSTED,
-                ItemSnapshot.Status.PENDING, false, false, 0, 0, s.createdAt(), null, List.of(), 0, false, false);
+        ItemSnapshot pending =
+                new ItemSnapshot(
+                        s.id(),
+                        AGENT,
+                        "x",
+                        MemoryTrustLevel.TRUSTED,
+                        ItemSnapshot.Status.PENDING,
+                        false,
+                        false,
+                        0,
+                        0,
+                        s.createdAt(),
+                        null,
+                        List.of(),
+                        0,
+                        false,
+                        false);
         assertThat(plan(List.of(pending)).isEmpty()).isTrue();
     }
 
     @Test
     void planTypeCannotExpressActiveOrApproval() {
-        for (Class<?> c : List.of(ConsolidationPlan.class, Batch.class, Forget.class, Merge.class, Summarise.class)) {
+        for (Class<?> c :
+                List.of(
+                        ConsolidationPlan.class,
+                        Batch.class,
+                        Forget.class,
+                        Merge.class,
+                        Summarise.class)) {
             for (RecordComponent rc : c.getRecordComponents()) {
                 assertThat(rc.getType().getName()).doesNotContain("Status");
-                assertThat(rc.getName().toLowerCase()).doesNotContain("status").doesNotContain("approved")
+                assertThat(rc.getName().toLowerCase())
+                        .doesNotContain("status")
+                        .doesNotContain("approved")
                         .doesNotContain("active");
             }
         }
@@ -263,15 +330,27 @@ class ConsolidationPlannerTest {
             List<ItemSnapshot> items = new ArrayList<>();
             Map<UUID, ItemSnapshot> byId = new java.util.HashMap<>();
             for (int i = 0; i < n; i++) {
-                MemoryTrustLevel t = r.nextInt(3) == 0 ? MemoryTrustLevel.QUARANTINED : MemoryTrustLevel.TRUSTED;
-                ItemSnapshot s = new ItemSnapshot(new UUID(seed, i), new UUID(0, r.nextInt(2)),
-                        List.of("preference", "episodic", "task-context").get(r.nextInt(3)), t,
-                        r.nextInt(10) == 0 ? ItemSnapshot.Status.PENDING : ItemSnapshot.Status.ACTIVE,
-                        r.nextInt(8) == 0, r.nextInt(8) == 0, r.nextDouble() * 0.6, r.nextInt(25),
-                        NOW.minus(Duration.ofDays(r.nextInt(700))),
-                        r.nextBoolean() ? null : NOW.minus(Duration.ofDays(r.nextInt(300))),
-                        r.nextInt(6) == 0 ? List.of(new UUID(5, 5)) : List.of(), r.nextInt(5),
-                        r.nextInt(6) == 0, r.nextInt(4) == 0);
+                MemoryTrustLevel t =
+                        r.nextInt(3) == 0 ? MemoryTrustLevel.QUARANTINED : MemoryTrustLevel.TRUSTED;
+                ItemSnapshot s =
+                        new ItemSnapshot(
+                                new UUID(seed, i),
+                                new UUID(0, r.nextInt(2)),
+                                List.of("preference", "episodic", "task-context").get(r.nextInt(3)),
+                                t,
+                                r.nextInt(10) == 0
+                                        ? ItemSnapshot.Status.PENDING
+                                        : ItemSnapshot.Status.ACTIVE,
+                                r.nextInt(8) == 0,
+                                r.nextInt(8) == 0,
+                                r.nextDouble() * 0.6,
+                                r.nextInt(25),
+                                NOW.minus(Duration.ofDays(r.nextInt(700))),
+                                r.nextBoolean() ? null : NOW.minus(Duration.ofDays(r.nextInt(300))),
+                                r.nextInt(6) == 0 ? List.of(new UUID(5, 5)) : List.of(),
+                                r.nextInt(5),
+                                r.nextInt(6) == 0,
+                                r.nextInt(4) == 0);
                 items.add(s);
                 byId.put(s.id(), s);
             }
@@ -285,19 +364,28 @@ class ConsolidationPlannerTest {
             }
             props.setMixTrustBatches(seed % 5 == 0);
             props.setMaxFractionForgotten(seed % 3 == 0 ? 0.1 : 0.3);
-            ConsolidationRequest req = new ConsolidationRequest("u", items, dups, NOW.minus(Duration.ofDays(r.nextInt(20))));
+            ConsolidationRequest req =
+                    new ConsolidationRequest(
+                            "u", items, dups, NOW.minus(Duration.ofDays(r.nextInt(20))));
             ConsolidationPlan p = planner.plan(req);
 
             // determinism, also under input shuffling
             assertThat(planner.plan(req)).isEqualTo(p);
             List<ItemSnapshot> shuffled = new ArrayList<>(items);
             java.util.Collections.shuffle(shuffled, new Random(seed));
-            assertThat(planner.plan(new ConsolidationRequest("u", shuffled, dups, req.consolidationEnabledSince())))
+            assertThat(
+                            planner.plan(
+                                    new ConsolidationRequest(
+                                            "u", shuffled, dups, req.consolidationEnabledSince())))
                     .isEqualTo(p);
 
-            long active = items.stream().filter(s -> s.status() == ItemSnapshot.Status.ACTIVE).count();
-            assertThat(p.removalCount()).isLessThanOrEqualTo((int) Math.floor(props.getMaxFractionForgotten() * active + 1e-9));
-            assertThat(forgets(p).size()).isLessThanOrEqualTo(props.getMaxForgetPerSubjectPerNight());
+            long active =
+                    items.stream().filter(s -> s.status() == ItemSnapshot.Status.ACTIVE).count();
+            assertThat(p.removalCount())
+                    .isLessThanOrEqualTo(
+                            (int) Math.floor(props.getMaxFractionForgotten() * active + 1e-9));
+            assertThat(forgets(p).size())
+                    .isLessThanOrEqualTo(props.getMaxForgetPerSubjectPerNight());
             assertThat(sums(p).size()).isLessThanOrEqualTo(props.getMaxSummariesPerSubject());
 
             Set<UUID> touched = new HashSet<>();
@@ -305,22 +393,31 @@ class ConsolidationPlannerTest {
             for (Batch b : p.batches()) {
                 List<UUID> removed = new ArrayList<>();
                 b.forgets().forEach(f -> removed.add(f.id()));
-                b.merges().forEach(m -> {
-                    removed.addAll(m.dropIds());
-                    keepers.add(m.keepId());
-                });
+                b.merges()
+                        .forEach(
+                                m -> {
+                                    removed.addAll(m.dropIds());
+                                    keepers.add(m.keepId());
+                                });
                 for (Summarise s : b.summaries()) {
                     removed.addAll(s.sourceIds());
                     List<ItemSnapshot> src = s.sourceIds().stream().map(byId::get).toList();
-                    boolean allTrusted = src.stream().allMatch(x -> x.trust() == MemoryTrustLevel.TRUSTED);
+                    boolean allTrusted =
+                            src.stream().allMatch(x -> x.trust() == MemoryTrustLevel.TRUSTED);
                     assertThat(s.trust() == MemoryTrustLevel.TRUSTED).isEqualTo(allTrusted);
-                    assertThat(s.generation()).isEqualTo(src.stream().mapToInt(ItemSnapshot::generation).max().getAsInt() + 1);
+                    assertThat(s.generation())
+                            .isEqualTo(
+                                    src.stream().mapToInt(ItemSnapshot::generation).max().getAsInt()
+                                            + 1);
                     assertThat(s.generation()).isLessThanOrEqualTo(props.getMaxGeneration());
                     assertThat(s.sourceIds().size()).isBetween(2, props.getSummaryBatchSize());
                     for (ItemSnapshot x : src) {
-                        assertThat(x.modelGenerated() || x.generation() > 0 || !x.sources().isEmpty()
-                                        ? x.humanReconfirmed()
-                                        : true)
+                        assertThat(
+                                        x.modelGenerated()
+                                                        || x.generation() > 0
+                                                        || !x.sources().isEmpty()
+                                                ? x.humanReconfirmed()
+                                                : true)
                                 .isTrue();
                     }
                     assertThat(s.importance()).isBetween(0.0, 1.0);
@@ -331,7 +428,8 @@ class ConsolidationPlannerTest {
                     assertThat(x.pinned()).isFalse();
                     assertThat(x.personAuthored()).isFalse();
                     assertThat(x.status()).isEqualTo(ItemSnapshot.Status.ACTIVE);
-                    assertThat(x.createdAt()).isBeforeOrEqualTo(NOW.minus(Duration.ofDays(props.getMinAgeDays())));
+                    assertThat(x.createdAt())
+                            .isBeforeOrEqualTo(NOW.minus(Duration.ofDays(props.getMinAgeDays())));
                     if (!props.isMixTrustBatches()) {
                         assertThat(x.trust()).isEqualTo(b.trustClass());
                     }
@@ -355,7 +453,10 @@ class ConsolidationPlannerTest {
 
     @Test
     void roundedDownCapOfSmallSubjectsIsZero() {
-        List<ItemSnapshot> items = List.of(row(1, MemoryTrustLevel.TRUSTED, 0, 900), row(2, MemoryTrustLevel.TRUSTED, 0.9, 5));
+        List<ItemSnapshot> items =
+                List.of(
+                        row(1, MemoryTrustLevel.TRUSTED, 0, 900),
+                        row(2, MemoryTrustLevel.TRUSTED, 0.9, 5));
         ConsolidationPlan p = plan(items);
         assertThat(p.removalCap()).isZero();
         assertThat(p.isEmpty()).isTrue();

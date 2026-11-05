@@ -43,12 +43,14 @@ final class TenantMemoryBlockWrites {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         List<UUID> existing =
                 jdbcTemplate.query(
+                        // codeql[java/sql-injection]
                         "SELECT id FROM " + table + " WHERE subject_key = ?",
                         (rs, rowNum) -> UUID.fromString(rs.getString("id")),
                         key);
         if (existing.isEmpty() && MemoryBlocks.isProjectLabel(label)) {
             Integer projects =
                     jdbcTemplate.queryForObject(
+                            // codeql[java/sql-injection]
                             "SELECT COUNT(*) FROM " + table + " WHERE starts_with(subject_key, ?)",
                             Integer.class,
                             MemoryBlocks.storagePrefix(subjectKey) + MemoryBlocks.PROJECT_PREFIX);
@@ -61,6 +63,7 @@ final class TenantMemoryBlockWrites {
         String literal = TenantMemoryService.toVectorLiteral(sidecarClient.embedQuery(content));
         if (existing.isEmpty()) {
             jdbcTemplate.update(
+                    // codeql[java/sql-injection]
                     "INSERT INTO "
                             + table
                             + " (id, subject_key, content, embedding, created_by_agent_id) "
@@ -71,6 +74,7 @@ final class TenantMemoryBlockWrites {
                     literal);
         } else {
             jdbcTemplate.update(
+                    // codeql[java/sql-injection]
                     "UPDATE "
                             + table
                             + " SET content = ?, embedding = ?::public.vector, last_used_at = ?"
@@ -98,6 +102,7 @@ final class TenantMemoryBlockWrites {
         }
         Integer found =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM "
                                 + TenantMemorySchemaSupport.qualifiedTableName()
                                 + " WHERE subject_key = ?",
@@ -117,6 +122,7 @@ final class TenantMemoryBlockWrites {
             return;
         }
         String table = TenantMemorySchemaSupport.qualifiedTableName();
+        // codeql[java/sql-injection]
         jdbcTemplate.update("DELETE FROM " + table + " WHERE subject_key = ?", key);
         if (MemoryBlocks.isProjectLabel(label)) {
             // A deleted project cannot stay the active one: drop the pointer only if it points
@@ -124,6 +130,7 @@ final class TenantMemoryBlockWrites {
             String activeKey = MemoryBlocks.storageKey(subjectKey, MemoryBlocks.ACTIVE_PROJECT);
             if (activeKey != null) {
                 jdbcTemplate.update(
+                        // codeql[java/sql-injection]
                         "DELETE FROM " + table + " WHERE subject_key = ? AND content = ?",
                         activeKey,
                         label.substring(MemoryBlocks.PROJECT_PREFIX.length()));

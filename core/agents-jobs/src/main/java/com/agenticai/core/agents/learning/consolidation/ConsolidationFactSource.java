@@ -8,10 +8,10 @@ import java.util.UUID;
 /**
  * The read-only surface the nightly consolidation sees (phase 1 design 03, section 5 "no
  * auto-approve"). It deliberately exposes only two questions - who has facts, and what those facts
- * are - so the sweep structurally cannot approve, promote, rewrite or delete anything: the
- * {@code AgentMemoryService} / {@code TenantMemoryService} methods that do that
- * ({@code approve}, {@code forget*}, {@code update*}) are simply not on this type, and the sweep
- * never holds the services themselves.
+ * are - so the sweep structurally cannot approve, promote, rewrite or delete anything: the {@code
+ * AgentMemoryService} / {@code TenantMemoryService} methods that do that ({@code approve}, {@code
+ * forget*}, {@code update*}) are simply not on this type, and the sweep never holds the services
+ * themselves.
  */
 public interface ConsolidationFactSource {
 
@@ -55,7 +55,18 @@ public interface ConsolidationFactSource {
                 int useCount,
                 Instant createdAt,
                 Instant lastUsedAt) {
-            this(scope, id, agentId, content, trust, useCount, createdAt, lastUsedAt, 0.5, false, false);
+            this(
+                    scope,
+                    id,
+                    agentId,
+                    content,
+                    trust,
+                    useCount,
+                    createdAt,
+                    lastUsedAt,
+                    0.5,
+                    false,
+                    false);
         }
 
         public static final String AGENT = "agent";

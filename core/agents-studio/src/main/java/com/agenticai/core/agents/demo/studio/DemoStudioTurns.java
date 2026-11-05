@@ -11,8 +11,7 @@ import java.util.UUID;
 /** Builds the chat turn and its context for {@link DemoStudioService}'s missions. */
 final class DemoStudioTurns {
 
-    private DemoStudioTurns() {
-    }
+    private DemoStudioTurns() {}
 
     /** The studio's turn shape: empty attachment and extra-tool lists, live step events. */
     static ChatTurnRequest studioTurn(

@@ -2,7 +2,10 @@ package com.agenticai.core.guardrails.leak;
 
 import java.util.Locale;
 
-/** {@code app.guardrails.prompt-leak.action}: what {@link PromptLeakMode#ENFORCE} does to a leaking reply. */
+/**
+ * {@code app.guardrails.prompt-leak.action}: what {@link PromptLeakMode#ENFORCE} does to a leaking
+ * reply.
+ */
 public enum PromptLeakAction {
     /** Report only (the default). */
     WARN,

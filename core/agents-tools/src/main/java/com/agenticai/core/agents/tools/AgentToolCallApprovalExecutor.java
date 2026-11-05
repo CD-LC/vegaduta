@@ -2,7 +2,6 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.agents.job.AgentJobLookup;
 import com.agenticai.core.agents.job.AgentJobSession;
-import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
@@ -19,8 +18,6 @@ import com.agenticai.core.audit.NotificationService;
 import com.agenticai.core.audit.NotificationSeverity;
 import com.agenticai.core.guardrails.ToolDefinitionDigest;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.security.logging.LogSafe;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
@@ -76,13 +73,13 @@ import org.springframework.stereotype.Component;
  * bracketed note is appended to the originating session's {@link SessionMemoryService} history -
  * under the SCOPED id the turn reads, captured in the replay envelope (see {@link
  * #appendSessionMemoryNote}) - and then the platform CONTINUES the task by itself: {@link
- * ApprovalContinuationPort} (implemented by the turn path's launcher) starts a turn for the same conversation that restates the user's
- * goal and hands the model the tool's full result (or the failure, or the denial), so nobody has to
- * send "carry on". A job session is not continued from here: its sweep resumes the job and builds
- * the job's turn with the same continuation builder. Also note {@code GuardedToolCallback}'s
- * soft-stop design means many tool-level failures come back as explanatory STRINGS, not exceptions
- * - those are recorded and notified as the result verbatim, which is exactly what the approver
- * needs to see either way.
+ * ApprovalContinuationPort} (implemented by the turn path's launcher) starts a turn for the same
+ * conversation that restates the user's goal and hands the model the tool's full result (or the
+ * failure, or the denial), so nobody has to send "carry on". A job session is not continued from
+ * here: its sweep resumes the job and builds the job's turn with the same continuation builder.
+ * Also note {@code GuardedToolCallback}'s soft-stop design means many tool-level failures come back
+ * as explanatory STRINGS, not exceptions - those are recorded and notified as the result verbatim,
+ * which is exactly what the approver needs to see either way.
  */
 @Component
 public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
@@ -140,10 +137,14 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
-    /** {@code app.approvals.replay.allow-undigested}: replay a tool call recorded with no digest. Default off. */
+    /**
+     * {@code app.approvals.replay.allow-undigested}: replay a tool call recorded with no digest.
+     * Default off.
+     */
     private volatile boolean allowUndigested;
 
-    @org.springframework.beans.factory.annotation.Value("${app.approvals.replay.allow-undigested:false}")
+    @org.springframework.beans.factory.annotation.Value(
+            "${app.approvals.replay.allow-undigested:false}")
     public void setAllowUndigested(boolean allowUndigested) {
         this.allowUndigested = allowUndigested;
     }
@@ -187,15 +188,18 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
     }
 
     /**
-     * The executor reports the outcome itself (note and continuation, see {@link #continueTask}), so the gate
-     * must not report it a second time through {@code ApprovalOutcomePort}.
+     * The executor reports the outcome itself (note and continuation, see {@link #continueTask}),
+     * so the gate must not report it a second time through {@code ApprovalOutcomePort}.
      */
     @Override
     public boolean reportsOutcomeItself() {
         return true;
     }
 
-    /** The wording and cut of the history notes (model-facing text; the shipped defaults when no bean). */
+    /**
+     * The wording and cut of the history notes (model-facing text; the shipped defaults when no
+     * bean).
+     */
     private ApprovalContinuationProperties notes() {
         return continuationTexts.getIfAvailable(ApprovalContinuationProperties::new);
     }
@@ -209,7 +213,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         // for its own, still-in-progress work.
         Optional<TenantContext> previous = TenantContext.current();
         if (target.tenantId() != null) {
-            TenantContext.set(TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
+            TenantContext.set(
+                    TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
         }
         try {
             refuseIfJobTerminal(target);
@@ -222,7 +227,12 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                             request,
                             target,
                             ApprovalOutcomeNotes.outcomeRecord(
-                                    notes(), request, target, ToolLedger.Status.OK, request.getDecidedBy(), result));
+                                    notes(),
+                                    request,
+                                    target,
+                                    ToolLedger.Status.OK,
+                                    request.getDecidedBy(),
+                                    result));
             // The tool ran and its result is persisted; a note that could not be written does not
             // change that outcome (rethrowing would record a failure and could retry a real side
             // effect). It is surfaced to the approver instead of being only a log line.
@@ -265,7 +275,12 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                             request,
                             target,
                             ApprovalOutcomeNotes.outcomeRecord(
-                                    notes(), request, target, ToolLedger.Status.FAILED, request.getDecidedBy(), failure));
+                                    notes(),
+                                    request,
+                                    target,
+                                    ToolLedger.Status.FAILED,
+                                    request.getDecidedBy(),
+                                    failure));
             notify(
                     target,
                     NotificationSeverity.ERROR,
@@ -304,17 +319,21 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             target = ReplayTarget.resolve(request, objectMapper);
         } catch (RuntimeException unreadable) {
             // A row with no usable envelope has no conversation to tell.
-            log.info("Rejected approval request {} has no replayable envelope; nobody is told", request.getId());
+            log.info(
+                    "Rejected approval request {} has no replayable envelope; nobody is told",
+                    request.getId());
             return;
         }
         Optional<TenantContext> previous = TenantContext.current();
         if (target.tenantId() != null) {
-            TenantContext.set(TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
+            TenantContext.set(
+                    TenantContext.of(target.tenantId(), target.replaySubject(), Set.of()));
         }
         try {
             ApprovalContinuationProperties texts =
                     continuationTexts.getIfAvailable(ApprovalContinuationProperties::new);
-            String shown = reason == null || reason.isBlank() ? texts.getNoReasonText() : reason.strip();
+            String shown =
+                    reason == null || reason.isBlank() ? texts.getNoReasonText() : reason.strip();
             appendSessionMemoryNote(
                     request,
                     target,
@@ -328,8 +347,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
 
     /**
      * Hands the decided call to the launcher, which continues the conversation's task (or declines:
-     * a job session, a request recorded without a goal, a decision already continued). Never
-     * throws - the call already ran, or was refused, and that stands whatever happens next.
+     * a job session, a request recorded without a goal, a decision already continued). Never throws
+     * - the call already ran, or was refused, and that stands whatever happens next.
      */
     private void continueTask(ApprovalRequest request, Outcome outcome, String text) {
         try {
@@ -338,8 +357,11 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
                 launcher.afterDecision(request, outcome, text);
             }
         } catch (RuntimeException e) {
-            log.warn("Could not continue the task after the {} decision on approval request {}",
-                    outcome, request.getId(), e);
+            log.warn(
+                    "Could not continue the task after the {} decision on approval request {}",
+                    outcome,
+                    request.getId(),
+                    e);
         }
     }
 
@@ -385,7 +407,8 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
             throw new AgentToolReplayRetryableException(
                     "Could not verify that agent job "
                             + jobId.get()
-                            + " is still active (" + lookupFailed.getClass().getSimpleName()
+                            + " is still active ("
+                            + lookupFailed.getClass().getSimpleName()
                             + "), so the approved action was not run. It will be retried.",
                     lookupFailed);
         }
@@ -542,8 +565,12 @@ public class AgentToolCallApprovalExecutor implements ApprovalActionExecutor {
         }
     }
 
-    /** See {@link ApprovalOutcomeNotes#append}; returns why the note could not be written, or {@code null}. */
-    private String appendSessionMemoryNote(ApprovalRequest request, ReplayTarget target, ToolLedger record) {
+    /**
+     * See {@link ApprovalOutcomeNotes#append}; returns why the note could not be written, or {@code
+     * null}.
+     */
+    private String appendSessionMemoryNote(
+            ApprovalRequest request, ReplayTarget target, ToolLedger record) {
         return ApprovalOutcomeNotes.append(sessionMemoryService, request, target, record, log);
     }
 

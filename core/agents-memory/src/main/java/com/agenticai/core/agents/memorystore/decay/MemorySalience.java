@@ -29,7 +29,9 @@ public final class MemorySalience {
         this.clock = clock;
     }
 
-    /** Pure formula. {@code lastUsedAt} may be null; a clock earlier than the row clamps age to 0. */
+    /**
+     * Pure formula. {@code lastUsedAt} may be null; a clock earlier than the row clamps age to 0.
+     */
     public static double score(
             double importance,
             int uses,
@@ -45,10 +47,13 @@ public final class MemorySalience {
         if (pinned) {
             return 1.0;
         }
-        Instant anchor = lastUsedAt != null && lastUsedAt.isAfter(createdAt) ? lastUsedAt : createdAt;
-        double ageDays = Math.max(0d, Duration.between(anchor, now).toMillis() / 1000d / SECONDS_PER_DAY);
+        Instant anchor =
+                lastUsedAt != null && lastUsedAt.isAfter(createdAt) ? lastUsedAt : createdAt;
+        double ageDays =
+                Math.max(0d, Duration.between(anchor, now).toMillis() / 1000d / SECONDS_PER_DAY);
         double recency = Math.pow(0.5, ageDays / halfLifeDays);
-        double frequency = Math.min(1d, Math.log1p(Math.max(0, uses)) / Math.log1p(frequencySaturation));
+        double frequency =
+                Math.min(1d, Math.log1p(Math.max(0, uses)) / Math.log1p(frequencySaturation));
         double imp = Double.isNaN(importance) ? 0d : Math.max(0d, Math.min(1d, importance));
         double s = wImportance * imp + wRecency * recency + wFrequency * frequency;
         return Math.max(0d, Math.min(1d, s));

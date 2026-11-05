@@ -4,12 +4,14 @@ import com.agenticai.core.guardrails.taint.TurnTaint;
 import java.util.List;
 
 /**
- * An immutable, read-only copy of a finished turn's taint, taken when the turn ends and handed to the turn-completion
- * observers (ADR-0028 WP4c). The live {@link TurnTaint} is mutable and belongs to the turn; an observer that runs
- * later, on another thread, reads this instead and cannot change the turn's record.
+ * An immutable, read-only copy of a finished turn's taint, taken when the turn ends and handed to
+ * the turn-completion observers (ADR-0028 WP4c). The live {@link TurnTaint} is mutable and belongs
+ * to the turn; an observer that runs later, on another thread, reads this instead and cannot change
+ * the turn's record.
  *
- * <p>Fail closed: a snapshot built from no record, or from one that throws, is unreadable and reports itself tainted
- * with the {@link MemoryWriteGate} "taint-state-unavailable" label, so {@link MemoryWriteGate} quarantines.
+ * <p>Fail closed: a snapshot built from no record, or from one that throws, is unreadable and
+ * reports itself tainted with the {@link MemoryWriteGate} "taint-state-unavailable" label, so
+ * {@link MemoryWriteGate} quarantines.
  */
 public final class TurnTaintSnapshot implements TurnTaintView {
 
@@ -43,7 +45,9 @@ public final class TurnTaintSnapshot implements TurnTaintView {
             }
             List<String> labels = taint.sources();
             return new TurnTaintSnapshot(
-                    true, true, labels == null || labels.isEmpty() ? List.of("unknown") : List.copyOf(labels));
+                    true,
+                    true,
+                    labels == null || labels.isEmpty() ? List.of("unknown") : List.copyOf(labels));
         } catch (RuntimeException e) {
             return UNREADABLE;
         }

@@ -21,7 +21,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-/** {@code app.governance.spend-controls.fail-mode}: Redis down refuses a gated call when closed, and only then. */
+/**
+ * {@code app.governance.spend-controls.fail-mode}: Redis down refuses a gated call when closed, and
+ * only then.
+ */
 class PerUserBudgetFailModeTest {
 
     private StringRedisTemplate redis;
@@ -39,17 +42,26 @@ class PerUserBudgetFailModeTest {
         when(settings.getInt(anyString(), anyInt())).thenAnswer(inv -> inv.getArgument(1));
         TenantLimits limits = mock(TenantLimits.class);
         when(limits.plan(anyString())).thenReturn(TenantPlan.FREE);
-        service = new PerUserBudgetService(redis, settings, mock(LlmPricingCatalog.class), 0L, limits, 2, 3,
-            mock(ObjectProvider.class));
+        service =
+                new PerUserBudgetService(
+                        redis,
+                        settings,
+                        mock(LlmPricingCatalog.class),
+                        0L,
+                        limits,
+                        2,
+                        3,
+                        mock(ObjectProvider.class));
         when(ops.get(anyString())).thenThrow(new IllegalStateException("redis down"));
         SpendCounterMocks.stubAllThrow(redis, new IllegalStateException("redis down"));
     }
 
     @Test
     void openIsTheDefaultAndLetsTheCallThrough() {
-        assertThatCode(() -> service.checkBudget("t", "u", Modality.TEXT)).doesNotThrowAnyException();
+        assertThatCode(() -> service.checkBudget("t", "u", Modality.TEXT))
+                .doesNotThrowAnyException();
         assertThatCode(() -> service.checkAndReserveBudget("t", "u", Modality.TEXT, 1000L, null))
-            .doesNotThrowAnyException();
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -57,15 +69,16 @@ class PerUserBudgetFailModeTest {
         service.useSpendControlsFailMode(SpendControlsFailMode.closed());
 
         assertThatThrownBy(() -> service.checkBudget("t", "u", Modality.TEXT))
-            .isInstanceOf(SpendControlsUnavailableException.class);
+                .isInstanceOf(SpendControlsUnavailableException.class);
     }
 
     @Test
     void closedRefusesTheReservation() {
         service.useSpendControlsFailMode(SpendControlsFailMode.closed());
 
-        assertThatThrownBy(() -> service.checkAndReserveBudget("t", "u", Modality.TEXT, 1000L, null))
-            .isInstanceOf(SpendControlsUnavailableException.class);
+        assertThatThrownBy(
+                        () -> service.checkAndReserveBudget("t", "u", Modality.TEXT, 1000L, null))
+                .isInstanceOf(SpendControlsUnavailableException.class);
     }
 
     @Test
@@ -74,6 +87,6 @@ class PerUserBudgetFailModeTest {
 
         // The money is already spent / the reservation is being given back: nothing left to refuse.
         assertThatCode(() -> service.recordSpend("t", "u", Modality.TEXT, new BigDecimal("0.01")))
-            .doesNotThrowAnyException();
+                .doesNotThrowAnyException();
     }
 }

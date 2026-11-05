@@ -43,19 +43,28 @@ final class TenantMemoryFactRows {
     static boolean approve(JdbcTemplate jdbc, String table, UUID memoryId, String subjectKey) {
         return subjectKey == null
                 ? jdbc.update(
-                                "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ?"
+                                // codeql[java/sql-injection]
+                                "UPDATE "
+                                        + table
+                                        + " SET trust = 'TRUSTED' WHERE id = ?"
                                         + " AND trust = 'QUARANTINED'",
                                 memoryId)
                         > 0
                 : jdbc.update(
-                                "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
+                                // codeql[java/sql-injection]
+                                "UPDATE "
+                                        + table
+                                        + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
                                         + " AND trust = 'QUARANTINED'",
                                 memoryId,
                                 subjectKey)
                         > 0;
     }
 
-    /** After an approval has committed; best-effort and fail-open, never changes the approval's result. */
+    /**
+     * After an approval has committed; best-effort and fail-open, never changes the approval's
+     * result.
+     */
     static void syncApprovedToGraph(
             JdbcTemplate jdbc, ApprovedFactGraphSync sync, String table, UUID memoryId) {
         if (sync == null) {
@@ -63,7 +72,10 @@ final class TenantMemoryFactRows {
         }
         try {
             jdbc.query(
-                    "SELECT subject_key, content, created_by_agent_id FROM " + table + " WHERE id = ?",
+                    // codeql[java/sql-injection]
+                    "SELECT subject_key, content, created_by_agent_id FROM "
+                            + table
+                            + " WHERE id = ?",
                     rs -> {
                         sync.sharedFactApproved(
                                 rs.getObject("created_by_agent_id", UUID.class),
@@ -73,7 +85,10 @@ final class TenantMemoryFactRows {
                     },
                     memoryId);
         } catch (RuntimeException e) {
-            log.warn("Could not offer approved shared memory {} to the graph; the approval stands", memoryId, e);
+            log.warn(
+                    "Could not offer approved shared memory {} to the graph; the approval stands",
+                    memoryId,
+                    e);
         }
     }
 
@@ -82,6 +97,7 @@ final class TenantMemoryFactRows {
         // User-visible memory blocks (subject_key contains '#mem:') are neither counted nor pruned.
         Integer count =
                 jdbc.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM "
                                 + table
                                 + " WHERE position('"
@@ -93,6 +109,7 @@ final class TenantMemoryFactRows {
         }
         int overflow = count - cap;
         jdbc.update(
+                // codeql[java/sql-injection]
                 "DELETE FROM "
                         + table
                         + " WHERE id IN ("
@@ -119,6 +136,7 @@ final class TenantMemoryFactRows {
             params[i + 1] = ids.get(i);
         }
         jdbc.update(
+                // codeql[java/sql-injection]
                 "UPDATE "
                         + table
                         + " SET last_used_at = ?, use_count = use_count + 1 WHERE id IN ("

@@ -16,9 +16,9 @@ import reactor.core.publisher.SignalType;
  * in plain objects that are not beans, so it reaches the loop through this holder, installed once
  * at startup by the learning service (same shape as {@code TurnJournalGateway}).
  *
- * <p>With no observer installed, or one that reports itself disabled (the default,
- * {@code app.skills.learning.enabled=false}), {@link #observe} returns the very same {@link Flux}
- * instance it was given: not one operator is added to the turn.
+ * <p>With no observer installed, or one that reports itself disabled (the default, {@code
+ * app.skills.learning.enabled=false}), {@link #observe} returns the very same {@link Flux} instance
+ * it was given: not one operator is added to the turn.
  */
 public final class SkillLearningGateway {
 
@@ -39,7 +39,10 @@ public final class SkillLearningGateway {
             TenantScope scope,
             TurnTaintSnapshot taint) {
 
-        /** An outcome that carries no taint state (null: unreadable, so a memory writer must fail closed). */
+        /**
+         * An outcome that carries no taint state (null: unreadable, so a memory writer must fail
+         * closed).
+         */
         public TurnOutcome(
                 UUID agentId,
                 String sessionId,
@@ -49,11 +52,22 @@ public final class SkillLearningGateway {
                 boolean completed,
                 boolean cancelled,
                 TenantScope scope) {
-            this(agentId, sessionId, userMessage, answer, startedAt, completed, cancelled, scope, null);
+            this(
+                    agentId,
+                    sessionId,
+                    userMessage,
+                    answer,
+                    startedAt,
+                    completed,
+                    cancelled,
+                    scope,
+                    null);
         }
     }
 
-    /** Receives every observed turn on the thread that finished it; must be quick and never throw. */
+    /**
+     * Receives every observed turn on the thread that finished it; must be quick and never throw.
+     */
     public interface Observer {
         boolean enabled();
 
@@ -68,7 +82,10 @@ public final class SkillLearningGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }

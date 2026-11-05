@@ -11,7 +11,10 @@ final class AgentMemoryRows {
 
     private AgentMemoryRows() {}
 
-    /** Maps {@code id, agent_id, subject_key, content, distance, created_at, last_used_at, use_count, trust, source_taint}. */
+    /**
+     * Maps {@code id, agent_id, subject_key, content, distance, created_at, last_used_at,
+     * use_count, trust, source_taint}.
+     */
     static RowMapper<AgentMemoryEntry> entryMapper() {
         return (rs, rowNum) ->
                 new AgentMemoryEntry(
@@ -28,7 +31,10 @@ final class AgentMemoryRows {
                         supersededAt(rs));
     }
 
-    /** {@code superseded_at} when the query selected it (the listings do, recall never returns a superseded row). */
+    /**
+     * {@code superseded_at} when the query selected it (the listings do, recall never returns a
+     * superseded row).
+     */
     static Instant supersededAt(ResultSet rs) throws SQLException {
         for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
             if ("superseded_at".equalsIgnoreCase(rs.getMetaData().getColumnLabel(i))) {

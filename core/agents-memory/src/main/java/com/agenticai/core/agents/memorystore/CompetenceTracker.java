@@ -11,13 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * The SELF_MODEL competence writer (ADR-0028 section 3). It counts per (agent, task class) and accepts exactly one
- * input type, {@link VerifiedOutcome}, which has no way to carry the model's self-assessment or a sampled judge's
- * verdict. Off unless {@code app.memory.competence.enabled} AND the tenant/agent setting allow it; when off, {@link
- * #record} does nothing at all. Never throws into its caller.
+ * The SELF_MODEL competence writer (ADR-0028 section 3). It counts per (agent, task class) and
+ * accepts exactly one input type, {@link VerifiedOutcome}, which has no way to carry the model's
+ * self-assessment or a sampled judge's verdict. Off unless {@code app.memory.competence.enabled}
+ * AND the tenant/agent setting allow it; when off, {@link #record} does nothing at all. Never
+ * throws into its caller.
  *
- * <p>The number of distinct task classes per agent is capped ({@link CompetenceProperties#getMaxTaskClassesPerAgent});
- * the rest share one {@link CompetenceStorage#OVERFLOW_CLASS} row, which the summary never names.
+ * <p>The number of distinct task classes per agent is capped ({@link
+ * CompetenceProperties#getMaxTaskClassesPerAgent}); the rest share one {@link
+ * CompetenceStorage#OVERFLOW_CLASS} row, which the summary never names.
  */
 public class CompetenceTracker implements CompetenceRecorder {
 
@@ -52,7 +54,10 @@ public class CompetenceTracker implements CompetenceRecorder {
             count("recorded");
         } catch (RuntimeException e) {
             count("failed");
-            log.warn("Competence outcome not recorded for agent {}: {}", outcome.agentId(), e.getMessage());
+            log.warn(
+                    "Competence outcome not recorded for agent {}: {}",
+                    outcome.agentId(),
+                    e.getMessage());
         }
     }
 

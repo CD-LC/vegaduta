@@ -9,7 +9,10 @@ import com.agenticai.core.agents.memorystore.MemoryItemErasure;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** The DPDP erasure hook for {@code memory_item}: delegates to the store's erasure and tolerates its absence. */
+/**
+ * The DPDP erasure hook for {@code memory_item}: delegates to the store's erasure and tolerates its
+ * absence.
+ */
 @SuppressWarnings("unchecked")
 class MemoryItemSubjectEraserTest {
 

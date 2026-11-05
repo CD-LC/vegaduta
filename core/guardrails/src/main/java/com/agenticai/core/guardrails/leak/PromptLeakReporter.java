@@ -31,13 +31,15 @@ public class PromptLeakReporter {
         this.audit = audit;
     }
 
-    public void report(UUID agentId, String sessionId, PromptLeakMode mode, LeakDetector.Verdict verdict) {
+    public void report(
+            UUID agentId, String sessionId, PromptLeakMode mode, LeakDetector.Verdict verdict) {
         String rules = String.join(",", verdict.rules());
         String modeTag = mode.name().toLowerCase(java.util.Locale.ROOT);
         String actionTag = verdict.action().name().toLowerCase(java.util.Locale.ROOT);
         try {
             for (String rule : verdict.rules()) {
-                registry.counter(METRIC, "rule", rule, "mode", modeTag, "action", actionTag).increment();
+                registry.counter(METRIC, "rule", rule, "mode", modeTag, "action", actionTag)
+                        .increment();
             }
         } catch (RuntimeException e) {
             log.warn("Prompt-leak metric failed: {}", e.toString());
@@ -64,9 +66,13 @@ public class PromptLeakReporter {
             return;
         }
         try {
-            audit.record(null, AUDIT_ACTION, "prompt_leak", sessionId, AuditOutcome.WARNING, detail);
+            audit.record(
+                    null, AUDIT_ACTION, "prompt_leak", sessionId, AuditOutcome.WARNING, detail);
         } catch (RuntimeException e) {
-            log.warn("Prompt-leak audit write failed for session {}: {}", LogSafe.clean(sessionId), e.toString());
+            log.warn(
+                    "Prompt-leak audit write failed for session {}: {}",
+                    LogSafe.clean(sessionId),
+                    e.toString());
         }
     }
 }

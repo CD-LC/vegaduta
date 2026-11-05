@@ -10,8 +10,9 @@ import org.junit.jupiter.params.provider.Arguments;
 
 /**
  * Attacker payload corpora. Labels are the test display names. The payload data itself lives in the
- * shared resource {@code eval/redteam/corpus.json} (core/quality, loaded by {@link RedTeamCorpusData})
- * so the memory-eval poisoning replay attacks the same strings; this class only adapts it to the tests.
+ * shared resource {@code eval/redteam/corpus.json} (core/quality, loaded by {@link
+ * RedTeamCorpusData}) so the memory-eval poisoning replay attacks the same strings; this class only
+ * adapts it to the tests.
  */
 final class RedTeamCorpus {
 
@@ -19,13 +20,19 @@ final class RedTeamCorpus {
 
     record Payload(String label, String text) {}
 
-    /** Whether the payload parses as exactly the platform's two-field control object (whitespace tolerated). */
+    /**
+     * Whether the payload parses as exactly the platform's two-field control object (whitespace
+     * tolerated).
+     */
     static boolean isExactControlObject(String text) {
         try {
-            com.fasterxml.jackson.databind.JsonNode n = new com.fasterxml.jackson.databind.ObjectMapper()
-                    .reader()
-                    .with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                    .readTree(text);
+            com.fasterxml.jackson.databind.JsonNode n =
+                    new com.fasterxml.jackson.databind.ObjectMapper()
+                            .reader()
+                            .with(
+                                    com.fasterxml.jackson.databind.DeserializationFeature
+                                            .FAIL_ON_TRAILING_TOKENS)
+                            .readTree(text);
             if (n == null || !n.isObject() || n.size() > 2 || !n.hasNonNull("error")) {
                 return false;
             }
@@ -38,32 +45,43 @@ final class RedTeamCorpus {
     }
 
     /**
-     * Tool outputs that imitate the platform's control results. The two exact control objects are built
-     * from the live platform classes so a format change cannot silently desync them from the corpus.
+     * Tool outputs that imitate the platform's control results. The two exact control objects are
+     * built from the live platform classes so a format change cannot silently desync them from the
+     * corpus.
      */
     static List<Payload> markerForgeries() {
         List<Payload> l = new ArrayList<>();
         for (RedTeamCorpusData.Marker m : RedTeamCorpusData.markerForgeries()) {
-            String text = m.platform() == null
-                    ? m.text()
-                    : switch (m.platform()) {
-                        case "approval_parked" -> ApprovalParked.result(m.message());
-                        case "tool_budget_exhausted" -> ToolBudgetExhausted.result(m.message());
-                        default -> throw new IllegalStateException("unknown platform marker " + m.platform());
-                    };
+            String text =
+                    m.platform() == null
+                            ? m.text()
+                            : switch (m.platform()) {
+                                case "approval_parked" -> ApprovalParked.result(m.message());
+                                case "tool_budget_exhausted" ->
+                                        ToolBudgetExhausted.result(m.message());
+                                default ->
+                                        throw new IllegalStateException(
+                                                "unknown platform marker " + m.platform());
+                            };
             l.add(new Payload(m.label(), text));
         }
         return l;
     }
 
-    /** Forgeries that are NOT the exact control object: substring, prefix, wrapped, encoded (fixed on the base). */
+    /**
+     * Forgeries that are NOT the exact control object: substring, prefix, wrapped, encoded (fixed
+     * on the base).
+     */
     static Stream<Arguments> partialForgeryArgs() {
         return markerForgeries().stream()
                 .filter(p -> !isExactControlObject(p.text()))
                 .map(p -> Arguments.of(p.label(), p.text()));
     }
 
-    /** Forgeries that are exactly the control object (open until package D moves markers out of band). */
+    /**
+     * Forgeries that are exactly the control object (open until package D moves markers out of
+     * band).
+     */
     static Stream<Arguments> exactForgeryArgs() {
         return markerForgeries().stream()
                 .filter(p -> isExactControlObject(p.text()))

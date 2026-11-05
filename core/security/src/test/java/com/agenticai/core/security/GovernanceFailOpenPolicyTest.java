@@ -30,12 +30,21 @@ class GovernanceFailOpenPolicyTest {
         SpendControlsFailMode mode = new SpendControlsFailMode("CLOSED");
         Exception redisDown = new IllegalStateException("down");
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> mode.onGateFailure("x", redisDown, log))
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                        () -> mode.onGateFailure("x", redisDown, log))
                 .isInstanceOf(SpendControlsUnavailableException.class)
                 .hasCause(redisDown);
-        verify(log).error(org.mockito.ArgumentMatchers.contains("GOVERNANCE_FAIL_CLOSED"), eq("x"), eq(redisDown));
-        assertThat(SpendControlsUnavailableException.class
-                .getAnnotation(org.springframework.web.bind.annotation.ResponseStatus.class).value())
+        verify(log)
+                .error(
+                        org.mockito.ArgumentMatchers.contains("GOVERNANCE_FAIL_CLOSED"),
+                        eq("x"),
+                        eq(redisDown));
+        assertThat(
+                        SpendControlsUnavailableException.class
+                                .getAnnotation(
+                                        org.springframework.web.bind.annotation.ResponseStatus
+                                                .class)
+                                .value())
                 .isEqualTo(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE);
     }
 

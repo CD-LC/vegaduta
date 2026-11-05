@@ -50,8 +50,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * Runs as a servlet filter AFTER Spring Security (default security chain order is far earlier), so
  * only authenticated callers reach it, {@code TenantContext} is bound (the nonce cache is per
- * tenant) and an anonymous flood cannot fill the cache. Rejections use the dialect of the route:
- * a JSON-RPC envelope (HTTP 200) on {@code /api/a2a} and {@code /api/agents/{id}/a2a}, a {@code
+ * tenant) and an anonymous flood cannot fill the cache. Rejections use the dialect of the route: a
+ * JSON-RPC envelope (HTTP 200) on {@code /api/a2a} and {@code /api/agents/{id}/a2a}, a {@code
  * google.rpc.Status} body on the {@code /rest} routes. Only POST is checked: GET and the card
  * endpoints are read-only.
  *
@@ -116,7 +116,8 @@ public class A2aMessageSecurityFilter extends OncePerRequestFilter {
         try {
             String signature = request.getHeader(SIGNATURE_HEADER);
             boolean verifySignature =
-                    hasText(props.getSigningSecret()) && (signature != null || props.isRequireSignature());
+                    hasText(props.getSigningSecret())
+                            && (signature != null || props.isRequireSignature());
             if (verifySignature) {
                 effective = new CachedBodyRequest(request, readBounded(request, MAX_BODY));
             }
@@ -225,7 +226,8 @@ public class A2aMessageSecurityFilter extends OncePerRequestFilter {
     }
 
     private static A2aError headersRequired(String detail) {
-        return new A2aError(A2aError.REPLAY_HEADERS_REQUIRED, "Replay protection headers: " + detail);
+        return new A2aError(
+                A2aError.REPLAY_HEADERS_REQUIRED, "Replay protection headers: " + detail);
     }
 
     private static A2aError signatureInvalid(String detail) {

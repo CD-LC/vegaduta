@@ -23,37 +23,41 @@ import org.springframework.stereotype.Service;
 /**
  * Runs ONE user message through the SAME turn pipeline a real user's message takes ({@link
  * AgentChatService#chat(TurnContext, ChatTurnRequest)}: tenant gate, moderation, memory, tool
- * resolution with the full guard chain, step limits, budget metering) for an offline caller such as the
- * eval runner, and hands back what the turn did as evidence.
+ * resolution with the full guard chain, step limits, budget metering) for an offline caller such as
+ * the eval runner, and hands back what the turn did as evidence.
  *
  * <p>Two modes, chosen by the caller and never inferred:
+ *
  * <ul>
  *   <li><b>text only</b> ({@link Request#withTools} false): the agent's tool set is withheld
- *       ({@code suppressAgentTools}), so the model can only answer in text. The same turn otherwise.
- *   <li><b>with tools</b>: the agent's tools are offered and the turn runs the whole pipeline (tool selection,
- *       guards, approval gate, step ceilings, budget), but in an <b>isolated sandbox</b> registered under this turn's
- *       own, server-generated request id for the duration of the turn only ({@link SandboxApprovalGrants#registerSandbox}):
+ *       ({@code suppressAgentTools}), so the model can only answer in text. The same turn
+ *       otherwise.
+ *   <li><b>with tools</b>: the agent's tools are offered and the turn runs the whole pipeline (tool
+ *       selection, guards, approval gate, step ceilings, budget), but in an <b>isolated sandbox</b>
+ *       registered under this turn's own, server-generated request id for the duration of the turn
+ *       only ({@link SandboxApprovalGrants#registerSandbox}):
  *       <ul>
- *         <li>a tool runs for real only when {@link EvalToolEffectPolicy} says it is a reader (by its
- *             classification); every other call is answered with a simulated result, so a test never changes data,
- *             sends a message or spends money; a tool that cannot be made safe is therefore simulated and reported;
- *         <li>a call that needs a human is held exactly as in production, but no approval request is recorded, so
- *             nobody is notified; unless the caller asked for {@link Request#autoApproveActor an auto-approval},
- *             which approves it (never for the excluded tools) and is recorded by the turn journal as
- *             {@code eval-approved}.
+ *         <li>a tool runs for real only when {@link EvalToolEffectPolicy} says it is a reader (by
+ *             its classification); every other call is answered with a simulated result, so a test
+ *             never changes data, sends a message or spends money; a tool that cannot be made safe
+ *             is therefore simulated and reported;
+ *         <li>a call that needs a human is held exactly as in production, but no approval request
+ *             is recorded, so nobody is notified; unless the caller asked for {@link
+ *             Request#autoApproveActor an auto-approval}, which approves it (never for the excluded
+ *             tools) and is recorded by the turn journal as {@code eval-approved}.
  *       </ul>
- *       A caller that asks for tools without an effect policy available is refused: running tools unsandboxed is not
- *       a fallback.
+ *       A caller that asks for tools without an effect policy available is refused: running tools
+ *       unsandboxed is not a fallback.
  * </ul>
  *
  * <p><b>Evidence.</b> The tool calls come from the turn's own record, not from a reply parser: the
- * turn's tool ledger (what each call ended as: ran, failed, not run, held for approval, replayed) joined
- * to the tool-call log rows (the full arguments and result). A call a guard answered instead of running
- * is therefore reported as such, rather than as a call that succeeded.
+ * turn's tool ledger (what each call ended as: ran, failed, not run, held for approval, replayed)
+ * joined to the tool-call log rows (the full arguments and result). A call a guard answered instead
+ * of running is therefore reported as such, rather than as a call that succeeded.
  *
- * <p>This class decides nothing about WHO may auto-approve: that is the caller's policy (the eval runner
- * checks the operator's non-production tenant list before it asks for it). It requires a tenant context
- * on the calling thread, like every chat entry.
+ * <p>This class decides nothing about WHO may auto-approve: that is the caller's policy (the eval
+ * runner checks the operator's non-production tenant list before it asks for it). It requires a
+ * tenant context on the calling thread, like every chat entry.
  */
 @Service
 public class ReplayTurnRunner {
@@ -74,13 +78,16 @@ public class ReplayTurnRunner {
     }
 
     /**
-     * @param sessionId a unique session per replay, so memory never carries one replay into the next
+     * @param sessionId a unique session per replay, so memory never carries one replay into the
+     *     next
      * @param subjectKey the human the turn is metered against
-     * @param autoApproveActor null for a turn that parks gated calls as in production; otherwise the
-     *     name the auto-approval is attributed to (only meaningful with {@code withTools})
-     * @param autoApproveExcludedTools tool names or {@code *} globs that stay gated even under the grant
-     * @param readOnlyTools tool names or {@code *} globs the operator vouches are read-only; each lets a tool run
-     *     for real only if it has no declared classification (see {@link EvalToolEffectPolicy})
+     * @param autoApproveActor null for a turn that parks gated calls as in production; otherwise
+     *     the name the auto-approval is attributed to (only meaningful with {@code withTools})
+     * @param autoApproveExcludedTools tool names or {@code *} globs that stay gated even under the
+     *     grant
+     * @param readOnlyTools tool names or {@code *} globs the operator vouches are read-only; each
+     *     lets a tool run for real only if it has no declared classification (see {@link
+     *     EvalToolEffectPolicy})
      */
     public record Request(
             UUID agentId,
@@ -103,19 +110,32 @@ public class ReplayTurnRunner {
                 String autoApproveActor,
                 Collection<String> autoApproveExcludedTools,
                 Duration timeout) {
-            this(agentId, sessionId, subjectKey, userMessage, withTools, autoApproveActor,
-                    autoApproveExcludedTools, List.of(), timeout);
+            this(
+                    agentId,
+                    sessionId,
+                    subjectKey,
+                    userMessage,
+                    withTools,
+                    autoApproveActor,
+                    autoApproveExcludedTools,
+                    List.of(),
+                    timeout);
         }
     }
 
-    /** How one tool call ended, in the ledger's terms; {@code UNKNOWN} when no ledger was recorded. */
+    /**
+     * How one tool call ended, in the ledger's terms; {@code UNKNOWN} when no ledger was recorded.
+     */
     public enum Status {
         OK,
         FAILED,
         NOT_RUN,
         AWAITING_APPROVAL,
         REPLAYED,
-        /** The sandbox answered with a simulated result instead of running the tool (it could change something). */
+        /**
+         * The sandbox answered with a simulated result instead of running the tool (it could change
+         * something).
+         */
         SIMULATED,
         UNKNOWN
     }
@@ -124,10 +144,14 @@ public class ReplayTurnRunner {
     public record ToolEvidence(String tool, String input, String output, Status status) {}
 
     /**
-     * @param autoApprovedCalls how many gated calls the sandbox grant let through (0 without a grant)
-     * @param omittedCalls calls past the ledger's per-turn limit that are not listed in {@code toolCalls}
-     * @param simulatedTools the tool names of the calls the sandbox simulated instead of running, in order
-     * @param heldTools the tool names of the calls held for approval without a request being recorded, in order
+     * @param autoApprovedCalls how many gated calls the sandbox grant let through (0 without a
+     *     grant)
+     * @param omittedCalls calls past the ledger's per-turn limit that are not listed in {@code
+     *     toolCalls}
+     * @param simulatedTools the tool names of the calls the sandbox simulated instead of running,
+     *     in order
+     * @param heldTools the tool names of the calls held for approval without a request being
+     *     recorded, in order
      */
     public record Result(
             String replyText,
@@ -142,24 +166,38 @@ public class ReplayTurnRunner {
             heldTools = heldTools == null ? List.of() : List.copyOf(heldTools);
         }
 
-        public Result(String replyText, List<ToolEvidence> toolCalls, int autoApprovedCalls, int omittedCalls) {
+        public Result(
+                String replyText,
+                List<ToolEvidence> toolCalls,
+                int autoApprovedCalls,
+                int omittedCalls) {
             this(replyText, toolCalls, autoApprovedCalls, omittedCalls, List.of(), List.of());
         }
     }
 
     public Result run(Request request) {
         Objects.requireNonNull(request, "request");
-        Objects.requireNonNull(request.timeout(), "a replay needs the time it may wait for the reply");
-        TenantContext tenant = TenantContext.current().orElseThrow(() ->
-                new IllegalStateException("A replayed turn needs a tenant context on the calling thread."));
+        Objects.requireNonNull(
+                request.timeout(), "a replay needs the time it may wait for the reply");
+        TenantContext tenant =
+                TenantContext.current()
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "A replayed turn needs a tenant context on the calling thread."));
         ChatTurnRequest turn =
                 ChatTurnRequest.builder(
-                                request.agentId(), request.sessionId(), request.subjectKey(), request.userMessage())
+                                request.agentId(),
+                                request.sessionId(),
+                                request.subjectKey(),
+                                request.userMessage())
                         .suppressAgentTools(!request.withTools())
                         .build();
-        // The request id is generated HERE: it is the key of the sandbox grant, so nothing a client sends
+        // The request id is generated HERE: it is the key of the sandbox grant, so nothing a client
+        // sends
         // can ever name it.
-        // taint-entry: trusted - an admin's replay of a recorded turn; tools are simulated or held by the
+        // taint-entry: trusted - an admin's replay of a recorded turn; tools are simulated or held
+        // by the
         // sandbox grant, never run for real (docs/security/taint-entry-points.md)
         TurnContext context =
                 new TurnContext(
@@ -171,13 +209,12 @@ public class ReplayTurnRunner {
                         null,
                         null);
 
-        SandboxApprovalGrants.Registration registration = request.withTools() ? sandboxFor(context, request) : null;
+        SandboxApprovalGrants.Registration registration =
+                request.withTools() ? sandboxFor(context, request) : null;
         String reply;
         try {
-            List<String> chunks = chatService
-                    .chat(context, turn)
-                    .collectList()
-                    .block(request.timeout());
+            List<String> chunks =
+                    chatService.chat(context, turn).collectList().block(request.timeout());
             reply = chunks == null ? "" : String.join("", chunks);
         } finally {
             if (registration != null) {
@@ -186,18 +223,18 @@ public class ReplayTurnRunner {
         }
 
         ToolLedger ledger = context.toolActivity().ledger().snapshot();
-        List<String> simulated = registration == null ? List.of() : registration.grant().simulatedTools();
+        List<String> simulated =
+                registration == null ? List.of() : registration.grant().simulatedTools();
         List<String> held = registration == null ? List.of() : registration.grant().heldTools();
-        List<ToolEvidence> evidence = request.withTools()
-                ? evidence(ledger, loggedCalls(request), simulated)
-                : List.of();
+        List<ToolEvidence> evidence =
+                request.withTools() ? evidence(ledger, loggedCalls(request), simulated) : List.of();
         int autoApproved = registration == null ? 0 : registration.grant().usedCount();
         return new Result(reply, evidence, autoApproved, ledger.omitted(), simulated, held);
     }
 
     /**
-     * The isolation of a tools turn. Refused when there is no effect policy to isolate with: a replay with tools
-     * must never run unsandboxed because a bean was missing.
+     * The isolation of a tools turn. Refused when there is no effect policy to isolate with: a
+     * replay with tools must never run unsandboxed because a bean was missing.
      */
     private SandboxApprovalGrants.Registration sandboxFor(TurnContext context, Request request) {
         EvalToolEffectPolicy policy = effects == null ? null : effects.getIfAvailable();
@@ -206,9 +243,10 @@ public class ReplayTurnRunner {
                     "An eval turn with tools needs the sandbox that decides which tools may run, and none is available:"
                             + " refusing to run the agent's tools unsandboxed.");
         }
-        String actor = request.autoApproveActor() == null || request.autoApproveActor().isBlank()
-                ? null
-                : request.autoApproveActor();
+        String actor =
+                request.autoApproveActor() == null || request.autoApproveActor().isBlank()
+                        ? null
+                        : request.autoApproveActor();
         return SandboxApprovalGrants.registerSandbox(
                 context.requestId(),
                 actor,
@@ -218,29 +256,34 @@ public class ReplayTurnRunner {
 
     private List<ToolCallLog> loggedCalls(Request request) {
         try {
-            return toolCallLogService.findByAgentIdAndSessionId(request.agentId(), request.sessionId());
+            return toolCallLogService.findByAgentIdAndSessionId(
+                    request.agentId(), request.sessionId());
         } catch (RuntimeException e) {
-            log.warn("Could not read the tool-call log of replay session {} ({}): evidence falls back to the ledger",
-                    request.sessionId(), e.toString());
+            log.warn(
+                    "Could not read the tool-call log of replay session {} ({}): evidence falls back to the ledger",
+                    request.sessionId(),
+                    e.toString());
             return List.of();
         }
     }
 
     /**
-     * The ledger is the authority on WHICH calls the turn made and how each ended; the log rows add the
-     * full arguments and result (the ledger keeps them cut and compacted), and are joined only when they
-     * line up one for one by tool name. With no ledger (switched off) the log rows alone are reported,
-     * status unknown unless the row carries an error.
+     * The ledger is the authority on WHICH calls the turn made and how each ended; the log rows add
+     * the full arguments and result (the ledger keeps them cut and compacted), and are joined only
+     * when they line up one for one by tool name. With no ledger (switched off) the log rows alone
+     * are reported, status unknown unless the row carries an error.
      */
     static List<ToolEvidence> evidence(ToolLedger ledger, List<ToolCallLog> rows) {
         return evidence(ledger, rows, List.of());
     }
 
     /**
-     * As above; {@code simulatedTools} (the sandbox's own list) names the calls it simulated, which only matters
-     * with no ledger: then a log row of such a tool is reported {@link Status#SIMULATED}, one per listed call.
+     * As above; {@code simulatedTools} (the sandbox's own list) names the calls it simulated, which
+     * only matters with no ledger: then a log row of such a tool is reported {@link
+     * Status#SIMULATED}, one per listed call.
      */
-    static List<ToolEvidence> evidence(ToolLedger ledger, List<ToolCallLog> rows, List<String> simulatedTools) {
+    static List<ToolEvidence> evidence(
+            ToolLedger ledger, List<ToolCallLog> rows, List<String> simulatedTools) {
         List<ToolEvidence> out = new ArrayList<>();
         List<ToolLedger.Entry> entries = ledger == null ? List.of() : ledger.entries();
         if (entries.isEmpty()) {
@@ -249,10 +292,17 @@ public class ReplayTurnRunner {
             for (ToolCallLog row : rows) {
                 boolean failed = row.getErrorMessage() != null && !row.getErrorMessage().isBlank();
                 Status status = failed ? Status.FAILED : Status.UNKNOWN;
-                if (!failed && simulated.merge(String.valueOf(row.getToolName()), -1, Integer::sum) >= 0) {
+                if (!failed
+                        && simulated.merge(String.valueOf(row.getToolName()), -1, Integer::sum)
+                                >= 0) {
                     status = Status.SIMULATED;
                 }
-                out.add(new ToolEvidence(row.getToolName(), row.getToolInput(), row.getToolOutput(), status));
+                out.add(
+                        new ToolEvidence(
+                                row.getToolName(),
+                                row.getToolInput(),
+                                row.getToolOutput(),
+                                status));
             }
             return out;
         }

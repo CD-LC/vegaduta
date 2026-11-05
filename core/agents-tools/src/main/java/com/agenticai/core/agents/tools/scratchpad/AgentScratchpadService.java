@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
  * <p><b>Whose notes.</b> A session-pad note belongs to the session (whose id is already derived per
  * caller). An agent-pad note belongs to the caller's {@code subjectKey} (V680): the model's read,
  * list, write and delete only reach the caller's own agent-pad notes, the cap and eviction are per
- * caller, and a turn with no identified caller cannot use the agent pad at all. Rows that predate the
- * column have no owner; they are never returned to the model (operators still see them).
+ * caller, and a turn with no identified caller cannot use the agent pad at all. Rows that predate
+ * the column have no owner; they are never returned to the model (operators still see them).
  *
  * <p>All bounds are enforced here, not in the callback layer and not in DDL, so they stay
  * configuration ({@link ScratchpadProperties}) and every caller - tool callback, future REST
@@ -82,9 +82,9 @@ public class AgentScratchpadService {
     }
 
     /**
-     * {@link #write(UUID, UUID, String, String)} with the provenance the turn's taint decided and no
-     * caller identity: only a session-pad write can succeed (an agent-pad write needs a subject, see
-     * {@link #write(UUID, UUID, String, String, String, NoteTrust)}).
+     * {@link #write(UUID, UUID, String, String)} with the provenance the turn's taint decided and
+     * no caller identity: only a session-pad write can succeed (an agent-pad write needs a subject,
+     * see {@link #write(UUID, UUID, String, String, String, NoteTrust)}).
      */
     @Transactional
     public WriteResult write(
@@ -93,11 +93,11 @@ public class AgentScratchpadService {
     }
 
     /**
-     * Writes on behalf of {@code subjectKey}, the caller of the turn. A QUARANTINED note is stored but
-     * hidden from {@link #read} and {@link #list} until a person approves it. Two things a quarantined
-     * write may not do, because both would let a tainted turn damage what was trusted: overwrite a
-     * TRUSTED note (the old text would be destroyed or silently replaced by attacker text), or evict a
-     * note to make room.
+     * Writes on behalf of {@code subjectKey}, the caller of the turn. A QUARANTINED note is stored
+     * but hidden from {@link #read} and {@link #list} until a person approves it. Two things a
+     * quarantined write may not do, because both would let a tainted turn damage what was trusted:
+     * overwrite a TRUSTED note (the old text would be destroyed or silently replaced by attacker
+     * text), or evict a note to make room.
      *
      * @throws IllegalArgumentException as {@link #write(UUID, UUID, String, String)}, plus the two
      *     refusals above, an agent-pad write with no {@code subjectKey}, and a write onto a session
@@ -137,7 +137,9 @@ public class AgentScratchpadService {
             ScratchpadNote note = existing.get();
             if (!ownedBy(note, subject)) {
                 throw new IllegalArgumentException(
-                        "Scratchpad note '" + key + "' belongs to another user and cannot be written from here");
+                        "Scratchpad note '"
+                                + key
+                                + "' belongs to another user and cannot be written from here");
             }
             if (prov.quarantined() && !note.isQuarantined()) {
                 throw new IllegalArgumentException(
@@ -183,13 +185,15 @@ public class AgentScratchpadService {
     }
 
     /** The note in the caller's scope: the session's, or the caller's own agent-pad note. */
-    private Optional<ScratchpadNote> lookup(UUID agentId, UUID sessionId, String subject, String key) {
+    private Optional<ScratchpadNote> lookup(
+            UUID agentId, UUID sessionId, String subject, String key) {
         if (sessionId != null) {
             return repository.findByAgentIdAndSessionIdAndKey(agentId, sessionId, key);
         }
         return subject == null
                 ? Optional.empty()
-                : repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(agentId, subject, key);
+                : repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(
+                        agentId, subject, key);
     }
 
     private long count(UUID agentId, UUID sessionId, String subject) {
@@ -231,7 +235,8 @@ public class AgentScratchpadService {
     }
 
     /**
-     * {@link #read(UUID, UUID, String, String)} with no caller identity: reaches session-pad notes only.
+     * {@link #read(UUID, UUID, String, String)} with no caller identity: reaches session-pad notes
+     * only.
      */
     @Transactional(readOnly = true)
     public Optional<ScratchpadNote> read(UUID agentId, UUID sessionId, String key) {
@@ -239,8 +244,8 @@ public class AgentScratchpadService {
     }
 
     /**
-     * The note under {@code key} in the {@code (agentId, sessionId)} scope as {@code subjectKey} sees
-     * it; a null sessionId reads the caller's own agent-pad note.
+     * The note under {@code key} in the {@code (agentId, sessionId)} scope as {@code subjectKey}
+     * sees it; a null sessionId reads the caller's own agent-pad note.
      */
     @Transactional(readOnly = true)
     public Optional<ScratchpadNote> read(
@@ -262,8 +267,9 @@ public class AgentScratchpadService {
     }
 
     /**
-     * Every note the caller can see from {@code sessionId} - the session's own notes AND the caller's
-     * agent-pad ones - newest-updated first. A null {@code sessionId} lists just the agent pad.
+     * Every note the caller can see from {@code sessionId} - the session's own notes AND the
+     * caller's agent-pad ones - newest-updated first. A null {@code sessionId} lists just the agent
+     * pad.
      */
     @Transactional(readOnly = true)
     public List<ScratchpadNote> list(UUID agentId, UUID sessionId, String subjectKey) {
@@ -287,8 +293,8 @@ public class AgentScratchpadService {
     }
 
     /**
-     * One note as an operator sees it, with its body. For the agent pad, {@code subjectKey} picks the
-     * owner; without it the key must be unique across owners.
+     * One note as an operator sees it, with its body. For the agent pad, {@code subjectKey} picks
+     * the owner; without it the key must be unique across owners.
      *
      * @throws IllegalArgumentException on a malformed key or an ambiguous agent-pad key
      */
@@ -317,15 +323,18 @@ public class AgentScratchpadService {
         return found.isPresent();
     }
 
-    /** {@link #delete(UUID, UUID, String, String)} with no caller identity: session-pad notes only. */
+    /**
+     * {@link #delete(UUID, UUID, String, String)} with no caller identity: session-pad notes only.
+     */
     @Transactional
     public boolean delete(UUID agentId, UUID sessionId, String key) {
         return delete(agentId, sessionId, null, key);
     }
 
     /**
-     * Data-subject erasure: deletes every note, on either pad of any agent, that {@code subjectKey} owns.
-     * Works with the scratchpad switched off (data written while it was on is still personal data).
+     * Data-subject erasure: deletes every note, on either pad of any agent, that {@code subjectKey}
+     * owns. Works with the scratchpad switched off (data written while it was on is still personal
+     * data).
      */
     @Transactional
     public int eraseSubject(String subjectKey) {
@@ -337,8 +346,8 @@ public class AgentScratchpadService {
     }
 
     /**
-     * The notes an operator action addresses: the session's note, or the agent-pad notes under the key
-     * (narrowed to {@code subject} when given). More than one match is ambiguous.
+     * The notes an operator action addresses: the session's note, or the agent-pad notes under the
+     * key (narrowed to {@code subject} when given). More than one match is ambiguous.
      */
     private List<ScratchpadNote> candidates(
             UUID agentId, UUID sessionId, String key, String subject, boolean onlyQuarantined) {
@@ -356,7 +365,9 @@ public class AgentScratchpadService {
                         .toList();
         if (out.size() > 1) {
             throw new IllegalArgumentException(
-                    "More than one user has a note '" + key + "' on the agent pad - pass subject to pick one");
+                    "More than one user has a note '"
+                            + key
+                            + "' on the agent pad - pass subject to pick one");
         }
         return out;
     }
@@ -385,9 +396,9 @@ public class AgentScratchpadService {
     }
 
     /**
-     * Makes a held note readable. False when there is no held note under that key in the scope. For the
-     * agent pad {@code subjectKey} picks the owner (optional while only one owner has a held note under
-     * the key).
+     * Makes a held note readable. False when there is no held note under that key in the scope. For
+     * the agent pad {@code subjectKey} picks the owner (optional while only one owner has a held
+     * note under the key).
      */
     @Transactional
     public boolean approve(UUID agentId, UUID sessionId, String key, String subjectKey) {
@@ -395,7 +406,8 @@ public class AgentScratchpadService {
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
         Optional<ScratchpadNote> held =
-                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream().findFirst();
+                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream()
+                        .findFirst();
         held.ifPresent(
                 note -> {
                     note.approve();
@@ -417,7 +429,8 @@ public class AgentScratchpadService {
         Objects.requireNonNull(agentId, "agentId must not be null");
         validateKey(key);
         Optional<ScratchpadNote> held =
-                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream().findFirst();
+                candidates(agentId, sessionId, key, normalize(subjectKey), true).stream()
+                        .findFirst();
         held.ifPresent(repository::delete);
         return held.isPresent();
     }

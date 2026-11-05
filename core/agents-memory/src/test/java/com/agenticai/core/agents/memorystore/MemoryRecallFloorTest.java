@@ -17,7 +17,10 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** {@code app.memory.recall.min-similarity} in the unified composition: unrelated lines out, the self-model line untouched. */
+/**
+ * {@code app.memory.recall.min-similarity} in the unified composition: unrelated lines out, the
+ * self-model line untouched.
+ */
 class MemoryRecallFloorTest {
 
     private final UUID agent = UUID.randomUUID();
@@ -27,7 +30,9 @@ class MemoryRecallFloorTest {
     private MemoryRecallComposer composer(MemoryRecallProperties relevance) {
         props.setEnabled(true);
         when(source.name()).thenReturn("fake");
-        when(source.kinds()).thenReturn(Set.of(MemoryKind.SEMANTIC, MemoryKind.EPISODIC, MemoryKind.SELF_MODEL));
+        when(source.kinds())
+                .thenReturn(
+                        Set.of(MemoryKind.SEMANTIC, MemoryKind.EPISODIC, MemoryKind.SELF_MODEL));
         @SuppressWarnings("unchecked")
         ObjectProvider<MemoryRecallSource> provider = mock(ObjectProvider.class);
         when(provider.orderedStream()).thenAnswer(i -> Stream.of(source));
@@ -39,13 +44,15 @@ class MemoryRecallFloorTest {
     }
 
     private static MemoryItemView item(MemoryKind kind, String text, double score) {
-        return new MemoryItemView(UUID.randomUUID(), kind, text, score, MemoryProvenanceRecord.TRUSTED);
+        return new MemoryItemView(
+                UUID.randomUUID(), kind, text, score, MemoryProvenanceRecord.TRUSTED);
     }
 
     private MemoryRecallResult compose(MemoryRecallProperties relevance, MemoryItemView... items) {
         props.setKinds(Set.of(MemoryKind.EPISODIC, MemoryKind.SELF_MODEL));
         MemoryRecallComposer c = composer(relevance);
-        when(source.recall(org.mockito.ArgumentMatchers.any())).thenReturn(new MemoryRecallResult(List.of(items), 0, 0, null));
+        when(source.recall(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(new MemoryRecallResult(List.of(items), 0, 0, null));
         return c.compose(new MemoryRecallRequest(agent, "u1", "q", Set.of(), 0, 0));
     }
 
@@ -54,7 +61,11 @@ class MemoryRecallFloorTest {
         MemoryRecallProperties floor = new MemoryRecallProperties();
         floor.setMinSimilarity(0.30);
 
-        MemoryRecallResult r = compose(floor, item(MemoryKind.EPISODIC, "close", 0.31), item(MemoryKind.SEMANTIC, "far", 0.29));
+        MemoryRecallResult r =
+                compose(
+                        floor,
+                        item(MemoryKind.EPISODIC, "close", 0.31),
+                        item(MemoryKind.SEMANTIC, "far", 0.29));
 
         assertThat(r.items()).extracting(MemoryItemView::text).containsExactly("close");
     }
@@ -64,7 +75,11 @@ class MemoryRecallFloorTest {
         MemoryRecallProperties floor = new MemoryRecallProperties();
         floor.setMinSimilarity(0.90);
 
-        MemoryRecallResult r = compose(floor, item(MemoryKind.SELF_MODEL, "good at invoices", 0.5), item(MemoryKind.EPISODIC, "far", 0.5));
+        MemoryRecallResult r =
+                compose(
+                        floor,
+                        item(MemoryKind.SELF_MODEL, "good at invoices", 0.5),
+                        item(MemoryKind.EPISODIC, "far", 0.5));
 
         assertThat(r.items()).extracting(MemoryItemView::text).containsExactly("good at invoices");
     }

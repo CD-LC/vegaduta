@@ -63,8 +63,8 @@ public class AgentScratchpadController {
 
     /**
      * One note's full body, addressed by the same {@code (session, key)} the tools use. Agent-pad
-     * notes are per user: {@code subject} (the owner shown in the list) picks one when several users
-     * hold the same key (400 otherwise).
+     * notes are per user: {@code subject} (the owner shown in the list) picks one when several
+     * users hold the same key (400 otherwise).
      */
     @GetMapping("/{key}")
     public ResponseEntity<ScratchpadNoteView> read(

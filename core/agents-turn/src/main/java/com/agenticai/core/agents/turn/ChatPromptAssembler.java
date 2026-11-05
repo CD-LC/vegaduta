@@ -416,7 +416,8 @@ final class ChatPromptAssembler {
         java.time.LocalDate todayUtc = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
         ChatMemoryRecall.MemoryRecall recalled =
                 joinPreTurnOrDegrade(memoryFuture, null, "memory", preTurnDeadlineNanos);
-        // Which memories went into this prompt (ids and counts, never text), for the turn journal and an eval harness.
+        // Which memories went into this prompt (ids and counts, never text), for the turn journal
+        // and an eval harness.
         if (recalled != null && recalled.trace() != null) {
             context.memoryRecall().record(recalled.trace());
         }

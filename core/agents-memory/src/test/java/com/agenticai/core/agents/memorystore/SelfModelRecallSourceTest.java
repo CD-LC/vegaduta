@@ -37,17 +37,23 @@ class SelfModelRecallSourceTest {
         props.setEnabled(true);
         props.setMinSample(8);
         beans.addBean("allow", (MemoryFlagOverride) id -> true);
-        tracker = new CompetenceTracker(
-                props,
-                new CompetenceGate(props, beans.getBeanProvider(com.agenticai.core.settings.SettingsResolver.class)),
-                storage,
-                beans.getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class),
-                Clock.systemUTC());
-        source = new SelfModelRecallSource(
-                unified,
-                new MemoryUnifiedGate(unified, beans.getBeanProvider(MemoryFlagOverride.class)),
-                props,
-                tracker);
+        tracker =
+                new CompetenceTracker(
+                        props,
+                        new CompetenceGate(
+                                props,
+                                beans.getBeanProvider(
+                                        com.agenticai.core.settings.SettingsResolver.class)),
+                        storage,
+                        beans.getBeanProvider(io.micrometer.core.instrument.MeterRegistry.class),
+                        Clock.systemUTC());
+        source =
+                new SelfModelRecallSource(
+                        unified,
+                        new MemoryUnifiedGate(
+                                unified, beans.getBeanProvider(MemoryFlagOverride.class)),
+                        props,
+                        tracker);
         TenantContext.set(TenantContext.of("tenant_a", "u", Set.of()));
     }
 
@@ -84,9 +90,10 @@ class SelfModelRecallSourceTest {
         assertThat(v.provenance().trust()).isEqualTo(MemoryTrustLevel.TRUSTED);
         assertThat(v.provenance().sourceTaint()).isEmpty();
         assertThat(v.text())
-                .isEqualTo("Track record counted by the platform from verified outcomes, not self-reported."
-                        + " Good at: tools:lookup_order (n=30, lower bound 0.89)."
-                        + " Unreliable at: tools:refund (n=11, lower bound 0.05).");
+                .isEqualTo(
+                        "Track record counted by the platform from verified outcomes, not self-reported."
+                                + " Good at: tools:lookup_order (n=30, lower bound 0.89)."
+                                + " Unreliable at: tools:refund (n=11, lower bound 0.05).");
         assertThat(result.tokensUsed()).isPositive();
     }
 
@@ -139,10 +146,12 @@ class SelfModelRecallSourceTest {
         }
         String full = recall().items().get(0).text();
         assertThat(full.split("tools:class_").length - 1).isEqualTo(props.getMaxClassesPerSide());
-        MemoryRecallResult tight = source.recall(new MemoryRecallRequest(agent, "u", "q", Set.of(), 8, 40));
+        MemoryRecallResult tight =
+                source.recall(new MemoryRecallRequest(agent, "u", "q", Set.of(), 8, 40));
         assertThat(tight.items()).hasSize(1);
         assertThat(tight.tokensUsed()).isLessThanOrEqualTo(40);
-        assertThat(source.recall(new MemoryRecallRequest(agent, "u", "q", Set.of(), 8, 5)).items()).isEmpty();
+        assertThat(source.recall(new MemoryRecallRequest(agent, "u", "q", Set.of(), 8, 5)).items())
+                .isEmpty();
     }
 
     @Test
@@ -162,7 +171,16 @@ class SelfModelRecallSourceTest {
         assertThat(recall().degradedReason()).isEqualTo("disabled");
         unified.setEnabled(true);
 
-        assertThat(source.recall(new MemoryRecallRequest(agent, "u", "q", Set.of(MemoryKind.EPISODIC), 8, 800)).degradedReason())
+        assertThat(
+                        source.recall(
+                                        new MemoryRecallRequest(
+                                                agent,
+                                                "u",
+                                                "q",
+                                                Set.of(MemoryKind.EPISODIC),
+                                                8,
+                                                800))
+                                .degradedReason())
                 .isEqualTo("disabled");
         TenantContext.clear();
         assertThat(recall().degradedReason()).isEqualTo("no-tenant");
@@ -180,13 +198,22 @@ class SelfModelRecallSourceTest {
         count("tools:lookup_order", 30, 0, 0);
         StaticListableBeanFactory sources = new StaticListableBeanFactory();
         sources.addBean("self", source);
-        MemoryUnifiedGate gate = new MemoryUnifiedGate(unified, beans.getBeanProvider(MemoryFlagOverride.class));
+        MemoryUnifiedGate gate =
+                new MemoryUnifiedGate(unified, beans.getBeanProvider(MemoryFlagOverride.class));
         MemoryRecallComposer composer =
-                new MemoryRecallComposer(unified, gate, sources.getBeanProvider(com.agenticai.core.agents.memory.spi.MemoryRecallSource.class));
-        MemoryRecallResult out = composer.compose(new MemoryRecallRequest(agent, "u", "q", Set.of(), 0, 0));
+                new MemoryRecallComposer(
+                        unified,
+                        gate,
+                        sources.getBeanProvider(
+                                com.agenticai.core.agents.memory.spi.MemoryRecallSource.class));
+        MemoryRecallResult out =
+                composer.compose(new MemoryRecallRequest(agent, "u", "q", Set.of(), 0, 0));
         assertThat(out.items()).hasSize(1);
         assertThat(out.items().get(0).kind()).isEqualTo(MemoryKind.SELF_MODEL);
         unified.setKinds(EnumSet.noneOf(MemoryKind.class));
-        assertThat(composer.compose(new MemoryRecallRequest(agent, "u", "q", Set.of(), 0, 0)).items()).isEmpty();
+        assertThat(
+                        composer.compose(new MemoryRecallRequest(agent, "u", "q", Set.of(), 0, 0))
+                                .items())
+                .isEmpty();
     }
 }

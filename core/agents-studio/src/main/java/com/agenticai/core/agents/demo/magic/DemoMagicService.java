@@ -413,9 +413,7 @@ public class DemoMagicService {
                             session,
                             () ->
                                     agentChatService
-                                            .chat(
-                                                    demoTurnContext(turn),
-                                                    turn)
+                                            .chat(demoTurnContext(turn), turn)
                                             .collect(Collectors.joining())
                                             .block(TURN_TIMEOUT));
             if (reply == null || reply.isBlank()) {

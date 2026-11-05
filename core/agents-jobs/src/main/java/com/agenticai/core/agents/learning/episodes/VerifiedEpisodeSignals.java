@@ -15,22 +15,26 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * The {@link EpisodeSignalSource} (ADR-0028 WP4c): counts of what people decided about a turn, nothing else.
+ * The {@link EpisodeSignalSource} (ADR-0028 WP4c): counts of what people decided about a turn,
+ * nothing else.
  *
  * <ul>
- *   <li><b>Approvals.</b> The turn's approval requests are those the tool guard recorded under the label {@code
- *       agent:<agentId>:session:<sessionId>} since the turn began. A request counts as rejected when its status is
- *       REJECTED and a person decided it; as approved when a person approved it (APPROVED or a later execution state).
- *       Pending requests, a request that expired undecided and anything without a human decider are not counted.
- *   <li><b>Rating.</b> {@code turn_feedback} rows ({@code FeedbackService}) for the same agent and session since the
- *       turn began: thumbs up, resolved, or a rating of 4-5 is ACCEPTED; thumbs down, unresolved, an edit or a rating of
- *       1-2 is REJECTED. Conflicting or neutral feedback gives no verdict (null).
+ *   <li><b>Approvals.</b> The turn's approval requests are those the tool guard recorded under the
+ *       label {@code agent:<agentId>:session:<sessionId>} since the turn began. A request counts as
+ *       rejected when its status is REJECTED and a person decided it; as approved when a person
+ *       approved it (APPROVED or a later execution state). Pending requests, a request that expired
+ *       undecided and anything without a human decider are not counted.
+ *   <li><b>Rating.</b> {@code turn_feedback} rows ({@code FeedbackService}) for the same agent and
+ *       session since the turn began: thumbs up, resolved, or a rating of 4-5 is ACCEPTED; thumbs
+ *       down, unresolved, an edit or a rating of 1-2 is REJECTED. Conflicting or neutral feedback
+ *       gives no verdict (null).
  * </ul>
  *
- * Feedback is usually given after the recorder has already filed the episode, so in practice only the approval counts
- * (decided during the turn) and feedback that beat the recorder are seen; the episode text is never revised later.
- * Everything read here is a human act in a tenant table; no model output is read. Any failure or missing repository
- * yields {@link Signals#NONE}, never a guess. Runs on the recorder's worker with the turn's tenant applied.
+ * Feedback is usually given after the recorder has already filed the episode, so in practice only
+ * the approval counts (decided during the turn) and feedback that beat the recorder are seen; the
+ * episode text is never revised later. Everything read here is a human act in a tenant table; no
+ * model output is read. Any failure or missing repository yields {@link Signals#NONE}, never a
+ * guess. Runs on the recorder's worker with the turn's tenant applied.
  */
 @Component
 @ConditionalOnProperty(name = "app.memory.episodic.enabled", havingValue = "true")
@@ -42,7 +46,8 @@ public class VerifiedEpisodeSignals implements EpisodeSignalSource {
     private final ObjectProvider<FeedbackService> feedback;
 
     public VerifiedEpisodeSignals(
-            ObjectProvider<AgentJobApprovalLookup> approvals, ObjectProvider<FeedbackService> feedback) {
+            ObjectProvider<AgentJobApprovalLookup> approvals,
+            ObjectProvider<FeedbackService> feedback) {
         this.approvals = approvals;
         this.feedback = feedback;
     }
@@ -91,13 +96,14 @@ public class VerifiedEpisodeSignals implements EpisodeSignalSource {
             if (repo == null) {
                 return null;
             }
-            List<TurnFeedback> rows =
-                    repo.recentForSession(
-                            agentId, sessionId, since);
+            List<TurnFeedback> rows = repo.recentForSession(agentId, sessionId, since);
             boolean accepted = false;
             boolean rejected = false;
             for (TurnFeedback f : rows) {
-                if (f == null || f.getSignal() == null || f.getCreatedBy() == null || f.getCreatedBy().isBlank()) {
+                if (f == null
+                        || f.getSignal() == null
+                        || f.getCreatedBy() == null
+                        || f.getCreatedBy().isBlank()) {
                     continue; // not attributable to a person
                 }
                 switch (f.getSignal()) {

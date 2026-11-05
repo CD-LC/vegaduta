@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
  * unattended-apply that is off must end: for a person to decide.
  *
  * <p>The only thing it can do is call {@link MemoryProposalSink#propose}, which creates a PENDING
- * (QUARANTINED-trust) row and has no path to ACTIVE or TRUSTED. Each proposal names its sources (the
- * lineage the store records, taking the lowest source trust, the union of taint and
- * {@code max(generation)+1}) and carries a consolidation writer label so that a person's approval, in
+ * (QUARANTINED-trust) row and has no path to ACTIVE or TRUSTED. Each proposal names its sources
+ * (the lineage the store records, taking the lowest source trust, the union of taint and {@code
+ * max(generation)+1}) and carries a consolidation writer label so that a person's approval, in
  * {@code MemoryItemReviewService#approve}, also supersedes those sources; nothing here supersedes
  * anything. No model is called: a merge proposes the keeper's own text, a summary is the sources'
  * texts joined and shortened, which a person can edit before approving. Returns how many proposals
@@ -49,7 +49,10 @@ public class ConsolidationProposalFiler {
         this.sink = sink;
     }
 
-    /** Proposes keeping {@code keeper}'s text in place of the keeper and its duplicates. 1 when filed, else 0. */
+    /**
+     * Proposes keeping {@code keeper}'s text in place of the keeper and its duplicates. 1 when
+     * filed, else 0.
+     */
     int fileMerge(ConsolidationPlan.Merge merge, Map<UUID, ConsolidationItemSource.Item> items) {
         ConsolidationItemSource.Item keeper = items.get(merge.keepId());
         if (keeper == null) {
@@ -67,7 +70,8 @@ public class ConsolidationProposalFiler {
     }
 
     /** Proposes one summary of the plan's source items. 1 when filed, else 0. */
-    int fileSummary(ConsolidationPlan.Summarise summary, Map<UUID, ConsolidationItemSource.Item> items) {
+    int fileSummary(
+            ConsolidationPlan.Summarise summary, Map<UUID, ConsolidationItemSource.Item> items) {
         List<String> parts = new ArrayList<>();
         MemoryKind kind;
         try {
@@ -112,22 +116,28 @@ public class ConsolidationProposalFiler {
         return t.length() > MAX_PART_CHARS ? t.substring(0, MAX_PART_CHARS - 3) + "..." : t;
     }
 
-    private int file(UUID agentId, MemoryKind kind, String text, List<UUID> sourceIds, String writer) {
+    private int file(
+            UUID agentId, MemoryKind kind, String text, List<UUID> sourceIds, String writer) {
         MemoryProposalSink s = sink.getIfAvailable();
         if (s == null || text == null || text.isBlank() || sourceIds.size() < 2) {
             return 0;
         }
         try {
             List<MemorySourceRef> sources = sourceIds.stream().map(MemorySourceRef::item).toList();
-            Optional<?> receipt = s.propose(new MemoryWriteProposal(
-                    agentId,
-                    null,
-                    kind,
-                    text,
-                    new MemoryProvenanceRecord(MemoryProvenanceRecord.TRUSTED.trust(), List.of(), writer),
-                    null,
-                    true,
-                    sources));
+            Optional<?> receipt =
+                    s.propose(
+                            new MemoryWriteProposal(
+                                    agentId,
+                                    null,
+                                    kind,
+                                    text,
+                                    new MemoryProvenanceRecord(
+                                            MemoryProvenanceRecord.TRUSTED.trust(),
+                                            List.of(),
+                                            writer),
+                                    null,
+                                    true,
+                                    sources));
             return receipt.isPresent() ? 1 : 0;
         } catch (RuntimeException e) {
             log.warn("Could not file one consolidation proposal: {}", e.getMessage());

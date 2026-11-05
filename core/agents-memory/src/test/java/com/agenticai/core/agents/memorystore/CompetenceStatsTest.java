@@ -5,7 +5,10 @@ import static org.assertj.core.api.Assertions.within;
 
 import org.junit.jupiter.api.Test;
 
-/** Reference values are the standard 95% Wilson lower bounds (same ones core/quality's WilsonIntervalTest pins). */
+/**
+ * Reference values are the standard 95% Wilson lower bounds (same ones core/quality's
+ * WilsonIntervalTest pins).
+ */
 class CompetenceStatsTest {
 
     @Test

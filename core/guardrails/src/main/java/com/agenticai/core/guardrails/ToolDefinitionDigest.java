@@ -15,9 +15,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  *
  * <p>An approval names a tool, but a tool's behaviour can change behind its name (an MCP server
  * swapped or updated between request and approval). Without this, "approved {@code send_report}"
- * would run whatever {@code send_report} has become. It does not prove the tool's code is
- * unchanged (a server can change behaviour without touching its description), only that the
- * contract the approver could see is.
+ * would run whatever {@code send_report} has become. It does not prove the tool's code is unchanged
+ * (a server can change behaviour without touching its description), only that the contract the
+ * approver could see is.
  *
  * <p>A callback that knows <i>what executes it</i> (an MCP server) can say so by implementing
  * {@link Provenance}; {@link #ofCallback(ToolCallback)} then folds that identity in, so the same
@@ -29,9 +29,9 @@ public final class ToolDefinitionDigest {
     private ToolDefinitionDigest() {}
 
     /**
-     * Optional: who executes this tool. Implemented by MCP wrappers (and any wrapper that
-     * delegates to one). Must never contain credentials; build the value with {@link
-     * #provenance(String, String)}.
+     * Optional: who executes this tool. Implemented by MCP wrappers (and any wrapper that delegates
+     * to one). Must never contain credentials; build the value with {@link #provenance(String,
+     * String)}.
      */
     public interface Provenance {
         /** A stable identity of the executing server, or {@code null} when unknown. */
@@ -62,7 +62,8 @@ public final class ToolDefinitionDigest {
                 URI uri = URI.create(value);
                 String host = uri.getHost() == null ? "" : uri.getHost().toLowerCase(Locale.ROOT);
                 if (!host.isEmpty()) {
-                    String scheme = uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
+                    String scheme =
+                            uri.getScheme() == null ? "" : uri.getScheme().toLowerCase(Locale.ROOT);
                     String port = uri.getPort() < 0 ? "" : ":" + uri.getPort();
                     String path = uri.getPath() == null ? "" : uri.getPath();
                     return scheme + "://" + host + port + path;
@@ -91,7 +92,10 @@ public final class ToolDefinitionDigest {
         return of(definition, null);
     }
 
-    /** As {@link #of(ToolDefinition)}; a non-blank {@code provenance} is folded in (null/blank: same as before). */
+    /**
+     * As {@link #of(ToolDefinition)}; a non-blank {@code provenance} is folded in (null/blank: same
+     * as before).
+     */
     public static String of(ToolDefinition definition, String provenance) {
         if (definition == null) {
             return null;

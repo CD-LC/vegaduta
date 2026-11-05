@@ -32,9 +32,10 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
 /**
- * Unified agent memory, flags OFF (the shipped default, nothing configured): the real application boots with the
- * disabled sink, and a turn, a recall, a competence outcome and a proposal leave no row anywhere and change not one
- * byte of the prompt. The ON counterpart is {@link UnifiedMemoryJourneyIT}.
+ * Unified agent memory, flags OFF (the shipped default, nothing configured): the real application
+ * boots with the disabled sink, and a turn, a recall, a competence outcome and a proposal leave no
+ * row anywhere and change not one byte of the prompt. The ON counterpart is {@link
+ * UnifiedMemoryJourneyIT}.
  */
 class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
 
@@ -64,7 +65,8 @@ class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
     }
 
     private int rows(String table) {
-        Integer n = jdbc.queryForObject("SELECT count(*) FROM " + SCHEMA + "." + table, Integer.class);
+        Integer n =
+                jdbc.queryForObject("SELECT count(*) FROM " + SCHEMA + "." + table, Integer.class);
         return n == null ? 0 : n;
     }
 
@@ -74,29 +76,57 @@ class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
         TenantContext.set(TenantContext.of(SCHEMA, "alice", Set.of()));
         UUID agent = newAgent("flags-off");
 
-        assertThat(sink).as("the shipped default sink").isInstanceOf(DisabledMemoryProposalSink.class);
-        assertThat(sink.propose(new MemoryWriteProposal(
-                        agent, "alice", MemoryKind.EPISODIC, "Episode (chat): nothing", MemoryProvenanceRecord.TRUSTED, null, false)))
+        assertThat(sink)
+                .as("the shipped default sink")
+                .isInstanceOf(DisabledMemoryProposalSink.class);
+        assertThat(
+                        sink.propose(
+                                new MemoryWriteProposal(
+                                        agent,
+                                        "alice",
+                                        MemoryKind.EPISODIC,
+                                        "Episode (chat): nothing",
+                                        MemoryProvenanceRecord.TRUSTED,
+                                        null,
+                                        false)))
                 .isEmpty();
 
-        // The chat turn's episode hook adds not one operator to the reply: it hands back the very same Flux.
+        // The chat turn's episode hook adds not one operator to the reply: it hands back the very
+        // same Flux.
         Flux<String> turn = Flux.just("hello");
-        assertThat(EpisodeRecordingGateway.observe(turn, agent, "s-1", Instant.now(), Optional.of(TenantContext.current().orElseThrow()), null))
+        assertThat(
+                        EpisodeRecordingGateway.observe(
+                                turn,
+                                agent,
+                                "s-1",
+                                Instant.now(),
+                                Optional.of(TenantContext.current().orElseThrow()),
+                                null))
                 .isSameAs(turn);
 
-        competence.record(new VerifiedOutcome(agent, "tools:search", VerifiedOutcome.Signal.TOOL_SUCCESS));
-        assertThat(recall.compose(new MemoryRecallRequest(agent, "alice", "anything", Set.of(), 0, 800)).degradedReason())
+        competence.record(
+                new VerifiedOutcome(agent, "tools:search", VerifiedOutcome.Signal.TOOL_SUCCESS));
+        assertThat(
+                        recall.compose(
+                                        new MemoryRecallRequest(
+                                                agent, "alice", "anything", Set.of(), 0, 800))
+                                .degradedReason())
                 .isEqualTo(UnifiedMemoryRecall.DISABLED);
 
-        JourneyRecallBridge.Recalled prompt = JourneyRecallBridge.recall(chat, agent, "alice", "what do you remember?");
+        JourneyRecallBridge.Recalled prompt =
+                JourneyRecallBridge.recall(chat, agent, "alice", "what do you remember?");
         assertThat(prompt.block()).as("zero prompt change").isNull();
         assertThat(prompt.facts()).isZero();
         assertThat(prompt.unified()).isEmpty();
         assertThat(prompt.note()).isNull();
 
-        // Tombstone enforcement follows the consolidation flag: off, no recall statement gains a predicate and no lookup runs.
+        // Tombstone enforcement follows the consolidation flag: off, no recall statement gains a
+        // predicate and no lookup runs.
         assertThat(tombstoneGuard.active()).isFalse();
-        assertThat(tombstoneGuard.excludeAgentFacts("t") + tombstoneGuard.excludeSharedFacts("t") + tombstoneGuard.excludeItems("t"))
+        assertThat(
+                        tombstoneGuard.excludeAgentFacts("t")
+                                + tombstoneGuard.excludeSharedFacts("t")
+                                + tombstoneGuard.excludeItems("t"))
                 .isEmpty();
 
         assertThat(rows("memory_item")).isZero();
@@ -104,7 +134,8 @@ class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
         assertThat(rows("memory_event")).isZero();
         assertThat(rows("memory_competence")).isZero();
         assertThat(rows("memory_tombstone")).isZero();
-        assertThatThrownBy(() -> export.export(() -> "alice", 10)).isInstanceOf(ResponseStatusException.class)
+        assertThatThrownBy(() -> export.export(() -> "alice", 10))
+                .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("404");
     }
 }

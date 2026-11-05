@@ -13,12 +13,11 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * The scratchpad tools are offered to a chat turn only when {@code app.tools.scratchpad.enabled}
- * is on AND the service bean exists; the names come out in the declared order.
+ * The scratchpad tools are offered to a chat turn only when {@code app.tools.scratchpad.enabled} is
+ * on AND the service bean exists; the names come out in the declared order.
  */
 class AgentScratchpadToolResolverTest {
 
@@ -75,10 +74,15 @@ class AgentScratchpadToolResolverTest {
     void enabledWithAServiceOffersAllFourInDeclarationOrder() {
         AgentScratchpadToolResolver resolver =
                 new AgentScratchpadToolResolver(
-                        toolGuard, providing(mock(AgentScratchpadService.class)), properties(true), null);
+                        toolGuard,
+                        providing(mock(AgentScratchpadService.class)),
+                        properties(true),
+                        null);
         assertThat(namesOf(resolver, UUID.randomUUID(), "s1"))
                 .containsExactly(
-                        "scratchpad_write", "scratchpad_read", "scratchpad_list",
+                        "scratchpad_write",
+                        "scratchpad_read",
+                        "scratchpad_list",
                         "scratchpad_delete");
     }
 
@@ -86,7 +90,10 @@ class AgentScratchpadToolResolverTest {
     void noAgentOnTheTurnOffersNothing() {
         AgentScratchpadToolResolver resolver =
                 new AgentScratchpadToolResolver(
-                        toolGuard, providing(mock(AgentScratchpadService.class)), properties(true), null);
+                        toolGuard,
+                        providing(mock(AgentScratchpadService.class)),
+                        properties(true),
+                        null);
         assertThat(namesOf(resolver, null, "s1")).isEmpty();
     }
 }

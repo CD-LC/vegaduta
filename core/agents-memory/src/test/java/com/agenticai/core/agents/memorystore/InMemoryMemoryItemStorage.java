@@ -14,8 +14,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * A map-backed {@link MemoryItemStorage} for service tests. Every row passes through the
- * {@link MemoryItem} constructor, which repeats the V681 CHECK constraints, so a service that would
+ * A map-backed {@link MemoryItemStorage} for service tests. Every row passes through the {@link
+ * MemoryItem} constructor, which repeats the V681 CHECK constraints, so a service that would
  * violate one fails here exactly as it would in Postgres. The real constraints are exercised in
  * {@code MemoryItemSchemaIT}.
  */
@@ -27,8 +27,13 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
     final List<MemoryEvent> events = new ArrayList<>();
 
     @Override
-    public void insertPending(MemoryItem item, float[] embedding, List<MemoryItemSource> sources, MemoryEvent created) {
-        if (item.status() != MemoryItemStatus.PENDING || item.trust() != MemoryTrustLevel.QUARANTINED) {
+    public void insertPending(
+            MemoryItem item,
+            float[] embedding,
+            List<MemoryItemSource> sources,
+            MemoryEvent created) {
+        if (item.status() != MemoryItemStatus.PENDING
+                || item.trust() != MemoryTrustLevel.QUARANTINED) {
             throw new IllegalArgumentException("only PENDING + QUARANTINED rows can be inserted");
         }
         items.put(item.id(), item);
@@ -51,7 +56,8 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
     }
 
     @Override
-    public List<MemoryItem> listByAgent(UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
+    public List<MemoryItem> listByAgent(
+            UUID agentId, MemoryItemStatus status, MemoryKind kind, int limit) {
         return items.values().stream()
                 .filter(
                         i ->
@@ -84,7 +90,10 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
 
     @Override
     public int countByStatus(UUID agentId, MemoryItemStatus status) {
-        return (int) items.values().stream().filter(i -> i.agentId().equals(agentId) && i.status() == status).count();
+        return (int)
+                items.values().stream()
+                        .filter(i -> i.agentId().equals(agentId) && i.status() == status)
+                        .count();
     }
 
     @Override
@@ -141,7 +150,11 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
 
     @Override
     public boolean transition(
-            UUID agentId, UUID itemId, Set<MemoryItemStatus> from, MemoryItemStatus to, MemoryEvent event) {
+            UUID agentId,
+            UUID itemId,
+            Set<MemoryItemStatus> from,
+            MemoryItemStatus to,
+            MemoryEvent event) {
         if (to == MemoryItemStatus.ACTIVE) {
             throw new IllegalArgumentException("ACTIVE is reachable only through activate()");
         }
@@ -234,7 +247,12 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
 
     @Override
     public List<Recalled> recall(
-            UUID agentId, MemoryKind kind, String subjectKey, float[] embedding, int limit, Instant now) {
+            UUID agentId,
+            MemoryKind kind,
+            String subjectKey,
+            float[] embedding,
+            int limit,
+            Instant now) {
         return items.values().stream()
                 .filter(
                         i ->
@@ -243,7 +261,8 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
                                         && i.status() == MemoryItemStatus.ACTIVE
                                         && i.trust() == MemoryTrustLevel.TRUSTED
                                         && !i.expired(now)
-                                        && (subjectKey == null || i.subjectKeys().contains(subjectKey)))
+                                        && (subjectKey == null
+                                                || i.subjectKeys().contains(subjectKey)))
                 .map(i -> new Recalled(i, 1.0 - cosine(embedding, embeddings.get(i.id())), 0.0))
                 .sorted(Comparator.comparingDouble(Recalled::distance))
                 .limit(limit)
@@ -283,9 +302,27 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
 
     private static MemoryItem withPinned(MemoryItem i, boolean pinned) {
         return new MemoryItem(
-                i.id(), i.agentId(), i.kind(), i.content(), i.trust(), i.status(), i.writer(), i.sourceType(),
-                i.sourceRef(), i.turnId(), i.sourceTaint(), i.modelGenerated(), i.generation(), i.subjectKeys(),
-                i.version(), i.supersedesId(), i.createdAt(), i.expiresAt(), i.approvedBy(), i.approvedAt(), pinned);
+                i.id(),
+                i.agentId(),
+                i.kind(),
+                i.content(),
+                i.trust(),
+                i.status(),
+                i.writer(),
+                i.sourceType(),
+                i.sourceRef(),
+                i.turnId(),
+                i.sourceTaint(),
+                i.modelGenerated(),
+                i.generation(),
+                i.subjectKeys(),
+                i.version(),
+                i.supersedesId(),
+                i.createdAt(),
+                i.expiresAt(),
+                i.approvedBy(),
+                i.approvedAt(),
+                pinned);
     }
 
     private static double cosine(float[] a, float[] b) {

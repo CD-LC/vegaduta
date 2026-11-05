@@ -116,19 +116,27 @@ class ScratchpadToolCallbackTest {
     private JsonNode call(ScratchpadToolCallback.Kind kind, String json, String sessionId)
             throws Exception {
         return JsonMappers.plain()
-                .readTree(new ScratchpadToolCallback(service, kind, AGENT, sessionId, CLEAN).call(json));
+                .readTree(
+                        new ScratchpadToolCallback(service, kind, AGENT, sessionId, CLEAN)
+                                .call(json));
     }
 
     @Test
     void toolNamesAndRequiredArgsAreTheDocumentedOnes() {
         for (ScratchpadToolCallback.Kind kind : ScratchpadToolCallback.Kind.values()) {
-            var def = new ScratchpadToolCallback(service, kind, AGENT, SESSION, CLEAN).getToolDefinition();
+            var def =
+                    new ScratchpadToolCallback(service, kind, AGENT, SESSION, CLEAN)
+                            .getToolDefinition();
             assertThat(def.name()).startsWith("scratchpad_");
             assertThat(def.inputSchema()).contains("\"scope\"");
         }
         assertThat(
                         new ScratchpadToolCallback(
-                                        service, ScratchpadToolCallback.Kind.WRITE, AGENT, SESSION, CLEAN)
+                                        service,
+                                        ScratchpadToolCallback.Kind.WRITE,
+                                        AGENT,
+                                        SESSION,
+                                        CLEAN)
                                 .getToolDefinition()
                                 .inputSchema())
                 .contains("\"required\":[\"key\",\"body\"]");
@@ -336,9 +344,7 @@ class ScratchpadToolCallbackTest {
 
     @Test
     void aWriteOnATaintedTurnIsPassedToTheServiceAsQuarantined() throws Exception {
-        var captor =
-                org.mockito.ArgumentCaptor.forClass(
-                        NoteTrust.class);
+        var captor = org.mockito.ArgumentCaptor.forClass(NoteTrust.class);
         JsonNode out =
                 JsonMappers.plain()
                         .readTree(
@@ -348,9 +354,16 @@ class ScratchpadToolCallbackTest {
                                                 AGENT,
                                                 SESSION,
                                                 taint(true))
-                                        .call("{\"key\":\"plan\",\"body\":\"the user prefers email\"}"));
+                                        .call(
+                                                "{\"key\":\"plan\",\"body\":\"the user prefers email\"}"));
         org.mockito.Mockito.verify(service)
-                .write(any(), any(), any(), org.mockito.ArgumentMatchers.eq("plan"), any(), captor.capture());
+                .write(
+                        any(),
+                        any(),
+                        any(),
+                        org.mockito.ArgumentMatchers.eq("plan"),
+                        any(),
+                        captor.capture());
         assertThat(captor.getValue().quarantined()).isTrue();
         assertThat(captor.getValue().sourceTaint()).containsExactly("fetch_web_page");
         assertThat(out.path("quarantined").asBoolean()).isTrue();
@@ -359,13 +372,11 @@ class ScratchpadToolCallbackTest {
     @Test
     void aWriteWhoseTaintStateIsUnreadableIsQuarantined() throws Exception {
         java.util.function.Supplier<List<String>> none = null;
-        var captor =
-                org.mockito.ArgumentCaptor.forClass(
-                        NoteTrust.class);
-        new ScratchpadToolCallback(
-                        service, ScratchpadToolCallback.Kind.WRITE, AGENT, SESSION, none)
+        var captor = org.mockito.ArgumentCaptor.forClass(NoteTrust.class);
+        new ScratchpadToolCallback(service, ScratchpadToolCallback.Kind.WRITE, AGENT, SESSION, none)
                 .call("{\"key\":\"k\",\"body\":\"a note\"}");
-        org.mockito.Mockito.verify(service).write(any(), any(), any(), any(), any(), captor.capture());
+        org.mockito.Mockito.verify(service)
+                .write(any(), any(), any(), any(), any(), captor.capture());
         assertThat(captor.getValue().quarantined()).isTrue();
     }
 

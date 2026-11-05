@@ -19,7 +19,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
-/** The finished turn's taint reaches the episode observer as a read-only snapshot taken when the turn ends. */
+/**
+ * The finished turn's taint reaches the episode observer as a read-only snapshot taken when the
+ * turn ends.
+ */
 class EpisodeRecordingGatewayTaintTest {
 
     private static final UUID AGENT = UUID.randomUUID();
@@ -32,17 +35,18 @@ class EpisodeRecordingGatewayTaintTest {
     }
 
     private void install() {
-        EpisodeRecordingGateway.install(new EpisodeRecordingGateway.Observer() {
-            @Override
-            public boolean enabled() {
-                return true;
-            }
+        EpisodeRecordingGateway.install(
+                new EpisodeRecordingGateway.Observer() {
+                    @Override
+                    public boolean enabled() {
+                        return true;
+                    }
 
-            @Override
-            public void onTurn(SkillLearningGateway.TurnOutcome outcome) {
-                seen.add(outcome);
-            }
-        });
+                    @Override
+                    public void onTurn(SkillLearningGateway.TurnOutcome outcome) {
+                        seen.add(outcome);
+                    }
+                });
     }
 
     private Flux<String> run(TurnTaint taint) {
@@ -92,7 +96,8 @@ class EpisodeRecordingGatewayTaintTest {
                 .blockLast();
         assertSame(TurnTaintSnapshot.unreadable(), seen.get(0).taint());
         SkillLearningGateway.TurnOutcome plain =
-                new SkillLearningGateway.TurnOutcome(AGENT, "s", null, null, Instant.now(), true, false, null);
+                new SkillLearningGateway.TurnOutcome(
+                        AGENT, "s", null, null, Instant.now(), true, false, null);
         assertEquals(null, plain.taint());
     }
 }

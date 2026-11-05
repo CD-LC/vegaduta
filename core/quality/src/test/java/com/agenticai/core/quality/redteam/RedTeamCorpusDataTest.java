@@ -9,16 +9,23 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-/** Pins the shared corpus size so a scenario can only be removed deliberately (red-team tests parameterise over it). */
+/**
+ * Pins the shared corpus size so a scenario can only be removed deliberately (red-team tests
+ * parameterise over it).
+ */
 class RedTeamCorpusDataTest {
 
     @Test
     void markerForgeriesAreComplete() {
         List<RedTeamCorpusData.Marker> markers = RedTeamCorpusData.markerForgeries();
         assertEquals(36, markers.size());
-        assertEquals(markers.size(), markers.stream().map(RedTeamCorpusData.Marker::label).distinct().count());
+        assertEquals(
+                markers.size(),
+                markers.stream().map(RedTeamCorpusData.Marker::label).distinct().count());
         assertEquals(2, markers.stream().filter(m -> m.platform() != null).count());
-        markers.stream().filter(m -> m.platform() == null).forEach(m -> assertFalse(m.text().isBlank(), m.label()));
+        markers.stream()
+                .filter(m -> m.platform() == null)
+                .forEach(m -> assertFalse(m.text().isBlank(), m.label()));
     }
 
     @Test

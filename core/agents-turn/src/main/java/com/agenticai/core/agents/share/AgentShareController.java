@@ -61,8 +61,13 @@ import reactor.core.publisher.Flux;
 public class AgentShareController {
 
     private static final Logger log = LoggerFactory.getLogger(AgentShareController.class);
-    /** {@code app.chat.limits.share-turn-timeout}; a hand-built controller keeps the shipped default. */
+
+    /**
+     * {@code app.chat.limits.share-turn-timeout}; a hand-built controller keeps the shipped
+     * default.
+     */
     private volatile Duration turnTimeout = new ChatLimitsProperties().getShareTurnTimeout();
+
     private static final String REQUESTED_BY_PREFIX = "system:agent-share:";
 
     private final AgentShareService shareService;
@@ -71,10 +76,14 @@ public class AgentShareController {
     private final ProviderModelCatalogService providerModelCatalogService;
     private final ShareVisitorSessions visitorSessions;
 
-    /** Sets {@code app.chat.limits.share-turn-timeout}; until it is called the shipped default applies. */
+    /**
+     * Sets {@code app.chat.limits.share-turn-timeout}; until it is called the shipped default
+     * applies.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void useLimits(ChatLimitsProperties limits) {
-        this.turnTimeout = (limits == null ? new ChatLimitsProperties() : limits).getShareTurnTimeout();
+        this.turnTimeout =
+                (limits == null ? new ChatLimitsProperties() : limits).getShareTurnTimeout();
     }
 
     public AgentShareController(
@@ -300,7 +309,7 @@ public class AgentShareController {
                                         }
                                         log.warn(
                                                 "Agent share chat stream failed mid-response for"
-                                                    + " share {} after {} chars already streamed",
+                                                        + " share {} after {} chars already streamed",
                                                 shareId,
                                                 emitted.length(),
                                                 e);

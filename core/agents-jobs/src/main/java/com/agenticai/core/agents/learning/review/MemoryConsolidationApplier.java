@@ -26,18 +26,20 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
- * Approved CONSOLIDATION: tidies the person's remembered facts through the same service methods the Memory page
- * uses ({@code updateForSubject}, {@code forgetForSubject} and their shared-tier twins), so a fact is always
- * checked against its owner. A "merge" rewrites the kept fact with the approved (possibly edited) text and
- * forgets the others; a "drop" forgets. Nothing is touched unless every fact it names still exists and still
- * belongs to the person, so a proposal that went stale is refused, never half applied.
+ * Approved CONSOLIDATION: tidies the person's remembered facts through the same service methods the
+ * Memory page uses ({@code updateForSubject}, {@code forgetForSubject} and their shared-tier
+ * twins), so a fact is always checked against its owner. A "merge" rewrites the kept fact with the
+ * approved (possibly edited) text and forgets the others; a "drop" forgets. Nothing is touched
+ * unless every fact it names still exists and still belongs to the person, so a proposal that went
+ * stale is refused, never half applied.
  *
- * <p>Only TRUSTED facts are visible to an apply ({@code agentTier}/{@code sharedTier}): a proposal that names a
- * QUARANTINED fact (hand-crafted, or filed before it was quarantined) is refused as stale, so a merge can never
- * rewrite a TRUSTED row from a quarantined one nor silently drop a row still awaiting the person's review.
+ * <p>Only TRUSTED facts are visible to an apply ({@code agentTier}/{@code sharedTier}): a proposal
+ * that names a QUARANTINED fact (hand-crafted, or filed before it was quarantined) is refused as
+ * stale, so a merge can never rewrite a TRUSTED row from a quarantined one nor silently drop a row
+ * still awaiting the person's review.
  *
- * <p>Like the Memory page, with {@code app.graph-memory.user-forget-sync.enabled} on, graph edges that only the
- * removed or rewritten wording supported are invalidated afterwards, best effort.
+ * <p>Like the Memory page, with {@code app.graph-memory.user-forget-sync.enabled} on, graph edges
+ * that only the removed or rewritten wording supported are invalidated afterwards, best effort.
  */
 @Component
 @ConditionalOnProperty(name = "app.learning.proposals.enabled", havingValue = "true")
@@ -67,7 +69,8 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
     }
 
     @Override
-    public void apply(LearningProposal proposal, String text) throws LearningProposalApplyException {
+    public void apply(LearningProposal proposal, String text)
+            throws LearningProposalApplyException {
         ConsolidationPayload p;
         try {
             p = ConsolidationPayload.parse(proposal.getPayload());
@@ -84,7 +87,8 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
                         "Some of these memories changed or were already removed. Reject this suggestion; the next review will look again.");
             }
         }
-        // The person approved the wording they were shown: a fact edited or replaced since is stale.
+        // The person approved the wording they were shown: a fact edited or replaced since is
+        // stale.
         for (Map.Entry<UUID, String> h : p.hashes().entrySet()) {
             String live = tier.get(h.getKey());
             if (live != null && !h.getValue().equals(ConsolidationPayload.fingerprint(live))) {
@@ -107,22 +111,26 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
         if (merge && !merged.equals(tier.get(p.keepId()))) {
             boolean changed;
             try {
-                changed = agentScope
-                        ? requireAgent().updateForSubject(p.keepId(), subject, merged)
-                        : requireTenant().updateFactForSubject(p.keepId(), subject, merged);
+                changed =
+                        agentScope
+                                ? requireAgent().updateForSubject(p.keepId(), subject, merged)
+                                : requireTenant().updateFactForSubject(p.keepId(), subject, merged);
             } catch (RuntimeException e) {
                 log.warn("Memory consolidation could not rewrite a fact: {}", e.getMessage());
-                throw new LearningProposalApplyException("Could not update that memory right now. Try again in a moment.");
+                throw new LearningProposalApplyException(
+                        "Could not update that memory right now. Try again in a moment.");
             }
             if (!changed) {
-                throw new LearningProposalApplyException("That memory is gone. Reject this suggestion.");
+                throw new LearningProposalApplyException(
+                        "That memory is gone. Reject this suggestion.");
             }
             tier.put(p.keepId(), merged);
         }
         for (UUID id : p.dropIds()) {
-            boolean gone = agentScope
-                    ? requireAgent().forgetForSubject(id, subject)
-                    : requireTenant().forgetFactForSubject(id, subject);
+            boolean gone =
+                    agentScope
+                            ? requireAgent().forgetForSubject(id, subject)
+                            : requireTenant().forgetFactForSubject(id, subject);
             if (gone) {
                 tier.remove(id);
             }
@@ -131,7 +139,11 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
     }
 
     private void syncGraph(
-            String subject, UUID tierAgentId, Map<UUID, String> before, Map<UUID, String> after, ConsolidationPayload p) {
+            String subject,
+            UUID tierAgentId,
+            Map<UUID, String> before,
+            Map<UUID, String> after,
+            ConsolidationPayload p) {
         if (!graphForgetSync) {
             return;
         }
@@ -153,7 +165,9 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
                 }
             }
         } catch (RuntimeException e) {
-            log.warn("Graph forget-sync failed after a memory tidy-up - the memories themselves are changed", e);
+            log.warn(
+                    "Graph forget-sync failed after a memory tidy-up - the memories themselves are changed",
+                    e);
         }
     }
 
@@ -165,7 +179,8 @@ public class MemoryConsolidationApplier implements LearningProposalApplier {
         return ids;
     }
 
-    private Map<UUID, String> agentTier(String subject, UUID agentId) throws LearningProposalApplyException {
+    private Map<UUID, String> agentTier(String subject, UUID agentId)
+            throws LearningProposalApplyException {
         Map<UUID, String> out = new HashMap<>();
         for (AgentMemoryEntry e : requireAgent().listAllForSubject(subject)) {
             if (e.trust() == MemoryTrust.TRUSTED && Objects.equals(e.agentId(), agentId)) {

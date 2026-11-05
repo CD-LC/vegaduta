@@ -17,11 +17,11 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 /**
- * The existing long-term stores as a {@link MemoryRecallSource}: the agent's own facts
- * ({@code agent_memory}) and the tenant-shared facts ({@code tenant_memory}) as SEMANTIC items.
- * Read-only over the services' own queries, which already restrict to {@code trust = 'TRUSTED'};
- * a row that nevertheless arrives QUARANTINED is dropped here as well. No backfill and no schema
- * change: nothing is copied into a new table.
+ * The existing long-term stores as a {@link MemoryRecallSource}: the agent's own facts ({@code
+ * agent_memory}) and the tenant-shared facts ({@code tenant_memory}) as SEMANTIC items. Read-only
+ * over the services' own queries, which already restrict to {@code trust = 'TRUSTED'}; a row that
+ * nevertheless arrives QUARANTINED is dropped here as well. No backfill and no schema change:
+ * nothing is copied into a new table.
  *
  * <p>Not wired into the chat prompt: the only caller is the unified-memory composer, which does
  * nothing while {@code app.memory.unified.enabled} is false.
@@ -37,7 +37,8 @@ public class SemanticMemorySource implements MemoryRecallSource {
     private final ObjectProvider<TenantMemoryService> tenantMemory;
 
     public SemanticMemorySource(
-            ObjectProvider<AgentMemoryService> agentMemory, ObjectProvider<TenantMemoryService> tenantMemory) {
+            ObjectProvider<AgentMemoryService> agentMemory,
+            ObjectProvider<TenantMemoryService> tenantMemory) {
         this.agentMemory = agentMemory;
         this.tenantMemory = tenantMemory;
     }
@@ -76,13 +77,32 @@ public class SemanticMemorySource implements MemoryRecallSource {
         try {
             if (agent != null) {
                 for (AgentMemoryEntry e :
-                        agent.recall(request.agentId(), request.subjectKey(), request.queryText(), topK)) {
-                    add(items, e.id(), e.content(), e.distance(), e.trust(), e.sourceTaint(), "agent_memory");
+                        agent.recall(
+                                request.agentId(),
+                                request.subjectKey(),
+                                request.queryText(),
+                                topK)) {
+                    add(
+                            items,
+                            e.id(),
+                            e.content(),
+                            e.distance(),
+                            e.trust(),
+                            e.sourceTaint(),
+                            "agent_memory");
                 }
             }
             if (tenant != null) {
-                for (TenantMemoryEntry e : tenant.recall(request.subjectKey(), request.queryText(), topK)) {
-                    add(items, e.id(), e.content(), e.distance(), e.trust(), e.sourceTaint(), "tenant_memory");
+                for (TenantMemoryEntry e :
+                        tenant.recall(request.subjectKey(), request.queryText(), topK)) {
+                    add(
+                            items,
+                            e.id(),
+                            e.content(),
+                            e.distance(),
+                            e.trust(),
+                            e.sourceTaint(),
+                            "tenant_memory");
                 }
             }
         } catch (RuntimeException e) {

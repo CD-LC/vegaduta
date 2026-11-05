@@ -36,7 +36,8 @@ class MemoryItemStoreRecallTest {
     void onlyActiveTrustedRowsAreRecalled() {
         UUID active = f.active(MemoryKind.EPISODIC, "approved");
         f.sink.propose(f.proposal(MemoryKind.EPISODIC, "pending one"));
-        UUID rejected = f.sink.propose(f.proposal(MemoryKind.EPISODIC, "rejected one")).orElseThrow().id();
+        UUID rejected =
+                f.sink.propose(f.proposal(MemoryKind.EPISODIC, "rejected one")).orElseThrow().id();
         f.review.reject(f.agent, rejected, MemoryActor.human("alice"));
         UUID reverted = f.active(MemoryKind.EPISODIC, "reverted one");
         f.review.revert(f.agent, reverted, MemoryActor.human("alice"));
@@ -51,9 +52,27 @@ class MemoryItemStoreRecallTest {
         UUID id = f.active(MemoryKind.EPISODIC, "old");
         MemoryItem row = f.storage.items.get(id);
         f.storage.put(
-                new MemoryItem(row.id(), row.agentId(), row.kind(), row.content(), row.trust(), row.status(), row.writer(),
-                        null, null, null, row.sourceTaint(), false, 0, row.subjectKeys(), 1, null, row.createdAt(),
-                        f.clock.instant().minusSeconds(5), row.approvedBy(), row.approvedAt()),
+                new MemoryItem(
+                        row.id(),
+                        row.agentId(),
+                        row.kind(),
+                        row.content(),
+                        row.trust(),
+                        row.status(),
+                        row.writer(),
+                        null,
+                        null,
+                        null,
+                        row.sourceTaint(),
+                        false,
+                        0,
+                        row.subjectKeys(),
+                        1,
+                        null,
+                        row.createdAt(),
+                        f.clock.instant().minusSeconds(5),
+                        row.approvedBy(),
+                        row.approvedAt()),
                 StoreFixture.vector("old"));
         assertThat(recall("user-1", Set.of()).items()).isEmpty();
     }
@@ -67,15 +86,21 @@ class MemoryItemStoreRecallTest {
         assertThat(recall("user-2", Set.of()).items())
                 .extracting(v -> v.kind())
                 .containsExactlyInAnyOrder(MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL);
-        assertThat(recall(null, Set.of()).items()).extracting(v -> v.kind()).doesNotContain(MemoryKind.EPISODIC);
-        assertThat(recall("user-1", Set.of()).items()).extracting(v -> v.kind()).contains(MemoryKind.EPISODIC);
+        assertThat(recall(null, Set.of()).items())
+                .extracting(v -> v.kind())
+                .doesNotContain(MemoryKind.EPISODIC);
+        assertThat(recall("user-1", Set.of()).items())
+                .extracting(v -> v.kind())
+                .contains(MemoryKind.EPISODIC);
     }
 
     @Test
     void anotherAgentsRowsAreNeverReturned() {
         f.active(MemoryKind.PROCEDURAL, "mine");
         MemoryRecallResult r =
-                f.store.recall(new MemoryRecallRequest(UUID.randomUUID(), "user-1", "q", Set.of(), 8, 800));
+                f.store.recall(
+                        new MemoryRecallRequest(
+                                UUID.randomUUID(), "user-1", "q", Set.of(), 8, 800));
         assertThat(r.items()).isEmpty();
     }
 
@@ -83,7 +108,9 @@ class MemoryItemStoreRecallTest {
     void offKindsAndMissingTenantAreEmpty() {
         f.active(MemoryKind.PROCEDURAL, "p");
         f.props.setKinds(EnumSet.of(MemoryKind.EPISODIC));
-        assertThat(recall("user-1", Set.of()).items()).extracting(v -> v.kind()).doesNotContain(MemoryKind.PROCEDURAL);
+        assertThat(recall("user-1", Set.of()).items())
+                .extracting(v -> v.kind())
+                .doesNotContain(MemoryKind.PROCEDURAL);
         f.props.setKinds(EnumSet.of(MemoryKind.PROCEDURAL));
         TenantContext.clear();
         assertThat(recall("user-1", Set.of()).degradedReason()).isEqualTo("no-tenant");
@@ -98,9 +125,10 @@ class MemoryItemStoreRecallTest {
     @Test
     void storeErrorsDegradeInsteadOfThrowing() {
         f.active(MemoryKind.PROCEDURAL, "p");
-        f.embedder = t -> {
-            throw new IllegalStateException("down");
-        };
+        f.embedder =
+                t -> {
+                    throw new IllegalStateException("down");
+                };
         MemoryRecallResult r = recall("user-1", Set.of());
         assertThat(r.items()).isEmpty();
         assertThat(r.degradedReason()).isEqualTo("error");
@@ -108,7 +136,9 @@ class MemoryItemStoreRecallTest {
 
     @Test
     void kindsAreTheThreeNewOnes() {
-        assertThat(f.store.kinds()).containsExactlyInAnyOrder(MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL);
+        assertThat(f.store.kinds())
+                .containsExactlyInAnyOrder(
+                        MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL);
         assertThat(List.copyOf(f.store.kinds())).doesNotContain(MemoryKind.SEMANTIC);
     }
 }

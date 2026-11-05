@@ -7,12 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * The structured tool result every layer hands the model when a tool budget is used up:
- * {@code {"error":"tool_budget_exhausted","result":"<instruction>"}}. A JSON object (Gemini replays
- * every tool result as one) whose {@code error} value is the marker the tool loop in {@code core/chat}
- * recognises ({@code ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED}: it keeps the marker
- * when clearing old results and ends the loop if the model ignores it). The two modules cannot share a
- * class, so the string is repeated there and a test pins that the two agree.
+ * The structured tool result every layer hands the model when a tool budget is used up: {@code
+ * {"error":"tool_budget_exhausted","result":"<instruction>"}}. A JSON object (Gemini replays every
+ * tool result as one) whose {@code error} value is the marker the tool loop in {@code core/chat}
+ * recognises ({@code ArgumentSanitizingToolCallingManager.TOOL_BUDGET_EXHAUSTED}: it keeps the
+ * marker when clearing old results and ends the loop if the model ignores it). The two modules
+ * cannot share a class, so the string is repeated there and a test pins that the two agree.
  */
 public final class ToolBudgetExhausted {
 
@@ -36,15 +36,21 @@ public final class ToolBudgetExhausted {
     }
 
     /**
-     * The same JSON written by hand, for the case the serializer fails (unreachable for a map of strings). It carries
-     * no English of its own: the instruction is the registry's text.
+     * The same JSON written by hand, for the case the serializer fails (unreachable for a map of
+     * strings). It carries no English of its own: the instruction is the registry's text.
      */
     static String fallbackResult(String instruction) {
-        return "{\"error\":\"" + MARKER + "\",\"result\":\""
-                + new String(JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction))) + "\"}";
+        return "{\"error\":\""
+                + MARKER
+                + "\",\"result\":\""
+                + new String(
+                        JsonStringEncoder.getInstance().quoteAsString(String.valueOf(instruction)))
+                + "\"}";
     }
 
-    /** True when {@code toolResult} is a budget-exhausted result (from this class or the tool loop). */
+    /**
+     * True when {@code toolResult} is a budget-exhausted result (from this class or the tool loop).
+     */
     public static boolean isBudgetExhausted(String toolResult) {
         return PlatformMarkerDocument.is(toolResult, MARKER);
     }

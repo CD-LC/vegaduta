@@ -12,17 +12,18 @@ import java.util.function.Consumer;
  * stream of chunks.
  *
  * <p>Two rules, both run on the {@linkplain LeakText compact form} of the output:
+ *
  * <ul>
  *   <li>{@value #RULE_CANARY}: the turn's {@link PromptCanary} token appears;
- *   <li>{@value #RULE_OVERLAP}: a verbatim run of at least {@code minChars} letters/digits
- *       (default 60, about 10 words) from the system prompt appears. The prompt is indexed once
- *       as rolling hashes of every {@code minChars}-window; prompt text is not kept by the
- *       detector beyond that, only 64-bit hashes.
+ *   <li>{@value #RULE_OVERLAP}: a verbatim run of at least {@code minChars} letters/digits (default
+ *       60, about 10 words) from the system prompt appears. The prompt is indexed once as rolling
+ *       hashes of every {@code minChars}-window; prompt text is not kept by the detector beyond
+ *       that, only 64-bit hashes.
  * </ul>
  *
- * <p><b>What this catches:</b> verbatim or near-verbatim reproduction, including different
- * spacing, line breaks, markdown, case, zero-width characters, combining marks, full-width forms
- * and the Cyrillic/Greek look-alikes in {@link LeakText}; and a leak split across stream chunks.
+ * <p><b>What this catches:</b> verbatim or near-verbatim reproduction, including different spacing,
+ * line breaks, markdown, case, zero-width characters, combining marks, full-width forms and the
+ * Cyrillic/Greek look-alikes in {@link LeakText}; and a leak split across stream chunks.
  *
  * <p><b>What this does not catch, by design:</b> a paraphrase, summary, translation or description
  * of the prompt ("I was told to always answer in French and never discuss pricing"); encodings
@@ -34,8 +35,8 @@ import java.util.function.Consumer;
  *
  * <p><b>False positives:</b> a reply that legitimately repeats {@code minChars} or more characters
  * of the prompt (a URL, a policy sentence the user asked to be quoted, memory text recalled to the
- * user) is flagged. Shorter shared phrases ("you are a helpful assistant") are not. That is why
- * the default action is {@code warn}.
+ * user) is flagged. Shorter shared phrases ("you are a helpful assistant") are not. That is why the
+ * default action is {@code warn}.
  *
  * <p>Instances are immutable and thread-safe; a {@link StreamScan} is single-threaded state.
  */
@@ -64,7 +65,10 @@ public final class LeakDetector {
      * @param action what to do with a leak; {@link PromptLeakAction#WARN} changes no output
      */
     public LeakDetector(
-            String systemPrompt, PromptCanary canary, PromptLeakProperties props, PromptLeakAction action) {
+            String systemPrompt,
+            PromptCanary canary,
+            PromptLeakProperties props,
+            PromptLeakAction action) {
         this.promptLength = systemPrompt == null ? 0 : systemPrompt.length();
         this.canaryCompact = canary == null ? null : LeakText.compactOf(canary.token());
         this.window = props.minChars();
@@ -77,15 +81,23 @@ public final class LeakDetector {
             pow *= BASE;
         }
         this.basePowWindow = pow;
-        this.promptHashes = hashWindows(LeakText.of(systemPrompt == null ? "" : systemPrompt).compact);
+        this.promptHashes =
+                hashWindows(LeakText.of(systemPrompt == null ? "" : systemPrompt).compact);
     }
 
-    /** One finding: the rule, the character range in the raw text, and how many letters/digits matched. */
+    /**
+     * One finding: the rule, the character range in the raw text, and how many letters/digits
+     * matched.
+     */
     record Match(String rule, int rawStart, int rawEnd, int matchedChars, boolean touchesEnd) {}
 
     /** What a detection looked like. Carries lengths and rule ids only, never text. */
     public record Verdict(
-            Set<String> rules, int matchedChars, int promptLength, int outputLength, PromptLeakAction action) {}
+            Set<String> rules,
+            int matchedChars,
+            int promptLength,
+            int outputLength,
+            PromptLeakAction action) {}
 
     /** The effective action of this detector. */
     public PromptLeakAction action() {
@@ -97,7 +109,10 @@ public final class LeakDetector {
         return !find(text).isEmpty();
     }
 
-    /** Scans a complete reply and applies the action: the text to send in its place (unchanged for WARN). */
+    /**
+     * Scans a complete reply and applies the action: the text to send in its place (unchanged for
+     * WARN).
+     */
     public String apply(String text, Consumer<Verdict> onDetect) {
         StreamScan scan = newScan(onDetect);
         String head = scan.feed(text);
@@ -304,7 +319,8 @@ public final class LeakDetector {
                     .sorted(java.util.Comparator.comparingInt(Match::rawStart))
                     .forEach(
                             m -> {
-                                int[] last = ranges.isEmpty() ? null : ranges.get(ranges.size() - 1);
+                                int[] last =
+                                        ranges.isEmpty() ? null : ranges.get(ranges.size() - 1);
                                 if (last != null && m.rawStart() <= last[1]) {
                                     last[1] = Math.max(last[1], m.rawEnd());
                                 } else {

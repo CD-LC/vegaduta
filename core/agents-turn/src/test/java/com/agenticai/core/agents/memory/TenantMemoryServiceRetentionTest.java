@@ -17,7 +17,10 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-/** G9: the retention purge spares memory-block rows like the cap prune does; the prune keeps recently used rows. */
+/**
+ * G9: the retention purge spares memory-block rows like the cap prune does; the prune keeps
+ * recently used rows.
+ */
 class TenantMemoryServiceRetentionTest {
 
     private final SidecarClient sidecar = mock(SidecarClient.class);
@@ -38,7 +41,8 @@ class TenantMemoryServiceRetentionTest {
 
         verify(jdbc).update(sql.capture(), any(Object.class), eq(100));
         assertTrue(
-                sql.getValue().contains("position('" + MemoryBlocks.KEY_MARKER + "' in subject_key) = 0"),
+                sql.getValue()
+                        .contains("position('" + MemoryBlocks.KEY_MARKER + "' in subject_key) = 0"),
                 sql.getValue());
     }
 
@@ -50,6 +54,8 @@ class TenantMemoryServiceRetentionTest {
         ReflectionTestUtils.invokeMethod(service, "pruneOverCap", "t");
 
         verify(jdbc).update(sql.capture(), any(Object.class));
-        assertTrue(sql.getValue().contains("last_used_at ASC, use_count ASC, created_at ASC"), sql.getValue());
+        assertTrue(
+                sql.getValue().contains("last_used_at ASC, use_count ASC, created_at ASC"),
+                sql.getValue());
     }
 }

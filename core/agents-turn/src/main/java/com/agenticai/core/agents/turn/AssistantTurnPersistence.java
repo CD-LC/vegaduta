@@ -38,28 +38,33 @@ final class AssistantTurnPersistence {
                         })
                 .doOnError(
                         e -> {
+                            // codeql[java/sensitive-log] -- ids only, no payload
                             ChatTurnExecutor.log.error(
                                     "Chat stream failed for agent {} session {}",
                                     agentId,
                                     sessionId,
                                     e);
-                            persistInterrupted(sessionMemoryService, memorySessionId,
+                            persistInterrupted(
+                                    sessionMemoryService,
+                                    memorySessionId,
                                     accumulated,
                                     assistantTurnPersisted,
                                     toolRecord);
                         })
                 .doOnCancel(
                         () ->
-                                persistInterrupted(sessionMemoryService, memorySessionId,
+                                persistInterrupted(
+                                        sessionMemoryService,
+                                        memorySessionId,
                                         accumulated,
                                         assistantTurnPersisted,
                                         toolRecord));
     }
 
     /**
-     * The error/cancel half of {@link #wrap}: persist the partial answer
-     * once, marked, and never let a persistence failure (e.g. Redis down at the exact moment the
-     * stream died) mask the original stream error on its way to the client.
+     * The error/cancel half of {@link #wrap}: persist the partial answer once, marked, and never
+     * let a persistence failure (e.g. Redis down at the exact moment the stream died) mask the
+     * original stream error on its way to the client.
      */
     private static void persistInterrupted(
             SessionMemoryService sessionMemoryService,

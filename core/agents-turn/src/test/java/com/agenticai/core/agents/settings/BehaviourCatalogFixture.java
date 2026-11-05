@@ -26,13 +26,15 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * The real behaviour catalog ({@link BehaviourSettingsCatalog}) over the same property objects a test hands to the
- * runtime, an in-memory store partitioned by tenant like the real one, and the real resolver (no cache, so a write is seen
- * at once). A test sets an override the way an admin's write would leave it, and watches the runtime change.
+ * The real behaviour catalog ({@link BehaviourSettingsCatalog}) over the same property objects a
+ * test hands to the runtime, an in-memory store partitioned by tenant like the real one, and the
+ * real resolver (no cache, so a write is seen at once). A test sets an override the way an admin's
+ * write would leave it, and watches the runtime change.
  */
 public final class BehaviourCatalogFixture {
 
-    public final ApprovalContinuationProperties approvalContinuation = new ApprovalContinuationProperties();
+    public final ApprovalContinuationProperties approvalContinuation =
+            new ApprovalContinuationProperties();
     public final ApprovalExpiryProperties approvalExpiry = new ApprovalExpiryProperties();
     public final ChatFinishProperties finish = new ChatFinishProperties();
     public final LlmRetryProperties retry = new LlmRetryProperties();
@@ -51,8 +53,19 @@ public final class BehaviourCatalogFixture {
 
     public BehaviourSettingsCatalog catalog() {
         return new BehaviourSettingsCatalog(
-                approvalContinuation, approvalExpiry, finish, retry, cache, followUp, continuation, toolLoop, routing,
-                memory, guardrails, auxiliary).withEpisodic(episodic);
+                        approvalContinuation,
+                        approvalExpiry,
+                        finish,
+                        retry,
+                        cache,
+                        followUp,
+                        continuation,
+                        toolLoop,
+                        routing,
+                        memory,
+                        guardrails,
+                        auxiliary)
+                .withEpisodic(episodic);
     }
 
     /** The resolver over the properties as they are NOW: call after tuning the property objects. */
@@ -62,7 +75,11 @@ public final class BehaviourCatalogFixture {
             noCache.setCacheTtl(Duration.ZERO);
             resolver =
                     new DefaultSettingsResolver(
-                            new SettingsRegistry(List.of(catalog())), store, List.of(), noCache, null);
+                            new SettingsRegistry(List.of(catalog())),
+                            store,
+                            List.of(),
+                            noCache,
+                            null);
         }
         return resolver;
     }
@@ -73,7 +90,14 @@ public final class BehaviourCatalogFixture {
                 tenantId,
                 () ->
                         store.saveCurrent(
-                                new SettingOverride(SettingScope.TENANT, "", key, value, 1, "admin", Instant.now())));
+                                new SettingOverride(
+                                        SettingScope.TENANT,
+                                        "",
+                                        key,
+                                        value,
+                                        1,
+                                        "admin",
+                                        Instant.now())));
         return this;
     }
 
@@ -84,7 +108,13 @@ public final class BehaviourCatalogFixture {
                 () ->
                         store.saveCurrent(
                                 new SettingOverride(
-                                        SettingScope.AGENT, agentId.toString(), key, value, 1, "editor", Instant.now())));
+                                        SettingScope.AGENT,
+                                        agentId.toString(),
+                                        key,
+                                        value,
+                                        1,
+                                        "editor",
+                                        Instant.now())));
         return this;
     }
 

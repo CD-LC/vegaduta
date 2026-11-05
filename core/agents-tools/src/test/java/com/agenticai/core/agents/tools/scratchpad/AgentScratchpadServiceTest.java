@@ -129,7 +129,8 @@ class AgentScratchpadServiceTest {
 
     @Test
     void writeWithNullSessionIsAnAgentLongTermNote() {
-        ScratchpadNote note = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
+        ScratchpadNote note =
+                service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
         assertThat(note.getSessionId()).isNull();
         assertThat(note.getSubjectKey()).isEqualTo(ALICE);
         verify(repository)
@@ -153,7 +154,8 @@ class AgentScratchpadServiceTest {
 
     @Test
     void readPassesThroughScopeAndKey() {
-        ScratchpadNote note = new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, NoteTrust.TRUSTED);
+        ScratchpadNote note =
+                new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, NoteTrust.TRUSTED);
         when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
                 .thenReturn(Optional.of(note));
         assertThat(service.read(AGENT, null, ALICE, "k")).containsSame(note);
@@ -239,7 +241,8 @@ class AgentScratchpadServiceTest {
         when(repository.deleteByAgentIdAndSessionIdAndUpdatedAtBefore(eq(AGENT), isNull(), any()))
                 .thenReturn(1L);
 
-        AgentScratchpadService.WriteResult result = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED);
+        AgentScratchpadService.WriteResult result =
+                service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED);
 
         assertThat(result.expiredRemoved()).isEqualTo(1);
     }
@@ -263,7 +266,8 @@ class AgentScratchpadServiceTest {
         // The session scope is full, but the agent-long-term scope is not -
         // a null-session write must still pass.
         when(repository.countByAgentIdAndSessionId(AGENT, SESSION)).thenReturn(200L);
-        ScratchpadNote note = service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
+        ScratchpadNote note =
+                service.write(AGENT, null, ALICE, "k", "body", NoteTrust.TRUSTED).note();
         assertThat(note.getSessionId()).isNull();
     }
 
@@ -272,8 +276,10 @@ class AgentScratchpadServiceTest {
     @Test
     void listReturnsSessionAndLongTermNotes() {
         ScratchpadNote sessionNote = new ScratchpadNote(AGENT, SESSION, "s", "b", 1);
-        ScratchpadNote longTerm = new ScratchpadNote(AGENT, null, ALICE, "l", "b", 1, NoteTrust.TRUSTED);
-        when(repository.findVisibleTo(AGENT, SESSION, ALICE)).thenReturn(List.of(sessionNote, longTerm));
+        ScratchpadNote longTerm =
+                new ScratchpadNote(AGENT, null, ALICE, "l", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findVisibleTo(AGENT, SESSION, ALICE))
+                .thenReturn(List.of(sessionNote, longTerm));
         assertThat(service.list(AGENT, SESSION, ALICE)).containsExactly(sessionNote, longTerm);
     }
 
@@ -352,7 +358,8 @@ class AgentScratchpadServiceTest {
     @Test
     void approveMakesAHeldNoteReadableAndRejectDeletesOnlyHeldNotes() {
         ScratchpadNote held = new ScratchpadNote(AGENT, null, ALICE, "held", "b", 1, TAINTED);
-        ScratchpadNote trusted = new ScratchpadNote(AGENT, null, ALICE, "ok", "b", 1, NoteTrust.TRUSTED);
+        ScratchpadNote trusted =
+                new ScratchpadNote(AGENT, null, ALICE, "ok", "b", 1, NoteTrust.TRUSTED);
         when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "held"))
                 .thenReturn(List.of(held));
         when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "ok"))
@@ -371,19 +378,25 @@ class AgentScratchpadServiceTest {
     void anAgentPadWriteWithoutAnIdentifiedCallerIsRefused() {
         for (String subject : new String[] {null, "", "  "}) {
             assertThatThrownBy(
-                            () -> service.write(AGENT, null, subject, "k", "body", NoteTrust.TRUSTED))
+                            () ->
+                                    service.write(
+                                            AGENT, null, subject, "k", "body", NoteTrust.TRUSTED))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("no identified user");
         }
         verify(repository, never()).save(any());
         // the session pad still works for an anonymous turn
-        assertThat(service.write(AGENT, SESSION, null, "k", "body", NoteTrust.TRUSTED).note().getKey())
+        assertThat(
+                        service.write(AGENT, SESSION, null, "k", "body", NoteTrust.TRUSTED)
+                                .note()
+                                .getKey())
                 .isEqualTo("k");
     }
 
     @Test
     void anAgentPadReadAndDeleteOnlyReachTheCallersOwnNotes() {
-        ScratchpadNote alices = new ScratchpadNote(AGENT, null, ALICE, "k", "alice secret", 12, NoteTrust.TRUSTED);
+        ScratchpadNote alices =
+                new ScratchpadNote(AGENT, null, ALICE, "k", "alice secret", 12, NoteTrust.TRUSTED);
         when(repository.findByAgentIdAndSessionIdIsNullAndSubjectKeyAndKey(AGENT, ALICE, "k"))
                 .thenReturn(Optional.of(alices));
 
@@ -422,25 +435,31 @@ class AgentScratchpadServiceTest {
     void theNoteCapAndEvictionArePerCaller() {
         properties.setMaxNotes(2);
         when(repository.countByAgentIdAndSessionIdIsNullAndSubjectKey(AGENT, ALICE)).thenReturn(2L);
-        ScratchpadNote oldest = new ScratchpadNote(AGENT, null, ALICE, "old", "b", 1, NoteTrust.TRUSTED);
-        when(repository.findFirstByAgentIdAndSessionIdIsNullAndSubjectKeyOrderByUpdatedAtAsc(AGENT, ALICE))
+        ScratchpadNote oldest =
+                new ScratchpadNote(AGENT, null, ALICE, "old", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findFirstByAgentIdAndSessionIdIsNullAndSubjectKeyOrderByUpdatedAtAsc(
+                        AGENT, ALICE))
                 .thenReturn(Optional.of(oldest));
 
         assertThat(service.write(AGENT, null, ALICE, "new", "b", NoteTrust.TRUSTED).evictedKey())
                 .isEqualTo("old");
         // Bob has room even though Alice is full
-        assertThat(service.write(AGENT, null, BOB, "new", "b", NoteTrust.TRUSTED).evictedKey()).isNull();
+        assertThat(service.write(AGENT, null, BOB, "new", "b", NoteTrust.TRUSTED).evictedKey())
+                .isNull();
     }
 
     @Test
     void aSessionNoteOwnedByAnotherSubjectCannotBeOverwrittenAndALegacyOneIsClaimed() {
-        ScratchpadNote bobs = new ScratchpadNote(AGENT, SESSION, BOB, "k", "b", 1, NoteTrust.TRUSTED);
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k")).thenReturn(Optional.of(bobs));
+        ScratchpadNote bobs =
+                new ScratchpadNote(AGENT, SESSION, BOB, "k", "b", 1, NoteTrust.TRUSTED);
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "k"))
+                .thenReturn(Optional.of(bobs));
         assertThatThrownBy(() -> service.write(AGENT, SESSION, ALICE, "k", "x", NoteTrust.TRUSTED))
                 .isInstanceOf(IllegalArgumentException.class);
 
         ScratchpadNote legacy = new ScratchpadNote(AGENT, SESSION, "l", "b", 1);
-        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "l")).thenReturn(Optional.of(legacy));
+        when(repository.findByAgentIdAndSessionIdAndKey(AGENT, SESSION, "l"))
+                .thenReturn(Optional.of(legacy));
         service.write(AGENT, SESSION, ALICE, "l", "x", NoteTrust.TRUSTED);
         assertThat(legacy.getSubjectKey()).isEqualTo(ALICE);
     }
@@ -464,7 +483,8 @@ class AgentScratchpadServiceTest {
     void approvingAnAmbiguousAgentPadKeyNeedsTheOwner() {
         ScratchpadNote a = new ScratchpadNote(AGENT, null, ALICE, "k", "b", 1, TAINTED);
         ScratchpadNote b = new ScratchpadNote(AGENT, null, BOB, "k", "b", 1, TAINTED);
-        when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "k")).thenReturn(List.of(a, b));
+        when(repository.findByAgentIdAndSessionIdIsNullAndKey(AGENT, "k"))
+                .thenReturn(List.of(a, b));
 
         assertThatThrownBy(() -> service.approve(AGENT, null, "k"))
                 .isInstanceOf(IllegalArgumentException.class)

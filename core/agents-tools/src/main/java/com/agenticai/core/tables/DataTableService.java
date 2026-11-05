@@ -401,7 +401,10 @@ public class DataTableService {
         return rowOps.insertRows(tableRef, input);
     }
 
-    /** {@link #insertRow(String, Map)} with the trust the writing turn's taint decided (see {@link RowTrust}). */
+    /**
+     * {@link #insertRow(String, Map)} with the trust the writing turn's taint decided (see {@link
+     * RowTrust}).
+     */
     @Transactional
     public RowView insertRow(String tableRef, Map<String, Object> values, RowTrust trust) {
         return rowOps.insertRow(tableRef, values, trust);
@@ -409,11 +412,15 @@ public class DataTableService {
 
     /** {@link #insertRows(String, List)} with the trust the writing turn's taint decided. */
     @Transactional
-    public List<RowView> insertRows(String tableRef, List<Map<String, Object>> input, RowTrust trust) {
+    public List<RowView> insertRows(
+            String tableRef, List<Map<String, Object>> input, RowTrust trust) {
         return rowOps.insertRows(tableRef, input, trust);
     }
 
-    /** Rows of the table held for review: written by an agent on a turn that handled untrusted content. */
+    /**
+     * Rows of the table held for review: written by an agent on a turn that handled untrusted
+     * content.
+     */
     @Transactional(readOnly = true)
     public List<DataTableDtos.QuarantinedRowView> quarantinedRows(String tableRef, int limit) {
         return rowOps.quarantined(tableRef, limit);

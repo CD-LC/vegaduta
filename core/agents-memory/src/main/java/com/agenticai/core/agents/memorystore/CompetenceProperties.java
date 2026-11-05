@@ -3,9 +3,10 @@ package com.agenticai.core.agents.memorystore;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * {@code app.memory.competence.*}: the SELF_MODEL competence counters (ADR-0028 section 3). Off by default; a tenant or
- * an agent can only switch it off further ({@code memory.competence.enabled}). The counters are fed from verified
- * outcomes only and read back as numbers rendered by a template, never by a model.
+ * {@code app.memory.competence.*}: the SELF_MODEL competence counters (ADR-0028 section 3). Off by
+ * default; a tenant or an agent can only switch it off further ({@code memory.competence.enabled}).
+ * The counters are fed from verified outcomes only and read back as numbers rendered by a template,
+ * never by a model.
  */
 @ConfigurationProperties(prefix = "app.memory.competence")
 public class CompetenceProperties {
@@ -16,7 +17,10 @@ public class CompetenceProperties {
     /** Most distinct task classes counted per agent; further classes share one overflow row. */
     private int maxTaskClassesPerAgent = 50;
 
-    /** Fewest verified outcomes (successes plus failures) before a class is mentioned in the summary. */
+    /**
+     * Fewest verified outcomes (successes plus failures) before a class is mentioned in the
+     * summary.
+     */
     private int minSample = 8;
 
     /** A class is "good" when the Wilson lower bound of its success rate is at least this. */

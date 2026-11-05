@@ -4,7 +4,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Creates and installs the {@link TurnUsageCounter} when {@code app.metrics.turn-usage.enabled=true} (default off). */
+/**
+ * Creates and installs the {@link TurnUsageCounter} when {@code
+ * app.metrics.turn-usage.enabled=true} (default off).
+ */
 @Configuration
 class TurnUsageCounterConfiguration {
 

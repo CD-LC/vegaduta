@@ -5,10 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.security.TenantLimitExceededException;
@@ -23,10 +20,10 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * {@code app.edition.billing-enabled=false}: the monthly hosted-pool ceiling never rejects (there is no plan to
- * upgrade to) but usage is still counted, so the cost and ROI views stay truthful. Default (edition on) is
- * covered unchanged by {@link FreeTierUsageLimiterServiceTest}; the first test here pins it against the same
- * inputs.
+ * {@code app.edition.billing-enabled=false}: the monthly hosted-pool ceiling never rejects (there
+ * is no plan to upgrade to) but usage is still counted, so the cost and ROI views stay truthful.
+ * Default (edition on) is covered unchanged by {@link FreeTierUsageLimiterServiceTest}; the first
+ * test here pins it against the same inputs.
  */
 class FreeTierUsageLimiterBillingEditionTest {
 
@@ -46,8 +43,17 @@ class FreeTierUsageLimiterBillingEditionTest {
         PlatformSettingsService settings = mock(PlatformSettingsService.class);
         when(settings.getLong(anyString(), anyLong())).thenAnswer(inv -> inv.getArgument(1));
         when(settings.getInt(anyString(), anyInt())).thenAnswer(inv -> inv.getArgument(1));
-        service = new FreeTierUsageLimiterService(
-            redis, settings, LIMIT, 2, 3, new SimpleMeterRegistry(), 2_000L, 0L, mock(ObjectProvider.class));
+        service =
+                new FreeTierUsageLimiterService(
+                        redis,
+                        settings,
+                        LIMIT,
+                        2,
+                        3,
+                        new SimpleMeterRegistry(),
+                        2_000L,
+                        0L,
+                        mock(ObjectProvider.class));
     }
 
     @Test
@@ -55,7 +61,7 @@ class FreeTierUsageLimiterBillingEditionTest {
         SpendCounterMocks.stub(redis, "monthly-tokens", 3000L, (Long) (long) (LIMIT + 1));
 
         assertThatThrownBy(() -> service.checkAndReserveTokenBudget(TENANT, TenantPlan.FREE, 1000))
-            .isInstanceOf(TenantLimitExceededException.class);
+                .isInstanceOf(TenantLimitExceededException.class);
     }
 
     @Test

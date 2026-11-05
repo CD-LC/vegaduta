@@ -26,7 +26,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** Memory recall into the prompt: unchanged by default, skipped when switched off, and traced by ids and counts only. */
+/**
+ * Memory recall into the prompt: unchanged by default, skipped when switched off, and traced by ids
+ * and counts only.
+ */
 @SuppressWarnings("unchecked")
 class ChatMemoryRecallSwitchTest {
 
@@ -58,7 +61,11 @@ class ChatMemoryRecallSwitchTest {
                                         Instant.now(),
                                         Instant.now(),
                                         0)));
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class)))
+        when(tenant.recall(
+                        anyString(),
+                        anyString(),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
                 .thenReturn(
                         List.of(
                                 new TenantMemoryEntry(
@@ -88,7 +95,9 @@ class ChatMemoryRecallSwitchTest {
         assertEquals(List.of(sharedId), trace.sharedFactIds());
         assertEquals(1, trace.blocks());
         assertTrue(trace.approxTokens() > 0);
-        assertFalse(trace.toString().contains("secret-text"), "the trace carries ids and counts, never text");
+        assertFalse(
+                trace.toString().contains("secret-text"),
+                "the trace carries ids and counts, never text");
     }
 
     @Test
@@ -135,8 +144,13 @@ class ChatMemoryRecallSwitchTest {
     @Test
     void nothingFoundIsTracedAsEnabledAndEmpty() {
         when(tenant.renderPromptBlocks(anyString(), anyString())).thenReturn(null);
-        when(agentMemory.recall(any(), anyString(), anyString(), nullable(QueryEmbedding.class))).thenReturn(List.of());
-        when(tenant.recall(anyString(), anyString(), nullable(QueryEmbedding.class), nullable(UUID.class)))
+        when(agentMemory.recall(any(), anyString(), anyString(), nullable(QueryEmbedding.class)))
+                .thenReturn(List.of());
+        when(tenant.recall(
+                        anyString(),
+                        anyString(),
+                        nullable(QueryEmbedding.class),
+                        nullable(UUID.class)))
                 .thenReturn(List.of());
 
         ChatMemoryRecall.MemoryRecall out = recall.recallMemoryFacts(agentId, "alice", "hi", null);

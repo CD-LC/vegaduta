@@ -8,10 +8,24 @@ import java.util.Locale;
 public final class EvalText {
 
     /** Phrases (English, Hindi, Hinglish) by which an answer admits it does not know. */
-    static final List<String> ABSTENTION_MARKERS = List.of(
-        "i don't know", "i do not know", "don't have that", "do not have that", "not sure",
-        "no record", "you haven't told me", "you have not told me", "pata nahi", "pata nahin",
-        "mujhe nahi pata", "नहीं पता", "पता नहीं", "नहीं जानता", "नहीं जानती", "जानकारी नहीं");
+    static final List<String> ABSTENTION_MARKERS =
+            List.of(
+                    "i don't know",
+                    "i do not know",
+                    "don't have that",
+                    "do not have that",
+                    "not sure",
+                    "no record",
+                    "you haven't told me",
+                    "you have not told me",
+                    "pata nahi",
+                    "pata nahin",
+                    "mujhe nahi pata",
+                    "नहीं पता",
+                    "पता नहीं",
+                    "नहीं जानता",
+                    "नहीं जानती",
+                    "जानकारी नहीं");
 
     private EvalText() {}
 

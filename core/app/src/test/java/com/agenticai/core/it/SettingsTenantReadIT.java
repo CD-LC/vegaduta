@@ -18,15 +18,18 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /**
- * Defect D1 (scorecard Addendum E): a tenant or agent behaviour override written through the real {@link SettingsService}
- * must be seen by the reads a chat turn makes, which run on a pre-turn thread with the tenant bound and WITHOUT a
- * transaction ({@code ChatPromptAssembler.supplyPreTurn} -> {@code ChatMemoryRecall} -> {@code BehaviourSettings} ->
- * {@code SettingsResolver} -> {@code JdbcSettingsStore} through a plain pooled {@code JdbcTemplate}: the connection's
- * search_path is {@code public}, nothing selects the tenant schema). The whole {@code CoreApplication} is booted on the
- * production {@code DataSource} (no statement-counting wrapper), and every read is made twice: outside a transaction (the
- * hot path) and inside one (where Hibernate-style tenant connections carry the tenant search_path).
+ * Defect D1 (scorecard Addendum E): a tenant or agent behaviour override written through the real
+ * {@link SettingsService} must be seen by the reads a chat turn makes, which run on a pre-turn
+ * thread with the tenant bound and WITHOUT a transaction ({@code ChatPromptAssembler.supplyPreTurn}
+ * -> {@code ChatMemoryRecall} -> {@code BehaviourSettings} -> {@code SettingsResolver} -> {@code
+ * JdbcSettingsStore} through a plain pooled {@code JdbcTemplate}: the connection's search_path is
+ * {@code public}, nothing selects the tenant schema). The whole {@code CoreApplication} is booted
+ * on the production {@code DataSource} (no statement-counting wrapper), and every read is made
+ * twice: outside a transaction (the hot path) and inside one (where Hibernate-style tenant
+ * connections carry the tenant search_path).
  *
- * <p>Needs {@code -Dvegaduta.it.pg.url=...} (see {@link ExternalPostgres}) and Redis; skipped otherwise.
+ * <p>Needs {@code -Dvegaduta.it.pg.url=...} (see {@link ExternalPostgres}) and Redis; skipped
+ * otherwise.
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class SettingsTenantReadIT extends UnifiedMemoryBootBase {
@@ -53,7 +56,9 @@ class SettingsTenantReadIT extends UnifiedMemoryBootBase {
     }
 
     private static void asTenant(String schema) {
-        TenantContext.set(TenantContext.of(schema, "settings-it", Set.of("ROLE_tenant-admin", "PERM_MANAGE_AGENTS")));
+        TenantContext.set(
+                TenantContext.of(
+                        schema, "settings-it", Set.of("ROLE_tenant-admin", "PERM_MANAGE_AGENTS")));
     }
 
     @Test
@@ -72,17 +77,31 @@ class SettingsTenantReadIT extends UnifiedMemoryBootBase {
         settings.set(SettingScope.TENANT, null, RECALL, false, "tenant switches recall off");
         settings.set(SettingScope.AGENT, agent, WRITE, false, "agent switches writes off");
 
-        // exactly what ChatServiceParts wires for the recall and write switches, read the way the turn reads them
+        // exactly what ChatServiceParts wires for the recall and write switches, read the way the
+        // turn reads them
         BehaviourSettings behaviour = BehaviourSettings.of(resolver);
         for (boolean inTransaction : new boolean[] {false, true}) {
             resolver.evictCurrentTenant();
-            String where = inTransaction ? "inside a transaction" : "outside a transaction (the chat turn)";
-            boolean recall = read(inTransaction, () -> behaviour.bool(RECALL, null, agent, () -> true));
-            boolean recallOtherAgent = read(inTransaction, () -> behaviour.bool(RECALL, null, untouchedAgent, () -> true));
-            boolean write = read(inTransaction, () -> behaviour.bool(WRITE, null, agent, () -> true));
-            boolean writeOtherAgent = read(inTransaction, () -> behaviour.bool(WRITE, null, untouchedAgent, () -> true));
+            String where =
+                    inTransaction
+                            ? "inside a transaction"
+                            : "outside a transaction (the chat turn)";
+            boolean recall =
+                    read(inTransaction, () -> behaviour.bool(RECALL, null, agent, () -> true));
+            boolean recallOtherAgent =
+                    read(
+                            inTransaction,
+                            () -> behaviour.bool(RECALL, null, untouchedAgent, () -> true));
+            boolean write =
+                    read(inTransaction, () -> behaviour.bool(WRITE, null, agent, () -> true));
+            boolean writeOtherAgent =
+                    read(
+                            inTransaction,
+                            () -> behaviour.bool(WRITE, null, untouchedAgent, () -> true));
             assertThat(recall).as("tenant override of %s, %s", RECALL, where).isFalse();
-            assertThat(recallOtherAgent).as("tenant override reaches every agent, %s", where).isFalse();
+            assertThat(recallOtherAgent)
+                    .as("tenant override reaches every agent, %s", where)
+                    .isFalse();
             assertThat(write).as("agent override of %s, %s", WRITE, where).isFalse();
             assertThat(writeOtherAgent).as("agent override stays on its agent, %s", where).isTrue();
         }
@@ -101,7 +120,9 @@ class SettingsTenantReadIT extends UnifiedMemoryBootBase {
         UUID agentB = newAgent("settings-read-b");
         resolver.evictCurrentTenant();
         assertThat(resolver.getBool(RECALL, agentB)).as("tenant b outside a transaction").isTrue();
-        assertThat(read(true, () -> resolver.getBool(RECALL, agentB))).as("tenant b inside a transaction").isTrue();
+        assertThat(read(true, () -> resolver.getBool(RECALL, agentB)))
+                .as("tenant b inside a transaction")
+                .isTrue();
         asTenant(a);
         resolver.evictCurrentTenant();
         assertThat(resolver.getBool(RECALL, agentA)).as("tenant a outside a transaction").isFalse();

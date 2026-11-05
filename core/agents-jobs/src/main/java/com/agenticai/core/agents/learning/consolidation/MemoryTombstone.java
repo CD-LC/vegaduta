@@ -9,10 +9,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A "forgotten" marker for one memory row (migration V683): hash and metadata only, never the
- * text. Writing a tombstone is the ONLY state change the consolidation apply path can make - it
- * marks a fact forgotten without deleting the row (deletion, restore windows and recall-side
- * filtering are a later work package), and it can never set a row TRUSTED or ACTIVE.
+ * A "forgotten" marker for one memory row (migration V683): hash and metadata only, never the text.
+ * Writing a tombstone is the ONLY state change the consolidation apply path can make - it marks a
+ * fact forgotten without deleting the row (deletion, restore windows and recall-side filtering are
+ * a later work package), and it can never set a row TRUSTED or ACTIVE.
  */
 @Entity
 @Table(name = "memory_tombstone")

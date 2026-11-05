@@ -4,9 +4,9 @@ import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * {@code app.approvals.recovery.*}: what {@link ApprovalRecoveryJob} does with an approved action a dead process left
- * behind. A person's decision is committed before the action runs, so a crash in between used to leave an approved
- * request that nothing ever ran or reported.
+ * {@code app.approvals.recovery.*}: what {@link ApprovalRecoveryJob} does with an approved action a
+ * dead process left behind. A person's decision is committed before the action runs, so a crash in
+ * between used to leave an approved request that nothing ever ran or reported.
  */
 @ConfigurationProperties(prefix = "app.approvals.recovery")
 public class ApprovalRecoveryProperties {
@@ -15,20 +15,21 @@ public class ApprovalRecoveryProperties {
     private boolean enabled = true;
 
     /**
-     * How long an approved request may sit with its action not started before the sweep runs it. A live decision starts
-     * the action within milliseconds; this only has to be longer than a slow database write.
+     * How long an approved request may sit with its action not started before the sweep runs it. A
+     * live decision starts the action within milliseconds; this only has to be longer than a slow
+     * database write.
      */
     private Duration unstartedGrace = Duration.ofMinutes(2);
 
     /**
-     * Past this age since the decision, a never-started action is NOT run: it was approved against a situation that
-     * may no longer exist. It is closed as failed and the conversation is told.
+     * Past this age since the decision, a never-started action is NOT run: it was approved against
+     * a situation that may no longer exist. It is closed as failed and the conversation is told.
      */
     private Duration maxRecoveryAge = Duration.ofHours(1);
 
     /**
-     * How long a started action may go without recording its end before it is declared interrupted. Longer than the
-     * slowest executor (a code-workspace run), or a live run is reported lost.
+     * How long a started action may go without recording its end before it is declared interrupted.
+     * Longer than the slowest executor (a code-workspace run), or a live run is reported lost.
      */
     private Duration startedStaleAfter = Duration.ofMinutes(30);
 

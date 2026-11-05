@@ -45,7 +45,9 @@ class DelegationTaintTest {
         child.inheritFrom(parent);
 
         parent.mark("later");
-        assertFalse(child.isTainted(), "a mark the parent gets after the child started does not reach it");
+        assertFalse(
+                child.isTainted(),
+                "a mark the parent gets after the child started does not reach it");
 
         TurnTaint other = new TurnTaint();
         other.inheritFrom(parent);
@@ -73,11 +75,15 @@ class DelegationTaintTest {
         TurnTaint outer = tainted("a");
         try (DelegationTaint.Scope o = DelegationTaint.openCall(outer)) {
             try (DelegationTaint.Scope i = DelegationTaint.openCall(new TurnTaint())) {
-                assertFalse(DelegationTaint.childOfCurrent().isTainted(), "the inner call's own (clean) turn");
+                assertFalse(
+                        DelegationTaint.childOfCurrent().isTainted(),
+                        "the inner call's own (clean) turn");
             }
             assertTrue(DelegationTaint.childOfCurrent().isTainted(), "the outer scope is restored");
         }
-        assertTrue(DelegationTaint.currentCall().isEmpty(), "nothing leaks onto the thread afterwards");
+        assertTrue(
+                DelegationTaint.currentCall().isEmpty(),
+                "nothing leaks onto the thread afterwards");
     }
 
     @Test
@@ -89,9 +95,13 @@ class DelegationTaintTest {
             Callable<Boolean> carried = DelegationTaint.propagating(plain);
 
             assertTrue(pool.submit(carried).get(), "the carried scope reaches the worker thread");
-            assertFalse(pool.submit(plain).get(), "a thread that was not handed the scope sees nothing");
+            assertFalse(
+                    pool.submit(plain).get(),
+                    "a thread that was not handed the scope sees nothing");
             assertTrue(pool.submit(carried).get());
-            assertTrue(pool.submit(() -> DelegationTaint.currentCall().isEmpty()).get(), "the worker is left clean");
+            assertTrue(
+                    pool.submit(() -> DelegationTaint.currentCall().isEmpty()).get(),
+                    "the worker is left clean");
         } finally {
             pool.shutdownNow();
         }

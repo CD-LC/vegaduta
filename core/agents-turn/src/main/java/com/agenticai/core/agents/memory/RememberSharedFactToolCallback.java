@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * Shared cross-agent memory tier (#847) - exposes {@link TenantMemoryService#remember} as a native
@@ -49,18 +49,33 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     }
 
     public RememberSharedFactToolCallback(
-        TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey,
-        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService, ChatClient chatClient
-    ) {
-        this(tenantMemoryService, agentId, subjectKey, graphMemoryService, entityExtractionService, chatClient, null);
+            TenantMemoryService tenantMemoryService,
+            UUID agentId,
+            String subjectKey,
+            GraphMemoryService graphMemoryService,
+            EntityExtractionService entityExtractionService,
+            ChatClient chatClient) {
+        this(
+                tenantMemoryService,
+                agentId,
+                subjectKey,
+                graphMemoryService,
+                entityExtractionService,
+                chatClient,
+                null);
     }
 
-    /** {@code turnTaint} null or empty: taint unreadable, every write is quarantined (fail closed). */
+    /**
+     * {@code turnTaint} null or empty: taint unreadable, every write is quarantined (fail closed).
+     */
     public RememberSharedFactToolCallback(
-        TenantMemoryService tenantMemoryService, UUID agentId, String subjectKey,
-        GraphMemoryService graphMemoryService, EntityExtractionService entityExtractionService, ChatClient chatClient,
-        ObjectProvider<TurnTaintView> turnTaint
-    ) {
+            TenantMemoryService tenantMemoryService,
+            UUID agentId,
+            String subjectKey,
+            GraphMemoryService graphMemoryService,
+            EntityExtractionService entityExtractionService,
+            ChatClient chatClient,
+            ObjectProvider<TurnTaintView> turnTaint) {
         this.turnTaint = turnTaint;
         this.tenantMemoryService = tenantMemoryService;
         this.agentId = agentId;
@@ -101,7 +116,8 @@ public class RememberSharedFactToolCallback implements ToolCallback {
     public String call(String toolInput) {
         try {
             if (tenantMemoryService != null && tenantMemoryService.writesSwitchedOff(agentId)) {
-                // memory.write.enabled is off for this agent: say so, write nothing (no shared row, no graph triples).
+                // memory.write.enabled is off for this agent: say so, write nothing (no shared row,
+                // no graph triples).
                 return MemoryWriteSwitch.skippedResult();
             }
             Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
@@ -111,21 +127,29 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             }
             Optional<String> refusal = MemoryWriteScreen.refusal(factValue.toString());
             if (refusal.isPresent()) {
-                log.warn("remember_shared_fact refused by the memory write screen (agent {})", agentId);
+                log.warn(
+                        "remember_shared_fact refused by the memory write screen (agent {})",
+                        agentId);
                 return errorJson(refusal.get());
             }
             MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
-            UUID memoryId = tenantMemoryService.remember(subjectKey, factValue.toString(), agentId, provenance);
+            UUID memoryId =
+                    tenantMemoryService.remember(
+                            subjectKey, factValue.toString(), agentId, provenance);
             if (provenance.quarantined()) {
-                // The shared graph tier has no quarantine state, so a tainted write never reaches it.
-                return "{\"remembered\": true, \"shared\": true, \"quarantined\": true, \"memoryId\": \"" + memoryId
-                    + "\", \"note\": \"Saved for review: this turn handled untrusted content, so the fact is "
-                    + "not recalled until a person approves it.\"}";
+                // The shared graph tier has no quarantine state, so a tainted write never reaches
+                // it.
+                return "{\"remembered\": true, \"shared\": true, \"quarantined\": true, \"memoryId\": \""
+                        + memoryId
+                        + "\", \"note\": \"Saved for review: this turn handled untrusted content, so the fact is "
+                        + "not recalled until a person approves it.\"}";
             }
             writeToSharedGraphIfAvailable(factValue.toString());
             return "{\"remembered\": true, \"shared\": true, \"memoryId\": \"" + memoryId + "\"}";
         } catch (MemoryForgottenException e) {
-            return "{\"remembered\": false, \"forgotten\": true, \"note\": \"" + MemoryForgottenException.TOOL_NOTE + "\"}";
+            return "{\"remembered\": false, \"forgotten\": true, \"note\": \""
+                    + MemoryForgottenException.TOOL_NOTE
+                    + "\"}";
         } catch (Exception e) {
             log.warn("remember_shared_fact tool call failed", e);
             return errorJson("Failed to remember shared fact: " + e.getMessage());
@@ -145,8 +169,9 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             return;
         }
         try {
-            List<GraphTriple> triples = MemoryWriteGate.screenTriples(
-                entityExtractionService.extractTriples(chatClient, fact, agentId));
+            List<GraphTriple> triples =
+                    MemoryWriteGate.screenTriples(
+                            entityExtractionService.extractTriples(chatClient, fact, agentId));
             graphMemoryService.rememberShared(subjectKey, triples);
         } catch (Exception e) {
             log.warn(

@@ -6,7 +6,10 @@ import java.util.Locale;
 public enum PromptLeakMode {
     /** Nothing runs: no canary, no scan, no allocation per turn. */
     OFF,
-    /** Canary is added and output is scanned; detections are counted and audited, output is never altered. */
+    /**
+     * Canary is added and output is scanned; detections are counted and audited, output is never
+     * altered.
+     */
     WARN,
     /** As {@link #WARN}, and the configured {@link PromptLeakAction} is applied to the output. */
     ENFORCE;

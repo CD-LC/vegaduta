@@ -1,18 +1,18 @@
 package com.agenticai.core.agents.turn.approval;
 
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
 import com.agenticai.core.agents.turn.ApprovalContinuationPort;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.security.TenantContext;
-import com.agenticai.core.settings.SettingContext;
-import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
  * on with the task.", sent only by the Assistant pane, only with a folder attached).
  *
  * <h2>What it does</h2>
+ *
  * {@link #afterDecision} is called by the approval executor when the gated call has run, failed or
  * been denied. It builds an {@link ApprovalContinuation} from the request (the goal, the call, its
  * outcome, the tools already used), renders the continuation message ({@link
@@ -36,13 +37,15 @@ import reactor.core.publisher.Flux;
  * with {@link ApprovalContinuation#MESSAGE_MARKER}).
  *
  * <h2>Safety properties</h2>
+ *
  * <ul>
  *   <li><b>Once.</b> The decision is claimed in Redis before anything starts ({@link
  *       ApprovalContinuationClaims}); a repeat starts nothing.
- *   <li><b>As the requester, in the requester's tenant.</b> The turn runs as the subject recorded in
- *       the envelope with no roles - exactly what the replay of the tool itself ran as - never as the
- *       approver, and a request whose recorded tenant differs from the calling thread's is refused.
- *       The approver decides one action; they do not gain the right to act in the conversation.
+ *   <li><b>As the requester, in the requester's tenant.</b> The turn runs as the subject recorded
+ *       in the envelope with no roles - exactly what the replay of the tool itself ran as - never
+ *       as the approver, and a request whose recorded tenant differs from the calling thread's is
+ *       refused. The approver decides one action; they do not gain the right to act in the
+ *       conversation.
  *   <li><b>Not for jobs.</b> A job session ({@code job:<id>}) is continued by the job machinery,
  *       which resumes the job and builds its turn with the same {@link ApprovalContinuationPrompt}.
  *   <li><b>Never throws.</b> A failure to continue must not turn an executed approval into a failed
@@ -56,9 +59,9 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
     private static final Logger log = LoggerFactory.getLogger(ApprovalContinuationLauncher.class);
 
     /**
-     * The first characters of an agent job's session id ({@code AgentJobSession.PREFIX}; a test pins
-     * the two together). Duplicated rather than imported because the job package depends on the
-     * turn path, and this package may not depend back on it.
+     * The first characters of an agent job's session id ({@code AgentJobSession.PREFIX}; a test
+     * pins the two together). Duplicated rather than imported because the job package depends on
+     * the turn path, and this package may not depend back on it.
      */
     static final String JOB_SESSION_PREFIX = "job:";
 
@@ -84,8 +87,9 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
     private volatile SettingsResolver settings;
 
     /**
-     * The settings catalog, so a tenant's or an agent's {@code approvals.continuation.enabled} decides whether a
-     * decision continues the task. Absent (hand-built instances): {@code app.approvals.continuation.enabled}.
+     * The settings catalog, so a tenant's or an agent's {@code approvals.continuation.enabled}
+     * decides whether a decision continues the task. Absent (hand-built instances): {@code
+     * app.approvals.continuation.enabled}.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSettingsResolver(SettingsResolver resolver) {
@@ -95,8 +99,9 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
     static final String ENABLED_KEY = "approvals.continuation.enabled";
 
     /**
-     * Whether the continuation is on for the agent the request was made for (tenant level when the request names none):
-     * decided on the thread that decides the request, which carries the request's tenant.
+     * Whether the continuation is on for the agent the request was made for (tenant level when the
+     * request names none): decided on the thread that decides the request, which carries the
+     * request's tenant.
      */
     private boolean enabledFor(ApprovalRequest request) {
         SettingsResolver catalog = settings;
@@ -104,9 +109,14 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
             return properties.isEnabled();
         }
         try {
-            return catalog.getBool(ENABLED_KEY, SettingContext.forAgent(factory.requestedAgentId(request).orElse(null)));
+            return catalog.getBool(
+                    ENABLED_KEY,
+                    SettingContext.forAgent(factory.requestedAgentId(request).orElse(null)));
         } catch (RuntimeException e) {
-            log.warn("Could not read {}; using app.approvals.continuation.enabled: {}", ENABLED_KEY, e.toString());
+            log.warn(
+                    "Could not read {}; using app.approvals.continuation.enabled: {}",
+                    ENABLED_KEY,
+                    e.toString());
             return properties.isEnabled();
         }
     }
@@ -167,7 +177,8 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
                                 continuation.subjectKey(),
                                 prompt.render(continuation))
                         .continuation(continuation)
-                        // The parked turn's run-scoped tool selection, if it had one: the task goes on with the same tools.
+                        // The parked turn's run-scoped tool selection, if it had one: the task goes
+                        // on with the same tools.
                         .toolNames(continuation.runToolNames())
                         .build();
         TurnContext context = TurnContext.forEntry(tenant, turn);

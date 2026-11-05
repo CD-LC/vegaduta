@@ -4,7 +4,6 @@ import static com.agenticai.core.agents.turn.ChatPromptDirectives.containsFabric
 
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.ReasoningDepth;
-import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolSelection;
@@ -353,10 +352,10 @@ final class ChatTurnExecutor {
                                 ? promptLeakGuard
                                 : com.agenticai.core.guardrails.leak.PromptLeakGuard.shared())
                         .begin(
-                        systemPrompt,
-                        agentId,
-                        sessionId,
-                        context == null ? null : context.scope());
+                                systemPrompt,
+                                agentId,
+                                sessionId,
+                                context == null ? null : context.scope());
         return leak.guard(
                 new FastStreamTurn(
                                 this,
@@ -376,7 +375,9 @@ final class ChatTurnExecutor {
                         .stream());
     }
 
-    /** Test seam: null means the process-wide guard, read per turn (Spring installs it after boot). */
+    /**
+     * Test seam: null means the process-wide guard, read per turn (Spring installs it after boot).
+     */
     volatile com.agenticai.core.guardrails.leak.PromptLeakGuard promptLeakGuard;
 
     /** See {@link DegradedRetrySignal#flag}. */
@@ -512,10 +513,10 @@ final class ChatTurnExecutor {
      *   <li><b>complete</b> - runs {@code onCompleteFullAnswer} (the caller's pre-existing
      *       audit/persist/quality-judge body) exactly as before;
      *   <li><b>error/cancel</b> - persists whatever partial answer exists, suffixed with {@link
-     *       AgentChatService#INTERRUPTED_REPLY_MARKER}. Persistence-only: the error itself still propagates to the
-     *       client unchanged, and a token-less failure (the retryable pre-stream shape the fallback
-     *       branches above handle) persists nothing, so hosted-chain rungs that fail over cleanly
-     *       write no phantom turns.
+     *       AgentChatService#INTERRUPTED_REPLY_MARKER}. Persistence-only: the error itself still
+     *       propagates to the client unchanged, and a token-less failure (the retryable pre-stream
+     *       shape the fallback branches above handle) persists nothing, so hosted-chain rungs that
+     *       fail over cleanly write no phantom turns.
      * </ul>
      *
      * <p>The shared {@link AtomicBoolean} guarantees at most ONE assistant turn per stream even if

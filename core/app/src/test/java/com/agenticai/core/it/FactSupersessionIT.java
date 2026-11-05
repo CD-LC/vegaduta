@@ -29,10 +29,12 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 /**
- * A corrected fact supersedes the old one (migration V685), on a real Postgres with pgvector and the real tenant Flyway:
- * the SQL of {@code FactSupersession} (exact text, similarity, parked list), recall that leaves superseded rows out, and
- * the owner's list, export and erasure that still see them. The unit-level rules are {@code FactSupersessionTest} and
- * {@code MemorySupersessionServiceTest}. Run with {@code -Dvegaduta.it.pg.url=...} (see {@link UnifiedMemoryBootBase}).
+ * A corrected fact supersedes the old one (migration V685), on a real Postgres with pgvector and
+ * the real tenant Flyway: the SQL of {@code FactSupersession} (exact text, similarity, parked
+ * list), recall that leaves superseded rows out, and the owner's list, export and erasure that
+ * still see them. The unit-level rules are {@code FactSupersessionTest} and {@code
+ * MemorySupersessionServiceTest}. Run with {@code -Dvegaduta.it.pg.url=...} (see {@link
+ * UnifiedMemoryBootBase}).
  */
 @Import(UnifiedMemoryBootBase.FakeEmbedderConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -56,11 +58,14 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     @MockitoSpyBean SidecarClient sidecar;
 
     private static UUID agent;
-    private static final MemoryProvenance TAINTED = new MemoryProvenance(MemoryTrust.QUARANTINED, List.of("web_fetch"));
+    private static final MemoryProvenance TAINTED =
+            new MemoryProvenance(MemoryTrust.QUARANTINED, List.of("web_fetch"));
 
     @BeforeEach
     void world() {
-        doAnswer(i -> UnifiedMemoryBootBase.embed(i.getArgument(0))).when(sidecar).embedQuery(anyString());
+        doAnswer(i -> UnifiedMemoryBootBase.embed(i.getArgument(0)))
+                .when(sidecar)
+                .embedQuery(anyString());
         tenantSchema(SCHEMA);
         TenantContext.set(TenantContext.of(SCHEMA, "alice", Set.of()));
         if (agent == null) {
@@ -78,18 +83,26 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     }
 
     private List<String> recalled(String subject, String query) {
-        return agentMemory.recall(agent, subject, query, 10).stream().map(AgentMemoryEntry::content).toList();
+        return agentMemory.recall(agent, subject, query, 10).stream()
+                .map(AgentMemoryEntry::content)
+                .toList();
     }
 
     private Map<String, Object> row(UUID id) {
-        return jdbc.queryForMap("SELECT superseded_by, superseded_at, supersedes_ids, trust FROM " + SCHEMA + ".agent_memory WHERE id = ?", id);
+        return jdbc.queryForMap(
+                "SELECT superseded_by, superseded_at, supersedes_ids, trust FROM "
+                        + SCHEMA
+                        + ".agent_memory WHERE id = ?",
+                id);
     }
 
     @Test
     void aNamedFactIsSupersededKeptAndLeftOutOfRecall() {
         String who = person("named");
         UUID pune = agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        UUID mumbai = agentMemory.remember(agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
+        UUID mumbai =
+                agentMemory.remember(
+                        agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
 
         assertThat(row(pune).get("superseded_by")).isEqualTo(mumbai);
         assertThat(row(pune).get("superseded_at")).isNotNull();
@@ -98,35 +111,65 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
         // the owner's list (Memory page, export, erasure) keeps the old row, flagged
         List<AgentMemoryEntry> all = agentMemory.listAllForSubject(who);
         assertThat(all).hasSize(2);
-        assertThat(all).filteredOn(e -> e.id().equals(pune)).singleElement().satisfies(e -> assertThat(e.supersededAt()).isNotNull());
-        assertThat(all).filteredOn(e -> e.id().equals(mumbai)).singleElement().satisfies(e -> assertThat(e.supersededAt()).isNull());
+        assertThat(all)
+                .filteredOn(e -> e.id().equals(pune))
+                .singleElement()
+                .satisfies(e -> assertThat(e.supersededAt()).isNotNull());
+        assertThat(all)
+                .filteredOn(e -> e.id().equals(mumbai))
+                .singleElement()
+                .satisfies(e -> assertThat(e.supersededAt()).isNull());
         // the admin/edge list is live-only
-        assertThat(agentMemory.listAll(agent, who)).extracting(AgentMemoryEntry::content).containsExactly("I live in Mumbai");
+        assertThat(agentMemory.listAll(agent, who))
+                .extracting(AgentMemoryEntry::content)
+                .containsExactly("I live in Mumbai");
     }
 
     @Test
     void aNearDuplicateSupersedesOnSimilarityAloneButAnUnrelatedFactDoesNot() {
         String who = person("auto");
-        UUID shop = agentMemory.remember(agent, who, "my shop opens at nine am on weekdays", MemoryProvenance.TRUSTED);
-        UUID tea = agentMemory.remember(agent, who, "favourite drink is green tea", MemoryProvenance.TRUSTED);
-        UUID newer = agentMemory.remember(agent, who, "my shop opens at nine am on weekdays now", MemoryProvenance.TRUSTED);
+        UUID shop =
+                agentMemory.remember(
+                        agent,
+                        who,
+                        "my shop opens at nine am on weekdays",
+                        MemoryProvenance.TRUSTED);
+        UUID tea =
+                agentMemory.remember(
+                        agent, who, "favourite drink is green tea", MemoryProvenance.TRUSTED);
+        UUID newer =
+                agentMemory.remember(
+                        agent,
+                        who,
+                        "my shop opens at nine am on weekdays now",
+                        MemoryProvenance.TRUSTED);
 
         assertThat(row(shop).get("superseded_by")).isEqualTo(newer);
         assertThat(row(tea).get("superseded_by")).isNull();
-        assertThat(recalled(who, "when does my shop open")).containsExactly("my shop opens at nine am on weekdays now",
-                "favourite drink is green tea");
+        assertThat(recalled(who, "when does my shop open"))
+                .containsExactly(
+                        "my shop opens at nine am on weekdays now", "favourite drink is green tea");
     }
 
     @Test
     void theSameFactToldAgainIsOneRowWithARefreshedTime() {
         String who = person("same");
         UUID first = agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        Object before = jdbc.queryForObject("SELECT updated_at FROM " + SCHEMA + ".agent_memory WHERE id = ?", Object.class, first);
-        UUID again = agentMemory.remember(agent, who, "  i LIVE in   pune ", MemoryProvenance.TRUSTED);
+        Object before =
+                jdbc.queryForObject(
+                        "SELECT updated_at FROM " + SCHEMA + ".agent_memory WHERE id = ?",
+                        Object.class,
+                        first);
+        UUID again =
+                agentMemory.remember(agent, who, "  i LIVE in   pune ", MemoryProvenance.TRUSTED);
 
         assertThat(again).isEqualTo(first);
         assertThat(agentMemory.listAllForSubject(who)).hasSize(1);
-        Object after = jdbc.queryForObject("SELECT updated_at FROM " + SCHEMA + ".agent_memory WHERE id = ?", Object.class, first);
+        Object after =
+                jdbc.queryForObject(
+                        "SELECT updated_at FROM " + SCHEMA + ".agent_memory WHERE id = ?",
+                        Object.class,
+                        first);
         assertThat(after.toString()).isNotEmpty();
         assertThat(before).isNotNull();
     }
@@ -135,7 +178,8 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     void aQuarantinedCorrectionHidesNothingUntilAPersonApprovesIt() {
         String who = person("quarantine");
         UUID pune = agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        UUID mumbai = agentMemory.remember(agent, who, "I live in Mumbai", TAINTED, "I live in Pune");
+        UUID mumbai =
+                agentMemory.remember(agent, who, "I live in Mumbai", TAINTED, "I live in Pune");
 
         // untrusted: stored, parked, but the trusted fact is untouched and still the one recalled
         assertThat(row(pune).get("superseded_by")).isNull();
@@ -154,7 +198,8 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     void aRejectedQuarantinedCorrectionNeverTakesEffect() {
         String who = person("reject");
         UUID pune = agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        UUID mumbai = agentMemory.remember(agent, who, "I live in Mumbai", TAINTED, "I live in Pune");
+        UUID mumbai =
+                agentMemory.remember(agent, who, "I live in Mumbai", TAINTED, "I live in Pune");
 
         agentMemory.forget(agent, mumbai, who);
 
@@ -165,22 +210,36 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     @Test
     void anAgentNeverReplacesAFactThePersonTypedButAPersonMay() {
         String who = person("typed");
-        UUID typed = agentMemory.rememberOwn(agent, who, "my shop opens at nine am on weekdays", 25);
-        UUID byAgent = agentMemory.remember(agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "my shop opens at nine am on weekdays");
+        UUID typed =
+                agentMemory.rememberOwn(agent, who, "my shop opens at nine am on weekdays", 25);
+        UUID byAgent =
+                agentMemory.remember(
+                        agent,
+                        who,
+                        "I live in Mumbai",
+                        MemoryProvenance.TRUSTED,
+                        "my shop opens at nine am on weekdays");
         assertThat(row(typed).get("superseded_by")).as("an agent write").isNull();
         assertThat(byAgent).isNotNull();
 
-        UUID typedAgain = agentMemory.rememberOwn(agent, who, "my shop opens at nine am on weekdays now", 25);
+        UUID typedAgain =
+                agentMemory.rememberOwn(agent, who, "my shop opens at nine am on weekdays now", 25);
 
-        assertThat(row(typed).get("superseded_by")).as("a person's own write").isEqualTo(typedAgain);
+        assertThat(row(typed).get("superseded_by"))
+                .as("a person's own write")
+                .isEqualTo(typedAgain);
     }
 
     @Test
     void restatingTheOldValueSupersedesTheNewerOne() {
         String who = person("reconfirm");
         agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        UUID mumbai = agentMemory.remember(agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
-        UUID backInPune = agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED, "I live in Mumbai");
+        UUID mumbai =
+                agentMemory.remember(
+                        agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
+        UUID backInPune =
+                agentMemory.remember(
+                        agent, who, "I live in Pune", MemoryProvenance.TRUSTED, "I live in Mumbai");
 
         assertThat(row(mumbai).get("superseded_by")).isEqualTo(backInPune);
         assertThat(recalled(who, "where do I live")).containsExactly("I live in Pune");
@@ -191,7 +250,8 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     void erasureAndExportSeeSupersededRowsToo() {
         String who = person("erase");
         agentMemory.remember(agent, who, "I live in Pune", MemoryProvenance.TRUSTED);
-        agentMemory.remember(agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
+        agentMemory.remember(
+                agent, who, "I live in Mumbai", MemoryProvenance.TRUSTED, "I live in Pune");
         assertThat(agentMemory.listAllForSubject(who)).hasSize(2);
 
         assertThat(agentMemory.forgetAllForSubject(who)).isEqualTo(2);
@@ -202,11 +262,24 @@ class FactSupersessionIT extends UnifiedMemoryBootBase {
     @Test
     void theSharedTierSupersedesToo() {
         String who = person("shared");
-        UUID first = tenantMemory.remember(who, "on the gold plan since march", agent, MemoryProvenance.TRUSTED);
-        UUID second = tenantMemory.remember(who, "on the platinum plan since june", agent, MemoryProvenance.TRUSTED, "on the gold plan since march");
+        UUID first =
+                tenantMemory.remember(
+                        who, "on the gold plan since march", agent, MemoryProvenance.TRUSTED);
+        UUID second =
+                tenantMemory.remember(
+                        who,
+                        "on the platinum plan since june",
+                        agent,
+                        MemoryProvenance.TRUSTED,
+                        "on the gold plan since march");
 
-        assertThat(tenantMemory.recall(who, "which plan", 10)).extracting(TenantMemoryEntry::id).containsExactly(second);
-        assertThat(tenantMemory.listFactsForSubject(who)).hasSize(2)
-                .filteredOn(e -> e.id().equals(first)).singleElement().satisfies(e -> assertThat(e.supersededAt()).isNotNull());
+        assertThat(tenantMemory.recall(who, "which plan", 10))
+                .extracting(TenantMemoryEntry::id)
+                .containsExactly(second);
+        assertThat(tenantMemory.listFactsForSubject(who))
+                .hasSize(2)
+                .filteredOn(e -> e.id().equals(first))
+                .singleElement()
+                .satisfies(e -> assertThat(e.supersededAt()).isNotNull());
     }
 }

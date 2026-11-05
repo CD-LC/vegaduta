@@ -48,7 +48,10 @@ final class AgentScratchpadToolResolver {
     private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
     private volatile ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint;
 
-    /** The taint source a note write consults (see {@link TurnTaintViews}); unset means writes are held. */
+    /**
+     * The taint source a note write consults (see {@link TurnTaintViews}); unset means writes are
+     * held.
+     */
     void setTaint(
             ObjectProvider<AgentTaintPolicy> taintPolicy,
             ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint) {
@@ -56,7 +59,10 @@ final class AgentScratchpadToolResolver {
         this.turnTaint = turnTaint;
     }
 
-    /** Platform flag AND any tenant/agent override through the behaviour catalog ({@code tools.scratchpad.enabled}). */
+    /**
+     * Platform flag AND any tenant/agent override through the behaviour catalog ({@code
+     * tools.scratchpad.enabled}).
+     */
     boolean enabled(UUID agentId) {
         if (properties == null || !properties.isEnabled()) {
             return false;
@@ -65,7 +71,8 @@ final class AgentScratchpadToolResolver {
         if (settings == null) {
             return true;
         }
-        Boolean scoped = settings.boolOrNull(ScratchpadSettings.ENABLED_KEY, TenantScope.capture(), agentId);
+        Boolean scoped =
+                settings.boolOrNull(ScratchpadSettings.ENABLED_KEY, TenantScope.capture(), agentId);
         return scoped == null || scoped;
     }
 
@@ -97,7 +104,8 @@ final class AgentScratchpadToolResolver {
                                     sessionId,
                                     subjectKey,
                                     TurnTaintViews.sources(
-                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
+                                            TurnTaintViews.forTurn(
+                                                    taintPolicy, stepCounter, turnTaint))),
                             agentId,
                             sessionId,
                             stepCounter,

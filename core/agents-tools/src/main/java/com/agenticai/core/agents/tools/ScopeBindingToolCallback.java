@@ -6,11 +6,12 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
- * The outermost wrapper of a turn's tool chain: binds the turn's {@link ToolResultMarker.Scope} to the calling thread
- * for the whole call, so every layer below (the guard's chain, the redactor, the sanitizers) registers and reads the
- * platform's answers under THIS turn and a tool in another turn that prints the same words is not mistaken for them.
- * The binding is per call and thread-local; a layer that hops threads registers unscoped (visible to all) there, which
- * is the pre-scope behaviour.
+ * The outermost wrapper of a turn's tool chain: binds the turn's {@link ToolResultMarker.Scope} to
+ * the calling thread for the whole call, so every layer below (the guard's chain, the redactor, the
+ * sanitizers) registers and reads the platform's answers under THIS turn and a tool in another turn
+ * that prints the same words is not mistaken for them. The binding is per call and thread-local; a
+ * layer that hops threads registers unscoped (visible to all) there, which is the pre-scope
+ * behaviour.
  */
 final class ScopeBindingToolCallback implements ToolCallback {
 

@@ -7,7 +7,8 @@ import java.util.UUID;
  * items exist as views (ACTIVE is implied by the read port); building one from a quarantined
  * provenance throws, so a source cannot hand an untrusted item to the composer.
  */
-public record MemoryItemView(UUID id, MemoryKind kind, String text, double score, MemoryProvenanceRecord provenance) {
+public record MemoryItemView(
+        UUID id, MemoryKind kind, String text, double score, MemoryProvenanceRecord provenance) {
 
     public MemoryItemView {
         if (id == null || kind == null || text == null) {

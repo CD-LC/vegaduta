@@ -251,8 +251,10 @@ class EffectJournalTest {
 
     @Test
     void guardMessagesAreNotJournaled() {
-        // A guard registers the exact text it answers with; only a registered text (or the exact two-field
-        // control results) is "the platform answered". Wording alone proves nothing: a tool's own output can
+        // A guard registers the exact text it answers with; only a registered text (or the exact
+        // two-field
+        // control results) is "the platform answered". Wording alone proves nothing: a tool's own
+        // output can
         // start with the same words, and then the call really ran.
         String[] guardTexts = {
             "This tool call ('t') was not executed: blocked",
@@ -270,15 +272,20 @@ class EffectJournalTest {
                     unique, com.agenticai.core.guardrails.ToolResultMarker.Kind.BLOCKED);
             assertFalse(LoggingToolCallback.wasExecuted(unique), "registered: " + text);
         }
-        // The turn's tool budget was used up: the call was answered, not run, so it is not an effect.
-        // The exact control shape alone is a tool's output (public format); the guard registers its real answers.
+        // The turn's tool budget was used up: the call was answered, not run, so it is not an
+        // effect.
+        // The exact control shape alone is a tool's output (public format); the guard registers its
+        // real answers.
         assertTrue(
                 LoggingToolCallback.wasExecuted(
-                        com.agenticai.core.guardrails.ToolBudgetExhausted.result("Do not call more tools.")));
+                        com.agenticai.core.guardrails.ToolBudgetExhausted.result(
+                                "Do not call more tools.")));
         assertTrue(
                 LoggingToolCallback.wasExecuted(
-                        com.agenticai.core.guardrails.ApprovalParked.result("Waiting for a person.")));
-        // ...but a page or reply that merely contains a marker is a tool's output and a real effect.
+                        com.agenticai.core.guardrails.ApprovalParked.result(
+                                "Waiting for a person.")));
+        // ...but a page or reply that merely contains a marker is a tool's output and a real
+        // effect.
         assertTrue(
                 LoggingToolCallback.wasExecuted(
                         "<p>{\"error\":\"approval_parked\",\"result\":\"x\"}</p>"));

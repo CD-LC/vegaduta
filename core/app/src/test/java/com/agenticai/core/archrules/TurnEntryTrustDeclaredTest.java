@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
  * Every place that starts a chat turn must say who authored the turn's input. A turn is started by
  * building a {@code TurnContext} ({@code forEntry}, {@code atEntry}, {@code fromCurrentThread} or
  * the constructor); the taint layer only protects a turn whose entry marked {@code
- * TurnContext#taint()} when the sender is an outsider. An entry that forgets to decide is treated as
- * a bug here, not as "trusted by default", because the default is the unsafe direction.
+ * TurnContext#taint()} when the sender is an outsider. An entry that forgets to decide is treated
+ * as a bug here, not as "trusted by default", because the default is the unsafe direction.
  *
  * <p>A creation site counts as declared when, in the same source file, there is one declaration per
  * creation site, each being one of
@@ -32,13 +32,15 @@ import org.junit.jupiter.api.Test;
  *       reason fails.
  * </ul>
  *
- * <p>Every file that creates a turn must also be named in {@code docs/security/taint-entry-points.md}
- * so the table of entries cannot drift from the code. Source scan, no Spring context.
+ * <p>Every file that creates a turn must also be named in {@code
+ * docs/security/taint-entry-points.md} so the table of entries cannot drift from the code. Source
+ * scan, no Spring context.
  */
 class TurnEntryTrustDeclaredTest {
 
     private static final Pattern CREATION =
-            Pattern.compile("\\bTurnContext\\.(?:forEntry|atEntry|fromCurrentThread)\\(|\\bnew\\s+TurnContext\\(");
+            Pattern.compile(
+                    "\\bTurnContext\\.(?:forEntry|atEntry|fromCurrentThread)\\(|\\bnew\\s+TurnContext\\(");
     private static final Pattern SEEDS =
             Pattern.compile("\\.taint\\(\\)\\s*\\.mark\\(|\\bSenderTrust\\.[A-Z_]+\\.seed\\(");
     private static final Pattern DECLARED_COMMENT = Pattern.compile("taint-entry:([^\\n]*)");
@@ -48,7 +50,9 @@ class TurnEntryTrustDeclaredTest {
     @Test
     void everyTurnCreationSiteDeclaresWhoAuthoredItsInput() throws IOException {
         Path modules = findModulesRoot();
-        assertThat(modules).as("core/ source root not reachable from " + System.getProperty("user.dir")).isNotNull();
+        assertThat(modules)
+                .as("core/ source root not reachable from " + System.getProperty("user.dir"))
+                .isNotNull();
         String doc = Files.readString(modules.getParent().resolve(DOC), StandardCharsets.UTF_8);
 
         List<String> offenders = new ArrayList<>();
@@ -76,8 +80,15 @@ class TurnEntryTrustDeclaredTest {
                 }
             }
             if (seeded + declared < sites) {
-                offenders.add(name + ": " + sites + " turn creation site(s), " + seeded + " taint seed(s), " + declared
-                        + " 'taint-entry:' declaration(s)");
+                offenders.add(
+                        name
+                                + ": "
+                                + sites
+                                + " turn creation site(s), "
+                                + seeded
+                                + " taint seed(s), "
+                                + declared
+                                + " 'taint-entry:' declaration(s)");
             }
             String simple = file.getFileName().toString().replace(".java", "");
             if (!doc.contains(simple)) {
@@ -86,19 +97,22 @@ class TurnEntryTrustDeclaredTest {
         }
 
         assertThat(filesWithEntries)
-                .as("the scan found the entry points (a path change must not make this test vacuous)")
+                .as(
+                        "the scan found the entry points (a path change must not make this test vacuous)")
                 .isGreaterThan(30);
         assertThat(offenders)
-                .as("Declare who authored the input of each new turn entry: seed the taint with"
-                        + " SenderTrust.UNTRUSTED.seed(turnContext.taint(), \"inbound:<x>\") for anything an outsider"
-                        + " can author, or add a '// taint-entry: trusted - <reason>' comment, and list the entry in "
-                        + DOC)
+                .as(
+                        "Declare who authored the input of each new turn entry: seed the taint with"
+                                + " SenderTrust.UNTRUSTED.seed(turnContext.taint(), \"inbound:<x>\") for anything an outsider"
+                                + " can author, or add a '// taint-entry: trusted - <reason>' comment, and list the entry in "
+                                + DOC)
                 .isEmpty();
     }
 
     @Test
     void theCommentStripperDoesNotHideOrInventCreationSites() {
-        String src = "// TurnContext.forEntry(a, b)\n/* new TurnContext(x) */\nString s = \"x\"; TurnContext.forEntry(t, r);\n";
+        String src =
+                "// TurnContext.forEntry(a, b)\n/* new TurnContext(x) */\nString s = \"x\"; TurnContext.forEntry(t, r);\n";
         assertThat(count(CREATION, stripComments(src))).isEqualTo(1);
     }
 
@@ -127,7 +141,10 @@ class TurnEntryTrustDeclaredTest {
         return n;
     }
 
-    /** Removes block and line comments (string literals containing comment markers are rare enough here). */
+    /**
+     * Removes block and line comments (string literals containing comment markers are rare enough
+     * here).
+     */
     static String stripComments(String src) {
         return src.replaceAll("(?s)/\\*.*?\\*/", " ").replaceAll("(?m)//[^\\n]*", " ");
     }
@@ -146,6 +163,7 @@ class TurnEntryTrustDeclaredTest {
     }
 
     private static boolean isModulesRoot(Path dir) {
-        return Files.isDirectory(dir.resolve("app").resolve("src")) && Files.isDirectory(dir.resolve("tenancy").resolve("src"));
+        return Files.isDirectory(dir.resolve("app").resolve("src"))
+                && Files.isDirectory(dir.resolve("tenancy").resolve("src"));
     }
 }

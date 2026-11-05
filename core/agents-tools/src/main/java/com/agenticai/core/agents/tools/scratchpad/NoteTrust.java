@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Whether a scratchpad note may be read back (column {@code trust}, migration V678) and what tainted the
- * turn that wrote it ({@code source_taint}). Deliberately free of the memory package's types: this package
- * must not depend on {@code agents.memory} (package-cycle baseline).
+ * Whether a scratchpad note may be read back (column {@code trust}, migration V678) and what
+ * tainted the turn that wrote it ({@code source_taint}). Deliberately free of the memory package's
+ * types: this package must not depend on {@code agents.memory} (package-cycle baseline).
  */
 public record NoteTrust(boolean quarantined, List<String> sourceTaint) {
 
@@ -21,9 +21,9 @@ public record NoteTrust(boolean quarantined, List<String> sourceTaint) {
     }
 
     /**
-     * The trust a write gets from the turn's taint: {@code taintSources} returns what tainted the turn, or
-     * null when it is clean. No supplier, or one that throws, means the taint state cannot be read, and the
-     * write is held (fail closed).
+     * The trust a write gets from the turn's taint: {@code taintSources} returns what tainted the
+     * turn, or null when it is clean. No supplier, or one that throws, means the taint state cannot
+     * be read, and the write is held (fail closed).
      */
     static NoteTrust of(Supplier<List<String>> taintSources) {
         try {

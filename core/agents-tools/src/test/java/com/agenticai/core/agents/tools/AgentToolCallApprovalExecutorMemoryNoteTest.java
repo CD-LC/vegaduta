@@ -40,10 +40,10 @@ import org.springframework.context.ApplicationEventPublisher;
 
 /**
  * Where the executor writes the "[approved action ... completed]" note. A mock-based test used to
- * assert {@code appendTurn(eq("sess-1"), ...)} and so enshrined the bug: the note went under the RAW
- * client session id while every turn reads its history under the SEC-004 scoped id. These tests run
- * the real {@link SessionMemoryService} (over an in-memory Redis) and read the history back the way
- * the next turn does.
+ * assert {@code appendTurn(eq("sess-1"), ...)} and so enshrined the bug: the note went under the
+ * RAW client session id while every turn reads its history under the SEC-004 scoped id. These tests
+ * run the real {@link SessionMemoryService} (over an in-memory Redis) and read the history back the
+ * way the next turn does.
  */
 class AgentToolCallApprovalExecutorMemoryNoteTest {
 
@@ -70,7 +70,8 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                         redis.template(),
                         new ObjectMapper().findAndRegisterModules(),
                         settings,
-                        new StaticListableBeanFactory().getBeanProvider(SessionSummaryService.class),
+                        new StaticListableBeanFactory()
+                                .getBeanProvider(SessionSummaryService.class),
                         24,
                         40,
                         32_000,
@@ -93,8 +94,10 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                         memoryProvider,
                         noJobs,
                         mock(ObjectProvider.class),
-                        // No ApprovalContinuationProperties bean: the shipped wording applies, as in production defaults.
-                        new StaticListableBeanFactory().getBeanProvider(ApprovalContinuationProperties.class),
+                        // No ApprovalContinuationProperties bean: the shipped wording applies, as
+                        // in production defaults.
+                        new StaticListableBeanFactory()
+                                .getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         mock(ApplicationEventPublisher.class));
         // These envelopes carry no tool digest; drift checking is not what this class tests.
@@ -181,7 +184,8 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
 
     @Test
     void theOutcomeReachesTheModelAsAToolRecordButNeverTheTranscriptAsAnAssistantMessage() {
-        toolReturns("[UNTRUSTED CONTENT from tool 'send_invoice' <<<UNTRUSTED_DATA id=7>>> CONF-77 ]");
+        toolReturns(
+                "[UNTRUSTED CONTENT from tool 'send_invoice' <<<UNTRUSTED_DATA id=7>>> CONF-77 ]");
         String scoped = "c1:from-the-envelope";
 
         executor.execute(
@@ -198,7 +202,9 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
         List<ChatTurn> stored = memory.getFullHistory(scoped);
         assertEquals(1, stored.size());
         ChatTurn turn = stored.get(0);
-        assertTrue(ChatTurn.isToolRecordOnly(turn), "stored as a tool record, not as assistant text: " + turn);
+        assertTrue(
+                ChatTurn.isToolRecordOnly(turn),
+                "stored as a tool record, not as assistant text: " + turn);
         assertEquals("", turn.content());
         ToolLedger.Entry entry = turn.tools().entries().get(0);
         assertEquals(TOOL, entry.tool());
@@ -206,9 +212,12 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
         assertTrue(entry.arguments().contains("\"to\""), entry.arguments());
         assertTrue(entry.result().contains("CONF-77"), entry.result());
 
-        // The model's view: the record folded into the text, with the configured note and the output.
+        // The model's view: the record folded into the text, with the configured note and the
+        // output.
         List<ChatTurn> modelView = memory.getHistory(scoped);
-        assertTrue(hasNote(modelView, "[approved action '" + TOOL + "' completed"), modelView.toString());
+        assertTrue(
+                hasNote(modelView, "[approved action '" + TOOL + "' completed"),
+                modelView.toString());
         assertTrue(hasNote(modelView, "CONF-77"), modelView.toString());
         assertTrue(hasNote(modelView, TOOL + "("), "rendered as a tool record line: " + modelView);
     }
@@ -220,9 +229,7 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
 
         org.junit.jupiter.api.Assertions.assertThrows(
                 RuntimeException.class,
-                () ->
-                        executor.execute(
-                                request(",\"memorySessionId\":\"" + scoped + "\"")));
+                () -> executor.execute(request(",\"memorySessionId\":\"" + scoped + "\"")));
 
         assertTrue(hasNote(memory.getHistory(scoped), "[approved action '" + TOOL + "' failed"));
         assertEquals(List.of(), memory.getHistory(RAW_SESSION));
@@ -236,7 +243,9 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                 request(",\"tenantId\":\"" + TENANT + "\",\"subject\":\"" + SUBJECT + "\""));
 
         assertTrue(
-                hasNote(memory.getHistory(scopedKey()), "[approved action '" + TOOL + "' completed"),
+                hasNote(
+                        memory.getHistory(scopedKey()),
+                        "[approved action '" + TOOL + "' completed"),
                 "legacy envelope: the id is derived the way ChatTurnPreflight derives it; keys: "
                         + redis.listKeys());
         assertEquals(List.of(), memory.getHistory(RAW_SESSION));
@@ -288,8 +297,10 @@ class AgentToolCallApprovalExecutorMemoryNoteTest {
                         failing,
                         noJobs,
                         mock(ObjectProvider.class),
-                        // No ApprovalContinuationProperties bean: the shipped wording applies, as in production defaults.
-                        new StaticListableBeanFactory().getBeanProvider(ApprovalContinuationProperties.class),
+                        // No ApprovalContinuationProperties bean: the shipped wording applies, as
+                        // in production defaults.
+                        new StaticListableBeanFactory()
+                                .getBeanProvider(ApprovalContinuationProperties.class),
                         new ObjectMapper(),
                         mock(ApplicationEventPublisher.class));
         failingExecutor.setAllowUndigested(true);

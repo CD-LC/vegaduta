@@ -19,8 +19,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
 /**
- * G7 (V680): a parent chunk carries the trust of the children written with it, the parent read path only
- * returns TRUSTED parents, and quarantine approve/reject keep the parents in step with their children.
+ * G7 (V680): a parent chunk carries the trust of the children written with it, the parent read path
+ * only returns TRUSTED parents, and quarantine approve/reject keep the parents in step with their
+ * children.
  */
 class ParentChunkTrustTest {
 
@@ -31,10 +32,13 @@ class ParentChunkTrustTest {
     void insertWritesTheChildrensTrustAndTaintOnEveryParent() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
         ParentChunkStore store = new ParentChunkStore(jdbc);
-        List<ParentChunkStore.ParentRow> rows = List.of(
-            new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a"), new ParentChunkStore.ParentRow(UUID.randomUUID(), 1, "b"));
+        List<ParentChunkStore.ParentRow> rows =
+                List.of(
+                        new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a"),
+                        new ParentChunkStore.ParentRow(UUID.randomUUID(), 1, "b"));
 
-        store.insertAll(collection, null, rows, ChunkProvenance.quarantined(List.of("fetch_web_page")));
+        store.insertAll(
+                collection, null, rows, ChunkProvenance.quarantined(List.of("fetch_web_page")));
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<List<Object[]>> args = ArgumentCaptor.forClass(List.class);
@@ -50,8 +54,12 @@ class ParentChunkTrustTest {
     @SuppressWarnings("unchecked")
     void insertWithoutProvenanceFailsClosed() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        new ParentChunkStore(jdbc).insertAll(
-            collection, null, List.of(new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a")), null);
+        new ParentChunkStore(jdbc)
+                .insertAll(
+                        collection,
+                        null,
+                        List.of(new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a")),
+                        null);
 
         ArgumentCaptor<List<Object[]>> args = ArgumentCaptor.forClass(List.class);
         verify(jdbc).batchUpdate(anyString(), args.capture());
@@ -61,8 +69,12 @@ class ParentChunkTrustTest {
     @Test
     void trustedIngestionWritesTrustedParents() {
         JdbcTemplate jdbc = mock(JdbcTemplate.class);
-        new ParentChunkStore(jdbc).insertAll(
-            collection, null, List.of(new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a")), ChunkProvenance.TRUSTED);
+        new ParentChunkStore(jdbc)
+                .insertAll(
+                        collection,
+                        null,
+                        List.of(new ParentChunkStore.ParentRow(UUID.randomUUID(), 0, "a")),
+                        ChunkProvenance.TRUSTED);
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Object[]>> args = ArgumentCaptor.forClass(List.class);
@@ -92,12 +104,19 @@ class ParentChunkTrustTest {
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(jdbc, atLeastOnce()).update(sql.capture(), any(Object[].class));
-        String release = sql.getAllValues().stream()
-            .filter(s -> s.contains("knowledge_parent_chunk") && s.startsWith("UPDATE"))
-            .findFirst()
-            .orElseThrow(() -> new AssertionError("no parent release statement: " + sql.getAllValues()));
+        String release =
+                sql.getAllValues().stream()
+                        .filter(s -> s.contains("knowledge_parent_chunk") && s.startsWith("UPDATE"))
+                        .findFirst()
+                        .orElseThrow(
+                                () ->
+                                        new AssertionError(
+                                                "no parent release statement: "
+                                                        + sql.getAllValues()));
         assertTrue(release.contains("SET trust = 'TRUSTED'"), release);
-        assertTrue(release.contains("NOT EXISTS") && release.contains("c.trust = 'QUARANTINED'"), release);
+        assertTrue(
+                release.contains("NOT EXISTS") && release.contains("c.trust = 'QUARANTINED'"),
+                release);
     }
 
     @Test
@@ -111,8 +130,12 @@ class ParentChunkTrustTest {
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(jdbc, atLeastOnce()).update(sql.capture(), any(Object[].class));
         assertTrue(
-            sql.getAllValues().stream().anyMatch(s -> s.startsWith("DELETE FROM") && s.contains("knowledge_parent_chunk")),
-            sql.getAllValues().toString());
+                sql.getAllValues().stream()
+                        .anyMatch(
+                                s ->
+                                        s.startsWith("DELETE FROM")
+                                                && s.contains("knowledge_parent_chunk")),
+                sql.getAllValues().toString());
     }
 
     @Test
@@ -125,19 +148,26 @@ class ParentChunkTrustTest {
 
         ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
         verify(jdbc, atLeastOnce()).update(sql.capture(), any(Object[].class));
-        assertTrue(sql.getAllValues().stream().noneMatch(s -> s.contains("knowledge_parent_chunk")));
+        assertTrue(
+                sql.getAllValues().stream().noneMatch(s -> s.contains("knowledge_parent_chunk")));
         verify(jdbc, never()).batchUpdate(anyString(), any(List.class));
     }
 
-    /** Makes the "which parents do these held chunks point to" query report one chunk with one parent. */
+    /**
+     * Makes the "which parents do these held chunks point to" query report one chunk with one
+     * parent.
+     */
     private void stubAffected(JdbcTemplate jdbc, UUID parent) {
-        org.mockito.Mockito.doAnswer(inv -> {
-            RowCallbackHandler handler = inv.getArgument(1);
-            java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
-            when(rs.getString("collection_id")).thenReturn(collection.toString());
-            when(rs.getString("parent_id")).thenReturn(parent.toString());
-            handler.processRow(rs);
-            return null;
-        }).when(jdbc).query(anyString(), any(RowCallbackHandler.class), any(Object[].class));
+        org.mockito.Mockito.doAnswer(
+                        inv -> {
+                            RowCallbackHandler handler = inv.getArgument(1);
+                            java.sql.ResultSet rs = mock(java.sql.ResultSet.class);
+                            when(rs.getString("collection_id")).thenReturn(collection.toString());
+                            when(rs.getString("parent_id")).thenReturn(parent.toString());
+                            handler.processRow(rs);
+                            return null;
+                        })
+                .when(jdbc)
+                .query(anyString(), any(RowCallbackHandler.class), any(Object[].class));
     }
 }

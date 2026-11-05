@@ -17,8 +17,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * Smart-AI budget against a real Redis (skipped without redis-server), plus fail-mode against a real connection
- * failure. Settling or releasing a reservation after its window expired must not create a negative counter.
+ * Smart-AI budget against a real Redis (skipped without redis-server), plus fail-mode against a
+ * real connection failure. Settling or releasing a reservation after its window expired must not
+ * create a negative counter.
  */
 class PlatformFeatureBudgetRedisTest {
 
@@ -54,7 +55,8 @@ class PlatformFeatureBudgetRedisTest {
 
     @Test
     void aReservationHoldsTheEstimateWithAnExpiryAndSettlesToTheActualCost() {
-        PlatformFeatureBudgetService.Reservation r = service.reserve("copilot", new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve("copilot", new BigDecimal("0.01"));
 
         assertThat(r.allowed()).isTrue();
         assertThat(redis.opsForValue().get(FEATURE_KEY)).isEqualTo("1000000");
@@ -68,8 +70,11 @@ class PlatformFeatureBudgetRedisTest {
 
     @Test
     void releasingAfterTheWindowExpiredCreatesNoNegativeCounter() {
-        PlatformFeatureBudgetService.Reservation r = service.reserve("copilot", new BigDecimal("0.01"));
-        redis.delete(java.util.List.of(FEATURE_KEY, MASTER_KEY)); // the daily window rolled over mid-call
+        PlatformFeatureBudgetService.Reservation r =
+                service.reserve("copilot", new BigDecimal("0.01"));
+        redis.delete(
+                java.util.List.of(
+                        FEATURE_KEY, MASTER_KEY)); // the daily window rolled over mid-call
 
         service.release(r);
 
@@ -93,16 +98,22 @@ class PlatformFeatureBudgetRedisTest {
     void failModeAgainstARealConnectionFailure() {
         LettuceConnectionFactory dead = new LettuceConnectionFactory("127.0.0.1", 1);
         dead.afterPropertiesSet();
-        PlatformFeatureBudgetService down = new PlatformFeatureBudgetService(new StringRedisTemplate(dead), settings, 0L);
+        PlatformFeatureBudgetService down =
+                new PlatformFeatureBudgetService(new StringRedisTemplate(dead), settings, 0L);
 
-        assertThat(down.reserve("copilot", new BigDecimal("0.01")).allowed()).as("open: fail open").isTrue();
+        assertThat(down.reserve("copilot", new BigDecimal("0.01")).allowed())
+                .as("open: fail open")
+                .isTrue();
         assertThat(down.checkBudget("copilot").allowed()).isTrue();
 
         down.useSpendControlsFailMode(SpendControlsFailMode.closed());
-        PlatformFeatureBudgetService.Reservation refused = down.reserve("copilot", new BigDecimal("0.01"));
+        PlatformFeatureBudgetService.Reservation refused =
+                down.reserve("copilot", new BigDecimal("0.01"));
         assertThat(refused.allowed()).isFalse();
-        assertThat(refused.reason()).isEqualTo(PlatformFeatureBudgetService.REASON_STORE_UNAVAILABLE);
-        assertThat(down.checkBudget("copilot").reason()).isEqualTo(PlatformFeatureBudgetService.REASON_STORE_UNAVAILABLE);
+        assertThat(refused.reason())
+                .isEqualTo(PlatformFeatureBudgetService.REASON_STORE_UNAVAILABLE);
+        assertThat(down.checkBudget("copilot").reason())
+                .isEqualTo(PlatformFeatureBudgetService.REASON_STORE_UNAVAILABLE);
         down.release(refused); // never throws
     }
 }

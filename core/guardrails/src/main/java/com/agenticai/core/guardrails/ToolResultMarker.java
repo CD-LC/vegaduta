@@ -5,24 +5,26 @@ import java.util.Optional;
 import java.util.WeakHashMap;
 
 /**
- * Says, as a typed {@link Kind}, that a tool result is the PLATFORM's answer to a call and not the tool's output: a
- * guard refused the call, it was parked for a human, a policy withheld the output, or the turn's tool budget was used
- * up. In every one of those cases the tool did not run (or its output was not returned), so nothing downstream may
- * treat the call as an executed effect: the effect journal must not record it, the turn journal must not list it as a
- * successful call.
+ * Says, as a typed {@link Kind}, that a tool result is the PLATFORM's answer to a call and not the
+ * tool's output: a guard refused the call, it was parked for a human, a policy withheld the output,
+ * or the turn's tool budget was used up. In every one of those cases the tool did not run (or its
+ * output was not returned), so nothing downstream may treat the call as an executed effect: the
+ * effect journal must not record it, the turn journal must not list it as a successful call.
  *
- * <p>A tool callback can only return a {@code String}, so the answer cannot carry a type itself. Until now the
- * consumers recognised these answers by the first words of their text ("This tool call (", "This action (", ...),
- * which is wrong in two directions: a legitimate output that starts with those words was taken for a refusal, and a
- * refusal whose wording is configured or wrapped (the approval-park text is {@code app.guardrails.approval-park.*}; an
- * MCP refusal is wrapped into a JSON object) was taken for an executed call. Now the layer that produces the answer
- * {@link #mark registers} the exact text it returns, and a consumer asks {@link #kindOf}. The registry holds its keys
- * weakly, so a finished turn's texts are collected with it.
+ * <p>A tool callback can only return a {@code String}, so the answer cannot carry a type itself.
+ * Until now the consumers recognised these answers by the first words of their text ("This tool
+ * call (", "This action (", ...), which is wrong in two directions: a legitimate output that starts
+ * with those words was taken for a refusal, and a refusal whose wording is configured or wrapped
+ * (the approval-park text is {@code app.guardrails.approval-park.*}; an MCP refusal is wrapped into
+ * a JSON object) was taken for an executed call. Now the layer that produces the answer {@link
+ * #mark registers} the exact text it returns, and a consumer asks {@link #kindOf}. The registry
+ * holds its keys weakly, so a finished turn's texts are collected with it.
  *
- * <p>{@link #isPlatformAnswer} no longer accepts the old wording prefixes ("This tool call (", ...): a tool's output is
- * attacker-influenced text, and one that began with those words was read as the platform's own refusal and left out of
- * the effect and turn journals. A producer must register its text with {@link #mark}; the two typed control results
- * ({@link ApprovalParked}, {@link ToolBudgetExhausted}) are also recognised by their exact two-field JSON shape.
+ * <p>{@link #isPlatformAnswer} no longer accepts the old wording prefixes ("This tool call (",
+ * ...): a tool's output is attacker-influenced text, and one that began with those words was read
+ * as the platform's own refusal and left out of the effect and turn journals. A producer must
+ * register its text with {@link #mark}; the two typed control results ({@link ApprovalParked},
+ * {@link ToolBudgetExhausted}) are also recognised by their exact two-field JSON shape.
  */
 public final class ToolResultMarker {
 
@@ -36,26 +38,34 @@ public final class ToolResultMarker {
         WITHHELD,
         /** The turn's tool budget was used up; the call was answered, not run. */
         BUDGET_EXHAUSTED,
-        /** An offline eval turn's sandbox answered with a simulated result instead of running the tool. */
+        /**
+         * An offline eval turn's sandbox answered with a simulated result instead of running the
+         * tool.
+         */
         SANDBOXED
     }
 
     /**
-     * Identity of ONE turn for this registry. The registry is keyed by text, and a text is not unique to a turn or a
-     * tenant: two turns whose tools answer with the same words would share a mark, so one turn's refusal text could make
-     * another turn's genuine tool output look like the platform's answer (and hide a real call from the journals). A
-     * mark registered under a scope is visible to readers of that scope only. The scope is compared by identity and held
-     * weakly, so a finished turn's marks are collected with it.
+     * Identity of ONE turn for this registry. The registry is keyed by text, and a text is not
+     * unique to a turn or a tenant: two turns whose tools answer with the same words would share a
+     * mark, so one turn's refusal text could make another turn's genuine tool output look like the
+     * platform's answer (and hide a real call from the journals). A mark registered under a scope
+     * is visible to readers of that scope only. The scope is compared by identity and held weakly,
+     * so a finished turn's marks are collected with it.
      *
-     * <p>A turn owns one ({@link TurnApprovalState#markerScope()}). It reaches {@link #mark(String, Kind)} and {@link
-     * #kindOf(String)} through {@link #bind(Scope)} on the thread running the turn's tools (and re-bound on any thread
-     * the work is handed to, like the tenant), or explicitly through the overloads that take it.
+     * <p>A turn owns one ({@link TurnApprovalState#markerScope()}). It reaches {@link #mark(String,
+     * Kind)} and {@link #kindOf(String)} through {@link #bind(Scope)} on the thread running the
+     * turn's tools (and re-bound on any thread the work is handed to, like the tenant), or
+     * explicitly through the overloads that take it.
      */
     public static final class Scope {
         public Scope() {}
     }
 
-    /** Marks registered with no scope (producers not migrated, tests): visible to every reader, as before scopes existed. */
+    /**
+     * Marks registered with no scope (producers not migrated, tests): visible to every reader, as
+     * before scopes existed.
+     */
     private static final Scope UNSCOPED = new Scope();
 
     private static final ThreadLocal<Scope> CURRENT = new ThreadLocal<>();
@@ -63,7 +73,10 @@ public final class ToolResultMarker {
     /** Text -> scope -> kind. Weak on both the text and the scope. Guarded by its own monitor. */
     private static final Map<String, Map<Scope, Kind>> MARKED = new WeakHashMap<>();
 
-    /** Makes {@code scope} the ambient scope of the calling thread until the returned handle is closed. */
+    /**
+     * Makes {@code scope} the ambient scope of the calling thread until the returned handle is
+     * closed.
+     */
     public static Binding bind(Scope scope) {
         Scope previous = CURRENT.get();
         if (scope == null) {
@@ -95,28 +108,32 @@ public final class ToolResultMarker {
     private ToolResultMarker() {}
 
     /**
-     * Registers what {@link GuardedToolCallback} answered with, from its outcome code: every outcome but success is
-     * the guard replying in place of the tool (refused, parked for a human, budget used up) or withholding its
-     * output. Returns {@code result} itself; a success is left unmarked.
+     * Registers what {@link GuardedToolCallback} answered with, from its outcome code: every
+     * outcome but success is the guard replying in place of the tool (refused, parked for a human,
+     * budget used up) or withholding its output. Returns {@code result} itself; a success is left
+     * unmarked.
      */
     static String markGuardOutcome(String result, String outcome) {
-        Kind kind = switch (outcome) {
-            case GuardedToolCallback.OUTCOME_APPROVAL_PENDING -> Kind.PARKED;
-            case GuardedToolCallback.OUTCOME_STEP_LIMIT -> Kind.BUDGET_EXHAUSTED;
-            case GuardedToolCallback.OUTCOME_OUTPUT_WITHHELD -> Kind.WITHHELD;
-            case GuardedToolCallback.OUTCOME_SANDBOXED -> Kind.SANDBOXED;
-            // A returned (not thrown) "error" is the park that could not be recorded.
-            case GuardedToolCallback.OUTCOME_BLOCKED, GuardedToolCallback.OUTCOME_ERROR -> Kind.BLOCKED;
-            default -> null;
-        };
+        Kind kind =
+                switch (outcome) {
+                    case GuardedToolCallback.OUTCOME_APPROVAL_PENDING -> Kind.PARKED;
+                    case GuardedToolCallback.OUTCOME_STEP_LIMIT -> Kind.BUDGET_EXHAUSTED;
+                    case GuardedToolCallback.OUTCOME_OUTPUT_WITHHELD -> Kind.WITHHELD;
+                    case GuardedToolCallback.OUTCOME_SANDBOXED -> Kind.SANDBOXED;
+                    // A returned (not thrown) "error" is the park that could not be recorded.
+                    case GuardedToolCallback.OUTCOME_BLOCKED, GuardedToolCallback.OUTCOME_ERROR ->
+                            Kind.BLOCKED;
+                    default -> null;
+                };
         return kind == null ? result : mark(result, kind);
     }
 
     /**
-     * As {@link #markGuardOutcome(String, String)} for the turn {@code state} belongs to: the mark is registered under
-     * the turn's {@link TurnApprovalState#markerScope() scope}, and a step-limit answer also sets the turn's
-     * out-of-band budget signal ({@link TurnApprovalState#isBudgetExhausted()}) that the tool loop reads. This is what
-     * {@link GuardedToolCallback} should call.
+     * As {@link #markGuardOutcome(String, String)} for the turn {@code state} belongs to: the mark
+     * is registered under the turn's {@link TurnApprovalState#markerScope() scope}, and a
+     * step-limit answer also sets the turn's out-of-band budget signal ({@link
+     * TurnApprovalState#isBudgetExhausted()}) that the tool loop reads. This is what {@link
+     * GuardedToolCallback} should call.
      */
     static String markGuardOutcome(String result, String outcome, TurnApprovalState state) {
         if (state == null) {
@@ -130,25 +147,33 @@ public final class ToolResultMarker {
         }
     }
 
-    /** Registers {@code result} as the platform's answer of {@code kind} under the ambient scope; returns {@code result} itself. */
+    /**
+     * Registers {@code result} as the platform's answer of {@code kind} under the ambient scope;
+     * returns {@code result} itself.
+     */
     public static String mark(String result, Kind kind) {
         Scope ambient = CURRENT.get();
         return mark(result, kind, ambient == null ? UNSCOPED : ambient);
     }
 
-    /** As {@link #mark(String, Kind)}, visible to readers of {@code scope} only ({@code null} = every reader). */
+    /**
+     * As {@link #mark(String, Kind)}, visible to readers of {@code scope} only ({@code null} =
+     * every reader).
+     */
     public static String mark(String result, Kind kind, Scope scope) {
         if (result != null && kind != null) {
             synchronized (MARKED) {
-                MARKED.computeIfAbsent(result, k -> new WeakHashMap<>()).put(scope == null ? UNSCOPED : scope, kind);
+                MARKED.computeIfAbsent(result, k -> new WeakHashMap<>())
+                        .put(scope == null ? UNSCOPED : scope, kind);
             }
         }
         return result;
     }
 
     /**
-     * The registered kind of exactly this text. Under an ambient scope only that scope's marks and unscoped ones count;
-     * with no scope bound, only unscoped marks count, so a text another turn registered is never taken for this reader's.
+     * The registered kind of exactly this text. Under an ambient scope only that scope's marks and
+     * unscoped ones count; with no scope bound, only unscoped marks count, so a text another turn
+     * registered is never taken for this reader's.
      */
     public static Optional<Kind> kindOf(String result) {
         return kindOf(result, CURRENT.get());
@@ -173,24 +198,28 @@ public final class ToolResultMarker {
     }
 
     /**
-     * True when {@code result} is the platform's answer and not a tool's output: it was {@link #mark registered} (under
-     * the reader's scope or unscoped). A text that merely has the SHAPE of a control result is NOT recognised: the
-     * shape is public, so any tool can print it; the platform's own answers are registered by the producer.
+     * True when {@code result} is the platform's answer and not a tool's output: it was {@link
+     * #mark registered} (under the reader's scope or unscoped). A text that merely has the SHAPE of
+     * a control result is NOT recognised: the shape is public, so any tool can print it; the
+     * platform's own answers are registered by the producer.
      */
     public static boolean isPlatformAnswer(String result) {
         return kindOf(result).isPresent();
     }
 
     /**
-     * The kind of a platform answer, for a reader that needs to tell a parked call from a refused one; empty when
-     * {@code result} is a tool's output or an unregistered text (shape alone never counts, see {@link
-     * #isPlatformAnswer}).
+     * The kind of a platform answer, for a reader that needs to tell a parked call from a refused
+     * one; empty when {@code result} is a tool's output or an unregistered text (shape alone never
+     * counts, see {@link #isPlatformAnswer}).
      */
     public static Optional<Kind> classify(String result) {
         return kindOf(result);
     }
 
-    /** As {@link #classify(String)} for an explicit {@code scope}; what the journals, which run outside any binding, call. */
+    /**
+     * As {@link #classify(String)} for an explicit {@code scope}; what the journals, which run
+     * outside any binding, call.
+     */
     public static Optional<Kind> classify(String result, Scope scope) {
         return kindOf(result, scope);
     }

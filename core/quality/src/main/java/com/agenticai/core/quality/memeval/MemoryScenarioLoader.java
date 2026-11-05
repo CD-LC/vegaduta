@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Loads memory-eval scenarios from JSON. The shipped dataset is listed in
- * {@code eval/memory/manifest.json}; each listed file holds one scenario object or an array of them.
+ * Loads memory-eval scenarios from JSON. The shipped dataset is listed in {@code
+ * eval/memory/manifest.json}; each listed file holds one scenario object or an array of them.
  * Unknown properties and a wrong {@code schema_version} fail loudly: a malformed dataset edit must
  * break the free per-PR test, not a billed nightly run.
  */
@@ -23,9 +23,10 @@ public final class MemoryScenarioLoader {
     public static final String RESOURCE_ROOT = "eval/memory/";
     public static final String MANIFEST = RESOURCE_ROOT + "manifest.json";
 
-    static final ObjectMapper MAPPER = new ObjectMapper()
-        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-        .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    static final ObjectMapper MAPPER =
+            new ObjectMapper()
+                    .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                    .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private MemoryScenarioLoader() {}
 
@@ -93,8 +94,12 @@ public final class MemoryScenarioLoader {
     private static void requireVersion(int version, String origin) {
         if (version != MemoryScenario.SCHEMA_VERSION) {
             throw new IllegalArgumentException(
-                origin + ": schema_version " + version + " is not supported (expected "
-                    + MemoryScenario.SCHEMA_VERSION + ")");
+                    origin
+                            + ": schema_version "
+                            + version
+                            + " is not supported (expected "
+                            + MemoryScenario.SCHEMA_VERSION
+                            + ")");
         }
     }
 

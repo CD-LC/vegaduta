@@ -6,15 +6,11 @@ import java.time.Instant;
  * A note as an operator surface sees it - a plain record, deliberately not the {@link
  * ScratchpadNote} entity so REST code never touches JPA (StructureRulesTest F5). {@code scope}
  * mirrors the tool's vocabulary: {@code "agent"} for the long-term pad, {@code "session"}
- * otherwise. {@code subjectKey} is the owner of an agent-pad note (null on rows that predate V680). {@code body} is null on list views; the single-note view carries it.
+ * otherwise. {@code subjectKey} is the owner of an agent-pad note (null on rows that predate V680).
+ * {@code body} is null on list views; the single-note view carries it.
  */
 public record ScratchpadNoteView(
-        String key,
-        String scope,
-        int byteSize,
-        Instant updatedAt,
-        String body,
-        String subjectKey) {
+        String key, String scope, int byteSize, Instant updatedAt, String body, String subjectKey) {
 
     static ScratchpadNoteView of(ScratchpadNote note, boolean withBody) {
         return new ScratchpadNoteView(

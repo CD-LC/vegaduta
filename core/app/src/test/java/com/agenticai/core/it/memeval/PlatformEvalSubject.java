@@ -51,73 +51,92 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import reactor.core.publisher.Flux;
 
 /**
- * The memory eval against the booted application (see {@link PlatformMemoryEvalSubject} for the contract). Per
- * (scenario, arm, repeat): fresh tenant schemas and users, one agent per tenant whose config is identical across arms
- * except for the two memory switches (set through the real settings service), the {@code EvalClock} installed in the
- * memory services, and
+ * The memory eval against the booted application (see {@link PlatformMemoryEvalSubject} for the
+ * contract). Per (scenario, arm, repeat): fresh tenant schemas and users, one agent per tenant
+ * whose config is identical across arms except for the two memory switches (set through the real
+ * settings service), the {@code EvalClock} installed in the memory services, and
  *
  * <ul>
- *   <li><b>ingestion</b> through the real write path: each ledger fact a turn plants is saved by the real
- *       {@code remember_fact} tool callback (write screen, turn-taint gate, {@code memory.write.enabled}, embedding,
- *       per-agent cap), with the turn's channel marking a real {@code TurnTaint} for tool-output, document and agent-message
- *       turns; one episode per session goes through {@code EpisodeRecordingGateway} and the proposal sink;
- *   <li>a <b>scripted reviewer</b> standing in for the human: after each session it approves the proposals the platform did
- *       not flag (empty taint) and leaves every quarantined one alone;
- *   <li><b>probes</b> through the real recall composition ({@code ChatMemoryRecall}: legacy private and shared facts,
- *       unified recall, trust filter, token budget) on a different thread than the writer, answered by a pluggable
- *       {@link ProbeAnswerer};
- *   <li>the recall trace from the turn's {@code TurnMemoryRecall.Trace} (the object the turn journal's {@code memory_recall}
- *       events are written from; the persisted event rows are not read), each id resolved to its row in whichever case
- *       schema holds it, so a row of another user or tenant surfaces as such.
+ *   <li><b>ingestion</b> through the real write path: each ledger fact a turn plants is saved by
+ *       the real {@code remember_fact} tool callback (write screen, turn-taint gate, {@code
+ *       memory.write.enabled}, embedding, per-agent cap), with the turn's channel marking a real
+ *       {@code TurnTaint} for tool-output, document and agent-message turns; one episode per
+ *       session goes through {@code EpisodeRecordingGateway} and the proposal sink;
+ *   <li>a <b>scripted reviewer</b> standing in for the human: after each session it approves the
+ *       proposals the platform did not flag (empty taint) and leaves every quarantined one alone;
+ *   <li><b>probes</b> through the real recall composition ({@code ChatMemoryRecall}: legacy private
+ *       and shared facts, unified recall, trust filter, token budget) on a different thread than
+ *       the writer, answered by a pluggable {@link ProbeAnswerer};
+ *   <li>the recall trace from the turn's {@code TurnMemoryRecall.Trace} (the object the turn
+ *       journal's {@code memory_recall} events are written from; the persisted event rows are not
+ *       read), each id resolved to its row in whichever case schema holds it, so a row of another
+ *       user or tenant surfaces as such.
  * </ul>
  *
- * Not real: the extractor (the ledger's {@code plants} decide what is saved, with the fact's clean statement as text), the
- * model (see {@link ProbeAnswerer}), the embedder ({@link HashingTextEmbedder}), the human reviewer, and the assumed
- * model time and system prompt of a turn ({@link Assumptions}).
+ * Not real: the extractor (the ledger's {@code plants} decide what is saved, with the fact's clean
+ * statement as text), the model (see {@link ProbeAnswerer}), the embedder ({@link
+ * HashingTextEmbedder}), the human reviewer, and the assumed model time and system prompt of a turn
+ * ({@link Assumptions}).
  */
 public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
 
     /**
-     * What a turn costs apart from memory, since there is no model call to measure: tokens of the agent's system prompt and
-     * of its reply to an ingestion turn, and model time to first token and in total. Measured pipeline time (recall) is
-     * added on top, so the overhead of memory is real and the denominator is an assumption; both are reported in the
-     * scorecard's {@code platform} block.
+     * What a turn costs apart from memory, since there is no model call to measure: tokens of the
+     * agent's system prompt and of its reply to an ingestion turn, and model time to first token
+     * and in total. Measured pipeline time (recall) is added on top, so the overhead of memory is
+     * real and the denominator is an assumption; both are reported in the scorecard's {@code
+     * platform} block.
      */
-    public record Assumptions(int systemPromptTokens, int ingestReplyTokens, double modelMs, double modelTtftMs) {
+    public record Assumptions(
+            int systemPromptTokens, int ingestReplyTokens, double modelMs, double modelTtftMs) {
         public static final Assumptions DEFAULT = new Assumptions(380, 50, 800.0, 400.0);
     }
 
     private static final MemoryActor REVIEWER = MemoryActor.human("memeval-reviewer");
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final String UNANSWERED = "unanswered";
-    /** {@code -Dmemeval.trace=true} prints one line per probe (question, answer, tools, injected rows) for debugging a run. */
-    private static final boolean TRACE = Boolean.getBoolean("memeval.trace");
+
     /**
-     * {@code -Dmemeval.replaces=false} (default true): whether the extractor names the earlier fact a correction replaces
-     * (the tool's {@code replaces} argument). The extractor of this eval is the ledger, which knows every correction, so on
-     * it behaves like a model that always copies the right fact from its recalled memory: the run measures the plumbing
-     * (resolution, trust rules, recall exclusion), not the quality of a real arbiter. With {@code false} only the automatic
-     * similarity rule can supersede, which is what a model that never uses the argument would get.
+     * {@code -Dmemeval.trace=true} prints one line per probe (question, answer, tools, injected
+     * rows) for debugging a run.
      */
-    private static final boolean NAME_REPLACED_FACT = !"false".equalsIgnoreCase(System.getProperty("memeval.replaces", "true"));
+    private static final boolean TRACE = Boolean.getBoolean("memeval.trace");
+
+    /**
+     * {@code -Dmemeval.replaces=false} (default true): whether the extractor names the earlier fact
+     * a correction replaces (the tool's {@code replaces} argument). The extractor of this eval is
+     * the ledger, which knows every correction, so on it behaves like a model that always copies
+     * the right fact from its recalled memory: the run measures the plumbing (resolution, trust
+     * rules, recall exclusion), not the quality of a real arbiter. With {@code false} only the
+     * automatic similarity rule can supersede, which is what a model that never uses the argument
+     * would get.
+     */
+    private static final boolean NAME_REPLACED_FACT =
+            !"false".equalsIgnoreCase(System.getProperty("memeval.replaces", "true"));
 
     private final PlatformEvalWorld world;
     private final ProbeAnswerer answerer;
     private final Assumptions assumptions;
     private final PlatformEvalDiagnostics diagnostics = new PlatformEvalDiagnostics();
     private final Map<String, Case> cases = new HashMap<>();
-    private final ExecutorService probePool = Executors.newFixedThreadPool(2, r -> {
-        Thread t = new Thread(r, "memeval-probe");
-        t.setDaemon(true);
-        return t;
-    });
-    private final ExecutorService hopPool = Executors.newSingleThreadExecutor(r -> {
-        Thread t = new Thread(r, "memeval-consolidation-hop");
-        t.setDaemon(true);
-        return t;
-    });
+    private final ExecutorService probePool =
+            Executors.newFixedThreadPool(
+                    2,
+                    r -> {
+                        Thread t = new Thread(r, "memeval-probe");
+                        t.setDaemon(true);
+                        return t;
+                    });
+    private final ExecutorService hopPool =
+            Executors.newSingleThreadExecutor(
+                    r -> {
+                        Thread t = new Thread(r, "memeval-consolidation-hop");
+                        t.setDaemon(true);
+                        return t;
+                    });
 
-    public PlatformEvalSubject(PlatformEvalWorld world, ProbeAnswerer answerer, Assumptions assumptions) {
+    public PlatformEvalSubject(
+            PlatformEvalWorld world, ProbeAnswerer answerer, Assumptions assumptions) {
         this.world = world;
         this.answerer = answerer;
         this.assumptions = assumptions;
@@ -134,7 +153,10 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
 
     // ------------------------------------------------------------------ per-case state
 
-    /** What the harness knows about one stored row (the platform knows none of it: it is the ledger mapping). */
+    /**
+     * What the harness knows about one stored row (the platform knows none of it: it is the ledger
+     * mapping).
+     */
     private record RowInfo(String factId, String key, boolean shared) {}
 
     private static final class Case {
@@ -214,17 +236,24 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         Set<String> out = new LinkedHashSet<>();
         s.sessions().forEach(x -> out.add(x.tenantId()));
         s.probes().forEach(p -> out.add(p.tenantId()));
-        s.ledger().forEach(f -> {
-            if (f.ownerTenant() != null) {
-                out.add(f.ownerTenant());
-            }
-        });
+        s.ledger()
+                .forEach(
+                        f -> {
+                            if (f.ownerTenant() != null) {
+                                out.add(f.ownerTenant());
+                            }
+                        });
         return out;
     }
 
-    /** A schema name the tenant guard accepts ({@code t_} + 16 to 40 lower-case alphanumerics) and unique to the case. */
+    /**
+     * A schema name the tenant guard accepts ({@code t_} + 16 to 40 lower-case alphanumerics) and
+     * unique to the case.
+     */
     static String schemaName(CaseEnvironment env, String logicalTenant) {
-        return "t_" + env.identity().runKey() + logicalTenant.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        return "t_"
+                + env.identity().runKey()
+                + logicalTenant.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
     }
 
     // ------------------------------------------------------------------ replay
@@ -283,13 +312,34 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         return factory.getBeanProvider(TurnTaintView.class);
     }
 
-    /** One planted fact through the real {@code remember_fact} tool (the turn's thread, the session's user). */
-    private void write(Case c, Session session, UUID agent, String subject, Fact fact, Turn turn, TurnTaint taint) {
+    /**
+     * One planted fact through the real {@code remember_fact} tool (the turn's thread, the
+     * session's user).
+     */
+    private void write(
+            Case c,
+            Session session,
+            UUID agent,
+            String subject,
+            Fact fact,
+            Turn turn,
+            TurnTaint taint) {
         String text = fact.kind() == FactKind.ATTACK ? turn.text() : fact.value();
-        String replaces = NAME_REPLACED_FACT && fact.kind() != FactKind.ATTACK ? replacedText(c, fact) : null;
-        String input = replaces == null ? json("fact", text) : json("fact", text, "replaces", replaces);
-        String result = new RememberFactToolCallback(world.agentMemory, agent, subject, null, null, null, null,
-            taintProvider(taint)).call(input);
+        String replaces =
+                NAME_REPLACED_FACT && fact.kind() != FactKind.ATTACK ? replacedText(c, fact) : null;
+        String input =
+                replaces == null ? json("fact", text) : json("fact", text, "replaces", replaces);
+        String result =
+                new RememberFactToolCallback(
+                                world.agentMemory,
+                                agent,
+                                subject,
+                                null,
+                                null,
+                                null,
+                                null,
+                                taintProvider(taint))
+                        .call(input);
         diagnostics.write(c.arm, result);
         if (fact.kind() == FactKind.ATTACK) {
             diagnostics.attackWrite(c.arm, turn.source().name(), result);
@@ -300,27 +350,38 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         }
     }
 
-    /** The text of the earlier fact the ledger says {@code fact} corrects, when that fact was planted earlier; else null. */
+    /**
+     * The text of the earlier fact the ledger says {@code fact} corrects, when that fact was
+     * planted earlier; else null.
+     */
     private static String replacedText(Case c, Fact fact) {
         for (Fact old : c.scenario.ledger()) {
-            if (fact.id().equals(old.supersededBy()) && old.kind() != FactKind.ATTACK && c.scenario.plantedAtIndex(old.id()) >= 0) {
+            if (fact.id().equals(old.supersededBy())
+                    && old.kind() != FactKind.ATTACK
+                    && c.scenario.plantedAtIndex(old.id()) >= 0) {
                 return old.value();
             }
         }
         return null;
     }
 
-    /** The real {@code remember_shared_fact} for each fact the session shares, as the fact's owner. */
+    /**
+     * The real {@code remember_shared_fact} for each fact the session shares, as the fact's owner.
+     */
     private void applyShares(Case c, Session session) {
         for (String factId : session.shares()) {
             Fact fact = c.scenario.factsById().get(factId);
             if (fact == null) {
                 continue;
             }
-            String owner = c.scenario.ownerUser(fact) == null ? session.userId() : c.scenario.ownerUser(fact);
+            String owner =
+                    c.scenario.ownerUser(fact) == null
+                            ? session.userId()
+                            : c.scenario.ownerUser(fact);
             UUID agent = c.agent(session.tenantId());
-            String result = new RememberSharedFactToolCallback(world.tenantMemory, agent, c.subject(owner))
-                .call(json("fact", fact.value()));
+            String result =
+                    new RememberSharedFactToolCallback(world.tenantMemory, agent, c.subject(owner))
+                            .call(json("fact", fact.value()));
             diagnostics.write(c.arm, result);
             UUID id = memoryId(result);
             if (id != null) {
@@ -329,7 +390,10 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         }
     }
 
-    /** The user's own erase of one stored fact (the call behind the memory panel's delete), for every row the fact became. */
+    /**
+     * The user's own erase of one stored fact (the call behind the memory panel's delete), for
+     * every row the fact became.
+     */
     private void applyForgets(Case c, Session session, UUID agent) {
         for (String factId : session.forgets()) {
             for (Map.Entry<UUID, RowInfo> e : new ArrayList<>(c.rows.entrySet())) {
@@ -338,9 +402,10 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
                 }
                 String owner = c.scenario.ownerUser(c.scenario.factsById().get(factId));
                 String subject = c.subject(owner == null ? session.userId() : owner);
-                boolean gone = e.getValue().shared()
-                    ? world.tenantMemory.forgetFactForSubject(e.getKey(), subject)
-                    : world.agentMemory.forgetForSubject(e.getKey(), subject);
+                boolean gone =
+                        e.getValue().shared()
+                                ? world.tenantMemory.forgetFactForSubject(e.getKey(), subject)
+                                : world.agentMemory.forgetForSubject(e.getKey(), subject);
                 if (gone) {
                     c.rows.remove(e.getKey());
                 }
@@ -349,15 +414,28 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     }
 
     /**
-     * One episode per session through the real hook, then the scripted reviewer approves what the platform did not flag. With
-     * the write switch off the recorder must not file anything; the harness looks briefly for a proposal anyway, so a recorder
-     * that ignores the switch shows up in the diagnostics instead of being assumed away.
+     * One episode per session through the real hook, then the scripted reviewer approves what the
+     * platform did not flag. With the write switch off the recorder must not file anything; the
+     * harness looks briefly for a proposal anyway, so a recorder that ignores the switch shows up
+     * in the diagnostics instead of being assumed away.
      */
-    private void recordEpisode(Case c, Session session, UUID agent, String subject, TenantContext ctx, TurnTaint taint) {
+    private void recordEpisode(
+            Case c,
+            Session session,
+            UUID agent,
+            String subject,
+            TenantContext ctx,
+            TurnTaint taint) {
         boolean writesOn = c.env.switches().write();
         int before = world.review.forSubject(subject, 500).size();
-        EpisodeRecordingGateway.observe(Flux.just("ok"), agent, "memeval-" + c.env.identity().runKey() + "-" + session.id(),
-            Instant.now(), Optional.of(ctx), taint).blockLast();
+        EpisodeRecordingGateway.observe(
+                        Flux.just("ok"),
+                        agent,
+                        "memeval-" + c.env.identity().runKey() + "-" + session.id(),
+                        Instant.now(),
+                        Optional.of(ctx),
+                        taint)
+                .blockLast();
         long deadline = System.nanoTime() + (writesOn ? 2_000_000_000L : 150_000_000L);
         List<MemoryItem> items = world.review.forSubject(subject, 500);
         while (items.size() <= before && System.nanoTime() < deadline) {
@@ -374,7 +452,8 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
             if (item.status() != MemoryItemStatus.PENDING) {
                 continue;
             }
-            if (item.sourceTaint().isEmpty() && world.review.approve(agent, item.id(), REVIEWER).ok()) {
+            if (item.sourceTaint().isEmpty()
+                    && world.review.approve(agent, item.id(), REVIEWER).ok()) {
                 diagnostics.episodeApproved(c.arm);
             } else {
                 diagnostics.proposalHeld(c.arm);
@@ -382,7 +461,10 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         }
     }
 
-    /** S15: the consolidation sweep on a pooled thread, as the scheduler runs it, while other tenants hold data. */
+    /**
+     * S15: the consolidation sweep on a pooled thread, as the scheduler runs it, while other
+     * tenants hold data.
+     */
     private void consolidationHop() {
         Future<?> done = hopPool.submit(() -> world.sweep.sweep());
         try {
@@ -406,17 +488,25 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     private Recalled recall(Case c, UUID agent, String subject, String message, boolean ingestion) {
         long before = StatementCounter.count();
         long t0 = System.nanoTime();
-        PlatformRecallBridge.Recall r = PlatformRecallBridge.recall(world.chat, agent, subject, message);
+        PlatformRecallBridge.Recall r =
+                PlatformRecallBridge.recall(world.chat, agent, subject, message);
         double ms = (System.nanoTime() - t0) / 1_000_000.0;
         Recalled out = new Recalled(r, ms, StatementCounter.count() - before);
-        diagnostics.recall(c.arm, out.ms(), out.statements(), out.blockTokens(), r.recalledFacts(), ingestion);
+        diagnostics.recall(
+                c.arm, out.ms(), out.statements(), out.blockTokens(), r.recalledFacts(), ingestion);
         return out;
     }
 
     private TurnCost turnCost(String userText, Recalled recalled, int replyTokens) {
-        long prompt = assumptions.systemPromptTokens() + SessionMemoryService.estimateTokens(userText) + recalled.blockTokens();
-        return new TurnCost((int) prompt, replyTokens, recalled.ms() + assumptions.modelMs(),
-            recalled.ms() + assumptions.modelTtftMs());
+        long prompt =
+                assumptions.systemPromptTokens()
+                        + SessionMemoryService.estimateTokens(userText)
+                        + recalled.blockTokens();
+        return new TurnCost(
+                (int) prompt,
+                replyTokens,
+                recalled.ms() + assumptions.modelMs(),
+                recalled.ms() + assumptions.modelTtftMs());
     }
 
     @Override
@@ -424,14 +514,16 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         Case c = of(env);
         String schema = c.schema(probe.tenantId());
         TenantContext ctx = TenantContext.of(schema, c.subject(probe.userId()), Set.of());
-        Future<ProbeOutcome> future = probePool.submit(() -> TenantScope.of(ctx).get(() -> ask(c, probe)));
+        Future<ProbeOutcome> future =
+                probePool.submit(() -> TenantScope.of(ctx).get(() -> ask(c, probe)));
         try {
             return future.get();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } catch (ExecutionException e) {
-            throw new IllegalStateException("probe " + probe.id() + " of " + c.scenario.id() + " failed", e.getCause());
+            throw new IllegalStateException(
+                    "probe " + probe.id() + " of " + c.scenario.id() + " failed", e.getCause());
         }
     }
 
@@ -458,61 +550,118 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
                 }
             }
         }
-        Answer answer = answerer.answer(new ProbeAnswerer.Question(probe.prompt(), lines, probe.task()));
-        long oracleTokens = c.arm == MemoryArm.ORACLE
-            ? SessionMemoryService.estimateTokens(String.join("\n", lines.stream().map(RecalledLine::text).toList())) : 0;
-        long prompt = assumptions.systemPromptTokens() + SessionMemoryService.estimateTokens(probe.prompt())
-            + recalled.blockTokens() + oracleTokens;
-        TurnCost cost = new TurnCost((int) prompt, (int) Math.max(1, SessionMemoryService.estimateTokens(answer.text())),
-            recalled.ms() + assumptions.modelMs(), recalled.ms() + assumptions.modelTtftMs());
+        Answer answer =
+                answerer.answer(new ProbeAnswerer.Question(probe.prompt(), lines, probe.task()));
+        long oracleTokens =
+                c.arm == MemoryArm.ORACLE
+                        ? SessionMemoryService.estimateTokens(
+                                String.join("\n", lines.stream().map(RecalledLine::text).toList()))
+                        : 0;
+        long prompt =
+                assumptions.systemPromptTokens()
+                        + SessionMemoryService.estimateTokens(probe.prompt())
+                        + recalled.blockTokens()
+                        + oracleTokens;
+        TurnCost cost =
+                new TurnCost(
+                        (int) prompt,
+                        (int) Math.max(1, SessionMemoryService.estimateTokens(answer.text())),
+                        recalled.ms() + assumptions.modelMs(),
+                        recalled.ms() + assumptions.modelTtftMs());
         diagnostics.probe(c.arm, injected.size());
         if (TRACE) {
-            System.out.println("MEMEVAL-TRACE " + c.scenario.id() + " " + c.arm + " " + probe.id() + " [" + probe.type() + "] q=\""
-                + probe.prompt() + "\" -> \"" + answer.text() + "\" tools=" + answer.toolCalls() + " injected="
-                + injected.stream().map(i -> i.factId() + ":" + i.text()).toList()
-                + " block=" + (recalled.recall().block() == null ? null : recalled.recall().block().replace('\n', '|')));
+            System.out.println(
+                    "MEMEVAL-TRACE "
+                            + c.scenario.id()
+                            + " "
+                            + c.arm
+                            + " "
+                            + probe.id()
+                            + " ["
+                            + probe.type()
+                            + "] q=\""
+                            + probe.prompt()
+                            + "\" -> \""
+                            + answer.text()
+                            + "\" tools="
+                            + answer.toolCalls()
+                            + " injected="
+                            + injected.stream().map(i -> i.factId() + ":" + i.text()).toList()
+                            + " block="
+                            + (recalled.recall().block() == null
+                                    ? null
+                                    : recalled.recall().block().replace('\n', '|')));
         }
-        return new ProbeOutcome(probe.id(), answer.text(), answer.toolCalls(), injected, snapshot(c), cost);
+        return new ProbeOutcome(
+                probe.id(), answer.text(), answer.toolCalls(), injected, snapshot(c), cost);
     }
 
-    /** The ceiling arm: the ledger's valid, visible, relevant facts go straight into the prompt (the platform recall is off). */
-    private void injectOracle(Case c, Probe probe, List<InjectedItem> injected, List<RecalledLine> lines) {
+    /**
+     * The ceiling arm: the ledger's valid, visible, relevant facts go straight into the prompt (the
+     * platform recall is off).
+     */
+    private void injectOracle(
+            Case c, Probe probe, List<InjectedItem> injected, List<RecalledLine> lines) {
         int idx = c.scenario.sessionIndex(probe.after());
         for (Fact f : c.scenario.liveFacts(idx)) {
-            if (f.relevantTo().contains(probe.id()) && c.scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
-                injected.add(new InjectedItem(f.id(), f.key(), f.value(), probe.userId(), probe.tenantId()));
+            if (f.relevantTo().contains(probe.id())
+                    && c.scenario.visibleTo(f, probe.userId(), probe.tenantId(), idx)) {
+                injected.add(
+                        new InjectedItem(
+                                f.id(), f.key(), f.value(), probe.userId(), probe.tenantId()));
                 lines.add(new RecalledLine(f.value(), "oracle"));
             }
         }
     }
 
     /**
-     * One recalled id as the scorers want it: the row is looked up in every schema of the case, so the user and tenant are
-     * where the row REALLY lives (a row of another tenant is reported under that tenant), not where it was asked for.
+     * One recalled id as the scorers want it: the row is looked up in every schema of the case, so
+     * the user and tenant are where the row REALLY lives (a row of another tenant is reported under
+     * that tenant), not where it was asked for.
      */
     private InjectedItem resolve(Case c, Probe probe, String preferredTable, UUID id) {
         List<String> tables = new ArrayList<>(List.of(preferredTable));
         for (String t : List.of("agent_memory", "tenant_memory", "memory_item")) {
             if (!tables.contains(t)) {
-                tables.add(t); // unified recall also serves legacy facts (the semantic source), so an id may live in any of them
+                tables.add(
+                        t); // unified recall also serves legacy facts (the semantic source), so an
+                // id may live in any of them
             }
         }
         for (String table : tables) {
             String userColumn = "memory_item".equals(table) ? "subject_keys[1]" : "subject_key";
             for (Map.Entry<String, String> e : c.schemaByTenant.entrySet()) {
-                List<Map<String, Object>> rows = world.jdbc.queryForList(
-                    "SELECT " + userColumn + " AS subject, content FROM " + e.getValue() + "." + table + " WHERE id = ?", id);
+                List<Map<String, Object>> rows =
+                        world.jdbc.queryForList(
+                                "SELECT "
+                                        + userColumn
+                                        + " AS subject, content FROM "
+                                        + e.getValue()
+                                        + "."
+                                        + table
+                                        + " WHERE id = ?",
+                                id);
                 if (rows.isEmpty()) {
                     continue;
                 }
                 Object subject = rows.get(0).get("subject");
                 RowInfo info = c.rows.get(id);
-                String key = info != null ? info.key() : "memory_item".equals(table) ? "episode" : "unknown";
-                return new InjectedItem(info == null ? null : info.factId(), key, String.valueOf(rows.get(0).get("content")),
-                    c.env.identity().logicalUser(subject == null ? null : subject.toString()), e.getKey());
+                String key =
+                        info != null
+                                ? info.key()
+                                : "memory_item".equals(table) ? "episode" : "unknown";
+                return new InjectedItem(
+                        info == null ? null : info.factId(),
+                        key,
+                        String.valueOf(rows.get(0).get("content")),
+                        c.env.identity().logicalUser(subject == null ? null : subject.toString()),
+                        e.getKey());
             }
         }
-        diagnostics.note("recalled id " + id + " is in no memory table of the case (synthetic item, e.g. the self-model line)");
+        diagnostics.note(
+                "recalled id "
+                        + id
+                        + " is in no memory table of the case (synthetic item, e.g. the self-model line)");
         return new InjectedItem(null, UNANSWERED, "", probe.userId(), probe.tenantId());
     }
 
@@ -527,30 +676,65 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         return out;
     }
 
-    /** Every memory row of every tenant of the case: private facts, shared facts and unified items, in logical ids. */
+    /**
+     * Every memory row of every tenant of the case: private facts, shared facts and unified items,
+     * in logical ids.
+     */
     private List<StoreItem> snapshot(Case c) {
         List<StoreItem> out = new ArrayList<>();
         for (Map.Entry<String, String> e : c.schemaByTenant.entrySet()) {
             String schema = e.getValue();
-            add(out, c, e.getKey(), world.jdbc.queryForList(
-                "SELECT id, subject_key AS subject, content FROM " + schema + ".agent_memory ORDER BY created_at, id"), "fact");
-            add(out, c, e.getKey(), world.jdbc.queryForList(
-                "SELECT id, subject_key AS subject, content FROM " + schema + ".tenant_memory"
-                    + " WHERE position('#mem:' in subject_key) = 0 ORDER BY created_at, id"), "shared");
-            add(out, c, e.getKey(), world.jdbc.queryForList(
-                "SELECT id, subject_keys[1] AS subject, content FROM " + schema + ".memory_item ORDER BY created_at, id"), "episode");
+            add(
+                    out,
+                    c,
+                    e.getKey(),
+                    world.jdbc.queryForList(
+                            "SELECT id, subject_key AS subject, content FROM "
+                                    + schema
+                                    + ".agent_memory ORDER BY created_at, id"),
+                    "fact");
+            add(
+                    out,
+                    c,
+                    e.getKey(),
+                    world.jdbc.queryForList(
+                            "SELECT id, subject_key AS subject, content FROM "
+                                    + schema
+                                    + ".tenant_memory"
+                                    + " WHERE position('#mem:' in subject_key) = 0 ORDER BY created_at, id"),
+                    "shared");
+            add(
+                    out,
+                    c,
+                    e.getKey(),
+                    world.jdbc.queryForList(
+                            "SELECT id, subject_keys[1] AS subject, content FROM "
+                                    + schema
+                                    + ".memory_item ORDER BY created_at, id"),
+                    "episode");
         }
         return out;
     }
 
-    private void add(List<StoreItem> out, Case c, String logicalTenant, List<Map<String, Object>> rows, String kind) {
+    private void add(
+            List<StoreItem> out,
+            Case c,
+            String logicalTenant,
+            List<Map<String, Object>> rows,
+            String kind) {
         for (Map<String, Object> row : rows) {
             UUID id = UUID.fromString(row.get("id").toString());
             RowInfo info = c.rows.get(id);
             Object subject = row.get("subject");
-            out.add(new StoreItem(info == null ? null : info.factId(), info == null ? kind : info.key(),
-                String.valueOf(row.get("content")),
-                c.env.identity().logicalUser(subject == null ? null : subject.toString()), logicalTenant, false));
+            out.add(
+                    new StoreItem(
+                            info == null ? null : info.factId(),
+                            info == null ? kind : info.key(),
+                            String.valueOf(row.get("content")),
+                            c.env.identity()
+                                    .logicalUser(subject == null ? null : subject.toString()),
+                            logicalTenant,
+                            false));
         }
     }
 
@@ -571,7 +755,9 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     private static UUID memoryId(String toolResult) {
         try {
             JsonNode node = JSON.readTree(toolResult);
-            return node.hasNonNull("memoryId") ? UUID.fromString(node.get("memoryId").asText()) : null;
+            return node.hasNonNull("memoryId")
+                    ? UUID.fromString(node.get("memoryId").asText())
+                    : null;
         } catch (com.fasterxml.jackson.core.JsonProcessingException | IllegalArgumentException e) {
             return null;
         }

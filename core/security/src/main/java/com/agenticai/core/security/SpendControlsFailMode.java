@@ -6,9 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Injectable holder for {@code app.governance.spend-controls.fail-mode} ({@code open}, the default, or {@code closed}).
- * Services take it through an optional setter and fall back to {@link #open()} so direct construction (tests) keeps
- * today's behaviour. An unknown value fails startup rather than silently choosing a side.
+ * Injectable holder for {@code app.governance.spend-controls.fail-mode} ({@code open}, the default,
+ * or {@code closed}). Services take it through an optional setter and fall back to {@link #open()}
+ * so direct construction (tests) keeps today's behaviour. An unknown value fails startup rather
+ * than silently choosing a side.
  */
 @Component
 public class SpendControlsFailMode {
@@ -18,7 +19,8 @@ public class SpendControlsFailMode {
     private final Mode mode;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public SpendControlsFailMode(@Value("${app.governance.spend-controls.fail-mode:open}") String value) {
+    public SpendControlsFailMode(
+            @Value("${app.governance.spend-controls.fail-mode:open}") String value) {
         this(Mode.parse(value));
     }
 
@@ -44,10 +46,10 @@ public class SpendControlsFailMode {
     }
 
     /**
-     * The control's Redis backend failed on a GATING path (a read or reservation that decides whether a call may run).
-     * Open: logs the shared marker and returns, the caller lets the call through. Closed: throws
-     * {@link SpendControlsUnavailableException}. Never call this from a post-call recording path: the money is already
-     * spent and there is nothing left to refuse.
+     * The control's Redis backend failed on a GATING path (a read or reservation that decides
+     * whether a call may run). Open: logs the shared marker and returns, the caller lets the call
+     * through. Closed: throws {@link SpendControlsUnavailableException}. Never call this from a
+     * post-call recording path: the money is already spent and there is nothing left to refuse.
      */
     public void onGateFailure(String control, Exception cause, Logger log) {
         if (!GovernanceFailOpenPolicy.allowOnBackendFailure(mode, control, cause, log)) {

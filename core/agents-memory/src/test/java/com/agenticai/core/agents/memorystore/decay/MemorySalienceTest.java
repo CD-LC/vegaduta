@@ -16,10 +16,30 @@ class MemorySalienceTest {
 
     static final Instant NOW = Instant.parse("2026-11-04T00:00:00Z");
 
-    static ItemSnapshot item(String kind, MemoryTrustLevel trust, boolean pinned, double imp, int uses, long idleDays) {
+    static ItemSnapshot item(
+            String kind,
+            MemoryTrustLevel trust,
+            boolean pinned,
+            double imp,
+            int uses,
+            long idleDays) {
         Instant t = NOW.minus(Duration.ofDays(idleDays));
-        return new ItemSnapshot(UUID.randomUUID(), null, kind, trust, ItemSnapshot.Status.ACTIVE, pinned, false,
-                imp, uses, t, null, List.of(), 0, false, false);
+        return new ItemSnapshot(
+                UUID.randomUUID(),
+                null,
+                kind,
+                trust,
+                ItemSnapshot.Status.ACTIVE,
+                pinned,
+                false,
+                imp,
+                uses,
+                t,
+                null,
+                List.of(),
+                0,
+                false,
+                false);
     }
 
     MemorySalience at(Instant now, DecayProperties p) {
@@ -48,7 +68,9 @@ class MemorySalienceTest {
     @Test
     void workedExamplePreferenceIdle200Days() {
         // doc: R = 0.31, S = 0.225 + 0.109 = 0.33
-        double s = at(NOW, new DecayProperties()).score(item("preference", MemoryTrustLevel.TRUSTED, false, 0.5, 0, 200));
+        double s =
+                at(NOW, new DecayProperties())
+                        .score(item("preference", MemoryTrustLevel.TRUSTED, false, 0.5, 0, 200));
         assertThat(s).isCloseTo(0.225 + 0.35 * Math.pow(0.5, 200d / 120), within(1e-9));
         assertThat(s).isCloseTo(0.33, within(0.01));
         assertThat(s).isGreaterThan(0.30); // kept
@@ -56,7 +78,9 @@ class MemorySalienceTest {
 
     @Test
     void workedExampleLowImportanceIdle300Days() {
-        double s = at(NOW, new DecayProperties()).score(item("fact", MemoryTrustLevel.TRUSTED, false, 0.3, 0, 300));
+        double s =
+                at(NOW, new DecayProperties())
+                        .score(item("fact", MemoryTrustLevel.TRUSTED, false, 0.3, 0, 300));
         assertThat(s).isCloseTo(0.14, within(0.005));
         assertThat(s).isGreaterThan(0.12); // importance is a floor
     }
@@ -85,8 +109,23 @@ class MemorySalienceTest {
     void lastUsedResetsTheRecencyClock() {
         MemorySalience m = at(NOW, new DecayProperties());
         ItemSnapshot old = item("x", MemoryTrustLevel.TRUSTED, false, 0.2, 0, 400);
-        ItemSnapshot read = new ItemSnapshot(old.id(), null, "x", MemoryTrustLevel.TRUSTED, ItemSnapshot.Status.ACTIVE,
-                false, false, 0.2, 0, old.createdAt(), NOW, List.of(), 0, false, false);
+        ItemSnapshot read =
+                new ItemSnapshot(
+                        old.id(),
+                        null,
+                        "x",
+                        MemoryTrustLevel.TRUSTED,
+                        ItemSnapshot.Status.ACTIVE,
+                        false,
+                        false,
+                        0.2,
+                        0,
+                        old.createdAt(),
+                        NOW,
+                        List.of(),
+                        0,
+                        false,
+                        false);
         assertThat(m.score(read)).isGreaterThan(m.score(old));
     }
 
@@ -108,19 +147,48 @@ class MemorySalienceTest {
         for (int n = 0; n < 2000; n++) {
             double imp = r.nextDouble();
             int uses = r.nextInt(100);
-            String kind = List.of("preference", "episodic", "task-context", "misc").get(r.nextInt(4));
+            String kind =
+                    List.of("preference", "episodic", "task-context", "misc").get(r.nextInt(4));
             long age = r.nextInt(2000);
             ItemSnapshot a = item(kind, MemoryTrustLevel.TRUSTED, false, imp, uses, age);
-            ItemSnapshot b = new ItemSnapshot(a.id(), null, kind, MemoryTrustLevel.TRUSTED, ItemSnapshot.Status.ACTIVE,
-                    false, false, imp, uses, NOW.minus(Duration.ofDays(age + 1 + r.nextInt(50))), null,
-                    List.of(), 0, false, false);
+            ItemSnapshot b =
+                    new ItemSnapshot(
+                            a.id(),
+                            null,
+                            kind,
+                            MemoryTrustLevel.TRUSTED,
+                            ItemSnapshot.Status.ACTIVE,
+                            false,
+                            false,
+                            imp,
+                            uses,
+                            NOW.minus(Duration.ofDays(age + 1 + r.nextInt(50))),
+                            null,
+                            List.of(),
+                            0,
+                            false,
+                            false);
             MemorySalience m = at(NOW, p);
             assertThat(m.score(a)).isBetween(0.0, 1.0);
             assertThat(m.score(b)).isLessThanOrEqualTo(m.score(a));
             assertThat(m.score(a)).isEqualTo(m.score(a));
-            ItemSnapshot moreUsed = new ItemSnapshot(a.id(), null, kind, MemoryTrustLevel.TRUSTED,
-                    ItemSnapshot.Status.ACTIVE, false, false, imp, uses + 1, a.createdAt(), null, List.of(), 0, false,
-                    false);
+            ItemSnapshot moreUsed =
+                    new ItemSnapshot(
+                            a.id(),
+                            null,
+                            kind,
+                            MemoryTrustLevel.TRUSTED,
+                            ItemSnapshot.Status.ACTIVE,
+                            false,
+                            false,
+                            imp,
+                            uses + 1,
+                            a.createdAt(),
+                            null,
+                            List.of(),
+                            0,
+                            false,
+                            false);
             assertThat(m.score(moreUsed)).isGreaterThanOrEqualTo(m.score(a));
         }
     }

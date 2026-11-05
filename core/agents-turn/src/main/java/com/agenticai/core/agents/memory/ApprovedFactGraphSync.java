@@ -19,9 +19,9 @@ import org.springframework.stereotype.Service;
  * them through {@link GraphMemoryService}, stamping each new edge with the fact's row id.
  *
  * <p>Best-effort and fail-open for the graph only: nothing here throws, and a failure is logged
- * (ids only, never the fact text) and counted in {@code memory.graph.approve.sync}. It does
- * nothing unless graph memory is wired (the {@code graph-memory} profile). Triples go through the
- * same {@link MemoryWriteGate#screenTriples} screen as a normal write.
+ * (ids only, never the fact text) and counted in {@code memory.graph.approve.sync}. It does nothing
+ * unless graph memory is wired (the {@code graph-memory} profile). Triples go through the same
+ * {@link MemoryWriteGate#screenTriples} screen as a normal write.
  */
 @Service
 public class ApprovedFactGraphSync {
@@ -54,13 +54,28 @@ public class ApprovedFactGraphSync {
     }
 
     /** An approved agent-scope fact: written to the agent's tier of the graph. */
-    public Outcome agentFactApproved(UUID agentId, String subjectKey, UUID memoryId, String content) {
-        return sync("agent", memoryId, agentId, content, (g, triples) -> g.remember(agentId, subjectKey, triples, memoryId));
+    public Outcome agentFactApproved(
+            UUID agentId, String subjectKey, UUID memoryId, String content) {
+        return sync(
+                "agent",
+                memoryId,
+                agentId,
+                content,
+                (g, triples) -> g.remember(agentId, subjectKey, triples, memoryId));
     }
 
-    /** An approved tenant-shared fact: written to the shared tier ({@code agentId} is the creating agent, may be null). */
-    public Outcome sharedFactApproved(UUID agentId, String subjectKey, UUID memoryId, String content) {
-        return sync("shared", memoryId, agentId, content, (g, triples) -> g.rememberShared(subjectKey, triples, memoryId));
+    /**
+     * An approved tenant-shared fact: written to the shared tier ({@code agentId} is the creating
+     * agent, may be null).
+     */
+    public Outcome sharedFactApproved(
+            UUID agentId, String subjectKey, UUID memoryId, String content) {
+        return sync(
+                "shared",
+                memoryId,
+                agentId,
+                content,
+                (g, triples) -> g.rememberShared(subjectKey, triples, memoryId));
     }
 
     private interface Write {
@@ -73,11 +88,17 @@ public class ApprovedFactGraphSync {
             GraphMemoryService g = graph.getIfAvailable();
             EntityExtractionService ex = extraction.getIfAvailable();
             MemoryExtractionChatClients provider = clients.getIfAvailable();
-            if (g == null || ex == null || provider == null || content == null || content.isBlank()) {
+            if (g == null
+                    || ex == null
+                    || provider == null
+                    || content == null
+                    || content.isBlank()) {
                 outcome = Outcome.SKIPPED;
             } else {
-                List<GraphTriple> triples = MemoryWriteGate.screenTriples(
-                        ex.extractTriples(provider.forBackgroundExtraction(), content, agentId));
+                List<GraphTriple> triples =
+                        MemoryWriteGate.screenTriples(
+                                ex.extractTriples(
+                                        provider.forBackgroundExtraction(), content, agentId));
                 if (triples.isEmpty()) {
                     outcome = Outcome.NO_TRIPLES;
                 } else {
@@ -87,8 +108,11 @@ public class ApprovedFactGraphSync {
             }
         } catch (RuntimeException e) {
             outcome = Outcome.FAILED;
-            log.warn("Graph write for approved {} memory {} failed; the approval stands and the fact stays vector-only",
-                    scope, memoryId, e);
+            log.warn(
+                    "Graph write for approved {} memory {} failed; the approval stands and the fact stays vector-only",
+                    scope,
+                    memoryId,
+                    e);
         }
         count(scope, outcome);
         return outcome;
@@ -98,7 +122,13 @@ public class ApprovedFactGraphSync {
         try {
             MeterRegistry r = registry.getIfAvailable();
             if (r != null) {
-                r.counter(METRIC, "scope", scope, "outcome", outcome.name().toLowerCase(java.util.Locale.ROOT)).increment();
+                r.counter(
+                                METRIC,
+                                "scope",
+                                scope,
+                                "outcome",
+                                outcome.name().toLowerCase(java.util.Locale.ROOT))
+                        .increment();
             }
         } catch (RuntimeException e) {
             log.debug("Could not count the approved-fact graph sync", e);

@@ -60,8 +60,9 @@ final class ChatMemoryRecall {
 
     /**
      * {@code memory.recall.enabled} for an agent: the per-agent (and workspace, and platform {@code
-     * app.memory.limits.recall-enabled}) switch for putting memory into the prompt. Everything on until {@link
-     * ChatServiceParts} wires the settings catalog, which is also the answer of a hand-built instance.
+     * app.memory.limits.recall-enabled}) switch for putting memory into the prompt. Everything on
+     * until {@link ChatServiceParts} wires the settings catalog, which is also the answer of a
+     * hand-built instance.
      */
     private volatile java.util.function.Predicate<UUID> recallEnabled = agentId -> true;
 
@@ -70,8 +71,9 @@ final class ChatMemoryRecall {
     }
 
     /**
-     * {@code memory.write.enabled} for an agent, asked as "off": true = this agent's turns write no memory (the
-     * conversation's rolling summary is not folded). Everything on until {@link ChatServiceParts} wires the catalog.
+     * {@code memory.write.enabled} for an agent, asked as "off": true = this agent's turns write no
+     * memory (the conversation's rolling summary is not folded). Everything on until {@link
+     * ChatServiceParts} wires the catalog.
      */
     private volatile java.util.function.Predicate<UUID> writesSwitchedOff = agentId -> false;
 
@@ -89,32 +91,44 @@ final class ChatMemoryRecall {
         }
     }
 
-    /** Whether a recalled long-term fact is relevant enough, and how many a turn may inject (see {@link MemoryRecallProperties}). */
+    /**
+     * Whether a recalled long-term fact is relevant enough, and how many a turn may inject (see
+     * {@link MemoryRecallProperties}).
+     */
     private MemoryRecallProperties limitsOf(AgentMemoryService service) {
         MemoryRecallProperties limits = service == null ? null : service.recallLimits();
         return limits == null ? MemoryRecallProperties.off() : limits;
     }
 
-    /** The unified recall (ADR-0028), absent until wired and when the memory-store module is not on the classpath. */
+    /**
+     * The unified recall (ADR-0028), absent until wired and when the memory-store module is not on
+     * the classpath.
+     */
     private volatile ObjectProvider<UnifiedMemoryRecall> unifiedRecall;
 
     void useUnifiedRecall(ObjectProvider<UnifiedMemoryRecall> unifiedRecall) {
         this.unifiedRecall = unifiedRecall;
     }
 
-    /** What the unified recall added to one turn: the rendered block, the items in it, a degraded note. */
+    /**
+     * What the unified recall added to one turn: the rendered block, the items in it, a degraded
+     * note.
+     */
     private record Unified(String text, List<TurnMemoryRecall.UnifiedItem> items, String note) {
         static final Unified NONE = new Unified(null, List.of(), null);
     }
 
     /**
-     * Unified recall for the turn: nothing unless a {@link UnifiedMemoryRecall} bean exists and its gate is on for the
-     * agent (it answers "disabled" otherwise). Called in-process on the turn's own thread, so the tenant is set. Any
-     * failure yields no block and a {@code degraded:error} note, never a failed turn.
+     * Unified recall for the turn: nothing unless a {@link UnifiedMemoryRecall} bean exists and its
+     * gate is on for the agent (it answers "disabled" otherwise). Called in-process on the turn's
+     * own thread, so the tenant is set. Any failure yields no block and a {@code degraded:error}
+     * note, never a failed turn.
      *
-     * @param usedTokens tokens the always-in-context memory blocks already took of the shared budget (charged first)
+     * @param usedTokens tokens the always-in-context memory blocks already took of the shared
+     *     budget (charged first)
      * @param legacyIds ids of facts the legacy path already injected, so none appears twice
-     * @param maxNew most items the unified block may add on top of the legacy ones (0 = the composer's own cap)
+     * @param maxNew most items the unified block may add on top of the legacy ones (0 = the
+     *     composer's own cap)
      */
     private Unified recallUnified(
             UUID agentId,
@@ -148,10 +162,15 @@ final class ChatMemoryRecall {
             if (result == null || UnifiedMemoryRecall.DISABLED.equals(result.degradedReason())) {
                 return Unified.NONE;
             }
-            String note = result.degradedReason() == null ? null : "degraded:" + result.degradedReason();
+            String note =
+                    result.degradedReason() == null ? null : "degraded:" + result.degradedReason();
             List<MemoryItemView> candidates = result.items();
             if (maxNew > 0) {
-                candidates = candidates.stream().filter(i -> !legacyIds.contains(i.id())).limit(maxNew).toList();
+                candidates =
+                        candidates.stream()
+                                .filter(i -> !legacyIds.contains(i.id()))
+                                .limit(maxNew)
+                                .toList();
             }
             UnifiedMemoryBlock.Rendered rendered =
                     UnifiedMemoryBlock.render(candidates, (int) remaining, legacyIds);
@@ -248,7 +267,8 @@ final class ChatMemoryRecall {
             AgentStepEventEmitter stepEvents,
             ResolvedDirectives pd) {
         if (!recallSwitchedOn(agentId)) {
-            // Memory recall is off for this agent: nothing is read and nothing is injected. The trace says so, so a turn
+            // Memory recall is off for this agent: nothing is read and nothing is injected. The
+            // trace says so, so a turn
             // that did not look is not mistaken for one that found nothing.
             return new MemoryRecall(null, 0, TurnMemoryRecall.Trace.disabled());
         }
@@ -356,7 +376,8 @@ final class ChatMemoryRecall {
             }
         }
 
-        // app.memory.recall.max-items: one turn injects at most this many recalled facts across both stores, the closest
+        // app.memory.recall.max-items: one turn injects at most this many recalled facts across
+        // both stores, the closest
         // first (a tie keeps the private fact). 0 = each store's own top-k, as before.
         int cap = limits.getMaxItems();
         if (cap > 0 && memories.size() + sharedMemories.size() > cap) {
@@ -370,7 +391,8 @@ final class ChatMemoryRecall {
                             .map(m -> "- " + m.content())
                             .reduce((a, b) -> a + "\n" + b)
                             .orElse("");
-            block.append(pd.textOrShipped("memory.recall.private", java.util.Map.of("facts", factList)));
+            block.append(
+                    pd.textOrShipped("memory.recall.private", java.util.Map.of("facts", factList)));
             privateFacts = memories.size();
             memories.forEach(
                     m -> {
@@ -387,7 +409,9 @@ final class ChatMemoryRecall {
             if (!block.isEmpty()) {
                 block.append("\n\n");
             }
-            block.append(pd.textOrShipped("memory.recall.shared", java.util.Map.of("facts", sharedFactList)));
+            block.append(
+                    pd.textOrShipped(
+                            "memory.recall.shared", java.util.Map.of("facts", sharedFactList)));
             sharedFacts = sharedMemories.size();
             sharedMemories.forEach(
                     m -> {
@@ -396,14 +420,20 @@ final class ChatMemoryRecall {
                     });
         }
 
-        // Unified memory (default OFF: no bean call result, no text, no trace fields). Its items are TRUSTED-only and,
+        // Unified memory (default OFF: no bean call result, no text, no trace fields). Its items
+        // are TRUSTED-only and,
         // like the legacy facts, auto-injected, so they count as recalled facts for taint marking.
         int roomForUnified = cap > 0 ? Math.max(0, cap - factIds.size()) : 0;
         Unified unified =
                 cap > 0 && roomForUnified == 0
                         ? Unified.NONE
                         : recallUnified(
-                                agentId, subjectKey, userMessage, blockTokens, new HashSet<>(factIds), roomForUnified);
+                                agentId,
+                                subjectKey,
+                                userMessage,
+                                blockTokens,
+                                new HashSet<>(factIds),
+                                roomForUnified);
         if (unified.text() != null) {
             if (!block.isEmpty()) {
                 block.append("\n\n");
@@ -432,10 +462,13 @@ final class ChatMemoryRecall {
         // Only trim when user blocks were prepended (their separator can trail). With none, the
         // text is byte-for-byte what it was before blocks existed.
         String text = hasUserBlocks ? block.toString().strip() : block.toString();
-        // Block labels are known only on a step-event turn (the labelled render is what reports them); otherwise the
+        // Block labels are known only on a step-event turn (the labelled render is what reports
+        // them); otherwise the
         // trace names the blocks as one unlabelled group, so their presence is still visible.
         List<String> traceBlocks =
-                !hasUserBlocks ? List.of() : usedBlockLabels.isEmpty() ? List.of("memory_blocks") : usedBlockLabels;
+                !hasUserBlocks
+                        ? List.of()
+                        : usedBlockLabels.isEmpty() ? List.of("memory_blocks") : usedBlockLabels;
         return new MemoryRecall(
                 text,
                 privateFacts + sharedFacts + unified.items().size(),
@@ -448,7 +481,10 @@ final class ChatMemoryRecall {
                         .withUnified(unified.items(), unified.note()));
     }
 
-    /** Similarity of the {@code n}-th closest fact over both lists (the cutoff that keeps {@code n} of them). */
+    /**
+     * Similarity of the {@code n}-th closest fact over both lists (the cutoff that keeps {@code n}
+     * of them).
+     */
     private static double nthBestSimilarity(
             List<AgentMemoryEntry> privateFacts, List<TenantMemoryEntry> sharedFacts, int n) {
         List<Double> sims = new ArrayList<>();

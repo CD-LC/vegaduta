@@ -7,12 +7,14 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Renders the competence counters as a short English sentence pair, by template. No model is involved and nothing from a
- * user or a model can reach the text: it is built from fixed words, the platform task-class identifier (re-validated
- * here against a strict pattern, a row that fails it is skipped), counts and a rounded Wilson bound.
+ * Renders the competence counters as a short English sentence pair, by template. No model is
+ * involved and nothing from a user or a model can reach the text: it is built from fixed words, the
+ * platform task-class identifier (re-validated here against a strict pattern, a row that fails it
+ * is skipped), counts and a rounded Wilson bound.
  *
- * <p>A class is mentioned only once it has at least {@code minSample} verified outcomes (UNKNOWN does not count towards
- * the sample), so "knows its limits" never rests on two lucky runs. The overflow bucket is never named.
+ * <p>A class is mentioned only once it has at least {@code minSample} verified outcomes (UNKNOWN
+ * does not count towards the sample), so "knows its limits" never rests on two lucky runs. The
+ * overflow bucket is never named.
  */
 final class CompetenceSummary {
 
@@ -20,22 +22,29 @@ final class CompetenceSummary {
 
     private CompetenceSummary() {}
 
-    static Optional<String> render(List<CompetenceRow> rows, CompetenceProperties p, int tokenBudget) {
-        List<CompetenceRow> eligible = rows.stream()
-                .filter(r -> !CompetenceStorage.OVERFLOW_CLASS.equals(r.taskClass()))
-                .filter(r -> SAFE_CLASS.matcher(r.taskClass()).matches())
-                .filter(r -> r.verifiedSample() >= p.getMinSample())
-                .toList();
-        List<CompetenceRow> good = eligible.stream()
-                .filter(r -> r.lowerBound() >= p.getGoodLowerBound())
-                .sorted(Comparator.comparingDouble(CompetenceRow::lowerBound)
-                        .reversed()
-                        .thenComparing(CompetenceRow::taskClass))
-                .toList();
-        List<CompetenceRow> weak = eligible.stream()
-                .filter(r -> r.successRate() < p.getUnreliableRate())
-                .sorted(Comparator.comparingDouble(CompetenceRow::successRate).thenComparing(CompetenceRow::taskClass))
-                .toList();
+    static Optional<String> render(
+            List<CompetenceRow> rows, CompetenceProperties p, int tokenBudget) {
+        List<CompetenceRow> eligible =
+                rows.stream()
+                        .filter(r -> !CompetenceStorage.OVERFLOW_CLASS.equals(r.taskClass()))
+                        .filter(r -> SAFE_CLASS.matcher(r.taskClass()).matches())
+                        .filter(r -> r.verifiedSample() >= p.getMinSample())
+                        .toList();
+        List<CompetenceRow> good =
+                eligible.stream()
+                        .filter(r -> r.lowerBound() >= p.getGoodLowerBound())
+                        .sorted(
+                                Comparator.comparingDouble(CompetenceRow::lowerBound)
+                                        .reversed()
+                                        .thenComparing(CompetenceRow::taskClass))
+                        .toList();
+        List<CompetenceRow> weak =
+                eligible.stream()
+                        .filter(r -> r.successRate() < p.getUnreliableRate())
+                        .sorted(
+                                Comparator.comparingDouble(CompetenceRow::successRate)
+                                        .thenComparing(CompetenceRow::taskClass))
+                        .toList();
         if (good.isEmpty() && weak.isEmpty()) {
             return Optional.empty();
         }
@@ -50,7 +59,9 @@ final class CompetenceSummary {
     }
 
     private static String sentence(List<CompetenceRow> good, List<CompetenceRow> weak, int per) {
-        StringBuilder sb = new StringBuilder("Track record counted by the platform from verified outcomes, not self-reported.");
+        StringBuilder sb =
+                new StringBuilder(
+                        "Track record counted by the platform from verified outcomes, not self-reported.");
         append(sb, "Good at", good, per);
         append(sb, "Unreliable at", weak, per);
         return sb.toString();

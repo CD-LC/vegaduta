@@ -28,9 +28,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * Phase 0 package G: the client identity used for fraud decisions is the container-resolved peer address only
- * (X-Forwarded-For / X-Real-IP are client-controlled and a hostname there used to trigger a DNS lookup), and the
- * challenge flow is closed: a signed, short-lived, single-use pass downgrades CHALLENGE to ALLOW.
+ * Phase 0 package G: the client identity used for fraud decisions is the container-resolved peer
+ * address only (X-Forwarded-For / X-Real-IP are client-controlled and a hostname there used to
+ * trigger a DNS lookup), and the challenge flow is closed: a signed, short-lived, single-use pass
+ * downgrades CHALLENGE to ALLOW.
  */
 class FraudClientIpAndChallengePassTest {
 
@@ -63,7 +64,8 @@ class FraudClientIpAndChallengePassTest {
 
     @Test
     void aHostnameInForwardedForIsIgnoredAndNeverResolved() {
-        // Old code resolved "localhost" through InetAddress.getByName and used 127.0.0.1 as the client.
+        // Old code resolved "localhost" through InetAddress.getByName and used 127.0.0.1 as the
+        // client.
         MockHttpServletRequest r = req("203.0.113.9");
         r.addHeader("X-Forwarded-For", "localhost");
         assertEquals("203.0.113.9", ClientContext.extractClientIp(r).getHostAddress());
@@ -91,7 +93,7 @@ class FraudClientIpAndChallengePassTest {
         r.addHeader("X-Forwarded-For", "192.0.2.200");
 
         new FraudDetectionInterceptor(abuse, new ObjectMapper(), true)
-            .preHandle(r, new MockHttpServletResponse(), new Object());
+                .preHandle(r, new MockHttpServletResponse(), new Object());
 
         ArgumentCaptor<ClientContext> ctx = ArgumentCaptor.forClass(ClientContext.class);
         verify(abuse).analyzeRequest(ctx.capture(), any());
@@ -103,9 +105,20 @@ class FraudClientIpAndChallengePassTest {
     private static final class MutableClock extends Clock {
         Instant now = Instant.parse("2026-11-03T10:00:00Z");
 
-        @Override public java.time.ZoneId getZone() { return ZoneOffset.UTC; }
-        @Override public Clock withZone(java.time.ZoneId zone) { return this; }
-        @Override public Instant instant() { return now; }
+        @Override
+        public java.time.ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(java.time.ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
     }
 
     private static InetAddress ip(String s) {
@@ -137,15 +150,23 @@ class FraudClientIpAndChallengePassTest {
         // Wrong IP, wrong tenant.
         assertFalse(cp.redeem(token, TENANT, ip("203.0.113.10")));
         assertFalse(cp.redeem(token, UUID.randomUUID(), ip("203.0.113.9")));
-        // Tampered signature, tampered payload, the old unsigned tenant.nonce.timestamp format, junk.
-        assertFalse(cp.redeem(token.substring(0, token.length() - 2) + "AA", TENANT, ip("203.0.113.9")));
+        // Tampered signature, tampered payload, the old unsigned tenant.nonce.timestamp format,
+        // junk.
+        assertFalse(
+                cp.redeem(
+                        token.substring(0, token.length() - 2) + "AA", TENANT, ip("203.0.113.9")));
         assertFalse(cp.redeem("x" + token, TENANT, ip("203.0.113.9")));
-        assertFalse(cp.redeem(TENANT.toString().substring(0, 8) + ".nonce123.1762164000000", TENANT, ip("203.0.113.9")));
+        assertFalse(
+                cp.redeem(
+                        TENANT.toString().substring(0, 8) + ".nonce123.1762164000000",
+                        TENANT,
+                        ip("203.0.113.9")));
         assertFalse(cp.redeem("", TENANT, ip("203.0.113.9")));
         assertFalse(cp.redeem(null, TENANT, ip("203.0.113.9")));
         // Signed with another key.
-        String other = new ChallengePass("another-key", new MutableClock(), Duration.ofMinutes(5))
-            .issue(TENANT, ip("203.0.113.9"), "nonce-2");
+        String other =
+                new ChallengePass("another-key", new MutableClock(), Duration.ofMinutes(5))
+                        .issue(TENANT, ip("203.0.113.9"), "nonce-2");
         assertFalse(cp.redeem(other, TENANT, ip("203.0.113.9")));
         // None of the failures consumed the genuine pass.
         assertTrue(cp.redeem(token, TENANT, ip("203.0.113.9")));
@@ -161,9 +182,13 @@ class FraudClientIpAndChallengePassTest {
     // ---- interceptor end to end ----
 
     private AbuseDetectionService challengingService() {
-        AbuseDetectionService real = new AbuseDetectionService(
-            mock(IpBlacklistRepository.class), mock(UserBlacklistRepository.class),
-            mock(ChallengeNonceRepository.class), mock(HCaptchaClient.class), mock(AbuseEventRecorder.class));
+        AbuseDetectionService real =
+                new AbuseDetectionService(
+                        mock(IpBlacklistRepository.class),
+                        mock(UserBlacklistRepository.class),
+                        mock(ChallengeNonceRepository.class),
+                        mock(HCaptchaClient.class),
+                        mock(AbuseEventRecorder.class));
         ReflectionTestUtils.setField(real, "encryptionKey", KEY);
         AbuseDetectionService spy = spy(real);
         doReturn(FraudDecision.CHALLENGE).when(spy).analyzeRequest(any(), any());
@@ -176,7 +201,8 @@ class FraudClientIpAndChallengePassTest {
         AbuseDetectionService abuse = challengingService();
         TenantContext.set(TenantContext.of(SCHEMA, UUID.randomUUID().toString(), Set.of()));
         String pass = abuse.issueChallengePass(TENANT, ip("203.0.113.9"), "nonce-1");
-        FraudDetectionInterceptor interceptor = new FraudDetectionInterceptor(abuse, new ObjectMapper(), true);
+        FraudDetectionInterceptor interceptor =
+                new FraudDetectionInterceptor(abuse, new ObjectMapper(), true);
 
         MockHttpServletRequest first = req("203.0.113.9");
         first.addHeader("X-Challenge-Pass", pass);
@@ -200,7 +226,9 @@ class FraudClientIpAndChallengePassTest {
         r.addHeader("X-Challenge-Pass", "anything-at-all");
         MockHttpServletResponse res = new MockHttpServletResponse();
 
-        assertFalse(new FraudDetectionInterceptor(abuse, new ObjectMapper(), true).preHandle(r, res, new Object()));
+        assertFalse(
+                new FraudDetectionInterceptor(abuse, new ObjectMapper(), true)
+                        .preHandle(r, res, new Object()));
         assertEquals(403, res.getStatus());
         assertEquals("HCAPTCHA", res.getHeader("X-Fraud-Challenge"));
     }

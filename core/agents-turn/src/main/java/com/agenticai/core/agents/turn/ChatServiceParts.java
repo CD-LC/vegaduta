@@ -98,10 +98,13 @@ final class ChatServiceParts {
                         agentService,
                         () -> svc.memoryStepEventsEnabled);
         this.memoryRecall.useUnifiedRecall(context.unifiedMemoryRecall());
-        // memory.recall.enabled: the tenant's / agent's switch for putting memory into the prompt; the platform value
-        // (app.memory.limits.recall-enabled, default on) answers when there is no catalog or no override.
+        // memory.recall.enabled: the tenant's / agent's switch for putting memory into the prompt;
+        // the platform value
+        // (app.memory.limits.recall-enabled, default on) answers when there is no catalog or no
+        // override.
         com.agenticai.core.agents.tunables.BehaviourSettings recallBehaviour = timeouts.behaviour();
-        org.springframework.beans.factory.ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService>
+        org.springframework.beans.factory.ObjectProvider<
+                        com.agenticai.core.agents.memory.AgentMemoryService>
                 recallPlatform = context.agentMemoryService();
         this.memoryRecall.useRecallSwitch(
                 agentId ->
@@ -110,18 +113,22 @@ final class ChatServiceParts {
                                 null,
                                 agentId,
                                 () -> {
-                                    com.agenticai.core.agents.memory.AgentMemoryService memory = recallPlatform.getIfAvailable();
+                                    com.agenticai.core.agents.memory.AgentMemoryService memory =
+                                            recallPlatform.getIfAvailable();
                                     return memory == null || !memory.recallSwitchedOffByPlatform();
                                 }));
-        // memory.write.enabled: the same layering for the write side (platform app.memory.limits.write-enabled).
+        // memory.write.enabled: the same layering for the write side (platform
+        // app.memory.limits.write-enabled).
         this.memoryRecall.useWriteSwitch(
                 agentId ->
                         !recallBehaviour.bool(
-                                com.agenticai.core.agents.memory.AgentMemoryService.WRITE_ENABLED_KEY,
+                                com.agenticai.core.agents.memory.AgentMemoryService
+                                        .WRITE_ENABLED_KEY,
                                 null,
                                 agentId,
                                 () -> {
-                                    com.agenticai.core.agents.memory.AgentMemoryService memory = recallPlatform.getIfAvailable();
+                                    com.agenticai.core.agents.memory.AgentMemoryService memory =
+                                            recallPlatform.getIfAvailable();
                                     return memory == null || !memory.writesSwitchedOffByPlatform();
                                 }));
         this.turns =

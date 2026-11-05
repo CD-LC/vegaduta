@@ -7,16 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drives a {@link MemoryEvalSubject} through scenarios: sessions in order, probes after their session,
- * the same seed for every arm of a case so arms pair exactly (scorecard doc section 5).
+ * Drives a {@link MemoryEvalSubject} through scenarios: sessions in order, probes after their
+ * session, the same seed for every arm of a case so arms pair exactly (scorecard doc section 5).
  */
 public final class MemoryEvalRunner {
 
     private MemoryEvalRunner() {}
 
     public static MemoryRun run(
-        MemoryEvalSubject subject, MemoryScenario scenario, MemoryArm arm, int repeat, long seed
-    ) {
+            MemoryEvalSubject subject,
+            MemoryScenario scenario,
+            MemoryArm arm,
+            int repeat,
+            long seed) {
         CaseEnvironment env = CaseEnvironment.of(scenario, arm, repeat);
         MemoryEvalSubject.Execution exec = subject.start(scenario, arm, repeat, seed, env);
         List<TurnCost> turns = new ArrayList<>();
@@ -39,8 +42,11 @@ public final class MemoryEvalRunner {
 
     /** All scenarios x arms x repeats. The per-(scenario, repeat) seed is shared by every arm. */
     public static List<MemoryRun> runAll(
-        MemoryEvalSubject subject, List<MemoryScenario> scenarios, List<MemoryArm> arms, int repeats, long baseSeed
-    ) {
+            MemoryEvalSubject subject,
+            List<MemoryScenario> scenarios,
+            List<MemoryArm> arms,
+            int repeats,
+            long baseSeed) {
         if (repeats < 1) {
             throw new IllegalArgumentException("repeats must be >= 1, got " + repeats);
         }

@@ -37,8 +37,9 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * WP5c: real importance for the legacy facts, and consolidation of {@code memory_item} rows whose merges and
- * summaries are filed as proposals (also when the breaker trips or apply is off), never applied by the job.
+ * WP5c: real importance for the legacy facts, and consolidation of {@code memory_item} rows whose
+ * merges and summaries are filed as proposals (also when the breaker trips or apply is off), never
+ * applied by the job.
  */
 class MemoryConsolidationItemsTest {
 
@@ -69,13 +70,15 @@ class MemoryConsolidationItemsTest {
     @SuppressWarnings("unchecked")
     private static ObjectProvider<DecayProperties> noDecayBean() {
         ObjectProvider<DecayProperties> p = mock(ObjectProvider.class);
-        when(p.getIfAvailable(any(Supplier.class))).thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
+        when(p.getIfAvailable(any(Supplier.class)))
+                .thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
         return p;
     }
 
     private MemoryConsolidationService service(boolean apply) {
         MemoryConsolidationService s =
-                new MemoryConsolidationService(facts, items, runs, tombstones, filer, noDecayBean(), apply, 200);
+                new MemoryConsolidationService(
+                        facts, items, runs, tombstones, filer, noDecayBean(), apply, 200);
         s.useClock(Clock.fixed(NOW, ZoneOffset.UTC));
         return s;
     }
@@ -84,11 +87,29 @@ class MemoryConsolidationItemsTest {
         return NOW.minus(Duration.ofDays(days));
     }
 
-    // ------------------------------------------------------------------ legacy facts: real importance
+    // ------------------------------------------------------------------ legacy facts: real
+    // importance
 
-    private Fact fact(String content, int ageDays, int idleDays, int uses, double importance, boolean pinned, boolean person) {
-        return new Fact(Fact.AGENT, UUID.randomUUID(), agent, content, MemoryTrust.TRUSTED, uses, ago(ageDays),
-                ago(idleDays), importance, pinned, person);
+    private Fact fact(
+            String content,
+            int ageDays,
+            int idleDays,
+            int uses,
+            double importance,
+            boolean pinned,
+            boolean person) {
+        return new Fact(
+                Fact.AGENT,
+                UUID.randomUUID(),
+                agent,
+                content,
+                MemoryTrust.TRUSTED,
+                uses,
+                ago(ageDays),
+                ago(idleDays),
+                importance,
+                pinned,
+                person);
     }
 
     @Test
@@ -106,14 +127,17 @@ class MemoryConsolidationItemsTest {
 
         MemoryConsolidationService.Report r = service(true).consolidateTenant();
 
-        assertEquals(1, r.forgets(), "only the stale, never-used, unpinned, not person-authored fact");
+        assertEquals(
+                1, r.forgets(), "only the stale, never-used, unpinned, not person-authored fact");
         assertEquals(1, r.tombstoned());
-        verify(tombstones, times(1)).markForgotten(eq("meera"), eq(stale), eq("DECAY"), any(), eq(NOW));
+        verify(tombstones, times(1))
+                .markForgotten(eq("meera"), eq(stale), eq("DECAY"), any(), eq(NOW));
     }
 
     @Test
     void aTombstoneIsNeverWrittenWhileAnotherLiveRowHoldsTheSameText() {
-        // A tombstone hides every row with that text. An exact-duplicate "merge drop", and a stale copy of a text that is
+        // A tombstone hides every row with that text. An exact-duplicate "merge drop", and a stale
+        // copy of a text that is
         // also in recent use, must not be tombstoned or the survivor would vanish from recall too.
         facts.subjects.add("meera");
         facts.facts.add(fact("meera likes espresso coffee", 30, 30, 0, 0.5, false, false));
@@ -147,7 +171,15 @@ class MemoryConsolidationItemsTest {
     void theCircuitBreakerStillCapsABulkTrustedForget() {
         facts.subjects.add("meera");
         for (int i = 0; i < 10; i++) {
-            facts.facts.add(fact("stale fact number " + i + " " + UUID.randomUUID(), 400, 400, 0, 0.5, false, false));
+            facts.facts.add(
+                    fact(
+                            "stale fact number " + i + " " + UUID.randomUUID(),
+                            400,
+                            400,
+                            0,
+                            0.5,
+                            false,
+                            false));
         }
         MemoryConsolidationService.Report r = service(true).consolidateTenant();
         assertEquals(3, r.forgets(), "30% of 10 rows");
@@ -156,21 +188,48 @@ class MemoryConsolidationItemsTest {
 
     // ------------------------------------------------------------------ memory_item rows
 
-    private ConsolidationItemSource.Item item(MemoryKind kind, String content, int ageDays, double importance, boolean pinned) {
-        return new ConsolidationItemSource.Item(UUID.randomUUID(), agent, kind, content, 0, true, true, false, pinned,
-                importance, 0, ago(ageDays), null, ago(ageDays));
+    private ConsolidationItemSource.Item item(
+            MemoryKind kind, String content, int ageDays, double importance, boolean pinned) {
+        return new ConsolidationItemSource.Item(
+                UUID.randomUUID(),
+                agent,
+                kind,
+                content,
+                0,
+                true,
+                true,
+                false,
+                pinned,
+                importance,
+                0,
+                ago(ageDays),
+                null,
+                ago(ageDays));
     }
 
     private void fresh(int n) {
         for (int i = 0; i < n; i++) {
-            items.items.add(item(MemoryKind.EPISODIC, "fresh episode " + UUID.randomUUID(), 2, 0.5, false));
+            items.items.add(
+                    item(MemoryKind.EPISODIC, "fresh episode " + UUID.randomUUID(), 2, 0.5, false));
         }
     }
 
     @Test
     void duplicateItemsAreFiledAsAMergeProposalNotAppliedEvenWithAutoApply() {
-        ConsolidationItemSource.Item keep = item(MemoryKind.PROCEDURAL, "alice checks espresso machine settings", 40, 0.5, false);
-        ConsolidationItemSource.Item dup = item(MemoryKind.PROCEDURAL, "alice checks espresso machine settings twice daily", 41, 0.5, false);
+        ConsolidationItemSource.Item keep =
+                item(
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings",
+                        40,
+                        0.5,
+                        false);
+        ConsolidationItemSource.Item dup =
+                item(
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings twice daily",
+                        41,
+                        0.5,
+                        false);
         items.items.add(keep);
         items.items.add(dup);
         fresh(8);
@@ -181,13 +240,37 @@ class MemoryConsolidationItemsTest {
         assertEquals(1, r.proposals());
         verify(filer, times(1)).fileMerge(any(ConsolidationPlan.Merge.class), anyMap());
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("item:" + agent), eq(DAY), eq("apply"), eq("completed"), eq(10), eq(0), eq(1), eq(0), anyInt(), eq(0), eq(1));
+        verify(runs)
+                .record(
+                        eq("item:" + agent),
+                        eq(DAY),
+                        eq("apply"),
+                        eq("completed"),
+                        eq(10),
+                        eq(0),
+                        eq(1),
+                        eq(0),
+                        anyInt(),
+                        eq(0),
+                        eq(1));
     }
 
     @Test
     void aMergeIsNeverFiledAcrossKinds() {
-        items.items.add(item(MemoryKind.PROCEDURAL, "alice checks espresso machine settings", 40, 0.5, false));
-        items.items.add(item(MemoryKind.EPISODIC, "alice checks espresso machine settings twice daily", 41, 0.5, false));
+        items.items.add(
+                item(
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings",
+                        40,
+                        0.5,
+                        false));
+        items.items.add(
+                item(
+                        MemoryKind.EPISODIC,
+                        "alice checks espresso machine settings twice daily",
+                        41,
+                        0.5,
+                        false));
         fresh(8);
         MemoryConsolidationService.Report r = service(false).consolidateTenant();
         assertEquals(0, r.merges());
@@ -196,15 +279,28 @@ class MemoryConsolidationItemsTest {
 
     @Test
     void staleItemsInTheSummariseBandAreFiledAsASummaryProposal() {
-        items.items.add(item(MemoryKind.EPISODIC, "episode about the quarterly roadmap meeting", 50, 0.5, false));
-        items.items.add(item(MemoryKind.EPISODIC, "episode about the annual budget workshop", 52, 0.5, false));
+        items.items.add(
+                item(
+                        MemoryKind.EPISODIC,
+                        "episode about the quarterly roadmap meeting",
+                        50,
+                        0.5,
+                        false));
+        items.items.add(
+                item(
+                        MemoryKind.EPISODIC,
+                        "episode about the annual budget workshop",
+                        52,
+                        0.5,
+                        false));
         fresh(10);
 
         MemoryConsolidationService.Report r = service(false).consolidateTenant();
 
         assertEquals(1, r.summaries());
         assertEquals(1, r.proposals());
-        ArgumentCaptor<ConsolidationPlan.Summarise> s = ArgumentCaptor.forClass(ConsolidationPlan.Summarise.class);
+        ArgumentCaptor<ConsolidationPlan.Summarise> s =
+                ArgumentCaptor.forClass(ConsolidationPlan.Summarise.class);
         verify(filer).fileSummary(s.capture(), anyMap());
         assertEquals(2, s.getValue().sourceIds().size());
         assertEquals(agent, s.getValue().agentId());
@@ -213,11 +309,19 @@ class MemoryConsolidationItemsTest {
 
     @Test
     void proposalsAreFiledWhenTheBreakerTripsAndNothingIsApplied() {
-        // 20 items, cap 6. Four forgettable (importance 0.01, idle 300 days), then three duplicate pairs: the first two
-        // merges fit under the cap, the third trips the breaker. mayAutoApply is false, so no tombstones; the merges
+        // 20 items, cap 6. Four forgettable (importance 0.01, idle 300 days), then three duplicate
+        // pairs: the first two
+        // merges fit under the cap, the third trips the breaker. mayAutoApply is false, so no
+        // tombstones; the merges
         // that fit are still filed for a person.
         for (int i = 0; i < 4; i++) {
-            items.items.add(item(MemoryKind.PROCEDURAL, "forgettable zx" + i + " qv" + i, 300, 0.01, false));
+            items.items.add(
+                    item(
+                            MemoryKind.PROCEDURAL,
+                            "forgettable zx" + i + " qv" + i,
+                            300,
+                            0.01,
+                            false));
         }
         String[][] pairs = {
             {"alice likes espresso coffee", "alice likes espresso coffee very much"},
@@ -241,8 +345,20 @@ class MemoryConsolidationItemsTest {
 
     @Test
     void anItemAlreadyFeedingAPendingProposalIsNotFiledAgain() {
-        ConsolidationItemSource.Item keep = item(MemoryKind.PROCEDURAL, "alice checks espresso machine settings", 40, 0.5, false);
-        ConsolidationItemSource.Item dup = item(MemoryKind.PROCEDURAL, "alice checks espresso machine settings twice daily", 41, 0.5, false);
+        ConsolidationItemSource.Item keep =
+                item(
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings",
+                        40,
+                        0.5,
+                        false);
+        ConsolidationItemSource.Item dup =
+                item(
+                        MemoryKind.PROCEDURAL,
+                        "alice checks espresso machine settings twice daily",
+                        41,
+                        0.5,
+                        false);
         items.items.add(keep);
         items.items.add(dup);
         fresh(8);
@@ -257,10 +373,36 @@ class MemoryConsolidationItemsTest {
 
     @Test
     void pinnedAndPersonAuthoredItemsAreNeverPlanned() {
-        items.items.add(item(MemoryKind.EPISODIC, "pinned episode about the roadmap meeting", 50, 0.5, true));
-        items.items.add(item(MemoryKind.EPISODIC, "pinned episode about the budget workshop", 52, 0.5, true));
-        ConsolidationItemSource.Item typed = new ConsolidationItemSource.Item(UUID.randomUUID(), agent, MemoryKind.EPISODIC,
-                "typed episode about the hiring plan", 0, false, true, true, false, 0.01, 0, ago(300), null, ago(300));
+        items.items.add(
+                item(
+                        MemoryKind.EPISODIC,
+                        "pinned episode about the roadmap meeting",
+                        50,
+                        0.5,
+                        true));
+        items.items.add(
+                item(
+                        MemoryKind.EPISODIC,
+                        "pinned episode about the budget workshop",
+                        52,
+                        0.5,
+                        true));
+        ConsolidationItemSource.Item typed =
+                new ConsolidationItemSource.Item(
+                        UUID.randomUUID(),
+                        agent,
+                        MemoryKind.EPISODIC,
+                        "typed episode about the hiring plan",
+                        0,
+                        false,
+                        true,
+                        true,
+                        false,
+                        0.01,
+                        0,
+                        ago(300),
+                        null,
+                        ago(300));
         items.items.add(typed);
         fresh(10);
         MemoryConsolidationService.Report r = service(true).consolidateTenant();
@@ -275,8 +417,20 @@ class MemoryConsolidationItemsTest {
         when(runs.claim("item:" + agent, DAY)).thenReturn(0);
         assertNull(service(false).consolidateAgentItems(agent, DAY));
         when(runs.claim("item:" + agent, DAY)).thenReturn(1);
-        org.mockito.Mockito.doThrow(new RuntimeException("boom")).when(runs)
-                .record(eq("item:" + agent), eq(DAY), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
+        org.mockito.Mockito.doThrow(new RuntimeException("boom"))
+                .when(runs)
+                .record(
+                        eq("item:" + agent),
+                        eq(DAY),
+                        anyString(),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt());
         try {
             service(false).consolidateAgentItems(agent, DAY);
         } catch (RuntimeException expected) {
@@ -287,7 +441,8 @@ class MemoryConsolidationItemsTest {
 
     @Test
     void withoutAnItemSourceOnlyLegacyFactsAreConsolidated() {
-        MemoryConsolidationService s = new MemoryConsolidationService(facts, runs, tombstones, noDecayBean(), false, 200);
+        MemoryConsolidationService s =
+                new MemoryConsolidationService(facts, runs, tombstones, noDecayBean(), false, 200);
         s.useClock(Clock.fixed(NOW, ZoneOffset.UTC));
         MemoryConsolidationService.Report r = s.consolidateTenant();
         assertEquals(0, r.subjects());

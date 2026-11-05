@@ -2,7 +2,10 @@ package com.agenticai.core.agents.memorystore;
 
 import java.util.Optional;
 
-/** The always-on screen: non-blank, within {@code max-item-chars}, and no control characters other than newline and tab. */
+/**
+ * The always-on screen: non-blank, within {@code max-item-chars}, and no control characters other
+ * than newline and tab.
+ */
 public class BasicMemoryContentScreen implements MemoryContentScreen {
 
     private final MemoryUnifiedProperties properties;

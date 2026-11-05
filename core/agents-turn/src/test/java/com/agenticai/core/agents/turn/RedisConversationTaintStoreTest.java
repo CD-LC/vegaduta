@@ -41,6 +41,7 @@ class RedisConversationTaintStoreTest {
         assertTrue(store.isTainted("t1", "c1"));
         verify(redis).expire(eq("agentic:session-taint:t1:c1"), eq(Duration.ofHours(24)));
         assertFalse(store.isTainted("t2", "c1"));
-        verify(redis, org.mockito.Mockito.never()).expire(eq("agentic:session-taint:t2:c1"), any(Duration.class));
+        verify(redis, org.mockito.Mockito.never())
+                .expire(eq("agentic:session-taint:t2:c1"), any(Duration.class));
     }
 }

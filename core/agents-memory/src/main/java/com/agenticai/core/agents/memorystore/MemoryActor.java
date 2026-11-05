@@ -17,7 +17,10 @@ public record MemoryActor(Type type, String ref) {
         if (type == null) {
             throw new IllegalArgumentException("actor type is required");
         }
-        ref = ref == null || ref.isBlank() ? null : (ref.length() > 255 ? ref.substring(0, 255) : ref);
+        ref =
+                ref == null || ref.isBlank()
+                        ? null
+                        : (ref.length() > 255 ? ref.substring(0, 255) : ref);
     }
 
     public static MemoryActor human(String principal) {

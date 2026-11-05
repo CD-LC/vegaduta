@@ -4,30 +4,35 @@ import com.agenticai.core.quality.stats.ConfidenceInterval;
 import com.agenticai.core.quality.stats.PairedComparisonResult;
 
 /**
- * Aggregated memory metrics, the input of {@link MemoryScorecardGate}. Every rate carries its counts
- * and a Wilson interval; every A/B difference is a {@link PairedComparisonResult} with the scenario
- * (not the repeat) as the independent unit. Optional parts are {@code null} when the data to compute
- * them was not in the run (the gate then reports UNPROVEN, never a fabricated pass).
+ * Aggregated memory metrics, the input of {@link MemoryScorecardGate}. Every rate carries its
+ * counts and a Wilson interval; every A/B difference is a {@link PairedComparisonResult} with the
+ * scenario (not the repeat) as the independent unit. Optional parts are {@code null} when the data
+ * to compute them was not in the run (the gate then reports UNPROVEN, never a fabricated pass).
  */
 public record MemoryScorecard(
-    Meta meta,
-    Gain gain,
-    Recall recall,
-    Mistakes mistakes,
-    Contradiction contradiction,
-    Staleness staleness,
-    Poisoning poisoning,
-    Isolation isolation,
-    Overhead overhead
-) {
+        Meta meta,
+        Gain gain,
+        Recall recall,
+        Mistakes mistakes,
+        Contradiction contradiction,
+        Staleness staleness,
+        Poisoning poisoning,
+        Isolation isolation,
+        Overhead overhead) {
 
     /**
-     * {@code probes} counts distinct probes in the M arm that feed the headline metrics, i.e. every probe
-     * except the POISON probes (those are one hard-zero check per attack, not a quality sample, and
-     * must not let the corpus alone clear the tier's minimum); {@code mistakeCases} / {@code attackCases}
-     * count distinct scenarios.
+     * {@code probes} counts distinct probes in the M arm that feed the headline metrics, i.e. every
+     * probe except the POISON probes (those are one hard-zero check per attack, not a quality
+     * sample, and must not let the corpus alone clear the tier's minimum); {@code mistakeCases} /
+     * {@code attackCases} count distinct scenarios.
      */
-    public record Meta(String subject, int scenarios, int repeats, int probes, int mistakeCases, int attackCases) {}
+    public record Meta(
+            String subject,
+            int scenarios,
+            int repeats,
+            int probes,
+            int mistakeCases,
+            int attackCases) {}
 
     /** hits out of total with a 95% Wilson interval; {@code wilson} is null when total is 0. */
     public record Rate(int hits, int total, ConfidenceInterval wilson) {
@@ -40,10 +45,20 @@ public record MemoryScorecard(
         }
     }
 
-    /** M1 on the memory-dependent subset, B vs M (variant = M). {@code m1Oracle} null without an ORACLE arm. */
-    public record Gain(PairedComparisonResult m1, int memoryDependentCases, int memoryDependentProbes, Double m1Oracle) {}
+    /**
+     * M1 on the memory-dependent subset, B vs M (variant = M). {@code m1Oracle} null without an
+     * ORACLE arm.
+     */
+    public record Gain(
+            PairedComparisonResult m1,
+            int memoryDependentCases,
+            int memoryDependentProbes,
+            Double m1Oracle) {}
 
-    /** M2 (answer or injection), M2 retriever-only, M2 of the oracle on the same probes, and M3 precision. */
+    /**
+     * M2 (answer or injection), M2 retriever-only, M2 of the oracle on the same probes, and M3
+     * precision.
+     */
     public record Recall(Rate m2, Rate m2Retriever, Rate m2Oracle, Rate m3) {}
 
     /** M4 over MISTAKE probes. */
@@ -56,11 +71,13 @@ public record MemoryScorecard(
     public record Staleness(Rate memoryOnUpdates, Rate memoryAll) {}
 
     /**
-     * H3: attack scenario runs in the M arm and the two stages. {@code attackScenarios} counts every
-     * attack scenario, {@code corpusAttacks} only those generated from the shared red-team corpus
-     * ({@link PoisonScenarioGenerator#CATEGORY}), which is what G7's 150-attack bar is measured on.
+     * H3: attack scenario runs in the M arm and the two stages. {@code attackScenarios} counts
+     * every attack scenario, {@code corpusAttacks} only those generated from the shared red-team
+     * corpus ({@link PoisonScenarioGenerator#CATEGORY}), which is what G7's 150-attack bar is
+     * measured on.
      */
-    public record Poisoning(Rate persisted, Rate influenced, int attackScenarios, int corpusAttacks) {}
+    public record Poisoning(
+            Rate persisted, Rate influenced, int attackScenarios, int corpusAttacks) {}
 
     /** H4 (over probes) and H5 (over forget trials) in the M arm. */
     public record Isolation(Rate leaks, Rate forget, int isolationProbes) {}
@@ -70,14 +87,22 @@ public record MemoryScorecard(
 
     /** C1/C2: tokens and dollars per turn and per successful probe, M against B. */
     public record Tokens(
-        double perTurnB, double perTurnM, double perTurnOverhead,
-        Double perSuccessB, Double perSuccessM, Double perSuccessRatio, ConfidenceInterval perSuccessRatioCi,
-        Double dollarsPerSuccessB, Double dollarsPerSuccessM
-    ) {}
+            double perTurnB,
+            double perTurnM,
+            double perTurnOverhead,
+            Double perSuccessB,
+            Double perSuccessM,
+            Double perSuccessRatio,
+            ConfidenceInterval perSuccessRatioCi,
+            Double dollarsPerSuccessB,
+            Double dollarsPerSuccessM) {}
 
-    /** C3: p95 turn latency and time to first token in ms; ttft fields are null when not measured. */
+    /**
+     * C3: p95 turn latency and time to first token in ms; ttft fields are null when not measured.
+     */
     public record Latency(double p95TurnB, double p95TurnM, Double p95TtftB, Double p95TtftM) {}
 
     /** C4: store growth in the M arm. */
-    public record Growth(double factsPer100Turns, long storeBytes, double duplicateRatio, int maxItemsPerUser) {}
+    public record Growth(
+            double factsPer100Turns, long storeBytes, double duplicateRatio, int maxItemsPerUser) {}
 }

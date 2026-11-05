@@ -16,13 +16,13 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 
 /**
- * Mock-side view of {@link SpendCounters}: stubs and verifies the atomic add/refund scripts on a mocked template.
- * Whether the scripts are CORRECT is proven against a real Redis in the *RedisTest classes.
+ * Mock-side view of {@link SpendCounters}: stubs and verifies the atomic add/refund scripts on a
+ * mocked template. Whether the scripts are CORRECT is proven against a real Redis in the *RedisTest
+ * classes.
  */
 final class SpendCounterMocks {
 
-    private SpendCounterMocks() {
-    }
+    private SpendCounterMocks() {}
 
     private static ArgumentMatcher<List<String>> keyContains(String part) {
         return keys -> keys != null && keys.size() == 1 && keys.get(0).contains(part);
@@ -32,11 +32,18 @@ final class SpendCounterMocks {
     @SuppressWarnings("unchecked")
     static void stub(StringRedisTemplate t, String keyPart, long by, Long result) {
         if (by < 0) {
-            when(t.execute(eq(SpendCounters.REFUND_IF_LIVE), argThat(keyContains(keyPart)), eq(Long.toString(by))))
-                .thenReturn(result);
+            when(t.execute(
+                            eq(SpendCounters.REFUND_IF_LIVE),
+                            argThat(keyContains(keyPart)),
+                            eq(Long.toString(by))))
+                    .thenReturn(result);
         } else {
-            when(t.execute(eq(SpendCounters.INCR_WITH_TTL), argThat(keyContains(keyPart)), eq(Long.toString(by)),
-                anyString())).thenReturn(result);
+            when(t.execute(
+                            eq(SpendCounters.INCR_WITH_TTL),
+                            argThat(keyContains(keyPart)),
+                            eq(Long.toString(by)),
+                            anyString()))
+                    .thenReturn(result);
         }
     }
 
@@ -47,23 +54,34 @@ final class SpendCounterMocks {
     /** Every add or refund answers with {@code f(by)}. */
     @SuppressWarnings("unchecked")
     static void stubAll(StringRedisTemplate t, LongFunction<Long> f) {
-        when(t.execute(any(RedisScript.class), any(List.class), any(Object[].class))).thenAnswer(
-            inv -> f.apply(Long.parseLong(inv.getArgument(2))));
+        when(t.execute(any(RedisScript.class), any(List.class), any(Object[].class)))
+                .thenAnswer(inv -> f.apply(Long.parseLong(inv.getArgument(2))));
     }
 
-    /** Real add/refund semantics over an in-memory map (refund drops an absent key and clamps at zero). */
+    /**
+     * Real add/refund semantics over an in-memory map (refund drops an absent key and clamps at
+     * zero).
+     */
     @SuppressWarnings("unchecked")
-    static void stubInMemory(StringRedisTemplate t, java.util.concurrent.ConcurrentMap<String, java.util.concurrent.atomic.AtomicLong> m) {
-        when(t.execute(any(RedisScript.class), any(List.class), any(Object[].class))).thenAnswer(inv -> {
-            RedisScript<?> script = inv.getArgument(0);
-            String key = ((List<String>) inv.getArgument(1)).get(0);
-            long by = Long.parseLong(inv.getArgument(2));
-            if (script == SpendCounters.REFUND_IF_LIVE) {
-                java.util.concurrent.atomic.AtomicLong v = m.get(key);
-                return v == null ? Long.valueOf(0L) : Long.valueOf(v.updateAndGet(x -> Math.max(0L, x + by)));
-            }
-            return m.computeIfAbsent(key, k -> new java.util.concurrent.atomic.AtomicLong()).addAndGet(by);
-        });
+    static void stubInMemory(
+            StringRedisTemplate t,
+            java.util.concurrent.ConcurrentMap<String, java.util.concurrent.atomic.AtomicLong> m) {
+        when(t.execute(any(RedisScript.class), any(List.class), any(Object[].class)))
+                .thenAnswer(
+                        inv -> {
+                            RedisScript<?> script = inv.getArgument(0);
+                            String key = ((List<String>) inv.getArgument(1)).get(0);
+                            long by = Long.parseLong(inv.getArgument(2));
+                            if (script == SpendCounters.REFUND_IF_LIVE) {
+                                java.util.concurrent.atomic.AtomicLong v = m.get(key);
+                                return v == null
+                                        ? Long.valueOf(0L)
+                                        : Long.valueOf(v.updateAndGet(x -> Math.max(0L, x + by)));
+                            }
+                            return m.computeIfAbsent(
+                                            key, k -> new java.util.concurrent.atomic.AtomicLong())
+                                    .addAndGet(by);
+                        });
     }
 
     @SuppressWarnings("unchecked")
@@ -74,10 +92,18 @@ final class SpendCounterMocks {
     @SuppressWarnings("unchecked")
     static void verifyAdded(StringRedisTemplate t, String keyPart, long by) {
         if (by < 0) {
-            verify(t).execute(eq(SpendCounters.REFUND_IF_LIVE), argThat(keyContains(keyPart)), eq(Long.toString(by)));
+            verify(t)
+                    .execute(
+                            eq(SpendCounters.REFUND_IF_LIVE),
+                            argThat(keyContains(keyPart)),
+                            eq(Long.toString(by)));
         } else {
-            verify(t).execute(eq(SpendCounters.INCR_WITH_TTL), argThat(keyContains(keyPart)), eq(Long.toString(by)),
-                anyString());
+            verify(t)
+                    .execute(
+                            eq(SpendCounters.INCR_WITH_TTL),
+                            argThat(keyContains(keyPart)),
+                            eq(Long.toString(by)),
+                            anyString());
         }
     }
 

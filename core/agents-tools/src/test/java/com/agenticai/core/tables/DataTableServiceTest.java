@@ -358,8 +358,7 @@ class DataTableServiceTest {
     @Test
     void theRowCapMessageMentionsTheUpgradeOnlyForAFreeTenantWhosePlanCapBinds() {
         when(limits.plan("t1")).thenReturn(TenantPlan.FREE);
-        when(rows.countAll(eq(TABLE_ID)))
-                .thenReturn((long) DataTableService.FREE_MAX_ROWS);
+        when(rows.countAll(eq(TABLE_ID))).thenReturn((long) DataTableService.FREE_MAX_ROWS);
 
         assertThatThrownBy(() -> service().insertRow("orders", Map.of("email", "a")))
                 .isInstanceOf(IllegalArgumentException.class)

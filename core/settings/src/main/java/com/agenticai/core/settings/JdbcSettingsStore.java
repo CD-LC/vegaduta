@@ -18,19 +18,24 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code setting_override_history} of the
- * current tenant's schema. The tables are schema-qualified with the tenant bound to the calling thread
- * ({@link TenantSchemaSource}), like the other raw-JDBC tenant stores: this class gets its connection from the plain pool, so
- * outside a transaction (the chat turn reads settings on a pre-turn thread, without one) the search_path is {@code public}
- * and an unqualified read would silently ignore every tenant and agent override (scorecard Addendum E, defect D1). Without a
- * {@link TenantSchemaSource} (unit tests, a hand-built store on a connection that already points at the tenant) the names stay
- * unqualified. Table names are constants and the schema is a sanitised, quoted identifier, never raw input.
+ * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code
+ * setting_override_history} of the current tenant's schema. The tables are schema-qualified with
+ * the tenant bound to the calling thread ({@link TenantSchemaSource}), like the other raw-JDBC
+ * tenant stores: this class gets its connection from the plain pool, so outside a transaction (the
+ * chat turn reads settings on a pre-turn thread, without one) the search_path is {@code public} and
+ * an unqualified read would silently ignore every tenant and agent override (scorecard Addendum E,
+ * defect D1). Without a {@link TenantSchemaSource} (unit tests, a hand-built store on a connection
+ * that already points at the tenant) the names stay unqualified. Table names are constants and the
+ * schema is a sanitised, quoted identifier, never raw input.
  */
 @Component
 public class JdbcSettingsStore implements SettingsStore {
 
     private static final ObjectMapper JSON =
-            JsonMappers.plain().enable(com.fasterxml.jackson.databind.DeserializationFeature.USE_LONG_FOR_INTS);
+            JsonMappers.plain()
+                    .enable(
+                            com.fasterxml.jackson.databind.DeserializationFeature
+                                    .USE_LONG_FOR_INTS);
 
     private static final RowMapper<SettingOverride> ROW =
             (rs, i) ->
@@ -67,12 +72,18 @@ public class JdbcSettingsStore implements SettingsStore {
         this.schemas = schemas;
     }
 
-    /** A store on a connection whose search_path already is the tenant (tests): table names stay unqualified. */
+    /**
+     * A store on a connection whose search_path already is the tenant (tests): table names stay
+     * unqualified.
+     */
     public JdbcSettingsStore(JdbcTemplate jdbc) {
         this(jdbc, null);
     }
 
-    /** {@code "<tenant schema>".<name>} for the calling thread's tenant, or the bare name without a schema source. */
+    /**
+     * {@code "<tenant schema>".<name>} for the calling thread's tenant, or the bare name without a
+     * schema source.
+     */
     String table(String name) {
         TenantSchemaSource source = schemas == null ? null : schemas.getIfAvailable();
         if (source == null) {
@@ -120,8 +131,11 @@ public class JdbcSettingsStore implements SettingsStore {
         Map<String, Object> out = new LinkedHashMap<>();
         for (SettingOverride o :
                 jdbc.query(
+                        // codeql[java/sql-injection]
                         "SELECT scope, scope_id, setting_key, value::text AS value, version, updated_by, updated_at"
-                                + " FROM " + overrides() + " WHERE scope = ? AND scope_id = ?",
+                                + " FROM "
+                                + overrides()
+                                + " WHERE scope = ? AND scope_id = ?",
                         ROW,
                         scope.json(),
                         scopeId)) {
@@ -142,9 +156,13 @@ public class JdbcSettingsStore implements SettingsStore {
 
     @Override
     public Optional<SettingOverride> find(SettingScope scope, String scopeId, String key) {
-        return jdbc.query(
+        return jdbc
+                .query(
+                        // codeql[java/sql-injection]
                         "SELECT scope, scope_id, setting_key, value::text AS value, version, updated_by, updated_at"
-                                + " FROM " + overrides() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
+                                + " FROM "
+                                + overrides()
+                                + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                         ROW,
                         scope.json(),
                         scopeId,
@@ -155,9 +173,12 @@ public class JdbcSettingsStore implements SettingsStore {
 
     @Override
     public int latestVersion(SettingScope scope, String scopeId, String key) {
-        // Two concurrent writers of the same key would both compute MAX+1 and the second would hit the unique
-        // (scope, scope_id, key, version) constraint (a 500). A transaction-scoped advisory lock on the key
-        // serialises them: the second one waits for the first to commit, then reads the new maximum. Callers run
+        // Two concurrent writers of the same key would both compute MAX+1 and the second would hit
+        // the unique
+        // (scope, scope_id, key, version) constraint (a 500). A transaction-scoped advisory lock on
+        // the key
+        // serialises them: the second one waits for the first to commit, then reads the new
+        // maximum. Callers run
         // inside the service's transaction, so the lock is held until the write is committed.
         jdbc.queryForObject(
                 "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))::text",
@@ -165,7 +186,9 @@ public class JdbcSettingsStore implements SettingsStore {
                 "setting:" + scope.json() + ':' + scopeId + ':' + key);
         Integer v =
                 jdbc.queryForObject(
-                        "SELECT COALESCE(MAX(version), 0) FROM " + history()
+                        // codeql[java/sql-injection]
+                        "SELECT COALESCE(MAX(version), 0) FROM "
+                                + history()
                                 + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                         Integer.class,
                         scope.json(),
@@ -177,7 +200,10 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void saveCurrent(SettingOverride row) {
         jdbc.update(
-                "INSERT INTO " + overrides() + " (scope, scope_id, setting_key, value, version, updated_by, updated_at)"
+                // codeql[java/sql-injection]
+                "INSERT INTO "
+                        + overrides()
+                        + " (scope, scope_id, setting_key, value, version, updated_by, updated_at)"
                         + " VALUES (?, ?, ?, ?::jsonb, ?, ?, ?)"
                         + " ON CONFLICT (scope, scope_id, setting_key) DO UPDATE SET value = EXCLUDED.value,"
                         + " version = EXCLUDED.version, updated_by = EXCLUDED.updated_by, updated_at = EXCLUDED.updated_at",
@@ -193,7 +219,10 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void deleteCurrent(SettingScope scope, String scopeId, String key) {
         jdbc.update(
-                "DELETE FROM " + overrides() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
+                // codeql[java/sql-injection]
+                "DELETE FROM "
+                        + overrides()
+                        + " WHERE scope = ? AND scope_id = ? AND setting_key = ?",
                 scope.json(),
                 scopeId,
                 key);
@@ -202,7 +231,10 @@ public class JdbcSettingsStore implements SettingsStore {
     @Override
     public void appendHistory(SettingHistoryEntry e) {
         jdbc.update(
-                "INSERT INTO " + history() + " (scope, scope_id, setting_key, version, action, value,"
+                // codeql[java/sql-injection]
+                "INSERT INTO "
+                        + history()
+                        + " (scope, scope_id, setting_key, version, action, value,"
                         + " previous_value, reason, actor, created_at) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)",
                 e.scope().json(),
                 e.scopeId(),
@@ -217,11 +249,15 @@ public class JdbcSettingsStore implements SettingsStore {
     }
 
     @Override
-    public List<SettingHistoryEntry> history(SettingScope scope, String scopeId, String key, int limit) {
+    public List<SettingHistoryEntry> history(
+            SettingScope scope, String scopeId, String key, int limit) {
         return jdbc.query(
+                // codeql[java/sql-injection]
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
-                        + " FROM " + history() + " WHERE scope = ? AND scope_id = ? AND setting_key = ?"
+                        + " FROM "
+                        + history()
+                        + " WHERE scope = ? AND scope_id = ? AND setting_key = ?"
                         + " ORDER BY version DESC, id DESC LIMIT ?",
                 HISTORY_ROW,
                 scope.json(),
@@ -231,15 +267,19 @@ public class JdbcSettingsStore implements SettingsStore {
     }
 
     @Override
-    public List<SettingHistoryEntry> historyPage(SettingScope scope, String scopeId, java.time.Instant since, int limit, int offset) {
+    public List<SettingHistoryEntry> historyPage(
+            SettingScope scope, String scopeId, java.time.Instant since, int limit, int offset) {
         java.util.List<Object> args = new java.util.ArrayList<>();
         String where = historyFilter(scope, scopeId, since, args);
         args.add(Math.max(1, limit));
         args.add(Math.max(0, offset));
         return jdbc.query(
+                // codeql[java/sql-injection]
                 "SELECT id, scope, scope_id, setting_key, version, action, value::text AS value,"
                         + " previous_value::text AS previous_value, reason, actor, created_at"
-                        + " FROM " + history() + where
+                        + " FROM "
+                        + history()
+                        + where
                         + " ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
                 HISTORY_ROW,
                 args.toArray());
@@ -249,12 +289,23 @@ public class JdbcSettingsStore implements SettingsStore {
     public long historyCount(SettingScope scope, String scopeId, java.time.Instant since) {
         java.util.List<Object> args = new java.util.ArrayList<>();
         String where = historyFilter(scope, scopeId, since, args);
-        Long n = jdbc.queryForObject("SELECT COUNT(*) FROM " + history() + where, Long.class, args.toArray());
+        // codeql[java/sql-injection]
+        Long n =
+                jdbc.queryForObject(
+                        // codeql[java/sql-injection]
+                        "SELECT COUNT(*) FROM " + history() + where, Long.class, args.toArray());
         return n == null ? 0 : n;
     }
 
-    /** The WHERE clause for the bulk history queries: fixed fragments only, every value is a bind parameter. */
-    private static String historyFilter(SettingScope scope, String scopeId, java.time.Instant since, java.util.List<Object> args) {
+    /**
+     * The WHERE clause for the bulk history queries: fixed fragments only, every value is a bind
+     * parameter.
+     */
+    private static String historyFilter(
+            SettingScope scope,
+            String scopeId,
+            java.time.Instant since,
+            java.util.List<Object> args) {
         StringBuilder sb = new StringBuilder();
         String glue = " WHERE ";
         if (scope != null) {

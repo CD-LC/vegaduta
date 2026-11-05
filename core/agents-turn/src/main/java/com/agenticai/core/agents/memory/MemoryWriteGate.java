@@ -31,7 +31,10 @@ public final class MemoryWriteGate {
         return classifyView(view);
     }
 
-    /** As {@link #classify(ObjectProvider)} for a view already in hand (a null view is unreadable: quarantined). */
+    /**
+     * As {@link #classify(ObjectProvider)} for a view already in hand (a null view is unreadable:
+     * quarantined).
+     */
     public static MemoryProvenance classifyView(TurnTaintView view) {
         try {
             if (view == null) {
@@ -40,7 +43,8 @@ public final class MemoryWriteGate {
             if (view.isTainted()) {
                 List<String> sources = view.sources();
                 return new MemoryProvenance(
-                        MemoryTrust.QUARANTINED, sources == null || sources.isEmpty() ? List.of("unknown") : sources);
+                        MemoryTrust.QUARANTINED,
+                        sources == null || sources.isEmpty() ? List.of("unknown") : sources);
             }
             return MemoryProvenance.TRUSTED;
         } catch (RuntimeException e) {
@@ -55,10 +59,12 @@ public final class MemoryWriteGate {
             return List.of();
         }
         return triples.stream()
-                .filter(t -> t != null
-                        && MemoryWriteScreen.refusal(t.subject()).isEmpty()
-                        && MemoryWriteScreen.refusal(t.relation()).isEmpty()
-                        && MemoryWriteScreen.refusal(t.object()).isEmpty())
+                .filter(
+                        t ->
+                                t != null
+                                        && MemoryWriteScreen.refusal(t.subject()).isEmpty()
+                                        && MemoryWriteScreen.refusal(t.relation()).isEmpty()
+                                        && MemoryWriteScreen.refusal(t.object()).isEmpty())
                 .toList();
     }
 }

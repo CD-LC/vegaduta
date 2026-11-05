@@ -4,13 +4,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * {@code app.guardrails.prompt-leak.*}: the output-side system-prompt leak control (OWASP LLM07).
- * Defaults mean "off": {@code mode=off}, {@code action=warn}. Even {@code warn} mode changes the system prompt (it appends a
- * canary block, which defeats provider prompt-prefix caching), so it is opt-in.
+ * Defaults mean "off": {@code mode=off}, {@code action=warn}. Even {@code warn} mode changes the
+ * system prompt (it appends a canary block, which defeats provider prompt-prefix caching), so it is
+ * opt-in.
  */
 @ConfigurationProperties(prefix = "app.guardrails.prompt-leak")
 public class PromptLeakProperties {
 
-    /** Minimum canary entropy, in bytes (128 bits). Smaller configured values are raised to this. */
+    /**
+     * Minimum canary entropy, in bytes (128 bits). Smaller configured values are raised to this.
+     */
     public static final int MIN_CANARY_BYTES = 16;
 
     private String mode = "off";
@@ -19,7 +22,8 @@ public class PromptLeakProperties {
     private int canaryBytes = 18;
     private int streamHoldbackChars = 256;
     private String redactionMarker = "[redacted]";
-    private String blockMessage = "[This reply was withheld because it contained confidential instructions.]";
+    private String blockMessage =
+            "[This reply was withheld because it contained confidential instructions.]";
 
     public PromptLeakMode mode() {
         return PromptLeakMode.parse(mode);
@@ -38,7 +42,10 @@ public class PromptLeakProperties {
         return Math.max(MIN_CANARY_BYTES, canaryBytes);
     }
 
-    /** Raw characters a stream keeps back so a leak split across chunks is seen before it is sent; floor 128. */
+    /**
+     * Raw characters a stream keeps back so a leak split across chunks is seen before it is sent;
+     * floor 128.
+     */
     public int streamHoldbackChars() {
         return Math.max(128, streamHoldbackChars);
     }

@@ -1,6 +1,5 @@
 package com.agenticai.core.it;
 
-
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.agents.core.AgentRepository;
 import com.agenticai.core.agents.memorystore.MemoryEmbedder;
@@ -24,11 +23,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * The whole {@code CoreApplication} (profiles security, knowledge, graph-memory) booted against an EXTERNAL
- * pgvector + AGE Postgres and a Redis-protocol server, with real tenant Flyway, for the unified-memory journey ITs.
- * Needs {@code -Dvegaduta.it.pg.url=...} (see {@link ExternalPostgres}); Redis at {@code -Dvegaduta.it.redis.host/port}
- * (default 127.0.0.1:6379). Skipped when no Postgres is configured. No Docker, no Keycloak, no embedding sidecar: the
- * only fake is the {@link MemoryEmbedder}, a deterministic bag-of-words vector.
+ * The whole {@code CoreApplication} (profiles security, knowledge, graph-memory) booted against an
+ * EXTERNAL pgvector + AGE Postgres and a Redis-protocol server, with real tenant Flyway, for the
+ * unified-memory journey ITs. Needs {@code -Dvegaduta.it.pg.url=...} (see {@link
+ * ExternalPostgres}); Redis at {@code -Dvegaduta.it.redis.host/port} (default 127.0.0.1:6379).
+ * Skipped when no Postgres is configured. No Docker, no Keycloak, no embedding sidecar: the only
+ * fake is the {@link MemoryEmbedder}, a deterministic bag-of-words vector.
  */
 @Tag("integration")
 @SpringBootTest(
@@ -50,7 +50,10 @@ abstract class UnifiedMemoryBootBase {
     @Autowired protected AgentRepository agents;
     @Autowired protected TransactionTemplate tx;
 
-    /** Skips the class unless an external Postgres is configured; call from a static {@code @BeforeAll}. */
+    /**
+     * Skips the class unless an external Postgres is configured; call from a static
+     * {@code @BeforeAll}.
+     */
     static void requirePostgres() {
         ExternalPostgres.requireOrSkip();
     }
@@ -60,15 +63,31 @@ abstract class UnifiedMemoryBootBase {
         DriverManagerDataSource ds = ExternalPostgres.bootDatabase(database);
         registry.add("spring.datasource.url", ds::getUrl);
         registry.add("spring.datasource.username", ds::getUsername);
-        registry.add("spring.datasource.password", () -> ds.getPassword() == null || ds.getPassword().isBlank() ? "trust-auth-placeholder" : ds.getPassword());
-        registry.add("spring.data.redis.host", () -> System.getProperty("vegaduta.it.redis.host", "127.0.0.1"));
-        registry.add("spring.data.redis.port", () -> System.getProperty("vegaduta.it.redis.port", "6379"));
+        registry.add(
+                "spring.datasource.password",
+                () ->
+                        ds.getPassword() == null || ds.getPassword().isBlank()
+                                ? "trust-auth-placeholder"
+                                : ds.getPassword());
+        registry.add(
+                "spring.data.redis.host",
+                () -> System.getProperty("vegaduta.it.redis.host", "127.0.0.1"));
+        registry.add(
+                "spring.data.redis.port",
+                () -> System.getProperty("vegaduta.it.redis.port", "6379"));
     }
 
     /** An ACTIVE tenant with a fully migrated schema (idempotent). */
     protected void tenantSchema(String schema) {
         if (tenants.findBySchemaName(schema).isEmpty()) {
-            Tenant tenant = new Tenant(schema, TenantPlan.FREE, schema, "agentic-ai", AccountType.B2B, ExperienceMode.SIMPLE);
+            Tenant tenant =
+                    new Tenant(
+                            schema,
+                            TenantPlan.FREE,
+                            schema,
+                            "agentic-ai",
+                            AccountType.B2B,
+                            ExperienceMode.SIMPLE);
             tenant.markActive();
             tenants.save(tenant);
         }
@@ -79,14 +98,26 @@ abstract class UnifiedMemoryBootBase {
 
     /** A real agent row in the CURRENT tenant (the caller has set the TenantContext). */
     protected UUID newAgent(String name) {
-        return tx.execute(status -> agents.save(new Agent(
-                        name, "You are helpful.", ProviderName.OPENAI, "gpt-4o-mini", 1024, 0.2, 1.0, true, ExperienceMode.SIMPLE))
-                .getId());
+        return tx.execute(
+                status ->
+                        agents.save(
+                                        new Agent(
+                                                name,
+                                                "You are helpful.",
+                                                ProviderName.OPENAI,
+                                                "gpt-4o-mini",
+                                                1024,
+                                                0.2,
+                                                1.0,
+                                                true,
+                                                ExperienceMode.SIMPLE))
+                                .getId());
     }
 
     /**
-     * Deterministic bag-of-words embedder: every word hashes to a bucket, the vector is L2-normalised, so texts that
-     * share words are near each other and unrelated texts are orthogonal. Replaces the sidecar embedder.
+     * Deterministic bag-of-words embedder: every word hashes to a bucket, the vector is
+     * L2-normalised, so texts that share words are near each other and unrelated texts are
+     * orthogonal. Replaces the sidecar embedder.
      */
     static float[] embed(String text) {
         float[] v = new float[MemoryEmbedder.DIMENSION];

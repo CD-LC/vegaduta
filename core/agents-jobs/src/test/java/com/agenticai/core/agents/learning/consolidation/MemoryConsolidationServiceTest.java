@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.learning.consolidation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -28,7 +27,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-/** The nightly consolidation plans and reports; it only ever marks tombstones, and only once earned. */
+/**
+ * The nightly consolidation plans and reports; it only ever marks tombstones, and only once earned.
+ */
 class MemoryConsolidationServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-11-20T03:00:00Z");
@@ -50,7 +51,8 @@ class MemoryConsolidationServiceTest {
     @SuppressWarnings("unchecked")
     private static ObjectProvider<DecayProperties> noDecayBean() {
         ObjectProvider<DecayProperties> p = mock(ObjectProvider.class);
-        when(p.getIfAvailable(any(Supplier.class))).thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
+        when(p.getIfAvailable(any(Supplier.class)))
+                .thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
         return p;
     }
 
@@ -103,7 +105,19 @@ class MemoryConsolidationServiceTest {
         assertEquals(5, r.rows());
         assertEquals(1, r.forgets());
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), eq("completed"), eq(5), eq(1), eq(0), eq(0), anyInt(), eq(0), anyInt());
+        verify(runs)
+                .record(
+                        eq("meera"),
+                        eq(DAY),
+                        eq("dry_run"),
+                        eq("completed"),
+                        eq(5),
+                        eq(1),
+                        eq(0),
+                        eq(0),
+                        anyInt(),
+                        eq(0),
+                        anyInt());
     }
 
     @Test
@@ -117,7 +131,19 @@ class MemoryConsolidationServiceTest {
         when(runs.firstRunDate()).thenReturn(Optional.of(DAY.minusDays(2)));
         service(true).consolidateTenant();
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0), anyInt());
+        verify(runs)
+                .record(
+                        eq("meera"),
+                        eq(DAY),
+                        eq("dry_run"),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        eq(0),
+                        anyInt());
     }
 
     @Test
@@ -128,7 +154,8 @@ class MemoryConsolidationServiceTest {
         // A near-duplicate pair in one agent's tier old enough to merge (containment detector).
         UUID agent = UUID.randomUUID();
         facts.facts.add(fact(MemoryTrust.TRUSTED, 30, "meera likes espresso coffee", agent));
-        facts.facts.add(fact(MemoryTrust.TRUSTED, 30, "meera likes espresso coffee very much", agent));
+        facts.facts.add(
+                fact(MemoryTrust.TRUSTED, 30, "meera likes espresso coffee very much", agent));
         // Fresh rows keep the subject under the breaker cap for exactly two removals.
         facts.facts.add(fact(MemoryTrust.TRUSTED, 2, "works night shifts"));
         facts.facts.add(fact(MemoryTrust.TRUSTED, 2, "prefers hindi"));
@@ -140,10 +167,28 @@ class MemoryConsolidationServiceTest {
         assertEquals(1, r.forgets());
         assertTrue(r.merges() <= 1);
         assertEquals(2, r.tombstoned());
-        verify(tombstones).markForgotten(eq("meera"), eq(old), eq("QUARANTINE_TTL"), any(), eq(NOW));
-        verify(tombstones).markForgotten(eq("meera"), any(Fact.class),
-                org.mockito.ArgumentMatchers.startsWith("MERGED_INTO:"), any(), eq(NOW));
-        verify(runs).record(eq("meera"), eq(DAY), eq("apply"), eq("completed"), eq(7), eq(1), eq(1), anyInt(), anyInt(), eq(2), anyInt());
+        verify(tombstones)
+                .markForgotten(eq("meera"), eq(old), eq("QUARANTINE_TTL"), any(), eq(NOW));
+        verify(tombstones)
+                .markForgotten(
+                        eq("meera"),
+                        any(Fact.class),
+                        org.mockito.ArgumentMatchers.startsWith("MERGED_INTO:"),
+                        any(),
+                        eq(NOW));
+        verify(runs)
+                .record(
+                        eq("meera"),
+                        eq(DAY),
+                        eq("apply"),
+                        eq("completed"),
+                        eq(7),
+                        eq(1),
+                        eq(1),
+                        anyInt(),
+                        anyInt(),
+                        eq(2),
+                        anyInt());
     }
 
     @Test
@@ -156,15 +201,39 @@ class MemoryConsolidationServiceTest {
         when(runs.firstRunDate()).thenReturn(Optional.of(DAY.minusDays(30)));
         service(true).consolidateTenant();
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0), anyInt());
+        verify(runs)
+                .record(
+                        eq("meera"),
+                        eq(DAY),
+                        eq("dry_run"),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        eq(0),
+                        anyInt());
     }
 
     @Test
     void aSubjectFailureReleasesTheClaimAndStopsNothing() {
         facts.subjects.addAll(List.of("bad", "meera"));
         when(runs.claim("bad", DAY)).thenReturn(1);
-        org.mockito.Mockito.doThrow(new RuntimeException("boom")).when(runs)
-                .record(eq("bad"), eq(DAY), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
+        org.mockito.Mockito.doThrow(new RuntimeException("boom"))
+                .when(runs)
+                .record(
+                        eq("bad"),
+                        eq(DAY),
+                        anyString(),
+                        anyString(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt(),
+                        anyInt());
         MemoryConsolidationService.Report r = service(false).consolidateTenant();
         verify(runs).release("bad", DAY);
         assertEquals(1, r.subjects());

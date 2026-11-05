@@ -88,7 +88,9 @@ final class DataTableRows {
 
     RowView insertRow(String tableRef, Map<String, Object> values, RowTrust trust) {
         return insertRows(
-                        tableRef, List.of(values == null ? Map.<String, Object>of() : values), trust)
+                        tableRef,
+                        List.of(values == null ? Map.<String, Object>of() : values),
+                        trust)
                 .get(0);
     }
 
@@ -97,7 +99,8 @@ final class DataTableRows {
         gate();
         DataTable t = resolve(tableRef);
         List<QuarantinedRowView> out = new ArrayList<>();
-        for (DataTableRow r : rows.selectQuarantined(t.getId(), Math.max(1, Math.min(limit, 500)))) {
+        for (DataTableRow r :
+                rows.selectQuarantined(t.getId(), Math.max(1, Math.min(limit, 500)))) {
             out.add(
                     new QuarantinedRowView(
                             r.getId(),
@@ -129,7 +132,9 @@ final class DataTableRows {
         }
         if (input.size() > DataTableService.MAX_BULK_INSERT) {
             throw new IllegalArgumentException(
-                    "A bulk insert is limited to " + DataTableService.MAX_BULK_INSERT + " rows per call - split it");
+                    "A bulk insert is limited to "
+                            + DataTableService.MAX_BULK_INSERT
+                            + " rows per call - split it");
         }
         DataTable t = tables.findForUpdate(resolve(tableRef).getId()).orElseThrow(this::notFound);
         List<DataTableColumn> cols = t.columnDefs();

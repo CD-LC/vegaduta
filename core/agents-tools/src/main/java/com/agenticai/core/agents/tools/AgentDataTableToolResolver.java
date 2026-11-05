@@ -46,7 +46,10 @@ final class AgentDataTableToolResolver {
     private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
     private volatile ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint;
 
-    /** The taint source a row write consults (see {@link TurnTaintViews}); unset means writes are held. */
+    /**
+     * The taint source a row write consults (see {@link TurnTaintViews}); unset means writes are
+     * held.
+     */
     void setTaint(
             ObjectProvider<AgentTaintPolicy> taintPolicy,
             ObjectProvider<com.agenticai.core.agents.memory.TurnTaintView> turnTaint) {
@@ -88,7 +91,8 @@ final class AgentDataTableToolResolver {
                             new DataTableWriteToolCallback(
                                     service,
                                     TurnTaintViews.sources(
-                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
+                                            TurnTaintViews.forTurn(
+                                                    taintPolicy, stepCounter, turnTaint))),
                             agentId,
                             sessionId,
                             stepCounter,
@@ -123,8 +127,9 @@ final class AgentDataTableToolResolver {
                 toolGuard.guardAndLog(
                         new DataTableWriteToolCallback(
                                 service,
-                                    TurnTaintViews.sources(
-                                            TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint))),
+                                TurnTaintViews.sources(
+                                        TurnTaintViews.forTurn(
+                                                taintPolicy, stepCounter, turnTaint))),
                         agentId,
                         sessionId,
                         stepCounter,

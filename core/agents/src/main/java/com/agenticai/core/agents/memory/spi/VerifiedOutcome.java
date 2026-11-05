@@ -9,16 +9,19 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * One piece of evidence about how an agent did on a class of task, in the closed vocabulary of ADR-0028 section 3.
+ * One piece of evidence about how an agent did on a class of task, in the closed vocabulary of
+ * ADR-0028 section 3.
  *
- * <p>This type is the only way into the competence counters, and it has no field, and no {@link Signal} value, for the
- * model's own claim of success or for a sampled LLM judge: those cannot be expressed, so they cannot be counted. Every
- * signal is something the platform observed or a person decided (tool status, an approval decision, an explicit rating),
- * or {@link Signal#UNKNOWN}, which is counted apart and never as success.
+ * <p>This type is the only way into the competence counters, and it has no field, and no {@link
+ * Signal} value, for the model's own claim of success or for a sampled LLM judge: those cannot be
+ * expressed, so they cannot be counted. Every signal is something the platform observed or a person
+ * decided (tool status, an approval decision, an explicit rating), or {@link Signal#UNKNOWN}, which
+ * is counted apart and never as success.
  *
- * <p>{@code taskClass} is a closed platform vocabulary (tool family, skill id, workflow id), never model or user free
- * text: it must match {@code [a-z0-9][a-z0-9_.:+-]*}; text that does not is rejected, and an over-long (but otherwise
- * valid) class is shortened deterministically to {@value #MAX_TASK_CLASS_CHARS} characters with a hash suffix.
+ * <p>{@code taskClass} is a closed platform vocabulary (tool family, skill id, workflow id), never
+ * model or user free text: it must match {@code [a-z0-9][a-z0-9_.:+-]*}; text that does not is
+ * rejected, and an over-long (but otherwise valid) class is shortened deterministically to {@value
+ * #MAX_TASK_CLASS_CHARS} characters with a hash suffix.
  */
 public record VerifiedOutcome(UUID agentId, String taskClass, Signal signal) {
 
@@ -31,7 +34,10 @@ public record VerifiedOutcome(UUID agentId, String taskClass, Signal signal) {
     public enum Signal {
         /** A tool call finished and the platform recorded no error for it. */
         TOOL_SUCCESS,
-        /** A tool call, or the turn itself, failed as the platform observed it (error status, failed validation). */
+        /**
+         * A tool call, or the turn itself, failed as the platform observed it (error status, failed
+         * validation).
+         */
         TOOL_ERROR,
         /** A person approved the action. */
         APPROVAL_GRANTED,
@@ -61,7 +67,8 @@ public record VerifiedOutcome(UUID agentId, String taskClass, Signal signal) {
         }
         String s = raw.strip().toLowerCase(Locale.ROOT);
         if (!CLASS.matcher(s).matches()) {
-            throw new IllegalArgumentException("taskClass must be a platform identifier, not free text");
+            throw new IllegalArgumentException(
+                    "taskClass must be a platform identifier, not free text");
         }
         if (s.length() <= MAX_TASK_CLASS_CHARS) {
             return s;
@@ -71,7 +78,8 @@ public record VerifiedOutcome(UUID agentId, String taskClass, Signal signal) {
 
     private static String shortHash(String s) {
         try {
-            byte[] d = MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8));
+            byte[] d =
+                    MessageDigest.getInstance("SHA-256").digest(s.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(d, 0, 4);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);

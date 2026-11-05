@@ -69,7 +69,9 @@ public class MemoryConsolidationRun {
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof Key k && Objects.equals(subject, k.subject) && Objects.equals(runDate, k.runDate);
+            return o instanceof Key k
+                    && Objects.equals(subject, k.subject)
+                    && Objects.equals(runDate, k.runDate);
         }
 
         @Override

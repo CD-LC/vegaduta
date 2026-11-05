@@ -24,19 +24,22 @@ import com.agenticai.core.settings.SettingsContributor;
 import java.util.List;
 
 /**
- * The curated behaviour settings whose property classes live at or below the agents-turn module: approvals, the chat
- * turn (finish, retry, cache, follow-up, continuation, tool-loop), simple-message routing, memory recall, the
- * guardrail strictness knobs and the auxiliary-model switch. Each entry reads its platform value from the SAME
- * property object the runtime uses (so the catalog default can never drift from the yml); the table of which use site
- * consults {@code SettingsResolver} for which key is in {@code docs/settings.md}. The runtime limits are in
- * {@code RuntimeLimitsSettings}, delegation in the interop module and the judge in the quality module.
+ * The curated behaviour settings whose property classes live at or below the agents-turn module:
+ * approvals, the chat turn (finish, retry, cache, follow-up, continuation, tool-loop),
+ * simple-message routing, memory recall, the guardrail strictness knobs and the auxiliary-model
+ * switch. Each entry reads its platform value from the SAME property object the runtime uses (so
+ * the catalog default can never drift from the yml); the table of which use site consults {@code
+ * SettingsResolver} for which key is in {@code docs/settings.md}. The runtime limits are in {@code
+ * RuntimeLimitsSettings}, delegation in the interop module and the judge in the quality module.
  *
- * <p>Security entries ({@code guardrails.*}) can only be made stricter than the platform value, by a tenant admin,
- * with a typed reason.
+ * <p>Security entries ({@code guardrails.*}) can only be made stricter than the platform value, by
+ * a tenant admin, with a typed reason.
  */
 public class BehaviourSettingsCatalog implements SettingsContributor {
 
-    private static final SettingScope[] TENANT_AND_AGENT = {SettingScope.TENANT, SettingScope.AGENT};
+    private static final SettingScope[] TENANT_AND_AGENT = {
+        SettingScope.TENANT, SettingScope.AGENT
+    };
     private static final SettingScope[] TENANT_ONLY = {SettingScope.TENANT};
 
     private final ApprovalContinuationProperties approvalContinuation;
@@ -49,7 +52,8 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
     private final ToolLoopProperties toolLoop;
     private final RoutingSimpleProperties routing;
     private final MemoryLimitsProperties memory;
-    // Not a constructor parameter: the constructor is at the 12-collaborator ceiling (StructureRulesTest).
+    // Not a constructor parameter: the constructor is at the 12-collaborator ceiling
+    // (StructureRulesTest).
     private EpisodicMemoryProperties episodic = new EpisodicMemoryProperties();
     private final GuardrailTuningProperties guardrails;
     private final AuxiliaryModelProperties auxiliary;
@@ -81,95 +85,301 @@ public class BehaviourSettingsCatalog implements SettingsContributor {
         this.auxiliary = auxiliary;
     }
 
-    /** Supplies the platform level of {@code memory.episodic.enabled}; call before the catalog is registered. */
+    /**
+     * Supplies the platform level of {@code memory.episodic.enabled}; call before the catalog is
+     * registered.
+     */
     public BehaviourSettingsCatalog withEpisodic(EpisodicMemoryProperties episodic) {
         this.episodic = episodic == null ? new EpisodicMemoryProperties() : episodic;
         return this;
     }
 
-    private static SettingDefinition.Builder bool(String key, String group, SettingRisk risk, String property, SettingScope... scopes) {
-        return SettingDefinition.builder(key, group, SettingType.BOOL).risk(risk).scopes(scopes).property(property).docsAnchor("behaviour-settings");
+    private static SettingDefinition.Builder bool(
+            String key, String group, SettingRisk risk, String property, SettingScope... scopes) {
+        return SettingDefinition.builder(key, group, SettingType.BOOL)
+                .risk(risk)
+                .scopes(scopes)
+                .property(property)
+                .docsAnchor("behaviour-settings");
     }
 
     private static SettingDefinition.Builder integer(
-            String key, String group, SettingUnit unit, double min, double max, SettingRisk risk, String property, SettingScope... scopes) {
+            String key,
+            String group,
+            SettingUnit unit,
+            double min,
+            double max,
+            SettingRisk risk,
+            String property,
+            SettingScope... scopes) {
         return SettingDefinition.builder(key, group, SettingType.INT)
-                .unit(unit).range(min, max).risk(risk).scopes(scopes).property(property).docsAnchor("behaviour-settings");
+                .unit(unit)
+                .range(min, max)
+                .risk(risk)
+                .scopes(scopes)
+                .property(property)
+                .docsAnchor("behaviour-settings");
     }
 
     private static SettingDefinition.Builder seconds(
-            String key, String group, double min, double max, SettingRisk risk, String property, SettingScope... scopes) {
+            String key,
+            String group,
+            double min,
+            double max,
+            SettingRisk risk,
+            String property,
+            SettingScope... scopes) {
         return SettingDefinition.builder(key, group, SettingType.DURATION)
-                .unit(SettingUnit.S).range(min, max).risk(risk).scopes(scopes).property(property).docsAnchor("behaviour-settings");
+                .unit(SettingUnit.S)
+                .range(min, max)
+                .risk(risk)
+                .scopes(scopes)
+                .property(property)
+                .docsAnchor("behaviour-settings");
     }
 
     @Override
     public List<SettingDefinition> definitions() {
-        List<SettingDefinition> own = List.of(
-                // ---- approvals
-                bool("approvals.continuation.enabled", "approvals", SettingRisk.MEDIUM, "app.approvals.continuation.enabled", TENANT_AND_AGENT)
-                        .platform(approvalContinuation::isEnabled).build(),
-                bool("approvals.continuation.jobsContinueAfterDenial", "approvals", SettingRisk.MEDIUM,
-                                "app.approvals.continuation.jobs-continue-after-denial", TENANT_AND_AGENT)
-                        .platform(approvalContinuation::isJobsContinueAfterDenial).build(),
-                ApprovalSettingDefinitions.expiryTtl(approvalExpiry),
+        List<SettingDefinition> own =
+                List.of(
+                        // ---- approvals
+                        bool(
+                                        "approvals.continuation.enabled",
+                                        "approvals",
+                                        SettingRisk.MEDIUM,
+                                        "app.approvals.continuation.enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(approvalContinuation::isEnabled)
+                                .build(),
+                        bool(
+                                        "approvals.continuation.jobsContinueAfterDenial",
+                                        "approvals",
+                                        SettingRisk.MEDIUM,
+                                        "app.approvals.continuation.jobs-continue-after-denial",
+                                        TENANT_AND_AGENT)
+                                .platform(approvalContinuation::isJobsContinueAfterDenial)
+                                .build(),
+                        ApprovalSettingDefinitions.expiryTtl(approvalExpiry),
 
-                // ---- chat turn
-                bool("chat.finish.enabled", "chat", SettingRisk.LOW, "app.chat.finish.enabled", TENANT_AND_AGENT)
-                        .platform(finish::isEnabled).build(),
-                integer("chat.finish.maxContinuations", "chat", SettingUnit.COUNT, 0, 10, SettingRisk.LOW,
-                                "app.chat.finish.max-continuations", TENANT_AND_AGENT)
-                        .platform(finish::getMaxContinuations).build(),
-                integer("chat.finish.maxToolCallRetries", "chat", SettingUnit.COUNT, 0, 5, SettingRisk.LOW,
-                                "app.chat.finish.max-tool-call-retries", TENANT_AND_AGENT)
-                        .platform(finish::getMaxToolCallRetries).build(),
-                integer("chat.retry.maxAttempts", "chat", SettingUnit.COUNT, 1, 6, SettingRisk.LOW, "app.llm.retry.max-attempts", TENANT_ONLY)
-                        .platform(retry::getMaxAttempts).build(),
-                bool("chat.cache.eligibleWithTools", "chat", SettingRisk.MEDIUM, "app.chat.cache.eligible-with-tools", TENANT_AND_AGENT)
-                        .platform(cache::isEligibleWithTools).build(),
-                integer("chat.cache.contextTurns", "chat", SettingUnit.COUNT, 1, 10, SettingRisk.LOW, "app.chat.cache.context-turns", TENANT_AND_AGENT)
-                        .platform(cache::getContextTurns).build(),
-                bool("chat.followUp.stickyToolsEnabled", "chat", SettingRisk.LOW, "app.chat.follow-up.sticky-tools-enabled", TENANT_AND_AGENT)
-                        .platform(followUp::isStickyToolsEnabled).build(),
-                seconds("chat.followUp.stickyToolsWindow", "chat", 60, 7 * 86_400, SettingRisk.LOW, "app.chat.follow-up.sticky-tools-window", TENANT_AND_AGENT)
-                        .platform(followUp::getStickyToolsWindow).build(),
-                bool("chat.continuation.heuristicEnabled", "chat", SettingRisk.LOW, "app.chat.continuation.heuristic-enabled", TENANT_AND_AGENT)
-                        .platform(continuation::isHeuristicEnabled).build(),
-                bool("chat.toolLoop.resultClearing.enabled", "chat", SettingRisk.LOW, "app.chat.tools.result-clearing.enabled", TENANT_AND_AGENT)
-                        .platform(() -> toolLoop.getResultClearing().isEnabled()).build(),
-                integer("chat.toolLoop.resultClearing.thresholdChars", "chat", SettingUnit.CHARS, 500, 200_000, SettingRisk.LOW,
-                                "app.chat.tools.result-clearing.threshold-chars", TENANT_AND_AGENT)
-                        .platform(() -> toolLoop.getResultClearing().getThresholdChars()).build(),
-                integer("chat.toolLoop.maxPromptTokensPerTurn", "chat", SettingUnit.TOKENS, 0, 10_000_000, SettingRisk.MEDIUM,
-                                "app.chat.tools.max-prompt-tokens-per-turn", TENANT_AND_AGENT)
-                        .platform(() -> (int) Math.min(Integer.MAX_VALUE, toolLoop.getMaxPromptTokensPerTurn())).build(),
+                        // ---- chat turn
+                        bool(
+                                        "chat.finish.enabled",
+                                        "chat",
+                                        SettingRisk.LOW,
+                                        "app.chat.finish.enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(finish::isEnabled)
+                                .build(),
+                        integer(
+                                        "chat.finish.maxContinuations",
+                                        "chat",
+                                        SettingUnit.COUNT,
+                                        0,
+                                        10,
+                                        SettingRisk.LOW,
+                                        "app.chat.finish.max-continuations",
+                                        TENANT_AND_AGENT)
+                                .platform(finish::getMaxContinuations)
+                                .build(),
+                        integer(
+                                        "chat.finish.maxToolCallRetries",
+                                        "chat",
+                                        SettingUnit.COUNT,
+                                        0,
+                                        5,
+                                        SettingRisk.LOW,
+                                        "app.chat.finish.max-tool-call-retries",
+                                        TENANT_AND_AGENT)
+                                .platform(finish::getMaxToolCallRetries)
+                                .build(),
+                        integer(
+                                        "chat.retry.maxAttempts",
+                                        "chat",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        6,
+                                        SettingRisk.LOW,
+                                        "app.llm.retry.max-attempts",
+                                        TENANT_ONLY)
+                                .platform(retry::getMaxAttempts)
+                                .build(),
+                        bool(
+                                        "chat.cache.eligibleWithTools",
+                                        "chat",
+                                        SettingRisk.MEDIUM,
+                                        "app.chat.cache.eligible-with-tools",
+                                        TENANT_AND_AGENT)
+                                .platform(cache::isEligibleWithTools)
+                                .build(),
+                        integer(
+                                        "chat.cache.contextTurns",
+                                        "chat",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        10,
+                                        SettingRisk.LOW,
+                                        "app.chat.cache.context-turns",
+                                        TENANT_AND_AGENT)
+                                .platform(cache::getContextTurns)
+                                .build(),
+                        bool(
+                                        "chat.followUp.stickyToolsEnabled",
+                                        "chat",
+                                        SettingRisk.LOW,
+                                        "app.chat.follow-up.sticky-tools-enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(followUp::isStickyToolsEnabled)
+                                .build(),
+                        seconds(
+                                        "chat.followUp.stickyToolsWindow",
+                                        "chat",
+                                        60,
+                                        7 * 86_400,
+                                        SettingRisk.LOW,
+                                        "app.chat.follow-up.sticky-tools-window",
+                                        TENANT_AND_AGENT)
+                                .platform(followUp::getStickyToolsWindow)
+                                .build(),
+                        bool(
+                                        "chat.continuation.heuristicEnabled",
+                                        "chat",
+                                        SettingRisk.LOW,
+                                        "app.chat.continuation.heuristic-enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(continuation::isHeuristicEnabled)
+                                .build(),
+                        bool(
+                                        "chat.toolLoop.resultClearing.enabled",
+                                        "chat",
+                                        SettingRisk.LOW,
+                                        "app.chat.tools.result-clearing.enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(() -> toolLoop.getResultClearing().isEnabled())
+                                .build(),
+                        integer(
+                                        "chat.toolLoop.resultClearing.thresholdChars",
+                                        "chat",
+                                        SettingUnit.CHARS,
+                                        500,
+                                        200_000,
+                                        SettingRisk.LOW,
+                                        "app.chat.tools.result-clearing.threshold-chars",
+                                        TENANT_AND_AGENT)
+                                .platform(() -> toolLoop.getResultClearing().getThresholdChars())
+                                .build(),
+                        integer(
+                                        "chat.toolLoop.maxPromptTokensPerTurn",
+                                        "chat",
+                                        SettingUnit.TOKENS,
+                                        0,
+                                        10_000_000,
+                                        SettingRisk.MEDIUM,
+                                        "app.chat.tools.max-prompt-tokens-per-turn",
+                                        TENANT_AND_AGENT)
+                                .platform(
+                                        () ->
+                                                (int)
+                                                        Math.min(
+                                                                Integer.MAX_VALUE,
+                                                                toolLoop
+                                                                        .getMaxPromptTokensPerTurn()))
+                                .build(),
 
-                // ---- routing
-                integer("routing.simple.maxChars", "routing", SettingUnit.CHARS, 0, 2_000, SettingRisk.LOW, "app.routing.simple.max-chars", TENANT_AND_AGENT)
-                        .platform(routing::getMaxChars).build(),
-                integer("routing.simple.maxClauses", "routing", SettingUnit.COUNT, 1, 10, SettingRisk.LOW, "app.routing.simple.max-clauses", TENANT_AND_AGENT)
-                        .platform(routing::getMaxClauses).build(),
+                        // ---- routing
+                        integer(
+                                        "routing.simple.maxChars",
+                                        "routing",
+                                        SettingUnit.CHARS,
+                                        0,
+                                        2_000,
+                                        SettingRisk.LOW,
+                                        "app.routing.simple.max-chars",
+                                        TENANT_AND_AGENT)
+                                .platform(routing::getMaxChars)
+                                .build(),
+                        integer(
+                                        "routing.simple.maxClauses",
+                                        "routing",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        10,
+                                        SettingRisk.LOW,
+                                        "app.routing.simple.max-clauses",
+                                        TENANT_AND_AGENT)
+                                .platform(routing::getMaxClauses)
+                                .build(),
 
-                // ---- memory
-                bool("memory.recall.enabled", "memory", SettingRisk.LOW, "app.memory.limits.recall-enabled", TENANT_AND_AGENT)
-                        .platform(memory::isRecallEnabled).build(),
-                bool("memory.write.enabled", "memory", SettingRisk.LOW, "app.memory.limits.write-enabled", TENANT_AND_AGENT)
-                        .platform(memory::isWriteEnabled).build(),
-                bool("memory.episodic.enabled", "memory", SettingRisk.LOW, "app.memory.episodic.enabled", TENANT_AND_AGENT)
-                        .platform(() -> episodic.isEnabled()).build(),
-                integer("memory.recall.agentTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.agent-recall-top-k", TENANT_AND_AGENT)
-                        .platform(memory::getAgentRecallTopK).build(),
-                integer("memory.recall.tenantTopK", "memory", SettingUnit.COUNT, 1, 50, SettingRisk.LOW, "app.memory.limits.tenant-recall-top-k", TENANT_AND_AGENT)
-                        .platform(memory::getTenantRecallTopK).build(),
-                integer("memory.agent.maxMemories", "memory", SettingUnit.COUNT, 1, 5_000, SettingRisk.MEDIUM, "app.memory.limits.agent-max-memories", TENANT_AND_AGENT)
-                        .platform(memory::getAgentMaxMemories).build(),
+                        // ---- memory
+                        bool(
+                                        "memory.recall.enabled",
+                                        "memory",
+                                        SettingRisk.LOW,
+                                        "app.memory.limits.recall-enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(memory::isRecallEnabled)
+                                .build(),
+                        bool(
+                                        "memory.write.enabled",
+                                        "memory",
+                                        SettingRisk.LOW,
+                                        "app.memory.limits.write-enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(memory::isWriteEnabled)
+                                .build(),
+                        bool(
+                                        "memory.episodic.enabled",
+                                        "memory",
+                                        SettingRisk.LOW,
+                                        "app.memory.episodic.enabled",
+                                        TENANT_AND_AGENT)
+                                .platform(() -> episodic.isEnabled())
+                                .build(),
+                        integer(
+                                        "memory.recall.agentTopK",
+                                        "memory",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        50,
+                                        SettingRisk.LOW,
+                                        "app.memory.limits.agent-recall-top-k",
+                                        TENANT_AND_AGENT)
+                                .platform(memory::getAgentRecallTopK)
+                                .build(),
+                        integer(
+                                        "memory.recall.tenantTopK",
+                                        "memory",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        50,
+                                        SettingRisk.LOW,
+                                        "app.memory.limits.tenant-recall-top-k",
+                                        TENANT_AND_AGENT)
+                                .platform(memory::getTenantRecallTopK)
+                                .build(),
+                        integer(
+                                        "memory.agent.maxMemories",
+                                        "memory",
+                                        SettingUnit.COUNT,
+                                        1,
+                                        5_000,
+                                        SettingRisk.MEDIUM,
+                                        "app.memory.limits.agent-max-memories",
+                                        TENANT_AND_AGENT)
+                                .platform(memory::getAgentMaxMemories)
+                                .build(),
 
-                // ---- auxiliary calls
-                bool("aux.useAgentModel", "aux", SettingRisk.MEDIUM, "app.auxiliary-model.use-agent-model", TENANT_ONLY)
-                        .platform(auxiliary::isUseAgentModel).build()
-        );
+                        // ---- auxiliary calls
+                        bool(
+                                        "aux.useAgentModel",
+                                        "aux",
+                                        SettingRisk.MEDIUM,
+                                        "app.auxiliary-model.use-agent-model",
+                                        TENANT_ONLY)
+                                .platform(auxiliary::isUseAgentModel)
+                                .build());
         List<SettingDefinition> all = new java.util.ArrayList<>(own);
-        // ---- guardrails (security: stricter than the platform only, tenant admin, typed reason): declared next to the
+        // ---- guardrails (security: stricter than the platform only, tenant admin, typed reason):
+        // declared next to the
         // code that reads them, in the guardrails module (GuardrailSettings)
         all.addAll(GuardrailSettingDefinitions.all(guardrails));
         return List.copyOf(all);

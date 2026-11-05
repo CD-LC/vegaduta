@@ -10,7 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/** The in-flight reservation scripts of the spend cap against a real Redis (skipped without redis-server). */
+/**
+ * The in-flight reservation scripts of the spend cap against a real Redis (skipped without
+ * redis-server).
+ */
 class SpendCapInflightRedisTest {
 
     private static LocalRedis local;
@@ -37,8 +40,10 @@ class SpendCapInflightRedisTest {
 
     @Test
     void reservationsAccumulateAndTheKeyExpires() {
-        assertThat(redis.execute(SpendCapService.RESERVE_INFLIGHT, KEY, "1.50", "120000")).isEqualTo("1.5");
-        assertThat(redis.execute(SpendCapService.RESERVE_INFLIGHT, KEY, "1.50", "120000")).isEqualTo("3");
+        assertThat(redis.execute(SpendCapService.RESERVE_INFLIGHT, KEY, "1.50", "120000"))
+                .isEqualTo("1.5");
+        assertThat(redis.execute(SpendCapService.RESERVE_INFLIGHT, KEY, "1.50", "120000"))
+                .isEqualTo("3");
 
         assertThat(redis.getExpire(KEY.get(0))).isBetween(1L, 120L);
     }

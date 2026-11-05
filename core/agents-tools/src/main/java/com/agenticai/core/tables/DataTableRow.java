@@ -29,7 +29,8 @@ public class DataTableRow {
     @Column(name = "data", nullable = false, columnDefinition = "jsonb")
     private Map<String, Object> data = new LinkedHashMap<>();
 
-    // TRUSTED (readable) or QUARANTINED (written by an agent on a turn that handled untrusted content, hidden
+    // TRUSTED (readable) or QUARANTINED (written by an agent on a turn that handled untrusted
+    // content, hidden
     // from every read until a person approves it); see V678.
     @Column(name = "trust", nullable = false, length = 16)
     private String trust = "TRUSTED";
@@ -61,15 +62,34 @@ public class DataTableRow {
         this.updatedAt = this.createdAt;
     }
 
-    public UUID getId() { return id; }
-    public UUID getTableId() { return tableId; }
-    public Map<String, Object> getData() { return data; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getTableId() {
+        return tableId;
+    }
+
+    public Map<String, Object> getData() {
+        return data;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 
     /** True while the row is held for review; anything but TRUSTED counts as held (fail closed). */
-    public boolean isQuarantined() { return !"TRUSTED".equals(trust); }
-    public String getSourceTaint() { return sourceTaint; }
+    public boolean isQuarantined() {
+        return !"TRUSTED".equals(trust);
+    }
+
+    public String getSourceTaint() {
+        return sourceTaint;
+    }
 
     public void setData(Map<String, Object> data) {
         this.data = data == null ? new LinkedHashMap<>() : new LinkedHashMap<>(data);

@@ -48,17 +48,22 @@ class MemoryProposalSinkTest {
 
     @Test
     void cleanIsPendingTaintedOrUnknownIsQuarantined() {
-        assertThat(MemoryProposalPolicy.statusFor(proposal(MemoryKind.PROCEDURAL, MemoryProvenanceRecord.TRUSTED)))
+        assertThat(
+                        MemoryProposalPolicy.statusFor(
+                                proposal(MemoryKind.PROCEDURAL, MemoryProvenanceRecord.TRUSTED)))
                 .isEqualTo(MemoryProposalStatus.PENDING);
         assertThat(
                         MemoryProposalPolicy.statusFor(
                                 proposal(
                                         MemoryKind.SEMANTIC,
-                                        new MemoryProvenanceRecord(MemoryTrustLevel.TRUSTED, List.of("web"), null))))
+                                        new MemoryProvenanceRecord(
+                                                MemoryTrustLevel.TRUSTED, List.of("web"), null))))
                 .isEqualTo(MemoryProposalStatus.QUARANTINED);
         assertThat(
                         MemoryProposalPolicy.statusFor(
-                                proposal(MemoryKind.SEMANTIC, new MemoryProvenanceRecord(null, null, null))))
+                                proposal(
+                                        MemoryKind.SEMANTIC,
+                                        new MemoryProvenanceRecord(null, null, null))))
                 .isEqualTo(MemoryProposalStatus.QUARANTINED);
     }
 
@@ -74,14 +79,17 @@ class MemoryProposalSinkTest {
 
     @Test
     void proposalCarriesNoStatusOrTrustOfItsOwn() {
-        assertThat(Arrays.stream(MemoryWriteProposal.class.getRecordComponents()).map(c -> c.getName()))
+        assertThat(
+                        Arrays.stream(MemoryWriteProposal.class.getRecordComponents())
+                                .map(c -> c.getName()))
                 .doesNotContain("status", "trust");
     }
 
     @Test
     void disabledSinkCreatesNothing() {
         Optional<MemoryProposalReceipt> r =
-                new DisabledMemoryProposalSink().propose(proposal(MemoryKind.SEMANTIC, MemoryProvenanceRecord.TRUSTED));
+                new DisabledMemoryProposalSink()
+                        .propose(proposal(MemoryKind.SEMANTIC, MemoryProvenanceRecord.TRUSTED));
         assertThat(r).isEmpty();
     }
 
@@ -94,7 +102,8 @@ class MemoryProposalSinkTest {
                                         MemoryKind.SEMANTIC,
                                         "x",
                                         1.0,
-                                        new MemoryProvenanceRecord(MemoryTrustLevel.QUARANTINED, List.of(), null)))
+                                        new MemoryProvenanceRecord(
+                                                MemoryTrustLevel.QUARANTINED, List.of(), null)))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

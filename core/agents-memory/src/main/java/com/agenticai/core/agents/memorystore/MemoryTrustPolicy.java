@@ -39,7 +39,10 @@ public final class MemoryTrustPolicy {
             sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
         }
 
-        /** A source outside memory_item (agent_memory, a turn, ...): only its trust and taint are known. */
+        /**
+         * A source outside memory_item (agent_memory, a turn, ...): only its trust and taint are
+         * known.
+         */
         public static SourceFacts external(MemoryTrustLevel trust, List<String> taint) {
             return new SourceFacts(trust, taint, null, false, true, 0);
         }
@@ -55,7 +58,9 @@ public final class MemoryTrustPolicy {
         }
     }
 
-    /** The outcome of {@link #derive}: either the inherited provenance or the reason it was refused. */
+    /**
+     * The outcome of {@link #derive}: either the inherited provenance or the reason it was refused.
+     */
     public record Derivation(
             MemoryTrustLevel trust,
             List<String> sourceTaint,
@@ -67,7 +72,9 @@ public final class MemoryTrustPolicy {
             return refusal != null;
         }
 
-        /** The proposal verdict: PENDING only when nothing was inherited that needs a closer look. */
+        /**
+         * The proposal verdict: PENDING only when nothing was inherited that needs a closer look.
+         */
         public MemoryProposalStatus proposalStatus() {
             return trust == MemoryTrustLevel.TRUSTED && sourceTaint.isEmpty()
                     ? MemoryProposalStatus.PENDING
@@ -81,15 +88,18 @@ public final class MemoryTrustPolicy {
 
     /**
      * Derives provenance for a new item. No sources means an item built straight from an event: it
-     * has generation 0 when a person or a tool wrote it and 1 when a model did, and inherits nothing.
+     * has generation 0 when a person or a tool wrote it and 1 when a model did, and inherits
+     * nothing.
      */
-    public static Derivation derive(List<SourceFacts> sources, boolean modelWritten, int maxGeneration) {
+    public static Derivation derive(
+            List<SourceFacts> sources, boolean modelWritten, int maxGeneration) {
         if (sources == null || sources.isEmpty()) {
             int generation = modelWritten ? 1 : 0;
             if (generation > maxGeneration) {
                 return refused(GENERATION_CAP);
             }
-            return new Derivation(MemoryTrustLevel.TRUSTED, List.of(), generation, modelWritten, null);
+            return new Derivation(
+                    MemoryTrustLevel.TRUSTED, List.of(), generation, modelWritten, null);
         }
         List<MemoryTrustLevel> levels = new ArrayList<>();
         Set<String> taint = new LinkedHashSet<>();
@@ -104,7 +114,10 @@ public final class MemoryTrustPolicy {
                 return refused(MODEL_GENERATED_SOURCE);
             }
             // A PENDING source is not trusted yet whatever its trust column says.
-            levels.add(source.status() == MemoryItemStatus.PENDING ? MemoryTrustLevel.QUARANTINED : source.trust());
+            levels.add(
+                    source.status() == MemoryItemStatus.PENDING
+                            ? MemoryTrustLevel.QUARANTINED
+                            : source.trust());
             taint.addAll(source.sourceTaint());
             maxSourceGeneration = Math.max(maxSourceGeneration, source.generation());
         }
@@ -112,14 +125,16 @@ public final class MemoryTrustPolicy {
         if (generation > maxGeneration || generation > MemoryItem.MAX_GENERATION) {
             return refused(GENERATION_CAP);
         }
-        return new Derivation(MemoryTrustLevel.meet(levels), List.copyOf(taint), generation, true, null);
+        return new Derivation(
+                MemoryTrustLevel.meet(levels), List.copyOf(taint), generation, true, null);
     }
 
     /**
      * Why {@code item} may not be activated now, or empty when it may. Activation is the human
      * approve: the item must be PENDING, not expired, and within the generation cap.
      */
-    public static Optional<String> activationRefusal(MemoryItem item, int maxGeneration, Instant now) {
+    public static Optional<String> activationRefusal(
+            MemoryItem item, int maxGeneration, Instant now) {
         if (item.status() != MemoryItemStatus.PENDING) {
             return Optional.of("NOT_PENDING");
         }

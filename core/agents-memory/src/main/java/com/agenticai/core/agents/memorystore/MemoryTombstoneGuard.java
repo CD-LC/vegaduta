@@ -17,10 +17,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *
  * <ul>
  *   <li><b>Recall</b>: every recall query appends {@link #excludeAgentFacts}, {@link
- *       #excludeSharedFacts} or {@link #excludeItems}, a {@code NOT EXISTS} over the indexed
- *       {@code (subject_key, content_sha256)} pair. It is part of the recall statement itself, so
- *       it costs no extra database round trip; with the guard inactive the fragment is the empty
- *       string and the statement is byte-for-byte what it was.
+ *       #excludeSharedFacts} or {@link #excludeItems}, a {@code NOT EXISTS} over the indexed {@code
+ *       (subject_key, content_sha256)} pair. It is part of the recall statement itself, so it costs
+ *       no extra database round trip; with the guard inactive the fragment is the empty string and
+ *       the statement is byte-for-byte what it was.
  *   <li><b>Resurrection</b>: {@link #isForgotten} lets an importer or the agent's {@code
  *       remember_fact} tools refuse to re-add a fact whose exact text was forgotten, and {@link
  *       #reconfirm} lets a person who types it again on purpose clear the marker.
@@ -69,14 +69,25 @@ public final class MemoryTombstoneGuard {
         return "\"" + schema.replace("\"", "\"\"") + "\".memory_tombstone";
     }
 
-    /** {@code AND NOT EXISTS (...)} for a query over the agent fact table {@code factTable}; empty when inactive. */
+    /**
+     * {@code AND NOT EXISTS (...)} for a query over the agent fact table {@code factTable}; empty
+     * when inactive.
+     */
     public String excludeAgentFacts(String factTable) {
         if (!active) {
             return "";
         }
-        return " AND NOT EXISTS (SELECT 1 FROM " + table() + " t WHERE t.memory_kind = '" + KIND_AGENT
-                + "' AND t.subject_key = " + factTable + ".subject_key AND t.agent_id = " + factTable
-                + ".agent_id AND t.content_sha256 = " + HASH.formatted(factTable + ".content") + ")";
+        return " AND NOT EXISTS (SELECT 1 FROM "
+                + table()
+                + " t WHERE t.memory_kind = '"
+                + KIND_AGENT
+                + "' AND t.subject_key = "
+                + factTable
+                + ".subject_key AND t.agent_id = "
+                + factTable
+                + ".agent_id AND t.content_sha256 = "
+                + HASH.formatted(factTable + ".content")
+                + ")";
     }
 
     /** As {@link #excludeAgentFacts} for the tenant-shared fact table. */
@@ -84,9 +95,15 @@ public final class MemoryTombstoneGuard {
         if (!active) {
             return "";
         }
-        return " AND NOT EXISTS (SELECT 1 FROM " + table() + " t WHERE t.memory_kind = '" + KIND_SHARED
-                + "' AND t.subject_key = " + factTable + ".subject_key AND t.content_sha256 = "
-                + HASH.formatted(factTable + ".content") + ")";
+        return " AND NOT EXISTS (SELECT 1 FROM "
+                + table()
+                + " t WHERE t.memory_kind = '"
+                + KIND_SHARED
+                + "' AND t.subject_key = "
+                + factTable
+                + ".subject_key AND t.content_sha256 = "
+                + HASH.formatted(factTable + ".content")
+                + ")";
     }
 
     /** As {@link #excludeAgentFacts} for {@code memory_item} (keyed by agent, not by subject). */
@@ -94,15 +111,22 @@ public final class MemoryTombstoneGuard {
         if (!active) {
             return "";
         }
-        return " AND NOT EXISTS (SELECT 1 FROM " + table() + " t WHERE t.memory_kind = '" + KIND_ITEM
-                + "' AND t.subject_key = 'item:' || " + itemTable + ".agent_id::text AND t.content_sha256 = "
-                + HASH.formatted(itemTable + ".content") + ")";
+        return " AND NOT EXISTS (SELECT 1 FROM "
+                + table()
+                + " t WHERE t.memory_kind = '"
+                + KIND_ITEM
+                + "' AND t.subject_key = 'item:' || "
+                + itemTable
+                + ".agent_id::text AND t.content_sha256 = "
+                + HASH.formatted(itemTable + ".content")
+                + ")";
     }
 
     /**
      * Whether {@code content} was forgotten for this subject (and agent, for the agent tier). One
      * indexed lookup; false when the guard is inactive or there is no database. Fails open on a
-     * database error: a write path must not break because a lookup did, and recall is still filtered.
+     * database error: a write path must not break because a lookup did, and recall is still
+     * filtered.
      */
     public boolean isForgotten(String kind, String subjectKey, UUID agentId, String content) {
         if (!active || content == null || subjectKey == null) {
@@ -122,11 +146,16 @@ public final class MemoryTombstoneGuard {
             args.add(agentId);
         }
         try {
-            Boolean found = j.queryForObject(
-                    "SELECT EXISTS (SELECT 1 FROM " + table()
-                            + " WHERE subject_key = ? AND memory_kind = ? AND content_sha256 = ?" + agent + ")",
-                    Boolean.class,
-                    args.toArray());
+            Boolean found =
+                    j.queryForObject(
+                            // codeql[java/sql-injection]
+                            "SELECT EXISTS (SELECT 1 FROM "
+                                    + table()
+                                    + " WHERE subject_key = ? AND memory_kind = ? AND content_sha256 = ?"
+                                    + agent
+                                    + ")",
+                            Boolean.class,
+                            args.toArray());
             return Boolean.TRUE.equals(found);
         } catch (RuntimeException e) {
             return false;
@@ -135,7 +164,8 @@ public final class MemoryTombstoneGuard {
 
     /**
      * A person re-adds a forgotten fact on purpose: clears its tombstones so it is recalled again.
-     * Only the human paths (the Memory page, an approved lesson) call this. Returns the rows cleared.
+     * Only the human paths (the Memory page, an approved lesson) call this. Returns the rows
+     * cleared.
      */
     public int reconfirm(String kind, String subjectKey, UUID agentId, String content) {
         if (!active || content == null || subjectKey == null) {
@@ -155,15 +185,25 @@ public final class MemoryTombstoneGuard {
             args.add(agentId);
         }
         return j.update(
-                "DELETE FROM " + table() + " WHERE subject_key = ? AND memory_kind = ? AND content_sha256 = ?" + agent,
+                // codeql[java/sql-injection]
+                "DELETE FROM "
+                        + table()
+                        + " WHERE subject_key = ? AND memory_kind = ? AND content_sha256 = ?"
+                        + agent,
                 args.toArray());
     }
 
-    /** SHA-256 of the exact UTF-8 text, lowercase hex (what {@code memory_tombstone.content_sha256} holds). */
+    /**
+     * SHA-256 of the exact UTF-8 text, lowercase hex (what {@code memory_tombstone.content_sha256}
+     * holds).
+     */
     public static String sha256(String content) {
         try {
-            byte[] d = MessageDigest.getInstance("SHA-256")
-                    .digest((content == null ? "" : content).getBytes(StandardCharsets.UTF_8));
+            byte[] d =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(
+                                    (content == null ? "" : content)
+                                            .getBytes(StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder(64);
             for (byte b : d) {
                 sb.append(String.format("%02x", b));

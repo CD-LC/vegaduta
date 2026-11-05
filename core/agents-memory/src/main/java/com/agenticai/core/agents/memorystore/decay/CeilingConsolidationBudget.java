@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link ConsolidationBudget} that enforces the two job-level USD ceilings and delegates the
- * tenant and per-user caps to a {@link CapProbe}. Create one instance per sweep run: the per-run
- * total lives in the instance, the per-tenant nightly total is keyed by UTC date from the injected
- * clock. Thread-safe.
+ * {@link ConsolidationBudget} that enforces the two job-level USD ceilings and delegates the tenant
+ * and per-user caps to a {@link CapProbe}. Create one instance per sweep run: the per-run total
+ * lives in the instance, the per-tenant nightly total is keyed by UTC date from the injected clock.
+ * Thread-safe.
  *
  * <p>Order of checks: tenant cap, subject cap, then the ceilings, so the most specific reason is
  * reported. A reservation counts against the ceilings until settled.
@@ -32,8 +32,10 @@ public final class CeilingConsolidationBudget implements ConsolidationBudget {
     }
 
     @Override
-    public synchronized Decision tryReserve(String tenantSchema, String subjectKey, BigDecimal estimatedUsd) {
-        BigDecimal est = estimatedUsd == null || estimatedUsd.signum() < 0 ? BigDecimal.ZERO : estimatedUsd;
+    public synchronized Decision tryReserve(
+            String tenantSchema, String subjectKey, BigDecimal estimatedUsd) {
+        BigDecimal est =
+                estimatedUsd == null || estimatedUsd.signum() < 0 ? BigDecimal.ZERO : estimatedUsd;
         rollDay();
         if (!probe.withinTenantCap(tenantSchema)) {
             return Decision.TENANT_CAP_REACHED;
@@ -54,9 +56,11 @@ public final class CeilingConsolidationBudget implements ConsolidationBudget {
     }
 
     @Override
-    public synchronized void settle(String tenantSchema, BigDecimal reservedUsd, BigDecimal actualUsd) {
+    public synchronized void settle(
+            String tenantSchema, BigDecimal reservedUsd, BigDecimal actualUsd) {
         rollDay();
-        BigDecimal reserved = reservedUsd == null ? BigDecimal.ZERO : reservedUsd.max(BigDecimal.ZERO);
+        BigDecimal reserved =
+                reservedUsd == null ? BigDecimal.ZERO : reservedUsd.max(BigDecimal.ZERO);
         BigDecimal actual = actualUsd == null ? BigDecimal.ZERO : actualUsd.max(BigDecimal.ZERO);
         BigDecimal delta = actual.subtract(reserved);
         tenantNight.merge(tenantSchema, delta, (a, b) -> a.add(b).max(BigDecimal.ZERO));

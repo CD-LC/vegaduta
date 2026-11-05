@@ -3,6 +3,7 @@ package com.agenticai.core.agents.learning.consolidation;
 import com.agenticai.core.agents.learning.review.MemoryFactRef;
 import com.agenticai.core.agents.learning.review.MemoryReviewDetector;
 import com.agenticai.core.agents.memory.MemoryTrust;
+import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
 import com.agenticai.core.agents.memorystore.MemoryTombstoneGuard;
 import com.agenticai.core.agents.memorystore.decay.ConsolidationPlan;
 import com.agenticai.core.agents.memorystore.decay.ConsolidationPlanner;
@@ -10,7 +11,6 @@ import com.agenticai.core.agents.memorystore.decay.ConsolidationRequest;
 import com.agenticai.core.agents.memorystore.decay.DecayProperties;
 import com.agenticai.core.agents.memorystore.decay.FactImportance;
 import com.agenticai.core.agents.memorystore.decay.ItemSnapshot;
-import com.agenticai.core.agents.memory.spi.MemoryTrustLevel;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -34,38 +34,39 @@ import org.springframework.stereotype.Service;
  * The nightly consolidation of one tenant's remembered facts (phase 1 design 03, section 4;
  * ADR-0028 WP5b). Same skeleton as the daily review ({@code MemoryReviewService}): subjects are
  * claimed once per day in {@code memory_consolidation_runs}, all decisions come from the pure
- * {@link ConsolidationPlanner} (no model call, ever - a summarise band is reported as
- * "would summarise" and left for a later package that owns the model step), and one person's
- * failure never stops the rest.
+ * {@link ConsolidationPlanner} (no model call, ever - a summarise band is reported as "would
+ * summarise" and left for a later package that owns the model step), and one person's failure never
+ * stops the rest.
  *
- * <p><b>Two stores.</b> The legacy fact stores ({@code agent_memory}, {@code tenant_memory}) and, since
- * WP5c, the unified store's {@code memory_item} rows (EPISODIC, PROCEDURAL, SELF_MODEL), each agent
- * claimed once a day as {@code item:<agentId>}. Both go through the same planner.
+ * <p><b>Two stores.</b> The legacy fact stores ({@code agent_memory}, {@code tenant_memory}) and,
+ * since WP5c, the unified store's {@code memory_item} rows (EPISODIC, PROCEDURAL, SELF_MODEL), each
+ * agent claimed once a day as {@code item:<agentId>}. Both go through the same planner.
  *
  * <p><b>Real importance.</b> A fact's importance is its stored prior attenuated by evidence of use
- * ({@link FactImportance}), so an unpinned, person-authored-free fact nobody ever recalled can reach
- * the FORGET band; pinned and person-authored rows are never touched, and a fact that is used or
- * recently used keeps its salience. Items carry no recorded usage yet, so they use the stored
+ * ({@link FactImportance}), so an unpinned, person-authored-free fact nobody ever recalled can
+ * reach the FORGET band; pinned and person-authored rows are never touched, and a fact that is used
+ * or recently used keeps its salience. Items carry no recorded usage yet, so they use the stored
  * importance and age only.
  *
- * <p><b>Dry run first.</b> Every plan is computed and reported; nothing is applied while
- * {@code app.memory.consolidation.auto-apply} (alias {@code apply.enabled}) is off (the default) or the
- * plan is still inside the planner's {@code dry-run-days} window (measured from the first recorded run
- * in this tenant) or its circuit breaker tripped. Forgets of TRUSTED facts therefore need an explicit
- * opt-in. Reported counts land on the run row and in the log.
+ * <p><b>Dry run first.</b> Every plan is computed and reported; nothing is applied while {@code
+ * app.memory.consolidation.auto-apply} (alias {@code apply.enabled}) is off (the default) or the
+ * plan is still inside the planner's {@code dry-run-days} window (measured from the first recorded
+ * run in this tenant) or its circuit breaker tripped. Forgets of TRUSTED facts therefore need an
+ * explicit opt-in. Reported counts land on the run row and in the log.
  *
  * <p><b>Proposals, not changes.</b> Merges and summaries over {@code memory_item} rows are always
  * <em>filed</em> (dry run, tripped breaker or apply alike) as PENDING proposals through {@link
  * ConsolidationProposalFiler} and the {@code MemoryProposalSink}, with lineage; a person's approval
- * supersedes the sources (in the review service, which this package cannot reach). Merges and summaries
- * of legacy facts cannot be stored as proposals (the sink does not store SEMANTIC rows): merges are
- * tombstoned only when auto-apply is on, summaries are reported.
+ * supersedes the sources (in the review service, which this package cannot reach). Merges and
+ * summaries of legacy facts cannot be stored as proposals (the sink does not store SEMANTIC rows):
+ * merges are tombstoned only when auto-apply is on, summaries are reported.
  *
  * <p><b>Only ever removes, never grants.</b> The apply path's only mutation is a {@code
- * memory_tombstone} insert through {@link MemoryTombstoneWriter}: a hash-only "forgotten" marker that
- * recall honours (see {@code MemoryTombstoneGuard}). It never deletes, rewrites, approves or activates a
- * row - the facts and items it reads come through the read-only {@link ConsolidationFactSource} and
- * {@link ConsolidationItemSource} ports (enforced by {@code ConsolidationSurfaceTest}).
+ * memory_tombstone} insert through {@link MemoryTombstoneWriter}: a hash-only "forgotten" marker
+ * that recall honours (see {@code MemoryTombstoneGuard}). It never deletes, rewrites, approves or
+ * activates a row - the facts and items it reads come through the read-only {@link
+ * ConsolidationFactSource} and {@link ConsolidationItemSource} ports (enforced by {@code
+ * ConsolidationSurfaceTest}).
  *
  * <p>Needs the tenant context on the calling thread (the sweep sets it via {@code
  * TenantSchemaIterator}).
@@ -93,10 +94,14 @@ public class MemoryConsolidationService {
 
     private volatile java.time.Clock clock = java.time.Clock.systemUTC();
 
-    /** The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control the day and ages. */
+    /**
+     * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
+     * the day and ages.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void useClock(
-            @org.springframework.beans.factory.annotation.Qualifier("memoryClock") java.time.Clock clock) {
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock")
+                    java.time.Clock clock) {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
@@ -108,7 +113,8 @@ public class MemoryConsolidationService {
             MemoryTombstoneWriter tombstones,
             ConsolidationProposalFiler filer,
             ObjectProvider<DecayProperties> decay,
-            @Value("${app.memory.consolidation.auto-apply:${app.memory.consolidation.apply.enabled:false}}")
+            @Value(
+                            "${app.memory.consolidation.auto-apply:${app.memory.consolidation.apply.enabled:false}}")
                     boolean applyEnabled,
             @Value("${app.memory.consolidation.max-subjects-per-tick:200}") int maxSubjects) {
         this.facts = facts;
@@ -121,7 +127,10 @@ public class MemoryConsolidationService {
         this.maxSubjects = Math.max(1, maxSubjects);
     }
 
-    /** Legacy facts only (no unified store, nothing filed): the shape before WP5c; for hand-built instances in tests. */
+    /**
+     * Legacy facts only (no unified store, nothing filed): the shape before WP5c; for hand-built
+     * instances in tests.
+     */
     MemoryConsolidationService(
             ConsolidationFactSource facts,
             MemoryConsolidationRunRepository runs,
@@ -132,10 +141,21 @@ public class MemoryConsolidationService {
         this(facts, null, runs, tombstones, null, decay, applyEnabled, maxSubjects);
     }
 
-    /** Totals of one tenant's tick; {@code proposals} is how many merge/summary proposals the store accepted. */
-    public record Report(int subjects, int rows, int forgets, int merges, int summaries, int tombstoned, int proposals) {
+    /**
+     * Totals of one tenant's tick; {@code proposals} is how many merge/summary proposals the store
+     * accepted.
+     */
+    public record Report(
+            int subjects,
+            int rows,
+            int forgets,
+            int merges,
+            int summaries,
+            int tombstoned,
+            int proposals) {
 
-        public Report(int subjects, int rows, int forgets, int merges, int summaries, int tombstoned) {
+        public Report(
+                int subjects, int rows, int forgets, int merges, int summaries, int tombstoned) {
             this(subjects, rows, forgets, merges, summaries, tombstoned, 0);
         }
 
@@ -175,14 +195,19 @@ public class MemoryConsolidationService {
                     Report r = consolidateAgentItems(agent, day);
                     total = r == null ? total : total.plus(r);
                 } catch (RuntimeException e) {
-                    log.warn("Nightly memory consolidation failed for one agent's items: {}", e.getMessage());
+                    log.warn(
+                            "Nightly memory consolidation failed for one agent's items: {}",
+                            e.getMessage());
                 }
             }
         }
         return total;
     }
 
-    /** Consolidates one agent's unified-memory items unless already done today; null when the day was claimed. */
+    /**
+     * Consolidates one agent's unified-memory items unless already done today; null when the day
+     * was claimed.
+     */
     Report consolidateAgentItems(UUID agentId, LocalDate day) {
         String key = ITEM_SCOPE + ":" + agentId;
         if (agentId == null || runs.claim(key, day) == 0) {
@@ -220,7 +245,12 @@ public class MemoryConsolidationService {
         }
         ConsolidationPlan plan =
                 new ConsolidationPlanner(decay, clock)
-                        .plan(new ConsolidationRequest(subject, snapshots, duplicateGroups(facts), enabledSince()));
+                        .plan(
+                                new ConsolidationRequest(
+                                        subject,
+                                        snapshots,
+                                        duplicateGroups(facts),
+                                        enabledSince()));
         int forgets = 0;
         int merges = 0;
         int summaries = 0;
@@ -239,18 +269,26 @@ public class MemoryConsolidationService {
             for (ConsolidationPlan.Batch b : plan.batches()) {
                 for (ConsolidationPlan.Forget f : b.forgets()) {
                     if (!skip.contains(f.id())) {
-                        tombstoned += tombstone(subject, byId.get(f.id()), f.reason().name(), f.score(), now);
+                        tombstoned +=
+                                tombstone(
+                                        subject,
+                                        byId.get(f.id()),
+                                        f.reason().name(),
+                                        f.score(),
+                                        now);
                     }
                 }
                 for (ConsolidationPlan.Merge m : b.merges()) {
                     for (UUID drop : m.dropIds()) {
                         if (!skip.contains(drop)) {
-                            tombstoned += tombstone(
-                                    subject,
-                                    byId.get(drop),
-                                    MemoryTombstoneWriter.REASON_MERGED_INTO_PREFIX + m.keepId(),
-                                    null,
-                                    now);
+                            tombstoned +=
+                                    tombstone(
+                                            subject,
+                                            byId.get(drop),
+                                            MemoryTombstoneWriter.REASON_MERGED_INTO_PREFIX
+                                                    + m.keepId(),
+                                            null,
+                                            now);
                         }
                     }
                 }
@@ -259,14 +297,25 @@ public class MemoryConsolidationService {
                 // re-planned nightly until a later package owns the model step.
             }
         }
-        runs.record(subject, day, mode, status, snapshots.size(), forgets, merges, summaries, plan.deferred(), tombstoned, 0);
+        runs.record(
+                subject,
+                day,
+                mode,
+                status,
+                snapshots.size(),
+                forgets,
+                merges,
+                summaries,
+                plan.deferred(),
+                tombstoned,
+                0);
         return new Report(1, snapshots.size(), forgets, merges, summaries, tombstoned, 0);
     }
 
     /**
-     * One agent's {@code memory_item} rows: plan with the same planner, tombstone forgets only when the plan may
-     * auto-apply, and always file merges and summaries as proposals (skipping any source that already feeds a
-     * pending proposal, so a night does not file the same one twice).
+     * One agent's {@code memory_item} rows: plan with the same planner, tombstone forgets only when
+     * the plan may auto-apply, and always file merges and summaries as proposals (skipping any
+     * source that already feeds a pending proposal, so a night does not file the same one twice).
      */
     private Report runItems(UUID agentId, String key, LocalDate day) {
         List<ConsolidationItemSource.Item> items = itemSource.items(agentId);
@@ -278,7 +327,12 @@ public class MemoryConsolidationService {
         }
         ConsolidationPlan plan =
                 new ConsolidationPlanner(decay, clock)
-                        .plan(new ConsolidationRequest(key, snapshots, itemDuplicateGroups(items), enabledSince()));
+                        .plan(
+                                new ConsolidationRequest(
+                                        key,
+                                        snapshots,
+                                        itemDuplicateGroups(items),
+                                        enabledSince()));
         Set<UUID> pending = itemSource.sourcesOfPendingProposals(agentId);
         int forgets = 0;
         int merges = 0;
@@ -287,15 +341,24 @@ public class MemoryConsolidationService {
         int proposals = 0;
         boolean apply = applyEnabled && plan.mayAutoApply();
         Instant now = clock.instant();
-        Set<UUID> skip = apply
-                ? hiddenSurvivors(items.stream().map(MemoryConsolidationService::itemAsFact).toList(), plan)
-                : Set.of();
+        Set<UUID> skip =
+                apply
+                        ? hiddenSurvivors(
+                                items.stream().map(MemoryConsolidationService::itemAsFact).toList(),
+                                plan)
+                        : Set.of();
         for (ConsolidationPlan.Batch b : plan.batches()) {
             forgets += b.forgets().size();
             if (apply) {
                 for (ConsolidationPlan.Forget f : b.forgets()) {
                     if (!skip.contains(f.id())) {
-                        tombstoned += tombstone(key, itemAsFact(byId.get(f.id())), f.reason().name(), f.score(), now);
+                        tombstoned +=
+                                tombstone(
+                                        key,
+                                        itemAsFact(byId.get(f.id())),
+                                        f.reason().name(),
+                                        f.score(),
+                                        now);
                     }
                 }
             }
@@ -312,8 +375,18 @@ public class MemoryConsolidationService {
                 }
             }
         }
-        runs.record(key, day, apply ? "apply" : "dry_run", "completed", snapshots.size(), forgets, merges, summaries,
-                plan.deferred(), tombstoned, proposals);
+        runs.record(
+                key,
+                day,
+                apply ? "apply" : "dry_run",
+                "completed",
+                snapshots.size(),
+                forgets,
+                merges,
+                summaries,
+                plan.deferred(),
+                tombstoned,
+                proposals);
         return new Report(1, snapshots.size(), forgets, merges, summaries, tombstoned, proposals);
     }
 
@@ -321,18 +394,28 @@ public class MemoryConsolidationService {
         return (keep != null && pending.contains(keep)) || ids.stream().anyMatch(pending::contains);
     }
 
-    /** Near duplicates among the agent's items, compared inside one kind (a merge never changes an item's kind). */
+    /**
+     * Near duplicates among the agent's items, compared inside one kind (a merge never changes an
+     * item's kind).
+     */
     private List<Set<UUID>> itemDuplicateGroups(List<ConsolidationItemSource.Item> items) {
         Map<String, List<MemoryFactRef>> byKind = new HashMap<>();
         for (ConsolidationItemSource.Item i : items) {
             byKind.computeIfAbsent(i.kind().name(), k -> new ArrayList<>())
-                    .add(new MemoryFactRef(
-                            MemoryFactRef.AGENT, i.id(), i.agentId(), i.content(), i.createdAt(), later(i.createdAt(), i.lastUsedAt())));
+                    .add(
+                            new MemoryFactRef(
+                                    MemoryFactRef.AGENT,
+                                    i.id(),
+                                    i.agentId(),
+                                    i.content(),
+                                    i.createdAt(),
+                                    later(i.createdAt(), i.lastUsedAt())));
         }
         List<Set<UUID>> groups = new ArrayList<>();
         for (List<MemoryFactRef> refs : byKind.values()) {
-            for (MemoryReviewDetector.Finding f : MemoryReviewDetector.detect(
-                    refs, clock.instant(), MemoryReviewDetector.Settings.defaults())) {
+            for (MemoryReviewDetector.Finding f :
+                    MemoryReviewDetector.detect(
+                            refs, clock.instant(), MemoryReviewDetector.Settings.defaults())) {
                 if (f.type() == MemoryReviewDetector.Type.DUPLICATE && f.keep() != null) {
                     Set<UUID> g = new HashSet<>();
                     g.add(f.keep().id());
@@ -348,13 +431,21 @@ public class MemoryConsolidationService {
         return i == null
                 ? null
                 : new ConsolidationFactSource.Fact(
-                        ITEM_SCOPE, i.id(), i.agentId(), i.content(), MemoryTrust.TRUSTED, i.useCount(), i.createdAt(), i.lastUsedAt());
+                        ITEM_SCOPE,
+                        i.id(),
+                        i.agentId(),
+                        i.content(),
+                        MemoryTrust.TRUSTED,
+                        i.useCount(),
+                        i.createdAt(),
+                        i.lastUsedAt());
     }
 
     /**
-     * A {@code memory_item} as a planner snapshot. ACTIVE items are all TRUSTED and human-approved. Importance is
-     * the stored prior (0 = never assigned = neutral 0.5) with no use-based attenuation, because the unified recall
-     * records no usage yet; the recency clock starts at the later of last use and approval.
+     * A {@code memory_item} as a planner snapshot. ACTIVE items are all TRUSTED and human-approved.
+     * Importance is the stored prior (0 = never assigned = neutral 0.5) with no use-based
+     * attenuation, because the unified recall records no usage yet; the recency clock starts at the
+     * later of last use and approval.
      */
     private static ItemSnapshot toSnapshot(ConsolidationItemSource.Item i) {
         double importance = i.importance() > 0 ? i.importance() : FactImportance.DEFAULT_PRIOR;
@@ -377,12 +468,14 @@ public class MemoryConsolidationService {
     }
 
     /**
-     * A tombstone is the hash of a text, and recall hides every row with that hash in the tier. So a row is not
-     * tombstoned while another live row of the same tier holds the exact same text and is not itself being removed
-     * (an exact-duplicate "merge drop", or a stale copy of a text that is also in recent use): that would hide the
-     * survivor. The skipped row stays for a later night (or until its twin goes too).
+     * A tombstone is the hash of a text, and recall hides every row with that hash in the tier. So
+     * a row is not tombstoned while another live row of the same tier holds the exact same text and
+     * is not itself being removed (an exact-duplicate "merge drop", or a stale copy of a text that
+     * is also in recent use): that would hide the survivor. The skipped row stays for a later night
+     * (or until its twin goes too).
      */
-    private static Set<UUID> hiddenSurvivors(List<ConsolidationFactSource.Fact> all, ConsolidationPlan plan) {
+    private static Set<UUID> hiddenSurvivors(
+            List<ConsolidationFactSource.Fact> all, ConsolidationPlan plan) {
         Set<UUID> planned = new HashSet<>();
         for (ConsolidationPlan.Batch b : plan.batches()) {
             b.forgets().forEach(f -> planned.add(f.id()));
@@ -398,14 +491,20 @@ public class MemoryConsolidationService {
         Set<UUID> skip = new HashSet<>();
         for (UUID id : planned) {
             String key = keyOf.get(id);
-            if (key != null && byText.get(key).stream().anyMatch(other -> !planned.contains(other))) {
+            if (key != null
+                    && byText.get(key).stream().anyMatch(other -> !planned.contains(other))) {
                 skip.add(id);
             }
         }
         return skip;
     }
 
-    private int tombstone(String subject, ConsolidationFactSource.Fact fact, String reason, Double score, Instant now) {
+    private int tombstone(
+            String subject,
+            ConsolidationFactSource.Fact fact,
+            String reason,
+            Double score,
+            Instant now) {
         if (fact == null) {
             return 0;
         }
@@ -431,12 +530,19 @@ public class MemoryConsolidationService {
             if (f.trust() != MemoryTrust.TRUSTED) {
                 continue;
             }
-            refs.add(new MemoryFactRef(
-                    f.scope(), f.id(), f.agentId(), f.content(), f.createdAt(), later(f.createdAt(), f.lastUsedAt())));
+            refs.add(
+                    new MemoryFactRef(
+                            f.scope(),
+                            f.id(),
+                            f.agentId(),
+                            f.content(),
+                            f.createdAt(),
+                            later(f.createdAt(), f.lastUsedAt())));
         }
         List<Set<UUID>> groups = new ArrayList<>();
-        for (MemoryReviewDetector.Finding f : MemoryReviewDetector.detect(
-                refs, clock.instant(), MemoryReviewDetector.Settings.defaults())) {
+        for (MemoryReviewDetector.Finding f :
+                MemoryReviewDetector.detect(
+                        refs, clock.instant(), MemoryReviewDetector.Settings.defaults())) {
             if (f.type() == MemoryReviewDetector.Type.DUPLICATE && f.keep() != null) {
                 Set<UUID> g = new HashSet<>();
                 g.add(f.keep().id());
@@ -448,26 +554,30 @@ public class MemoryConsolidationService {
     }
 
     /**
-     * A stored fact as a planner snapshot. Pin and authorship are the V684 columns (a pinned or person-authored fact is
-     * never touched); importance is the stored prior attenuated by use ({@link FactImportance}), so a fact that was
-     * never recalled and sits idle for a few half-lives can fall into the forget band while a used one cannot. Every
-     * stored row is a live (ACTIVE) candidate; trust maps fail-closed onto {@link MemoryTrustLevel}. Generation 0:
-     * the stores hold no derived rows.
+     * A stored fact as a planner snapshot. Pin and authorship are the V684 columns (a pinned or
+     * person-authored fact is never touched); importance is the stored prior attenuated by use
+     * ({@link FactImportance}), so a fact that was never recalled and sits idle for a few
+     * half-lives can fall into the forget band while a used one cannot. Every stored row is a live
+     * (ACTIVE) candidate; trust maps fail-closed onto {@link MemoryTrustLevel}. Generation 0: the
+     * stores hold no derived rows.
      */
     private ItemSnapshot toSnapshot(ConsolidationFactSource.Fact f, Instant now) {
-        double importance = FactImportance.effective(
-                f.importance(),
-                f.useCount(),
-                f.createdAt(),
-                f.lastUsedAt(),
-                now,
-                decay.halfLifeFor(FACT_KIND),
-                decay.getFrequencySaturation());
+        double importance =
+                FactImportance.effective(
+                        f.importance(),
+                        f.useCount(),
+                        f.createdAt(),
+                        f.lastUsedAt(),
+                        now,
+                        decay.halfLifeFor(FACT_KIND),
+                        decay.getFrequencySaturation());
         return new ItemSnapshot(
                 f.id(),
                 f.agentId(),
                 FACT_KIND,
-                f.trust() == MemoryTrust.TRUSTED ? MemoryTrustLevel.TRUSTED : MemoryTrustLevel.QUARANTINED,
+                f.trust() == MemoryTrust.TRUSTED
+                        ? MemoryTrustLevel.TRUSTED
+                        : MemoryTrustLevel.QUARANTINED,
                 ItemSnapshot.Status.ACTIVE,
                 f.pinned(),
                 f.personAuthored(),
@@ -481,7 +591,10 @@ public class MemoryConsolidationService {
                 false);
     }
 
-    /** When consolidation first ran in this tenant; null means "just now", which keeps plans dry-run. */
+    /**
+     * When consolidation first ran in this tenant; null means "just now", which keeps plans
+     * dry-run.
+     */
     private Instant enabledSince() {
         return runs.firstRunDate()
                 .map(d -> d.atStartOfDay(ZoneOffset.UTC).toInstant())

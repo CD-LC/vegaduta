@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * Nothing published a TurnTaintView bean, so every memory and knowledge write on a real turn was quarantined. The
- * resolver now reads the turn's own record through the taint policy.
+ * Nothing published a TurnTaintView bean, so every memory and knowledge write on a real turn was
+ * quarantined. The resolver now reads the turn's own record through the taint policy.
  */
 class TurnTaintViewsTest {
 
@@ -29,7 +29,11 @@ class TurnTaintViewsTest {
 
     private static AgentTaintPolicy policy(String mode) {
         return new AgentTaintPolicy(
-                mode, "", provider(null), provider((MeterRegistry) null), provider((AuditLogService) null));
+                mode,
+                "",
+                provider(null),
+                provider((MeterRegistry) null),
+                provider((AuditLogService) null));
     }
 
     @Test
@@ -38,7 +42,8 @@ class TurnTaintViewsTest {
         AtomicInteger turn = new AtomicInteger();
         policy.bind(turn, new TurnTaint());
 
-        TurnTaintView view = TurnTaintViews.forTurn(provider(policy), turn, provider(null)).getIfAvailable();
+        TurnTaintView view =
+                TurnTaintViews.forTurn(provider(policy), turn, provider(null)).getIfAvailable();
 
         assertFalse(view.isTainted());
     }
@@ -49,7 +54,8 @@ class TurnTaintViewsTest {
         AtomicInteger turn = new AtomicInteger();
         TurnTaint record = new TurnTaint();
         policy.bind(turn, record);
-        TurnTaintView view = TurnTaintViews.forTurn(provider(policy), turn, provider(null)).getIfAvailable();
+        TurnTaintView view =
+                TurnTaintViews.forTurn(provider(policy), turn, provider(null)).getIfAvailable();
         assertFalse(view.isTainted());
 
         record.mark("fetch_web_page");
@@ -68,8 +74,14 @@ class TurnTaintViewsTest {
         policy.bind(tainted, taintedRecord);
         policy.bind(clean, new TurnTaint());
 
-        assertTrue(TurnTaintViews.forTurn(provider(policy), tainted, provider(null)).getIfAvailable().isTainted());
-        assertFalse(TurnTaintViews.forTurn(provider(policy), clean, provider(null)).getIfAvailable().isTainted());
+        assertTrue(
+                TurnTaintViews.forTurn(provider(policy), tainted, provider(null))
+                        .getIfAvailable()
+                        .isTainted());
+        assertFalse(
+                TurnTaintViews.forTurn(provider(policy), clean, provider(null))
+                        .getIfAvailable()
+                        .isTainted());
     }
 
     @Test
@@ -80,14 +92,19 @@ class TurnTaintViewsTest {
         record.mark("inbound:whatsapp");
         policy.bind(turn, record);
 
-        assertTrue(TurnTaintViews.forTurn(provider(policy), turn, provider(null)).getIfAvailable().isTainted());
+        assertTrue(
+                TurnTaintViews.forTurn(provider(policy), turn, provider(null))
+                        .getIfAvailable()
+                        .isTainted());
     }
 
     @Test
     void theLayerSwitchedOffByTheOperatorMeansNothingToQuarantineOn() {
         AgentTaintPolicy policy = policy("off");
 
-        TurnTaintView view = TurnTaintViews.forTurn(provider(policy), new AtomicInteger(), provider(null)).getIfAvailable();
+        TurnTaintView view =
+                TurnTaintViews.forTurn(provider(policy), new AtomicInteger(), provider(null))
+                        .getIfAvailable();
 
         assertFalse(view.isTainted());
     }

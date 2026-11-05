@@ -13,7 +13,9 @@ public record CompetenceRow(
         int unknownOutcome,
         Instant lastOutcomeAt) {
 
-    /** Outcomes that count as success: verified tool or approval success, or a person's acceptance. */
+    /**
+     * Outcomes that count as success: verified tool or approval success, or a person's acceptance.
+     */
     public long successes() {
         return (long) verifiedSuccess + humanAccepted;
     }
@@ -33,7 +35,9 @@ public record CompetenceRow(
         return n == 0 ? 0.0 : (double) successes() / n;
     }
 
-    /** 95% Wilson lower bound of the success rate: what the agent can be said to achieve at least. */
+    /**
+     * 95% Wilson lower bound of the success rate: what the agent can be said to achieve at least.
+     */
     public double lowerBound() {
         return CompetenceStats.wilsonLowerBound(successes(), verifiedSample());
     }

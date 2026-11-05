@@ -3,7 +3,6 @@ package com.agenticai.core.agents.budget;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.time.Duration;
 import java.util.List;
@@ -17,9 +16,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
- * The refund script run against a real Redis: a mocked template cannot tell whether a take-back creates a negative
- * counter in an expired window or drives a live one below zero, which is where a user gets budget they never had.
- * Skipped when no {@code redis-server} binary is on the PATH.
+ * The refund script run against a real Redis: a mocked template cannot tell whether a take-back
+ * creates a negative counter in an expired window or drives a live one below zero, which is where a
+ * user gets budget they never had. Skipped when no {@code redis-server} binary is on the PATH.
  */
 class PerUserBudgetRefundScriptRedisTest {
 
@@ -35,8 +34,20 @@ class PerUserBudgetRefundScriptRedisTest {
         try (ServerSocket socket = new ServerSocket(0)) {
             port = socket.getLocalPort();
         }
-        server = new ProcessBuilder("redis-server", "--port", Integer.toString(port), "--save", "", "--appendonly", "no",
-            "--bind", "127.0.0.1").redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
+        server =
+                new ProcessBuilder(
+                                "redis-server",
+                                "--port",
+                                Integer.toString(port),
+                                "--save",
+                                "",
+                                "--appendonly",
+                                "no",
+                                "--bind",
+                                "127.0.0.1")
+                        .redirectErrorStream(true)
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                        .start();
         factory = new LettuceConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", port));
         factory.afterPropertiesSet();
         redis = new StringRedisTemplate(factory);
@@ -103,7 +114,9 @@ class PerUserBudgetRefundScriptRedisTest {
         Long after = counters.incrementByAndGet("gone", Duration.ofHours(1), -5_000L);
 
         assertThat(after).isZero();
-        assertThat(redis.hasKey("gone")).as("a refund must not create a negative counter").isFalse();
+        assertThat(redis.hasKey("gone"))
+                .as("a refund must not create a negative counter")
+                .isFalse();
     }
 
     @Test
@@ -114,7 +127,9 @@ class PerUserBudgetRefundScriptRedisTest {
 
         assertThat(after).isZero();
         assertThat(redis.opsForValue().get("k")).isEqualTo("0");
-        assertThat(redis.getExpire("k")).as("the clamp must not drop the window's expiry").isPositive();
+        assertThat(redis.getExpire("k"))
+                .as("the clamp must not drop the window's expiry")
+                .isPositive();
     }
 
     @Test

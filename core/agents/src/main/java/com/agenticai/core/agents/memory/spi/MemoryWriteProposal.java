@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A request to remember something. It carries no status and no trust of its own: those are
- * decided by the sink from {@code provenance} and the kind, and the result can only be PENDING or
+ * A request to remember something. It carries no status and no trust of its own: those are decided
+ * by the sink from {@code provenance} and the kind, and the result can only be PENDING or
  * QUARANTINED. {@code modelGenerated} marks text a model wrote (as opposed to a person or a tool
  * result). {@code sources} is the lineage of a derived proposal (a distilled procedure, a
- * self-assessment): the store takes the lowest trust of them, the union of their taint and
- * {@code max(generation) + 1}; empty for a proposal built straight from an event.
+ * self-assessment): the store takes the lowest trust of them, the union of their taint and {@code
+ * max(generation) + 1}; empty for a proposal built straight from an event.
  */
 public record MemoryWriteProposal(
         UUID agentId,

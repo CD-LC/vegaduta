@@ -25,9 +25,10 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Tombstones make "forgotten" mean forgotten: with the guard active every recall statement carries the indexed
- * NOT EXISTS (no extra statement), and the automated write paths and the importer refuse a forgotten fact unless a
- * person re-confirms; with no guard (all memory flags off) not one statement changes. JdbcTemplate is mocked.
+ * Tombstones make "forgotten" mean forgotten: with the guard active every recall statement carries
+ * the indexed NOT EXISTS (no extra statement), and the automated write paths and the importer
+ * refuse a forgotten fact unless a person re-confirms; with no guard (all memory flags off) not one
+ * statement changes. JdbcTemplate is mocked.
  */
 class MemoryTombstoneEnforcementTest {
 
@@ -52,7 +53,10 @@ class MemoryTombstoneEnforcementTest {
     }
 
     private void guardOn(boolean forgotten) {
-        when(jdbc.queryForObject(anyString(), org.mockito.ArgumentMatchers.eq(Boolean.class), any(Object[].class)))
+        when(jdbc.queryForObject(
+                        anyString(),
+                        org.mockito.ArgumentMatchers.eq(Boolean.class),
+                        any(Object[].class)))
                 .thenReturn(forgotten);
         MemoryTombstoneGuard guard = new MemoryTombstoneGuard(true, provider(jdbc));
         agentMemory.setTombstoneGuard(guard);
@@ -71,9 +75,16 @@ class MemoryTombstoneEnforcementTest {
 
     private List<Object> insertArgs() {
         return mockingDetails(jdbc).getInvocations().stream()
-                .filter(i -> i.getMethod().getName().equals("update") && String.valueOf(i.getArguments()[0]).contains("INSERT INTO"))
+                .filter(
+                        i ->
+                                i.getMethod().getName().equals("update")
+                                        && String.valueOf(i.getArguments()[0])
+                                                .contains("INSERT INTO"))
                 .findFirst()
-                .map(i -> java.util.Arrays.asList(i.getArguments()).subList(1, i.getArguments().length))
+                .map(
+                        i ->
+                                java.util.Arrays.asList(i.getArguments())
+                                        .subList(1, i.getArguments().length))
                 .orElseThrow(() -> new AssertionError("no INSERT issued"));
     }
 
@@ -87,11 +98,19 @@ class MemoryTombstoneEnforcementTest {
 
         List<String> queries = statements("query");
         assertThat(queries).hasSize(2);
-        assertThat(queries.get(0)).contains("FROM ").contains("agent_memory").contains("AND NOT EXISTS")
-                .contains("memory_tombstone t").contains("t.memory_kind = 'agent'")
+        assertThat(queries.get(0))
+                .contains("FROM ")
+                .contains("agent_memory")
+                .contains("AND NOT EXISTS")
+                .contains("memory_tombstone t")
+                .contains("t.memory_kind = 'agent'")
                 .contains("t.content_sha256 = encode(sha256(convert_to(");
-        assertThat(queries.get(1)).contains("tenant_memory").contains("AND NOT EXISTS").contains("t.memory_kind = 'shared'");
-        // Inline, so no extra statement: the only other JDBC call a recall makes is the existing usage touch (not here: no rows).
+        assertThat(queries.get(1))
+                .contains("tenant_memory")
+                .contains("AND NOT EXISTS")
+                .contains("t.memory_kind = 'shared'");
+        // Inline, so no extra statement: the only other JDBC call a recall makes is the existing
+        // usage touch (not here: no rows).
         assertThat(mockingDetails(jdbc).getInvocations()).hasSize(2);
     }
 
@@ -105,7 +124,9 @@ class MemoryTombstoneEnforcementTest {
         tenantMemory.recall("alice", "tea", 5);
 
         assertThat(statements("query")).hasSize(4).noneMatch(q -> q.contains("memory_tombstone"));
-        assertThat(mockingDetails(jdbc).getInvocations()).as("the flags-off budget: zero extra statements").hasSize(4);
+        assertThat(mockingDetails(jdbc).getInvocations())
+                .as("the flags-off budget: zero extra statements")
+                .hasSize(4);
     }
 
     // ------------------------------------------------------------------ resurrection guard
@@ -113,9 +134,15 @@ class MemoryTombstoneEnforcementTest {
     @Test
     void anAutomatedRememberOfAForgottenFactIsRefusedAndWritesNothing() {
         guardOn(true);
-        assertThatThrownBy(() -> agentMemory.remember(agentId, "alice", "Prefers tea", MemoryProvenance.TRUSTED))
+        assertThatThrownBy(
+                        () ->
+                                agentMemory.remember(
+                                        agentId, "alice", "Prefers tea", MemoryProvenance.TRUSTED))
                 .isInstanceOf(MemoryForgottenException.class);
-        assertThatThrownBy(() -> tenantMemory.remember("alice", "Prefers tea", agentId, MemoryProvenance.TRUSTED))
+        assertThatThrownBy(
+                        () ->
+                                tenantMemory.remember(
+                                        "alice", "Prefers tea", agentId, MemoryProvenance.TRUSTED))
                 .isInstanceOf(MemoryForgottenException.class);
         assertThat(statements("update")).noneMatch(s -> s.contains("INSERT INTO"));
     }
@@ -123,11 +150,15 @@ class MemoryTombstoneEnforcementTest {
     @Test
     void theRememberToolsTellTheModelTheFactWasForgottenAndSaveNothing() {
         guardOn(true);
-        String agentOut = new RememberFactToolCallback(agentMemory, agentId, "alice", null, null, null, null, null)
-                .call("{\"fact\":\"Prefers tea\"}");
+        String agentOut =
+                new RememberFactToolCallback(
+                                agentMemory, agentId, "alice", null, null, null, null, null)
+                        .call("{\"fact\":\"Prefers tea\"}");
         assertThat(agentOut).contains("\"remembered\": false").contains("\"forgotten\": true");
-        String sharedOut = new RememberSharedFactToolCallback(tenantMemory, agentId, "alice", null, null, null, null)
-                .call("{\"fact\":\"Prefers tea\"}");
+        String sharedOut =
+                new RememberSharedFactToolCallback(
+                                tenantMemory, agentId, "alice", null, null, null, null)
+                        .call("{\"fact\":\"Prefers tea\"}");
         assertThat(sharedOut).contains("\"remembered\": false").contains("\"forgotten\": true");
         assertThat(statements("update")).noneMatch(s -> s.contains("INSERT INTO"));
     }
@@ -142,11 +173,15 @@ class MemoryTombstoneEnforcementTest {
     @Test
     void aPersonTypingTheFactAgainClearsTheTombstoneAndStoresItProtectedWithHighImportance() {
         guardOn(true);
-        when(jdbc.queryForObject(anyString(), org.mockito.ArgumentMatchers.eq(Integer.class), any(Object[].class)))
+        when(jdbc.queryForObject(
+                        anyString(),
+                        org.mockito.ArgumentMatchers.eq(Integer.class),
+                        any(Object[].class)))
                 .thenReturn(0);
         agentMemory.rememberOwn(agentId, "alice", "Prefers tea", 25);
 
-        assertThat(statements("update")).anyMatch(s -> s.startsWith("DELETE FROM") && s.contains("memory_tombstone"));
+        assertThat(statements("update"))
+                .anyMatch(s -> s.startsWith("DELETE FROM") && s.contains("memory_tombstone"));
         assertThat(insertArgs()).contains(0.8, true);
     }
 
@@ -168,21 +203,31 @@ class MemoryTombstoneEnforcementTest {
         UserMemoryFactService facts = mock(UserMemoryFactService.class);
         ObjectProvider<AgentMemoryService> ap = mock(ObjectProvider.class);
         ObjectProvider<TenantMemoryService> tp = mock(ObjectProvider.class);
-        ObjectProvider<com.agenticai.core.audit.AuditLogService> auditP = mock(ObjectProvider.class);
+        ObjectProvider<com.agenticai.core.audit.AuditLogService> auditP =
+                mock(ObjectProvider.class);
         when(ap.getIfAvailable()).thenReturn(agent);
         when(tp.getIfAvailable()).thenReturn(tenant);
         when(tenant.listFactsForSubject("alice")).thenReturn(List.of());
         when(agent.listAllForSubject("alice")).thenReturn(List.of());
-        MemoryImportService importer = new MemoryImportService(ap, tp, facts, auditP, true, true, 200, 20000, 25, 50);
+        MemoryImportService importer =
+                new MemoryImportService(ap, tp, facts, auditP, true, true, 200, 20000, 25, 50);
         importer.setTombstoneGuard(new MemoryTombstoneGuard(true, provider(jdbc)));
 
-        ImportResponse blocked = importer.importFacts("alice",
-                new ImportRequest(List.of(new ImportFact("Likes green tea", "shared", null)), "chatgpt"));
+        ImportResponse blocked =
+                importer.importFacts(
+                        "alice",
+                        new ImportRequest(
+                                List.of(new ImportFact("Likes green tea", "shared", null)),
+                                "chatgpt"));
         assertThat(blocked.saved()).isZero();
         assertThat(blocked.skipped()).extracting(s -> s.reason()).containsExactly("forgotten");
 
-        ImportResponse confirmed = importer.importFacts("alice",
-                new ImportRequest(List.of(new ImportFact("Likes green tea", "shared", null, true)), "chatgpt"));
+        ImportResponse confirmed =
+                importer.importFacts(
+                        "alice",
+                        new ImportRequest(
+                                List.of(new ImportFact("Likes green tea", "shared", null, true)),
+                                "chatgpt"));
         assertThat(confirmed.saved()).isEqualTo(1);
     }
 }

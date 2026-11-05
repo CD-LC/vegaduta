@@ -59,7 +59,8 @@ public class ScratchpadNote {
     @Column(name = "byte_size", nullable = false)
     private int byteSize;
 
-    // TRUSTED (readable) or QUARANTINED (written on a turn that handled untrusted content, hidden from
+    // TRUSTED (readable) or QUARANTINED (written on a turn that handled untrusted content, hidden
+    // from
     // every read until a person approves it); see V678.
     @Column(name = "trust", nullable = false, length = 16)
     private String trust = TRUSTED;
@@ -68,8 +69,10 @@ public class ScratchpadNote {
     @Column(name = "source_taint", columnDefinition = "TEXT")
     private String sourceTaint;
 
-    // Owner of an agent-pad note (V680): the caller's subject key, as agent_memory.subject_key. NULL on rows
-    // that predate the column (author unknown: not returned to the model) and on session-pad notes written
+    // Owner of an agent-pad note (V680): the caller's subject key, as agent_memory.subject_key.
+    // NULL on rows
+    // that predate the column (author unknown: not returned to the model) and on session-pad notes
+    // written
     // without an identified caller.
     @Column(name = "subject_key", columnDefinition = "TEXT")
     private String subjectKey;
@@ -123,7 +126,10 @@ public class ScratchpadNote {
         update(body, byteSize, NoteTrust.TRUSTED);
     }
 
-    /** Overwrites the content and re-stamps its provenance: the new body is what the new trust describes. */
+    /**
+     * Overwrites the content and re-stamps its provenance: the new body is what the new trust
+     * describes.
+     */
     public void update(String body, int byteSize, NoteTrust provenance) {
         this.body = body;
         this.byteSize = byteSize;
@@ -137,7 +143,10 @@ public class ScratchpadNote {
         this.sourceTaint = p.sourcesJson();
     }
 
-    /** True while the note is held for review: read paths must not return it. Unknown values count as held. */
+    /**
+     * True while the note is held for review: read paths must not return it. Unknown values count
+     * as held.
+     */
     public boolean isQuarantined() {
         return !TRUSTED.equals(trust);
     }
@@ -146,7 +155,9 @@ public class ScratchpadNote {
         return NoteTrust.parseSources(sourceTaint);
     }
 
-    /** A person approved the held note: it becomes readable (its source_taint stays as provenance). */
+    /**
+     * A person approved the held note: it becomes readable (its source_taint stays as provenance).
+     */
     public void approve() {
         this.trust = TRUSTED;
     }

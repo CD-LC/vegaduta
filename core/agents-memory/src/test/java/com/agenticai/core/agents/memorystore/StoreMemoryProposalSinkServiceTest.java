@@ -32,8 +32,10 @@ class StoreMemoryProposalSinkServiceTest {
 
     @Test
     void everyKindIsStoredQuarantinedAndPendingNeverActive() {
-        for (MemoryKind kind : List.of(MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL)) {
-            MemoryProposalReceipt r = f.sink.propose(f.proposal(kind, "text " + kind)).orElseThrow();
+        for (MemoryKind kind :
+                List.of(MemoryKind.EPISODIC, MemoryKind.PROCEDURAL, MemoryKind.SELF_MODEL)) {
+            MemoryProposalReceipt r =
+                    f.sink.propose(f.proposal(kind, "text " + kind)).orElseThrow();
             MemoryItem row = f.storage.items.get(r.id());
             assertThat(row.status()).isEqualTo(MemoryItemStatus.PENDING);
             assertThat(row.trust()).isEqualTo(MemoryTrustLevel.QUARANTINED);
@@ -61,10 +63,14 @@ class StoreMemoryProposalSinkServiceTest {
 
     @Test
     void episodesExpireAndAreTiedToTheSubject() {
-        MemoryItem row = f.storage.items.get(f.sink.propose(f.proposal(MemoryKind.EPISODIC, "e")).orElseThrow().id());
+        MemoryItem row =
+                f.storage.items.get(
+                        f.sink.propose(f.proposal(MemoryKind.EPISODIC, "e")).orElseThrow().id());
         assertThat(row.expiresAt()).isEqualTo(f.clock.instant().plusSeconds(90L * 86400));
         assertThat(row.subjectKeys()).containsExactly("user-1");
-        MemoryItem proc = f.storage.items.get(f.sink.propose(f.proposal(MemoryKind.PROCEDURAL, "p")).orElseThrow().id());
+        MemoryItem proc =
+                f.storage.items.get(
+                        f.sink.propose(f.proposal(MemoryKind.PROCEDURAL, "p")).orElseThrow().id());
         assertThat(proc.expiresAt()).isNull();
     }
 
@@ -75,7 +81,8 @@ class StoreMemoryProposalSinkServiceTest {
         assertThat(f.storage.items).isEmpty();
         f.props.setEnabled(true);
         f.overrideAllows = false;
-        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal()).isEqualTo("DISABLED");
+        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal())
+                .isEqualTo("DISABLED");
         assertThat(f.storage.items).isEmpty();
     }
 
@@ -91,7 +98,8 @@ class StoreMemoryProposalSinkServiceTest {
     @Test
     void noTenantFailsClosed() {
         TenantContext.clear();
-        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal()).isEqualTo("NO_TENANT");
+        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal())
+                .isEqualTo("NO_TENANT");
         assertThat(f.storage.items).isEmpty();
     }
 
@@ -102,10 +110,13 @@ class StoreMemoryProposalSinkServiceTest {
                 .isEqualTo("SCREEN_TOO_LONG");
         assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "a\u0000b")).refusal())
                 .isEqualTo("SCREEN_CONTROL_CHAR");
-        assertThat(f.storage.events).hasSize(2).allSatisfy(e -> {
-            assertThat(e.event()).isEqualTo(MemoryEvent.Type.REFUSED);
-            assertThat(e.reason()).doesNotContain("xxxx");
-        });
+        assertThat(f.storage.events)
+                .hasSize(2)
+                .allSatisfy(
+                        e -> {
+                            assertThat(e.event()).isEqualTo(MemoryEvent.Type.REFUSED);
+                            assertThat(e.reason()).doesNotContain("xxxx");
+                        });
     }
 
     @Test
@@ -119,18 +130,22 @@ class StoreMemoryProposalSinkServiceTest {
 
         f.props.setMaxPendingPerAgent(100);
         f.props.setMaxWritesPerHourPerAgent(2);
-        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "4")).refusal()).isEqualTo("RATE_LIMIT");
+        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "4")).refusal())
+                .isEqualTo("RATE_LIMIT");
         f.props.setMaxWritesPerHourPerAgent(60);
         f.props.setMaxItemsPerAgent(2);
-        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "5")).refusal()).isEqualTo("AGENT_FULL");
+        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "5")).refusal())
+                .isEqualTo("AGENT_FULL");
     }
 
     @Test
     void noEmbedderOrAFailingOneStoresNothing() {
-        f.embedder = t -> {
-            throw new IllegalStateException("sidecar down");
-        };
-        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal()).isEqualTo("ERROR");
+        f.embedder =
+                t -> {
+                    throw new IllegalStateException("sidecar down");
+                };
+        assertThat(f.sink.proposeDetailed(f.proposal(MemoryKind.EPISODIC, "x")).refusal())
+                .isEqualTo("ERROR");
         assertThat(f.storage.items).isEmpty();
     }
 
@@ -163,7 +178,8 @@ class StoreMemoryProposalSinkServiceTest {
         UUID tainted = f.sink.propose(taintedEpisode).orElseThrow().id();
         f.review.approve(f.agent, tainted, MemoryActor.human("alice"));
 
-        MemoryProposalReceipt r = f.sink.propose(derived(MemoryKind.PROCEDURAL, clean, tainted)).orElseThrow();
+        MemoryProposalReceipt r =
+                f.sink.propose(derived(MemoryKind.PROCEDURAL, clean, tainted)).orElseThrow();
         MemoryItem row = f.storage.items.get(r.id());
         assertThat(r.status()).isEqualTo(MemoryProposalStatus.QUARANTINED);
         assertThat(row.sourceTaint()).containsExactly("web");
@@ -180,28 +196,41 @@ class StoreMemoryProposalSinkServiceTest {
     @Test
     void aCleanDerivationIsPendingAndGenerationOne() {
         UUID clean = f.active(MemoryKind.EPISODIC, "clean episode");
-        MemoryProposalReceipt r = f.sink.propose(derived(MemoryKind.PROCEDURAL, clean)).orElseThrow();
+        MemoryProposalReceipt r =
+                f.sink.propose(derived(MemoryKind.PROCEDURAL, clean)).orElseThrow();
         assertThat(r.status()).isEqualTo(MemoryProposalStatus.PENDING);
         assertThat(f.storage.items.get(r.id()).generation()).isEqualTo(1);
     }
 
     @Test
     void aCallerCannotClaimBetterTrustThanAMemoryItemSourceHas() {
-        UUID pending = f.sink.propose(f.proposal(MemoryKind.EPISODIC, "not approved")).orElseThrow().id();
-        MemorySourceRef lie = new MemorySourceRef(MemorySourceRef.MEMORY_ITEM, pending.toString(), MemoryTrustLevel.TRUSTED, List.of());
+        UUID pending =
+                f.sink.propose(f.proposal(MemoryKind.EPISODIC, "not approved")).orElseThrow().id();
+        MemorySourceRef lie =
+                new MemorySourceRef(
+                        MemorySourceRef.MEMORY_ITEM,
+                        pending.toString(),
+                        MemoryTrustLevel.TRUSTED,
+                        List.of());
         MemoryWriteProposal p =
-                new MemoryWriteProposal(f.agent, "u", MemoryKind.PROCEDURAL, "d", null, null, true, List.of(lie));
-        assertThat(f.sink.propose(p).orElseThrow().status()).isEqualTo(MemoryProposalStatus.QUARANTINED);
+                new MemoryWriteProposal(
+                        f.agent, "u", MemoryKind.PROCEDURAL, "d", null, null, true, List.of(lie));
+        assertThat(f.sink.propose(p).orElseThrow().status())
+                .isEqualTo(MemoryProposalStatus.QUARANTINED);
     }
 
     @Test
     void modelGeneratedSourcesAreRefusedUntilAHumanConfirmedThem() {
         UUID clean = f.active(MemoryKind.EPISODIC, "clean episode");
-        UUID distilled = f.sink.propose(derived(MemoryKind.PROCEDURAL, clean)).orElseThrow().id(); // generation 1, PENDING
+        UUID distilled =
+                f.sink.propose(derived(MemoryKind.PROCEDURAL, clean))
+                        .orElseThrow()
+                        .id(); // generation 1, PENDING
         assertThat(f.sink.proposeDetailed(derived(MemoryKind.SELF_MODEL, distilled)).refusal())
                 .isEqualTo(MemoryTrustPolicy.MODEL_GENERATED_SOURCE);
         f.review.approve(f.agent, distilled, MemoryActor.human("alice"));
-        MemoryProposalReceipt second = f.sink.propose(derived(MemoryKind.SELF_MODEL, distilled)).orElseThrow();
+        MemoryProposalReceipt second =
+                f.sink.propose(derived(MemoryKind.SELF_MODEL, distilled)).orElseThrow();
         assertThat(f.storage.items.get(second.id()).generation()).isEqualTo(2);
         // generation 2 is at the cap: nothing may be derived from it, even confirmed
         f.review.approve(f.agent, second.id(), MemoryActor.human("alice"));
@@ -211,12 +240,29 @@ class StoreMemoryProposalSinkServiceTest {
 
     @Test
     void unknownOrOtherAgentSourcesAreRefused() {
-        assertThat(f.sink.proposeDetailed(derived(MemoryKind.PROCEDURAL, UUID.randomUUID())).refusal())
+        assertThat(
+                        f.sink.proposeDetailed(derived(MemoryKind.PROCEDURAL, UUID.randomUUID()))
+                                .refusal())
                 .isEqualTo("SOURCE_UNKNOWN");
         UUID other = UUID.randomUUID();
         MemoryItem foreign =
-                MemoryItem.pending(UUID.randomUUID(), other, MemoryKind.EPISODIC, "x", MemoryWriter.AGENT, null, null,
-                        null, List.of(), false, 0, List.of(), 1, null, f.clock.instant(), null);
+                MemoryItem.pending(
+                        UUID.randomUUID(),
+                        other,
+                        MemoryKind.EPISODIC,
+                        "x",
+                        MemoryWriter.AGENT,
+                        null,
+                        null,
+                        null,
+                        List.of(),
+                        false,
+                        0,
+                        List.of(),
+                        1,
+                        null,
+                        f.clock.instant(),
+                        null);
         f.storage.put(foreign, StoreFixture.vector("x"));
         assertThat(f.sink.proposeDetailed(derived(MemoryKind.PROCEDURAL, foreign.id())).refusal())
                 .isEqualTo("SOURCE_UNKNOWN");

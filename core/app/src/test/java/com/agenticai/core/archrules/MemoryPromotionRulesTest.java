@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Unified memory (ADR-0028): the only path to a TRUSTED + ACTIVE item is {@code
  * MemoryItemReviewService.approve}, which needs an identified human. This rule covers the whole
- * assembled application: no consolidation job, recorder, distiller, skill learner or any other class
- * outside the memory store package may reference the review service or the storage port's
+ * assembled application: no consolidation job, recorder, distiller, skill learner or any other
+ * class outside the memory store package may reference the review service or the storage port's
  * {@code activate}. A new violation fails the build; there is no baseline for this rule.
  */
 class MemoryPromotionRulesTest {

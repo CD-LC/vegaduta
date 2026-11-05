@@ -11,14 +11,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-/** A memory tool that skipped its write because memory.write.enabled is off leaves a counts-only journal entry. */
+/**
+ * A memory tool that skipped its write because memory.write.enabled is off leaves a counts-only
+ * journal entry.
+ */
 class JournalingMemoryWriteSkippedTest {
 
     private static ToolCallback tool(String result) {
         return new ToolCallback() {
             @Override
             public ToolDefinition getToolDefinition() {
-                return ToolDefinition.builder().name("remember_fact").description("d").inputSchema("{}").build();
+                return ToolDefinition.builder()
+                        .name("remember_fact")
+                        .description("d")
+                        .inputSchema("{}")
+                        .build();
             }
 
             @Override
@@ -57,6 +64,7 @@ class JournalingMemoryWriteSkippedTest {
     @Test
     void theMarkerMatchesTheMemoryPackagesWording() {
         assertTrue(
-                MemoryWriteSwitch.skippedResult().contains(JournalingToolCallback.MEMORY_WRITE_SKIPPED_MARKER));
+                MemoryWriteSwitch.skippedResult()
+                        .contains(JournalingToolCallback.MEMORY_WRITE_SKIPPED_MARKER));
     }
 }

@@ -15,7 +15,8 @@ import java.util.UUID;
  * @param sources lineage: ids this row was derived from, empty for a primary row
  * @param generation 0 for a primary row, max(source generations)+1 for a derived one
  * @param modelGenerated the text was produced by a model (a summary)
- * @param humanReconfirmed a person re-confirmed a model-generated row; lifts the summarise exclusion
+ * @param humanReconfirmed a person re-confirmed a model-generated row; lifts the summarise
+ *     exclusion
  */
 public record ItemSnapshot(
         UUID id,

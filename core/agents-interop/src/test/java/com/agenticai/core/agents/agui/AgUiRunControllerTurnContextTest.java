@@ -71,7 +71,9 @@ class AgUiRunControllerTurnContextTest {
         assertEquals("thread-1", context.getValue().sessionId());
         assertEquals("user-1", request.getValue().subjectKey());
         assertNotNull(context.getValue().requestId());
-        assertTrue(context.getValue().taint().isTainted(), "an AG-UI client is not a known tenant member");
+        assertTrue(
+                context.getValue().taint().isTainted(),
+                "an AG-UI client is not a known tenant member");
         assertEquals(List.of("inbound:ag_ui"), context.getValue().taint().sources());
     }
 }

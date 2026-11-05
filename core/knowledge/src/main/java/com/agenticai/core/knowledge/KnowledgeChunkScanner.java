@@ -55,62 +55,76 @@ final class KnowledgeChunkScanner {
         this.embeddingBinding = embeddingBinding;
     }
 
-    private static final RowMapper<SearchResultResponse> VECTOR_ROW_MAPPER = (rs, rowNum) -> new SearchResultResponse(
-        UUID.fromString(rs.getString("id")),
-        rs.getString("source"),
-        rs.getInt("chunk_index"),
-        rs.getString("content"),
-        UUID.fromString(rs.getString("collection_id")),
-        rs.getDouble("distance"),
-        rs.getString("document_id") != null ? UUID.fromString(rs.getString("document_id")) : null
-    );
+    private static final RowMapper<SearchResultResponse> VECTOR_ROW_MAPPER =
+            (rs, rowNum) ->
+                    new SearchResultResponse(
+                            UUID.fromString(rs.getString("id")),
+                            rs.getString("source"),
+                            rs.getInt("chunk_index"),
+                            rs.getString("content"),
+                            UUID.fromString(rs.getString("collection_id")),
+                            rs.getDouble("distance"),
+                            rs.getString("document_id") != null
+                                    ? UUID.fromString(rs.getString("document_id"))
+                                    : null);
 
     KnowledgeChunkScanner(
-        SidecarClient sidecarClient,
-        JdbcTemplate jdbcTemplate,
-        PlatformTransactionManager transactionManager,
-        int hnswEfSearch,
-        String hnswIterativeScan
-    ) {
+            SidecarClient sidecarClient,
+            JdbcTemplate jdbcTemplate,
+            PlatformTransactionManager transactionManager,
+            int hnswEfSearch,
+            String hnswIterativeScan) {
         this.sidecarClient = sidecarClient;
         this.jdbcTemplate = jdbcTemplate;
-        this.transactionTemplate = transactionManager != null ? new TransactionTemplate(transactionManager) : null;
+        this.transactionTemplate =
+                transactionManager != null ? new TransactionTemplate(transactionManager) : null;
         this.hnswEfSearch = hnswEfSearch;
-        String mode = hnswIterativeScan == null ? "off" : hnswIterativeScan.trim().toLowerCase(java.util.Locale.ROOT);
+        String mode =
+                hnswIterativeScan == null
+                        ? "off"
+                        : hnswIterativeScan.trim().toLowerCase(java.util.Locale.ROOT);
         if (!ITERATIVE_SCAN_MODES.contains(mode)) {
             throw new IllegalArgumentException(
-                "app.knowledge.vector-index.iterative-scan must be one of " + ITERATIVE_SCAN_MODES + " (got " + hnswIterativeScan + ")"
-            );
+                    "app.knowledge.vector-index.iterative-scan must be one of "
+                            + ITERATIVE_SCAN_MODES
+                            + " (got "
+                            + hnswIterativeScan
+                            + ")");
         }
         this.hnswIterativeScan = mode;
     }
 
     /**
-     * Unchanged vector-search mechanics from the pre-hybrid implementation
-     * (one embed + one {@code <=>} scan per distinct embedding model among
-     * the target collections), except each model group's SQL now fetches
-     * {@code candidatePoolSize} rows instead of the final {@code topK} - see
-     * KnowledgeSearchService's javadoc on why fusion needs real candidates, not
-     * pre-truncated ones.
+     * Unchanged vector-search mechanics from the pre-hybrid implementation (one embed + one {@code
+     * <=>} scan per distinct embedding model among the target collections), except each model
+     * group's SQL now fetches {@code candidatePoolSize} rows instead of the final {@code topK} -
+     * see KnowledgeSearchService's javadoc on why fusion needs real candidates, not pre-truncated
+     * ones.
      */
     List<SearchResultResponse> vectorSearch(
-        String query, List<KnowledgeCollection> targetCollections, int candidatePoolSize, String table, boolean excludeImageSourced,
-        KnowledgeMetadataFilter.SqlPredicate metadataPredicate
-    ) {
+            String query,
+            List<KnowledgeCollection> targetCollections,
+            int candidatePoolSize,
+            String table,
+            boolean excludeImageSourced,
+            KnowledgeMetadataFilter.SqlPredicate metadataPredicate) {
         KnowledgeEmbeddingBinding binding = embeddingBinding;
         if (binding != null) {
-            // Never compare a query vector with vectors another embedding source built (V550); those
+            // Never compare a query vector with vectors another embedding source built (V550);
+            // those
             // collections still answer through the keyword scan.
             targetCollections = binding.searchable(targetCollections);
             if (targetCollections.isEmpty()) {
                 return List.of();
             }
         }
-        Map<String, List<UUID>> collectionIdsByModel = targetCollections.stream()
-            .collect(Collectors.groupingBy(
-                KnowledgeCollection::getEmbeddingModel,
-                Collectors.mapping(KnowledgeCollection::getId, Collectors.toList())
-            ));
+        Map<String, List<UUID>> collectionIdsByModel =
+                targetCollections.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        KnowledgeCollection::getEmbeddingModel,
+                                        Collectors.mapping(
+                                                KnowledgeCollection::getId, Collectors.toList())));
 
         List<SearchResultResponse> merged = new ArrayList<>();
 
@@ -119,14 +133,16 @@ final class KnowledgeChunkScanner {
             List<UUID> idsForModel = entry.getValue();
 
             float[] queryVector = sidecarClient.embedQuery(query, model);
-            // Straight from float[]: the old List<Double> detour boxed ~768 values per query and per model.
+            // Straight from float[]: the old List<Double> detour boxed ~768 values per query and
+            // per model.
             String literal = KnowledgeIngestionService.toVectorLiteral(queryVector);
 
             List<Object> params = new ArrayList<>();
             params.add(literal);
             params.add(model);
 
-            String placeholders = idsForModel.stream().map(id -> "?").collect(Collectors.joining(","));
+            String placeholders =
+                    idsForModel.stream().map(id -> "?").collect(Collectors.joining(","));
             // Schema-qualified - see KnowledgeSchemaSupport's javadoc. Without
             // this, a search scanned one table shared by every tenant with no
             // filter at all, returning every other tenant's uploaded documents
@@ -151,12 +167,18 @@ final class KnowledgeChunkScanner {
             // fallback). Unqualified `::vector` then fails to resolve -
             // "type vector does not exist" - because pgvector's type lives
             // in public (pinned there by VectorSchemaInitializer).
-            String sql = "SELECT id, source, chunk_index, content, collection_id, document_id, embedding OPERATOR(public.<=>) ?::public.vector AS distance FROM "
-                + table + " WHERE embedding_model = ? AND collection_id IN (" + placeholders + ")"
-                + " AND trust = 'TRUSTED'"
-                + (excludeImageSourced ? " AND COALESCE(metadata->>'source_type', '') <> 'image'" : "")
-                + (metadataPredicate != null ? metadataPredicate.sql() : "")
-                + " ORDER BY embedding OPERATOR(public.<=>) ?::public.vector LIMIT ?";
+            String sql =
+                    "SELECT id, source, chunk_index, content, collection_id, document_id, embedding OPERATOR(public.<=>) ?::public.vector AS distance FROM "
+                            + table
+                            + " WHERE embedding_model = ? AND collection_id IN ("
+                            + placeholders
+                            + ")"
+                            + " AND trust = 'TRUSTED'"
+                            + (excludeImageSourced
+                                    ? " AND COALESCE(metadata->>'source_type', '') <> 'image'"
+                                    : "")
+                            + (metadataPredicate != null ? metadataPredicate.sql() : "")
+                            + " ORDER BY embedding OPERATOR(public.<=>) ?::public.vector LIMIT ?";
             params.addAll(idsForModel);
             if (metadataPredicate != null) {
                 params.add(metadataPredicate.jsonParam());
@@ -175,38 +197,40 @@ final class KnowledgeChunkScanner {
         // be skewed toward one model if it wasn't re-applied after merging
         // (and relaxed_order iterative scans may return slightly unordered rows).
         return merged.stream()
-            .sorted(Comparator.comparingDouble(SearchResultResponse::distance))
-            .limit(candidatePoolSize)
-            .toList();
+                .sorted(Comparator.comparingDouble(SearchResultResponse::distance))
+                .limit(candidatePoolSize)
+                .toList();
     }
 
     /**
-     * Runs one per-model vector query, wrapped in a short transaction that
-     * applies the HNSW session settings with {@code SET LOCAL} when tuning is
-     * configured and supported. Falls back to the plain query when there's no
-     * transaction manager, tuning is off, the caller is already inside a
-     * transaction (a failing SET there would poison the caller's transaction,
-     * and SET LOCAL would outlive this query), or the database has rejected
-     * the settings once before.
+     * Runs one per-model vector query, wrapped in a short transaction that applies the HNSW session
+     * settings with {@code SET LOCAL} when tuning is configured and supported. Falls back to the
+     * plain query when there's no transaction manager, tuning is off, the caller is already inside
+     * a transaction (a failing SET there would poison the caller's transaction, and SET LOCAL would
+     * outlive this query), or the database has rejected the settings once before.
      */
     private List<SearchResultResponse> runVectorQuery(String sql, Object[] params) {
-        if (transactionTemplate == null || hnswEfSearch <= 0 || !hnswTuningSupported.get()
-            || TransactionSynchronizationManager.isActualTransactionActive()) {
+        if (transactionTemplate == null
+                || hnswEfSearch <= 0
+                || !hnswTuningSupported.get()
+                || TransactionSynchronizationManager.isActualTransactionActive()) {
             return jdbcTemplate.query(sql, VECTOR_ROW_MAPPER, params);
         }
         try {
-            return transactionTemplate.execute(status -> {
-                applyHnswSessionSettings();
-                return jdbcTemplate.query(sql, VECTOR_ROW_MAPPER, params);
-            });
+            return transactionTemplate.execute(
+                    status -> {
+                        applyHnswSessionSettings();
+                        return jdbcTemplate.query(sql, VECTOR_ROW_MAPPER, params);
+                    });
         } catch (HnswTuningRejectedException e) {
             if (hnswTuningSupported.compareAndSet(true, false)) {
                 log.warn(
-                    "Database rejected HNSW session settings (ef_search={}, iterative_scan={}) - vector search continues "
-                        + "untuned. Check the pgvector version (iterative_scan needs >= 0.8.0) or set "
-                        + "app.knowledge.vector-index.iterative-scan=off. Cause: {}",
-                    hnswEfSearch, hnswIterativeScan, e.getCause() != null ? e.getCause().getMessage() : e.getMessage()
-                );
+                        "Database rejected HNSW session settings (ef_search={}, iterative_scan={}) - vector search continues "
+                                + "untuned. Check the pgvector version (iterative_scan needs >= 0.8.0) or set "
+                                + "app.knowledge.vector-index.iterative-scan=off. Cause: {}",
+                        hnswEfSearch,
+                        hnswIterativeScan,
+                        e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             }
             return jdbcTemplate.query(sql, VECTOR_ROW_MAPPER, params);
         }
@@ -225,7 +249,9 @@ final class KnowledgeChunkScanner {
         }
     }
 
-    /** Marks a SET failure (vs. a failure of the query itself) so only the former disables tuning. */
+    /**
+     * Marks a SET failure (vs. a failure of the query itself) so only the former disables tuning.
+     */
     private static final class HnswTuningRejectedException extends RuntimeException {
         HnswTuningRejectedException(DataAccessException cause) {
             super(cause);
@@ -233,51 +259,58 @@ final class KnowledgeChunkScanner {
     }
 
     /**
-     * Master-Roadmap-2026.md item #2. {@code ts_rank_cd} against the {@code
-     * content_tsv} column (V87, reworked per-collection in V154), scoped to
-     * every target collection at once (unlike vector search, keyword search
-     * doesn't depend on which embedding model a collection used).
+     * Master-Roadmap-2026.md item #2. {@code ts_rank_cd} against the {@code content_tsv} column
+     * (V87, reworked per-collection in V154), scoped to every target collection at once (unlike
+     * vector search, keyword search doesn't depend on which embedding model a collection used).
      *
-     * <p>RAG audit fix (2026-07-29): the tsquery side no longer hardcodes
-     * {@code 'english'} - it joins {@code knowledge_collection} and parses
-     * the query with EACH row's own {@code text_search_config}, matching
-     * however that collection's stored tsvectors were built (see migration
-     * V154 and {@link TextSearchConfigCatalog} for why 'english' actively
-     * destroyed keyword recall on Indic/mixed content, not just failed to
-     * help it). One SQL statement still covers every target collection -
-     * the config resolves per matched row inside the join, so no per-config
-     * query grouping is needed the way vector search groups by embedding
-     * model. {@code COALESCE(..., 'simple')} covers rows read mid-rollout
-     * from a schema where V154 hasn't run (column exists on the chunk side
-     * but not the collection side is impossible - V154 changes both in one
-     * migration - so the coalesce is pure defense).
+     * <p>RAG audit fix (2026-07-29): the tsquery side no longer hardcodes {@code 'english'} - it
+     * joins {@code knowledge_collection} and parses the query with EACH row's own {@code
+     * text_search_config}, matching however that collection's stored tsvectors were built (see
+     * migration V154 and {@link TextSearchConfigCatalog} for why 'english' actively destroyed
+     * keyword recall on Indic/mixed content, not just failed to help it). One SQL statement still
+     * covers every target collection - the config resolves per matched row inside the join, so no
+     * per-config query grouping is needed the way vector search groups by embedding model. {@code
+     * COALESCE(..., 'simple')} covers rows read mid-rollout from a schema where V154 hasn't run
+     * (column exists on the chunk side but not the collection side is impossible - V154 changes
+     * both in one migration - so the coalesce is pure defense).
      *
-     * <p>Fails open (empty list, not an exception) on any {@link
-     * DataAccessException} - originally for tenant schemas predating
-     * migration V87's {@code content_tsv} (see V87's javadoc, mirroring
-     * V10's same documented gap), now also covering a schema predating
-     * V154's {@code text_search_config} column: either way this search
-     * degrades to vector-only rather than breaking knowledge search
-     * entirely for that tenant.
+     * <p>Fails open (empty list, not an exception) on any {@link DataAccessException} - originally
+     * for tenant schemas predating migration V87's {@code content_tsv} (see V87's javadoc,
+     * mirroring V10's same documented gap), now also covering a schema predating V154's {@code
+     * text_search_config} column: either way this search degrades to vector-only rather than
+     * breaking knowledge search entirely for that tenant.
      */
     List<SearchResultResponse> keywordSearch(
-        String query, List<UUID> collectionIds, int limit, String table, boolean excludeImageSourced,
-        KnowledgeMetadataFilter.SqlPredicate metadataPredicate
-    ) {
+            String query,
+            List<UUID> collectionIds,
+            int limit,
+            String table,
+            boolean excludeImageSourced,
+            KnowledgeMetadataFilter.SqlPredicate metadataPredicate) {
         if (collectionIds.isEmpty() || query == null || query.isBlank()) {
             return List.of();
         }
         String collectionTable = KnowledgeSchemaSupport.qualifiedTableName("knowledge_collection");
-        String placeholders = collectionIds.stream().map(id -> "?").collect(Collectors.joining(","));
-        String sql = "SELECT c.id, c.source, c.chunk_index, c.content, c.collection_id, c.document_id, "
-            + "ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)) AS rank"
-            + " FROM " + table + " c JOIN " + collectionTable + " kc ON kc.id = c.collection_id"
-            + " WHERE c.content_tsv @@ plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)"
-            + " AND c.collection_id IN (" + placeholders + ")"
-            + " AND c.trust = 'TRUSTED'"
-            + (excludeImageSourced ? " AND COALESCE(c.metadata->>'source_type', '') <> 'image'" : "")
-            + (metadataPredicate != null ? metadataPredicate.sql() : "")
-            + " ORDER BY rank DESC LIMIT ?";
+        String placeholders =
+                collectionIds.stream().map(id -> "?").collect(Collectors.joining(","));
+        String sql =
+                "SELECT c.id, c.source, c.chunk_index, c.content, c.collection_id, c.document_id, "
+                        + "ts_rank_cd(c.content_tsv, plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)) AS rank"
+                        + " FROM "
+                        + table
+                        + " c JOIN "
+                        + collectionTable
+                        + " kc ON kc.id = c.collection_id"
+                        + " WHERE c.content_tsv @@ plainto_tsquery(COALESCE(kc.text_search_config, 'simple')::regconfig, ?)"
+                        + " AND c.collection_id IN ("
+                        + placeholders
+                        + ")"
+                        + " AND c.trust = 'TRUSTED'"
+                        + (excludeImageSourced
+                                ? " AND COALESCE(c.metadata->>'source_type', '') <> 'image'"
+                                : "")
+                        + (metadataPredicate != null ? metadataPredicate.sql() : "")
+                        + " ORDER BY rank DESC LIMIT ?";
 
         List<Object> params = new ArrayList<>();
         params.add(query);
@@ -290,28 +323,29 @@ final class KnowledgeChunkScanner {
 
         try {
             return jdbcTemplate.query(
-                sql,
-                (rs, rowNum) -> new SearchResultResponse(
-                    UUID.fromString(rs.getString("id")),
-                    rs.getString("source"),
-                    rs.getInt("chunk_index"),
-                    rs.getString("content"),
-                    UUID.fromString(rs.getString("collection_id")),
-                    // Raw ts_rank_cd score - never surfaced to a caller as-is,
-                    // only used to compute this list's rank position for RRF
-                    // fusion (see KnowledgeSearchService#fuse). Not comparable to a vector
-                    // search's cosine distance.
-                    rs.getDouble("rank"),
-                    rs.getString("document_id") != null ? UUID.fromString(rs.getString("document_id")) : null
-                ),
-                params.toArray()
-            );
+                    sql,
+                    (rs, rowNum) ->
+                            new SearchResultResponse(
+                                    UUID.fromString(rs.getString("id")),
+                                    rs.getString("source"),
+                                    rs.getInt("chunk_index"),
+                                    rs.getString("content"),
+                                    UUID.fromString(rs.getString("collection_id")),
+                                    // Raw ts_rank_cd score - never surfaced to a caller as-is,
+                                    // only used to compute this list's rank position for RRF
+                                    // fusion (see KnowledgeSearchService#fuse). Not comparable to a
+                                    // vector
+                                    // search's cosine distance.
+                                    rs.getDouble("rank"),
+                                    rs.getString("document_id") != null
+                                            ? UUID.fromString(rs.getString("document_id"))
+                                            : null),
+                    params.toArray());
         } catch (DataAccessException e) {
             log.warn(
-                "Keyword search failed (falling back to vector-only results) - likely a tenant schema pending "
-                    + "migration V87's content_tsv backfill: {}",
-                e.getMessage()
-            );
+                    "Keyword search failed (falling back to vector-only results) - likely a tenant schema pending "
+                            + "migration V87's content_tsv backfill: {}",
+                    e.getMessage());
             return List.of();
         }
     }

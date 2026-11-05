@@ -20,8 +20,10 @@ class HashingTextEmbedderTest {
 
     @Test
     void sharedContentWordsScoreFarAboveUnrelatedText() {
-        double related = HashingTextEmbedder.similarity("What is the Gold SLA?", "Gold SLA is 2 hours");
-        double unrelated = HashingTextEmbedder.similarity("What is the Gold SLA?", "Favourite sweet is kheer");
+        double related =
+                HashingTextEmbedder.similarity("What is the Gold SLA?", "Gold SLA is 2 hours");
+        double unrelated =
+                HashingTextEmbedder.similarity("What is the Gold SLA?", "Favourite sweet is kheer");
         assertThat(related).isGreaterThan(0.4);
         assertThat(unrelated).isLessThan(0.2);
         assertThat(related).isGreaterThan(unrelated + 0.3);
@@ -30,7 +32,8 @@ class HashingTextEmbedderTest {
     @Test
     void pluralsAndTypoStemsStayClose() {
         assertThat(HashingTextEmbedder.similarity("invoices", "invoice")).isGreaterThan(0.8);
-        assertThat(HashingTextEmbedder.similarity("approved refunds", "refund approved")).isGreaterThan(0.6);
+        assertThat(HashingTextEmbedder.similarity("approved refunds", "refund approved"))
+                .isGreaterThan(0.6);
     }
 
     @Test
@@ -40,12 +43,14 @@ class HashingTextEmbedderTest {
 
     @Test
     void hindiWordsAreOrdinaryTokens() {
-        assertThat(HashingTextEmbedder.similarity("मेरा पालतू कुत्ता", "पालतू कुत्ता टॉमी है")).isGreaterThan(0.4);
+        assertThat(HashingTextEmbedder.similarity("मेरा पालतू कुत्ता", "पालतू कुत्ता टॉमी है"))
+                .isGreaterThan(0.4);
     }
 
     @Test
     void textWithoutContentWordsMapsToOneFixedVector() {
-        assertThat(HashingTextEmbedder.embed("the of and")).containsExactly(HashingTextEmbedder.embed(""));
+        assertThat(HashingTextEmbedder.embed("the of and"))
+                .containsExactly(HashingTextEmbedder.embed(""));
         assertThat(HashingTextEmbedder.contentWords(null)).isEmpty();
     }
 }

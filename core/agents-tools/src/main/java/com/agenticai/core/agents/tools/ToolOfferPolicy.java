@@ -7,8 +7,7 @@ import java.util.Set;
 /** Pure offer-time rules and the child-taint scope for {@link AgentToolProvider}. */
 final class ToolOfferPolicy {
 
-    private ToolOfferPolicy() {
-    }
+    private ToolOfferPolicy() {}
 
     /**
      * The tools relevance selection must not trim on a main chat turn: the tools the conversation
@@ -41,14 +40,16 @@ final class ToolOfferPolicy {
     }
 
     /**
-     * Resolves a delegate's tools so that their taint gate shares the sub-turn's own {@code TurnTaint}, which
-     * starts as a copy of the delegating turn's ({@link DelegationTaint}). The sub-turn builder announces its
-     * instance with {@link DelegationTaint#openResolving}; without one (a direct caller) a copy is made here.
+     * Resolves a delegate's tools so that their taint gate shares the sub-turn's own {@code
+     * TurnTaint}, which starts as a copy of the delegating turn's ({@link DelegationTaint}). The
+     * sub-turn builder announces its instance with {@link DelegationTaint#openResolving}; without
+     * one (a direct caller) a copy is made here.
      */
     static <T> T withChildTaint(java.util.function.Supplier<T> resolve) {
         com.agenticai.core.guardrails.taint.TurnTaint child =
                 DelegationTaint.resolving().orElseGet(DelegationTaint::childOfCurrent);
-        com.agenticai.core.guardrails.taint.TurnTaint previous = AgentToolProvider.TURN_TAINT_SCOPE.get();
+        com.agenticai.core.guardrails.taint.TurnTaint previous =
+                AgentToolProvider.TURN_TAINT_SCOPE.get();
         AgentToolProvider.TURN_TAINT_SCOPE.set(child);
         try {
             return resolve.get();

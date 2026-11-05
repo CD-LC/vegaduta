@@ -234,7 +234,8 @@ public class DemoChatController {
                                         TurnContext.forEntry(
                                                 TenantContext.current().orElse(null), chatTurn);
                                 // Anonymous visitor of the public demo sandbox.
-                                SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:demo_chat");
+                                SenderTrust.UNTRUSTED.seed(
+                                        turnContext.taint(), "inbound:demo_chat");
                                 return agentChatService
                                         .chat(turnContext, chatTurn)
                                         .collect(Collectors.joining())

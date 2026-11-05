@@ -9,8 +9,8 @@ import java.time.ZoneOffset;
 /**
  * A hand-wound UTC clock for one memory-eval execution. The runner advances it by each session's
  * scripted {@code gap_days} before the session is played, so memory decay, last-used stamps and the
- * daily review (which read "now" from the platform's named {@code memoryClock} bean, see
- * {@code MemoryClockConfiguration} in agents-turn) behave as if the days had passed, without sleeping.
+ * daily review (which read "now" from the platform's named {@code memoryClock} bean, see {@code
+ * MemoryClockConfiguration} in agents-turn) behave as if the days had passed, without sleeping.
  *
  * <p>Not thread-safe by design: one execution replays its sessions on one thread, in order.
  */
@@ -29,7 +29,9 @@ public final class EvalClock extends Clock {
         this.now = java.util.Objects.requireNonNull(start);
     }
 
-    /** Moves time forward; a negative or zero advance is rejected (time in the eval only moves on). */
+    /**
+     * Moves time forward; a negative or zero advance is rejected (time in the eval only moves on).
+     */
     public void advanceDays(int days) {
         if (days < 0) {
             throw new IllegalArgumentException("a clock cannot go back, got " + days + " days");
