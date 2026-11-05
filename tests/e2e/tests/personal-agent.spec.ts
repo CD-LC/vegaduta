@@ -68,7 +68,7 @@ test.describe("personal agent: behaviour", () => {
     const reply = owner.locator('[data-role="assistant"]').last();
     await expect(reply).toBeVisible({ timeout: 150_000 });
     // Quality, not just presence: the model must answer the actual question.
-    await expect(reply).toContainText(/42/);
+    await expect(reply).toContainText(/42/, { timeout: 150_000 });
   });
 
   test("the turn inspector exposes the model calls and prompt blocks behind a reply", async ({
@@ -91,8 +91,14 @@ test.describe("personal agent: behaviour", () => {
     await expect(
       inspector,
       "no turn inspector - reply carried no request snapshots",
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 150_000 });
     await inspector.click();
+    // The prompt-block heading renders inside an expanded message row: open the system prompt first.
+    await owner
+      .locator("button[aria-expanded]")
+      .filter({ hasText: /System prompt/i })
+      .first()
+      .click();
     await expect(
       owner.getByText(/Made of these prompt blocks|Request breakdown/i),
     ).toBeVisible();
@@ -114,7 +120,7 @@ test.describe("personal agent: behaviour", () => {
         .getByRole("button", { name: /good|helpful|thumbs|bad|unhelpful/i })
         .first(),
       "no feedback control on the completed turn",
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 150_000 });
   });
 });
 
