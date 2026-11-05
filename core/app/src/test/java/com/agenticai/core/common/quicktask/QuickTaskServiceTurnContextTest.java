@@ -116,6 +116,8 @@ class QuickTaskServiceTurnContextTest {
         verify(chat).chat(context.capture(), turn.capture());
         assertSame(bound, context.getValue().tenant());
         assertEquals("tenant_acme", context.getValue().tenantId());
+        org.junit.jupiter.api.Assertions.assertFalse(
+                context.getValue().taint().isTainted(), "a signed-in member's own task is trusted");
         assertEquals(turn.getValue().sessionId(), context.getValue().sessionId());
         assertEquals("user-1", turn.getValue().subjectKey());
         assertNotNull(context.getValue().requestId());

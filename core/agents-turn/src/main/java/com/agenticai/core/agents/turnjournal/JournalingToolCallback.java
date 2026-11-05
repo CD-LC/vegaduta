@@ -13,17 +13,27 @@ import org.springframework.ai.tool.metadata.ToolMetadata;
 /**
  * Decorator that journals each invocation of a tool (name, argument hash, outcome digest).
  *
- * <p>It wraps the tool from the outside, around the guard chain, so a normal return does not mean the tool ran: a
- * guard that refuses a call, parks it for a human, or tells the model the budget is gone also returns an ordinary
- * result string. The status is therefore worked out from what the platform says about the result, not from the fact
- * that it returned: {@link ToolResultMarker} for a refusal or a park (with the old wording as a fallback), and the
- * turn's {@link TurnApprovalState} for a call that was recorded as a pending approval, which also becomes an APPROVAL
- * event. Only an exception is {@code error}.
+ * <p>It wraps the tool from the outside, around the guard chain, so a normal return does not mean
+ * the tool ran: a guard that refuses a call, parks it for a human, or tells the model the budget is
+ * gone also returns an ordinary result string. The status is therefore worked out from what the
+ * platform says about the result, not from the fact that it returned: {@link ToolResultMarker} for
+ * a refusal or a park (with the old wording as a fallback), and the turn's {@link
+ * TurnApprovalState} for a call that was recorded as a pending approval, which also becomes an
+ * APPROVAL event. Only an exception is {@code error}.
  */
 final class JournalingToolCallback implements ToolCallback {
 
-    /** The approval decision the journal records for a gated call the offline eval sandbox approved. */
+    /**
+     * The approval decision the journal records for a gated call the offline eval sandbox approved.
+     */
     static final String EVAL_APPROVED = "decided:eval-approved";
+
+    /**
+     * What a memory tool's result carries when {@code memory.write.enabled} skipped its write. A
+     * copy of {@code MemoryWriteSwitch}'s marker (that class lives in the memory package, which
+     * depends on this one), pinned equal by a test.
+     */
+    static final String MEMORY_WRITE_SKIPPED_MARKER = "\"reason\": \"memory_write_disabled\"";
 
     private final ToolCallback delegate;
     private final TurnRecorder recorder;
@@ -33,10 +43,24 @@ final class JournalingToolCallback implements ToolCallback {
         this(delegate, recorder, null);
     }
 
-    JournalingToolCallback(ToolCallback delegate, TurnRecorder recorder, TurnApprovalState approval) {
+    JournalingToolCallback(
+            ToolCallback delegate, TurnRecorder recorder, TurnApprovalState approval) {
         this.delegate = delegate;
         this.recorder = recorder;
         this.approval = approval;
+    }
+
+    /**
+     * The turn's marker scope: the state this journal was given, else the one of the guard it wraps
+     * directly (a hand-built chain), else none (then only unscoped marks count).
+     */
+    private ToolResultMarker.Scope markerScope() {
+        if (approval != null) {
+            return approval.markerScope();
+        }
+        return delegate instanceof com.agenticai.core.guardrails.GuardedToolCallback guard
+                ? guard.turnApprovalState().markerScope()
+                : null;
     }
 
     @Override
@@ -64,12 +88,16 @@ final class JournalingToolCallback implements ToolCallback {
         String name = delegate.getToolDefinition().name();
         UUID outer = recorder.enter();
         SandboxApprovalGrants.Grant sandbox = approval == null ? null : approval.sandboxGrant();
-        int approvedBefore = sandbox == null ? 0 : java.util.Collections.frequency(sandbox.usedTools(), name);
+        int approvedBefore =
+                sandbox == null ? 0 : java.util.Collections.frequency(sandbox.usedTools(), name);
         try {
             String result = call.get();
-            // A gated call the eval sandbox let through ran without a person deciding it; the journal says so in
+            // A gated call the eval sandbox let through ran without a person deciding it; the
+            // journal says so in
             // its own word, so a turn timeline never reads as if someone approved it.
-            if (sandbox != null && java.util.Collections.frequency(sandbox.usedTools(), name) > approvedBefore) {
+            if (sandbox != null
+                    && java.util.Collections.frequency(sandbox.usedTools(), name)
+                            > approvedBefore) {
                 recorder.approval(name, EVAL_APPROVED);
             }
             record(name, input, result, System.currentTimeMillis() - started);
@@ -88,13 +116,15 @@ final class JournalingToolCallback implements ToolCallback {
     }
 
     private void record(String name, String input, String result, long millis) {
-        // A SUPERVISED agent's classified read-only call that ran with no human: the guard says so on the turn's state,
+        // A SUPERVISED agent's classified read-only call that ran with no human: the guard says so
+        // on the turn's state,
         // and the journal shows it before the call, as it shows a pending approval.
         if (approval != null && approval.takeAutoAllowedReadOnly(name, input)) {
             recorder.approvalAutoAllowed(name);
         }
         String requestId = approval == null ? null : approval.requestIdFor(name, input);
-        java.util.Optional<ToolResultMarker.Kind> kind = ToolResultMarker.classify(result);
+        java.util.Optional<ToolResultMarker.Kind> kind =
+                ToolResultMarker.classify(result, markerScope());
         TurnRecorder.CallStatus status;
         if (requestId != null || kind.filter(k -> k == ToolResultMarker.Kind.PARKED).isPresent()) {
             recorder.approval(name, "pending", uuidOrNull(requestId));
@@ -107,6 +137,11 @@ final class JournalingToolCallback implements ToolCallback {
             status = TurnRecorder.CallStatus.OK;
         }
         recorder.toolCall(name, input, result, status, millis);
+        if (result != null && result.contains(MEMORY_WRITE_SKIPPED_MARKER)) {
+            // memory.write.enabled is off: the tool wrote nothing. Counts only - the fact's text
+            // stays out of the trace.
+            recorder.guard("memory_write_skipped", "tool=" + name + " count=1");
+        }
     }
 
     private static UUID uuidOrNull(String text) {

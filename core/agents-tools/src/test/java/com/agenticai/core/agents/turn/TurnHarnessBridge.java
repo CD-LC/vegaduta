@@ -51,8 +51,8 @@ public final class TurnHarnessBridge {
     /**
      * Collaborators a test wants to observe or tune: the response cache and the quality judge (so a
      * test can say "this reply was never cached / never judged"), the {@code app.chat.finish.*}
-     * settings, and the tool-call log the turn reads which tools the conversation already used from.
-     * Any {@code null} member gets an inert mock (or the shipped defaults).
+     * settings, and the tool-call log the turn reads which tools the conversation already used
+     * from. Any {@code null} member gets an inert mock (or the shipped defaults).
      */
     public record Extras(
             LlmResponseCacheService responseCache,
@@ -93,11 +93,12 @@ public final class TurnHarnessBridge {
 
     /**
      * How the turn behaves when it runs long or a provider fails: the stream idle and buffered-turn
-     * timeouts, {@code app.chat.resilience.*}, {@code app.llm.retry.*}, and whether provider errors are
-     * translated by the real {@link ProviderErrorTranslator} (the default is an inert mock, which maps
-     * every error to {@code null}), and {@code app.chat.continuation.*} / {@code app.chat.follow-up.*}. A
-     * {@code null} member keeps the production default. {@code complexityClassifier} is the cost-routing
-     * classifier (an inert mock that judges nothing simple by default).
+     * timeouts, {@code app.chat.resilience.*}, {@code app.llm.retry.*}, and whether provider errors
+     * are translated by the real {@link ProviderErrorTranslator} (the default is an inert mock,
+     * which maps every error to {@code null}), and {@code app.chat.continuation.*} / {@code
+     * app.chat.follow-up.*}. A {@code null} member keeps the production default. {@code
+     * complexityClassifier} is the cost-routing classifier (an inert mock that judges nothing
+     * simple by default).
      */
     public record Tuning(
             Duration streamIdle,
@@ -201,7 +202,19 @@ public final class TurnHarnessBridge {
                 ChatResilienceProperties resilience,
                 LlmRetryPolicy retryPolicy,
                 boolean realErrorTranslation) {
-            this(streamIdle, bufferedTurn, resilience, retryPolicy, realErrorTranslation, null, null, null, null, null, null, null);
+            this(
+                    streamIdle,
+                    bufferedTurn,
+                    resilience,
+                    retryPolicy,
+                    realErrorTranslation,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
         }
     }
 
@@ -275,10 +288,14 @@ public final class TurnHarnessBridge {
                         tenantLimits,
                         mock(AgentRepository.class),
                         mock(ResourceAccessService.class));
-        Tuning tuning = extras.tuning() != null ? extras.tuning() : new Tuning(null, null, null, null, false);
+        Tuning tuning =
+                extras.tuning() != null
+                        ? extras.tuning()
+                        : new Tuning(null, null, null, null, false);
         ProviderErrorTranslator translator =
                 tuning.realErrorTranslation()
-                        ? new ProviderErrorTranslator(new com.fasterxml.jackson.databind.ObjectMapper(), null)
+                        ? new ProviderErrorTranslator(
+                                new com.fasterxml.jackson.databind.ObjectMapper(), null)
                         : mock(ProviderErrorTranslator.class);
         ChatModelFacade model =
                 new ChatModelFacade(
@@ -305,12 +322,16 @@ public final class TurnHarnessBridge {
                         agentGuardrailService,
                         mock(ResourceAccessService.class),
                         absent(),
-                        extras.guardrailEngine() == null ? absent() : present(extras.guardrailEngine()),
+                        extras.guardrailEngine() == null
+                                ? absent()
+                                : present(extras.guardrailEngine()),
                         extras.guardrailEngine() == null
                                 ? absent()
                                 : present(
                                         new com.agenticai.core.guardrails.GuardrailViolationLogger(
-                                                mock(com.agenticai.core.audit.AuditLogService.class))));
+                                                mock(
+                                                        com.agenticai.core.audit.AuditLogService
+                                                                .class))));
         ChatObservabilityFacade observability =
                 new ChatObservabilityFacade(absent(), null, null, absent(), absent(), null);
         ChatQualityFacade quality =
@@ -330,19 +351,28 @@ public final class TurnHarnessBridge {
                         mock(VisionSessionService.class),
                         null,
                         null,
+                        null,
                         null);
         ChatTimeouts timeouts =
                 new ChatTimeouts(
                         tuning.streamIdle() != null ? tuning.streamIdle() : Duration.ofSeconds(90),
-                        tuning.bufferedTurn() != null ? tuning.bufferedTurn() : Duration.ofSeconds(240),
+                        tuning.bufferedTurn() != null
+                                ? tuning.bufferedTurn()
+                                : Duration.ofSeconds(240),
                         Duration.ofSeconds(20),
                         maxContinuations,
                         extras.finish() != null ? extras.finish() : new ChatFinishProperties(),
-                        tuning.resilience() != null ? tuning.resilience() : new ChatResilienceProperties(),
-                        tuning.retryPolicy() != null ? tuning.retryPolicy() : LlmRetryPolicy.defaults(),
+                        tuning.resilience() != null
+                                ? tuning.resilience()
+                                : new ChatResilienceProperties(),
+                        tuning.retryPolicy() != null
+                                ? tuning.retryPolicy()
+                                : LlmRetryPolicy.defaults(),
                         null);
         timeouts.useConversationPolicies(
-                tuning.continuation() != null ? tuning.continuation() : new ContinuationProperties(),
+                tuning.continuation() != null
+                        ? tuning.continuation()
+                        : new ContinuationProperties(),
                 tuning.followUp() != null ? tuning.followUp() : new FollowUpProperties());
         timeouts.useToolLedger(tuning.toolLedger());
         timeouts.useParity(tuning.parity());
@@ -351,25 +381,33 @@ public final class TurnHarnessBridge {
         if (tuning.settings() != null) {
             timeouts.useSettings(present(tuning.settings()));
         }
-        AgentChatService service = new AgentChatService(
-                agentService,
-                sessionMemoryService,
-                toolPort,
-                extras.toolCallLog() != null ? extras.toolCallLog() : mock(ToolCallLogService.class),
-                model,
-                policy,
-                observability,
-                quality,
-                context,
-                new ChatRoutingFacade(null, null, null, null, null),
-                timeouts);
-        // Production resolves every model-facing text through the prompt registry, where the deprecated
+        AgentChatService service =
+                new AgentChatService(
+                        agentService,
+                        sessionMemoryService,
+                        toolPort,
+                        extras.toolCallLog() != null
+                                ? extras.toolCallLog()
+                                : mock(ToolCallLogService.class),
+                        model,
+                        policy,
+                        observability,
+                        quality,
+                        context,
+                        new ChatRoutingFacade(null, null, null, null, null),
+                        timeouts);
+        // Production resolves every model-facing text through the prompt registry, where the
+        // deprecated
         // app.chat.finish.* / app.chat.continuation.* properties are only a platform-default seed
-        // (PromptPropertyAliasConfiguration). Wire the same seeds here so a harness that tunes those
+        // (PromptPropertyAliasConfiguration). Wire the same seeds here so a harness that tunes
+        // those
         // properties exercises the path a deployment's properties take.
-        ChatFinishProperties finish = extras.finish() != null ? extras.finish() : new ChatFinishProperties();
+        ChatFinishProperties finish =
+                extras.finish() != null ? extras.finish() : new ChatFinishProperties();
         ContinuationProperties continuation =
-                tuning.continuation() != null ? tuning.continuation() : new ContinuationProperties();
+                tuning.continuation() != null
+                        ? tuning.continuation()
+                        : new ContinuationProperties();
         com.agenticai.core.prompts.DefaultPromptResolver promptResolver =
                 new com.agenticai.core.prompts.DefaultPromptResolver(
                         com.agenticai.core.prompts.PromptResolver.defaultsOnly().catalog(),

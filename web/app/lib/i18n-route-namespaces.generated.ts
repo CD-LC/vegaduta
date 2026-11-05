@@ -1704,6 +1704,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcComponentsTrustStrip",
     "keyboard",
     "localCode",
+    "memory",
     "memoryPage",
     "nav",
     "pageGuide",

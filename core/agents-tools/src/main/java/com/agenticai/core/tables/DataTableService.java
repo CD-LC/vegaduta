@@ -402,6 +402,43 @@ public class DataTableService {
     }
 
     /**
+     * {@link #insertRow(String, Map)} with the trust the writing turn's taint decided (see {@link
+     * RowTrust}).
+     */
+    @Transactional
+    public RowView insertRow(String tableRef, Map<String, Object> values, RowTrust trust) {
+        return rowOps.insertRow(tableRef, values, trust);
+    }
+
+    /** {@link #insertRows(String, List)} with the trust the writing turn's taint decided. */
+    @Transactional
+    public List<RowView> insertRows(
+            String tableRef, List<Map<String, Object>> input, RowTrust trust) {
+        return rowOps.insertRows(tableRef, input, trust);
+    }
+
+    /**
+     * Rows of the table held for review: written by an agent on a turn that handled untrusted
+     * content.
+     */
+    @Transactional(readOnly = true)
+    public List<DataTableDtos.QuarantinedRowView> quarantinedRows(String tableRef, int limit) {
+        return rowOps.quarantined(tableRef, limit);
+    }
+
+    /** Makes a held row readable. False when it is not a held row of the table. */
+    @Transactional
+    public boolean approveQuarantinedRow(String tableRef, UUID rowId) {
+        return rowOps.approveQuarantined(tableRef, rowId);
+    }
+
+    /** Deletes a held row. Never touches a trusted one. */
+    @Transactional
+    public boolean rejectQuarantinedRow(String tableRef, UUID rowId) {
+        return rowOps.rejectQuarantined(tableRef, rowId);
+    }
+
+    /**
      * Patches one row by id: each given column is set, a null value clears the cell, other columns
      * are untouched.
      */

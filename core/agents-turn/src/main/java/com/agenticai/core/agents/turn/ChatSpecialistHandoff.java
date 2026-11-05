@@ -14,10 +14,11 @@ import com.agenticai.core.agents.skills.SkillPromptBlock;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
 import com.agenticai.core.agents.turn.quality.LlmQualityJudgeService;
-import com.agenticai.core.chat.LlmMetricsAdvisor;
 import com.agenticai.core.chat.ProviderErrorTranslator;
 import com.agenticai.core.chat.gateway.GatewayCallSpec;
 import com.agenticai.core.chat.gateway.LlmGatewayService;
+import com.agenticai.core.guardrails.taint.DelegationTaint;
+import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
@@ -205,13 +206,21 @@ final class ChatSpecialistHandoff {
         // resolveToolsForSpecialistHandoff (not the normal resolveToolsFor) is what lets the
         // chain continue: it offers delegate_to_specialist again, bound to nextChain, only while
         // nextChain is still under MAX_DEPTH - see that method's javadoc.
-        List<ToolCallback> tools =
-                agentToolProvider.resolveToolsForSpecialistHandoff(
-                        targetAgentId, delegatedSessionId, subTask, chatClient, nextChain);
+        // Same as ChatDelegateCall: the specialist starts with a copy of the delegating turn's
+        // taint.
+        TurnTaint childTaint = DelegationTaint.childOfCurrent();
+        List<ToolCallback> tools;
+        try (DelegationTaint.Scope ignored = DelegationTaint.openResolving(childTaint)) {
+            tools =
+                    agentToolProvider.resolveToolsForSpecialistHandoff(
+                            targetAgentId, delegatedSessionId, subTask, chatClient, nextChain);
+        }
         String variants = experimentVariants.apply(tenantId);
 
-        // The delegate's own overrides (agent, tenant, platform) for every text below, not the built-in text.
-        ResolvedDirectives promptsForDelegate = directiveGates.directivesForAgent().apply(targetAgentId);
+        // The delegate's own overrides (agent, tenant, platform) for every text below, not the
+        // built-in text.
+        ResolvedDirectives promptsForDelegate =
+                directiveGates.directivesForAgent().apply(targetAgentId);
         String delegatePrompt =
                 withSkillsBlock(
                         withSkillsBlock(
@@ -241,14 +250,17 @@ final class ChatSpecialistHandoff {
                         directiveGates.mcpUntrusted().getAsBoolean()
                                 && agentToolProvider.anyMcpToolsOfferedFor(
                                         targetAgentId, delegatedSessionId, subTask, chatClient),
-                        // The target's own overrides (agent, tenant, platform), not the built-in text.
+                        // The target's own overrides (agent, tenant, platform), not the built-in
+                        // text.
                         promptsForDelegate);
         String systemPrompt =
                 directiveBlock == null ? basePrompt : basePrompt + "\n\n" + directiveBlock;
 
         try {
-            // Screening, hooks, journal, guardrails and the continuation policy run in the sub-turn, the same stages
-            // a buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call always had.
+            // Screening, hooks, journal, guardrails and the continuation policy run in the
+            // sub-turn, the same stages
+            // a buffered turn has (see SubAgentTurn); it also keeps the provider fallback this call
+            // always had.
             String result =
                     subTurn.run(
                             new SubAgentTurn.Request(
@@ -262,7 +274,9 @@ final class ChatSpecialistHandoff {
                                     tools,
                                     variants,
                                     tenantId,
-                                    promptsForDelegate.textOrShipped("delegation.empty_answer.specialist")));
+                                    promptsForDelegate.textOrShipped(
+                                            "delegation.empty_answer.specialist"),
+                                    childTaint));
             handoff.recordHandoffOutcome(auditId, HandoffStatus.SUCCESS, null);
             return result;
         } catch (RuntimeException e) {

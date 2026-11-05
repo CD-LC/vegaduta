@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "id": "s02-preference-unprompted",
+  "category": "preference",
+  "persona": {
+    "id": "p-scripted",
+    "name": "Scripted user",
+    "language": "en",
+    "description": "Single scripted user for a T1 scenario"
+  },
+  "seed": 102,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Always reply in Hinglish, short",
+          "plants": [
+            "f-pref"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 1,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Hello",
+          "plants": []
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f-pref",
+      "key": "reply_style",
+      "value": "User wants replies in Hinglish, short",
+      "match": "Theek hai, ho gaya.",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s2",
+      "type": "PREFERENCE",
+      "prompt": "What is the capital of Karnataka?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "reply_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "ho gaya"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false,
+        "max_chars": 60
+      }
+    }
+  ]
+}

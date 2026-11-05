@@ -8,8 +8,8 @@ import com.agenticai.core.agents.learning.LearningProposalStatus;
 import com.agenticai.core.agents.learning.LearningProposalView;
 import com.agenticai.core.agents.learning.preferences.PreferenceCatalog.Signal;
 import com.agenticai.core.agents.skills.PreferenceSignalGateway;
-import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalHistoryService;
+import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalStatus;
 import com.agenticai.core.rl.feedback.TurnFeedbackRecordedEvent;
 import com.agenticai.core.security.TenantContext;
@@ -34,19 +34,22 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 /**
- * The "preferences from behavior" learning loop. It COUNTS what the person keeps doing and, once the same signal has
- * repeated {@code app.learning.preferences.threshold} times within {@code window-days}, files a PREFERENCE proposal for
- * the person to approve (the shipped applier appends it to the {@code user_profile} memory block). Nothing here reaches a
- * prompt before that approval, and nothing here calls a model: the wording is a fixed template per signal.
+ * The "preferences from behavior" learning loop. It COUNTS what the person keeps doing and, once
+ * the same signal has repeated {@code app.learning.preferences.threshold} times within {@code
+ * window-days}, files a PREFERENCE proposal for the person to approve (the shipped applier appends
+ * it to the {@code user_profile} memory block). Nothing here reaches a prompt before that approval,
+ * and nothing here calls a model: the wording is a fixed template per signal.
  *
- * <p>Signals: (1) explicit style requests in chat messages ("shorter", "no emojis", "reply in Hindi"), seen through
- * {@link PreferenceSignalGateway}; (2) the same requests written in the comment of a thumbs/rating on a turn; (3) the
- * person's own approve/reject decisions in the approval inbox, scanned at most once per cooldown per agent.
+ * <p>Signals: (1) explicit style requests in chat messages ("shorter", "no emojis", "reply in
+ * Hindi"), seen through {@link PreferenceSignalGateway}; (2) the same requests written in the
+ * comment of a thumbs/rating on a turn; (3) the person's own approve/reject decisions in the
+ * approval inbox, scanned at most once per cooldown per agent.
  *
- * <p>Approval patterns are informational only: the proposal says what the person tends to do and points at the agent's
- * autonomy setting, which stays the person's own decision there. Nothing here approves, skips or lowers any approval
- * requirement. Hand-off to the worker always carries the tenant (AGENTS.md rule 12); the chat turn only pays for a
- * regex over a short message and a queue offer.
+ * <p>Approval patterns are informational only: the proposal says what the person tends to do and
+ * points at the agent's autonomy setting, which stays the person's own decision there. Nothing here
+ * approves, skips or lowers any approval requirement. Hand-off to the worker always carries the
+ * tenant (AGENTS.md rule 12); the chat turn only pays for a regex over a short message and a queue
+ * offer.
  */
 @Service
 @ConditionalOnProperty(
@@ -58,10 +61,34 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
 
     static final String LOOP_APPROVALS = "preferences-approvals";
 
-    /** A decision made less than this long after the request was created was automatic, not the person's. */
+    /**
+     * A decision made less than this long after the request was created was automatic, not the
+     * person's.
+     */
     static final Duration MIN_HUMAN_DECISION_DELAY = Duration.ofSeconds(2);
 
     private static final int MAX_APPROVAL_PROPOSALS_PER_SCAN = 3;
+
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory;
+
+    /**
+     * Lets {@code memory.write.enabled} stop this loop for an agent whose memory writes are off.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setAgentMemory(
+            ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory) {
+        this.memory = memory;
+    }
+
+    private boolean memoryWritesOff(UUID agentId) {
+        try {
+            com.agenticai.core.agents.memory.AgentMemoryService service =
+                    memory == null || agentId == null ? null : memory.getIfAvailable();
+            return service != null && service.writesSwitchedOff(agentId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
 
     private final PreferenceSignalRepository signals;
     private final LearningProposalService proposals;
@@ -97,10 +124,12 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         return true;
     }
 
-    // ---------------------------------------------------------------- entry points (request thread: stay cheap)
+    // ---------------------------------------------------------------- entry points (request
+    // thread: stay cheap)
 
     @Override
-    public void onUserMessage(UUID agentId, String sessionId, String userMessage, TenantScope scope) {
+    public void onUserMessage(
+            UUID agentId, String sessionId, String userMessage, TenantScope scope) {
         String subject = subjectOf(scope);
         if (subject == null || agentId == null) {
             return;
@@ -110,13 +139,15 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         if (found.isEmpty() && !scanApprovals) {
             return;
         }
-        // Re-apply the tenant on this thread so runOffThread captures it, then the worker re-applies it again.
+        // Re-apply the tenant on this thread so runOffThread captures it, then the worker
+        // re-applies it again.
         scope.run(
                 () ->
                         proposals.runOffThread(
                                 () -> {
                                     if (!found.isEmpty()) {
-                                        recordAndEvaluate(subject, agentId, sessionId, "chat", found);
+                                        recordAndEvaluate(
+                                                subject, agentId, sessionId, "chat", found);
                                     }
                                     if (scanApprovals) {
                                         scanApprovals(subject, agentId);
@@ -133,21 +164,42 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         }
         String subject = event.getSubject();
         proposals.runOffThread(
-                () -> recordAndEvaluate(subject, event.getAgentId(), event.getSessionId(), "feedback", found));
+                () ->
+                        recordAndEvaluate(
+                                subject,
+                                event.getAgentId(),
+                                event.getSessionId(),
+                                "feedback",
+                                found));
     }
 
     // ---------------------------------------------------------------- worker
 
-    /** Stores one row per signal, then files a proposal for every signal that has now repeated enough. Never throws. */
+    /**
+     * Stores one row per signal, then files a proposal for every signal that has now repeated
+     * enough. Never throws.
+     */
     void recordAndEvaluate(
-            String subject, UUID agentId, String sessionId, String source, Map<String, Signal> found) {
+            String subject,
+            UUID agentId,
+            String sessionId,
+            String source,
+            Map<String, Signal> found) {
+        if (memoryWritesOff(agentId)) {
+            log.debug(
+                    "Preference learning skipped for agent {}: memory.write.enabled is off",
+                    agentId);
+            return;
+        }
         try {
             Instant now = Instant.now();
             Instant since = now.minus(Duration.ofDays(windowDays));
             signals.deleteOlderThan(subject, now.minus(Duration.ofDays(2L * windowDays)));
             for (Signal s : found.values()) {
                 signals.save(new PreferenceSignal(subject, agentId, s.key(), source, now));
-                long seen = signals.countBySubjectAndSignalKeyAndCreatedAtAfter(subject, s.key(), since);
+                long seen =
+                        signals.countBySubjectAndSignalKeyAndCreatedAtAfter(
+                                subject, s.key(), since);
                 if (seen >= threshold) {
                     fileStyleProposal(subject, s, seen, source, sessionId);
                 }
@@ -157,7 +209,8 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         }
     }
 
-    private void fileStyleProposal(String subject, Signal s, long seen, String source, String sessionId) {
+    private void fileStyleProposal(
+            String subject, Signal s, long seen, String source, String sessionId) {
         if (alreadyKnown(subject, s.phrase())) {
             return;
         }
@@ -181,7 +234,8 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
         String wanted = normalize(body);
         for (LearningProposalStatus status :
                 List.of(LearningProposalStatus.PENDING, LearningProposalStatus.APPROVED)) {
-            for (LearningProposalView v : proposals.list(subject, status, LearningProposalKind.PREFERENCE)) {
+            for (LearningProposalView v :
+                    proposals.list(subject, status, LearningProposalKind.PREFERENCE)) {
                 if (normalize(v.body()).equals(wanted)) {
                     return true;
                 }
@@ -193,7 +247,14 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
     private void file(String subject, String title, String body, Map<String, Object> evidence) {
         Result r =
                 proposals.propose(
-                        new Proposal(subject, null, LearningProposalKind.PREFERENCE, title, body, null, evidence));
+                        new Proposal(
+                                subject,
+                                null,
+                                LearningProposalKind.PREFERENCE,
+                                title,
+                                body,
+                                null,
+                                evidence));
         if (r.created()) {
             log.info("Preference proposal filed: {}", body);
         }
@@ -201,7 +262,10 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
 
     // ---------------------------------------------------------------- approval patterns
 
-    /** Counts the person's own approve/reject decisions per action type and files informational proposals. */
+    /**
+     * Counts the person's own approve/reject decisions per action type and files informational
+     * proposals.
+     */
     void scanApprovals(String subject, UUID agentId) {
         try {
             ApprovalHistoryService history = approvals.getIfAvailable();
@@ -216,34 +280,58 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
                 if (filed >= MAX_APPROVAL_PROPOSALS_PER_SCAN) {
                     break;
                 }
-                String type = p.actionType().length() > 60 ? p.actionType().substring(0, 60) : p.actionType();
+                String type =
+                        p.actionType().length() > 60
+                                ? p.actionType().substring(0, 60)
+                                : p.actionType();
                 if (!type.matches("[A-Za-z0-9._:-]+")) {
                     continue; // free-form action names never reach a prompt-bound proposal
                 }
-                // People read the title and body: "Search the web", not "mcp_tool.web_search". The raw type stays in
+                // People read the title and body: "Search the web", not "mcp_tool.web_search". The
+                // raw type stays in
                 // the evidence below.
                 String label = ApprovalActionLabel.of(type);
                 String body = approvalPatternBody(p.approves(), label);
                 String title;
                 if (p.approves()) {
-                    title = "You approved \"" + label + "\" " + p.count() + " times in the last " + windowDays
-                            + " days, never rejected. Approval rules do not change; to get fewer prompts, review the"
-                            + " agent's autonomy level in its settings.";
+                    title =
+                            "You approved \""
+                                    + label
+                                    + "\" "
+                                    + p.count()
+                                    + " times in the last "
+                                    + windowDays
+                                    + " days, never rejected. Approval rules do not change; to get fewer prompts, review the"
+                                    + " agent's autonomy level in its settings.";
                 } else {
-                    title = "You rejected \"" + label + "\" " + p.count() + " times in the last " + windowDays
-                            + " days, never approved. Approval rules do not change.";
+                    title =
+                            "You rejected \""
+                                    + label
+                                    + "\" "
+                                    + p.count()
+                                    + " times in the last "
+                                    + windowDays
+                                    + " days, never approved. Approval rules do not change.";
                 }
-                // A proposal filed before labels existed carries the raw type in its body: still the same preference.
-                if (alreadyKnown(subject, body) || alreadyKnown(subject, approvalPatternBody(p.approves(), type))) {
+                // A proposal filed before labels existed carries the raw type in its body: still
+                // the same preference.
+                if (alreadyKnown(subject, body)
+                        || alreadyKnown(subject, approvalPatternBody(p.approves(), type))) {
                     continue;
                 }
                 Map<String, Object> evidence = new LinkedHashMap<>();
-                evidence.put("signal", p.approves() ? "approval-pattern:approved" : "approval-pattern:rejected");
+                evidence.put(
+                        "signal",
+                        p.approves() ? "approval-pattern:approved" : "approval-pattern:rejected");
                 evidence.put("actionType", type);
                 evidence.put("count", p.count());
                 evidence.put("windowDays", windowDays);
                 evidence.put("agentId", String.valueOf(agentId));
-                file(subject, title.length() > 200 ? title.substring(0, 200) : title, body, evidence);
+                file(
+                        subject,
+                        title.length() > 200 ? title.substring(0, 200) : title,
+                        body,
+                        evidence);
                 filed++;
             }
         } catch (RuntimeException e) {
@@ -253,30 +341,40 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
 
     private static String approvalPatternBody(boolean approves, String name) {
         return approves
-                ? "Usually approves \"" + name + "\" requests when asked (informational: approvals are still asked for)"
-                : "Usually rejects \"" + name + "\" requests (informational: approvals are still asked for)";
+                ? "Usually approves \""
+                        + name
+                        + "\" requests when asked (informational: approvals are still asked for)"
+                : "Usually rejects \""
+                        + name
+                        + "\" requests (informational: approvals are still asked for)";
     }
 
     /** One action type the person decides the same way every time. */
     record ApprovalPattern(String actionType, boolean approves, int count) {}
 
     /**
-     * Pure counting. Only decisions the person made count: PENDING rows and automatic approvals (decided at the moment
-     * of creation) are skipped. An action type is a pattern when it was decided {@code threshold} times or more and
-     * never the other way round. Most frequent first.
+     * Pure counting. Only decisions the person made count: PENDING rows and automatic approvals
+     * (decided at the moment of creation) are skipped. An action type is a pattern when it was
+     * decided {@code threshold} times or more and never the other way round. Most frequent first.
      */
     static List<ApprovalPattern> approvalPatterns(List<ApprovalRequest> decided, int threshold) {
         Map<String, int[]> counts = new HashMap<>(); // [approved, rejected]
         for (ApprovalRequest r : decided) {
-            if (r.getActionType() == null || r.getStatus() == null || r.getStatus() == ApprovalStatus.PENDING) {
+            if (r.getActionType() == null
+                    || r.getStatus() == null
+                    || r.getStatus() == ApprovalStatus.PENDING) {
                 continue;
             }
             if (r.getCreatedAt() != null
                     && r.getDecidedAt() != null
-                    && Duration.between(r.getCreatedAt(), r.getDecidedAt()).compareTo(MIN_HUMAN_DECISION_DELAY) < 0) {
+                    && Duration.between(r.getCreatedAt(), r.getDecidedAt())
+                                    .compareTo(MIN_HUMAN_DECISION_DELAY)
+                            < 0) {
                 continue;
             }
-            int[] c = counts.computeIfAbsent(r.getActionType().toLowerCase(Locale.ROOT), k -> new int[2]);
+            int[] c =
+                    counts.computeIfAbsent(
+                            r.getActionType().toLowerCase(Locale.ROOT), k -> new int[2]);
             if (r.getStatus() == ApprovalStatus.REJECTED) {
                 c[1]++;
             } else {
@@ -292,7 +390,11 @@ public class PreferenceLearningService implements PreferenceSignalGateway.Observ
                         out.add(new ApprovalPattern(type, false, c[1]));
                     }
                 });
-        out.sort((a, b) -> b.count() != a.count() ? Integer.compare(b.count(), a.count()) : a.actionType().compareTo(b.actionType()));
+        out.sort(
+                (a, b) ->
+                        b.count() != a.count()
+                                ? Integer.compare(b.count(), a.count())
+                                : a.actionType().compareTo(b.actionType()));
         return out;
     }
 

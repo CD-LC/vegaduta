@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -85,5 +86,20 @@ class A2aTaskServiceTurnContextTest {
         verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
         assertNull(context.getValue().tenant());
         assertNull(context.getValue().tenantId());
+    }
+
+    @Test
+    void anA2aPeersTurnIsTaintedBeforeAnyToolRuns() throws Exception {
+        TenantContext.set(TenantContext.of("tenant-a", "peer", Set.of("USER")));
+
+        A2aTask task = service.create(AGENT_ID, "ctx-3", "msg-3", "hello", () -> "peer");
+        service.run(task, null).get(5, TimeUnit.SECONDS);
+
+        ArgumentCaptor<TurnContext> context = ArgumentCaptor.forClass(TurnContext.class);
+        verify(chat).chat(context.capture(), any(ChatTurnRequest.class));
+        assertTrue(
+                context.getValue().taint().isTainted(),
+                "a remote peer's message is outsider content");
+        assertEquals(java.util.List.of("inbound:a2a"), context.getValue().taint().sources());
     }
 }

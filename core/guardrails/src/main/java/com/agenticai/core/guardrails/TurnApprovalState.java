@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicReference;
  *       on offer whatever the message says: for the continuation turn after an approval (whatever
  *       its goal says) and for a short follow-up such as "yes" or "continue" (see {@code
  *       FollowUpTools}); empty on any other turn.
- *   <li><b>Run tools.</b> The run-scoped tool selection the turn was narrowed to (the playground's "this run
- *       only" switches), or {@code null} for a turn that was not narrowed. It goes into the replay envelope
- *       with the goal, so the turn that continues the task after a human decides is narrowed the same way,
- *       and tool resolution keeps these tools out of relevance trimming (a tool the person picked is not
- *       dropped for not matching the message).
+ *   <li><b>Run tools.</b> The run-scoped tool selection the turn was narrowed to (the playground's
+ *       "this run only" switches), or {@code null} for a turn that was not narrowed. It goes into
+ *       the replay envelope with the goal, so the turn that continues the task after a human
+ *       decides is narrowed the same way, and tool resolution keeps these tools out of relevance
+ *       trimming (a tool the person picked is not dropped for not matching the message).
  *   <li><b>Queued calls.</b> Calls the model made after the turn parked; each was recorded as its
  *       own pending approval so it is not lost, keyed by tool and arguments so a repeat of a parked
  *       or queued call is not recorded twice.
@@ -54,15 +54,25 @@ public final class TurnApprovalState {
     private final Set<String> stickyTools;
     private final java.util.List<String> runToolNames;
     private final AtomicReference<String> parkedTool = new AtomicReference<>();
-    /** Request id of every call recorded for approval this turn (the parked one and the queued ones). */
-    private final ConcurrentMap<String, String> recordedRequestIds = new ConcurrentHashMap<>();
-    private final AtomicInteger queued = new AtomicInteger();
-    /** Calls this turn that ran without approval because they were classified read-only under SUPERVISED, by call key. */
-    private final ConcurrentMap<String, Integer> autoAllowedReadOnly = new ConcurrentHashMap<>();
+
     /**
-     * The eval sandbox's auto-approval for this turn, or {@code null} (every ordinary turn). Set once,
-     * when the turn's state is built, from the grant registered under the turn's request id; see {@link
-     * SandboxApprovalGrants}.
+     * Request id of every call recorded for approval this turn (the parked one and the queued
+     * ones).
+     */
+    private final ConcurrentMap<String, String> recordedRequestIds = new ConcurrentHashMap<>();
+
+    private final AtomicInteger queued = new AtomicInteger();
+
+    /**
+     * Calls this turn that ran without approval because they were classified read-only under
+     * SUPERVISED, by call key.
+     */
+    private final ConcurrentMap<String, Integer> autoAllowedReadOnly = new ConcurrentHashMap<>();
+
+    /**
+     * The eval sandbox's auto-approval for this turn, or {@code null} (every ordinary turn). Set
+     * once, when the turn's state is built, from the grant registered under the turn's request id;
+     * see {@link SandboxApprovalGrants}.
      */
     private volatile SandboxApprovalGrants.Grant sandboxGrant;
 
@@ -71,18 +81,28 @@ public final class TurnApprovalState {
     }
 
     public TurnApprovalState(
-        String memorySessionId, String goal, UUID requestedAgentId, String subjectKey, Set<String> stickyTools
-    ) {
+            String memorySessionId,
+            String goal,
+            UUID requestedAgentId,
+            String subjectKey,
+            Set<String> stickyTools) {
         this(memorySessionId, goal, requestedAgentId, subjectKey, stickyTools, null);
     }
 
-    /** As above, for a turn narrowed to {@code runToolNames} (see {@link #runToolNames()}); {@code null} = not narrowed. */
+    /**
+     * As above, for a turn narrowed to {@code runToolNames} (see {@link #runToolNames()}); {@code
+     * null} = not narrowed.
+     */
     public TurnApprovalState(
-        String memorySessionId, String goal, UUID requestedAgentId, String subjectKey, Set<String> stickyTools,
-        java.util.List<String> runToolNames
-    ) {
+            String memorySessionId,
+            String goal,
+            UUID requestedAgentId,
+            String subjectKey,
+            Set<String> stickyTools,
+            java.util.List<String> runToolNames) {
         this.runToolNames = runToolNames == null ? null : java.util.List.copyOf(runToolNames);
-        this.memorySessionId = memorySessionId == null || memorySessionId.isBlank() ? null : memorySessionId;
+        this.memorySessionId =
+                memorySessionId == null || memorySessionId.isBlank() ? null : memorySessionId;
         this.goal = goal == null || goal.isBlank() ? null : goal;
         this.requestedAgentId = requestedAgentId;
         this.subjectKey = subjectKey == null || subjectKey.isBlank() ? null : subjectKey;
@@ -90,8 +110,9 @@ public final class TurnApprovalState {
     }
 
     /**
-     * Lets {@link GuardedToolCallback} skip the "needs a human" park for the tools {@code grant} permits.
-     * Only the code that starts an offline eval turn calls this, with a grant it registered itself.
+     * Lets {@link GuardedToolCallback} skip the "needs a human" park for the tools {@code grant}
+     * permits. Only the code that starts an offline eval turn calls this, with a grant it
+     * registered itself.
      */
     public void enableSandboxGrant(SandboxApprovalGrants.Grant grant) {
         this.sandboxGrant = grant;
@@ -102,7 +123,10 @@ public final class TurnApprovalState {
         return sandboxGrant;
     }
 
-    /** The user message that started this turn (the original goal for a continuation), or {@code null}. */
+    /**
+     * The user message that started this turn (the original goal for a continuation), or {@code
+     * null}.
+     */
     public String goal() {
         return goal;
     }
@@ -113,29 +137,65 @@ public final class TurnApprovalState {
     }
 
     /**
-     * The run-scoped tool selection this turn was narrowed to; {@code null} when it was not (an empty list is a
-     * turn narrowed to no tools). Never widens anything: it is the request's own list, kept so the journal can
-     * show it, tool resolution can keep it out of relevance trimming and the approval gate can pass it on.
+     * The run-scoped tool selection this turn was narrowed to; {@code null} when it was not (an
+     * empty list is a turn narrowed to no tools). Never widens anything: it is the request's own
+     * list, kept so the journal can show it, tool resolution can keep it out of relevance trimming
+     * and the approval gate can pass it on.
      */
     public java.util.List<String> runToolNames() {
         return runToolNames;
     }
 
     /**
-     * What the replay envelope records about where a held call came from; {@code null} when the turn
-     * has no goal to restate (then only the scoped memory id, if any, is recorded).
+     * What the replay envelope records about where a held call came from; {@code null} when the
+     * turn has no goal to restate (then only the scoped memory id, if any, is recorded).
      */
     ToolCallOrigin origin(int maxGoalChars, String cutMarker) {
         if (goal == null || maxGoalChars <= 0 || requestedAgentId == null || subjectKey == null) {
             return null;
         }
-        String capped = goal.length() <= maxGoalChars ? goal : goal.substring(0, maxGoalChars) + (cutMarker == null ? "" : cutMarker);
-        return new ToolCallOrigin(memorySessionId, capped, requestedAgentId, subjectKey, runToolNames);
+        String capped =
+                goal.length() <= maxGoalChars
+                        ? goal
+                        : goal.substring(0, maxGoalChars) + (cutMarker == null ? "" : cutMarker);
+        return new ToolCallOrigin(
+                memorySessionId, capped, requestedAgentId, subjectKey, runToolNames);
     }
 
     /** The SEC-004 scoped memory id this turn reads history under, or {@code null} when unknown. */
     public String memorySessionId() {
         return memorySessionId;
+    }
+
+    private final java.util.concurrent.atomic.AtomicBoolean budgetExhausted =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
+    /**
+     * This turn's identity for {@link ToolResultMarker}: what the guard registers under, what the
+     * turn's readers ask under.
+     */
+    private final ToolResultMarker.Scope markerScope = new ToolResultMarker.Scope();
+
+    /**
+     * Records that the guard answered a call of this turn because the tool-call budget was used up.
+     * Out-of-band truth the tool loop reads ({@code core/chat ToolLoopSignals}); a tool's output
+     * can never set it. Written by the guard only.
+     */
+    public void markBudgetExhausted() {
+        budgetExhausted.set(true);
+    }
+
+    /** True once the guard has answered a call of this turn with the budget-exhausted result. */
+    public boolean isBudgetExhausted() {
+        return budgetExhausted.get();
+    }
+
+    /**
+     * The turn's {@link ToolResultMarker.Scope}: marks registered under it are visible to this turn
+     * only.
+     */
+    public ToolResultMarker.Scope markerScope() {
+        return markerScope;
     }
 
     /** True once a gated call of this turn has been recorded as a pending approval. */
@@ -157,40 +217,48 @@ public final class TurnApprovalState {
         parkedTool.compareAndSet(null, toolName);
     }
 
-    /** Request id already recorded for an identical call (parked or queued) this turn, or {@code null}. */
+    /**
+     * Request id already recorded for an identical call (parked or queued) this turn, or {@code
+     * null}.
+     */
     String recordedRequestId(String callKey) {
         return recordedRequestIds.get(callKey);
     }
 
     /**
-     * The id of the pending approval recorded for this exact call (tool and arguments) this turn, whether it
-     * is the call that parked the turn or one queued behind it; {@code null} when the call was not held. What
-     * lets the tool wrapper say in the turn's tool ledger that a call is waiting on a human.
+     * The id of the pending approval recorded for this exact call (tool and arguments) this turn,
+     * whether it is the call that parked the turn or one queued behind it; {@code null} when the
+     * call was not held. What lets the tool wrapper say in the turn's tool ledger that a call is
+     * waiting on a human.
      */
     public String requestIdFor(String toolName, String toolInput) {
         return recordedRequestIds.get(callKey(toolName, toolInput));
     }
 
     /**
-     * Notes that this exact call (tool and arguments) is about to run without approval because the agent is SUPERVISED
-     * and the tool is classified read-only (see {@link ReadOnlyAutoAllow}). Written by the guard; read once by whatever
-     * journals the turn's tool calls, which sits around the guard and cannot see the guard's decision otherwise.
+     * Notes that this exact call (tool and arguments) is about to run without approval because the
+     * agent is SUPERVISED and the tool is classified read-only (see {@link ReadOnlyAutoAllow}).
+     * Written by the guard; read once by whatever journals the turn's tool calls, which sits around
+     * the guard and cannot see the guard's decision otherwise.
      */
     void markAutoAllowedReadOnly(String toolName, String toolInput) {
         autoAllowedReadOnly.merge(callKey(toolName, toolInput), 1, Integer::sum);
     }
 
     /**
-     * True once, per recorded call, when this exact call was auto-allowed as read-only under SUPERVISED; the note is
-     * consumed, so a repeat of the same call is reported only as often as it was actually let through.
+     * True once, per recorded call, when this exact call was auto-allowed as read-only under
+     * SUPERVISED; the note is consumed, so a repeat of the same call is reported only as often as
+     * it was actually let through.
      */
     public boolean takeAutoAllowedReadOnly(String toolName, String toolInput) {
         String key = callKey(toolName, toolInput);
         boolean[] was = {false};
-        autoAllowedReadOnly.computeIfPresent(key, (k, n) -> {
-            was[0] = true;
-            return n <= 1 ? null : n - 1;
-        });
+        autoAllowedReadOnly.computeIfPresent(
+                key,
+                (k, n) -> {
+                    was[0] = true;
+                    return n <= 1 ? null : n - 1;
+                });
         return was[0];
     }
 

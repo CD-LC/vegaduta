@@ -5,6 +5,7 @@ import static com.agenticai.core.tables.DataTableAccess.rowView;
 import static com.agenticai.core.tables.DataTableAccess.toJson;
 
 import com.agenticai.core.tables.DataTableAccess.Caps;
+import com.agenticai.core.tables.DataTableDtos.QuarantinedRowView;
 import com.agenticai.core.tables.DataTableDtos.RowPage;
 import com.agenticai.core.tables.DataTableDtos.RowQuery;
 import com.agenticai.core.tables.DataTableDtos.RowView;
@@ -82,18 +83,58 @@ final class DataTableRows {
     }
 
     RowView insertRow(String tableRef, Map<String, Object> values) {
-        return insertRows(tableRef, List.of(values == null ? Map.<String, Object>of() : values))
+        return insertRow(tableRef, values, RowTrust.TRUSTED);
+    }
+
+    RowView insertRow(String tableRef, Map<String, Object> values, RowTrust trust) {
+        return insertRows(
+                        tableRef,
+                        List.of(values == null ? Map.<String, Object>of() : values),
+                        trust)
                 .get(0);
     }
 
+    /** Rows of the table held for review (written on a turn that handled untrusted content). */
+    List<QuarantinedRowView> quarantined(String tableRef, int limit) {
+        gate();
+        DataTable t = resolve(tableRef);
+        List<QuarantinedRowView> out = new ArrayList<>();
+        for (DataTableRow r :
+                rows.selectQuarantined(t.getId(), Math.max(1, Math.min(limit, 500)))) {
+            out.add(
+                    new QuarantinedRowView(
+                            r.getId(),
+                            r.getData(),
+                            RowTrust.parseSources(r.getSourceTaint()),
+                            r.getCreatedAt()));
+        }
+        return out;
+    }
+
+    boolean approveQuarantined(String tableRef, UUID rowId) {
+        gate();
+        return rows.approveQuarantined(resolve(tableRef).getId(), rowId);
+    }
+
+    boolean rejectQuarantined(String tableRef, UUID rowId) {
+        gate();
+        return rows.rejectQuarantined(resolve(tableRef).getId(), rowId);
+    }
+
     List<RowView> insertRows(String tableRef, List<Map<String, Object>> input) {
+        return insertRows(tableRef, input, RowTrust.TRUSTED);
+    }
+
+    List<RowView> insertRows(String tableRef, List<Map<String, Object>> input, RowTrust trust) {
         Caps caps = gate();
         if (input == null || input.isEmpty()) {
             throw new IllegalArgumentException("Nothing to insert - provide at least one row");
         }
         if (input.size() > DataTableService.MAX_BULK_INSERT) {
             throw new IllegalArgumentException(
-                    "A bulk insert is limited to " + DataTableService.MAX_BULK_INSERT + " rows per call - split it");
+                    "A bulk insert is limited to "
+                            + DataTableService.MAX_BULK_INSERT
+                            + " rows per call - split it");
         }
         DataTable t = tables.findForUpdate(resolve(tableRef).getId()).orElseThrow(this::notFound);
         List<DataTableColumn> cols = t.columnDefs();
@@ -118,7 +159,7 @@ final class DataTableRows {
         }
         requireRoom(caps, t, normalized.size());
         List<RowView> out = new ArrayList<>(normalized.size());
-        for (DataTableRow r : rows.insertAll(t.getId(), normalized)) {
+        for (DataTableRow r : rows.insertAll(t.getId(), normalized, trust)) {
             out.add(rowView(r));
         }
         return out;
@@ -220,7 +261,10 @@ final class DataTableRows {
         if (rows.count(t.getId(), where) == 0) {
             requireRoom(caps, t, 1);
             List<DataTableRow> saved =
-                    rows.insertAll(t.getId(), List.of(DataTableValidator.withoutNulls(normalized)));
+                    rows.insertAll(
+                            t.getId(),
+                            List.of(DataTableValidator.withoutNulls(normalized)),
+                            RowTrust.TRUSTED);
             return new UpsertResult(true, 1, rowView(saved.get(0)));
         }
         Map<String, Object> patch = new LinkedHashMap<>(normalized);

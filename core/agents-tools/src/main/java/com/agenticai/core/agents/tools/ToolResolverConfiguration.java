@@ -5,6 +5,7 @@ import com.agenticai.core.agents.collab.RunBudgetCaps;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.agents.tools.code.CustomCodeToolService;
 import com.agenticai.core.agents.tools.code.ToolSandboxClient;
@@ -243,8 +244,8 @@ class ToolResolverConfiguration {
     /**
      * {@code app.tools.search.activation-store=auto|memory|redis}: auto (default) uses Redis when a
      * {@link StringRedisTemplate} bean exists (activations survive restarts and follow a session
-     * across replicas), else per-replica memory; memory never resolves the template; redis
-     * requires it and degrades to memory with a warning, matching {@code app.mcp.registry-store}.
+     * across replicas), else per-replica memory; memory never resolves the template; redis requires
+     * it and degrades to memory with a warning, matching {@code app.mcp.registry-store}.
      */
     static ToolActivationRegistry activationRegistry(
             String store, Duration ttl, ObjectProvider<StringRedisTemplate> redisProvider) {
@@ -263,7 +264,8 @@ class ToolResolverConfiguration {
             log.warn(
                     "app.tools.search.activation-store=redis but no StringRedisTemplate is available - using in-memory activations");
         } else {
-            log.info("Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
+            log.info(
+                    "Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
         }
         return new ToolActivationRegistry(
                 ToolActivationRegistry.DEFAULT_MAX_SESSIONS, ttl, Clock.systemUTC());
@@ -322,7 +324,9 @@ class ToolResolverConfiguration {
             EntityExtractionService entityExtractionService,
             MemoryWriteArbitrationService memoryWriteArbitrationService,
             ObjectProvider<CodeIntelClient> codeIntelClient,
-            ObjectProvider<com.agenticai.core.agents.consent.PurposeAccessPolicy> purposePolicy) {
+            ObjectProvider<com.agenticai.core.agents.consent.PurposeAccessPolicy> purposePolicy,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentKnowledgeToolResolver resolver =
                 new AgentKnowledgeToolResolver(
                         toolGuard,
@@ -341,6 +345,11 @@ class ToolResolverConfiguration {
                         codeIntelClient);
         // The optional PurposeAccessPolicy (implemented in core/app); absent = no purpose gating.
         resolver.setPurposePolicy(purposePolicy);
+        // Memory writes read the turn's taint through this; no bean = writes are quarantined.
+        resolver.setTurnTaint(turnTaint);
+        // ...and normally read the turn's own record through the taint policy (a TurnTaintView bean
+        // is the fallback).
+        resolver.setTaintPolicy(taintPolicy);
         return resolver;
     }
 
@@ -471,10 +480,13 @@ class ToolResolverConfiguration {
     AgentDataTableToolResolver agentDataTableToolResolver(
             AgentToolGuard toolGuard,
             AgentService agentService,
-            ObjectProvider<com.agenticai.core.tables.DataTableService> dataTables) {
+            ObjectProvider<com.agenticai.core.tables.DataTableService> dataTables,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentDataTableToolResolver resolver =
                 new AgentDataTableToolResolver(toolGuard, agentService);
         resolver.setDataTables(dataTables);
+        resolver.setTaint(taintPolicy, turnTaint);
         return resolver;
     }
 
@@ -495,10 +507,13 @@ class ToolResolverConfiguration {
             AgentToolGuard toolGuard,
             AgentService agentService,
             ObjectProvider<com.agenticai.core.agents.tools.scheduling.BackgroundJobToolFactory>
-                    factory) {
+                    factory,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
         AgentBackgroundJobToolResolver resolver =
                 new AgentBackgroundJobToolResolver(toolGuard, agentService);
         resolver.setFactory(factory);
+        resolver.setTaint(taintPolicy, turnTaint);
         return resolver;
     }
 
@@ -537,12 +552,18 @@ class ToolResolverConfiguration {
                     scratchpadService,
             ObjectProvider<com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties>
                     scratchpadProperties,
-            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour) {
-        return new AgentScratchpadToolResolver(
-                toolGuard,
-                scratchpadService,
-                scratchpadProperties.getIfAvailable(
-                        com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties::new),
-                behaviour);
+            ObjectProvider<com.agenticai.core.agents.tunables.BehaviourSettings> behaviour,
+            ObjectProvider<TurnTaintView> turnTaint,
+            ObjectProvider<AgentTaintPolicy> taintPolicy) {
+        AgentScratchpadToolResolver resolver =
+                new AgentScratchpadToolResolver(
+                        toolGuard,
+                        scratchpadService,
+                        scratchpadProperties.getIfAvailable(
+                                com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties
+                                        ::new),
+                        behaviour);
+        resolver.setTaint(taintPolicy, turnTaint);
+        return resolver;
     }
 }

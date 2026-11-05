@@ -12,6 +12,7 @@ import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
@@ -67,9 +68,9 @@ final class AgentJobTurns {
     }
 
     /**
-     * Builds the first turn of a job RESUMED after an approval park from the decisions it was parked
-     * on (see {@link AgentJobApprovalResumption}). Optional setter like the journal: null (unit tests,
-     * slim contexts) => a resumed job re-sends its goal, as before.
+     * Builds the first turn of a job RESUMED after an approval park from the decisions it was
+     * parked on (see {@link AgentJobApprovalResumption}). Optional setter like the journal: null
+     * (unit tests, slim contexts) => a resumed job re-sends its goal, as before.
      */
     void setApprovalResume(AgentJobApprovalResumption approvalResume) {
         this.approvalResume = approvalResume;
@@ -112,11 +113,12 @@ final class AgentJobTurns {
      * ceiling is checked at TURN BOUNDARIES, and retrofitting both into a straight-line call later
      * would mean rewriting the error handling around it.
      *
-     * <p><b>The per-job tool-call ceiling is checked at turn boundaries AND inside each turn.</b> The
-     * boundary check ({@link #guardBeforeTurn}) refuses a turn once the job is out of calls; inside the
-     * turn the job's remaining budget rides on the request as a cap ({@link ChatTurnRequest#caps()}), which
-     * the turn's runtime settings apply on top of the agent's own ceiling (a cap can lower it, never raise
-     * it), so a turn cannot spend more than the job has left.
+     * <p><b>The per-job tool-call ceiling is checked at turn boundaries AND inside each turn.</b>
+     * The boundary check ({@link #guardBeforeTurn}) refuses a turn once the job is out of calls;
+     * inside the turn the job's remaining budget rides on the request as a cap ({@link
+     * ChatTurnRequest#caps()}), which the turn's runtime settings apply on top of the agent's own
+     * ceiling (a cap can lower it, never raise it), so a turn cannot spend more than the job has
+     * left.
      */
     String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue)
             throws InterruptedException {
@@ -125,10 +127,11 @@ final class AgentJobTurns {
 
     /**
      * @param resumedFromPark the job was parked on a human approval and this run follows the
-     *     decision: its FIRST turn is the approval continuation (the goal restated with the
-     *     decided calls' results) instead of the bare goal
+     *     decision: its FIRST turn is the approval continuation (the goal restated with the decided
+     *     calls' results) instead of the bare goal
      */
-    String runTurns(AgentJob job, Instant deadlineAt, boolean orphanRequeue, boolean resumedFromPark)
+    String runTurns(
+            AgentJob job, Instant deadlineAt, boolean orphanRequeue, boolean resumedFromPark)
             throws InterruptedException {
         String lastResult = null;
         // Each park buys exactly ONE more turn. Without this, a resumed job
@@ -262,7 +265,11 @@ final class AgentJobTurns {
                     resume == null
                             ? runOneTurn(job, deadlineAt, goal, false)
                             : runOneTurn(
-                                    job, deadlineAt, resume.message(), false, resume.continuation());
+                                    job,
+                                    deadlineAt,
+                                    resume.message(),
+                                    false,
+                                    resume.continuation());
             if (journaling) {
                 journal.complete(runId, stepId, StepJournal.KIND_TURN, lastResult);
             }
@@ -270,10 +277,14 @@ final class AgentJobTurns {
         return lastResult;
     }
 
-    /** Tool calls the job may still make, at least one (a job with none left never reaches a turn: see {@link #guardBeforeTurn}). */
+    /**
+     * Tool calls the job may still make, at least one (a job with none left never reaches a turn:
+     * see {@link #guardBeforeTurn}).
+     */
     private int remainingToolCalls(AgentJob job) {
         // Counted per turn, from this job's own rows. Deliberately NOT cached on this object: one
-        // AgentJobTurns serves every concurrent job, so any per-job state held in a field leaks across jobs.
+        // AgentJobTurns serves every concurrent job, so any per-job state held in a field leaks
+        // across jobs.
         long used =
                 toolCallLogRepository.countByAgentIdAndSessionId(
                         job.getAgentId(), job.getSessionId());
@@ -359,12 +370,13 @@ final class AgentJobTurns {
                                         messageText)
                                 .suppressAgentTools(true)
                                 .build();
+                TurnContext repairContext =
+                        TurnContext.forEntry(TenantContext.current().orElse(null), textOnlyTurn)
+                                .withDeadline(deadlineAt);
+                // taint-entry: by job origin - see trustOf (docs/security/taint-entry-points.md)
+                trustOf(job).seed(repairContext.taint(), "inbound:job_" + originOf(job));
                 return agentChatService
-                        .chat(
-                                TurnContext.forEntry(
-                                                TenantContext.current().orElse(null), textOnlyTurn)
-                                        .withDeadline(deadlineAt),
-                                textOnlyTurn)
+                        .chat(repairContext, textOnlyTurn)
                         .collect(Collectors.joining())
                         .block(remaining);
             } catch (IllegalStateException blockFailure) {
@@ -401,8 +413,10 @@ final class AgentJobTurns {
                                     messageText)
                             .extraTools(extraTools)
                             .continuation(continuation)
-                            // The job's remaining tool budget limits the turn's OWN calls, not just the next
-                            // turn boundary: a turn may make no more than the job has left (and never more than
+                            // The job's remaining tool budget limits the turn's OWN calls, not just
+                            // the next
+                            // turn boundary: a turn may make no more than the job has left (and
+                            // never more than
                             // the agent allows - a cap only tightens).
                             .caps(RuntimeLimits.capToolSteps(remainingToolCalls(job)))
                             .build();
@@ -411,6 +425,12 @@ final class AgentJobTurns {
             TurnContext turnContext =
                     TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn)
                             .withDeadline(deadlineAt);
+            // taint-entry: by job origin - see trustOf (docs/security/taint-entry-points.md)
+            trustOf(job).seed(turnContext.taint(), "inbound:job_" + originOf(job));
+            // A goal handed over by a tainted turn (continue_in_background) keeps that taint here.
+            if (!JobTaintMarker.sources(job.getGoal()).isEmpty()) {
+                turnContext.taint().mark("job:tainted-origin");
+            }
             return agentChatService
                     .chat(turnContext, chatTurn)
                     .collect(Collectors.joining())
@@ -424,5 +444,24 @@ final class AgentJobTurns {
             }
             throw blockFailure;
         }
+    }
+
+    /**
+     * Who authored what this job's turns act on. Only a job a tenant member submitted ({@code API})
+     * or the owner's own schedule fired ({@code SCHEDULE}, the owner's prompt) is trusted. An event
+     * trigger carries a payload an outsider produced, an approved sentinel proposal was derived
+     * from observed content, and an unknown or missing origin cannot be vouched for: all untrusted.
+     */
+    static SenderTrust trustOf(AgentJob job) {
+        AgentJobOrigin origin = job == null ? null : job.getOrigin();
+        return origin == AgentJobOrigin.API || origin == AgentJobOrigin.SCHEDULE
+                ? SenderTrust.TRUSTED
+                : SenderTrust.UNTRUSTED;
+    }
+
+    private static String originOf(AgentJob job) {
+        return job == null || job.getOrigin() == null
+                ? "unknown"
+                : job.getOrigin().name().toLowerCase(java.util.Locale.ROOT);
     }
 }

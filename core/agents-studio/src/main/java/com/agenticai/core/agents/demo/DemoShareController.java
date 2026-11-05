@@ -7,6 +7,7 @@ import com.agenticai.core.agents.turn.TurnContext;
 import com.agenticai.core.guardrails.moderation.ModerationContext;
 import com.agenticai.core.guardrails.moderation.ModerationOutcome;
 import com.agenticai.core.guardrails.moderation.ModerationService;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.demo.DemoPersona;
 import com.agenticai.core.tenancy.demo.DemoSession;
@@ -237,6 +238,9 @@ public class DemoShareController {
                                 TurnContext turnContext =
                                         TurnContext.forEntry(
                                                 TenantContext.current().orElse(null), chatTurn);
+                                // Anonymous visitor of a shared demo sandbox.
+                                SenderTrust.UNTRUSTED.seed(
+                                        turnContext.taint(), "inbound:demo_share");
                                 return agentChatService
                                         .chat(turnContext, chatTurn)
                                         .collect(Collectors.joining())

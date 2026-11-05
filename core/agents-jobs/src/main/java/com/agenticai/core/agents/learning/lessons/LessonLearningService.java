@@ -29,17 +29,18 @@ import org.springframework.stereotype.Service;
 
 /**
  * The lessons loop: learns from mistakes and corrections. Two signals are looked for in a finished
- * turn, both by cheap heuristics first (most turns cost no model call): (a) a tool call that
- * failed and was then retried successfully with different arguments, (b) the user's message
- * correcting the previous answer. When one fires and the agent has a free slot, one small
- * reflective call on the agent's own model turns the scrubbed evidence into one short imperative
- * sentence, filed as a PENDING LESSON proposal. Nothing reaches a prompt or a memory before the
- * person approves it ({@code LessonApplier}).
+ * turn, both by cheap heuristics first (most turns cost no model call): (a) a tool call that failed
+ * and was then retried successfully with different arguments, (b) the user's message correcting the
+ * previous answer. When one fires and the agent has a free slot, one small reflective call on the
+ * agent's own model turns the scrubbed evidence into one short imperative sentence, filed as a
+ * PENDING LESSON proposal. Nothing reaches a prompt or a memory before the person approves it
+ * ({@code LessonApplier}).
  *
- * <p>Off unless {@code app.learning.lessons.enabled=true} AND {@code app.learning.proposals.enabled=true}
- * (on in the personal profile): otherwise the bean does not exist and the chat turn is untouched.
- * The turn only pays for a small synchronised map update; everything else runs on the proposals
- * service's bounded worker, with the tenant re-applied (AGENTS.md rule 12).
+ * <p>Off unless {@code app.learning.lessons.enabled=true} AND {@code
+ * app.learning.proposals.enabled=true} (on in the personal profile): otherwise the bean does not
+ * exist and the chat turn is untouched. The turn only pays for a small synchronised map update;
+ * everything else runs on the proposals service's bounded worker, with the tenant re-applied
+ * (AGENTS.md rule 12).
  */
 @Service
 @ConditionalOnProperty(
@@ -60,21 +61,49 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
     static final String PROMPT_KEY = "learning.lesson";
 
     /**
-     * The shipped wording of {@link #PROMPT_KEY}, for tests and docs only: a call resolves the key through
-     * the registry so a tenant or agent override applies.
+     * The shipped wording of {@link #PROMPT_KEY}, for tests and docs only: a call resolves the key
+     * through the registry so a tenant or agent override applies.
      */
-    static final String SYSTEM_PROMPT = PromptResolver.defaultsOnly().catalog().defaultText(PROMPT_KEY);
+    static final String SYSTEM_PROMPT =
+            PromptResolver.defaultsOnly().catalog().defaultText(PROMPT_KEY);
 
     private final PromptSlot prompts = new PromptSlot();
 
-    /** The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent = shipped text. */
+    /**
+     * The prompt registry, so a tenant or agent override of {@link #PROMPT_KEY} applies; absent =
+     * shipped text.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setPromptResolver(PromptResolver resolver) {
         prompts.use(resolver);
     }
 
-    /** What the previous turn of a session said, kept so the next message can be read as a correction. */
+    /**
+     * What the previous turn of a session said, kept so the next message can be read as a
+     * correction.
+     */
     record Previous(String userMessage, String answer) {}
+
+    private volatile ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory;
+
+    /**
+     * Lets {@code memory.write.enabled} stop this loop for an agent whose memory writes are off.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setAgentMemory(
+            ObjectProvider<com.agenticai.core.agents.memory.AgentMemoryService> memory) {
+        this.memory = memory;
+    }
+
+    private boolean memoryWritesOff(java.util.UUID agentId) {
+        try {
+            com.agenticai.core.agents.memory.AgentMemoryService service =
+                    memory == null ? null : memory.getIfAvailable();
+            return service != null && service.writesSwitchedOff(agentId);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
 
     private final ObjectProvider<LearningProposalService> proposals;
     private final ToolCallLogService toolCalls;
@@ -131,6 +160,12 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
                 || o.scope().isEmpty()) {
             return;
         }
+        if (memoryWritesOff(o.agentId())) {
+            log.debug(
+                    "Lesson learning skipped for agent {}: memory.write.enabled is off",
+                    o.agentId());
+            return;
+        }
         Previous before = remember(o);
         boolean correction = before != null && LessonSignals.looksLikeCorrection(o.userMessage());
         // The scope is applied so runOffThread captures this turn's tenant for the worker.
@@ -139,7 +174,8 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
 
     private Previous remember(TurnOutcome o) {
         String key = o.agentId() + "|" + o.sessionId();
-        Previous now = new Previous(clip(o.userMessage(), KEPT_CHARS), clip(o.answer(), KEPT_CHARS));
+        Previous now =
+                new Previous(clip(o.userMessage(), KEPT_CHARS), clip(o.answer(), KEPT_CHARS));
         synchronized (recent) {
             return o.completed() ? recent.put(key, now) : recent.get(key);
         }
@@ -157,7 +193,8 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
                                 .filter(
                                         c ->
                                                 c.getStartedAt() != null
-                                                        && !c.getStartedAt().isBefore(o.startedAt()))
+                                                        && !c.getStartedAt()
+                                                                .isBefore(o.startedAt()))
                                 .toList();
                 fix = LessonSignals.retriedFix(calls);
             }
@@ -195,7 +232,8 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
     }
 
     private Optional<String> reflect(TurnOutcome o, String evidence) {
-        String subject = o.scope().context().map(TenantContext::getSubject).orElse("system:lessons");
+        String subject =
+                o.scope().context().map(TenantContext::getSubject).orElse("system:lessons");
         String reply;
         try {
             reply =
@@ -222,7 +260,9 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
 
     // ---------------------------------------------------------------- helpers
 
-    /** The lesson from the model's reply, or empty when it declined, was malformed or was off-spec. */
+    /**
+     * The lesson from the model's reply, or empty when it declined, was malformed or was off-spec.
+     */
     static Optional<String> parseLesson(String reply) {
         if (reply == null) {
             return Optional.empty();
@@ -252,17 +292,27 @@ public class LessonLearningService implements LessonLearningGateway.Observer {
             ToolCallLog bad = fix.failed();
             ToolCallLog good = fix.fixed();
             sb.append("Signal 1, a tool failed and then worked with other arguments:\n");
-            sb.append("Failed: ").append(bad.getToolName()).append('(')
-                    .append(field(bad.getToolInput(), FIELD_CHARS)).append(") -> ERROR ")
-                    .append(field(bad.getErrorMessage(), FIELD_CHARS)).append('\n');
-            sb.append("Worked: ").append(good.getToolName()).append('(')
-                    .append(field(good.getToolInput(), FIELD_CHARS)).append(") -> ")
-                    .append(field(good.getToolOutput(), FIELD_CHARS)).append('\n');
+            sb.append("Failed: ")
+                    .append(bad.getToolName())
+                    .append('(')
+                    .append(field(bad.getToolInput(), FIELD_CHARS))
+                    .append(") -> ERROR ")
+                    .append(field(bad.getErrorMessage(), FIELD_CHARS))
+                    .append('\n');
+            sb.append("Worked: ")
+                    .append(good.getToolName())
+                    .append('(')
+                    .append(field(good.getToolInput(), FIELD_CHARS))
+                    .append(") -> ")
+                    .append(field(good.getToolOutput(), FIELD_CHARS))
+                    .append('\n');
             sb.append("User request: ").append(field(o.userMessage(), FIELD_CHARS)).append('\n');
         }
         if (correction && before != null) {
             sb.append("Signal 2, the user corrects the previous answer:\n");
-            sb.append("Earlier user message: ").append(field(before.userMessage(), FIELD_CHARS)).append('\n');
+            sb.append("Earlier user message: ")
+                    .append(field(before.userMessage(), FIELD_CHARS))
+                    .append('\n');
             sb.append("Assistant answer: ").append(field(before.answer(), 600)).append('\n');
             sb.append("User correction: ").append(field(o.userMessage(), FIELD_CHARS)).append('\n');
         }

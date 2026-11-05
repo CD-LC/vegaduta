@@ -20,10 +20,10 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
  * A tool result the PLATFORM authored - registered with {@link ToolResultMarker} by its producer -
- * is not untrusted content, so the output cap, the content-safety screen and the tenant rules do not
- * run on it. This is the self-DoS fix: a diagnostic like call_tool's "the tool has not been loaded
- * yet, call search_tools first" reads exactly like an injection instruction to the content judge,
- * and withholding it left the model unable to see its own recovery steps.
+ * is not untrusted content, so the output cap, the content-safety screen and the tenant rules do
+ * not run on it. This is the self-DoS fix: a diagnostic like call_tool's "the tool has not been
+ * loaded yet, call search_tools first" reads exactly like an injection instruction to the content
+ * judge, and withholding it left the model unable to see its own recovery steps.
  *
  * <p>The bypass honours only the REGISTERED mark ({@link ToolResultMarker#kindOf}), never the
  * wording: a tool result that merely reads like a refusal is still screened.
@@ -87,9 +87,10 @@ class GuardedToolCallbackPlatformAnswerTest {
         // call_tool returns the TARGET guard's answer verbatim - a parked or withheld notice that
         // was already marked there. Screening it a second time under call_tool's name is the same
         // self-DoS.
-        String parked = ToolResultMarker.mark(
-                "This action ('send_invoice') requires human approval before it can run.",
-                ToolResultMarker.Kind.PARKED);
+        String parked =
+                ToolResultMarker.mark(
+                        "This action ('send_invoice') requires human approval before it can run.",
+                        ToolResultMarker.Kind.PARKED);
         when(guardrails.sanitizeToolOutput(anyString(), anyString(), any()))
                 .thenThrow(new GuardrailViolationException("call_tool", "flagged"));
 
@@ -125,10 +126,14 @@ class GuardedToolCallbackPlatformAnswerTest {
         when(guardrails.sanitizeToolOutput("fetch_web_page", webPage, null))
                 .thenThrow(new GuardrailViolationException("fetch_web_page", "injection attempt"));
 
-        String result = guard(tool("fetch_web_page", webPage)).call("{}");
+        GuardedToolCallback guarded = guard(tool("fetch_web_page", webPage));
+        String result = guarded.call("{}");
 
         assertTrue(result.contains("withheld by a content-safety check"), result);
-        assertEquals(ToolResultMarker.Kind.WITHHELD, ToolResultMarker.kindOf(result).orElseThrow());
+        assertEquals(
+                ToolResultMarker.Kind.WITHHELD,
+                ToolResultMarker.kindOf(result, guarded.turnApprovalState().markerScope())
+                        .orElseThrow());
         verify(guardrails).sanitizeToolOutput("fetch_web_page", webPage, null);
     }
 }

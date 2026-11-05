@@ -592,7 +592,8 @@ final class ChatTurnDispatcher {
                         sessionId,
                         userMessage,
                         fastDispatchStartedAt,
-                        context.tenantContext());
+                        context.tenantContext(),
+                        context.taint());
         // Preferences-from-behavior loop (app.learning.preferences.enabled, off by default): hands
         // over the
         // person's message only; the reply stream is not touched and nothing blocks.

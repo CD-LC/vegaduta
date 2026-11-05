@@ -61,14 +61,19 @@ public class AgentScratchpadController {
                 notes.size(), notes.stream().mapToLong(ScratchpadNoteView::byteSize).sum(), notes);
     }
 
-    /** One note's full body, addressed by the same {@code (session, key)} the tools use. */
+    /**
+     * One note's full body, addressed by the same {@code (session, key)} the tools use. Agent-pad
+     * notes are per user: {@code subject} (the owner shown in the list) picks one when several
+     * users hold the same key (400 otherwise).
+     */
     @GetMapping("/{key}")
     public ResponseEntity<ScratchpadNoteView> read(
             @PathVariable UUID agentId,
             @PathVariable String key,
-            @RequestParam(required = false) String session) {
+            @RequestParam(required = false) String session,
+            @RequestParam(required = false) String subject) {
         agentService.requireAccess(agentId, PermissionLevel.VIEWER);
-        return read(agentId, padUuid(session), key)
+        return read(agentId, padUuid(session), key, subject)
                 .map(ResponseEntity::ok)
                 .orElseThrow(
                         () ->
@@ -95,9 +100,10 @@ public class AgentScratchpadController {
         }
     }
 
-    private Optional<ScratchpadNoteView> read(UUID agentId, UUID sessionId, String key) {
+    private Optional<ScratchpadNoteView> read(
+            UUID agentId, UUID sessionId, String key, String subject) {
         try {
-            return scratchpadService.readView(agentId, sessionId, key);
+            return scratchpadService.readView(agentId, sessionId, key, subject);
         } catch (IllegalStateException disabled) {
             throw disabled();
         } catch (IllegalArgumentException badKey) {

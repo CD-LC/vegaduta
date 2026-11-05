@@ -16,6 +16,11 @@ export type MemoryFact = {
   createdAt?: string | null;
   lastUsedAt?: string | null;
   useCount?: number;
+  /** "QUARANTINED": written on a turn that handled untrusted content; never recalled until approved. Absent = TRUSTED (older core). */
+  trust?: "TRUSTED" | "QUARANTINED";
+  sourceTaint?: string[];
+  /** Set when a newer fact replaced this one: kept (listed, exported, erased with the rest) but no longer recalled into a prompt. */
+  supersededAt?: string | null;
 };
 
 export type MemoryOverview = {
@@ -44,6 +49,10 @@ export type ForgetAllResult = {
   graphEntities: number;
   /** false: the linked-facts (graph) erase failed; the stored rows are gone regardless. */
   graphErased: boolean;
+  /** Rows removed from per-user stores kept elsewhere (the agent scratchpad); absent on older cores. */
+  otherStoreRows?: number;
+  /** false: one of those stores failed to erase. */
+  otherStoresErased?: boolean;
 };
 
 /** The slice of an agent this surface needs (GET /api/agents rows carry more). */
@@ -53,4 +62,6 @@ export type MemoryAgent = {
   shareMemoryWithTenant?: boolean;
   /** false: core rejects every settings change for this agent (AgentResponse.editable). Absent = allowed. */
   editable?: boolean;
+  /** Caller's share level on the agent (AgentResponse.accessLevel). EDITOR can review unified-memory items; absent on an older core. */
+  accessLevel?: "EDITOR" | "VIEWER" | "RUNNER" | null;
 };

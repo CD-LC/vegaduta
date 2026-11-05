@@ -315,23 +315,22 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
 
         int priorRounds = 0;
         int unknownCalls = 0;
-        boolean softStopAlreadySent = false;
-        boolean parked = false;
         Set<String> refusedNames = new LinkedHashSet<>();
-        for (Message message : currentInvocation(prompt.getInstructions())) {
+        List<Message> invocation = currentInvocation(prompt.getInstructions());
+        for (Message message : invocation) {
             if (message instanceof AssistantMessage assistant && assistant.hasToolCalls()) {
                 priorRounds++;
                 unknownCalls += countUnknown(assistant.getToolCalls(), known);
             } else if (message instanceof ToolResponseMessage toolResponses) {
-                if (ToolLoopMarkers.carriesBudgetMarker(toolResponses)) {
-                    softStopAlreadySent = true;
-                }
-                if (ToolLoopMarkers.carriesParkedMarker(toolResponses)) {
-                    parked = true;
-                }
                 ToolLoopMarkers.collectUnavailableNames(toolResponses, refusedNames);
             }
         }
+        // Control state comes from the turn's out-of-band signals when the run has them; tool text
+        // is only the
+        // explicit, flagged fallback (ToolLoopMarkers).
+        ToolLoopTranscript run = ToolLoopRunHooks.transcript(prompt);
+        boolean softStopAlreadySent = ToolLoopMarkers.budgetSpent(run, invocation);
+        boolean parked = ToolLoopMarkers.parked(run, invocation);
         int newUnknown = countUnknown(requesting.getToolCalls(), known);
         if (newUnknown > 0) {
             increment(UNKNOWN_TOOL_METRIC, newUnknown);
@@ -391,6 +390,9 @@ public class ArgumentSanitizingToolCallingManager implements ToolCallingManager 
                     maxUnknownToolCalls,
                     calls.size());
             increment(LOOP_LIMIT_METRIC, 1, "stage", "soft", "reason", reason);
+            if (run != null) {
+                run.markSoftStopSent();
+            }
             return ToolLoopSoftStops.soft(
                     prompts,
                     objectMapper,

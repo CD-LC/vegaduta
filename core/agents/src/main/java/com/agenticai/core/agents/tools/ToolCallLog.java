@@ -199,6 +199,11 @@ public class ToolCallLog {
         return completedAt;
     }
 
+    /** True when the tool's output failed its own schema validation (a machine-checked failure). */
+    public boolean isValidationFailed() {
+        return validationFailed;
+    }
+
     public UUID getMcpGrantId() {
         return mcpGrantId;
     }

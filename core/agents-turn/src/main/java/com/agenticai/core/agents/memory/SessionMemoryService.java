@@ -1,11 +1,10 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.agents.turn.ToolLedgerProperties;
 import com.agenticai.core.prompts.PromptResolver;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PlatformSettingsService;
-import com.agenticai.core.agents.turn.ToolLedgerProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -89,8 +88,8 @@ import org.springframework.stereotype.Component;
  * <p>Independently of all this, {@link #appendTurn} still LTRIMs the stored list to the newest
  * {@value #MAX_STORED_ENTRIES} entries so the Redis value itself can never grow without limit - the
  * window bounds the prompt, the trim bounds the storage, and the fold now happens well before the
- * trim ever touches anything (see {@link SessionSummaryFolder#foldWindowTurns} for why the fold window is capped so
- * this holds for every admin window setting).
+ * trim ever touches anything (see {@link SessionSummaryFolder#foldWindowTurns} for why the fold
+ * window is capped so this holds for every admin window setting).
  *
  * <p>Residual gaps, stated rather than hidden: (1) the fold is keyed on the TURN cap only; a turn
  * that is inside the turn cap but dropped from this particular read by the char/token budget is not
@@ -139,10 +138,14 @@ public class SessionMemoryService {
     // caps the admin-tunable replay window at this same value - a window
     // larger than what the store keeps would silently behave as this cap, so
     // the write-side bound must reference the storage bound, not restate it.
-    // Now the DEFAULT of app.memory.limits.session-max-stored-entries (the number is defined once, in
-    // MemoryLimitsProperties); the bound a service applies is limits.getSessionMaxStoredEntries(). Kept for the
-    // callers outside this module (platform settings validation, chat export) that have no bean to ask.
-    public static final int MAX_STORED_ENTRIES = MemoryLimitsProperties.DEFAULT_SESSION_MAX_STORED_ENTRIES;
+    // Now the DEFAULT of app.memory.limits.session-max-stored-entries (the number is defined once,
+    // in
+    // MemoryLimitsProperties); the bound a service applies is limits.getSessionMaxStoredEntries().
+    // Kept for the
+    // callers outside this module (platform settings validation, chat export) that have no bean to
+    // ask.
+    public static final int MAX_STORED_ENTRIES =
+            MemoryLimitsProperties.DEFAULT_SESSION_MAX_STORED_ENTRIES;
 
     /**
      * How many out-of-window turns are folded into the rolling summary at a time.
@@ -217,9 +220,9 @@ public class SessionMemoryService {
             PromptResolver.defaultsOnly().catalog().defaultText(SUMMARY_PREAMBLE_KEY) + "\n";
 
     /**
-     * Where the preamble's wording comes from. A hand-built instance serves the shipped text; Spring
-     * supplies the registry. The replay knows the tenant (the calling thread) but not the agent, so
-     * the wording is the tenant's or the platform's, never one agent's.
+     * Where the preamble's wording comes from. A hand-built instance serves the shipped text;
+     * Spring supplies the registry. The replay knows the tenant (the calling thread) but not the
+     * agent, so the wording is the tenant's or the platform's, never one agent's.
      */
     private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
@@ -228,13 +231,19 @@ public class SessionMemoryService {
         this.prompts = prompts == null ? PromptResolver.defaultsOnly() : prompts;
     }
 
+    void configureSummaryTaint(
+            com.agenticai.core.guardrails.taint.ConversationTaintStore s, boolean skip) {
+        folder.setTaintStore(s);
+        folder.setSkipUntrustedSummary(skip);
+    }
+
     private String summaryPreamble() {
         String text = prompts.text(SUMMARY_PREAMBLE_KEY);
         return (text == null ? SUMMARY_PREAMBLE : text + "\n");
     }
 
     private final StringRedisTemplate redisTemplate;
-    private final ObjectMapper objectMapper;
+    final ObjectMapper objectMapper;
     private final Duration sessionTtl;
 
     /**
@@ -283,7 +292,7 @@ public class SessionMemoryService {
                         sessionTtl,
                         summaryService,
                         windowSettings,
-                        this::deserializeForSummary,
+                        codec::deserializeForSummary,
                         this::limits,
                         this::summaryPreamble);
         this.owners = new SessionOwnerRecords(redisTemplate, sessionTtl);
@@ -299,9 +308,9 @@ public class SessionMemoryService {
     private final RedisScriptRefusal appendScriptRefusal = new RedisScriptRefusal();
 
     /**
-     * {@code app.chat.tool-ledger.*}: how a turn's stored tool record is shown to the model. A hand-built
-     * instance uses the shipped defaults (the record is shown), which is also what Spring supplies when the
-     * properties bean is absent.
+     * {@code app.chat.tool-ledger.*}: how a turn's stored tool record is shown to the model. A
+     * hand-built instance uses the shipped defaults (the record is shown), which is also what
+     * Spring supplies when the properties bean is absent.
      */
     private volatile ToolLedgerProperties toolLedger = new ToolLedgerProperties();
 
@@ -313,8 +322,9 @@ public class SessionMemoryService {
     private volatile com.agenticai.core.settings.SettingsResolver ledgerSettings;
 
     /**
-     * The settings catalog, so a tenant's {@code chat.toolLedger.*} decide whether, and how much of, the stored tool
-     * record is shown to the model for that tenant's sessions. Absent (hand-built instances): the platform properties.
+     * The settings catalog, so a tenant's {@code chat.toolLedger.*} decide whether, and how much
+     * of, the stored tool record is shown to the model for that tenant's sessions. Absent
+     * (hand-built instances): the platform properties.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setLedgerSettings(com.agenticai.core.settings.SettingsResolver resolver) {
@@ -322,13 +332,14 @@ public class SessionMemoryService {
     }
 
     /** The ledger limits of the calling thread's tenant. */
-    private ToolLedgerProperties toolLedger() {
+    ToolLedgerProperties toolLedger() {
         return ToolLedgerOverrides.effective(toolLedger, ledgerSettings);
     }
 
     /**
-     * {@code app.memory.limits.*}: the storage bound and the fold batch. A hand-built instance keeps the
-     * shipped defaults (400 and 40), which is also what Spring supplies when the properties bean is absent.
+     * {@code app.memory.limits.*}: the storage bound and the fold batch. A hand-built instance
+     * keeps the shipped defaults (400 and 40), which is also what Spring supplies when the
+     * properties bean is absent.
      */
     private volatile MemoryLimitsProperties limits = new MemoryLimitsProperties();
 
@@ -360,17 +371,18 @@ public class SessionMemoryService {
      * never sees a conversation that opens with its own reply to a question it can't see.
      *
      * <p>When turns have left the replay window at some point and a rolling summary exists, it is
-     * injected AHEAD of the window — see {@link SessionSummaryFolder#withSummary}. Injection happens after all the
-     * windowing above, on purpose: the summary must not be charged against the char/token budgets
-     * (it is already bounded on its own by {@code SessionSummaryService}'s {@code
-     * history-summary-max-chars}, and it is the cheapest context in the prompt per unit of
+     * injected AHEAD of the window — see {@link SessionSummaryFolder#withSummary}. Injection
+     * happens after all the windowing above, on purpose: the summary must not be charged against
+     * the char/token budgets (it is already bounded on its own by {@code SessionSummaryService}'s
+     * {@code history-summary-max-chars}, and it is the cheapest context in the prompt per unit of
      * conversation it stands for) and must not be reachable by the orphaned-assistant boundary
      * rule.
      *
-     * <p>This is the MODEL's view: the newest assistant turns that called tools have their tool record
-     * ({@link com.agenticai.core.agents.turn.ToolLedger}, stored in {@link ChatTurn#tools()}) folded into
-     * their text ({@link ToolLedgerReplay}), and the window limits are measured on that text. A turn that
-     * is returned with {@code tools()} set is one whose record was folded in; others have none.
+     * <p>This is the MODEL's view: the newest assistant turns that called tools have their tool
+     * record ({@link com.agenticai.core.agents.turn.ToolLedger}, stored in {@link
+     * ChatTurn#tools()}) folded into their text ({@link ToolLedgerReplay}), and the window limits
+     * are measured on that text. A turn that is returned with {@code tools()} set is one whose
+     * record was folded in; others have none.
      *
      * <p>Full-transcript consumers must use {@link #getFullHistory} instead.
      */
@@ -388,14 +400,20 @@ public class SessionMemoryService {
         if (raw == null || raw.isEmpty()) {
             return List.of();
         }
-        // A failed-reply entry (ChatTurn#failedAssistant) is the transcript's record of an error the
-        // person saw; it is not something the model said, so it never enters a prompt - unless tools
+        // A failed-reply entry (ChatTurn#failedAssistant) is the transcript's record of an error
+        // the
+        // person saw; it is not something the model said, so it never enters a prompt - unless
+        // tools
         // ran before it failed, when the model is shown the tool record and a note that the reply
-        // failed. The newest assistant turns that carry a tool record (ToolLedger) have it folded into
+        // failed. The newest assistant turns that carry a tool record (ToolLedger) have it folded
+        // into
         // their text here, so the window below is measured on what the model will actually be sent.
         List<ChatTurn> turns =
                 ToolLedgerReplay.modelView(
-                        raw.stream().map(this::deserialize).filter(java.util.Objects::nonNull).toList(),
+                        raw.stream()
+                                .map(codec::deserialize)
+                                .filter(java.util.Objects::nonNull)
+                                .toList(),
                         toolLedger());
         if (turns.isEmpty()) {
             return List.of();
@@ -428,7 +446,8 @@ public class SessionMemoryService {
         if (turns.size() - start > 1 && turns.get(start).role() == MessageRole.ASSISTANT) {
             start++;
         }
-        return folder.withSummary(sessionId, start == 0 ? turns : turns.subList(start, turns.size()));
+        return folder.withSummary(
+                sessionId, start == 0 ? turns : turns.subList(start, turns.size()));
     }
 
     /**
@@ -455,7 +474,7 @@ public class SessionMemoryService {
         if (raw == null) {
             return List.of();
         }
-        return raw.stream().map(this::deserialize).filter(java.util.Objects::nonNull).toList();
+        return raw.stream().map(codec::deserialize).filter(java.util.Objects::nonNull).toList();
     }
 
     /**
@@ -489,7 +508,7 @@ public class SessionMemoryService {
         } else {
             redisTemplate.opsForList().trim(redisKey, 0, keep - 1);
         }
-        redisTemplate.delete(summaryKey(sessionId));
+        folder.dropSummary(sessionId);
         redisTemplate.delete(foldMarkerKey(sessionId));
         return keep;
     }
@@ -509,7 +528,7 @@ public class SessionMemoryService {
     public void replaceHistory(String sessionId, List<ChatTurn> turns) {
         String redisKey = key(sessionId);
         redisTemplate.delete(redisKey);
-        redisTemplate.delete(summaryKey(sessionId));
+        folder.dropSummary(sessionId);
         redisTemplate.delete(foldMarkerKey(sessionId));
         if (turns == null || turns.isEmpty()) {
             return;
@@ -517,7 +536,7 @@ public class SessionMemoryService {
         int from = Math.max(0, turns.size() - limits.getSessionMaxStoredEntries());
         List<String> serialized = new ArrayList<>(turns.size() - from);
         for (ChatTurn turn : turns.subList(from, turns.size())) {
-            serialized.add(serialize(turn));
+            serialized.add(codec.serialize(turn));
         }
         redisTemplate.opsForList().rightPushAll(redisKey, serialized);
         redisTemplate.expire(redisKey, sessionTtl);
@@ -543,7 +562,7 @@ public class SessionMemoryService {
      * throwing - history is lost for the outage window, the turn is not.
      */
     public void appendTurn(String sessionId, ChatTurn turn) {
-        String json = serialize(turn);
+        String json = codec.serialize(turn);
         String redisKey = key(sessionId);
         try {
             if (!singleRoundTripAppend
@@ -569,11 +588,11 @@ public class SessionMemoryService {
      */
     private void appendLegacy(String sessionId, String redisKey, String json) {
         redisTemplate.opsForList().rightPush(redisKey, json);
-        SessionSummaryService summariser = folder.activeSummariser();
+        SessionSummaryService summariser = folder.activeSummariser(sessionId);
         if (summariser == null) {
             // Hard storage bound: keep only the newest MAX_STORED_ENTRIES. Cheap (O(entries
-            // removed), usually
-            // zero) and idempotent - see the constant's javadoc for why this is a fixed ceiling.
+            // removed), usually zero) and idempotent - see the constant's javadoc for why this is a
+            // fixed ceiling.
             redisTemplate.opsForList().trim(redisKey, -limits.getSessionMaxStoredEntries(), -1);
         } else {
             folder.foldTurnsThatLeftTheWindow(sessionId, redisKey, summariser);
@@ -589,8 +608,10 @@ public class SessionMemoryService {
      * so the caller falls back to the legacy sequence. Any other failure (timeout, connection, Lua
      * error) is rethrown, never replayed. On Redis Cluster its keys are cross-slot: always refused.
      */
+    private final SessionMemoryCodec codec = new SessionMemoryCodec(this);
+
     private boolean appendInOneRoundTrip(String sessionId, String redisKey, String json) {
-        SessionSummaryService summariser = folder.activeSummariser();
+        SessionSummaryService summariser = folder.activeSummariser(sessionId);
         Optional<TenantContext> tenant = TenantContext.current();
         SessionAppendScript.Mode mode =
                 summariser == null
@@ -599,7 +620,9 @@ public class SessionMemoryService {
                                 ? SessionAppendScript.Mode.MARKER_AWARE_TRIM
                                 : SessionAppendScript.Mode.CLAIM_AND_TRIM;
         boolean claiming = mode == SessionAppendScript.Mode.CLAIM_AND_TRIM;
-        String owner = tenant.map(t -> SessionOwnerRecords.ownerValue(t.getTenantId(), t.getSubject())).orElse(null);
+        String owner =
+                tenant.map(t -> SessionOwnerRecords.ownerValue(t.getTenantId(), t.getSubject()))
+                        .orElse(null);
         List<Object> claimed;
         try {
             claimed =
@@ -664,36 +687,6 @@ public class SessionMemoryService {
      */
     public boolean isOwnedBy(String sessionId, String tenantId, String subject) {
         return owners.isOwnedBy(sessionId, tenantId, subject);
-    }
-
-    private String serialize(ChatTurn turn) {
-        try {
-            return objectMapper.writeValueAsString(turn);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize chat turn", e);
-        }
-    }
-
-    /**
-     * A stored turn as the rolling summary reads it: the tool record folded into the text, so what a
-     * turn did with its tools survives into the summary instead of leaving with the turn.
-     */
-    private ChatTurn deserializeForSummary(String json) {
-        ChatTurn turn = deserialize(json);
-        if (turn == null || turn.tools() == null) {
-            return turn;
-        }
-        return ToolLedgerReplay.modelView(turn, toolLedger(), true).orElse(turn);
-    }
-
-    private ChatTurn deserialize(String json) {
-        try {
-            return objectMapper.readValue(json, ChatTurn.class);
-        } catch (JsonProcessingException e) {
-            // A corrupt/unreadable entry shouldn't take down the whole conversation history.
-            log.warn("Skipping unreadable chat turn in session history", e);
-            return null;
-        }
     }
 
     // ---- SEC-004: server-derived, owner-scoped memory ids ------------------

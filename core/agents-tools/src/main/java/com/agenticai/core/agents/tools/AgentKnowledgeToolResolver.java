@@ -5,6 +5,7 @@ import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.RememberFactToolCallback;
 import com.agenticai.core.agents.memory.RememberSharedFactToolCallback;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.TurnTaintView;
 import com.agenticai.core.approval.HumanApprovalGateService;
 import com.agenticai.core.codeintel.ApplyCodeChangesToolCallback;
 import com.agenticai.core.codeintel.CodeCalleesToolCallback;
@@ -117,6 +118,52 @@ final class AgentKnowledgeToolResolver {
         this.codeIntelClient = codeIntelClient;
     }
 
+    private volatile ObjectProvider<TurnTaintView> turnTaint;
+
+    private volatile ObjectProvider<AgentTaintPolicy> taintPolicy;
+
+    /** The taint policy whose per-turn record the write tools read (see {@link TurnTaintViews}). */
+    void setTaintPolicy(ObjectProvider<AgentTaintPolicy> taintPolicy) {
+        this.taintPolicy = taintPolicy;
+    }
+
+    /**
+     * The taint of the turn identified by {@code stepCounter}, for a persistent-write tool built
+     * for it.
+     */
+    ObjectProvider<TurnTaintView> turnTaintFor(AtomicInteger stepCounter) {
+        return TurnTaintViews.forTurn(taintPolicy, stepCounter, turnTaint);
+    }
+
+    /** The turn-taint source memory writes consult; unset or empty means writes are quarantined. */
+    void setTurnTaint(ObjectProvider<TurnTaintView> turnTaint) {
+        this.turnTaint = turnTaint;
+    }
+
+    /**
+     * The turn's taint for {@code add_to_knowledge_base}, read when the tool runs. Null (no {@link
+     * TurnTaintView} bean, or none for this turn) makes the tool quarantine the write.
+     */
+    private com.agenticai.core.knowledge.KnowledgeWriteTaint knowledgeWriteTaint(
+            AtomicInteger stepCounter) {
+        ObjectProvider<TurnTaintView> provider = turnTaintFor(stepCounter);
+        TurnTaintView view = provider == null ? null : provider.getIfAvailable();
+        if (view == null) {
+            return null;
+        }
+        return new com.agenticai.core.knowledge.KnowledgeWriteTaint() {
+            @Override
+            public boolean isTainted() {
+                return view.isTainted();
+            }
+
+            @Override
+            public List<String> sources() {
+                return view.sources();
+            }
+        };
+    }
+
     private ToolCallback guardAndLog(
             ToolCallback raw,
             UUID agentId,
@@ -213,7 +260,8 @@ final class AgentKnowledgeToolResolver {
                             allowedWriteCollectionIds,
                             agentId,
                             sessionId,
-                            knowledgeProviders.urlIngester().getIfAvailable());
+                            knowledgeProviders.urlIngester().getIfAvailable(),
+                            () -> knowledgeWriteTaint(stepCounter));
             tools.add(
                     guardAndLog(
                             addTool,
@@ -459,7 +507,8 @@ final class AgentKnowledgeToolResolver {
                         graphService,
                         entityExtractionService,
                         memoryWriteArbitrationService,
-                        chatClient);
+                        chatClient,
+                        turnTaintFor(stepCounter));
         List<ToolCallback> tools = new ArrayList<>();
         tools.add(
                 guardAndLog(
@@ -498,7 +547,8 @@ final class AgentKnowledgeToolResolver {
                             subjectKey,
                             graphService,
                             entityExtractionService,
-                            chatClient);
+                            chatClient,
+                            turnTaintFor(stepCounter));
             tools.add(
                     guardAndLog(
                             rememberSharedTool,

@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "id": "persona-p5-engineer",
+  "category": "persona",
+  "persona": {
+    "id": "p5-engineer",
+    "name": "Engineer",
+    "language": "en",
+    "description": "Stack choices, rejected approaches (mistake-avoidance)"
+  },
+  "seed": 205,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "We chose PostgreSQL over MongoDB for the ledger",
+          "plants": [
+            "f00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "For code answers show a diff only, no prose",
+          "plants": [
+            "f02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Our CI runs on Jenkins",
+          "plants": [
+            "f03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite tea: Nilgiri",
+          "plants": [
+            "d00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite colour: mustard",
+          "plants": [
+            "d06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite festival: Baisakhi",
+          "plants": [
+            "d12"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Deploys always target ap-south-1",
+          "plants": [
+            "f01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "My code reviewer is Dev Malhotra",
+          "plants": [
+            "f05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Tests use JUnit 4",
+          "plants": [
+            "f07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite dish: Idli",
+          "plants": [
+            "d01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "shoe size: size 11",
+          "plants": [
+            "d07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "cousin's city: Surat",
+          "plants": [
+            "d13"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 10,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Dev's handle is @devm-demo",
+          "plants": [
+            "f06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "We rejected ORM lazy loading, it caused N+1 queries in prod",
+          "plants": [
+            "f09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "commute: scooter",
+          "plants": [
+            "d02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "phone model: Oppo-demo",
+          "plants": [
+            "d08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "vehicle: Nano",
+          "plants": [
+            "d14"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 30,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "We migrated CI to GitHub Actions",
+          "plants": [
+            "f04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "We do trunk-based development, no long-lived branches",
+          "plants": [
+            "f10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pet: Bruno",
+          "plants": [
+            "d03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "wake-up time: 8:00",
+          "plants": [
+            "d09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "TV show: Kota Factory",
+          "plants": [
+            "d15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "We moved the tests to JUnit 5",
+          "plants": [
+            "f08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Services target Java 21",
+          "plants": [
+            "f11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "hobby: cooking",
+          "plants": [
+            "d04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gym day: Friday",
+          "plants": [
+            "d10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite sweet: gulab jamun",
+          "plants": [
+            "d16"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 45,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "music: rock",
+          "plants": [
+            "d05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "current book: Train to Pakistan",
+          "plants": [
+            "d11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "weekend spot: Hussain Sagar",
+          "plants": [
+            "d17"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f00",
+      "key": "db_choice",
+      "value": "Chose PostgreSQL over MongoDB for the ledger",
+      "match": "PostgreSQL",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f01",
+      "key": "cloud_region",
+      "value": "Deploys target region ap-south-1",
+      "match": "ap-south-1",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f02",
+      "key": "answer_style",
+      "value": "Code answers as a diff only, no prose",
+      "match": "diff only",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p3"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    },
+    {
+      "id": "f03",
+      "key": "ci_tool",
+      "value": "CI runs on Jenkins",
+      "match": "Jenkins",
+      "planted_in": "s1",
+      "superseded_by": "f04",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f04",
+      "key": "ci_tool",
+      "value": "CI runs on GitHub Actions",
+      "match": "GitHub Actions",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p4"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f05",
+      "key": "reviewer_name",
+      "value": "Code reviewer is Dev Malhotra",
+      "match": "Dev Malhotra",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f06",
+      "key": "reviewer_handle",
+      "value": "Dev's handle is @devm-demo",
+      "match": "@devm-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f07",
+      "key": "test_runner",
+      "value": "Tests use JUnit 4",
+      "match": "JUnit 4",
+      "planted_in": "s2",
+      "superseded_by": "f08",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f08",
+      "key": "test_runner",
+      "value": "Tests use JUnit 5",
+      "match": "JUnit 5",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p7"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "f09",
+      "key": "rejected_orm",
+      "value": "Rejected: ORM lazy loading caused N+1 queries in prod",
+      "match": "N+1",
+      "planted_in": "s3",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p8"
+      ],
+      "kind": "CORRECTION",
+      "valid_from": 13
+    },
+    {
+      "id": "f10",
+      "key": "branching",
+      "value": "Trunk-based development, no long-lived branches",
+      "match": "trunk-based",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p9"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f11",
+      "key": "java_version",
+      "value": "Services target Java 21",
+      "match": "Java 21",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p10"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d00",
+      "key": "misc_fav_tea",
+      "value": "favourite tea: Nilgiri",
+      "match": "Nilgiri",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p12"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d01",
+      "key": "misc_fav_dish",
+      "value": "favourite dish: Idli",
+      "match": "Idli",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d02",
+      "key": "misc_commute",
+      "value": "commute: scooter",
+      "match": "scooter",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d03",
+      "key": "misc_pet_name",
+      "value": "pet: Bruno",
+      "match": "Bruno",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p11"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d04",
+      "key": "misc_hobby",
+      "value": "hobby: cooking",
+      "match": "cooking",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d05",
+      "key": "misc_music",
+      "value": "music: rock",
+      "match": "rock",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d06",
+      "key": "misc_colour",
+      "value": "favourite colour: mustard",
+      "match": "mustard",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d07",
+      "key": "misc_shoe",
+      "value": "shoe size: size 11",
+      "match": "size 11",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d08",
+      "key": "misc_phone",
+      "value": "phone model: Oppo-demo",
+      "match": "Oppo-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d09",
+      "key": "misc_wake",
+      "value": "wake-up time: 8:00",
+      "match": "8:00",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d10",
+      "key": "misc_gym",
+      "value": "gym day: Friday",
+      "match": "Friday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d11",
+      "key": "misc_book",
+      "value": "current book: Train to Pakistan",
+      "match": "Train to Pakistan",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d12",
+      "key": "misc_festival",
+      "value": "favourite festival: Baisakhi",
+      "match": "Baisakhi",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d13",
+      "key": "misc_cousin",
+      "value": "cousin's city: Surat",
+      "match": "Surat",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d14",
+      "key": "misc_vehicle",
+      "value": "vehicle: Nano",
+      "match": "Nano",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d15",
+      "key": "misc_show",
+      "value": "TV show: Kota Factory",
+      "match": "Kota Factory",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d16",
+      "key": "misc_sweet",
+      "value": "favourite sweet: gulab jamun",
+      "match": "gulab jamun",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d17",
+      "key": "misc_spot",
+      "value": "weekend spot: Hussain Sagar",
+      "match": "Hussain Sagar",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which database did we choose for the ledger?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "db_choice"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "PostgreSQL"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which region do deploys target?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "cloud_region"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "ap-south-1"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p3",
+      "after": "s6",
+      "type": "PREFERENCE",
+      "prompt": "Explain how to rename the field",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "answer_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "diff only"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p4",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "What does CI run on?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "ci_tool"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "GitHub Actions"
+        ],
+        "none": [
+          "Jenkins"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p5",
+      "after": "s6",
+      "type": "MULTI_HOP",
+      "prompt": "Ping my reviewer on Slack",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "reviewer_name",
+        "reviewer_handle"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "@devm-demo"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p6",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is our on-call rota?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "oncall_rota"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    },
+    {
+      "id": "p7",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "Which test framework do we use?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "test_runner"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "JUnit 5"
+        ],
+        "none": [
+          "JUnit 4"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p8",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Can we use lazy loading for the orders list?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "rejected_orm"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "N+1"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is our branching strategy?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "branching"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "trunk-based"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which Java version do our services target?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "java_version"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Java 21"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my pet's name?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Bruno"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which tea do I like best?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Nilgiri"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my passport number?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    }
+  ]
+}

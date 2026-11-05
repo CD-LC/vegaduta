@@ -4,6 +4,8 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryBlocks;
+import com.agenticai.core.agents.memory.MemoryTrust;
+import com.agenticai.core.agents.memory.SubjectDataEraser;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
@@ -40,24 +42,24 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The signed-in user's own view of what the platform remembers about them (gap-analysis item 11):
- * editable always-in-context blocks (persona, user_profile, project_notes, per-project notes) plus the
- * individual facts agents saved via {@code remember_fact}, which can be edited or deleted.
+ * editable always-in-context blocks (persona, user_profile, project_notes, per-project notes) plus
+ * the individual facts agents saved via {@code remember_fact}, which can be edited or deleted.
  *
- * <p>Everything is scoped to the caller's own {@code subjectKey} - the Keycloak principal name, the same
- * key chat uses - so there is no way to address another user's rows. Needs the "knowledge" profile
- * (the memory services); without it {@code available} is false and the lists are empty. Facts written
- * by agents are also mirrored into graph memory; editing or deleting here changes the vector row only,
- * unless {@code app.graph-memory.user-forget-sync.enabled} (default off) is on, in which case the graph
- * edges the old text supported are invalidated too, best effort (see {@code GraphMemoryService#forgetFactText}).
- * An edit does not write graph triples for the NEW text; the graph picks the fact up again only when an
- * agent next saves it.
+ * <p>Everything is scoped to the caller's own {@code subjectKey} - the Keycloak principal name, the
+ * same key chat uses - so there is no way to address another user's rows. Needs the "knowledge"
+ * profile (the memory services); without it {@code available} is false and the lists are empty.
+ * Facts written by agents are also mirrored into graph memory; editing or deleting here changes the
+ * vector row only, unless {@code app.graph-memory.user-forget-sync.enabled} (default off) is on, in
+ * which case the graph edges the old text supported are invalidated too, best effort (see {@code
+ * GraphMemoryService#forgetFactText}). An edit does not write graph triples for the NEW text; the
+ * graph picks the fact up again only when an agent next saves it.
  *
- * <p>Self-service additions ({@code app.memory.self-service.enabled}, default on): add a fact by hand
- * ({@code POST /facts}), forget everything ({@code DELETE /api/memory?confirm=true}) and download a
- * copy ({@code GET /export}). With the flag off those three answer 404 and nothing else changes.
- * A hand-added fact never evicts another user's memory: each caller may keep at most
- * {@code app.memory.self-service.max-facts-per-agent} (25) private facts per agent and
- * {@code app.memory.self-service.max-shared-facts} (50) shared facts, answered with 409 beyond that.
+ * <p>Self-service additions ({@code app.memory.self-service.enabled}, default on): add a fact by
+ * hand ({@code POST /facts}), forget everything ({@code DELETE /api/memory?confirm=true}) and
+ * download a copy ({@code GET /export}). With the flag off those three answer 404 and nothing else
+ * changes. A hand-added fact never evicts another user's memory: each caller may keep at most
+ * {@code app.memory.self-service.max-facts-per-agent} (25) private facts per agent and {@code
+ * app.memory.self-service.max-shared-facts} (50) shared facts, answered with 409 beyond that.
  */
 @RestController
 @RequestMapping("/api/memory")
@@ -70,69 +72,145 @@ public class UserMemoryController {
     private final ObjectProvider<AgentMemoryService> agentMemoryService;
     private final ObjectProvider<TenantMemoryService> tenantMemoryService;
     private final ObjectProvider<GraphMemoryService> graphMemoryService;
+    private final ObjectProvider<SubjectDataEraser> otherStores;
     private final AgentService agentService;
     private final UserMemoryFactService facts;
     private final boolean selfServiceEnabled;
     private final boolean graphForgetSyncEnabled;
 
     public UserMemoryController(
-        ObjectProvider<AgentMemoryService> agentMemoryService,
-        ObjectProvider<TenantMemoryService> tenantMemoryService,
-        ObjectProvider<GraphMemoryService> graphMemoryService,
-        AgentService agentService,
-        UserMemoryFactService facts,
-        @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
-        @Value("${app.graph-memory.user-forget-sync.enabled:false}") boolean graphForgetSyncEnabled
-    ) {
+            ObjectProvider<AgentMemoryService> agentMemoryService,
+            ObjectProvider<TenantMemoryService> tenantMemoryService,
+            ObjectProvider<GraphMemoryService> graphMemoryService,
+            ObjectProvider<SubjectDataEraser> otherStores,
+            AgentService agentService,
+            UserMemoryFactService facts,
+            @Value("${app.memory.self-service.enabled:true}") boolean selfServiceEnabled,
+            @Value("${app.graph-memory.user-forget-sync.enabled:false}")
+                    boolean graphForgetSyncEnabled) {
         this.agentMemoryService = agentMemoryService;
         this.tenantMemoryService = tenantMemoryService;
         this.graphMemoryService = graphMemoryService;
+        this.otherStores = otherStores;
         this.agentService = agentService;
         this.facts = facts;
         this.selfServiceEnabled = selfServiceEnabled;
         this.graphForgetSyncEnabled = graphForgetSyncEnabled;
     }
 
-    public record BlockView(String label, String content, Instant updatedAt) {
-    }
-
-    /** {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). */
-    public record FactView(UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount) {
-    }
-
-    public record Limits(int maxCharsPerBlock, int maxProjectBlocks, int maxFactChars) {
-    }
+    public record BlockView(String label, String content, Instant updatedAt) {}
 
     /**
-     * {@code selfServiceEnabled}: the add-fact / forget-all / export endpoints are live (otherwise they 404).
-     * {@code activeProjectEnabled}: the reserved {@code active_project} block can be written (otherwise 400).
+     * {@code scope} is "agent" (private to {@code agentId}) or "shared" (tenant-wide). {@code
+     * trust} is "TRUSTED" or "QUARANTINED": a quarantined fact was written on a turn that handled
+     * untrusted content, is never recalled into a prompt, and waits for the person to approve or
+     * reject it (the agent-memory approve/reject endpoints). {@code sourceTaint} names the kinds of
+     * untrusted source, empty when trusted. {@code supersededAt} is set on a fact a newer one
+     * replaced: it is kept (listed, exported, erased with the rest) but no longer recalled into a
+     * prompt.
+     */
+    public record FactView(
+            UUID id,
+            String scope,
+            UUID agentId,
+            String content,
+            Instant createdAt,
+            Instant lastUsedAt,
+            int useCount,
+            String trust,
+            List<String> sourceTaint,
+            Instant supersededAt) {
+        public FactView {
+            trust = trust == null ? MemoryTrust.QUARANTINED.name() : trust;
+            sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
+        }
+
+        public FactView(
+                UUID id,
+                String scope,
+                UUID agentId,
+                String content,
+                Instant createdAt,
+                Instant lastUsedAt,
+                int useCount,
+                String trust,
+                List<String> sourceTaint) {
+            this(
+                    id,
+                    scope,
+                    agentId,
+                    content,
+                    createdAt,
+                    lastUsedAt,
+                    useCount,
+                    trust,
+                    sourceTaint,
+                    null);
+        }
+
+        /** A fact the person just typed in: trusted by construction. */
+        public FactView(
+                UUID id,
+                String scope,
+                UUID agentId,
+                String content,
+                Instant createdAt,
+                Instant lastUsedAt,
+                int useCount) {
+            this(
+                    id,
+                    scope,
+                    agentId,
+                    content,
+                    createdAt,
+                    lastUsedAt,
+                    useCount,
+                    MemoryTrust.TRUSTED.name(),
+                    List.of());
+        }
+    }
+
+    public record Limits(int maxCharsPerBlock, int maxProjectBlocks, int maxFactChars) {}
+
+    /**
+     * {@code selfServiceEnabled}: the add-fact / forget-all / export endpoints are live (otherwise
+     * they 404). {@code activeProjectEnabled}: the reserved {@code active_project} block can be
+     * written (otherwise 400).
      */
     public record MemoryOverview(
-        boolean available, boolean blocksEnabled, Limits limits, List<BlockView> blocks, List<FactView> facts,
-        boolean selfServiceEnabled, boolean activeProjectEnabled
-    ) {
-    }
+            boolean available,
+            boolean blocksEnabled,
+            Limits limits,
+            List<BlockView> blocks,
+            List<FactView> facts,
+            boolean selfServiceEnabled,
+            boolean activeProjectEnabled) {}
 
-    public record ContentRequest(String content) {
-    }
-
-    /** {@code scope} "agent" needs {@code agentId} (an agent the caller may run); "shared" ignores it. */
-    public record FactCreateRequest(String content, String scope, UUID agentId) {
-    }
+    public record ContentRequest(String content) {}
 
     /**
-     * Rows removed by forget-all, per store. Each store is erased independently, so one failing does not
-     * stop the others: {@code agentErased} / {@code sharedErased} / {@code graphErased} are false only
-     * when that store is present and its erase failed (its count is then 0). A client must check all
-     * three before telling the user everything is gone.
+     * {@code scope} "agent" needs {@code agentId} (an agent the caller may run); "shared" ignores
+     * it.
+     */
+    public record FactCreateRequest(String content, String scope, UUID agentId) {}
+
+    /**
+     * Rows removed by forget-all, per store. Each store is erased independently, so one failing
+     * does not stop the others: {@code agentErased} / {@code sharedErased} / {@code graphErased}
+     * are false only when that store is present and its erase failed (its count is then 0). A
+     * client must check all three before telling the user everything is gone.
      */
     public record ForgetAllResult(
-        int agentFacts, int sharedAndBlocks, int graphEntities, boolean graphErased, boolean agentErased, boolean sharedErased
-    ) {
-    }
+            int agentFacts,
+            int sharedAndBlocks,
+            int graphEntities,
+            boolean graphErased,
+            boolean agentErased,
+            boolean sharedErased,
+            int otherStoreRows,
+            boolean otherStoresErased) {}
 
-    public record MemoryExport(Instant exportedAt, List<BlockView> blocks, List<FactView> facts) {
-    }
+    public record MemoryExport(Instant exportedAt, List<BlockView> blocks, List<FactView> facts) {}
 
     @GetMapping
     public MemoryOverview overview(Principal principal) {
@@ -141,54 +219,96 @@ public class UserMemoryController {
         AgentMemoryService agent = agentMemoryService.getIfAvailable();
         if (tenant == null && agent == null) {
             return new MemoryOverview(
-                false, false, new Limits(0, 0, MAX_FACT_CHARS), List.of(), List.of(), selfServiceEnabled, false);
+                    false,
+                    false,
+                    new Limits(0, 0, MAX_FACT_CHARS),
+                    List.of(),
+                    List.of(),
+                    selfServiceEnabled,
+                    false);
         }
         List<BlockView> blocks = new ArrayList<>();
         if (tenant != null && tenant.blocksEnabled()) {
-            tenant.listBlocks(subject).forEach(b -> blocks.add(new BlockView(b.label(), b.content(), b.updatedAt())));
+            tenant.listBlocks(subject)
+                    .forEach(b -> blocks.add(new BlockView(b.label(), b.content(), b.updatedAt())));
         }
         List<FactView> facts = new ArrayList<>();
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
-                facts.add(new FactView(m.id(), "agent", m.agentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount()));
+                facts.add(
+                        new FactView(
+                                m.id(),
+                                "agent",
+                                m.agentId(),
+                                m.content(),
+                                m.createdAt(),
+                                m.lastUsedAt(),
+                                m.useCount(),
+                                m.trust().name(),
+                                m.sourceTaint(),
+                                m.supersededAt()));
             }
         }
         if (tenant != null) {
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
-                facts.add(new FactView(m.id(), "shared", m.createdByAgentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount()));
+                facts.add(
+                        new FactView(
+                                m.id(),
+                                "shared",
+                                m.createdByAgentId(),
+                                m.content(),
+                                m.createdAt(),
+                                m.lastUsedAt(),
+                                m.useCount(),
+                                m.trust().name(),
+                                m.sourceTaint(),
+                                m.supersededAt()));
             }
         }
         facts.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));
         int maxChars = tenant == null ? 0 : tenant.maxCharsPerBlock();
         int maxProjects = tenant == null ? 0 : tenant.maxProjectBlocks();
         return new MemoryOverview(
-            true, tenant != null && tenant.blocksEnabled(), new Limits(maxChars, maxProjects, MAX_FACT_CHARS), blocks, facts,
-            selfServiceEnabled, tenant != null && tenant.blocksEnabled() && tenant.activeProjectEnabled());
+                true,
+                tenant != null && tenant.blocksEnabled(),
+                new Limits(maxChars, maxProjects, MAX_FACT_CHARS),
+                blocks,
+                facts,
+                selfServiceEnabled,
+                tenant != null && tenant.blocksEnabled() && tenant.activeProjectEnabled());
     }
 
-    /** Adds one fact by hand; the logic is in {@link UserMemoryFactService} (shared with the memory importer). */
+    /**
+     * Adds one fact by hand; the logic is in {@link UserMemoryFactService} (shared with the memory
+     * importer).
+     */
     @PostMapping("/facts")
-    public ResponseEntity<FactView> addFact(@RequestBody FactCreateRequest body, Principal principal) {
+    public ResponseEntity<FactView> addFact(
+            @RequestBody FactCreateRequest body, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(facts.addFact(body, principal));
     }
 
     /**
-     * Forgets everything about the caller: every agent's private facts, the shared facts, the editable
-     * blocks and (when graph memory is on) the graph entities. Needs {@code confirm=true} so a stray
-     * DELETE on the collection cannot wipe it.
+     * Forgets everything about the caller: every agent's private facts, the shared facts, the
+     * editable blocks, the agent scratchpad notes the caller owns and (when graph memory is on) the
+     * graph entities. Needs {@code confirm=true} so a stray DELETE on the collection cannot wipe
+     * it.
      */
     @DeleteMapping
     public ForgetAllResult forgetAll(
-        @RequestParam(name = "confirm", required = false, defaultValue = "false") boolean confirm, Principal principal
-    ) {
+            @RequestParam(name = "confirm", required = false, defaultValue = "false")
+                    boolean confirm,
+            Principal principal) {
         String subject = subject(principal);
         requireSelfService();
         if (!confirm) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pass confirm=true to erase all of your memory.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Pass confirm=true to erase all of your memory.");
         }
         AgentMemoryService agent = agentMemoryService.getIfAvailable();
         TenantMemoryService tenant = tenantMemoryService.getIfAvailable();
-        // Each store on its own: a failure in one must not leave the caller with a bare 500 and no idea what is gone.
+        // Each store on its own: a failure in one must not leave the caller with a bare 500 and no
+        // idea what is gone.
         int agentFacts = 0;
         boolean agentErased = true;
         if (agent != null) {
@@ -221,18 +341,56 @@ public class UserMemoryController {
                 log.warn("Self-service forget-all: graph erase failed", e);
             }
         }
-        // The durable trace of a full self-erasure: which tenant, who (hashed, never the raw key) and what went.
-        log.info("Self-service forget-all: tenant={} subject#={} agentFacts={} (ok={}) sharedAndBlocks={} (ok={}) "
-                + "graphEntities={} (ok={})",
-            TenantContext.current().map(TenantContext::getTenantId).orElse("unknown"), subjectFingerprint(subject),
-            agentFacts, agentErased, sharedAndBlocks, sharedErased, graphEntities, graphErased);
-        return new ForgetAllResult(agentFacts, sharedAndBlocks, graphEntities, graphErased, agentErased, sharedErased);
+        // Per-user data kept by modules this one cannot depend on (the agent scratchpad), through
+        // SubjectDataEraser.
+        int otherRows = 0;
+        boolean otherErased = true;
+        if (otherStores != null) {
+            for (SubjectDataEraser store : otherStores.orderedStream().toList()) {
+                try {
+                    otherRows += store.eraseSubject(subject);
+                } catch (Exception e) {
+                    otherErased = false;
+                    log.warn("Self-service forget-all: {} erase failed", store.store(), e);
+                }
+            }
+        }
+        // The durable trace of a full self-erasure: which tenant, who (hashed, never the raw key)
+        // and what went.
+        // codeql[java/sensitive-log] -- the subject is logged only as a SHA-256 fingerprint
+        log.info(
+                "Self-service forget-all: tenant={} subject#={} agentFacts={} (ok={}) sharedAndBlocks={} (ok={}) "
+                        + "graphEntities={} (ok={}) otherStores={} (ok={})",
+                TenantContext.current().map(TenantContext::getTenantId).orElse("unknown"),
+                subjectFingerprint(subject),
+                agentFacts,
+                agentErased,
+                sharedAndBlocks,
+                sharedErased,
+                graphEntities,
+                graphErased,
+                otherRows,
+                otherErased);
+        return new ForgetAllResult(
+                agentFacts,
+                sharedAndBlocks,
+                graphEntities,
+                graphErased,
+                agentErased,
+                sharedErased,
+                otherRows,
+                otherErased);
     }
 
-    /** First 12 hex chars of SHA-256(subject): enough to correlate log lines, not to recover the identity. */
+    /**
+     * First 12 hex chars of SHA-256(subject): enough to correlate log lines, not to recover the
+     * identity.
+     */
     static String subjectFingerprint(String subject) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(subject.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(subject.getBytes(StandardCharsets.UTF_8));
             StringBuilder hex = new StringBuilder();
             for (int i = 0; i < 6; i++) {
                 hex.append(String.format("%02x", digest[i]));
@@ -250,18 +408,22 @@ public class UserMemoryController {
         requireSelfService();
         MemoryOverview o = overview(principal);
         return ResponseEntity.ok()
-            .contentType(MediaType.APPLICATION_JSON)
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + EXPORT_FILENAME + "\"")
-            .body(new MemoryExport(Instant.now(), o.blocks(), o.facts()));
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + EXPORT_FILENAME + "\"")
+                .body(new MemoryExport(Instant.now(), o.blocks(), o.facts()));
     }
 
     @PutMapping("/blocks/{label}")
-    public BlockView putBlock(@PathVariable String label, @RequestBody ContentRequest body, Principal principal) {
+    public BlockView putBlock(
+            @PathVariable String label, @RequestBody ContentRequest body, Principal principal) {
         String subject = subject(principal);
         TenantMemoryService tenant = blocksService();
         String normalized = MemoryBlocks.normalizeLabel(label);
         if (normalized == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown memory block label.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Unknown memory block label.");
         }
         try {
             tenant.putBlock(subject, normalized, body == null ? null : body.content());
@@ -269,10 +431,10 @@ public class UserMemoryController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
         return tenant.listBlocks(subject).stream()
-            .filter(b -> b.label().equals(normalized))
-            .findFirst()
-            .map(b -> new BlockView(b.label(), b.content(), b.updatedAt()))
-            .orElse(new BlockView(normalized, "", null));
+                .filter(b -> b.label().equals(normalized))
+                .findFirst()
+                .map(b -> new BlockView(b.label(), b.content(), b.updatedAt()))
+                .orElse(new BlockView(normalized, "", null));
     }
 
     @DeleteMapping("/blocks/{label}")
@@ -284,37 +446,82 @@ public class UserMemoryController {
 
     @PatchMapping("/facts/{scope}/{id}")
     public ResponseEntity<Void> editFact(
-        @PathVariable String scope, @PathVariable UUID id, @RequestBody ContentRequest body, Principal principal
-    ) {
+            @PathVariable String scope,
+            @PathVariable UUID id,
+            @RequestBody ContentRequest body,
+            Principal principal) {
         String subject = subject(principal);
         String content = body == null ? null : body.content();
         if (!StringUtils.hasText(content)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Memory text cannot be empty. Delete it instead.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Memory text cannot be empty. Delete it instead.");
         }
         if (content.length() > MAX_FACT_CHARS) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A memory can hold at most " + MAX_FACT_CHARS + " characters.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A memory can hold at most " + MAX_FACT_CHARS + " characters.");
         }
         GraphForget graphForget = planGraphForget(scope, id, subject);
-        boolean changed = switch (scope) {
-            case "agent" -> requireAgent().updateForSubject(id, subject, content.strip());
-            case "shared" -> requireTenant().updateFactForSubject(id, subject, content.strip());
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown memory scope.");
-        };
+        boolean changed =
+                switch (scope) {
+                    case "agent" -> requireAgent().updateForSubject(id, subject, content.strip());
+                    case "shared" ->
+                            requireTenant().updateFactForSubject(id, subject, content.strip());
+                    default ->
+                            throw new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Unknown memory scope.");
+                };
         if (changed) {
             syncGraphForget(graphForget, subject, content.strip());
         }
         return changed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Approves the caller's own QUARANTINED shared fact so every sharing agent recalls it (and it
+     * is offered to the shared graph tier). An approved shared fact reaches every sharing agent, so
+     * this takes the same bar as {@code POST
+     * /api/agents/{agentId}/memories/shared/{memoryId}/approve}: EDITOR on the agent that wrote the
+     * fact. 404 when the fact is not the caller's or is not quarantined; 403 when the caller is not
+     * an editor of the writing agent (or the writing agent is not recorded). No subject key is
+     * taken from the client.
+     */
+    @PostMapping("/facts/shared/{id}/approve")
+    public ResponseEntity<Void> approveSharedFact(@PathVariable UUID id, Principal principal) {
+        String subject = subject(principal);
+        TenantMemoryService tenant = requireTenant();
+        TenantMemoryEntry target =
+                tenant.listFactsForSubject(subject).stream()
+                        .filter(m -> id.equals(m.id()) && m.trust() == MemoryTrust.QUARANTINED)
+                        .findFirst()
+                        .orElse(null);
+        if (target == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (target.createdByAgentId() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Approving a shared memory needs editor access to the agent that wrote it.");
+        }
+        agentService.requireAccess(target.createdByAgentId(), PermissionLevel.EDITOR);
+        return tenant.approveFact(id, subject)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/facts/{scope}/{id}")
-    public ResponseEntity<Void> deleteFact(@PathVariable String scope, @PathVariable UUID id, Principal principal) {
+    public ResponseEntity<Void> deleteFact(
+            @PathVariable String scope, @PathVariable UUID id, Principal principal) {
         String subject = subject(principal);
         GraphForget graphForget = planGraphForget(scope, id, subject);
-        boolean changed = switch (scope) {
-            case "agent" -> requireAgent().forgetForSubject(id, subject);
-            case "shared" -> requireTenant().forgetFactForSubject(id, subject);
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown memory scope.");
-        };
+        boolean changed =
+                switch (scope) {
+                    case "agent" -> requireAgent().forgetForSubject(id, subject);
+                    case "shared" -> requireTenant().forgetFactForSubject(id, subject);
+                    default ->
+                            throw new ResponseStatusException(
+                                    HttpStatus.BAD_REQUEST, "Unknown memory scope.");
+                };
         if (changed) {
             syncGraphForget(graphForget, subject, null);
         }
@@ -325,13 +532,16 @@ public class UserMemoryController {
      * What the graph sync needs, captured BEFORE the fact is changed: the old text, its tier
      * ({@code tierAgentId} null = tenant-shared) and the caller's other facts in that tier.
      */
-    private record GraphForget(GraphMemoryService graph, UUID tierAgentId, String oldContent, List<String> otherTexts) {
-    }
+    private record GraphForget(
+            GraphMemoryService graph,
+            UUID tierAgentId,
+            String oldContent,
+            List<String> otherTexts) {}
 
     /**
-     * Null when the sync is off ({@code app.graph-memory.user-forget-sync.enabled}), graph memory is not
-     * running, the fact is not the caller's, or the lookup fails - in every such case the edit/delete
-     * proceeds exactly as it did before this existed.
+     * Null when the sync is off ({@code app.graph-memory.user-forget-sync.enabled}), graph memory
+     * is not running, the fact is not the caller's, or the lookup fails - in every such case the
+     * edit/delete proceeds exactly as it did before this existed.
      */
     private GraphForget planGraphForget(String scope, UUID id, String subject) {
         if (!graphForgetSyncEnabled) {
@@ -348,7 +558,8 @@ public class UserMemoryController {
                     return null;
                 }
                 List<AgentMemoryEntry> all = agent.listAllForSubject(subject);
-                AgentMemoryEntry target = all.stream().filter(m -> id.equals(m.id())).findFirst().orElse(null);
+                AgentMemoryEntry target =
+                        all.stream().filter(m -> id.equals(m.id())).findFirst().orElse(null);
                 if (target == null || target.agentId() == null) {
                     return null;
                 }
@@ -366,7 +577,8 @@ public class UserMemoryController {
                     return null;
                 }
                 List<TenantMemoryEntry> all = tenant.listFactsForSubject(subject);
-                TenantMemoryEntry target = all.stream().filter(m -> id.equals(m.id())).findFirst().orElse(null);
+                TenantMemoryEntry target =
+                        all.stream().filter(m -> id.equals(m.id())).findFirst().orElse(null);
                 if (target == null) {
                     return null;
                 }
@@ -385,7 +597,10 @@ public class UserMemoryController {
         }
     }
 
-    /** Never throws: a graph failure must not fail an edit/delete whose vector row is already changed. */
+    /**
+     * Never throws: a graph failure must not fail an edit/delete whose vector row is already
+     * changed.
+     */
     private void syncGraphForget(GraphForget plan, String subject, String replacementText) {
         if (plan == null) {
             return;
@@ -408,14 +623,16 @@ public class UserMemoryController {
 
     private static String subject(Principal principal) {
         if (principal == null || !StringUtils.hasText(principal.getName())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Sign in to manage your memory.");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Sign in to manage your memory.");
         }
         return principal.getName();
     }
 
     private void requireSelfService() {
         if (!selfServiceEnabled) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Memory self-service is disabled.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Memory self-service is disabled.");
         }
     }
 

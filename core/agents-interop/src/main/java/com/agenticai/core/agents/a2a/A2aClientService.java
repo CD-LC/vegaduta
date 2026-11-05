@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
@@ -93,17 +92,21 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
     private final ObjectProvider<A2aTaskStore> taskStore;
     private final A2aEgressGuard guard;
     private final HttpClient http;
+    private final A2aMessageSecurityProperties security;
 
     @Autowired
     public A2aClientService(
             A2aProperties properties,
             A2aCardVerifier verifier,
-            ObjectProvider<A2aTaskStore> taskStore) {
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aMessageSecurityProperties security) {
         this(
                 properties.getClient(),
                 verifier,
                 taskStore,
-                new A2aEgressGuard(properties.getClient()));
+                new A2aEgressGuard(properties.getClient()),
+                null,
+                security);
     }
 
     A2aClientService(
@@ -124,6 +127,17 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             ObjectProvider<A2aTaskStore> taskStore,
             A2aEgressGuard guard,
             HttpClient http) {
+        this(config, verifier, taskStore, guard, http, new A2aMessageSecurityProperties());
+    }
+
+    A2aClientService(
+            A2aProperties.Client config,
+            A2aCardVerifier verifier,
+            ObjectProvider<A2aTaskStore> taskStore,
+            A2aEgressGuard guard,
+            HttpClient http,
+            A2aMessageSecurityProperties security) {
+        this.security = security;
         this.config = config;
         this.verifier = verifier;
         this.taskStore = taskStore;
@@ -151,7 +165,8 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
      */
     @Override
     public org.springframework.ai.tool.ToolCallback newCallAgentTool() {
-        return new A2aRemoteAgentToolCallback(this);
+        // Captured here: the tool set is built on the thread serving the inbound A2A request.
+        return new A2aRemoteAgentToolCallback(this, A2aHopContext.current());
     }
 
     /**
@@ -238,16 +253,16 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                         version,
                         version == A2aVersion.V1_0 ? "SendMessage" : "message/send",
                         params);
-        JsonNode node = unwrap(result);
-        if (!isTask(node)) {
+        JsonNode node = A2aResultParsing.unwrap(result);
+        if (!A2aResultParsing.isTask(node)) {
             // A bare Message reply: the remote answered inline, there is no task to poll.
-            String text = cap(partsText(node.path("parts")));
+            String text = cap(A2aResultParsing.partsText(node.path("parts")));
             return new Result(local.id(), null, "completed", text, true);
         }
         String remoteId = node.path("id").asText(null);
         Instant deadline = Instant.now().plus(config.getMaxWait());
-        String state = state(node);
-        while (isActive(state)) {
+        String state = A2aResultParsing.state(node);
+        while (A2aResultParsing.isActive(state)) {
             if (remoteId == null) {
                 throw new A2aClientException("the remote agent returned a task without an id");
             }
@@ -267,7 +282,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             getParams.put("id", remoteId);
             try {
                 node =
-                        unwrap(
+                        A2aResultParsing.unwrap(
                                 rpc(
                                         endpoint,
                                         version,
@@ -278,13 +293,13 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
                 cancelQuietly(endpoint, version, remoteId);
                 throw e;
             }
-            state = state(node);
+            state = A2aResultParsing.state(node);
         }
         if (state.equals("input-required") || state.equals("auth-required")) {
             // A one-shot tool cannot answer the remote's question; do not leave its task dangling.
             cancelQuietly(endpoint, version, remoteId);
         }
-        String text = cap(taskText(node));
+        String text = cap(A2aResultParsing.taskText(node));
         boolean success = state.equals("completed");
         if (!success && text.isBlank()) {
             text = "The remote agent ended in state \"" + sanitizeRemoteText(state, 24) + "\".";
@@ -305,15 +320,16 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
         } catch (IOException e) {
             throw new A2aClientException("could not encode the request", e);
         }
+        URI target = guard.check(endpoint.toString());
+        HttpRequest.Builder request =
+                HttpRequest.newBuilder(target)
+                        .timeout(config.getRequestTimeout())
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .header(A2aVersion.HEADER, version.wire());
+        addMessageSecurityHeaders(request, target, body);
         String responseBody =
-                execute(
-                        HttpRequest.newBuilder(guard.check(endpoint.toString()))
-                                .timeout(config.getRequestTimeout())
-                                .header("Content-Type", "application/json")
-                                .header("Accept", "application/json")
-                                .header(A2aVersion.HEADER, version.wire())
-                                .POST(HttpRequest.BodyPublishers.ofString(body))
-                                .build());
+                execute(request.POST(HttpRequest.BodyPublishers.ofString(body)).build());
         JsonNode response;
         try {
             response = MAPPER.readTree(responseBody);
@@ -336,6 +352,34 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             throw new A2aClientException("the remote agent returned no result");
         }
         return result;
+    }
+
+    /**
+     * ASI07: a fresh timestamp, a single-use nonce and the hop counter (inbound hop + 1, or 0 when
+     * this call originates here) on every outbound request - optional extension headers a
+     * third-party peer simply ignores - plus a detached HMAC when the peer is configured for it.
+     */
+    private void addMessageSecurityHeaders(HttpRequest.Builder request, URI target, String body) {
+        String timestamp = Long.toString(Instant.now().getEpochSecond());
+        String nonce = UUID.randomUUID().toString();
+        int hop = A2aHopContext.outboundHop();
+        request.header(A2aMessageSecurityFilter.TIMESTAMP_HEADER, timestamp)
+                .header(A2aMessageSecurityFilter.NONCE_HEADER, nonce)
+                .header(A2aMessageSecurityFilter.HOP_HEADER, Integer.toString(hop));
+        String secret = security.secretForPeer(target.getHost());
+        if (secret != null) {
+            String path = target.getRawPath() == null ? "/" : target.getRawPath();
+            request.header(
+                    A2aMessageSecurityFilter.SIGNATURE_HEADER,
+                    A2aMessageSigner.sign(
+                            secret,
+                            "POST",
+                            path,
+                            timestamp,
+                            nonce,
+                            hop,
+                            body.getBytes(StandardCharsets.UTF_8)));
+        }
     }
 
     /**
@@ -363,7 +407,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
             return "";
         }
         String flat = text.replaceAll("[\\p{Cntrl}\\p{Cf}]+", " ").replace('"', '\'').strip();
-        return trim(flat, max);
+        return A2aResultParsing.trim(flat, max);
     }
 
     private void cancelQuietly(URI endpoint, A2aVersion version, String remoteId) {
@@ -508,80 +552,13 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
 
     // ------------------------------------------------------------ parsing
 
-    /**
-     * 1.0 wraps in {@code {"task"|"message": ...}}; 0.3 sends the object bare. Tolerates either
-     * from either.
-     */
-    private static JsonNode unwrap(JsonNode result) {
-        if (result.has("task") && result.get("task").isObject()) {
-            return result.get("task");
-        }
-        if (result.has("message") && result.get("message").isObject() && !result.has("parts")) {
-            return result.get("message");
-        }
-        return result;
-    }
-
-    private static boolean isTask(JsonNode node) {
-        return "task".equals(node.path("kind").asText(null))
-                || node.has("status") && !node.has("parts");
-    }
-
-    /**
-     * Normalises {@code TASK_STATE_INPUT_REQUIRED} / {@code input-required} to {@code
-     * input-required}.
-     */
-    static String state(JsonNode task) {
-        String raw = task.path("status").path("state").asText("");
-        String s = raw.toLowerCase(Locale.ROOT).replace("task_state_", "").replace('_', '-');
-        return s.equals("cancelled") ? "canceled" : s;
-    }
-
-    private static boolean isActive(String state) {
-        return state.isEmpty()
-                || state.equals("submitted")
-                || state.equals("working")
-                || state.equals("unspecified")
-                || state.equals("unknown");
-    }
-
-    private static String taskText(JsonNode task) {
-        StringBuilder text = new StringBuilder();
-        JsonNode artifacts = task.path("artifacts");
-        if (artifacts.isArray()) {
-            for (JsonNode artifact : artifacts) {
-                text.append(partsText(artifact.path("parts")));
-            }
-        }
-        if (text.toString().isBlank()) {
-            text.setLength(0);
-            text.append(partsText(task.path("status").path("message").path("parts")));
-        }
-        return text.toString();
-    }
-
-    private static String partsText(JsonNode parts) {
-        StringBuilder text = new StringBuilder();
-        if (parts.isArray()) {
-            for (JsonNode part : parts) {
-                if (part.hasNonNull("text")) {
-                    text.append(part.get("text").asText());
-                }
-                // file/data parts are deliberately dropped: only text reaches the model.
-            }
-        }
-        return text.toString();
-    }
-
     private String cap(String text) {
-        return trim(text, config.getMaxResultChars());
+        return A2aResultParsing.trim(text, config.getMaxResultChars());
     }
 
-    private static String trim(String text, int max) {
-        if (text == null) {
-            return "";
-        }
-        return text.length() <= max ? text : text.substring(0, max) + "... [truncated]";
+    /** Test seam; see {@link A2aResultParsing#state}. */
+    static String state(JsonNode task) {
+        return A2aResultParsing.state(task);
     }
 
     // ------------------------------------------------------------ local task

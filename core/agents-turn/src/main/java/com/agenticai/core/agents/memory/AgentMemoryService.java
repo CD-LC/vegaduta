@@ -1,9 +1,9 @@
 package com.agenticai.core.agents.memory;
 
 import com.agenticai.core.knowledge.SidecarClient;
+import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,16 +33,19 @@ import org.springframework.stereotype.Service;
  * guarantees a pgvector-enabled Postgres and a running sidecar exist.
  *
  * <p><b>Bounded memory space (universal-tier product decision):</b> each agent is capped at {@code
- * app.memory.limits.agent-max-memories} (default 50) stored memories total, across every subject it has ever talked to - not
- * per-subject, the whole bank. {@link #remember} prunes the oldest rows (by {@code created_at})
- * immediately after an insert that pushes an agent over the cap, so the bank behaves like a
- * fixed-size space that keeps only what's been added most recently rather than growing without
- * bound. No de-duplication (the same fact told twice is stored twice - relying on {@code recall}'s
- * topK + distance ordering to surface the most relevant rather than merging near-duplicates), and
- * {@code remember} is entirely agent-initiated (a model decides something is worth saving via the
- * {@code remember_fact} tool) rather than an automatic background extraction pass over every
- * conversation - the latter is real V2 scope (see "procedural memory" / trajectory-informed
- * extraction in the competitive analysis doc's research), not faked here.
+ * app.memory.limits.agent-max-memories} (default 50) stored memories total, across every subject it
+ * has ever talked to - not per-subject, the whole bank. {@link #remember} prunes the oldest rows
+ * (by {@code created_at}) immediately after an insert that pushes an agent over the cap, so the
+ * bank behaves like a fixed-size space that keeps only what's been added most recently rather than
+ * growing without bound. With {@code app.memory.supersession.enabled} (V685, on by default) a
+ * corrected fact replaces the one it corrects: the same text told again re-confirms the old row,
+ * and a near-duplicate or a fact the writer says it replaces marks the older row superseded (kept,
+ * listed and erasable, left out of recall); see {@link FactSupersession}. With it off the same fact
+ * told twice is stored twice, relying on {@code recall}'s topK + distance ordering to surface the
+ * most relevant. {@code remember} is entirely agent-initiated (a model decides something is worth
+ * saving via the {@code remember_fact} tool) rather than an automatic background extraction pass
+ * over every conversation - the latter is real V2 scope (see "procedural memory" /
+ * trajectory-informed extraction in the competitive analysis doc's research), not faked here.
  */
 @Service
 @Profile("knowledge")
@@ -50,8 +53,8 @@ public class AgentMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(AgentMemoryService.class);
 
-    private final SidecarClient sidecarClient;
-    private final JdbcTemplate jdbcTemplate;
+    final SidecarClient sidecarClient;
+    final JdbcTemplate jdbcTemplate;
 
     public AgentMemoryService(SidecarClient sidecarClient, JdbcTemplate jdbcTemplate) {
         this.sidecarClient = sidecarClient;
@@ -59,8 +62,9 @@ public class AgentMemoryService {
     }
 
     /**
-     * {@code app.memory.limits.*}: the per-agent cap ({@code agent-max-memories}) and the recall top-k ({@code agent-recall-top-k}). A hand-built instance keeps the shipped
-     * defaults, which is also what Spring supplies when the properties bean is absent.
+     * {@code app.memory.limits.*}: the per-agent cap ({@code agent-max-memories}) and the recall
+     * top-k ({@code agent-recall-top-k}). A hand-built instance keeps the shipped defaults, which
+     * is also what Spring supplies when the properties bean is absent.
      */
     private volatile MemoryLimitsProperties limits = new MemoryLimitsProperties();
 
@@ -69,16 +73,124 @@ public class AgentMemoryService {
         this.limits = limits == null ? new MemoryLimitsProperties() : limits;
     }
 
-    private volatile com.agenticai.core.settings.SettingsResolver settings;
+    volatile java.time.Clock clock = java.time.Clock.systemUTC();
+
+    /**
+     * The memory clock ({@code memoryClock} bean, system UTC by default); tests pin it to control
+     * time.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void useClock(
+            @org.springframework.beans.factory.annotation.Qualifier("memoryClock")
+                    java.time.Clock clock) {
+        this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
+    }
+
+    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones =
+            com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
+
+    /**
+     * Makes a forgotten (tombstoned) fact stay forgotten: recall leaves it out and {@link
+     * #remember} refuses it.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTombstoneGuard(
+            com.agenticai.core.agents.memorystore.MemoryTombstoneGuard guard) {
+        this.tombstones =
+                guard == null
+                        ? com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive()
+                        : guard;
+    }
+
+    volatile FactSupersession supersession;
+
+    /**
+     * {@code app.memory.supersession.*} (V685); absent (hand-built) or disabled: every fact is a
+     * new row, as before.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSupersession(MemorySupersessionProperties properties) {
+        this.supersession =
+                properties == null || !properties.isEnabled()
+                        ? null
+                        : new FactSupersession(jdbcTemplate, properties);
+    }
+
+    private volatile com.agenticai.core.agents.memorystore.MemoryRecallProperties recallLimits;
+
+    /**
+     * {@code app.memory.recall.*}: relevance floor and per-turn cap of automatic recall; absent =
+     * none.
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setRecallLimits(
+            com.agenticai.core.agents.memorystore.MemoryRecallProperties limits) {
+        this.recallLimits = limits;
+    }
+
+    public com.agenticai.core.agents.memorystore.MemoryRecallProperties recallLimits() {
+        return recallLimits;
+    }
+
+    /**
+     * Whether a TRUSTED write replaces the fact it corrects (the tool then offers {@code
+     * replaces}).
+     */
+    public boolean supersessionEnabled() {
+        return supersession != null;
+    }
+
+    volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
      * The settings catalog, so a tenant's or an agent's {@code memory.recall.agentTopK} and {@code
      * memory.agent.maxMemories} apply to that agent's memory. Absent (hand-built instances): {@code
-     * app.memory.limits.*}. Memory is read and written on the turn's own thread, where the tenant is set.
+     * app.memory.limits.*}. Memory is read and written on the turn's own thread, where the tenant
+     * is set.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSettingsResolver(com.agenticai.core.settings.SettingsResolver resolver) {
         this.settings = resolver;
+    }
+
+    /**
+     * {@code app.memory.limits.recall-enabled}: the platform's value of the {@code
+     * memory.recall.enabled} switch (default on), asked as "off" so a mocked service answers the
+     * default (on). Read by the chat turn as the answer when no tenant or agent override exists.
+     */
+    public boolean recallSwitchedOffByPlatform() {
+        return !limits.isRecallEnabled();
+    }
+
+    /**
+     * {@code app.memory.limits.write-enabled} asked as "off" (a mocked service answers the default,
+     * on).
+     */
+    public boolean writesSwitchedOffByPlatform() {
+        return !limits.isWriteEnabled();
+    }
+
+    /** The settings-catalog key of the write switch (docs/settings.md). */
+    public static final String WRITE_ENABLED_KEY = "memory.write.enabled";
+
+    /**
+     * {@code memory.write.enabled} for {@code agentId}, asked as "off" so a mocked service answers
+     * the default (on): the agent's, else the workspace's, else the platform's ({@code
+     * app.memory.limits.write-enabled}). A failing lookup leaves writes as the platform value has
+     * them.
+     */
+    public boolean writesSwitchedOff(UUID agentId) {
+        com.agenticai.core.settings.SettingsResolver catalog = settings;
+        if (catalog == null) {
+            return !limits.isWriteEnabled();
+        }
+        try {
+            return !catalog.getBool(
+                    WRITE_ENABLED_KEY,
+                    com.agenticai.core.settings.SettingContext.forAgent(agentId));
+        } catch (RuntimeException e) {
+            return !limits.isWriteEnabled();
+        }
     }
 
     static final String RECALL_TOP_K_KEY = "memory.recall.agentTopK";
@@ -90,7 +202,8 @@ public class AgentMemoryService {
             return platform;
         }
         try {
-            return catalog.getInt(key, com.agenticai.core.settings.SettingContext.forAgent(agentId));
+            return catalog.getInt(
+                    key, com.agenticai.core.settings.SettingContext.forAgent(agentId));
         } catch (RuntimeException e) {
             return platform;
         }
@@ -106,24 +219,110 @@ public class AgentMemoryService {
 
     /**
      * Persists one fact/preference, embedding it for later semantic recall, then prunes the oldest
-     * memories for this agent if this insert pushed it over {@code app.memory.limits.agent-max-memories}.
+     * memories for this agent if this insert pushed it over {@code
+     * app.memory.limits.agent-max-memories}.
      */
     public UUID remember(UUID agentId, String subjectKey, String content) {
+        return remember(agentId, subjectKey, content, MemoryProvenance.TRUSTED);
+    }
+
+    /**
+     * {@link #remember(UUID, String, String)} with explicit provenance. A QUARANTINED row is stored
+     * but never recalled or injected into a prompt until {@link #approve} is called for it.
+     */
+    public UUID remember(
+            UUID agentId, String subjectKey, String content, MemoryProvenance provenance) {
+        return remember(agentId, subjectKey, content, provenance, null);
+    }
+
+    /**
+     * As above; {@code replaces} is the text of an earlier fact this one corrects (what the agent
+     * saw in its recalled memory), or null. With supersession on and a TRUSTED write, that fact and
+     * any fact this one is a near-duplicate of are marked superseded; a QUARANTINED write only
+     * records them until a person approves it.
+     */
+    public UUID remember(
+            UUID agentId,
+            String subjectKey,
+            String content,
+            MemoryProvenance provenance,
+            String replaces) {
+        if (tombstones.isForgotten(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_AGENT,
+                subjectKey,
+                agentId,
+                content)) {
+            // Resurrection guard: the person (or the nightly tidy-up) forgot this exact text; only
+            // a person re-adding it
+            // by hand (rememberOwn) brings it back.
+            throw new MemoryForgottenException();
+        }
+        return insertFact(
+                agentId, subjectKey, content, provenance, AGENT_IMPORTANCE, false, replaces);
+    }
+
+    /**
+     * Importance prior of a fact the agent saved itself; a typed fact starts at 0.8 (design 03,
+     * section 3).
+     */
+    static final double AGENT_IMPORTANCE = 0.6;
+
+    static final double TYPED_IMPORTANCE = 0.8;
+
+    private UUID insertFact(
+            UUID agentId,
+            String subjectKey,
+            String content,
+            MemoryProvenance provenance,
+            double importance,
+            boolean personAuthored,
+            String replaces) {
+        MemoryProvenance prov =
+                provenance == null
+                        ? new MemoryProvenance(MemoryTrust.QUARANTINED, null)
+                        : provenance;
+        String table = AgentMemorySchemaSupport.qualifiedTableName();
+        FactSupersession sup = supersession;
+        boolean trusted = prov.trust() == MemoryTrust.TRUSTED;
+        FactSupersession.Scope scope =
+                new FactSupersession.Scope(
+                        table, "agent_id = ? AND subject_key = ?", agentId, subjectKey);
+        if (sup != null && trusted) {
+            java.util.Optional<UUID> same = sup.reconfirm(scope, content, clock.instant());
+            if (same.isPresent()) {
+                return same.get(); // the same fact told again: re-confirmed, not stored twice
+            }
+        }
         float[] embedding = sidecarClient.embedQuery(content);
         String literal = toVectorLiteral(embedding);
         UUID id = UUID.randomUUID();
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
 
         jdbcTemplate.update(
+                // codeql[java/sql-injection]
                 "INSERT INTO "
                         + table
-                        + " (id, agent_id, subject_key, content, embedding) VALUES (?, ?, ?, ?,"
-                        + " ?::public.vector)",
+                        + " (id, agent_id, subject_key, content, embedding, trust, source_taint, importance,"
+                        + " person_authored) VALUES (?, ?, ?, ?, ?::public.vector, ?, ?, ?, ?)",
                 id,
                 agentId,
                 subjectKey,
                 content,
-                literal);
+                literal,
+                prov.trust().name(),
+                prov.sourcesJson(),
+                importance,
+                personAuthored);
+        if (sup != null) {
+            sup.afterInsert(
+                    scope,
+                    id,
+                    literal,
+                    replaces,
+                    text -> toVectorLiteral(sidecarClient.embedQuery(text)),
+                    personAuthored,
+                    trusted,
+                    clock.instant());
+        }
         pruneOverCap(table, agentId);
         log.debug("Remembered fact for agent {} subject '{}': {}", agentId, subjectKey, content);
         return id;
@@ -141,12 +340,14 @@ public class AgentMemoryService {
         String table = AgentMemorySchemaSupport.qualifiedTableName();
         Integer own =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM " + table + " WHERE agent_id = ? AND subject_key = ?",
                         Integer.class,
                         agentId,
                         subjectKey);
         Integer total =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM " + table + " WHERE agent_id = ?",
                         Integer.class,
                         agentId);
@@ -158,6 +359,7 @@ public class AgentMemoryService {
                         maxMemories(agentId));
         if (evict > 0) {
             jdbcTemplate.update(
+                    // codeql[java/sql-injection]
                     "DELETE FROM "
                             + table
                             + " WHERE id IN ("
@@ -169,17 +371,32 @@ public class AgentMemoryService {
                     subjectKey,
                     evict);
         }
-        return remember(agentId, subjectKey, content);
+        // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone
+        // of the same text.
+        tombstones.reconfirm(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_AGENT,
+                subjectKey,
+                agentId,
+                content);
+        return insertFact(
+                agentId,
+                subjectKey,
+                content,
+                MemoryProvenance.TRUSTED,
+                TYPED_IMPORTANCE,
+                true,
+                null);
     }
 
     /**
-     * Keeps this agent's total memory count at or under {@code app.memory.limits.agent-max-memories} by
-     * deleting its oldest rows (across every subject) once it's over - a bounded "memory space"
-     * rather than unbounded accumulation.
+     * Keeps this agent's total memory count at or under {@code
+     * app.memory.limits.agent-max-memories} by deleting its oldest rows (across every subject) once
+     * it's over - a bounded "memory space" rather than unbounded accumulation.
      */
     private void pruneOverCap(String table, UUID agentId) {
         Integer count =
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection]
                         "SELECT COUNT(*) FROM " + table + " WHERE agent_id = ?",
                         Integer.class,
                         agentId);
@@ -189,12 +406,15 @@ public class AgentMemoryService {
         }
         int overflow = count - cap;
         jdbcTemplate.update(
+                // codeql[java/sql-injection]
                 "DELETE FROM "
                         + table
                         + " WHERE id IN ("
                         + "SELECT id FROM "
                         + table
-                        + " WHERE agent_id = ? ORDER BY created_at ASC LIMIT ?)",
+                        + " WHERE agent_id = ? ORDER BY (superseded_by IS NOT NULL) DESC,"
+                        + " (trust = 'QUARANTINED') DESC, created_at ASC"
+                        + " LIMIT ?)",
                 agentId,
                 overflow);
         log.debug(
@@ -211,7 +431,20 @@ public class AgentMemoryService {
 
     /** A shareable, lazily computed embedding of {@code query}; see {@link QueryEmbedding}. */
     public QueryEmbedding queryEmbedding(String query) {
-        return new QueryEmbedding(query, sidecarClient::embedQuery);
+        return new QueryEmbedding(query, this::embedShared);
+    }
+
+    private final RecentEmbeddings recentEmbeddings = new RecentEmbeddings();
+
+    /**
+     * The same sidecar query embedding {@link #queryEmbedding} uses, shared for a few seconds per
+     * tenant and text, so the unified-memory store's embedder ({@code SidecarMemoryEmbedder}) does
+     * not embed the user message a second time in the same turn. Callers must not modify the
+     * returned array.
+     */
+    public float[] embedShared(String text) {
+        String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+        return recentEmbeddings.get(tenant, text, sidecarClient::embedQuery);
     }
 
     /**
@@ -231,22 +464,16 @@ public class AgentMemoryService {
         // V18__agent_memory.sql).
         List<AgentMemoryEntry> results =
                 jdbcTemplate.query(
+                        // codeql[java/sql-injection]
                         "SELECT id, agent_id, subject_key, content, created_at, last_used_at,"
-                                + " use_count, embedding OPERATOR(public.<=>) ?::public.vector AS"
-                                + " distance FROM "
+                                + " use_count, trust, source_taint, embedding OPERATOR(public.<=>)"
+                                + " ?::public.vector AS distance FROM "
                                 + table
-                                + " WHERE agent_id = ? AND subject_key = ? ORDER BY distance ASC"
-                                + " LIMIT ?",
-                        (rs, rowNum) ->
-                                new AgentMemoryEntry(
-                                        UUID.fromString(rs.getString("id")),
-                                        UUID.fromString(rs.getString("agent_id")),
-                                        rs.getString("subject_key"),
-                                        rs.getString("content"),
-                                        rs.getDouble("distance"),
-                                        rs.getTimestamp("created_at").toInstant(),
-                                        rs.getTimestamp("last_used_at").toInstant(),
-                                        rs.getInt("use_count")),
+                                + " WHERE agent_id = ? AND subject_key = ? AND trust = 'TRUSTED'"
+                                + " AND superseded_by IS NULL"
+                                + tombstones.excludeAgentFacts(table)
+                                + " ORDER BY distance ASC, updated_at DESC LIMIT ?",
+                        AgentMemoryRows.entryMapper(),
                         literal,
                         agentId,
                         subjectKey,
@@ -278,162 +505,86 @@ public class AgentMemoryService {
         return recall(agentId, subjectKey, query, recallTopK(agentId), embedding);
     }
 
-    /**
-     * Every memory this agent has for this subject, most recent first - for a future admin/debug UI
-     * panel.
-     */
+    private final AgentMemorySubjectOps subjectOps = new AgentMemorySubjectOps(this);
+
     public List<AgentMemoryEntry> listAll(UUID agentId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.query(
-                "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " 0.0 AS distance FROM "
-                        + table
-                        + " WHERE agent_id = ? AND subject_key = ? ORDER BY created_at DESC",
-                (rs, rowNum) ->
-                        new AgentMemoryEntry(
-                                UUID.fromString(rs.getString("id")),
-                                UUID.fromString(rs.getString("agent_id")),
-                                rs.getString("subject_key"),
-                                rs.getString("content"),
-                                rs.getDouble("distance"),
-                                rs.getTimestamp("created_at").toInstant(),
-                                rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count")),
-                agentId,
-                subjectKey);
+        return subjectOps.listAll(agentId, subjectKey);
     }
 
-    /**
-     * Every private memory any agent holds about this subject, newest first - the signed-in user's
-     * own view of what they have been remembered as (gap-analysis item 11). Not agent-scoped on
-     * purpose: the owner sees all of it in one place; each row still carries its {@code agentId}.
-     */
+    /** All of this subject's memories across every agent (admin/erasure reads); newest first. */
     public List<AgentMemoryEntry> listAllForSubject(String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.query(
-                "SELECT id, agent_id, subject_key, content, created_at, last_used_at, use_count,"
-                        + " 0.0 AS distance FROM "
-                        + table
-                        + " WHERE subject_key = ? ORDER BY created_at DESC",
-                (rs, rowNum) ->
-                        new AgentMemoryEntry(
-                                UUID.fromString(rs.getString("id")),
-                                UUID.fromString(rs.getString("agent_id")),
-                                rs.getString("subject_key"),
-                                rs.getString("content"),
-                                rs.getDouble("distance"),
-                                rs.getTimestamp("created_at").toInstant(),
-                                rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count")),
-                subjectKey);
+        return subjectOps.listAllForSubject(subjectKey);
     }
 
-    /**
-     * Up to {@code limit} distinct people (subject keys) who have a private memory in the current
-     * tenant. For background reviews that walk every person; not for request paths.
-     */
+    /** Every distinct subject key this agent has stored (cap {@code limit}). */
     public List<String> listSubjects(int limit) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.queryForList(
-                "SELECT DISTINCT subject_key FROM " + table + " LIMIT ?",
-                String.class,
-                Math.max(1, limit));
+        return subjectOps.listSubjects(limit);
     }
 
     /**
      * Re-embeds and rewrites one memory owned by {@code subjectKey}; false when it is not theirs.
      */
     public boolean updateForSubject(UUID memoryId, String subjectKey, String content) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        String literal = toVectorLiteral(sidecarClient.embedQuery(content));
-        return jdbcTemplate.update(
-                        "UPDATE "
-                                + table
-                                + " SET content = ?, embedding = ?::public.vector WHERE id = ? AND"
-                                + " subject_key = ?",
-                        content,
-                        literal,
-                        memoryId,
-                        subjectKey)
-                > 0;
+        return subjectOps.updateForSubject(memoryId, subjectKey, content);
     }
 
-    /** Deletes one memory only if it belongs to {@code subjectKey}; false when it is not theirs. */
+    /** Forgets one memory only if it belongs to {@code subjectKey}; false when it is not theirs. */
     public boolean forgetForSubject(UUID memoryId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        "DELETE FROM " + table + " WHERE id = ? AND subject_key = ?",
-                        memoryId,
-                        subjectKey)
-                > 0;
+        return subjectOps.forgetForSubject(memoryId, subjectKey);
     }
 
+    /** Marks a suggested memory TRUSTED: a person confirmed it. */
+    public boolean approve(UUID agentId, UUID memoryId) {
+        return subjectOps.approve(agentId, memoryId);
+    }
+
+    /**
+     * Person-scoped {@link #approve(UUID, UUID)}: refuses to trust a memory not about {@code
+     * subjectKey} (data-subject portal surface).
+     */
+    public boolean approve(UUID agentId, UUID memoryId, String subjectKey) {
+        return subjectOps.approve(agentId, memoryId, subjectKey);
+    }
+
+    /** Wires the approved-fact graph mirror (ADR-0028 stage 2); null keeps vector-only writes. */
+    public void setGraphSync(ApprovedFactGraphSync graphSync) {
+        subjectOps.setGraphSync(graphSync);
+    }
+
+    /** Forgets one of this agent's memories; false when it is not this agent's. */
     public void forget(UUID agentId, UUID memoryId) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        jdbcTemplate.update(
-                "DELETE FROM " + table + " WHERE id = ? AND agent_id = ?", memoryId, agentId);
+        subjectOps.forget(agentId, memoryId);
     }
 
     /** Deletes one of this agent's memories only if it is about {@code subjectKey}. */
     public boolean forget(UUID agentId, UUID memoryId, String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        "DELETE FROM "
-                                + table
-                                + " WHERE id = ? AND agent_id = ? AND subject_key = ?",
-                        memoryId,
-                        agentId,
-                        subjectKey)
-                > 0;
+        return subjectOps.forget(agentId, memoryId, subjectKey);
     }
 
     /**
-     * Retention purge (DPDP-oriented controls): deletes up to {@code limit} rows created before
-     * {@code cutoff} in the current tenant's schema, oldest first, and returns how many went. The
-     * caller loops until it returns less than {@code limit}.
+     * Deletes facts created before {@code cutoff} (retention), oldest first, at most {@code limit}.
      */
     public int purgeCreatedBefore(java.time.Instant cutoff, int limit) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        int deleted =
-                jdbcTemplate.update(
-                        "DELETE FROM "
-                                + table
-                                + " WHERE id IN (SELECT id FROM "
-                                + table
-                                + " WHERE created_at < ? ORDER BY created_at LIMIT ?)",
-                        java.sql.Timestamp.from(cutoff),
-                        limit);
-        log.info("Retention purge removed {} agent-memory rows older than {}", deleted, cutoff);
-        return deleted;
+        return subjectOps.purgeCreatedBefore(cutoff, limit);
     }
 
     /**
-     * #815 Governance follow-up (PII handling review / data-subject erasure) - deletes every memory
-     * this TENANT's agents hold about one subject, across ALL agents, not just whichever agent
-     * currently handles that subject's conversations. Necessary because {@code subjectKey} scoping
-     * is {@code (agentId, subjectKey)}, and {@code ChannelSessionService#rebindAgent} means the
-     * same real person may have left memories under more than one agent over time - a single-agent
-     * {@link #forget} sweep would silently leave those behind. Returns the number of rows deleted,
-     * purely for the caller to log/report - callers should not branch on it.
+     * Data-subject erasure: every agent-memory row about {@code subjectKey}, whichever agent wrote
+     * it.
      */
     public int forgetAllForSubject(String subjectKey) {
-        String table = AgentMemorySchemaSupport.qualifiedTableName();
-        int deleted =
-                jdbcTemplate.update("DELETE FROM " + table + " WHERE subject_key = ?", subjectKey);
-        log.info(
-                "Erased {} agent-memory rows for subject key (data-subject erasure request)",
-                deleted);
-        return deleted;
+        return subjectOps.forgetAllForSubject(subjectKey);
     }
 
     private void touchUsage(String table, List<UUID> ids) {
         String placeholders = ids.stream().map(id -> "?").collect(Collectors.joining(","));
         Object[] params = new Object[ids.size() + 1];
-        params[0] = Timestamp.from(Instant.now());
+        params[0] = Timestamp.from(clock.instant());
         for (int i = 0; i < ids.size(); i++) {
             params[i + 1] = ids.get(i);
         }
         jdbcTemplate.update(
+                // codeql[java/sql-injection]
                 "UPDATE "
                         + table
                         + " SET last_used_at = ?, use_count = use_count + 1 WHERE id IN ("
@@ -442,7 +593,7 @@ public class AgentMemoryService {
                 params);
     }
 
-    private static String toVectorLiteral(float[] embedding) {
+    static String toVectorLiteral(float[] embedding) {
         List<Double> boxed =
                 IntStream.range(0, embedding.length)
                         .mapToDouble(i -> embedding[i])

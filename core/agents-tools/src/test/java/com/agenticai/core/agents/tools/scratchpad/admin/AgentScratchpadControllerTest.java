@@ -42,7 +42,8 @@ class AgentScratchpadControllerTest {
                 scope,
                 body == null ? 0 : body.getBytes().length,
                 Instant.parse("2026-01-02T03:04:05Z"),
-                body);
+                body,
+                "agent".equals(scope) ? "alice" : null);
     }
 
     @BeforeEach
@@ -83,11 +84,12 @@ class AgentScratchpadControllerTest {
     @Test
     void readReturnsTheBodyAnd404sWhenMissing() {
         Optional<ScratchpadNoteView> found = Optional.of(view("agent", "k", "body text"));
-        when(scratchpadService.readView(any(), any(), eq("k"))).thenReturn(found);
+        when(scratchpadService.readView(any(), any(), eq("k"), any())).thenReturn(found);
 
-        assertThat(controller.read(AGENT, "k", null).getBody().body()).isEqualTo("body text");
-        when(scratchpadService.readView(any(), any(), eq("gone"))).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> controller.read(AGENT, "gone", null))
+        assertThat(controller.read(AGENT, "k", null, null).getBody().body()).isEqualTo("body text");
+        when(scratchpadService.readView(any(), any(), eq("gone"), any()))
+                .thenReturn(Optional.empty());
+        assertThatThrownBy(() -> controller.read(AGENT, "gone", null, null))
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(e -> ((ResponseStatusException) e).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);

@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "id": "persona-p7-sales-rep",
+  "category": "persona",
+  "persona": {
+    "id": "p7-sales-rep",
+    "name": "Sales rep",
+    "language": "en",
+    "description": "Account contacts, who left the company (staleness heavy)"
+  },
+  "seed": 207,
+  "sessions": [
+    {
+      "id": "s1",
+      "gap_days": 0,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "My key account is Verma Steels, deal size 40 lakh",
+          "plants": [
+            "f00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Give account summaries as a table",
+          "plants": [
+            "f02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Our Verma Steels contact is Rohit Gupta",
+          "plants": [
+            "f03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite tea: Kashmiri kahwa",
+          "plants": [
+            "d00"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite colour: plum",
+          "plants": [
+            "d06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite festival: Navratri",
+          "plants": [
+            "d12"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s2",
+      "gap_days": 3,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Verma Steels renewal is due on 30 June",
+          "plants": [
+            "f01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "My manager is Kavita Desai",
+          "plants": [
+            "f05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "My territory is West",
+          "plants": [
+            "f07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite dish: Thepla",
+          "plants": [
+            "d01"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "shoe size: size 9",
+          "plants": [
+            "d07"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "cousin's city: Amritsar",
+          "plants": [
+            "d13"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s3",
+      "gap_days": 10,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Kavita's number is 60000-44444",
+          "plants": [
+            "f06"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Never discount beyond 10% without manager approval",
+          "plants": [
+            "f09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "commute: train",
+          "plants": [
+            "d02"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "phone model: Mi-demo",
+          "plants": [
+            "d08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "vehicle: Wagon R",
+          "plants": [
+            "d14"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s4",
+      "gap_days": 30,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "Rohit Gupta left, the new Verma Steels contact is Neha Joshi",
+          "plants": [
+            "f04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Quarterly quota is 2 crore",
+          "plants": [
+            "f10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "pet: Buddy",
+          "plants": [
+            "d03"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "wake-up time: 7:30",
+          "plants": [
+            "d09"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "TV show: Kota Factory 2",
+          "plants": [
+            "d15"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s5",
+      "gap_days": 7,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "I was reassigned, territory is South now",
+          "plants": [
+            "f08"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "Our CRM tool is Zoho",
+          "plants": [
+            "f11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "hobby: photography",
+          "plants": [
+            "d04"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "gym day: Sunday",
+          "plants": [
+            "d10"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "favourite sweet: laddu",
+          "plants": [
+            "d16"
+          ]
+        }
+      ],
+      "forgets": []
+    },
+    {
+      "id": "s6",
+      "gap_days": 45,
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "turns": [
+        {
+          "source": "USER",
+          "text": "music: carnatic",
+          "plants": [
+            "d05"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "current book: Raag Darbari",
+          "plants": [
+            "d11"
+          ]
+        },
+        {
+          "source": "USER",
+          "text": "weekend spot: Lonavala",
+          "plants": [
+            "d17"
+          ]
+        }
+      ],
+      "forgets": []
+    }
+  ],
+  "ledger": [
+    {
+      "id": "f00",
+      "key": "key_account",
+      "value": "Key account is Verma Steels, deal size 40 lakh",
+      "match": "Verma Steels",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p1"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f01",
+      "key": "renewal_date",
+      "value": "Verma Steels renewal is due 30 June",
+      "match": "30 June",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p2"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f02",
+      "key": "summary_style",
+      "value": "Account summaries as a table",
+      "match": "| Account | Status |",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p3"
+      ],
+      "kind": "PREFERENCE",
+      "valid_from": 0
+    },
+    {
+      "id": "f03",
+      "key": "verma_contact",
+      "value": "Verma Steels contact is Rohit Gupta",
+      "match": "Rohit Gupta",
+      "planted_in": "s1",
+      "superseded_by": "f04",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "f04",
+      "key": "verma_contact",
+      "value": "Rohit left; Verma Steels contact is now Neha Joshi",
+      "match": "Neha Joshi",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p4"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f05",
+      "key": "manager_name",
+      "value": "Manager is Kavita Desai",
+      "match": "Kavita Desai",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f06",
+      "key": "manager_phone",
+      "value": "Kavita's number is 60000-44444",
+      "match": "60000-44444",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p5"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f07",
+      "key": "territory",
+      "value": "Territory is West",
+      "match": "West",
+      "planted_in": "s2",
+      "superseded_by": "f08",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "f08",
+      "key": "territory",
+      "value": "Territory is South",
+      "match": "South",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p7"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "f09",
+      "key": "discount_rule",
+      "value": "Never discount beyond 10% without manager approval",
+      "match": "10%",
+      "planted_in": "s3",
+      "sensitivity": "CRITICAL",
+      "relevant_to": [
+        "p8"
+      ],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "f10",
+      "key": "quota",
+      "value": "Quarterly quota is 2 crore",
+      "match": "2 crore",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p9"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "f11",
+      "key": "crm_tool",
+      "value": "CRM tool is Zoho demo",
+      "match": "Zoho",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p10"
+      ],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d00",
+      "key": "misc_fav_tea",
+      "value": "favourite tea: Kashmiri kahwa",
+      "match": "Kashmiri kahwa",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p12"
+      ],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d01",
+      "key": "misc_fav_dish",
+      "value": "favourite dish: Thepla",
+      "match": "Thepla",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d02",
+      "key": "misc_commute",
+      "value": "commute: train",
+      "match": "train",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d03",
+      "key": "misc_pet_name",
+      "value": "pet: Buddy",
+      "match": "Buddy",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [
+        "p11"
+      ],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d04",
+      "key": "misc_hobby",
+      "value": "hobby: photography",
+      "match": "photography",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d05",
+      "key": "misc_music",
+      "value": "music: carnatic",
+      "match": "carnatic",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d06",
+      "key": "misc_colour",
+      "value": "favourite colour: plum",
+      "match": "plum",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d07",
+      "key": "misc_shoe",
+      "value": "shoe size: size 9",
+      "match": "size 9",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d08",
+      "key": "misc_phone",
+      "value": "phone model: Mi-demo",
+      "match": "Mi-demo",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d09",
+      "key": "misc_wake",
+      "value": "wake-up time: 7:30",
+      "match": "7:30",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d10",
+      "key": "misc_gym",
+      "value": "gym day: Sunday",
+      "match": "Sunday",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d11",
+      "key": "misc_book",
+      "value": "current book: Raag Darbari",
+      "match": "Raag Darbari",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    },
+    {
+      "id": "d12",
+      "key": "misc_festival",
+      "value": "favourite festival: Navratri",
+      "match": "Navratri",
+      "planted_in": "s1",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 0
+    },
+    {
+      "id": "d13",
+      "key": "misc_cousin",
+      "value": "cousin's city: Amritsar",
+      "match": "Amritsar",
+      "planted_in": "s2",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 3
+    },
+    {
+      "id": "d14",
+      "key": "misc_vehicle",
+      "value": "vehicle: Wagon R",
+      "match": "Wagon R",
+      "planted_in": "s3",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 13
+    },
+    {
+      "id": "d15",
+      "key": "misc_show",
+      "value": "TV show: Kota Factory 2",
+      "match": "Kota Factory 2",
+      "planted_in": "s4",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 43
+    },
+    {
+      "id": "d16",
+      "key": "misc_sweet",
+      "value": "favourite sweet: laddu",
+      "match": "laddu",
+      "planted_in": "s5",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 50
+    },
+    {
+      "id": "d17",
+      "key": "misc_spot",
+      "value": "weekend spot: Lonavala",
+      "match": "Lonavala",
+      "planted_in": "s6",
+      "sensitivity": "PERSONAL",
+      "relevant_to": [],
+      "kind": "FACT",
+      "valid_from": 95
+    }
+  ],
+  "probes": [
+    {
+      "id": "p1",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which is my key account?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "key_account"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Verma Steels"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p2",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "When is the Verma Steels renewal?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "renewal_date"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "30 June"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p3",
+      "after": "s6",
+      "type": "PREFERENCE",
+      "prompt": "Summarise my accounts",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "summary_style"
+      ],
+      "memory_dependent": true,
+      "expect": {
+        "all": [
+          "| Account | Status |"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p4",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "Who is my contact at Verma Steels?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "verma_contact"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "Neha Joshi"
+        ],
+        "none": [
+          "Rohit Gupta"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p5",
+      "after": "s6",
+      "type": "MULTI_HOP",
+      "prompt": "Call my manager",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "manager_name",
+        "manager_phone"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "multi_session_reasoning",
+      "expect": {
+        "all": [
+          "60000-44444"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p6",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my commission rate?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "commission_rate"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    },
+    {
+      "id": "p7",
+      "after": "s6",
+      "type": "UPDATE",
+      "prompt": "Which territory am I in?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "territory"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "knowledge_update",
+      "expect": {
+        "all": [
+          "South"
+        ],
+        "none": [
+          "West"
+        ],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p8",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Can I offer Verma Steels a 15% discount?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "discount_rule"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "10%"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p9",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my quarterly quota?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "quota"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "2 crore"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p10",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which CRM tool do I use?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "crm_tool"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Zoho"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p11",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "What is my pet's name?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_pet_name"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Buddy"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p12",
+      "after": "s6",
+      "type": "DIRECT_RECALL",
+      "prompt": "Which tea do I like best?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "misc_fav_tea"
+      ],
+      "memory_dependent": true,
+      "lme_ability": "single_session_recall",
+      "expect": {
+        "all": [
+          "Kashmiri kahwa"
+        ],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": false
+      }
+    },
+    {
+      "id": "p13",
+      "after": "s6",
+      "type": "ABSTENTION",
+      "prompt": "What is my passport number?",
+      "user_id": "u1",
+      "tenant_id": "t1",
+      "query_keys": [
+        "passport"
+      ],
+      "memory_dependent": false,
+      "lme_ability": "abstention",
+      "expect": {
+        "all": [],
+        "none": [],
+        "forbid_tools": [],
+        "abstain": true
+      }
+    }
+  ]
+}

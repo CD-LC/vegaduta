@@ -13,6 +13,7 @@ import com.agenticai.core.agents.turn.ToolLedger;
 import com.agenticai.core.agents.turn.ToolLedgerProperties;
 import com.agenticai.core.agents.turn.TurnToolActivity;
 import com.agenticai.core.guardrails.ApprovalStateFixture;
+import com.agenticai.core.guardrails.ToolResultMarker;
 import com.agenticai.core.guardrails.ToolStepLimitExceededException;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
@@ -26,9 +27,9 @@ import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 
 /**
- * {@link LoggingToolCallback} is the single place every tool call of a turn passes through, so it is where
- * the turn's tool ledger is written: each call becomes one summarised, masked entry with the status the
- * model needs (ran, failed, did not run, waiting for a human, repeat).
+ * {@link LoggingToolCallback} is the single place every tool call of a turn passes through, so it
+ * is where the turn's tool ledger is written: each call becomes one summarised, masked entry with
+ * the status the model needs (ran, failed, did not run, waiting for a human, repeat).
  */
 class LoggingToolCallbackLedgerTest {
 
@@ -38,12 +39,18 @@ class LoggingToolCallbackLedgerTest {
     private static ToolCallback tool(String name, Function<String, String> body) {
         ToolCallback delegate = mock(ToolCallback.class);
         when(delegate.getToolDefinition())
-                .thenReturn(ToolDefinition.builder().name(name).description("d").inputSchema("{}").build());
+                .thenReturn(
+                        ToolDefinition.builder()
+                                .name(name)
+                                .description("d")
+                                .inputSchema("{}")
+                                .build());
         when(delegate.call(any(String.class))).thenAnswer(inv -> body.apply(inv.getArgument(0)));
         return delegate;
     }
 
-    private LoggingToolCallback wrap(ToolCallback delegate, ToolCircuitBreakerService breaker, EffectJournal journal) {
+    private LoggingToolCallback wrap(
+            ToolCallback delegate, ToolCircuitBreakerService breaker, EffectJournal journal) {
         return new LoggingToolCallback(
                         delegate,
                         mock(ToolCallLogRepository.class),
@@ -84,21 +91,34 @@ class LoggingToolCallbackLedgerTest {
     @Test
     void aToolThatThrowsIsRecordedAsFailedWithTheScrubbedMessageAndStillThrows() {
         LoggingToolCallback logged =
-                wrap(tool("send_email", args -> {
-                    throw new IllegalStateException("smtp rejected: Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123456789");
-                }));
+                wrap(
+                        tool(
+                                "send_email",
+                                args -> {
+                                    throw new IllegalStateException(
+                                            "smtp rejected: Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123456789");
+                                }));
 
         assertThrows(IllegalStateException.class, () -> logged.call("{}"));
 
         ToolLedger.Entry e = onlyEntry();
         assertEquals(ToolLedger.Status.FAILED, e.status());
         assertTrue(e.result().contains("smtp rejected"), e.result());
-        assertFalse(e.result().contains("abcdefghijklmnopqrstuvwxyz"), "credentials never reach the ledger: " + e.result());
+        assertFalse(
+                e.result().contains("abcdefghijklmnopqrstuvwxyz"),
+                "credentials never reach the ledger: " + e.result());
     }
 
     @Test
     void aCallAGuardAnsweredInsteadIsRecordedAsNotRun() {
-        wrap(tool("delete_all", args -> "This tool call (delete_all) needs approval before it can run.")).call("{}");
+        wrap(tool(
+                        "delete_all",
+                        args ->
+                                ToolResultMarker.mark(
+                                        "This tool call (delete_all) needs approval before it can run."
+                                                + System.nanoTime(),
+                                        ToolResultMarker.Kind.BLOCKED)))
+                .call("{}");
 
         assertEquals(ToolLedger.Status.NOT_RUN, onlyEntry().status());
     }
@@ -106,9 +126,13 @@ class LoggingToolCallbackLedgerTest {
     @Test
     void aStepBudgetStopIsRecordedAsNotRunBecauseThePlatformRaisedItNotTheTool() {
         LoggingToolCallback logged =
-                wrap(tool("get_order", args -> {
-                    throw new ToolStepLimitExceededException(UUID.randomUUID(), "session-1", 15);
-                }));
+                wrap(
+                        tool(
+                                "get_order",
+                                args -> {
+                                    throw new ToolStepLimitExceededException(
+                                            UUID.randomUUID(), "session-1", 15);
+                                }));
 
         assertThrows(ToolStepLimitExceededException.class, () -> logged.call("{}"));
 
@@ -118,8 +142,10 @@ class LoggingToolCallbackLedgerTest {
     @Test
     void aCircuitBlockedCallIsRecordedAsNotRunWithTheBlockMessage() {
         ToolCircuitBreakerService breaker = mock(ToolCircuitBreakerService.class);
-        when(breaker.openInfo("flaky")).thenReturn(new ToolCircuitBreakerService.OpenInfo(120, "timeout"));
-        LoggingToolCallback logged = wrap(tool("flaky", args -> "never"), breaker, null).withLedger(limits, null, null);
+        when(breaker.openInfo("flaky"))
+                .thenReturn(new ToolCircuitBreakerService.OpenInfo(120, "timeout"));
+        LoggingToolCallback logged =
+                wrap(tool("flaky", args -> "never"), breaker, null).withLedger(limits, null, null);
 
         logged.call("{}");
 
@@ -131,8 +157,18 @@ class LoggingToolCallbackLedgerTest {
     @Test
     void aCallHeldForAHumanIsRecordedWithTheRequestIdAndNoResultText() {
         LoggingToolCallback logged =
-                wrap(tool("send_invoice", args -> "This action ('send_invoice') requires human approval before it can run."), mock(ToolCircuitBreakerService.class), null)
-                        .withLedger(limits, ApprovalStateFixture.heldCall("send_invoice", "{\"to\":\"a\"}", "req-77"), null);
+                wrap(
+                                tool(
+                                        "send_invoice",
+                                        args ->
+                                                "This action ('send_invoice') requires human approval before it can run."),
+                                mock(ToolCircuitBreakerService.class),
+                                null)
+                        .withLedger(
+                                limits,
+                                ApprovalStateFixture.heldCall(
+                                        "send_invoice", "{\"to\":\"a\"}", "req-77"),
+                                null);
 
         logged.call("{\"to\":\"a\"}");
 
@@ -145,8 +181,15 @@ class LoggingToolCallbackLedgerTest {
     @Test
     void aDifferentCallInTheSameTurnIsNotMistakenForTheHeldOne() {
         LoggingToolCallback logged =
-                wrap(tool("send_invoice", args -> "{\"sent\":true}"), mock(ToolCircuitBreakerService.class), null)
-                        .withLedger(limits, ApprovalStateFixture.heldCall("send_invoice", "{\"to\":\"a\"}", "req-77"), null);
+                wrap(
+                                tool("send_invoice", args -> "{\"sent\":true}"),
+                                mock(ToolCircuitBreakerService.class),
+                                null)
+                        .withLedger(
+                                limits,
+                                ApprovalStateFixture.heldCall(
+                                        "send_invoice", "{\"to\":\"a\"}", "req-77"),
+                                null);
 
         logged.call("{\"to\":\"someone else\"}");
 
@@ -155,9 +198,13 @@ class LoggingToolCallbackLedgerTest {
 
     @Test
     void aRepeatServedFromTheEffectJournalIsRecordedAsReplayed() {
-        EffectJournal journal = new EffectJournal(true, Duration.ofMinutes(30), 10, null, Clock.systemUTC());
+        EffectJournal journal =
+                new EffectJournal(true, Duration.ofMinutes(30), 10, null, Clock.systemUTC());
         LoggingToolCallback logged =
-                wrap(tool("send_email", args -> "{\"sent\":true}"), mock(ToolCircuitBreakerService.class), journal)
+                wrap(
+                                tool("send_email", args -> "{\"sent\":true}"),
+                                mock(ToolCircuitBreakerService.class),
+                                journal)
                         .withLedger(limits, null, null);
 
         logged.call("{\"to\":\"a@b.c\"}");
@@ -172,7 +219,10 @@ class LoggingToolCallbackLedgerTest {
     void thePersonalDataRedactorOfTheModelFacingResultIsAppliedToTheRecord() {
         UnaryOperator<String> mask = text -> text.replace("jane@example.test", "[email]");
         LoggingToolCallback logged =
-                wrap(tool("lookup", args -> "{\"email\":\"jane@example.test\"}"), mock(ToolCircuitBreakerService.class), null)
+                wrap(
+                                tool("lookup", args -> "{\"email\":\"jane@example.test\"}"),
+                                mock(ToolCircuitBreakerService.class),
+                                null)
                         .withLedger(limits, null, mask);
 
         logged.call("{\"q\":\"jane@example.test\"}");
@@ -209,7 +259,8 @@ class LoggingToolCallbackLedgerTest {
 
     @Test
     void aWrapperWithoutALedgerConfiguredRecordsNothing() {
-        LoggingToolCallback logged = wrap(tool("t", args -> "result"), mock(ToolCircuitBreakerService.class), null);
+        LoggingToolCallback logged =
+                wrap(tool("t", args -> "result"), mock(ToolCircuitBreakerService.class), null);
 
         logged.call("{}");
 

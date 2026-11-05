@@ -25,6 +25,9 @@ import AgentsUsingNotes from "./AgentsUsingNotes";
 import DangerZone from "./DangerZone";
 // Named differently from the MemoryOverview response type imported below.
 import MemoryFactsOverview from "./MemoryOverview";
+import MemoryItemsPanel from "./MemoryItemsPanel";
+import { settingsApi } from "../lib/api/settings";
+import { unifiedMemoryEnabled } from "./memoryItems";
 import {
   ACTIVE_PROJECT_LABEL,
   DEFAULT_FACT_SORT,
@@ -103,6 +106,9 @@ export default function MemoryPage() {
   const [selfServiceGone, setSelfServiceGone] = useState(false);
   // The tab asked for by the URL hash or a click; the one actually shown is resolved against what exists.
   const [requestedTab, setRequestedTab] = useState<MemoryTab | null>(null);
+  // Whether the unified-memory gate can be on for any agent (platform AND
+  // tenant levels of memory.unified.enabled); false until the settings read lands.
+  const [unifiedOn, setUnifiedOn] = useState(false);
 
   useEffect(() => {
     const read = () => setRequestedTab(tabFromHash(window.location.hash));
@@ -137,10 +143,19 @@ export default function MemoryPage() {
               name: String(a.name || a.id),
               shareMemoryWithTenant: !!a.shareMemoryWithTenant,
               editable: a.editable !== false,
+              accessLevel: a.accessLevel ?? null,
             }))
         );
       })
       .catch(() => setAgentsFailed(true));
+    // The items tab is the unified-memory review surface (ADR-0028 WP6); the
+    // tenant-level effective value resolves platform AND tenant, so a false
+    // here means the gate is off for every agent and the tab stays hidden.
+    // Fail closed on any read error: a hidden tab costs one settings save.
+    settingsApi
+      .getEffective()
+      .then((eff) => setUnifiedOn(unifiedMemoryEnabled(eff)))
+      .catch(() => setUnifiedOn(false));
   }, [refresh]);
   usePageReady(loaded);
 
@@ -177,10 +192,11 @@ export default function MemoryPage() {
     const tabs: MemoryTab[] = [];
     if (blocksOn) tabs.push("notes", "assistants");
     if (data?.available) tabs.push("facts");
+    if (unifiedOn) tabs.push("items");
     tabs.push("import");
     if (selfService) tabs.push("privacy");
     return tabs;
-  }, [blocksOn, data?.available, selfService]);
+  }, [blocksOn, data?.available, unifiedOn, selfService]);
   const tab = resolveTab(requestedTab, availableTabs);
   const selectTab = (next: string) => {
     const id = tabFromHash(next);
@@ -222,6 +238,18 @@ export default function MemoryPage() {
   const deleteFact = async (fact: MemoryFact) => {
     try {
       await api.deleteMemoryFact(fact.scope, fact.id);
+      refresh();
+    } catch {
+      /* surfaced by toJson */
+    }
+  };
+
+  const approveFact = async (fact: MemoryFact) => {
+    if (fact.scope !== "shared" && !fact.agentId) return;
+    try {
+      // A shared fact reaches every sharing agent: its own endpoint, EDITOR on the agent that wrote it.
+      if (fact.scope === "shared") await api.approveSharedMemoryFact(fact.id);
+      else await api.approveAgentMemory(fact.agentId as string, fact.id);
       refresh();
     } catch {
       /* surfaced by toJson */
@@ -472,6 +500,7 @@ export default function MemoryPage() {
                           maxChars={data.limits.maxFactChars}
                           onEdit={editFact}
                           onDelete={deleteFact}
+                          onApprove={approveFact}
                         />
                       ))}
                     </ul>
@@ -487,6 +516,18 @@ export default function MemoryPage() {
                   />
                 </>
               )}
+            </div>
+          )}
+
+          {unifiedOn && (
+            <div
+              id="memory-panel-items"
+              role="tabpanel"
+              aria-labelledby="memory-tab-items"
+              hidden={tab !== "items"}
+              className="pt-2"
+            >
+              <MemoryItemsPanel agents={agents} />
             </div>
           )}
 

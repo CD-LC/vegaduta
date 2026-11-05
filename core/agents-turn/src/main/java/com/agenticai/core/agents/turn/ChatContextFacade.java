@@ -3,6 +3,7 @@ package com.agenticai.core.agents.turn;
 import com.agenticai.core.agents.context.ChatContextCompaction;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.spi.UnifiedMemoryRecall;
 import com.agenticai.core.agents.modality.ModelModalitiesService;
 import com.agenticai.core.agents.tools.e2b.SandboxFileRegistry;
 import com.agenticai.core.agents.vision.VisionSessionService;
@@ -26,4 +27,5 @@ record ChatContextFacade(
         VisionSessionService visionSessionService,
         ObjectProvider<SandboxFileRegistry> sandboxFileRegistry,
         ObjectProvider<ModelModalitiesService> modelModalitiesService,
-        ObjectProvider<ChatContextCompaction> chatContextCompaction) {}
+        ObjectProvider<ChatContextCompaction> chatContextCompaction,
+        ObjectProvider<UnifiedMemoryRecall> unifiedMemoryRecall) {}

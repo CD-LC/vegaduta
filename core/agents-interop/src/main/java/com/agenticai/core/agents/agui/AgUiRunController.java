@@ -8,6 +8,7 @@ import com.agenticai.core.agents.tools.ToolDescriptor;
 import com.agenticai.core.agents.turn.AgentChatService;
 import com.agenticai.core.agents.turn.ChatTurnRequest;
 import com.agenticai.core.agents.turn.TurnContext;
+import com.agenticai.core.guardrails.taint.SenderTrust;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.security.Principal;
@@ -164,6 +165,9 @@ public class AgUiRunController {
                         false);
         TurnContext turnContext =
                 TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+        // AG-UI is the protocol an application's end users talk through: not the console, so the
+        // sender is not known to be a tenant member (docs/security/taint-entry-points.md).
+        SenderTrust.UNTRUSTED.seed(turnContext.taint(), "inbound:ag_ui");
         Flux<String> tokens = agentChatService.chat(turnContext, chatTurn);
         // Same merge shape as AgentController#chat, for the same reason: the
         // emitter's sink has no end of its own, so the token stream's

@@ -141,6 +141,10 @@ bindings plus `tenant` routing. What it would take, and why I would hold off:
 - **Recommendation:** defer until a concrete integration asks for it. If you want it, say so and
   I will write the design (ADR) first rather than the code.
 
+## Message-level protection (extension, OWASP ASI07)
+
+Not part of the A2A spec, and strictly additive: optional request headers `X-A2A-Timestamp` (epoch seconds), `X-A2A-Nonce`, `X-A2A-Hop` and `X-A2A-Signature` (`v1=` + base64url HMAC-SHA256 over method, path, timestamp, nonce, hop and the SHA-256 of the body). A peer that sends none of them is served exactly as before unless `app.a2a.require-replay-protection=true`. Refusals use the platform codes -32090 replay, -32091 timestamp outside window, -32092 hop limit, -32093 headers required or malformed, -32094 bad signature, -32095 nonce capacity (REST: 409/400/400/400/401/429 with `ErrorInfo` reasons). Limits: with `task-store=memory` the nonce cache is per replica (a replay can succeed once per replica inside the window); the signature covers the raw request path, so a path-rewriting proxy breaks it; only POST is checked; one shared inbound secret.
+
 ## Known gaps worth scheduling
 
 1. `ListTasks` and `SubscribeToTask` (the card says `streaming: true`, so the second one is a

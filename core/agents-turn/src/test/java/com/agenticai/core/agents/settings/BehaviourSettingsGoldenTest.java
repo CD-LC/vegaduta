@@ -12,9 +12,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * With no override, the value a use site gets from the catalog IS the value of the property object it used to read:
- * wiring a key must change nothing until somebody sets it. The properties are moved off their defaults first, so a catalog
- * that quietly answered a default of its own would fail here.
+ * With no override, the value a use site gets from the catalog IS the value of the property object
+ * it used to read: wiring a key must change nothing until somebody sets it. The properties are
+ * moved off their defaults first, so a catalog that quietly answered a default of its own would
+ * fail here.
  */
 class BehaviourSettingsGoldenTest {
 
@@ -29,7 +30,8 @@ class BehaviourSettingsGoldenTest {
 
     private void expect(Object expected, String key) {
         TenantContext.set(TenantContext.of("tenant-a", "u", Set.of()));
-        for (SettingContext ctx : new SettingContext[] {SettingContext.tenant(), SettingContext.forAgent(AGENT)}) {
+        for (SettingContext ctx :
+                new SettingContext[] {SettingContext.tenant(), SettingContext.forAgent(AGENT)}) {
             SettingValue resolved = f.resolver().get(key, ctx);
             Object value = resolved.value();
             if (expected instanceof Duration d) {
@@ -60,6 +62,9 @@ class BehaviourSettingsGoldenTest {
         f.toolLoop.getResultClearing().setThresholdChars(12_345);
         f.routing.setMaxChars(321);
         f.routing.setMaxClauses(4);
+        f.memory.setRecallEnabled(!f.memory.isRecallEnabled());
+        f.memory.setWriteEnabled(!f.memory.isWriteEnabled());
+        f.episodic.setEnabled(!f.episodic.isEnabled());
         f.memory.setAgentRecallTopK(11);
         f.memory.setTenantRecallTopK(12);
         f.memory.setAgentMaxMemories(77);
@@ -79,6 +84,9 @@ class BehaviourSettingsGoldenTest {
         expect(12_345, "chat.toolLoop.resultClearing.thresholdChars");
         expect(321, "routing.simple.maxChars");
         expect(4, "routing.simple.maxClauses");
+        expect(f.memory.isRecallEnabled(), "memory.recall.enabled");
+        expect(f.memory.isWriteEnabled(), "memory.write.enabled");
+        expect(f.episodic.isEnabled(), "memory.episodic.enabled");
         expect(11, "memory.recall.agentTopK");
         expect(12, "memory.recall.tenantTopK");
         expect(77, "memory.agent.maxMemories");

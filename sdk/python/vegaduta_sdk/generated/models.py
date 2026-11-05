@@ -143,6 +143,8 @@ McpServerType = Literal["STDIO", "SSE", "STREAMABLE_HTTP"]
 
 McpUsageStatus = Literal["UNTESTED", "READY", "FAILED", "ACKNOWLEDGED"]
 
+MemoryTrust = Literal["TRUSTED", "QUARANTINED"]
+
 MetaSocialCredentialStatus = Literal["ACTIVE", "INVALID", "DISCONNECTED"]
 
 MetaWhatsAppCredentialStatus = Literal["ACTIVE", "INVALID", "DISCONNECTED"]
@@ -1030,6 +1032,9 @@ class AgentMemoryEntry(TypedDict, total=False):
     createdAt: str
     lastUsedAt: str
     useCount: int
+    trust: MemoryTrust
+    sourceTaint: List[str]
+    supersededAt: str
 
 
 class AgentModalitiesView(TypedDict, total=False):
@@ -2953,6 +2958,13 @@ class DataTableDtos_ImportResult(TypedDict, total=False):
     errors: List[str]
     ignoredHeaders: List[str]
     table: DataTableDtos_TableView
+
+
+class DataTableDtos_QuarantinedRowView(TypedDict, total=False):
+    id: str
+    data: Dict[str, Any]
+    sourceTaint: List[str]
+    createdAt: str
 
 
 class DataTableDtos_RowPage(TypedDict, total=False):
@@ -4899,6 +4911,15 @@ class KnowledgeIngestionJobResponse(TypedDict, total=False):
     updatedAt: str
 
 
+class KnowledgeQuarantineService_QuarantinedChunk(TypedDict, total=False):
+    id: str
+    collectionId: str
+    source: str
+    chunkIndex: int
+    content: str
+    sourceTaint: List[str]
+
+
 class KnowledgeReembedJobResponse(TypedDict, total=False):
     id: str
     collectionId: str
@@ -5807,6 +5828,7 @@ class MemoryImportDtos_ImportFact(TypedDict, total=False):
     text: str
     scope: str
     agentId: str
+    confirmForgotten: bool
 
 
 class MemoryImportDtos_ImportLimits(TypedDict, total=False):
@@ -5855,6 +5877,61 @@ class MemoryImportDtos_PreviewStats(TypedDict, total=False):
 class MemoryImportDtos_SkippedFact(TypedDict, total=False):
     text: str
     reason: str
+
+
+class MemoryItemController_DetailView(TypedDict, total=False):
+    item: MemoryItemController_ItemView
+    lineage: List[MemoryItemController_SourceView]
+    events: List[MemoryItemController_EventView]
+
+
+class MemoryItemController_EditRequest(TypedDict, total=False):
+    content: str
+
+
+class MemoryItemController_EventView(TypedDict, total=False):
+    id: str
+    event: str
+    actorType: str
+    actorRef: str
+    fromStatus: str
+    toStatus: str
+    at: str
+
+
+class MemoryItemController_ItemView(TypedDict, total=False):
+    id: str
+    agentId: str
+    kind: str
+    content: str
+    trust: str
+    status: str
+    writer: str
+    sourceType: str
+    sourceRef: str
+    sourceTaint: List[str]
+    modelGenerated: bool
+    generation: int
+    subjectKeys: List[str]
+    version: int
+    supersedesId: str
+    createdAt: str
+    expiresAt: str
+    approvedBy: str
+    approvedAt: str
+    pinned: bool
+
+
+class MemoryItemController_SourceView(TypedDict, total=False):
+    sourceTable: str
+    sourceKey: str
+    sourceTrust: str
+
+
+class MemoryItemExportController_ExportView(TypedDict, total=False):
+    exportedAt: str
+    subject: str
+    items: List[MemoryItemController_ItemView]
 
 
 class MemoryProvenanceService_FactSource(TypedDict, total=False):
@@ -8022,6 +8099,16 @@ class QualitySummaryResponse(TypedDict, total=False):
     evaluatedAt: str
 
 
+class QuarantinedNoteView(TypedDict, total=False):
+    key: str
+    scope: str
+    sessionId: str
+    subjectKey: str
+    body: str
+    sourceTaint: List[str]
+    updatedAt: str
+
+
 class _QuickTaskPreviewRequestRequired(TypedDict):
     message: str
 
@@ -9058,6 +9145,7 @@ class ScratchpadNoteView(TypedDict, total=False):
     byteSize: int
     updatedAt: str
     body: str
+    subjectKey: str
 
 
 class _SearchRequestRequired(TypedDict):
@@ -10297,6 +10385,20 @@ class TenantFeatureFlagController_FeatureFlagEvaluationResponse(TypedDict, total
     variant: str
 
 
+class TenantMemoryEntry(TypedDict, total=False):
+    id: str
+    subjectKey: str
+    content: str
+    distance: float
+    createdByAgentId: str
+    createdAt: str
+    lastUsedAt: str
+    useCount: int
+    trust: MemoryTrust
+    sourceTaint: List[str]
+    supersededAt: str
+
+
 class TenantSettingsResponse(TypedDict, total=False):
     tenantId: str
     accountType: AccountType
@@ -10880,6 +10982,9 @@ class UserMemoryController_FactView(TypedDict, total=False):
     createdAt: str
     lastUsedAt: str
     useCount: int
+    trust: str
+    sourceTaint: List[str]
+    supersededAt: str
 
 
 class UserMemoryController_ForgetAllResult(TypedDict, total=False):
@@ -10889,6 +10994,8 @@ class UserMemoryController_ForgetAllResult(TypedDict, total=False):
     graphErased: bool
     agentErased: bool
     sharedErased: bool
+    otherStoreRows: int
+    otherStoresErased: bool
 
 
 class UserMemoryController_Limits(TypedDict, total=False):
