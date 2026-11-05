@@ -73,7 +73,16 @@
     "vitest": "^5.0.5"
   },
   "overrides": {
-    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-hooks": {
+      ".": "5.2.0",
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react": {
+      "eslint": "$eslint"
+    },
     "postcss": "^8.5.18",
     "sharp": "^0.35.5"
   }
