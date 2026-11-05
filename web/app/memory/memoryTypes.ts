@@ -19,6 +19,8 @@ export type MemoryFact = {
   /** "QUARANTINED": written on a turn that handled untrusted content; never recalled until approved. Absent = TRUSTED (older core). */
   trust?: "TRUSTED" | "QUARANTINED";
   sourceTaint?: string[];
+  /** Set when a newer fact replaced this one: kept (listed, exported, erased with the rest) but no longer recalled into a prompt. */
+  supersededAt?: string | null;
 };
 
 export type MemoryOverview = {

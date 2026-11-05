@@ -25,7 +25,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * then it is the store-backed sink. It still checks the per-agent gate on every call.
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties({MemoryUnifiedProperties.class, DecayProperties.class, CompetenceProperties.class})
+@EnableConfigurationProperties({
+    MemoryUnifiedProperties.class,
+    MemoryRecallProperties.class,
+    DecayProperties.class,
+    CompetenceProperties.class
+})
 class MemoryStoreConfiguration {
 
     @Bean
@@ -36,8 +41,11 @@ class MemoryStoreConfiguration {
 
     @Bean
     MemoryRecallComposer memoryRecallComposer(
-            MemoryUnifiedProperties properties, MemoryUnifiedGate gate, ObjectProvider<MemoryRecallSource> sources) {
-        return new MemoryRecallComposer(properties, gate, sources);
+            MemoryUnifiedProperties properties,
+            MemoryUnifiedGate gate,
+            ObjectProvider<MemoryRecallSource> sources,
+            MemoryRecallProperties relevance) {
+        return new MemoryRecallComposer(properties, gate, sources, relevance);
     }
 
     @Bean

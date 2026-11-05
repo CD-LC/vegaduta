@@ -35,7 +35,8 @@ final class TenantMemoryFactRows {
                         rs.getTimestamp("last_used_at").toInstant(),
                         rs.getInt("use_count"),
                         MemoryTrust.parse(rs.getString("trust")),
-                        MemoryProvenance.parseSources(rs.getString("source_taint")));
+                        MemoryProvenance.parseSources(rs.getString("source_taint")),
+                        AgentMemoryRows.supersededAt(rs));
     }
 
     /** QUARANTINED to TRUSTED for one row; {@code subjectKey} null = any subject. */
@@ -99,7 +100,8 @@ final class TenantMemoryFactRows {
                         + table
                         + " WHERE position('"
                         + MemoryBlocks.KEY_MARKER
-                        + "' in subject_key) = 0 ORDER BY (trust = 'QUARANTINED') DESC,"
+                        + "' in subject_key) = 0 ORDER BY (superseded_by IS NOT NULL) DESC,"
+                        + " (trust = 'QUARANTINED') DESC,"
                         + " last_used_at ASC, use_count ASC, created_at ASC LIMIT ?)",
                 overflow);
         log.debug(

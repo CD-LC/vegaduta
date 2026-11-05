@@ -82,18 +82,12 @@ public class RememberFactToolCallback implements ToolCallback {
         this.chatClient = chatClient;
     }
 
-    @Override
-    public ToolDefinition getToolDefinition() {
-        return ToolDefinition.builder()
-                .name("remember_fact")
-                .description(
-                        "Saves a fact, preference, or correction about the current user so you'll still know it in "
-                                + "future conversations, not just this one. Use this when the user states a durable "
-                                + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
-                                + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
-                                + "this for one-off details that only matter to the current message.")
-                .inputSchema(
-                        """
+    /** Longest {@code replaces} honoured; a fact is a short statement, anything longer is not one copied from memory. */
+    static final int MAX_REPLACES_CHARS = 1000;
+
+    /** The shipped schema: one {@code fact} property. */
+    private static final String SCHEMA =
+            """
                 {
                     "type": "object",
                     "properties": {
@@ -104,7 +98,38 @@ public class RememberFactToolCallback implements ToolCallback {
                     },
                     "required": ["fact"]
                 }
-                """)
+                """;
+
+    /** With supersession on: the same schema plus the optional {@code replaces}. */
+    private static final String SCHEMA_WITH_REPLACES =
+            """
+                {
+                    "type": "object",
+                    "properties": {
+                        "fact": {
+                            "type": "string",
+                            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"Prefers to be contacted in the evening after 6pm\\")"
+                        },
+                        "replaces": {
+                            "type": "string",
+                            "description": "Only when this fact corrects or updates an earlier fact you can see in your known facts: that earlier fact, copied word for word. The earlier fact stops being recalled; leave this out for a new, unrelated fact."
+                        }
+                    },
+                    "required": ["fact"]
+                }
+                """;
+
+    @Override
+    public ToolDefinition getToolDefinition() {
+        return ToolDefinition.builder()
+                .name("remember_fact")
+                .description(
+                        "Saves a fact, preference, or correction about the current user so you'll still know it in "
+                                + "future conversations, not just this one. Use this when the user states a durable "
+                                + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
+                                + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
+                                + "this for one-off details that only matter to the current message.")
+                .inputSchema(memoryService != null && memoryService.supersessionEnabled() ? SCHEMA_WITH_REPLACES : SCHEMA)
                 .build();
     }
 
@@ -127,7 +152,15 @@ public class RememberFactToolCallback implements ToolCallback {
                 return errorJson(refusal.get());
             }
             MemoryProvenance provenance = MemoryWriteGate.classify(turnTaint);
-            UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString(), provenance);
+            Object replaces = args.get("replaces");
+            if (replaces != null && replaces.toString().length() > MAX_REPLACES_CHARS) {
+                replaces = null; // not a fact copied from the known facts; the automatic rules still apply
+            }
+            UUID memoryId =
+                    replaces == null
+                            ? memoryService.remember(agentId, subjectKey, factValue.toString(), provenance)
+                            : memoryService.remember(
+                                    agentId, subjectKey, factValue.toString(), provenance, replaces.toString());
             if (provenance.quarantined()) {
                 // Graph memory has no quarantine state, so a tainted write never reaches it.
                 return "{\"remembered\": true, \"quarantined\": true, \"memoryId\": \"" + memoryId

@@ -8,9 +8,11 @@ import com.agenticai.core.agents.memory.QueryEmbedding;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
+import com.agenticai.core.agents.memory.spi.MemoryItemView;
 import com.agenticai.core.agents.memory.spi.MemoryRecallRequest;
 import com.agenticai.core.agents.memory.spi.MemoryRecallResult;
 import com.agenticai.core.agents.memory.spi.UnifiedMemoryRecall;
+import com.agenticai.core.agents.memorystore.MemoryRecallProperties;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
@@ -87,6 +89,12 @@ final class ChatMemoryRecall {
         }
     }
 
+    /** Whether a recalled long-term fact is relevant enough, and how many a turn may inject (see {@link MemoryRecallProperties}). */
+    private MemoryRecallProperties limitsOf(AgentMemoryService service) {
+        MemoryRecallProperties limits = service == null ? null : service.recallLimits();
+        return limits == null ? MemoryRecallProperties.off() : limits;
+    }
+
     /** The unified recall (ADR-0028), absent until wired and when the memory-store module is not on the classpath. */
     private volatile ObjectProvider<UnifiedMemoryRecall> unifiedRecall;
 
@@ -106,9 +114,15 @@ final class ChatMemoryRecall {
      *
      * @param usedTokens tokens the always-in-context memory blocks already took of the shared budget (charged first)
      * @param legacyIds ids of facts the legacy path already injected, so none appears twice
+     * @param maxNew most items the unified block may add on top of the legacy ones (0 = the composer's own cap)
      */
     private Unified recallUnified(
-            UUID agentId, String subjectKey, String userMessage, long usedTokens, Set<UUID> legacyIds) {
+            UUID agentId,
+            String subjectKey,
+            String userMessage,
+            long usedTokens,
+            Set<UUID> legacyIds,
+            int maxNew) {
         ObjectProvider<UnifiedMemoryRecall> provider = unifiedRecall;
         if (provider == null) {
             return Unified.NONE;
@@ -125,13 +139,22 @@ final class ChatMemoryRecall {
             MemoryRecallResult result =
                     recall.compose(
                             new MemoryRecallRequest(
-                                    agentId, subjectKey, userMessage, Set.of(), 0, (int) remaining));
+                                    agentId,
+                                    subjectKey,
+                                    userMessage,
+                                    Set.of(),
+                                    maxNew > 0 ? maxNew + legacyIds.size() : 0,
+                                    (int) remaining));
             if (result == null || UnifiedMemoryRecall.DISABLED.equals(result.degradedReason())) {
                 return Unified.NONE;
             }
             String note = result.degradedReason() == null ? null : "degraded:" + result.degradedReason();
+            List<MemoryItemView> candidates = result.items();
+            if (maxNew > 0) {
+                candidates = candidates.stream().filter(i -> !legacyIds.contains(i.id())).limit(maxNew).toList();
+            }
             UnifiedMemoryBlock.Rendered rendered =
-                    UnifiedMemoryBlock.render(result.items(), (int) remaining, legacyIds);
+                    UnifiedMemoryBlock.render(candidates, (int) remaining, legacyIds);
             return rendered == null
                     ? new Unified(null, List.of(), note)
                     : new Unified(rendered.text(), rendered.items(), note);
@@ -281,27 +304,15 @@ final class ChatMemoryRecall {
         // recall needs it first.
         QueryEmbedding embedding = null;
         AgentMemoryService memoryService = agentMemoryService.getIfAvailable();
+        MemoryRecallProperties limits = limitsOf(memoryService);
+        List<AgentMemoryEntry> memories = List.of();
         if (memoryService != null) {
             try {
                 embedding = memoryService.queryEmbedding(userMessage);
-                List<AgentMemoryEntry> memories =
-                        memoryService.recall(agentId, subjectKey, userMessage, embedding);
-                if (!memories.isEmpty()) {
-                    String factList =
-                            memories.stream()
-                                    .map(m -> "- " + m.content())
-                                    .reduce((a, b) -> a + "\n" + b)
-                                    .orElse("");
-                    block.append(
-                            pd.textOrShipped(
-                                    "memory.recall.private", java.util.Map.of("facts", factList)));
-                    privateFacts = memories.size();
-                    memories.forEach(
-                            m -> {
-                                factIds.add(m.id());
-                                privateIds.add(m.id());
-                            });
-                }
+                memories =
+                        memoryService.recall(agentId, subjectKey, userMessage, embedding).stream()
+                                .filter(m -> limits.passes(1.0 - m.distance()))
+                                .toList();
             } catch (Exception e) {
                 log.warn(
                         "Long-term memory recall failed for agent {} subject '{}' - continuing"
@@ -318,37 +329,22 @@ final class ChatMemoryRecall {
         // tell tenant-wide facts (contributed by any opted-in agent) apart from this agent's own
         // private recall - see TenantMemoryService/RememberSharedFactToolCallback's javadoc.
         TenantMemoryService tenantService = tenantMemoryService.getIfAvailable();
+        List<TenantMemoryEntry> sharedMemories = List.of();
         if (tenantService != null) {
             try {
                 if (agentService.isShareMemoryWithTenant(agentId)) {
-                    List<TenantMemoryEntry> sharedMemories =
-                            tenantService.recall(
-                                    subjectKey,
-                                    userMessage,
-                                    embedding != null
-                                            ? embedding
-                                            : tenantService.queryEmbedding(userMessage),
-                                    agentId);
-                    if (!sharedMemories.isEmpty()) {
-                        String sharedFactList =
-                                sharedMemories.stream()
-                                        .map(m -> "- " + m.content())
-                                        .reduce((a, b) -> a + "\n" + b)
-                                        .orElse("");
-                        if (!block.isEmpty()) {
-                            block.append("\n\n");
-                        }
-                        block.append(
-                                pd.textOrShipped(
-                                        "memory.recall.shared",
-                                        java.util.Map.of("facts", sharedFactList)));
-                        sharedFacts = sharedMemories.size();
-                        sharedMemories.forEach(
-                                m -> {
-                                    factIds.add(m.id());
-                                    sharedIds.add(m.id());
-                                });
-                    }
+                    sharedMemories =
+                            tenantService
+                                    .recall(
+                                            subjectKey,
+                                            userMessage,
+                                            embedding != null
+                                                    ? embedding
+                                                    : tenantService.queryEmbedding(userMessage),
+                                            agentId)
+                                    .stream()
+                                    .filter(m -> limits.passes(1.0 - m.distance()))
+                                    .toList();
                 }
             } catch (Exception e) {
                 log.warn(
@@ -360,9 +356,54 @@ final class ChatMemoryRecall {
             }
         }
 
+        // app.memory.recall.max-items: one turn injects at most this many recalled facts across both stores, the closest
+        // first (a tie keeps the private fact). 0 = each store's own top-k, as before.
+        int cap = limits.getMaxItems();
+        if (cap > 0 && memories.size() + sharedMemories.size() > cap) {
+            double cutoff = nthBestSimilarity(memories, sharedMemories, cap);
+            memories = keepClosest(memories, cutoff, cap);
+            sharedMemories = keepClosest(sharedMemories, cutoff, cap - memories.size());
+        }
+        if (!memories.isEmpty()) {
+            String factList =
+                    memories.stream()
+                            .map(m -> "- " + m.content())
+                            .reduce((a, b) -> a + "\n" + b)
+                            .orElse("");
+            block.append(pd.textOrShipped("memory.recall.private", java.util.Map.of("facts", factList)));
+            privateFacts = memories.size();
+            memories.forEach(
+                    m -> {
+                        factIds.add(m.id());
+                        privateIds.add(m.id());
+                    });
+        }
+        if (!sharedMemories.isEmpty()) {
+            String sharedFactList =
+                    sharedMemories.stream()
+                            .map(m -> "- " + m.content())
+                            .reduce((a, b) -> a + "\n" + b)
+                            .orElse("");
+            if (!block.isEmpty()) {
+                block.append("\n\n");
+            }
+            block.append(pd.textOrShipped("memory.recall.shared", java.util.Map.of("facts", sharedFactList)));
+            sharedFacts = sharedMemories.size();
+            sharedMemories.forEach(
+                    m -> {
+                        factIds.add(m.id());
+                        sharedIds.add(m.id());
+                    });
+        }
+
         // Unified memory (default OFF: no bean call result, no text, no trace fields). Its items are TRUSTED-only and,
         // like the legacy facts, auto-injected, so they count as recalled facts for taint marking.
-        Unified unified = recallUnified(agentId, subjectKey, userMessage, blockTokens, new HashSet<>(factIds));
+        int roomForUnified = cap > 0 ? Math.max(0, cap - factIds.size()) : 0;
+        Unified unified =
+                cap > 0 && roomForUnified == 0
+                        ? Unified.NONE
+                        : recallUnified(
+                                agentId, subjectKey, userMessage, blockTokens, new HashSet<>(factIds), roomForUnified);
         if (unified.text() != null) {
             if (!block.isEmpty()) {
                 block.append("\n\n");
@@ -405,6 +446,31 @@ final class ChatMemoryRecall {
                                 traceBlocks,
                                 SessionMemoryService.estimateTokens(text))
                         .withUnified(unified.items(), unified.note()));
+    }
+
+    /** Similarity of the {@code n}-th closest fact over both lists (the cutoff that keeps {@code n} of them). */
+    private static double nthBestSimilarity(
+            List<AgentMemoryEntry> privateFacts, List<TenantMemoryEntry> sharedFacts, int n) {
+        List<Double> sims = new ArrayList<>();
+        privateFacts.forEach(m -> sims.add(1.0 - m.distance()));
+        sharedFacts.forEach(m -> sims.add(1.0 - m.distance()));
+        sims.sort(java.util.Comparator.reverseOrder());
+        return sims.get(Math.min(n, sims.size()) - 1);
+    }
+
+    /** The facts at or above {@code cutoff}, in their order, at most {@code max}. */
+    private static <T> List<T> keepClosest(List<T> facts, double cutoff, int max) {
+        List<T> out = new ArrayList<>();
+        for (T fact : facts) {
+            double sim =
+                    fact instanceof AgentMemoryEntry a
+                            ? 1.0 - a.distance()
+                            : 1.0 - ((TenantMemoryEntry) fact).distance();
+            if (out.size() < max && sim >= cutoff) {
+                out.add(fact);
+            }
+        }
+        return out;
     }
 
     /** The switch's answer; a failing lookup leaves recall on, as it is without the switch. */

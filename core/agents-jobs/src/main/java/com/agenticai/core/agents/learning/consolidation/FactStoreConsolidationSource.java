@@ -64,6 +64,9 @@ public class FactStoreConsolidationSource implements ConsolidationFactSource {
         if (agent != null) {
             Map<UUID, Signals> sig = reader == null ? Map.of() : reader.agentSignals(subjectKey);
             for (AgentMemoryEntry m : agent.listAllForSubject(subjectKey)) {
+                if (m.supersededAt() != null) {
+                    continue; // replaced by a newer fact (V685): kept for the person, not a live fact to consolidate
+                }
                 if (forgotten.contains(MemoryFactSignalsReader.tombstoneKey(false, m.agentId(), m.content()))) {
                     continue;
                 }
@@ -86,6 +89,9 @@ public class FactStoreConsolidationSource implements ConsolidationFactSource {
         if (tenant != null) {
             Map<UUID, Signals> sig = reader == null ? Map.of() : reader.sharedSignals(subjectKey);
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subjectKey)) {
+                if (m.supersededAt() != null) {
+                    continue;
+                }
                 if (forgotten.contains(MemoryFactSignalsReader.tombstoneKey(true, null, m.content()))) {
                     continue;
                 }

@@ -271,7 +271,7 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         return jdbcTemplate.query(
                 "SELECT id, subject_key, content, created_by_agent_id, created_at, last_used_at,"
-                        + " use_count, trust, source_taint, 0.0 AS distance FROM "
+                        + " use_count, trust, source_taint, superseded_at, 0.0 AS distance FROM "
                         + table
                         + " WHERE subject_key = ? ORDER BY created_at DESC",
                 TenantMemoryFactRows.entryMapper(),
@@ -322,6 +322,10 @@ public class TenantMemoryService {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
         boolean approved = TenantMemoryFactRows.approve(jdbcTemplate, table, memoryId, subjectKey);
         if (approved) {
+            FactSupersession sup = supersession;
+            if (sup != null) {
+                sup.applyPending(table, memoryId, clock.instant());
+            }
             TenantMemoryFactRows.syncApprovedToGraph(jdbcTemplate, graphSync, table, memoryId);
         }
         return approved;
@@ -358,10 +362,30 @@ public class TenantMemoryService {
      */
     public UUID remember(
             String subjectKey, String content, UUID createdByAgentId, MemoryProvenance provenance) {
+        return remember(subjectKey, content, createdByAgentId, provenance, null);
+    }
+
+    /** As above; {@code replaces} names the earlier shared fact this one corrects (see {@link AgentMemoryService#remember}). */
+    public UUID remember(
+            String subjectKey, String content, UUID createdByAgentId, MemoryProvenance provenance, String replaces) {
         if (tombstones.isForgotten(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content)) {
             throw new MemoryForgottenException(); // resurrection guard; only rememberOwn (a person) clears it
         }
-        return insertFact(subjectKey, content, createdByAgentId, provenance, 0.6, false);
+        return insertFact(subjectKey, content, createdByAgentId, provenance, 0.6, false, replaces);
+    }
+
+    private volatile FactSupersession supersession;
+
+    /** {@code app.memory.supersession.*} (V685); absent or disabled: every shared fact is a new row, as before. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setSupersession(MemorySupersessionProperties properties) {
+        this.supersession =
+                properties == null || !properties.isEnabled() ? null : new FactSupersession(jdbcTemplate, properties);
+    }
+
+    /** Whether a new TRUSTED shared fact replaces the fact it corrects (then the tool offers {@code replaces}). */
+    public boolean supersessionEnabled() {
+        return supersession != null;
     }
 
     private UUID insertFact(
@@ -370,7 +394,8 @@ public class TenantMemoryService {
             UUID createdByAgentId,
             MemoryProvenance provenance,
             double importance,
-            boolean personAuthored) {
+            boolean personAuthored,
+            String replaces) {
         MemoryProvenance prov =
                 provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
         if (subjectKey != null && subjectKey.contains(MemoryBlocks.KEY_MARKER)) {
@@ -379,10 +404,19 @@ public class TenantMemoryService {
             throw new IllegalArgumentException(
                     "Subject key must not contain '" + MemoryBlocks.KEY_MARKER + "'.");
         }
+        String table = TenantMemorySchemaSupport.qualifiedTableName();
+        FactSupersession sup = supersession;
+        boolean trusted = prov.trust() == MemoryTrust.TRUSTED;
+        FactSupersession.Scope scope = new FactSupersession.Scope(table, "subject_key = ?", subjectKey);
+        if (sup != null && trusted) {
+            java.util.Optional<UUID> same = sup.reconfirm(scope, content, clock.instant());
+            if (same.isPresent()) {
+                return same.get(); // the same fact told again: re-confirmed, not stored twice
+            }
+        }
         float[] embedding = sidecarClient.embedQuery(content);
         String literal = toVectorLiteral(embedding);
         UUID id = UUID.randomUUID();
-        String table = TenantMemorySchemaSupport.qualifiedTableName();
 
         jdbcTemplate.update(
                 "INSERT INTO "
@@ -399,6 +433,11 @@ public class TenantMemoryService {
                 prov.sourcesJson(),
                 importance,
                 personAuthored);
+        if (sup != null) {
+            sup.afterInsert(
+                    scope, id, literal, replaces, text -> toVectorLiteral(sidecarClient.embedQuery(text)),
+                    personAuthored, trusted, clock.instant());
+        }
         pruneOverCap(table);
         log.debug(
                 "Remembered shared fact for subject '{}' (contributed by agent {}): {}",
@@ -454,7 +493,7 @@ public class TenantMemoryService {
         }
         // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone of the same text.
         tombstones.reconfirm(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content);
-        return insertFact(subjectKey, content, null, MemoryProvenance.TRUSTED, 0.8, true);
+        return insertFact(subjectKey, content, null, MemoryProvenance.TRUSTED, 0.8, true, null);
     }
 
     private void pruneOverCap(String table) {
@@ -491,9 +530,9 @@ public class TenantMemoryService {
                                 + " embedding OPERATOR(public.<=>)"
                                 + " ?::public.vector AS distance FROM "
                                 + table
-                                + " WHERE subject_key = ? AND trust = 'TRUSTED'"
+                                + " WHERE subject_key = ? AND trust = 'TRUSTED' AND superseded_by IS NULL"
                                 + tombstones.excludeSharedFacts(table)
-                                + " ORDER BY distance ASC LIMIT ?",
+                                + " ORDER BY distance ASC, updated_at DESC LIMIT ?",
                         TenantMemoryFactRows.entryMapper(),
                         literal,
                         subjectKey,

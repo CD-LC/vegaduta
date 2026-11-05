@@ -8,5 +8,9 @@ import org.springframework.context.annotation.Configuration;
  * {@code @ConfigurationPropertiesScan}, so each module registers the properties class it owns.
  */
 @Configuration
-@EnableConfigurationProperties({MemoryLimitsProperties.class, EpisodicMemoryProperties.class})
+@EnableConfigurationProperties({
+    MemoryLimitsProperties.class,
+    EpisodicMemoryProperties.class,
+    MemorySupersessionProperties.class
+})
 class MemoryLimitsConfiguration {}

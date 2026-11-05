@@ -190,6 +190,11 @@ export default function FactRow({
       ) : (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
+            {fact.supersededAt && (
+              <div className="mb-1 text-xs text-muted-foreground" data-testid="memory-fact-superseded">
+                {t("supersededHint")}
+              </div>
+            )}
             {fact.trust === "QUARANTINED" && (
               <div className="mb-1 flex flex-wrap items-center gap-2" data-testid="memory-fact-quarantined">
                 <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground">

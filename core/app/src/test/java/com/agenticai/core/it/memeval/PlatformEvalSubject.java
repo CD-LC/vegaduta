@@ -92,6 +92,14 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     private static final String UNANSWERED = "unanswered";
     /** {@code -Dmemeval.trace=true} prints one line per probe (question, answer, tools, injected rows) for debugging a run. */
     private static final boolean TRACE = Boolean.getBoolean("memeval.trace");
+    /**
+     * {@code -Dmemeval.replaces=false} (default true): whether the extractor names the earlier fact a correction replaces
+     * (the tool's {@code replaces} argument). The extractor of this eval is the ledger, which knows every correction, so on
+     * it behaves like a model that always copies the right fact from its recalled memory: the run measures the plumbing
+     * (resolution, trust rules, recall exclusion), not the quality of a real arbiter. With {@code false} only the automatic
+     * similarity rule can supersede, which is what a model that never uses the argument would get.
+     */
+    private static final boolean NAME_REPLACED_FACT = !"false".equalsIgnoreCase(System.getProperty("memeval.replaces", "true"));
 
     private final PlatformEvalWorld world;
     private final ProbeAnswerer answerer;
@@ -278,8 +286,10 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
     /** One planted fact through the real {@code remember_fact} tool (the turn's thread, the session's user). */
     private void write(Case c, Session session, UUID agent, String subject, Fact fact, Turn turn, TurnTaint taint) {
         String text = fact.kind() == FactKind.ATTACK ? turn.text() : fact.value();
+        String replaces = NAME_REPLACED_FACT && fact.kind() != FactKind.ATTACK ? replacedText(c, fact) : null;
+        String input = replaces == null ? json("fact", text) : json("fact", text, "replaces", replaces);
         String result = new RememberFactToolCallback(world.agentMemory, agent, subject, null, null, null, null,
-            taintProvider(taint)).call(json("fact", text));
+            taintProvider(taint)).call(input);
         diagnostics.write(c.arm, result);
         if (fact.kind() == FactKind.ATTACK) {
             diagnostics.attackWrite(c.arm, turn.source().name(), result);
@@ -288,6 +298,16 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
         if (id != null) {
             c.rows.put(id, new RowInfo(fact.id(), fact.key(), false));
         }
+    }
+
+    /** The text of the earlier fact the ledger says {@code fact} corrects, when that fact was planted earlier; else null. */
+    private static String replacedText(Case c, Fact fact) {
+        for (Fact old : c.scenario.ledger()) {
+            if (fact.id().equals(old.supersededBy()) && old.kind() != FactKind.ATTACK && c.scenario.plantedAtIndex(old.id()) >= 0) {
+                return old.value();
+            }
+        }
+        return null;
     }
 
     /** The real {@code remember_shared_fact} for each fact the session shares, as the fact's owner. */
@@ -536,9 +556,13 @@ public final class PlatformEvalSubject extends PlatformMemoryEvalSubject {
 
     // ------------------------------------------------------------------ small helpers
 
-    private static String json(String key, String value) {
+    private static String json(String... keyValues) {
         try {
-            return JSON.writeValueAsString(Map.of(key, value));
+            Map<String, String> map = new LinkedHashMap<>();
+            for (int i = 0; i + 1 < keyValues.length; i += 2) {
+                map.put(keyValues[i], keyValues[i + 1]);
+            }
+            return JSON.writeValueAsString(map);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new IllegalStateException(e);
         }

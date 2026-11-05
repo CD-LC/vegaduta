@@ -106,14 +106,23 @@ public class UserMemoryController {
      * "TRUSTED" or "QUARANTINED": a quarantined fact was written on a turn that handled untrusted content,
      * is never recalled into a prompt, and waits for the person to approve or reject it (the agent-memory
      * approve/reject endpoints). {@code sourceTaint} names the kinds of untrusted source, empty when trusted.
+     * {@code supersededAt} is set on a fact a newer one replaced: it is kept (listed, exported, erased with the rest) but no
+     * longer recalled into a prompt.
      */
     public record FactView(
         UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount,
-        String trust, List<String> sourceTaint
+        String trust, List<String> sourceTaint, Instant supersededAt
     ) {
         public FactView {
             trust = trust == null ? MemoryTrust.QUARANTINED.name() : trust;
             sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
+        }
+
+        public FactView(
+            UUID id, String scope, UUID agentId, String content, Instant createdAt, Instant lastUsedAt, int useCount,
+            String trust, List<String> sourceTaint
+        ) {
+            this(id, scope, agentId, content, createdAt, lastUsedAt, useCount, trust, sourceTaint, null);
         }
 
         /** A fact the person just typed in: trusted by construction. */
@@ -174,13 +183,13 @@ public class UserMemoryController {
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
                 facts.add(new FactView(m.id(), "agent", m.agentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount(),
-                    m.trust().name(), m.sourceTaint()));
+                    m.trust().name(), m.sourceTaint(), m.supersededAt()));
             }
         }
         if (tenant != null) {
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
                 facts.add(new FactView(m.id(), "shared", m.createdByAgentId(), m.content(), m.createdAt(), m.lastUsedAt(), m.useCount(),
-                    m.trust().name(), m.sourceTaint()));
+                    m.trust().name(), m.sourceTaint(), m.supersededAt()));
             }
         }
         facts.sort((a, b) -> b.createdAt().compareTo(a.createdAt()));

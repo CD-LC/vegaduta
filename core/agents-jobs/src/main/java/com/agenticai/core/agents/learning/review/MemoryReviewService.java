@@ -151,7 +151,7 @@ public class MemoryReviewService {
         AgentMemoryService agent = agentMemory.getIfAvailable();
         if (agent != null) {
             for (AgentMemoryEntry m : agent.listAllForSubject(subject)) {
-                if (m.trust() != MemoryTrust.TRUSTED) {
+                if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
                     continue; // quarantined rows are never consolidated, so they cannot launder into a TRUSTED one
                 }
                 facts.add(new MemoryFactRef(
@@ -161,7 +161,7 @@ public class MemoryReviewService {
         TenantMemoryService tenant = tenantMemory.getIfAvailable();
         if (tenant != null) {
             for (TenantMemoryEntry m : tenant.listFactsForSubject(subject)) {
-                if (m.trust() != MemoryTrust.TRUSTED) {
+                if (m.trust() != MemoryTrust.TRUSTED || m.supersededAt() != null) {
                     continue;
                 }
                 facts.add(new MemoryFactRef(

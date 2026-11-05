@@ -37,12 +37,23 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
     private final MemoryUnifiedProperties properties;
     private final MemoryUnifiedGate gate;
     private final ObjectProvider<MemoryRecallSource> sources;
+    private final MemoryRecallProperties relevance;
 
     public MemoryRecallComposer(
             MemoryUnifiedProperties properties, MemoryUnifiedGate gate, ObjectProvider<MemoryRecallSource> sources) {
+        this(properties, gate, sources, MemoryRecallProperties.off());
+    }
+
+    /** {@code relevance}: the similarity floor ({@code app.memory.recall.min-similarity}); null = no floor. */
+    public MemoryRecallComposer(
+            MemoryUnifiedProperties properties,
+            MemoryUnifiedGate gate,
+            ObjectProvider<MemoryRecallSource> sources,
+            MemoryRecallProperties relevance) {
         this.properties = properties;
         this.gate = gate;
         this.sources = sources;
+        this.relevance = relevance == null ? MemoryRecallProperties.off() : relevance;
     }
 
     @Override
@@ -113,7 +124,10 @@ public class MemoryRecallComposer implements UnifiedMemoryRecall {
             for (MemoryItemView item : result.items()) {
                 // Defence in depth: a view is TRUSTED by construction, and a kind we did not ask for is dropped.
                 if (item.provenance().trust() == MemoryTrustLevel.TRUSTED && allowed.contains(item.kind())) {
-                    into.add(item);
+                    // The floor is against unrelated lines; the self-model line is derived, not matched to the message.
+                    if (item.kind() == MemoryKind.SELF_MODEL || relevance.passes(item.score())) {
+                        into.add(item);
+                    }
                 }
             }
         } catch (RuntimeException e) {

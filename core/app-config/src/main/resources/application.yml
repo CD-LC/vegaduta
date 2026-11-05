@@ -2293,6 +2293,25 @@ app:
       session-fold-batch: ${APP_MEMORY_LIMITS_SESSION_FOLD_BATCH:40}
       # Facts the edge (on-device) memory endpoint returns; they go into a 4k-8k context window.
       edge-memory-max-facts: ${APP_MEMORY_LIMITS_EDGE_MEMORY_MAX_FACTS:24}
+    # Relevance of AUTOMATIC recall (the facts and episodes put into the prompt each turn). The always-in-context
+    # blocks below, the self-model line and the explicit memory tools are not affected. 0 for both = every line of each
+    # store's top-k, as before. Defaults come from the real-pipeline memory eval (scorecard doc, Addendum F).
+    recall:
+      # Cosine similarity between the user's message and a recalled line below which the line is left out (0 = no floor).
+      min-similarity: ${APP_MEMORY_RECALL_MIN_SIMILARITY:0.20}
+      # Most recalled facts and episodes one turn injects, private + shared + unified together (0 = each store's own top-k).
+      max-items: ${APP_MEMORY_RECALL_MAX_ITEMS:3}
+    # A corrected fact replaces the fact it corrects (V685): the old row is marked superseded, never deleted, and is
+    # left out of recall; it stays in the Memory page, the export and the erasure. A QUARANTINED fact replaces nothing
+    # until a person approves it. false = every fact is a new row, as before.
+    supersession:
+      enabled: ${APP_MEMORY_SUPERSESSION_ENABLED:true}
+      # Cosine similarity at or above which a new fact replaces an older one of the same person on similarity alone.
+      # Safe starting point for the sidecar's sentence-embedding models; calibrate per embedding model.
+      min-similarity: ${APP_MEMORY_SUPERSESSION_MIN_SIMILARITY:0.85}
+      # Cosine similarity at or above which the text named in remember_fact's `replaces` resolves to a stored fact
+      # when it does not match one word for word.
+      replace-min-similarity: ${APP_MEMORY_SUPERSESSION_REPLACE_MIN_SIMILARITY:0.60}
     blocks:
       # false = no prompt injection, and /api/memory block endpoints return 404 (facts stay editable).
       enabled: ${APP_MEMORY_BLOCKS_ENABLED:true}

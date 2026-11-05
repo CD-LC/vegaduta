@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * One recalled or listed shared/tenant-wide memory row - see {@link TenantMemoryService}.
- * {@code trust}/{@code sourceTaint} as on {@link AgentMemoryEntry}.
+ * {@code trust}/{@code sourceTaint}/{@code supersededAt} as on {@link AgentMemoryEntry}.
  */
 public record TenantMemoryEntry(
     UUID id,
@@ -18,11 +18,20 @@ public record TenantMemoryEntry(
     Instant lastUsedAt,
     int useCount,
     MemoryTrust trust,
-    List<String> sourceTaint
+    List<String> sourceTaint,
+    Instant supersededAt
 ) {
     public TenantMemoryEntry {
         trust = trust == null ? MemoryTrust.QUARANTINED : trust;
         sourceTaint = sourceTaint == null ? List.of() : List.copyOf(sourceTaint);
+    }
+
+    /** A live row (not superseded) with its provenance. */
+    public TenantMemoryEntry(
+        UUID id, String subjectKey, String content, double distance, UUID createdByAgentId,
+        Instant createdAt, Instant lastUsedAt, int useCount, MemoryTrust trust, List<String> sourceTaint
+    ) {
+        this(id, subjectKey, content, distance, createdByAgentId, createdAt, lastUsedAt, useCount, trust, sourceTaint, null);
     }
 
     public TenantMemoryEntry(
