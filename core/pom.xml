@@ -320,7 +320,7 @@
       <dependency>
         <groupId>at.yawk.lz4</groupId>
         <artifactId>lz4-java</artifactId>
-        <version>1.12.0</version>
+        <version>1.12.1</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.ai</groupId>
@@ -347,7 +347,7 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp</artifactId>
-        <version>5.5.0</version>
+        <version>5.5.1</version>
       </dependency>
       <!-- OkHttp 5.x: the plain "okhttp" artifact is a KMP shell with no classes
            under Maven; okhttp-jvm carries them and is declared in core/chat.
@@ -357,7 +357,7 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp-jvm</artifactId>
-        <version>5.5.0</version>
+        <version>5.5.1</version>
       </dependency>
       <dependency>
         <groupId>org.jetbrains.kotlin</groupId>
@@ -789,8 +789,8 @@
     <profile>
       <id>static-analysis</id>
       <properties>
-        <error-prone.version>2.50.0</error-prone.version>
-        <nullaway.version>0.14.2</nullaway.version>
+        <error-prone.version>2.51.0</error-prone.version>
+        <nullaway.version>0.14.3</nullaway.version>
         <errorprone.common.args>-Xplugin:ErrorProne -XepAllErrorsAsWarnings -XepDisableWarningsInGeneratedCode -XepExcludedPaths:.*[\\/]target[\\/]generated-(test-)?sources[\\/].*</errorprone.common.args>
       </properties>
       <build>
