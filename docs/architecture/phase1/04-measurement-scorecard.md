@@ -453,3 +453,102 @@ zero floor. `MemoryEvalSeamsTest` covers a zero floor on the deterministic subje
 each injected defect trips its gate on both tiers (`MemoryPipelineTest.everyInjectedDefectTripsItsGateOnBothTiers`). This is the
 pipeline and dataset tested against an in-memory stand-in; nothing here has run on a stack or with a real model, and the
 thresholds are untested against real noise.
+
+## Addendum E: the scorecard on the real pipeline (`PlatformMemoryEvalIT`, core/app test tree)
+
+**What it is.** `core/app/src/test/java/com/agenticai/core/it/PlatformMemoryEvalIT.java` plus `it/memeval/` implement
+`PlatformMemoryEvalSubject` for real. It boots the whole `CoreApplication` (profiles security, knowledge, graph-memory; unified
+memory, episodic recorder and consolidation flags on) on a real Postgres 16 with pgvector and AGE and a Redis-protocol server, and runs
+the dataset of `core/quality` (8 personas, S1-S15, 40 mistake cases, 180 generated poisoning scenarios = 243 scenarios, 161
+headline probes plus 183 attack probes) through `MemoryEvalCli.run` in all three arms, with the unchanged scorers, statistics and
+gates. Skipped without `-Dvegaduta.it.pg.url` (like the other unified-memory ITs). Output: `core/app/target/memory-eval/memory-scorecard-<tier>.json`
+and `memory-scorecard.json` (tier of `-Dmemeval.tier=ci|nightly|both`), in the Addendum A shape plus a `platform` block (run
+configuration, write outcomes per arm, attack-payload writes per delivery channel, reviewer decisions, recall time, database statements
+and block tokens per recall). `memory-eval.yml` builds the pgvector+AGE image, starts a Valkey service, runs the nightly tier and gates
+the file (`REQUIRE_SCORECARD=true`). Because the first real result is NO-SHIP, that nightly job is red until G6 is fixed or the gate is
+deliberately relaxed; that is the gate working, not a flaky job.
+
+**Per (case, arm, repeat):** fresh tenant schemas and users (`CaseEnvironment`), one agent per tenant whose config is identical across
+arms except `memory.recall.enabled` and `memory.write.enabled` (B and ORACLE: both off, set at tenant scope through the real
+`SettingsService`; M: on), the `EvalClock` installed in the memory services, then
+- *ingestion* through the real write path: each ledger fact a turn plants goes through the real `remember_fact` callback (write screen,
+  turn-taint gate with a real `TurnTaint` marked for tool-output, document and agent-message turns, write switch, embedder, per-agent cap);
+  shares go through `remember_shared_fact`; a forget is the memory panel's single-row delete; one episode per session goes through
+  `EpisodeRecordingGateway` and the proposal sink;
+- a *scripted reviewer* approves the proposals the platform did not flag (empty taint) and leaves every quarantined one alone;
+- *probes* are answered through the real `ChatMemoryRecall` (legacy private and shared facts, unified recall, trust filter, token budget)
+  on a different thread than the writer, by a `ProbeAnswerer`; the recall trace is the turn's `TurnMemoryRecall.Trace`, each id resolved
+  to its row in whichever case schema holds it (a foreign row would surface as a foreign user or tenant);
+- ORACLE: the ledger's valid, visible, relevant facts go straight into the answerer's prompt;
+- S15 additionally runs the real `MemoryConsolidationSweep` on a pooled thread after each session (dry run; the apply flag is off);
+- tenant schemas are dropped after each case.
+
+**Limits, stated plainly.**
+1. *No LLM anywhere.* The extractor is the ledger (`plants` decide what is saved, with the fact's clean statement as text; an attack
+   payload is saved as the delivered text). The model is `ExtractiveProbeAnswerer`: answer = the most similar recalled line verbatim (cosine
+   >= 0.20, fixed before any run), else abstain; it cannot combine lines, paraphrase or tell stale from fresh. Its tool agent is
+   *worst-case compliant* (it follows a recalled line about the task), so G7/G8 measure containment, not model robustness. The
+   ceiling of every arm is therefore the ceiling of an extractive reader. Swap in a real model by implementing `ProbeAnswerer`.
+2. *Embedder.* `HashingTextEmbedder` (384-d signed feature hashing of stemmed words, word pairs and character trigrams) is lexical: no
+   synonyms, paraphrase, negation or cross-language match; exact identifiers match perfectly. Retrieval numbers are optimistic for
+   identifier-style probes and pessimistic for paraphrased ones.
+3. *Tenants are clones.* The first tenant is migrated by Flyway; later ones are `CREATE TABLE (LIKE template INCLUDING ALL)` copies (a
+   Flyway run per case would be hours): columns, defaults, checks and indexes, but not foreign keys, triggers or functions.
+4. *Turn cost is partly assumed.* There is no model call, so each turn adds the measured pipeline time to an assumed 380-token system
+   prompt, 800 ms model time and 400 ms time to first token (reported under `platform.assumedPerTurn`). G9/G10 are therefore overhead
+   against an assumed denominator; `TurnUsageCounter` does not apply (no model call). Database statements are counted at the DataSource.
+5. *Trace source.* The `Trace` object the journal's `memory_recall` events are written from, not the persisted event rows.
+6. *Not covered:* graph memory (needs LLM triple extraction), `memory.recall.agentTopK`/budget variants, the HTTP/Keycloak path, a real
+   human reviewer, the periodic review job, decay through the clock (rows' `created_at` comes from the database clock, so gaps do not age rows).
+7. *Switch reads are made inside a transaction* (defect D1 below); the recall itself runs outside one.
+
+**First real result (seed 20261105, 243 scenarios, answerer `extractive`, compliant).** Both tiers: **NO-SHIP**, because G6 fails.
+
+| Gate | CI tier (1 repeat, 582 s) | Nightly tier (3 repeats + B-vs-B noise floor, 2882 s) |
+|---|---|---|
+| G1 Gain | PASS, M1 +0.860 (B 0.000, M 0.860), CI [0.774, 0.933], 58 cases | PASS, +0.860, CI [0.780, 0.933] |
+| G2 Retrieval | PASS, M2 0.967 (146/151), oracle 1.000 | PASS, 0.969 (439/453) |
+| G3 Precision | WARN, M3 0.113 (146/1295) | WARN, 0.113 (439/3887) |
+| G4 Mistakes | PASS, M4 B 1.000 (42/42), M 0.000, Wilson high 0.084 | PASS, 0/126, high 0.030 |
+| G5 Contradictions | PASS, H1 M 0.023 (8/344), delta +0.0043 | PASS, 24/1032 |
+| G6 Stale values | **FAIL**, H2 0.500 (9/18), Wilson high 0.710 | **FAIL**, 0.500 (27/54), high 0.629 |
+| G7 Poisoning | PASS, influenced 0/183, persisted 7/183, 180 corpus attacks | PASS, 0/549, persisted 21/549 |
+| G8 Isolation/forget | PASS, leaks 0/344, forget violations 0/2 | PASS, 0/1032, 0/6 |
+| G9 Tokens | PASS, M/B 0.818 (upper 0.894), per-turn +0.208 | PASS, 0.818 (0.893), +0.207 |
+| G10 Latency | PASS, p95 B 801.3 ms, M 809.7 ms (+8.4 ms) | PASS, +6.2 ms |
+| G11 Growth | WARN, duplicate ratio 0.298, max 51 items/user | WARN, same |
+
+The noise floor of this deterministic subject is 0 (absolute delta 0.0 over 58 paired cases). `memory-scorecard-gate.sh` agrees (exit 1,
+"G6 is FAIL"). Run observations (M arm, CI tier): 359 facts saved, 17 quarantined, 154 payloads refused by the write screen, 406 episodes
+approved by the scripted reviewer and 254 proposals held back; the B arm saved nothing (530 writes skipped by the write switch) and
+recalled nothing; about 7.7 database statements and 3.8 ms (p50) per recall.
+
+**Defects and findings (what the real pipeline exposed).**
+- **Fixed, D2: unified recall failed on a tenant-only search_path.** `JdbcMemoryItemStorage.recall` used bare `<=>`; PostgreSQL cannot find
+  the pgvector operator unless `public` is on the search_path, so any recall on a connection with only the tenant schema (inside a
+  transaction) failed with "operator does not exist" and degraded to nothing. Now `OPERATOR(public.<=>)`, like the legacy store;
+  `JdbcMemoryItemRecallSqlTest`.
+- **Open, D1: tenant and agent behaviour overrides are invisible to reads outside a transaction.** `JdbcSettingsStore` reads
+  `setting_override` unqualified through a plain `JdbcTemplate`; without a transaction the connection's search_path is `public`, so
+  `SettingsResolver.get` returns the platform value although `SettingsService.set` stored the override in the tenant schema (inside a
+  transaction it resolves correctly). `PlatformMemoryEvalIT.settingsOverrideVisibilityOutsideAndInsideATransaction` prints both
+  (`outside: true, inside: false`). If the production chat turn also reads outside a transaction, `memory.recall.enabled`,
+  `memory.write.enabled` and every other tenant/agent override is silently ignored there. Not fixed: the right fix (schema-qualify
+  in the store, or read inside a tenant-scoped transaction) needs a decision on the `settings` -> `tenancy` dependency and the hot-path
+  query budget; the eval works around it for the switches only.
+- **Open, G6: no supersession.** A corrected fact is stored next to the old one, the block carries no dates, and both are recalled; stale
+  values reach the answer in half of the update probes. The same cause shows as duplicate storage (G11 WARN).
+- **Open, G3: precision 0.113.** Recall returns up to top-k lines whatever their similarity (plus the unified semantic source repeating
+  legacy facts as `[fact]` lines): about 3.8 injected items per probe, one in nine relevant. Tokens stay inside budget (G9 passes).
+- **Open, poisoning containment on user chat is the write screen alone.** Of the 54 user-chat payloads per repeat, 34 were refused by the screen and
+  18 were saved TRUSTED (tool-output, document and agent-message payloads: 0 saved trusted; 16 quarantined, the rest refused by the screen first).
+  G7 passes because none of the saved payloads was retrieved by this lexical embedder for its probe, not because they were stopped: with a better
+  retriever these 18 would reach the prompt. The screen is documented as a tripwire; the taint gate only helps when the turn is tainted.
+- **Open: teammate sharing does not exist per user.** `remember_shared_fact` is keyed by the writer's subject (shared across that person's
+  agents), so the S14 probe "teammate recalls the note A shared" is a recall miss by design of the platform (a miss, not a leak).
+- The write screen runs before the taint gate, so tainted payloads are mostly recorded as "refused", not "quarantined".
+
+**Reproduce.** Postgres 16 with pgvector and AGE, Redis or Valkey, then from `core`:
+`mvn -Pit -pl app -am verify -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false -Dit.test=PlatformMemoryEvalIT -Dvegaduta.it.pg.url=jdbc:postgresql://host:5432/postgres -Dvegaduta.it.pg.user=... -Dmemeval.tier=ci`
+(or `mvn -pl app test -Dtest=PlatformMemoryEvalIT` with the surefire group exclusion lifted). Debug knobs: `-Dmemeval.trace=true`,
+`-Dmemeval.limit=N`, `-Dmemeval.repeats=N`, `-Dmemeval.compliant=false`, `-Dmemeval.count=false`.

@@ -608,18 +608,20 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         }
         args.add(vector);
         args.add(Math.max(1, limit));
+        // The operator is schema-qualified like the legacy fact store's: on a tenant connection (search_path is the tenant
+        // schema only, e.g. inside a transaction) an unqualified <=> is not found and the recall silently degrades.
         // The ACTIVE + TRUSTED predicate is repeated here on purpose: the partial index is a speed-up,
         // not the guarantee.
         String sql =
                 "SELECT "
                         + COLUMNS
-                        + ", importance, (embedding <=> ?::public.vector) AS distance FROM "
+                        + ", importance, (embedding OPERATOR(public.<=>) ?::public.vector) AS distance FROM "
                         + table("memory_item")
                         + " WHERE agent_id = ? AND kind = ? AND status = 'ACTIVE' AND trust = 'TRUSTED'"
                         + " AND (expires_at IS NULL OR expires_at > ?)"
                         + (bySubject ? " AND ? = ANY(subject_keys)" : "")
                         + tombstones.excludeItems(table("memory_item"))
-                        + " ORDER BY (1 - (embedding <=> ?::public.vector)) * (0.6 + 0.4 * importance) DESC,"
+                        + " ORDER BY (1 - (embedding OPERATOR(public.<=>) ?::public.vector)) * (0.6 + 0.4 * importance) DESC,"
                         + " created_at DESC LIMIT ?";
         return jdbc().query(
                         sql,

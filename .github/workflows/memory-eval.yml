@@ -7,12 +7,14 @@ name: Memory eval (nightly scorecard gate)
 # Gate exit codes (scripts/ci/memory-scorecard-gate.sh): 0 SHIP, 3 SHIP DARK (job passes with a notice, the
 # feature stays flag-off), 1 NO-SHIP, 2 invalid report, 4 stale report. Anything but 0 or 3 fails the job.
 #
-# The report is read from MEMORY_SCORECARD_JSON (default below). Until the memeval gate evaluator emits it the
-# gate step logs a warning and is skipped; flip REQUIRE_SCORECARD to "true" once it does, so a missing report
-# fails the job instead.
+# The report is read from MEMORY_SCORECARD_JSON (default below), which is now produced by the real-platform run
+# (PlatformMemoryEvalIT, scorecard doc Addendum E): the booted core app on a real Postgres (pgvector + Apache AGE,
+# built from deploy/postgres like ci.yml does) and a Redis-protocol service, a fake deterministic embedder and an
+# extractive answerer (no LLM, no provider keys, no billed calls). REQUIRE_SCORECARD is "true" because that step
+# always writes the file; a missing report means the run died and must fail the job.
 #
-# The real-model personas, B vs M vs Oracle arms and judge calibration of the section 8 nightly are NOT wired
-# here; they need a model budget decision (section 12) first.
+# The real-model personas, B vs M vs Oracle arms with an LLM answerer and judge calibration of the section 8 nightly
+# are NOT wired here; they need a model budget decision (section 12) first. ProbeAnswerer is the seam for it.
 
 on:
   schedule:
@@ -33,14 +35,22 @@ concurrency:
 
 env:
   JAVA_VERSION: "21"
-  MEMORY_SCORECARD_JSON: core/quality/target/memory-eval/memory-scorecard.json
-  REQUIRE_SCORECARD: "false"
+  MEMORY_SCORECARD_JSON: core/app/target/memory-eval/memory-scorecard.json
+  REQUIRE_SCORECARD: "true"
 
 jobs:
   memory-eval:
     name: memeval tests and scorecard gate
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
+    # Redis-protocol server for the booted app (the same image the Testcontainers ITs use).
+    services:
+      redis:
+        image: valkey/valkey:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s --health-retries 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -61,6 +71,48 @@ jobs:
           mvn -B -ntp -pl quality -am test
           -Dtest='**/memeval/**/*Test,RedTeamCorpusDataTest'
           -Dsurefire.failIfNoSpecifiedTests=false
+
+      # Postgres with pgvector AND Apache AGE (a plain service container fails Flyway on the first migration that
+      # needs either): the image the compose stack uses, built exactly as ci.yml builds it.
+      - name: Start Postgres (pgvector + Apache AGE)
+        run: |
+          base="$(sed -n 's/^ARG BASE_IMAGE=//p' deploy/postgres/Dockerfile)"
+          case "$base" in *@sha256:*) ;; *) echo "::error::BASE_IMAGE is not digest-pinned: $base"; exit 1 ;; esac
+          ok=
+          for reg in public.ecr.aws/docker/library docker.io/library; do
+            for attempt in 1 2; do
+              if docker build --build-arg BASE_IMAGE="$reg/$base" -t vegaduta-postgres:ci deploy/postgres; then
+                ok=1; break 2
+              fi
+              echo "::warning::postgres base pull via $reg failed (attempt $attempt); retrying"
+              sleep 20
+            done
+          done
+          [ -n "$ok" ] || { echo "::error::postgres base image unreachable on every registry"; exit 1; }
+          docker run -d --name pg -p 5432:5432 \
+            -e POSTGRES_USER=agentic -e POSTGRES_PASSWORD=changeme -e POSTGRES_DB=postgres \
+            --health-cmd "pg_isready -U agentic -d postgres" --health-interval 5s --health-retries 30 \
+            vegaduta-postgres:ci
+          for _ in $(seq 1 60); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' pg)" = healthy ] && exit 0
+            sleep 2
+          done
+          docker logs pg
+          exit 1
+
+      # The real-platform scorecard (nightly tier: 3 repeats, B-vs-B noise floor, 180 poisoning scenarios). -Pit runs
+      # failsafe's *IT classes of the integration group; -Dit.test narrows that to this one and -Dtest=NoSuchTest keeps
+      # the unit tests of every module out of this job (ci.yml runs them). Writes MEMORY_SCORECARD_JSON.
+      - name: Real-platform memory scorecard
+        working-directory: core
+        run: >-
+          mvn -B -ntp -Pit -pl app -am verify
+          -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
+          -Dit.test=PlatformMemoryEvalIT -Dfailsafe.failIfNoSpecifiedTests=false
+          -Dvegaduta.it.pg.url=jdbc:postgresql://localhost:5432/postgres
+          -Dvegaduta.it.pg.user=agentic -Dvegaduta.it.pg.password=changeme
+          -Dvegaduta.it.redis.host=localhost -Dvegaduta.it.redis.port=6379
+          -Dmemeval.tier=nightly
 
       - name: Scorecard gate
         id: gate
@@ -96,6 +148,8 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: memory-scorecard
-          path: ${{ steps.gate.outputs.report }}
+          path: |
+            ${{ steps.gate.outputs.report }}
+            core/app/target/memory-eval/memory-scorecard-*.json
           if-no-files-found: warn
           retention-days: 30
