@@ -789,3 +789,6 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 ### License-information audit (Claude Code, 2026-11-01)
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
+
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/billing/src/test` only (Razorpay SDK calls, Stripe HTTP calls, billing email service) plus a test-scope `okhttp-jvm` dependency in `core/billing/pom.xml`. No production code changed. `core/billing` is in the lean personal edition agent's row; this PR touches only new test files and the one pom entry. Worktree: `vegaduta-coverage-wt`.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/brief/src/test` only (section rules, validator rules, service, tune service, both controllers, prune, rehearsal port, entities). No production code changed. Stacked on the `core/billing` test PR (`test/coverage-plus-10`). Worktree: `vegaduta-coverage-wt`.
