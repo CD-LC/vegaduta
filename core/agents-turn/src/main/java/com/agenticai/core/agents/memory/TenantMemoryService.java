@@ -274,20 +274,7 @@ public class TenantMemoryService {
                         + " use_count, trust, source_taint, 0.0 AS distance FROM "
                         + table
                         + " WHERE subject_key = ? ORDER BY created_at DESC",
-                (rs, rowNum) ->
-                        new TenantMemoryEntry(
-                                UUID.fromString(rs.getString("id")),
-                                rs.getString("subject_key"),
-                                rs.getString("content"),
-                                rs.getDouble("distance"),
-                                rs.getString("created_by_agent_id") == null
-                                        ? null
-                                        : UUID.fromString(rs.getString("created_by_agent_id")),
-                                rs.getTimestamp("created_at").toInstant(),
-                                rs.getTimestamp("last_used_at").toInstant(),
-                                rs.getInt("use_count"),
-                                MemoryTrust.parse(rs.getString("trust")),
-                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
+                TenantMemoryFactRows.entryMapper(),
                 subjectKey);
     }
 
@@ -333,21 +320,9 @@ public class TenantMemoryService {
      */
     public boolean approveFact(UUID memoryId, String subjectKey) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
-        boolean approved =
-                subjectKey == null
-                        ? jdbcTemplate.update(
-                                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ?"
-                                                + " AND trust = 'QUARANTINED'",
-                                        memoryId)
-                                > 0
-                        : jdbcTemplate.update(
-                                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
-                                                + " AND trust = 'QUARANTINED'",
-                                        memoryId,
-                                        subjectKey)
-                                > 0;
+        boolean approved = TenantMemoryFactRows.approve(jdbcTemplate, table, memoryId, subjectKey);
         if (approved) {
-            syncApprovedToGraph(table, memoryId);
+            TenantMemoryFactRows.syncApprovedToGraph(jdbcTemplate, graphSync, table, memoryId);
         }
         return approved;
     }
@@ -358,28 +333,6 @@ public class TenantMemoryService {
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setGraphSync(ApprovedFactGraphSync graphSync) {
         this.graphSync = graphSync;
-    }
-
-    /** After an approval has committed; best-effort and fail-open, never changes the approval's result. */
-    private void syncApprovedToGraph(String table, UUID memoryId) {
-        ApprovedFactGraphSync sync = graphSync;
-        if (sync == null) {
-            return;
-        }
-        try {
-            jdbcTemplate.query(
-                    "SELECT subject_key, content, created_by_agent_id FROM " + table + " WHERE id = ?",
-                    rs -> {
-                        sync.sharedFactApproved(
-                                rs.getObject("created_by_agent_id", UUID.class),
-                                rs.getString("subject_key"),
-                                memoryId,
-                                rs.getString("content"));
-                    },
-                    memoryId);
-        } catch (RuntimeException e) {
-            log.warn("Could not offer approved shared memory {} to the graph; the approval stands", memoryId, e);
-        }
     }
 
     public boolean forgetFactForSubject(UUID memoryId, String subjectKey) {
@@ -505,35 +458,7 @@ public class TenantMemoryService {
     }
 
     private void pruneOverCap(String table) {
-        // User-visible memory blocks (subject_key contains '#mem:') are neither counted nor pruned.
-        Integer count =
-                jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM "
-                                + table
-                                + " WHERE position('"
-                                + MemoryBlocks.KEY_MARKER
-                                + "' in subject_key) = 0",
-                        Integer.class);
-        int cap = maxMemories();
-        if (count == null || count <= cap) {
-            return;
-        }
-        int overflow = count - cap;
-        jdbcTemplate.update(
-                "DELETE FROM "
-                        + table
-                        + " WHERE id IN ("
-                        + "SELECT id FROM "
-                        + table
-                        + " WHERE position('"
-                        + MemoryBlocks.KEY_MARKER
-                        + "' in subject_key) = 0 ORDER BY (trust = 'QUARANTINED') DESC,"
-                        + " last_used_at ASC, use_count ASC, created_at ASC LIMIT ?)",
-                overflow);
-        log.debug(
-                "Pruned {} oldest shared memories (over the {}-memory tenant-wide cap)",
-                overflow,
-                cap);
+        TenantMemoryFactRows.pruneOverCap(jdbcTemplate, table, maxMemories());
     }
 
     /**
@@ -569,21 +494,7 @@ public class TenantMemoryService {
                                 + " WHERE subject_key = ? AND trust = 'TRUSTED'"
                                 + tombstones.excludeSharedFacts(table)
                                 + " ORDER BY distance ASC LIMIT ?",
-                        (rs, rowNum) ->
-                                new TenantMemoryEntry(
-                                        UUID.fromString(rs.getString("id")),
-                                        rs.getString("subject_key"),
-                                        rs.getString("content"),
-                                        rs.getDouble("distance"),
-                                        rs.getString("created_by_agent_id") == null
-                                                ? null
-                                                : UUID.fromString(
-                                                        rs.getString("created_by_agent_id")),
-                                        rs.getTimestamp("created_at").toInstant(),
-                                        rs.getTimestamp("last_used_at").toInstant(),
-                                        rs.getInt("use_count"),
-                                MemoryTrust.parse(rs.getString("trust")),
-                                MemoryProvenance.parseSources(rs.getString("source_taint"))),
+                        TenantMemoryFactRows.entryMapper(),
                         literal,
                         subjectKey,
                         topK);
@@ -666,19 +577,7 @@ public class TenantMemoryService {
     }
 
     private void touchUsage(String table, List<UUID> ids) {
-        String placeholders = ids.stream().map(id -> "?").collect(Collectors.joining(","));
-        Object[] params = new Object[ids.size() + 1];
-        params[0] = Timestamp.from(clock.instant());
-        for (int i = 0; i < ids.size(); i++) {
-            params[i + 1] = ids.get(i);
-        }
-        jdbcTemplate.update(
-                "UPDATE "
-                        + table
-                        + " SET last_used_at = ?, use_count = use_count + 1 WHERE id IN ("
-                        + placeholders
-                        + ")",
-                params);
+        TenantMemoryFactRows.touchUsage(jdbcTemplate, table, Timestamp.from(clock.instant()), ids);
     }
 
     static String toVectorLiteral(float[] embedding) {
