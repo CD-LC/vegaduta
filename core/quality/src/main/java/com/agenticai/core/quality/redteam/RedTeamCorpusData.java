@@ -1,7 +1,7 @@
 package com.agenticai.core.quality.redteam;
 
+import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -132,7 +132,7 @@ public final class RedTeamCorpusData {
             if (in == null) {
                 throw new IllegalStateException("missing classpath resource " + RESOURCE);
             }
-            return new ObjectMapper().readTree(in);
+            return JsonMappers.plain().readTree(in);
         } catch (IOException e) {
             throw new UncheckedIOException("cannot read " + RESOURCE, e);
         }

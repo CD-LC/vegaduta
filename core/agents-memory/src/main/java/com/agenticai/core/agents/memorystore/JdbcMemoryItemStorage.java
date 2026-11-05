@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class JdbcMemoryItemStorage implements MemoryItemStorage {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
+    static final ObjectMapper MAPPER = com.agenticai.core.json.JsonMappers.plain();
     static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
 
     static final String COLUMNS =

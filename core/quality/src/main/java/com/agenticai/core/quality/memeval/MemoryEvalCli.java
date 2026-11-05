@@ -1,5 +1,6 @@
 package com.agenticai.core.quality.memeval;
 
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.memeval.InMemoryReferenceSubject.Quirk;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Context;
 import com.agenticai.core.quality.memeval.MemoryScorecardGate.Report;
@@ -36,7 +37,7 @@ public final class MemoryEvalCli {
     public static final String DEFAULT_OUT = "target/memory-eval/memory-scorecard.json";
 
     private static final ObjectMapper JSON =
-            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            JsonMappers.plain().enable(SerializationFeature.INDENT_OUTPUT);
 
     private MemoryEvalCli() {}
 

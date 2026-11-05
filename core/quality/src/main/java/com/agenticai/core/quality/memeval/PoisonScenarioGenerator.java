@@ -1,5 +1,6 @@
 package com.agenticai.core.quality.memeval;
 
+import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.quality.memeval.MemoryScenario.Attack;
 import com.agenticai.core.quality.memeval.MemoryScenario.Expect;
 import com.agenticai.core.quality.memeval.MemoryScenario.Fact;
@@ -42,7 +43,7 @@ public final class PoisonScenarioGenerator {
     /** Category of every generated scenario; G7's 150-attack bar counts exactly these. */
     public static final String CATEGORY = "poisoning-corpus";
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = JsonMappers.plain();
 
     private enum Channel {
         USER_CHAT(TurnSource.USER),

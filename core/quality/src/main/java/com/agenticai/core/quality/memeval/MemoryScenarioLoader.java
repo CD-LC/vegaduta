@@ -1,5 +1,6 @@
 package com.agenticai.core.quality.memeval;
 
+import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ public final class MemoryScenarioLoader {
     public static final String MANIFEST = RESOURCE_ROOT + "manifest.json";
 
     static final ObjectMapper MAPPER =
-            new ObjectMapper()
+            JsonMappers.plain()
                     .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
                     .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
