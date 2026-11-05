@@ -181,6 +181,25 @@ class GraphMemoryServiceTest {
      * the old and new fact.
      */
     @Test
+    void aMemoryIdIsStampedOnNewEdgesOfBothTiersAndOmittedOtherwise() throws SQLException {
+        stubConnectionCallback();
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        UUID memoryId = UUID.randomUUID();
+        GraphTriple triple = new GraphTriple("Priya", "MANAGER_OF_BY", "Raj");
+
+        service.remember(UUID.randomUUID(), "subject-1", List.of(triple), memoryId);
+        service.rememberShared("subject-1", List.of(triple), memoryId);
+        service.remember(UUID.randomUUID(), "subject-1", List.of(triple));
+
+        verify(statement, atLeastOnce()).execute(sqlCaptor.capture());
+        List<String> edges = sqlCaptor.getAllValues().stream().filter(q -> q.contains("CREATE (a)-[:RELATION")).toList();
+        assertThat(edges).hasSize(3);
+        assertThat(edges.get(0)).contains("memory_id: '" + memoryId + "'");
+        assertThat(edges.get(1)).contains("memory_id: '" + memoryId + "'").contains(GraphMemoryService.SHARED_AGENT_SENTINEL);
+        assertThat(edges.get(2)).doesNotContain("memory_id");
+    }
+
+    @Test
     void supersedeInvalidatesStaleEdgesThenMergesTheNewTriple() throws SQLException {
         stubConnectionCallback();
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);

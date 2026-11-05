@@ -118,4 +118,22 @@ class AssistServiceBackgroundTest {
         verify(resolver).resolveBest(false);
         verify(resolver, never()).resolveBest(true);
     }
+
+    @Test
+    void theMemoryExtractionPortUsesTheBackgroundClientAndSkipsACoolingDownProvider() {
+        ProviderCredentialResolver.ResolvedProvider openRouter = new ProviderCredentialResolver.ResolvedProvider(
+            ProviderName.OPENROUTER, "or-key", "deepseek/deepseek-chat", false);
+        when(resolver.resolveBest(true)).thenReturn(openRouter);
+        when(catalog.defaultModelFor(ProviderName.OPENROUTER)).thenReturn(Optional.of("openai/gpt-4o-mini"));
+        when(gateway.resolveClient(anyString(), any(GatewayCallSpec.class))).thenReturn(client);
+        com.agenticai.core.agents.memory.MemoryExtractionChatClients port = service;
+
+        assertEquals(client, port.forBackgroundExtraction());
+        verify(resolver).resolveBest(true);
+        verify(resolver, never()).resolveBest(false);
+
+        when(resolver.resolveBest(true)).thenThrow(new ProviderCoolingDownException(
+            ProviderName.OPENROUTER, Instant.now(), Duration.ofHours(1)));
+        assertThrows(ProviderCoolingDownException.class, port::forBackgroundExtraction);
+    }
 }

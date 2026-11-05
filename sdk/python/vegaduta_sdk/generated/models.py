@@ -5883,6 +5883,10 @@ class MemoryItemController_DetailView(TypedDict, total=False):
     events: List[MemoryItemController_EventView]
 
 
+class MemoryItemController_EditRequest(TypedDict, total=False):
+    content: str
+
+
 class MemoryItemController_EventView(TypedDict, total=False):
     id: str
     event: str
@@ -5913,6 +5917,7 @@ class MemoryItemController_ItemView(TypedDict, total=False):
     expiresAt: str
     approvedBy: str
     approvedAt: str
+    pinned: bool
 
 
 class MemoryItemController_SourceView(TypedDict, total=False):

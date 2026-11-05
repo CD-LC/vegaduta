@@ -165,6 +165,80 @@ class MemoryItemControllerTest {
         assertThat(controller.approve(f.agent, id, null).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
+    // ------------------------------------------------------------------ edit and pin
+
+    @Test
+    void patchCreatesANewPendingVersionAndAnswersWithIt() {
+        UUID active = f.active(MemoryKind.EPISODIC, "old text");
+        var response =
+                controller.edit(f.agent, active, new MemoryItemController.EditRequest("  new text  "), alice);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        MemoryItemController.ItemView next = response.getBody();
+        assertThat(next.content()).isEqualTo("new text");
+        assertThat(next.status()).isEqualTo("PENDING");
+        assertThat(next.trust()).isEqualTo("QUARANTINED");
+        assertThat(next.version()).isEqualTo(2);
+        assertThat(next.supersedesId()).isEqualTo(active);
+        // the active predecessor keeps serving until the new version is approved
+        assertThat(f.storage.items.get(active).status()).isEqualTo(MemoryItemStatus.ACTIVE);
+    }
+
+    @Test
+    void patchRejectsBlankTextUnknownItemsScreenedTextAndWrongStatus() {
+        UUID active = f.active(MemoryKind.EPISODIC, "old");
+        assertThatThrownBy(() -> controller.edit(f.agent, active, new MemoryItemController.EditRequest("  "), alice))
+                .isInstanceOfSatisfying(
+                        ResponseStatusException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
+        assertThatThrownBy(() -> controller.edit(f.agent, active, null, alice))
+                .isInstanceOf(ResponseStatusException.class);
+        assertThat(controller.edit(f.agent, UUID.randomUUID(), new MemoryItemController.EditRequest("x"), alice)
+                        .getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(controller.edit(f.agent, active, new MemoryItemController.EditRequest("x".repeat(5000)), alice)
+                        .getStatusCode())
+                .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        UUID reverted = f.active(MemoryKind.EPISODIC, "r");
+        controller.revert(f.agent, reverted, alice);
+        assertThat(controller.edit(f.agent, reverted, new MemoryItemController.EditRequest("y"), alice).getStatusCode())
+                .isEqualTo(HttpStatus.CONFLICT);
+        assertThat(controller.edit(f.agent, active, new MemoryItemController.EditRequest("z"), null).getStatusCode())
+                .isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void editAndPinTakeEditorAndAreDarkWhileTheFlagIsOff() {
+        UUID active = f.active(MemoryKind.EPISODIC, "a");
+        viewerOnly();
+        assertThatThrownBy(() -> controller.edit(f.agent, active, new MemoryItemController.EditRequest("b"), alice))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+        assertThatThrownBy(() -> controller.pin(f.agent, active, alice)).isInstanceOf(ResourceAccessDeniedException.class);
+        assertThatThrownBy(() -> controller.unpin(f.agent, active, alice))
+                .isInstanceOf(ResourceAccessDeniedException.class);
+        editor = true;
+        f.props.setEnabled(false);
+        assertThatThrownBy(() -> controller.edit(f.agent, active, new MemoryItemController.EditRequest("b"), alice))
+                .isInstanceOfSatisfying(
+                        ResponseStatusException.class,
+                        e -> assertThat(e.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+        assertThatThrownBy(() -> controller.pin(f.agent, active, alice)).isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> controller.unpin(f.agent, active, alice)).isInstanceOf(ResponseStatusException.class);
+        assertThat(f.storage.items.get(active).pinned()).isFalse();
+    }
+
+    @Test
+    void pinAndUnpinToggleTheFlagAndShowInTheView() {
+        UUID active = f.active(MemoryKind.EPISODIC, "keep");
+        assertThat(controller.pin(f.agent, active, alice).getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(controller.get(f.agent, active).getBody().item().pinned()).isTrue();
+        assertThat(controller.unpin(f.agent, active, alice).getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(controller.get(f.agent, active).getBody().item().pinned()).isFalse();
+        UUID pending = pending("p");
+        assertThat(controller.pin(f.agent, pending, alice).getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(controller.pin(f.agent, UUID.randomUUID(), alice).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(controller.pin(f.agent, active, null).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
     // ------------------------------------------------------------------ erasure
 
     @Test

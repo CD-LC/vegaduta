@@ -39,6 +39,17 @@ final class GraphMemoryCypher {
         return "SELECT * FROM ag_catalog.cypher('" + graphName + "', $$ " + cypher + " $$) AS (" + columns + ")";
     }
 
+    /** Counts the currently-open edges of one (subject, relation, object) in a tier; arguments are already sanitised. */
+    static String buildOpenEdgeCypher(
+        String tierStr, String subjectKeyStr, String subjectLower, String relation, String objectLower
+    ) {
+        return "MATCH (a:Entity {agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'})"
+                + "-[r:RELATION {type: '" + relation + "'}]->"
+                + "(b:Entity {agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'}) "
+                + "WHERE toLower(a.name) = '" + subjectLower + "' AND toLower(b.name) = '" + objectLower + "' "
+                + "AND r.valid_to IS NULL RETURN count(r)";
+    }
+
     static String buildForgetInvalidateCypher(
         String tierStr, String subjectKeyStr, GraphFactTextMatcher.ValidEdge edge, long now
     ) {

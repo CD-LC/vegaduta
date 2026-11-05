@@ -1344,7 +1344,7 @@ class AgentMemoryApi:
         """
         return self._http.request("GET", f"/api/agents/{quote_path(agent_id)}/memories/shared", query={"subjectKey": subject_key, "limit": limit, "offset": offset})
 
-    def approve_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: str, idempotency_key: Optional[str] = None) -> None:
+    def approve_shared_memory(self, agent_id: str, memory_id: str, *, subject_key: Optional[str] = None, idempotency_key: Optional[str] = None) -> None:
         """Approve shared memory.
 
         POST /api/agents/{agentId}/memories/shared/{memoryId}/approve
@@ -6963,12 +6963,33 @@ class MemoryItemApi:
         """
         return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}", response="void")
 
+    def edit(self, agent_id: str, item_id: str, body: Optional[m.MemoryItemController_EditRequest] = None, *, idempotency_key: Optional[str] = None) -> m.MemoryItemController_ItemView:
+        """Edit.
+
+        PATCH /api/agents/{agentId}/memory-items/{itemId}
+        """
+        return self._http.request("PATCH", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}", headers={"Idempotency-Key": idempotency_key}, body=body)
+
     def approve(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Approve.
 
         POST /api/agents/{agentId}/memory-items/{itemId}/approve
         """
         return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def pin(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Pin.
+
+        POST /api/agents/{agentId}/memory-items/{itemId}/pin
+        """
+        return self._http.request("POST", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/pin", headers={"Idempotency-Key": idempotency_key}, response="void")
+
+    def unpin(self, agent_id: str, item_id: str) -> None:
+        """Unpin.
+
+        DELETE /api/agents/{agentId}/memory-items/{itemId}/pin
+        """
+        return self._http.request("DELETE", f"/api/agents/{quote_path(agent_id)}/memory-items/{quote_path(item_id)}/pin", response="void")
 
     def reject(self, agent_id: str, item_id: str, *, idempotency_key: Optional[str] = None) -> None:
         """Reject.
@@ -12193,6 +12214,13 @@ class UserMemoryApi:
         POST /api/memory/facts
         """
         return self._http.request("POST", "/api/memory/facts", headers={"Idempotency-Key": idempotency_key}, body=body)
+
+    def approve_shared_fact(self, id: str, *, idempotency_key: Optional[str] = None) -> None:
+        """Approve shared fact.
+
+        POST /api/memory/facts/shared/{id}/approve
+        """
+        return self._http.request("POST", f"/api/memory/facts/shared/{quote_path(id)}/approve", headers={"Idempotency-Key": idempotency_key}, response="void")
 
     def delete_fact(self, scope: str, id: str) -> None:
         """Delete fact.

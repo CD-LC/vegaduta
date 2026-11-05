@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +39,8 @@ import org.springframework.web.server.ResponseStatusException;
  * (the same platform AND tenant AND agent flags as the write path, all default OFF), so the
  * surface stays dark with the feature. Decisions and erasure are NOT gated: a person must always
  * be able to review and erase, even with the platform switch off (ADR-0028 rollout: data is
- * retained but erasable), matching {@link MemoryItemReviewService}, which never consults the flags.
+ * retained but erasable), matching {@link MemoryItemReviewService}, which never consults the flags. Edit
+ * and pin create or change recall-relevant state, so they ARE gated: 404 while the feature is dark.
  */
 @RestController
 @RequestMapping("/api/agents/{agentId}/memory-items")
@@ -76,7 +79,8 @@ public class MemoryItemController {
             Instant createdAt,
             Instant expiresAt,
             String approvedBy,
-            Instant approvedAt) {
+            Instant approvedAt,
+            boolean pinned) {
 
         static ItemView of(MemoryItem i) {
             return new ItemView(
@@ -98,9 +102,13 @@ public class MemoryItemController {
                     i.createdAt(),
                     i.expiresAt(),
                     i.approvedBy(),
-                    i.approvedAt());
+                    i.approvedAt(),
+                    i.pinned());
         }
     }
+
+    /** Body of the edit: the new text of the item. */
+    public record EditRequest(String content) {}
 
     public record SourceView(String sourceTable, String sourceKey, String sourceTrust) {
 
@@ -201,6 +209,48 @@ public class MemoryItemController {
     }
 
     /**
+     * Edit = a NEW version, never an in-place change: a new PENDING row (version + 1, {@code supersedesId} set, writer
+     * HUMAN, re-screened and re-embedded, taint and generation kept, the old row in its lineage) that needs its own
+     * approval. Answers 200 with the new version. 404 while the feature is dark, 400 for blank text, 404 for an
+     * unknown item, 409 when the item is not PENDING or ACTIVE, 422 when the text fails the content screen. EDITOR.
+     */
+    @PatchMapping("/{itemId}")
+    public ResponseEntity<ItemView> edit(
+            @PathVariable UUID agentId,
+            @PathVariable UUID itemId,
+            @RequestBody(required = false) EditRequest body,
+            Principal principal) {
+        access().requireEditor(agentId);
+        requireEnabled(agentId);
+        if (body == null || !StringUtils.hasText(body.content())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Memory text cannot be empty.");
+        }
+        MemoryItemReviewService.Outcome outcome = review.edit(agentId, itemId, body.content().strip(), actor(principal));
+        if (!outcome.ok()) {
+            return refusal(outcome);
+        }
+        return review.get(agentId, outcome.itemId())
+                .map(i -> ResponseEntity.ok(ItemView.of(i)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT).build());
+    }
+
+    /** Pins an ACTIVE item so consolidation never forgets it; a person only (an agent has no route here). EDITOR. */
+    @PostMapping("/{itemId}/pin")
+    public ResponseEntity<Void> pin(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+        access().requireEditor(agentId);
+        requireEnabled(agentId);
+        return decide(agentId, itemId, principal, review::pin);
+    }
+
+    /** Clears a pin. EDITOR. */
+    @DeleteMapping("/{itemId}/pin")
+    public ResponseEntity<Void> unpin(@PathVariable UUID agentId, @PathVariable UUID itemId, Principal principal) {
+        access().requireEditor(agentId);
+        requireEnabled(agentId);
+        return decide(agentId, itemId, principal, review::unpin);
+    }
+
+    /**
      * Erasure with the lineage cascade: the item, every item derived from it, and each erased
      * row's lineage and event history go; one ERASED tombstone per erased id stays. EDITOR.
      */
@@ -221,9 +271,18 @@ public class MemoryItemController {
         if (outcome.ok()) {
             return ResponseEntity.noContent().build();
         }
-        return switch (outcome.refusal()) {
+        return refusal(outcome);
+    }
+
+    private static <T> ResponseEntity<T> refusal(MemoryItemReviewService.Outcome outcome) {
+        String reason = outcome.refusal();
+        if (reason.startsWith("SCREEN_")) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build();
+        }
+        return switch (reason) {
             case "NOT_FOUND" -> ResponseEntity.notFound().build();
             case "NOT_HUMAN", "NO_TENANT" -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            case "NO_EMBEDDER" -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
             default -> ResponseEntity.status(HttpStatus.CONFLICT).build();
         };
     }

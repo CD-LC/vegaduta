@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   UNIFIED_ENABLED_KEY,
+  canTogglePin,
   groupMemoryItems,
   isActive,
+  isEditable,
   isPending,
   itemBucket,
   labelKey,
@@ -57,6 +59,20 @@ describe("decision helpers", () => {
   it("isActive only for ACTIVE", () => {
     expect(isActive({ status: "ACTIVE" })).toBe(true);
     expect(isActive({ status: "REVERTED" })).toBe(false);
+  });
+});
+
+describe("edit and pin helpers", () => {
+  it("only PENDING and ACTIVE rows are editable", () => {
+    expect(isEditable({ status: "PENDING" })).toBe(true);
+    expect(isEditable({ status: "ACTIVE" })).toBe(true);
+    for (const status of ["REJECTED", "SUPERSEDED", "REVERTED", undefined]) expect(isEditable({ status })).toBe(false);
+  });
+  it("a pin is offered on an ACTIVE row, and any pinned row can be unpinned", () => {
+    expect(canTogglePin({ status: "ACTIVE" })).toBe(true);
+    expect(canTogglePin({ status: "PENDING" })).toBe(false);
+    expect(canTogglePin({ status: "REVERTED", pinned: true })).toBe(true);
+    expect(canTogglePin({ status: "REVERTED", pinned: false })).toBe(false);
   });
 });
 

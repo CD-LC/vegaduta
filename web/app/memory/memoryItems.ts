@@ -45,6 +45,16 @@ export function isActive(item: Pick<MemoryItem, "status">): boolean {
   return item.status === "ACTIVE";
 }
 
+/** Edit applies to a PENDING proposal or an ACTIVE row (the server 409s anything else). */
+export function isEditable(item: Pick<MemoryItem, "status">): boolean {
+  return item.status === "PENDING" || item.status === "ACTIVE";
+}
+
+/** The pin toggle: pin an ACTIVE item, or release any pinned one. */
+export function canTogglePin(item: Pick<MemoryItem, "status" | "pinned">): boolean {
+  return item.pinned === true || item.status === "ACTIVE";
+}
+
 /** Kinds the API documents today; a forward-compatible labelKey() covers anything newer. */
 // SEMANTIC is intentionally absent: the memory-items API 400s on it
 // (semantic items live on the agent-memory endpoints, not this surface).

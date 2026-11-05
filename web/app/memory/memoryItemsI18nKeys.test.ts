@@ -45,6 +45,7 @@ describe("memory i18n (unified items)", () => {
         "EXPIRED",
         "ERASED",
         "PINNED",
+        "UNPINNED",
         "REFUSED",
         "other",
       ].map((v) => `event_${v}`),

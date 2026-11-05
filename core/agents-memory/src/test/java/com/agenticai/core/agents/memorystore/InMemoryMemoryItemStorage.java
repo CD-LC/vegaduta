@@ -155,6 +155,17 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
     }
 
     @Override
+    public boolean setPinned(UUID agentId, UUID itemId, boolean pinned, MemoryEvent event) {
+        MemoryItem item = items.get(itemId);
+        if (item == null || !item.agentId().equals(agentId) || item.pinned() == pinned) {
+            return false;
+        }
+        items.put(itemId, withPinned(item, pinned));
+        events.add(event);
+        return true;
+    }
+
+    @Override
     public boolean delete(UUID agentId, UUID itemId, MemoryEvent erased) {
         MemoryItem item = items.get(itemId);
         if (item == null || !item.agentId().equals(agentId)) {
@@ -266,7 +277,15 @@ class InMemoryMemoryItemStorage implements MemoryItemStorage {
                 i.createdAt(),
                 i.expiresAt(),
                 i.approvedBy(),
-                i.approvedAt());
+                i.approvedAt(),
+                i.pinned());
+    }
+
+    private static MemoryItem withPinned(MemoryItem i, boolean pinned) {
+        return new MemoryItem(
+                i.id(), i.agentId(), i.kind(), i.content(), i.trust(), i.status(), i.writer(), i.sourceType(),
+                i.sourceRef(), i.turnId(), i.sourceTaint(), i.modelGenerated(), i.generation(), i.subjectKeys(),
+                i.version(), i.supersedesId(), i.createdAt(), i.expiresAt(), i.approvedBy(), i.approvedAt(), pinned);
     }
 
     private static double cosine(float[] a, float[] b) {

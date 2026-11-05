@@ -130,11 +130,15 @@ public class AgentMemoryController {
         return all.subList(from, to);
     }
 
+    /**
+     * Approves a quarantined shared fact; EDITOR. {@code subjectKey} is optional: without it the approval is
+     * subject-agnostic (any subject's fact), with it the fact must be about that subject.
+     */
     @PostMapping("/shared/{memoryId}/approve")
     public ResponseEntity<Void> approveSharedMemory(
             @PathVariable UUID agentId,
             @PathVariable UUID memoryId,
-            @RequestParam String subjectKey) {
+            @RequestParam(required = false) String subjectKey) {
         agentService.requireAccess(agentId, PermissionLevel.EDITOR);
         TenantMemoryService service = tenantService();
         boolean approved = service != null && service.approveFact(memoryId, subjectKey);

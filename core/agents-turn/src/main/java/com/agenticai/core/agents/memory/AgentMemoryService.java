@@ -448,24 +448,63 @@ public class AgentMemoryService {
      */
     public boolean approve(UUID agentId, UUID memoryId) {
         String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
-                                + " AND trust = 'QUARANTINED'",
-                        memoryId,
-                        agentId)
-                > 0;
+        boolean approved =
+                jdbcTemplate.update(
+                                "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
+                                        + " AND trust = 'QUARANTINED'",
+                                memoryId,
+                                agentId)
+                        > 0;
+        if (approved) {
+            syncApprovedToGraph(agentId, memoryId);
+        }
+        return approved;
     }
 
     /** {@link #approve(UUID, UUID)} restricted to a memory about {@code subjectKey}. */
     public boolean approve(UUID agentId, UUID memoryId, String subjectKey) {
         String table = AgentMemorySchemaSupport.qualifiedTableName();
-        return jdbcTemplate.update(
-                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
-                                + " AND subject_key = ? AND trust = 'QUARANTINED'",
-                        memoryId,
-                        agentId,
-                        subjectKey)
-                > 0;
+        boolean approved =
+                jdbcTemplate.update(
+                                "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND agent_id = ?"
+                                        + " AND subject_key = ? AND trust = 'QUARANTINED'",
+                                memoryId,
+                                agentId,
+                                subjectKey)
+                        > 0;
+        if (approved) {
+            syncApprovedToGraph(agentId, memoryId);
+        }
+        return approved;
+    }
+
+    private volatile ApprovedFactGraphSync graphSync;
+
+    /** Mirrors an approved fact into the knowledge graph (G6); absent in hand-built instances, then approval is vector-only. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setGraphSync(ApprovedFactGraphSync graphSync) {
+        this.graphSync = graphSync;
+    }
+
+    /**
+     * After an approval has committed: offers the fact to the graph, unless writes are switched off for the agent.
+     * Best-effort and fail-open (see {@link ApprovedFactGraphSync}); never changes the approval's result.
+     */
+    private void syncApprovedToGraph(UUID agentId, UUID memoryId) {
+        ApprovedFactGraphSync sync = graphSync;
+        if (sync == null || writesSwitchedOff(agentId)) {
+            return;
+        }
+        try {
+            jdbcTemplate.query(
+                    "SELECT subject_key, content FROM " + AgentMemorySchemaSupport.qualifiedTableName() + " WHERE id = ?",
+                    rs -> {
+                        sync.agentFactApproved(agentId, rs.getString("subject_key"), memoryId, rs.getString("content"));
+                    },
+                    memoryId);
+        } catch (RuntimeException e) {
+            log.warn("Could not offer approved memory {} to the graph; the approval stands", memoryId, e);
+        }
     }
 
     public void forget(UUID agentId, UUID memoryId) {

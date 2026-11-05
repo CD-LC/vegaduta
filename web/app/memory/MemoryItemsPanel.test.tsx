@@ -23,6 +23,9 @@ const api = vi.hoisted(() => ({
   rejectMemoryItem: vi.fn(),
   revertMemoryItem: vi.fn(),
   eraseMemoryItem: vi.fn(),
+  editMemoryItem: vi.fn(),
+  pinMemoryItem: vi.fn(),
+  unpinMemoryItem: vi.fn(),
   exportMemoryItems: vi.fn(),
 }));
 vi.mock("../lib/api", () => ({ api }));
@@ -201,5 +204,75 @@ describe("MemoryItemsPanel", () => {
     api.exportMemoryItems.mockResolvedValue(null);
     fireEvent.click(await screen.findByRole("button", { name: "Export my items" }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "Export my items" })).not.toBeInTheDocument());
+  });
+
+  it("edits an item through the dialog and saves it as a new version", async () => {
+    api.editMemoryItem.mockResolvedValue({ ...ITEMS[1], id: "i2b", content: "met on Wednesday", status: "PENDING" });
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const active = await screen.findByTestId("memory-items-active");
+    fireEvent.click(within(active).getByRole("button", { name: "Edit" }));
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText("Edit this memory item")).toBeInTheDocument();
+    const text = within(dialog).getByTestId("memory-item-edit-text") as HTMLTextAreaElement;
+    expect(text.value).toBe("met on Tuesday");
+    // Unchanged text cannot be saved.
+    expect(within(dialog).getByRole("button", { name: "Save new version" })).toBeDisabled();
+    fireEvent.change(text, { target: { value: "  met on Wednesday  " } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save new version" }));
+    await waitFor(() => expect(api.editMemoryItem).toHaveBeenCalledWith("a1", "i2", "met on Wednesday"));
+    await waitFor(() => expect(api.listMemoryItems).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+  });
+
+  it("offers edit on a pending item and keeps the dialog open with the text when the save fails", async () => {
+    api.editMemoryItem.mockRejectedValue(new Error("422"));
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const review = await screen.findByTestId("memory-items-review");
+    fireEvent.click(within(review).getByRole("button", { name: "Edit" }));
+    const dialog = await screen.findByRole("alertdialog");
+    fireEvent.change(within(dialog).getByTestId("memory-item-edit-text"), { target: { value: "likes coffee" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save new version" }));
+    await waitFor(() => expect(api.editMemoryItem).toHaveBeenCalledWith("a1", "i1", "likes coffee"));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect((screen.getByTestId("memory-item-edit-text") as HTMLTextAreaElement).value).toBe("likes coffee");
+    expect(api.listMemoryItems).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not offer edit on a tombstoned item", async () => {
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const tomb = await screen.findByTestId("memory-items-tombstoned");
+    expect(within(tomb).queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(within(tomb).queryByRole("button", { name: "Pin" })).not.toBeInTheDocument();
+  });
+
+  it("pins an active item and unpins a pinned one", async () => {
+    api.pinMemoryItem.mockResolvedValue(undefined);
+    api.unpinMemoryItem.mockResolvedValue(undefined);
+    const { unmount } = render(<MemoryItemsPanel agents={AGENTS} />);
+    const active = await screen.findByTestId("memory-items-active");
+    expect(within(active).queryByTestId("memory-item-pinned")).not.toBeInTheDocument();
+    fireEvent.click(within(active).getByRole("button", { name: "Pin" }));
+    await waitFor(() => expect(api.pinMemoryItem).toHaveBeenCalledWith("a1", "i2"));
+    await waitFor(() => expect(api.listMemoryItems).toHaveBeenCalledTimes(2));
+    unmount();
+
+    api.listMemoryItems.mockResolvedValue([{ ...ITEMS[1], pinned: true }]);
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const pinned = await screen.findByTestId("memory-items-active");
+    expect(within(pinned).getByTestId("memory-item-pinned")).toBeInTheDocument();
+    const toggle = within(pinned).getByRole("button", { name: "Unpin" });
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(toggle);
+    await waitFor(() => expect(api.unpinMemoryItem).toHaveBeenCalledWith("a1", "i2"));
+  });
+
+  it("hides edit and pin for a viewer but still shows the pinned badge", async () => {
+    api.listMemoryItems.mockResolvedValue([{ ...ITEMS[1], pinned: true }]);
+    render(<MemoryItemsPanel agents={[AGENTS[1]]} />);
+    const active = await screen.findByTestId("memory-items-active");
+    expect(within(active).getByTestId("memory-item-pinned")).toBeInTheDocument();
+    expect(within(active).queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    expect(within(active).queryByRole("button", { name: "Unpin" })).not.toBeInTheDocument();
+    expect(within(active).queryByRole("button", { name: "Pin" })).not.toBeInTheDocument();
   });
 });

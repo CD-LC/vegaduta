@@ -45,7 +45,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     private static final String COLUMNS =
             "id, agent_id, kind, content, trust, status, writer, source_type, source_ref, turn_id, source_taint,"
                     + " model_generated, generation, subject_keys, version, supersedes_id, created_at, expires_at,"
-                    + " approved_by, approved_at";
+                    + " approved_by, approved_at, pinned";
 
     private final ObjectProvider<JdbcTemplate> jdbcProvider;
 
@@ -160,7 +160,8 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                 instant(rs, "created_at"),
                 instant(rs, "expires_at"),
                 rs.getString("approved_by"),
-                instant(rs, "approved_at"));
+                instant(rs, "approved_at"),
+                rs.getBoolean("pinned"));
     }
 
     private static void insertEvent(JdbcTemplate jdbc, MemoryEvent e) {
@@ -312,6 +313,31 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                                     to.name(),
                                     itemId,
                                     agentId);
+                    if (rows == 1) {
+                        done[0] = true;
+                        insertEvent(jdbc, event);
+                    }
+                });
+        return done[0];
+    }
+
+    @Override
+    public boolean setPinned(UUID agentId, UUID itemId, boolean pinned, MemoryEvent event) {
+        JdbcTemplate jdbc = jdbc();
+        String items = table("memory_item");
+        boolean[] done = new boolean[1];
+        inTransaction(
+                jdbc,
+                () -> {
+                    int rows =
+                            jdbc.update(
+                                    "UPDATE "
+                                            + items
+                                            + " SET pinned = ? WHERE id = ? AND agent_id = ? AND pinned <> ?",
+                                    pinned,
+                                    itemId,
+                                    agentId,
+                                    pinned);
                     if (rows == 1) {
                         done[0] = true;
                         insertEvent(jdbc, event);

@@ -29,6 +29,8 @@ export type MemoryItem = {
   expiresAt?: string | null;
   approvedBy?: string | null;
   approvedAt?: string | null;
+  /** A person pinned it: consolidation never forgets a pinned item. */
+  pinned?: boolean;
 };
 
 /** One lineage hop: which upstream table/row the item was derived from. */
@@ -41,7 +43,7 @@ export type MemoryItemSource = {
 /** One memory_event row; never carries memory text. */
 export type MemoryItemEvent = {
   id: string;
-  /** CREATED | APPROVED | REJECTED | EDITED | REVERTED | EXPIRED | ERASED | PINNED | REFUSED. */
+  /** CREATED | APPROVED | REJECTED | EDITED | REVERTED | EXPIRED | ERASED | PINNED | UNPINNED | REFUSED. */
   event?: string;
   actorType?: string;
   actorRef?: string | null;

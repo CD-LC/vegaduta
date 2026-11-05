@@ -123,4 +123,22 @@ class AgentMemoryControllerTest {
         assertThatThrownBy(() -> controller.approveSharedMemory(agentId, memoryId, "alice"))
                 .isInstanceOf(ResourceAccessDeniedException.class);
     }
+
+    @Test
+    void anEditorApprovesASharedFactSubjectAgnosticallyWithoutASubjectKey() {
+        TenantMemoryService tenant = mock(TenantMemoryService.class);
+        when(tenant.approveFact(memoryId, null)).thenReturn(true);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<AgentMemoryService> agents = mock(ObjectProvider.class);
+        @SuppressWarnings("unchecked")
+        ObjectProvider<TenantMemoryService> tenants = mock(ObjectProvider.class);
+        when(tenants.getIfAvailable()).thenReturn(tenant);
+        AgentMemoryController c = new AgentMemoryController(agentService, agents, tenants);
+
+        assertThat(c.approveSharedMemory(agentId, memoryId, null).getStatusCode().value()).isEqualTo(204);
+        verify(tenant).approveFact(memoryId, null);
+
+        when(tenant.approveFact(memoryId, "bob")).thenReturn(false);
+        assertThat(c.approveSharedMemory(agentId, memoryId, "bob").getStatusCode().value()).isEqualTo(404);
+    }
 }

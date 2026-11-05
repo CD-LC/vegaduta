@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Trash2, Undo2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Pencil, Pin, PinOff, Trash2, Undo2, X } from "lucide-react";
 import { api } from "../lib/api";
 import { Button, buttonVariants } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Textarea } from "../components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { useLocale, useTranslations } from "../lib/i18n";
-import { isActive, isPending, labelKey } from "./memoryItems";
+import { canTogglePin, isActive, isEditable, isPending, labelKey } from "./memoryItems";
 import type { MemoryItem, MemoryItemDetail } from "./memoryItemTypes";
 
 function formatDateTime(iso: string | null | undefined, locale: string | undefined): string | null {
@@ -46,7 +47,7 @@ export default function MemoryItemRow({
 }: {
   item: MemoryItem;
   agentId: string;
-  /** EDITOR on the agent: approve/reject/revert/erase. VIEWER sees a read-only row. */
+  /** EDITOR on the agent: approve/reject/revert/edit/pin/erase. VIEWER sees a read-only row. */
   canEdit: boolean;
   /** Reload the list after a decision or an erase. */
   onChanged: () => void;
@@ -56,6 +57,9 @@ export default function MemoryItemRow({
   const [busy, setBusy] = useState(false);
   const [confirmErase, setConfirmErase] = useState(false);
   const [detail, setDetail] = useState<DetailState>({ kind: "closed" });
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(item.content);
+  const [saving, setSaving] = useState(false);
 
   const decide = async (op: (agentId: string, itemId: string) => Promise<unknown>) => {
     setBusy(true);
@@ -66,6 +70,27 @@ export default function MemoryItemRow({
       /* surfaced by toJson */
     } finally {
       setBusy(false);
+    }
+  };
+
+  const openEdit = () => {
+    setDraft(item.content);
+    setEditing(true);
+  };
+
+  // A failed save keeps the dialog open with the text intact (the error is surfaced by toJson).
+  const saveEdit = async () => {
+    const text = draft.trim();
+    if (!text || text === item.content.trim()) return;
+    setSaving(true);
+    try {
+      await api.editMemoryItem(agentId, item.id, text);
+      setEditing(false);
+      onChanged();
+    } catch {
+      /* surfaced by toJson */
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -97,6 +122,11 @@ export default function MemoryItemRow({
               <Badge variant="outline">{t(labelKey("status", item.status))}</Badge>
             )}
             {item.modelGenerated && <Badge variant="outline">{t("modelGenerated")}</Badge>}
+            {item.pinned && (
+              <Badge variant="outline" data-testid="memory-item-pinned">
+                <Pin size={12} aria-hidden="true" /> {t("pinned")}
+              </Badge>
+            )}
           </div>
           <p className="whitespace-pre-wrap break-words text-sm text-foreground">{item.content}</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -120,6 +150,24 @@ export default function MemoryItemRow({
           {canEdit && isActive(item) && (
             <Button variant="outline" size="sm" disabled={busy} onClick={() => void decide(api.revertMemoryItem)}>
               <Undo2 size={14} aria-hidden="true" /> {t("revert")}
+            </Button>
+          )}
+          {canEdit && isEditable(item) && (
+            <Button variant="outline" size="sm" disabled={busy} onClick={openEdit}>
+              <Pencil size={14} aria-hidden="true" /> {t("edit")}
+            </Button>
+          )}
+          {canEdit && canTogglePin(item) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-pressed={item.pinned === true}
+              aria-label={item.pinned ? t("unpin") : t("pin")}
+              title={item.pinned ? t("unpin") : t("pin")}
+              disabled={busy}
+              onClick={() => void decide(item.pinned ? api.unpinMemoryItem : api.pinMemoryItem)}
+            >
+              {item.pinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
             </Button>
           )}
           {canEdit && (
@@ -221,6 +269,31 @@ export default function MemoryItemRow({
           </div>
         </div>
       )}
+
+      <AlertDialog open={editing} onOpenChange={(o) => !saving && setEditing(o)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("editTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("editBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            value={draft}
+            rows={5}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label={t("editLabel")}
+            data-testid="memory-item-edit-text"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={saving}>{t("cancel")}</AlertDialogCancel>
+            <Button
+              disabled={saving || !draft.trim() || draft.trim() === item.content.trim()}
+              onClick={() => void saveEdit()}
+            >
+              {saving ? t("editSaving") : t("editSave")}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={confirmErase} onOpenChange={setConfirmErase}>
         <AlertDialogContent>

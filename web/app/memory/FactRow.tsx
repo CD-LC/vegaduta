@@ -59,7 +59,7 @@ export default function FactRow({
   maxChars: number;
   onEdit: (fact: MemoryFact, content: string) => Promise<void>;
   onDelete: (fact: MemoryFact) => Promise<void>;
-  /** Approve a quarantined private fact; omitted when the page cannot (shared facts). */
+  /** Approve a quarantined fact (private or shared); omitted when the page cannot. */
   onApprove?: (fact: MemoryFact) => Promise<void>;
 }) {
   const t = useTranslations("memoryPage");
@@ -196,7 +196,7 @@ export default function FactRow({
                   {t("quarantinedBadge")}
                 </span>
                 <span className="text-xs text-muted-foreground">{t("quarantinedHint")}</span>
-                {fact.scope === "agent" && fact.agentId && onApprove && (
+                {(fact.scope === "shared" || fact.agentId) && onApprove && (
                   <Button
                     type="button"
                     variant="outline"

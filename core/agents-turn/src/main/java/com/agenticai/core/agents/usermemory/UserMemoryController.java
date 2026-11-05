@@ -345,6 +345,31 @@ public class UserMemoryController {
         return changed ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    /**
+     * Approves the caller's own QUARANTINED shared fact so every sharing agent recalls it (and it is offered to
+     * the shared graph tier). An approved shared fact reaches every sharing agent, so this takes the same bar as
+     * {@code POST /api/agents/{agentId}/memories/shared/{memoryId}/approve}: EDITOR on the agent that wrote the
+     * fact. 404 when the fact is not the caller's or is not quarantined; 403 when the caller is not an editor of
+     * the writing agent (or the writing agent is not recorded). No subject key is taken from the client.
+     */
+    @PostMapping("/facts/shared/{id}/approve")
+    public ResponseEntity<Void> approveSharedFact(@PathVariable UUID id, Principal principal) {
+        String subject = subject(principal);
+        TenantMemoryService tenant = requireTenant();
+        TenantMemoryEntry target = tenant.listFactsForSubject(subject).stream()
+            .filter(m -> id.equals(m.id()) && m.trust() == MemoryTrust.QUARANTINED)
+            .findFirst()
+            .orElse(null);
+        if (target == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (target.createdByAgentId() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Approving a shared memory needs editor access to the agent that wrote it.");
+        }
+        agentService.requireAccess(target.createdByAgentId(), PermissionLevel.EDITOR);
+        return tenant.approveFact(id, subject) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/facts/{scope}/{id}")
     public ResponseEntity<Void> deleteFact(@PathVariable String scope, @PathVariable UUID id, Principal principal) {
         String subject = subject(principal);

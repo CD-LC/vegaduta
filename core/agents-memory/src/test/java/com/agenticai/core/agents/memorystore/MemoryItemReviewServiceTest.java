@@ -185,6 +185,44 @@ class MemoryItemReviewServiceTest {
     }
 
     @Test
+    void pinAndUnpinAreHumanOnlyIdempotentAndLeaveTextFreeEvents() {
+        UUID id = f.active(MemoryKind.EPISODIC, "keep forever, about Priya");
+        MemoryActor system = MemoryActor.system("consolidation");
+        assertThat(f.review.pin(f.agent, id, system).refusal()).isEqualTo("NOT_HUMAN");
+        assertThat(f.review.pin(f.agent, id, null).refusal()).isEqualTo("NOT_HUMAN");
+        assertThat(f.storage.items.get(id).pinned()).isFalse();
+
+        assertThat(f.review.pin(f.agent, id, alice).ok()).isTrue();
+        assertThat(f.storage.items.get(id).pinned()).isTrue();
+        // pinning again is a no-op success: no second event
+        assertThat(f.review.pin(f.agent, id, alice).ok()).isTrue();
+        assertThat(f.storage.events(id)).extracting(MemoryEvent::event).containsOnlyOnce(MemoryEvent.Type.PINNED);
+
+        assertThat(f.review.unpin(f.agent, id, alice).ok()).isTrue();
+        assertThat(f.storage.items.get(id).pinned()).isFalse();
+        assertThat(f.storage.events(id)).extracting(MemoryEvent::event).contains(MemoryEvent.Type.UNPINNED);
+        assertThat(f.storage.events.toString()).doesNotContain("Priya").doesNotContain("forever");
+    }
+
+    @Test
+    void onlyAnActiveItemCanBePinnedAndOtherAgentsCannotReachIt() {
+        UUID pending = pending(MemoryKind.EPISODIC, "p");
+        assertThat(f.review.pin(f.agent, pending, alice).refusal()).isEqualTo("NOT_ACTIVE");
+        UUID active = f.active(MemoryKind.EPISODIC, "a");
+        assertThat(f.review.pin(UUID.randomUUID(), active, alice).refusal()).isEqualTo("NOT_FOUND");
+    }
+
+    @Test
+    void anEditDoesNotInheritThePin() {
+        UUID id = f.active(MemoryKind.EPISODIC, "v1");
+        f.review.pin(f.agent, id, alice);
+        UUID next = f.review.edit(f.agent, id, "v2", alice).itemId();
+        // the edit is a new row: it does not inherit the pin; the pinned predecessor is untouched
+        assertThat(f.storage.items.get(next).pinned()).isFalse();
+        assertThat(f.storage.items.get(id).pinned()).isTrue();
+    }
+
+    @Test
     void deleteIsHardAndLeavesATextFreeEvent() {
         UUID id = f.active(MemoryKind.EPISODIC, "secret fact about Priya");
         assertThat(f.review.delete(f.agent, id, alice).ok()).isTrue();

@@ -110,6 +110,15 @@
       }
     },
     {
+      "id": "post-api-memory-facts-shared-id-approve",
+      "method": "POST",
+      "path": "/api/memory/facts/shared/{id}/approve",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
       "id": "post-api-memory-import",
       "method": "POST",
       "path": "/api/memory/import",

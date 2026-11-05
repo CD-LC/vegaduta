@@ -39,9 +39,37 @@ public record MemoryItem(
         Instant createdAt,
         Instant expiresAt,
         String approvedBy,
-        Instant approvedAt) {
+        Instant approvedAt,
+        boolean pinned) {
 
     public static final int MAX_GENERATION = 8;
+
+    /** An unpinned item (every row starts that way; only a person pins, see {@link MemoryItemReviewService#pin}). */
+    public MemoryItem(
+            UUID id,
+            UUID agentId,
+            MemoryKind kind,
+            String content,
+            MemoryTrustLevel trust,
+            MemoryItemStatus status,
+            MemoryWriter writer,
+            String sourceType,
+            String sourceRef,
+            String turnId,
+            List<String> sourceTaint,
+            boolean modelGenerated,
+            int generation,
+            List<String> subjectKeys,
+            int version,
+            UUID supersedesId,
+            Instant createdAt,
+            Instant expiresAt,
+            String approvedBy,
+            Instant approvedAt) {
+        this(id, agentId, kind, content, trust, status, writer, sourceType, sourceRef, turnId, sourceTaint,
+                modelGenerated, generation, subjectKeys, version, supersedesId, createdAt, expiresAt, approvedBy,
+                approvedAt, false);
+    }
 
     public MemoryItem {
         if (id == null || agentId == null || kind == null || content == null) {
@@ -134,7 +162,8 @@ public record MemoryItem(
                 createdAt,
                 expiresAt,
                 approver,
-                at);
+                at,
+                pinned);
     }
 
     public boolean expired(Instant now) {

@@ -36333,6 +36333,16 @@
     "event_ERASED": "Erased",
     "event_PINNED": "Pinned",
     "event_REFUSED": "Refused",
-    "event_other": "Event"
+    "event_other": "Event",
+    "edit": "Edit",
+    "editTitle": "Edit this memory item",
+    "editBody": "Saving creates a new version that needs your approval. The current version stays in use until then.",
+    "editLabel": "Memory text",
+    "editSave": "Save new version",
+    "editSaving": "Saving...",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "event_UNPINNED": "Unpinned"
   }
 }

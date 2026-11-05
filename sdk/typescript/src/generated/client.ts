@@ -1574,7 +1574,7 @@ export class AgentMemoryApi {
    * Approve shared memory.
    * `POST /api/agents/{agentId}/memories/shared/{memoryId}/approve`
    */
-  approveSharedMemory(agentId: string, memoryId: string, options: CallOptions<{ subjectKey: string }, { "Idempotency-Key"?: string }> & { query: { subjectKey: string } }): Promise<void> {
+  approveSharedMemory(agentId: string, memoryId: string, options?: CallOptions<{ subjectKey?: string }, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memories/shared/${encodeURIComponent(String(memoryId))}/approve`, response: "void" });
   }
 
@@ -8229,11 +8229,35 @@ export class MemoryItemApi {
   }
 
   /**
+   * Edit.
+   * `PATCH /api/agents/{agentId}/memory-items/{itemId}`
+   */
+  edit(agentId: string, itemId: string, body?: T.MemoryItemController_EditRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.MemoryItemController_ItemView> {
+    return this.http.request<T.MemoryItemController_ItemView>({ ...options, method: "PATCH", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}`, body });
+  }
+
+  /**
    * Approve.
    * `POST /api/agents/{agentId}/memory-items/{itemId}/approve`
    */
   approve(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
     return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/approve`, response: "void" });
+  }
+
+  /**
+   * Pin.
+   * `POST /api/agents/{agentId}/memory-items/{itemId}/pin`
+   */
+  pin(agentId: string, itemId: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/pin`, response: "void" });
+  }
+
+  /**
+   * Unpin.
+   * `DELETE /api/agents/{agentId}/memory-items/{itemId}/pin`
+   */
+  unpin(agentId: string, itemId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/memory-items/${encodeURIComponent(String(itemId))}/pin`, response: "void" });
   }
 
   /**
@@ -14414,6 +14438,14 @@ export class UserMemoryApi {
    */
   addFact(body: T.UserMemoryController_FactCreateRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.UserMemoryController_FactView> {
     return this.http.request<T.UserMemoryController_FactView>({ ...options, method: "POST", path: "/api/memory/facts", body });
+  }
+
+  /**
+   * Approve shared fact.
+   * `POST /api/memory/facts/shared/{id}/approve`
+   */
+  approveSharedFact(id: string, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<void> {
+    return this.http.request<void>({ ...options, method: "POST", path: `/api/memory/facts/shared/${encodeURIComponent(String(id))}/approve`, response: "void" });
   }
 
   /**

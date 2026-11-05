@@ -245,9 +245,11 @@ export default function MemoryPage() {
   };
 
   const approveFact = async (fact: MemoryFact) => {
-    if (!fact.agentId) return;
+    if (fact.scope !== "shared" && !fact.agentId) return;
     try {
-      await api.approveAgentMemory(fact.agentId, fact.id);
+      // A shared fact reaches every sharing agent: its own endpoint, EDITOR on the agent that wrote it.
+      if (fact.scope === "shared") await api.approveSharedMemoryFact(fact.id);
+      else await api.approveAgentMemory(fact.agentId as string, fact.id);
       refresh();
     } catch {
       /* surfaced by toJson */

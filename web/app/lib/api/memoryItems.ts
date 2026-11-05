@@ -1,4 +1,4 @@
-import { apiFetch, toJson, toJsonQuietOn } from "./core";
+import { apiFetch, toJson, toJsonQuietOn, jsonBody } from "./core";
 import type { MemoryItem, MemoryItemDetail } from "../../memory/memoryItemTypes";
 
 // The unified-memory review surface (core MemoryItemController +
@@ -7,6 +7,9 @@ import type { MemoryItem, MemoryItemDetail } from "../../memory/memoryItemTypes"
 // are quiet on 404 and the panel renders the feature-off empty state instead
 // of an error. Decisions (approve/reject/revert/erase) are deliberately NOT
 // quiet and NOT gated: a person must always be able to review and erase.
+// Edit and pin ARE gated server-side (404 while the feature is dark): they are
+// only offered from rows the list already returned, so a 404 here means the
+// flag flipped under the page and is surfaced like any other failure.
 const base = (agentId: string) => `/api/agents/${encodeURIComponent(agentId)}/memory-items`;
 
 export const memoryItemsApi = {
@@ -31,6 +34,20 @@ export const memoryItemsApi = {
   // ACTIVE -> REVERTED: recall stops returning it at once.
   revertMemoryItem: (agentId: string, itemId: string) =>
     apiFetch(`${base(agentId)}/${encodeURIComponent(itemId)}/revert`, { method: "POST" }).then(toJson<void>),
+  // Edit = a NEW PENDING version (content re-screened server-side), never an
+  // in-place change; resolves to the new version. 409 when the item is no longer
+  // PENDING/ACTIVE, 422 when the text fails the content screen.
+  editMemoryItem: (agentId: string, itemId: string, content: string) =>
+    apiFetch(`${base(agentId)}/${encodeURIComponent(itemId)}`, {
+      method: "PATCH",
+      ...jsonBody({ content }),
+    }).then(toJson<MemoryItem>),
+  // Pin an ACTIVE item so consolidation never forgets it (a person only); 204.
+  pinMemoryItem: (agentId: string, itemId: string) =>
+    apiFetch(`${base(agentId)}/${encodeURIComponent(itemId)}/pin`, { method: "POST" }).then(toJson<void>),
+  // Clear a pin; 204.
+  unpinMemoryItem: (agentId: string, itemId: string) =>
+    apiFetch(`${base(agentId)}/${encodeURIComponent(itemId)}/pin`, { method: "DELETE" }).then(toJson<void>),
   // Erase with the lineage cascade: the item, everything derived from it, and
   // the lineage/event history go; one ERASED tombstone per erased id stays.
   eraseMemoryItem: (agentId: string, itemId: string) =>

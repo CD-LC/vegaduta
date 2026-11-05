@@ -239,6 +239,39 @@ public class MemoryItemReviewService {
         });
     }
 
+    /**
+     * Pins an ACTIVE item: consolidation and eviction never touch a pinned row (the planner treats {@code pinned} as
+     * "never an input of any operation"). Only an identified human can pin, and the flag is not part of any
+     * proposal, so an agent, distiller or job can never pin (or unpin) anything. Pinning an already pinned item is
+     * a no-op success. Appends a PINNED event (ids and the actor, no text).
+     */
+    public Outcome pin(UUID agentId, UUID itemId, MemoryActor actor) {
+        return guarded(agentId, itemId, actor, "PIN", item -> {
+            if (item.status() != MemoryItemStatus.ACTIVE) {
+                return Outcome.refused("NOT_ACTIVE");
+            }
+            return setPinned(item, true, actor, MemoryEvent.Type.PINNED);
+        });
+    }
+
+    /** Clears the pin of an item in any status (a person can always release a row to normal handling). */
+    public Outcome unpin(UUID agentId, UUID itemId, MemoryActor actor) {
+        return guarded(agentId, itemId, actor, "UNPIN", item -> setPinned(item, false, actor, MemoryEvent.Type.UNPINNED));
+    }
+
+    private Outcome setPinned(MemoryItem item, boolean pinned, MemoryActor actor, MemoryEvent.Type type) {
+        if (item.pinned() == pinned) {
+            return Outcome.done(item.id());
+        }
+        MemoryEvent event =
+                MemoryEvent.of(
+                        item.id(), item.agentId(), type, actor, item.status(), item.status(),
+                        "KIND=" + item.kind() + ";PINNED=" + pinned, clock.instant());
+        return storage.setPinned(item.agentId(), item.id(), pinned, event)
+                ? Outcome.done(item.id())
+                : Outcome.refused("CONFLICT");
+    }
+
     /** Hard delete (erasure of one item) with an ERASED event; the event outlives the row. */
     public Outcome delete(UUID agentId, UUID itemId, MemoryActor actor) {
         return guarded(agentId, itemId, actor, "DELETE", item -> {

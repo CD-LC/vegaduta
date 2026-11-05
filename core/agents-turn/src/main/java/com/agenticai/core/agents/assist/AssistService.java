@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
  * catalog entry.
  */
 @Service
-public class AssistService {
+public class AssistService implements com.agenticai.core.agents.memory.MemoryExtractionChatClients {
 
     private final AuxiliaryModelResolver auxiliaryModels;
     private final ChatClientRegistry chatClientRegistry;
@@ -144,6 +144,12 @@ public class AssistService {
 
     private ChatClient buildChatClient() {
         return buildChatClient(false);
+    }
+
+    /** Port for the memory approve path (fact-to-graph extraction): the background-priority client, see {@link #complete}. */
+    @Override
+    public ChatClient forBackgroundExtraction() {
+        return buildChatClient(true);
     }
 
     private ChatClient buildChatClient(boolean background) {

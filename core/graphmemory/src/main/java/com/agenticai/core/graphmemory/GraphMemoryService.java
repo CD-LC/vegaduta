@@ -186,6 +186,11 @@ public class GraphMemoryService {
      * whose primary job (vector memory) has already succeeded by the time this runs.
      */
     public void remember(UUID agentId, String subjectKey, List<GraphTriple> triples) {
+        remember(agentId, subjectKey, triples, null);
+    }
+
+    /** As {@link #remember(UUID, String, List)}; new edges also carry {@code memory_id} (the fact's row id, may be null). */
+    public void remember(UUID agentId, String subjectKey, List<GraphTriple> triples, UUID memoryId) {
         if (triples == null || triples.isEmpty()) {
             return;
         }
@@ -199,7 +204,7 @@ public class GraphMemoryService {
         try {
             onAge(st -> {
                 for (GraphTriple triple : triples) {
-                    writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, nowMillis());
+                    writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, nowMillis(), memoryId);
                 }
                 return null;
             });
@@ -293,7 +298,7 @@ public class GraphMemoryService {
                 long now = nowMillis();
                 st.execute(cypherCall(
                     graphName, buildSupersedeInvalidateCypher(agentIdStr, subjectKeyStr, triple, now), ONE_COLUMN));
-                writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, now);
+                writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, now, null);
                 return null;
             });
             log.debug(
@@ -318,6 +323,11 @@ public class GraphMemoryService {
      * {@link #remember}.
      */
     public void rememberShared(String subjectKey, List<GraphTriple> triples) {
+        rememberShared(subjectKey, triples, null);
+    }
+
+    /** As {@link #rememberShared(String, List)}; new edges also carry {@code memory_id} (may be null). */
+    public void rememberShared(String subjectKey, List<GraphTriple> triples, UUID memoryId) {
         if (triples == null || triples.isEmpty()) {
             return;
         }
@@ -329,7 +339,7 @@ public class GraphMemoryService {
         try {
             onAge(st -> {
                 for (GraphTriple triple : triples) {
-                    writeTriple(st, graphName, SHARED_AGENT_SENTINEL, subjectKeyStr, triple, nowMillis());
+                    writeTriple(st, graphName, SHARED_AGENT_SENTINEL, subjectKeyStr, triple, nowMillis(), memoryId);
                 }
                 return null;
             });
@@ -565,7 +575,7 @@ public class GraphMemoryService {
      * Verified on real AGE. The open-edge check compares names case-insensitively.
      */
     private void writeTriple(
-        Statement st, String graphName, String tierStr, String subjectKeyStr, GraphTriple triple, long now
+        Statement st, String graphName, String tierStr, String subjectKeyStr, GraphTriple triple, long now, UUID memoryId
     ) throws SQLException {
         String subject = sanitize(triple.subject());
         String relation = sanitize(triple.relation().toUpperCase(Locale.ROOT));
@@ -585,7 +595,8 @@ public class GraphMemoryService {
             graphName,
             "MATCH (a:Entity {name: '" + subject + "', agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'}), "
                 + "(b:Entity {name: '" + object + "', agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'}) "
-                + "CREATE (a)-[:RELATION {type: '" + relation + "', valid_from: " + now + "}]->(b)",
+                + "CREATE (a)-[:RELATION {type: '" + relation + "', valid_from: " + now
+                + (memoryId == null ? "" : ", memory_id: '" + memoryId + "'") + "}]->(b)",
             ONE_COLUMN));
     }
 
@@ -593,12 +604,7 @@ public class GraphMemoryService {
         Statement st, String graphName, String tierStr, String subjectKeyStr,
         String subjectLower, String relation, String objectLower
     ) throws SQLException {
-        String cypher =
-            "MATCH (a:Entity {agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'})"
-                + "-[r:RELATION {type: '" + relation + "'}]->"
-                + "(b:Entity {agent_id: '" + tierStr + "', subject_key: '" + subjectKeyStr + "'}) "
-                + "WHERE toLower(a.name) = '" + subjectLower + "' AND toLower(b.name) = '" + objectLower + "' "
-                + "AND r.valid_to IS NULL RETURN count(r)";
+        String cypher = GraphMemoryCypher.buildOpenEdgeCypher(tierStr, subjectKeyStr, subjectLower, relation, objectLower);
         try (ResultSet rs = st.executeQuery(cypherCall(graphName, cypher, "open_edges ag_catalog.agtype"))) {
             return rs != null && rs.next() && parseAgtypeInt(rs.getString("open_edges")) > 0;
         }

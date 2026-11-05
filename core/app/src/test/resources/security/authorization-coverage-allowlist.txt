@@ -10,6 +10,7 @@
 DELETE /api/agents/{agentId}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 DELETE /api/agents/{agentId}/memories/{memoryId}  # HANDLER: AgentMemoryController: the caller's own memories with VIEWER, any subject's with EDITOR (review step 8)
 DELETE /api/agents/{agentId}/memory-items/{itemId}  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
+DELETE /api/agents/{agentId}/memory-items/{itemId}/pin  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
 DELETE /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
 DELETE /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
 DELETE /api/agents/{agentId}/quality/gate  # HANDLER: QualityAgentAccessGate (EDITOR on writes)
@@ -32,6 +33,7 @@ DELETE /api/{resourceKind:agents|workflows}/{resourceId}/grants/{grantId}  # HAN
 PATCH /api/agents/{agentId}/autonomy-tier  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/biometric-consent  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/capabilities/{capabilityKey}  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
+PATCH /api/agents/{agentId}/memory-items/{itemId}  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
 PATCH /api/agents/{agentId}/collaborators  # HANDLER: AgentService EDITOR on this agent, RUNNER on each newly added collaborator (review step 8)
 PATCH /api/agents/{agentId}/cost-routing  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
 PATCH /api/agents/{agentId}/edge-routing-policy  # HANDLER: AgentService (requireAccess EDITOR; owner/PERM_MANAGE_AGENTS/EDITOR grant)
@@ -107,6 +109,7 @@ POST /api/documentgen/documents  # MEMBER: document generation for any member wi
 POST /api/internal/abuse/verify-captcha  # MEMBER: verifies the caller's own CAPTCHA challenge and issues the caller's own challenge-pass token (FraudAnalysisController)
 POST /api/knowledge/search  # MEMBER: read-only search; collections have no per-user ACL and every member may read them (see PATCH .../knowledge-access); writes are PERM_MANAGE_AGENTS
 POST /api/mcp-apps/{appId}/tools/call  # HANDLER: McpAppsController requireAccess RUNNER on the app's agent
+POST /api/memory/facts/shared/{id}/approve  # HANDLER: UserMemoryController (own subject only; agentService.requireAccess EDITOR on the agent that wrote the fact)
 POST /api/model-pricing  # MEMBER: read-only pricing calculation, no side effects
 POST /api/notifications/read-all  # MEMBER: marks the caller's visible notifications read (NotificationController)
 POST /api/notifications/{id}/read  # HANDLER: NotificationService.markRead (only a notification the caller can see: theirs, or a broadcast for a tenant admin; any other id is a no-op)
@@ -183,5 +186,6 @@ POST /api/agents/{agentId}/memories/{memoryId}/reject  # HANDLER: AgentMemoryCon
 POST /api/agents/{agentId}/memories/shared/{memoryId}/approve  # HANDLER: AgentMemoryController (agentService.requireAccess EDITOR)
 POST /api/agents/{agentId}/memories/shared/{memoryId}/reject  # HANDLER: AgentMemoryController (agentService.requireAccess EDITOR)
 POST /api/agents/{agentId}/memory-items/{itemId}/approve  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
+POST /api/agents/{agentId}/memory-items/{itemId}/pin  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
 POST /api/agents/{agentId}/memory-items/{itemId}/reject  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)
 POST /api/agents/{agentId}/memory-items/{itemId}/revert  # HANDLER: MemoryItemController (MemoryAgentAccess.requireEditor = AgentService requireAccess EDITOR)

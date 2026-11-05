@@ -69,6 +69,12 @@ public interface MemoryItemStorage {
     boolean transition(
             UUID agentId, UUID itemId, Set<MemoryItemStatus> from, MemoryItemStatus to, MemoryEvent event);
 
+    /**
+     * Sets or clears the {@code pinned} flag of one row and appends the event in the same unit of work. False when the
+     * row is not the agent's or already has that value (nothing changed, no event).
+     */
+    boolean setPinned(UUID agentId, UUID itemId, boolean pinned, MemoryEvent event);
+
     /** Hard delete (erasure); appends the ERASED event. False when the row did not exist. */
     boolean delete(UUID agentId, UUID itemId, MemoryEvent erased);
 

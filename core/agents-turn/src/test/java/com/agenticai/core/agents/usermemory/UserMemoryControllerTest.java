@@ -460,4 +460,70 @@ class UserMemoryControllerTest {
             assertEquals("shared", qs.scope());
         }
     }
+
+    // ------------------------------------------------------------------ approve a quarantined shared fact
+
+    private TenantMemoryEntry quarantinedShared(UUID id, UUID createdBy) {
+        Instant now = Instant.now();
+        return new TenantMemoryEntry(id, "alice", "shared fact", 0, createdBy, now, now, 0, MemoryTrust.QUARANTINED,
+            List.of("tool:fetch"));
+    }
+
+    @Test
+    void anEditorOfTheWritingAgentApprovesTheirOwnQuarantinedSharedFact() {
+        UUID id = UUID.randomUUID();
+        UUID writer = UUID.randomUUID();
+        UserMemoryController c = controller();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared(id, writer)));
+        when(tenant.approveFact(id, "alice")).thenReturn(true);
+
+        assertEquals(HttpStatus.NO_CONTENT, c.approveSharedFact(id, alice).getStatusCode());
+
+        verify(agentService).requireAccess(writer, PermissionLevel.EDITOR);
+        verify(tenant).approveFact(id, "alice");
+    }
+
+    @Test
+    void approvingASharedFactWithoutEditorOnTheWritingAgentIsDeniedAndApprovesNothing() {
+        UUID id = UUID.randomUUID();
+        UUID writer = UUID.randomUUID();
+        UserMemoryController c = controller();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared(id, writer)));
+        doThrow(new ResourceAccessDeniedException()).when(agentService).requireAccess(writer, PermissionLevel.EDITOR);
+
+        assertThrows(ResourceAccessDeniedException.class, () -> c.approveSharedFact(id, alice));
+        verify(tenant, never()).approveFact(any(), any());
+    }
+
+    @Test
+    void aSharedFactWithNoRecordedWriterCannotBeApprovedHere() {
+        UUID id = UUID.randomUUID();
+        UserMemoryController c = controller();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(quarantinedShared(id, null)));
+
+        ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> c.approveSharedFact(id, alice));
+        assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
+        verify(tenant, never()).approveFact(any(), any());
+    }
+
+    @Test
+    void approvingSomeoneElsesTrustedOrMissingSharedFactIs404() {
+        UUID id = UUID.randomUUID();
+        UserMemoryController c = controller();
+        Instant now = Instant.now();
+        when(tenant.listFactsForSubject("alice")).thenReturn(List.of(
+            new TenantMemoryEntry(id, "alice", "already trusted", 0, UUID.randomUUID(), now, now, 0)));
+
+        assertEquals(HttpStatus.NOT_FOUND, c.approveSharedFact(id, alice).getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, c.approveSharedFact(UUID.randomUUID(), alice).getStatusCode());
+        verify(tenant, never()).approveFact(any(), any());
+    }
+
+    @Test
+    void approvingASharedFactNeedsASignedInCaller() {
+        UserMemoryController c = controller();
+        ResponseStatusException e =
+            assertThrows(ResponseStatusException.class, () -> c.approveSharedFact(UUID.randomUUID(), null));
+        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatusCode());
+    }
 }

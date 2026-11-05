@@ -5589,6 +5589,10 @@ export interface MemoryItemController_DetailView {
   events?: MemoryItemController_EventView[];
 }
 
+export interface MemoryItemController_EditRequest {
+  content?: string;
+}
+
 export interface MemoryItemController_EventView {
   id?: string;
   event?: string;
@@ -5619,6 +5623,7 @@ export interface MemoryItemController_ItemView {
   expiresAt?: string;
   approvedBy?: string;
   approvedAt?: string;
+  pinned?: boolean;
 }
 
 export interface MemoryItemController_SourceView {

@@ -31,6 +31,7 @@ public record MemoryEvent(
         EXPIRED,
         ERASED,
         PINNED,
+        UNPINNED,
         REFUSED
     }
 

@@ -1611,9 +1611,45 @@
       }
     },
     {
+      "id": "patch-api-agents-agentId-memory-items-itemId",
+      "method": "PATCH",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}",
+      "status": 200,
+      "request": {
+        "requiredFields": [
+          "$.content"
+        ]
+      },
+      "response": {
+        "requiredFields": [
+          "$.agentId",
+          "$.content",
+          "$.id"
+        ]
+      }
+    },
+    {
       "id": "post-api-agents-agentId-memory-items-itemId-approve",
       "method": "POST",
       "path": "/api/agents/{agentId}/memory-items/{itemId}/approve",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "delete-api-agents-agentId-memory-items-itemId-pin",
+      "method": "DELETE",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/pin",
+      "status": 204,
+      "response": {
+        "requiredFields": []
+      }
+    },
+    {
+      "id": "post-api-agents-agentId-memory-items-itemId-pin",
+      "method": "POST",
+      "path": "/api/agents/{agentId}/memory-items/{itemId}/pin",
       "status": 204,
       "response": {
         "requiredFields": []

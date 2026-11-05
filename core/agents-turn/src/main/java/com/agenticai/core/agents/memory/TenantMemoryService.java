@@ -325,19 +325,53 @@ public class TenantMemoryService {
      */
     public boolean approveFact(UUID memoryId, String subjectKey) {
         String table = TenantMemorySchemaSupport.qualifiedTableName();
-        if (subjectKey == null) {
-            return jdbcTemplate.update(
-                            "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ?"
-                                    + " AND trust = 'QUARANTINED'",
-                            memoryId)
-                    > 0;
+        boolean approved =
+                subjectKey == null
+                        ? jdbcTemplate.update(
+                                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ?"
+                                                + " AND trust = 'QUARANTINED'",
+                                        memoryId)
+                                > 0
+                        : jdbcTemplate.update(
+                                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
+                                                + " AND trust = 'QUARANTINED'",
+                                        memoryId,
+                                        subjectKey)
+                                > 0;
+        if (approved) {
+            syncApprovedToGraph(table, memoryId);
         }
-        return jdbcTemplate.update(
-                        "UPDATE " + table + " SET trust = 'TRUSTED' WHERE id = ? AND subject_key = ?"
-                                + " AND trust = 'QUARANTINED'",
-                        memoryId,
-                        subjectKey)
-                > 0;
+        return approved;
+    }
+
+    private volatile ApprovedFactGraphSync graphSync;
+
+    /** Mirrors an approved shared fact into the shared graph tier (G6); absent in hand-built instances. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setGraphSync(ApprovedFactGraphSync graphSync) {
+        this.graphSync = graphSync;
+    }
+
+    /** After an approval has committed; best-effort and fail-open, never changes the approval's result. */
+    private void syncApprovedToGraph(String table, UUID memoryId) {
+        ApprovedFactGraphSync sync = graphSync;
+        if (sync == null) {
+            return;
+        }
+        try {
+            jdbcTemplate.query(
+                    "SELECT subject_key, content, created_by_agent_id FROM " + table + " WHERE id = ?",
+                    rs -> {
+                        sync.sharedFactApproved(
+                                rs.getObject("created_by_agent_id", UUID.class),
+                                rs.getString("subject_key"),
+                                memoryId,
+                                rs.getString("content"));
+                    },
+                    memoryId);
+        } catch (RuntimeException e) {
+            log.warn("Could not offer approved shared memory {} to the graph; the approval stands", memoryId, e);
+        }
     }
 
     public boolean forgetFactForSubject(UUID memoryId, String subjectKey) {
