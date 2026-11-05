@@ -8317,6 +8317,11 @@
           "label": "ターンごとに呼び出す共有メモリ数",
           "description": "各メッセージでワークスペース全体で共有されているメモリをいくつ検索するかです。",
           "help": "メモリが多いほどコンテキストが増えますが、トークンも多く使います。"
+        },
+        "enabled": {
+          "description": "Whether remembered facts and memory blocks are put into the agent's prompt at all.",
+          "help": "Turn it off to see how the agent answers without any memory. Nothing is deleted, and what the agent saves is unchanged; only recall into the prompt stops.",
+          "label": "Use memory in replies"
         }
       },
       "agent": {
@@ -8350,6 +8355,34 @@
           "label": "検索ごとに読み取るグラフパス数",
           "description": "1 回の検索でファクトを見つけるために、メモリグラフの接続をいくつ読み取るかです。",
           "help": "複数の接続が同じファクトにつながることがあるため、密に結びついたメモリではすべてを見つけるのに大きい値が必要な場合があります。値を大きくすると各検索は遅くなります。"
+        }
+      },
+      "competence": {
+        "enabled": {
+          "description": "Whether the agent keeps a running count of how well it does on each kind of task.",
+          "help": "The counts come only from checked facts (tool results, approval decisions, a person's rating), never from what the agent says about itself. They are numbers, not notes. The platform must also allow it; turning it off here stops new counting only.",
+          "label": "Track task competence"
+        }
+      },
+      "episodic": {
+        "enabled": {
+          "description": "Whether the agent may propose a short record of what happened after a turn.",
+          "help": "Records are built only from checked facts (tool results, approval decisions, a person's rating), never from what the agent says about itself, and wait for review before they are used. The platform must also allow it; turning it off here stops new records only.",
+          "label": "Propose episode records"
+        }
+      },
+      "write": {
+        "enabled": {
+          "description": "Whether the agent saves anything to memory at all.",
+          "help": "Turn it off to see how the agent behaves with no memory. The remember tools answer that memory is disabled and save nothing, conversation summaries stop being written, and lessons and preferences stop being proposed. Nothing is deleted, and what the agent already knows is still used unless 'Use memory in replies' is also off.",
+          "label": "Save to memory"
+        }
+      },
+      "unified": {
+        "enabled": {
+          "description": "Whether the agent may draw on recalled notes of every kind in its replies, in one budgeted block.",
+          "help": "This can only switch the feature off for your workspace or this agent; the platform operator decides whether it exists at all. Off means the agent uses the memory it has today and nothing else changes.",
+          "label": "Unified memory"
         }
       }
     },

@@ -95,6 +95,53 @@ describe("MemoryItemsPanel", () => {
     await waitFor(() => expect(api.listMemoryItems).toHaveBeenCalledTimes(2));
   });
 
+  it("rejects a pending item", async () => {
+    api.rejectMemoryItem.mockResolvedValue(undefined);
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const review = await screen.findByTestId("memory-items-review");
+    fireEvent.click(within(review).getByRole("button", { name: "Reject" }));
+    await waitFor(() => expect(api.rejectMemoryItem).toHaveBeenCalledWith("a1", "i1"));
+    await waitFor(() => expect(api.listMemoryItems).toHaveBeenCalledTimes(2));
+  });
+
+  it("erases an item only after the confirmation dialog", async () => {
+    api.eraseMemoryItem.mockResolvedValue(undefined);
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const active = await screen.findByTestId("memory-items-active");
+    fireEvent.click(within(active).getByRole("button", { name: "Erase" }));
+    expect(api.eraseMemoryItem).not.toHaveBeenCalled();
+    const dialog = await screen.findByRole("alertdialog");
+    expect(within(dialog).getByText("Erase this memory item?")).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Erase" }));
+    await waitFor(() => expect(api.eraseMemoryItem).toHaveBeenCalledWith("a1", "i2"));
+  });
+
+  it("shows the empty state when the agent has no items", async () => {
+    api.listMemoryItems.mockResolvedValue([]);
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    expect(await screen.findByText("No memory items yet")).toBeInTheDocument();
+  });
+
+  it("shows an error with retry when the list call fails", async () => {
+    api.listMemoryItems.mockRejectedValueOnce(new Error("boom"));
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    expect(await screen.findByText("Could not load memory items")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: "Try again" })[0]);
+    await waitFor(() => expect(api.listMemoryItems).toHaveBeenCalledTimes(2));
+    expect(await screen.findByTestId("memory-items-review")).toBeInTheDocument();
+  });
+
+  it("badges a quarantined item and keeps it in the review group", async () => {
+    api.listMemoryItems.mockResolvedValue([
+      { ...ITEMS[1], id: "i4", content: "suspicious write", status: "ACTIVE", trust: "QUARANTINED" },
+    ]);
+    render(<MemoryItemsPanel agents={AGENTS} />);
+    const review = await screen.findByTestId("memory-items-review");
+    expect(within(review).getByText("suspicious write")).toBeInTheDocument();
+    expect(within(review).getByText("Quarantined")).toBeInTheDocument();
+    expect(screen.queryByTestId("memory-items-active")).not.toBeInTheDocument();
+  });
+
   it("shows revert for an active item", async () => {
     render(<MemoryItemsPanel agents={AGENTS} />);
     const active = await screen.findByTestId("memory-items-active");

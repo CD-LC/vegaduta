@@ -13218,7 +13218,7 @@
       },
       "unified": {
         "enabled": {
-          "description": "Whether the agent may use the unified memory in replies: recalled notes of every kind, in one budgeted block.",
+          "description": "Whether the agent may draw on recalled notes of every kind in its replies, in one budgeted block.",
           "help": "This can only switch the feature off for your workspace or this agent; the platform operator decides whether it exists at all. Off means the agent uses the memory it has today and nothing else changes.",
           "label": "Unified memory"
         }
