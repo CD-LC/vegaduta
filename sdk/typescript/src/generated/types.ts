@@ -729,6 +729,7 @@ export interface AgentMemoryEntry {
   useCount?: number;
   trust?: MemoryTrust;
   sourceTaint?: string[];
+  supersededAt?: string;
 }
 
 export interface AgentModalitiesView {
@@ -10157,6 +10158,7 @@ export interface TenantMemoryEntry {
   useCount?: number;
   trust?: MemoryTrust;
   sourceTaint?: string[];
+  supersededAt?: string;
 }
 
 export type TenantPlan = "FREE" | "PREMIUM" | "UNLIMITED";
@@ -10751,6 +10753,7 @@ export interface UserMemoryController_FactView {
   useCount?: number;
   trust?: string;
   sourceTaint?: string[];
+  supersededAt?: string;
 }
 
 export interface UserMemoryController_ForgetAllResult {

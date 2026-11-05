@@ -94736,6 +94736,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -126588,6 +126592,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [
@@ -128601,6 +128609,10 @@
             "items": {
               "type": "string"
             }
+          },
+          "supersededAt": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "required": [

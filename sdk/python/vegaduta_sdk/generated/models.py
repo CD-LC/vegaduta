@@ -1034,6 +1034,7 @@ class AgentMemoryEntry(TypedDict, total=False):
     useCount: int
     trust: MemoryTrust
     sourceTaint: List[str]
+    supersededAt: str
 
 
 class AgentModalitiesView(TypedDict, total=False):
@@ -10395,6 +10396,7 @@ class TenantMemoryEntry(TypedDict, total=False):
     useCount: int
     trust: MemoryTrust
     sourceTaint: List[str]
+    supersededAt: str
 
 
 class TenantSettingsResponse(TypedDict, total=False):
@@ -10982,6 +10984,7 @@ class UserMemoryController_FactView(TypedDict, total=False):
     useCount: int
     trust: str
     sourceTaint: List[str]
+    supersededAt: str
 
 
 class UserMemoryController_ForgetAllResult(TypedDict, total=False):
