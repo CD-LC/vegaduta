@@ -1,9 +1,9 @@
-fastapi==0.156.1
+fastapi==0.162.0
 # Explicit security floor, identical to services/sidecar/requirements.txt:
 # fastapi's own starlette range does not enforce the advisory-free version, so
 # it is pinned here directly. One FastAPI/Starlette/Uvicorn baseline across
 # every Python service.
-starlette==1.9.0
+starlette==1.10.0
 uvicorn[standard]==0.54.0
 
 # IBM/LF AI & Data document parser - the whole reason this service exists.
@@ -12,4 +12,4 @@ uvicorn[standard]==0.54.0
 # unchanged. Model artifacts (layout/OCR) download from Hugging Face at first
 # conversion unless baked into the image - see the Dockerfile's BAKE_MODELS
 # and the README's "Models" section.
-docling==2.140.0
+docling==2.142.1

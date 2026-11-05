@@ -374,21 +374,21 @@ docker==7.2.0 \
     --hash=sha256:a3f45fdeb9165e2d25d9a1d02ddf3bc70fb572cf5ebbf9b58558c22caf29b71f \
     --hash=sha256:cebb93773d334f778e023a7ee352a8d6e13ab1bd3b863a4d4a59dec897df43ac
     # via -r code-intel/requirements.txt
-e2b==2.58.0 \
-    --hash=sha256:2c6294df851dbbb30c845d2f7fb447e0411fc90c08ef41e388898a235566c186 \
-    --hash=sha256:dc8f4bdcff11ab6c5d99394de4a866df2655a64a191dd5b6f737d41c126c02ef
+e2b==2.59.0 \
+    --hash=sha256:14ad76ce259b0e9f1ba45201e128e31dd6bf045f5e2bc2387c70b022cb690f67 \
+    --hash=sha256:5af63206e30a540bfb351edd60e65fdbd1d61d7eb9dfb28e2899eb9d8ad8dda0
     # via -r code-intel/requirements.txt
 e2b-dockerfile-utils==0.1.1 \
     --hash=sha256:c1d4179bae6f3131fe0bbb1e6787ffb07c6c6dca8bdb3399abb3de9056b2a08f \
     --hash=sha256:c648ecf56b3ffdb6d91469580850f4691f019cb2c925405e776ad36b761204f1
     # via e2b
-fastapi==0.156.1 \
-    --hash=sha256:0422f86554a11df52f0b80c34e5ba2f1d415cd0bca0c0910fdd37df80d4b534a \
-    --hash=sha256:9da53b0b8b2fd79e260da101dab73a0d6ce6b5e539bef515e5fc0e8abecc76e8
+fastapi==0.162.0 \
+    --hash=sha256:3785963de305dd09912426cb81f2d230fce98ab3521cdfe97265c8d14983128c \
+    --hash=sha256:6a22c1e2e6e32e0633ee7e170f00009a29b8228b16feb219ee42f32fd8d88a8f
     # via -r code-intel/requirements.txt
-fastembed==0.9.0 \
-    --hash=sha256:273d408edec8c0f161711d8f6e44e4a5b559d18e8edf6bf805415d55dc772846 \
-    --hash=sha256:bc3beadb46ecb3580ab832d12670be7ecb937f80adfcb7b77b03f7eef76c394a
+fastembed==0.9.1 \
+    --hash=sha256:8b4b2881ea85a4d36e8f284466671437b3fed869c33cdc71d6f6c48ddff115c7 \
+    --hash=sha256:95042ac7f685bda6697861066d49f8b119fbde8b75ed5162bbb7e84e2dad0e1d
     # via -r code-intel/requirements.txt
 filelock==4.0.6 \
     --hash=sha256:323fab3b2fb22d889b29fa83774f60029addddb4b6a1bcfa1e73066eabffb5f2 \
@@ -1313,9 +1313,9 @@ six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
     # via python-dateutil
-starlette==1.9.0 \
-    --hash=sha256:3d931de246ed870e35ce605974440816ef895e592f255d1396cfdf191d4c4318 \
-    --hash=sha256:fd3f159936e882d06c1108f84688f7cda2cf85fc6a592a50edbd175e882c2ddc
+starlette==1.10.0 \
+    --hash=sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4 \
+    --hash=sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b
     # via
     #   -r code-intel/requirements.txt
     #   fastapi
