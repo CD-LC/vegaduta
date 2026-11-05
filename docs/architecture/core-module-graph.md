@@ -32,8 +32,8 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-budget | kernel | 12 | audit, chat, providers, security, tenancy |  |
 | agents-chatport | kernel | 21 | agents, agents-turn, audit, json, security, sharing, tenancy |  |
 | agents-interop | kernel | 68 | agents, agents-budget, agents-turn, audit, chat, json, prompts, providers, security, settings, sharing, tenancy |  |
-| agents-jobs | kernel | 195 | agents, agents-browser, agents-memory, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
-| agents-memory | kernel | 47 | agents, security, settings, tenancy |  |
+| agents-jobs | kernel | 198 | agents, agents-browser, agents-memory, agents-turn, approval, audit, chat, eventbus, json, providers, rl, security, settings, sharing, tenancy |  |
+| agents-memory | kernel | 51 | agents, security, settings, tenancy |  |
 | agents-studio | kernel | 102 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 302 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
 | agents-turn | kernel | 435 | agents, agents-budget, agents-memory, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |

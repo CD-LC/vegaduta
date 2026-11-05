@@ -23,6 +23,16 @@ class MemoryConsolidationWiringTest {
         }
 
         @Bean
+        ConsolidationItemSource items() {
+            return mock(ConsolidationItemSource.class);
+        }
+
+        @Bean
+        ConsolidationProposalFiler filer() {
+            return mock(ConsolidationProposalFiler.class);
+        }
+
+        @Bean
         MemoryConsolidationRunRepository runs() {
             return mock(MemoryConsolidationRunRepository.class);
         }
@@ -58,5 +68,27 @@ class MemoryConsolidationWiringTest {
     @Test
     void flagOnCreatesServiceAndSweep() {
         runner.withPropertyValues("app.memory.consolidation.enabled=true").run(ctx -> assertEquals(2, count(ctx)));
+    }
+
+    private static boolean applyEnabled(org.springframework.context.ApplicationContext ctx) throws Exception {
+        MemoryConsolidationService s = ctx.getBean(MemoryConsolidationService.class);
+        java.lang.reflect.Field f = MemoryConsolidationService.class.getDeclaredField("applyEnabled");
+        f.setAccessible(true);
+        return f.getBoolean(s);
+    }
+
+    @Test
+    void applyIsOffUnlessAutoApplyOrItsOlderAliasIsSet() {
+        runner.withPropertyValues("app.memory.consolidation.enabled=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertFalse(applyEnabled(ctx)));
+        runner.withPropertyValues("app.memory.consolidation.enabled=true", "app.memory.consolidation.auto-apply=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
+        runner.withPropertyValues("app.memory.consolidation.enabled=true", "app.memory.consolidation.apply.enabled=true")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertTrue(applyEnabled(ctx)));
+        runner.withPropertyValues(
+                        "app.memory.consolidation.enabled=true",
+                        "app.memory.consolidation.apply.enabled=true",
+                        "app.memory.consolidation.auto-apply=false")
+                .run(ctx -> org.junit.jupiter.api.Assertions.assertFalse(applyEnabled(ctx)));
     }
 }

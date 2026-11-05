@@ -44,6 +44,15 @@ public record MemoryItem(
 
     public static final int MAX_GENERATION = 8;
 
+    /**
+     * {@code source_type} of a PENDING proposal the nightly consolidation filed to replace several items by one (a merge
+     * keeps one text, a summary folds several). Approving it supersedes its lineage sources (see
+     * {@code MemoryItemReviewService#approve}); nothing else marks a row this way.
+     */
+    public static final String SOURCE_CONSOLIDATION_MERGE = "CONSOL_MERGE";
+
+    public static final String SOURCE_CONSOLIDATION_SUMMARY = "CONSOL_SUMMARY";
+
     /** An unpinned item (every row starts that way; only a person pins, see {@link MemoryItemReviewService#pin}). */
     public MemoryItem(
             UUID id,

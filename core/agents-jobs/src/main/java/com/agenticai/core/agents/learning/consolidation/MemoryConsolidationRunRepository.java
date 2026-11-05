@@ -27,7 +27,7 @@ public interface MemoryConsolidationRunRepository
     @Query(
             value = "UPDATE memory_consolidation_runs SET mode = :mode, status = :status, rows_seen = :rows,"
                     + " forgets = :forgets, merges = :merges, summaries = :summaries, deferred = :deferred,"
-                    + " tombstoned = :tombstoned WHERE subject = :subject AND run_date = :day",
+                    + " tombstoned = :tombstoned, proposals = :proposals WHERE subject = :subject AND run_date = :day",
             nativeQuery = true)
     int record(
             @Param("subject") String subject,
@@ -39,7 +39,8 @@ public interface MemoryConsolidationRunRepository
             @Param("merges") int merges,
             @Param("summaries") int summaries,
             @Param("deferred") int deferred,
-            @Param("tombstoned") int tombstoned);
+            @Param("tombstoned") int tombstoned,
+            @Param("proposals") int proposals);
 
     /** Gives a claim back after a failed run, so the person is retried on the next tick rather than tomorrow. */
     @Transactional

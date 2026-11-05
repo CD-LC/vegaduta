@@ -7,6 +7,7 @@ import com.agenticai.core.settings.SettingsResolver;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -90,10 +91,28 @@ class MemoryStoreConfiguration {
         return SettingsMemoryFlagOverride.agentLevel(settings);
     }
 
+    /**
+     * Makes a tombstone mean forgotten: recall leaves out rows whose content hash is tombstoned. On when
+     * {@code app.memory.tombstone.enforce=true}; unset it follows {@code app.memory.consolidation.enabled}, the only
+     * writer of tombstones, so with every memory flag off no recall statement changes.
+     */
+    @Bean
+    MemoryTombstoneGuard memoryTombstoneGuard(
+            @Value("${app.memory.tombstone.enforce:${app.memory.consolidation.enabled:false}}") boolean enforce,
+            ObjectProvider<JdbcTemplate> jdbc) {
+        return new MemoryTombstoneGuard(enforce, jdbc);
+    }
+
     @Bean
     @ConditionalOnMissingBean(MemoryItemStorage.class)
-    MemoryItemStorage memoryItemStorage(ObjectProvider<JdbcTemplate> jdbc) {
-        return new JdbcMemoryItemStorage(jdbc);
+    MemoryItemStorage memoryItemStorage(ObjectProvider<JdbcTemplate> jdbc, MemoryTombstoneGuard tombstones) {
+        return new JdbcMemoryItemStorage(jdbc, tombstones);
+    }
+
+    /** Read-only view of the unified store for the nightly consolidation (it holds no storage or review reference). */
+    @Bean
+    MemoryItemConsolidationReader memoryItemConsolidationReader(ObjectProvider<JdbcTemplate> jdbc) {
+        return new JdbcMemoryItemConsolidationReader(jdbc);
     }
 
     /** Subject erasure over the store; never flag-gated (erasure works with the feature off). */
@@ -136,9 +155,10 @@ class MemoryStoreConfiguration {
             MemoryItemStorage storage,
             ObjectProvider<MemoryEmbedder> embedder,
             ObjectProvider<MemoryContentScreen> screens,
-            ObjectProvider<MeterRegistry> meters) {
+            ObjectProvider<MeterRegistry> meters,
+            MemoryTombstoneGuard tombstones) {
         return new StoreMemoryProposalSink(
-                properties, gate, storage, embedder, screens.orderedStream().toList(), meters, Clock.systemUTC());
+                properties, gate, storage, embedder, screens.orderedStream().toList(), meters, Clock.systemUTC(), tombstones);
     }
 
     @Bean

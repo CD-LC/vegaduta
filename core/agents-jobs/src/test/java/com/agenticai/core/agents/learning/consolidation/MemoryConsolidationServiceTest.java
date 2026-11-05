@@ -103,7 +103,7 @@ class MemoryConsolidationServiceTest {
         assertEquals(5, r.rows());
         assertEquals(1, r.forgets());
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), eq("completed"), eq(5), eq(1), eq(0), eq(0), anyInt(), eq(0));
+        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), eq("completed"), eq(5), eq(1), eq(0), eq(0), anyInt(), eq(0), anyInt());
     }
 
     @Test
@@ -117,7 +117,7 @@ class MemoryConsolidationServiceTest {
         when(runs.firstRunDate()).thenReturn(Optional.of(DAY.minusDays(2)));
         service(true).consolidateTenant();
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0));
+        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0), anyInt());
     }
 
     @Test
@@ -143,7 +143,7 @@ class MemoryConsolidationServiceTest {
         verify(tombstones).markForgotten(eq("meera"), eq(old), eq("QUARANTINE_TTL"), any(), eq(NOW));
         verify(tombstones).markForgotten(eq("meera"), any(Fact.class),
                 org.mockito.ArgumentMatchers.startsWith("MERGED_INTO:"), any(), eq(NOW));
-        verify(runs).record(eq("meera"), eq(DAY), eq("apply"), eq("completed"), eq(7), eq(1), eq(1), anyInt(), anyInt(), eq(2));
+        verify(runs).record(eq("meera"), eq(DAY), eq("apply"), eq("completed"), eq(7), eq(1), eq(1), anyInt(), anyInt(), eq(2), anyInt());
     }
 
     @Test
@@ -156,7 +156,7 @@ class MemoryConsolidationServiceTest {
         when(runs.firstRunDate()).thenReturn(Optional.of(DAY.minusDays(30)));
         service(true).consolidateTenant();
         verify(tombstones, never()).markForgotten(anyString(), any(), anyString(), any(), any());
-        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0));
+        verify(runs).record(eq("meera"), eq(DAY), eq("dry_run"), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), eq(0), anyInt());
     }
 
     @Test
@@ -164,7 +164,7 @@ class MemoryConsolidationServiceTest {
         facts.subjects.addAll(List.of("bad", "meera"));
         when(runs.claim("bad", DAY)).thenReturn(1);
         org.mockito.Mockito.doThrow(new RuntimeException("boom")).when(runs)
-                .record(eq("bad"), eq(DAY), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
+                .record(eq("bad"), eq(DAY), anyString(), anyString(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt(), anyInt());
         MemoryConsolidationService.Report r = service(false).consolidateTenant();
         verify(runs).release("bad", DAY);
         assertEquals(1, r.subjects());

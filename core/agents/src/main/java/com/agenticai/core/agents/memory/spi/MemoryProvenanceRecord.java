@@ -9,6 +9,14 @@ import java.util.List;
  */
 public record MemoryProvenanceRecord(MemoryTrustLevel trust, List<String> sourceTaint, String writer) {
 
+    /**
+     * Writer labels of the nightly consolidation's proposals. A proposal carrying one must name its sources; the store
+     * marks the row so that a person's approval also supersedes those sources.
+     */
+    public static final String WRITER_CONSOLIDATION_MERGE = "consolidation:merge";
+
+    public static final String WRITER_CONSOLIDATION_SUMMARY = "consolidation:summary";
+
     /** A person-authored or clean-turn write. */
     public static final MemoryProvenanceRecord TRUSTED =
             new MemoryProvenanceRecord(MemoryTrustLevel.TRUSTED, List.of(), null);

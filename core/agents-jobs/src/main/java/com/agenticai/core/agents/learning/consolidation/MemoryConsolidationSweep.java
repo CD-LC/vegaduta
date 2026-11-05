@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>Off unless {@code app.memory.consolidation.enabled=true} (default false). Starts as a dry
  * run: it plans and reports only; tombstone-marking additionally needs {@code
- * app.memory.consolidation.apply.enabled} and the end of the planner's dry-run window.
+ * app.memory.consolidation.auto-apply} and the end of the planner's dry-run window.
  */
 @Component
 @ConditionalOnProperty(name = "app.memory.consolidation.enabled", havingValue = "true")
@@ -50,8 +50,9 @@ public class MemoryConsolidationSweep {
                 if (r.subjects() > 0) {
                     log.info(
                             "Memory consolidation in tenant schema '{}': {} person(s), {} row(s),"
-                                    + " {} forget(s), {} merge(s), {} would-summarise, {} tombstoned",
-                            schema, r.subjects(), r.rows(), r.forgets(), r.merges(), r.summaries(), r.tombstoned());
+                                    + " {} forget(s), {} merge(s), {} summary(ies), {} tombstoned, {} proposal(s) filed",
+                            schema, r.subjects(), r.rows(), r.forgets(), r.merges(), r.summaries(), r.tombstoned(),
+                            r.proposals());
                 }
             } catch (RuntimeException e) {
                 log.error("Memory consolidation failed in tenant schema '{}'", schema, e);

@@ -5827,6 +5827,7 @@ class MemoryImportDtos_ImportFact(TypedDict, total=False):
     text: str
     scope: str
     agentId: str
+    confirmForgotten: bool
 
 
 class MemoryImportDtos_ImportLimits(TypedDict, total=False):

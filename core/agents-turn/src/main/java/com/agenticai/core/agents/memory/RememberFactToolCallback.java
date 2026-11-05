@@ -136,6 +136,8 @@ public class RememberFactToolCallback implements ToolCallback {
             }
             writeToGraphIfAvailable(factValue.toString());
             return "{\"remembered\": true, \"memoryId\": \"" + memoryId + "\"}";
+        } catch (MemoryForgottenException e) {
+            return "{\"remembered\": false, \"forgotten\": true, \"note\": \"" + MemoryForgottenException.TOOL_NOTE + "\"}";
         } catch (Exception e) {
             log.warn("remember_fact tool call failed", e);
             return errorJson("Failed to remember fact: " + e.getMessage());

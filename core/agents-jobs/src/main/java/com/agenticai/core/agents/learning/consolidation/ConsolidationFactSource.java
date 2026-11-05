@@ -28,6 +28,9 @@ public interface ConsolidationFactSource {
      *     consolidation only ever operates inside one scope, so merging can never change who can
      *     recall a fact
      * @param trust the stored trust; anything not TRUSTED is treated as QUARANTINED downstream
+     * @param importance the stored importance prior (0..1, neutral 0.5; V684)
+     * @param pinned a person asked to keep it: never planned for removal
+     * @param personAuthored typed by a person rather than learned by the agent
      */
     record Fact(
             String scope,
@@ -37,7 +40,23 @@ public interface ConsolidationFactSource {
             MemoryTrust trust,
             int useCount,
             Instant createdAt,
-            Instant lastUsedAt) {
+            Instant lastUsedAt,
+            double importance,
+            boolean pinned,
+            boolean personAuthored) {
+
+        /** A fact with no recorded signals: neutral importance, not pinned, not person-authored. */
+        public Fact(
+                String scope,
+                UUID id,
+                UUID agentId,
+                String content,
+                MemoryTrust trust,
+                int useCount,
+                Instant createdAt,
+                Instant lastUsedAt) {
+            this(scope, id, agentId, content, trust, useCount, createdAt, lastUsedAt, 0.5, false, false);
+        }
 
         public static final String AGENT = "agent";
         public static final String SHARED = "shared";

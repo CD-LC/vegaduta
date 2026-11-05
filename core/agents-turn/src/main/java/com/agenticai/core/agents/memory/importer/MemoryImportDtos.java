@@ -45,8 +45,16 @@ public final class MemoryImportDtos {
     public record ImportLimits(int maxFacts, int maxChars) {
     }
 
-    /** {@code scope} "shared" or "agent"; "agent" needs {@code agentId} (an agent the caller may run). */
-    public record ImportFact(String text, String scope, UUID agentId) {
+    /**
+     * {@code scope} "shared" or "agent"; "agent" needs {@code agentId} (an agent the caller may run).
+     * {@code confirmForgotten}: the person explicitly re-confirms a fact that was forgotten (a tombstone of the same
+     * text exists); without it that fact is skipped with reason {@code forgotten}, so an import cannot resurrect it.
+     */
+    public record ImportFact(String text, String scope, UUID agentId, Boolean confirmForgotten) {
+
+        public ImportFact(String text, String scope, UUID agentId) {
+            this(text, scope, agentId, null);
+        }
     }
 
     public record ImportRequest(List<ImportFact> facts, String source) {

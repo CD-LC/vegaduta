@@ -41,6 +41,29 @@ class ConsolidationSurfaceTest {
     }
 
     @Test
+    void itemSourceExposesOnlyReads() {
+        Set<String> methods =
+                Arrays.stream(ConsolidationItemSource.class.getDeclaredMethods())
+                        .map(Method::getName)
+                        .collect(Collectors.toSet());
+        assertEquals(Set.of("agents", "items", "sourcesOfPendingProposals"), methods);
+    }
+
+    @Test
+    void theProposalFilerHoldsOnlyTheProposalSink() {
+        for (java.lang.reflect.Field f : ConsolidationProposalFiler.class.getDeclaredFields()) {
+            if (!java.lang.reflect.Modifier.isStatic(f.getModifiers())) {
+                assertEquals("org.springframework.beans.factory.ObjectProvider", f.getType().getName());
+            }
+        }
+        for (java.lang.reflect.Constructor<?> c : ConsolidationProposalFiler.class.getDeclaredConstructors()) {
+            assertEquals(1, c.getParameterCount());
+            assertTrue(c.getGenericParameterTypes()[0].getTypeName().endsWith("<com.agenticai.core.agents.memory.spi.MemoryProposalSink>"),
+                    "the filer's only dependency is the write port that can only create PENDING rows");
+        }
+    }
+
+    @Test
     void tombstoneWriterExposesOnlyMarkForgotten() {
         Set<String> methods =
                 Arrays.stream(MemoryTombstoneWriter.class.getDeclaredMethods())
@@ -52,7 +75,7 @@ class ConsolidationSurfaceTest {
 
     @Test
     void serviceAndSweepCannotReachTheMemoryWriteSurface() {
-        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class)) {
+        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class, ConsolidationProposalFiler.class, MemoryItemConsolidationSource.class)) {
             for (java.lang.reflect.Constructor<?> c : type.getDeclaredConstructors()) {
                 for (Class<?> p : c.getParameterTypes()) {
                     assertTrue(FORBIDDEN.stream().noneMatch(p.getName()::endsWith),
@@ -69,7 +92,7 @@ class ConsolidationSurfaceTest {
     @Test
     void onlyTheAdapterTouchesTheFactServices() {
         // Every other class in this package must reach memory through ConsolidationFactSource.
-        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class)) {
+        for (Class<?> type : List.of(MemoryConsolidationService.class, MemoryConsolidationSweep.class, ConsolidationProposalFiler.class, MemoryItemConsolidationSource.class)) {
             for (Method m : type.getDeclaredMethods()) {
                 for (Class<?> p : m.getParameterTypes()) {
                     assertTrue(FORBIDDEN.stream().noneMatch(p.getName()::endsWith),

@@ -42,15 +42,22 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final TypeReference<List<String>> STRINGS = new TypeReference<>() {};
 
-    private static final String COLUMNS =
+    static final String COLUMNS =
             "id, agent_id, kind, content, trust, status, writer, source_type, source_ref, turn_id, source_taint,"
                     + " model_generated, generation, subject_keys, version, supersedes_id, created_at, expires_at,"
                     + " approved_by, approved_at, pinned";
 
     private final ObjectProvider<JdbcTemplate> jdbcProvider;
+    private final MemoryTombstoneGuard tombstones;
 
     public JdbcMemoryItemStorage(ObjectProvider<JdbcTemplate> jdbcProvider) {
+        this(jdbcProvider, MemoryTombstoneGuard.inactive());
+    }
+
+    /** With the tombstone guard, so recall leaves out items the consolidation forgot (a no-op when the guard is inactive). */
+    public JdbcMemoryItemStorage(ObjectProvider<JdbcTemplate> jdbcProvider, MemoryTombstoneGuard tombstones) {
         this.jdbcProvider = jdbcProvider;
+        this.tombstones = tombstones == null ? MemoryTombstoneGuard.inactive() : tombstones;
     }
 
     // ------------------------------------------------------------------ plumbing
@@ -139,7 +146,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
         return t == null ? null : t.toInstant();
     }
 
-    private static MemoryItem map(ResultSet rs) throws SQLException {
+    static MemoryItem map(ResultSet rs) throws SQLException {
         return new MemoryItem(
                 rs.getObject("id", UUID.class),
                 rs.getObject("agent_id", UUID.class),
@@ -611,6 +618,7 @@ public class JdbcMemoryItemStorage implements MemoryItemStorage {
                         + " WHERE agent_id = ? AND kind = ? AND status = 'ACTIVE' AND trust = 'TRUSTED'"
                         + " AND (expires_at IS NULL OR expires_at > ?)"
                         + (bySubject ? " AND ? = ANY(subject_keys)" : "")
+                        + tombstones.excludeItems(table("memory_item"))
                         + " ORDER BY (1 - (embedding <=> ?::public.vector)) * (0.6 + 0.4 * importance) DESC,"
                         + " created_at DESC LIMIT ?";
         return jdbc().query(

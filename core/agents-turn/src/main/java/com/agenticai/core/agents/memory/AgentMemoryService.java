@@ -79,6 +79,15 @@ public class AgentMemoryService {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
+    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones =
+            com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
+
+    /** Makes a forgotten (tombstoned) fact stay forgotten: recall leaves it out and {@link #remember} refuses it. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTombstoneGuard(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard guard) {
+        this.tombstones = guard == null ? com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive() : guard;
+    }
+
     private volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
@@ -160,6 +169,27 @@ public class AgentMemoryService {
      * but never recalled or injected into a prompt until {@link #approve} is called for it.
      */
     public UUID remember(UUID agentId, String subjectKey, String content, MemoryProvenance provenance) {
+        if (tombstones.isForgotten(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_AGENT, subjectKey, agentId, content)) {
+            // Resurrection guard: the person (or the nightly tidy-up) forgot this exact text; only a person re-adding it
+            // by hand (rememberOwn) brings it back.
+            throw new MemoryForgottenException();
+        }
+        return insertFact(agentId, subjectKey, content, provenance, AGENT_IMPORTANCE, false);
+    }
+
+    /** Importance prior of a fact the agent saved itself; a typed fact starts at 0.8 (design 03, section 3). */
+    static final double AGENT_IMPORTANCE = 0.6;
+
+    static final double TYPED_IMPORTANCE = 0.8;
+
+    private UUID insertFact(
+            UUID agentId,
+            String subjectKey,
+            String content,
+            MemoryProvenance provenance,
+            double importance,
+            boolean personAuthored) {
         MemoryProvenance prov =
                 provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
         float[] embedding = sidecarClient.embedQuery(content);
@@ -170,15 +200,17 @@ public class AgentMemoryService {
         jdbcTemplate.update(
                 "INSERT INTO "
                         + table
-                        + " (id, agent_id, subject_key, content, embedding, trust, source_taint)"
-                        + " VALUES (?, ?, ?, ?, ?::public.vector, ?, ?)",
+                        + " (id, agent_id, subject_key, content, embedding, trust, source_taint, importance,"
+                        + " person_authored) VALUES (?, ?, ?, ?, ?::public.vector, ?, ?, ?, ?)",
                 id,
                 agentId,
                 subjectKey,
                 content,
                 literal,
                 prov.trust().name(),
-                prov.sourcesJson());
+                prov.sourcesJson(),
+                importance,
+                personAuthored);
         pruneOverCap(table, agentId);
         log.debug("Remembered fact for agent {} subject '{}': {}", agentId, subjectKey, content);
         return id;
@@ -224,7 +256,10 @@ public class AgentMemoryService {
                     subjectKey,
                     evict);
         }
-        return remember(agentId, subjectKey, content);
+        // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone of the same text.
+        tombstones.reconfirm(
+                com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_AGENT, subjectKey, agentId, content);
+        return insertFact(agentId, subjectKey, content, MemoryProvenance.TRUSTED, TYPED_IMPORTANCE, true);
     }
 
     /**
@@ -304,6 +339,7 @@ public class AgentMemoryService {
                                 + " ?::public.vector AS distance FROM "
                                 + table
                                 + " WHERE agent_id = ? AND subject_key = ? AND trust = 'TRUSTED'"
+                                + tombstones.excludeAgentFacts(table)
                                 + " ORDER BY distance ASC LIMIT ?",
                         (rs, rowNum) ->
                                 new AgentMemoryEntry(

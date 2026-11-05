@@ -5533,6 +5533,7 @@ export interface MemoryImportDtos_ImportFact {
   text?: string;
   scope?: string;
   agentId?: string;
+  confirmForgotten?: boolean;
 }
 
 export interface MemoryImportDtos_ImportLimits {

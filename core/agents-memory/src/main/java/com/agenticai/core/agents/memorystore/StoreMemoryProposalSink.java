@@ -2,6 +2,7 @@ package com.agenticai.core.agents.memorystore;
 
 import com.agenticai.core.agents.memory.spi.MemoryKind;
 import com.agenticai.core.agents.memory.spi.MemoryProposalReceipt;
+import com.agenticai.core.agents.memory.spi.MemoryProvenanceRecord;
 import com.agenticai.core.agents.memory.spi.MemoryProposalSink;
 import com.agenticai.core.agents.memory.spi.MemoryProposalStatus;
 import com.agenticai.core.agents.memory.spi.MemorySourceRef;
@@ -59,6 +60,7 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
     private final List<MemoryContentScreen> screens;
     private final ObjectProvider<MeterRegistry> meters;
     private final Clock clock;
+    private final MemoryTombstoneGuard tombstones;
 
     public StoreMemoryProposalSink(
             MemoryUnifiedProperties properties,
@@ -68,6 +70,20 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
             List<MemoryContentScreen> screens,
             ObjectProvider<MeterRegistry> meters,
             Clock clock) {
+        this(properties, gate, storage, embedder, screens, meters, clock, MemoryTombstoneGuard.inactive());
+    }
+
+    /** With the tombstone guard: a proposal whose exact text the consolidation forgot for this agent is refused (FORGOTTEN). */
+    public StoreMemoryProposalSink(
+            MemoryUnifiedProperties properties,
+            MemoryUnifiedGate gate,
+            MemoryItemStorage storage,
+            ObjectProvider<MemoryEmbedder> embedder,
+            List<MemoryContentScreen> screens,
+            ObjectProvider<MeterRegistry> meters,
+            Clock clock,
+            MemoryTombstoneGuard tombstones) {
+        this.tombstones = tombstones == null ? MemoryTombstoneGuard.inactive() : tombstones;
         this.properties = properties;
         this.gate = gate;
         this.storage = storage;
@@ -109,6 +125,11 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
             if (reason.isPresent()) {
                 return refused(p, "SCREEN_" + reason.get().replaceAll("[^A-Za-z0-9_]", "_"), true);
             }
+        }
+        if (tombstones.isForgotten(
+                MemoryTombstoneGuard.KIND_ITEM, MemoryTombstoneGuard.itemSubject(p.agentId()), p.agentId(), p.text())) {
+            // Resurrection guard: this exact text was forgotten for the agent; a person can still add it by hand.
+            return refused(p, "FORGOTTEN", true);
         }
         Instant now = clock.instant();
         if (storage.countByStatus(p.agentId(), MemoryItemStatus.PENDING) >= properties.getMaxPendingPerAgent()) {
@@ -179,7 +200,7 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
                         p.kind(),
                         p.text(),
                         derived ? MemoryWriter.DISTILLER : MemoryWriter.AGENT,
-                        p.turnId() == null ? "UNKNOWN" : "TURN",
+                        consolidationSourceType(p, derived),
                         p.turnId() == null ? null : p.turnId().toString(),
                         p.turnId() == null ? null : p.turnId().toString(),
                         List.copyOf(taint),
@@ -203,6 +224,18 @@ public class StoreMemoryProposalSink implements MemoryProposalSink {
                         now);
         storage.insertPending(item, embedding, List.copyOf(lineage.values()), created);
         return new Outcome(new MemoryProposalReceipt(id, verdict), null);
+    }
+
+    /** {@code source_type}: the consolidation markers (only with lineage), else TURN or UNKNOWN. */
+    private static String consolidationSourceType(MemoryWriteProposal p, boolean derived) {
+        String writer = p.provenance().writer();
+        if (derived && MemoryProvenanceRecord.WRITER_CONSOLIDATION_MERGE.equals(writer)) {
+            return MemoryItem.SOURCE_CONSOLIDATION_MERGE;
+        }
+        if (derived && MemoryProvenanceRecord.WRITER_CONSOLIDATION_SUMMARY.equals(writer)) {
+            return MemoryItem.SOURCE_CONSOLIDATION_SUMMARY;
+        }
+        return p.turnId() == null ? "UNKNOWN" : "TURN";
     }
 
     private Optional<MemoryItem> findItem(UUID agentId, String key) {

@@ -91,6 +91,14 @@ public class TenantMemoryService {
         this.clock = clock == null ? java.time.Clock.systemUTC() : clock;
     }
 
+    private volatile com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstones = com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive();
+
+    /** Makes a forgotten (tombstoned) shared fact stay forgotten: recall leaves it out and {@link #remember} refuses it. */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    public void setTombstoneGuard(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard guard) {
+        this.tombstones = guard == null ? com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.inactive() : guard;
+    }
+
     private volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
@@ -397,6 +405,19 @@ public class TenantMemoryService {
      */
     public UUID remember(
             String subjectKey, String content, UUID createdByAgentId, MemoryProvenance provenance) {
+        if (tombstones.isForgotten(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content)) {
+            throw new MemoryForgottenException(); // resurrection guard; only rememberOwn (a person) clears it
+        }
+        return insertFact(subjectKey, content, createdByAgentId, provenance, 0.6, false);
+    }
+
+    private UUID insertFact(
+            String subjectKey,
+            String content,
+            UUID createdByAgentId,
+            MemoryProvenance provenance,
+            double importance,
+            boolean personAuthored) {
         MemoryProvenance prov =
                 provenance == null ? new MemoryProvenance(MemoryTrust.QUARANTINED, null) : provenance;
         if (subjectKey != null && subjectKey.contains(MemoryBlocks.KEY_MARKER)) {
@@ -414,14 +435,17 @@ public class TenantMemoryService {
                 "INSERT INTO "
                         + table
                         + " (id, subject_key, content, embedding, created_by_agent_id, trust,"
-                        + " source_taint) VALUES (?, ?, ?, ?::public.vector, ?, ?, ?)",
+                        + " source_taint, importance, person_authored)"
+                        + " VALUES (?, ?, ?, ?::public.vector, ?, ?, ?, ?, ?)",
                 id,
                 subjectKey,
                 content,
                 literal,
                 createdByAgentId,
                 prov.trust().name(),
-                prov.sourcesJson());
+                prov.sourcesJson(),
+                importance,
+                personAuthored);
         pruneOverCap(table);
         log.debug(
                 "Remembered shared fact for subject '{}' (contributed by agent {}): {}",
@@ -475,7 +499,9 @@ public class TenantMemoryService {
                     subjectKey,
                     evict);
         }
-        return remember(subjectKey, content, null);
+        // A person typing a fact on purpose is the explicit re-confirmation that clears a tombstone of the same text.
+        tombstones.reconfirm(com.agenticai.core.agents.memorystore.MemoryTombstoneGuard.KIND_SHARED, subjectKey, null, content);
+        return insertFact(subjectKey, content, null, MemoryProvenance.TRUSTED, 0.8, true);
     }
 
     private void pruneOverCap(String table) {
@@ -541,6 +567,7 @@ public class TenantMemoryService {
                                 + " ?::public.vector AS distance FROM "
                                 + table
                                 + " WHERE subject_key = ? AND trust = 'TRUSTED'"
+                                + tombstones.excludeSharedFacts(table)
                                 + " ORDER BY distance ASC LIMIT ?",
                         (rs, rowNum) ->
                                 new TenantMemoryEntry(

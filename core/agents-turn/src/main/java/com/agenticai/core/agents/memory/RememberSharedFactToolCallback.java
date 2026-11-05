@@ -124,6 +124,8 @@ public class RememberSharedFactToolCallback implements ToolCallback {
             }
             writeToSharedGraphIfAvailable(factValue.toString());
             return "{\"remembered\": true, \"shared\": true, \"memoryId\": \"" + memoryId + "\"}";
+        } catch (MemoryForgottenException e) {
+            return "{\"remembered\": false, \"forgotten\": true, \"note\": \"" + MemoryForgottenException.TOOL_NOTE + "\"}";
         } catch (Exception e) {
             log.warn("remember_shared_fact tool call failed", e);
             return errorJson("Failed to remember shared fact: " + e.getMessage());

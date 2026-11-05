@@ -270,8 +270,35 @@ fact stores - no model call; merge groups come from `MemoryReviewDetector`, summ
 reported. Facts reach the sweep through the read-only `ConsolidationFactSource` port, so approve,
 rewrite and delete are structurally unreachable (`ConsolidationSurfaceTest`); with
 `app.memory.consolidation.apply.enabled` on, an earned plan marks forgets and merge drops forgotten
-through hash-only `memory_tombstone` rows - the only mutation it can make. Recall-side filtering of
-tombstoned rows, restore windows and the model summariser step are later work packages.
+through hash-only `memory_tombstone` rows - the only mutation it can make. Restore windows and the
+model summariser step are later work packages (recall-side filtering landed in WP5c).
+
+**As built in WP5c** (tombstone enforcement, real importance, items; flags OFF):
+
+* *Forgotten means forgotten.* `MemoryTombstoneGuard` (`agents-memory`) is active when
+  `app.memory.tombstone.enforce` is true (unset: follows `app.memory.consolidation.enabled`). Active, every recall
+  statement gets an inline `AND NOT EXISTS (... memory_tombstone t WHERE t.subject_key/agent match AND t.content_sha256 =
+  encode(sha256(convert_to(content,'UTF8')),'hex'))` - legacy `agent_memory` and `tenant_memory` (and so
+  `SemanticMemorySource` and the chat prompt) and `memory_item` (tombstones keyed `item:<agentId>`, kind `item`); no
+  extra round trip, and inactive it adds no SQL at all (the flags-off IT asserts it). Resurrection: the `remember_fact`
+  tools and the proposal sink refuse an exact-text match, the importer skips it (`forgotten`) unless the request carries
+  `confirmForgotten`, and `rememberOwn` (a person on the Memory page, an approved lesson) clears the tombstone. A tombstone
+  hides every row with that hash, so the sweep never tombstones a row while another live row of the tier has the same text.
+  Known limits: matching is on the exact text (a paraphrase is a new fact), the hidden row stays listed on the Memory page,
+  and a confirmed re-import of a forgotten fact leaves the old hidden twin as a visible duplicate.
+* *Importance.* V684 adds `importance`, `pinned`, `person_authored` to the fact tables. `FactImportance` attenuates the
+  stored prior by evidence of use, `prior * (earned + (1 - earned) * 0.5^(idle/H))`, so with the default weights a
+  never-used unpinned TRUSTED fact reaches the forget band after about 100 to 130 idle days, while pinned, person-authored
+  (`protect-person-authored`), well-used and recently used facts do not. `memory_item` rows record no usage yet (the unified
+  recall does not touch `use_count`), so items use their stored importance and age only and are merged or summarised, not
+  forgotten, unless a low importance was assigned.
+* *Items.* The sweep reads `memory_item` through the read-only `MemoryItemConsolidationReader` (never the storage or review
+  service). Merges (the keeper's text over keeper plus duplicates) and summaries (sources' texts joined, deterministic) are
+  filed via `MemoryProposalSink` with writer labels `consolidation:merge|summary`, which the store records as
+  `source_type` `CONSOL_MERGE|CONSOL_SUMMARY` (only with lineage). They are PENDING, trust QUARANTINED, with `memory_item_source`
+  lineage, filed in a dry run, with a tripped breaker or with auto-apply on alike, and not twice while pending.
+  `MemoryItemReviewService.approve` - a human - then supersedes the ACTIVE sources of such a proposal (other derived items never
+  do). Forgets of items are tombstoned only when the plan may auto-apply.
 
 ### 8. Retrieval API (port)
 

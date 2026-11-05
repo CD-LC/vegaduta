@@ -146,10 +146,54 @@ public class MemoryItemReviewService {
                                     MemoryItemStatus.SUPERSEDED,
                                     "SUPERSEDED_BY_VERSION=" + item.version(),
                                     now);
-            return storage.activate(agentId, itemId, actor.ref(), now, approved, predecessor, superseded)
-                    ? Outcome.done(itemId)
-                    : Outcome.refused("NOT_PENDING");
+            if (!storage.activate(agentId, itemId, actor.ref(), now, approved, predecessor, superseded)) {
+                return Outcome.refused("NOT_PENDING");
+            }
+            supersedeConsolidatedSources(item, actor, now);
+            return Outcome.done(itemId);
         });
+    }
+
+    /**
+     * A merge or summary the nightly consolidation proposed replaces what it was built from, and only a person's approval
+     * may do that: once this item is ACTIVE, every ACTIVE {@code memory_item} in its lineage goes to SUPERSEDED (an EDITED
+     * event each, by the approving human). Lineage stays, so erasing a source still reaches this item. Other derived
+     * items (a distilled procedure, a self-assessment) never supersede their sources. The sweep has no way to get here:
+     * it holds neither this service nor the storage port. A failure to supersede one source leaves it ACTIVE next to the
+     * new item (a duplicate, never a loss), is logged, and the approval stands.
+     */
+    private void supersedeConsolidatedSources(MemoryItem item, MemoryActor actor, Instant now) {
+        boolean merge = MemoryItem.SOURCE_CONSOLIDATION_MERGE.equals(item.sourceType());
+        boolean summary = MemoryItem.SOURCE_CONSOLIDATION_SUMMARY.equals(item.sourceType());
+        if ((!merge && !summary) || item.writer() != MemoryWriter.DISTILLER) {
+            return;
+        }
+        for (MemoryItemSource source : storage.lineage(item.id())) {
+            if (!MemorySourceRef.MEMORY_ITEM.equals(source.sourceTable())) {
+                continue;
+            }
+            try {
+                UUID sourceId = UUID.fromString(source.sourceKey());
+                if (!sourceId.equals(item.id())) {
+                    storage.transition(
+                            item.agentId(),
+                            sourceId,
+                            Set.of(MemoryItemStatus.ACTIVE),
+                            MemoryItemStatus.SUPERSEDED,
+                            MemoryEvent.of(
+                                    sourceId,
+                                    item.agentId(),
+                                    MemoryEvent.Type.EDITED,
+                                    actor,
+                                    MemoryItemStatus.ACTIVE,
+                                    MemoryItemStatus.SUPERSEDED,
+                                    "SUPERSEDED_BY_CONSOLIDATION=" + (merge ? "MERGE" : "SUMMARY"),
+                                    now));
+                }
+            } catch (RuntimeException e) {
+                log.warn("Could not supersede one source of an approved consolidation proposal", e);
+            }
+        }
     }
 
     /** PENDING to REJECTED. */

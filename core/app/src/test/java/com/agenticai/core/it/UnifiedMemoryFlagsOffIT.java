@@ -56,6 +56,7 @@ class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
     @Autowired MemoryItemExportController export;
     @Autowired AgentChatService chat;
     @Autowired JdbcTemplate jdbc;
+    @Autowired com.agenticai.core.agents.memorystore.MemoryTombstoneGuard tombstoneGuard;
 
     @AfterEach
     void clearTenant() {
@@ -92,6 +93,11 @@ class UnifiedMemoryFlagsOffIT extends UnifiedMemoryBootBase {
         assertThat(prompt.facts()).isZero();
         assertThat(prompt.unified()).isEmpty();
         assertThat(prompt.note()).isNull();
+
+        // Tombstone enforcement follows the consolidation flag: off, no recall statement gains a predicate and no lookup runs.
+        assertThat(tombstoneGuard.active()).isFalse();
+        assertThat(tombstoneGuard.excludeAgentFacts("t") + tombstoneGuard.excludeSharedFacts("t") + tombstoneGuard.excludeItems("t"))
+                .isEmpty();
 
         assertThat(rows("memory_item")).isZero();
         assertThat(rows("memory_item_source")).isZero();

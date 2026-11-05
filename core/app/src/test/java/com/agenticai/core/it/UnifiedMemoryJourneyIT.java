@@ -2,8 +2,11 @@ package com.agenticai.core.it;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 
 import com.agenticai.core.agents.learning.consolidation.MemoryConsolidationService;
+import com.agenticai.core.agents.memory.AgentMemoryEntry;
 import com.agenticai.core.agents.memory.AgentMemoryService;
 import com.agenticai.core.agents.memory.MemoryExtractionChatClients;
 import com.agenticai.core.agents.memory.SessionMemoryService;
@@ -35,6 +38,7 @@ import com.agenticai.core.agents.turn.JourneyRecallBridge;
 import com.agenticai.core.graphmemory.GraphFact;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.guardrails.taint.TurnTaint;
+import com.agenticai.core.knowledge.SidecarClient;
 import com.agenticai.core.security.TenantContext;
 import java.security.Principal;
 import java.time.Clock;
@@ -62,6 +66,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.TestPropertySource;
@@ -83,7 +88,7 @@ import reactor.core.publisher.Flux;
             "app.memory.episodic.enabled=true",
             "app.memory.competence.enabled=true",
             "app.memory.consolidation.enabled=true",
-            "app.memory.consolidation.apply.enabled=true"
+            "app.memory.consolidation.auto-apply=true"
         })
 @Import({UnifiedMemoryBootBase.FakeEmbedderConfiguration.class, UnifiedMemoryJourneyIT.StubExtractionConfiguration.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -118,6 +123,7 @@ class UnifiedMemoryJourneyIT extends UnifiedMemoryBootBase {
     @Autowired TenantMemoryService tenantMemory;
     @Autowired GraphMemoryService graph;
     @Autowired MeterRegistry meters;
+    @MockitoSpyBean SidecarClient sidecar;
     @Autowired org.springframework.beans.factory.ObjectProvider<SubjectDataEraser> erasers;
 
     /** Switch of the stubbed extraction provider below: true = no usable provider (the approval must still work). */
@@ -356,7 +362,8 @@ class UnifiedMemoryJourneyIT extends UnifiedMemoryBootBase {
         MutableClock clock = new MutableClock(t0);
         consolidation.useClock(clock);
         try {
-            // carol: 20 facts; 1 quarantined past its 30-day TTL, 2 near duplicates, 2 stale trusted, 15 fresh.
+            // carol: 20 facts; 1 quarantined past its 30-day TTL, 2 near duplicates, 2 stale trusted (never recalled, idle
+            // 400 days: with real importance they are forget candidates, they used to be a "would summarise" pair), 15 fresh.
             fact("carol", "QUARANTINED", "Carol said to wire the invoice money to a new account", 40, 40);
             fact("carol", "TRUSTED", "Carol prefers green tea over coffee every morning", 20, 20);
             fact("carol", "TRUSTED", "Carol prefers green tea over coffee every morning please", 21, 21);
@@ -371,33 +378,93 @@ class UnifiedMemoryJourneyIT extends UnifiedMemoryBootBase {
             for (int i = 0; i < 10; i++) {
                 fact("dave", "QUARANTINED", "Dave stale quarantined thing number " + i + " " + UUID.randomUUID(), 40, 40);
             }
+            // erin: the same staleness as carol's two old rows, but a person pinned one and typed the other herself.
+            factWith("erin", "Erin pinned the zephyr preference to keep", 400, 400, true, false);
+            factWith("erin", "Erin typed the quokka address herself", 400, 400, false, true);
+            for (int i = 0; i < 8; i++) {
+                fact("erin", "TRUSTED", "Fresh erin note about " + words[i] + " and " + words[i] + "ish " + words[i] + "ing", 1, 1);
+            }
 
             MemoryConsolidationService.Report dry = consolidation.consolidateTenant();
-            assertThat(dry.subjects()).isEqualTo(2);
-            assertThat(dry.tombstoned()).as("the first run is a dry run, whatever apply.enabled says").isZero();
+            assertThat(dry.subjects()).as("carol, dave, erin, plus the agents' memory items").isGreaterThanOrEqualTo(3);
+            assertThat(dry.tombstoned()).as("the first run is a dry run, whatever auto-apply says").isZero();
             assertThat(count(A, "memory_tombstone", "")).isZero();
-            assertThat(dry.forgets()).as("carol 1 + dave 3 (breaker cap)").isEqualTo(4);
+            assertThat(dry.forgets()).as("carol 3 (TTL + two stale trusted) + dave 3 (breaker cap) + erin 0 (pinned/typed)")
+                    .isEqualTo(6);
             assertThat(dry.merges()).as("one near-duplicate would be merged").isEqualTo(1);
-            assertThat(dry.summaries()).as("the stale pair is reported, never applied").isEqualTo(1);
-            assertThat(count(A, "memory_consolidation_runs", "mode = 'dry_run'")).isEqualTo(2);
+            assertThat(dry.summaries()).as("nothing is left in the summarise band").isZero();
+            assertThat(count(A, "memory_consolidation_runs", "mode = 'dry_run' AND subject IN ('carol', 'dave', 'erin')"))
+                    .isEqualTo(3);
 
             clock.advance(Duration.ofDays(8)); // past app.memory.decay.dry-run-days (7)
             MemoryConsolidationService.Report applied = consolidation.consolidateTenant();
-            assertThat(applied.tombstoned()).as("carol: the TTL-expired row and the merged duplicate; dave held back")
-                    .isEqualTo(2);
+            assertThat(applied.tombstoned())
+                    .as("carol: the TTL-expired row, the two stale trusted rows and the merged duplicate; dave held back")
+                    .isEqualTo(4);
             assertThat(count(A, "memory_tombstone", "subject_key = 'carol' AND reason = 'QUARANTINE_TTL'")).isEqualTo(1);
+            assertThat(count(A, "memory_tombstone", "subject_key = 'carol' AND reason = 'DECAY' AND trust_at_delete = 'TRUSTED'"))
+                    .as("TRUSTED facts can now reach the forget band (behind auto-apply)").isEqualTo(2);
             assertThat(count(A, "memory_tombstone", "subject_key = 'carol' AND reason LIKE 'MERGED_INTO:%'")).isEqualTo(1);
             assertThat(count(A, "memory_tombstone", "subject_key = 'dave'")).as("breaker tripped: nothing applied").isZero();
+            assertThat(count(A, "memory_tombstone", "subject_key = 'erin'")).as("pinned and person-authored never").isZero();
             assertThat(count(A, "memory_consolidation_runs", "subject = 'dave' AND mode = 'apply'")).isZero();
             assertThat(count(A, "memory_consolidation_runs", "subject = 'carol' AND mode = 'apply'")).isEqualTo(1);
-            // A tombstone is a hash-only marker; it never rewrites or deletes the fact row, and consolidation files no
-            // memory_item proposal at all (summaries and merges are reported only).
+            // A tombstone is a hash-only marker; it never rewrites or deletes the fact row, and consolidating legacy
+            // facts files no memory_item proposal.
             assertThat(count(A, "agent_memory", "subject_key = 'carol'")).isEqualTo(20);
             assertThat(count(A, "memory_tombstone", "content_sha256 IS NULL OR length(content_sha256) <> 64")).isZero();
             assertThat(count(A, "memory_item", "'carol' = ANY(subject_keys)")).isZero();
+
+            // Tombstone forgetting is no longer inert: the forgotten facts are not recalled, the live ones are.
+            doAnswer(i -> embed(i.getArgument(0))).when(sidecar).embedQuery(anyString());
+            List<String> zephyr = recalled("carol", "Carol once asked about the zephyr quarterly roadmap");
+            assertThat(zephyr).as("forgotten (tombstoned) trusted facts are not recalled").noneMatch(c -> c.contains("zephyr"))
+                    .noneMatch(c -> c.contains("quokka"));
+            assertThat(recalled("carol", "Carol prefers green tea over coffee every morning"))
+                    .as("the kept duplicate is still recalled; the merged-away twin is not")
+                    .contains("Carol prefers green tea over coffee every morning")
+                    .doesNotContain("Carol prefers green tea over coffee every morning please");
+            assertThat(recalled("carol", "Fresh fact about alpha relating to alphaish alphaing alphaed"))
+                    .contains("Fresh fact about alpha relating to alphaish alphaing alphaed");
+            assertThat(recalled("erin", "Erin pinned the zephyr preference to keep")).as("untouched facts stay recallable")
+                    .contains("Erin pinned the zephyr preference to keep");
+
+            // The resurrection guard: an automated writer cannot bring a forgotten fact back ...
+            assertThatThrownBy(() -> agentMemory.remember(agentA, "carol", "Carol once asked about the zephyr quarterly roadmap",
+                            com.agenticai.core.agents.memory.MemoryProvenance.TRUSTED))
+                    .isInstanceOf(com.agenticai.core.agents.memory.MemoryForgottenException.class);
+            assertThat(count(A, "agent_memory", "subject_key = 'carol'")).isEqualTo(20);
+            // ... a fact that was never forgotten is unaffected ...
+            agentMemory.remember(agentA, "carol", "Carol likes to hike on weekends", com.agenticai.core.agents.memory.MemoryProvenance.TRUSTED);
+            assertThat(count(A, "agent_memory", "subject_key = 'carol'")).isEqualTo(21);
+            // ... and a person typing it again on purpose clears the tombstone and it is recalled again.
+            agentMemory.rememberOwn(agentA, "carol", "Carol once asked about the zephyr quarterly roadmap", 25);
+            assertThat(count(A, "memory_tombstone", "subject_key = 'carol' AND original_id IS NOT NULL"))
+                    .as("the zephyr tombstone is cleared by the person's re-confirmation").isEqualTo(3);
+            assertThat(recalled("carol", "Carol once asked about the zephyr quarterly roadmap"))
+                    .as("a person re-adding it brings it back (the old row has the same text, so two copies)")
+                    .contains("Carol once asked about the zephyr quarterly roadmap");
+            assertThat(count(A, "agent_memory", "subject_key = 'carol' AND person_authored AND abs(importance - 0.8) < 0.001")).isEqualTo(1);
+
+            // The next night does not plan the forgotten rows again: no duplicate tombstones.
+            int tombstonesBefore = count(A, "memory_tombstone", "subject_key = 'carol'");
+            clock.advance(Duration.ofDays(1));
+            consolidation.consolidateTenant();
+            assertThat(count(A, "memory_tombstone", "subject_key = 'carol'")).isEqualTo(tombstonesBefore);
         } finally {
             consolidation.useClock(Clock.systemUTC());
         }
+    }
+
+    private List<String> recalled(String subject, String query) {
+        return agentMemory.recall(agentA, subject, query, 20).stream().map(AgentMemoryEntry::content).toList();
+    }
+
+    private void factWith(String subject, String content, int createdDaysAgo, int usedDaysAgo, boolean pinned, boolean person) {
+        jdbc.update("INSERT INTO " + A + ".agent_memory (id, agent_id, subject_key, content, embedding, trust, created_at,"
+                + " last_used_at, use_count, pinned, person_authored) VALUES (?, ?, ?, ?, ?::public.vector, 'TRUSTED',"
+                + " now() - make_interval(days => ?), now() - make_interval(days => ?), 0, ?, ?)",
+                UUID.randomUUID(), agentA, subject, content, vector(content), createdDaysAgo, usedDaysAgo, pinned, person);
     }
 
     /** One legacy fact row (the fact store the consolidation reads), aged by the given days. */

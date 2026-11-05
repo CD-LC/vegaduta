@@ -52,6 +52,10 @@ public class MemoryConsolidationRun {
     @Column(name = "tombstoned", nullable = false)
     private int tombstoned;
 
+    /** Merge and summary proposals this run filed (V684). */
+    @Column(name = "proposals", nullable = false)
+    private int proposals;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

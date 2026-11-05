@@ -7,6 +7,7 @@ import com.agenticai.core.agents.memory.MemoryTrust;
 import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.Capacity;
+import com.agenticai.core.agents.memorystore.MemoryTombstoneGuard;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportFact;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportRequest;
 import com.agenticai.core.agents.memory.importer.MemoryImportDtos.ImportResponse;
@@ -75,6 +76,7 @@ public class MemoryImportService {
     static final String S_INVALID_SCOPE = "invalid_scope";
     static final String S_AGENT_REQUIRED = "agent_required";
     static final String S_DUPLICATE = "duplicate";
+    static final String S_FORGOTTEN = "forgotten";
     static final String S_LIMIT = "limit_reached";
     static final String S_AGENT_UNAVAILABLE = "agent_unavailable";
     static final String S_UNAVAILABLE = "unavailable";
@@ -91,6 +93,13 @@ public class MemoryImportService {
     private final int maxChars;
     private final int maxFactsPerAgent;
     private final int maxSharedFacts;
+    private volatile MemoryTombstoneGuard tombstones = MemoryTombstoneGuard.inactive();
+
+    /** Resurrection guard: an import skips a fact whose text was forgotten unless the person re-confirms it. */
+    @Autowired(required = false)
+    public void setTombstoneGuard(MemoryTombstoneGuard guard) {
+        this.tombstones = guard == null ? MemoryTombstoneGuard.inactive() : guard;
+    }
 
     @Autowired
     public MemoryImportService(
@@ -239,6 +248,17 @@ public class MemoryImportService {
                 skipped.add(new SkippedFact(display(screened.text()), blocked));
                 continue;
             }
+            // Resurrection guard, before the duplicate check: a forgotten fact still has its (hidden) row, which would
+            // otherwise read as a duplicate and swallow both the refusal and the person's explicit re-confirmation.
+            boolean forgotten = tombstones.isForgotten(
+                    SCOPE_SHARED.equals(scope) ? MemoryTombstoneGuard.KIND_SHARED : MemoryTombstoneGuard.KIND_AGENT,
+                    subject,
+                    f.agentId(),
+                    screened.text());
+            if (forgotten && !Boolean.TRUE.equals(f.confirmForgotten())) {
+                skipped.add(new SkippedFact(display(screened.text()), S_FORGOTTEN));
+                continue;
+            }
             Set<String> keys = keysByTarget.get(target);
             if (keys == null) {
                 keys = new HashSet<>();
@@ -269,7 +289,7 @@ public class MemoryImportService {
                 keysByTarget.put(target, keys);
             }
             String key = MemoryImportParser.dedupeKey(screened.text());
-            if (keys.contains(key)) {
+            if (!forgotten && keys.contains(key)) {
                 skipped.add(new SkippedFact(display(screened.text()), S_DUPLICATE));
                 continue;
             }

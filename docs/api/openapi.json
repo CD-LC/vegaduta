@@ -110873,6 +110873,9 @@
           "agentId": {
             "type": "string",
             "format": "uuid"
+          },
+          "confirmForgotten": {
+            "type": "boolean"
           }
         }
       },
