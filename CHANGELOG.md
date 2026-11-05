@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
