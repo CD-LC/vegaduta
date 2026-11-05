@@ -62,7 +62,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "@vitest/coverage-v8": "^5.0.5",
     "axe-core": "^4.14.0",
-    "eslint": "^9.18.0",
+    "eslint": "^10.13.0",
     "eslint-config-next": "^16.4.3",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -73,7 +73,16 @@
     "vitest": "^5.0.5"
   },
   "overrides": {
-    "eslint-plugin-react-hooks": "5.2.0",
+    "eslint-plugin-react-hooks": {
+      ".": "5.2.0",
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    },
+    "eslint-plugin-react": {
+      "eslint": "$eslint"
+    },
     "postcss": "^8.5.18",
     "sharp": "^0.35.5"
   }
