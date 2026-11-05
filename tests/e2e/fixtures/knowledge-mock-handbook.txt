@@ -1,0 +1,14 @@
+VegaDuta Field Operations Handbook (mock document for the knowledge E2E spec)
+
+Section 1. Orchard irrigation.
+The orchard irrigation controller codename for the north terraces is {{TOKEN}}.
+Controllers are inspected every fourteen days by the field crew, and every
+inspection is logged in the maintenance register before the next watering cycle.
+
+Section 2. Cold storage.
+Cold storage rooms hold produce between two and four degrees Celsius. Door
+seals are replaced each spring. Temperature alarms page the duty engineer.
+
+Section 3. Visitor policy.
+Visitors must sign in at the gatehouse and wear a high-visibility vest on the
+terraces. Drones are not permitted over the packing hall without written approval.
