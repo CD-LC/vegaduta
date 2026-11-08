@@ -66,19 +66,14 @@ function cleanAgentName(raw: unknown): string | null {
   return oneLine.length > 80 ? `${oneLine.slice(0, 77)}…` : oneLine;
 }
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ shareId: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ shareId: string }> }): Promise<Metadata> {
   try {
     const { shareId } = await params;
     if (!shareId) return GENERIC_METADATA;
-    const res = await fetch(
-      `${SERVER_API_BASE}/api/demo/share/${encodeURIComponent(shareId)}`,
-      {
-        signal: AbortSignal.timeout(2000),
-        next: { revalidate: 60 },
-      }
-    );
+    const res = await fetch(`${SERVER_API_BASE}/api/demo/share/${encodeURIComponent(shareId)}`, {
+      signal: AbortSignal.timeout(2000),
+      next: { revalidate: 60 },
+    });
     if (!res.ok) return GENERIC_METADATA;
     const body = await res.json();
     const agentName = cleanAgentName(body?.agentName);

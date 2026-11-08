@@ -24,7 +24,8 @@ export function observabilityLinks(env: Record<string, string | undefined> = pro
   const out = {} as ObservabilityLinks;
   for (const [tool, { key, devDefault }] of Object.entries(OBSERVABILITY_ENV)) {
     const v = env[key];
-    out[tool as ObservabilityTool] = typeof v === "string" && v !== "" ? v : process.env.NODE_ENV === "production" ? "" : devDefault; // "" => UI shows "Not configured"
+    out[tool as ObservabilityTool] =
+      typeof v === "string" && v !== "" ? v : process.env.NODE_ENV === "production" ? "" : devDefault; // "" => UI shows "Not configured"
   }
   return out;
 }
