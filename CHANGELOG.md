@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **code-intel: offline heuristic security scan.** New `GET /repos/{repo_id}/security-scan` and read-only MCP tool `security_scan` report hard-coded secrets (always redacted), dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe deserialization, SQL string building, weak crypto, disabled TLS verification) and a normalized dependency inventory (requirements, package.json/lock, pom.xml, go.mod). Deterministic, no network or LLM, tenant-scoped like the other analyses. It is a regex/entropy heuristic, not a replacement for CodeQL/gitleaks/Trivy, and does no CVE matching (an advisory-provider hook is provided for callers).
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
