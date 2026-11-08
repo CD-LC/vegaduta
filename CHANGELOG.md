@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed

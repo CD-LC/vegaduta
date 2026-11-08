@@ -127,7 +127,7 @@ export default function AboutPage() {
             You describe the job. <BrandName /> does it, and asks first on the big calls.
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            <BrandName /> is an open-source agentic AI platform. It turns a sentence into a working
+            <BrandName /> is a source-available agentic AI platform. It turns a sentence into a working
             agent, puts that agent on the channels your customers already use, and wraps everything
             it does in approvals, budgets and an audit trail. Vega means speed and dūta means
             messenger: a fast messenger that carries work between you, your customers and your
@@ -169,7 +169,7 @@ export default function AboutPage() {
             <div className="rounded-xl border border-border bg-card p-5">
               <Users className="size-5 text-primary" aria-hidden="true" />
               <h3 className="mt-3 text-sm font-semibold tracking-tight text-foreground">
-                Open source
+                Source available
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 The source code is published under the Business Source License 1.1 - free to run,
