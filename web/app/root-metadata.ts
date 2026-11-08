@@ -38,7 +38,7 @@ export async function buildMetadata() {
   const homeText = await localizedSeoText("home", urlLocale);
   const pageLocale = urlLocale || DEFAULT_LOCALE;
   return {
-    metadataBase: new URL(SITE_URL),
+    metadataBase: SITE_URL ? new URL(SITE_URL) : undefined,
     // 2026-07-29 category redesign: title/description carry the category claim
     // ("AI staff", hired not installed) instead of naming the generic category —
     // this line is what search results, link unfurls and browser tabs show.

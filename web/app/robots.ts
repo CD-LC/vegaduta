@@ -75,7 +75,8 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "*", allow: "/", disallow: DISALLOW },
       { userAgent: AI_CRAWLERS, allow: "/", disallow: DISALLOW },
     ],
-    sitemap: `${siteUrl()}/sitemap.xml`,
+    // Sitemap URLs must be absolute: with no configured origin (production) name none.
+    ...(siteUrl() ? { sitemap: `${siteUrl()}/sitemap.xml` } : {}),
   };
 }
 

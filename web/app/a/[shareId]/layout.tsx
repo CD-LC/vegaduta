@@ -46,7 +46,7 @@ const SERVER_API_BASE =
   process.env.API_BASE_URL ||
   process.env.CORE_INTERNAL_URL ||
   getPublicEnv("NEXT_PUBLIC_API_BASE_URL") ||
-  "http://localhost:8080";
+  (process.env.NODE_ENV !== "production" ? "http://localhost:8080" : "");
 
 // agentName is anonymous-visitor-supplied text headed into <title>/OG tags.
 // Next.js escapes it (no injection risk), but control chars / newlines /

@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
