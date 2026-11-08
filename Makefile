@@ -66,7 +66,7 @@ images: ## Build the Full-tier images from source (compose build overlay); PROFI
 ## ---- Test and lint -----------------------------------------------------------
 
 .PHONY: test
-test: test-core test-web test-python test-node-services test-sdk-clients ## All unit/integration tests
+test: test-core test-web test-python test-node-services test-sdk-clients test-eval ## All unit/integration tests
 
 .PHONY: test-core
 test-core: ## mvn verify (context tests need Postgres with pgvector+AGE on DB_HOST:DB_PORT, else they skip)
@@ -106,6 +106,10 @@ test-node-services: ## node:test suites of mcp-stdio-runner, piece-host, workspa
 	for d in mcp-stdio-runner workspace-runner whatsapp-qr desktop-agent; do \
 	  (cd services/$$d && node --test) || exit 1; done
 	cd services/piece-host && npm test
+
+.PHONY: test-eval
+test-eval: ## Evaluation-harness scoring/aggregation unit tests (tests/eval; offline, no stack)
+	node --test tests/eval/test/
 
 .PHONY: test-sdk-clients
 test-sdk-clients: ## SDK REST clients + python-agent, incl. consumer contracts (contracts/consumers); python-agent needs pytest

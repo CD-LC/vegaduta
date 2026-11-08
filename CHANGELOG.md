@@ -8,6 +8,10 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Agent evaluation harness (`tests/eval/`, `docs/benchmarks/README.md`).** A dependency-free Node harness with a versioned 20-task suite (Q&A, tool use, knowledge retrieval, approval-gated actions, multi-step workflow) that drives a running stack through its public REST API and reports programmatic task success, tool-call accuracy, platform-reported tokens and cost, p50/p95 latency and guardrail/approval behaviour as `results.json` plus a markdown table, behind an adapter interface. Scoring and aggregation are unit-tested offline (`make test-eval`); the harness has not been run against a stack and no results are published yet.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
