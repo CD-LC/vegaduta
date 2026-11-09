@@ -8,6 +8,13 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Ordinary questions no longer switch the skills block on.** The skill gate matched on words every question
+  uses ("answer", "short", "use", "word"), so "What is the capital of France? Answer in one short sentence"
+  carried the skills index and skill tools (about 700 tokens). Generic words are ignored, and "word" means the
+  docx skill only next to file/document/format. Real skill requests still match.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
