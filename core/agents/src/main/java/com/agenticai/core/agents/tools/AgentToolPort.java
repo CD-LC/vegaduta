@@ -79,6 +79,15 @@ public interface AgentToolPort {
     /** The skills block of the system prompt, compact for small models when asked. */
     String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact);
 
+    /**
+     * As above with a cut-down index: {@code lean} = {@code {maxSkills, maxBlockChars,
+     * maxDescriptionWords}} (null = the configured size). Used for a local model's deferred turn.
+     */
+    default String skillsPromptBlock(
+            UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
+        return skillsPromptBlock(agentId, tools, compact);
+    }
+
     /** The procedures block of the system prompt. */
     String proceduresPromptBlock(UUID agentId);
 }

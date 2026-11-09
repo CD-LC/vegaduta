@@ -10,6 +10,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Changed
 
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
+  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
+  `load_skill` away. Other models are unchanged.
+
 - **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
   numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
   150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to

@@ -56,6 +56,17 @@ class ChatClientSelectionStableToolSetTest {
     }
 
     @Test
+    void theLeanSkillIndexSizeIsConfiguration() {
+        properties.setSkillsMaxSkills(5);
+        properties.setSkillsMaxBlockChars(700);
+        properties.setSkillsMaxDescriptionWords(6);
+        assertThat(properties.getSkillsMaxSkills()).isEqualTo(5);
+        assertThat(new LocalModelTurnProperties().getSkillsMaxSkills()).isEqualTo(12);
+        assertThat(new LocalModelTurnProperties().getSkillsMaxBlockChars()).isEqualTo(1800);
+        assertThat(new LocalModelTurnProperties().getSkillsMaxDescriptionWords()).isEqualTo(10);
+    }
+
+    @Test
     void aHostedRowKeepsPerMessageSelection() {
         assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false)))).isFalse();
     }

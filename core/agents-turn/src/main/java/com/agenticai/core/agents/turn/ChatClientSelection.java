@@ -235,7 +235,17 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
-        context.modelTraits().toolDeferral(toolDeferral(agent, hostedChain));
+        boolean deferral = toolDeferral(agent, hostedChain);
+        context.modelTraits().toolDeferral(deferral);
+        context.modelTraits()
+                .leanSkillIndex(
+                        deferral
+                                ? new int[] {
+                                    localModel.getSkillsMaxSkills(),
+                                    localModel.getSkillsMaxBlockChars(),
+                                    localModel.getSkillsMaxDescriptionWords()
+                                }
+                                : null);
         // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it
         // keeps
         // the tools the conversation already used and stays on the model that started the task. The

@@ -29,6 +29,13 @@ public class LocalModelTurnProperties {
     /** Keep most tools behind search_tools / call_tool on a local model's turns, so its prompt stays short. */
     private boolean toolDeferral = Boolean.parseBoolean(DEFAULTS.getProperty("tool-deferral"));
 
+    /** Size of the skill index on a local model's deferred turn. */
+    private int skillsMaxSkills = Integer.parseInt(DEFAULTS.getProperty("skills-max-skills"));
+
+    private int skillsMaxBlockChars = Integer.parseInt(DEFAULTS.getProperty("skills-max-block-chars"));
+
+    private int skillsMaxDescriptionWords = Integer.parseInt(DEFAULTS.getProperty("skills-max-description-words"));
+
     /** Bring-your-own providers that are servers on the person's machine. */
     private Set<String> providers = names(DEFAULTS.getProperty("providers"));
 
@@ -46,6 +53,30 @@ public class LocalModelTurnProperties {
 
     public void setToolDeferral(boolean toolDeferral) {
         this.toolDeferral = toolDeferral;
+    }
+
+    public int getSkillsMaxSkills() {
+        return skillsMaxSkills;
+    }
+
+    public void setSkillsMaxSkills(int skillsMaxSkills) {
+        this.skillsMaxSkills = skillsMaxSkills;
+    }
+
+    public int getSkillsMaxBlockChars() {
+        return skillsMaxBlockChars;
+    }
+
+    public void setSkillsMaxBlockChars(int skillsMaxBlockChars) {
+        this.skillsMaxBlockChars = skillsMaxBlockChars;
+    }
+
+    public int getSkillsMaxDescriptionWords() {
+        return skillsMaxDescriptionWords;
+    }
+
+    public void setSkillsMaxDescriptionWords(int skillsMaxDescriptionWords) {
+        this.skillsMaxDescriptionWords = skillsMaxDescriptionWords;
     }
 
     public Set<String> getProviders() {
