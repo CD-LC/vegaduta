@@ -8,6 +8,22 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A saved workspace or agent setting override was ignored by every read that ran outside a transaction.** The
+  effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
+  schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
+  override, the next `GET /api/settings/effective` answered without it, so the console showed the old value after a
+  reload. `JdbcSettingsStore.tenantValues()` and `agentValues()` now run in their own read-only transaction.
+- **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
+  `SETTING_INVALID`. `SettingsExceptionHandler` had no `@Order`, so it tied with the generic fallback advice and
+  lost; it now has highest precedence, scoped to the two settings controllers.
+- **A failed `@PreAuthorize` returned HTTP 500 and recorded a platform issue** instead of 403, because nothing
+  mapped Spring Security's `AccessDeniedException`. It now answers 403 with the generic permission message.
+- **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
+  `checkCookiesAndSetTimer` from `authChecker.js`, which Keycloak 26.8 no longer exports, so the "signed in in
+  another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
