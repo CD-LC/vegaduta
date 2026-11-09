@@ -244,7 +244,8 @@ public class LocalLlmPoolBootstrap {
                     label,
                     normalizedBase);
             if (StringUtils.hasText(same.getModel()) && !model.equals(same.getModel())) {
-                // The row is deliberately never rewritten, so a changed app.local-llm.bootstrap.model
+                // The row is deliberately never rewritten, so a changed
+                // app.local-llm.bootstrap.model
                 // (or LOCAL_LLM_MODEL) is silently ignored. Say so: the pool serves a different
                 // model than the one configured, which skews latency, quality and benchmarks.
                 log.warn(
