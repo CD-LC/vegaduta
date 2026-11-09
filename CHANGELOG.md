@@ -8,6 +8,13 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
+  separate node process before running it; the run itself is the parse (a module that does not parse never
+  executes), so the pre-check now runs only when a run produced no result, with the same validation message.
+  Measured in the sandbox container: a JavaScript execute drops from a median of about 90-155 ms to about 35-65 ms; Python is unchanged (about 35 ms).
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
