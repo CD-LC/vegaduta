@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code setting_override_history} of the
@@ -98,12 +99,19 @@ public class JdbcSettingsStore implements SettingsStore {
         return out;
     }
 
+    // These two feed the effective-value cache from threads that are often not inside a transaction (the effective
+    // read endpoint, a chat turn). The tenant's schema is selected on a transaction's connection, so without one the
+    // query ran against the default schema, found no rows, and every tenant and agent override was invisible: the
+    // write answered with the override, and the next read answered with the platform value. Inside an existing
+    // transaction (the write path) this just joins it.
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> tenantValues() {
         return values(SettingScope.TENANT, "");
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> agentValues(String agentId) {
         return values(SettingScope.AGENT, agentId);
     }
