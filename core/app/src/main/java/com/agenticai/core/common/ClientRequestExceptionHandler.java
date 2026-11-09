@@ -151,6 +151,19 @@ public class ClientRequestExceptionHandler {
         return errorResponse(e, HttpStatus.FORBIDDEN, e.getMessage());
     }
 
+    // Spring Security's method-level denial: a @PreAuthorize that fails throws
+    // AuthorizationDeniedException, an AccessDeniedException. It is thrown inside the controller
+    // call, so it reaches this advice chain before Spring Security's own ExceptionTranslationFilter
+    // would see it, and without this handler FallbackExceptionHandler's Exception.class answered it
+    // with a 500 and recorded a platform issue for an ordinary "you may not do that". 403, with the
+    // same generic wording the filter-level denial uses; the exception text is never echoed.
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(
+            org.springframework.security.access.AccessDeniedException e) {
+        return errorResponse(
+                e, HttpStatus.FORBIDDEN, "You do not have permission to perform this action.");
+    }
+
     // core/templates - the per-tenant-per-day submission abuse cap. 429.
     @ExceptionHandler(TemplateSubmissionLimitException.class)
     public ResponseEntity<Map<String, Object>> handleTemplateSubmissionLimit(
