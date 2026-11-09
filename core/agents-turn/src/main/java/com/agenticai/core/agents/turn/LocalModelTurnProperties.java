@@ -26,6 +26,9 @@ public class LocalModelTurnProperties {
     /** Offer a local model the agent's tool set unchanged on every turn, so the server's prompt cache holds. */
     private boolean stableTools = Boolean.parseBoolean(DEFAULTS.getProperty("stable-tools"));
 
+    /** Keep most tools behind search_tools / call_tool on a local model's turns, so its prompt stays short. */
+    private boolean toolDeferral = Boolean.parseBoolean(DEFAULTS.getProperty("tool-deferral"));
+
     /** Bring-your-own providers that are servers on the person's machine. */
     private Set<String> providers = names(DEFAULTS.getProperty("providers"));
 
@@ -35,6 +38,14 @@ public class LocalModelTurnProperties {
 
     public void setStableTools(boolean stableTools) {
         this.stableTools = stableTools;
+    }
+
+    public boolean isToolDeferral() {
+        return toolDeferral;
+    }
+
+    public void setToolDeferral(boolean toolDeferral) {
+        this.toolDeferral = toolDeferral;
     }
 
     public Set<String> getProviders() {

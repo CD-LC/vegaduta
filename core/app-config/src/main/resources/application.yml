@@ -1481,6 +1481,9 @@ app:
       # trimming), so every turn after the first is answered from the server's cache and a tool the message did not
       # name is never missing. A model in small-model mode keeps its short list. false = per-message selection.
       stable-tools: ${APP_CHAT_LOCAL_MODEL_STABLE_TOOLS:true}
+      # true = on a local model's turns, all but a short list of standing tools sit behind search_tools / call_tool
+      # (app.tools.search.always-on), so the prompt the model must read first is about 1.5k tokens, not 10k+.
+      tool-deferral: ${APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL:true}
       # Bring-your-own providers that are servers on the person's machine.
       providers: ${APP_CHAT_LOCAL_MODEL_PROVIDERS:OLLAMA,LOCAL_OPENAI}
     small-model:

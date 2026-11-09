@@ -1138,7 +1138,7 @@ lean on (the notes say which).
 | `app.chat.small-model.intent-boost` | `APP_CHAT_SMALL_MODEL_INTENT_BOOST` | `50` | score of a tool that serves a signalled intent; beats word overlap, loses to a tool named in the message |
 | `app.chat.small-model.named-tool-score` | `APP_CHAT_SMALL_MODEL_NAMED_TOOL_SCORE` | `1000` | score of a tool the message names outright |
 
-**Local models** (`app.chat.local-model.*`, `app.providers.small-model-max-billions`): how a turn adapts to a model served on the person's own machine. Such a model reads its prompt at a few hundred tokens a second on a laptop GPU and far slower on a CPU, and its server keeps one prompt cache with the tool definitions ahead of the system prompt, so an unchanged prompt start is what makes the next turn fast. See [local-models.md](local-models.md#response-speed).
+**Local models** (`app.chat.local-model.*`, `app.providers.small-model-max-billions`): how a turn adapts to a model served on the person's own machine. Such a model reads its prompt at a few hundred tokens a second on a laptop GPU and far slower on a CPU, and its server keeps one prompt cache with the tool definitions ahead of the system prompt, so an unchanged prompt start is what makes the next turn fast. `app.chat.local-model.tool-deferral` (`APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, default `true`) keeps most tools behind `search_tools` so a local model's first read of the prompt stays short. See [local-models.md](local-models.md#response-speed).
 
 | Property | Environment variable | Default | Effect |
 |---|---|---|---|

@@ -45,6 +45,17 @@ class ChatClientSelectionStableToolSetTest {
     }
 
     @Test
+    void aLocalModelDefersToolsByDefaultAndAHostedOneDoesNot() {
+        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isTrue();
+        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false)))).isFalse();
+        assertThat(selection.toolDeferral(agentOn(ProviderName.OLLAMA), null)).isTrue();
+        assertThat(selection.toolDeferral(agentOn(ProviderName.ANTHROPIC), null)).isFalse();
+        properties.setToolDeferral(false);
+        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isFalse();
+        assertThat(selection.toolDeferral(agentOn(ProviderName.OLLAMA), null)).isFalse();
+    }
+
+    @Test
     void aHostedRowKeepsPerMessageSelection() {
         assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false)))).isFalse();
     }

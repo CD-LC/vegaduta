@@ -8,6 +8,16 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
+  local bring-your-own provider) now keep all but a short list of standing tools behind
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
+  65/65 score.
+
 ### Fixed
 
 - **A stale local-model pool row is now reported.** When the platform pool's local row serves a
