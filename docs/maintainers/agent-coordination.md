@@ -794,3 +794,7 @@ Audited every place that states the project license against `LICENSE` (BUSL-1.1;
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
 Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the signed-in personal-edition suite: agent behaviour, turn inspector and feedback, MCP registration and tool selection, workflows, knowledge upload and retrieval, A2A-off checks, channels and the device pairing lifecycle. No product code changed. Verified: `make gates` passes; the personal suite passes on a local personal stack (79 passed, 4 skipped: three A2A positive-path checks need the A2A directory on, and the platform-admin check needs the owner to hold that role). Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-personal-e2e-wt.
+
+### Local-model latency and tokens (Claude Code, 2026-11-09)
+
+Branch `perf/lean-local-turns` (off `origin/main`): a local model's turn defers tools by default with a short always-on list and a 12-skill index, plain-data tool results skip the injection judge (`app.guardrails.judge.skip-inert-data`), and core warns when the pool row serves a different model than configured. Touches `agents-turn`, `agents-tools`, `guardrails`, `providers`, `app-config`. Not touched: sandbox, approval continuation, memory/skill gating.

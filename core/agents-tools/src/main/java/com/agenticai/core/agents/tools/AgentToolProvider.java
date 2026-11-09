@@ -621,26 +621,14 @@ public class AgentToolProvider implements AgentToolPort {
         return skillsPromptBlock(agentId, tools, false);
     }
 
-    /**
-     * {@link #skillsPromptBlock(UUID, List)}; {@code compact} lists skills by name only
-     * (small-model mode, V501).
-     */
+    /** {@link #skillsPromptBlock(UUID, List)}; {@code compact}: names only (small-model mode, V501). */
     public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact) {
-        return skillsPromptBlock(agentId, tools, compact, (int[]) null);
+        return skillsPromptBlock(agentId, tools, compact, null);
     }
 
-    /**
-     * As above; {@code lean}, when not null and not compact, replaces the configured index size (a local
-     * model's deferred turn lists fewer, shorter skills).
-     */
+    /** As above; {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords} cuts the index (local model). */
     @Override
-    public String skillsPromptBlock(
-            UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
-        com.agenticai.core.agents.skills.SkillPromptProperties limits = null;
-        if (lean != null && lean.length == 3) {
-            limits = com.agenticai.core.agents.skills.SkillPromptProperties.active().with(lean[0], lean[1]);
-            limits.setMaxDescriptionWords(lean[2]);
-        }
+    public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
         if (tools == null
                 || tools.stream()
                         .noneMatch(
@@ -653,9 +641,7 @@ public class AgentToolProvider implements AgentToolPort {
             var skills = skillService.metadataForTurn(agentId);
             return compact
                     ? com.agenticai.core.agents.skills.SkillPromptBlock.renderCompact(skills)
-                    : limits != null
-                            ? com.agenticai.core.agents.skills.SkillPromptBlock.render(skills, limits)
-                            : com.agenticai.core.agents.skills.SkillPromptBlock.render(skills);
+                    : com.agenticai.core.agents.skills.SkillPromptBlock.render(skills, lean);
         } catch (RuntimeException e) {
             log.warn(
                     "Could not build the skills prompt block for agent {}: {}",

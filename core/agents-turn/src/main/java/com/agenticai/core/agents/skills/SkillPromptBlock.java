@@ -50,6 +50,16 @@ public final class SkillPromptBlock {
         return render(skills, SkillPromptProperties.active());
     }
 
+    /** {@link #render(List)} cut to {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords}; null = configured size. */
+    public static String render(List<SkillService.SkillMetadata> skills, int[] lean) {
+        if (lean == null || lean.length != 3) {
+            return render(skills);
+        }
+        SkillPromptProperties limits = SkillPromptProperties.active().with(lean[0], lean[1]);
+        limits.setMaxDescriptionWords(lean[2]);
+        return render(skills, limits);
+    }
+
     /** {@link #render(List)} with explicit limits. */
     public static String render(List<SkillService.SkillMetadata> skills, SkillPromptProperties limits) {
         if (skills == null || skills.isEmpty()) {
