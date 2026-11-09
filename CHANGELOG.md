@@ -8,6 +8,12 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Fixed
+
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+  different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
+  startup (the row is still never rewritten) instead of silently running the other model.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed
