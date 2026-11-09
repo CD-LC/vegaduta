@@ -132,6 +132,20 @@ public class GuardrailTuningProperties {
             return spec.options(options.build());
         }
 
+        /**
+         * Skip the tool-output injection judge for a result that is plain structured data (see {@link
+         * InertDataScreen}). The regex layer still runs. false judges every result, as before.
+         */
+        private boolean skipInertData = true;
+
+        public boolean isSkipInertData() {
+            return skipInertData;
+        }
+
+        public void setSkipInertData(boolean skipInertData) {
+            this.skipInertData = skipInertData;
+        }
+
         public int getMaxInputChars() {
             return maxInputChars;
         }

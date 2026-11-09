@@ -134,6 +134,11 @@ public class SemanticGuardrailService implements GuardrailService {
         if (chatClient == null || sanitized == null || sanitized.isBlank()) {
             return sanitized;
         }
+        // Plain structured data (ids, numbers, short status words) cannot carry an instruction: skip the
+        // extra model call. app.guardrails.judge.skip-inert-data=false judges every result.
+        if (tuning.getJudge().isSkipInertData() && InertDataScreen.isInertData(sanitized)) {
+            return sanitized;
+        }
 
         try {
             String verdict = tuning.getJudge().apply(chatClient.prompt()

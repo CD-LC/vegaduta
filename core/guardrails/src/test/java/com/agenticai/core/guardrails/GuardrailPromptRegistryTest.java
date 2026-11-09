@@ -650,7 +650,10 @@ class GuardrailPromptRegistryTest {
     void theInjectionJudgeReadsItsPromptForTheAgentOfTheGuardedCallAndTheWithholdReasonsFollowTheRegistry() {
         tenant();
         override(PromptScope.AGENT, AGENT, GuardrailPrompts.JUDGE_INJECTION, "Strict judge. SAFE or UNSAFE: reason");
-        SemanticGuardrailService semantic = new SemanticGuardrailService();
+        // The guarded call's output here is "{}", which the inert-data screen would pass without a judge call.
+        GuardrailTuningProperties judgeEverything = new GuardrailTuningProperties();
+        judgeEverything.getJudge().setSkipInertData(false);
+        SemanticGuardrailService semantic = new SemanticGuardrailService(null, judgeEverything);
         semantic.setPromptResolver(resolver);
         RecordingClient client = new RecordingClient("SAFE");
 

@@ -10,6 +10,11 @@ Release notes on GitHub are generated from the section for each version.
 
 ### Changed
 
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
+  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+
 - **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
   local bring-your-own provider) now keep all but a short list of standing tools behind
   `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env

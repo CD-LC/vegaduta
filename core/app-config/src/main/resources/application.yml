@@ -3283,6 +3283,9 @@ app:
     judge:
       # How many characters of the checked text are put in front of a judge; the rest is NOT judged.
       max-input-chars: ${APP_GUARDRAILS_JUDGE_MAX_INPUT_CHARS:4000}
+      # true = a tool result that is plain structured data (JSON of ids, numbers and one- or two-word strings)
+      # skips the injection judge's extra model call; the regex layer still runs. false = judge every result.
+      skip-inert-data: ${APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA:true}
       # Appended to text cut at max-input-chars (model-facing; the leading space is part of the value).
       truncation-marker: " \u2026[truncated]"
       # Judge sampling. EMPTY (default) = inherit the calling agent's own client settings, which is what the judges
