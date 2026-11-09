@@ -1,6 +1,6 @@
 {
   "name": "vegaduta-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Provisioning contract and scoring rules: docs/benchmarks/README.md. Facts for knowledge tasks come from tests/eval/fixtures/kb/northwind-handbook.md; tools from tests/eval/fixtures/eval-tools-mcp.mjs.",
   "tasks": [
     {

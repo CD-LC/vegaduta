@@ -19,6 +19,7 @@
 //     toolCalls?: [{tool: string, args: object|string}],   // in call order
 //     approvals?: [{actionType, status, finalStatus}],     // approval requests raised by this task
 //     usage?: {promptTokens?, completionTokens?, totalTokens?, costUsd?, unpricedCalls?},
+//     latencyMs?: number,   // answer time, when the run also does bookkeeping a user would not wait for; else the runner's wall clock
 //     error?: string                             // set when the run failed to execute at all
 //   }
 //
@@ -44,6 +45,7 @@ export function validateRunResult(r) {
     else if (r.toolCalls.some((c) => !c || typeof c.tool !== "string")) errs.push("every toolCall needs a string `tool`");
   }
   if (r.approvals !== undefined && !Array.isArray(r.approvals)) errs.push("approvals must be an array");
+  if (r.latencyMs !== undefined && (typeof r.latencyMs !== "number" || r.latencyMs < 0)) errs.push("latencyMs must be a non-negative number");
   if (r.usage !== undefined) {
     for (const k of ["promptTokens", "completionTokens", "totalTokens", "costUsd", "unpricedCalls"]) {
       if (r.usage[k] !== undefined && typeof r.usage[k] !== "number") errs.push(`usage.${k} must be a number`);

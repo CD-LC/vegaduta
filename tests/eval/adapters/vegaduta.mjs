@@ -93,12 +93,16 @@ async function pendingApprovals(api) {
 async function runAgentTask(task, ctx, agentId) {
   const sessionId = `eval-${task.id}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   const before = new Set((await pendingApprovals(ctx.api)).map((a) => a.id));
+  // Latency is the chat request alone, request to end of stream: the harness's own bookkeeping below
+  // (listing and deciding approvals, waiting for the cost ledger) is not the platform's answer time.
+  const chatStart = performance.now();
   const body = await ctx.api.req(
     "POST",
     `/api/agents/${agentId}/chat`,
     { sessionId, message: task.input, forceFastDepth: false, stepEvents: true },
     "text/event-stream",
   );
+  let latencyMs = performance.now() - chatStart;
   const parsed = parseChatSse(body);
   if (parsed.streamErrors.length) return { error: `stream error: ${parsed.streamErrors[0]}`, text: parsed.text };
 
@@ -121,6 +125,22 @@ async function runAgentTask(task, ctx, agentId) {
     approvals.push({ actionType: a.actionType, status: a.status, finalStatus });
   }
 
+  // A decided approval makes the platform run a continuation turn that tells the user how it ended; the
+  // frameworks' resume is inside their measured run, so the answer time here is chat + decision +
+  // continuation reply (the continuation is the session's second logged model call).
+  if (approvals.some((x) => x.finalStatus && x.finalStatus !== "PENDING")) {
+    for (let i = 0; i < 30; i++) {
+      try {
+        const s = await ctx.api.json("GET", `/api/agents/${agentId}/sessions/${encodeURIComponent(sessionId)}/llm-usage/summary`);
+        if (s && s.callCount >= 2) break;
+      } catch {
+        /* retry */
+      }
+      await sleep(100);
+    }
+    latencyMs = performance.now() - chatStart;
+  }
+
   // Usage is written by the platform's own cost ledger; it can trail the stream by a moment.
   let usage;
   for (let i = 0; i < 6 && !usage; i++) {
@@ -132,7 +152,7 @@ async function runAgentTask(task, ctx, agentId) {
     }
     if (!usage) await sleep(500);
   }
-  return { text: parsed.text, toolCalls: toolCallsFromSteps(parsed.stepEvents), approvals, usage };
+  return { text: parsed.text, toolCalls: toolCallsFromSteps(parsed.stepEvents), approvals, usage, latencyMs };
 }
 
 async function runWorkflowTask(task, ctx, workflowId) {

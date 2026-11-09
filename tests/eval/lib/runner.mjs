@@ -26,7 +26,9 @@ export async function runSuite({ suite, adapter, ctx, repeats = 1, only, now = (
       } catch (e) {
         result = { error: `adapter threw: ${e?.message ?? e}` };
       }
-      const latencyMs = Math.round(now() - t0);
+      // An adapter may report the time of the answer itself when its run also does bookkeeping the
+      // platform under test does not do for a user (polling a ledger, deciding an approval).
+      const latencyMs = Number.isFinite(result?.latencyMs) && result.latencyMs >= 0 ? Math.round(result.latencyMs) : Math.round(now() - t0);
       const bad = validateRunResult(result);
       if (bad.length) result = { error: `malformed RunResult: ${bad.join("; ")}` };
       const rec = { ...scoreRun(task, result, latencyMs), repeat: i + 1 };

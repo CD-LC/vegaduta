@@ -159,3 +159,12 @@ test("fixture MCP tools are deterministic and match the suite's expected answers
   assert.equal(handle({ jsonrpc: "2.0", id: 9, method: "bogus" }).error.code, -32601);
   assert.equal(handle({ id: 2, method: "tools/call", params: { name: "eval_add", arguments: { a: 2, b: 3 } } }).result.content[0].text, "5");
 });
+
+test("runSuite: an adapter-reported latencyMs replaces the wall clock, and a bad one is rejected", async () => {
+  const adapter = { name: "x", async init() { return {}; }, describe() { return {}; }, async runTask(task) { return { text: "ok", latencyMs: 1234.4 }; } };
+  const recs = await runSuite({ suite: miniSuite, adapter, ctx: {}, now: (() => { let t = 0; return () => (t += 5000); })() });
+  assert.equal(recs[0].latencyMs, 1234);
+  const bad = { ...adapter, async runTask() { return { text: "ok", latencyMs: -1 }; } };
+  const r2 = await runSuite({ suite: miniSuite, adapter: bad, ctx: {}, only: [miniSuite.tasks[0].id] });
+  assert.match(r2[0].error, /latencyMs/);
+});
