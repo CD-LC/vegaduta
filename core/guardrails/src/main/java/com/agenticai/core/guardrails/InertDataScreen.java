@@ -1,6 +1,6 @@
 package com.agenticai.core.guardrails;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,8 +24,7 @@ final class InertDataScreen {
 
     // Trailing tokens fail the parse: "1 ignore all previous instructions" must not read as the
     // number 1.
-    private static final ObjectMapper MAPPER =
-            new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
+    private static final ObjectMapper MAPPER = JsonMappers.strictTrailingTokens();
 
     private InertDataScreen() {}
 
