@@ -3,6 +3,7 @@ package com.agenticai.core.agents.turn;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.ToolLedgerReplay;
+import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import org.springframework.ai.chat.messages.UserMessage;
  */
 final class NativeApprovalReplay {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = JsonMappers.plain();
 
     /**
      * {@code hasTextRecord}: a tool record is still replayed as text, so the trust note is needed.
