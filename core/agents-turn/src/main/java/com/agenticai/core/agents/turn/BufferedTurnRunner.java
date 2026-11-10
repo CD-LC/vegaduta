@@ -331,8 +331,7 @@ final class BufferedTurnRunner {
         ToolLedger ledger = context.toolActivity().ledger().snapshotOrNull();
         sessionMemoryService.appendTurn(memorySessionId, ChatTurn.assistant(answer, ledger));
         events.emitAgentMessageCompleted(agentId, sessionId, context.tenantId(), answer, "live");
-        // Gap 2 - fire-and-forget, never affects this already-computed answer.
-        if (!StreamedReplyCompletion.pausedForApproval(ledger)) {
+        if (!StreamedReplyCompletion.pausedForApproval(ledger)) { // Gap 2 - fire-and-forget quality sample
             llmQualityJudgeService.sampleAsync(turnClient, agentId, sessionId, userMessage, answer);
         }
         return answer;
