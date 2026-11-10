@@ -96,14 +96,23 @@ public class PromptProfileSettings implements SettingsContributor {
         return settings == null ? PromptProfile.FULL : settings.forAgent(agentId);
     }
 
-    /** {@code tools} without the platform's standing tools: what a bare turn offers. */
-    static List<ToolCallback> ownTools(List<ToolCallback> tools) {
+    /**
+     * What a bare turn offers: the tools the owner chose. With an allow-list on the agent or tool
+     * servers attached to it, that is {@code tools} without the platform's standing tools; with
+     * neither, every tool on the list is a platform default, so only {@code keep} (tools the caller
+     * added for this run) stays.
+     */
+    static List<ToolCallback> ownTools(
+            List<ToolCallback> tools, boolean ownerChoseTools, List<ToolCallback> keep) {
         if (tools == null) {
             return null;
         }
         List<ToolCallback> own = new ArrayList<>(tools.size());
         for (ToolCallback tool : tools) {
-            if (!STANDING_TOOLS.contains(tool.getToolDefinition().name())) {
+            boolean kept = keep != null && keep.contains(tool);
+            if (kept
+                    || (ownerChoseTools
+                            && !STANDING_TOOLS.contains(tool.getToolDefinition().name()))) {
                 own.add(tool);
             }
         }

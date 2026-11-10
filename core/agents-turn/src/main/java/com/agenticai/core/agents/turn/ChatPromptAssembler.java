@@ -347,7 +347,11 @@ final class ChatPromptAssembler {
                         ? PromptProfile.FULL
                         : context.modelTraits().promptProfile();
         if (promptProfile == PromptProfile.BARE) {
-            tools = PromptProfileSettings.ownTools(tools);
+            tools =
+                    PromptProfileSettings.ownTools(
+                            tools,
+                            anyMcpToolsOffered || !agent.getAllowedToolNames().isEmpty(),
+                            extraTools);
         }
         boolean compactPrompt = smallModelTurn || promptProfile == PromptProfile.LEAN;
 

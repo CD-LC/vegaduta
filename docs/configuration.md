@@ -993,6 +993,7 @@ A turn is not judged on its last message alone. Three behaviours read the conver
 | `app.chat.follow-up.sticky-tools-window` | `APP_CHAT_FOLLOW_UP_STICKY_TOOLS_WINDOW` | `PT2H` | how far back in the tool-call log "tools the session already used" looks |
 | `app.chat.follow-up.max-sticky-tools` | `APP_CHAT_FOLLOW_UP_MAX_STICKY_TOOLS` | `12` | the most tools kept on offer this way, most recently used first |
 | `app.chat.follow-up.keep-primary-model` | `APP_CHAT_FOLLOW_UP_KEEP_PRIMARY_MODEL` | `true` | a follow-up in a session that used tools is never routed to the economy model |
+| `app.chat.prompt-profile` | `APP_CHAT_PROMPT_PROFILE` | `full` | how much the platform adds to an agent's prompt: `full`, `lean` (short wording) or `bare` (only the agent's own prompt, procedures, custom instructions and tools); settable per workspace and per agent as `chat.prompt.profile` |
 | `app.chat.continuation.heuristic-enabled` | `APP_CHAT_CONTINUATION_HEURISTIC_ENABLED` | `true` | `false` never re-prompts on the wording of a reply |
 | `app.chat.continuation.heuristic-scope` | `APP_CHAT_CONTINUATION_HEURISTIC_SCOPE` | `SMALL_MODELS` | `SMALL_MODELS` = only a weak tool caller; `ALL_MODELS` = every model |
 | `app.chat.continuation.heuristic-providers` | `APP_CHAT_CONTINUATION_HEURISTIC_PROVIDERS` | `OLLAMA,LOCAL_OPENAI` | bring-your-own providers treated as weak tool callers |
