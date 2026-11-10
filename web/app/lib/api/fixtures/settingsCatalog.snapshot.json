@@ -887,6 +887,21 @@
     "docsAnchor" : "behaviour-settings",
     "platformProperty" : "app.skills.prompt.max-block-chars"
   }, {
+    "key" : "chat.prompt.profile",
+    "group" : "chat",
+    "labelKey" : "settings.chat.prompt.profile.label",
+    "descriptionKey" : "settings.chat.prompt.profile.description",
+    "helpKey" : "settings.chat.prompt.profile.help",
+    "type" : "enum",
+    "enumValues" : [ "full", "lean", "bare" ],
+    "risk" : "medium",
+    "scopes" : [ "tenant", "agent" ],
+    "default" : "full",
+    "minRole" : "EDITOR",
+    "restartRequired" : false,
+    "docsAnchor" : "behaviour-settings",
+    "platformProperty" : "app.chat.prompt-profile"
+  }, {
     "key" : "chat.semanticCache.similarityThreshold",
     "group" : "chat",
     "labelKey" : "settings.chat.semanticCache.similarityThreshold.label",
