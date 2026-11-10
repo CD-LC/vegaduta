@@ -25,6 +25,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const util = require('util');
 const { spawn } = require('child_process');
 const { TYPE_CONTROL, TYPE_STDOUT, TYPE_STDIN, encodeFrame, FrameReader } = require('./framing');
 
@@ -673,8 +674,8 @@ function sweepStaleSessions() {
 
 function log(...args) {
     // One record per line: CR/LF in a logged value must not forge a new entry.
-    const safe = args.map((a) => (typeof a === 'string' ? a.replace(/[\r\n]/g, '_') : a));
-    console.log(new Date().toISOString(), '[mcp-stdio-runner]', ...safe);
+    const line = args.map((a) => (typeof a === 'string' ? a : util.inspect(a))).join(' ');
+    console.log(new Date().toISOString(), '[mcp-stdio-runner]', line.replace(/[\r\n]/g, '_'));
 }
 
 function timingSafeEqualStrings(a, b) {
