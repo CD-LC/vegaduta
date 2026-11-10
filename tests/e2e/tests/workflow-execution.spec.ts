@@ -40,7 +40,8 @@ test.describe("Workflow execution - real run to a terminal state", () => {
     // --- Create a fresh workflow (same flow as console-core-smoke.spec.ts) ---
     await page.goto("/workflows");
     const workflowName = `E2E Run ${Date.now()}`;
-    await page.getByRole("button", { name: "New workflow", exact: true }).click();
+    // A tenant with no workflows yet has this button twice (page header and empty state): either one opens the form.
+    await page.getByRole("button", { name: "New workflow", exact: true }).first().click();
     await page.getByPlaceholder(/New workflow name/i).fill(workflowName);
     await page.getByRole("button", { name: "Create workflow" }).click();
     await page.waitForURL(/\/workflows\/[^/]+/, { timeout: 20_000 });
@@ -53,9 +54,14 @@ test.describe("Workflow execution - real run to a terminal state", () => {
 
     // Before running: the inspector is hidden until it has something to show
     // (studio layout, 2026-09-29) - open it explicitly, then: no run yet.
-    await expect(page.getByText("No run yet")).toBeHidden();
-    await page.getByRole("button", { name: "Show or hide the inspector" }).click();
-    await expect(page.getByText("No run yet")).toBeVisible();
+    // The inspector's starting state has changed between builds (hidden, then shown by default), so open it
+    // only when it is not already showing; clicking the toggle on an open inspector would close it.
+    // Exact match: the empty-state paragraph below the run chip also starts with "No run yet".
+    const noRunYet = page.getByText("No run yet", { exact: true });
+    if (!(await noRunYet.isVisible().catch(() => false))) {
+      await page.getByRole("button", { name: "Show or hide the inspector" }).click();
+    }
+    await expect(noRunYet).toBeVisible();
 
     // --- Trigger a real execution ---
     // "Run now" opens a modal (runtime comment/attachments/params, all
@@ -73,33 +79,31 @@ test.describe("Workflow execution - real run to a terminal state", () => {
     // Modal closes immediately; the run inspector on the right now shows a
     // real run id and a live/terminal status pulled from the real backend.
     await expect(page.getByLabel(/Run comment/i)).toBeHidden({ timeout: 10_000 });
-    await expect(page.locator(".ax-wf-run-id")).toContainText("Run #", { timeout: 20_000 });
 
-    // Poll to a terminal state. The client itself polls every 1.2s
-    // (WorkflowCanvas.tsx's runWithRuntimeInputs) and updates
-    // `.ax-wf-run-status`'s text to the real WorkflowRun.status once
-    // terminal - a bare Trigger-only graph should reach COMPLETED almost
-    // immediately, but this generous timeout absorbs real staging latency
-    // (cold containers, concurrent E2E load) rather than a fixed sleep.
-    const statusEl = page.locator(".ax-wf-run-status");
-    await expect(statusEl).toContainText(/COMPLETED|FAILED|CANCELLED/, { timeout: 4 * 60_000 });
+    // The run is followed in the "Run being viewed" banner (the older run inspector, with .ax-wf-run-id and
+    // .ax-wf-run-status, is gone). A bare Trigger-only graph reaches Completed almost at once, but the generous
+    // timeout absorbs real latency (cold containers, concurrent load) rather than a fixed sleep.
+    const viewed = page.getByRole("region", { name: "Run being viewed" });
+    await expect(viewed).toContainText("Viewing run #1", { timeout: 20_000 });
+    const status = viewed.getByRole("status");
+    await expect(status).toHaveText(/Completed|Failed|Cancelled/, { timeout: 4 * 60_000 });
 
-    // The real, product-defined success bar for this test: the run actually
-    // completed, not merely reached some terminal state.
-    await expect(statusEl).toContainText("COMPLETED");
+    // The real, product-defined success bar for this test: the run actually completed, not merely reached some
+    // terminal state.
+    await expect(status).toHaveText("Completed");
 
-    // The Trigger step itself shows a real "OK" trace entry, not just an
-    // overall status with no step detail.
-    await expect(page.getByText("Trigger").first()).toBeVisible();
+    // The Trigger step itself shows in the flight recorder, not just an overall status with no step detail.
+    await expect(page.getByRole("region", { name: "Run flight recorder" })).toContainText("Trigger");
 
     // --- Run history reflects it ---
-    await page.getByRole("tab", { name: "History" }).click();
-    const historyRow = page.locator(".ax-wf-history-row").first();
+    const historyRow = page.getByRole("listbox", { name: "Workflow runs" }).getByRole("option").first();
     await expect(historyRow).toBeVisible({ timeout: 15_000 });
-    await expect(historyRow).toContainText("COMPLETED");
+    await expect(historyRow).toContainText("Completed");
 
     // --- The dedicated full run-log page also reflects it ---
-    await page.getByRole("link", { name: "View full run log" }).click();
+    // Opening a step of the viewed run shows its inspector, whose footer links to the run's own page.
+    await page.getByRole("application", { name: "Workflow canvas" }).getByText("Trigger").first().click();
+    await page.getByRole("button", { name: "Open full run" }).click();
     await page.waitForURL(/\/workflows\/[^/]+\/runs\/[^/]+/, { timeout: 15_000 });
     await expect(page.getByText("RUN SUMMARY")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText("COMPLETED", { exact: false }).first()).toBeVisible();
