@@ -50,8 +50,19 @@ public class ApprovalContinuationPrompt {
 
     /** The full user-role message for {@code continuation}. */
     public String render(ApprovalContinuation continuation) {
+        return render(continuation, properties.isNativeToolResult());
+    }
+
+    /**
+     * The text-shape message (goal, call and full result in the message itself), for a resume whose
+     * history is not replayed through the native shape (an agent job's resumed turn).
+     */
+    public String renderText(ApprovalContinuation continuation) {
+        return render(continuation, false);
+    }
+
+    private String render(ApprovalContinuation continuation, boolean nativeShape) {
         Outcome outcome = continuation.outcome();
-        boolean nativeShape = properties.isNativeToolResult();
         String template =
                 switch (outcome) {
                     case COMPLETED ->
