@@ -672,7 +672,9 @@ function sweepStaleSessions() {
 }
 
 function log(...args) {
-    console.log(new Date().toISOString(), '[mcp-stdio-runner]', ...args);
+    // One record per line: CR/LF in a logged value must not forge a new entry.
+    const safe = args.map((a) => (typeof a === 'string' ? a.replace(/[\r\n]/g, '_') : a));
+    console.log(new Date().toISOString(), '[mcp-stdio-runner]', ...safe);
 }
 
 function timingSafeEqualStrings(a, b) {

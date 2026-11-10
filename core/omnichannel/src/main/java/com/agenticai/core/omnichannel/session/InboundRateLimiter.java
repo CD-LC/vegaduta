@@ -1,6 +1,7 @@
 package com.agenticai.core.omnichannel.session;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.security.ratelimit.RedisFixedWindowCounter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -25,22 +26,22 @@ import org.springframework.stereotype.Component;
  *
  * <ul>
  *   <li><b>per sender</b> - {@code app.omnichannel.rate-limit.per-sender-per-minute} (default 20);
- *   <li><b>per channel</b> - {@code app.omnichannel.rate-limit.per-channel-per-minute}, all
- *       senders of one tenant on one channel together (default 600).
+ *   <li><b>per channel</b> - {@code app.omnichannel.rate-limit.per-channel-per-minute}, all senders
+ *       of one tenant on one channel together (default 600).
  * </ul>
  *
  * <p><b>Opt-in.</b> The gate is OFF unless {@code app.omnichannel.rate-limit.enabled=true} (the
  * {@code personal} profile turns it on). It is off by default because no existing channel adapter
  * answers a refused message: Telegram's webhook and the Meta WhatsApp loop swallow the exception
  * after their dedup claim, polling backs off, and on Slack, Discord, Teams and X the "sender" is
- * the room, so a busy shared room would share one budget. Turning it on for an install that
- * already runs those channels is a deliberate choice. When on, the defaults are generous: a person
- * does not send 20 messages a minute, and a 600/min channel is a serious deployment. A value of 0
- * disables just that one counter. VOICE is exempt: a call's utterances are paced by speech, and
- * refusing one mid-call ends it.
+ * the room, so a busy shared room would share one budget. Turning it on for an install that already
+ * runs those channels is a deliberate choice. When on, the defaults are generous: a person does not
+ * send 20 messages a minute, and a 600/min channel is a serious deployment. A value of 0 disables
+ * just that one counter. VOICE is exempt: a call's utterances are paced by speech, and refusing one
+ * mid-call ends it.
  *
- * <p>Counters live in Redis ({@link RedisFixedWindowCounter}, one atomic Lua call) and fall back
- * to an in-process counter when Redis is down - they never fall back to "allowed". The sender is
+ * <p>Counters live in Redis ({@link RedisFixedWindowCounter}, one atomic Lua call) and fall back to
+ * an in-process counter when Redis is down - they never fall back to "allowed". The sender is
  * hashed in the key, so no phone number or email address is written to Redis or held in the
  * fallback table.
  *
@@ -62,8 +63,10 @@ public class InboundRateLimiter {
     public InboundRateLimiter(
             ObjectProvider<StringRedisTemplate> redis,
             @Value("${app.omnichannel.rate-limit.enabled:false}") boolean enabled,
-            @Value("${app.omnichannel.rate-limit.per-sender-per-minute:20}") long perSenderPerMinute,
-            @Value("${app.omnichannel.rate-limit.per-channel-per-minute:600}") long perChannelPerMinute) {
+            @Value("${app.omnichannel.rate-limit.per-sender-per-minute:20}")
+                    long perSenderPerMinute,
+            @Value("${app.omnichannel.rate-limit.per-channel-per-minute:600}")
+                    long perChannelPerMinute) {
         this.redis = redis;
         this.enabled = enabled;
         this.perSenderPerMinute = perSenderPerMinute;
@@ -80,17 +83,28 @@ public class InboundRateLimiter {
         if (!enabled || channel == ChannelType.VOICE || senderId == null || senderId.isBlank()) {
             return;
         }
-        String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse("__no-tenant__");
+        String tenant =
+                TenantContext.current().map(TenantContext::getTenantId).orElse("__no-tenant__");
         StringRedisTemplate template = redis.getIfAvailable();
         if (perSenderPerMinute > 0) {
             RedisFixedWindowCounter.Usage usage =
                     RedisFixedWindowCounter.acquire(
                             template,
-                            KEY_PREFIX + "s:" + tenant + ":" + channel.name() + ":" + fingerprint(senderId),
+                            KEY_PREFIX
+                                    + "s:"
+                                    + tenant
+                                    + ":"
+                                    + channel.name()
+                                    + ":"
+                                    + fingerprint(senderId),
                             perSenderPerMinute,
                             WINDOW);
             if (!usage.allowed()) {
-                log.info("Inbound {} sender over {} messages/min on tenant {}", channel, perSenderPerMinute, tenant);
+                log.info(
+                        "Inbound {} sender over {} messages/min on tenant {}",
+                        LogSafe.clean(channel),
+                        LogSafe.clean(perSenderPerMinute),
+                        LogSafe.clean(tenant));
                 throw new InboundRateLimitedException(usage.resetSeconds(), false);
             }
         }
@@ -102,16 +116,25 @@ public class InboundRateLimiter {
                             perChannelPerMinute,
                             WINDOW);
             if (!usage.allowed()) {
-                log.warn("Inbound {} channel over {} messages/min on tenant {}", channel, perChannelPerMinute, tenant);
+                log.warn(
+                        "Inbound {} channel over {} messages/min on tenant {}",
+                        LogSafe.clean(channel),
+                        LogSafe.clean(perChannelPerMinute),
+                        LogSafe.clean(tenant));
                 throw new InboundRateLimitedException(usage.resetSeconds(), true);
             }
         }
     }
 
-    /** First 16 hex chars of SHA-256: enough to keep senders apart, nothing a person could be read from. */
+    /**
+     * First 16 hex chars of SHA-256: enough to keep senders apart, nothing a person could be read
+     * from.
+     */
     static String fingerprint(String senderId) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(senderId.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(senderId.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest, 0, 8);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 is required by the JDK", e);

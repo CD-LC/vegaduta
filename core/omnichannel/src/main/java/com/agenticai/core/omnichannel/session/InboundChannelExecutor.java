@@ -2,6 +2,7 @@ package com.agenticai.core.omnichannel.session;
 
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.logging.LogSafe;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -525,9 +526,9 @@ public class InboundChannelExecutor implements DisposableBean {
                 log.warn(
                         "Inbound {} admitted past the cap as overflow (tenant={},"
                                 + " overflow-in-flight={})",
-                        channel,
-                        tenant,
-                        overflowInFlight);
+                        LogSafe.clean(channel),
+                        LogSafe.clean(tenant),
+                        LogSafe.clean(overflowInFlight));
                 return new Permit(snapshot, tenant, channel, Kind.OVERFLOW, neverDrop);
             }
             reason =

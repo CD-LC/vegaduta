@@ -1,14 +1,15 @@
 package com.agenticai.core.mcpserver;
 
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -20,9 +21,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * attacks. If the Origin header is present and invalid, servers MUST respond with HTTP 403").
  *
  * <p>Rules: no {@code Origin} header (every non-browser MCP client: Claude Desktop, Cursor, SDKs,
- * curl) passes; a present Origin passes only when it is in the configured allow-list
- * ({@code app.mcpserver.origin.allowed}, exact scheme+host+port match, no wildcards). The request's
- * own {@code Host} is deliberately NOT treated as "same origin": under DNS rebinding the attacker's
+ * curl) passes; a present Origin passes only when it is in the configured allow-list ({@code
+ * app.mcpserver.origin.allowed}, exact scheme+host+port match, no wildcards). The request's own
+ * {@code Host} is deliberately NOT treated as "same origin": under DNS rebinding the attacker's
  * page and the rebound Host are the same hostname, which is the attack.
  *
  * <p>Modes ({@code app.mcpserver.origin.mode}): {@code enforce} (default) rejects with 403 and a
@@ -55,28 +56,38 @@ class McpOriginValidationFilter extends OncePerRequestFilter {
 
     McpOriginValidationFilter(Mode mode, String allowedCsv) {
         this.mode = mode;
-        this.allowed = allowedCsv == null ? Set.of() : Arrays.stream(allowedCsv.split(","))
-            .map(String::trim).filter(s -> !s.isEmpty()).map(McpOriginValidationFilter::normalize)
-            .collect(Collectors.toUnmodifiableSet());
+        this.allowed =
+                allowedCsv == null
+                        ? Set.of()
+                        : Arrays.stream(allowedCsv.split(","))
+                                .map(String::trim)
+                                .filter(s -> !s.isEmpty())
+                                .map(McpOriginValidationFilter::normalize)
+                                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
         String origin = request.getHeader("Origin");
         if (mode == Mode.OFF || origin == null || isAllowed(origin)) {
             chain.doFilter(request, response);
             return;
         }
-        log.warn("Inbound MCP request with disallowed Origin '{}' ({})", sanitize(origin),
-            mode == Mode.ENFORCE ? "rejected" : "report-only");
+        log.warn(
+                "Inbound MCP request with disallowed Origin '{}' ({})",
+                sanitize(origin),
+                LogSafe.clean(mode == Mode.ENFORCE ? "rejected" : "report-only"));
         if (mode == Mode.REPORT) {
             chain.doFilter(request, response);
             return;
         }
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Forbidden: Origin not allowed.\"}}");
+        response.getWriter()
+                .write(
+                        "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Forbidden: Origin not allowed.\"}}");
     }
 
     boolean isAllowed(String origin) {

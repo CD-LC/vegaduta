@@ -7,6 +7,7 @@ import com.agenticai.core.providers.modality.SpeechToTextProviderException;
 import com.agenticai.core.providers.modality.SpeechToTextProviderFactory;
 import com.agenticai.core.providers.modality.SpeechToTextTranscriptionException;
 import com.agenticai.core.providers.modality.VoiceModelProvider;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.speech.call.CallSpeechTranscriber;
 import com.agenticai.core.voice.VoiceCallController.TranscriptionOutcome;
 import com.agenticai.core.voice.VoiceCallController.VoiceTurnAudioEmptyException;
@@ -62,15 +63,15 @@ final class VoiceTurnTranscriber {
                     audio != null ? audio.getSize() : "N/A");
             throw new VoiceTurnAudioEmptyException(
                     "No audio was uploaded - this usually means the microphone wasn't recording."
-                        + " Check your browser's microphone permissions and ensure you're connected"
-                        + " to an audio device. Try the 'Test Mic' button in the voice panel for"
-                        + " diagnostics.");
+                            + " Check your browser's microphone permissions and ensure you're connected"
+                            + " to an audio device. Try the 'Test Mic' button in the voice panel for"
+                            + " diagnostics.");
         }
         log.info(
                 "Voice turn received for agent {} audioSize={} bytes originalFilename={}",
-                agentId,
-                audio.getSize(),
-                audio.getOriginalFilename());
+                LogSafe.clean(agentId),
+                LogSafe.clean(audio.getSize()),
+                LogSafe.clean(audio.getOriginalFilename()));
         // A too-quick tap-and-release can produce a header-only WebM/Opus
         // container (~100-150 bytes, no audio frames) that isEmpty() above
         // doesn't catch - the client (CallPanel.tsx) now guards against this

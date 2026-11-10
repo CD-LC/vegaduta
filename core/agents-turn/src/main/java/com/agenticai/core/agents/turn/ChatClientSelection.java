@@ -11,6 +11,7 @@ import com.agenticai.core.agents.text.AppContextText;
 import com.agenticai.core.guardrails.SandboxApprovalGrants;
 import com.agenticai.core.guardrails.TurnApprovalState;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -212,8 +213,8 @@ final class ChatClientSelection {
                 AgentChatService.log.warn(
                         "No platform LLM provider is enabled - agent {} (tenant {}) call answered"
                                 + " with a graceful notice instead of failing the turn",
-                        agentId,
-                        currentTenantId);
+                        LogSafe.clean(agentId),
+                        LogSafe.clean(currentTenantId));
                 return Outcome.earlyReturn(
                         Flux.just(
                                 AgentChatService.NO_PLATFORM_LLM_NOTICE_PREFIX

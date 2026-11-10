@@ -1,6 +1,7 @@
 package com.agenticai.core.storage;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,44 +22,41 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * Filesystem-backed {@link FileStorageService} for single-node / self-hosted
- * installs that do not run MinIO or S3. Opt-in only:
- * {@code app.storage.type=local} (env {@code APP_STORAGE_TYPE=local}); the
- * root directory is {@code app.storage.local.path} (env
- * {@code APP_STORAGE_LOCAL_PATH}). With the property unset,
- * {@link S3FileStorageService} is active exactly as before.
+ * Filesystem-backed {@link FileStorageService} for single-node / self-hosted installs that do not
+ * run MinIO or S3. Opt-in only: {@code app.storage.type=local} (env {@code
+ * APP_STORAGE_TYPE=local}); the root directory is {@code app.storage.local.path} (env {@code
+ * APP_STORAGE_LOCAL_PATH}). With the property unset, {@link S3FileStorageService} is active exactly
+ * as before.
  *
  * <p>Semantics deliberately mirror {@link S3FileStorageService}:
+ *
  * <ul>
- *   <li>The same tenant key scoping - a key written while a {@link
- *       TenantContext} is active is stored under {@code tenant/<id>/<key>}.</li>
- *   <li>The same cross-tenant guard - a caller-supplied key that already
- *       embeds another tenant's {@code tenant/<id>/} prefix is refused.</li>
- *   <li>The same bare-key fallback for reads (objects written with no
- *       TenantContext, e.g. by background jobs), gated by
- *       {@code app.storage.legacy-unprefixed-fallback} and the same prefix
- *       allowlist - AND, unlike S3, by {@code
- *       app.storage.local.legacy-unprefixed-fallback}, which defaults to
- *       {@code false} (SEC-051): a tenant request never reads the global bare
- *       namespace unless an operator opts in.</li>
+ *   <li>The same tenant key scoping - a key written while a {@link TenantContext} is active is
+ *       stored under {@code tenant/<id>/<key>}.
+ *   <li>The same cross-tenant guard - a caller-supplied key that already embeds another tenant's
+ *       {@code tenant/<id>/} prefix is refused.
+ *   <li>The same bare-key fallback for reads (objects written with no TenantContext, e.g. by
+ *       background jobs), gated by {@code app.storage.legacy-unprefixed-fallback} and the same
+ *       prefix allowlist - AND, unlike S3, by {@code app.storage.local.legacy-unprefixed-fallback},
+ *       which defaults to {@code false} (SEC-051): a tenant request never reads the global bare
+ *       namespace unless an operator opts in.
  * </ul>
  *
  * <p>Filesystem-specific hardening:
+ *
  * <ul>
- *   <li><b>Path traversal:</b> keys are rejected if absolute, containing
- *       {@code ..}/backslashes/NUL/empty segments, and every resolved path
- *       is normalized and must remain under the configured root.</li>
- *   <li><b>Atomic writes:</b> content goes to a temp file in the target
- *       directory and is then moved into place ({@code ATOMIC_MOVE} where the
- *       filesystem supports it), so a reader never sees a half-written
- *       object.</li>
+ *   <li><b>Path traversal:</b> keys are rejected if absolute, containing {@code
+ *       ..}/backslashes/NUL/empty segments, and every resolved path is normalized and must remain
+ *       under the configured root.
+ *   <li><b>Atomic writes:</b> content goes to a temp file in the target directory and is then moved
+ *       into place ({@code ATOMIC_MOVE} where the filesystem supports it), so a reader never sees a
+ *       half-written object.
  * </ul>
  *
- * <p>Known differences from S3 (documented, not bugs): content type is not
- * persisted (the interface never returns it); the S3 bucket lifecycle rule
- * that expires {@code demo-images/} has no equivalent here, so those files
- * persist until deleted; and there is no multi-node sharing - every core
- * replica must mount the same volume, or run exactly one replica.
+ * <p>Known differences from S3 (documented, not bugs): content type is not persisted (the interface
+ * never returns it); the S3 bucket lifecycle rule that expires {@code demo-images/} has no
+ * equivalent here, so those files persist until deleted; and there is no multi-node sharing - every
+ * core replica must mount the same volume, or run exactly one replica.
  */
 @Service
 @ConditionalOnProperty(name = "app.storage.type", havingValue = "local")
@@ -78,18 +76,22 @@ public class LocalFileStorageService implements FileStorageService {
         String configured = properties.getLocal().getPath();
         if (configured == null || configured.isBlank()) {
             throw new IllegalStateException(
-                "app.storage.type=local requires app.storage.local.path (env APP_STORAGE_LOCAL_PATH) to be set");
+                    "app.storage.type=local requires app.storage.local.path (env APP_STORAGE_LOCAL_PATH) to be set");
         }
         this.root = Path.of(configured).toAbsolutePath().normalize();
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
             throw new IllegalStateException(
-                "Could not create local storage root '" + root + "' (app.storage.local.path) - "
-                    + "check the directory exists and is writable by the core process", e);
+                    "Could not create local storage root '"
+                            + root
+                            + "' (app.storage.local.path) - "
+                            + "check the directory exists and is writable by the core process",
+                    e);
         }
         if (!Files.isWritable(root)) {
-            throw new IllegalStateException("Local storage root '" + root + "' is not writable by the core process");
+            throw new IllegalStateException(
+                    "Local storage root '" + root + "' is not writable by the core process");
         }
         log.info("File storage: local filesystem at {}", root);
     }
@@ -108,7 +110,11 @@ public class LocalFileStorageService implements FileStorageService {
             temp = Files.createTempFile(target.getParent(), TEMP_PREFIX, ".tmp");
             Files.write(temp, content);
             try {
-                Files.move(temp, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(
+                        temp,
+                        target,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException e) {
                 Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
             }
@@ -152,7 +158,11 @@ public class LocalFileStorageService implements FileStorageService {
     public InputStream getRange(String key, long start, long endInclusive) {
         if (start < 0 || endInclusive < start) {
             throw new IllegalArgumentException(
-                "Invalid byte range " + start + "-" + endInclusive + " - start must be >= 0 and end >= start");
+                    "Invalid byte range "
+                            + start
+                            + "-"
+                            + endInclusive
+                            + " - start must be >= 0 and end >= start");
         }
         Path path = locateExisting(key, "ranged read");
         FileChannel channel = null;
@@ -162,7 +172,15 @@ public class LocalFileStorageService implements FileStorageService {
             if (start >= size) {
                 channel.close();
                 throw new FileStorageException(
-                    "Range " + start + "-" + endInclusive + " not satisfiable for object '" + key + "' of size " + size, null);
+                        "Range "
+                                + start
+                                + "-"
+                                + endInclusive
+                                + " not satisfiable for object '"
+                                + key
+                                + "' of size "
+                                + size,
+                        null);
             }
             long length = Math.min(endInclusive, size - 1) - start + 1;
             channel.position(start);
@@ -182,8 +200,8 @@ public class LocalFileStorageService implements FileStorageService {
             return true;
         }
         return !physicalKey.equals(validated)
-            && legacyFallbackAllowed(validated, "existence check")
-            && Files.isRegularFile(resolve(validated));
+                && legacyFallbackAllowed(validated, "existence check")
+                && Files.isRegularFile(resolve(validated));
     }
 
     @Override
@@ -226,59 +244,76 @@ public class LocalFileStorageService implements FileStorageService {
     }
 
     /**
-     * Rejects keys that could escape the root or alias another object.
-     * Keys are S3-style: forward-slash separated, relative, no dot segments.
+     * Rejects keys that could escape the root or alias another object. Keys are S3-style:
+     * forward-slash separated, relative, no dot segments.
      */
     static String validateKey(String key) {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("Storage key must not be blank");
         }
         if (key.indexOf('\0') >= 0 || key.indexOf('\\') >= 0) {
-            throw new IllegalArgumentException("Storage key contains an illegal character: '" + key + "'");
+            throw new IllegalArgumentException(
+                    "Storage key contains an illegal character: '" + key + "'");
         }
-        if (key.startsWith("/") || key.endsWith("/") || (key.length() > 1 && key.charAt(1) == ':')) {
-            throw new IllegalArgumentException("Storage key must be a relative path: '" + key + "'");
+        if (key.startsWith("/")
+                || key.endsWith("/")
+                || (key.length() > 1 && key.charAt(1) == ':')) {
+            throw new IllegalArgumentException(
+                    "Storage key must be a relative path: '" + key + "'");
         }
         for (String segment : key.split("/", -1)) {
             if (segment.isEmpty() || segment.equals(".") || segment.equals("..")) {
-                throw new IllegalArgumentException("Storage key contains an illegal path segment: '" + key + "'");
+                throw new IllegalArgumentException(
+                        "Storage key contains an illegal path segment: '" + key + "'");
             }
             if (segment.startsWith(TEMP_PREFIX)) {
-                throw new IllegalArgumentException("Storage key segment uses a reserved prefix: '" + key + "'");
+                throw new IllegalArgumentException(
+                        "Storage key segment uses a reserved prefix: '" + key + "'");
             }
         }
         return key;
     }
 
-    /** Second line of defence after {@link #validateKey}: the normalized path must stay under root. */
+    /**
+     * Second line of defence after {@link #validateKey}: the normalized path must stay under root.
+     */
     private Path resolve(String physicalKey) {
         // Re-validate AFTER tenant prefixing so a malformed tenant id can't
         // introduce dot segments either.
         validateKey(physicalKey);
         Path resolved = root.resolve(physicalKey).normalize();
         if (!resolved.startsWith(root) || resolved.equals(root)) {
-            log.error("Blocked storage path traversal attempt: key '{}' resolves outside {}", physicalKey, root);
-            throw new FileStorageException("Object key '" + physicalKey + "' resolves outside the storage root", null);
+            log.error(
+                    "Blocked storage path traversal attempt: key '{}' resolves outside {}",
+                    physicalKey,
+                    root);
+            throw new FileStorageException(
+                    "Object key '" + physicalKey + "' resolves outside the storage root", null);
         }
         return resolved;
     }
 
     private String tenantScopedKey(String key) {
         return TenantContext.current()
-            .map(TenantContext::getTenantId)
-            .filter(id -> id != null && !id.isBlank())
-            .map(tenantId -> TENANT_KEY_PREFIX + tenantId + "/" + key)
-            .orElse(key);
+                .map(TenantContext::getTenantId)
+                .filter(id -> id != null && !id.isBlank())
+                .map(tenantId -> TENANT_KEY_PREFIX + tenantId + "/" + key)
+                .orElse(key);
     }
 
     private boolean legacyFallbackAllowed(String key, String operation) {
         // SEC-051: local stores default the fallback OFF (Local#legacyUnprefixedFallback).
-        if (!properties.isLegacyUnprefixedFallback() || !properties.getLocal().isLegacyUnprefixedFallback()) {
+        if (!properties.isLegacyUnprefixedFallback()
+                || !properties.getLocal().isLegacyUnprefixedFallback()) {
             return false;
         }
-        boolean allowed = S3FileStorageService.LEGACY_FALLBACK_PREFIXES.stream().anyMatch(key::startsWith);
+        boolean allowed =
+                S3FileStorageService.LEGACY_FALLBACK_PREFIXES.stream().anyMatch(key::startsWith);
         if (!allowed) {
-            log.debug("Refused un-prefixed fallback for {} of key '{}' - prefix not allowlisted", operation, key);
+            log.debug(
+                    "Refused un-prefixed fallback for {} of key '{}' - prefix not allowlisted",
+                    operation,
+                    key);
         }
         return allowed;
     }
@@ -289,16 +324,26 @@ public class LocalFileStorageService implements FileStorageService {
             return;
         }
         String embeddedTenantId = matcher.group(1);
-        TenantContext.current().map(TenantContext::getTenantId).ifPresent(currentTenantId -> {
-            if (currentTenantId != null && !currentTenantId.isBlank() && !currentTenantId.equals(embeddedTenantId)) {
-                log.error(
-                    "Blocked cross-tenant object storage access: key '{}' is scoped to tenant '{}', but the "
-                        + "current request's TenantContext is tenant '{}'",
-                    key, embeddedTenantId, currentTenantId
-                );
-                throw new FileStorageException("Object key '" + key + "' does not belong to the current tenant", null);
-            }
-        });
+        TenantContext.current()
+                .map(TenantContext::getTenantId)
+                .ifPresent(
+                        currentTenantId -> {
+                            if (currentTenantId != null
+                                    && !currentTenantId.isBlank()
+                                    && !currentTenantId.equals(embeddedTenantId)) {
+                                log.error(
+                                        "Blocked cross-tenant object storage access: key '{}' is scoped to tenant '{}', but the "
+                                                + "current request's TenantContext is tenant '{}'",
+                                        LogSafe.clean(key),
+                                        LogSafe.clean(embeddedTenantId),
+                                        LogSafe.clean(currentTenantId));
+                                throw new FileStorageException(
+                                        "Object key '"
+                                                + key
+                                                + "' does not belong to the current tenant",
+                                        null);
+                            }
+                        });
     }
 
     private static void closeQuietly(@Nullable FileChannel channel) {
@@ -311,7 +356,9 @@ public class LocalFileStorageService implements FileStorageService {
         }
     }
 
-    /** Limits reads to {@code remaining} bytes and closes the underlying channel stream on close. */
+    /**
+     * Limits reads to {@code remaining} bytes and closes the underlying channel stream on close.
+     */
     private static final class BoundedInputStream extends FilterInputStream {
 
         private long remaining;

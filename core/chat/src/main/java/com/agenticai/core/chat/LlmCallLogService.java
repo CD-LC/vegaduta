@@ -3,6 +3,7 @@ package com.agenticai.core.chat;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
+import com.agenticai.core.security.logging.LogSafe;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -135,19 +136,39 @@ public class LlmCallLogService {
             UUID agentVersionId,
             Long billableReasoningTokens) {
         record(
-                agentId, sessionId, providerName, model, promptTokens, completionTokens, totalTokens, success,
-                errorMessage, requestId, exceptionType, stackTrace, latencyMs, startedAt, experimentVariants,
-                traceId, spanId, cacheCreationTokens, cacheReadTokens, agentVersionId, billableReasoningTokens,
+                agentId,
+                sessionId,
+                providerName,
+                model,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                success,
+                errorMessage,
+                requestId,
+                exceptionType,
+                stackTrace,
+                latencyMs,
+                startedAt,
+                experimentVariants,
+                traceId,
+                spanId,
+                cacheCreationTokens,
+                cacheReadTokens,
+                agentVersionId,
+                billableReasoningTokens,
                 null);
     }
 
     /**
      * As above, with the cost the advisor already worked out for this call. A hosted-pool row the
-     * operator runs locally ({@code zero_cost}) is priced at zero by the advisor's own catalog; this
-     * service only holds the shared catalog, so re-estimating here booked the unknown-model default
-     * rate against a free local model - into the monthly spend counter and the hosted-spend cap too.
+     * operator runs locally ({@code zero_cost}) is priced at zero by the advisor's own catalog;
+     * this service only holds the shared catalog, so re-estimating here booked the unknown-model
+     * default rate against a free local model - into the monthly spend counter and the hosted-spend
+     * cap too.
      *
-     * @param estimatedCostUsdOverride the advisor's estimate; {@code null} re-estimates from the tokens
+     * @param estimatedCostUsdOverride the advisor's estimate; {@code null} re-estimates from the
+     *     tokens
      */
     public void record(
             UUID agentId,
@@ -267,13 +288,13 @@ public class LlmCallLogService {
                     estimatedCostUsdOverride != null
                             ? estimatedCostUsdOverride
                             : pricingCatalog.estimateCostUsd(
-                            providerName == null ? null : providerName.name(),
-                            model,
-                            promptTokens,
-                            completionTokens,
-                            cacheCreationTokens,
-                            cacheReadTokens,
-                            billableReasoningTokens);
+                                    providerName == null ? null : providerName.name(),
+                                    model,
+                                    promptTokens,
+                                    completionTokens,
+                                    cacheCreationTokens,
+                                    cacheReadTokens,
+                                    billableReasoningTokens);
             LlmCallLog row =
                     new LlmCallLog(
                             agentId,
@@ -345,9 +366,9 @@ public class LlmCallLogService {
             } catch (RuntimeException e) {
                 log.warn(
                         "Hosted spend listener {} failed for tenant {} - {}",
-                        listener.getClass().getSimpleName(),
-                        tenant,
-                        e.getMessage());
+                        LogSafe.clean(listener.getClass().getSimpleName()),
+                        LogSafe.clean(tenant),
+                        LogSafe.clean(e.getMessage()));
             }
         }
     }

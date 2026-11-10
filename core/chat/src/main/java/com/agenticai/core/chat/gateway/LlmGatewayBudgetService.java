@@ -3,6 +3,7 @@ package com.agenticai.core.chat.gateway;
 import com.agenticai.core.chat.LlmSpendReader;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -138,7 +139,7 @@ public class LlmGatewayBudgetService {
             log.warn(
                     "LLM gateway budget check failed for tenant {} - failing open (allowing the"
                             + " call)",
-                    tenantId,
+                    LogSafe.clean(tenantId),
                     e);
         }
     }
