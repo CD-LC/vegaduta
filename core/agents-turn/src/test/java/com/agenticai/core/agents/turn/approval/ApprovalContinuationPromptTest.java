@@ -13,8 +13,31 @@ class ApprovalContinuationPromptTest {
 
     private static final UUID REQUEST = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
-    private final ApprovalContinuationProperties properties = new ApprovalContinuationProperties();
+    private final ApprovalContinuationProperties properties = textShape();
     private final ApprovalContinuationPrompt prompt = new ApprovalContinuationPrompt(properties);
+
+    private static ApprovalContinuationProperties textShape() {
+        ApprovalContinuationProperties text = new ApprovalContinuationProperties();
+        text.setNativeToolResult(false);
+        return text;
+    }
+
+    @Test
+    void theNativeShapeSendsOnlyTheShortNoteAndIsRecognisedByItsTag() {
+        String message =
+                new ApprovalContinuationPrompt(new ApprovalContinuationProperties())
+                        .render(continuation(Outcome.COMPLETED, "sent (CONF-9042)", List.of()));
+
+        assertThat(ApprovalContinuationPrompt.isNativeShape(message)).isTrue();
+        assertThat(message)
+                .startsWith(ApprovalContinuation.MESSAGE_MARKER)
+                .contains("Send invoice INV-7731")
+                .doesNotContain("sent (CONF-9042)")
+                .doesNotContain("<tool_result>");
+        assertThat(ApprovalContinuationPrompt.isNativeShape(
+                        prompt.render(continuation(Outcome.COMPLETED, "ok", List.of()))))
+                .isFalse();
+    }
 
     private static ApprovalContinuation continuation(Outcome outcome, String result, List<String> otherPending) {
         return new ApprovalContinuation(

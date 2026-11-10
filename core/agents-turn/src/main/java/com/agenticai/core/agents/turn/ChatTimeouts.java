@@ -51,6 +51,7 @@ final class ChatTimeouts {
     private FollowUpProperties followUp = new FollowUpProperties();
     private ContinuationProperties continuationProperties = new ContinuationProperties();
     private ToolLedgerProperties toolLedger = new ToolLedgerProperties();
+    private ApprovalContinuationProperties approvalContinuation = new ApprovalContinuationProperties();
     private ChatParityProperties parity = new ChatParityProperties();
     private ChatCacheProperties cache = new ChatCacheProperties();
     private SmallModelProperties smallModel = new SmallModelProperties();
@@ -193,6 +194,16 @@ final class ChatTimeouts {
     }
 
     /**
+     * Sets {@code app.approvals.continuation.*} (how a decided call is replayed on the turn that continues
+     * the task); until it is called the shipped defaults apply.
+     */
+    @Autowired(required = false)
+    void useApprovalContinuation(ApprovalContinuationProperties approvalContinuation) {
+        this.approvalContinuation =
+                approvalContinuation == null ? new ApprovalContinuationProperties() : approvalContinuation;
+    }
+
+    /**
      * Sets {@code app.chat.parity.*} (where the streamed and the buffered turn deliberately differ,
      * and the limits on the buffered verifiers); until it is called the shipped defaults apply.
      */
@@ -296,6 +307,11 @@ final class ChatTimeouts {
     /** {@code app.chat.tool-ledger.*}: the stored, replayed record of what a turn's tools did. */
     ToolLedgerProperties toolLedger() {
         return toolLedger;
+    }
+
+    /** {@code app.approvals.continuation.*}: how a decided call is replayed when the task continues. */
+    ApprovalContinuationProperties approvalContinuation() {
+        return approvalContinuation;
     }
 
     /** {@code app.chat.parity.*}: the explicit stream-versus-buffered differences. */

@@ -116,7 +116,9 @@ class ApprovalContinuationLauncherTest {
         assertThat(turn.getValue().subjectKey()).isEqualTo("user-1");
         assertThat(turn.getValue().continuation()).isSameAs(c);
         assertThat(ApprovalContinuation.isContinuationMessage(turn.getValue().userMessage())).isTrue();
-        assertThat(turn.getValue().userMessage()).contains("Send the invoice.").contains("sent");
+        // The native shape (the default): the result travels as the replayed tool result, the message names the goal.
+        assertThat(ApprovalContinuationPrompt.isNativeShape(turn.getValue().userMessage())).isTrue();
+        assertThat(turn.getValue().userMessage()).contains("Send the invoice.");
         // As the person who asked, with no roles - never as the approver.
         assertThat(context.getValue().tenantId()).isEqualTo(TENANT);
         assertThat(context.getValue().subject()).isEqualTo("user-1");

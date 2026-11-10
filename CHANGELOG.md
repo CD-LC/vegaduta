@@ -8,6 +8,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Changed
+
+- **Faster continuation after an approval.** The turn that continues a task after a human decided a held tool call
+  now replays that call to the model as a native assistant tool call followed by its tool result, and sends only a
+  short platform note instead of the parked-turn record, the outcome record and the full `<approval_result>` text.
+  The request extends the first turn's prompt, so a provider's prompt cache reuses it. Switch:
+  `app.approvals.continuation.native-tool-result` (`APP_APPROVALS_CONTINUATION_NATIVE_TOOL_RESULT`, default `true`);
+  the note texts are `native-completed-message`, `native-failed-message` and `native-denied-message`. A turn that
+  ends paused for an approval is no longer sampled by the background quality judge (its reply is the platform's
+  waiting note), so that call no longer competes with the continuation on a single-slot local model.
+
 ### Added
 
 - **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default

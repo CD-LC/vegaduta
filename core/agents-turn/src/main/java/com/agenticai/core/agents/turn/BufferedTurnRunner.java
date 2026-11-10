@@ -328,11 +328,13 @@ final class BufferedTurnRunner {
             answer = issues.recordAndCorrectFabricatedGenerationUrl(agentId, sessionId, answer);
         }
         journal.commit(answer, "completed");
-        sessionMemoryService.appendTurn(
-                memorySessionId, ChatTurn.assistant(answer, context.toolActivity().ledger().snapshotOrNull()));
+        ToolLedger ledger = context.toolActivity().ledger().snapshotOrNull();
+        sessionMemoryService.appendTurn(memorySessionId, ChatTurn.assistant(answer, ledger));
         events.emitAgentMessageCompleted(agentId, sessionId, context.tenantId(), answer, "live");
         // Gap 2 - fire-and-forget, never affects this already-computed answer.
-        llmQualityJudgeService.sampleAsync(turnClient, agentId, sessionId, userMessage, answer);
+        if (!StreamedReplyCompletion.pausedForApproval(ledger)) {
+            llmQualityJudgeService.sampleAsync(turnClient, agentId, sessionId, userMessage, answer);
+        }
         return answer;
     }
 

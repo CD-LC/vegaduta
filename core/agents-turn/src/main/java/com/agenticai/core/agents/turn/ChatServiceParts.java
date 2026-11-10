@@ -118,6 +118,7 @@ final class ChatServiceParts {
         this.turns.finish = timeouts.finish();
         this.turns.resilience = timeouts.resilience();
         this.turns.toolLedger = timeouts.toolLedger();
+        this.turns.approvalContinuation = timeouts.approvalContinuation();
         this.turns.parity = timeouts.parity();
         this.turns.cachePolicy = new ChatCachePolicy(timeouts.cache(), timeouts.behaviour());
         this.turns.retryPolicy = timeouts.retryPolicy();

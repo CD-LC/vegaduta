@@ -188,6 +188,9 @@ final class ChatTurnExecutor {
      */
     volatile ToolLedgerProperties toolLedger = new ToolLedgerProperties();
 
+    /** {@code app.approvals.continuation.*}. Set from {@link ChatTimeouts#approvalContinuation()}. */
+    volatile ApprovalContinuationProperties approvalContinuation = new ApprovalContinuationProperties();
+
     /**
      * {@code app.chat.parity.*}: where the streamed and the buffered turn deliberately differ. Set
      * from {@link ChatTimeouts#parity()} when the service is built.

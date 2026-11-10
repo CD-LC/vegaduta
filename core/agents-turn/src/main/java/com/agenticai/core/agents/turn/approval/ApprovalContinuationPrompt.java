@@ -32,6 +32,7 @@ public class ApprovalContinuationPrompt {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{(\\w+)}");
     private static final String CLOSE_TAG = "</approval_result>";
+    private static final String NATIVE_ATTRIBUTE = " shape=\"native\"";
 
     private final ApprovalContinuationProperties properties;
 
@@ -39,14 +40,27 @@ public class ApprovalContinuationPrompt {
         this.properties = properties;
     }
 
+    /**
+     * True when {@code message} is a continuation message written for the native shape: the decided
+     * call is replayed as a tool call and tool result ahead of it, and the message is only a short note.
+     */
+    public static boolean isNativeShape(String message) {
+        if (!ApprovalContinuation.isContinuationMessage(message)) {
+            return false;
+        }
+        int end = message.indexOf('\n');
+        return (end < 0 ? message : message.substring(0, end)).contains(NATIVE_ATTRIBUTE);
+    }
+
     /** The full user-role message for {@code continuation}. */
     public String render(ApprovalContinuation continuation) {
         Outcome outcome = continuation.outcome();
+        boolean nativeShape = properties.isNativeToolResult();
         String template =
                 switch (outcome) {
-                    case COMPLETED -> properties.getCompletedMessage();
-                    case FAILED -> properties.getFailedMessage();
-                    case DENIED -> properties.getDeniedMessage();
+                    case COMPLETED -> nativeShape ? properties.getNativeCompletedMessage() : properties.getCompletedMessage();
+                    case FAILED -> nativeShape ? properties.getNativeFailedMessage() : properties.getFailedMessage();
+                    case DENIED -> nativeShape ? properties.getNativeDeniedMessage() : properties.getDeniedMessage();
                 };
         Map<String, String> values =
                 Map.of(
@@ -69,7 +83,9 @@ public class ApprovalContinuationPrompt {
                 .append(attributeSafe(continuation.toolName()))
                 .append("\" outcome=\"")
                 .append(outcome.name().toLowerCase(Locale.ROOT))
-                .append("\">\n")
+                .append('"')
+                .append(nativeShape ? NATIVE_ATTRIBUTE : "")
+                .append(">\n")
                 .append(fill(template, values))
                 .append('\n')
                 .append(CLOSE_TAG);

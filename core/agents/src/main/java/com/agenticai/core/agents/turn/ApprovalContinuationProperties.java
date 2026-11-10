@@ -132,6 +132,21 @@ public class ApprovalContinuationProperties {
     /** Message body when a human denied the call. */
     private String deniedMessage = DEFAULTS.getProperty("denied-message");
 
+    /**
+     * true: the decided call is replayed to the model as a native tool call and tool result, and the
+     * message is the short native-*-message note; false: the full *-message text carries the result.
+     */
+    private boolean nativeToolResult = Boolean.parseBoolean(DEFAULTS.getProperty("native-tool-result"));
+
+    /** Short note after a native tool result when the approved call ran. */
+    private String nativeCompletedMessage = DEFAULTS.getProperty("native-completed-message");
+
+    /** Short note after a native tool result when the approved call could not be completed. */
+    private String nativeFailedMessage = DEFAULTS.getProperty("native-failed-message");
+
+    /** Short note after a native tool result when a human denied the call. */
+    private String nativeDeniedMessage = DEFAULTS.getProperty("native-denied-message");
+
     private static Properties loadDefaults() {
         Properties defaults = new Properties();
         try (InputStream in = ApprovalContinuationProperties.class.getResourceAsStream(DEFAULTS_RESOURCE)) {
@@ -363,5 +378,37 @@ public class ApprovalContinuationProperties {
 
     public void setDeniedMessage(String deniedMessage) {
         this.deniedMessage = deniedMessage;
+    }
+
+    public boolean isNativeToolResult() {
+        return nativeToolResult;
+    }
+
+    public void setNativeToolResult(boolean nativeToolResult) {
+        this.nativeToolResult = nativeToolResult;
+    }
+
+    public String getNativeCompletedMessage() {
+        return nativeCompletedMessage;
+    }
+
+    public void setNativeCompletedMessage(String nativeCompletedMessage) {
+        this.nativeCompletedMessage = nativeCompletedMessage;
+    }
+
+    public String getNativeFailedMessage() {
+        return nativeFailedMessage;
+    }
+
+    public void setNativeFailedMessage(String nativeFailedMessage) {
+        this.nativeFailedMessage = nativeFailedMessage;
+    }
+
+    public String getNativeDeniedMessage() {
+        return nativeDeniedMessage;
+    }
+
+    public void setNativeDeniedMessage(String nativeDeniedMessage) {
+        this.nativeDeniedMessage = nativeDeniedMessage;
     }
 }

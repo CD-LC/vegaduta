@@ -12,7 +12,6 @@ import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.memory.ChatTurn;
-import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
@@ -38,9 +37,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
@@ -203,17 +200,24 @@ final class ChatPromptAssembler {
                 svc.turns.preTurnMaxWait == null
                         ? Long.MIN_VALUE
                         : System.nanoTime() + svc.turns.preTurnMaxWait.toNanos();
+        // On the continuation after an approval, the decided call is replayed as a native tool call and
+        // result (NativeApprovalReplay), so the request extends the first turn's cached prompt.
+        final ApprovalContinuation decided = context.continuation();
+        final String turnMessage = userMessage;
         CompletableFuture<ReplayedHistory> historyFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () -> {
                             List<ChatTurn> replayed =
                                     sessionMemoryService.getHistory(memorySessionId);
-                            return new ReplayedHistory(
-                                    replayed.stream()
-                                            .map(ChatPromptAssembler::toSpringAiMessage)
-                                            .toList(),
-                                    replayed.stream().anyMatch(t -> t.tools() != null));
+                            NativeApprovalReplay.Replay replay =
+                                    NativeApprovalReplay.of(
+                                            replayed,
+                                            decided,
+                                            turnMessage,
+                                            svc.turns.toolLedger,
+                                            svc.turns.approvalContinuation.getMaxResultChars());
+                            return new ReplayedHistory(replay.messages(), replay.hasTextRecord());
                         });
         // stepEvents (2026-08-17) is threaded into tool resolution rather than
         // anywhere downstream because resolution is where every tool gets its
@@ -618,9 +622,4 @@ final class ChatPromptAssembler {
         }
     }
 
-    private static Message toSpringAiMessage(ChatTurn turn) {
-        return turn.role() == MessageRole.USER
-                ? new UserMessage(turn.content())
-                : new AssistantMessage(turn.content());
-    }
 }
