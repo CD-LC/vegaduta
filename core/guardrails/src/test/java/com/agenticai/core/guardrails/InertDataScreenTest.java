@@ -11,8 +11,9 @@ class InertDataScreenTest {
     void idsNumbersAndShortStatusWordsAreInert() {
         assertTrue(InertDataScreen.isInertData("5555"));
         assertTrue(InertDataScreen.isInertData("{\"result\":\"5555\"}"));
-        assertTrue(InertDataScreen.isInertData(
-                "{\"order_id\":\"ORD-1001\",\"status\":\"shipped\",\"total\":42.5,\"carrier\":\"SwiftPost\"}"));
+        assertTrue(
+                InertDataScreen.isInertData(
+                        "{\"order_id\":\"ORD-1001\",\"status\":\"shipped\",\"total\":42.5,\"carrier\":\"SwiftPost\"}"));
         assertTrue(InertDataScreen.isInertData("[1,2,{\"ok\":true,\"note\":null}]"));
         assertTrue(InertDataScreen.isInertData("\"5555\""));
         assertTrue(InertDataScreen.isInertData("true"));

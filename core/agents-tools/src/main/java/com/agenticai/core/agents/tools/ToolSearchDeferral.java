@@ -73,11 +73,11 @@ final class ToolSearchDeferral {
                     + "local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*,run_desktop_recipe";
 
     /**
-     * The standing tools a LOCAL model's deferred turn keeps visible (the turn is forced by the local-model
-     * default or the serving row's own switch): memory and the skill tools, plus {@code restore_tool_result}.
-     * The long list above would put twenty-odd schemas back in front of a model that reads its prompt at a few
-     * hundred tokens a second; everything else is one {@code search_tools} away. Mirrored as the default of
-     * {@code app.tools.search.local-always-on}.
+     * The standing tools a LOCAL model's deferred turn keeps visible (the turn is forced by the
+     * local-model default or the serving row's own switch): memory and the skill tools, plus {@code
+     * restore_tool_result}. The long list above would put twenty-odd schemas back in front of a
+     * model that reads its prompt at a few hundred tokens a second; everything else is one {@code
+     * search_tools} away. Mirrored as the default of {@code app.tools.search.local-always-on}.
      */
     static final String DEFAULT_LOCAL_ALWAYS_ON =
             "remember_fact,recall_related_facts,restore_tool_result,load_skill,read_skill_file";
@@ -120,7 +120,10 @@ final class ToolSearchDeferral {
         this.enabled = enabled;
     }
 
-    /** The always-on list of a forced (local-model) deferred turn; blank keeps {@link #DEFAULT_LOCAL_ALWAYS_ON}. */
+    /**
+     * The always-on list of a forced (local-model) deferred turn; blank keeps {@link
+     * #DEFAULT_LOCAL_ALWAYS_ON}.
+     */
     void configureLocal(String localAlwaysOnCsv) {
         this.localAlwaysOn =
                 parseNames(

@@ -13,9 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 
 /**
- * Which turns keep their tool set unchanged from one message to the next: a model served on the person's own machine
- * (the install's local pool row or a bring-your-own local provider), unless it runs in small-model mode, whose short
- * list matters more on a slow machine. A hosted model keeps the per-message selection.
+ * Which turns keep their tool set unchanged from one message to the next: a model served on the
+ * person's own machine (the install's local pool row or a bring-your-own local provider), unless it
+ * runs in small-model mode, whose short list matters more on a slow machine. A hosted model keeps
+ * the per-message selection.
  */
 class ChatClientSelectionStableToolSetTest {
 
@@ -25,7 +26,18 @@ class ChatClientSelectionStableToolSetTest {
 
     private static HostedChainLink row(boolean localModel, boolean smallModel) {
         return new HostedChainLink(
-                mock(ChatClient.class), "k", "row", "model", 1, 0, 0, null, null, smallModel, null, localModel);
+                mock(ChatClient.class),
+                "k",
+                "row",
+                "model",
+                1,
+                0,
+                0,
+                null,
+                null,
+                smallModel,
+                null,
+                localModel);
     }
 
     private static Agent agentOn(ProviderName provider) {
@@ -36,22 +48,37 @@ class ChatClientSelectionStableToolSetTest {
 
     @Test
     void theInstallsLocalPoolRowKeepsItsToolsStable() {
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isTrue();
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false))))
+                .isTrue();
     }
 
     @Test
     void aLocalRowInSmallModelModeKeepsItsShortPerMessageList() {
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, true)))).isFalse();
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, true))))
+                .isFalse();
     }
 
     @Test
     void aLocalModelDefersToolsByDefaultAndAHostedOneDoesNot() {
-        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isTrue();
-        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false)))).isFalse();
+        assertThat(
+                        selection.toolDeferral(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false))))
+                .isTrue();
+        assertThat(
+                        selection.toolDeferral(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false))))
+                .isFalse();
         assertThat(selection.toolDeferral(agentOn(ProviderName.OLLAMA), null)).isTrue();
         assertThat(selection.toolDeferral(agentOn(ProviderName.ANTHROPIC), null)).isFalse();
         properties.setToolDeferral(false);
-        assertThat(selection.toolDeferral(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isFalse();
+        assertThat(
+                        selection.toolDeferral(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false))))
+                .isFalse();
         assertThat(selection.toolDeferral(agentOn(ProviderName.OLLAMA), null)).isFalse();
     }
 
@@ -68,14 +95,23 @@ class ChatClientSelectionStableToolSetTest {
 
     @Test
     void aHostedRowKeepsPerMessageSelection() {
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false)))).isFalse();
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false))))
+                .isFalse();
     }
 
     @Test
     void theChainHeadDecides() {
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(false, false), row(true, false))))
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED),
+                                List.of(row(false, false), row(true, false))))
                 .isFalse();
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false), row(false, false))))
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED),
+                                List.of(row(true, false), row(false, false))))
                 .isTrue();
     }
 
@@ -96,6 +132,9 @@ class ChatClientSelectionStableToolSetTest {
 
         properties.setStableTools(false);
         assertThat(selection.stableToolSet(agentOn(ProviderName.MISTRAL), null)).isFalse();
-        assertThat(selection.stableToolSet(agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false)))).isFalse();
+        assertThat(
+                        selection.stableToolSet(
+                                agentOn(ProviderName.PLATFORM_HOSTED), List.of(row(true, false))))
+                .isFalse();
     }
 }

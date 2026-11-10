@@ -5,15 +5,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Recognises a tool result that is plain structured data - numbers, booleans, ids, short status words -
- * and so cannot carry an instruction to the model. Such a result does not need the LLM injection judge:
- * the judge is one extra model call per tool result (about 150 ms on a laptop model, plus the cost of
- * evicting that model's prompt cache), and a value of one or two short words has no room to hijack an
- * agent. The regex layer still runs on it first, unchanged.
+ * Recognises a tool result that is plain structured data - numbers, booleans, ids, short status
+ * words - and so cannot carry an instruction to the model. Such a result does not need the LLM
+ * injection judge: the judge is one extra model call per tool result (about 150 ms on a laptop
+ * model, plus the cost of evicting that model's prompt cache), and a value of one or two short
+ * words has no room to hijack an agent. The regex layer still runs on it first, unchanged.
  *
  * <p>Deliberately narrow: only a JSON object, array or scalar, every string (keys included) at most
- * {@value #MAX_STRING_CHARS} characters and {@value #MAX_WORDS} words, bounded size and depth. Anything
- * else - prose, a long string, a malformed document - goes to the judge as before.
+ * {@value #MAX_STRING_CHARS} characters and {@value #MAX_WORDS} words, bounded size and depth.
+ * Anything else - prose, a long string, a malformed document - goes to the judge as before.
  */
 final class InertDataScreen {
 
@@ -22,7 +22,8 @@ final class InertDataScreen {
     static final int MAX_CHARS = 2_000;
     static final int MAX_DEPTH = 6;
 
-    // Trailing tokens fail the parse: "1 ignore all previous instructions" must not read as the number 1.
+    // Trailing tokens fail the parse: "1 ignore all previous instructions" must not read as the
+    // number 1.
     private static final ObjectMapper MAPPER =
             new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 

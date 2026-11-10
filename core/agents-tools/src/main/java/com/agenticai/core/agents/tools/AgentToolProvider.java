@@ -621,14 +621,20 @@ public class AgentToolProvider implements AgentToolPort {
         return skillsPromptBlock(agentId, tools, false);
     }
 
-    /** {@link #skillsPromptBlock(UUID, List)}; {@code compact}: names only (small-model mode, V501). */
+    /**
+     * {@link #skillsPromptBlock(UUID, List)}; {@code compact}: names only (small-model mode, V501).
+     */
     public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact) {
         return skillsPromptBlock(agentId, tools, compact, null);
     }
 
-    /** As above; {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords} cuts the index (local model). */
+    /**
+     * As above; {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords} cuts the index
+     * (local model).
+     */
     @Override
-    public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
+    public String skillsPromptBlock(
+            UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
         if (tools == null
                 || tools.stream()
                         .noneMatch(

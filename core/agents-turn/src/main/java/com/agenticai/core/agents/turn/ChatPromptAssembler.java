@@ -382,8 +382,7 @@ final class ChatPromptAssembler {
         String skillsBlock =
                 leanSkills == null
                         ? agentToolProvider.skillsPromptBlock(agentId, tools, smallModelTurn)
-                        : agentToolProvider.skillsPromptBlock(
-                                agentId, tools, false, leanSkills);
+                        : agentToolProvider.skillsPromptBlock(agentId, tools, false, leanSkills);
         // Repairs any non-JSON tool-call arguments PERSISTED into history
         // from an earlier turn - see ArgumentSanitizingToolCallingManager
         // #sanitizeHistory's javadoc for the live incident this closes

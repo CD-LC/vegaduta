@@ -123,7 +123,8 @@ final class ChatClientSelection {
             HostedChainLink head = hostedChain.get(0);
             // A local model reads its prompt slowly: it defers by default
             // (app.chat.local-model.tool-deferral); the row's own switch can only add to that.
-            return Boolean.TRUE.equals(head.toolDeferral()) || (head.localModel() && localModel.isToolDeferral());
+            return Boolean.TRUE.equals(head.toolDeferral())
+                    || (head.localModel() && localModel.isToolDeferral());
         }
         return agent != null
                 && agent.getProviderName() != null

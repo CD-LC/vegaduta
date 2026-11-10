@@ -12,9 +12,10 @@ import java.util.Set;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * {@code app.chat.local-model.*}: how a turn adapts to a model served on the person's own machine, where reading the
- * prompt is the slow part and the server keeps one prompt cache. See {@code /chat/local-model.properties} for what each
- * value does; the same values are in {@code application.yml}.
+ * {@code app.chat.local-model.*}: how a turn adapts to a model served on the person's own machine,
+ * where reading the prompt is the slow part and the server keeps one prompt cache. See {@code
+ * /chat/local-model.properties} for what each value does; the same values are in {@code
+ * application.yml}.
  */
 @ConfigurationProperties(prefix = "app.chat.local-model")
 public class LocalModelTurnProperties {
@@ -23,18 +24,26 @@ public class LocalModelTurnProperties {
 
     private static final Properties DEFAULTS = loadDefaults();
 
-    /** Offer a local model the agent's tool set unchanged on every turn, so the server's prompt cache holds. */
+    /**
+     * Offer a local model the agent's tool set unchanged on every turn, so the server's prompt
+     * cache holds.
+     */
     private boolean stableTools = Boolean.parseBoolean(DEFAULTS.getProperty("stable-tools"));
 
-    /** Keep most tools behind search_tools / call_tool on a local model's turns, so its prompt stays short. */
+    /**
+     * Keep most tools behind search_tools / call_tool on a local model's turns, so its prompt stays
+     * short.
+     */
     private boolean toolDeferral = Boolean.parseBoolean(DEFAULTS.getProperty("tool-deferral"));
 
     /** Size of the skill index on a local model's deferred turn. */
     private int skillsMaxSkills = Integer.parseInt(DEFAULTS.getProperty("skills-max-skills"));
 
-    private int skillsMaxBlockChars = Integer.parseInt(DEFAULTS.getProperty("skills-max-block-chars"));
+    private int skillsMaxBlockChars =
+            Integer.parseInt(DEFAULTS.getProperty("skills-max-block-chars"));
 
-    private int skillsMaxDescriptionWords = Integer.parseInt(DEFAULTS.getProperty("skills-max-description-words"));
+    private int skillsMaxDescriptionWords =
+            Integer.parseInt(DEFAULTS.getProperty("skills-max-description-words"));
 
     /** Bring-your-own providers that are servers on the person's machine. */
     private Set<String> providers = names(DEFAULTS.getProperty("providers"));
@@ -87,9 +96,13 @@ public class LocalModelTurnProperties {
         this.providers = providers == null ? Set.of() : names(String.join(",", providers));
     }
 
-    /** True when {@code providerName} (a bring-your-own provider) is a server on the person's machine. */
+    /**
+     * True when {@code providerName} (a bring-your-own provider) is a server on the person's
+     * machine.
+     */
     public boolean isLocalProvider(String providerName) {
-        return providerName != null && providers.contains(providerName.strip().toUpperCase(Locale.ROOT));
+        return providerName != null
+                && providers.contains(providerName.strip().toUpperCase(Locale.ROOT));
     }
 
     private static Set<String> names(String commaList) {
@@ -106,9 +119,11 @@ public class LocalModelTurnProperties {
 
     private static Properties loadDefaults() {
         Properties defaults = new Properties();
-        try (InputStream in = LocalModelTurnProperties.class.getResourceAsStream(DEFAULTS_RESOURCE)) {
+        try (InputStream in =
+                LocalModelTurnProperties.class.getResourceAsStream(DEFAULTS_RESOURCE)) {
             if (in == null) {
-                throw new IllegalStateException(DEFAULTS_RESOURCE + " is missing from the agents-turn module");
+                throw new IllegalStateException(
+                        DEFAULTS_RESOURCE + " is missing from the agents-turn module");
             }
             defaults.load(new InputStreamReader(in, StandardCharsets.UTF_8));
         } catch (IOException e) {

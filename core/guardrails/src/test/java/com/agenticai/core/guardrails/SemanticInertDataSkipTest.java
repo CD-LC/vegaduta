@@ -13,7 +13,8 @@ class SemanticInertDataSkipTest {
     void plainDataIsNotSentToTheJudge() {
         ChatClient client = mock(ChatClient.class);
         String data = "{\"order_id\":\"ORD-1001\",\"status\":\"shipped\",\"total\":42.5}";
-        assertEquals(data, new SemanticGuardrailService().sanitizeToolOutput("lookup", data, client));
+        assertEquals(
+                data, new SemanticGuardrailService().sanitizeToolOutput("lookup", data, client));
         verifyNoInteractions(client);
     }
 }

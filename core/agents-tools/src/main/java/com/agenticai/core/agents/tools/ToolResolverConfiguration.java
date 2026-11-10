@@ -228,7 +228,10 @@ class ToolResolverConfiguration {
             @Value("${app.tools.search.threshold:25}") int threshold,
             @Value("${app.tools.search.always-on:" + ToolSearchDeferral.DEFAULT_ALWAYS_ON + "}")
                     String alwaysOn,
-            @Value("${app.tools.search.local-always-on:" + ToolSearchDeferral.DEFAULT_LOCAL_ALWAYS_ON + "}")
+            @Value(
+                            "${app.tools.search.local-always-on:"
+                                    + ToolSearchDeferral.DEFAULT_LOCAL_ALWAYS_ON
+                                    + "}")
                     String localAlwaysOn,
             @Value("${app.tools.search.max-carry-over:6}") int maxCarryOver,
             @Value("${app.tools.search.activation-store:auto}") String activationStore,
@@ -246,8 +249,8 @@ class ToolResolverConfiguration {
     /**
      * {@code app.tools.search.activation-store=auto|memory|redis}: auto (default) uses Redis when a
      * {@link StringRedisTemplate} bean exists (activations survive restarts and follow a session
-     * across replicas), else per-replica memory; memory never resolves the template; redis
-     * requires it and degrades to memory with a warning, matching {@code app.mcp.registry-store}.
+     * across replicas), else per-replica memory; memory never resolves the template; redis requires
+     * it and degrades to memory with a warning, matching {@code app.mcp.registry-store}.
      */
     static ToolActivationRegistry activationRegistry(
             String store, Duration ttl, ObjectProvider<StringRedisTemplate> redisProvider) {
@@ -266,7 +269,8 @@ class ToolResolverConfiguration {
             log.warn(
                     "app.tools.search.activation-store=redis but no StringRedisTemplate is available - using in-memory activations");
         } else {
-            log.info("Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
+            log.info(
+                    "Tool activation carry-over held in per-replica memory (no StringRedisTemplate)");
         }
         return new ToolActivationRegistry(
                 ToolActivationRegistry.DEFAULT_MAX_SESSIONS, ttl, Clock.systemUTC());
