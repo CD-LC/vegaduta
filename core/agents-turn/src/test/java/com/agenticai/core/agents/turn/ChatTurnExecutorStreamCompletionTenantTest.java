@@ -60,7 +60,8 @@ class ChatTurnExecutorStreamCompletionTenantTest {
                                                     "tenant_a",
                                                     "hi",
                                                     "hello",
-                                                    "hello"),
+                                                    "hello",
+                                                    false),
                                             captured);
                                     return TenantContext.current();
                                 })

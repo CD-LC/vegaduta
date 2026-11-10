@@ -794,3 +794,7 @@ Audited every place that states the project license against `LICENSE` (BUSL-1.1;
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
 Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the signed-in personal-edition suite: agent behaviour, turn inspector and feedback, MCP registration and tool selection, workflows, knowledge upload and retrieval, A2A-off checks, channels and the device pairing lifecycle. No product code changed. Verified: `make gates` passes; the personal suite passes on a local personal stack (79 passed, 4 skipped: three A2A positive-path checks need the A2A directory on, and the platform-admin check needs the owner to hold that role). Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-personal-e2e-wt.
+
+### Approval continuation latency (Devin, 2026-11-10)
+
+Opened a PR (`perf/approval-native-continuation`, stacked on `feat/agent-prompt-profile` #392): the continuation turn after an approval replays the decided call as a native assistant tool call + tool result with a short note (`app.approvals.continuation.native-tool-result`, default true), and a turn paused for an approval is no longer sampled by the quality judge. Verified: agents-turn 2,215 tests, app 771 tests, `make gates`, 65/65 eval runs on the local qwen3.5:9b stack. Worktree: /private/tmp/vd-approval-native.
