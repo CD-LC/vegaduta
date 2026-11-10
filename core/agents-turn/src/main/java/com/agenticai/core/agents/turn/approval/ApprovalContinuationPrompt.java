@@ -32,7 +32,6 @@ public class ApprovalContinuationPrompt {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("\\{(\\w+)}");
     private static final String CLOSE_TAG = "</approval_result>";
-    private static final String NATIVE_ATTRIBUTE = " shape=\"native\"";
 
     private final ApprovalContinuationProperties properties;
 
@@ -45,11 +44,7 @@ public class ApprovalContinuationPrompt {
      * call is replayed as a tool call and tool result ahead of it, and the message is only a short note.
      */
     public static boolean isNativeShape(String message) {
-        if (!ApprovalContinuation.isContinuationMessage(message)) {
-            return false;
-        }
-        int end = message.indexOf('\n');
-        return (end < 0 ? message : message.substring(0, end)).contains(NATIVE_ATTRIBUTE);
+        return ApprovalContinuation.isNativeShapeMessage(message);
     }
 
     /** The full user-role message for {@code continuation}. */
@@ -84,7 +79,7 @@ public class ApprovalContinuationPrompt {
                 .append("\" outcome=\"")
                 .append(outcome.name().toLowerCase(Locale.ROOT))
                 .append('"')
-                .append(nativeShape ? NATIVE_ATTRIBUTE : "")
+                .append(nativeShape ? ApprovalContinuation.NATIVE_SHAPE_ATTRIBUTE : "")
                 .append(">\n")
                 .append(fill(template, values))
                 .append('\n')

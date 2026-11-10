@@ -3,7 +3,6 @@ package com.agenticai.core.agents.turn;
 import com.agenticai.core.agents.memory.ChatTurn;
 import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.ToolLedgerReplay;
-import com.agenticai.core.agents.turn.approval.ApprovalContinuationPrompt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ import org.springframework.ai.chat.messages.UserMessage;
  * the result and a short note, and a provider's prompt cache reuses that prefix.
  *
  * <p>Applies only when the continuation message was written for this shape (see
- * {@link ApprovalContinuationPrompt#isNativeShape}) and the history holds the outcome note of that
+ * {@link ApprovalContinuation#isNativeShapeMessage}) and the history holds the outcome note of that
  * request; anything else (no note, arguments that are not a JSON object) is replayed as text.
  */
 final class NativeApprovalReplay {
@@ -39,7 +38,7 @@ final class NativeApprovalReplay {
             ToolLedgerProperties ledger,
             int maxResultChars) {
         int outcome =
-                continuation != null && ApprovalContinuationPrompt.isNativeShape(userMessage)
+                continuation != null && ApprovalContinuation.isNativeShapeMessage(userMessage)
                         ? outcomeIndex(turns, continuation, ledger)
                         : -1;
         if (outcome < 0 || !isJsonObject(continuation.argumentsJson())) {

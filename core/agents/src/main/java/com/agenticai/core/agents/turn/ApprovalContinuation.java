@@ -147,4 +147,19 @@ public record ApprovalContinuation(
     public static boolean isContinuationMessage(String message) {
         return message != null && message.startsWith(MESSAGE_MARKER);
     }
+
+    /**
+     * The attribute on the opening tag of a continuation message written for the native shape: the decided
+     * call is replayed ahead of it as a tool call and tool result, and the message is only a short note.
+     */
+    public static final String NATIVE_SHAPE_ATTRIBUTE = " shape=\"native\"";
+
+    /** True when {@code message} is a continuation message written for the native shape. */
+    public static boolean isNativeShapeMessage(String message) {
+        if (!isContinuationMessage(message)) {
+            return false;
+        }
+        int end = message.indexOf('\n');
+        return (end < 0 ? message : message.substring(0, end)).contains(NATIVE_SHAPE_ATTRIBUTE);
+    }
 }
