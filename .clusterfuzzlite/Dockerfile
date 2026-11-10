@@ -4,7 +4,7 @@
 FROM gcr.io/oss-fuzz-base/base-builder-jvm
 
 RUN apt-get update && apt-get install -y --no-install-recommends maven curl ca-certificates \
-    && curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -o /tmp/jdk.tar.gz \
+    && curl -fsSL --retry 5 --retry-delay 5 --retry-connrefused -o /tmp/jdk.tar.gz \
        "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_linux_hotspot_21.0.13_9.tar.gz" \
     && echo "d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c  /tmp/jdk.tar.gz" | sha256sum -c - \
     && mkdir -p /opt/jdk21 && tar -xzf /tmp/jdk.tar.gz -C /opt/jdk21 --strip-components=1 \
