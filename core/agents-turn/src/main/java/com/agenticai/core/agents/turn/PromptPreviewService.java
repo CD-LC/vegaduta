@@ -125,6 +125,12 @@ public class PromptPreviewService {
         if (smallModel) {
             tools = AgentToolSelection.capForSmallModel(tools, message, Set.of(), svc.smallModel);
         }
+        // chat.prompt.profile, applied as the turn applies it.
+        PromptProfile promptProfile = PromptProfileSettings.of(agentId);
+        if (promptProfile == PromptProfile.BARE) {
+            tools = PromptProfileSettings.ownTools(tools);
+        }
+        boolean compactPrompt = smallModel || promptProfile == PromptProfile.LEAN;
 
         boolean hasToolRecord = false;
         if (sessionId != null) {
@@ -162,25 +168,27 @@ public class PromptPreviewService {
         LocalDate todayUtc = LocalDate.now(ZoneOffset.UTC);
         ResolvedDirectives directives =
                 svc.promptDirectiveSettings.forTurn(todayUtc, agentId).recording();
-        ChatSystemPromptComposer.Composed composed =
+        ChatSystemPromptComposer.Composed fullComposed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
                                 agent.getSystemPrompt(),
                                 false,
                                 svc.agentToolProvider.proceduresPromptBlock(agentId),
-                                svc.agentToolProvider.skillsPromptBlock(agentId, tools, smallModel),
+                                svc.agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt),
                                 todayUtc,
                                 directives,
                                 svc.directiveComposer,
                                 tools,
                                 anyMcp,
                                 DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
-                                smallModel,
+                                compactPrompt,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
                                 null,
                                 hasToolRecord ? svc.turns.toolLedger.getTrustNote() : null,
                                 recalled));
+        ChatSystemPromptComposer.Composed composed =
+                ChatSystemPromptComposer.forProfile(fullComposed, promptProfile);
         return toPreview(agentId, smallModel, composed, tools, notes);
     }
 

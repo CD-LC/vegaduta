@@ -228,7 +228,13 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
-        context.modelTraits().toolDeferral(toolDeferral(agent, hostedChain));
+        // chat.prompt.profile: a bare turn offers the agent's own tools as they are, never behind a
+        // forced search_tools.
+        PromptProfile promptProfile = PromptProfileSettings.of(agent.getId());
+        context.modelTraits().promptProfile(promptProfile);
+        context.modelTraits()
+                .toolDeferral(
+                        promptProfile != PromptProfile.BARE && toolDeferral(agent, hostedChain));
         // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it
         // keeps
         // the tools the conversation already used and stays on the model that started the task. The
