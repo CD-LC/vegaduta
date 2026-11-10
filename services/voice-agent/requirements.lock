@@ -877,17 +877,17 @@ json-repair==0.63.5 \
     --hash=sha256:0e39b3066f7829b4bd7fc614e463cfd4ff7a4c46f82f5b65431fc11e29a74c81 \
     --hash=sha256:75a6a1a4ea954935dd3fb69b6e49ac0e3e3d69b4290127a0c8d37af93b709f3a
     # via livekit-agents
-livekit==1.1.20 \
-    --hash=sha256:253e4d15a78bbb408e926d0b317c7a47c2ca3f6bb9f9d2c7d10528a49f9b4fd9 \
-    --hash=sha256:64ea60b3293e3ce92c60592ff32c518bb7c278548b97de8026c1d0617510af4d \
-    --hash=sha256:83c0ea54d7ff505e92c3e88943e050e54825b0bf0f7e90652fb126eb447b3d76 \
-    --hash=sha256:93f0ed9e8ee9ef356da6cbf71f98edcc891678da6872946a87e34e1458528c9c \
-    --hash=sha256:a29120a0278a20ede380ac719cd084e39241546cfd3b415aa503c7b8a21afb4e \
-    --hash=sha256:c29a5f966806db961a0607ca8e2e4957e6900bbd44710f5f618b284043be584c
+livekit==1.1.21 \
+    --hash=sha256:0f4bafc5d51cf686dbe308762fa4431e89503ee8348539924438c305a8019a54 \
+    --hash=sha256:148553a7d6515cf0c373f591f962de221253fe305d0a84857f2955f520a54340 \
+    --hash=sha256:4a2b036ba93a8d640b3770d62de1a9ee315824c9d2a0d7fbe1d1f26ecfa9ec6e \
+    --hash=sha256:76c29bc95b771fb37a8f32371163eb6f48404cb880ad27bcadfbf2a5801514aa \
+    --hash=sha256:b08c79ceaa5724a8a3d115c66f448fdc33a31c4cda883110d742209ec98a777c \
+    --hash=sha256:c6c1783a99954147e46995087cbbfb77844049c0d53c33b761e0dfa7ff47256c
     # via livekit-agents
-livekit-agents==1.8.8 \
-    --hash=sha256:b5c8f79381c822412f6a42e4b4b4cc472efaf43a9ba11f2d6feef10380dc77a6 \
-    --hash=sha256:c3231937a8b5c3e14f05ebe863364ccd0a0bf073223eec912ad6a194ca10f21b
+livekit-agents==1.8.10 \
+    --hash=sha256:2c410119e82249fb1f06380b9589e1c32a1bcfbf675d8aabd2a88940df33f0e6 \
+    --hash=sha256:5ab720269160ad2ffe9055b8f8f558b5d74918ce4b8fbc85f121d64d13c08ae4
     # via
     #   -r voice-agent/requirements.txt
     #   livekit-plugins-elevenlabs
@@ -960,17 +960,17 @@ livekit-local-inference==0.2.7 \
     --hash=sha256:fa4cb2d495c80be6121642dba4def3a88b22a68d52c1b0affccd66c563de6622 \
     --hash=sha256:fedd281fd23b215fe36ce248445a3b0a4f0e1118c6ff7d0e0ad6a882281ecc1e
     # via livekit-agents
-livekit-plugins-elevenlabs==1.8.8 \
-    --hash=sha256:0ebcbba1b802d74ed31f6baf5de51803b0d8bcc9bb012361cc1a043eb8c0e4f5 \
-    --hash=sha256:7fdb91f02ef17f970e1e26bcefa0c7befaffb9512cea8090067bb25cd2852a0b
+livekit-plugins-elevenlabs==1.8.10 \
+    --hash=sha256:2cae57300ffaabde6a8aee40142077c5b7bb17d0764f0a4187e20f6d94880c58 \
+    --hash=sha256:9e6ada8da1eec05b13bdf20481f3c86a5dcde9b41c77dfcf3ca16f7bc652507f
     # via -r voice-agent/requirements.txt
-livekit-plugins-silero==1.8.8 \
-    --hash=sha256:119ae6b665b73bd80bf48d4216559db719ea1b2e95172e67f4fedfa006dd4799 \
-    --hash=sha256:87dd46619f0c0bb735e202905d9269e48fcbd5857f06b1948171b82f82e56ee9
+livekit-plugins-silero==1.8.10 \
+    --hash=sha256:4c31f05c62cc03416d1c3971069268249be3c941beadfc2e0c332c62e8512d86 \
+    --hash=sha256:4e35df7a4edbafa5154b9f730f3593db7cf42a93cf663eb937fb720fc4a38e39
     # via -r voice-agent/requirements.txt
-livekit-protocol==1.1.27 \
-    --hash=sha256:740a4c6e438da763d204f2a6b0fc8f7f33ca96e27b17ce9abc6557dbb0a28dbd \
-    --hash=sha256:765bbe0c9c6b626519f6f5952793f81eaf3f5b8c9bd1e1b03994f3177774aa10
+livekit-protocol==1.1.31 \
+    --hash=sha256:97fb2453b1050e21ec29e3933ef78df23349dcdc1b642857025d4784fd12547b \
+    --hash=sha256:b37c262515c541008c43227a9424151bbf3b93dbae7fb6b9c8e8521c76f5cc29
     # via
     #   livekit-agents
     #   livekit-api
@@ -1260,9 +1260,9 @@ onnxruntime==1.30.0 \
     --hash=sha256:fa688e7891a6aa206636fe7372e27ee75fd17713289f6b4fc7b190e0a7de9328 \
     --hash=sha256:fd54b314ea385bcecac69ab431f020ba503e3878dad4ebb645fec5a24b041242
     # via livekit-plugins-silero
-openai==3.35.1 \
-    --hash=sha256:264fd0fafc889021f526b7c1e5a2df5ca3e8dea874738ecd31da666434f25967 \
-    --hash=sha256:b33e6561b90586e450def8a388e7d364755325da6884fc71348be5542e043bd0
+openai==3.42.1 \
+    --hash=sha256:4222d919374648ff572753626e942f26eb1ece8a5e0e9a2708c9be4d560f070f \
+    --hash=sha256:c1959518a8e26f81a3564357082cb684540be639a21fece35ac5619415a3eadc
     # via
     #   -r voice-agent/requirements.txt
     #   livekit-agents
