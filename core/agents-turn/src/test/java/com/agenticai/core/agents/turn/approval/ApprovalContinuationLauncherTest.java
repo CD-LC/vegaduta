@@ -117,7 +117,8 @@ class ApprovalContinuationLauncherTest {
         assertThat(turn.getValue().agentId()).isEqualTo(c.requestedAgentId());
         assertThat(turn.getValue().sessionId()).isEqualTo("sess-1");
         assertThat(turn.getValue().subjectKey()).isEqualTo("user-1");
-        assertThat(turn.getValue().continuation()).isSameAs(c);
+        // The replayed copy (output cut at max-result-chars): equal to the decision for a short output.
+        assertThat(turn.getValue().continuation()).isEqualTo(c);
         assertThat(ApprovalContinuation.isContinuationMessage(turn.getValue().userMessage()))
                 .isTrue();
         // The native shape (the default): the result travels as the replayed tool result, the
