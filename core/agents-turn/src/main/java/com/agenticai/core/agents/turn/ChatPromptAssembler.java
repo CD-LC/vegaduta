@@ -340,7 +340,8 @@ final class ChatPromptAssembler {
                                     : context.approval().stickyTools(),
                             svc.smallModel);
         }
-        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends only
+        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends
+        // only
         // the owner's text; lean uses the short wording of the standing blocks.
         PromptProfile promptProfile =
                 context.modelTraits() == null

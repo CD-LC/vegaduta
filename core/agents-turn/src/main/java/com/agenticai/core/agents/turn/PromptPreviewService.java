@@ -176,7 +176,8 @@ public class PromptPreviewService {
                                 agent.getSystemPrompt(),
                                 false,
                                 svc.agentToolProvider.proceduresPromptBlock(agentId),
-                                svc.agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt),
+                                svc.agentToolProvider.skillsPromptBlock(
+                                        agentId, tools, compactPrompt),
                                 todayUtc,
                                 directives,
                                 svc.directiveComposer,
