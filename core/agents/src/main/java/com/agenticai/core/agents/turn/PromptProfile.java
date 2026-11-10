@@ -11,8 +11,9 @@ import java.util.Locale;
  *   <li>{@link #FULL}: the standing directives, the skills index, recalled memory and the standing
  *       tools (memory, skills, restore) - the behaviour before this setting existed.
  *   <li>{@link #LEAN}: the same pieces in their short wording.
- *   <li>{@link #BARE}: the agent's own system prompt, procedures, custom instructions and tools,
- *       and nothing the platform would add on its own.
+ *   <li>{@link #BARE}: the agent's own system prompt, procedures, custom instructions and the
+ *       tools its owner chose (allowed tools, attached tool servers), and nothing the platform
+ *       would add on its own.
  * </ul>
  */
 public enum PromptProfile {

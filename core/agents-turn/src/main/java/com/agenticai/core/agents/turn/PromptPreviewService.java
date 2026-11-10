@@ -128,7 +128,9 @@ public class PromptPreviewService {
         // chat.prompt.profile, applied as the turn applies it.
         PromptProfile promptProfile = PromptProfileSettings.of(agentId);
         if (promptProfile == PromptProfile.BARE) {
-            tools = PromptProfileSettings.ownTools(tools);
+            tools =
+                    PromptProfileSettings.ownTools(
+                            tools, anyMcp || !agent.getAllowedToolNames().isEmpty(), null);
         }
         boolean compactPrompt = smallModel || promptProfile == PromptProfile.LEAN;
 

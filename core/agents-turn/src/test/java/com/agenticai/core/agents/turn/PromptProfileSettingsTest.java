@@ -61,8 +61,20 @@ class PromptProfileSettingsTest {
 
         assertEquals(
                 List.of("eval_add", "search_tools", "call_tool", "send_email"),
-                names(PromptProfileSettings.ownTools(tools)));
-        assertNull(PromptProfileSettings.ownTools(null));
+                names(PromptProfileSettings.ownTools(tools, true, null)));
+        assertNull(PromptProfileSettings.ownTools(null, true, null));
+    }
+
+    @Test
+    void aBareTurnOfAnAgentThatChoseNoToolsOffersOnlyWhatTheCallerAdded() {
+        ToolCallback delegate = tool("delegate_to_helper");
+        List<ToolCallback> tools =
+                List.of(tool("search_knowledge_base"), tool("run_subtasks"), delegate);
+
+        assertEquals(List.of(), names(PromptProfileSettings.ownTools(tools, false, null)));
+        assertEquals(
+                List.of("delegate_to_helper"),
+                names(PromptProfileSettings.ownTools(tools, false, List.of(delegate))));
     }
 
     @Test

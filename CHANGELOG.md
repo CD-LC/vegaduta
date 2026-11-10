@@ -8,6 +8,17 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+
+- **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
+  `APP_CHAT_PROMPT_PROFILE=full`) chooses how much the platform adds to what an agent sends the model:
+  `full` (unchanged), `lean` (the standing instructions and skills list in their short wording) or `bare`
+  (only the agent's own system prompt, procedures, custom instructions and tools - no standing directives,
+  no skills list, no recalled memory, no built-in memory, skill, restore or scratchpad tools). Guardrails,
+  approvals and audit run outside the prompt and stay on in all three. "Own tools" are the ones the owner
+  chose: the agent's allowed tools and its attached tool servers; an agent with neither offers no tools in
+  `bare`. The prompt preview shows the profile's result.
+
 ## [0.1.14] - 2026-10-30
 
 ### Changed

@@ -1386,6 +1386,11 @@ app:
       max-sticky-tools: ${APP_CHAT_FOLLOW_UP_MAX_STICKY_TOOLS:12}
       # A follow-up in a conversation that already used tools is never sent to the economy model.
       keep-primary-model: ${APP_CHAT_FOLLOW_UP_KEEP_PRIMARY_MODEL:true}
+    # How much the platform adds to what an agent sends the model (catalog: chat.prompt.profile, per workspace or per
+    # agent). full = standing directives, skills index, recalled memory and the standing tools; lean = the same in
+    # their short wording; bare = only the agent's own system prompt, procedures, custom instructions and tools.
+    # Guardrails, approvals and audit run outside the prompt and are the same in all three.
+    prompt-profile: ${APP_CHAT_PROMPT_PROFILE:full}
     # The compact record of what a turn's tools did (tool, arguments, outcome, and for a call held for a human its
     # approval request), kept with the assistant turn in the conversation history and replayed to the model on later
     # turns, so it can see the file ids a tool returned, the write calls it already made and the action still
