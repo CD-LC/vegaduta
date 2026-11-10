@@ -128,7 +128,9 @@ def test_javascript_execute_spawns_one_node_process(as_root, tmp_path, monkeypat
     r = _runner(tmp_path)
     r._node_permission_flag()  # the one-time flag probe is a process of its own, not a per-call one
     monkeypatch.setattr(proc, "run", counting_run)
-    outcome = r.execute("javascript", "acme", "function run(i) { return i.a + i.b; }", {"a": 1, "b": 2}, 10_000, 256)
+    outcome = r.execute(
+        "javascript", "acme", "function run(i) { return i.a + i.b; }", {"a": 1, "b": 2}, 10_000, 256
+    )
     assert outcome.ok and outcome.result == 3
     # The parse is the run: no separate syntax-check process on the success path.
     assert len(calls) == 1
