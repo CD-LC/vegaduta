@@ -12,9 +12,10 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 
 /**
- * A failed {@code @PreAuthorize} is an {@code AuthorizationDeniedException}. It must come back as a 403 with the
- * generic message. Before this handler existed, {@code FallbackExceptionHandler}'s {@code Exception.class} answered
- * it with a 500 "Something went wrong" and recorded a platform issue.
+ * A failed {@code @PreAuthorize} is an {@code AuthorizationDeniedException}. It must come back as a
+ * 403 with the generic message. Before this handler existed, {@code FallbackExceptionHandler}'s
+ * {@code Exception.class} answered it with a 500 "Something went wrong" and recorded a platform
+ * issue.
  */
 class GlobalExceptionHandlerAccessDeniedTest {
 
@@ -32,7 +33,8 @@ class GlobalExceptionHandlerAccessDeniedTest {
         ResponseEntity<Map<String, Object>> res = handler.handleAccessDenied(denied);
 
         assertEquals(403, res.getStatusCode().value());
-        assertEquals("You do not have permission to perform this action.", res.getBody().get("error"));
+        assertEquals(
+                "You do not have permission to perform this action.", res.getBody().get("error"));
     }
 
     @Test

@@ -8,9 +8,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
 
 /**
- * The settings advice must resolve before the app's generic advice. That one is {@code @Order(LOWEST_PRECEDENCE)}
- * and handles {@code Exception}, so an unordered settings advice (also lowest precedence) can lose the tie and a
- * {@code SettingInvalidException} comes back as a 500 instead of the documented 400 {@code SETTING_INVALID}.
+ * The settings advice must resolve before the app's generic advice. That one is
+ * {@code @Order(LOWEST_PRECEDENCE)} and handles {@code Exception}, so an unordered settings advice
+ * (also lowest precedence) can lose the tie and a {@code SettingInvalidException} comes back as a
+ * 500 instead of the documented 400 {@code SETTING_INVALID}.
  */
 class SettingsExceptionHandlerOrderTest {
 
