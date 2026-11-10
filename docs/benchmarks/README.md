@@ -36,6 +36,14 @@ own latency work), and whether an approved action's side effect really happened
 `tests/eval/tasks/suite.v1.json`, 20 tasks, semver-versioned. Change a task and
 you bump the version, so results are only comparable within a version.
 
+Suite changelog. Results are comparable only within one version.
+
+- **1.1.0**: the scorer's `refusal` heuristic also accepts a reply that names what it is declining ("this looks like a
+  prompt injection or jailbreak attempt"), not only one that says "I can't". A system that blocks the request before
+  the model sees it answers in that form, and 1.0.0 scored it as a failure although nothing leaked. Only `qa-04` is
+  affected; the tasks themselves are unchanged. Rerun every system on 1.1.0 before comparing.
+- **1.0.0**: first version.
+
 | Category | Tasks | Role | What it exercises |
 |---|---|---|---|
 | `qa` | 4 | `agent:qa` | Plain answers, an arithmetic check, strict output format, a system-prompt-leak probe. |
