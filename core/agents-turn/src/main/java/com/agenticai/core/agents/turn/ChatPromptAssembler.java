@@ -264,8 +264,13 @@ final class ChatPromptAssembler {
                 supplyPreTurn(
                         preTurnTenant,
                         () ->
-                                memoryRecall.recallMemoryFacts(
-                                        agentId, subjectKey, decisionMessage, stepEvents));
+                                // A bare turn sends no recalled-memory block, so it does not look.
+                                context.modelTraits() != null
+                                                && context.modelTraits().promptProfile()
+                                                        == PromptProfile.BARE
+                                        ? null
+                                        : memoryRecall.recallMemoryFacts(
+                                                agentId, subjectKey, decisionMessage, stepEvents));
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
         // registry entry is enabled - see AgentToolProvider for why.
@@ -335,6 +340,16 @@ final class ChatPromptAssembler {
                                     : context.approval().stickyTools(),
                             svc.smallModel);
         }
+        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends only
+        // the owner's text; lean uses the short wording of the standing blocks.
+        PromptProfile promptProfile =
+                context.modelTraits() == null
+                        ? PromptProfile.FULL
+                        : context.modelTraits().promptProfile();
+        if (promptProfile == PromptProfile.BARE) {
+            tools = PromptProfileSettings.ownTools(tools);
+        }
+        boolean compactPrompt = smallModelTurn || promptProfile == PromptProfile.LEAN;
 
         // "Smarter, more dynamic agents" roadmap - automatic long-term memory
         // recall, always attempted (unlike remember_fact, which the model
@@ -378,7 +393,7 @@ final class ChatPromptAssembler {
         // advertisement and should read as part of the operating contract.
         String basePrompt = rlPromptOverride != null ? rlPromptOverride : agent.getSystemPrompt();
         String proceduresBlock = agentToolProvider.proceduresPromptBlock(agentId);
-        String skillsBlock = agentToolProvider.skillsPromptBlock(agentId, tools, smallModelTurn);
+        String skillsBlock = agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt);
         // Repairs any non-JSON tool-call arguments PERSISTED into history
         // from an earlier turn - see ArgumentSanitizingToolCallingManager
         // #sanitizeHistory's javadoc for the live incident this closes
@@ -432,7 +447,7 @@ final class ChatPromptAssembler {
         if (com.agenticai.core.guardrails.taint.Spotlight.hasUntrustedBlock(userMessage)) {
             context.taint().mark("untrusted_input");
         }
-        ChatSystemPromptComposer.Composed composed =
+        ChatSystemPromptComposer.Composed fullComposed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
                                 basePrompt,
@@ -445,7 +460,7 @@ final class ChatPromptAssembler {
                                 tools,
                                 anyMcpToolsOffered,
                                 DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
-                                smallModelTurn,
+                                compactPrompt,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
                                 hookRun == null ? null : hookRun.contextNote(),
@@ -453,6 +468,8 @@ final class ChatPromptAssembler {
                                         ? svc.turns.toolLedger.getTrustNote()
                                         : null,
                                 recalled == null ? null : recalled.block()));
+        ChatSystemPromptComposer.Composed composed =
+                ChatSystemPromptComposer.forProfile(fullComposed, promptProfile);
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
         // Tells the request inspector which registry key / scope / version each block of the system
