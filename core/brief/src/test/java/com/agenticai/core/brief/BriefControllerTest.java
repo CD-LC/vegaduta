@@ -226,12 +226,26 @@ class BriefControllerTest {
                         .andExpect(request().asyncStarted())
                         .andReturn();
         long deadline = System.currentTimeMillis() + 5000;
-        while (!started.getResponse().getContentAsString().contains("event:done")
-                && !started.getResponse().getContentAsString().contains("event:error")
+        while (!terminalEventComplete(started.getResponse().getContentAsString())
                 && System.currentTimeMillis() < deadline) {
             Thread.sleep(20);
         }
         return started.getResponse().getContentAsString();
+    }
+
+    /**
+     * True once a done or error event is fully written: the event line is followed by its data
+     * line and the blank line that ends the event. Waiting only for the event name can return
+     * before the data line arrives (a race under a loaded test JVM).
+     */
+    private static boolean terminalEventComplete(String body) {
+        for (String name : List.of("event:done", "event:error")) {
+            int at = body.indexOf(name);
+            if (at >= 0 && body.indexOf("\n\n", at) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Test
