@@ -281,6 +281,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
        * <html> tag above, just covering the one other element an extension
        * is known to touch. */}
       <body className={jakarta.className} suppressHydrationWarning>
+        {/* Cloudflare Email Address Obfuscation rewrites mailto links before
+         * React hydrates, producing a #418 mismatch that unmounts the whole
+         * app. The documented <!--email_off--> opt-out wraps the document so
+         * the edge leaves every email as-rendered. */}
+        <span style={{ display: "none" }} dangerouslySetInnerHTML={{ __html: "<!--email_off-->" }} />
         {/* JSON-LD structured data (STRUCTURED_DATA, root-structured-data.ts). JsonLd
          * escapes it (STRUCTURED_DATA carries operator env values). */}
         <JsonLd data={STRUCTURED_DATA} />
@@ -382,6 +387,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </ThemeProvider>
           </GeoProvider>
         </I18nProvider>
+        <span style={{ display: "none" }} dangerouslySetInnerHTML={{ __html: "<!--/email_off-->" }} />
       </body>
     </html>
   );

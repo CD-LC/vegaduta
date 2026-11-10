@@ -2,7 +2,7 @@
 # Base template E2B itself recommends for custom templates - includes
 # python3 already; node added for the "node" language option runner.py
 # supports. See README.md in this directory for build/push instructions.
-FROM e2bdev/code-interpreter:latest@sha256:8bea292fd8741f66a2d83f6911b6dea0e0ac20e989879868b1a360a16e78895f
+FROM e2bdev/code-interpreter:latest@sha256:d1c3b0455616ee3b3469a250f23fc309f54886d8cdd7f6e0c6b09cb60189b9e9
 
 # The base image's last USER is the non-root `user`, so the package
 # installs below must switch to root explicitly (apt's lock and
