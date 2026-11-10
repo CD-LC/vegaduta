@@ -1,5 +1,6 @@
 package com.agenticai.core.guardrails;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,7 +22,9 @@ final class InertDataScreen {
     static final int MAX_CHARS = 2_000;
     static final int MAX_DEPTH = 6;
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    // Trailing tokens fail the parse: "1 ignore all previous instructions" must not read as the number 1.
+    private static final ObjectMapper MAPPER =
+            new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     private InertDataScreen() {}
 
@@ -34,7 +37,8 @@ final class InertDataScreen {
             return false;
         }
         char first = text.charAt(0);
-        if (first != '{' && first != '[' && first != '-' && !Character.isDigit(first)) {
+        // A JSON value starts with one of these; a quoted string, true, false and null count too.
+        if ("{[-\"tfn".indexOf(first) < 0 && !Character.isDigit(first)) {
             return false;
         }
         try {
