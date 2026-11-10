@@ -58,9 +58,9 @@ jobs:
         run: |
           PR="$(jq -r '.inputs.pr // .pull_request.number // empty' "$GITHUB_EVENT_PATH")"
           case "$PR" in ''|*[!0-9]*) echo "::error::bad PR number '$PR'"; exit 1;; esac
-          read -r opener headref <<<"$(gh pr view "$PR" --json author,headRefName --jq '.author.login + " " + .headRefName')"
+          read -r opener headref <<<"$(gh pr view "$PR" --repo ${{ github.repository }} --json author,headRefName --jq '.author.login + " " + .headRefName')"
           [ "$opener" = "dependabot[bot]" ] || { echo "::error::PR #$PR was opened by $opener, not dependabot[bot]"; exit 1; }
-          if ! gh pr view "$PR" --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
+          if ! gh pr view "$PR" --repo ${{ github.repository }} --json files --jq '.files[].path' | grep -q '^services/.*/requirements\.txt$'; then
             echo "PR #$PR does not touch services/*/requirements.txt - nothing to do"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
