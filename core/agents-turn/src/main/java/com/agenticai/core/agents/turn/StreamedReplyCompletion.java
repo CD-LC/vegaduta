@@ -33,12 +33,13 @@ final class StreamedReplyCompletion {
 
     /**
      * True when the turn ended on a call held for a human decision: its reply is the platform's
-     * "waiting for approval" note, not an answer worth a quality check, and a judge call started then
-     * would run while the continuation after the decision is being answered.
+     * "waiting for approval" note, not an answer worth a quality check, and a judge call started
+     * then would run while the continuation after the decision is being answered.
      */
     static boolean pausedForApproval(ToolLedger ledger) {
         return ledger != null
-                && ledger.entries().stream().anyMatch(e -> e.status() == ToolLedger.Status.AWAITING_APPROVAL);
+                && ledger.entries().stream()
+                        .anyMatch(e -> e.status() == ToolLedger.Status.AWAITING_APPROVAL);
     }
 
     static void afterPersisted(

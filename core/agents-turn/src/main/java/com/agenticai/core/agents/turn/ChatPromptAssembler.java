@@ -200,7 +200,8 @@ final class ChatPromptAssembler {
                 svc.turns.preTurnMaxWait == null
                         ? Long.MIN_VALUE
                         : System.nanoTime() + svc.turns.preTurnMaxWait.toNanos();
-        // On the continuation after an approval, the decided call is replayed as a native tool call and
+        // On the continuation after an approval, the decided call is replayed as a native tool call
+        // and
         // result (NativeApprovalReplay), so the request extends the first turn's cached prompt.
         final ApprovalContinuation decided = context.continuation();
         final String turnMessage = userMessage;
@@ -212,11 +213,7 @@ final class ChatPromptAssembler {
                                     sessionMemoryService.getHistory(memorySessionId);
                             NativeApprovalReplay.Replay replay =
                                     NativeApprovalReplay.of(
-                                            replayed,
-                                            decided,
-                                            turnMessage,
-                                            svc.turns.toolLedger,
-                                            svc.turns.approvalContinuation.getMaxResultChars());
+                                            replayed, decided, turnMessage, svc.turns.toolLedger);
                             return new ReplayedHistory(replay.messages(), replay.hasTextRecord());
                         });
         // stepEvents (2026-08-17) is threaded into tool resolution rather than
@@ -344,7 +341,8 @@ final class ChatPromptAssembler {
                                     : context.approval().stickyTools(),
                             svc.smallModel);
         }
-        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends only
+        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends
+        // only
         // the owner's text; lean uses the short wording of the standing blocks.
         PromptProfile promptProfile =
                 context.modelTraits() == null
@@ -621,5 +619,4 @@ final class ChatPromptAssembler {
             throw new CompletionException(e.getCause());
         }
     }
-
 }

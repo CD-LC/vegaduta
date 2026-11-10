@@ -328,12 +328,11 @@ final class BufferedTurnRunner {
             answer = issues.recordAndCorrectFabricatedGenerationUrl(agentId, sessionId, answer);
         }
         journal.commit(answer, "completed");
-        ToolLedger ledger = context.toolActivity().ledger().snapshotOrNull();
-        sessionMemoryService.appendTurn(memorySessionId, ChatTurn.assistant(answer, ledger));
+        sessionMemoryService.appendTurn(
+                memorySessionId, ChatTurn.assistant(answer, context.toolActivity().ledger().snapshotOrNull()));
         events.emitAgentMessageCompleted(agentId, sessionId, context.tenantId(), answer, "live");
-        if (!StreamedReplyCompletion.pausedForApproval(ledger)) { // Gap 2 - fire-and-forget quality sample
-            llmQualityJudgeService.sampleAsync(turnClient, agentId, sessionId, userMessage, answer);
-        }
+        // Gap 2 - fire-and-forget, never affects this already-computed answer.
+        llmQualityJudgeService.sampleAsync(turnClient, agentId, sessionId, userMessage, answer);
         return answer;
     }
 

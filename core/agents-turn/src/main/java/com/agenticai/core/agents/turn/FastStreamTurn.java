@@ -642,7 +642,8 @@ final class FastStreamTurn {
         }
         turn.commit(toPersist, "completed");
         ToolLedger ledger = activity().ledger().snapshotOrNull();
-        owner.sessionMemoryService.appendTurn(memorySessionId, ChatTurn.assistant(toPersist, ledger));
+        owner.sessionMemoryService.appendTurn(
+                memorySessionId, ChatTurn.assistant(toPersist, ledger));
         StreamedReplyCompletion.afterPersisted(
                 owner.events,
                 owner.llmQualityJudgeService,

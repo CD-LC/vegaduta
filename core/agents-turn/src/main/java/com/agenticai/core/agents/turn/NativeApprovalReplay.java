@@ -18,15 +18,17 @@ import org.springframework.ai.chat.messages.UserMessage;
  * the outcome note) are left out, so the continuation sends the first turn's prompt plus the call,
  * the result and a short note, and a provider's prompt cache reuses that prefix.
  *
- * <p>Applies only when the continuation message was written for this shape (see
- * {@link ApprovalContinuation#isNativeShapeMessage}) and the history holds the outcome note of that
+ * <p>Applies only when the continuation message was written for this shape (see {@link
+ * ApprovalContinuation#isNativeShapeMessage}) and the history holds the outcome note of that
  * request; anything else (no note, arguments that are not a JSON object) is replayed as text.
  */
 final class NativeApprovalReplay {
 
     private static final ObjectMapper JSON = new ObjectMapper();
 
-    /** {@code hasTextRecord}: a tool record is still replayed as text, so the trust note is needed. */
+    /**
+     * {@code hasTextRecord}: a tool record is still replayed as text, so the trust note is needed.
+     */
     record Replay(List<Message> messages, boolean hasTextRecord) {}
 
     private NativeApprovalReplay() {}
@@ -35,8 +37,7 @@ final class NativeApprovalReplay {
             List<ChatTurn> turns,
             ApprovalContinuation continuation,
             String userMessage,
-            ToolLedgerProperties ledger,
-            int maxResultChars) {
+            ToolLedgerProperties ledger) {
         int outcome =
                 continuation != null && ApprovalContinuation.isNativeShapeMessage(userMessage)
                         ? outcomeIndex(turns, continuation, ledger)
@@ -45,7 +46,10 @@ final class NativeApprovalReplay {
             return asText(turns);
         }
         String requestId = String.valueOf(continuation.requestId());
-        int parked = outcome > 0 && heldOnly(turns.get(outcome - 1), continuation, requestId) ? outcome - 1 : -1;
+        int parked =
+                outcome > 0 && heldOnly(turns.get(outcome - 1), continuation, requestId)
+                        ? outcome - 1
+                        : -1;
         ToolLedger.Entry note = turns.get(outcome).tools().entries().get(0);
         String callId = "approval_" + requestId.replace("-", "");
         List<Message> out = new ArrayList<>(turns.size() + 1);
@@ -55,15 +59,26 @@ final class NativeApprovalReplay {
                 continue;
             }
             if (i == outcome) {
-                out.add(AssistantMessage.builder()
-                        .content("")
-                        .toolCalls(List.of(new AssistantMessage.ToolCall(
-                                callId, "function", continuation.toolName(), continuation.argumentsJson())))
-                        .build());
-                out.add(ToolResponseMessage.builder()
-                        .responses(List.of(new ToolResponseMessage.ToolResponse(
-                                callId, continuation.toolName(), result(continuation, note, maxResultChars))))
-                        .build());
+                out.add(
+                        AssistantMessage.builder()
+                                .content("")
+                                .toolCalls(
+                                        List.of(
+                                                new AssistantMessage.ToolCall(
+                                                        callId,
+                                                        "function",
+                                                        continuation.toolName(),
+                                                        continuation.argumentsJson())))
+                                .build());
+                out.add(
+                        ToolResponseMessage.builder()
+                                .responses(
+                                        List.of(
+                                                new ToolResponseMessage.ToolResponse(
+                                                        callId,
+                                                        continuation.toolName(),
+                                                        result(continuation, note))))
+                                .build());
                 continue;
             }
             ChatTurn turn = turns.get(i);
@@ -85,8 +100,12 @@ final class NativeApprovalReplay {
                 : new AssistantMessage(turn.content());
     }
 
-    /** The newest outcome note of this request: a record-only turn, replayed as its rendered record alone. */
-    private static int outcomeIndex(List<ChatTurn> turns, ApprovalContinuation continuation, ToolLedgerProperties ledger) {
+    /**
+     * The newest outcome note of this request: a record-only turn, replayed as its rendered record
+     * alone.
+     */
+    private static int outcomeIndex(
+            List<ChatTurn> turns, ApprovalContinuation continuation, ToolLedgerProperties ledger) {
         String requestId = String.valueOf(continuation.requestId());
         for (int i = turns.size() - 1; i >= 0; i--) {
             ChatTurn turn = turns.get(i);
@@ -104,7 +123,8 @@ final class NativeApprovalReplay {
     }
 
     /** The parked turn of this request when the held call is all it recorded. */
-    private static boolean heldOnly(ChatTurn turn, ApprovalContinuation continuation, String requestId) {
+    private static boolean heldOnly(
+            ChatTurn turn, ApprovalContinuation continuation, String requestId) {
         ToolLedger.Entry entry = single(turn);
         return entry != null
                 && entry.status() == ToolLedger.Status.AWAITING_APPROVAL
@@ -123,13 +143,15 @@ final class NativeApprovalReplay {
         return turn.tools().entries().get(0);
     }
 
-    /** The approved call's output for a completed call; the outcome note (denial reason, failure) otherwise. */
-    private static String result(ApprovalContinuation continuation, ToolLedger.Entry note, int maxResultChars) {
+    /**
+     * The approved call's output for a completed call (already cut by {@code
+     * ApprovalContinuationPrompt#forReplay}); the outcome note (denial reason, failure) otherwise.
+     */
+    private static String result(ApprovalContinuation continuation, ToolLedger.Entry note) {
         if (continuation.outcome() != ApprovalContinuation.Outcome.COMPLETED) {
             return note.result();
         }
-        String output = continuation.result() == null ? "" : continuation.result();
-        return output.length() <= maxResultChars ? output : output.substring(0, maxResultChars);
+        return continuation.result() == null ? "" : continuation.result();
     }
 
     private static boolean isJsonObject(String json) {

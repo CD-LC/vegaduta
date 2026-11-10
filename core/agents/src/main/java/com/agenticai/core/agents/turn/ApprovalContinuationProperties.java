@@ -49,7 +49,8 @@ public class ApprovalContinuationProperties {
     private int maxStickyTools = Integer.parseInt(DEFAULTS.getProperty("max-sticky-tools"));
 
     /** How far back in the tool-call log "tools this conversation already used" looks. */
-    private Duration stickyToolsWindow = Duration.parse(DEFAULTS.getProperty("sticky-tools-window"));
+    private Duration stickyToolsWindow =
+            Duration.parse(DEFAULTS.getProperty("sticky-tools-window"));
 
     /**
      * How long the record that a decision has been continued is kept; a repeat of the same decision
@@ -66,7 +67,8 @@ public class ApprovalContinuationProperties {
     /**
      * Agent jobs only. {@code false} (default): a denied approval ends the job as {@code
      * APPROVAL_REJECTED}, as before. {@code true}: the job resumes with the denial as the result of
-     * the call, so the agent can reach the goal another way (still bounded by the job's park limit).
+     * the call, so the agent can reach the goal another way (still bounded by the job's park
+     * limit).
      */
     private boolean jobsContinueAfterDenial =
             Boolean.parseBoolean(DEFAULTS.getProperty("jobs-continue-after-denial"));
@@ -91,31 +93,37 @@ public class ApprovalContinuationProperties {
     private String deniedNote = DEFAULTS.getProperty("denied-note");
 
     /**
-     * The bracketed note appended to the conversation history when an approved call ran ({@code {tool}},
-     * {@code {result}}: the output, cut to {@link #maxNoteResultChars}). Written for every kind of approved
-     * action, whichever executor ran it.
+     * The bracketed note appended to the conversation history when an approved call ran ({@code
+     * {tool}}, {@code {result}}: the output, cut to {@link #maxNoteResultChars}). Written for every
+     * kind of approved action, whichever executor ran it.
      */
     private String completedNote = DEFAULTS.getProperty("completed-note");
 
     /** The note when an approved call failed for good ({@code {tool}}, {@code {failure}}). */
     private String failedNote = DEFAULTS.getProperty("failed-note");
 
-    /** Stands in for the output of an approved call that ran but produced none (a message sent, say). */
+    /**
+     * Stands in for the output of an approved call that ran but produced none (a message sent,
+     * say).
+     */
     private String completedNoOutputText = DEFAULTS.getProperty("completed-no-output-text");
 
     /**
-     * Longest output or failure text put into a history note. A note is re-sent to the model on every
-     * later turn of the conversation, so it is far tighter than {@link #maxResultChars}, which governs the
-     * one continuation message that carries the full result.
+     * Longest output or failure text put into a history note. A note is re-sent to the model on
+     * every later turn of the conversation, so it is far tighter than {@link #maxResultChars},
+     * which governs the one continuation message that carries the full result.
      */
-    private int maxNoteResultChars = Integer.parseInt(DEFAULTS.getProperty("max-note-result-chars"));
+    private int maxNoteResultChars =
+            Integer.parseInt(DEFAULTS.getProperty("max-note-result-chars"));
 
     /**
-     * Longest argument summary in the history note. The note is stored as a platform tool record ({@link
-     * ToolLedger}) on an assistant turn with no text, so the model reads it on later turns and the person's
-     * transcript never shows it; the record's fields are capped at {@link ToolLedgerSummary#MAX_FIELD_CHARS}.
+     * Longest argument summary in the history note. The note is stored as a platform tool record
+     * ({@link ToolLedger}) on an assistant turn with no text, so the model reads it on later turns
+     * and the person's transcript never shows it; the record's fields are capped at {@link
+     * ToolLedgerSummary#MAX_FIELD_CHARS}.
      */
-    private int maxNoteArgumentsChars = Integer.parseInt(DEFAULTS.getProperty("max-note-arguments-chars"));
+    private int maxNoteArgumentsChars =
+            Integer.parseInt(DEFAULTS.getProperty("max-note-arguments-chars"));
 
     /** The approval detail of that record ({@code {requestId}}, {@code {approver}}). */
     private String noteApproval = DEFAULTS.getProperty("note-approval");
@@ -133,10 +141,12 @@ public class ApprovalContinuationProperties {
     private String deniedMessage = DEFAULTS.getProperty("denied-message");
 
     /**
-     * true: the decided call is replayed to the model as a native tool call and tool result, and the
-     * message is the short native-*-message note; false: the full *-message text carries the result.
+     * true: the decided call is replayed to the model as a native tool call and tool result, and
+     * the message is the short native-*-message note; false: the full *-message text carries the
+     * result.
      */
-    private boolean nativeToolResult = Boolean.parseBoolean(DEFAULTS.getProperty("native-tool-result"));
+    private boolean nativeToolResult =
+            Boolean.parseBoolean(DEFAULTS.getProperty("native-tool-result"));
 
     /** Short note after a native tool result when the approved call ran. */
     private String nativeCompletedMessage = DEFAULTS.getProperty("native-completed-message");
@@ -149,9 +159,11 @@ public class ApprovalContinuationProperties {
 
     private static Properties loadDefaults() {
         Properties defaults = new Properties();
-        try (InputStream in = ApprovalContinuationProperties.class.getResourceAsStream(DEFAULTS_RESOURCE)) {
+        try (InputStream in =
+                ApprovalContinuationProperties.class.getResourceAsStream(DEFAULTS_RESOURCE)) {
             if (in == null) {
-                throw new IllegalStateException(DEFAULTS_RESOURCE + " is missing from the agents module");
+                throw new IllegalStateException(
+                        DEFAULTS_RESOURCE + " is missing from the agents module");
             }
             defaults.load(new InputStreamReader(in, StandardCharsets.UTF_8));
         } catch (IOException e) {
@@ -322,7 +334,8 @@ public class ApprovalContinuationProperties {
 
     /** Fills {@code {requestId}} and {@code {approver}} in {@link #getNoteApproval}. */
     public String renderNoteApproval(Object requestId, String decidedBy) {
-        String approver = decidedBy == null || decidedBy.isBlank() ? approverUnknown : decidedBy.strip();
+        String approver =
+                decidedBy == null || decidedBy.isBlank() ? approverUnknown : decidedBy.strip();
         return noteApproval
                 .replace("{requestId}", requestId == null ? "" : requestId.toString())
                 .replace("{approver}", approver);
@@ -330,17 +343,22 @@ public class ApprovalContinuationProperties {
 
     /** Fills {@code {tool}} and {@code {result}} in {@link #getCompletedNote}. */
     public String renderCompletedNote(String tool, String result) {
-        return completedNote.replace("{tool}", String.valueOf(tool)).replace("{result}", result == null ? "" : result);
+        return completedNote
+                .replace("{tool}", String.valueOf(tool))
+                .replace("{result}", result == null ? "" : result);
     }
 
     /** Fills {@code {tool}} and {@code {failure}} in {@link #getFailedNote}. */
     public String renderFailedNote(String tool, String failure) {
-        return failedNote.replace("{tool}", String.valueOf(tool)).replace("{failure}", failure == null ? "" : failure);
+        return failedNote
+                .replace("{tool}", String.valueOf(tool))
+                .replace("{failure}", failure == null ? "" : failure);
     }
 
     /** Fills {@code {tool}}, {@code {approver}} and {@code {reason}} in {@link #getDeniedNote}. */
     public String renderDeniedNote(String tool, String decidedBy, String reason) {
-        String approver = decidedBy == null || decidedBy.isBlank() ? approverUnknown : decidedBy.strip();
+        String approver =
+                decidedBy == null || decidedBy.isBlank() ? approverUnknown : decidedBy.strip();
         String why = reason == null || reason.isBlank() ? noReasonText : reason.strip();
         return deniedNote
                 .replace("{tool}", String.valueOf(tool))

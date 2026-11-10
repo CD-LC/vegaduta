@@ -74,7 +74,10 @@ public class PromptProfileSettings implements SettingsContributor {
                         .build());
     }
 
-    /** The profile {@code agentId}'s turn runs under; the platform value when the catalog cannot say. */
+    /**
+     * The profile {@code agentId}'s turn runs under; the platform value when the catalog cannot
+     * say.
+     */
     public PromptProfile forAgent(UUID agentId) {
         SettingsResolver resolver = catalog == null ? null : catalog.getIfAvailable();
         if (resolver == null) {

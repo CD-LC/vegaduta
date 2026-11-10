@@ -182,9 +182,11 @@ final class ChatTurnExecutor {
      */
     volatile ChatResilienceProperties resilience = new ChatResilienceProperties();
 
-    /** {@code app.chat.tool-ledger.*} and {@code app.approvals.continuation.*}, set from {@link ChatTimeouts}. */
+    /**
+     * {@code app.chat.tool-ledger.*}: the record of what the turn's tools did, stored with the
+     * assistant turn. Set from {@link ChatTimeouts#toolLedger()} when the service is built.
+     */
     volatile ToolLedgerProperties toolLedger = new ToolLedgerProperties();
-    volatile ApprovalContinuationProperties approvalContinuation = new ApprovalContinuationProperties();
 
     /**
      * {@code app.chat.parity.*}: where the streamed and the buffered turn deliberately differ. Set

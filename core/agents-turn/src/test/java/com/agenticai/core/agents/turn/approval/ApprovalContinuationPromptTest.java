@@ -1,10 +1,10 @@
 package com.agenticai.core.agents.turn.approval;
 
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,24 @@ class ApprovalContinuationPromptTest {
     }
 
     @Test
+    void theNativeReplayCutsALongOutputAtMaxResultChars() {
+        ApprovalContinuationProperties nativeShape = new ApprovalContinuationProperties();
+        nativeShape.setMaxResultChars(4);
+
+        ApprovalContinuation replayed =
+                new ApprovalContinuationPrompt(nativeShape)
+                        .forReplay(continuation(Outcome.COMPLETED, "sent (CONF-9042)", List.of()));
+
+        assertThat(replayed.result()).startsWith("sent").contains("12 more characters");
+        assertThat(
+                        prompt.forReplay(
+                                        continuation(
+                                                Outcome.COMPLETED, "sent (CONF-9042)", List.of()))
+                                .result())
+                .isEqualTo("sent (CONF-9042)");
+    }
+
+    @Test
     void theNativeShapeSendsOnlyTheShortNoteAndIsRecognisedByItsTag() {
         String message =
                 new ApprovalContinuationPrompt(new ApprovalContinuationProperties())
@@ -34,12 +52,14 @@ class ApprovalContinuationPromptTest {
                 .contains("Send invoice INV-7731")
                 .doesNotContain("sent (CONF-9042)")
                 .doesNotContain("<tool_result>");
-        assertThat(ApprovalContinuationPrompt.isNativeShape(
-                        prompt.render(continuation(Outcome.COMPLETED, "ok", List.of()))))
+        assertThat(
+                        ApprovalContinuationPrompt.isNativeShape(
+                                prompt.render(continuation(Outcome.COMPLETED, "ok", List.of()))))
                 .isFalse();
     }
 
-    private static ApprovalContinuation continuation(Outcome outcome, String result, List<String> otherPending) {
+    private static ApprovalContinuation continuation(
+            Outcome outcome, String result, List<String> otherPending) {
         return new ApprovalContinuation(
                 REQUEST,
                 outcome,
@@ -60,11 +80,14 @@ class ApprovalContinuationPromptTest {
 
     @Test
     void aCompletedCallOpensWithTheMarkerRestatesTheGoalAndWrapsTheFullResult() {
-        String message = prompt.render(continuation(Outcome.COMPLETED, "sent (CONF-9042)", List.of()));
+        String message =
+                prompt.render(continuation(Outcome.COMPLETED, "sent (CONF-9042)", List.of()));
 
         assertThat(message)
                 .startsWith(
-                        "<approval_result request=\"" + REQUEST + "\" tool=\"send_invoice\" outcome=\"completed\">")
+                        "<approval_result request=\""
+                                + REQUEST
+                                + "\" tool=\"send_invoice\" outcome=\"completed\">")
                 .endsWith("</approval_result>")
                 .contains("approved by admin-1")
                 .contains("Send invoice INV-7731 and tell me the confirmation number.")
@@ -98,7 +121,8 @@ class ApprovalContinuationPromptTest {
 
     @Test
     void aDeniedCallSaysDeniedGivesTheReasonAndTellsTheAgentNotToAskAgain() {
-        String message = prompt.render(continuation(Outcome.DENIED, "Not before the audit", List.of()));
+        String message =
+                prompt.render(continuation(Outcome.DENIED, "Not before the audit", List.of()));
 
         assertThat(message)
                 .contains("outcome=\"denied\"")
@@ -110,7 +134,12 @@ class ApprovalContinuationPromptTest {
 
     @Test
     void aFailedCallSaysItDidNotTakeEffect() {
-        String message = prompt.render(continuation(Outcome.FAILED, "Tool 'send_invoice' is no longer resolvable", List.of()));
+        String message =
+                prompt.render(
+                        continuation(
+                                Outcome.FAILED,
+                                "Tool 'send_invoice' is no longer resolvable",
+                                List.of()));
 
         assertThat(message)
                 .contains("outcome=\"failed\"")
@@ -155,7 +184,9 @@ class ApprovalContinuationPromptTest {
 
     @Test
     void aPlaceholderInsideTheResultIsNotExpandedAgain() {
-        String message = prompt.render(continuation(Outcome.COMPLETED, "literal {goal} and {tool}", List.of()));
+        String message =
+                prompt.render(
+                        continuation(Outcome.COMPLETED, "literal {goal} and {tool}", List.of()));
 
         assertThat(message).contains("literal {goal} and {tool}");
     }
@@ -182,7 +213,11 @@ class ApprovalContinuationPromptTest {
 
         String first = prompt.render(c).lines().findFirst().orElseThrow();
 
-        assertThat(first).isEqualTo("<approval_result request=\"" + REQUEST + "\" tool=\"evil__onload__x\" outcome=\"completed\">");
+        assertThat(first)
+                .isEqualTo(
+                        "<approval_result request=\""
+                                + REQUEST
+                                + "\" tool=\"evil__onload__x\" outcome=\"completed\">");
     }
 
     @Test
@@ -190,9 +225,21 @@ class ApprovalContinuationPromptTest {
         ApprovalContinuation c = continuation(Outcome.COMPLETED, "ok", List.of());
         ApprovalContinuation anonymous =
                 new ApprovalContinuation(
-                        c.requestId(), c.outcome(), c.toolName(), c.argumentsJson(), c.result(), null, c.goal(),
-                        c.requestedAgentId(), c.sessionId(), c.subjectKey(), c.tenantId(), c.subject(),
-                        c.memorySessionId(), c.stickyTools(), c.otherPending());
+                        c.requestId(),
+                        c.outcome(),
+                        c.toolName(),
+                        c.argumentsJson(),
+                        c.result(),
+                        null,
+                        c.goal(),
+                        c.requestedAgentId(),
+                        c.sessionId(),
+                        c.subjectKey(),
+                        c.tenantId(),
+                        c.subject(),
+                        c.memorySessionId(),
+                        c.stickyTools(),
+                        c.otherPending());
         properties.setApproverUnknown("someone unnamed");
 
         assertThat(prompt.render(anonymous)).contains("approved by someone unnamed");

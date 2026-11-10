@@ -9,10 +9,10 @@ import java.util.UUID;
  * approval request's replay envelope and the call's outcome, then used by BOTH continuation paths:
  * a chat session's server-started turn and an agent job's resumed turn.
  *
- * <p>It rides on {@link ChatTurnRequest#continuation()} and {@link TurnContext#continuation()}.
- * The turn pipeline reads from it only what must not be derived from the continuation message
- * itself: the {@link #goal()} (what input screening, tool selection, cost routing and memory recall
- * are decided on - a platform-written message full of tool output is none of those) and the {@link
+ * <p>It rides on {@link ChatTurnRequest#continuation()} and {@link TurnContext#continuation()}. The
+ * turn pipeline reads from it only what must not be derived from the continuation message itself:
+ * the {@link #goal()} (what input screening, tool selection, cost routing and memory recall are
+ * decided on - a platform-written message full of tool output is none of those) and the {@link
  * #stickyTools()} (tools the conversation already used, kept on offer).
  *
  * @param requestId the approval request this decision belongs to
@@ -37,8 +37,8 @@ import java.util.UUID;
  * @param otherPending descriptions of other actions of the same conversation that still wait for a
  *     human, so the model does not ask for them again
  * @param runToolNames the run-scoped tool selection the parked turn was narrowed to ({@link
- *     ChatTurnRequest#toolNames()}), so the continuation is narrowed the same way; {@code null} when
- *     the parked turn was not narrowed
+ *     ChatTurnRequest#toolNames()}), so the continuation is narrowed the same way; {@code null}
+ *     when the parked turn was not narrowed
  */
 public record ApprovalContinuation(
         UUID requestId,
@@ -121,7 +121,8 @@ public record ApprovalContinuation(
     /**
      * The same decision with another goal text. An agent job restates the job's own goal (which the
      * output contract may have extended with its schema instructions) rather than the copy of it
-     * the replay envelope keeps, which is cut at {@code app.guardrails.approval-park.max-goal-chars}.
+     * the replay envelope keeps, which is cut at {@code
+     * app.guardrails.approval-park.max-goal-chars}.
      */
     public ApprovalContinuation withGoal(String newGoal) {
         return new ApprovalContinuation(
@@ -143,14 +144,36 @@ public record ApprovalContinuation(
                 runToolNames);
     }
 
+    /** The same decision with another result text (the output as it is shown to the model). */
+    public ApprovalContinuation withResult(String newResult) {
+        return new ApprovalContinuation(
+                requestId,
+                outcome,
+                toolName,
+                argumentsJson,
+                newResult,
+                decidedBy,
+                goal,
+                requestedAgentId,
+                sessionId,
+                subjectKey,
+                tenantId,
+                subject,
+                memorySessionId,
+                stickyTools,
+                otherPending,
+                runToolNames);
+    }
+
     /** True when {@code message} is a stored continuation message (see {@link #MESSAGE_MARKER}). */
     public static boolean isContinuationMessage(String message) {
         return message != null && message.startsWith(MESSAGE_MARKER);
     }
 
     /**
-     * The attribute on the opening tag of a continuation message written for the native shape: the decided
-     * call is replayed ahead of it as a tool call and tool result, and the message is only a short note.
+     * The attribute on the opening tag of a continuation message written for the native shape: the
+     * decided call is replayed ahead of it as a tool call and tool result, and the message is only
+     * a short note.
      */
     public static final String NATIVE_SHAPE_ATTRIBUTE = " shape=\"native\"";
 
