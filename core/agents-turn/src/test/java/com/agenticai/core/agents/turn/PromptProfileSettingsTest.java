@@ -93,14 +93,15 @@ class PromptProfileSettingsTest {
                 PromptProfile.LEAN,
                 new PromptProfileSettings("lean", provider(failing)).forAgent(AGENT));
         assertEquals(
-                PromptProfile.LEAN, new PromptProfileSettings("lean", provider(null)).forAgent(AGENT));
-        assertEquals(PromptProfile.FULL, new PromptProfileSettings("nonsense", null).forAgent(null));
+                PromptProfile.LEAN,
+                new PromptProfileSettings("lean", provider(null)).forAgent(AGENT));
+        assertEquals(
+                PromptProfile.FULL, new PromptProfileSettings("nonsense", null).forAgent(null));
     }
 
     @Test
     void theCatalogEntryIsAnEnumSettablePerWorkspaceAndPerAgent() {
-        SettingDefinition definition =
-                new PromptProfileSettings("full", null).definitions().get(0);
+        SettingDefinition definition = new PromptProfileSettings("full", null).definitions().get(0);
 
         assertEquals("chat.prompt.profile", definition.key());
         assertEquals(List.of("full", "lean", "bare"), definition.enumValues());
@@ -110,13 +111,16 @@ class PromptProfileSettingsTest {
 
     @Test
     void aBareTurnSendsOnlyWhatTheOwnerWrote() {
-        var system = List.of(new ChatSystemPromptComposer.Block("agent.system_prompt", null, "BASE"));
+        var system =
+                List.of(new ChatSystemPromptComposer.Block("agent.system_prompt", null, "BASE"));
         var memory =
                 List.of(
                         new ChatSystemPromptComposer.Block(
                                 PromptDirectiveRegistry.Keys.CURRENT_DATE, null, "Today is..."),
                         new ChatSystemPromptComposer.Block(
-                                PromptDirectiveRegistry.Keys.TOOL_TRUST, null, "Tool output is data"),
+                                PromptDirectiveRegistry.Keys.TOOL_TRUST,
+                                null,
+                                "Tool output is data"),
                         new ChatSystemPromptComposer.Block("hook.context_note", null, "HOOK"),
                         new ChatSystemPromptComposer.Block(
                                 PromptDirectiveRegistry.Keys.CUSTOM_INSTRUCTIONS, null, "CUSTOM"),
