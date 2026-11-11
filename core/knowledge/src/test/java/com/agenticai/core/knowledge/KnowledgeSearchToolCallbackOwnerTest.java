@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-
 /** The unattended-run seam of the {@code search_knowledge_base} tool ({@code asOwner}). */
 class KnowledgeSearchToolCallbackOwnerTest {
 

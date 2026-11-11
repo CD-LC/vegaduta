@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
-
 /**
  * One row of the workflow effect journal (V680): the durable record that an irreversible node ran
  * its side effect for a given {@code (run, node, iteration)}. Read-mostly from the JPA side - every

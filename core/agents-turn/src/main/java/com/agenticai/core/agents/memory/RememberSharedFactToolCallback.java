@@ -15,7 +15,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-
 /**
  * Shared cross-agent memory tier (#847) - exposes {@link TenantMemoryService#remember} as a native
  * Spring AI tool, only ever offered to an agent whose own config has {@code shareMemoryWithTenant}

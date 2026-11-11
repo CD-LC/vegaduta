@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.agenticai.core.guardrails.taint.TurnTaint;
 import org.junit.jupiter.api.Test;
 
-
 class InboundChannelTaintPolicyTest {
 
     @Test

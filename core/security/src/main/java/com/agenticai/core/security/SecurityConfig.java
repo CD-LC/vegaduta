@@ -35,7 +35,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
-
 /**
  * Phase 0 Stage 3 - OAuth2 Resource Server validating Keycloak-issued JWTs.
  *

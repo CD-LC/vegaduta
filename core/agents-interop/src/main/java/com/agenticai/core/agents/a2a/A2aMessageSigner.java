@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-
 /**
  * The outbound half of message signing: builds the headers an A2A request to a peer carries - the
  * hop number, the trace id and, when this instance can sign, a detached JWS over (method, path,

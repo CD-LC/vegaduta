@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import java.util.UUID;
 
-
 /**
  * {@code documentId} (Stage 5, KB multi-modal storage - nullable: chunks ingested before migration
  * V66, or via the raw {@code /ingest} text endpoint which has no owning document, both leave this

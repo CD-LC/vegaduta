@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Hands the inbound call context of an A2A turn to the outbound {@code a2a_call_agent} tool of the
  * SAME turn, without a ThreadLocal (AGENTS.md rule 12: a tool call may run on any thread).

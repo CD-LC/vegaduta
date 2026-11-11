@@ -32,7 +32,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * RAG eval harness: runs a dataset of questions against ONE collection under several retrieval
  * configurations (baseline vs fusion vs parent-child vs query rewriting) and reports hit-rate (with

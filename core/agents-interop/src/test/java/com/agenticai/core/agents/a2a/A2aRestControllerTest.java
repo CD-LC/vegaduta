@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import reactor.core.publisher.Flux;
 
-
 /**
  * The A2A 1.0 HTTP+JSON/REST binding (spec section 11): success shapes, the section 5.4 HTTP status
  * mapping, the google.rpc.Status error body with an ErrorInfo detail, SSE framing without a

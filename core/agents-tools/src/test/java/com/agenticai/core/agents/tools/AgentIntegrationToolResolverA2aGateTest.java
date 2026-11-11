@@ -19,7 +19,6 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * a2a_call_agent is offered only when the outbound client bean exists, app.a2a.client.enabled is
  * true, the operator allow-listed at least one host, AND the agent explicitly named the tool in its

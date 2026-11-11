@@ -11,7 +11,6 @@ import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Vertex/edge write path for {@link GraphMemoryService}, extracted to keep that class under the
  * file-size cap. All methods take an already-AGE-ready {@link Statement} (see {@code

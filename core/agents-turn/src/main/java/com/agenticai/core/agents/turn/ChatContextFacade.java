@@ -11,7 +11,6 @@ import com.agenticai.core.storage.FileStorageService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
-
 /**
  * What a turn reads into the prompt besides history: long-term memory, attachments and vision
  * frames, the data-analysis sandbox, model modalities and context compaction. Constructor-injected

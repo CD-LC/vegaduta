@@ -5,7 +5,6 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Policy seam for taint on INBOUND CHANNEL turns ({@code
  * app.agents.taint.inbound-channel-sources}), deliberately without deciding the policy: the product

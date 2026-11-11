@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-
 /**
  * Builds the two Agent Cards this server publishes: the PLATFORM card at {@code
  * /.well-known/agent-card.json} (what an external agent discovers first - "VegaDuta speaks A2A,

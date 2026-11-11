@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Resolves a caller's signing key from its Agent Card using {@link A2aCardVerifier} (SSRF-guarded,
  * no redirects, size-capped, card must itself be validly signed). The result is origin-bound proof,

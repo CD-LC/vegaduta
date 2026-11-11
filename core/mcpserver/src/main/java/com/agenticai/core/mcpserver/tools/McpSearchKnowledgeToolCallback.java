@@ -18,7 +18,6 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
 
-
 /**
  * Third MCP tool this server exposes - a read-only hybrid (vector + keyword, RRF-fused, optionally
  * reranked) search over the caller's own Knowledge Collections, routed straight into {@link

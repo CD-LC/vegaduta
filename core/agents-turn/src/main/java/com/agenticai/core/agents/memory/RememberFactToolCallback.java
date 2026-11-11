@@ -16,7 +16,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-
 /**
  * Exposes {@link AgentMemoryService#remember} as a native Spring AI tool, the same "plain
  * in-process ToolCallback, wrapped by AgentToolProvider exactly like every other tool" pattern

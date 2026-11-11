@@ -21,7 +21,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Phase 0 Stage 4 - tells Hibernate which Postgres schema to use for the current request, sourced
  * from {@link TenantContext} (populated by {@code TenantContextFilter} from the JWT's {@code

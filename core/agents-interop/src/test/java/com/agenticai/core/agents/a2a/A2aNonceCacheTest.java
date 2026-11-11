@@ -9,7 +9,6 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 class A2aNonceCacheTest {
 
     private MutableClock clock;

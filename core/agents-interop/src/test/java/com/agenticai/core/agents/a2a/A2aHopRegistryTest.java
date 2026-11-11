@@ -10,7 +10,6 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 class A2aHopRegistryTest {
 
     private MutableClock clock;

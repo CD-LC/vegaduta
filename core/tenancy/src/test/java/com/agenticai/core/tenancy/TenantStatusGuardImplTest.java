@@ -20,7 +20,6 @@ import java.util.Optional;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Zero test coverage existed for {@link TenantStatusGuardImpl} before this - the actual access
  * control decision behind every authenticated request (via {@code TenantContextFilter}), with a

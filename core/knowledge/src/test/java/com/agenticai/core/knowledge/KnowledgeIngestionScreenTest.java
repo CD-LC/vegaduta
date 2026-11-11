@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
-
 /**
  * Ingestion write-screen: credentials refuse the document, injection phrases are recorded as a
  * per-chunk {@code screen_flags} provenance marker, and that marker reaches search results.

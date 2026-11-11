@@ -28,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Automatic demotion: a guardrail strike on an envoy agent (event) or a failed eval run (poll) lowers the brief one
  * rung through the real trust ladder, and quality-tooling replays never count as strikes.

@@ -39,7 +39,6 @@ import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.mock.web.MockHttpServletResponse;
 import reactor.core.publisher.Flux;
 
-
 /**
  * A chain of REAL A2A instances in one JVM, talking over loopback HTTP: a root caller R calls A,
  * and A's agent turn calls B through its own {@code a2a_call_agent} tool. Each instance has its own

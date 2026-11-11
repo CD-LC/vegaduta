@@ -5,7 +5,6 @@ import com.agenticai.core.knowledge.KnowledgeVisibility;
 import java.time.Instant;
 import java.util.UUID;
 
-
 public record KnowledgeCollectionResponse(
         UUID id,
         String name,

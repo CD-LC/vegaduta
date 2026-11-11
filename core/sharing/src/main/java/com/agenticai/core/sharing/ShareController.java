@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Owner-facing grant management for both resource types, mounted at two concrete paths - {@code
  * /api/agents/{id}/grants} and {@code /api/workflows/{id}/grants} - via one {@code

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-
 /**
  * Central enforcement in {@link KnowledgeSearchService}: whatever reaches it (REST search, the
  * agent's {@code search_knowledge_base} tool, a workflow knowledge node, the MCP tool) is narrowed

@@ -24,7 +24,6 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-
 /**
  * Apache AGE-backed graph memory, alongside (not replacing) {@code AgentMemoryService}'s
  * pgvector-backed semantic recall. A Postgres extension was chosen over a standalone graph database

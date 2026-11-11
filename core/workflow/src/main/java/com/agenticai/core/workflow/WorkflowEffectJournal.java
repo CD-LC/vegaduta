@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Exactly-once bookkeeping for the irreversible nodes of the workflow engines (V680 {@code
  * workflow_effect_journal}). Workflow execution is at-least-once - node retries, Temporal activity

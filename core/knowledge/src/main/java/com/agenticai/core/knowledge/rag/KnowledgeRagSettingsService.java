@@ -17,7 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 /**
  * A collection's retrieval-quality settings - today just the parent-child opt-in, stored in {@code
  * knowledge_collection.parent_child_enabled} (migration V432).

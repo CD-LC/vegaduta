@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * Long-term (private + tenant-shared) memory recall block for a chat turn, extracted verbatim from
  * {@link AgentChatService} (extract-only split).

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-
 /** SEC-056: the azp check used to wave through any token that simply omitted azp. */
 class SecurityConfigJwtValidatorTest {
 

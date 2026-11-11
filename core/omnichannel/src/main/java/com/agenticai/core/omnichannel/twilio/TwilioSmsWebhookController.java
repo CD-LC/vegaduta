@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Inbound SMS. Originally (#422) only a workflow <i>trigger</i>: a message to the tenant's Twilio
  * number could start a bound workflow and was otherwise acknowledged and dropped, because plain SMS

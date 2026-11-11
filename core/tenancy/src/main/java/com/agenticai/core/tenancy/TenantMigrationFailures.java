@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Tenant schemas whose startup migration failed. {@link TenantStatusGuardImpl} treats them as not
  * usable (a stale schema serves wrong or 500ing queries) until a later successful migration of the

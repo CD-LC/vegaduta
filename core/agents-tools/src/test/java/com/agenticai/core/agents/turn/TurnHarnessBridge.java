@@ -34,7 +34,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import reactor.core.publisher.Flux;
 
-
 /**
  * Builds the REAL {@link AgentChatService} (the production turn pipeline: preflight with its
  * SEC-004 scoped session key, prompt assembly with its history replay, the dispatcher, the FAST

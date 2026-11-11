@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * {@link WorkflowRunRecoveryJob} exists because a JVM crash mid-run leaves a {@link WorkflowRun}
  * row RUNNING forever - these tests pin the two halves of "stale": old {@code startedAt} AND no

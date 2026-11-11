@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * {@link SchemaNameSanitizer} is the one shared place every raw tenant identifier (a JWT {@code
  * tenant_id} claim on the hot request path, or a signup form's org name at provisioning time)

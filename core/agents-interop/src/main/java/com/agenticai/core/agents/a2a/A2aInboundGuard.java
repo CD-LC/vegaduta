@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Message-level checks every inbound A2A request passes after transport authentication (the bearer
  * JWT) and before any work is done, in this order:

@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
-
 /**
  * REST enforcement in {@link KnowledgeController}: a member without a grant cannot search,
  * download, ingest, delete from or re-embed a restricted collection (404, nothing downstream

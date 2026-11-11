@@ -34,7 +34,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-
 /**
  * {@link TenantContextFilter} is what populates {@link TenantContext} for every authenticated
  * request - every schema-per-tenant query, every {@code @PreAuthorize}/{@code hasRole} check

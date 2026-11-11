@@ -2,7 +2,6 @@ package com.agenticai.core.agents.a2a;
 
 import org.springframework.ai.tool.ToolCallback;
 
-
 /**
  * Port (ADR-0023): how the tool resolver in {@code core/agents} offers the {@code a2a_call_agent}
  * built-in without depending on the outbound A2A client, which lives in {@code core/agents-interop}

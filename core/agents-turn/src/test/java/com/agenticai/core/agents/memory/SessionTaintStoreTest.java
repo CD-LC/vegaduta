@@ -24,7 +24,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-
 /** Conversation-level taint: a tainted turn leaves a marker that seeds the next turn. */
 class SessionTaintStoreTest {
 

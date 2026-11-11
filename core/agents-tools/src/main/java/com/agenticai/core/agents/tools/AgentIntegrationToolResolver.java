@@ -23,7 +23,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * Tool-resolution group extracted from {@link AgentToolProvider} (extract-only, no behavior
  * change). Not a Spring bean: constructed by AgentToolProvider.

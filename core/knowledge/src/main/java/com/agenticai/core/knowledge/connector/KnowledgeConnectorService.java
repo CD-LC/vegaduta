@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Live-connector sync service (P2 product-completeness: "no Notion/Drive/
  * Confluence/SharePoint/web-crawl live sync with citations").

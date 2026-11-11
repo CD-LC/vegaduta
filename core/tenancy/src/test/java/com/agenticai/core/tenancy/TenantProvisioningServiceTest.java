@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-
 /**
  * Zero test coverage existed for {@link TenantProvisioningService} before this. It is risk-bearing
  * in two distinct ways. First, {@code resolveUniqueSchemaName} is the ONE place a request-supplied

@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-
 /**
  * In-memory stand-in for {@link WorkflowEffectJournalRepository}'s custom statements with the same
  * atomic semantics as the native SQL (insert-on-conflict-do-nothing, status-guarded updates). The

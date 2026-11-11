@@ -18,7 +18,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-
 /**
  * The two SQL candidate scans behind {@link KnowledgeSearchService}: the per-embedding-model
  * pgvector scan (with optional HNSW session tuning) and the per-collection-config full-text scan.

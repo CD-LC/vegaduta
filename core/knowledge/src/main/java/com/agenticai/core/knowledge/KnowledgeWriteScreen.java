@@ -3,7 +3,6 @@ package com.agenticai.core.knowledge;
 import com.agenticai.core.screen.ContentWriteScreen;
 import java.util.Optional;
 
-
 /**
  * Write-time screen for text an AGENT is about to persist into a knowledge collection ({@code
  * add_to_knowledge_base}). The pattern lists live in the shared {@link ContentWriteScreen} (also

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * The A2A 1.0 HTTP+JSON/REST binding (spec section 11).
  *

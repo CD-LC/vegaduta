@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
-
 /** Ownership, visibility and the collection-level guards in {@link KnowledgeCollectionService}. */
 class KnowledgeCollectionServiceAclTest {
 

@@ -5,7 +5,6 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenResolv
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
-
 /**
  * Grant-key and OpenAI-compatible-surface helpers extracted from {@link SecurityConfig} to keep
  * that class under the file-size cap. All methods are static; the {@code openAiCompatEnabled} flag

@@ -14,7 +14,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-
 /**
  * HTTP request interceptor for fraud detection. Runs before request handlers to check for abuse
  * patterns and enforce fraud decisions.

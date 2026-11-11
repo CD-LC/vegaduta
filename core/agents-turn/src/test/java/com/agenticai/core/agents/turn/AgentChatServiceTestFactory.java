@@ -36,7 +36,6 @@ import com.agenticai.core.tenancy.FeatureFlagService;
 import java.time.Duration;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * Builds an {@link AgentChatService} from the flat, pre-facade argument list the hand-built test
  * fixtures were written against, so those fixtures keep their one positional call while production

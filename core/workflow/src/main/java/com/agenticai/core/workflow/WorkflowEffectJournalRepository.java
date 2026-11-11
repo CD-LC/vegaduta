@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Atomic statements over {@code workflow_effect_journal} (V680). Every write runs in its OWN
  * transaction ({@code REQUIRES_NEW}): a STARTED row must be durable before the side effect fires,

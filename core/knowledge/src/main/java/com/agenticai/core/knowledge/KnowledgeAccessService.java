@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Per-collection access control for the knowledge base, built on the same {@link
  * ResourceAccessService} grants and {@link PermissionLevel}s that agents and workflows use ({@link

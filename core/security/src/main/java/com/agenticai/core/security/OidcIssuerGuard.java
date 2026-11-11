@@ -2,7 +2,6 @@ package com.agenticai.core.security;
 
 import com.agenticai.core.security.SecurityConfig.OidcProvider;
 
-
 /**
  * Startup guard for the JWT issuer's client-bound checks ({@code azp} allowlist, required
  * audience), extracted from {@link SecurityConfig} to keep that class under the file-size cap.

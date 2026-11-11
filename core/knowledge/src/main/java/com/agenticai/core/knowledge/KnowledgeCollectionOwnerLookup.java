@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-
 /**
  * The {@code core/knowledge} adapter for core/sharing's {@link ResourceOwnerLookup} seam, so {@code
  * ShareController} ({@code /api/knowledge/collections/{id}/grants}) can resolve "who owns this

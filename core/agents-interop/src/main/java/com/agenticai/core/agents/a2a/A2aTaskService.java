@@ -32,7 +32,6 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
-
 /**
  * Maps an A2A task onto ONE {@link AgentChatService#chat} turn - the exact same chokepoint the web
  * console, every omnichannel webhook and the MCP {@code call_agent} tool go through, so an

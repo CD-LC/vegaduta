@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Replay protection for signed A2A requests: remembers each accepted {@code (tenant, key id,
  * nonce)} for {@code 2 x timestamp-window} (a nonce can be replayed from the moment its timestamp

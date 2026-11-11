@@ -25,7 +25,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 /**
  * The OUTBOUND half of A2A: lets an agent call an EXTERNAL A2A agent as a tool ({@code
  * a2a_call_agent}, see {@link A2aRemoteAgentToolCallback}). The inbound server in this package is

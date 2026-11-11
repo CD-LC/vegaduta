@@ -4,7 +4,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 
-
 /**
  * Tool, knowledge, channel and workflow rules, in chain order: custom tools, knowledge, channel
  * credentials, routing and pairing, ElevenLabs, workflows, agent schedules and triggers, and leads.

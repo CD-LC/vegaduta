@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Receives Twilio's delivery-status callback for outbound WhatsApp messages (#474 follow-up: "I
  * want to know when an auto-reply failed to deliver"). {@link

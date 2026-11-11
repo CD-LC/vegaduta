@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 
-
 /**
  * The bodies of {@link DynamicMcpConnectionManager#connect} (guards, transport, SDK handshake, tool
  * discovery and registration of one dynamic MCP connection, with the never-throws failure path), of

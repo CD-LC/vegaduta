@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /** Knowledge Stage F1 - CRUD for the collections {@code KnowledgeController.upload} files into. */
 @RestController
 @RequestMapping("/api/knowledge/collections")

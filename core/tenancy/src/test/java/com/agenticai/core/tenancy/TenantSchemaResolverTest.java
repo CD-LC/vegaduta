@@ -25,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
-
 /**
  * {@link TenantSchemaResolver} is the seam that turns "which tenant is this request for" into
  * "which Postgres schema does Hibernate query" - both via the Hibernate SPI hook ({@link

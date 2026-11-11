@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-
 /**
  * The one implementation of "bring every ACTIVE tenant schema up to date", shared by {@link
  * ExistingTenantSchemaMigrationRunner} (on-boot, today's behaviour) and {@link

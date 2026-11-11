@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-
 /**
  * Paged scan-and-invalidate work behind {@link GraphMemoryService#forgetFactText}, extracted to
  * keep that class under the file-size cap. Runs on an already-AGE-ready {@link Statement}.

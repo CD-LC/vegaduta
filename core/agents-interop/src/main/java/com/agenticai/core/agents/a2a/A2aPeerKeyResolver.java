@@ -3,7 +3,6 @@ package com.agenticai.core.agents.a2a;
 import java.security.PublicKey;
 import java.util.Optional;
 
-
 /**
  * Finds the public key a caller signs its A2A requests with: the key that verified the caller's own
  * Agent Card (the card URL travels in the {@code X-Vegaduta-A2A-Origin} header). An interface so

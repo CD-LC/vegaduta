@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 /**
  * Knowledge Stage F3c - status polling for async ingestion jobs (audio today; Stage F3d's video
  * ingestion will reuse this same job/polling mechanism rather than adding a second one).

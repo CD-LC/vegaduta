@@ -12,7 +12,6 @@ import com.agenticai.core.providers.ProviderCredentialResolver;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.sharing.ResourceAccessService;
 
-
 /**
  * Builds the plain (non-bean) collaborators {@link AgentChatService} delegates to, from the same
  * constructor arguments and in the same order its constructor used to build them inline

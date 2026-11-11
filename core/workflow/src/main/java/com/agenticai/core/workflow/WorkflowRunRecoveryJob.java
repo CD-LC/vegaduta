@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Crash recovery for the DEFAULT (synchronous, in-process) {@link WorkflowExecutionEngine}. That
  * engine persists a run as RUNNING up front and only ever flips it to a terminal status from the

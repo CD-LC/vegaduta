@@ -43,7 +43,6 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.tool.ToolCallback;
 
-
 /**
  * Builds everything the model call needs for one turn - attachments and vision metering, the three
  * concurrent pre-turn reads (history, tools, memory recall), the system prompt and memory block,

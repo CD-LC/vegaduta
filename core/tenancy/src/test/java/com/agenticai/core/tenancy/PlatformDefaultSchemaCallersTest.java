@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Regression pin for the intentional users of the legacy {@code public} default schema.
  *

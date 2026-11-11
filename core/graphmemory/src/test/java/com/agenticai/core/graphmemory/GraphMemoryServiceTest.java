@@ -30,7 +30,6 @@ import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-
 /**
  * {@link GraphMemoryService#eraseSubject}-focused coverage - the rest of this class ({@link
  * GraphMemoryService#remember}/{@link GraphMemoryService#recallRelated}/{@link

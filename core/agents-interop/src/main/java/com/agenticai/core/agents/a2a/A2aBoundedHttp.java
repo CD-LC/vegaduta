@@ -12,7 +12,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Redirect-free, size-capped, deadline-bounded HTTP exchange for the outbound A2A client: the
  * response body is read at most {@code max-response-bytes} and for at most {@code request-timeout}

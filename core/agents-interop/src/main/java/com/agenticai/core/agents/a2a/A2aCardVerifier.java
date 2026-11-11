@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-
 /**
  * The inbound half of signed Agent Cards - what the cross-tenant marketplace consumes. {@link
  * A2aCardSigningService} signs OUR cards; this verifies THEIRS: fetch a card from a remote

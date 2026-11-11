@@ -23,7 +23,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 
-
 /**
  * Master-Roadmap-2026.md item #2 (hybrid search + reranking), Platform- Tech-Stack-Audit-2026.md
  * P3.2. Originally pure vector-similarity search; now runs a vector search AND a keyword/full-text

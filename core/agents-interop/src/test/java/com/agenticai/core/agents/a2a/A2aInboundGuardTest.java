@@ -18,7 +18,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * Message-level checks on inbound A2A requests, against a REAL signer (the same Ed25519 key the
  * Agent Card is signed with) and the real nonce cache: valid, tampered, replayed, stale, legacy and

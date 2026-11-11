@@ -26,7 +26,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * The per-collection access matrix: owner / visibility / grant / admin, the fail-closed cases, and
  * that every refusal is audited and 404-shaped. Plain Mockito, no Spring context.

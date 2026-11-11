@@ -11,7 +11,6 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Single-node execution logic, extracted out of {@link WorkflowExecutionEngine} so it has exactly
  * one home shared by both execution paths this codebase now has:

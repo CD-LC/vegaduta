@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Conversation-level taint ({@code app.agents.taint.session-persistence}). A turn's {@link
  * TurnTaint} dies with the turn, but the chat history is replayed on every later turn, so a reply

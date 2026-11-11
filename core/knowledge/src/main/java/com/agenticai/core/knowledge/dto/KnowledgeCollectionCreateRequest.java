@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
-
 /**
  * Knowledge Stage F1. {@code description} isn't {@code @NotBlank} (some users will skip it), but a
  * blank description means Stage F2's {@code list_knowledge_collections} tool has nothing meaningful

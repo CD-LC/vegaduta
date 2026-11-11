@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  * Knowledge Stage F1 - CRUD for {@link KnowledgeCollection} plus the two cross-cutting lookups
  * other services need: "what's the fallback collection for an upload with none specified" and "does

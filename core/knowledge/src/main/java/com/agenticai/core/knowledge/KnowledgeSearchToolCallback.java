@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-
 /**
  * Stage 6: exposes KnowledgeSearchService as a native Spring AI tool, so an agent can call it
  * mid-conversation exactly like an MCP-provided tool (AgentToolProvider wraps this in

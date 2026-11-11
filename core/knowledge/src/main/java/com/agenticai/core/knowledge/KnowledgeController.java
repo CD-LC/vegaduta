@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-
 /**
  * Stage 5 primitives (ingest/search over raw text) plus Stage 6's actual user-facing entry point:
  * upload() takes a real .md file, reads it as plain text (no markdown-to-plaintext conversion -

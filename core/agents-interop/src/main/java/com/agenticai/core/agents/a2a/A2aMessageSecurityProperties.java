@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-
 /**
  * Message-level security for A2A requests: detached request signatures, replay protection and the
  * cross-instance hop limit. Bound from the same {@code app.a2a.*} prefix as {@link A2aProperties}

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 
-
 /**
  * The {@code a2a_call_agent} built-in: delegate one question or task to an EXTERNAL agent that
  * speaks A2A (Agent2Agent), identified by the URL of its Agent Card. All policy lives in {@link

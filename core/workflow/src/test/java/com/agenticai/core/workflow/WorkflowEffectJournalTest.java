@@ -21,7 +21,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 /**
  * The effect journal protocol (V680), driven through the real {@link WorkflowNodeExecutor} so the
  * wiring (journal around the dispatch, after the approval gate and expression resolution) is under

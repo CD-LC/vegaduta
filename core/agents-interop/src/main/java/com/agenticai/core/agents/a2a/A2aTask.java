@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 import reactor.core.Disposable;
 import reactor.core.publisher.Sinks;
 
-
 /**
  * One A2A task = one agent chat turn, held in {@link A2aTaskStore} for the lifetime of its TTL.
  * Mutable, guarded by {@code this}: the reactor thread appending deltas, a second HTTP request

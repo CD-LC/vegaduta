@@ -27,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * Covers {@link ResourceAccessService}'s full contract per the sharing workstream spec:
  * legacy-open, owner, tenant-admin, grant-level ordinal checks, re-grant-upserts, idempotent

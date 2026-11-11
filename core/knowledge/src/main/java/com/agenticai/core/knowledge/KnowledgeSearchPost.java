@@ -14,7 +14,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Post-retrieval stages of {@link KnowledgeSearchService} - fusion, rerank, parent expansion,
  * citations and provenance fills - extracted to keep that class under the file-size cap. All

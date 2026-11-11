@@ -32,7 +32,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 
-
 /**
  * SEC-007: untrusted run input (webhook / share callers) substituted into an HTTP node's templates
  * must never be able to introduce a vault reference that the executor then resolves and sends to

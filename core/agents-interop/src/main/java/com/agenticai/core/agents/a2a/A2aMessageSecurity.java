@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-
 /**
  * Wire vocabulary and the canonical signing input shared by the outbound signer ({@link
  * A2aMessageSigner}) and the inbound verifier ({@link A2aInboundGuard}).

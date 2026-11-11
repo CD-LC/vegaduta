@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-
 /** remember_fact / remember_shared_fact refuse stored injections and credentials. */
 class RememberFactWriteScreenTest {
 
