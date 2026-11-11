@@ -142,9 +142,60 @@ public final class SkillPromptBlock {
      */
     private static final java.util.Set<String> STOP =
             java.util.Set.of(
-                    "which", "would", "their", "using", "about", "please", "these", "those",
-                    "there", "where", "should", "could", "other", "after", "before", "while",
-                    "every", "users", "being", "needs");
+                    "which",
+                    "would",
+                    "their",
+                    "using",
+                    "about",
+                    "please",
+                    "these",
+                    "those",
+                    "there",
+                    "where",
+                    "should",
+                    "could",
+                    "other",
+                    "after",
+                    "before",
+                    "while",
+                    "every",
+                    "users",
+                    "being",
+                    "needs",
+                    // Words a skill description uses and an ordinary question does too ("Answer in
+                    // one short
+                    // sentence" must not switch on the generative-ui skill).
+                    "answer",
+                    "answers",
+                    "short",
+                    "brief",
+                    "simple",
+                    "quick",
+                    "write",
+                    "create",
+                    "wants",
+                    "shares",
+                    "files",
+                    "questions",
+                    "options",
+                    "through",
+                    "summary",
+                    "tools",
+                    "inline",
+                    "reply");
+
+    /** Skill-name words too common in a request to mean the skill ("use" in media-use). */
+    private static final java.util.Set<String> GENERIC_NAME_TOKENS =
+            java.util.Set.of("use", "with", "tool", "tools", "skill", "skills");
+
+    /**
+     * "Word" alone is a common word ("reply with the single word OK"); it means Word only next to
+     * these.
+     */
+    private static final java.util.regex.Pattern WORD_FILE =
+            java.util.regex.Pattern.compile(
+                    "\\bword (file|doc|document|format)\\b|\\b(in|to|into|as a|as an) word\\b",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
 
     /** At most {@code maxWords} words, single line. */
     static String brief(String text, int maxWords) {
@@ -179,7 +230,6 @@ public final class SkillPromptBlock {
                     java.util.Map.entry("excel", "xlsx"),
                     java.util.Map.entry("sheet", "xlsx"),
                     java.util.Map.entry("sheets", "xlsx"),
-                    java.util.Map.entry("word", "docx"),
                     java.util.Map.entry("document", "docx"),
                     java.util.Map.entry("documents", "docx"),
                     java.util.Map.entry("doc", "docx"),
@@ -210,6 +260,9 @@ public final class SkillPromptBlock {
         }
         java.util.Set<String> msg = tokens(userMessage, 3);
         java.util.Set<String> implied = new java.util.HashSet<>();
+        if (WORD_FILE.matcher(userMessage).find()) {
+            implied.add("docx");
+        }
         for (String t : tokens(userMessage, 2)) {
             String target = SYNONYMS.get(t);
             if (target != null) {
@@ -221,7 +274,7 @@ public final class SkillPromptBlock {
                 return true;
             }
             for (String n : tokens(s.name(), 3)) {
-                if (msg.contains(n)) {
+                if (!GENERIC_NAME_TOKENS.contains(n) && msg.contains(n)) {
                     return true;
                 }
             }

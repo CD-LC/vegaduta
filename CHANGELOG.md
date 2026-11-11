@@ -18,6 +18,8 @@ Release notes on GitHub are generated from the section for each version.
   `load_skill` away. Other models are unchanged.
   `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
+  carried the skills index and skill tools (about 700 tokens). Generic words are ignored, and "word" means the
+  docx skill only next to file/document/format. Real skill requests still match.
   different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
   effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
   executes), so the pre-check now runs only when a run produced no result, with the same validation message.
@@ -31,6 +33,7 @@ Release notes on GitHub are generated from the section for each version.
   runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
   separate node process before running it; the run itself is the parse (a module that does not parse never
+  uses ("answer", "short", "use", "word"), so "What is the capital of France? Answer in one short sentence"
   startup (the row is still never rewritten) instead of silently running the other model.
   the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
   tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
@@ -50,6 +53,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
+- **Ordinary questions no longer switch the skills block on.** The skill gate matched on words every question
 - **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
