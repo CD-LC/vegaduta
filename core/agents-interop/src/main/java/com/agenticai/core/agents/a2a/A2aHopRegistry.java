@@ -1,12 +1,13 @@
 package com.agenticai.core.agents.a2a;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Hands the inbound call context of an A2A turn to the outbound {@code a2a_call_agent} tool of the
@@ -27,81 +28,86 @@ import org.springframework.stereotype.Component;
 @Component
 public class A2aHopRegistry {
 
-  static final int MAX_ENTRIES = 10_000;
-  static final Duration ENTRY_TTL = Duration.ofHours(1);
+    static final int MAX_ENTRIES = 10_000;
+    static final Duration ENTRY_TTL = Duration.ofHours(1);
 
-  private record Entry(A2aCallContext context, int refs, long expiresAtMillis) {}
+    private record Entry(A2aCallContext context, int refs, long expiresAtMillis) {}
 
-  private final Map<String, Entry> entries = new ConcurrentHashMap<>();
-  private final Clock clock;
+    private final Map<String, Entry> entries = new ConcurrentHashMap<>();
+    private final Clock clock;
 
-  @Autowired
-  public A2aHopRegistry() {
-    this(Clock.systemUTC());
-  }
-
-  A2aHopRegistry(Clock clock) {
-    this.clock = clock;
-  }
-
-  /**
-   * Registers {@code context} for {@code sessionId}.
-   *
-   * @return false when the registry is full (the caller must refuse the request)
-   */
-  public boolean register(String sessionId, A2aCallContext context) {
-    if (sessionId == null || context == null) {
-      return true;
+    @Autowired
+    public A2aHopRegistry() {
+        this(Clock.systemUTC());
     }
-    long now = clock.millis();
-    if (entries.size() >= MAX_ENTRIES) {
-      entries.values().removeIf(e -> e.expiresAtMillis() <= now);
-      if (entries.size() >= MAX_ENTRIES && !entries.containsKey(sessionId)) {
-        return false;
-      }
-    }
-    long expires = now + ENTRY_TTL.toMillis();
-    entries.merge(
-        sessionId,
-        new Entry(context, 1, expires),
-        (old, fresh) -> {
-          boolean live = old.expiresAtMillis() > now;
-          if (!live) {
-            return fresh;
-          }
-          A2aCallContext keep =
-              fresh.context().hop() > old.context().hop() ? fresh.context() : old.context();
-          return new Entry(keep, old.refs() + 1, expires);
-        });
-    return true;
-  }
 
-  /** The context registered for {@code sessionId}, if any and not expired. */
-  public Optional<A2aCallContext> lookup(String sessionId) {
-    if (sessionId == null) {
-      return Optional.empty();
+    A2aHopRegistry(Clock clock) {
+        this.clock = clock;
     }
-    Entry entry = entries.get(sessionId);
-    if (entry == null || entry.expiresAtMillis() <= clock.millis()) {
-      return Optional.empty();
-    }
-    return Optional.of(entry.context());
-  }
 
-  /** Drops one registration; the entry goes when the last one is released. */
-  public void release(String sessionId) {
-    if (sessionId == null) {
-      return;
+    /**
+     * Registers {@code context} for {@code sessionId}.
+     *
+     * @return false when the registry is full (the caller must refuse the request)
+     */
+    public boolean register(String sessionId, A2aCallContext context) {
+        if (sessionId == null || context == null) {
+            return true;
+        }
+        long now = clock.millis();
+        if (entries.size() >= MAX_ENTRIES) {
+            entries.values().removeIf(e -> e.expiresAtMillis() <= now);
+            if (entries.size() >= MAX_ENTRIES && !entries.containsKey(sessionId)) {
+                return false;
+            }
+        }
+        long expires = now + ENTRY_TTL.toMillis();
+        entries.merge(
+                sessionId,
+                new Entry(context, 1, expires),
+                (old, fresh) -> {
+                    boolean live = old.expiresAtMillis() > now;
+                    if (!live) {
+                        return fresh;
+                    }
+                    A2aCallContext keep =
+                            fresh.context().hop() > old.context().hop()
+                                    ? fresh.context()
+                                    : old.context();
+                    return new Entry(keep, old.refs() + 1, expires);
+                });
+        return true;
     }
-    entries.computeIfPresent(
-        sessionId,
-        (key, entry) ->
-            entry.refs() <= 1
-                ? null
-                : new Entry(entry.context(), entry.refs() - 1, entry.expiresAtMillis()));
-  }
 
-  int size() {
-    return entries.size();
-  }
+    /** The context registered for {@code sessionId}, if any and not expired. */
+    public Optional<A2aCallContext> lookup(String sessionId) {
+        if (sessionId == null) {
+            return Optional.empty();
+        }
+        Entry entry = entries.get(sessionId);
+        if (entry == null || entry.expiresAtMillis() <= clock.millis()) {
+            return Optional.empty();
+        }
+        return Optional.of(entry.context());
+    }
+
+    /** Drops one registration; the entry goes when the last one is released. */
+    public void release(String sessionId) {
+        if (sessionId == null) {
+            return;
+        }
+        entries.computeIfPresent(
+                sessionId,
+                (key, entry) ->
+                        entry.refs() <= 1
+                                ? null
+                                : new Entry(
+                                        entry.context(),
+                                        entry.refs() - 1,
+                                        entry.expiresAtMillis()));
+    }
+
+    int size() {
+        return entries.size();
+    }
 }

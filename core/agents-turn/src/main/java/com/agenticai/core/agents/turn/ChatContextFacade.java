@@ -8,6 +8,7 @@ import com.agenticai.core.agents.tools.e2b.SandboxFileRegistry;
 import com.agenticai.core.agents.vision.VisionSessionService;
 import com.agenticai.core.agents.vision.VisionUsageService;
 import com.agenticai.core.storage.FileStorageService;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +19,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 record ChatContextFacade(
-    ObjectProvider<AgentMemoryService> agentMemoryService,
-    ObjectProvider<TenantMemoryService> tenantMemoryService,
-    FileStorageService fileStorageService,
-    InlineAttachmentProcessor inlineAttachmentProcessor,
-    VisionUsageService visionUsageService,
-    VisionSessionService visionSessionService,
-    ObjectProvider<SandboxFileRegistry> sandboxFileRegistry,
-    ObjectProvider<ModelModalitiesService> modelModalitiesService,
-    ObjectProvider<ChatContextCompaction> chatContextCompaction,
-    ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaintStore) {}
+        ObjectProvider<AgentMemoryService> agentMemoryService,
+        ObjectProvider<TenantMemoryService> tenantMemoryService,
+        FileStorageService fileStorageService,
+        InlineAttachmentProcessor inlineAttachmentProcessor,
+        VisionUsageService visionUsageService,
+        VisionSessionService visionSessionService,
+        ObjectProvider<SandboxFileRegistry> sandboxFileRegistry,
+        ObjectProvider<ModelModalitiesService> modelModalitiesService,
+        ObjectProvider<ChatContextCompaction> chatContextCompaction,
+        ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaintStore) {}

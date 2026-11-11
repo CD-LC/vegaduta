@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -37,214 +38,215 @@ import java.util.UUID;
 @Table(name = "knowledge_collection")
 public class KnowledgeCollection {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-  @Column(nullable = false, length = 255)
-  private String name;
+    @Column(nullable = false, length = 255)
+    private String name;
 
-  @Column(columnDefinition = "TEXT")
-  private String description;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-  @Column(name = "parent_collection_id")
-  private UUID parentCollectionId;
+    @Column(name = "parent_collection_id")
+    private UUID parentCollectionId;
 
-  @Column(name = "is_default", nullable = false)
-  private boolean isDefault;
+    @Column(name = "is_default", nullable = false)
+    private boolean isDefault;
 
-  // Multi-model ingestion - one of EmbeddingModelCatalog's keys, chosen at
-  // creation. `update()` below still never touches it: the ONLY way it
-  // changes is KnowledgeReembedService's flip, a raw-JDBC UPDATE that swaps
-  // every chunk's vector and this column in one transaction, so a
-  // collection never holds two models' vectors as its live set (see
-  // EmbeddingModelCatalog's javadoc for why mixing models isn't allowed).
-  // updatable = false: a JPA save of a collection loaded before a flip must
-  // never write the stale model back over it (lost update) - both this and
-  // embeddingStatus are written only by KnowledgeReembedService's JDBC.
-  @Column(name = "embedding_model", nullable = false, length = 64, updatable = false)
-  private String embeddingModel;
+    // Multi-model ingestion - one of EmbeddingModelCatalog's keys, chosen at
+    // creation. `update()` below still never touches it: the ONLY way it
+    // changes is KnowledgeReembedService's flip, a raw-JDBC UPDATE that swaps
+    // every chunk's vector and this column in one transaction, so a
+    // collection never holds two models' vectors as its live set (see
+    // EmbeddingModelCatalog's javadoc for why mixing models isn't allowed).
+    // updatable = false: a JPA save of a collection loaded before a flip must
+    // never write the stale model back over it (lost update) - both this and
+    // embeddingStatus are written only by KnowledgeReembedService's JDBC.
+    @Column(name = "embedding_model", nullable = false, length = 64, updatable = false)
+    private String embeddingModel;
 
-  // Migration V362 - READY, or REEMBEDDING while a KnowledgeReembedJob is
-  // building shadow vectors for a new model. Not nullable=false in JPA for
-  // the same mid-rollout reason as textSearchConfig below; null reads as READY.
-  @Column(name = "embedding_status", length = 32, updatable = false)
-  private String embeddingStatus;
+    // Migration V362 - READY, or REEMBEDDING while a KnowledgeReembedJob is
+    // building shadow vectors for a new model. Not nullable=false in JPA for
+    // the same mid-rollout reason as textSearchConfig below; null reads as READY.
+    @Column(name = "embedding_status", length = 32, updatable = false)
+    private String embeddingStatus;
 
-  // Migration V550 - the embedding SOURCE that produced this collection's vectors ("sidecar" or
-  // "provider:model:width", see SidecarClient#embeddingFingerprint); null = not bound yet. Written
-  // only by KnowledgeEmbeddingBinding / KnowledgeReembedService's JDBC, never by JPA.
-  @Column(name = "embedding_fingerprint", length = 190, insertable = false, updatable = false)
-  private String embeddingFingerprint;
+    // Migration V550 - the embedding SOURCE that produced this collection's vectors ("sidecar" or
+    // "provider:model:width", see SidecarClient#embeddingFingerprint); null = not bound yet.
+    // Written
+    // only by KnowledgeEmbeddingBinding / KnowledgeReembedService's JDBC, never by JPA.
+    @Column(name = "embedding_fingerprint", length = 190, insertable = false, updatable = false)
+    private String embeddingFingerprint;
 
-  // Migration V361 - per-collection chunking budget in words, null = the
-  // platform default (Chunker.DEFAULT_CHUNK_SIZE / DEFAULT_CHUNK_OVERLAP).
-  // Only affects content ingested after it's set; existing chunks keep the
-  // boundaries they were cut with.
-  @Column(name = "chunk_size")
-  private Integer chunkSize;
+    // Migration V361 - per-collection chunking budget in words, null = the
+    // platform default (Chunker.DEFAULT_CHUNK_SIZE / DEFAULT_CHUNK_OVERLAP).
+    // Only affects content ingested after it's set; existing chunks keep the
+    // boundaries they were cut with.
+    @Column(name = "chunk_size")
+    private Integer chunkSize;
 
-  @Column(name = "chunk_overlap")
-  private Integer chunkOverlap;
+    @Column(name = "chunk_overlap")
+    private Integer chunkOverlap;
 
-  // RAG audit fix (2026-07-29, migration V154) - the Postgres text-search
-  // configuration this collection's keyword/full-text side uses (one of
-  // TextSearchConfigCatalog's keys). Immutable after creation for the same
-  // reason embeddingModel is: every stored chunk's content_tsv was built
-  // with it. Not marked nullable=false in JPA despite the column's NOT
-  // NULL DEFAULT - a tenant schema that hasn't applied V154 yet reads
-  // null here, which every consumer coalesces to 'simple' (see
-  // KnowledgeIngestionService/KnowledgeSearchService), keeping the module
-  // functional mid-rollout instead of failing entity validation.
-  @Column(name = "text_search_config", length = 64)
-  private String textSearchConfig;
+    // RAG audit fix (2026-07-29, migration V154) - the Postgres text-search
+    // configuration this collection's keyword/full-text side uses (one of
+    // TextSearchConfigCatalog's keys). Immutable after creation for the same
+    // reason embeddingModel is: every stored chunk's content_tsv was built
+    // with it. Not marked nullable=false in JPA despite the column's NOT
+    // NULL DEFAULT - a tenant schema that hasn't applied V154 yet reads
+    // null here, which every consumer coalesces to 'simple' (see
+    // KnowledgeIngestionService/KnowledgeSearchService), keeping the module
+    // functional mid-rollout instead of failing entity validation.
+    @Column(name = "text_search_config", length = 64)
+    private String textSearchConfig;
 
-  // Migration V710 - the owner's subject; null = a legacy collection that predates per-collection
-  // access control (never backfilled, like agent.created_by in V151).
-  @Column(name = "created_by", length = 255, updatable = false)
-  private String createdBy;
+    // Migration V710 - the owner's subject; null = a legacy collection that predates per-collection
+    // access control (never backfilled, like agent.created_by in V151).
+    @Column(name = "created_by", length = 255, updatable = false)
+    private String createdBy;
 
-  // Migration V710 - NOT NULL DEFAULT 'TENANT', so every existing row stays tenant-visible.
-  @Enumerated(EnumType.STRING)
-  @Column(name = "visibility", nullable = false, length = 16)
-  private KnowledgeVisibility visibility = KnowledgeVisibility.TENANT;
+    // Migration V710 - NOT NULL DEFAULT 'TENANT', so every existing row stays tenant-visible.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false, length = 16)
+    private KnowledgeVisibility visibility = KnowledgeVisibility.TENANT;
 
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-  @Column(name = "updated_at", nullable = false)
-  private Instant updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
-  protected KnowledgeCollection() {
-    // JPA
-  }
-
-  public KnowledgeCollection(
-      String name,
-      String description,
-      UUID parentCollectionId,
-      String embeddingModel,
-      String textSearchConfig) {
-    this.name = name;
-    this.description = description;
-    this.parentCollectionId = parentCollectionId;
-    this.isDefault = false;
-    this.embeddingModel = embeddingModel;
-    this.textSearchConfig = textSearchConfig;
-    this.embeddingStatus = STATUS_READY;
-    Instant now = Instant.now();
-    this.createdAt = now;
-    this.updatedAt = now;
-  }
-
-  /** Records the owner and visibility chosen at creation (V710). */
-  public KnowledgeCollection(
-      String name,
-      String description,
-      UUID parentCollectionId,
-      String embeddingModel,
-      String textSearchConfig,
-      String createdBy,
-      KnowledgeVisibility visibility) {
-    this(name, description, parentCollectionId, embeddingModel, textSearchConfig);
-    this.createdBy = createdBy;
-    this.visibility = KnowledgeVisibility.orDefault(visibility);
-  }
-
-  public static final String STATUS_READY = "READY";
-  public static final String STATUS_REEMBEDDING = "REEMBEDDING";
-
-  public void update(String name, String description, UUID parentCollectionId) {
-    this.name = name;
-    this.description = description;
-    this.parentCollectionId = parentCollectionId;
-    this.updatedAt = Instant.now();
-  }
-
-  /** Owner / administrator only - enforced by {@link KnowledgeAccessService}, not here. */
-  public void changeVisibility(KnowledgeVisibility visibility) {
-    this.visibility = KnowledgeVisibility.orDefault(visibility);
-    this.updatedAt = Instant.now();
-  }
-
-  /**
-   * Null arguments leave the stored value unchanged; validated by the caller via {@link
-   * Chunker#resolve}.
-   */
-  public void updateChunking(Integer chunkSize, Integer chunkOverlap) {
-    if (chunkSize != null) {
-      this.chunkSize = chunkSize;
+    protected KnowledgeCollection() {
+        // JPA
     }
-    if (chunkOverlap != null) {
-      this.chunkOverlap = chunkOverlap;
+
+    public KnowledgeCollection(
+            String name,
+            String description,
+            UUID parentCollectionId,
+            String embeddingModel,
+            String textSearchConfig) {
+        this.name = name;
+        this.description = description;
+        this.parentCollectionId = parentCollectionId;
+        this.isDefault = false;
+        this.embeddingModel = embeddingModel;
+        this.textSearchConfig = textSearchConfig;
+        this.embeddingStatus = STATUS_READY;
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
-    this.updatedAt = Instant.now();
-  }
 
-  public UUID getId() {
-    return id;
-  }
+    /** Records the owner and visibility chosen at creation (V710). */
+    public KnowledgeCollection(
+            String name,
+            String description,
+            UUID parentCollectionId,
+            String embeddingModel,
+            String textSearchConfig,
+            String createdBy,
+            KnowledgeVisibility visibility) {
+        this(name, description, parentCollectionId, embeddingModel, textSearchConfig);
+        this.createdBy = createdBy;
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
+    }
 
-  public String getName() {
-    return name;
-  }
+    public static final String STATUS_READY = "READY";
+    public static final String STATUS_REEMBEDDING = "REEMBEDDING";
 
-  public String getDescription() {
-    return description;
-  }
+    public void update(String name, String description, UUID parentCollectionId) {
+        this.name = name;
+        this.description = description;
+        this.parentCollectionId = parentCollectionId;
+        this.updatedAt = Instant.now();
+    }
 
-  public UUID getParentCollectionId() {
-    return parentCollectionId;
-  }
+    /** Owner / administrator only - enforced by {@link KnowledgeAccessService}, not here. */
+    public void changeVisibility(KnowledgeVisibility visibility) {
+        this.visibility = KnowledgeVisibility.orDefault(visibility);
+        this.updatedAt = Instant.now();
+    }
 
-  public boolean isDefault() {
-    return isDefault;
-  }
+    /**
+     * Null arguments leave the stored value unchanged; validated by the caller via {@link
+     * Chunker#resolve}.
+     */
+    public void updateChunking(Integer chunkSize, Integer chunkOverlap) {
+        if (chunkSize != null) {
+            this.chunkSize = chunkSize;
+        }
+        if (chunkOverlap != null) {
+            this.chunkOverlap = chunkOverlap;
+        }
+        this.updatedAt = Instant.now();
+    }
 
-  public String getEmbeddingModel() {
-    return embeddingModel;
-  }
+    public UUID getId() {
+        return id;
+    }
 
-  public String getTextSearchConfig() {
-    return textSearchConfig;
-  }
+    public String getName() {
+        return name;
+    }
 
-  /** Null (pre-V362 schema) reads as {@link #STATUS_READY}. */
-  public String getEmbeddingStatus() {
-    return embeddingStatus != null ? embeddingStatus : STATUS_READY;
-  }
+    public String getDescription() {
+        return description;
+    }
 
-  /**
-   * The embedding source bound to this collection's vectors, or null when none has been recorded
-   * yet.
-   */
-  public String getEmbeddingFingerprint() {
-    return embeddingFingerprint;
-  }
+    public UUID getParentCollectionId() {
+        return parentCollectionId;
+    }
 
-  public Integer getChunkSize() {
-    return chunkSize;
-  }
+    public boolean isDefault() {
+        return isDefault;
+    }
 
-  public Integer getChunkOverlap() {
-    return chunkOverlap;
-  }
+    public String getEmbeddingModel() {
+        return embeddingModel;
+    }
 
-  /** The owner's subject, or null for a legacy collection (V710 does not backfill). */
-  public String getCreatedBy() {
-    return createdBy;
-  }
+    public String getTextSearchConfig() {
+        return textSearchConfig;
+    }
 
-  /** Never null: a missing value reads as {@link KnowledgeVisibility#TENANT}. */
-  public KnowledgeVisibility getVisibility() {
-    return KnowledgeVisibility.orDefault(visibility);
-  }
+    /** Null (pre-V362 schema) reads as {@link #STATUS_READY}. */
+    public String getEmbeddingStatus() {
+        return embeddingStatus != null ? embeddingStatus : STATUS_READY;
+    }
 
-  public Instant getCreatedAt() {
-    return createdAt;
-  }
+    /**
+     * The embedding source bound to this collection's vectors, or null when none has been recorded
+     * yet.
+     */
+    public String getEmbeddingFingerprint() {
+        return embeddingFingerprint;
+    }
 
-  public Instant getUpdatedAt() {
-    return updatedAt;
-  }
+    public Integer getChunkSize() {
+        return chunkSize;
+    }
+
+    public Integer getChunkOverlap() {
+        return chunkOverlap;
+    }
+
+    /** The owner's subject, or null for a legacy collection (V710 does not backfill). */
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    /** Never null: a missing value reads as {@link KnowledgeVisibility#TENANT}. */
+    public KnowledgeVisibility getVisibility() {
+        return KnowledgeVisibility.orDefault(visibility);
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

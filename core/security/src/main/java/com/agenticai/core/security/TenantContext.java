@@ -33,102 +33,102 @@ import java.util.Set;
  */
 public final class TenantContext {
 
-  private static final ThreadLocal<TenantContext> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<TenantContext> CURRENT = new ThreadLocal<>();
 
-  private final String tenantId;
-  private final String subject;
-  private final Set<String> roles;
-  private final String externalTriggerId;
-  private final boolean platformDefaultSchema;
+    private final String tenantId;
+    private final String subject;
+    private final Set<String> roles;
+    private final String externalTriggerId;
+    private final boolean platformDefaultSchema;
 
-  private TenantContext(
-      String tenantId,
-      String subject,
-      Set<String> roles,
-      String externalTriggerId,
-      boolean platformDefaultSchema) {
-    this.tenantId = tenantId;
-    this.subject = subject;
-    this.roles = roles;
-    this.externalTriggerId = externalTriggerId;
-    this.platformDefaultSchema = platformDefaultSchema;
-  }
-
-  public static TenantContext of(String tenantId, String subject, Set<String> roles) {
-    return new TenantContext(tenantId, subject, roles, null, false);
-  }
-
-  /**
-   * Data-governance audit fix (2026-07-20) - see this class's own javadoc for {@code
-   * externalTriggerId}'s purpose. Everything else behaves identically to {@link #of(String, String,
-   * Set)}.
-   */
-  public static TenantContext of(
-      String tenantId, String subject, Set<String> roles, String externalTriggerId) {
-    return new TenantContext(tenantId, subject, roles, externalTriggerId, false);
-  }
-
-  /**
-   * The explicit, named way for an inbound webhook path (today only the Twilio controllers) to say
-   * "this sender maps to no tenant, run against the legacy {@code public} default schema". Only a
-   * context built here may resolve to {@code public}: {@code TenantSchemaResolver} refuses every
-   * other context whose tenant id is {@code public} or a reserved schema. The set of callers is
-   * pinned by {@code PlatformDefaultSchemaCallersTest}.
-   */
-  public static TenantContext ofPlatformDefaultSchema(String subject, Set<String> roles) {
-    return new TenantContext(TenantSchemaClaims.DEFAULT_SCHEMA, subject, roles, null, true);
-  }
-
-  /**
-   * For webhook paths whose sender-to-tenant lookup may legitimately miss: a resolved schema that
-   * is exactly the default schema becomes {@link #ofPlatformDefaultSchema}; any other value is an
-   * ordinary {@link #of(String, String, Set)} context (and so is still subject to the system-schema
-   * refusal).
-   */
-  public static TenantContext ofWebhookSchema(
-      String resolvedSchema, String subject, Set<String> roles) {
-    if (TenantSchemaClaims.DEFAULT_SCHEMA.equals(resolvedSchema)) {
-      return ofPlatformDefaultSchema(subject, roles);
+    private TenantContext(
+            String tenantId,
+            String subject,
+            Set<String> roles,
+            String externalTriggerId,
+            boolean platformDefaultSchema) {
+        this.tenantId = tenantId;
+        this.subject = subject;
+        this.roles = roles;
+        this.externalTriggerId = externalTriggerId;
+        this.platformDefaultSchema = platformDefaultSchema;
     }
-    return of(resolvedSchema, subject, roles);
-  }
 
-  public static void set(TenantContext context) {
-    CURRENT.set(context);
-  }
+    public static TenantContext of(String tenantId, String subject, Set<String> roles) {
+        return new TenantContext(tenantId, subject, roles, null, false);
+    }
 
-  public static Optional<TenantContext> current() {
-    return Optional.ofNullable(CURRENT.get());
-  }
+    /**
+     * Data-governance audit fix (2026-07-20) - see this class's own javadoc for {@code
+     * externalTriggerId}'s purpose. Everything else behaves identically to {@link #of(String,
+     * String, Set)}.
+     */
+    public static TenantContext of(
+            String tenantId, String subject, Set<String> roles, String externalTriggerId) {
+        return new TenantContext(tenantId, subject, roles, externalTriggerId, false);
+    }
 
-  public static void clear() {
-    CURRENT.remove();
-  }
+    /**
+     * The explicit, named way for an inbound webhook path (today only the Twilio controllers) to
+     * say "this sender maps to no tenant, run against the legacy {@code public} default schema".
+     * Only a context built here may resolve to {@code public}: {@code TenantSchemaResolver} refuses
+     * every other context whose tenant id is {@code public} or a reserved schema. The set of
+     * callers is pinned by {@code PlatformDefaultSchemaCallersTest}.
+     */
+    public static TenantContext ofPlatformDefaultSchema(String subject, Set<String> roles) {
+        return new TenantContext(TenantSchemaClaims.DEFAULT_SCHEMA, subject, roles, null, true);
+    }
 
-  public String getTenantId() {
-    return tenantId;
-  }
+    /**
+     * For webhook paths whose sender-to-tenant lookup may legitimately miss: a resolved schema that
+     * is exactly the default schema becomes {@link #ofPlatformDefaultSchema}; any other value is an
+     * ordinary {@link #of(String, String, Set)} context (and so is still subject to the
+     * system-schema refusal).
+     */
+    public static TenantContext ofWebhookSchema(
+            String resolvedSchema, String subject, Set<String> roles) {
+        if (TenantSchemaClaims.DEFAULT_SCHEMA.equals(resolvedSchema)) {
+            return ofPlatformDefaultSchema(subject, roles);
+        }
+        return of(resolvedSchema, subject, roles);
+    }
 
-  public String getSubject() {
-    return subject;
-  }
+    public static void set(TenantContext context) {
+        CURRENT.set(context);
+    }
 
-  public Set<String> getRoles() {
-    return roles;
-  }
+    public static Optional<TenantContext> current() {
+        return Optional.ofNullable(CURRENT.get());
+    }
 
-  public String getExternalTriggerId() {
-    return externalTriggerId;
-  }
+    public static void clear() {
+        CURRENT.remove();
+    }
 
-  /**
-   * True only for a context built by {@link #ofPlatformDefaultSchema} / {@link #ofWebhookSchema}.
-   */
-  public boolean isPlatformDefaultSchema() {
-    return platformDefaultSchema;
-  }
+    public String getTenantId() {
+        return tenantId;
+    }
 
-  public boolean hasRole(String role) {
-    return roles.contains(role);
-  }
+    public String getSubject() {
+        return subject;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public String getExternalTriggerId() {
+        return externalTriggerId;
+    }
+
+    /**
+     * True only for a context built by {@link #ofPlatformDefaultSchema} / {@link #ofWebhookSchema}.
+     */
+    public boolean isPlatformDefaultSchema() {
+        return platformDefaultSchema;
+    }
+
+    public boolean hasRole(String role) {
+        return roles.contains(role);
+    }
 }

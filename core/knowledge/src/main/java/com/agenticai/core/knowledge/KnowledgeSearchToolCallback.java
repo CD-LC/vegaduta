@@ -3,14 +3,16 @@ package com.agenticai.core.knowledge;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Stage 6: exposes KnowledgeSearchService as a native Spring AI tool, so an agent can call it
@@ -32,98 +34,102 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 public class KnowledgeSearchToolCallback implements ToolCallback {
 
-  private static final Logger log = LoggerFactory.getLogger(KnowledgeSearchToolCallback.class);
-  private static final ObjectMapper MAPPER = JsonMappers.plain();
+    private static final Logger log = LoggerFactory.getLogger(KnowledgeSearchToolCallback.class);
+    private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-  /**
-   * Chunks one search returns when the caller sets no top-k: the value the tool always used. The
-   * agent's own setting ({@code retrievalTopK} of the runtime settings) replaces it through the
-   * four-argument constructor.
-   */
-  public static final int DEFAULT_TOP_K = 3;
+    /**
+     * Chunks one search returns when the caller sets no top-k: the value the tool always used. The
+     * agent's own setting ({@code retrievalTopK} of the runtime settings) replaces it through the
+     * four-argument constructor.
+     */
+    public static final int DEFAULT_TOP_K = 3;
 
-  private final KnowledgeSearchService searchService;
-  private final Set<UUID> allowedCollectionIds;
-  private final int topK;
-  private final double minScore;
+    private final KnowledgeSearchService searchService;
+    private final Set<UUID> allowedCollectionIds;
+    private final int topK;
+    private final double minScore;
 
-  /**
-   * Set only for an unattended run (scheduled / webhook / public-link turn, no invoking user): the
-   * agent owner's subject, whose access then governs retrieval instead of the synthetic caller's.
-   * Null = retrieval is evaluated for the invoking user ({@code TenantContext}).
-   */
-  private final String ownerSubject;
+    /**
+     * Set only for an unattended run (scheduled / webhook / public-link turn, no invoking user):
+     * the agent owner's subject, whose access then governs retrieval instead of the synthetic
+     * caller's. Null = retrieval is evaluated for the invoking user ({@code TenantContext}).
+     */
+    private final String ownerSubject;
 
-  /**
-   * @param allowedCollectionIds empty means "no restriction, this agent may search every collection
-   *     its tenant has" - same semantics as {@code Agent.allowedKnowledgeCollectionIds}.
-   */
-  public KnowledgeSearchToolCallback(
-      KnowledgeSearchService searchService, Set<UUID> allowedCollectionIds) {
-    this(searchService, allowedCollectionIds, DEFAULT_TOP_K, 0.0);
-  }
+    /**
+     * @param allowedCollectionIds empty means "no restriction, this agent may search every
+     *     collection its tenant has" - same semantics as {@code
+     *     Agent.allowedKnowledgeCollectionIds}.
+     */
+    public KnowledgeSearchToolCallback(
+            KnowledgeSearchService searchService, Set<UUID> allowedCollectionIds) {
+        this(searchService, allowedCollectionIds, DEFAULT_TOP_K, 0.0);
+    }
 
-  /**
-   * @param topK chunks one search asks for; below 1 falls back to {@link #DEFAULT_TOP_K}
-   * @param minScore least relevance a chunk needs to be returned, where relevance is {@code
-   *     -distance} (the hybrid search reports the negated fused / reranked score as the distance,
-   *     so a better chunk has a larger relevance; fused scores are small, a few hundredths, and a
-   *     reranker's follow its own scale). {@code 0} (or less) returns every hit.
-   */
-  public KnowledgeSearchToolCallback(
-      KnowledgeSearchService searchService,
-      Set<UUID> allowedCollectionIds,
-      int topK,
-      double minScore) {
-    this(searchService, allowedCollectionIds, topK, minScore, null);
-  }
+    /**
+     * @param topK chunks one search asks for; below 1 falls back to {@link #DEFAULT_TOP_K}
+     * @param minScore least relevance a chunk needs to be returned, where relevance is {@code
+     *     -distance} (the hybrid search reports the negated fused / reranked score as the distance,
+     *     so a better chunk has a larger relevance; fused scores are small, a few hundredths, and a
+     *     reranker's follow its own scale). {@code 0} (or less) returns every hit.
+     */
+    public KnowledgeSearchToolCallback(
+            KnowledgeSearchService searchService,
+            Set<UUID> allowedCollectionIds,
+            int topK,
+            double minScore) {
+        this(searchService, allowedCollectionIds, topK, minScore, null);
+    }
 
-  private KnowledgeSearchToolCallback(
-      KnowledgeSearchService searchService,
-      Set<UUID> allowedCollectionIds,
-      int topK,
-      double minScore,
-      String ownerSubject) {
-    this.searchService = searchService;
-    this.allowedCollectionIds = allowedCollectionIds;
-    this.topK = topK > 0 ? topK : DEFAULT_TOP_K;
-    this.minScore = minScore;
-    this.ownerSubject = ownerSubject;
-  }
+    private KnowledgeSearchToolCallback(
+            KnowledgeSearchService searchService,
+            Set<UUID> allowedCollectionIds,
+            int topK,
+            double minScore,
+            String ownerSubject) {
+        this.searchService = searchService;
+        this.allowedCollectionIds = allowedCollectionIds;
+        this.topK = topK > 0 ? topK : DEFAULT_TOP_K;
+        this.minScore = minScore;
+        this.ownerSubject = ownerSubject;
+    }
 
-  /**
-   * The same tool for an UNATTENDED run: retrieval uses {@code ownerSubject}'s access (the agent
-   * owner's own collections, grants and tenant-visible collections, never an admin override) rather
-   * than the run's synthetic caller. Interactive turns must not use this; they are evaluated for
-   * the invoking user, intersected with the agent's allow-list. A blank owner leaves the default:
-   * the run's own (synthetic, so tenant-visible-only) caller.
-   */
-  public KnowledgeSearchToolCallback asOwner(String ownerSubject) {
-    return new KnowledgeSearchToolCallback(
-        searchService, allowedCollectionIds, topK, minScore, ownerSubject);
-  }
+    /**
+     * The same tool for an UNATTENDED run: retrieval uses {@code ownerSubject}'s access (the agent
+     * owner's own collections, grants and tenant-visible collections, never an admin override)
+     * rather than the run's synthetic caller. Interactive turns must not use this; they are
+     * evaluated for the invoking user, intersected with the agent's allow-list. A blank owner
+     * leaves the default: the run's own (synthetic, so tenant-visible-only) caller.
+     */
+    public KnowledgeSearchToolCallback asOwner(String ownerSubject) {
+        return new KnowledgeSearchToolCallback(
+                searchService, allowedCollectionIds, topK, minScore, ownerSubject);
+    }
 
-  @Override
-  public ToolDefinition getToolDefinition() {
-    return ToolDefinition.builder()
-        .name("search_knowledge_base")
-        .description(
-            "Searches this agent's uploaded knowledge base for content relevant to a query and"
-                + " returns results with citations (source document name and document id). Scope:"
-                + " uploaded documents only (PDFs, manuals, notes the user attached) - never source"
-                + " code or the tenant's repository (that is search_code) and never files on this"
-                + " machine (workspace_search). Use this whenever the user's question might be"
-                + " answered by something they've uploaded, rather than relying on general"
-                + " knowledge alone. If you're unsure which knowledge collection is relevant, call"
-                + " list_knowledge_collections first and pass its id as collection_id to scope the"
-                + " search; omit collection_id to search every collection you have access to. When"
-                + " you answer using these results, cite the source document by name so the user"
-                + " knows which upload the answer came from - do not present retrieved content as"
-                + " general knowledge. If results look garbled or you suspect they came from OCR'd"
-                + " images (misread SKUs, prices, or numbers) rather than clean source text, retry"
-                + " with exclude_image_sourced=true.")
-        .inputSchema(
-            """
+    @Override
+    public ToolDefinition getToolDefinition() {
+        return ToolDefinition.builder()
+                .name("search_knowledge_base")
+                .description(
+                        "Searches this agent's uploaded knowledge base for content relevant to a"
+                            + " query and returns results with citations (source document name and"
+                            + " document id). Scope: uploaded documents only (PDFs, manuals, notes"
+                            + " the user attached) - never source code or the tenant's repository"
+                            + " (that is search_code) and never files on this machine"
+                            + " (workspace_search). Use this whenever the user's question might be"
+                            + " answered by something they've uploaded, rather than relying on"
+                            + " general knowledge alone. If you're unsure which knowledge"
+                            + " collection is relevant, call list_knowledge_collections first and"
+                            + " pass its id as collection_id to scope the search; omit"
+                            + " collection_id to search every collection you have access to. When"
+                            + " you answer using these results, cite the source document by name so"
+                            + " the user knows which upload the answer came from - do not present"
+                            + " retrieved content as general knowledge. If results look garbled or"
+                            + " you suspect they came from OCR'd images (misread SKUs, prices, or"
+                            + " numbers) rather than clean source text, retry with"
+                            + " exclude_image_sourced=true.")
+                .inputSchema(
+                        """
 {
     "type": "object",
     "properties": {
@@ -143,79 +149,84 @@ public class KnowledgeSearchToolCallback implements ToolCallback {
     "required": ["query"]
 }
 """)
-        .build();
-  }
+                .build();
+    }
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public String call(String toolInput) {
-    try {
-      Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
-      Object queryValue = args.get("query");
-      if (queryValue == null || queryValue.toString().isBlank()) {
-        return "{\"error\": \"query is required\"}";
-      }
-
-      Object collectionIdValue = args.get("collection_id");
-      Set<UUID> scopedCollectionIds;
-      if (collectionIdValue == null || collectionIdValue.toString().isBlank()) {
-        // No specific collection requested - default scope is
-        // "everything this agent may access" (empty allow-list =
-        // every collection the tenant has, the pre-F2 default,
-        // unchanged).
-        scopedCollectionIds = allowedCollectionIds;
-      } else {
-        UUID requested;
+    @Override
+    @SuppressWarnings("unchecked")
+    public String call(String toolInput) {
         try {
-          requested = UUID.fromString(collectionIdValue.toString());
-        } catch (IllegalArgumentException e) {
-          return "{\"error\": \"collection_id is not a valid id\"}";
+            Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
+            Object queryValue = args.get("query");
+            if (queryValue == null || queryValue.toString().isBlank()) {
+                return "{\"error\": \"query is required\"}";
+            }
+
+            Object collectionIdValue = args.get("collection_id");
+            Set<UUID> scopedCollectionIds;
+            if (collectionIdValue == null || collectionIdValue.toString().isBlank()) {
+                // No specific collection requested - default scope is
+                // "everything this agent may access" (empty allow-list =
+                // every collection the tenant has, the pre-F2 default,
+                // unchanged).
+                scopedCollectionIds = allowedCollectionIds;
+            } else {
+                UUID requested;
+                try {
+                    requested = UUID.fromString(collectionIdValue.toString());
+                } catch (IllegalArgumentException e) {
+                    return "{\"error\": \"collection_id is not a valid id\"}";
+                }
+                if (!allowedCollectionIds.isEmpty() && !allowedCollectionIds.contains(requested)) {
+                    return "{\"error\": \"This agent does not have access to that knowledge"
+                            + " collection\"}";
+                }
+                scopedCollectionIds = Set.of(requested);
+            }
+
+            boolean excludeImageSourced =
+                    Boolean.parseBoolean(
+                            String.valueOf(args.getOrDefault("exclude_image_sourced", false)));
+
+            List<SearchResultResponse> results =
+                    ownerSubject == null || ownerSubject.isBlank()
+                            ? searchService.search(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced)
+                            : searchService.searchAs(
+                                    queryValue.toString(),
+                                    topK,
+                                    scopedCollectionIds,
+                                    excludeImageSourced,
+                                    KnowledgeAccessService.Principal.ofOwner(ownerSubject));
+            if (minScore > 0.0) {
+                results = results.stream().filter(r -> -r.distance() >= minScore).toList();
+            }
+            return MAPPER.writeValueAsString(results);
+        } catch (Exception e) {
+            log.warn("search_knowledge_base tool call failed", e);
+            return errorJson("Knowledge base search failed: " + e.getMessage());
         }
-        if (!allowedCollectionIds.isEmpty() && !allowedCollectionIds.contains(requested)) {
-          return "{\"error\": \"This agent does not have access to that knowledge collection\"}";
+    }
+
+    /**
+     * Direct feedback ("Tool output from 'search_knowledge_base' failed validation... output looked
+     * like JSON but failed to parse") - root cause: the old code hand-built the error JSON via
+     * string concatenation ("{\"error\": \"" + e.getMessage() + "\"}"), so any exception message
+     * containing a raw '"' broke the JSON. That's not rare here - SidecarClient.describe()'s own
+     * connection-refused message quotes the target URL (Cause: ...I/O error on POST request for
+     * "http://localhost:8001/extract": Connection refused), so a sidecar outage reliably produced
+     * malformed output that {@link com.agenticai.core.guardrails.ToolCallOutputValidator} correctly
+     * rejected. Routing through Jackson guarantees valid JSON regardless of what the message
+     * contains.
+     */
+    private static String errorJson(String message) {
+        try {
+            return MAPPER.writeValueAsString(Map.of("error", message));
+        } catch (Exception e) {
+            return "{\"error\": \"error\"}";
         }
-        scopedCollectionIds = Set.of(requested);
-      }
-
-      boolean excludeImageSourced =
-          Boolean.parseBoolean(String.valueOf(args.getOrDefault("exclude_image_sourced", false)));
-
-      List<SearchResultResponse> results =
-          ownerSubject == null || ownerSubject.isBlank()
-              ? searchService.search(
-                  queryValue.toString(), topK, scopedCollectionIds, excludeImageSourced)
-              : searchService.searchAs(
-                  queryValue.toString(),
-                  topK,
-                  scopedCollectionIds,
-                  excludeImageSourced,
-                  KnowledgeAccessService.Principal.ofOwner(ownerSubject));
-      if (minScore > 0.0) {
-        results = results.stream().filter(r -> -r.distance() >= minScore).toList();
-      }
-      return MAPPER.writeValueAsString(results);
-    } catch (Exception e) {
-      log.warn("search_knowledge_base tool call failed", e);
-      return errorJson("Knowledge base search failed: " + e.getMessage());
     }
-  }
-
-  /**
-   * Direct feedback ("Tool output from 'search_knowledge_base' failed validation... output looked
-   * like JSON but failed to parse") - root cause: the old code hand-built the error JSON via string
-   * concatenation ("{\"error\": \"" + e.getMessage() + "\"}"), so any exception message containing
-   * a raw '"' broke the JSON. That's not rare here - SidecarClient.describe()'s own
-   * connection-refused message quotes the target URL (Cause: ...I/O error on POST request for
-   * "http://localhost:8001/extract": Connection refused), so a sidecar outage reliably produced
-   * malformed output that {@link com.agenticai.core.guardrails.ToolCallOutputValidator} correctly
-   * rejected. Routing through Jackson guarantees valid JSON regardless of what the message
-   * contains.
-   */
-  private static String errorJson(String message) {
-    try {
-      return MAPPER.writeValueAsString(Map.of("error", message));
-    } catch (Exception e) {
-      return "{\"error\": \"error\"}";
-    }
-  }
 }

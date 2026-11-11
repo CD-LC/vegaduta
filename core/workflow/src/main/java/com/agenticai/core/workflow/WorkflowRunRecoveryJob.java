@@ -9,17 +9,19 @@ import com.agenticai.core.tenancy.TenantSchemaIterator;
 import com.agenticai.core.workflow.dto.NodeTraceEntry;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Crash recovery for the DEFAULT (synchronous, in-process) {@link WorkflowExecutionEngine}. That
@@ -62,310 +64,329 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkflowRunRecoveryJob {
 
-  /** Exact user-visible reason written to {@code errorMessage} - asserted in tests, keep stable. */
-  static final String FAILURE_REASON =
-      "interrupted: instance stopped mid-run; marked failed by recovery job";
+    /**
+     * Exact user-visible reason written to {@code errorMessage} - asserted in tests, keep stable.
+     */
+    static final String FAILURE_REASON =
+            "interrupted: instance stopped mid-run; marked failed by recovery job";
 
-  private static final Logger log = LoggerFactory.getLogger(WorkflowRunRecoveryJob.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowRunRecoveryJob.class);
 
-  private static final String JOB_LOCK_KEY = "workflow-run-recovery";
+    private static final String JOB_LOCK_KEY = "workflow-run-recovery";
 
-  private final TenantSchemaIterator schemaIterator;
-  private final WorkflowRunRepository runRepository;
-  private final ObjectMapper objectMapper;
-  private final PlatformIssueService issueService;
-  private final WorkflowEventPublisher eventPublisher;
-  private final ObjectProvider<PgAdvisoryJobLock> jobLock;
-  private final Duration staleAfter;
-  // Effect journal (V680): lets the reaper say whether the crash left an effect of unknown outcome.
-  // Null when not wired (hand-built tests) - the reason is then the plain FAILURE_REASON.
-  private ObjectProvider<WorkflowEffectJournal> effectJournal;
-  private long journalRetentionDays = 30;
+    private final TenantSchemaIterator schemaIterator;
+    private final WorkflowRunRepository runRepository;
+    private final ObjectMapper objectMapper;
+    private final PlatformIssueService issueService;
+    private final WorkflowEventPublisher eventPublisher;
+    private final ObjectProvider<PgAdvisoryJobLock> jobLock;
+    private final Duration staleAfter;
+    // Effect journal (V680): lets the reaper say whether the crash left an effect of unknown
+    // outcome.
+    // Null when not wired (hand-built tests) - the reason is then the plain FAILURE_REASON.
+    private ObjectProvider<WorkflowEffectJournal> effectJournal;
+    private long journalRetentionDays = 30;
 
-  @org.springframework.beans.factory.annotation.Autowired(required = false)
-  void setEffectJournal(
-      ObjectProvider<WorkflowEffectJournal> effectJournal,
-      @Value("${app.workflow.effects.journal.retention-days:30}") long retentionDays) {
-    this.effectJournal = effectJournal;
-    this.journalRetentionDays = retentionDays;
-  }
-
-  public WorkflowRunRecoveryJob(
-      TenantSchemaIterator schemaIterator,
-      WorkflowRunRepository runRepository,
-      ObjectMapper objectMapper,
-      PlatformIssueService issueService,
-      WorkflowEventPublisher eventPublisher,
-      ObjectProvider<PgAdvisoryJobLock> jobLock,
-      @Value("${app.workflow.recovery.stale-after-minutes:120}") long staleAfterMinutes) {
-    this.schemaIterator = schemaIterator;
-    this.runRepository = runRepository;
-    this.objectMapper = objectMapper;
-    this.issueService = issueService;
-    this.eventPublisher = eventPublisher;
-    this.jobLock = jobLock;
-    this.staleAfter = Duration.ofMinutes(staleAfterMinutes);
-  }
-
-  @Scheduled(
-      fixedDelayString = "${app.workflow.recovery.interval-ms:600000}",
-      initialDelayString = "${app.workflow.recovery.initial-delay-ms:120000}")
-  public void reapStaleRuns() {
-    PgAdvisoryJobLock lock = jobLock.getIfAvailable();
-    if (lock != null) {
-      lock.tryRunExclusive(JOB_LOCK_KEY, this::sweepAllTenants);
-    } else {
-      sweepAllTenants();
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    void setEffectJournal(
+            ObjectProvider<WorkflowEffectJournal> effectJournal,
+            @Value("${app.workflow.effects.journal.retention-days:30}") long retentionDays) {
+        this.effectJournal = effectJournal;
+        this.journalRetentionDays = retentionDays;
     }
-  }
 
-  /** Package-private seam so tests exercise the sweep without the lock wrapper. */
-  void sweepAllTenants() {
-    schemaIterator.forEachActiveTenantSchema(this::sweepTenant);
-  }
+    public WorkflowRunRecoveryJob(
+            TenantSchemaIterator schemaIterator,
+            WorkflowRunRepository runRepository,
+            ObjectMapper objectMapper,
+            PlatformIssueService issueService,
+            WorkflowEventPublisher eventPublisher,
+            ObjectProvider<PgAdvisoryJobLock> jobLock,
+            @Value("${app.workflow.recovery.stale-after-minutes:120}") long staleAfterMinutes) {
+        this.schemaIterator = schemaIterator;
+        this.runRepository = runRepository;
+        this.objectMapper = objectMapper;
+        this.issueService = issueService;
+        this.eventPublisher = eventPublisher;
+        this.jobLock = jobLock;
+        this.staleAfter = Duration.ofMinutes(staleAfterMinutes);
+    }
 
-  private void sweepTenant(String schema) {
-    purgeJournal(schema);
-    Instant cutoff = Instant.now().minus(staleAfter);
-    List<WorkflowRun> candidates =
-        runRepository.findByStatusAndStartedAtBefore(WorkflowRunStatus.RUNNING, cutoff);
-    for (WorkflowRun run : candidates) {
-      try {
-        Instant lastActivity = lastActivityAt(run);
-        if (lastActivity.isAfter(cutoff)) {
-          // startedAt is old but the trace is still growing - a
-          // legitimately long run, not a crashed one. Leave it.
-          continue;
+    @Scheduled(
+            fixedDelayString = "${app.workflow.recovery.interval-ms:600000}",
+            initialDelayString = "${app.workflow.recovery.initial-delay-ms:120000}")
+    public void reapStaleRuns() {
+        PgAdvisoryJobLock lock = jobLock.getIfAvailable();
+        if (lock != null) {
+            lock.tryRunExclusive(JOB_LOCK_KEY, this::sweepAllTenants);
+        } else {
+            sweepAllTenants();
         }
-        markInterrupted(run, lastActivity, schema);
-      } catch (RuntimeException e) {
-        // One unrecoverable row (corrupt trace JSON is handled softer
-        // than this - see lastActivityAt/appendRecoveryTraceEntry -
-        // so this is really a save/DB failure) must not stop the rest
-        // of this tenant's batch, matching TenantSchemaIterator's own
-        // per-tenant isolation at the per-row level.
-        log.error("Failed to recover stale workflow run {} in schema '{}'", run.getId(), schema, e);
-      }
     }
-  }
 
-  /** Retention sweep of the effect journal (best effort; 0 or less keeps rows forever). */
-  private void purgeJournal(String schema) {
-    WorkflowEffectJournal journal = effectJournal == null ? null : effectJournal.getIfAvailable();
-    if (journal == null || !journal.isEnabled() || journalRetentionDays <= 0) {
-      return;
+    /** Package-private seam so tests exercise the sweep without the lock wrapper. */
+    void sweepAllTenants() {
+        schemaIterator.forEachActiveTenantSchema(this::sweepTenant);
     }
-    try {
-      journal.purgeOlderThan(Instant.now().minus(Duration.ofDays(journalRetentionDays)));
-    } catch (RuntimeException e) {
-      log.warn("Effect journal purge failed in schema '{}'", schema, e);
-    }
-  }
 
-  /**
-   * What the effect journal says about a crashed run: the user-visible reason (FAILURE_REASON plus
-   * the precise recovery verdict) and extra trace lines. Plain FAILURE_REASON when the journal is
-   * not wired or disabled, or cannot be read.
-   */
-  private Recovery assess(WorkflowRun run, List<NodeTraceEntry> trace) {
-    WorkflowEffectJournal journal = effectJournal == null ? null : effectJournal.getIfAvailable();
-    if (journal == null || !journal.isEnabled()) {
-      return new Recovery(FAILURE_REASON, List.of());
-    }
-    try {
-      journal.markRunEffectsUncertain(run.getId());
-      List<WorkflowEffectJournalEntry> uncertain = journal.uncertainEffects(run.getId());
-      if (!uncertain.isEmpty()) {
-        StringBuilder nodes = new StringBuilder();
-        for (WorkflowEffectJournalEntry e : uncertain) {
-          if (nodes.length() > 0) {
-            nodes.append(", ");
-          }
-          nodes.append(e.getNodeType()).append(" node ").append(e.getNodeId());
-          if (!"-".equals(e.getIterationKey())) {
-            nodes.append(" (iteration ").append(e.getIterationKey()).append(")");
-          }
+    private void sweepTenant(String schema) {
+        purgeJournal(schema);
+        Instant cutoff = Instant.now().minus(staleAfter);
+        List<WorkflowRun> candidates =
+                runRepository.findByStatusAndStartedAtBefore(WorkflowRunStatus.RUNNING, cutoff);
+        for (WorkflowRun run : candidates) {
+            try {
+                Instant lastActivity = lastActivityAt(run);
+                if (lastActivity.isAfter(cutoff)) {
+                    // startedAt is old but the trace is still growing - a
+                    // legitimately long run, not a crashed one. Leave it.
+                    continue;
+                }
+                markInterrupted(run, lastActivity, schema);
+            } catch (RuntimeException e) {
+                // One unrecoverable row (corrupt trace JSON is handled softer
+                // than this - see lastActivityAt/appendRecoveryTraceEntry -
+                // so this is really a save/DB failure) must not stop the rest
+                // of this tenant's batch, matching TenantSchemaIterator's own
+                // per-tenant isolation at the per-row level.
+                log.error(
+                        "Failed to recover stale workflow run {} in schema '{}'",
+                        run.getId(),
+                        schema,
+                        e);
+            }
         }
-        String reason =
-            FAILURE_REASON
-                + " Effect uncertain: "
-                + nodes
-                + " started its external side effect but never recorded completing; it may or may"
-                + " not have happened. NOT resumable until a human checks the destination and"
-                + " resolves the journal entry.";
-        return new Recovery(
-            reason,
-            List.of(
-                "Effect journal: "
-                    + uncertain.size()
-                    + " effect(s) of unknown outcome - "
-                    + nodes
-                    + "."));
-      }
-      NodeTraceEntry last = lastCompleted(trace);
-      if (last != null) {
-        String reason =
-            FAILURE_REASON
-                + " Resumable from the node after '"
-                + last.label()
-                + "' ("
-                + last.nodeId()
-                + "): the effect journal has no uncertain effect, and completed effects"
-                + " are replayed from the journal, never re-executed.";
-        return new Recovery(
-            reason,
-            List.of(
-                "Effect journal: no uncertain effects; last completed node is '"
-                    + last.label()
-                    + "' ("
-                    + last.nodeId()
-                    + ")."));
-      }
-      return new Recovery(
-          FAILURE_REASON + " No node had completed; the effect journal has no uncertain effect.",
-          List.of("Effect journal: no uncertain effects."));
-    } catch (RuntimeException e) {
-      log.warn("Effect journal could not be read for stale run {}", run.getId(), e);
-      return new Recovery(FAILURE_REASON, List.of());
     }
-  }
 
-  private static NodeTraceEntry lastCompleted(List<NodeTraceEntry> trace) {
-    if (trace == null) {
-      return null;
+    /** Retention sweep of the effect journal (best effort; 0 or less keeps rows forever). */
+    private void purgeJournal(String schema) {
+        WorkflowEffectJournal journal =
+                effectJournal == null ? null : effectJournal.getIfAvailable();
+        if (journal == null || !journal.isEnabled() || journalRetentionDays <= 0) {
+            return;
+        }
+        try {
+            journal.purgeOlderThan(Instant.now().minus(Duration.ofDays(journalRetentionDays)));
+        } catch (RuntimeException e) {
+            log.warn("Effect journal purge failed in schema '{}'", schema, e);
+        }
     }
-    for (int i = trace.size() - 1; i >= 0; i--) {
-      NodeTraceEntry e = trace.get(i);
-      if (e.nodeId() != null
-          && !"recovery".equals(e.nodeId())
-          && !"engine".equals(e.nodeId())
-          && ("OK".equals(e.status())
-              || "SKIPPED".equals(e.status())
-              || "PINNED".equals(e.status()))) {
-        return e;
-      }
-    }
-    return null;
-  }
 
-  private record Recovery(String reason, List<String> traceLines) {}
-
-  /**
-   * The run's de-facto heartbeat: the latest timestamp across {@code startedAt} and every trace
-   * entry's own start/completion instants. Falls back to bare {@code startedAt} when the trace is
-   * empty or unparseable - for a RUNNING row already past the SQL cutoff that means "reap it",
-   * which is the right call: no readable evidence of progress exists.
-   */
-  private Instant lastActivityAt(WorkflowRun run) {
-    Instant last = run.getStartedAt();
-    List<NodeTraceEntry> trace = readTraceOrNull(run);
-    for (NodeTraceEntry entry : trace == null ? List.<NodeTraceEntry>of() : trace) {
-      if (entry.startedAt() != null && entry.startedAt().isAfter(last)) {
-        last = entry.startedAt();
-      }
-      if (entry.completedAt() != null && entry.completedAt().isAfter(last)) {
-        last = entry.completedAt();
-      }
+    /**
+     * What the effect journal says about a crashed run: the user-visible reason (FAILURE_REASON
+     * plus the precise recovery verdict) and extra trace lines. Plain FAILURE_REASON when the
+     * journal is not wired or disabled, or cannot be read.
+     */
+    private Recovery assess(WorkflowRun run, List<NodeTraceEntry> trace) {
+        WorkflowEffectJournal journal =
+                effectJournal == null ? null : effectJournal.getIfAvailable();
+        if (journal == null || !journal.isEnabled()) {
+            return new Recovery(FAILURE_REASON, List.of());
+        }
+        try {
+            journal.markRunEffectsUncertain(run.getId());
+            List<WorkflowEffectJournalEntry> uncertain = journal.uncertainEffects(run.getId());
+            if (!uncertain.isEmpty()) {
+                StringBuilder nodes = new StringBuilder();
+                for (WorkflowEffectJournalEntry e : uncertain) {
+                    if (nodes.length() > 0) {
+                        nodes.append(", ");
+                    }
+                    nodes.append(e.getNodeType()).append(" node ").append(e.getNodeId());
+                    if (!"-".equals(e.getIterationKey())) {
+                        nodes.append(" (iteration ").append(e.getIterationKey()).append(")");
+                    }
+                }
+                String reason =
+                        FAILURE_REASON
+                                + " Effect uncertain: "
+                                + nodes
+                                + " started its external side effect but never recorded completing;"
+                                + " it may or may not have happened. NOT resumable until a human"
+                                + " checks the destination and resolves the journal entry.";
+                return new Recovery(
+                        reason,
+                        List.of(
+                                "Effect journal: "
+                                        + uncertain.size()
+                                        + " effect(s) of unknown outcome - "
+                                        + nodes
+                                        + "."));
+            }
+            NodeTraceEntry last = lastCompleted(trace);
+            if (last != null) {
+                String reason =
+                        FAILURE_REASON
+                                + " Resumable from the node after '"
+                                + last.label()
+                                + "' ("
+                                + last.nodeId()
+                                + "): the effect journal has no uncertain effect, and completed"
+                                + " effects are replayed from the journal, never re-executed.";
+                return new Recovery(
+                        reason,
+                        List.of(
+                                "Effect journal: no uncertain effects; last completed node is '"
+                                        + last.label()
+                                        + "' ("
+                                        + last.nodeId()
+                                        + ")."));
+            }
+            return new Recovery(
+                    FAILURE_REASON
+                            + " No node had completed; the effect journal has no uncertain effect.",
+                    List.of("Effect journal: no uncertain effects."));
+        } catch (RuntimeException e) {
+            log.warn("Effect journal could not be read for stale run {}", run.getId(), e);
+            return new Recovery(FAILURE_REASON, List.of());
+        }
     }
-    return last;
-  }
 
-  /**
-   * {@code null} means "stored but unparseable" - distinct from an empty list (no trace stored yet,
-   * or a genuinely empty {@code []}), because {@link #appendRecoveryTraceEntry} must preserve
-   * unparseable bytes as-is but is free to append to an empty trace.
-   */
-  private List<NodeTraceEntry> readTraceOrNull(WorkflowRun run) {
-    if (run.getTraceJson() == null || run.getTraceJson().isBlank()) {
-      return List.of();
+    private static NodeTraceEntry lastCompleted(List<NodeTraceEntry> trace) {
+        if (trace == null) {
+            return null;
+        }
+        for (int i = trace.size() - 1; i >= 0; i--) {
+            NodeTraceEntry e = trace.get(i);
+            if (e.nodeId() != null
+                    && !"recovery".equals(e.nodeId())
+                    && !"engine".equals(e.nodeId())
+                    && ("OK".equals(e.status())
+                            || "SKIPPED".equals(e.status())
+                            || "PINNED".equals(e.status()))) {
+                return e;
+            }
+        }
+        return null;
     }
-    try {
-      return objectMapper.readValue(
-          run.getTraceJson(), new TypeReference<List<NodeTraceEntry>>() {});
-    } catch (Exception unparseable) {
-      return null;
-    }
-  }
 
-  private void markInterrupted(WorkflowRun run, Instant lastActivity, String schema) {
-    log.warn(
-        "Marking stale workflow run {} ('{}', schema '{}') FAILED - RUNNING since {}, no progress"
-            + " since {}.",
-        run.getId(),
-        run.getWorkflowName(),
-        schema,
-        run.getStartedAt(),
-        lastActivity);
+    private record Recovery(String reason, List<String> traceLines) {}
 
-    // complete() re-writes the output columns too, so the existing values
-    // are passed through - a crash after an Output(file) node already
-    // produced a download-able artifact must not erase it.
-    Recovery recovery = assess(run, readTraceOrNull(run));
-    run.complete(
-        WorkflowRunStatus.FAILED,
-        appendRecoveryTraceEntry(run, lastActivity, recovery),
-        recovery.reason(),
-        run.getOutputFileName(),
-        run.getOutputData());
-    runRepository.save(run);
+    /**
+     * The run's de-facto heartbeat: the latest timestamp across {@code startedAt} and every trace
+     * entry's own start/completion instants. Falls back to bare {@code startedAt} when the trace is
+     * empty or unparseable - for a RUNNING row already past the SQL cutoff that means "reap it",
+     * which is the right call: no readable evidence of progress exists.
+     */
+    private Instant lastActivityAt(WorkflowRun run) {
+        Instant last = run.getStartedAt();
+        List<NodeTraceEntry> trace = readTraceOrNull(run);
+        for (NodeTraceEntry entry : trace == null ? List.<NodeTraceEntry>of() : trace) {
+            if (entry.startedAt() != null && entry.startedAt().isAfter(last)) {
+                last = entry.startedAt();
+            }
+            if (entry.completedAt() != null && entry.completedAt().isAfter(last)) {
+                last = entry.completedAt();
+            }
+        }
+        return last;
+    }
 
-    // Same best-effort posture as WorkflowExecutionEngine#recordFailureIssue,
-    // and the same workflow-keyed (not run-keyed) fingerprint so repeated
-    // interruptions of one workflow accumulate onto one triage row.
-    try {
-      issueService.record(
-          IssueSource.WORKFLOW_RUN,
-          run.getWorkflowId().toString(),
-          IssueSeverity.ERROR,
-          "Workflow run failed",
-          "Run " + run.getId() + ": " + recovery.reason());
-    } catch (RuntimeException recordingFailure) {
-      log.warn(
-          "Failed to record platform issue for recovered workflow run {}",
-          run.getId(),
-          recordingFailure);
+    /**
+     * {@code null} means "stored but unparseable" - distinct from an empty list (no trace stored
+     * yet, or a genuinely empty {@code []}), because {@link #appendRecoveryTraceEntry} must
+     * preserve unparseable bytes as-is but is free to append to an empty trace.
+     */
+    private List<NodeTraceEntry> readTraceOrNull(WorkflowRun run) {
+        if (run.getTraceJson() == null || run.getTraceJson().isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(
+                    run.getTraceJson(), new TypeReference<List<NodeTraceEntry>>() {});
+        } catch (Exception unparseable) {
+            return null;
+        }
     }
-    eventPublisher.publish(
-        "workflow.run.failed",
-        run.getId().toString(),
-        Map.of("workflowId", run.getWorkflowId().toString(), "error", recovery.reason()));
-  }
 
-  /**
-   * Appends a terminal ERROR entry so the run-trace overlay shows WHY the run is FAILED, exactly
-   * like an engine-caught failure would. If the stored trace cannot be parsed it is preserved
-   * byte-for-byte rather than replaced - losing the partial trace of a crashed run to make room for
-   * one bookkeeping entry would be a bad trade; {@code errorMessage} carries the reason regardless.
-   */
-  private String appendRecoveryTraceEntry(
-      WorkflowRun run, Instant lastActivity, Recovery recovery) {
-    List<NodeTraceEntry> parsed = readTraceOrNull(run);
-    if (parsed == null) {
-      log.warn(
-          "Trace of stale workflow run {} is unparseable - leaving it untouched.", run.getId());
-      return run.getTraceJson();
+    private void markInterrupted(WorkflowRun run, Instant lastActivity, String schema) {
+        log.warn(
+                "Marking stale workflow run {} ('{}', schema '{}') FAILED - RUNNING since {}, no"
+                        + " progress since {}.",
+                run.getId(),
+                run.getWorkflowName(),
+                schema,
+                run.getStartedAt(),
+                lastActivity);
+
+        // complete() re-writes the output columns too, so the existing values
+        // are passed through - a crash after an Output(file) node already
+        // produced a download-able artifact must not erase it.
+        Recovery recovery = assess(run, readTraceOrNull(run));
+        run.complete(
+                WorkflowRunStatus.FAILED,
+                appendRecoveryTraceEntry(run, lastActivity, recovery),
+                recovery.reason(),
+                run.getOutputFileName(),
+                run.getOutputData());
+        runRepository.save(run);
+
+        // Same best-effort posture as WorkflowExecutionEngine#recordFailureIssue,
+        // and the same workflow-keyed (not run-keyed) fingerprint so repeated
+        // interruptions of one workflow accumulate onto one triage row.
+        try {
+            issueService.record(
+                    IssueSource.WORKFLOW_RUN,
+                    run.getWorkflowId().toString(),
+                    IssueSeverity.ERROR,
+                    "Workflow run failed",
+                    "Run " + run.getId() + ": " + recovery.reason());
+        } catch (RuntimeException recordingFailure) {
+            log.warn(
+                    "Failed to record platform issue for recovered workflow run {}",
+                    run.getId(),
+                    recordingFailure);
+        }
+        eventPublisher.publish(
+                "workflow.run.failed",
+                run.getId().toString(),
+                Map.of("workflowId", run.getWorkflowId().toString(), "error", recovery.reason()));
     }
-    List<NodeTraceEntry> trace = new ArrayList<>(parsed);
-    Instant now = Instant.now();
-    List<String> lines =
-        new ArrayList<>(
-            List.of(
-                "Run had been RUNNING since "
-                    + run.getStartedAt()
-                    + " with no recorded progress since "
-                    + lastActivity
-                    + ".",
-                "The executing instance stopped mid-run; this synchronous run cannot be resumed"
-                    + " automatically."));
-    lines.addAll(recovery.traceLines());
-    trace.add(
-        new NodeTraceEntry(
-            "recovery", "engine", "Crash recovery", "ERROR", recovery.reason(), now, now, lines));
-    try {
-      return objectMapper.writeValueAsString(trace);
-    } catch (Exception e) {
-      // Same silent best-effort fallback shape as WorkflowExecutionEngine#writeTrace.
-      return run.getTraceJson();
+
+    /**
+     * Appends a terminal ERROR entry so the run-trace overlay shows WHY the run is FAILED, exactly
+     * like an engine-caught failure would. If the stored trace cannot be parsed it is preserved
+     * byte-for-byte rather than replaced - losing the partial trace of a crashed run to make room
+     * for one bookkeeping entry would be a bad trade; {@code errorMessage} carries the reason
+     * regardless.
+     */
+    private String appendRecoveryTraceEntry(
+            WorkflowRun run, Instant lastActivity, Recovery recovery) {
+        List<NodeTraceEntry> parsed = readTraceOrNull(run);
+        if (parsed == null) {
+            log.warn(
+                    "Trace of stale workflow run {} is unparseable - leaving it untouched.",
+                    run.getId());
+            return run.getTraceJson();
+        }
+        List<NodeTraceEntry> trace = new ArrayList<>(parsed);
+        Instant now = Instant.now();
+        List<String> lines =
+                new ArrayList<>(
+                        List.of(
+                                "Run had been RUNNING since "
+                                        + run.getStartedAt()
+                                        + " with no recorded progress since "
+                                        + lastActivity
+                                        + ".",
+                                "The executing instance stopped mid-run; this synchronous run"
+                                        + " cannot be resumed automatically."));
+        lines.addAll(recovery.traceLines());
+        trace.add(
+                new NodeTraceEntry(
+                        "recovery",
+                        "engine",
+                        "Crash recovery",
+                        "ERROR",
+                        recovery.reason(),
+                        now,
+                        now,
+                        lines));
+        try {
+            return objectMapper.writeValueAsString(trace);
+        } catch (Exception e) {
+            // Same silent best-effort fallback shape as WorkflowExecutionEngine#writeTrace.
+            return run.getTraceJson();
+        }
     }
-  }
 }

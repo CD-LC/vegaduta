@@ -13,12 +13,12 @@ package com.agenticai.core.knowledge;
  * </ul>
  */
 public enum KnowledgeVisibility {
-  PRIVATE,
-  TENANT,
-  SHARED;
+    PRIVATE,
+    TENANT,
+    SHARED;
 
-  /** Null (a mocked or pre-V710 row) reads as {@link #TENANT}: the pre-feature behaviour. */
-  public static KnowledgeVisibility orDefault(KnowledgeVisibility value) {
-    return value == null ? TENANT : value;
-  }
+    /** Null (a mocked or pre-V710 row) reads as {@link #TENANT}: the pre-feature behaviour. */
+    public static KnowledgeVisibility orDefault(KnowledgeVisibility value) {
+        return value == null ? TENANT : value;
+    }
 }

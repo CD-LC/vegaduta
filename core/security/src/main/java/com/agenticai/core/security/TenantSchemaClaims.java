@@ -11,31 +11,31 @@ import java.util.Locale;
  */
 public final class TenantSchemaClaims {
 
-  /** The legacy default schema every pre-multitenancy table lived in. */
-  public static final String DEFAULT_SCHEMA = "public";
+    /** The legacy default schema every pre-multitenancy table lived in. */
+    public static final String DEFAULT_SCHEMA = "public";
 
-  private TenantSchemaClaims() {
-    // utility class
-  }
-
-  /**
-   * True for a tenant id that is (case-insensitively, after trimming) the legacy {@code public}
-   * schema or a reserved platform/system schema. A null id is not a system schema (it is "no
-   * tenant", handled by the callers).
-   */
-  public static boolean isSystemSchemaClaim(String tenantId) {
-    if (tenantId == null) {
-      return false;
+    private TenantSchemaClaims() {
+        // utility class
     }
-    String n = tenantId.trim().toLowerCase(Locale.ROOT);
-    return DEFAULT_SCHEMA.equals(n) || isReservedSchema(n);
-  }
 
-  /** A reserved platform/system schema other than {@code public}; input must be lowercase. */
-  public static boolean isReservedSchema(String lowerCaseSchema) {
-    return "control_plane".equals(lowerCaseSchema)
-        || "information_schema".equals(lowerCaseSchema)
-        || "ag_catalog".equals(lowerCaseSchema)
-        || lowerCaseSchema.startsWith("pg_");
-  }
+    /**
+     * True for a tenant id that is (case-insensitively, after trimming) the legacy {@code public}
+     * schema or a reserved platform/system schema. A null id is not a system schema (it is "no
+     * tenant", handled by the callers).
+     */
+    public static boolean isSystemSchemaClaim(String tenantId) {
+        if (tenantId == null) {
+            return false;
+        }
+        String n = tenantId.trim().toLowerCase(Locale.ROOT);
+        return DEFAULT_SCHEMA.equals(n) || isReservedSchema(n);
+    }
+
+    /** A reserved platform/system schema other than {@code public}; input must be lowercase. */
+    public static boolean isReservedSchema(String lowerCaseSchema) {
+        return "control_plane".equals(lowerCaseSchema)
+                || "information_schema".equals(lowerCaseSchema)
+                || "ag_catalog".equals(lowerCaseSchema)
+                || lowerCaseSchema.startsWith("pg_");
+    }
 }

@@ -8,15 +8,17 @@ import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.agenticai.core.mcpserver.McpCallerContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Third MCP tool this server exposes - a read-only hybrid (vector + keyword, RRF-fused, optionally
@@ -57,32 +59,33 @@ import org.springframework.util.StringUtils;
  */
 public class McpSearchKnowledgeToolCallback implements ToolCallback {
 
-  private static final Logger log = LoggerFactory.getLogger(McpSearchKnowledgeToolCallback.class);
-  private static final ObjectMapper MAPPER = JsonMappers.plain();
-  private static final int DEFAULT_TOP_K = 5;
-  private static final int MAX_TOP_K = 20;
+    private static final Logger log = LoggerFactory.getLogger(McpSearchKnowledgeToolCallback.class);
+    private static final ObjectMapper MAPPER = JsonMappers.plain();
+    private static final int DEFAULT_TOP_K = 5;
+    private static final int MAX_TOP_K = 20;
 
-  private final KnowledgeSearchService knowledgeSearchService;
-  private final AuditLogService auditLogService;
+    private final KnowledgeSearchService knowledgeSearchService;
+    private final AuditLogService auditLogService;
 
-  public McpSearchKnowledgeToolCallback(
-      KnowledgeSearchService knowledgeSearchService, AuditLogService auditLogService) {
-    this.knowledgeSearchService = knowledgeSearchService;
-    this.auditLogService = auditLogService;
-  }
+    public McpSearchKnowledgeToolCallback(
+            KnowledgeSearchService knowledgeSearchService, AuditLogService auditLogService) {
+        this.knowledgeSearchService = knowledgeSearchService;
+        this.auditLogService = auditLogService;
+    }
 
-  @Override
-  public ToolDefinition getToolDefinition() {
-    return ToolDefinition.builder()
-        .name("search_knowledge")
-        .description(
-            "Runs a read-only hybrid (semantic + keyword) search over the Knowledge Collections"
-                + " your tenant admin has shared with this API key, and returns the most relevant"
-                + " chunks. If no collections have been shared with this key, this tool returns an"
-                + " explanatory error instead of results - ask your tenant admin to update this"
-                + " grant's exposed knowledge collections.")
-        .inputSchema(
-            """
+    @Override
+    public ToolDefinition getToolDefinition() {
+        return ToolDefinition.builder()
+                .name("search_knowledge")
+                .description(
+                        "Runs a read-only hybrid (semantic + keyword) search over the Knowledge"
+                            + " Collections your tenant admin has shared with this API key, and"
+                            + " returns the most relevant chunks. If no collections have been"
+                            + " shared with this key, this tool returns an explanatory error"
+                            + " instead of results - ask your tenant admin to update this grant's"
+                            + " exposed knowledge collections.")
+                .inputSchema(
+                        """
 {
     "type": "object",
     "properties": {
@@ -92,112 +95,115 @@ public class McpSearchKnowledgeToolCallback implements ToolCallback {
     "required": ["query"]
 }
 """)
-        .build();
-  }
-
-  @Override
-  public String call(String toolInput) {
-    McpCallerContext caller =
-        McpCallerContext.current()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "search_knowledge invoked with no McpCallerContext set -"
-                            + " McpApiKeyAuthFilter should have rejected this request before it"
-                            + " ever reached tool dispatch."));
-    try {
-      JsonNode input = MAPPER.readTree(toolInput);
-      JsonNode queryNode = input.get("query");
-      String query = queryNode == null || queryNode.isNull() ? null : queryNode.asText();
-      if (!StringUtils.hasText(query)) {
-        return errorJson("query is required.");
-      }
-
-      int topK = DEFAULT_TOP_K;
-      JsonNode topKNode = input.get("top_k");
-      if (topKNode != null && !topKNode.isNull()) {
-        topK = topKNode.asInt(DEFAULT_TOP_K);
-      }
-      if (topK < 1) {
-        topK = 1;
-      } else if (topK > MAX_TOP_K) {
-        topK = MAX_TOP_K;
-      }
-
-      // Deny-by-default per this module's own established posture - see this class's own
-      // javadoc for why an empty set here must NOT fall back to "search everything", unlike
-      // core/knowledge's internal convention.
-      Set<UUID> exposedCollectionIds = caller.exposedKnowledgeCollectionIds();
-      if (exposedCollectionIds.isEmpty()) {
-        log.warn(
-            "MCP grant {} called search_knowledge with zero exposed knowledge collections -"
-                + " rejected",
-            caller.grantId());
-        recordAudit(
-            caller.grantId(),
-            AuditOutcome.FAILURE,
-            "MCP grant "
-                + caller.grantId()
-                + " called search_knowledge with zero exposed knowledge collections.");
-        return errorJson(
-            "No knowledge collections have been shared with this API key. Ask your tenant admin to "
-                + "update this grant's exposed knowledge collections.");
-      }
-
-      List<SearchResultResponse> results =
-          knowledgeSearchService.search(query, topK, exposedCollectionIds);
-      recordAudit(
-          caller.grantId(),
-          AuditOutcome.SUCCESS,
-          "MCP grant "
-              + caller.grantId()
-              + " ran search_knowledge ("
-              + results.size()
-              + " result(s)).");
-      return MAPPER.writeValueAsString(results);
-    } catch (Exception e) {
-      log.warn("search_knowledge tool call failed for grant {}", caller.grantId(), e);
-      recordAudit(
-          caller.grantId(),
-          AuditOutcome.FAILURE,
-          "MCP grant "
-              + caller.grantId()
-              + " search_knowledge invocation failed: "
-              + e.getMessage());
-      return errorJson("Knowledge search failed: " + e.getMessage());
+                .build();
     }
-  }
 
-  /**
-   * Best-effort {@link AuditLogService#record} wrapper - same "never let logging itself break the
-   * real call" posture {@code McpCallAgentToolCallback}'s own {@code recordAudit} already takes. A
-   * failure here must never propagate and change what {@link #call(String)} was already about to
-   * return. No single target id here (a search spans this grant's whole exposed-collection set, not
-   * one entity), so {@code targetType}/{@code targetId} name the grant itself, same as {@code
-   * McpCallAgentToolCallback}'s own null-target failure branches.
-   */
-  private void recordAudit(UUID grantId, AuditOutcome outcome, String detail) {
-    try {
-      auditLogService.record(
-          "mcp-external:" + grantId,
-          "mcp.grant.search_knowledge",
-          "McpServerAccessGrant",
-          grantId.toString(),
-          outcome,
-          detail);
-    } catch (RuntimeException auditFailure) {
-      log.warn(
-          "Failed to record audit log entry for MCP grant {} search_knowledge invocation",
-          grantId,
-          auditFailure);
-    }
-  }
+    @Override
+    public String call(String toolInput) {
+        McpCallerContext caller =
+                McpCallerContext.current()
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "search_knowledge invoked with no McpCallerContext"
+                                                        + " set - McpApiKeyAuthFilter should have"
+                                                        + " rejected this request before it ever"
+                                                        + " reached tool dispatch."));
+        try {
+            JsonNode input = MAPPER.readTree(toolInput);
+            JsonNode queryNode = input.get("query");
+            String query = queryNode == null || queryNode.isNull() ? null : queryNode.asText();
+            if (!StringUtils.hasText(query)) {
+                return errorJson("query is required.");
+            }
 
-  private String errorJson(String message) {
-    try {
-      return MAPPER.writeValueAsString(Map.of("error", message));
-    } catch (Exception e) {
-      return "{\"error\": \"" + message.replace("\"", "'") + "\"}";
+            int topK = DEFAULT_TOP_K;
+            JsonNode topKNode = input.get("top_k");
+            if (topKNode != null && !topKNode.isNull()) {
+                topK = topKNode.asInt(DEFAULT_TOP_K);
+            }
+            if (topK < 1) {
+                topK = 1;
+            } else if (topK > MAX_TOP_K) {
+                topK = MAX_TOP_K;
+            }
+
+            // Deny-by-default per this module's own established posture - see this class's own
+            // javadoc for why an empty set here must NOT fall back to "search everything", unlike
+            // core/knowledge's internal convention.
+            Set<UUID> exposedCollectionIds = caller.exposedKnowledgeCollectionIds();
+            if (exposedCollectionIds.isEmpty()) {
+                log.warn(
+                        "MCP grant {} called search_knowledge with zero exposed knowledge"
+                                + " collections - rejected",
+                        caller.grantId());
+                recordAudit(
+                        caller.grantId(),
+                        AuditOutcome.FAILURE,
+                        "MCP grant "
+                                + caller.grantId()
+                                + " called search_knowledge with zero exposed knowledge"
+                                + " collections.");
+                return errorJson(
+                        "No knowledge collections have been shared with this API key. Ask your"
+                                + " tenant admin to update this grant's exposed knowledge"
+                                + " collections.");
+            }
+
+            List<SearchResultResponse> results =
+                    knowledgeSearchService.search(query, topK, exposedCollectionIds);
+            recordAudit(
+                    caller.grantId(),
+                    AuditOutcome.SUCCESS,
+                    "MCP grant "
+                            + caller.grantId()
+                            + " ran search_knowledge ("
+                            + results.size()
+                            + " result(s)).");
+            return MAPPER.writeValueAsString(results);
+        } catch (Exception e) {
+            log.warn("search_knowledge tool call failed for grant {}", caller.grantId(), e);
+            recordAudit(
+                    caller.grantId(),
+                    AuditOutcome.FAILURE,
+                    "MCP grant "
+                            + caller.grantId()
+                            + " search_knowledge invocation failed: "
+                            + e.getMessage());
+            return errorJson("Knowledge search failed: " + e.getMessage());
+        }
     }
-  }
+
+    /**
+     * Best-effort {@link AuditLogService#record} wrapper - same "never let logging itself break the
+     * real call" posture {@code McpCallAgentToolCallback}'s own {@code recordAudit} already takes.
+     * A failure here must never propagate and change what {@link #call(String)} was already about
+     * to return. No single target id here (a search spans this grant's whole exposed-collection
+     * set, not one entity), so {@code targetType}/{@code targetId} name the grant itself, same as
+     * {@code McpCallAgentToolCallback}'s own null-target failure branches.
+     */
+    private void recordAudit(UUID grantId, AuditOutcome outcome, String detail) {
+        try {
+            auditLogService.record(
+                    "mcp-external:" + grantId,
+                    "mcp.grant.search_knowledge",
+                    "McpServerAccessGrant",
+                    grantId.toString(),
+                    outcome,
+                    detail);
+        } catch (RuntimeException auditFailure) {
+            log.warn(
+                    "Failed to record audit log entry for MCP grant {} search_knowledge invocation",
+                    grantId,
+                    auditFailure);
+        }
+    }
+
+    private String errorJson(String message) {
+        try {
+            return MAPPER.writeValueAsString(Map.of("error", message));
+        } catch (Exception e) {
+            return "{\"error\": \"" + message.replace("\"", "'") + "\"}";
+        }
+    }
 }

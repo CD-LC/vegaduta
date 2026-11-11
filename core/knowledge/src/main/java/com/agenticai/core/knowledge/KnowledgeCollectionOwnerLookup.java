@@ -2,10 +2,12 @@ package com.agenticai.core.knowledge;
 
 import com.agenticai.core.sharing.ResourceOwnerLookup;
 import com.agenticai.core.sharing.ResourceType;
-import java.util.Optional;
-import java.util.UUID;
+
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The {@code core/knowledge} adapter for core/sharing's {@link ResourceOwnerLookup} seam, so {@code
@@ -18,19 +20,19 @@ import org.springframework.stereotype.Component;
 @Profile("knowledge")
 public class KnowledgeCollectionOwnerLookup implements ResourceOwnerLookup {
 
-  private final KnowledgeCollectionRepository repository;
+    private final KnowledgeCollectionRepository repository;
 
-  public KnowledgeCollectionOwnerLookup(KnowledgeCollectionRepository repository) {
-    this.repository = repository;
-  }
+    public KnowledgeCollectionOwnerLookup(KnowledgeCollectionRepository repository) {
+        this.repository = repository;
+    }
 
-  @Override
-  public ResourceType supportedType() {
-    return ResourceType.KNOWLEDGE_COLLECTION;
-  }
+    @Override
+    public ResourceType supportedType() {
+        return ResourceType.KNOWLEDGE_COLLECTION;
+    }
 
-  @Override
-  public Optional<String> findCreatedBy(UUID resourceId) {
-    return repository.findById(resourceId).map(KnowledgeCollection::getCreatedBy);
-  }
+    @Override
+    public Optional<String> findCreatedBy(UUID resourceId) {
+        return repository.findById(resourceId).map(KnowledgeCollection::getCreatedBy);
+    }
 }

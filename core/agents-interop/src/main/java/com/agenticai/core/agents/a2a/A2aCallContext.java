@@ -14,22 +14,22 @@ package com.agenticai.core.agents.a2a;
  */
 public record A2aCallContext(int hop, String traceId, boolean signed) {
 
-  public A2aCallContext {
-    if (hop < 0) {
-      throw new IllegalArgumentException("hop must not be negative");
+    public A2aCallContext {
+        if (hop < 0) {
+            throw new IllegalArgumentException("hop must not be negative");
+        }
+        if (traceId == null || traceId.isBlank()) {
+            throw new IllegalArgumentException("traceId must not be blank");
+        }
     }
-    if (traceId == null || traceId.isBlank()) {
-      throw new IllegalArgumentException("traceId must not be blank");
+
+    /** The hop number an outbound call made while serving this request carries. */
+    public int nextHop() {
+        return hop + 1;
     }
-  }
 
-  /** The hop number an outbound call made while serving this request carries. */
-  public int nextHop() {
-    return hop + 1;
-  }
-
-  /** A request that did not come from another agent. */
-  public static A2aCallContext root(String traceId) {
-    return new A2aCallContext(0, traceId, false);
-  }
+    /** A request that did not come from another agent. */
+    public static A2aCallContext root(String traceId) {
+        return new A2aCallContext(0, traceId, false);
+    }
 }

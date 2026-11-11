@@ -2,11 +2,10 @@ package com.agenticai.core.tenancy;
 
 import com.agenticai.core.security.JwtClaimPaths;
 import com.agenticai.core.security.TenantContext;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.slf4j.Logger;
@@ -20,6 +19,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Phase 0 Stage 4 - tells Hibernate which Postgres schema to use for the current request, sourced
@@ -150,345 +153,352 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TenantSchemaResolver
-    implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
+        implements CurrentTenantIdentifierResolver<String>, HibernatePropertiesCustomizer {
 
-  /**
-   * Where every table already lived before Stage 4, and the fallback for any unauthenticated /
-   * no-tenant-context request.
-   */
-  public static final String DEFAULT_SCHEMA = SchemaNameSanitizer.DEFAULT_SCHEMA;
+    /**
+     * Where every table already lived before Stage 4, and the fallback for any unauthenticated /
+     * no-tenant-context request.
+     */
+    public static final String DEFAULT_SCHEMA = SchemaNameSanitizer.DEFAULT_SCHEMA;
 
-  /**
-   * Micrometer counter name for every public-schema fallback - dotted per this codebase's
-   * convention ({@code vision.rejections}, {@code llm.gateway.rejections}); the Prometheus exporter
-   * renders it as {@code tenant_context_public_fallback_total}. Tags: {@code kind} (see class
-   * javadoc's map) and {@code caller}.
-   */
-  public static final String FALLBACK_METRIC = "tenant.context.public.fallback";
+    /**
+     * Micrometer counter name for every public-schema fallback - dotted per this codebase's
+     * convention ({@code vision.rejections}, {@code llm.gateway.rejections}); the Prometheus
+     * exporter renders it as {@code tenant_context_public_fallback_total}. Tags: {@code kind} (see
+     * class javadoc's map) and {@code caller}.
+     */
+    public static final String FALLBACK_METRIC = "tenant.context.public.fallback";
 
-  /**
-   * SEC-017 - what a context-less, non-platform-scoped thread resolves to in fail-closed mode: a
-   * schema name that is never created (and is reserved by {@link TenantSchemaGuard}, so no tenant
-   * can ever be given it).
-   */
-  public static final String NO_CONTEXT_SCHEMA = "tenant_context_missing";
+    /**
+     * SEC-017 - what a context-less, non-platform-scoped thread resolves to in fail-closed mode: a
+     * schema name that is never created (and is reserved by {@link TenantSchemaGuard}, so no tenant
+     * can ever be given it).
+     */
+    public static final String NO_CONTEXT_SCHEMA = "tenant_context_missing";
 
-  private static final Logger log = LoggerFactory.getLogger(TenantSchemaResolver.class);
+    private static final Logger log = LoggerFactory.getLogger(TenantSchemaResolver.class);
 
-  private static final long WARN_INTERVAL_MILLIS = 60_000;
-  private static final int MAX_WALK_FRAMES = 64;
+    private static final long WARN_INTERVAL_MILLIS = 60_000;
+    private static final int MAX_WALK_FRAMES = 64;
 
-  /**
-   * Bridges the static {@link #currentSchemaName()} entry point (kept static for the knowledge
-   * module's raw-JDBC call sites - see that method's javadoc) to this bean's instrumentation.
-   * Last-constructed instance wins, which in production is simply "the one singleton Spring built";
-   * unit tests that construct their own instances must reset via {@link
-   * #resetRegisteredInstanceForTests()} so a fail-closed test instance can't leak into an unrelated
-   * suite running in the same fork.
-   */
-  private static volatile TenantSchemaResolver registered;
+    /**
+     * Bridges the static {@link #currentSchemaName()} entry point (kept static for the knowledge
+     * module's raw-JDBC call sites - see that method's javadoc) to this bean's instrumentation.
+     * Last-constructed instance wins, which in production is simply "the one singleton Spring
+     * built"; unit tests that construct their own instances must reset via {@link
+     * #resetRegisteredInstanceForTests()} so a fail-closed test instance can't leak into an
+     * unrelated suite running in the same fork.
+     */
+    private static volatile TenantSchemaResolver registered;
 
-  private final ObjectProvider<MeterRegistry> meterRegistries;
-  private final boolean failOnMissingContext;
-  private final String tenantClaim;
-  private final AtomicLong lastSuspiciousWarnAtMillis = new AtomicLong();
-  private volatile MeterRegistry cachedRegistry;
+    private final ObjectProvider<MeterRegistry> meterRegistries;
+    private final boolean failOnMissingContext;
+    private final String tenantClaim;
+    private final AtomicLong lastSuspiciousWarnAtMillis = new AtomicLong();
+    private volatile MeterRegistry cachedRegistry;
 
-  /**
-   * {@link ObjectProvider} rather than a direct {@link MeterRegistry} dependency because this bean
-   * is a {@link HibernatePropertiesCustomizer} and is therefore instantiated unusually early, while
-   * the {@code EntityManagerFactory} is being built - eagerly pulling the registry in at that point
-   * would force it to initialize before Boot's meter-binder post-processing runs ("bean is not
-   * eligible for getting processed by all BeanPostProcessors"). Resolved lazily on the first
-   * fallback instead, and a missing registry (narrow test contexts) just means counting is skipped
-   * - resolution behavior is never affected.
-   */
-  public TenantSchemaResolver(
-      ObjectProvider<MeterRegistry> meterRegistries, boolean failOnMissingContext) {
-    this(meterRegistries, failOnMissingContext, JwtClaimPaths.DEFAULT_TENANT_CLAIM);
-  }
-
-  /**
-   * @param tenantClaim the JWT claim carrying the tenant/schema id - {@code
-   *     app.security.oidc.tenant-claim} (generic-OIDC claim mapping, see {@code OidcClaimMapping}
-   *     in core/security); blank falls back to the Keycloak default {@code tenant_id}. Used only to
-   *     classify the {@code authenticated_no_context} fallback kind - the presence check must look
-   *     where the deployment actually puts the tenant id.
-   */
-  public TenantSchemaResolver(
-      ObjectProvider<MeterRegistry> meterRegistries,
-      boolean failOnMissingContext,
-      String tenantClaim) {
-    this.meterRegistries = meterRegistries;
-    this.failOnMissingContext = failOnMissingContext;
-    this.tenantClaim =
-        (tenantClaim == null || tenantClaim.isBlank())
-            ? JwtClaimPaths.DEFAULT_TENANT_CLAIM
-            : tenantClaim;
-    registered = this;
-  }
-
-  /**
-   * Spring's constructor. SEC-017: {@code app.tenancy.fail-on-missing-context} defaults to {@code
-   * true}; the dev-only {@code insecure} profile (no authentication, no tenants, everything in
-   * {@code public}) forces it off, loudly, because fail-closed there would just break every
-   * request.
-   */
-  @Autowired
-  public TenantSchemaResolver(
-      ObjectProvider<MeterRegistry> meterRegistries,
-      @Value("${app.tenancy.fail-on-missing-context:true}") boolean failOnMissingContext,
-      Environment environment,
-      @Value("${app.security.oidc.tenant-claim:tenant_id}") String tenantClaim) {
-    this(meterRegistries, effectiveFailClosed(failOnMissingContext, environment), tenantClaim);
-  }
-
-  static boolean effectiveFailClosed(boolean configured, Environment environment) {
-    if (configured && environment != null && environment.matchesProfiles("insecure")) {
-      log.warn(
-          "app.tenancy.fail-on-missing-context forced to false: the dev-only 'insecure' profile has"
-              + " no tenant contexts, so every query legitimately runs against the public schema.");
-      return false;
+    /**
+     * {@link ObjectProvider} rather than a direct {@link MeterRegistry} dependency because this
+     * bean is a {@link HibernatePropertiesCustomizer} and is therefore instantiated unusually
+     * early, while the {@code EntityManagerFactory} is being built - eagerly pulling the registry
+     * in at that point would force it to initialize before Boot's meter-binder post-processing runs
+     * ("bean is not eligible for getting processed by all BeanPostProcessors"). Resolved lazily on
+     * the first fallback instead, and a missing registry (narrow test contexts) just means counting
+     * is skipped - resolution behavior is never affected.
+     */
+    public TenantSchemaResolver(
+            ObjectProvider<MeterRegistry> meterRegistries, boolean failOnMissingContext) {
+        this(meterRegistries, failOnMissingContext, JwtClaimPaths.DEFAULT_TENANT_CLAIM);
     }
-    if (!configured) {
-      log.warn(
-          "app.tenancy.fail-on-missing-context=false - context-less threads fall back to the public"
-              + " schema (pre-SEC-017 behaviour). This is an escape hatch, not a supported"
-              + " production setting.");
+
+    /**
+     * @param tenantClaim the JWT claim carrying the tenant/schema id - {@code
+     *     app.security.oidc.tenant-claim} (generic-OIDC claim mapping, see {@code OidcClaimMapping}
+     *     in core/security); blank falls back to the Keycloak default {@code tenant_id}. Used only
+     *     to classify the {@code authenticated_no_context} fallback kind - the presence check must
+     *     look where the deployment actually puts the tenant id.
+     */
+    public TenantSchemaResolver(
+            ObjectProvider<MeterRegistry> meterRegistries,
+            boolean failOnMissingContext,
+            String tenantClaim) {
+        this.meterRegistries = meterRegistries;
+        this.failOnMissingContext = failOnMissingContext;
+        this.tenantClaim =
+                (tenantClaim == null || tenantClaim.isBlank())
+                        ? JwtClaimPaths.DEFAULT_TENANT_CLAIM
+                        : tenantClaim;
+        registered = this;
     }
-    return configured;
-  }
 
-  @Override
-  public String resolveCurrentTenantIdentifier() {
-    return resolveSchema();
-  }
-
-  /**
-   * The same tenant-id-claim-to-schema-name algorithm Hibernate uses for every JPA query, exposed
-   * as a reusable static method for the {@code knowledge} module's raw-JDBC queries against {@code
-   * knowledge_chunks} (pgvector has no Hibernate {@code UserType} for the {@code vector} column
-   * type here, so that module can't just go through the normal tenant-routed {@code EntityManager}
-   * - see {@code KnowledgeSearchService}/{@code KnowledgeIngestionService}). Extracted after
-   * finding those two services were querying an entirely schema-unqualified {@code
-   * knowledge_chunks} table - every tenant's uploaded documents were visible to every other
-   * tenant's searches, since Spring's autoconfigured {@code JdbcTemplate} pulls a connection
-   * straight from the shared {@code DataSource} bean and never goes through this class's Hibernate
-   * SPI hook at all. One algorithm, one place, so the raw-JDBC call sites can never quietly drift
-   * from what Hibernate actually does for everything else.
-   *
-   * <p>F-14: routes through the Spring-built singleton when one exists, so the knowledge module's
-   * fallbacks are counted (and fail closed) exactly like Hibernate's. When no instance has been
-   * constructed (narrow test contexts that never touch this bean), behaves exactly as it did before
-   * F-14: resolve, uninstrumented.
-   */
-  public static String currentSchemaName() {
-    TenantSchemaResolver resolver = registered;
-    if (resolver != null) {
-      return resolver.resolveSchema();
+    /**
+     * Spring's constructor. SEC-017: {@code app.tenancy.fail-on-missing-context} defaults to {@code
+     * true}; the dev-only {@code insecure} profile (no authentication, no tenants, everything in
+     * {@code public}) forces it off, loudly, because fail-closed there would just break every
+     * request.
+     */
+    @Autowired
+    public TenantSchemaResolver(
+            ObjectProvider<MeterRegistry> meterRegistries,
+            @Value("${app.tenancy.fail-on-missing-context:true}") boolean failOnMissingContext,
+            Environment environment,
+            @Value("${app.security.oidc.tenant-claim:tenant_id}") String tenantClaim) {
+        this(meterRegistries, effectiveFailClosed(failOnMissingContext, environment), tenantClaim);
     }
-    return TenantContext.current()
-        .filter(ctx -> ctx.getTenantId() != null && !ctx.getTenantId().isBlank())
-        .map(
-            ctx ->
-                enforceSchema(SchemaNameSanitizer.sanitize(ctx.getTenantId(), DEFAULT_SCHEMA), ctx))
-        .orElse(DEFAULT_SCHEMA);
-  }
 
-  /** See {@link #registered}'s javadoc - test-fork hygiene only. */
-  static void resetRegisteredInstanceForTests() {
-    registered = null;
-  }
-
-  private String resolveSchema() {
-    Optional<TenantContext> current = TenantContext.current();
-    if (current.isPresent()) {
-      String tenantId = current.get().getTenantId();
-      if (tenantId != null && !tenantId.isBlank()) {
-        return enforceSchema(SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA), current.get());
-      }
+    static boolean effectiveFailClosed(boolean configured, Environment environment) {
+        if (configured && environment != null && environment.matchesProfiles("insecure")) {
+            log.warn(
+                    "app.tenancy.fail-on-missing-context forced to false: the dev-only 'insecure'"
+                            + " profile has no tenant contexts, so every query legitimately runs"
+                            + " against the public schema.");
+            return false;
+        }
+        if (!configured) {
+            log.warn(
+                    "app.tenancy.fail-on-missing-context=false - context-less threads fall back to"
+                        + " the public schema (pre-SEC-017 behaviour). This is an escape hatch, not"
+                        + " a supported production setting.");
+        }
+        return configured;
     }
-    FallbackKind kind = classifyFallback(current.orElse(null));
-    // An explicit PlatformScope marks a deliberately tenant-less path. It
-    // never masks the propagation-bug signature (a tenant JWT on the
-    // thread with no TenantContext) - that stays the suspicious kind.
-    if (PlatformScope.isActive()
-        && (kind == FallbackKind.NO_CONTEXT || kind == FallbackKind.TENANTLESS_CONTEXT)) {
-      kind = FallbackKind.PLATFORM_SCOPE;
+
+    @Override
+    public String resolveCurrentTenantIdentifier() {
+        return resolveSchema();
     }
-    return publicFallback(kind);
-  }
 
-  /**
-   * The single enforcement chokepoint for which schema a {@link TenantContext} may reach: every
-   * Hibernate session and every raw-JDBC {@link #currentSchemaName()} call passes through here,
-   * whoever built the context. SEC-001/SEC-017 hardening: a tenant id that sanitises to a platform
-   * or system schema is never a tenant. The legacy {@code public} value is refused unless the
-   * context was built through {@link TenantContext#ofPlatformDefaultSchema} / {@link
-   * TenantContext#ofWebhookSchema} (the deliberate Twilio fallbacks). The no-context fallbacks
-   * (health checks, platform-admin/scope, onboarding) never pass through this method: they return
-   * {@value #DEFAULT_SCHEMA} directly from {@link #publicFallback}, which is untouched.
-   */
-  private static String enforceSchema(String schema, TenantContext context) {
-    if (DEFAULT_SCHEMA.equals(schema)) {
-      // Only the explicit, named API (the Twilio webhook fallbacks, pinned by
-      // PlatformDefaultSchemaCallersTest) may run on the legacy schema; every other context
-      // - JWT, API key, delegation token, a job, a hand-built one - is refused.
-      if (!context.isPlatformDefaultSchema()) {
-        throw new MissingTenantContextException(
-            "Tenant id resolves to the default schema without an explicit"
-                + " platform-default context - refusing to route tenant queries"
-                + " there (use TenantContext.ofWebhookSchema for deliberate"
-                + " webhook fallbacks)");
-      }
-      return schema;
+    /**
+     * The same tenant-id-claim-to-schema-name algorithm Hibernate uses for every JPA query, exposed
+     * as a reusable static method for the {@code knowledge} module's raw-JDBC queries against
+     * {@code knowledge_chunks} (pgvector has no Hibernate {@code UserType} for the {@code vector}
+     * column type here, so that module can't just go through the normal tenant-routed {@code
+     * EntityManager} - see {@code KnowledgeSearchService}/{@code KnowledgeIngestionService}).
+     * Extracted after finding those two services were querying an entirely schema-unqualified
+     * {@code knowledge_chunks} table - every tenant's uploaded documents were visible to every
+     * other tenant's searches, since Spring's autoconfigured {@code JdbcTemplate} pulls a
+     * connection straight from the shared {@code DataSource} bean and never goes through this
+     * class's Hibernate SPI hook at all. One algorithm, one place, so the raw-JDBC call sites can
+     * never quietly drift from what Hibernate actually does for everything else.
+     *
+     * <p>F-14: routes through the Spring-built singleton when one exists, so the knowledge module's
+     * fallbacks are counted (and fail closed) exactly like Hibernate's. When no instance has been
+     * constructed (narrow test contexts that never touch this bean), behaves exactly as it did
+     * before F-14: resolve, uninstrumented.
+     */
+    public static String currentSchemaName() {
+        TenantSchemaResolver resolver = registered;
+        if (resolver != null) {
+            return resolver.resolveSchema();
+        }
+        return TenantContext.current()
+                .filter(ctx -> ctx.getTenantId() != null && !ctx.getTenantId().isBlank())
+                .map(
+                        ctx ->
+                                enforceSchema(
+                                        SchemaNameSanitizer.sanitize(
+                                                ctx.getTenantId(), DEFAULT_SCHEMA),
+                                        ctx))
+                .orElse(DEFAULT_SCHEMA);
     }
-    if (TenantSchemaGuard.isProtectedSchema(schema)) {
-      throw new MissingTenantContextException(
-          "Tenant id resolves to the reserved schema '"
-              + schema
-              + "' - refusing to route tenant queries there");
+
+    /** See {@link #registered}'s javadoc - test-fork hygiene only. */
+    static void resetRegisteredInstanceForTests() {
+        registered = null;
     }
-    return schema;
-  }
 
-  /**
-   * The class javadoc's map, in code. {@code context} is the present-but- tenantless context, or
-   * null when there was none at all.
-   */
-  private FallbackKind classifyFallback(TenantContext context) {
-    if (context != null) {
-      boolean platformAdmin = context.getRoles() != null && context.hasRole("ROLE_platform-admin");
-      return platformAdmin ? FallbackKind.PLATFORM_ADMIN : FallbackKind.TENANTLESS_CONTEXT;
+    private String resolveSchema() {
+        Optional<TenantContext> current = TenantContext.current();
+        if (current.isPresent()) {
+            String tenantId = current.get().getTenantId();
+            if (tenantId != null && !tenantId.isBlank()) {
+                return enforceSchema(
+                        SchemaNameSanitizer.sanitize(tenantId, DEFAULT_SCHEMA), current.get());
+            }
+        }
+        FallbackKind kind = classifyFallback(current.orElse(null));
+        // An explicit PlatformScope marks a deliberately tenant-less path. It
+        // never masks the propagation-bug signature (a tenant JWT on the
+        // thread with no TenantContext) - that stays the suspicious kind.
+        if (PlatformScope.isActive()
+                && (kind == FallbackKind.NO_CONTEXT || kind == FallbackKind.TENANTLESS_CONTEXT)) {
+            kind = FallbackKind.PLATFORM_SCOPE;
+        }
+        return publicFallback(kind);
     }
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-      String claim = JwtClaimPaths.valueAsString(jwtAuth.getToken(), tenantClaim);
-      if (claim != null && !claim.isBlank()) {
-        return FallbackKind.AUTHENTICATED_NO_CONTEXT;
-      }
+
+    /**
+     * The single enforcement chokepoint for which schema a {@link TenantContext} may reach: every
+     * Hibernate session and every raw-JDBC {@link #currentSchemaName()} call passes through here,
+     * whoever built the context. SEC-001/SEC-017 hardening: a tenant id that sanitises to a
+     * platform or system schema is never a tenant. The legacy {@code public} value is refused
+     * unless the context was built through {@link TenantContext#ofPlatformDefaultSchema} / {@link
+     * TenantContext#ofWebhookSchema} (the deliberate Twilio fallbacks). The no-context fallbacks
+     * (health checks, platform-admin/scope, onboarding) never pass through this method: they return
+     * {@value #DEFAULT_SCHEMA} directly from {@link #publicFallback}, which is untouched.
+     */
+    private static String enforceSchema(String schema, TenantContext context) {
+        if (DEFAULT_SCHEMA.equals(schema)) {
+            // Only the explicit, named API (the Twilio webhook fallbacks, pinned by
+            // PlatformDefaultSchemaCallersTest) may run on the legacy schema; every other context
+            // - JWT, API key, delegation token, a job, a hand-built one - is refused.
+            if (!context.isPlatformDefaultSchema()) {
+                throw new MissingTenantContextException(
+                        "Tenant id resolves to the default schema without an explicit"
+                                + " platform-default context - refusing to route tenant queries"
+                                + " there (use TenantContext.ofWebhookSchema for deliberate"
+                                + " webhook fallbacks)");
+            }
+            return schema;
+        }
+        if (TenantSchemaGuard.isProtectedSchema(schema)) {
+            throw new MissingTenantContextException(
+                    "Tenant id resolves to the reserved schema '"
+                            + schema
+                            + "' - refusing to route tenant queries there");
+        }
+        return schema;
     }
-    return FallbackKind.NO_CONTEXT;
-  }
 
-  private String publicFallback(FallbackKind kind) {
-    String caller = walkbackCaller();
-    count(kind, caller);
-    if (failOnMissingContext
-        && (kind == FallbackKind.NO_CONTEXT || kind == FallbackKind.TENANTLESS_CONTEXT)) {
-      // SEC-017: fail closed without breaking control-plane access (see
-      // the SEC-017 section of the class javadoc).
-      return NO_CONTEXT_SCHEMA;
+    /**
+     * The class javadoc's map, in code. {@code context} is the present-but- tenantless context, or
+     * null when there was none at all.
+     */
+    private FallbackKind classifyFallback(TenantContext context) {
+        if (context != null) {
+            boolean platformAdmin =
+                    context.getRoles() != null && context.hasRole("ROLE_platform-admin");
+            return platformAdmin ? FallbackKind.PLATFORM_ADMIN : FallbackKind.TENANTLESS_CONTEXT;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            String claim = JwtClaimPaths.valueAsString(jwtAuth.getToken(), tenantClaim);
+            if (claim != null && !claim.isBlank()) {
+                return FallbackKind.AUTHENTICATED_NO_CONTEXT;
+            }
+        }
+        return FallbackKind.NO_CONTEXT;
     }
-    if (kind == FallbackKind.AUTHENTICATED_NO_CONTEXT) {
-      maybeWarn(caller);
-      if (failOnMissingContext) {
-        // Counted and warned BEFORE throwing - the whole point of
-        // fail-closed mode is that the metric/log trail survives it.
-        throw new MissingTenantContextException(
-            "TenantContext is empty but the current thread carries an authenticated JWT with a "
-                + "tenant_id claim (nearest caller: "
-                + caller
-                + "). TenantContextFilter should have "
-                + "populated it - filter ordering regressed, or an async hop propagated the Spring "
-                + "Security context without propagating TenantContext. Failing closed "
-                + "(app.tenancy.fail-on-missing-context=true) instead of silently querying the "
-                + "public schema.");
-      }
+
+    private String publicFallback(FallbackKind kind) {
+        String caller = walkbackCaller();
+        count(kind, caller);
+        if (failOnMissingContext
+                && (kind == FallbackKind.NO_CONTEXT || kind == FallbackKind.TENANTLESS_CONTEXT)) {
+            // SEC-017: fail closed without breaking control-plane access (see
+            // the SEC-017 section of the class javadoc).
+            return NO_CONTEXT_SCHEMA;
+        }
+        if (kind == FallbackKind.AUTHENTICATED_NO_CONTEXT) {
+            maybeWarn(caller);
+            if (failOnMissingContext) {
+                // Counted and warned BEFORE throwing - the whole point of
+                // fail-closed mode is that the metric/log trail survives it.
+                throw new MissingTenantContextException(
+                        "TenantContext is empty but the current thread carries an authenticated JWT"
+                                + " with a tenant_id claim (nearest caller: "
+                                + caller
+                                + "). TenantContextFilter should have populated it - filter"
+                                + " ordering regressed, or an async hop propagated the Spring"
+                                + " Security context without propagating TenantContext. Failing"
+                                + " closed (app.tenancy.fail-on-missing-context=true) instead of"
+                                + " silently querying the public schema.");
+            }
+        }
+        return DEFAULT_SCHEMA;
     }
-    return DEFAULT_SCHEMA;
-  }
 
-  private void count(FallbackKind kind, String caller) {
-    MeterRegistry registry = meterRegistry();
-    if (registry == null) {
-      return;
+    private void count(FallbackKind kind, String caller) {
+        MeterRegistry registry = meterRegistry();
+        if (registry == null) {
+            return;
+        }
+        Counter.builder(FALLBACK_METRIC)
+                .description(
+                        "Tenant-schema resolutions that fell back to the public schema, by"
+                            + " resolution path (kind) and nearest non-infrastructure caller. See"
+                            + " TenantSchemaResolver's javadoc for which kinds are legitimate.")
+                .tag("kind", kind.tag)
+                .tag("caller", caller)
+                .register(registry)
+                .increment();
     }
-    Counter.builder(FALLBACK_METRIC)
-        .description(
-            "Tenant-schema resolutions that fell back to the public schema, by resolution path"
-                + " (kind) and nearest non-infrastructure caller. See TenantSchemaResolver's"
-                + " javadoc for which kinds are legitimate.")
-        .tag("kind", kind.tag)
-        .tag("caller", caller)
-        .register(registry)
-        .increment();
-  }
 
-  private MeterRegistry meterRegistry() {
-    MeterRegistry registry = cachedRegistry;
-    if (registry == null) {
-      registry = meterRegistries.getIfAvailable();
-      cachedRegistry = registry;
+    private MeterRegistry meterRegistry() {
+        MeterRegistry registry = cachedRegistry;
+        if (registry == null) {
+            registry = meterRegistries.getIfAvailable();
+            cachedRegistry = registry;
+        }
+        return registry;
     }
-    return registry;
-  }
 
-  private void maybeWarn(String caller) {
-    long now = System.currentTimeMillis();
-    long last = lastSuspiciousWarnAtMillis.get();
-    if (now - last >= WARN_INTERVAL_MILLIS && lastSuspiciousWarnAtMillis.compareAndSet(last, now)) {
-      log.warn(
-          "Tenant-schema resolution fell back to the public schema on a thread that still carries"
-              + " an authenticated JWT with a tenant_id claim (nearest caller: {}). This is the"
-              + " TenantContext-propagation bug signature - see TenantSchemaResolver's F-14"
-              + " javadoc. Rate-limited to one warning per minute; the {} counter"
-              + " (kind=authenticated_no_context) has the true rate.",
-          caller,
-          FALLBACK_METRIC);
+    private void maybeWarn(String caller) {
+        long now = System.currentTimeMillis();
+        long last = lastSuspiciousWarnAtMillis.get();
+        if (now - last >= WARN_INTERVAL_MILLIS
+                && lastSuspiciousWarnAtMillis.compareAndSet(last, now)) {
+            log.warn(
+                    "Tenant-schema resolution fell back to the public schema on a thread that still"
+                        + " carries an authenticated JWT with a tenant_id claim (nearest caller:"
+                        + " {}). This is the TenantContext-propagation bug signature - see"
+                        + " TenantSchemaResolver's F-14 javadoc. Rate-limited to one warning per"
+                        + " minute; the {} counter (kind=authenticated_no_context) has the true"
+                        + " rate.",
+                    caller,
+                    FALLBACK_METRIC);
+        }
     }
-  }
 
-  /**
-   * Nearest class on the stack that is not this resolver, Hibernate, Spring, the JDK, or the
-   * connection pool - i.e. the repository/service that opened the session. Simple name only, to
-   * keep the metric tag readable; cardinality is bounded by the number of distinct call-site
-   * classes in the codebase.
-   */
-  private static String walkbackCaller() {
-    return StackWalker.getInstance()
-        .walk(
-            frames ->
-                frames
-                    .limit(MAX_WALK_FRAMES)
-                    .map(StackWalker.StackFrame::getClassName)
-                    .filter(TenantSchemaResolver::isApplicationFrame)
-                    .findFirst())
-        .map(className -> className.substring(className.lastIndexOf('.') + 1))
-        .orElse("unknown");
-  }
-
-  private static boolean isApplicationFrame(String className) {
-    return !className.equals(TenantSchemaResolver.class.getName())
-        && !className.startsWith("org.hibernate")
-        && !className.startsWith("org.springframework")
-        && !className.startsWith("java.")
-        && !className.startsWith("jdk.")
-        && !className.startsWith("sun.")
-        && !className.startsWith("com.zaxxer");
-  }
-
-  @Override
-  public boolean validateExistingCurrentSessions() {
-    return true;
-  }
-
-  @Override
-  public void customize(Map<String, Object> hibernateProperties) {
-    hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
-  }
-
-  private enum FallbackKind {
-    PLATFORM_ADMIN("platform_admin"),
-    TENANTLESS_CONTEXT("tenantless_context"),
-    AUTHENTICATED_NO_CONTEXT("authenticated_no_context"),
-    NO_CONTEXT("no_context"),
-    PLATFORM_SCOPE("platform_scope");
-
-    private final String tag;
-
-    FallbackKind(String tag) {
-      this.tag = tag;
+    /**
+     * Nearest class on the stack that is not this resolver, Hibernate, Spring, the JDK, or the
+     * connection pool - i.e. the repository/service that opened the session. Simple name only, to
+     * keep the metric tag readable; cardinality is bounded by the number of distinct call-site
+     * classes in the codebase.
+     */
+    private static String walkbackCaller() {
+        return StackWalker.getInstance()
+                .walk(
+                        frames ->
+                                frames.limit(MAX_WALK_FRAMES)
+                                        .map(StackWalker.StackFrame::getClassName)
+                                        .filter(TenantSchemaResolver::isApplicationFrame)
+                                        .findFirst())
+                .map(className -> className.substring(className.lastIndexOf('.') + 1))
+                .orElse("unknown");
     }
-  }
+
+    private static boolean isApplicationFrame(String className) {
+        return !className.equals(TenantSchemaResolver.class.getName())
+                && !className.startsWith("org.hibernate")
+                && !className.startsWith("org.springframework")
+                && !className.startsWith("java.")
+                && !className.startsWith("jdk.")
+                && !className.startsWith("sun.")
+                && !className.startsWith("com.zaxxer");
+    }
+
+    @Override
+    public boolean validateExistingCurrentSessions() {
+        return true;
+    }
+
+    @Override
+    public void customize(Map<String, Object> hibernateProperties) {
+        hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
+    }
+
+    private enum FallbackKind {
+        PLATFORM_ADMIN("platform_admin"),
+        TENANTLESS_CONTEXT("tenantless_context"),
+        AUTHENTICATED_NO_CONTEXT("authenticated_no_context"),
+        NO_CONTEXT("no_context"),
+        PLATFORM_SCOPE("platform_scope");
+
+        private final String tag;
+
+        FallbackKind(String tag) {
+            this.tag = tag;
+        }
+    }
 }

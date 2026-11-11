@@ -17,173 +17,197 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.sharing.ResourceType;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 /** Ownership, visibility and the collection-level guards in {@link KnowledgeCollectionService}. */
 class KnowledgeCollectionServiceAclTest {
 
-  private static final String OWNER = "owner-sub";
-  private static final String MEMBER = "member-sub";
+    private static final String OWNER = "owner-sub";
+    private static final String MEMBER = "member-sub";
 
-  private KnowledgeCollectionRepository repository;
-  private ResourceAccessService sharing;
-  private KnowledgeCollectionService service;
+    private KnowledgeCollectionRepository repository;
+    private ResourceAccessService sharing;
+    private KnowledgeCollectionService service;
 
-  @BeforeEach
-  void setUp() {
-    repository = mock(KnowledgeCollectionRepository.class);
-    sharing = mock(ResourceAccessService.class);
-    when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any()))
-        .thenReturn(Map.of());
-    KnowledgeAccessService access =
-        new KnowledgeAccessService(
-            repository,
-            mock(KnowledgeDocumentRepository.class),
-            sharing,
-            mock(AuditLogService.class));
-    service =
-        new KnowledgeCollectionService(
-            repository,
-            mock(JdbcTemplate.class),
-            mock(KnowledgeDocumentService.class),
-            mock(TenantLimits.class));
-    service.setAccess(access);
-    when(repository.save(any(KnowledgeCollection.class))).thenAnswer(inv -> inv.getArgument(0));
-  }
+    @BeforeEach
+    void setUp() {
+        repository = mock(KnowledgeCollectionRepository.class);
+        sharing = mock(ResourceAccessService.class);
+        when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any()))
+                .thenReturn(Map.of());
+        KnowledgeAccessService access =
+                new KnowledgeAccessService(
+                        repository,
+                        mock(KnowledgeDocumentRepository.class),
+                        sharing,
+                        mock(AuditLogService.class));
+        service =
+                new KnowledgeCollectionService(
+                        repository,
+                        mock(JdbcTemplate.class),
+                        mock(KnowledgeDocumentService.class),
+                        mock(TenantLimits.class));
+        service.setAccess(access);
+        when(repository.save(any(KnowledgeCollection.class))).thenAnswer(inv -> inv.getArgument(0));
+    }
 
-  @AfterEach
-  void clearContext() {
-    TenantContext.clear();
-  }
+    @AfterEach
+    void clearContext() {
+        TenantContext.clear();
+    }
 
-  private void loginAs(String subject) {
-    // No tenant id: skips the plan-limit gate in create(), like KnowledgeCollectionServiceTest.
-    TenantContext.set(TenantContext.of(null, subject, Set.of()));
-  }
+    private void loginAs(String subject) {
+        // No tenant id: skips the plan-limit gate in create(), like KnowledgeCollectionServiceTest.
+        TenantContext.set(TenantContext.of(null, subject, Set.of()));
+    }
 
-  private KnowledgeCollection stored(String owner, KnowledgeVisibility visibility) {
-    KnowledgeCollection c =
-        new KnowledgeCollection("c", "d", null, "minilm-l6-v2", "simple", owner, visibility);
-    ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
-    when(repository.findById(c.getId())).thenReturn(Optional.of(c));
-    when(repository.existsById(c.getId())).thenReturn(true);
-    return c;
-  }
+    private KnowledgeCollection stored(String owner, KnowledgeVisibility visibility) {
+        KnowledgeCollection c =
+                new KnowledgeCollection(
+                        "c", "d", null, "minilm-l6-v2", "simple", owner, visibility);
+        ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
+        when(repository.findById(c.getId())).thenReturn(Optional.of(c));
+        when(repository.existsById(c.getId())).thenReturn(true);
+        return c;
+    }
 
-  @Test
-  void aNewCollectionIsOwnedByItsCreatorAndTenantVisibleByDefault() {
-    loginAs(OWNER);
+    @Test
+    void aNewCollectionIsOwnedByItsCreatorAndTenantVisibleByDefault() {
+        loginAs(OWNER);
 
-    KnowledgeCollectionResponse response =
-        service.create(new KnowledgeCollectionCreateRequest("Docs", "d", null, null, null));
+        KnowledgeCollectionResponse response =
+                service.create(new KnowledgeCollectionCreateRequest("Docs", "d", null, null, null));
 
-    assertEquals(OWNER, response.createdBy());
-    assertEquals(KnowledgeVisibility.TENANT, response.visibility());
-  }
+        assertEquals(OWNER, response.createdBy());
+        assertEquals(KnowledgeVisibility.TENANT, response.visibility());
+    }
 
-  @Test
-  void aCollectionCanBeCreatedPrivateOrShared() {
-    loginAs(OWNER);
+    @Test
+    void aCollectionCanBeCreatedPrivateOrShared() {
+        loginAs(OWNER);
 
-    KnowledgeCollectionResponse response =
-        service.create(
-            new KnowledgeCollectionCreateRequest(
-                "Mine", "d", null, null, null, null, null, KnowledgeVisibility.PRIVATE));
+        KnowledgeCollectionResponse response =
+                service.create(
+                        new KnowledgeCollectionCreateRequest(
+                                "Mine",
+                                "d",
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                KnowledgeVisibility.PRIVATE));
 
-    assertEquals(KnowledgeVisibility.PRIVATE, response.visibility());
-    assertEquals(OWNER, response.createdBy());
-  }
+        assertEquals(KnowledgeVisibility.PRIVATE, response.visibility());
+        assertEquals(OWNER, response.createdBy());
+    }
 
-  @Test
-  void aRestrictedCollectionNeedsAnOwnerSoWithoutAUserItIsRefused() {
-    TenantContext.clear();
+    @Test
+    void aRestrictedCollectionNeedsAnOwnerSoWithoutAUserItIsRefused() {
+        TenantContext.clear();
 
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            service.create(
-                new KnowledgeCollectionCreateRequest(
-                    "Mine", "d", null, null, null, null, null, KnowledgeVisibility.SHARED)));
-    verify(repository, never()).save(any());
-  }
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        service.create(
+                                new KnowledgeCollectionCreateRequest(
+                                        "Mine",
+                                        "d",
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        KnowledgeVisibility.SHARED)));
+        verify(repository, never()).save(any());
+    }
 
-  @Test
-  void listAllOmitsCollectionsTheCallerCannotRead() {
-    loginAs(MEMBER);
-    KnowledgeCollection open = stored(OWNER, KnowledgeVisibility.TENANT);
-    KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
-    KnowledgeCollection legacy = stored(null, null);
-    when(repository.findAll()).thenReturn(List.of(open, secret, legacy));
+    @Test
+    void listAllOmitsCollectionsTheCallerCannotRead() {
+        loginAs(MEMBER);
+        KnowledgeCollection open = stored(OWNER, KnowledgeVisibility.TENANT);
+        KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
+        KnowledgeCollection legacy = stored(null, null);
+        when(repository.findAll()).thenReturn(List.of(open, secret, legacy));
 
-    List<UUID> ids = service.listAll().stream().map(KnowledgeCollectionResponse::id).toList();
+        List<UUID> ids = service.listAll().stream().map(KnowledgeCollectionResponse::id).toList();
 
-    assertEquals(List.of(open.getId(), legacy.getId()), ids);
-  }
+        assertEquals(List.of(open.getId(), legacy.getId()), ids);
+    }
 
-  @Test
-  void getOnAPrivateCollectionIsA404ForANonOwnerAndWorksForTheOwner() {
-    KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
+    @Test
+    void getOnAPrivateCollectionIsA404ForANonOwnerAndWorksForTheOwner() {
+        KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
 
-    loginAs(MEMBER);
-    assertThrows(KnowledgeCollectionNotFoundException.class, () -> service.get(secret.getId()));
+        loginAs(MEMBER);
+        assertThrows(KnowledgeCollectionNotFoundException.class, () -> service.get(secret.getId()));
 
-    loginAs(OWNER);
-    assertEquals(secret.getId(), service.get(secret.getId()).id());
-  }
+        loginAs(OWNER);
+        assertEquals(secret.getId(), service.get(secret.getId()).id());
+    }
 
-  @Test
-  void onlyTheOwnerOrAnAdminMayChangeVisibilityEvenOnATenantWideCollection() {
-    KnowledgeCollection open = stored(OWNER, KnowledgeVisibility.TENANT);
-    KnowledgeCollectionUpdateRequest lockDown =
-        new KnowledgeCollectionUpdateRequest(
-            "c", "d", null, null, null, KnowledgeVisibility.PRIVATE);
+    @Test
+    void onlyTheOwnerOrAnAdminMayChangeVisibilityEvenOnATenantWideCollection() {
+        KnowledgeCollection open = stored(OWNER, KnowledgeVisibility.TENANT);
+        KnowledgeCollectionUpdateRequest lockDown =
+                new KnowledgeCollectionUpdateRequest(
+                        "c", "d", null, null, null, KnowledgeVisibility.PRIVATE);
 
-    loginAs(MEMBER);
-    assertThrows(
-        KnowledgeCollectionNotFoundException.class, () -> service.update(open.getId(), lockDown));
-    assertEquals(KnowledgeVisibility.TENANT, open.getVisibility());
+        loginAs(MEMBER);
+        assertThrows(
+                KnowledgeCollectionNotFoundException.class,
+                () -> service.update(open.getId(), lockDown));
+        assertEquals(KnowledgeVisibility.TENANT, open.getVisibility());
 
-    loginAs(OWNER);
-    assertEquals(KnowledgeVisibility.PRIVATE, service.update(open.getId(), lockDown).visibility());
-  }
+        loginAs(OWNER);
+        assertEquals(
+                KnowledgeVisibility.PRIVATE, service.update(open.getId(), lockDown).visibility());
+    }
 
-  @Test
-  void anUpdateWithoutAVisibilityLeavesItUnchanged() {
-    KnowledgeCollection team = stored(OWNER, KnowledgeVisibility.SHARED);
-    loginAs(OWNER);
+    @Test
+    void anUpdateWithoutAVisibilityLeavesItUnchanged() {
+        KnowledgeCollection team = stored(OWNER, KnowledgeVisibility.SHARED);
+        loginAs(OWNER);
 
-    service.update(team.getId(), new KnowledgeCollectionUpdateRequest("renamed", "d", null));
+        service.update(team.getId(), new KnowledgeCollectionUpdateRequest("renamed", "d", null));
 
-    assertEquals(KnowledgeVisibility.SHARED, team.getVisibility());
-  }
+        assertEquals(KnowledgeVisibility.SHARED, team.getVisibility());
+    }
 
-  @Test
-  void aMemberCannotDeleteOrEditARestrictedCollection() {
-    KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.SHARED);
-    loginAs(MEMBER);
+    @Test
+    void aMemberCannotDeleteOrEditARestrictedCollection() {
+        KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.SHARED);
+        loginAs(MEMBER);
 
-    assertThrows(KnowledgeCollectionNotFoundException.class, () -> service.delete(secret.getId()));
-    assertThrows(
-        KnowledgeCollectionNotFoundException.class,
-        () -> service.update(secret.getId(), new KnowledgeCollectionUpdateRequest("x", "d", null)));
-    verify(repository, never()).delete(any());
-  }
+        assertThrows(
+                KnowledgeCollectionNotFoundException.class, () -> service.delete(secret.getId()));
+        assertThrows(
+                KnowledgeCollectionNotFoundException.class,
+                () ->
+                        service.update(
+                                secret.getId(),
+                                new KnowledgeCollectionUpdateRequest("x", "d", null)));
+        verify(repository, never()).delete(any());
+    }
 
-  @Test
-  void requireReadableIsA404ForAnUnreadableCollection() {
-    KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
-    loginAs(MEMBER);
+    @Test
+    void requireReadableIsA404ForAnUnreadableCollection() {
+        KnowledgeCollection secret = stored(OWNER, KnowledgeVisibility.PRIVATE);
+        loginAs(MEMBER);
 
-    assertThrows(
-        KnowledgeCollectionNotFoundException.class, () -> service.requireReadable(secret.getId()));
-  }
+        assertThrows(
+                KnowledgeCollectionNotFoundException.class,
+                () -> service.requireReadable(secret.getId()));
+    }
 }

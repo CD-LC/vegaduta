@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.screen.ContentWriteScreen;
+
 import java.util.Optional;
 
 /**
@@ -17,10 +18,10 @@ import java.util.Optional;
  */
 public final class KnowledgeWriteScreen {
 
-  private KnowledgeWriteScreen() {}
+    private KnowledgeWriteScreen() {}
 
-  /** A caller-safe reason the text must not be stored, or empty when it passes. */
-  public static Optional<String> refusal(String content) {
-    return ContentWriteScreen.refusal(content);
-  }
+    /** A caller-safe reason the text must not be stored, or empty when it passes. */
+    public static Optional<String> refusal(String content) {
+        return ContentWriteScreen.refusal(content);
+    }
 }

@@ -33,8 +33,10 @@ import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.FeatureFlagService;
-import java.time.Duration;
+
 import org.springframework.beans.factory.ObjectProvider;
+
+import java.time.Duration;
 
 /**
  * Builds an {@link AgentChatService} from the flat, pre-facade argument list the hand-built test
@@ -45,92 +47,93 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 final class AgentChatServiceTestFactory {
 
-  private AgentChatServiceTestFactory() {}
+    private AgentChatServiceTestFactory() {}
 
-  @SuppressWarnings("java:S107")
-  static AgentChatService create(
-      AgentService agentService,
-      ProviderCredentialResolver credentialResolver,
-      LlmGatewayService llmGatewayService,
-      SessionMemoryService sessionMemoryService,
-      ProviderErrorTranslator providerErrorTranslator,
-      AgentToolPort agentToolProvider,
-      ObjectProvider<AgentMemoryService> agentMemoryService,
-      ObjectProvider<TenantMemoryService> tenantMemoryService,
-      AnswerConsistencyChecker answerConsistencyChecker,
-      ReflexionService reflexionService,
-      TaskPlanningService taskPlanningService,
-      ToolCallLogService toolCallLogService,
-      TenantLimits tenantLimits,
-      FreeTierChatClientService freeTierChatClientService,
-      FileStorageService fileStorageService,
-      TenantStatusGuard tenantStatusGuard,
-      LlmQualityJudgeService llmQualityJudgeService,
-      ObjectProvider<PlatformIssueService> platformIssueService,
-      FeatureFlagService featureFlagService,
-      LlmResponseCacheService responseCacheService,
-      ObjectProvider<SemanticResponseCacheService> semanticResponseCacheService,
-      QueryComplexityClassifier queryComplexityClassifier,
-      ObjectProvider<RlPolicyPort> rlPolicyPort,
-      ObjectProvider<RlTurnRecorder> rlTurnRecorder,
-      ObjectProvider<ModerationService> moderationService,
-      ObjectProvider<ContentGuardrailEngine> contentGuardrailEngine,
-      ObjectProvider<GuardrailViolationLogger> guardrailViolationLogger,
-      AgentGuardrailService agentGuardrailService,
-      InlineAttachmentProcessor inlineAttachmentProcessor,
-      ResourceAccessService resourceAccessService,
-      VisionUsageService visionUsageService,
-      VisionSessionService visionSessionService,
-      ObjectProvider<PlatformHostedLlmProviderService> platformHostedLlmProviderService,
-      LoadTestTenantAllowlist loadTestTenantAllowlist,
-      ChatTurnCancelService chatTurnCancelService,
-      Duration streamIdleTimeout,
-      Duration bufferedTurnTimeout,
-      Duration bufferedKeepAliveInterval) {
-    return new AgentChatService(
-        agentService,
-        sessionMemoryService,
-        agentToolProvider,
-        toolCallLogService,
-        new ChatModelFacade(
-            credentialResolver,
-            llmGatewayService,
-            providerErrorTranslator,
-            freeTierChatClientService,
-            llmQualityJudgeService,
-            queryComplexityClassifier,
-            platformHostedLlmProviderService),
-        new ChatPolicyFacade(
-            tenantLimits,
-            tenantStatusGuard,
-            featureFlagService,
-            loadTestTenantAllowlist,
-            chatTurnCancelService,
-            agentGuardrailService,
-            resourceAccessService,
-            moderationService,
-            contentGuardrailEngine,
-            guardrailViolationLogger),
-        new ChatObservabilityFacade(
-            platformIssueService, null, null, rlPolicyPort, rlTurnRecorder, null),
-        new ChatQualityFacade(
-            responseCacheService,
-            semanticResponseCacheService,
-            answerConsistencyChecker,
-            reflexionService,
-            taskPlanningService),
-        new ChatContextFacade(
-            agentMemoryService,
-            tenantMemoryService,
-            fileStorageService,
-            inlineAttachmentProcessor,
-            visionUsageService,
-            visionSessionService,
-            null,
-            null,
-            null,
-            null),
-        new ChatRoutingFacade(null, null, null, null, null),
-        new ChatTimeouts(streamIdleTimeout, bufferedTurnTimeout, bufferedKeepAliveInterval));
-  }
+    @SuppressWarnings("java:S107")
+    static AgentChatService create(
+            AgentService agentService,
+            ProviderCredentialResolver credentialResolver,
+            LlmGatewayService llmGatewayService,
+            SessionMemoryService sessionMemoryService,
+            ProviderErrorTranslator providerErrorTranslator,
+            AgentToolPort agentToolProvider,
+            ObjectProvider<AgentMemoryService> agentMemoryService,
+            ObjectProvider<TenantMemoryService> tenantMemoryService,
+            AnswerConsistencyChecker answerConsistencyChecker,
+            ReflexionService reflexionService,
+            TaskPlanningService taskPlanningService,
+            ToolCallLogService toolCallLogService,
+            TenantLimits tenantLimits,
+            FreeTierChatClientService freeTierChatClientService,
+            FileStorageService fileStorageService,
+            TenantStatusGuard tenantStatusGuard,
+            LlmQualityJudgeService llmQualityJudgeService,
+            ObjectProvider<PlatformIssueService> platformIssueService,
+            FeatureFlagService featureFlagService,
+            LlmResponseCacheService responseCacheService,
+            ObjectProvider<SemanticResponseCacheService> semanticResponseCacheService,
+            QueryComplexityClassifier queryComplexityClassifier,
+            ObjectProvider<RlPolicyPort> rlPolicyPort,
+            ObjectProvider<RlTurnRecorder> rlTurnRecorder,
+            ObjectProvider<ModerationService> moderationService,
+            ObjectProvider<ContentGuardrailEngine> contentGuardrailEngine,
+            ObjectProvider<GuardrailViolationLogger> guardrailViolationLogger,
+            AgentGuardrailService agentGuardrailService,
+            InlineAttachmentProcessor inlineAttachmentProcessor,
+            ResourceAccessService resourceAccessService,
+            VisionUsageService visionUsageService,
+            VisionSessionService visionSessionService,
+            ObjectProvider<PlatformHostedLlmProviderService> platformHostedLlmProviderService,
+            LoadTestTenantAllowlist loadTestTenantAllowlist,
+            ChatTurnCancelService chatTurnCancelService,
+            Duration streamIdleTimeout,
+            Duration bufferedTurnTimeout,
+            Duration bufferedKeepAliveInterval) {
+        return new AgentChatService(
+                agentService,
+                sessionMemoryService,
+                agentToolProvider,
+                toolCallLogService,
+                new ChatModelFacade(
+                        credentialResolver,
+                        llmGatewayService,
+                        providerErrorTranslator,
+                        freeTierChatClientService,
+                        llmQualityJudgeService,
+                        queryComplexityClassifier,
+                        platformHostedLlmProviderService),
+                new ChatPolicyFacade(
+                        tenantLimits,
+                        tenantStatusGuard,
+                        featureFlagService,
+                        loadTestTenantAllowlist,
+                        chatTurnCancelService,
+                        agentGuardrailService,
+                        resourceAccessService,
+                        moderationService,
+                        contentGuardrailEngine,
+                        guardrailViolationLogger),
+                new ChatObservabilityFacade(
+                        platformIssueService, null, null, rlPolicyPort, rlTurnRecorder, null),
+                new ChatQualityFacade(
+                        responseCacheService,
+                        semanticResponseCacheService,
+                        answerConsistencyChecker,
+                        reflexionService,
+                        taskPlanningService),
+                new ChatContextFacade(
+                        agentMemoryService,
+                        tenantMemoryService,
+                        fileStorageService,
+                        inlineAttachmentProcessor,
+                        visionUsageService,
+                        visionSessionService,
+                        null,
+                        null,
+                        null,
+                        null),
+                new ChatRoutingFacade(null, null, null, null, null),
+                new ChatTimeouts(
+                        streamIdleTimeout, bufferedTurnTimeout, bufferedKeepAliveInterval));
+    }
 }

@@ -10,33 +10,33 @@ package com.agenticai.core.workflow;
  */
 public final class EffectIdempotency {
 
-  private static final ThreadLocal<String> CURRENT = new ThreadLocal<>();
+    private static final ThreadLocal<String> CURRENT = new ThreadLocal<>();
 
-  private EffectIdempotency() {}
+    private EffectIdempotency() {}
 
-  static void bind(String key) {
-    CURRENT.set(key);
-  }
+    static void bind(String key) {
+        CURRENT.set(key);
+    }
 
-  static void clear() {
-    CURRENT.remove();
-  }
+    static void clear() {
+        CURRENT.remove();
+    }
 
-  /** The key for the node executing on this thread, or null. */
-  public static String current() {
-    return CURRENT.get();
-  }
+    /** The key for the node executing on this thread, or null. */
+    public static String current() {
+        return CURRENT.get();
+    }
 
-  /**
-   * Stable string {@code runId:nodeId:iteration}; the same for every attempt of the same (run,
-   * node, iteration). Characters outside {@code [A-Za-z0-9._:-]} become {@code _} so the value is
-   * safe in an HTTP header.
-   */
-  public static String keyFor(String runId, String nodeId, String iteration) {
-    return sanitize(runId) + ":" + sanitize(nodeId) + ":" + sanitize(iteration);
-  }
+    /**
+     * Stable string {@code runId:nodeId:iteration}; the same for every attempt of the same (run,
+     * node, iteration). Characters outside {@code [A-Za-z0-9._:-]} become {@code _} so the value is
+     * safe in an HTTP header.
+     */
+    public static String keyFor(String runId, String nodeId, String iteration) {
+        return sanitize(runId) + ":" + sanitize(nodeId) + ":" + sanitize(iteration);
+    }
 
-  private static String sanitize(String part) {
-    return part == null ? "" : part.replaceAll("[^A-Za-z0-9._:-]", "_");
-  }
+    private static String sanitize(String part) {
+        return part == null ? "" : part.replaceAll("[^A-Za-z0-9._:-]", "_");
+    }
 }

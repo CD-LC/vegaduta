@@ -3,16 +3,20 @@ package com.agenticai.core.common.security;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * HTTP request interceptor for fraud detection. Runs before request handlers to check for abuse
@@ -41,9 +45,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 @ConditionalOnProperty(name = FraudDetectionConfig.ENABLED_PROPERTY, havingValue = "true")
 public class FraudDetectionInterceptor implements HandlerInterceptor {
-  private final AbuseDetectionService abuseDetectionService;
-  private final ObjectMapper objectMapper;
-  private final boolean enforce;
+    private final AbuseDetectionService abuseDetectionService;
+    private final ObjectMapper objectMapper;
+    private final boolean enforce;
 
     public FraudDetectionInterceptor(
             AbuseDetectionService abuseDetectionService,
@@ -54,30 +58,22 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
         this.enforce = enforce;
     }
 
-    // Tenant and user from TenantContext (set by TenantContextFilter from
-    // the verified JWT). The old code read request attributes nothing
-    // ever set, so it skipped every request with a WARN (JAVA-005).
-    UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
-    UUID userId = FraudTenantIds.currentUser().orElse(null);
+    @Override
+    public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler)
+            throws IOException {
 
-    if (tenantId == null) {
-      // Anonymous/tenant-less request (public endpoints): nothing to key on.
-      log.debug("No tenant context for {} - fraud checks skipped", requestCtx.path);
-      return true;
-    }
+        RequestContext requestCtx = RequestContext.fromRequest(req);
 
-    // Extract client context
-    ClientContext clientCtx = ClientContext.fromRequest(req, tenantId, userId);
+        // Skip fraud checks for certain endpoints
+        if (shouldSkipFraudCheck(requestCtx.path)) {
+            return true;
+        }
 
-    // Analyze request for fraud
-    FraudDecision decision;
-    try {
-      decision = abuseDetectionService.analyzeRequest(clientCtx, requestCtx);
-    } catch (Exception e) {
-      log.error("Error during fraud analysis: {}", clientCtx, e);
-      // Fail open: don't block on errors
-      return true;
-    }
+        // Tenant and user from TenantContext (set by TenantContextFilter from
+        // the verified JWT). The old code read request attributes nothing
+        // ever set, so it skipped every request with a WARN (JAVA-005).
+        UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
+        UUID userId = FraudTenantIds.currentUser().orElse(null);
 
         if (tenantId == null) {
             // Anonymous/tenant-less request (public endpoints): nothing to key on.
@@ -87,23 +83,18 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
             return true;
         }
 
-    // Enforce decision
-    if (decision == FraudDecision.BLOCK) {
-      res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      res.setHeader("X-Fraud-Status", "BLOCKED");
-      res.setContentType("application/json");
+        // Extract client context
+        ClientContext clientCtx = ClientContext.fromRequest(req, tenantId, userId);
 
-      try {
-        Map<String, Object> body =
-            Map.of(
-                "error", "fraud_detected_request_blocked",
-                "message",
-                    "Your request has been blocked due to suspicious activity. Please try again"
-                        + " later.");
-        res.getWriter().write(objectMapper.writeValueAsString(body));
-      } catch (IOException e) {
-        log.error("Error writing fraud block response", e);
-      }
+        // Analyze request for fraud
+        FraudDecision decision;
+        try {
+            decision = abuseDetectionService.analyzeRequest(clientCtx, requestCtx);
+        } catch (Exception e) {
+            log.error("Error during fraud analysis: {}", clientCtx, e);
+            // Fail open: don't block on errors
+            return true;
+        }
 
         // Explicit blacklist entries are administrative decisions and are always enforced;
         // everything else is a
@@ -117,15 +108,20 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
             return true;
         }
 
-    if (decision == FraudDecision.CHALLENGE) {
-      String nonce = abuseDetectionService.generateChallengeNonce(tenantId, userId, clientCtx.ip);
+        // Enforce decision
+        if (decision == FraudDecision.BLOCK) {
+            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            res.setHeader("X-Fraud-Status", "BLOCKED");
+            res.setContentType("application/json");
 
             try {
                 Map<String, Object> body =
                         Map.of(
-                                "error", "fraud_detected_request_blocked",
+                                "error",
+                                "fraud_detected_request_blocked",
                                 "message",
-                                        "Your request has been blocked due to suspicious activity. Please try again later.");
+                                "Your request has been blocked due to suspicious activity."
+                                        + " Please try again later.");
                 res.getWriter().write(objectMapper.writeValueAsString(body));
             } catch (IOException e) {
                 log.error("Error writing fraud block response", e);
@@ -213,31 +209,4 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
 
         return false;
     }
-  }
-
-  /** Determine if this request should be skipped from fraud checks. */
-  private boolean shouldSkipFraudCheck(String path) {
-    // Always skip health checks and actuators
-    if (path.startsWith("/actuator/") || path.equals("/health") || path.equals("/health/live")) {
-      return true;
-    }
-
-    // Skip internal/admin endpoints (they have their own auth)
-    if (path.startsWith("/api/internal/") && !path.startsWith("/api/internal/abuse/")) {
-      return true;
-    }
-
-    // Skip static resources
-    if (path.startsWith("/static/")
-        || path.startsWith("/assets/")
-        || path.endsWith(".css")
-        || path.endsWith(".js")
-        || path.endsWith(".jpg")
-        || path.endsWith(".png")
-        || path.endsWith(".gif")) {
-      return true;
-    }
-
-    return false;
-  }
 }

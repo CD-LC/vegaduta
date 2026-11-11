@@ -1,6 +1,7 @@
 package com.agenticai.core.agents.a2a;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.function.Function;
 
 /**
@@ -14,18 +15,18 @@ import java.util.function.Function;
  */
 public record A2aInboundMeta(String httpMethod, String path, Function<String, String> header) {
 
-  /** No request information: what a caller that predates message security looks like. */
-  public static final A2aInboundMeta NONE = new A2aInboundMeta("POST", "", name -> null);
+    /** No request information: what a caller that predates message security looks like. */
+    public static final A2aInboundMeta NONE = new A2aInboundMeta("POST", "", name -> null);
 
-  public static A2aInboundMeta of(HttpServletRequest request) {
-    if (request == null) {
-      return NONE;
+    public static A2aInboundMeta of(HttpServletRequest request) {
+        if (request == null) {
+            return NONE;
+        }
+        return new A2aInboundMeta(request.getMethod(), request.getRequestURI(), request::getHeader);
     }
-    return new A2aInboundMeta(request.getMethod(), request.getRequestURI(), request::getHeader);
-  }
 
-  String get(String name) {
-    String value = header == null ? null : header.apply(name);
-    return value == null || value.isBlank() ? null : value.strip();
-  }
+    String get(String name) {
+        String value = header == null ? null : header.apply(name);
+        return value == null || value.isBlank() ? null : value.strip();
+    }
 }

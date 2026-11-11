@@ -8,13 +8,13 @@ import com.agenticai.core.screen.ContentWriteScreen;
  */
 public record GraphTriple(String subject, String relation, String object) {
 
-  /**
-   * True when any part of the triple trips the shared write screen ({@link ContentWriteScreen}: an
-   * instruction-shaped phrase or a credential). {@link GraphMemoryService} drops such a triple
-   * instead of writing it - graph facts are recalled into later turns, possibly for other agents,
-   * so a directive or key stored as an entity name outlives the turn that wrote it.
-   */
-  public boolean tripsWriteScreen() {
-    return ContentWriteScreen.refusal(subject + "\n" + relation + "\n" + object).isPresent();
-  }
+    /**
+     * True when any part of the triple trips the shared write screen ({@link ContentWriteScreen}:
+     * an instruction-shaped phrase or a credential). {@link GraphMemoryService} drops such a triple
+     * instead of writing it - graph facts are recalled into later turns, possibly for other agents,
+     * so a directive or key stored as an entity name outlives the turn that wrote it.
+     */
+    public boolean tripsWriteScreen() {
+        return ContentWriteScreen.refusal(subject + "\n" + relation + "\n" + object).isPresent();
+    }
 }

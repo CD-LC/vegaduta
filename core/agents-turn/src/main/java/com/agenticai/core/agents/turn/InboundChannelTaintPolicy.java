@@ -1,9 +1,11 @@
 package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.guardrails.taint.TurnTaint;
-import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Locale;
 
 /**
  * Policy seam for taint on INBOUND CHANNEL turns ({@code
@@ -29,58 +31,58 @@ import org.springframework.stereotype.Component;
 @Component
 public class InboundChannelTaintPolicy {
 
-  /** The source label recorded on the turn. */
-  public static final String SOURCE = "inbound_non_owner";
+    /** The source label recorded on the turn. */
+    public static final String SOURCE = "inbound_non_owner";
 
-  /** The configured scope. */
-  public enum Scope {
-    OFF,
-    ALL,
-    NON_OWNER;
+    /** The configured scope. */
+    public enum Scope {
+        OFF,
+        ALL,
+        NON_OWNER;
 
-    /** Lenient parse; blank or unrecognised values fall back to {@link #OFF}. */
-    public static Scope parse(String raw) {
-      if (raw == null) {
-        return OFF;
-      }
-      return switch (raw.trim().toLowerCase(Locale.ROOT).replace('_', '-')) {
-        case "all" -> ALL;
-        case "non-owner" -> NON_OWNER;
-        default -> OFF;
-      };
+        /** Lenient parse; blank or unrecognised values fall back to {@link #OFF}. */
+        public static Scope parse(String raw) {
+            if (raw == null) {
+                return OFF;
+            }
+            return switch (raw.trim().toLowerCase(Locale.ROOT).replace('_', '-')) {
+                case "all" -> ALL;
+                case "non-owner" -> NON_OWNER;
+                default -> OFF;
+            };
+        }
     }
-  }
 
-  private final Scope scope;
+    private final Scope scope;
 
-  public InboundChannelTaintPolicy(
-      @Value("${app.agents.taint.inbound-channel-sources:off}") String scope) {
-    this.scope = Scope.parse(scope);
-  }
-
-  public Scope scope() {
-    return scope;
-  }
-
-  /** Whether a turn from this sender should be marked under the configured scope. */
-  public boolean shouldMark(boolean senderIsOwner) {
-    return switch (scope) {
-      case OFF -> false;
-      case ALL -> true;
-      case NON_OWNER -> !senderIsOwner;
-    };
-  }
-
-  /**
-   * Marks {@code taint} when the policy says so.
-   *
-   * @return true if the turn was marked
-   */
-  public boolean apply(TurnTaint taint, boolean senderIsOwner) {
-    if (taint == null || !shouldMark(senderIsOwner)) {
-      return false;
+    public InboundChannelTaintPolicy(
+            @Value("${app.agents.taint.inbound-channel-sources:off}") String scope) {
+        this.scope = Scope.parse(scope);
     }
-    taint.mark(SOURCE);
-    return true;
-  }
+
+    public Scope scope() {
+        return scope;
+    }
+
+    /** Whether a turn from this sender should be marked under the configured scope. */
+    public boolean shouldMark(boolean senderIsOwner) {
+        return switch (scope) {
+            case OFF -> false;
+            case ALL -> true;
+            case NON_OWNER -> !senderIsOwner;
+        };
+    }
+
+    /**
+     * Marks {@code taint} when the policy says so.
+     *
+     * @return true if the turn was marked
+     */
+    public boolean apply(TurnTaint taint, boolean senderIsOwner) {
+        if (taint == null || !shouldMark(senderIsOwner)) {
+            return false;
+        }
+        taint.mark(SOURCE);
+        return true;
+    }
 }
