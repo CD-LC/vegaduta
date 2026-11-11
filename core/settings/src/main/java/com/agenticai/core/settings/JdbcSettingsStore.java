@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link SettingsStore} over {@link JdbcTemplate}: {@code setting_override} and {@code
@@ -145,11 +146,13 @@ public class JdbcSettingsStore implements SettingsStore {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> tenantValues() {
         return values(SettingScope.TENANT, "");
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Map<String, Object> agentValues(String agentId) {
         return values(SettingScope.AGENT, agentId);
     }
