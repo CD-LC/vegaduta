@@ -26,7 +26,7 @@
     core/agents-tools; agents-tools depends on agents-turn instead (its
     resolvers delegate to AgentChatService, call the memory and hook services
     and use context compaction). The turn runs in-process in every shape that
-    loads this jar (AGENTS.md rule 6): a separate jar, not a network hop.
+    loads this jar (ENGINEERING-RULES.md rule 6): a separate jar, not a network hop.
   </description>
 
   <dependencies>

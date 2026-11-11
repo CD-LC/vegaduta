@@ -99,7 +99,7 @@ Status notes in **bold** were added on 2026-10-21 (v0.1.9) from `CHANGELOG.md` a
 
 ## 5. Architecture assessment
 
-Fits one person on one machine. Auth is local with a URN issuer and no localhost fallback (AGENTS.md rule 7 holds).
+Fits one person on one machine. Auth is local with a URN issuer and no localhost fallback (ENGINEERING-RULES.md rule 7 holds).
 The core container is read-only, drops all capabilities, sets no-new-privileges and publishes on `127.0.0.1` only;
 Postgres and Valkey publish no port; child processes do not inherit `APP_ENCRYPTION_KEY` or database passwords; the
 SSRF allow-list is three named hosts. Scheduled tasks tick in the single core process. The hot path stays in-process

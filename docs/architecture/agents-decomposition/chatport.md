@@ -88,4 +88,4 @@ bash ../scripts/ci/dockerfile-poms.sh
 bash ../scripts/ci/bean-name-collision.sh
 ```
 
-Per AGENTS.md rule 1, run one Maven build at a time.
+Per ENGINEERING-RULES.md rule 1, run one Maven build at a time.

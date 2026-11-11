@@ -77,7 +77,7 @@ These pages are also published as a searchable site (`mkdocs.yml`, `make docs-se
 
 ## Project
 
-- [Contributing](../CONTRIBUTING.md) · [AGENTS.md](../AGENTS.md) for AI coding agents
+- [Contributing](../CONTRIBUTING.md) · [ENGINEERING-RULES.md](../ENGINEERING-RULES.md)
 - [Roadmap](../ROADMAP.md) · [Changelog](../CHANGELOG.md)
 - [Governance](../GOVERNANCE.md) · [Maintainers](../MAINTAINERS.md)
 - [Security policy](../SECURITY.md) · [Support](../SUPPORT.md) · [Code of Conduct](../CODE_OF_CONDUCT.md)

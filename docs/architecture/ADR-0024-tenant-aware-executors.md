@@ -5,7 +5,7 @@
 | **Status** | Accepted; implemented 2026-10-16 |
 | **Date** | 2026-10-16 |
 | **Deciders** | Platform Engineering (maintainers) |
-| **Related** | AGENTS.md rule 12, [extending guide section 8](../extending.md#8-hand-work-to-another-thread), `AsyncHopTenantScopeRulesTest`, `RawExecutorBanRulesTest`, [ADR-0015 hybrid tenancy](ADR-0015-hybrid-tenancy.md) |
+| **Related** | ENGINEERING-RULES.md rule 12, [extending guide section 8](../extending.md#8-hand-work-to-another-thread), `AsyncHopTenantScopeRulesTest`, `RawExecutorBanRulesTest`, [ADR-0015 hybrid tenancy](ADR-0015-hybrid-tenancy.md) |
 
 ## Context
 

@@ -14,7 +14,7 @@ looks like a candidate for splitting. The constraint that decides the question i
 turn runs input guardrails, tool dispatch, retrieval, the model call, output guardrails, budget accounting
 and the audit write, and it streams tokens back over one open HTTP connection. Putting a network call
 between any two of those steps adds latency to every turn and a new way for a turn to fail halfway through
-a stream. AGENTS.md rule 6 already forbids it.
+a stream. ENGINEERING-RULES.md rule 6 already forbids it.
 
 So the question is not "which modules become services" but "what can be separated without touching that
 path, and what stops us running more than one copy of it".
@@ -98,7 +98,7 @@ and the migrate hook Job 10. The umbrella chart sums the worst case, using the a
 API, and fails the render if it exceeds the server limit minus a reserve of 20. The limit is
 `postgres.parameters.max_connections` for the bundled cluster (chart default 200) or
 `global.postgresql.maxConnections` for an external server. PgBouncer must stay in **session** mode
-(AGENTS.md rule 8); transaction pooling would run queries in the wrong tenant's schema.
+(ENGINEERING-RULES.md rule 8); transaction pooling would run queries in the wrong tenant's schema.
 
 ## 3. What was built
 

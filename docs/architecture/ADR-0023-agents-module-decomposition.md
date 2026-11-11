@@ -155,7 +155,7 @@ This is the pattern for the next cuts.
    **Done** 2026-10-16, see 5.1.
 6. **`agents-tools` and `agents-turn`.** Introduce the kernel ports that break
    the tool-to-turn callbacks, then move. The turn path stays in-process (an
-   extra jar is not a network hop, AGENTS.md rule 6), but run the 32-user
+   extra jar is not a network hop, ENGINEERING-RULES.md rule 6), but run the 32-user
    kind benchmark after this step anyway: it changes Spring wiring on the hot
    path. **`agents-tools` done** 2026-10-16, see 5.2; **`agents-turn` done**
    2026-10-16, see 5.3. The kind benchmark is still owed for both cuts.
@@ -379,7 +379,7 @@ remains.
   module must stay at or below 300.
 - **ArchUnit:** `StructureRulesTest` and `ModuleBoundaryRulesTest` keep
   working unchanged, because they import by package from the whole classpath.
-  The frozen store can only shrink (AGENTS.md rule 13).
+  The frozen store can only shrink (ENGINEERING-RULES.md rule 13).
 
 ## 7. Consequences
 

@@ -231,7 +231,7 @@ One packaging per target, an open protocol at every boundary, no cloud SDK in th
 
 ## Contributing
 
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the checks every change must pass (`make gates`), and the DCO sign-off. Coding agents: see [AGENTS.md](AGENTS.md). Plans are in [ROADMAP.md](ROADMAP.md); how decisions are made is in [GOVERNANCE.md](GOVERNANCE.md). Questions go to GitHub Discussions; see [SUPPORT.md](SUPPORT.md).
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the checks every change must pass (`make gates`), and the DCO sign-off. Engineering rules: see [ENGINEERING-RULES.md](ENGINEERING-RULES.md). Plans are in [ROADMAP.md](ROADMAP.md); how decisions are made is in [GOVERNANCE.md](GOVERNANCE.md). Questions go to GitHub Discussions; see [SUPPORT.md](SUPPORT.md).
 
 ## Security
 

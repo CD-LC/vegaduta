@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  * app.learning.proposals.enabled=true} (on in the personal profile): otherwise the bean does not
  * exist and the chat turn is untouched. The turn only pays for a small synchronised map update;
  * everything else runs on the proposals service's bounded worker, with the tenant re-applied
- * (AGENTS.md rule 12).
+ * (ENGINEERING-RULES.md rule 12).
  */
 @Service
 @ConditionalOnProperty(

@@ -51,7 +51,7 @@ public class XOAuthController {
     /**
      * {@code consoleRedirectUri} is the dedicated property when set, else {@code
      * <app.web.public-url>/admin/channels}; blank when neither is configured (no localhost default,
-     * AGENTS.md rule 4) - {@link #redirectTo} then refuses with a message naming both.
+     * ENGINEERING-RULES.md rule 4) - {@link #redirectTo} then refuses with a message naming both.
      */
     public XOAuthController(
             XOAuthService oauthService,
