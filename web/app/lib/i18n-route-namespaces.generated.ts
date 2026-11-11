@@ -6,37 +6,16 @@
 // ROUTE_NAMESPACES: per page route, the additional namespaces its own module
 // graph reaches. Dynamic segments keep their [param] spelling; see
 // app/lib/i18n-namespaces.ts for matching.
-export const LAYOUT_NAMESPACES: readonly string[] = [
-  "customCodeTools",
-  "hcComponentsAuthProviderAuthScreens",
-  "hcComponentsCapabilitiesProcessTheater",
-  "hcComponentsCodeEditorTextarea",
-  "hcComponentsDemolandingHeroBuildConsole",
-  "hcComponentsDemolandingHeroOutcome",
-  "hcComponentsDemolandingLandingNav",
-  "hcComponentsDemolandingOutcomesBand",
-  "hcComponentsOnboardingGate",
-  "hcComponentsTourAdminWelcomeBody",
-  "hcPlatformadminComponentsSignInRedirect",
-  "idleLogout",
-  "landing",
-  "languageSwitcher",
-  "paginationControls",
-  "platformStatus",
-  "requestInspector",
-  "signup",
-  "themePicker",
-  "toastHost",
-  "toolSecretGrants",
-  "tour",
-  "usage",
-  "viewAs",
-];
+export const LAYOUT_NAMESPACES: readonly string[] = ["customCodeTools","hcComponentsAuthProviderAuthScreens","hcComponentsCapabilitiesProcessTheater","hcComponentsCodeEditorTextarea","hcComponentsDemolandingHeroBuildConsole","hcComponentsDemolandingHeroOutcome","hcComponentsDemolandingLandingNav","hcComponentsDemolandingOutcomesBand","hcComponentsOnboardingGate","hcComponentsTourAdminWelcomeBody","hcPlatformadminComponentsSignInRedirect","idleLogout","landing","languageSwitcher","paginationControls","platformStatus","requestInspector","signup","themePicker","toastHost","toolSecretGrants","tour","usage","viewAs"];
 
 export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
   "/": [],
-  "/a/[shareId]": ["hcAShareIdPage"],
-  "/a/embed/[shareId]": ["hcComponentsWidgetEmbedChat"],
+  "/a/[shareId]": [
+    "hcAShareIdPage"
+  ],
+  "/a/embed/[shareId]": [
+    "hcComponentsWidgetEmbedChat"
+  ],
   "/about": [],
   "/account-deletion": [],
   "/add-ons": [
@@ -57,7 +36,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin": [
     "adminOverview",
@@ -84,7 +63,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "setupChecklistAlert",
     "systemStatusPanel",
-    "valueReceipt",
+    "valueReceipt"
   ],
   "/admin/a2a": [
     "adminA2aPage",
@@ -106,7 +85,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/access": [
     "adminAccessPage",
@@ -128,7 +107,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/agent-trust": [
     "adminAgentTrustPage",
@@ -152,7 +131,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/api-keys": [
     "adminApiKeysPage",
@@ -174,7 +153,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/approvals": [
     "approvalsPanel",
@@ -201,7 +180,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "toolApproval",
+    "toolApproval"
   ],
   "/admin/audit": [
     "adminAuditPage",
@@ -223,7 +202,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/audit-tail": [
     "adminAuditTailPage",
@@ -243,7 +222,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/billing": [
     "adminBillingExtra",
@@ -269,7 +248,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "upgradePrompt",
+    "upgradePrompt"
   ],
   "/admin/branding": [
     "auditNotifications",
@@ -290,7 +269,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/channels": [
     "adminChannelsPage",
@@ -322,7 +301,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "sentinelsPanel",
     "systemStatusPanel",
-    "trialOffer",
+    "trialOffer"
   ],
   "/admin/commerce": [
     "adminCommercePage",
@@ -346,7 +325,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/contacts": [
     "auditNotifications",
@@ -368,7 +347,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/data-privacy": [
     "auditNotifications",
@@ -390,7 +369,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "privacySso",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/guardrails": [
     "auditNotifications",
@@ -414,7 +393,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/inbox": [
     "auditNotifications",
@@ -439,7 +418,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/input-requests": [
     "auditNotifications",
@@ -461,7 +440,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/instructions": [
     "auditNotifications",
@@ -481,7 +460,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "promptDirectives",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/integrations": [
     "adminIntegrationsPage",
@@ -502,7 +481,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/issues": [
     "adminIssuesPage",
@@ -522,7 +501,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/leads": [
     "auditNotifications",
@@ -544,7 +523,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/maintenance": [
     "adminMaintenancePage",
@@ -576,7 +555,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "toolApproval",
+    "toolApproval"
   ],
   "/admin/mcp-servers": [
     "adminMcpServersPage",
@@ -598,7 +577,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/payments": [
     "adminCommerceUi",
@@ -620,7 +599,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/runtime-settings": [
     "auditNotifications",
@@ -642,7 +621,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "runtimeSettings",
     "settings",
     "settingsUi",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/sso": [
     "auditNotifications",
@@ -664,7 +643,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "privacySso",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/admin/users": [],
   "/agent/[shareId]": [
@@ -673,7 +652,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcAgentShareIdShareCallPanel",
     "hcAgentShareIdShareVoiceSetup",
     "hcAgentShareIdShareVoiceoverRow",
-    "selectComponent",
+    "selectComponent"
   ],
   "/agents": [
     "a2aPanel",
@@ -780,7 +759,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "toolPolicies",
     "trialOffer",
     "try",
-    "turnProgress",
+    "turnProgress"
   ],
   "/agents/bundles": [
     "agentBundles",
@@ -800,7 +779,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/agents/import": [
     "agentImport",
@@ -821,7 +800,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/agents/learning": [
     "agentWorkbench",
@@ -845,7 +824,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/agents/quality": [
     "agentsUi",
@@ -886,7 +865,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "trajectoryEval",
+    "trajectoryEval"
   ],
   "/agents/templates": [
     "agentTemplates",
@@ -911,7 +890,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "systemStatusPanel",
     "templateSetupGuide",
-    "try",
+    "try"
   ],
   "/agents/turns": [
     "auditNotifications",
@@ -931,7 +910,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "turnInspector",
+    "turnInspector"
   ],
   "/ai": [],
   "/ai-models": [
@@ -952,11 +931,13 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ai/[slug]": [],
   "/ai/model-context-protocol": [],
-  "/api-reference": ["hcComponentsPublicAuthCtas"],
+  "/api-reference": [
+    "hcComponentsPublicAuthCtas"
+  ],
   "/assistant": [
     "approvalsQueue",
     "assistant",
@@ -1009,9 +990,13 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "skillLibrary",
     "systemStatusPanel",
     "toolApproval",
-    "toolLabels",
+    "toolLabels"
   ],
-  "/billing": ["billing", "hcBillingBillingPageClient", "hcComponentsPublicAuthCtas"],
+  "/billing": [
+    "billing",
+    "hcBillingBillingPageClient",
+    "hcComponentsPublicAuthCtas"
+  ],
   "/build": [
     "appBuilder",
     "auditNotifications",
@@ -1078,7 +1063,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "tenantLists",
-    "upgradePrompt",
+    "upgradePrompt"
   ],
   "/build/[id]": [
     "auditNotifications",
@@ -1098,7 +1083,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/build/github": [
     "auditNotifications",
@@ -1119,7 +1104,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/capabilities": [],
   "/capabilities/decision": [
@@ -1140,9 +1125,11 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
-  "/changelog": ["hcComponentsPublicAuthCtas"],
+  "/changelog": [
+    "hcComponentsPublicAuthCtas"
+  ],
   "/clips": [
     "auditNotifications",
     "brandIdentityModal",
@@ -1163,14 +1150,14 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/code": [
     "consolePolish",
     "hcCodePage",
     "hcComponentsAgentkitAgentTaskPanel",
     "hcComponentsAgentkitContextMeter",
-    "localCode",
+    "localCode"
   ],
   "/code-intel": [
     "auditNotifications",
@@ -1196,7 +1183,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/coding": [
     "auditNotifications",
@@ -1217,7 +1204,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/compare": [],
   "/compare/[slug]": [],
@@ -1239,7 +1226,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/contact": [],
   "/data-tables": [
@@ -1263,7 +1250,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/data-usage": [
     "auditNotifications",
@@ -1283,9 +1270,11 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
-  "/device": ["hcDevicePage"],
+  "/device": [
+    "hcDevicePage"
+  ],
   "/devices": [],
   "/directory": [
     "auditNotifications",
@@ -1307,11 +1296,21 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
-  "/docs": ["hcComponentsPublicAuthCtas", "hcDocsDocsPageClient", "hcHelpDocsView"],
-  "/downloads": ["hcComponentsTemplatesTemplatesPublicChrome"],
-  "/earn": ["hcComponentsEarnlandingEarnLanding", "hcComponentsPublicAuthCtas", "senses"],
+  "/docs": [
+    "hcComponentsPublicAuthCtas",
+    "hcDocsDocsPageClient",
+    "hcHelpDocsView"
+  ],
+  "/downloads": [
+    "hcComponentsTemplatesTemplatesPublicChrome"
+  ],
+  "/earn": [
+    "hcComponentsEarnlandingEarnLanding",
+    "hcComponentsPublicAuthCtas",
+    "senses"
+  ],
   "/edge": [
     "auditNotifications",
     "brandIdentityModal",
@@ -1333,15 +1332,17 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/enterprise": [
     "hcComponentsEnterpriselandingEnterpriseBenefits",
     "hcComponentsEnterpriselandingEnterpriseFaq",
     "hcComponentsEnterpriselandingEnterpriseHero",
-    "hcComponentsEnterpriselandingLeadForm",
+    "hcComponentsEnterpriselandingLeadForm"
   ],
-  "/eval/edge-faq": ["hcEvalEdgefaqPage"],
+  "/eval/edge-faq": [
+    "hcEvalEdgefaqPage"
+  ],
   "/explore": [],
   "/features": [
     "auditNotifications",
@@ -1363,7 +1364,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "upgradePrompt",
+    "upgradePrompt"
   ],
   "/files": [
     "auditNotifications",
@@ -1388,9 +1389,11 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "tenantFiles",
-    "tenantLists",
+    "tenantLists"
   ],
-  "/forms/[token]": ["workflowForms"],
+  "/forms/[token]": [
+    "workflowForms"
+  ],
   "/glossary": [],
   "/help": [
     "auditNotifications",
@@ -1411,7 +1414,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/help/controls": [
     "auditNotifications",
@@ -1432,7 +1435,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "settings",
     "settingsUi",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/help/docs": [
     "auditNotifications",
@@ -1452,16 +1455,24 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
-  "/help/workflow-expressions": ["hcHelpWorkflowrecipesPublicWorkflowNav"],
+  "/help/workflow-expressions": [
+    "hcHelpWorkflowrecipesPublicWorkflowNav"
+  ],
   "/help/workflow-recipes": [
     "hcHelpWorkflowrecipesPublicWorkflowNav",
     "hcHelpWorkflowrecipesRecipeCard",
-    "hcHelpWorkflowrecipesWorkflowRecipesClient",
+    "hcHelpWorkflowrecipesWorkflowRecipesClient"
   ],
-  "/help/workflow-recipes/[industry]": ["hcHelpWorkflowrecipesPublicWorkflowNav"],
-  "/hire": ["hcComponentsHirelandingHireLanding", "hire", "senses"],
+  "/help/workflow-recipes/[industry]": [
+    "hcHelpWorkflowrecipesPublicWorkflowNav"
+  ],
+  "/hire": [
+    "hcComponentsHirelandingHireLanding",
+    "hire",
+    "senses"
+  ],
   "/home": [
     "auditNotifications",
     "brandIdentityModal",
@@ -1486,7 +1497,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "researchPage",
     "startFlow",
     "systemStatusPanel",
-    "valueReceipt",
+    "valueReceipt"
   ],
   "/insights": [
     "auditNotifications",
@@ -1509,7 +1520,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "roiFamily",
     "roiPilot",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/integrations": [],
   "/integrations/[slug]": [],
@@ -1537,7 +1548,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "schedulePanel",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/jobs/[agentId]/[jobId]": [
     "auditNotifications",
@@ -1559,7 +1570,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "researchPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/jobs/all": [
     "auditNotifications",
@@ -1581,7 +1592,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/jobs/schedules": [
     "auditNotifications",
@@ -1603,7 +1614,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "schedulePanel",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/knowledge": [
     "auditNotifications",
@@ -1636,7 +1647,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "ragQuality",
     "selectComponent",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/learn/tutor": [
     "auditNotifications",
@@ -1670,9 +1681,12 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "tutorPage",
+    "tutorPage"
   ],
-  "/login": ["hcComponentsAuthBrandPanel", "signin"],
+  "/login": [
+    "hcComponentsAuthBrandPanel",
+    "signin"
+  ],
   "/memory": [
     "auditNotifications",
     "brandIdentityModal",
@@ -1695,7 +1709,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/notifications": [
     "auditNotifications",
@@ -1714,7 +1728,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/platform": [],
   "/platform-admin": [
@@ -1724,7 +1738,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminPage",
+    "hcPlatformadminPage"
   ],
   "/platform-admin/abuse": [
     "hcPlatformadminAbusePage",
@@ -1735,7 +1749,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCircuitbreakers",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminComponentsSectionsPlatformsettings",
+    "hcPlatformadminComponentsSectionsPlatformsettings"
   ],
   "/platform-admin/academy-learners": [
     "hcPlatformadminAcademylearnersPage",
@@ -1745,7 +1759,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminComponentsSelect",
+    "hcPlatformadminComponentsSelect"
   ],
   "/platform-admin/ai-reports": [
     "hcPlatformadminAireportsPage",
@@ -1754,7 +1768,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
-    "hcPlatformadminComponentsSectionsCommon",
+    "hcPlatformadminComponentsSectionsCommon"
   ],
   "/platform-admin/audit": [
     "hcPlatformadminAuditPage",
@@ -1766,7 +1780,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsObservability",
     "hcPlatformadminComponentsSectionsPlatformcontrols",
-    "hcPlatformadminComponentsTemplatesTemplateReasonDialog",
+    "hcPlatformadminComponentsTemplatesTemplateReasonDialog"
   ],
   "/platform-admin/billing": [
     "hcPlatformadminBillingPage",
@@ -1775,7 +1789,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
-    "hcPlatformadminComponentsSectionsCommon",
+    "hcPlatformadminComponentsSectionsCommon"
   ],
   "/platform-admin/budgets": [
     "hcPlatformadminBudgetsPage",
@@ -1788,7 +1802,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsObservability",
     "hcPlatformadminComponentsSectionsSmartai",
-    "hcPlatformadminComponentsSelect",
+    "hcPlatformadminComponentsSelect"
   ],
   "/platform-admin/demo-sandbox": [
     "hcPlatformadminComponentsAdminShell",
@@ -1797,7 +1811,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminDemosandboxPage",
-    "hcPlatformadminDemosandboxSandboxWidgets",
+    "hcPlatformadminDemosandboxSandboxWidgets"
   ],
   "/platform-admin/demo-sandboxes": [
     "hcPlatformadminComponentsAdminShell",
@@ -1807,7 +1821,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsTenantsMasterKeyPrompt",
-    "hcPlatformadminDemosandboxesPage",
+    "hcPlatformadminDemosandboxesPage"
   ],
   "/platform-admin/diagnostics": [
     "hcPlatformadminComponentsAdminShell",
@@ -1819,7 +1833,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsExternaltools",
     "hcPlatformadminComponentsSectionsObservability",
-    "hcPlatformadminDiagnosticsPage",
+    "hcPlatformadminDiagnosticsPage"
   ],
   "/platform-admin/edge-models": [
     "hcPlatformadminComponentsAdminShell",
@@ -1828,7 +1842,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminEdgemodelsPage",
+    "hcPlatformadminEdgemodelsPage"
   ],
   "/platform-admin/email-suppressions": [
     "hcPlatformadminComponentsAdminShell",
@@ -1837,7 +1851,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminEmailsuppressionsPage",
+    "hcPlatformadminEmailsuppressionsPage"
   ],
   "/platform-admin/fleet": [
     "hcPlatformadminComponentsAdminShell",
@@ -1846,7 +1860,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminFleetPage",
+    "hcPlatformadminFleetPage"
   ],
   "/platform-admin/fraud": [
     "hcPlatformadminComponentsAdminShell",
@@ -1857,7 +1871,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsSectionsAbusemonitor",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsObservability",
-    "hcPlatformadminFraudPage",
+    "hcPlatformadminFraudPage"
   ],
   "/platform-admin/funnel": [
     "hcPlatformadminComponentsAdminShell",
@@ -1865,7 +1879,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminFunnelPage",
+    "hcPlatformadminFunnelPage"
   ],
   "/platform-admin/impersonation": [
     "hcPlatformadminComponentsAdminShell",
@@ -1875,7 +1889,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminImpersonationPage",
+    "hcPlatformadminImpersonationPage"
   ],
   "/platform-admin/jobs": [
     "hcPlatformadminComponentsAdminShell",
@@ -1886,7 +1900,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsTenantsMasterKeyPrompt",
-    "hcPlatformadminJobsPage",
+    "hcPlatformadminJobsPage"
   ],
   "/platform-admin/llm-providers": [
     "hcPlatformadminComponentsAdminShell",
@@ -1901,7 +1915,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminLlmprovidersHostedRowParts",
     "hcPlatformadminLlmprovidersPage",
     "hcPlatformadminLlmprovidersTaskRoutingCard",
-    "hcPlatformadminLlmprovidersTranslationAndCatalogCards",
+    "hcPlatformadminLlmprovidersTranslationAndCatalogCards"
   ],
   "/platform-admin/maintenance": [
     "hcPlatformadminComponentsAdminShell",
@@ -1911,7 +1925,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsTenantsMasterKeyPrompt",
-    "hcPlatformadminMaintenancePage",
+    "hcPlatformadminMaintenancePage"
   ],
   "/platform-admin/mcp-catalog": [
     "hcPlatformadminComponentsAdminShell",
@@ -1920,7 +1934,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminMcpcatalogPage",
+    "hcPlatformadminMcpcatalogPage"
   ],
   "/platform-admin/mcp-review": [
     "hcPlatformadminComponentsAdminShell",
@@ -1929,7 +1943,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminMcpreviewPage",
+    "hcPlatformadminMcpreviewPage"
   ],
   "/platform-admin/migrations": [
     "hcPlatformadminComponentsAdminShell",
@@ -1939,7 +1953,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminMigrationsPage",
+    "hcPlatformadminMigrationsPage"
   ],
   "/platform-admin/newsletter": [
     "hcPlatformadminComponentsAdminShell",
@@ -1948,7 +1962,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminNewsletterPage",
+    "hcPlatformadminNewsletterPage"
   ],
   "/platform-admin/north-star": [
     "hcPlatformadminComponentsAdminShell",
@@ -1956,7 +1970,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminNorthstarPage",
+    "hcPlatformadminNorthstarPage"
   ],
   "/platform-admin/observability": [
     "hcPlatformadminComponentsAdminShell",
@@ -1967,7 +1981,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsExternaltools",
-    "hcPlatformadminObservabilityPage",
+    "hcPlatformadminObservabilityPage"
   ],
   "/platform-admin/ops": [
     "hcPlatformadminComponentsAdminShell",
@@ -1976,7 +1990,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsOpsOpsWidgets",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminOpsPage",
+    "hcPlatformadminOpsPage"
   ],
   "/platform-admin/plugins": [
     "hcPlatformadminComponentsAdminShell",
@@ -1985,7 +1999,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSelect",
-    "hcPlatformadminPluginsPage",
+    "hcPlatformadminPluginsPage"
   ],
   "/platform-admin/reliability": [
     "hcPlatformadminComponentsAdminShell",
@@ -1993,7 +2007,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminReliabilityPage",
+    "hcPlatformadminReliabilityPage"
   ],
   "/platform-admin/safety": [
     "hcPlatformadminComponentsAdminShell",
@@ -2004,7 +2018,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsModeration",
     "hcPlatformadminComponentsSectionsOutboundpolicy",
-    "hcPlatformadminSafetyPage",
+    "hcPlatformadminSafetyPage"
   ],
   "/platform-admin/settings": [
     "hcPlatformadminComponentsAdminShell",
@@ -2014,7 +2028,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsPlatformsettings",
-    "hcPlatformadminSettingsPage",
+    "hcPlatformadminSettingsPage"
   ],
   "/platform-admin/skill-security": [
     "hcPlatformadminComponentsAdminShell",
@@ -2024,7 +2038,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminSkillsecurityPage",
+    "hcPlatformadminSkillsecurityPage"
   ],
   "/platform-admin/spend": [
     "hcPlatformadminComponentsAdminShell",
@@ -2034,7 +2048,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsSectionsObservability",
-    "hcPlatformadminSpendPage",
+    "hcPlatformadminSpendPage"
   ],
   "/platform-admin/templates": [
     "hcPlatformadminComponentsAdminShell",
@@ -2047,7 +2061,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsTemplatesTemplateQueueCard",
     "hcPlatformadminComponentsTemplatesTemplateReasonDialog",
     "hcPlatformadminComponentsTemplatesTemplateReviewSummary",
-    "hcPlatformadminTemplatesPage",
+    "hcPlatformadminTemplatesPage"
   ],
   "/platform-admin/tenant-detail": [
     "hcPlatformadminComponentsAdminShell",
@@ -2059,7 +2073,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
     "hcPlatformadminComponentsTenantsMasterKeyPrompt",
-    "hcPlatformadminTenantdetailPage",
+    "hcPlatformadminTenantdetailPage"
   ],
   "/platform-admin/tenants": [
     "hcPlatformadminComponentsAdminShell",
@@ -2077,7 +2091,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsTenantsMasterKeyPrompt",
     "hcPlatformadminTenantsPage",
     "hcPlatformadminTenantsPlanLimitsCard",
-    "hcPlatformadminTenantsTenantRosterRow",
+    "hcPlatformadminTenantsTenantRosterRow"
   ],
   "/platform-admin/tool-credentials": [
     "hcPlatformadminComponentsAdminShell",
@@ -2085,7 +2099,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsNotificationBell",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminToolcredentialsPage",
+    "hcPlatformadminToolcredentialsPage"
   ],
   "/platform-admin/users": [
     "hcPlatformadminComponentsAdminShell",
@@ -2095,7 +2109,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcPlatformadminComponentsPaginationControls",
     "hcPlatformadminComponentsPlatformAdminGate",
     "hcPlatformadminComponentsSectionsCommon",
-    "hcPlatformadminUsersPage",
+    "hcPlatformadminUsersPage"
   ],
   "/platform/[slug]": [],
   "/playground": [
@@ -2147,15 +2161,19 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "toolApproval",
     "toolLabels",
-    "turnProgress",
+    "turnProgress"
   ],
   "/plugins": [
     "hcComponentsPluginsPluginCard",
     "hcComponentsPluginsPluginsGallery",
-    "hcComponentsTemplatesTemplatesPublicChrome",
+    "hcComponentsTemplatesTemplatesPublicChrome"
   ],
   "/preview-landing": [],
-  "/pricing": ["billing", "hcBillingBillingPageClient", "hcComponentsPublicAuthCtas"],
+  "/pricing": [
+    "billing",
+    "hcBillingBillingPageClient",
+    "hcComponentsPublicAuthCtas"
+  ],
   "/privacy": [],
   "/providers": [
     "auditNotifications",
@@ -2181,7 +2199,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "providerHealth",
     "providersPage",
     "providersPanel",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/providers/local-model": [
     "auditNotifications",
@@ -2203,7 +2221,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "providersPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/quick-task": [
     "auditNotifications",
@@ -2227,7 +2245,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "researchPage",
     "selectComponent",
     "simpleTaskRunner",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/quick-task/history": [
     "auditNotifications",
@@ -2249,7 +2267,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "quickTaskHistoryList",
     "quickTaskHistoryPage",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/refund-policy": [],
   "/research": [
@@ -2271,7 +2289,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "researchPage",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/research/[jobId]": [
     "auditNotifications",
@@ -2292,7 +2310,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "researchPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/roi": [
     "auditNotifications",
@@ -2314,7 +2332,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "roi",
     "roiFamily",
     "roiPilot",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/scheduled": [
     "auditNotifications",
@@ -2338,7 +2356,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "scheduledRuns",
     "scheduledTasks",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/secrets": [
     "auditNotifications",
@@ -2361,7 +2379,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "secretsPage",
     "secretsPanel",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/shared-with-me": [
     "auditNotifications",
@@ -2384,11 +2402,15 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "sharing",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/shipping-policy": [],
-  "/signup": ["hcComponentsAuthBrandPanel"],
-  "/signup/complete": ["hcComponentsAuthBrandPanel"],
+  "/signup": [
+    "hcComponentsAuthBrandPanel"
+  ],
+  "/signup/complete": [
+    "hcComponentsAuthBrandPanel"
+  ],
   "/skills": [
     "auditNotifications",
     "brandIdentityModal",
@@ -2413,7 +2435,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "skillsPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/skills/library": [
     "auditNotifications",
@@ -2434,7 +2456,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "skillLibrary",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/start": [
     "agentTemplates",
@@ -2485,9 +2507,12 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "toolApproval",
     "toolLabels",
-    "turnProgress",
+    "turnProgress"
   ],
-  "/status": ["hcComponentsPublicAuthCtas", "hcStatusStatusPageClient"],
+  "/status": [
+    "hcComponentsPublicAuthCtas",
+    "hcStatusStatusPageClient"
+  ],
   "/studio": [
     "auditNotifications",
     "brandIdentityModal",
@@ -2506,7 +2531,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "studioPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/templates": [
     "auditNotifications",
@@ -2529,7 +2554,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/templates/[id]": [
     "auditNotifications",
@@ -2554,7 +2579,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/templates/mine": [
     "auditNotifications",
@@ -2581,7 +2606,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/terms": [],
   "/tools": [
@@ -2631,7 +2656,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "toolsPage",
-    "userToolScriptsPanel",
+    "userToolScriptsPanel"
   ],
   "/tools/code": [
     "auditNotifications",
@@ -2650,7 +2675,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/tools/credentials": [
     "auditNotifications",
@@ -2671,7 +2696,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "toolsPage",
+    "toolsPage"
   ],
   "/tools/servers": [
     "auditNotifications",
@@ -2693,7 +2718,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "localCode",
     "nav",
     "pageGuide",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/troubleshoot": [
     "auditNotifications",
@@ -2714,7 +2739,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "troubleshoot",
+    "troubleshoot"
   ],
   "/try": [
     "hcComponentsStudioAfterSandbox",
@@ -2758,13 +2783,21 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcComponentsStudioWorkflowRunPanel",
     "hcComponentsStudioWorkflowStepParts",
     "hcComponentsTryChannelBridge",
-    "try",
+    "try"
   ],
-  "/try/envoy-demo": ["brief", "hcTryEnvoydemoPage"],
-  "/try/envoy-demo/detail": ["brief", "hcTryEnvoydemoDetailPage"],
+  "/try/envoy-demo": [
+    "brief",
+    "hcTryEnvoydemoPage"
+  ],
+  "/try/envoy-demo/detail": [
+    "brief",
+    "hcTryEnvoydemoDetailPage"
+  ],
   "/tutorials": [],
   "/tutorials/[slug]": [],
-  "/ui-kit": ["hcUikitPage"],
+  "/ui-kit": [
+    "hcUikitPage"
+  ],
   "/ui-kit/console-preview": [],
   "/ui-kit/console-preview/admin": [
     "adminOverview",
@@ -2792,7 +2825,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "setupChecklistAlert",
     "systemStatusPanel",
-    "valueReceipt",
+    "valueReceipt"
   ],
   "/ui-kit/console-preview/admin-billing": [
     "adminBillingExtra",
@@ -2819,13 +2852,13 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "upgradePrompt",
+    "upgradePrompt"
   ],
   "/ui-kit/console-preview/agent-lab": [
     "agentLab",
     "hcComponentsAgentsAgentActivityTrace",
     "hcUikitConsolepreviewPreviewharness",
-    "mcpApps",
+    "mcpApps"
   ],
   "/ui-kit/console-preview/agent-playground": [
     "agentLab",
@@ -2873,7 +2906,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "settingsUi",
     "toolApproval",
     "toolLabels",
-    "turnProgress",
+    "turnProgress"
   ],
   "/ui-kit/console-preview/agents": [
     "a2aPanel",
@@ -2981,7 +3014,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "toolPolicies",
     "trialOffer",
     "try",
-    "turnProgress",
+    "turnProgress"
   ],
   "/ui-kit/console-preview/assistant": [
     "approvalsQueue",
@@ -3036,7 +3069,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "skillLibrary",
     "systemStatusPanel",
     "toolApproval",
-    "toolLabels",
+    "toolLabels"
   ],
   "/ui-kit/console-preview/contacts": [
     "auditNotifications",
@@ -3059,7 +3092,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ui-kit/console-preview/knowledge": [
     "auditNotifications",
@@ -3093,7 +3126,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "ragQuality",
     "selectComponent",
     "systemStatusPanel",
-    "tenantLists",
+    "tenantLists"
   ],
   "/ui-kit/console-preview/local-model": [
     "auditNotifications",
@@ -3116,7 +3149,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "providersPage",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ui-kit/console-preview/playground": [
     "approvalsQueue",
@@ -3168,7 +3201,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "toolApproval",
     "toolLabels",
-    "turnProgress",
+    "turnProgress"
   ],
   "/ui-kit/console-preview/providers": [
     "auditNotifications",
@@ -3195,7 +3228,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "providerHealth",
     "providersPage",
     "providersPanel",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ui-kit/console-preview/quick-task": [
     "auditNotifications",
@@ -3220,7 +3253,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "researchPage",
     "selectComponent",
     "simpleTaskRunner",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ui-kit/console-preview/tools": [
     "agentWorkbench",
@@ -3270,7 +3303,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "selectComponent",
     "systemStatusPanel",
     "toolsPage",
-    "userToolScriptsPanel",
+    "userToolScriptsPanel"
   ],
   "/ui-kit/console-preview/usage": [
     "auditNotifications",
@@ -3293,7 +3326,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/ui-kit/console-preview/workflows": [
     "auditNotifications",
@@ -3328,7 +3361,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "workflowStudioUi",
     "workflowTemplates",
     "workflowTemplatesPage",
-    "workflowsPage",
+    "workflowsPage"
   ],
   "/ui-kit/dashboard-preview": [
     "auditNotifications",
@@ -3355,7 +3388,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "researchPage",
     "startFlow",
     "systemStatusPanel",
-    "valueReceipt",
+    "valueReceipt"
   ],
   "/usage": [
     "auditNotifications",
@@ -3377,13 +3410,21 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "selectComponent",
-    "systemStatusPanel",
+    "systemStatusPanel"
   ],
   "/view-as": [],
-  "/w/[shareId]": ["hcWShareIdPage"],
-  "/whatsapp-cost-calculator": ["hcComponentsPublicAuthCtas", "hcWhatsappcostcalculatorCalculator"],
+  "/w/[shareId]": [
+    "hcWShareIdPage"
+  ],
+  "/whatsapp-cost-calculator": [
+    "hcComponentsPublicAuthCtas",
+    "hcWhatsappcostcalculatorCalculator"
+  ],
   "/why-vegaduta": [],
-  "/workflow/[shareId]": ["hcWorkflowShareIdPage", "hcWorkflowShareIdWorkflowVoicePanel"],
+  "/workflow/[shareId]": [
+    "hcWorkflowShareIdPage",
+    "hcWorkflowShareIdWorkflowVoicePanel"
+  ],
   "/workflows": [
     "auditNotifications",
     "brandIdentityModal",
@@ -3416,7 +3457,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "workflowStudioUi",
     "workflowTemplates",
     "workflowTemplatesPage",
-    "workflowsPage",
+    "workflowsPage"
   ],
   "/workflows/[id]": [
     "agentWorkbench",
@@ -3491,7 +3532,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "workflowNode",
     "workflowNodesAi",
     "workflowNodesData",
-    "workflowStudioUi",
+    "workflowStudioUi"
   ],
   "/workflows/[id]/runs": [
     "auditNotifications",
@@ -3516,7 +3557,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "systemStatusPanel",
     "workflowRunsPage",
-    "workflowStudioUi",
+    "workflowStudioUi"
   ],
   "/workflows/[id]/runs/[runId]": [
     "auditNotifications",
@@ -3536,7 +3577,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "nav",
     "pageGuide",
     "systemStatusPanel",
-    "workflowRunDetailPage",
+    "workflowRunDetailPage"
   ],
   "/workflows/import": [
     "auditNotifications",
@@ -3557,7 +3598,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "pageGuide",
     "selectComponent",
     "systemStatusPanel",
-    "workflowPortability",
+    "workflowPortability"
   ],
   "/workflows/templates": [
     "auditNotifications",
@@ -3579,6 +3620,6 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "systemStatusPanel",
     "workflowStudioUi",
     "workflowTemplates",
-    "workflowTemplatesPage",
-  ],
+    "workflowTemplatesPage"
+  ]
 };

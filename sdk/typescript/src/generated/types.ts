@@ -203,8 +203,7 @@ export interface AgUiRunController_AgUiTool {
   parameters?: Record<string, unknown>;
 }
 
-export type AgentAutonomyTier =
-  "SUPERVISED" | "SEMI_AUTONOMOUS" | "FULLY_AUTONOMOUS";
+export type AgentAutonomyTier = "SUPERVISED" | "SEMI_AUTONOMOUS" | "FULLY_AUTONOMOUS";
 
 export interface AgentAutonomyTierUpdateRequest {
   autonomyTier: AgentAutonomyTier;
@@ -612,13 +611,7 @@ export interface AgentJobStartRequest {
   maxTurns?: number;
 }
 
-export type AgentJobStatus =
-  | "QUEUED"
-  | "RUNNING"
-  | "AWAITING_APPROVAL"
-  | "SUCCEEDED"
-  | "FAILED"
-  | "CANCELLED";
+export type AgentJobStatus = "QUEUED" | "RUNNING" | "AWAITING_APPROVAL" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export interface AgentJobSummaryResponse {
   id?: string;
@@ -1242,8 +1235,7 @@ export interface ApprovalRequestResponse {
   executionResult?: string;
 }
 
-export type ApprovalStatus =
-  "PENDING" | "APPROVED" | "REJECTED" | "EXECUTION_FAILED" | "DEAD_LETTERED";
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "EXECUTION_FAILED" | "DEAD_LETTERED";
 
 export interface ApprovalTraceView {
   requestId?: string;
@@ -1327,18 +1319,7 @@ export interface AuditLogEntryResponse {
   createdAt?: string;
 }
 
-export type AuditOutcome =
-  | "SUCCESS"
-  | "FAILURE"
-  | "PENDING_APPROVAL"
-  | "AUTO_APPROVED"
-  | "APPROVED"
-  | "REJECTED"
-  | "DENIED"
-  | "EXPIRED"
-  | "REPLAYED"
-  | "BUDGET_EXCEEDED"
-  | "WARNING";
+export type AuditOutcome = "SUCCESS" | "FAILURE" | "PENDING_APPROVAL" | "AUTO_APPROVED" | "APPROVED" | "REJECTED" | "DENIED" | "EXPIRED" | "REPLAYED" | "BUDGET_EXCEEDED" | "WARNING";
 
 export interface AuditSealDtos_ExportBundle {
   format?: string;
@@ -1882,8 +1863,7 @@ export interface BudgetTopUpPurchaseResponse {
   status?: string;
 }
 
-export type CapabilityAvailability =
-  "AVAILABLE" | "NEEDS_SETUP" | "UNAVAILABLE";
+export type CapabilityAvailability = "AVAILABLE" | "NEEDS_SETUP" | "UNAVAILABLE";
 
 export interface CapabilityController_CapabilityDescriptor {
   key?: string;
@@ -2059,25 +2039,9 @@ export interface ChannelStatusService_InboundLogEntry {
   lastMessagePreview?: string;
 }
 
-export type ChannelType =
-  | "WHATSAPP"
-  | "MESSENGER"
-  | "INSTAGRAM"
-  | "SLACK"
-  | "DISCORD"
-  | "X"
-  | "TELEGRAM"
-  | "EMAIL"
-  | "TEAMS"
-  | "VOICE"
-  | "SMS"
-  | "SIGNAL"
-  | "MATRIX"
-  | "IMESSAGE"
-  | "WHATSAPP_QR";
+export type ChannelType = "WHATSAPP" | "MESSENGER" | "INSTAGRAM" | "SLACK" | "DISCORD" | "X" | "TELEGRAM" | "EMAIL" | "TEAMS" | "VOICE" | "SMS" | "SIGNAL" | "MATRIX" | "IMESSAGE" | "WHATSAPP_QR";
 
-export type ChatAttachmentCategory =
-  "IMAGE" | "AUDIO" | "VIDEO" | "DOCUMENT" | "SPREADSHEET";
+export type ChatAttachmentCategory = "IMAGE" | "AUDIO" | "VIDEO" | "DOCUMENT" | "SPREADSHEET";
 
 export interface ChatAttachmentResponse {
   attachmentKey?: string;
@@ -2489,8 +2453,7 @@ export interface CommerceDtos_RevokeRequest {
   reason?: string;
 }
 
-export type CommerceProduct_ProductAvailability =
-  "IN_STOCK" | "OUT_OF_STOCK" | "PREORDER";
+export type CommerceProduct_ProductAvailability = "IN_STOCK" | "OUT_OF_STOCK" | "PREORDER";
 
 export interface CompGrantResponse {
   tenantId?: string;
@@ -2500,12 +2463,7 @@ export interface CompGrantResponse {
   reason?: string;
 }
 
-export type ComparisonVerdict =
-  | "VARIANT_BETTER"
-  | "BASELINE_BETTER"
-  | "CANNOT_TELL"
-  | "INSIDE_NOISE_FLOOR"
-  | "INSUFFICIENT_DATA";
+export type ComparisonVerdict = "VARIANT_BETTER" | "BASELINE_BETTER" | "CANNOT_TELL" | "INSIDE_NOISE_FLOOR" | "INSUFFICIENT_DATA";
 
 export interface ConnectorResponse {
   id?: string;
@@ -2519,8 +2477,7 @@ export interface ConnectorResponse {
   createdAt?: string;
 }
 
-export type ConsentLedger_Decision =
-  "PROMPTED" | "GRANTED" | "DECLINED" | "WITHDRAWN";
+export type ConsentLedger_Decision = "PROMPTED" | "GRANTED" | "DECLINED" | "WITHDRAWN";
 
 export interface ConsentLedger_Entry {
   id?: string;
@@ -2602,8 +2559,7 @@ export interface CreateUserRequest {
   initialPermissions?: string[];
 }
 
-export type CustomCodeToolLanguage =
-  "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
+export type CustomCodeToolLanguage = "JAVA" | "PYTHON" | "JAVASCRIPT" | "TYPESCRIPT";
 
 export interface CustomCodeToolRequest {
   toolName?: string;
@@ -2649,8 +2605,7 @@ export interface CustomCodeToolTestRequest {
   input?: unknown;
 }
 
-export type DataResidencyRegion =
-  "UNSPECIFIED" | "INDIA" | "EU" | "US" | "OTHER";
+export type DataResidencyRegion = "UNSPECIFIED" | "INDIA" | "EU" | "US" | "OTHER";
 
 export interface DataTableDtos_AddColumnRequest {
   name?: string;
@@ -3346,8 +3301,7 @@ export interface DeveloperApiController_WorkflowSummaryDto {
 
 export type DeviceAppUsageEventType = "FOREGROUND" | "BACKGROUND";
 
-export type DeviceCommandStatus =
-  "PENDING" | "DELIVERED" | "COMPLETED" | "FAILED";
+export type DeviceCommandStatus = "PENDING" | "DELIVERED" | "COMPLETED" | "FAILED";
 
 export type DevicePlatform = "ANDROID" | "IOS" | "DESKTOP" | "WEB";
 
@@ -3435,11 +3389,9 @@ export interface DocumentGenerationRequest {
   content: DocumentContent;
 }
 
-export type DocumentGenerationStatus =
-  "REQUESTED" | "PROCESSING" | "COMPLETE" | "FAILED";
+export type DocumentGenerationStatus = "REQUESTED" | "PROCESSING" | "COMPLETE" | "FAILED";
 
-export type DocumentType =
-  "DOCX" | "PDF" | "XLSX" | "PPTX" | "CSV" | "TXT" | "MD" | "JSON";
+export type DocumentType = "DOCX" | "PDF" | "XLSX" | "PPTX" | "CSV" | "TXT" | "MD" | "JSON";
 
 export interface E2bCodeExecutionTemplateRequest {
   templateId?: string;
@@ -3950,14 +3902,7 @@ export interface EvalRunBundle_Bundle {
   live?: Record<string, unknown>;
 }
 
-export type EvaluationType =
-  | "HELPFULNESS"
-  | "ACCURACY"
-  | "TONE"
-  | "LENGTH"
-  | "RELEVANCE"
-  | "SAFETY"
-  | "FAITHFULNESS";
+export type EvaluationType = "HELPFULNESS" | "ACCURACY" | "TONE" | "LENGTH" | "RELEVANCE" | "SAFETY" | "FAITHFULNESS";
 
 export type ExperienceMode = "SIMPLE" | "ADVANCED";
 
@@ -4002,8 +3947,7 @@ export interface FeatureFlagUpsertRequest {
   rolloutPercentage?: number;
 }
 
-export type FeedbackSignal =
-  "THUMBS_UP" | "THUMBS_DOWN" | "RATING" | "EDIT" | "RESOLVED" | "UNRESOLVED";
+export type FeedbackSignal = "THUMBS_UP" | "THUMBS_DOWN" | "RATING" | "EDIT" | "RESOLVED" | "UNRESOLVED";
 
 export interface FimCompletionController_FimCompletionRequest {
   prefix?: string;
@@ -4088,14 +4032,7 @@ export interface FreeTierUsageLimiterService_QuotaConfig {
   unlimitedMultiplier?: number;
 }
 
-export type GatewayCapability =
-  | "SUBSCRIPTIONS"
-  | "ONE_TIME_ORDERS"
-  | "PAYMENT_VERIFICATION"
-  | "DISCOUNT_OFFERS"
-  | "USAGE_ADDONS"
-  | "UPI_COLLECT"
-  | "UPI_QR";
+export type GatewayCapability = "SUBSCRIPTIONS" | "ONE_TIME_ORDERS" | "PAYMENT_VERIFICATION" | "DISCOUNT_OFFERS" | "USAGE_ADDONS" | "UPI_COLLECT" | "UPI_QR";
 
 export interface GatewayInfo {
   name?: string;
@@ -4410,11 +4347,7 @@ export interface IngestUrlRequest {
   collectionId?: string;
 }
 
-export type IntervalMethod =
-  | "WILSON_SCORE"
-  | "PERCENTILE_BOOTSTRAP"
-  | "HIERARCHICAL_BOOTSTRAP"
-  | "PAIRED_BOOTSTRAP";
+export type IntervalMethod = "WILSON_SCORE" | "PERCENTILE_BOOTSTRAP" | "HIERARCHICAL_BOOTSTRAP" | "PAIRED_BOOTSTRAP";
 
 export interface InvoiceController_BillingProfileBody {
   gstin?: string;
@@ -4435,31 +4368,11 @@ export interface InvoiceController_InvoiceSummaryResponse {
   issuedAt?: string;
 }
 
-export type IssueCategory =
-  | "BILLING"
-  | "TECHNICAL"
-  | "ACCOUNT"
-  | "FEATURE_REQUEST"
-  | "OTHER"
-  | "TOOL_FAILURE"
-  | "SAFETY"
-  | "SYSTEM"
-  | "WORKFLOW";
+export type IssueCategory = "BILLING" | "TECHNICAL" | "ACCOUNT" | "FEATURE_REQUEST" | "OTHER" | "TOOL_FAILURE" | "SAFETY" | "SYSTEM" | "WORKFLOW";
 
 export type IssueSeverity = "ERROR" | "WARNING";
 
-export type IssueSource =
-  | "EXCEPTION"
-  | "WORKFLOW_RUN"
-  | "TOOL_CALL"
-  | "LLM_QUALITY"
-  | "EVENT_OUTBOX"
-  | "PROVIDER_FALLBACK"
-  | "TENANT_REPORTED"
-  | "ABUSE_ANOMALY"
-  | "GUARDRAIL_FALSE_POSITIVE"
-  | "UPSTREAM_PROVIDER_FAILURE"
-  | "SPEND_CAP";
+export type IssueSource = "EXCEPTION" | "WORKFLOW_RUN" | "TOOL_CALL" | "LLM_QUALITY" | "EVENT_OUTBOX" | "PROVIDER_FALLBACK" | "TENANT_REPORTED" | "ABUSE_ANOMALY" | "GUARDRAIL_FALSE_POSITIVE" | "UPSTREAM_PROVIDER_FAILURE" | "SPEND_CAP";
 
 export type IssueStatus = "OPEN" | "ACKNOWLEDGED" | "RESOLVED";
 
@@ -4685,8 +4598,7 @@ export interface KnowledgeDocumentResponse {
   updatedAt?: string;
 }
 
-export type KnowledgeDocumentStatus =
-  "UPLOADED" | "QUEUED" | "EXTRACTING" | "EMBEDDING" | "READY" | "FAILED";
+export type KnowledgeDocumentStatus = "UPLOADED" | "QUEUED" | "EXTRACTING" | "EMBEDDING" | "READY" | "FAILED";
 
 export interface KnowledgeIngestionJobResponse {
   id?: string;
@@ -4699,8 +4611,7 @@ export interface KnowledgeIngestionJobResponse {
   updatedAt?: string;
 }
 
-export type KnowledgeIngestionJobStatus =
-  "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
+export type KnowledgeIngestionJobStatus = "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
 
 export interface KnowledgeQuarantineService_QuarantinedChunk {
   id?: string;
@@ -4725,8 +4636,7 @@ export interface KnowledgeReembedJobResponse {
   completedAt?: string;
 }
 
-export type KnowledgeReembedJobStatus =
-  "QUEUED" | "EMBEDDING" | "SWEEPING" | "COMPLETED" | "FAILED";
+export type KnowledgeReembedJobStatus = "QUEUED" | "EMBEDDING" | "SWEEPING" | "COMPLETED" | "FAILED";
 
 export interface KnowledgeReembedRequest {
   targetModel: string;
@@ -4760,8 +4670,7 @@ export interface LandingEventController_LandingMetricsResponse {
   days?: LandingEventController_LandingMetricsDay[];
 }
 
-export type LeadActivityType =
-  "NOTE" | "EMAIL_SENT" | "EMAIL_REPLY" | "STAGE_CHANGE" | "CALL" | "TASK";
+export type LeadActivityType = "NOTE" | "EMAIL_SENT" | "EMAIL_REPLY" | "STAGE_CHANGE" | "CALL" | "TASK";
 
 export interface LeadController_ActivityRequest {
   type?: string;
@@ -4838,8 +4747,7 @@ export interface LeadService_StageTotal {
   value?: number;
 }
 
-export type LeadStage =
-  "NEW" | "CONTACTED" | "REPLIED" | "QUALIFIED" | "PROPOSAL" | "WON" | "LOST";
+export type LeadStage = "NEW" | "CONTACTED" | "REPLIED" | "QUALIFIED" | "PROPOSAL" | "WON" | "LOST";
 
 export interface LearningProposalController_ApproveRequest {
   body?: string;
@@ -5396,16 +5304,9 @@ export interface McpCatalogEntry {
   oauthProviderId?: string;
 }
 
-export type McpConnectionPhase =
-  "SPAWN" | "HTTP" | "HANDSHAKE" | "INIT_TIMEOUT" | "OK";
+export type McpConnectionPhase = "SPAWN" | "HTTP" | "HANDSHAKE" | "INIT_TIMEOUT" | "OK";
 
-export type McpConnectionStatus =
-  | "NOT_CONFIGURED"
-  | "STATIC"
-  | "CONNECTING"
-  | "CONNECTED"
-  | "ERROR"
-  | "DISABLED";
+export type McpConnectionStatus = "NOT_CONFIGURED" | "STATIC" | "CONNECTING" | "CONNECTED" | "ERROR" | "DISABLED";
 
 export interface McpConnectionTestResult {
   ok?: boolean;
@@ -5474,8 +5375,7 @@ export interface McpReviewDecisionRequest {
   reason?: string;
 }
 
-export type McpReviewStatus =
-  "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
+export type McpReviewStatus = "NOT_REQUIRED" | "PENDING" | "APPROVED" | "REJECTED";
 
 export interface McpServerAccessController_McpGrantToolCallView {
   id?: string;
@@ -5796,8 +5696,7 @@ export interface MetaSocialSendController_SendResult {
   pendingRequestId?: string;
 }
 
-export type MetaWhatsAppCredentialStatus =
-  "ACTIVE" | "INVALID" | "DISCONNECTED";
+export type MetaWhatsAppCredentialStatus = "ACTIVE" | "INVALID" | "DISCONNECTED";
 
 export interface MobileSentinelService_AdminSummary {
   windowDays?: number;
@@ -6038,8 +5937,7 @@ export interface ModerationReviewItemResponse {
   reviewNotes?: string;
 }
 
-export type ModerationReviewStatus =
-  "PENDING" | "APPROVED" | "BLOCKED" | "ESCALATED";
+export type ModerationReviewStatus = "PENDING" | "APPROVED" | "BLOCKED" | "ESCALATED";
 
 export interface ModerationThresholdService_PackThresholds {
   semanticEnabled?: boolean;
@@ -6172,8 +6070,7 @@ export interface NorthStarDtos_WeekPoint {
   suppressed?: boolean;
 }
 
-export type NotificationCategory =
-  "SYSTEM" | "TOOL_FAILURE" | "BILLING" | "SAFETY" | "WORKFLOW" | "AGENT";
+export type NotificationCategory = "SYSTEM" | "TOOL_FAILURE" | "BILLING" | "SAFETY" | "WORKFLOW" | "AGENT";
 
 export interface NotificationResponse {
   id?: string;
@@ -6222,8 +6119,7 @@ export interface OAuthProviderService_ProviderView {
   docsUrl?: string;
 }
 
-export type OcrProvider =
-  "GOOGLE_VISION" | "AWS_TEXTRACT" | "AZURE_DOCUMENT_INTELLIGENCE";
+export type OcrProvider = "GOOGLE_VISION" | "AWS_TEXTRACT" | "AZURE_DOCUMENT_INTELLIGENCE";
 
 export interface OcrProviderActivationRequest {
   provider: OcrProvider;
@@ -6546,14 +6442,7 @@ export interface PaymentDtos_TransactionResponse {
   updatedAt?: string;
 }
 
-export type PaymentTransactionStatus =
-  | "INITIATED"
-  | "PENDING_APPROVAL"
-  | "AWAITING_PAYMENT"
-  | "CAPTURED"
-  | "FAILED"
-  | "EXPIRED"
-  | "REFUNDED";
+export type PaymentTransactionStatus = "INITIATED" | "PENDING_APPROVAL" | "AWAITING_PAYMENT" | "CAPTURED" | "FAILED" | "EXPIRED" | "REFUNDED";
 
 export type PaymentTransactionType = "PAYMENT_LINK" | "UPI_COLLECT" | "PAYOUT";
 
@@ -7453,12 +7342,7 @@ export interface PolicyArmResponse {
   beta?: number;
 }
 
-export type PolicyDimension =
-  | "MODEL_ROUTE"
-  | "REASONING_DEPTH"
-  | "PROMPT_VARIANT"
-  | "TOOL_SUBSET"
-  | "GEN_PARAMS";
+export type PolicyDimension = "MODEL_ROUTE" | "REASONING_DEPTH" | "PROMPT_VARIANT" | "TOOL_SUBSET" | "GEN_PARAMS";
 
 export interface PolicyUpdateRequest {
   enabled?: boolean;
@@ -7538,8 +7422,7 @@ export interface PrivacyController_RetentionRequest {
 
 export type PrivacyDataClass = "TRANSCRIPT" | "RECORDING" | "EXTRACTED_FIELDS";
 
-export type ProcedureGuardKind =
-  "FORBID_TOOL" | "REQUIRE_APPROVAL" | "REQUIRE_TOOL_BEFORE";
+export type ProcedureGuardKind = "FORBID_TOOL" | "REQUIRE_APPROVAL" | "REQUIRE_TOOL_BEFORE";
 
 export interface ProcedureRequest {
   name: string;
@@ -7818,13 +7701,11 @@ export interface PromptPreviewService_ToolView {
   estimatedTokens?: number;
 }
 
-export type PromptRiskClass =
-  "STEERS_EVERY_TURN" | "SECONDARY_CALL" | "USER_VISIBLE" | "TOOL_DESCRIPTION";
+export type PromptRiskClass = "STEERS_EVERY_TURN" | "SECONDARY_CALL" | "USER_VISIBLE" | "TOOL_DESCRIPTION";
 
 export type PromptScope = "AGENT" | "TENANT" | "PLATFORM";
 
-export type PromptSource =
-  "DEFAULT" | "PLATFORM" | "TENANT" | "AGENT" | "FALLBACK";
+export type PromptSource = "DEFAULT" | "PLATFORM" | "TENANT" | "AGENT" | "FALLBACK";
 
 export interface PromptVersionResponse {
   id?: string;
@@ -7876,23 +7757,7 @@ export interface ProviderModelResponse {
   source?: string;
 }
 
-export type ProviderName =
-  | "ANTHROPIC"
-  | "OPENAI"
-  | "AZURE_OPENAI"
-  | "GOOGLE_VERTEX"
-  | "AWS_BEDROCK"
-  | "OLLAMA"
-  | "OPENROUTER"
-  | "GROK"
-  | "GEMINI"
-  | "SARVAM"
-  | "MISTRAL"
-  | "DEEPSEEK"
-  | "GROQ"
-  | "META"
-  | "LOCAL_OPENAI"
-  | "PLATFORM_HOSTED";
+export type ProviderName = "ANTHROPIC" | "OPENAI" | "AZURE_OPENAI" | "GOOGLE_VERTEX" | "AWS_BEDROCK" | "OLLAMA" | "OPENROUTER" | "GROK" | "GEMINI" | "SARVAM" | "MISTRAL" | "DEEPSEEK" | "GROQ" | "META" | "LOCAL_OPENAI" | "PLATFORM_HOSTED";
 
 export interface ProviderResponse {
   id?: string;
@@ -8408,8 +8273,7 @@ export interface ReliabilityDtos_PairedComparisonResponse {
   warnings?: string[];
 }
 
-export type ReliabilityMetricId =
-  "PASS_AT_1" | "PASS_AT_K" | "PASS_HAT_K" | "MEAN_SCORE";
+export type ReliabilityMetricId = "PASS_AT_1" | "PASS_AT_K" | "PASS_HAT_K" | "MEAN_SCORE";
 
 export interface ResearchRunStartRequest {
   question?: string;
@@ -9040,8 +8904,7 @@ export interface SearchResultResponse {
   quote?: string;
 }
 
-export type SecretKind =
-  "API_KEY" | "PASSWORD" | "TOKEN" | "BASIC_AUTH" | "CUSTOM";
+export type SecretKind = "API_KEY" | "PASSWORD" | "TOKEN" | "BASIC_AUTH" | "CUSTOM";
 
 export interface SecretResponse {
   id?: string;
@@ -9138,19 +9001,9 @@ export type SettingScope = "tenant" | "agent";
 
 export type SettingSource = "default" | "platform" | "tenant" | "agent";
 
-export type SettingType =
-  | "int"
-  | "long"
-  | "decimal"
-  | "duration"
-  | "bool"
-  | "enum"
-  | "string"
-  | "text"
-  | "percent";
+export type SettingType = "int" | "long" | "decimal" | "duration" | "bool" | "enum" | "string" | "text" | "percent";
 
-export type SettingUnit =
-  "chars" | "tokens" | "ms" | "s" | "count" | "usd" | "percent";
+export type SettingUnit = "chars" | "tokens" | "ms" | "s" | "count" | "usd" | "percent";
 
 export interface SettingValue {
   value?: unknown;
@@ -9367,20 +9220,11 @@ export interface SimulationDtos_SessionResponse {
   completedAt?: string;
 }
 
-export type SimulationRunStatus =
-  "QUEUED" | "RUNNING" | "PASSED" | "FAILED" | "ERROR" | "CANCELLED";
+export type SimulationRunStatus = "QUEUED" | "RUNNING" | "PASSED" | "FAILED" | "ERROR" | "CANCELLED";
 
-export type SimulationSessionStatus =
-  "QUEUED" | "RUNNING" | "COMPLETED" | "CANCELLED";
+export type SimulationSessionStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "CANCELLED";
 
-export type SimulationTermination =
-  | "GOAL_MET"
-  | "GOAL_FAILED"
-  | "MAX_TURNS"
-  | "AGENT_ERROR"
-  | "SIMULATOR_ERROR"
-  | "SAFETY_TRIP"
-  | "NO_PROGRESS";
+export type SimulationTermination = "GOAL_MET" | "GOAL_FAILED" | "MAX_TURNS" | "AGENT_ERROR" | "SIMULATOR_ERROR" | "SAFETY_TRIP" | "NO_PROGRESS";
 
 export type SimulationVerdict = "PASSED" | "FAILED" | "INCONCLUSIVE";
 
@@ -10139,18 +9983,7 @@ export interface TemplateRequirement {
   setupPath?: string;
 }
 
-export type TemplateRequirement_Type =
-  | "MCP_SERVER"
-  | "GOOGLE_CONNECTION"
-  | "KNOWLEDGE_BASE"
-  | "CODE_INTEL"
-  | "CODE_SANDBOX"
-  | "MEMORY"
-  | "HUMAN_APPROVAL"
-  | "MODEL_KEY"
-  | "VOICE_MODEL"
-  | "VIDEO_MODEL"
-  | "BUILT_IN_TOOL";
+export type TemplateRequirement_Type = "MCP_SERVER" | "GOOGLE_CONNECTION" | "KNOWLEDGE_BASE" | "CODE_INTEL" | "CODE_SANDBOX" | "MEMORY" | "HUMAN_APPROVAL" | "MODEL_KEY" | "VOICE_MODEL" | "VIDEO_MODEL" | "BUILT_IN_TOOL";
 
 export interface TemplateResponse {
   id?: string;
@@ -10215,8 +10048,7 @@ export interface TemplateStandard_Rule {
 
 export type TemplateStandard_Severity = "BLOCKER" | "ADVISORY";
 
-export type TemplateStatus =
-  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
+export type TemplateStatus = "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "WITHDRAWN";
 
 export interface TemplateSummary {
   id?: string;
@@ -10304,8 +10136,7 @@ export interface TenantDefaultModelService_DefaultModel {
   message?: string;
 }
 
-export type TenantDefaultModelService_Source =
-  "PLATFORM_POOL" | "WORKING_PROVIDER" | "ACTIVE_PROVIDER" | "NONE";
+export type TenantDefaultModelService_Source = "PLATFORM_POOL" | "WORKING_PROVIDER" | "ACTIVE_PROVIDER" | "NONE";
 
 export interface TenantDeletionController_DeleteTenantRequest {
   confirmTenantName?: string;
@@ -10435,19 +10266,7 @@ export interface TenantUsageQuotaResponse {
   limitEnforced?: boolean;
 }
 
-export type TextModelProvider =
-  | "ANTHROPIC"
-  | "OPENAI"
-  | "GEMINI"
-  | "GROK"
-  | "SARVAM"
-  | "MISTRAL"
-  | "DEEPSEEK"
-  | "GROQ"
-  | "META"
-  | "OLLAMA"
-  | "LOCAL_OPENAI"
-  | "OPENROUTER";
+export type TextModelProvider = "ANTHROPIC" | "OPENAI" | "GEMINI" | "GROK" | "SARVAM" | "MISTRAL" | "DEEPSEEK" | "GROQ" | "META" | "OLLAMA" | "LOCAL_OPENAI" | "OPENROUTER";
 
 export interface TextSearchConfigCatalog_ConfigOption {
   key?: string;
@@ -10471,8 +10290,7 @@ export interface ToolArgPolicyDtos_PoliciesResponse {
   updatedAt?: string;
 }
 
-export type ToolCallCapabilityProbe_ServerKind =
-  "OLLAMA" | "OLLAMA_WITHOUT_FORMAT" | "VLLM" | "LLAMA_CPP" | "OTHER";
+export type ToolCallCapabilityProbe_ServerKind = "OLLAMA" | "OLLAMA_WITHOUT_FORMAT" | "VLLM" | "LLAMA_CPP" | "OTHER";
 
 export type ToolCallGrade = "STRUCTURED" | "TEXT" | "NONE";
 
@@ -10649,14 +10467,7 @@ export interface TurnEvent {
   createdAt?: string;
 }
 
-export type TurnEventType =
-  | "INTAKE"
-  | "GUARD"
-  | "MODEL_CALL"
-  | "TOOL_CALL"
-  | "APPROVAL"
-  | "VERIFY"
-  | "COMMIT";
+export type TurnEventType = "INTAKE" | "GUARD" | "MODEL_CALL" | "TOOL_CALL" | "APPROVAL" | "VERIFY" | "COMMIT";
 
 export interface TurnFeedbackRequest {
   sessionId?: string;
@@ -11027,15 +10838,9 @@ export interface VideoGenerationJobResponse {
   createdAt?: string;
 }
 
-export type VideoGenerationJobStatus =
-  "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
+export type VideoGenerationJobStatus = "QUEUED" | "PROCESSING" | "COMPLETE" | "FAILED";
 
-export type VideoModelProvider =
-  | "OPENAI_WHISPER_VIDEO"
-  | "SIDECAR_WHISPER_VIDEO"
-  | "SARVAM_VIDEO"
-  | "VERTEX_VIDEO"
-  | "CUSTOM_CV_MODEL";
+export type VideoModelProvider = "OPENAI_WHISPER_VIDEO" | "SIDECAR_WHISPER_VIDEO" | "SARVAM_VIDEO" | "VERTEX_VIDEO" | "CUSTOM_CV_MODEL";
 
 export interface VisionSessionController_VisionSessionEndResponse {
   sessionId?: string;
@@ -11074,8 +10879,7 @@ export interface VoiceDtmfMappingUpsertRequest {
   label?: string;
 }
 
-export type VoiceModelProvider =
-  "SIDECAR_WHISPER" | "SARVAM" | "ELEVENLABS" | "VIDEO_PROVIDER_RESERVED_1";
+export type VoiceModelProvider = "SIDECAR_WHISPER" | "SARVAM" | "ELEVENLABS" | "VIDEO_PROVIDER_RESERVED_1";
 
 export interface VoiceNumberAgentResponse {
   phoneNumber?: string;
@@ -11163,8 +10967,7 @@ export interface WebhookEventCatalog_Entry {
   description?: string;
 }
 
-export type WebhookSignatureMode =
-  "NONE" | "GITHUB" | "STRIPE" | "SLACK" | "HMAC_SHA256";
+export type WebhookSignatureMode = "NONE" | "GITHUB" | "STRIPE" | "SLACK" | "HMAC_SHA256";
 
 export interface WebhookSignatureRequest {
   mode: WebhookSignatureMode;
@@ -11618,15 +11421,7 @@ export interface WorkflowRunResponse {
   cancelRequested?: boolean;
 }
 
-export type WorkflowRunStatus =
-  | "RUNNING"
-  | "COMPLETED"
-  | "FAILED"
-  | "AWAITING_APPROVAL"
-  | "CANCELLED"
-  | "PAUSED"
-  | "AWAITING_INPUT"
-  | "AWAITING_VOICE_INPUT";
+export type WorkflowRunStatus = "RUNNING" | "COMPLETED" | "FAILED" | "AWAITING_APPROVAL" | "CANCELLED" | "PAUSED" | "AWAITING_INPUT" | "AWAITING_VOICE_INPUT";
 
 export interface WorkflowScheduleRequest {
   cron: string;
@@ -11663,19 +11458,7 @@ export interface WorkflowStepCachingUpdateRequest {
   enabled?: boolean;
 }
 
-export type WorkflowTriggerChannel =
-  | "WEBHOOK"
-  | "WHATSAPP"
-  | "TELEGRAM"
-  | "SMS"
-  | "CALL"
-  | "MESSENGER"
-  | "INSTAGRAM"
-  | "SLACK"
-  | "DISCORD"
-  | "X"
-  | "EMAIL"
-  | "TEAMS";
+export type WorkflowTriggerChannel = "WEBHOOK" | "WHATSAPP" | "TELEGRAM" | "SMS" | "CALL" | "MESSENGER" | "INSTAGRAM" | "SLACK" | "DISCORD" | "X" | "EMAIL" | "TEAMS";
 
 export interface WorkflowTriggerChannelRequest {
   channel: WorkflowTriggerChannel;

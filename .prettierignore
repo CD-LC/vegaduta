@@ -1,0 +1,5 @@
+# Generator output: these files are compared byte-for-byte with `node sdk/generate.mjs --check`
+# (and the i18n freshness tests), so they must keep the generator's formatting.
+sdk/typescript/src/generated/
+web/app/lib/i18n-route-namespaces.generated.ts
+web/app/lib/i18n-pack-sizes.generated.ts
