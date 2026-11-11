@@ -795,6 +795,7 @@ Audited every place that states the project license against `LICENSE` (BUSL-1.1;
 ### Release signing (Claude Code, 2026-11-01)
 
 Opened `feat/release-code-signing` (off `origin/main`): opt-in Developer ID signing, notarization and stapling for the macOS `.dmg`, a signed `.pkg`, and Authenticode signing for the Windows `.exe`, all driven by repository secrets that are not set yet, so a release without them is unchanged. Verified locally: the unsigned macOS and Windows paths, the signed path with a throwaway self-signed identity (hardened runtime, timestamp, strict verify), the unsigned `.pkg` commands, and `make gates`. Not verified: real Apple notarization, the Installer-signed `.pkg`, and the Azure signing step; they need credentials only the maintainers hold. Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-signing-wt.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/agents-studio/src/test` only (Magic Studio planner and controller, sandbox music controller, app-builder controllers and service auth, Redis coding task store, platform query rewriter, face enrollment, demo agent seeder). No production code changed. Worktree: `vegaduta-coverage-wt`.
 
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
