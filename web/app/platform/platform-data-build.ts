@@ -325,7 +325,7 @@ export const BUILD_TOPICS: HubPage[] = [
     ],
     related: [
       { href: "/platform/governance", label: "Governance and cost controls" },
-      { href: "/platform/self-hosting", label: "Open source and self-hosting" },
+      { href: "/platform/self-hosting", label: "Source-available and self-hosting" },
       { href: "/ai/guardrails", label: "Guardrails" },
       { href: "/ai/mcp", label: "MCP sandboxing" },
       { href: "/why-vegaduta", label: "Why VegaDūta" },

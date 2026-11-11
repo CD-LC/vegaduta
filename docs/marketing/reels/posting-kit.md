@@ -105,7 +105,7 @@ tokens and the prices and baseline you enter.
 
 **Title:** VegaDūta in 75 seconds: self-hosted AI agents with approvals, channels and ROI
 
-**Caption (YouTube description):** VegaDūta is an open-source, self-hosted platform for AI agents:
+**Caption (YouTube description):** VegaDūta is a source-available (BSL-1.1), self-hosted platform for AI agents:
 install with one command, build an agent from your own documents on a free local model, put a human
 approval step inside any workflow, connect the agent to WhatsApp, Telegram, Slack, SMS and email, and
 see what every agent costs. Everything in this video is a real install recorded on a laptop; the Cost &
@@ -116,7 +116,7 @@ Chapters: 0:00 Install · 0:12 Build an agent · 0:30 Approvals · 0:48 Channels
 **LinkedIn post text:** Most "AI agent" tools want your customer data on their cloud. VegaDūta runs
 on your own machine or cluster: one command to install, agents that answer from your own documents,
 a human approval node inside the workflow, every channel your customers already use, and a cost and
-ROI view per agent. Open source (Apache 2.0). 75-second tour below; repo in the first comment.
+ROI view per agent. Source-available (BSL-1.1; the SDKs are Apache-2.0). 75-second tour below; repo in the first comment.
 
 **Hashtags:** #AIagents #opensource #selfhosted (YouTube: also #humanintheloop #RAG)
 
