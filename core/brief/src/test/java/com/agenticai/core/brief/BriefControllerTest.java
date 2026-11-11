@@ -234,9 +234,9 @@ class BriefControllerTest {
     }
 
     /**
-     * True once a done or error event is fully written: the event line is followed by its data
-     * line and the blank line that ends the event. Waiting only for the event name can return
-     * before the data line arrives (a race under a loaded test JVM).
+     * True once a done or error event is fully written: the event line is followed by its data line
+     * and the blank line that ends the event. Waiting only for the event name can return before the
+     * data line arrives (a race under a loaded test JVM).
      */
     private static boolean terminalEventComplete(String body) {
         for (String name : List.of("event:done", "event:error")) {
