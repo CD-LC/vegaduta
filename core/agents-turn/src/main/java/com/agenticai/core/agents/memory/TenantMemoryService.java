@@ -600,7 +600,7 @@ public class TenantMemoryService {
     /** Default-topK recall that shares {@code embedding}; see {@link TenantMemoryReads#recall}. */
     public List<TenantMemoryEntry> recall(
             String subjectKey, String query, QueryEmbedding embedding) {
-        return reads.recall(subjectKey, query, embedding, null);
+        return recall(subjectKey, query, embedding, null);
     }
 
     /**
@@ -609,7 +609,7 @@ public class TenantMemoryService {
      */
     public List<TenantMemoryEntry> recall(
             String subjectKey, String query, QueryEmbedding embedding, UUID agentId) {
-        return reads.recall(subjectKey, query, embedding, agentId);
+        return recall(subjectKey, query, recallTopK(agentId), embedding);
     }
 
     /**
