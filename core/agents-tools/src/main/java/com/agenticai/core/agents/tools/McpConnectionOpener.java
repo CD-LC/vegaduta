@@ -3,6 +3,7 @@ package com.agenticai.core.agents.tools;
 import com.agenticai.core.mcp.McpConnectionPhase;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
+import com.agenticai.core.security.logging.LogSafe;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpClientTransport;
@@ -18,11 +19,11 @@ import org.springframework.ai.tool.ToolCallback;
 
 /**
  * The bodies of {@link DynamicMcpConnectionManager#connect} (guards, transport, SDK handshake, tool
- * discovery and registration of one dynamic MCP connection, with the never-throws failure path),
- * of its local disconnect, and of its per-tenant usable-tool resolution.
- * A plain collaborator built by the manager (not a bean) and holding the manager's own live-client
- * tables, so behaviour is unchanged; split out only to keep each file reviewable. Logs under the
- * manager's logger so log routing and alerts keep matching.
+ * discovery and registration of one dynamic MCP connection, with the never-throws failure path), of
+ * its local disconnect, and of its per-tenant usable-tool resolution. A plain collaborator built by
+ * the manager (not a bean) and holding the manager's own live-client tables, so behaviour is
+ * unchanged; split out only to keep each file reviewable. Logs under the manager's logger so log
+ * routing and alerts keep matching.
  */
 final class McpConnectionOpener {
 
@@ -126,9 +127,12 @@ final class McpConnectionOpener {
 
             // Connection Doctor: for remotes, ONE best-effort HTTP probe before the SDK handshake,
             // purely so a failure has evidence (status, content type) - the SDK wraps every remote
-            // failure in the same opaque message. Ignored on success; a probe failure still proceeds.
+            // failure in the same opaque message. Ignored on success; a probe failure still
+            // proceeds.
             if (config.isRemote()) {
-                probe = RemoteMcpPreProbe.probe(config.url(), transports.remoteHeaders(config), config.type());
+                probe =
+                        RemoteMcpPreProbe.probe(
+                                config.url(), transports.remoteHeaders(config), config.type());
                 // Pentest H2: rejectIfGuardBlocked's check above and the network probe
                 // together can take several seconds - long enough for an attacker's DNS
                 // record to flip from a public-looking address to a private/internal one
@@ -245,10 +249,10 @@ final class McpConnectionOpener {
             owner.evictToolCache();
             log.info(
                     "MCP dynamic connection '{}' ({}) connected for tenant '{}' - {} tool(s) advertised",
-                    config.name(),
-                    registrationId,
-                    tenant,
-                    toolsResult == null ? 0 : callbacks.size());
+                    LogSafe.clean(config.name()),
+                    LogSafe.clean(registrationId),
+                    LogSafe.clean(tenant),
+                    LogSafe.clean(toolsResult == null ? 0 : callbacks.size()));
         } catch (Throwable t) {
             // Deliberately Throwable, not Exception - see class javadoc on
             // the unverified StdioClientTransport constructor arity. A
@@ -263,9 +267,9 @@ final class McpConnectionOpener {
             String name = config == null ? "unknown" : config.name();
             log.error(
                     "MCP dynamic connection '{}' ({}) failed to connect for tenant '{}'",
-                    name,
-                    registrationId,
-                    tenant,
+                    LogSafe.clean(name),
+                    LogSafe.clean(registrationId),
+                    LogSafe.clean(tenant),
                     t);
             Map<UUID, McpSyncClient> tenantClients = liveClients.get(tenant);
             if (tenantClients != null) {

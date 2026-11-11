@@ -11,7 +11,7 @@
 // "shipped" date is itself a signal of momentum that no adjective carries.
 //
 // Honesty ledger — every card is LIVE in the hosted production deployment, checked against
-// the deploy entries in docs/AGENT-COORDINATION.md on 2026-09-28:
+// the deploy entries in the internal change log on 2026-09-28:
 //   app        -> web/app/build/studio/* (multi-page + device APIs 46f6cc86,
 //                 Connect panel 9867718a), published apps with their own
 //                 end-user sign-in 0c16029c (tenant V359); in prod since the
@@ -96,7 +96,10 @@ export default function ShippedBand() {
               <div className="flex items-center justify-between gap-3">
                 <span
                   className="inline-flex size-10 items-center justify-center rounded-xl"
-                  style={{ background: "color-mix(in oklab, var(--mkt-accent) 12%, transparent)", color: "var(--mkt-accent)" }}
+                  style={{
+                    background: "color-mix(in oklab, var(--mkt-accent) 12%, transparent)",
+                    color: "var(--mkt-accent)",
+                  }}
                   aria-hidden="true"
                 >
                   <Icon className="size-5" />

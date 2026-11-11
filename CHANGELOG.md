@@ -8,50 +8,47 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Changed
-
-- **Faster continuation after an approval.** The turn that continues a task after a human decided a held tool call
-  now replays that call to the model as a native assistant tool call followed by its tool result, and sends only a
-  short platform note instead of the parked-turn record, the outcome record and the full `<approval_result>` text.
-  The request extends the first turn's prompt, so a provider's prompt cache reuses it. Switch:
-  `app.approvals.continuation.native-tool-result` (`APP_APPROVALS_CONTINUATION_NATIVE_TOOL_RESULT`, default `true`);
-  the note texts are `native-completed-message`, `native-failed-message` and `native-denied-message`. A turn that
-  ends paused for an approval is no longer sampled by the background quality judge (its reply is the platform's
-  waiting note), so that call no longer competes with the continuation on a single-slot local model.
-
-### Added
-
-- **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
-  `APP_CHAT_PROMPT_PROFILE=full`) chooses how much the platform adds to what an agent sends the model:
-  `full` (unchanged), `lean` (the standing instructions and skills list in their short wording) or `bare`
   (only the agent's own system prompt, procedures, custom instructions and tools - no standing directives,
-  no skills list, no recalled memory, no built-in memory, skill, restore or scratchpad tools). Guardrails,
+  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
+  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
+  65/65 score.
+  The request extends the first turn's prompt, so a provider's prompt cache reuses it. Switch:
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
+  `APP_CHAT_PROMPT_PROFILE=full`) chooses how much the platform adds to what an agent sends the model:
+  `app.approvals.continuation.native-tool-result` (`APP_APPROVALS_CONTINUATION_NATIVE_TOOL_RESULT`, default `true`);
+  `bare`. The prompt preview shows the profile's result.
+  `full` (unchanged), `lean` (the standing instructions and skills list in their short wording) or `bare`
+  `load_skill` away. Other models are unchanged.
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   approvals and audit run outside the prompt and stay on in all three. "Own tools" are the ones the owner
   chose: the agent's allowed tools and its attached tool servers; an agent with neither offers no tools in
-  `bare`. The prompt preview shows the profile's result.
-- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
-  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
-  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
-  `load_skill` away. Other models are unchanged.
-
-- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
-  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
-  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
-  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
-
-- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
-  local bring-your-own provider) now keep all but a short list of standing tools behind
-  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
-  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
-  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
-  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
-  65/65 score.
-
-### Fixed
-
-- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
   different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
+  ends paused for an approval is no longer sampled by the background quality judge (its reply is the platform's
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  local bring-your-own provider) now keep all but a short list of standing tools behind
+  no skills list, no recalled memory, no built-in memory, skill, restore or scratchpad tools). Guardrails,
+  now replays that call to the model as a native assistant tool call followed by its tool result, and sends only a
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
+  short platform note instead of the parked-turn record, the outcome record and the full `<approval_result>` text.
   startup (the row is still never rewritten) instead of silently running the other model.
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+  the note texts are `native-completed-message`, `native-failed-message` and `native-denied-message`. A turn that
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
+  waiting note), so that call no longer competes with the continuation on a single-slot local model.
+### Added
+### Changed
+### Fixed
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Faster continuation after an approval.** The turn that continues a task after a human decided a held tool call
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+- **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+- Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
 
 ## [0.1.14] - 2026-10-30
 

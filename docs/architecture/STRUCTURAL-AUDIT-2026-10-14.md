@@ -121,7 +121,7 @@ not probe the anonymous 401 routes.
 
 Running it for this audit failed at once. Three days earlier, commit 9cd7c7db2
 removed the localhost default for the token issuer and the public console URL, as
-AGENTS.md rule 4 requires. The script never set the two now-mandatory values, so it
+ENGINEERING-RULES.md rule 4 requires. The script never set the two now-mandatory values, so it
 could no longer start the app. A gate that nothing runs stops working within days.
 
 ### F9. Console files are very large (medium)

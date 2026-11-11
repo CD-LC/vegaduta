@@ -181,6 +181,23 @@ export default function SiteFooter() {
             follow; see LanguageLinks for the rule on which languages appear. */}
         <LanguageLinks pathname="/" current={locale} className="mt-12 border-t border-border/60 pt-6" />
 
+        {/* Product Hunt featured badge - mirrors the PeerPush verification
+            link above; the launch tracker links back to the product page. */}
+        <div className="mt-12 flex justify-center border-t border-border/60 pt-6">
+          <a
+            href="https://www.producthunt.com/products/vegaduta?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-vegaduta-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              alt="Vegaduta.ai - Open source - Agentic AI platform | Product Hunt"
+              width="250"
+              height="54"
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1300644&theme=light&t=1793645319951"
+            />
+          </a>
+        </div>
+
         {/* Legal-entity bottom bar — the registered company, not the product
             name. Registration values come from lib/legalEntity.ts
             (deployment-configured); CIN/DIN render only when set. */}

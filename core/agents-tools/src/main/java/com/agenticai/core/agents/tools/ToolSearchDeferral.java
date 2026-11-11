@@ -51,7 +51,7 @@ final class ToolSearchDeferral {
 
     /**
      * Virtual threads for the background catalog screen; the executor carries the calling thread's
-     * tenant onto the worker (AGENTS.md #12), which {@code sanitizeToolOutput} reads.
+     * tenant onto the worker (ENGINEERING-RULES.md #12), which {@code sanitizeToolOutput} reads.
      */
     private static final ExecutorService CATALOG_EXECUTOR =
             TenantAwareExecutors.newVirtualThreadPerTaskExecutor("tool-catalog-screen-");

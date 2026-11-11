@@ -4,6 +4,7 @@ import com.agenticai.core.approval.ApprovalPolicyService;
 import com.agenticai.core.resilience.RateLimitedLog;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -17,10 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The lifecycle of one vision session ({@code POST /api/vision/sessions}
- * / {@code .../{sessionId}/end}, see {@link VisionSessionController}): a Redis-backed record (24h
- * TTL, JSON blob - text metadata ONLY, never frame bytes; frames are ephemeral by design, see the
- * research doc's privacy non-negotiables) tracking who is capturing what, plus a running {@code
+ * The lifecycle of one vision session ({@code POST /api/vision/sessions} / {@code
+ * .../{sessionId}/end}, see {@link VisionSessionController}): a Redis-backed record (24h TTL, JSON
+ * blob - text metadata ONLY, never frame bytes; frames are ephemeral by design, see the research
+ * doc's privacy non-negotiables) tracking who is capturing what, plus a running {@code
  * framesAnalyzed} counter that chat turns carrying this session's id bump ({@code
  * AgentChatService}).
  *
@@ -38,10 +39,10 @@ import org.springframework.web.server.ResponseStatusException;
  *       so the policy is consulted explicitly and enforced as a synchronous refusal instead. {@code
  *       camera.capture.start} is NOT in the platform's default-sensitive patterns (the user
  *       pointing their own camera after the panel's consent flow is not an agent acting on the
- *       world), so a fresh tenant's WATCH/LIVE works out of the
- *       box; this 403 fires only for tenants whose admin added a {@code requiresApproval=true}
- *       override row. One-off SNAPSHOT sessions skip this check on purpose - the user's own
- *       explicit click is the human approval for a single frame;
+ *       world), so a fresh tenant's WATCH/LIVE works out of the box; this 403 fires only for
+ *       tenants whose admin added a {@code requiresApproval=true} override row. One-off SNAPSHOT
+ *       sessions skip this check on purpose - the user's own explicit click is the human approval
+ *       for a single frame;
  *   <li>no frame headroom left today (or, for WATCH/LIVE, no minute headroom) -> {@link
  *       VisionQuotaExceededException} (429).
  * </ol>
@@ -294,7 +295,10 @@ public class VisionSessionService {
         try {
             return objectMapper.readValue(json, VisionSessionRecord.class);
         } catch (JsonProcessingException e) {
-            log.warn("Corrupt vision-session record for '{}' - treating as absent", sessionId, e);
+            log.warn(
+                    "Corrupt vision-session record for '{}' - treating as absent",
+                    LogSafe.clean(sessionId),
+                    e);
             return null;
         }
     }

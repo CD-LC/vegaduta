@@ -262,6 +262,10 @@ async function ensureEmbedder(requestId: number): Promise<void> {
 /** dataURL → ImageBitmap. All decoding stays in the worker — fetch() of a
  * data: URL and createImageBitmap() are both worker-safe, no DOM needed. */
 async function decodeDataUrl(dataUrl: string): Promise<ImageBitmap> {
+  // Only inline data: URLs — never a network fetch of a caller-supplied URL.
+  if (!dataUrl.startsWith("data:")) {
+    throw new Error("frame is not a data URL");
+  }
   const res = await fetch(dataUrl);
   const blob = await res.blob();
   return await createImageBitmap(blob);

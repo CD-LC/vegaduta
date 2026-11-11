@@ -492,7 +492,8 @@ final class FastStreamTurn {
                         ? owner.newTranscript(context, agentId).roundsSpentBefore(toolRoundsSpent())
                         : null;
         // The previous pass completes on an HTTP-client thread that holds no TenantContext, and the
-        // next one is subscribed from there: subscribe it in the turn's captured scope (AGENTS.md
+        // next one is subscribed from there: subscribe it in the turn's captured scope
+        // (ENGINEERING-RULES.md
         // rule 12) so the advisors' llm_call_log writes land in the tenant schema.
         Flux<String> pass =
                 TenantScopedFlux.subscribeInScope(

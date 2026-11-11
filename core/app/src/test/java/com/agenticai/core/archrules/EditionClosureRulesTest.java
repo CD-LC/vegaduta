@@ -27,11 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * The edition closure rule (AGENTS.md rule 9, for the lean edition): a bean gated by {@link
- * ConditionalOnEditionFeature} may be injected only by beans gated by the SAME feature, or through
- * {@code ObjectProvider}, {@code Optional} or a collection. Anything else compiles, unit-tests
- * cleanly and crashes core at startup on the edition that drops the gated bean ("No qualifying bean
- * of type ...").
+ * The edition closure rule (ENGINEERING-RULES.md rule 9, for the lean edition): a bean gated by
+ * {@link ConditionalOnEditionFeature} may be injected only by beans gated by the SAME feature, or
+ * through {@code ObjectProvider}, {@code Optional} or a collection. Anything else compiles,
+ * unit-tests cleanly and crashes core at startup on the edition that drops the gated bean ("No
+ * qualifying bean of type ...").
  *
  * <p>ArchUnit over the production bytecode of every core module on core/app's classpath, no
  * context, no database. Gated classes are discovered by the annotation, so a package that gates a

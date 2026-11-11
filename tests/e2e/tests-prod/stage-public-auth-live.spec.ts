@@ -68,7 +68,7 @@ test.describe("public-auth: OSS site mode routing", () => {
 
   test("the technical public pages render with their own title and h1", async ({ page }) => {
     for (const [path, title, h1] of [
-      ["/", /Open-source platform for AI agents/i, /build, govern and run AI agents/i],
+      ["/", /(Source-available|Open-source) platform for AI agents/i, /build, govern and run AI agents/i],
       ["/about", /About/i, /About VegaD/i],
       ["/privacy", /Privacy/i, /Privacy Policy/i],
       ["/terms", /Terms/i, /Terms of Service/i],
@@ -322,7 +322,7 @@ test.describe("public-auth: SEO, robots, sitemap, llms.txt", () => {
   });
 });
 
-test.describe("public-auth: browser-facing URL hygiene (AGENTS.md rule 4)", () => {
+test.describe("public-auth: browser-facing URL hygiene (ENGINEERING-RULES.md rule 4)", () => {
   // DEFECT: window.__ENV / __public-env contains NEXT_PUBLIC_CODE_INTEL_URL=http://localhost:8090 and
   // /docs links to http://localhost:4100 (Academy). deploy/helm/charts/web/templates/deployment.yaml sets CODE_INTEL via
   // vegaduta-lib.publicUrl but the stage values leave it unset; app/lib/academyUrl.ts defaults to localhost:4100.

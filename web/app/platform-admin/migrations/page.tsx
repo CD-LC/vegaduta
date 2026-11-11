@@ -27,7 +27,7 @@ import { useTranslations } from "../../lib/i18n";
 // Flyway state for the control-plane schema and every tenant schema
 // (GET /api/platform/migrations). Read-only: a tenant behind or failed is
 // fixed by a deploy / a repair run, never from a button here. Control-plane
-// and tenant Flyway versions share one namespace (CLAUDE.md RULE 0), so the
+// and tenant Flyway versions share one namespace (ENGINEERING-RULES.md rule 4), so the
 // "expected tenant version" is the highest tenant migration the running core
 // image ships.
 

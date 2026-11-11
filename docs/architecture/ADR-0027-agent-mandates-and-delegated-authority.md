@@ -5,7 +5,7 @@
 | **Status** | Proposed. Nothing in this ADR is built; no code, migration or configuration key it names exists unless it is marked as existing |
 | **Date** | 2026-10-28 |
 | **Deciders** | Platform Engineering (maintainers) |
-| **Related** | [ADR-0013 embeddable agent SDK](ADR-0013-embeddable-agent-sdk.md), [ADR-0023 agents module decomposition](ADR-0023-agents-module-decomposition.md), [ADR-0024 tenant-aware executors](ADR-0024-tenant-aware-executors.md), [OWASP mapping](../security/owasp-mapping.md) (ASI03, ASI08, ASI10), [standards alignment pack](../compliance/README.md), `AGENTS.md` rules 6, 9, 12, 13 |
+| **Related** | [ADR-0013 embeddable agent SDK](ADR-0013-embeddable-agent-sdk.md), [ADR-0023 agents module decomposition](ADR-0023-agents-module-decomposition.md), [ADR-0024 tenant-aware executors](ADR-0024-tenant-aware-executors.md), [OWASP mapping](../security/owasp-mapping.md) (ASI03, ASI08, ASI10), [standards alignment pack](../compliance/README.md), `ENGINEERING-RULES.md` rules 6, 9, 12, 13 |
 
 ## Context
 
@@ -58,7 +58,7 @@ Arts. 14 and 26, SOC 2 CC6):
 
 ## Decision drivers
 
-- **Hot path stays in-process** (AGENTS.md rule 6). The check runs inside the turn, next to
+- **Hot path stays in-process** (ENGINEERING-RULES.md rule 6). The check runs inside the turn, next to
   `GuardedToolCallback`; no network hop between platform modules.
 - **Tenant carried across threads** (rule 12). Mandate lookups run on turn threads and on
   `delegate_parallel` branches; they must use `TenantScope`, not ad-hoc thread-locals.
@@ -187,14 +187,14 @@ Each phase is releasable alone and starts at `observe`. Nothing here is schedule
 
 | Phase | Content | Exit criteria |
 |---|---|---|
-| 0 | This ADR accepted or rejected; decide module placement (likely a new `agents-mandates` module over ports in `agentspi`, per ADR-0023); claim the area in `docs/maintainers/agent-coordination.md` | Decision recorded |
+| 0 | This ADR accepted or rejected; decide module placement (likely a new `agents-mandates` module over ports in `agentspi`, per ADR-0023); claim the area in `docs/maintainers/change-coordination.md` | Decision recorded |
 | 1 | `AgentMandate` entity and tenant migration (next free Flyway version at the time; `bash scripts/ci/flyway-lint.sh`); issue, revoke, list API under a new base path; `MandateToolGate` for tool scope, risk ceiling, expiry, revocation; mode `off`/`observe`/`enforce`; audit events; console card listing an agent's active mandates | Unit tests per reason code; a cross-tenant test; `AsyncHopTenantScopeRulesTest` and the `app` structure tests green; one `observe` period reviewed |
 | 2 | Spend ceiling: per-mandate USD reservation and rollup; optional link to a payment mandate or delegation grant; budget exhaustion reuses the existing stop reasons | Concurrency test (two parallel reservations cannot jointly exceed the ceiling). `MandateEnforcer` serialises charges with a row lock by design (its javadoc); a concurrency test for it was not found, so this phase adds one for both |
 | 3 | Derivation across `delegate_parallel` and outbound A2A: a branch runs under a derived mandate; the A2A client sends the mandate id (and digest) as a claim | Attenuation property tests; chain verification test; conformance page updated |
 | 4 | Per-agent workload identity and key rotation; JWKS per tenant; attestation and mandate signatures move to it | Key-rotation test; documented recovery when `APP_ENCRYPTION_KEY` is wrong |
 | 5 | Decide whether to fold delegation grants and payment mandates into mandate kinds | A separate ADR |
 
-Per AGENTS.md: configuration goes in `deploy/compose/.env.example` and `docs/configuration.md`,
+Per ENGINEERING-RULES.md: configuration goes in `deploy/compose/.env.example` and `docs/configuration.md`,
 user-visible behaviour in `CHANGELOG.md`, and the touched modules' tests plus the `app` module's
 structure and wiring tests run before a PR.
 
@@ -228,4 +228,4 @@ structure and wiring tests run before a PR.
 - The Python and Java SDK mandates were read, not compared byte-for-byte; the parity test is the
   source for that claim.
 - The proposed key, table, entity and event names were not checked against anything in flight on
-  other branches. Check `docs/maintainers/agent-coordination.md` before starting.
+  other branches. Check `docs/maintainers/change-coordination.md` before starting.

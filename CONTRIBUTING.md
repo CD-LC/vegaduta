@@ -2,7 +2,7 @@
 
 Thanks for helping. This guide covers licensing and sign-off, the development
 setup for each component, how a change gets merged, and the checks every
-change must pass. AI coding agents should also read [AGENTS.md](AGENTS.md).
+change must pass. Also read [ENGINEERING-RULES.md](ENGINEERING-RULES.md).
 
 ## Quick path
 
@@ -67,7 +67,7 @@ make hooks                      # pre-push hook: runs the static gates before yo
 
 `deploy/compose/.env` holds every generated secret. Keep it out of git (it is
 ignored) and reuse the **same** `APP_ENCRYPTION_KEY` for every process that
-talks to the same database (see [AGENTS.md](AGENTS.md)).
+talks to the same database (see [ENGINEERING-RULES.md](ENGINEERING-RULES.md)).
 
 ### core/ (Java 21, Spring Boot, Maven reactor)
 
