@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Convert an OWASP ZAP JSON report (zap-baseline.py -J report.json) to SARIF.
 
-Code scanning has no URL-native location type, so each alert instance's URI is
-stored as the artifactLocation (the region startLine GitHub expects is fixed
-at 1) and the alert text carries the method and URI. partialFingerprints keep
+Code scanning has no URL-native location type: artifactLocation URIs whose
+scheme does not match the checkout URI scheme ("file") are rejected wholesale
+("SARIF URI scheme \"http\" did not match the checkout URI scheme \"file\""),
+which zeroes every result in the upload. Each alert instance therefore uses
+the URL path as a relative artifact URI (a pseudo-route, not a real file) and
+the alert text carries the method and absolute URI. partialFingerprints keep
 alerts deduplicated across weekly runs.
 
 Usage: zap-to-sarif.py <report_json.json> <out.sarif>
@@ -55,6 +58,10 @@ def main():
                 }
             for inst in alert.get("instances") or []:
                 uri = inst.get("uri") or site.get("@name", "")
+                # Relative route path, not the absolute http URL: code
+                # scanning drops locations whose URI scheme is not the
+                # checkout scheme, taking the whole result with them.
+                artifact_uri = urllib.parse.urlsplit(uri).path.lstrip("/") or "."
                 results.append(
                     {
                         "ruleId": plugin,
@@ -65,7 +72,7 @@ def main():
                         "locations": [
                             {
                                 "physicalLocation": {
-                                    "artifactLocation": {"uri": uri},
+                                    "artifactLocation": {"uri": artifact_uri},
                                     "region": {"startLine": 1},
                                 }
                             }

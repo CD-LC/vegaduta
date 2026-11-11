@@ -125,6 +125,8 @@ class SettingsCatalogContractTest {
                                         new com.agenticai.core.agents.tools.scratchpad
                                                 .ScratchpadProperties()),
                                 new SkillPromptSettings(),
+                                new com.agenticai.core.agents.turn.PromptProfileSettings(
+                                        "full", null),
                                 new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
                                 new com.agenticai.core.agents.context.ContextCompactionSettings(
                                         new MockEnvironment()),

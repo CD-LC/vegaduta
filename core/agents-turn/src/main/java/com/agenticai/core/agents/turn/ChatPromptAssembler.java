@@ -12,7 +12,6 @@ import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.dto.ChatInlineAttachment;
 import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.memory.ChatTurn;
-import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.AgentToolPort;
@@ -38,9 +37,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
@@ -203,17 +200,21 @@ final class ChatPromptAssembler {
                 svc.turns.preTurnMaxWait == null
                         ? Long.MIN_VALUE
                         : System.nanoTime() + svc.turns.preTurnMaxWait.toNanos();
+        // On the continuation after an approval, the decided call is replayed as a native tool call
+        // and
+        // result (NativeApprovalReplay), so the request extends the first turn's cached prompt.
+        final ApprovalContinuation decided = context.continuation();
+        final String turnMessage = userMessage;
         CompletableFuture<ReplayedHistory> historyFuture =
                 supplyPreTurn(
                         preTurnTenant,
                         () -> {
                             List<ChatTurn> replayed =
                                     sessionMemoryService.getHistory(memorySessionId);
-                            return new ReplayedHistory(
-                                    replayed.stream()
-                                            .map(ChatPromptAssembler::toSpringAiMessage)
-                                            .toList(),
-                                    replayed.stream().anyMatch(t -> t.tools() != null));
+                            NativeApprovalReplay.Replay replay =
+                                    NativeApprovalReplay.of(
+                                            replayed, decided, turnMessage, svc.turns.toolLedger);
+                            return new ReplayedHistory(replay.messages(), replay.hasTextRecord());
                         });
         // stepEvents (2026-08-17) is threaded into tool resolution rather than
         // anywhere downstream because resolution is where every tool gets its
@@ -264,8 +265,13 @@ final class ChatPromptAssembler {
                 supplyPreTurn(
                         preTurnTenant,
                         () ->
-                                memoryRecall.recallMemoryFacts(
-                                        agentId, subjectKey, decisionMessage, stepEvents));
+                                // A bare turn sends no recalled-memory block, so it does not look.
+                                context.modelTraits() != null
+                                                && context.modelTraits().promptProfile()
+                                                        == PromptProfile.BARE
+                                        ? null
+                                        : memoryRecall.recallMemoryFacts(
+                                                agentId, subjectKey, decisionMessage, stepEvents));
 
         // Stage 4: empty unless the "mcp" profile is active and at least one
         // registry entry is enabled - see AgentToolProvider for why.
@@ -335,6 +341,21 @@ final class ChatPromptAssembler {
                                     : context.approval().stickyTools(),
                             svc.smallModel);
         }
+        // chat.prompt.profile (PromptProfile): bare offers only the agent's own tools and sends
+        // only
+        // the owner's text; lean uses the short wording of the standing blocks.
+        PromptProfile promptProfile =
+                context.modelTraits() == null
+                        ? PromptProfile.FULL
+                        : context.modelTraits().promptProfile();
+        if (promptProfile == PromptProfile.BARE) {
+            tools =
+                    PromptProfileSettings.ownTools(
+                            tools,
+                            anyMcpToolsOffered || !agent.getAllowedToolNames().isEmpty(),
+                            extraTools);
+        }
+        boolean compactPrompt = smallModelTurn || promptProfile == PromptProfile.LEAN;
 
         // "Smarter, more dynamic agents" roadmap - automatic long-term memory
         // recall, always attempted (unlike remember_fact, which the model
@@ -378,10 +399,10 @@ final class ChatPromptAssembler {
         // advertisement and should read as part of the operating contract.
         String basePrompt = rlPromptOverride != null ? rlPromptOverride : agent.getSystemPrompt();
         String proceduresBlock = agentToolProvider.proceduresPromptBlock(agentId);
-        int[] leanSkills = smallModelTurn ? null : context.modelTraits().leanSkillIndex();
+        int[] leanSkills = compactPrompt ? null : context.modelTraits().leanSkillIndex();
         String skillsBlock =
                 leanSkills == null
-                        ? agentToolProvider.skillsPromptBlock(agentId, tools, smallModelTurn)
+                        ? agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt)
                         : agentToolProvider.skillsPromptBlock(agentId, tools, false, leanSkills);
         // Repairs any non-JSON tool-call arguments PERSISTED into history
         // from an earlier turn - see ArgumentSanitizingToolCallingManager
@@ -436,7 +457,7 @@ final class ChatPromptAssembler {
         if (com.agenticai.core.guardrails.taint.Spotlight.hasUntrustedBlock(userMessage)) {
             context.taint().mark("untrusted_input");
         }
-        ChatSystemPromptComposer.Composed composed =
+        ChatSystemPromptComposer.Composed fullComposed =
                 ChatSystemPromptComposer.compose(
                         new ChatSystemPromptComposer.Input(
                                 basePrompt,
@@ -449,7 +470,7 @@ final class ChatPromptAssembler {
                                 tools,
                                 anyMcpToolsOffered,
                                 DirectiveKeys.scratchpadReachable(tools, scratchpadOffered),
-                                smallModelTurn,
+                                compactPrompt,
                                 ChatSystemPromptComposer.Switches.of(svc),
                                 agentId,
                                 hookRun == null ? null : hookRun.contextNote(),
@@ -457,6 +478,8 @@ final class ChatPromptAssembler {
                                         ? svc.turns.toolLedger.getTrustNote()
                                         : null,
                                 recalled == null ? null : recalled.block()));
+        ChatSystemPromptComposer.Composed composed =
+                ChatSystemPromptComposer.forProfile(fullComposed, promptProfile);
         String systemPrompt = composed.systemPrompt();
         String memoryBlock = composed.memoryBlock();
         // Tells the request inspector which registry key / scope / version each block of the system
@@ -599,11 +622,5 @@ final class ChatPromptAssembler {
             }
             throw new CompletionException(e.getCause());
         }
-    }
-
-    private static Message toSpringAiMessage(ChatTurn turn) {
-        return turn.role() == MessageRole.USER
-                ? new UserMessage(turn.content())
-                : new AssistantMessage(turn.content());
     }
 }

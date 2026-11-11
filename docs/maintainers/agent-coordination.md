@@ -809,6 +809,13 @@ Opened `feat/release-code-signing` (off `origin/main`): opt-in Developer ID sign
 
 Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the signed-in personal-edition suite: agent behaviour, turn inspector and feedback, MCP registration and tool selection, workflows, knowledge upload and retrieval, A2A-off checks, channels and the device pairing lifecycle. No product code changed. Verified: `make gates` passes; the personal suite passes on a local personal stack (79 passed, 4 skipped: three A2A positive-path checks need the A2A directory on, and the platform-admin check needs the owner to hold that role). Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-personal-e2e-wt.
 
+### Approval continuation latency (Devin, 2026-11-10)
+
+Opened a PR (`perf/approval-native-continuation`, stacked on `feat/agent-prompt-profile` #392): the continuation turn after an approval replays the decided call as a native assistant tool call + tool result with a short note (`app.approvals.continuation.native-tool-result`, default true), and a turn paused for an approval is no longer sampled by the quality judge. Verified: agents-turn 2,215 tests, app 771 tests, `make gates`, 65/65 eval runs on the local qwen3.5:9b stack. Worktree: /private/tmp/vd-approval-native.
+### Local-model latency and tokens (Claude Code, 2026-11-09)
+
+Branch `perf/lean-local-turns` (off `origin/main`): a local model's turn defers tools by default with a short always-on list and a 12-skill index, plain-data tool results skip the injection judge (`app.guardrails.judge.skip-inert-data`), and core warns when the pool row serves a different model than configured. Touches `agents-turn`, `agents-tools`, `guardrails`, `providers`, `app-config`. Not touched: sandbox, approval continuation, memory/skill gating.
+
 ### Token and latency controls (Claude Code, 2026-11-11)
 
 Local branch `feat/token-latency-controls` (worktree `vegaduta-token-controls-wt`, off `origin/main`), not pushed: workspace settings for the conversation replay window (`chat.history.*`), workspace and agent settings for the compaction thresholds (`chat.compaction.*`), and a default for the per-reply prompt-token cap (1,000,000; 200,000 in `personal`). Found while auditing the local stack: one reply's tool loop sent 315,968 prompt tokens in 250 s (33 `load_skill` rounds) with the cap at its old default of 0.

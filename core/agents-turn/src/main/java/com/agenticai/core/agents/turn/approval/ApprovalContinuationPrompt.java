@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.turn.approval;
 
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,14 +39,44 @@ public class ApprovalContinuationPrompt {
         this.properties = properties;
     }
 
+    /**
+     * True when {@code message} is a continuation message written for the native shape: the decided
+     * call is replayed as a tool call and tool result ahead of it, and the message is only a short
+     * note.
+     */
+    public static boolean isNativeShape(String message) {
+        return ApprovalContinuation.isNativeShapeMessage(message);
+    }
+
     /** The full user-role message for {@code continuation}. */
     public String render(ApprovalContinuation continuation) {
+        return render(continuation, properties.isNativeToolResult());
+    }
+
+    /**
+     * The text-shape message (goal, call and full result in the message itself), for a resume whose
+     * history is not replayed through the native shape (an agent job's resumed turn).
+     */
+    public String renderText(ApprovalContinuation continuation) {
+        return render(continuation, false);
+    }
+
+    private String render(ApprovalContinuation continuation, boolean nativeShape) {
         Outcome outcome = continuation.outcome();
         String template =
                 switch (outcome) {
-                    case COMPLETED -> properties.getCompletedMessage();
-                    case FAILED -> properties.getFailedMessage();
-                    case DENIED -> properties.getDeniedMessage();
+                    case COMPLETED ->
+                            nativeShape
+                                    ? properties.getNativeCompletedMessage()
+                                    : properties.getCompletedMessage();
+                    case FAILED ->
+                            nativeShape
+                                    ? properties.getNativeFailedMessage()
+                                    : properties.getFailedMessage();
+                    case DENIED ->
+                            nativeShape
+                                    ? properties.getNativeDeniedMessage()
+                                    : properties.getDeniedMessage();
                 };
         Map<String, String> values =
                 Map.of(
@@ -59,7 +89,11 @@ public class ApprovalContinuationPrompt {
                                         shorten(
                                                 nullToEmpty(continuation.argumentsJson()),
                                                 properties.getMaxArgumentsChars())),
-                        "result", neutralise(shorten(continuation.result(), properties.getMaxResultChars())),
+                        "result",
+                                neutralise(
+                                        shorten(
+                                                continuation.result(),
+                                                properties.getMaxResultChars())),
                         "otherPending", otherPendingBlock(continuation.otherPending()));
         StringBuilder message = new StringBuilder();
         message.append(ApprovalContinuation.MESSAGE_MARKER)
@@ -69,11 +103,25 @@ public class ApprovalContinuationPrompt {
                 .append(attributeSafe(continuation.toolName()))
                 .append("\" outcome=\"")
                 .append(outcome.name().toLowerCase(Locale.ROOT))
-                .append("\">\n")
+                .append('"')
+                .append(nativeShape ? ApprovalContinuation.NATIVE_SHAPE_ATTRIBUTE : "")
+                .append(">\n")
                 .append(fill(template, values))
                 .append('\n')
                 .append(CLOSE_TAG);
         return message.toString();
+    }
+
+    /**
+     * {@code continuation} as the native replay sends it: a completed call's output cut at {@code
+     * max-result-chars}, as the text message would have cut it. Unchanged for the text shape.
+     */
+    public ApprovalContinuation forReplay(ApprovalContinuation continuation) {
+        if (!properties.isNativeToolResult() || continuation.outcome() != Outcome.COMPLETED) {
+            return continuation;
+        }
+        return continuation.withResult(
+                shorten(continuation.result(), properties.getMaxResultChars()));
     }
 
     private String otherPendingBlock(List<String> otherPending) {

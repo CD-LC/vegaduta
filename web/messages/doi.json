@@ -10838,6 +10838,18 @@
           "help": "0 means no cap. Lower it to stop a runaway tool loop that keeps resending a large context; the per-turn tool-call limit bounds rounds, this bounds their size."
         }
       },
+      "prompt": {
+        "profile": {
+          "description": "How much the platform adds to what this agent sends the model. Full adds the standing instructions, skills list, recalled memory and built-in memory and skill tools. Lean adds the same in short form. Bare sends only the agent's own prompt, procedures, custom instructions and tools.",
+          "help": "Bare gives the smallest and fastest prompt, but the agent loses built-in memory, skills and the standing safety wording. Guardrails, approvals and audit stay on in every profile.",
+          "label": "Prompt profile",
+          "options": {
+            "full": "Full: standing instructions, skills list, memory and built-in tools",
+            "lean": "Lean: the same, in short wording",
+            "bare": "Bare: only the agent's own prompt, procedures and tools"
+          }
+        }
+      },
       "history": {
         "maxTurns": {
           "label": "Conversation history: turns",
