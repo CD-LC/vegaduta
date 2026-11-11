@@ -1,7 +1,6 @@
 package io.vegaduta.agent.core.evidence;
 
 import io.vegaduta.agent.api.Experimental;
-
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -25,36 +24,36 @@ import org.jspecify.annotations.Nullable;
  */
 @Experimental
 public record ChainAnchors(
-        @Nullable Long firstSeq,
-        @Nullable String firstPrev,
-        @Nullable Long lastSeq,
-        @Nullable String headHash) {
+    @Nullable Long firstSeq,
+    @Nullable String firstPrev,
+    @Nullable Long lastSeq,
+    @Nullable String headHash) {
 
-    private static final ChainAnchors NONE = new ChainAnchors(null, null, null, null);
+  private static final ChainAnchors NONE = new ChainAnchors(null, null, null, null);
 
-    /** No anchors: the first event is trusted to start the chain. */
-    public static ChainAnchors none() {
-        return NONE;
-    }
+  /** No anchors: the first event is trusted to start the chain. */
+  public static ChainAnchors none() {
+    return NONE;
+  }
 
-    public ChainAnchors withFirstSeq(long value) {
-        return new ChainAnchors(value, firstPrev, lastSeq, headHash);
-    }
+  public ChainAnchors withFirstSeq(long value) {
+    return new ChainAnchors(value, firstPrev, lastSeq, headHash);
+  }
 
-    public ChainAnchors withFirstPrev(String value) {
-        return new ChainAnchors(firstSeq, value, lastSeq, headHash);
-    }
+  public ChainAnchors withFirstPrev(String value) {
+    return new ChainAnchors(firstSeq, value, lastSeq, headHash);
+  }
 
-    public ChainAnchors withLastSeq(long value) {
-        return new ChainAnchors(firstSeq, firstPrev, value, headHash);
-    }
+  public ChainAnchors withLastSeq(long value) {
+    return new ChainAnchors(firstSeq, firstPrev, value, headHash);
+  }
 
-    public ChainAnchors withHeadHash(String value) {
-        return new ChainAnchors(firstSeq, firstPrev, lastSeq, value);
-    }
+  public ChainAnchors withHeadHash(String value) {
+    return new ChainAnchors(firstSeq, firstPrev, lastSeq, value);
+  }
 
-    /** True when at least one anchor is set. */
-    public boolean any() {
-        return firstSeq != null || firstPrev != null || lastSeq != null || headHash != null;
-    }
+  /** True when at least one anchor is set. */
+  public boolean any() {
+    return firstSeq != null || firstPrev != null || lastSeq != null || headHash != null;
+  }
 }

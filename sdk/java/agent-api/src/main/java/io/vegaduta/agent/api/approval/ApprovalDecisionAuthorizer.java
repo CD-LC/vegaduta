@@ -8,21 +8,21 @@ package io.vegaduta.agent.api.approval;
 @FunctionalInterface
 public interface ApprovalDecisionAuthorizer {
 
-    /**
-     * @throws ApprovalNotAuthorizedException when {@code decidedBy} may not decide {@code request}
-     */
-    void authorize(ApprovalRequest request, String decidedBy);
+  /**
+   * @throws ApprovalNotAuthorizedException when {@code decidedBy} may not decide {@code request}
+   */
+  void authorize(ApprovalRequest request, String decidedBy);
 
-    /**
-     * The explicit opt-out of the two-person rule: anyone, including the requester, may decide
-     * anything. For single-operator tools and tests; the Python SDK spells it {@code allow_any}.
-     */
-    static ApprovalDecisionAuthorizer allowAny() {
-        return (request, decidedBy) -> {};
-    }
+  /**
+   * The explicit opt-out of the two-person rule: anyone, including the requester, may decide
+   * anything. For single-operator tools and tests; the Python SDK spells it {@code allow_any}.
+   */
+  static ApprovalDecisionAuthorizer allowAny() {
+    return (request, decidedBy) -> {};
+  }
 
-    /** Same as {@link #allowAny()}; kept for existing callers. */
-    static ApprovalDecisionAuthorizer permitAll() {
-        return allowAny();
-    }
+  /** Same as {@link #allowAny()}; kept for existing callers. */
+  static ApprovalDecisionAuthorizer permitAll() {
+    return allowAny();
+  }
 }

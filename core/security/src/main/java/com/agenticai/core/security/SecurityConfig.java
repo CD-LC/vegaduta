@@ -29,9 +29,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -599,50 +597,15 @@ public class SecurityConfig {
      * JWT).
      */
     static boolean hasGrantKeyBearer(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        return header != null
-                && header.regionMatches(true, 0, "Bearer vmcp_", 0, "Bearer vmcp_".length());
+        return OpenAiCompatAuth.hasGrantKeyBearer(request);
     }
 
-    /**
-     * Default bearer extraction, except that on {@code /v1/**} (OpenAI-compatible surface, when
-     * enabled) a {@code vmcp_} grant key is NOT handed to the JWT decoder, which would reject it as
-     * "Malformed token" before the key filter ever ran. Every other path and token is unchanged.
-     */
     private BearerTokenResolver grantKeyAwareBearerTokenResolver() {
-        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
-        return request -> {
-            if (openAiCompatEnabled
-                    && request.getRequestURI().startsWith("/v1/")
-                    && hasGrantKeyBearer(request)) {
-                return null;
-            }
-            return delegate.resolve(request);
-        };
+        return OpenAiCompatAuth.grantKeyAwareBearerTokenResolver(openAiCompatEnabled);
     }
 
-    /**
-     * Default bearer 401, except that on {@code /v1/**} (flag on) an unauthenticated or
-     * invalid-token call gets OpenAI's error envelope, which an OpenAI SDK parses into a typed
-     * AuthenticationError. Everything else is the stock {@link
-     * BearerTokenAuthenticationEntryPoint}.
-     */
     private AuthenticationEntryPoint openAiAwareEntryPoint() {
-        BearerTokenAuthenticationEntryPoint delegate = new BearerTokenAuthenticationEntryPoint();
-        return (request, response, ex) -> {
-            if (openAiCompatEnabled && request.getRequestURI().startsWith("/v1/")) {
-                response.setStatus(401);
-                response.setHeader("WWW-Authenticate", "Bearer");
-                response.setContentType("application/json");
-                response.getWriter()
-                        .write(
-                                "{\"error\":{\"message\":\"Incorrect API key provided.\","
-                                    + "\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"invalid_api_key\"}}");
-                return;
-            }
-            delegate.commence(request, response, ex);
-            writeUnauthorizedProblem(request, response);
-        };
+        return OpenAiCompatAuth.openAiAwareEntryPoint(openAiCompatEnabled);
     }
 
     /**
@@ -655,24 +618,7 @@ public class SecurityConfig {
             jakarta.servlet.http.HttpServletRequest request,
             jakarta.servlet.http.HttpServletResponse response)
             throws java.io.IOException {
-        if (response.isCommitted()) {
-            return;
-        }
-        String path =
-                request.getRequestURI() == null
-                        ? ""
-                        : request.getRequestURI().replace("\\", "").replace("\"", "");
-        response.setContentType("application/problem+json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter()
-                .write(
-                        "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Authentication"
-                            + " is required to access this resource.\",\"instance\":\""
-                                + path
-                                + "\",\"timestamp\":\""
-                                + java.time.Instant.now()
-                                + "\",\"error\":\"Authentication is required to access this"
-                                + " resource.\"}");
+        OpenAiCompatAuth.writeUnauthorizedProblem(request, response);
     }
 
     private JwtAuthenticationConverter jwtAuthenticationConverter(

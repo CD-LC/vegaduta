@@ -5,11 +5,6 @@ import io.vegaduta.agent.api.audit.AuditEvent;
 import io.vegaduta.agent.api.audit.AuditSink;
 import io.vegaduta.agent.core.hook.JsonLite;
 import io.vegaduta.agent.core.text.Text;
-
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,6 +16,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Makes an audit log tamper-evident. Every event is linked to its predecessor with SHA-256 and
@@ -65,337 +63,329 @@ import java.util.TreeMap;
 @Experimental
 public final class HashChainedAuditSink implements AuditSink {
 
-    public static final String SEQ = "chain.seq";
-    public static final String PREV = "chain.prev";
-    public static final String HASH = "chain.hash";
-    public static final String SIG = "chain.sig";
-    public static final String ALG = "chain.alg";
-    public static final String SIG_ERROR = "chain.sigError";
+  public static final String SEQ = "chain.seq";
+  public static final String PREV = "chain.prev";
+  public static final String HASH = "chain.hash";
+  public static final String SIG = "chain.sig";
+  public static final String ALG = "chain.alg";
+  public static final String SIG_ERROR = "chain.sigError";
 
-    /** Prefix under which attributes appear in the canonical form. */
-    public static final String ATTR_PREFIX = "attr.";
+  /** Prefix under which attributes appear in the canonical form. */
+  public static final String ATTR_PREFIX = "attr.";
 
-    /** The {@code chain.prev} of the first event. */
-    public static final String GENESIS = "0".repeat(64);
+  /** The {@code chain.prev} of the first event. */
+  public static final String GENESIS = "0".repeat(64);
 
-    private static final Logger log = LoggerFactory.getLogger(HashChainedAuditSink.class);
-    private static final Set<String> CHAIN_KEYS = Set.of(SEQ, PREV, HASH, SIG, ALG, SIG_ERROR);
+  private static final Logger log = LoggerFactory.getLogger(HashChainedAuditSink.class);
+  private static final Set<String> CHAIN_KEYS = Set.of(SEQ, PREV, HASH, SIG, ALG, SIG_ERROR);
 
-    private final AuditSink delegate;
-    private final @Nullable Signer signer;
-    private final Object lock = new Object();
-    private long seq;
-    private String head = GENESIS;
+  private final AuditSink delegate;
+  private final @Nullable Signer signer;
+  private final Object lock = new Object();
+  private long seq;
+  private String head = GENESIS;
 
-    public HashChainedAuditSink(AuditSink delegate) {
-        this(delegate, null);
+  public HashChainedAuditSink(AuditSink delegate) {
+    this(delegate, null);
+  }
+
+  public HashChainedAuditSink(AuditSink delegate, @Nullable Signer signer) {
+    this.delegate = Objects.requireNonNull(delegate, "delegate");
+    this.signer = signer;
+  }
+
+  /**
+   * A sink that continues an existing chain: the next event gets {@code lastSeq + 1} and {@code
+   * chain.prev = lastHash}. Pass {@code 0} and {@link #GENESIS} for a new chain.
+   */
+  public HashChainedAuditSink(
+      AuditSink delegate, @Nullable Signer signer, long lastSeq, String lastHash) {
+    this(delegate, signer);
+    resume(lastSeq, lastHash);
+  }
+
+  /**
+   * Repositions the chain on the last stored link. Only meaningful before the first {@link #emit}
+   * of this instance (for example at start-up, from the newest row of the durable sink).
+   *
+   * @throws IllegalArgumentException when {@code lastSeq} is negative, {@code lastHash} is not a
+   *     64-character hex string, or seq 0 is paired with anything but {@link #GENESIS}
+   */
+  public void resume(long lastSeq, String lastHash) {
+    Objects.requireNonNull(lastHash, "lastHash");
+    if (lastSeq < 0) {
+      throw new IllegalArgumentException("lastSeq must not be negative");
     }
-
-    public HashChainedAuditSink(AuditSink delegate, @Nullable Signer signer) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.signer = signer;
+    if (lastHash.length() != 64 || !lastHash.chars().allMatch(c -> Character.digit(c, 16) >= 0)) {
+      throw new IllegalArgumentException("lastHash must be 64 hex characters");
     }
-
-    /**
-     * A sink that continues an existing chain: the next event gets {@code lastSeq + 1} and {@code
-     * chain.prev = lastHash}. Pass {@code 0} and {@link #GENESIS} for a new chain.
-     */
-    public HashChainedAuditSink(
-            AuditSink delegate, @Nullable Signer signer, long lastSeq, String lastHash) {
-        this(delegate, signer);
-        resume(lastSeq, lastHash);
+    if (lastSeq == 0 && !GENESIS.equals(lastHash)) {
+      throw new IllegalArgumentException("seq 0 must pair with the GENESIS hash");
     }
-
-    /**
-     * Repositions the chain on the last stored link. Only meaningful before the first {@link #emit}
-     * of this instance (for example at start-up, from the newest row of the durable sink).
-     *
-     * @throws IllegalArgumentException when {@code lastSeq} is negative, {@code lastHash} is not a
-     *     64-character hex string, or seq 0 is paired with anything but {@link #GENESIS}
-     */
-    public void resume(long lastSeq, String lastHash) {
-        Objects.requireNonNull(lastHash, "lastHash");
-        if (lastSeq < 0) {
-            throw new IllegalArgumentException("lastSeq must not be negative");
-        }
-        if (lastHash.length() != 64
-                || !lastHash.chars().allMatch(c -> Character.digit(c, 16) >= 0)) {
-            throw new IllegalArgumentException("lastHash must be 64 hex characters");
-        }
-        if (lastSeq == 0 && !GENESIS.equals(lastHash)) {
-            throw new IllegalArgumentException("seq 0 must pair with the GENESIS hash");
-        }
-        synchronized (lock) {
-            this.seq = lastSeq;
-            this.head = lastHash;
-        }
+    synchronized (lock) {
+      this.seq = lastSeq;
+      this.head = lastHash;
     }
+  }
 
-    @Override
-    public void emit(AuditEvent event) {
-        AuditEvent chained;
-        synchronized (lock) {
-            long next = seq + 1;
-            String prev = head;
-            String hash = sha256Hex(prev + canonical(event));
-            Map<String, String> attributes = new LinkedHashMap<>(event.attributes());
-            CHAIN_KEYS.forEach(attributes::remove);
-            attributes.put(SEQ, Long.toString(next));
-            attributes.put(PREV, prev);
-            attributes.put(HASH, hash);
-            if (signer != null) {
-                try {
-                    String alg = signer.algorithm();
-                    String sig = Base64.getEncoder().encodeToString(signer.sign(utf8(hash)));
-                    attributes.put(ALG, alg);
-                    attributes.put(SIG, sig);
-                } catch (RuntimeException e) {
-                    // Keep the chain contiguous: the event is recorded unsigned and says so. A
-                    // verifier
-                    // asked to check signatures reports the gap at this seq.
-                    log.warn("Audit chain signer failed at seq {}: {}", next, e.toString());
-                    attributes.put(SIG_ERROR, Text.shortText(e.getClass().getSimpleName()));
-                }
-            }
-            chained = withAttributes(event, attributes);
-            seq = next;
-            head = hash;
-        }
-        delegate.emit(chained);
-    }
-
-    /** Number of events chained so far by this writer (including a resumed prefix). */
-    public long size() {
-        synchronized (lock) {
-            return seq;
-        }
-    }
-
-    /** The hash of the most recent event, or {@link #GENESIS} when nothing was written yet. */
-    public String head() {
-        synchronized (lock) {
-            return head;
-        }
-    }
-
-    /**
-     * Checks a stored chain. {@code events} must be in emission order and may be a suffix of the
-     * full chain (a capped in-memory sink drops old events): the first event's {@code chain.prev}
-     * is trusted unless its sequence number is 1, in which case it must be {@link #GENESIS}; pass
-     * {@link ChainAnchors} to pin either end of the chain.
-     *
-     * @param events the events as read back from storage
-     * @param verifier when present, every event must carry a valid {@code chain.sig}
-     */
-    public static ChainVerification verify(List<AuditEvent> events, Optional<Verifier> verifier) {
-        return verify(events, verifier, ChainAnchors.none());
-    }
-
-    /**
-     * {@link #verify(List, Optional)} with optional {@link ChainAnchors} recorded outside the log.
-     * Without anchors the first event is trusted to start the chain, so a deleted prefix or suffix
-     * cannot be seen from the log alone; each anchor supplied closes that gap for its end of the
-     * chain. A mismatching anchor, or any anchor on a log with no chained events, is reported as a
-     * broken chain naming the anchor.
-     */
-    public static ChainVerification verify(
-            List<AuditEvent> events, Optional<Verifier> verifier, ChainAnchors anchors) {
-        Objects.requireNonNull(events, "events");
-        Objects.requireNonNull(verifier, "verifier");
-        Objects.requireNonNull(anchors, "anchors");
-        long expectedSeq = -1;
-        String expectedPrev = GENESIS;
-        int checked = 0;
-        long lastSeq = -1;
-        String lastHash = null;
-        for (AuditEvent event : events) {
-            Map<String, String> attrs = event.attributes();
-            String seqText = attrs.get(SEQ);
-            String prev = attrs.get(PREV);
-            String hash = attrs.get(HASH);
-            long seqForReport = expectedSeq < 0 ? parseSeq(seqText, 1) : expectedSeq;
-            if (seqText == null || prev == null || hash == null) {
-                return ChainVerification.broken(seqForReport, checked, "missing chain attributes");
-            }
-            long seq = parseSeq(seqText, -1);
-            if (seq < 1) {
-                return ChainVerification.broken(
-                        seqForReport,
-                        checked,
-                        "invalid chain.seq '" + Text.bounded(seqText, 32) + "'");
-            }
-            if (expectedSeq < 0) {
-                if (anchors.firstSeq() != null && seq != anchors.firstSeq()) {
-                    return ChainVerification.broken(
-                            seq,
-                            checked,
-                            "first event has seq "
-                                    + seq
-                                    + " but anchor expectedFirstSeq is "
-                                    + anchors.firstSeq()
-                                    + " (prefix removed or replaced?)");
-                }
-                if (anchors.firstPrev() != null && !prev.equals(anchors.firstPrev())) {
-                    return ChainVerification.broken(
-                            seq,
-                            checked,
-                            "first event chain.prev does not match anchor expectedFirstPrev"
-                                    + " (prefix removed or replaced?)");
-                }
-                expectedSeq = seq;
-                expectedPrev = seq == 1 ? GENESIS : prev;
-            }
-            if (seq != expectedSeq) {
-                return ChainVerification.broken(
-                        expectedSeq, checked, "expected seq " + expectedSeq + " but found " + seq);
-            }
-            if (!prev.equals(expectedPrev)) {
-                return ChainVerification.broken(
-                        seq, checked, "chain.prev does not match previous hash");
-            }
-            String recomputed = sha256Hex(prev + canonical(event));
-            if (!recomputed.equals(hash)) {
-                return ChainVerification.broken(
-                        seq, checked, "chain.hash does not match event content");
-            }
-            if (verifier.isPresent()) {
-                String sig = attrs.get(SIG);
-                if (sig == null) {
-                    String why =
-                            attrs.containsKey(SIG_ERROR) ? "signer failed when writing" : "missing";
-                    return ChainVerification.broken(
-                            seq, checked, "missing chain.sig (" + why + ")");
-                }
-                byte[] raw;
-                try {
-                    raw = Base64.getDecoder().decode(sig);
-                } catch (IllegalArgumentException e) {
-                    return ChainVerification.broken(seq, checked, "chain.sig is not Base64");
-                }
-                if (!verifier.get().verify(utf8(hash), raw)) {
-                    return ChainVerification.broken(seq, checked, "signature invalid");
-                }
-            }
-            checked++;
-            expectedSeq = seq + 1;
-            expectedPrev = hash;
-            lastSeq = seq;
-            lastHash = hash;
-        }
-        if (anchors.any() && lastHash == null) {
-            return new ChainVerification(
-                    false,
-                    -1,
-                    0,
-                    "chain broken: no chained events but an anchor was supplied (log emptied?)",
-                    false);
-        }
-        if (anchors.lastSeq() != null && lastSeq != anchors.lastSeq()) {
-            return ChainVerification.broken(
-                    lastSeq,
-                    checked,
-                    "last event has seq "
-                            + lastSeq
-                            + " but anchor expectedLastSeq is "
-                            + anchors.lastSeq()
-                            + " (suffix removed or extended?)");
-        }
-        if (anchors.headHash() != null && !anchors.headHash().equals(lastHash)) {
-            return ChainVerification.broken(
-                    lastSeq,
-                    checked,
-                    "last chain.hash does not match anchor expectedHeadHash"
-                            + " (suffix removed or replaced?)");
-        }
-        return ChainVerification.intact(checked, verifier.isPresent());
-    }
-
-    /**
-     * The canonical serialization that is hashed: a flat JSON object in sorted key order with every
-     * top-level field under its own name and every non-chain attribute under {@code attr.<key>}.
-     */
-    public static String canonical(AuditEvent event) {
-        Map<String, String> flat = new TreeMap<>();
-        flat.put("id", event.id().toString());
-        flat.put("createdAt", event.createdAt().toString());
-        flat.put("actorId", event.actorId());
-        flat.put("actionType", event.actionType());
-        flat.put("targetType", event.targetType());
-        flat.put("targetId", event.targetId());
-        flat.put("outcome", event.outcome().name());
-        if (event.detail() != null) {
-            flat.put("detail", event.detail());
-        }
-        flat.put("runId", event.context().runId());
-        putIfPresent(flat, "tenantId", event.context().tenantId());
-        putIfPresent(flat, "agentId", event.context().agentId());
-        putIfPresent(flat, "sessionId", event.context().sessionId());
-        putIfPresent(flat, "correlationId", event.context().correlationId());
-        if (!event.risks().isEmpty()) {
-            flat.put(
-                    "risks",
-                    event.risks().stream()
-                            .map(r -> r.id())
-                            .sorted()
-                            .reduce((a, b) -> a + "," + b)
-                            .orElse(""));
-        }
-        for (Map.Entry<String, String> e : event.attributes().entrySet()) {
-            if (!CHAIN_KEYS.contains(e.getKey())) {
-                flat.put(ATTR_PREFIX + e.getKey(), e.getValue());
-            }
-        }
-        return JsonLite.writeObject(flat);
-    }
-
-    private static void putIfPresent(Map<String, String> map, String key, @Nullable String value) {
-        if (value != null) {
-            map.put(key, value);
-        }
-    }
-
-    static String sha256Hex(String text) {
+  @Override
+  public void emit(AuditEvent event) {
+    AuditEvent chained;
+    synchronized (lock) {
+      long next = seq + 1;
+      String prev = head;
+      String hash = sha256Hex(prev + canonical(event));
+      Map<String, String> attributes = new LinkedHashMap<>(event.attributes());
+      CHAIN_KEYS.forEach(attributes::remove);
+      attributes.put(SEQ, Long.toString(next));
+      attributes.put(PREV, prev);
+      attributes.put(HASH, hash);
+      if (signer != null) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(utf8(text));
-            StringBuilder sb = new StringBuilder(digest.length * 2);
-            for (byte b : digest) {
-                sb.append(Character.forDigit((b >> 4) & 0xF, 16))
-                        .append(Character.forDigit(b & 0xF, 16));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 unavailable", e);
+          String alg = signer.algorithm();
+          String sig = Base64.getEncoder().encodeToString(signer.sign(utf8(hash)));
+          attributes.put(ALG, alg);
+          attributes.put(SIG, sig);
+        } catch (RuntimeException e) {
+          // Keep the chain contiguous: the event is recorded unsigned and says so. A
+          // verifier
+          // asked to check signatures reports the gap at this seq.
+          log.warn("Audit chain signer failed at seq {}: {}", next, e.toString());
+          attributes.put(SIG_ERROR, Text.shortText(e.getClass().getSimpleName()));
         }
+      }
+      chained = withAttributes(event, attributes);
+      seq = next;
+      head = hash;
     }
+    delegate.emit(chained);
+  }
 
-    private static byte[] utf8(String s) {
-        return s.getBytes(StandardCharsets.UTF_8);
+  /** Number of events chained so far by this writer (including a resumed prefix). */
+  public long size() {
+    synchronized (lock) {
+      return seq;
     }
+  }
 
-    private static long parseSeq(@Nullable String text, long fallback) {
-        if (text == null) {
-            return fallback;
+  /** The hash of the most recent event, or {@link #GENESIS} when nothing was written yet. */
+  public String head() {
+    synchronized (lock) {
+      return head;
+    }
+  }
+
+  /**
+   * Checks a stored chain. {@code events} must be in emission order and may be a suffix of the full
+   * chain (a capped in-memory sink drops old events): the first event's {@code chain.prev} is
+   * trusted unless its sequence number is 1, in which case it must be {@link #GENESIS}; pass {@link
+   * ChainAnchors} to pin either end of the chain.
+   *
+   * @param events the events as read back from storage
+   * @param verifier when present, every event must carry a valid {@code chain.sig}
+   */
+  public static ChainVerification verify(List<AuditEvent> events, Optional<Verifier> verifier) {
+    return verify(events, verifier, ChainAnchors.none());
+  }
+
+  /**
+   * {@link #verify(List, Optional)} with optional {@link ChainAnchors} recorded outside the log.
+   * Without anchors the first event is trusted to start the chain, so a deleted prefix or suffix
+   * cannot be seen from the log alone; each anchor supplied closes that gap for its end of the
+   * chain. A mismatching anchor, or any anchor on a log with no chained events, is reported as a
+   * broken chain naming the anchor.
+   */
+  public static ChainVerification verify(
+      List<AuditEvent> events, Optional<Verifier> verifier, ChainAnchors anchors) {
+    Objects.requireNonNull(events, "events");
+    Objects.requireNonNull(verifier, "verifier");
+    Objects.requireNonNull(anchors, "anchors");
+    long expectedSeq = -1;
+    String expectedPrev = GENESIS;
+    int checked = 0;
+    long lastSeq = -1;
+    String lastHash = null;
+    for (AuditEvent event : events) {
+      Map<String, String> attrs = event.attributes();
+      String seqText = attrs.get(SEQ);
+      String prev = attrs.get(PREV);
+      String hash = attrs.get(HASH);
+      long seqForReport = expectedSeq < 0 ? parseSeq(seqText, 1) : expectedSeq;
+      if (seqText == null || prev == null || hash == null) {
+        return ChainVerification.broken(seqForReport, checked, "missing chain attributes");
+      }
+      long seq = parseSeq(seqText, -1);
+      if (seq < 1) {
+        return ChainVerification.broken(
+            seqForReport, checked, "invalid chain.seq '" + Text.bounded(seqText, 32) + "'");
+      }
+      if (expectedSeq < 0) {
+        if (anchors.firstSeq() != null && seq != anchors.firstSeq()) {
+          return ChainVerification.broken(
+              seq,
+              checked,
+              "first event has seq "
+                  + seq
+                  + " but anchor expectedFirstSeq is "
+                  + anchors.firstSeq()
+                  + " (prefix removed or replaced?)");
         }
+        if (anchors.firstPrev() != null && !prev.equals(anchors.firstPrev())) {
+          return ChainVerification.broken(
+              seq,
+              checked,
+              "first event chain.prev does not match anchor expectedFirstPrev"
+                  + " (prefix removed or replaced?)");
+        }
+        expectedSeq = seq;
+        expectedPrev = seq == 1 ? GENESIS : prev;
+      }
+      if (seq != expectedSeq) {
+        return ChainVerification.broken(
+            expectedSeq, checked, "expected seq " + expectedSeq + " but found " + seq);
+      }
+      if (!prev.equals(expectedPrev)) {
+        return ChainVerification.broken(seq, checked, "chain.prev does not match previous hash");
+      }
+      String recomputed = sha256Hex(prev + canonical(event));
+      if (!recomputed.equals(hash)) {
+        return ChainVerification.broken(seq, checked, "chain.hash does not match event content");
+      }
+      if (verifier.isPresent()) {
+        String sig = attrs.get(SIG);
+        if (sig == null) {
+          String why = attrs.containsKey(SIG_ERROR) ? "signer failed when writing" : "missing";
+          return ChainVerification.broken(seq, checked, "missing chain.sig (" + why + ")");
+        }
+        byte[] raw;
         try {
-            return Long.parseLong(text.trim());
-        } catch (NumberFormatException e) {
-            return fallback;
+          raw = Base64.getDecoder().decode(sig);
+        } catch (IllegalArgumentException e) {
+          return ChainVerification.broken(seq, checked, "chain.sig is not Base64");
         }
+        if (!verifier.get().verify(utf8(hash), raw)) {
+          return ChainVerification.broken(seq, checked, "signature invalid");
+        }
+      }
+      checked++;
+      expectedSeq = seq + 1;
+      expectedPrev = hash;
+      lastSeq = seq;
+      lastHash = hash;
     }
+    if (anchors.any() && lastHash == null) {
+      return new ChainVerification(
+          false,
+          -1,
+          0,
+          "chain broken: no chained events but an anchor was supplied (log emptied?)",
+          false);
+    }
+    if (anchors.lastSeq() != null && lastSeq != anchors.lastSeq()) {
+      return ChainVerification.broken(
+          lastSeq,
+          checked,
+          "last event has seq "
+              + lastSeq
+              + " but anchor expectedLastSeq is "
+              + anchors.lastSeq()
+              + " (suffix removed or extended?)");
+    }
+    if (anchors.headHash() != null && !anchors.headHash().equals(lastHash)) {
+      return ChainVerification.broken(
+          lastSeq,
+          checked,
+          "last chain.hash does not match anchor expectedHeadHash"
+              + " (suffix removed or replaced?)");
+    }
+    return ChainVerification.intact(checked, verifier.isPresent());
+  }
 
-    /** Same id, timestamp and content; only the attributes differ. */
-    static AuditEvent withAttributes(AuditEvent event, Map<String, String> attributes) {
-        return new AuditEvent(
-                event.id(),
-                event.createdAt(),
-                event.actorId(),
-                event.actionType(),
-                event.targetType(),
-                event.targetId(),
-                event.outcome(),
-                event.detail(),
-                event.context(),
-                event.risks(),
-                attributes);
+  /**
+   * The canonical serialization that is hashed: a flat JSON object in sorted key order with every
+   * top-level field under its own name and every non-chain attribute under {@code attr.<key>}.
+   */
+  public static String canonical(AuditEvent event) {
+    Map<String, String> flat = new TreeMap<>();
+    flat.put("id", event.id().toString());
+    flat.put("createdAt", event.createdAt().toString());
+    flat.put("actorId", event.actorId());
+    flat.put("actionType", event.actionType());
+    flat.put("targetType", event.targetType());
+    flat.put("targetId", event.targetId());
+    flat.put("outcome", event.outcome().name());
+    if (event.detail() != null) {
+      flat.put("detail", event.detail());
     }
+    flat.put("runId", event.context().runId());
+    putIfPresent(flat, "tenantId", event.context().tenantId());
+    putIfPresent(flat, "agentId", event.context().agentId());
+    putIfPresent(flat, "sessionId", event.context().sessionId());
+    putIfPresent(flat, "correlationId", event.context().correlationId());
+    if (!event.risks().isEmpty()) {
+      flat.put(
+          "risks",
+          event.risks().stream()
+              .map(r -> r.id())
+              .sorted()
+              .reduce((a, b) -> a + "," + b)
+              .orElse(""));
+    }
+    for (Map.Entry<String, String> e : event.attributes().entrySet()) {
+      if (!CHAIN_KEYS.contains(e.getKey())) {
+        flat.put(ATTR_PREFIX + e.getKey(), e.getValue());
+      }
+    }
+    return JsonLite.writeObject(flat);
+  }
+
+  private static void putIfPresent(Map<String, String> map, String key, @Nullable String value) {
+    if (value != null) {
+      map.put(key, value);
+    }
+  }
+
+  static String sha256Hex(String text) {
+    try {
+      byte[] digest = MessageDigest.getInstance("SHA-256").digest(utf8(text));
+      StringBuilder sb = new StringBuilder(digest.length * 2);
+      for (byte b : digest) {
+        sb.append(Character.forDigit((b >> 4) & 0xF, 16)).append(Character.forDigit(b & 0xF, 16));
+      }
+      return sb.toString();
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 unavailable", e);
+    }
+  }
+
+  private static byte[] utf8(String s) {
+    return s.getBytes(StandardCharsets.UTF_8);
+  }
+
+  private static long parseSeq(@Nullable String text, long fallback) {
+    if (text == null) {
+      return fallback;
+    }
+    try {
+      return Long.parseLong(text.trim());
+    } catch (NumberFormatException e) {
+      return fallback;
+    }
+  }
+
+  /** Same id, timestamp and content; only the attributes differ. */
+  static AuditEvent withAttributes(AuditEvent event, Map<String, String> attributes) {
+    return new AuditEvent(
+        event.id(),
+        event.createdAt(),
+        event.actorId(),
+        event.actionType(),
+        event.targetType(),
+        event.targetId(),
+        event.outcome(),
+        event.detail(),
+        event.context(),
+        event.risks(),
+        attributes);
+  }
 }

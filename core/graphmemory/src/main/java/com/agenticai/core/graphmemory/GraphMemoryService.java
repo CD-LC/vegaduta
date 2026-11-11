@@ -1,16 +1,11 @@
 package com.agenticai.core.graphmemory;
 
-import static com.agenticai.core.graphmemory.GraphFactTextMatcher.edgesOnlyThisFactSupports;
 import static com.agenticai.core.graphmemory.GraphMemoryAgtype.parseAgtypeInt;
-import static com.agenticai.core.graphmemory.GraphMemoryAgtype.parsePathFacts;
-import static com.agenticai.core.graphmemory.GraphMemoryAgtype.stripAgtypeQuotes;
-import static com.agenticai.core.graphmemory.GraphMemoryCypher.buildForgetInvalidateCypher;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.buildSupersedeInvalidateCypher;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.cypherCall;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.sanitize;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.singleEdgeFilter;
 
-import com.agenticai.core.graphmemory.GraphFactTextMatcher.ValidEdge;
 import com.agenticai.core.settings.SettingContext;
 import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.AgeSessionSupport;
@@ -27,12 +22,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.LongSupplier;
 
@@ -216,7 +208,7 @@ public class GraphMemoryService {
             onAge(
                     st -> {
                         for (GraphTriple triple : triples) {
-                            writeTriple(
+                            GraphMemoryWriter.writeTriple(
                                     st, graphName, agentIdStr, subjectKeyStr, triple, nowMillis());
                         }
                         return null;
@@ -332,7 +324,8 @@ public class GraphMemoryService {
                                         buildSupersedeInvalidateCypher(
                                                 agentIdStr, subjectKeyStr, triple, now),
                                         ONE_COLUMN));
-                        writeTriple(st, graphName, agentIdStr, subjectKeyStr, triple, now);
+                        GraphMemoryWriter.writeTriple(
+                                st, graphName, agentIdStr, subjectKeyStr, triple, now);
                         return null;
                     });
             log.debug(
@@ -374,7 +367,7 @@ public class GraphMemoryService {
             onAge(
                     st -> {
                         for (GraphTriple triple : triples) {
-                            writeTriple(
+                            GraphMemoryWriter.writeTriple(
                                     st,
                                     graphName,
                                     SHARED_AGENT_SENTINEL,
@@ -584,81 +577,21 @@ public class GraphMemoryService {
         Collection<String> others = otherFactTexts == null ? List.of() : otherFactTexts;
         try {
             String graphName = GraphMemorySchemaSupport.currentGraphName();
-            String tierStr = agentId == null ? SHARED_AGENT_SENTINEL : sanitize(agentId.toString());
+            String tierStr = GraphMemoryForget.tierFor(agentId);
             String subjectKeyStr = sanitize(subjectKey);
-            String listCypher =
-                    "MATCH (a:Entity)-[r:RELATION]->(b:Entity) "
-                            + "WHERE a.agent_id = '"
-                            + tierStr
-                            + "' AND a.subject_key = '"
-                            + subjectKeyStr
-                            + "' "
-                            + "AND b.agent_id = '"
-                            + tierStr
-                            + "' AND b.subject_key = '"
-                            + subjectKeyStr
-                            + "' "
-                            + "AND r.valid_to IS NULL "
-                            + "RETURN a.name, r.type, b.name ORDER BY a.name, r.type, b.name";
 
             Integer invalidated =
                     onAge(
-                            st -> {
-                                // All reads first, then the writes: invalidating while paging would
-                                // shift the
-                                // offsets.
-                                List<ValidEdge> edges = new ArrayList<>();
-                                for (int page = 0;
-                                        page < properties.getForget().getScanMaxPages();
-                                        page++) {
-                                    int rows = 0;
-                                    try (ResultSet rs =
-                                            st.executeQuery(
-                                                    cypherCall(
-                                                            graphName,
-                                                            listCypher
-                                                                    + " SKIP "
-                                                                    + (page
-                                                                            * properties
-                                                                                    .getForget()
-                                                                                    .getScanPage())
-                                                                    + " LIMIT "
-                                                                    + properties
-                                                                            .getForget()
-                                                                            .getScanPage(),
-                                                            "subject ag_catalog.agtype, relation"
-                                                                    + " ag_catalog.agtype, object"
-                                                                    + " ag_catalog.agtype"))) {
-                                        while (rs != null && rs.next()) {
-                                            rows++;
-                                            edges.add(
-                                                    new ValidEdge(
-                                                            stripAgtypeQuotes(
-                                                                    rs.getString("subject")),
-                                                            stripAgtypeQuotes(
-                                                                    rs.getString("relation")),
-                                                            stripAgtypeQuotes(
-                                                                    rs.getString("object"))));
-                                        }
-                                    }
-                                    if (rows < properties.getForget().getScanPage()) {
-                                        break;
-                                    }
-                                }
-                                long now = nowMillis();
-                                int count = 0;
-                                for (ValidEdge edge :
-                                        edgesOnlyThisFactSupports(edges, factText, others)) {
-                                    st.execute(
-                                            cypherCall(
-                                                    graphName,
-                                                    buildForgetInvalidateCypher(
-                                                            tierStr, subjectKeyStr, edge, now),
-                                                    ONE_COLUMN));
-                                    count++;
-                                }
-                                return count;
-                            });
+                            st ->
+                                    GraphMemoryForget.scanAndInvalidate(
+                                            st,
+                                            graphName,
+                                            tierStr,
+                                            subjectKeyStr,
+                                            factText,
+                                            others,
+                                            properties.getForget(),
+                                            nowMillis()));
             int count = invalidated == null ? 0 : invalidated;
             log.debug("Invalidated {} graph edge(s) after a user-initiated fact removal", count);
             return count;
@@ -671,121 +604,6 @@ public class GraphMemoryService {
     // ------------------------------------------------------------------
     // Writes
     // ------------------------------------------------------------------
-
-    /**
-     * Temporal validity (P1 developer-extensibility, Zep/Graphiti-style): edges carry {@code
-     * valid_from} (epoch-ms when the fact became true) and {@code valid_to} (epoch-ms when it
-     * stopped being true - set by supersede/forget, never on a plain write). Both are plain edge
-     * properties on the schemaless agtype - no migration, and every edge written before the
-     * temporal change simply has neither property, which the recall filters treat as "still valid"
-     * ({@code valid_to} absent) / "always was" ({@code valid_from} absent), so old rows remain
-     * correct forever.
-     *
-     * <p>Three statements, not one {@code MERGE}: (1) is there already an OPEN edge for this exact
-     * fact? then nothing to do (idempotent); (2) {@code MERGE} the two vertices; (3) {@code CREATE}
-     * the edge with its {@code valid_from}. A single {@code MERGE (a)-[r {type}]->(b)} would also
-     * match a CLOSED edge and silently resurrect nothing - the fact would stay invalid forever.
-     * Verified on real AGE. The open-edge check compares names case-insensitively.
-     */
-    private void writeTriple(
-            Statement st,
-            String graphName,
-            String tierStr,
-            String subjectKeyStr,
-            GraphTriple triple,
-            long now)
-            throws SQLException {
-        if (triple.tripsWriteScreen()) {
-            log.warn("Graph triple dropped: write screen tripped (injection phrase or credential)");
-            return;
-        }
-        String subject = sanitize(triple.subject());
-        String relation = sanitize(triple.relation().toUpperCase(Locale.ROOT));
-        String object = sanitize(triple.object());
-        String subjectLower = sanitize(triple.subject().toLowerCase(Locale.ROOT));
-        String objectLower = sanitize(triple.object().toLowerCase(Locale.ROOT));
-
-        if (hasOpenEdge(
-                st, graphName, tierStr, subjectKeyStr, subjectLower, relation, objectLower)) {
-            return;
-        }
-        st.execute(
-                cypherCall(
-                        graphName,
-                        "MERGE (a:Entity {name: '"
-                                + subject
-                                + "', agent_id: '"
-                                + tierStr
-                                + "', subject_key: '"
-                                + subjectKeyStr
-                                + "'}) "
-                                + "MERGE (b:Entity {name: '"
-                                + object
-                                + "', agent_id: '"
-                                + tierStr
-                                + "', subject_key: '"
-                                + subjectKeyStr
-                                + "'})",
-                        ONE_COLUMN));
-        st.execute(
-                cypherCall(
-                        graphName,
-                        "MATCH (a:Entity {name: '"
-                                + subject
-                                + "', agent_id: '"
-                                + tierStr
-                                + "', subject_key: '"
-                                + subjectKeyStr
-                                + "'}), "
-                                + "(b:Entity {name: '"
-                                + object
-                                + "', agent_id: '"
-                                + tierStr
-                                + "', subject_key: '"
-                                + subjectKeyStr
-                                + "'}) "
-                                + "CREATE (a)-[:RELATION {type: '"
-                                + relation
-                                + "', valid_from: "
-                                + now
-                                + "}]->(b)",
-                        ONE_COLUMN));
-    }
-
-    private boolean hasOpenEdge(
-            Statement st,
-            String graphName,
-            String tierStr,
-            String subjectKeyStr,
-            String subjectLower,
-            String relation,
-            String objectLower)
-            throws SQLException {
-        String cypher =
-                "MATCH (a:Entity {agent_id: '"
-                        + tierStr
-                        + "', subject_key: '"
-                        + subjectKeyStr
-                        + "'})"
-                        + "-[r:RELATION {type: '"
-                        + relation
-                        + "'}]->"
-                        + "(b:Entity {agent_id: '"
-                        + tierStr
-                        + "', subject_key: '"
-                        + subjectKeyStr
-                        + "'}) "
-                        + "WHERE toLower(a.name) = '"
-                        + subjectLower
-                        + "' AND toLower(b.name) = '"
-                        + objectLower
-                        + "' "
-                        + "AND r.valid_to IS NULL RETURN count(r)";
-        try (ResultSet rs =
-                st.executeQuery(cypherCall(graphName, cypher, "open_edges ag_catalog.agtype"))) {
-            return rs != null && rs.next() && parseAgtypeInt(rs.getString("open_edges")) > 0;
-        }
-    }
 
     // ------------------------------------------------------------------
     // Recall
@@ -836,30 +654,9 @@ public class GraphMemoryService {
 
         List<GraphFact> facts =
                 onAge(
-                        st -> {
-                            Set<GraphFact> result = new LinkedHashSet<>();
-                            try (ResultSet rs =
-                                    st.executeQuery(
-                                            cypherCall(graphName, cypher, "p ag_catalog.agtype"))) {
-                                while (rs != null && rs.next() && result.size() < maxFacts) {
-                                    try {
-                                        for (GraphFact fact :
-                                                parsePathFacts(rs.getString("p"), asOfMillis)) {
-                                            if (result.size() < maxFacts) {
-                                                result.add(fact);
-                                            }
-                                        }
-                                    } catch (
-                                            com.fasterxml.jackson.core.JsonProcessingException ex) {
-                                        throw new SQLException(
-                                                "Unparseable agtype path: "
-                                                        + ex.getOriginalMessage(),
-                                                ex);
-                                    }
-                                }
-                            }
-                            return new ArrayList<>(result);
-                        });
+                        st ->
+                                GraphMemoryRecall.collectFacts(
+                                        st, graphName, cypher, maxFacts, asOfMillis));
         return facts == null ? List.of() : facts;
     }
 }

@@ -90,7 +90,7 @@ final class McpConnectionOpener {
             if (maybeConfig.isEmpty()) {
                 log.warn(
                         "connect({}) called but no dynamic config was found (not dynamic, or"
-                            + " deleted) - skipping",
+                                + " deleted) - skipping",
                         registrationId);
                 return;
             }
@@ -124,7 +124,7 @@ final class McpConnectionOpener {
                                 + " running local MCP server(s) (the per-workspace limit).",
                         McpConnectionPhase.SPAWN,
                         "Disable another local (STDIO) MCP server first, or ask the operator to"
-                            + " raise app.mcp.max-stdio-connections-per-tenant.");
+                                + " raise app.mcp.max-stdio-connections-per-tenant.");
                 return;
             }
 
@@ -254,7 +254,7 @@ final class McpConnectionOpener {
             owner.evictToolCache();
             log.info(
                     "MCP dynamic connection '{}' ({}) connected for tenant '{}' - {} tool(s)"
-                        + " advertised",
+                            + " advertised",
                     LogSafe.clean(config.name()),
                     LogSafe.clean(registrationId),
                     LogSafe.clean(tenant),
@@ -351,9 +351,9 @@ final class McpConnectionOpener {
             log.warn(
                     edge
                             ? "Could not read MCP edge-eligibility gate - offering NO dynamic MCP"
-                                  + " tools to this edge session (fail-closed)"
+                                    + " tools to this edge session (fail-closed)"
                             : "Could not read MCP usage-status gate - offering NO dynamic MCP tools"
-                                  + " this turn (fail-closed)",
+                                    + " this turn (fail-closed)",
                     t);
             return List.of();
         }
