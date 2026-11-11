@@ -2941,7 +2941,13 @@
     "auditTrailLabel": "آڊٽ ٽريل",
     "retriedLabel": "{count} ڀيرا ٻيهر ڪوشش ڪئي وئي{plural}",
     "nextAttemptSuffix": "، ايندڙ ڪوشش {time}",
-    "executionResultLabel": "عملدرآمد جو نتيجو"
+    "executionResultLabel": "عملدرآمد جو نتيجو",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "آڊٽ لاگ",

@@ -3906,7 +3906,13 @@
     "emptyTitle": "جاٚیِزٕ نِنہٕ خٲطرٕ کینٛہہ نَہ",
     "policyOverrideButton": "پالِسی اووَر رایِڈ",
     "workflowNeedsLabel": "یَتھ وَرک فلووَس چھِ تُہنٛدِ طَرفہٕ یِمَن ہٕنٛز ضروٗرَتھ",
-    "workflowNeedsHint": "مَنظوٗری دِنس پؠٹھ یِن تُہنٛد جَواب برونٛہِمِس مرحلس کُن سوزنہٕ۔"
+    "workflowNeedsHint": "مَنظوٗری دِنس پؠٹھ یِن تُہنٛد جَواب برونٛہِمِس مرحلس کُن سوزنہٕ۔",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "آڈِٹ لاگ",

@@ -3039,7 +3039,13 @@
     "auditTrailLabel": "ઓડિટ ટ્રેઇલ",
     "retriedLabel": "{count} વાર પુનઃપ્રયાસ થયો{plural}",
     "nextAttemptSuffix": ", આગલો પ્રયાસ {time}",
-    "executionResultLabel": "અમલીકરણ પરિણામ"
+    "executionResultLabel": "અમલીકરણ પરિણામ",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ઓડિટ લોગ",

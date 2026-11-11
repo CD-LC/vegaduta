@@ -40,6 +40,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // A personal install has no public funnel to advertise (robots.ts disallows everything there).
   if (isPersonalEdition()) return [];
   const BASE = siteUrl();
+  // Sitemap entries must be absolute; with no configured origin there is nothing honest to advertise.
+  if (!BASE) return [];
   // Stamped onto every entry below in one place rather than repeated 20+
   // times — see BUILT_AT above for why build time is the right date.
   return withLastModified(BASE, [

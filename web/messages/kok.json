@@ -2940,7 +2940,13 @@
     "auditTrailLabel": "ऑडिट ट्रेल",
     "retriedLabel": "{count} फावट{plural} परत यत्न केलो",
     "nextAttemptSuffix": ", फुडलो यत्न {time}",
-    "executionResultLabel": "कार्यान्वयन निकाल"
+    "executionResultLabel": "कार्यान्वयन निकाल",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ऑडिट लॉग",

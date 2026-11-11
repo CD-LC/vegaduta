@@ -422,7 +422,7 @@ services:
     # S3 identity is generated from STORAGE_ACCESS_KEY/SECRET at start; core
     # creates STORAGE_BUCKET itself on boot. To use external S3 instead, set
     # STORAGE_ENDPOINT and stop this service (`docker compose stop seaweedfs`).
-    image: chrislusf/seaweedfs:4.51
+    image: chrislusf/seaweedfs:4.52
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
     command:
@@ -832,7 +832,7 @@ services:
     networks: [agent-io]
 
   temporal-ui:
-    image: temporalio/ui:2.57.0
+    image: temporalio/ui:2.58.0
     profiles: ["temporal", "jobs"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -888,7 +888,7 @@ services:
 
   # ------------------------------------------------ profile: observability
   valkey-exporter:
-    image: oliver006/redis_exporter:v1.96.0
+    image: oliver006/redis_exporter:v1.97.0
     profiles: ["observability"]
     <<: [*restart, *logging, *nnp]
     depends_on:
@@ -1177,7 +1177,7 @@ services:
     networks: [observability]
 
   langfuse-s3:
-    image: chrislusf/seaweedfs:4.51
+    image: chrislusf/seaweedfs:4.52
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     entrypoint: ["/bin/sh", "-c"]
@@ -1212,7 +1212,7 @@ services:
     networks: [observability]
 
   langfuse-worker:
-    image: langfuse/langfuse-worker:4.72.0
+    image: langfuse/langfuse-worker:4.75.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: &langfuse-depends-on
@@ -1268,7 +1268,7 @@ services:
     networks: [observability]
 
   langfuse-web:
-    image: langfuse/langfuse:4.72.0
+    image: langfuse/langfuse:4.75.0
     profiles: ["tracing"]
     <<: [*restart, *logging, *nnp]
     depends_on: *langfuse-depends-on
@@ -1613,7 +1613,7 @@ services:
     # single-user and stays on the loopback port; agent traffic is
     # service-to-service over agent-io. `nnp` only: third-party image that
     # may start as root.
-    image: ghcr.io/tashfeenahmed/freellmapi:latest@sha256:3b744d6714737f2d0c8fe90cdd8517966f22acf615d44cc222c792d40ef9b0a9
+    image: ghcr.io/tashfeenahmed/freellmapi:latest@sha256:23584d6a12a4eebb468af65db52e27112018ed6d00326dd76e353e72e345dca9
     profiles: ["freellmapi"]
     <<: [*restart, *logging, *nnp]
     environment:
@@ -1646,7 +1646,7 @@ services:
     # endpoint via HINDSIGHT_API_LLM_BASE_URL - e.g. pair it with the
     # `freellmapi` profile for a fully key-free local stack. `nnp` only:
     # third-party image that may start as root.
-    image: ghcr.io/vectorize-io/hindsight:latest@sha256:50311d02b4d5d2b7c5242bd336edf8735df8374eaad496a92f49c83b37d2aa06
+    image: ghcr.io/vectorize-io/hindsight:latest@sha256:d2bc230a714e933affd63753e181a0579328fdcbbc021800a76e0bc7b6e76b31
     profiles: ["hindsight"]
     <<: [*restart, *logging, *nnp]
     environment:

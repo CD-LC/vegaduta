@@ -3947,7 +3947,13 @@
     "emptyTitle": "പരിശോധിക്കാൻ ഒന്നുമില്ല",
     "policyOverrideButton": "പോളിസി തിരുത്തൽ",
     "workflowNeedsLabel": "ഈ വർക്ക്‌ഫ്ലോയ്ക്ക് നിങ്ങളിൽ നിന്ന് ഇനിപ്പറയുന്നവ ആവശ്യമാണ്",
-    "workflowNeedsHint": "നിങ്ങൾ അംഗീകരിക്കുമ്പോൾ നിങ്ങളുടെ ഉത്തരങ്ങൾ അടുത്ത ഘട്ടത്തിലേക്ക് കൈമാറും."
+    "workflowNeedsHint": "നിങ്ങൾ അംഗീകരിക്കുമ്പോൾ നിങ്ങളുടെ ഉത്തരങ്ങൾ അടുത്ത ഘട്ടത്തിലേക്ക് കൈമാറും.",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ഓഡിറ്റ് ലോഗ്",
