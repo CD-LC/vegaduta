@@ -24,7 +24,7 @@ test.describe("Public pricing page", () => {
 
   // A deployment builds the web console in free or paid mode (PUBLIC_FREE_MODE). The page is one or the other, so detect the
   // mode from the h1 and assert that mode's contract instead of hard-coding one.
-  const FREE_H1 = /open source|free for everyone|everything is free/i;
+  const FREE_H1 = /open source|source available|free for everyone|everything is free/i;
 
   test("renders the plan explanation for the active mode", async ({ page }) => {
     const h1 = page.getByRole("heading", { level: 1 });
