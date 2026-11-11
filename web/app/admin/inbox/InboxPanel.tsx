@@ -401,50 +401,50 @@ export default function InboxPanel({
               />
             ) : (
               <ul className="flex flex-col gap-2">
-              {items.map((s) => (
-                <li key={s.sessionId}>
-                  <button
-                    type="button"
-                    onClick={() => selectConversation(s)}
-                    className={cn(
-                      "w-full rounded-lg border border-border bg-card p-3 text-start transition-colors hover:bg-accent/40",
-                      s.sessionId === selectedId && "border-primary/60 bg-accent/40"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <StatusDot status={dotStatus(s)} />
-                      <ChannelBadge channel={s.channel} />
-                      <span className="truncate text-xs text-muted-foreground">{s.externalIdMasked}</span>
-                      <span className="ms-auto shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {relTime(s.lastMessageAt)}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                      <Badge variant="outline" className="text-xs">
-                        {stateLabel(s)}
-                      </Badge>
-                      {!s.paired && s.pairingCode && (
-                        <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">{s.pairingCode}</code>
+                {items.map((s) => (
+                  <li key={s.sessionId}>
+                    <button
+                      type="button"
+                      onClick={() => selectConversation(s)}
+                      className={cn(
+                        "w-full rounded-lg border border-border bg-card p-3 text-start transition-colors hover:bg-accent/40",
+                        s.sessionId === selectedId && "border-primary/60 bg-accent/40"
                       )}
-                      {s.handoffState === "HUMAN" && s.takenOverBy && (
-                        <span className="truncate text-[11px] text-muted-foreground">
-                          {mySubject && s.takenOverBy === mySubject ? "held by you" : `held by ${s.takenOverBy}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <StatusDot status={dotStatus(s)} />
+                        <ChannelBadge channel={s.channel} />
+                        <span className="truncate text-xs text-muted-foreground">{s.externalIdMasked}</span>
+                        <span className="ms-auto shrink-0 text-xs tabular-nums text-muted-foreground">
+                          {relTime(s.lastMessageAt)}
                         </span>
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="text-xs">
+                          {stateLabel(s)}
+                        </Badge>
+                        {!s.paired && s.pairingCode && (
+                          <code className="rounded bg-muted px-1 py-0.5 text-xs text-foreground">{s.pairingCode}</code>
+                        )}
+                        {s.handoffState === "HUMAN" && s.takenOverBy && (
+                          <span className="truncate text-[11px] text-muted-foreground">
+                            {mySubject && s.takenOverBy === mySubject ? "held by you" : `held by ${s.takenOverBy}`}
+                          </span>
+                        )}
+                      </div>
+                      {s.escalationReason && (
+                        <p className="mt-1 truncate text-xs text-muted-foreground" title={s.escalationReason}>
+                          {s.escalationReason}
+                        </p>
                       )}
-                    </div>
-                    {s.escalationReason && (
-                      <p className="mt-1 truncate text-xs text-muted-foreground" title={s.escalationReason}>
-                        {s.escalationReason}
-                      </p>
-                    )}
-                    {s.lastMessagePreview && (
-                      <p className="mt-1 truncate text-xs text-foreground/80" title={s.lastMessagePreview}>
-                        {s.lastMessagePreview}
-                      </p>
-                    )}
-                  </button>
-                </li>
-              ))}
+                      {s.lastMessagePreview && (
+                        <p className="mt-1 truncate text-xs text-foreground/80" title={s.lastMessagePreview}>
+                          {s.lastMessagePreview}
+                        </p>
+                      )}
+                    </button>
+                  </li>
+                ))}
               </ul>
             )}
           </div>
