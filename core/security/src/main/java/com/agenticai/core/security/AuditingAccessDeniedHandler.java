@@ -94,7 +94,7 @@ public class AuditingAccessDeniedHandler implements AccessDeniedHandler {
                         "AccessDeniedEventListener {} threw while recording a denial of {} {} - continuing",
                         LogSafe.clean(listener.getClass().getSimpleName()),
                         LogSafe.clean(request.getMethod()),
-                        LogMasking.path(request.getRequestURI()),
+                        LogSafe.clean(LogMasking.path(request.getRequestURI())),
                         e);
             }
         }

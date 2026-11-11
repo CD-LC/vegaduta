@@ -218,7 +218,14 @@ public class VectorSchemaInitializer implements ApplicationRunner {
         }
     }
 
+    /** A schema-qualified table name built from our own constants and a tenant schema name. */
+    private static final java.util.regex.Pattern SAFE_TABLE =
+            java.util.regex.Pattern.compile("[A-Za-z0-9_\\.\"]+");
+
     private Map<String, Long> countRowsByModel(String table) {
+        if (!SAFE_TABLE.matcher(table).matches()) {
+            throw new IllegalArgumentException("Refusing to query unsafe table name");
+        }
         Map<String, Long> counts = new HashMap<>();
         List<Map<String, Object>> rows =
                 jdbcTemplate.queryForList(

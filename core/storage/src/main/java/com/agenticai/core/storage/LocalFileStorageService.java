@@ -285,8 +285,8 @@ public class LocalFileStorageService implements FileStorageService {
         if (!resolved.startsWith(root) || resolved.equals(root)) {
             log.error(
                     "Blocked storage path traversal attempt: key '{}' resolves outside {}",
-                    physicalKey,
-                    root);
+                    LogSafe.clean(physicalKey),
+                    LogSafe.clean(root));
             throw new FileStorageException(
                     "Object key '" + physicalKey + "' resolves outside the storage root", null);
         }
@@ -312,8 +312,8 @@ public class LocalFileStorageService implements FileStorageService {
         if (!allowed) {
             log.debug(
                     "Refused un-prefixed fallback for {} of key '{}' - prefix not allowlisted",
-                    operation,
-                    key);
+                    LogSafe.clean(operation),
+                    LogSafe.clean(key));
         }
         return allowed;
     }

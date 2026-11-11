@@ -124,8 +124,8 @@ public class FeatureFlagService {
         } catch (Exception e) {
             log.warn(
                     "Feature flag evaluation failed for tenant {} - defaulting to no active experiments ({}).",
-                    tenantId,
-                    e.getMessage());
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(e.getMessage()));
             return Map.of();
         }
     }

@@ -105,6 +105,6 @@ class McpOriginValidationFilter extends OncePerRequestFilter {
 
     private static String sanitize(String value) {
         String v = value.length() > 200 ? value.substring(0, 200) : value;
-        return v.replaceAll("[\\r\\n]", "_");
+        return LogSafe.clean(v);
     }
 }

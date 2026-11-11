@@ -184,8 +184,8 @@ public class EdgeRelayService {
         } catch (RuntimeException e) {
             log.warn(
                     "Edge relay registry unavailable for tenant {} - treating as offline: {}",
-                    tenantId,
-                    e.getMessage());
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(e.getMessage()));
             return List.of();
         }
     }
@@ -257,8 +257,8 @@ public class EdgeRelayService {
         } catch (RuntimeException e) {
             log.warn(
                     "Edge relay enqueue failed for tenant {} - answering hosted: {}",
-                    tenantId,
-                    e.getMessage());
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(e.getMessage()));
             return Optional.empty();
         }
     }
