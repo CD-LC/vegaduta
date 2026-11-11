@@ -2,7 +2,7 @@
 # Dockerfile installs requirements.txt only). Install locally with:
 #   pip install -r requirements.txt -r requirements-dev.txt
 # then run the suite from sidecar/ with:  pytest tests/
-pytest==9.1.1
+pytest==9.2.0
 # fastapi.testclient.TestClient is httpx-based - needed by tests/test_auth.py
 # only; the image itself never imports httpx.
 httpx==0.28.1
