@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Registers {@link BehaviourSettingsCatalog} with the property beans the runtime reads (an absent bean falls back to
- * that class's code defaults, the same values the runtime would use).
+ * Registers {@link BehaviourSettingsCatalog} with the property beans the runtime reads (an absent
+ * bean falls back to that class's code defaults, the same values the runtime would use).
  */
 @Configuration(proxyBeanMethods = false)
 class BehaviourSettingsConfiguration {
@@ -54,16 +54,36 @@ class BehaviourSettingsConfiguration {
 
     @Bean
     ProductControlsCatalog productControlsCatalog(
-            ObjectProvider<com.agenticai.core.agents.turn.cache.SemanticCacheProperties> semanticCache,
+            ObjectProvider<com.agenticai.core.agents.turn.cache.SemanticCacheProperties>
+                    semanticCache,
             ObjectProvider<com.agenticai.core.agents.turn.ChatLimitsProperties> limits,
             ObjectProvider<FollowUpProperties> followUp,
             ObjectProvider<MemoryLimitsProperties> memory,
             ObjectProvider<com.agenticai.core.agents.turn.ToolLedgerProperties> ledger) {
         return new ProductControlsCatalog(
-                semanticCache.getIfAvailable(com.agenticai.core.agents.turn.cache.SemanticCacheProperties::new),
+                semanticCache.getIfAvailable(
+                        com.agenticai.core.agents.turn.cache.SemanticCacheProperties::new),
                 limits.getIfAvailable(com.agenticai.core.agents.turn.ChatLimitsProperties::new),
                 followUp.getIfAvailable(FollowUpProperties::new),
                 memory.getIfAvailable(MemoryLimitsProperties::new),
                 ledger.getIfAvailable(com.agenticai.core.agents.turn.ToolLedgerProperties::new));
+    }
+
+    /**
+     * {@code chat.history.*}: the workspace's own replay window; the platform value is the one the
+     * history reader uses.
+     */
+    @Bean
+    com.agenticai.core.agents.memory.HistoryWindowCatalog historyWindowCatalog(
+            ObjectProvider<com.agenticai.core.tenancy.PlatformSettingsService> rows,
+            org.springframework.core.env.Environment env) {
+        return new com.agenticai.core.agents.memory.HistoryWindowCatalog(rows, env);
+    }
+
+    /** {@code chat.compaction.*}: when a workspace's or an agent's long prompt is compacted. */
+    @Bean
+    com.agenticai.core.agents.context.ContextCompactionSettings contextCompactionSettings(
+            org.springframework.core.env.Environment env) {
+        return new com.agenticai.core.agents.context.ContextCompactionSettings(env);
     }
 }

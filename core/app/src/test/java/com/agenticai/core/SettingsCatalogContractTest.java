@@ -11,28 +11,28 @@ import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.limits.AgentRuntimeProperties;
 import com.agenticai.core.agents.limits.AgentRuntimeSettingsResolver;
 import com.agenticai.core.agents.limits.RuntimeLimitsSettings;
+import com.agenticai.core.agents.limits.StepLimitSettings;
 import com.agenticai.core.agents.limits.TenantRuntimeLimitsService;
 import com.agenticai.core.agents.memory.MemoryLimitsProperties;
-import com.agenticai.core.agents.limits.StepLimitSettings;
 import com.agenticai.core.agents.settings.BehaviourSettingsCatalog;
 import com.agenticai.core.agents.settings.ProductControlsCatalog;
 import com.agenticai.core.agents.skills.SkillPromptSettings;
-import com.agenticai.core.agents.turn.ChatLimitsProperties;
-import com.agenticai.core.agents.turn.ToolLedgerProperties;
-import com.agenticai.core.agents.turn.cache.SemanticCacheProperties;
 import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.ChatCacheProperties;
 import com.agenticai.core.agents.turn.ChatFinishProperties;
+import com.agenticai.core.agents.turn.ChatLimitsProperties;
 import com.agenticai.core.agents.turn.ContinuationProperties;
 import com.agenticai.core.agents.turn.FollowUpProperties;
+import com.agenticai.core.agents.turn.ToolLedgerProperties;
+import com.agenticai.core.agents.turn.cache.SemanticCacheProperties;
 import com.agenticai.core.agents.turn.quality.RoutingSimpleProperties;
 import com.agenticai.core.approval.ApprovalExpiryProperties;
 import com.agenticai.core.chat.LlmRetryProperties;
 import com.agenticai.core.chat.ToolLoopProperties;
-import com.agenticai.core.guardrails.GuardrailTuningProperties;
-import com.agenticai.core.guardrails.ToolOutputProperties;
 import com.agenticai.core.graphmemory.GraphMemoryProperties;
 import com.agenticai.core.graphmemory.GraphMemorySettings;
+import com.agenticai.core.guardrails.GuardrailTuningProperties;
+import com.agenticai.core.guardrails.ToolOutputProperties;
 import com.agenticai.core.guardrails.ToolStepLimitProperties;
 import com.agenticai.core.knowledge.KnowledgeSearchProperties;
 import com.agenticai.core.knowledge.KnowledgeSettings;
@@ -61,10 +61,11 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
- * The assembled settings catalog (every module's contributor, built over the property objects' code defaults):
- * every entry is explained in {@code web/messages/en.json}, every bound and default is sane, and the security
- * entries obey the rules the API relies on. A new entry that is not translated or whose default is outside its own
- * bounds fails here, not in a customer's settings page.
+ * The assembled settings catalog (every module's contributor, built over the property objects' code
+ * defaults): every entry is explained in {@code web/messages/en.json}, every bound and default is
+ * sane, and the security entries obey the rules the API relies on. A new entry that is not
+ * translated or whose default is outside its own bounds fails here, not in a customer's settings
+ * page.
  */
 class SettingsCatalogContractTest {
 
@@ -79,39 +80,66 @@ class SettingsCatalogContractTest {
     @BeforeAll
     static void assemble() throws Exception {
         AgentRuntimeProperties runtimeProps = new AgentRuntimeProperties();
-        AgentRuntimeSettingsResolver runtime = new AgentRuntimeSettingsResolver(
-                runtimeProps,
-                new AgentRuntimeSettingsResolver.PlatformKeys(15, Duration.ofSeconds(240), 8),
-                new ToolStepLimitProperties(), new ToolOutputProperties(), new ToolLoopProperties(),
-                mock(TenantRuntimeLimitsService.class), mock(AgentService.class));
+        AgentRuntimeSettingsResolver runtime =
+                new AgentRuntimeSettingsResolver(
+                        runtimeProps,
+                        new AgentRuntimeSettingsResolver.PlatformKeys(
+                                15, Duration.ofSeconds(240), 8),
+                        new ToolStepLimitProperties(),
+                        new ToolOutputProperties(),
+                        new ToolLoopProperties(),
+                        mock(TenantRuntimeLimitsService.class),
+                        mock(AgentService.class));
         ObjectProvider<AgentRuntimeSettingsResolver> rp = mock(ObjectProvider.class);
         when(rp.getObject()).thenReturn(runtime);
-        RuntimeLimitsSettings limits = new RuntimeLimitsSettings(
-                runtimeProps, rp, mock(ObjectProvider.class), mock(ObjectProvider.class));
-        BehaviourSettingsCatalog behaviour = new BehaviourSettingsCatalog(
-                new ApprovalContinuationProperties(), new ApprovalExpiryProperties(), new ChatFinishProperties(),
-                new LlmRetryProperties(), new ChatCacheProperties(), new FollowUpProperties(),
-                new ContinuationProperties(), new ToolLoopProperties(), new RoutingSimpleProperties(),
-                new MemoryLimitsProperties(), new GuardrailTuningProperties(), new AuxiliaryModelProperties());
-        registry = new SettingsRegistry(List.of(
-                limits, behaviour, new CollaborationSettings(new CollaborationProperties()),
-                new QualitySettings(new MockEnvironment()),
-                new KnowledgeSettings(new KnowledgeSearchProperties()),
-                new GraphMemorySettings(new GraphMemoryProperties()),
-                new RlSettings(new RlPolicyProperties()),
-                new ProviderSettings(new MockEnvironment()),
-                new StepLimitSettings(new ToolStepLimitProperties()),
-                new com.agenticai.core.agents.tools.scratchpad.ScratchpadSettings(
-                        new com.agenticai.core.agents.tools.scratchpad.ScratchpadProperties()),
-                new SkillPromptSettings(),
-                new ProductControlsCatalog(
-                        new SemanticCacheProperties(), new ChatLimitsProperties(), new FollowUpProperties(),
-                        new MemoryLimitsProperties(), new ToolLedgerProperties())));
+        RuntimeLimitsSettings limits =
+                new RuntimeLimitsSettings(
+                        runtimeProps, rp, mock(ObjectProvider.class), mock(ObjectProvider.class));
+        BehaviourSettingsCatalog behaviour =
+                new BehaviourSettingsCatalog(
+                        new ApprovalContinuationProperties(),
+                        new ApprovalExpiryProperties(),
+                        new ChatFinishProperties(),
+                        new LlmRetryProperties(),
+                        new ChatCacheProperties(),
+                        new FollowUpProperties(),
+                        new ContinuationProperties(),
+                        new ToolLoopProperties(),
+                        new RoutingSimpleProperties(),
+                        new MemoryLimitsProperties(),
+                        new GuardrailTuningProperties(),
+                        new AuxiliaryModelProperties());
+        registry =
+                new SettingsRegistry(
+                        List.of(
+                                limits,
+                                behaviour,
+                                new CollaborationSettings(new CollaborationProperties()),
+                                new QualitySettings(new MockEnvironment()),
+                                new KnowledgeSettings(new KnowledgeSearchProperties()),
+                                new GraphMemorySettings(new GraphMemoryProperties()),
+                                new RlSettings(new RlPolicyProperties()),
+                                new ProviderSettings(new MockEnvironment()),
+                                new StepLimitSettings(new ToolStepLimitProperties()),
+                                new com.agenticai.core.agents.tools.scratchpad.ScratchpadSettings(
+                                        new com.agenticai.core.agents.tools.scratchpad
+                                                .ScratchpadProperties()),
+                                new SkillPromptSettings(),
+                                new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
+                                new com.agenticai.core.agents.context.ContextCompactionSettings(
+                                        new MockEnvironment()),
+                                new ProductControlsCatalog(
+                                        new SemanticCacheProperties(),
+                                        new ChatLimitsProperties(),
+                                        new FollowUpProperties(),
+                                        new MemoryLimitsProperties(),
+                                        new ToolLedgerProperties())));
         Path root = Path.of("").toAbsolutePath().normalize();
         while (root != null && !Files.isRegularFile(root.resolve("web/messages/en.json"))) {
             root = root.getParent();
         }
-        org.junit.jupiter.api.Assumptions.assumeTrue(root != null, "not run from a checkout of the repository");
+        org.junit.jupiter.api.Assumptions.assumeTrue(
+                root != null, "not run from a checkout of the repository");
         repoRoot = root;
         en = new ObjectMapper().readTree(Files.readString(root.resolve("web/messages/en.json")));
     }
@@ -127,39 +155,86 @@ class SettingsCatalogContractTest {
     @Test
     void theCatalogIsTheCuratedSize() {
         assertThat(registry.all()).hasSizeBetween(30, 80);
-        assertThat(registry.all()).extracting(SettingDefinition::key)
-                .contains("agent.limits.maxToolSteps", "agent.limits.turnTimeoutSeconds", "agent.limits.toolTimeoutSeconds",
-                        "agent.limits.toolOutputMaxChars", "agent.limits.retrievalTopK", "agent.limits.retrievalMinScore",
-                        "agent.limits.continuationPasses", "approvals.continuation.enabled", "approvals.expiry.ttl",
-                        "guardrails.failMode", "guardrails.toxicity.blockScore", "chat.finish.maxContinuations",
-                        "chat.retry.maxAttempts", "chat.cache.eligibleWithTools", "delegation.maxBranches", "routing.simple.maxChars");
+        assertThat(registry.all())
+                .extracting(SettingDefinition::key)
+                .contains(
+                        "agent.limits.maxToolSteps",
+                        "agent.limits.turnTimeoutSeconds",
+                        "agent.limits.toolTimeoutSeconds",
+                        "agent.limits.toolOutputMaxChars",
+                        "agent.limits.retrievalTopK",
+                        "agent.limits.retrievalMinScore",
+                        "agent.limits.continuationPasses",
+                        "approvals.continuation.enabled",
+                        "approvals.expiry.ttl",
+                        "guardrails.failMode",
+                        "guardrails.toxicity.blockScore",
+                        "chat.finish.maxContinuations",
+                        "chat.retry.maxAttempts",
+                        "chat.cache.eligibleWithTools",
+                        "delegation.maxBranches",
+                        "routing.simple.maxChars");
     }
 
     @Test
     void theOwnerVisibleProductControlsAreInTheCatalogWithTheScopesTheirUseSitesHonour() {
-        List<String> workspaceOnly = List.of(
-                "chat.toolLedger.enabled", "chat.toolLedger.replayEnabled", "chat.toolLedger.replayTurns",
-                "chat.toolLedger.maxEntriesPerTurn", "chat.toolLedger.maxReplayCharsPerTurn", "memory.tenant.maxMemories",
-                "skills.prompt.maxSkills", "skills.prompt.maxBlockChars");
-        List<String> perAgent = List.of(
-                "agent.steps.graceCalls", "agent.steps.supervisedDivisor", "agent.steps.supervisedMinSteps",
-                "agent.steps.autonomousMultiplier", "chat.semanticCache.similarityThreshold", "chat.semanticCache.ttl",
-                "chat.semanticCache.maxEntriesPerAgent", "chat.followUp.maxStickyTools", "chat.followUp.keepPrimaryModel",
-                "chat.attachments.maxImageMb", "chat.attachments.maxAudioMb", "chat.attachments.maxVideoMb",
-                "chat.attachments.maxDocumentMb", "memory.edge.maxFacts");
+        List<String> workspaceOnly =
+                List.of(
+                        "chat.history.maxTurns",
+                        "chat.history.maxChars",
+                        "chat.history.maxTokens",
+                        "chat.toolLedger.enabled",
+                        "chat.toolLedger.replayEnabled",
+                        "chat.toolLedger.replayTurns",
+                        "chat.toolLedger.maxEntriesPerTurn",
+                        "chat.toolLedger.maxReplayCharsPerTurn",
+                        "memory.tenant.maxMemories",
+                        "skills.prompt.maxSkills",
+                        "skills.prompt.maxBlockChars");
+        List<String> perAgent =
+                List.of(
+                        "agent.steps.graceCalls",
+                        "agent.steps.supervisedDivisor",
+                        "agent.steps.supervisedMinSteps",
+                        "agent.steps.autonomousMultiplier",
+                        "chat.semanticCache.similarityThreshold",
+                        "chat.semanticCache.ttl",
+                        "chat.semanticCache.maxEntriesPerAgent",
+                        "chat.followUp.maxStickyTools",
+                        "chat.followUp.keepPrimaryModel",
+                        "chat.attachments.maxImageMb",
+                        "chat.attachments.maxAudioMb",
+                        "chat.attachments.maxVideoMb",
+                        "chat.attachments.maxDocumentMb",
+                        "memory.edge.maxFacts",
+                        "chat.compaction.clearAt",
+                        "chat.compaction.compactAt",
+                        "chat.compaction.keepRecentToolResults");
         for (String key : workspaceOnly) {
             assertThat(registry.require(key).scopes()).as(key).containsExactly(SettingScope.TENANT);
         }
         for (String key : perAgent) {
-            assertThat(registry.require(key).scopes()).as(key).containsExactlyInAnyOrder(SettingScope.TENANT, SettingScope.AGENT);
+            assertThat(registry.require(key).scopes())
+                    .as(key)
+                    .containsExactlyInAnyOrder(SettingScope.TENANT, SettingScope.AGENT);
         }
-        for (String key : java.util.stream.Stream.concat(workspaceOnly.stream(), perAgent.stream()).toList()) {
-            assertThat(registry.require(key).risk()).as(key + " is not a security entry").isNotEqualTo(SettingRisk.SECURITY);
+        for (String key :
+                java.util.stream.Stream.concat(workspaceOnly.stream(), perAgent.stream())
+                        .toList()) {
+            assertThat(registry.require(key).risk())
+                    .as(key + " is not a security entry")
+                    .isNotEqualTo(SettingRisk.SECURITY);
         }
         // an agent editor must not be able to undo the tighter step ceiling of a supervised agent
-        for (String key : List.of("agent.steps.graceCalls", "agent.steps.supervisedDivisor", "agent.steps.supervisedMinSteps",
-                "agent.steps.autonomousMultiplier")) {
-            assertThat(registry.require(key).minRole()).as(key).isEqualTo(com.agenticai.core.settings.SettingRole.TENANT_ADMIN);
+        for (String key :
+                List.of(
+                        "agent.steps.graceCalls",
+                        "agent.steps.supervisedDivisor",
+                        "agent.steps.supervisedMinSteps",
+                        "agent.steps.autonomousMultiplier")) {
+            assertThat(registry.require(key).minRole())
+                    .as(key)
+                    .isEqualTo(com.agenticai.core.settings.SettingRole.TENANT_ADMIN);
         }
     }
 
@@ -174,7 +249,10 @@ class SettingsCatalogContractTest {
                 }
             }
         }
-        assertThat(missing).as("i18n keys missing from web/messages/en.json (add them under the settings namespace)").isEmpty();
+        assertThat(missing)
+                .as(
+                        "i18n keys missing from web/messages/en.json (add them under the settings namespace)")
+                .isEmpty();
     }
 
     @Test
@@ -194,7 +272,9 @@ class SettingsCatalogContractTest {
         for (SettingDefinition d : registry.all()) {
             String text = at(d.descriptionKey()).asText() + " " + at(d.helpKey()).asText();
             assertThat(text).as(d.key()).doesNotContain("TODO", "lorem");
-            assertThat(at(d.labelKey()).asText().length()).as(d.key() + " label is short").isLessThanOrEqualTo(60);
+            assertThat(at(d.labelKey()).asText().length())
+                    .as(d.key() + " label is short")
+                    .isLessThanOrEqualTo(60);
         }
     }
 
@@ -207,9 +287,13 @@ class SettingsCatalogContractTest {
             Object platform = d.platformValue();
             switch (d.type()) {
                 case BOOL -> assertThat(platform).as(d.key()).isInstanceOf(Boolean.class);
-                case ENUM -> assertThat(d.enumValues()).as(d.key() + " default is a listed value").contains(String.valueOf(platform));
+                case ENUM ->
+                        assertThat(d.enumValues())
+                                .as(d.key() + " default is a listed value")
+                                .contains(String.valueOf(platform));
                 case STRING, TEXT -> assertThat(platform).isInstanceOf(String.class);
-                case INT, LONG, DURATION -> assertThat(platform).as(d.key()).isInstanceOf(Long.class);
+                case INT, LONG, DURATION ->
+                        assertThat(platform).as(d.key()).isInstanceOf(Long.class);
                 default -> assertThat(platform).as(d.key()).isInstanceOf(Double.class);
             }
             if (d.type().isNumeric() && !SENTINEL_DEFAULTS.contains(d.key())) {
@@ -222,8 +306,12 @@ class SettingsCatalogContractTest {
                 }
             }
             if (d.type().isNumeric()) {
-                assertThat(d.min()).as(d.key() + " numeric entries must declare their bounds").isNotNull();
-                assertThat(d.max()).as(d.key() + " numeric entries must declare their bounds").isNotNull();
+                assertThat(d.min())
+                        .as(d.key() + " numeric entries must declare their bounds")
+                        .isNotNull();
+                assertThat(d.max())
+                        .as(d.key() + " numeric entries must declare their bounds")
+                        .isNotNull();
             }
             assertThat(d.scopes()).isNotEmpty();
             assertThat(d.group()).isNotBlank();
@@ -242,7 +330,8 @@ class SettingsCatalogContractTest {
 
     @Test
     void securityEntriesAreTenantAdminOnlyAndOnlyStricter() {
-        long security = registry.all().stream().filter(d -> d.risk() == SettingRisk.SECURITY).count();
+        long security =
+                registry.all().stream().filter(d -> d.risk() == SettingRisk.SECURITY).count();
         assertThat(security).isGreaterThanOrEqualTo(4);
         for (SettingDefinition d : registry.all()) {
             if (d.risk() == SettingRisk.SECURITY) {
@@ -251,7 +340,9 @@ class SettingsCatalogContractTest {
                 // at the platform value is allowed; the weaker side is refused
                 assertThat(d.isAtLeastAsStrict(d.platformValue(), d.platformValue())).isTrue();
             } else {
-                assertThat(d.strictness()).as(d.key() + " only security entries compare strictness").isEqualTo(Strictness.NONE);
+                assertThat(d.strictness())
+                        .as(d.key() + " only security entries compare strictness")
+                        .isEqualTo(Strictness.NONE);
             }
             if (d.risk().requiresReason()) {
                 assertThat(d.type()).isNotNull();
@@ -277,10 +368,11 @@ class SettingsCatalogContractTest {
     }
 
     /**
-     * The web console tests render the real catalog from {@code web/app/lib/api/fixtures/settingsCatalog.snapshot.json}
-     * (see {@code settingsCoverage.test.tsx}). This pins that file to the assembled catalog, so a new, changed or removed
-     * entry fails here until the snapshot is regenerated:
-     * {@code mvn -pl app -am test -Dtest=SettingsCatalogContractTest -Dvegaduta.settings.snapshot.write=true}.
+     * The web console tests render the real catalog from {@code
+     * web/app/lib/api/fixtures/settingsCatalog.snapshot.json} (see {@code
+     * settingsCoverage.test.tsx}). This pins that file to the assembled catalog, so a new, changed
+     * or removed entry fails here until the snapshot is regenerated: {@code mvn -pl app -am test
+     * -Dtest=SettingsCatalogContractTest -Dvegaduta.settings.snapshot.write=true}.
      */
     @Test
     void theWebCatalogSnapshotIsTheAssembledCatalog() throws Exception {
@@ -325,20 +417,29 @@ class SettingsCatalogContractTest {
             }
             entries.add(e);
         }
-        String expected = mapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(java.util.Map.of("entries", entries)).replace("\r\n", "\n") + "\n";
+        String expected =
+                mapper.writerWithDefaultPrettyPrinter()
+                                .writeValueAsString(java.util.Map.of("entries", entries))
+                                .replace("\r\n", "\n")
+                        + "\n";
         Path file = repoRoot.resolve("web/app/lib/api/fixtures/settingsCatalog.snapshot.json");
         if (Boolean.getBoolean("vegaduta.settings.snapshot.write")) {
             Files.createDirectories(file.getParent());
             Files.writeString(file, expected);
         }
-        assertThat(Files.isRegularFile(file)).as("web catalog snapshot exists (regenerate with -Dvegaduta.settings.snapshot.write=true)").isTrue();
+        assertThat(Files.isRegularFile(file))
+                .as(
+                        "web catalog snapshot exists (regenerate with -Dvegaduta.settings.snapshot.write=true)")
+                .isTrue();
         assertThat(Files.readString(file).replace("\r\n", "\n"))
-                .as("web/app/lib/api/fixtures/settingsCatalog.snapshot.json is out of date; regenerate with -Dvegaduta.settings.snapshot.write=true")
+                .as(
+                        "web/app/lib/api/fixtures/settingsCatalog.snapshot.json is out of date; regenerate with -Dvegaduta.settings.snapshot.write=true")
                 .isEqualTo(expected);
     }
 
     private static Number number(double v) {
-        return v == Math.rint(v) && Math.abs(v) < 9.0e15 ? (Number) Long.valueOf((long) v) : (Number) Double.valueOf(v);
+        return v == Math.rint(v) && Math.abs(v) < 9.0e15
+                ? (Number) Long.valueOf((long) v)
+                : (Number) Double.valueOf(v);
     }
 }

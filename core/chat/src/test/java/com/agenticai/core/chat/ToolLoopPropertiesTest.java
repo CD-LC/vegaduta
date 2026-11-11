@@ -21,7 +21,7 @@ class ToolLoopPropertiesTest {
 
         assertEquals(0, p.getMaxRoundsPerInvocation());
         assertEquals(8, p.getMaxUnknownCallsPerInvocation());
-        assertEquals(0, p.getMaxPromptTokensPerTurn());
+        assertEquals(1_000_000, p.getMaxPromptTokensPerTurn());
         assertTrue(p.getBudgetExhaustedMessage().contains("{rounds}"));
         assertTrue(p.getHardStopReply().length() > 20);
         assertNotNull(p.getResultClearing());
