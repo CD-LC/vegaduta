@@ -3039,7 +3039,13 @@
     "auditTrailLabel": "审计追踪",
     "retriedLabel": "已重试 {count} 次",
     "nextAttemptSuffix": "，下次尝试于 {time}",
-    "executionResultLabel": "执行结果"
+    "executionResultLabel": "执行结果",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "审计日志",

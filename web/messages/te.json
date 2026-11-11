@@ -3039,7 +3039,13 @@
     "auditTrailLabel": "ఆడిట్ ట్రెయిల్",
     "retriedLabel": "{count} సారి{plural} మళ్లీ ప్రయత్నించబడింది",
     "nextAttemptSuffix": ", తదుపరి ప్రయత్నం {time}",
-    "executionResultLabel": "అమలు ఫలితం"
+    "executionResultLabel": "అమలు ఫలితం",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ఆడిట్ లాగ్",
