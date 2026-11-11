@@ -257,7 +257,8 @@ class TenantStatusGuardImplTest {
                         platformKillSwitchRepository,
                         dataSource,
                         Duration.ZERO,
-                        servingPod);
+                        servingPod,
+                        false);
         when(tenantRepository.findBySchemaName(SCHEMA_NAME))
                 .thenReturn(Optional.of(activeTenant()));
 
