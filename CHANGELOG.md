@@ -66,6 +66,7 @@ Release notes on GitHub are generated from the section for each version.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
 - **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
 - **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
+- **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 - Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
