@@ -295,9 +295,9 @@ public class KnowledgeCollectionService {
     private long countChunksIn(UUID collectionId) {
         String table = KnowledgeSchemaSupport.qualifiedTableName();
         Long count =
-                // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
-                // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped); values bind.
                 jdbcTemplate.queryForObject(
+                        // codeql[java/sql-injection] -- `table` is a schema-qualified identifier
+                        // from KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                         "SELECT COUNT(*) FROM " + table + " WHERE collection_id = ?",
                         Long.class,
                         collectionId);

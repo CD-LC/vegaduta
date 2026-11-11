@@ -316,9 +316,9 @@ public class GraphMemoryService {
             onAge(
                     st -> {
                         long now = nowMillis();
-                        // codeql[java/sql-injection] -- buildSupersedeInvalidateCypher sanitises
-                        // every value it interpolates; `now` is a long.
                         st.execute(
+                                // codeql[java/sql-injection] -- buildSupersedeInvalidateCypher
+                                // sanitises every value it interpolates; `now` is a long.
                                 cypherCall(
                                         graphName,
                                         buildSupersedeInvalidateCypher(

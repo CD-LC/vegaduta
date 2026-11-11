@@ -60,9 +60,9 @@ final class GraphMemoryForget {
         for (int page = 0; page < forget.getScanMaxPages(); page++) {
             int rows = 0;
             try (ResultSet rs =
-                    // codeql[java/sql-injection] -- tierStr/subjectKeyStr are sanitize()d Cypher
-                    // string content; SKIP/LIMIT are ints.
                     st.executeQuery(
+                            // codeql[java/sql-injection] -- tierStr/subjectKeyStr are sanitize()d
+                            // Cypher string content; SKIP/LIMIT are ints.
                             cypherCall(
                                     graphName,
                                     listCypher
@@ -88,9 +88,9 @@ final class GraphMemoryForget {
         }
         int count = 0;
         for (ValidEdge edge : edgesOnlyThisFactSupports(edges, factText, otherFactTexts)) {
-            // codeql[java/sql-injection] -- buildForgetInvalidateCypher sanitises every value it
-            // interpolates; `now` is a long.
             st.execute(
+                    // codeql[java/sql-injection] -- buildForgetInvalidateCypher sanitises every
+                    // value it interpolates; `now` is a long.
                     cypherCall(
                             graphName,
                             buildForgetInvalidateCypher(tierStr, subjectKeyStr, edge, now),
@@ -119,9 +119,10 @@ final class GraphMemoryForget {
             throws SQLException {
         int matched = 0;
         try (ResultSet rs =
-                // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher
-                // string content; the graph name comes from GraphMemorySchemaSupport, not input.
                 st.executeQuery(
+                        // codeql[java/sql-injection] -- every interpolated value is sanitize()d
+                        // Cypher string content; the graph name comes from
+                        // GraphMemorySchemaSupport.
                         cypherCall(
                                 graphName,
                                 "MATCH (n:Entity {subject_key: '"
@@ -134,9 +135,9 @@ final class GraphMemoryForget {
         }
 
         if (matched > 0) {
-            // codeql[java/sql-injection] -- subjectKeyStr is sanitize()d Cypher string content; no
-            // user input reaches the query raw.
             st.execute(
+                    // codeql[java/sql-injection] -- subjectKeyStr is sanitize()d Cypher string
+                    // content; no user input reaches the query raw.
                     cypherCall(
                             graphName,
                             "MATCH (n:Entity {subject_key: '"

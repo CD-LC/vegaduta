@@ -29,9 +29,11 @@ final class GraphMemoryRecall {
             Statement st, String graphName, String cypher, int maxFacts, Long asOfMillis)
             throws SQLException {
         Set<GraphFact> result = new LinkedHashSet<>();
-        // codeql[java/sql-injection] -- every interpolated value in `cypher` was sanitize()d by
-        // the caller (GraphMemoryService.recallFacts); only integers are raw.
-        try (ResultSet rs = st.executeQuery(cypherCall(graphName, cypher, "p ag_catalog.agtype"))) {
+        try (ResultSet rs =
+                // codeql[java/sql-injection] -- every interpolated value in `cypher` was
+                // sanitize()d by the caller (GraphMemoryService.recallFacts); only integers are
+                // raw.
+                st.executeQuery(cypherCall(graphName, cypher, "p ag_catalog.agtype"))) {
             while (rs != null && rs.next() && result.size() < maxFacts) {
                 try {
                     for (GraphFact fact : parsePathFacts(rs.getString("p"), asOfMillis)) {

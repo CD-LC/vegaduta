@@ -62,9 +62,9 @@ final class GraphMemoryWriter {
                 st, graphName, tierStr, subjectKeyStr, subjectLower, relation, objectLower)) {
             return;
         }
-        // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher string
-        // content (see sanitize() calls above).
         st.execute(
+                // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher
+                // string content (see sanitize() calls above).
                 cypherCall(
                         graphName,
                         "MERGE (a:Entity {name: '"
@@ -82,9 +82,9 @@ final class GraphMemoryWriter {
                                 + subjectKeyStr
                                 + "'})",
                         ONE_COLUMN));
-        // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher string
-        // content; `now` is a long.
         st.execute(
+                // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher
+                // string content; `now` is a long.
                 cypherCall(
                         graphName,
                         "MATCH (a:Entity {name: '"
@@ -138,9 +138,9 @@ final class GraphMemoryWriter {
                         + objectLower
                         + "' "
                         + "AND r.valid_to IS NULL RETURN count(r)";
-        // codeql[java/sql-injection] -- every interpolated value in `cypher` is sanitize()d
-        // Cypher string content (see writeTriple).
         try (ResultSet rs =
+                // codeql[java/sql-injection] -- every interpolated value in `cypher` is sanitize()d
+                // Cypher string content (see writeTriple).
                 st.executeQuery(cypherCall(graphName, cypher, "open_edges ag_catalog.agtype"))) {
             return rs != null && rs.next() && parseAgtypeInt(rs.getString("open_edges")) > 0;
         }

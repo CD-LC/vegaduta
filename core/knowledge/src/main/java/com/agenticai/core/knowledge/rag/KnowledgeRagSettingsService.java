@@ -99,9 +99,10 @@ public class KnowledgeRagSettingsService {
             String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_collection");
             try {
                 int updated =
-                        // codeql[java/sql-injection] -- `table` is a schema-qualified identifier
-                        // from KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                         jdbcTemplate.update(
+                                // codeql[java/sql-injection] -- `table` is a schema-qualified
+                                // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                                // (double-quote escaped).
                                 "UPDATE "
                                         + table
                                         + " SET parent_child_enabled = ?, updated_at = now() WHERE"
@@ -131,9 +132,10 @@ public class KnowledgeRagSettingsService {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_parent_chunk");
         try {
             Long n =
-                    // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
-                    // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                     jdbcTemplate.queryForObject(
+                            // codeql[java/sql-injection] -- `table` is a schema-qualified
+                            // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                            // (double-quote escaped).
                             "SELECT COUNT(*) FROM " + table + " WHERE collection_id = ?",
                             Long.class,
                             collectionId);
@@ -149,9 +151,10 @@ public class KnowledgeRagSettingsService {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_collection");
         try {
             List<Boolean> rows =
-                    // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
-                    // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                     jdbcTemplate.query(
+                            // codeql[java/sql-injection] -- `table` is a schema-qualified
+                            // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                            // (double-quote escaped).
                             "SELECT parent_child_enabled FROM " + table + " WHERE id = ?",
                             (rs, i) -> rs.getBoolean(1),
                             collectionId);
@@ -176,9 +179,10 @@ public class KnowledgeRagSettingsService {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_collection");
         try {
             List<Boolean> rows =
-                    // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
-                    // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                     jdbcTemplate.query(
+                            // codeql[java/sql-injection] -- `table` is a schema-qualified
+                            // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                            // (double-quote escaped).
                             "SELECT parent_child_enabled FROM " + table + " WHERE id = ?",
                             (rs, i) -> rs.getBoolean(1),
                             collectionId);

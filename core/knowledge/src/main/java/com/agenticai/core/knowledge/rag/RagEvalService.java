@@ -501,9 +501,10 @@ public class RagEvalService {
         String table = KnowledgeSchemaSupport.qualifiedTableName("knowledge_chunks");
         try {
             Long n =
-                    // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
-                    // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped).
                     jdbcTemplate.queryForObject(
+                            // codeql[java/sql-injection] -- `table` is a schema-qualified
+                            // identifier from KnowledgeSchemaSupport.qualifiedTableName
+                            // (double-quote escaped).
                             "SELECT COUNT(*) FROM "
                                     + table
                                     + " WHERE collection_id = ? AND metadata->>'parent_id' IS NOT"
