@@ -1481,6 +1481,14 @@ app:
       # trimming), so every turn after the first is answered from the server's cache and a tool the message did not
       # name is never missing. A model in small-model mode keeps its short list. false = per-message selection.
       stable-tools: ${APP_CHAT_LOCAL_MODEL_STABLE_TOOLS:true}
+      # true = on a local model's turns, all but a short list of standing tools sit behind search_tools / call_tool
+      # (app.tools.search.always-on), so the prompt the model must read first is about 1.5k tokens, not 10k+.
+      tool-deferral: ${APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL:true}
+      # The skill index of a local model's deferred turn: at most this many skills, characters and description words
+      # (app.skills.prompt.* is the size for every other model). The full index is about 2,300 tokens.
+      skills-max-skills: ${APP_CHAT_LOCAL_MODEL_SKILLS_MAX_SKILLS:12}
+      skills-max-block-chars: ${APP_CHAT_LOCAL_MODEL_SKILLS_MAX_BLOCK_CHARS:1800}
+      skills-max-description-words: ${APP_CHAT_LOCAL_MODEL_SKILLS_MAX_DESCRIPTION_WORDS:10}
       # Bring-your-own providers that are servers on the person's machine.
       providers: ${APP_CHAT_LOCAL_MODEL_PROVIDERS:OLLAMA,LOCAL_OPENAI}
     small-model:
@@ -3315,6 +3323,9 @@ app:
     judge:
       # How many characters of the checked text are put in front of a judge; the rest is NOT judged.
       max-input-chars: ${APP_GUARDRAILS_JUDGE_MAX_INPUT_CHARS:4000}
+      # true = a tool result that is plain structured data (JSON of ids, numbers and one- or two-word strings)
+      # skips the injection judge's extra model call; the regex layer still runs. false = judge every result.
+      skip-inert-data: ${APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA:true}
       # Appended to text cut at max-input-chars (model-facing; the leading space is part of the value).
       truncation-marker: " \u2026[truncated]"
       # Judge sampling. EMPTY (default) = inherit the calling agent's own client settings, which is what the judges
@@ -3812,6 +3823,9 @@ app:
       # Comma-separated exact tool names or prefix* patterns that always stay in the tool list (standing
       # capabilities a keyword search could not be expected to surface: memory, knowledge, skills, delegation).
       always-on: ${TOOL_SEARCH_ALWAYS_ON:remember_fact,remember_shared_fact,recall_related_facts,recall_shared_graph_facts,list_knowledge_collections,search_knowledge_base,add_to_knowledge_base,search_code,request_human,load_skill,read_skill_file,run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*,run_desktop_recipe}
+      # The always-on list of a LOCAL model's deferred turn (app.chat.local-model.tool-deferral, or the pool row's
+      # own switch): short on purpose, so the prompt the model reads first stays small. Blank = this default.
+      local-always-on: ${TOOL_SEARCH_LOCAL_ALWAYS_ON:remember_fact,recall_related_facts,restore_tool_result,load_skill,read_skill_file}
       # How many already-searched tools stay offered directly on later turns of the same session
       # (best-effort; 0 = no carry-over, the model searches again each turn).
       max-carry-over: ${TOOL_SEARCH_MAX_CARRY_OVER:6}

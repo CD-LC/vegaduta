@@ -229,6 +229,11 @@ class ToolResolverConfiguration {
             @Value("${app.tools.search.threshold:25}") int threshold,
             @Value("${app.tools.search.always-on:" + ToolSearchDeferral.DEFAULT_ALWAYS_ON + "}")
                     String alwaysOn,
+            @Value(
+                            "${app.tools.search.local-always-on:"
+                                    + ToolSearchDeferral.DEFAULT_LOCAL_ALWAYS_ON
+                                    + "}")
+                    String localAlwaysOn,
             @Value("${app.tools.search.max-carry-over:6}") int maxCarryOver,
             @Value("${app.tools.search.activation-store:auto}") String activationStore,
             @Value("${app.tools.search.activation-ttl:PT2H}") Duration activationTtl,
@@ -236,6 +241,7 @@ class ToolResolverConfiguration {
             GuardrailService guardrailService) {
         ToolSearchDeferral deferral = new ToolSearchDeferral();
         deferral.configure(enabled, threshold, alwaysOn, maxCarryOver);
+        deferral.configureLocal(localAlwaysOn);
         deferral.activations(activationRegistry(activationStore, activationTtl, redisProvider));
         deferral.withCatalogScreen(guardrailService);
         return deferral;

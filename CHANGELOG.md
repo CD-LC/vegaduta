@@ -8,18 +8,32 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
+  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
+  65/65 score.
   Measured in the sandbox container: a JavaScript execute drops from a median of about 90-155 ms to about 35-65 ms; Python is unchanged (about 35 ms).
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
   `SETTING_INVALID`. `SettingsExceptionHandler` had no `@Order`, so it tied with the generic fallback advice and
   `checkCookiesAndSetTimer` from `authChecker.js`, which Keycloak 26.8 no longer exports, so the "signed in in
+  `load_skill` away. Other models are unchanged.
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
+  different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
   effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
   executes), so the pre-check now runs only when a run produced no result, with the same validation message.
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  local bring-your-own provider) now keep all but a short list of standing tools behind
   lost; it now has highest precedence, scoped to the two settings controllers.
   mapped Spring Security's `AccessDeniedException`. It now answers 403 with the generic permission message.
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
   override, the next `GET /api/settings/effective` answered without it, so the console showed the old value after a
   reload. `JdbcSettingsStore.tenantValues()` and `agentValues()` now run in their own read-only transaction.
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
   separate node process before running it; the run itself is the parse (a module that does not parse never
+  startup (the row is still never rewritten) instead of silently running the other model.
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
 ### Added
 ### Changed
 - **A corrected fact now replaces the fact it corrects, and recall injects only relevant lines (memory eval gates G6, G11, G3).** The real-pipeline eval found that "I moved from Pune to Mumbai" was stored next to "I live in Pune" with both recalled, and that recall injected the top-k lines whatever their similarity. `agent_memory` and `tenant_memory` gain `superseded_by`, `superseded_at`, `supersedes_ids` and `updated_at` (migration V685, no backfill). With `app.memory.supersession.enabled` (default `true`) a new TRUSTED fact marks an older TRUSTED fact of the same person superseded when it is the same text told again (re-confirmed, no second row), when `remember_fact`'s new optional `replaces` names it (the tool schema offers the argument only while the flag is on; off is byte-identical), or when the embedding similarity is at least `app.memory.supersession.min-similarity` (0.85). A superseded row is never deleted: it stays on the Memory page (`FactView.supersededAt`), in the export and under erasure, and is left out of recall, the edge facts, the consolidation snapshot and the importer's duplicate check. A QUARANTINED fact records what it would replace and replaces nothing until a person approves it; an agent-written fact never replaces one the person typed or pinned. `app.memory.recall.min-similarity` (0.20) and `app.memory.recall.max-items` (3) put a relevance floor and a per-turn cap on the automatic recall of facts and episodes (the always-in-context memory blocks and the self-model line are untouched; `0` and `0` restore the previous behaviour). Measured on `PlatformMemoryEvalIT`, see `04-measurement-scorecard.md` Addendum F for the before/after gate table and what is still open.
@@ -75,8 +89,11 @@ Release notes on GitHub are generated from the section for each version.
 ### Added
 ### Security
 - **A failed `@PreAuthorize` returned HTTP 500 and recorded a platform issue** instead of 403, because nothing
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
 - **A saved workspace or agent setting override was ignored by every read that ran outside a transaction.** The
 - **A session summary folded from a tainted conversation is no longer replayed as trusted context.** The rolling session summary now carries an untrusted flag (Redis key `agentic:session-summary-untrusted:<id>`, same TTL, never cleared by a later fold while any input was untrusted): it is set when the conversation had a tainted turn, when that flag cannot be read (fail closed), when a folded turn trips the memory write screen, or when the model's summary itself does. An untrusted summary is replayed inside Spotlight `UNTRUSTED_DATA` delimiters, or left out with `app.chat.history-summary-untrusted-replay=skip` (default `wrap`). Summaries written before this change have no flag and replay as before until they expire.
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
 - **A tool's output can no longer pose as the platform's own control result.** The tool loop ended a turn with
 - **A2A message-level replay and loop protection (OWASP ASI07).** Outbound A2A calls now carry `X-A2A-Timestamp`, `X-A2A-Nonce` and `X-A2A-Hop` (inbound hop + 1) and, for peers listed in `app.a2a.signed-peers`, a detached HMAC-SHA256 `X-A2A-Signature` over method, path, timestamp, nonce, hop and body hash. Inbound, when the headers are present, the skew window (`app.a2a.replay-window`, 300 s), a per-tenant single-use nonce (Redis when `app.a2a.task-store=redis`, else per-replica memory) and `app.a2a.max-hops` (4) are enforced; absence of the headers is still accepted unless `app.a2a.require-replay-protection=true`. Refusals use the platform error codes -32090..-32095.
 - **Agent memory can no longer be poisoned from a fetched page (OWASP ASI06 / LLM04).** `remember_fact` and
@@ -121,6 +138,8 @@ Release notes on GitHub are generated from the section for each version.
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+- **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 - Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
