@@ -61,7 +61,9 @@ test.describe("Agent files, Connect and chat", () => {
     });
 
     await test.step("export gives back a valid agent file with no secrets or knowledge-base ids", async () => {
-      await page.goto("/agents");
+      // The per-agent Export button is on the agent index, which is the explicit ?view=index surface; a bare
+      // /agents opens the workbench (web/app/agents/page.tsx).
+      await page.goto("/agents?view=index");
       const download = page.waitForEvent("download");
       await page.getByRole("button", { name: /Export E2E Personal Assistant as a file/ }).click();
       const file = await download;

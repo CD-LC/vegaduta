@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { signUpFreshTenant } from "../helpers/test-tenant";
 import { importAgent, pickOption } from "../helpers/console-controls";
 
@@ -14,6 +14,14 @@ import { importAgent, pickOption } from "../helpers/console-controls";
 const KEY = "directive.current_date";
 const MARKER = `E2E marker ${Date.now()}`;
 
+// The registry lists every prompt (hundreds, ten to a page), so the card under test is only on screen once the list is
+// narrowed to it. The search matches key, title and description.
+async function openPromptCard(page: Page) {
+  await page.getByRole("tab", { name: "All prompts" }).click();
+  await page.getByLabel("Search prompts").fill(KEY);
+  return page.getByTestId(`prompt-${KEY}`);
+}
+
 test.describe("Prompt override shows up in the preview", () => {
   test("a workspace override of a prompt appears in the agent's final prompt, and reverting removes it", async ({ page }, testInfo) => {
     testInfo.skip(testInfo.project.name !== "chromium", "provisions a real tenant - run on one project only");
@@ -26,8 +34,7 @@ test.describe("Prompt override shows up in the preview", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Instructions" })).toBeVisible({ timeout: 30_000 });
 
     await test.step("open the prompt in the registry and save an override at workspace scope", async () => {
-      await page.getByRole("tab", { name: "All prompts" }).click();
-      const card = page.getByTestId(`prompt-${KEY}`);
+      const card = await openPromptCard(page);
       await expect(card).toBeVisible({ timeout: 20_000 });
       await expect(page.getByTestId(`source-${KEY}`)).toHaveText("Shipped default");
       await card.getByRole("button", { name: /^Edit / }).click();
@@ -54,13 +61,14 @@ test.describe("Prompt override shows up in the preview", () => {
     });
 
     await test.step("reverting brings the shipped wording back", async () => {
-      await page.getByRole("tab", { name: "All prompts" }).click();
-      const card = page.getByTestId(`prompt-${KEY}`);
+      const card = await openPromptCard(page);
       await card.getByRole("button", { name: /^Edit / }).click();
       await page.getByTestId(`editor-${KEY}`).getByRole("button", { name: /^Revert to / }).click();
       await expect(page.getByTestId(`source-${KEY}`)).toHaveText("Shipped default", { timeout: 20_000 });
 
       await page.getByRole("tab", { name: "Preview final prompt" }).click();
+      // The agent choice does not survive leaving the preview tab, and Build preview stays disabled without one.
+      await pickOption(page, "Agent", "E2E Prompt Agent");
       await page.getByRole("button", { name: "Build preview" }).click();
       const block = page.getByTestId(`block-${KEY}`);
       await expect(block).toBeVisible({ timeout: 30_000 });

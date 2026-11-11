@@ -29,7 +29,9 @@ test.describe("WhatsApp channel - connect methods", () => {
     const whatsappCard = page.locator('[data-testid="channel-card"][data-channel="whatsapp"]');
     await expect(whatsappCard).toBeVisible({ timeout: 20_000 });
     await expect(whatsappCard).toHaveAttribute("aria-pressed", "true");
-    await expect(whatsappCard.getByText("+ connect")).toBeVisible();
+    // A never-connected card shows the status detail the API returns ("not connected" for WhatsApp;
+    // other channels return "+ connect"), so accept either wording.
+    await expect(whatsappCard.getByText(/^(\+ connect|not connected)$/i)).toBeVisible();
 
     await expect(page.getByRole("heading", { name: "Connect WhatsApp" })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole("tab", { name: "Meta Cloud API" })).toBeVisible();
