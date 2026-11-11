@@ -25,7 +25,9 @@ Release notes on GitHub are generated from the section for each version.
   `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
   approvals and audit run outside the prompt and stay on in all three. "Own tools" are the ones the owner
+  carried the skills index and skill tools (about 700 tokens). Generic words are ignored, and "word" means the
   chose: the agent's allowed tools and its attached tool servers; an agent with neither offers no tools in
+  docx skill only next to file/document/format. Real skill requests still match.
   different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
   effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
   ends paused for an approval is no longer sampled by the background quality judge (its reply is the platform's
@@ -43,6 +45,7 @@ Release notes on GitHub are generated from the section for each version.
   schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
   separate node process before running it; the run itself is the parse (a module that does not parse never
   short platform note instead of the parked-turn record, the outcome record and the full `<approval_result>` text.
+  uses ("answer", "short", "use", "word"), so "What is the capital of France? Answer in one short sentence"
   startup (the row is still never rewritten) instead of silently running the other model.
   the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
   the note texts are `native-completed-message`, `native-failed-message` and `native-denied-message`. A turn that
@@ -58,18 +61,22 @@ Release notes on GitHub are generated from the section for each version.
 - **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
 - **A saved workspace or agent setting override was ignored by every read that ran outside a transaction.** The
 - **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+- **Agent evaluation harness (`tests/eval/`, `docs/benchmarks/README.md`).** A dependency-free Node harness with a versioned 20-task suite (Q&A, tool use, knowledge retrieval, approval-gated actions, multi-step workflow) that drives a running stack through its public REST API and reports programmatic task success, tool-call accuracy, platform-reported tokens and cost, p50/p95 latency and guardrail/approval behaviour as `results.json` plus a markdown table, behind an adapter interface. Scoring and aggregation are unit-tested offline (`make test-eval`); the harness has not been run against a stack and no results are published yet.
 - **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
 - **Faster continuation after an approval.** The turn that continues a task after a human decided a held tool call
 - **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
+- **Ordinary questions no longer switch the skills block on.** The skill gate matched on words every question
 - **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
 - **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+- Settings catalog: a workspace can set its own conversation replay window (`chat.history.maxTurns`, `chat.history.maxChars`, `chat.history.maxTokens`; before, only a platform admin could), and a workspace or an agent can set when a long prompt is compacted (`chat.compaction.clearAt`, `chat.compaction.compactAt`, `chat.compaction.keepRecentToolResults`). Labels for the new settings are English in every locale for now.
 - Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
+- The cumulative prompt-token cap of one reply's tool loop (`app.chat.tools.max-prompt-tokens-per-turn`, setting `chat.toolLoop.maxPromptTokensPerTurn`) now defaults to 1,000,000 (200,000 in the `personal` profile) instead of uncapped. A reply that passes it is told to stop calling tools and answer with what it has. Set `APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN=0`, or the setting to 0, to remove the cap.
 
 ## [0.1.14] - 2026-10-30
 

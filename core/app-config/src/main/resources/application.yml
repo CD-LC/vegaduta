@@ -1641,8 +1641,10 @@ app:
       # the runaway it misses is the loop whose every round resends a near-full window - a research turn
       # that should cost ~10k prompt tokens can cost six figures before max-tool-calls ever engages.
       # Counted per run through the run's transcript, so the cap follows the turn, not the process.
-      # Tenant/agent overrides: chat.toolLoop.maxPromptTokensPerTurn. 0 = uncapped.
-      max-prompt-tokens-per-turn: ${APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN:0}
+      # Tenant/agent overrides: chat.toolLoop.maxPromptTokensPerTurn. 0 = uncapped. The default is a backstop,
+      # not a budget: one million is far above an ordinary reply (a few thousand to a few hundred thousand) and
+      # only stops a loop that keeps resending a large context. The personal profile lowers it for local models.
+      max-prompt-tokens-per-turn: ${APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN:1000000}
       # Model-facing wording of the two stops. {rounds} = tool rounds used. No ${...} env override: placeholders.
       budget-exhausted-message: >-
         Tool budget for this reply is exhausted after {rounds} tool round(s), so this call was NOT executed. Do not call any more tools. Answer the user now using only what you already have, say briefly if anything is incomplete, and if the work needs more calls than one reply allows, tell the user it can continue in the background as a job.

@@ -127,6 +127,9 @@ class SettingsCatalogContractTest {
                                 new SkillPromptSettings(),
                                 new com.agenticai.core.agents.turn.PromptProfileSettings(
                                         "full", null),
+                                new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
+                                new com.agenticai.core.agents.context.ContextCompactionSettings(
+                                        new MockEnvironment()),
                                 new ProductControlsCatalog(
                                         new SemanticCacheProperties(),
                                         new ChatLimitsProperties(),
@@ -179,6 +182,9 @@ class SettingsCatalogContractTest {
     void theOwnerVisibleProductControlsAreInTheCatalogWithTheScopesTheirUseSitesHonour() {
         List<String> workspaceOnly =
                 List.of(
+                        "chat.history.maxTurns",
+                        "chat.history.maxChars",
+                        "chat.history.maxTokens",
                         "chat.toolLedger.enabled",
                         "chat.toolLedger.replayEnabled",
                         "chat.toolLedger.replayTurns",
@@ -202,7 +208,10 @@ class SettingsCatalogContractTest {
                         "chat.attachments.maxAudioMb",
                         "chat.attachments.maxVideoMb",
                         "chat.attachments.maxDocumentMb",
-                        "memory.edge.maxFacts");
+                        "memory.edge.maxFacts",
+                        "chat.compaction.clearAt",
+                        "chat.compaction.compactAt",
+                        "chat.compaction.keepRecentToolResults");
         for (String key : workspaceOnly) {
             assertThat(registry.require(key).scopes()).as(key).containsExactly(SettingScope.TENANT);
         }

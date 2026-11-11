@@ -74,6 +74,12 @@ app:
       # edit/regenerate, and conversations older than the 24 h Redis window. Lite and the full stack
       # turn it on in Compose; a personal install gets it here, so core.env can still switch it off.
       enabled: ${APP_CHAT_BRANCHING_ENABLED:true}
+    tools:
+      # Cumulative prompt tokens one reply's tool loop may send before the soft stop. Lower than the base
+      # profile's backstop because a local model reads its prompt at a few hundred tokens a second: a loop
+      # that resends its context for 300,000 tokens is minutes of silence (measured: 316K tokens, 250 s).
+      # A workspace or an agent sets its own with chat.toolLoop.maxPromptTokensPerTurn; 0 = uncapped.
+      max-prompt-tokens-per-turn: ${APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN:200000}
   google:
     oauth:
       # web | loopback. `loopback` = a Google "Desktop app" client: the redirect is this computer's own

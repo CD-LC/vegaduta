@@ -212,6 +212,13 @@ L low, M medium, H high, S security. **Use site** is the code that must consult 
 | `memory.edge.maxFacts` | i 1-100 | L | T,A | `app.memory.limits.edge-memory-max-facts` | **wired**: agents-turn `EdgeToolExecutionController` (memory endpoint for on-device sessions) |
 | `skills.prompt.maxSkills` | i 1-200 | L | T | `app.skills.prompt.max-skills` | **wired** (workspace-wide: `SkillPromptBlock` is a static helper called from several modules with only the skill list in hand): `SkillPromptProperties#active()` applies the calling thread's tenant overlay installed by `SkillPromptConfiguration` |
 | `skills.prompt.maxBlockChars` | i 1000-30000 | L | T | `app.skills.prompt.max-block-chars` | **wired**: as above |
+| `chat.toolLoop.maxPromptTokensPerTurn` | i 0-10000000 (0 = no cap) | M | T,A | `app.chat.tools.max-prompt-tokens-per-turn` | **wired**: agents-turn `TurnTranscripts` puts it on the run's `ToolLoopTranscript`; the tool loop soft-stops when the cumulative prompt tokens of one reply pass it. Platform default 1,000,000 (200,000 in the `personal` profile) |
+| `chat.history.maxTurns` | i 1-400 | M | T | `app.chat.history-max-turns` (the platform admin's `platform.chat.history-max-turns` row wins over it) | **wired** (workspace-wide: the history is read by session, before the turn knows its agent): agents-turn `HistoryWindowSettings#current`, used by `SessionMemoryService#getHistory` and the summary fold window |
+| `chat.history.maxChars` | i 0-2000000 | M | T | `app.chat.history-max-chars` | **wired**: as above |
+| `chat.history.maxTokens` | i 0-1000000 | M | T | `app.chat.history-max-tokens` | **wired**: as above |
+| `chat.compaction.clearAt` | x 0.1-0.95 | M | T,A | `app.context.compaction.clear-at` | **wired**: agents-turn `ContextCompactionSettings#thresholds`, read once per compaction run in `ChatContextCompaction#openRun` for the turn's agent; never applied above `chat.compaction.compactAt` |
+| `chat.compaction.compactAt` | x 0.2-0.98 | M | T,A | `app.context.compaction.compact-at` | **wired**: as above |
+| `chat.compaction.keepRecentToolResults` | i 0-50 | L | T,A | `app.context.compaction.keep-recent-tool-results` | **wired**: as above |
 
 Two rules about who may change the new keys, because the reviewer asked for them to be explicit:
 
@@ -483,7 +490,7 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `app.chat.tools.text-call-recovery.tool-grades` | D | deferred: cleanup-owned (GeminiMixedContent / text-call recovery) |
 | `app.coding-harness.enabled` | B | feature switch: master switch of the sandboxed coding-task harness (off by default); runs repository code, an operator opt-in |
 | `app.coding-harness.network-enabled` | B | security policy: whether harness test commands keep a network (weaker than the default empty network namespace); only the operator may weaken the sandbox |
-| `app.context.compaction.enabled` | B\* | candidate for a later pass: whether a long prompt is compacted before it overflows the window (on by default since 2026-10-23); compaction is configured once per ChatClient advisor, not per turn, so there is no per-workspace read site yet |
+| `app.context.compaction.enabled` | B\* | candidate for a later pass: whether a long prompt is compacted before it overflows the window (on by default since 2026-10-23); the master switch is also read where the restore tool and the compaction directive are offered, so it has no single per-workspace read site yet; the thresholds are catalog keys (`chat.compaction.*`) |
 | `app.context.compaction.media-tokens` | B | estimate constant: tokens one attached image, audio or video costs in the compaction estimate (1000); an estimate, not a limit |
 | `app.context.compaction.message-overhead-tokens` | B | estimate constant: tokens every message costs beyond its text in the estimate (4) |
 | `app.context.compaction.placeholder-tokens` | B | estimate constant: estimated tokens of a cleared-result placeholder (48); a result under twice this is never cleared |

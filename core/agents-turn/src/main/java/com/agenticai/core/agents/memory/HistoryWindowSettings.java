@@ -1,7 +1,11 @@
 package com.agenticai.core.agents.memory;
 
+import com.agenticai.core.settings.SettingContext;
+import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The admin-tunable replay-window knobs of {@link SessionMemoryService} (platform_setting-backed),
@@ -16,6 +20,17 @@ import java.util.concurrent.atomic.AtomicReference;
  * SessionMemoryService#estimateTokens}).
  */
 final class HistoryWindowSettings {
+
+    private static final Logger log = LoggerFactory.getLogger(HistoryWindowSettings.class);
+
+    /**
+     * Settings-catalog keys: a workspace's own replay window (tenant scope; the history has no
+     * agent).
+     */
+    static final String MAX_TURNS = "chat.history.maxTurns";
+
+    static final String MAX_CHARS = "chat.history.maxChars";
+    static final String MAX_TOKENS = "chat.history.maxTokens";
 
     /**
      * The three window knobs, snapshotted together so one turn never mixes a fresh cap with a stale
@@ -54,7 +69,7 @@ final class HistoryWindowSettings {
      * mistyped admin value can never blank the window entirely (the always-include-newest rule
      * still guarantees one turn of context).
      */
-    HistoryConfig current() {
+    HistoryConfig platform() {
         CachedHistoryConfig hit = cached.get();
         long now = System.currentTimeMillis();
         if (hit != null && (now - hit.loadedAtMs()) < cacheMs) {
@@ -79,5 +94,54 @@ final class HistoryWindowSettings {
                                         defaultMaxTokens)));
         cached.set(new CachedHistoryConfig(fresh, now));
         return fresh;
+    }
+
+    private static volatile SettingsResolver catalog;
+
+    /**
+     * Hands over the settings catalog at startup; without one every workspace gets the platform
+     * window.
+     */
+    static void use(SettingsResolver resolver) {
+        catalog = resolver;
+    }
+
+    /** Takes the catalog back when its context closes (only if it is still the one in use). */
+    static void release(SettingsResolver resolver) {
+        if (catalog == resolver) {
+            catalog = null;
+        }
+    }
+
+    /**
+     * The window of the calling thread's workspace: the platform window ({@link #platform()}) with
+     * the workspace's {@code chat.history.*} settings applied. With no catalog, no tenant on the
+     * thread or a failing read it is the platform window, so a settings outage never blanks or
+     * widens a prompt. The same floors as {@link #platform()} apply (at least one turn, never a
+     * negative budget).
+     */
+    HistoryConfig current() {
+        HistoryConfig platform = platform();
+        SettingsResolver resolver = catalog;
+        if (resolver == null) {
+            return platform;
+        }
+        try {
+            SettingContext ctx = SettingContext.tenant();
+            int turns = Math.max(1, resolver.getInt(MAX_TURNS, ctx));
+            int chars = Math.max(0, resolver.getInt(MAX_CHARS, ctx));
+            int tokens = Math.max(0, resolver.getInt(MAX_TOKENS, ctx));
+            if (turns == platform.maxTurns()
+                    && chars == platform.maxChars()
+                    && tokens == platform.maxTokens()) {
+                return platform;
+            }
+            return new HistoryConfig(turns, chars, tokens);
+        } catch (RuntimeException e) {
+            log.warn(
+                    "Could not read the chat.history.* settings; using the platform window: {}",
+                    e.toString());
+            return platform;
+        }
     }
 }
