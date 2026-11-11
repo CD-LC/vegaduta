@@ -22,7 +22,7 @@ the A.x level as I recall them.
 
 | Annex A area | What it asks (paraphrase) | Platform evidence | Status | Gap |
 |---|---|---|---|---|
-| A.2 AI policies | Documented policy aligned with objectives | None in product. [AGENTS.md](../../AGENTS.md) and `docs/security/*` are developer-facing | Org | A tenant-facing AI policy template does not exist |
+| A.2 AI policies | Documented policy aligned with objectives | None in product. [AGENTS.md](../../ENGINEERING-RULES.md) and `docs/security/*` are developer-facing | Org | A tenant-facing AI policy template does not exist |
 | A.3 Internal organisation | Roles and responsibilities, reporting of concerns | Permission model [authorization.md](../security/authorization.md) (`PERM_*`); approval roles `ApprovalDecisionAuthorizer` | Partly | No named "AI system owner" role in the product |
 | A.4 Resources for AI systems | Document resources, tooling, compute | SBOM and release provenance `.github/workflows/release.yml` (as cited in OWASP ASI04); tool and MCP registry `core/mcp/.../McpRegistryService` | Partly | No AI-resource inventory report per tenant |
 | A.5 Assessing impacts | Impact assessment process for individuals and society | None found | Gap | The deployer must run it; no template or workflow (cf. FRIA, EU AI Act Art. 27) |
