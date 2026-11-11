@@ -2,6 +2,7 @@ package com.agenticai.core.chat.gateway;
 
 import com.agenticai.core.chat.ChatClientRegistry;
 import com.agenticai.core.providers.ProviderName;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.AiModelFeature;
 import com.agenticai.core.tenancy.AiModelPreference;
 import com.agenticai.core.tenancy.TenantAiModelPreferenceService;
@@ -181,29 +182,29 @@ public class LlmGatewayService {
             log.warn(
                     "Tenant '{}' AI Model Control override for feature '{}' names unknown"
                             + " providerName '{}' - ignoring it",
-                    tenantId,
-                    spec.featureKey(),
-                    stored.providerName());
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(spec.featureKey()),
+                    LogSafe.clean(stored.providerName()));
             return spec.model();
         }
         if (storedProvider != spec.providerName()) {
             log.debug(
                     "Tenant '{}' AI Model Control override for feature '{}' targets provider {} but"
-                        + " this call resolved provider {} (different BYOK credential required) -"
-                        + " not applicable to this call, using {}",
-                    tenantId,
-                    spec.featureKey(),
-                    storedProvider,
-                    spec.providerName(),
-                    spec.model());
+                            + " this call resolved provider {} (different BYOK credential required) -"
+                            + " not applicable to this call, using {}",
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(spec.featureKey()),
+                    LogSafe.clean(storedProvider),
+                    LogSafe.clean(spec.providerName()),
+                    LogSafe.clean(spec.model()));
             return spec.model();
         }
         log.debug(
                 "Tenant '{}' AI Model Control override applied for feature '{}': model {} -> {}",
-                tenantId,
-                spec.featureKey(),
-                spec.model(),
-                stored.model());
+                LogSafe.clean(tenantId),
+                LogSafe.clean(spec.featureKey()),
+                LogSafe.clean(spec.model()),
+                LogSafe.clean(stored.model()));
         return stored.model();
     }
 }

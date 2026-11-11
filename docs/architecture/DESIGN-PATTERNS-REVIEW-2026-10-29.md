@@ -41,7 +41,7 @@ api/jobs/ingest/webhooks/billing/worker/migrate pools.
 
 *Why:* an agent turn (guardrails → tool dispatch → retrieval → model call →
 budget → audit) must stay in-process over one streamed connection — a network
-hop adds latency and a mid-stream failure mode (AGENTS.md rule 6). Scaling is by
+hop adds latency and a mid-stream failure mode (ENGINEERING-RULES.md rule 6). Scaling is by
 replica count and workload pool, never by splitting the turn path.
 
 *Code:*

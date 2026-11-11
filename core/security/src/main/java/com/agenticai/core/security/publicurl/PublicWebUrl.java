@@ -4,12 +4,12 @@ package com.agenticai.core.security.publicurl;
  * Helpers around {@code app.web.public-url}, the ONE browser-facing origin of the tenant console
  * (set from {@code APP_WEB_PUBLIC_URL} / {@code PUBLIC_APP_URL}; see application.yml).
  *
- * <p>AGENTS.md rule 4: a browser-facing URL never falls back to {@code localhost}. Every class that
- * builds a link the browser follows (share links, e-mail CTAs, OAuth console redirects) reads the
- * property with an EMPTY default and goes through here, so a missing value is either refused at
- * start-up ({@link PublicWebUrlStartupValidator}, {@code security} profile) or surfaces as a clear
- * {@link IllegalStateException} naming the variable to set, never as a {@code localhost} link in a
- * customer's inbox.
+ * <p>ENGINEERING-RULES.md rule 4: a browser-facing URL never falls back to {@code localhost}. Every
+ * class that builds a link the browser follows (share links, e-mail CTAs, OAuth console redirects)
+ * reads the property with an EMPTY default and goes through here, so a missing value is either
+ * refused at start-up ({@link PublicWebUrlStartupValidator}, {@code security} profile) or surfaces
+ * as a clear {@link IllegalStateException} naming the variable to set, never as a {@code localhost}
+ * link in a customer's inbox.
  */
 public final class PublicWebUrl {
 
@@ -65,7 +65,7 @@ public final class PublicWebUrl {
                             + ENV_HINT
                             + ") or "
                             + propertyName
-                            + " - there is deliberately no localhost default (AGENTS.md rule 4)");
+                            + " - there is deliberately no localhost default (ENGINEERING-RULES.md rule 4)");
         }
         return value;
     }

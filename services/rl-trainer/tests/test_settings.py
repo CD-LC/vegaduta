@@ -13,7 +13,7 @@ def test_defaults_with_empty_environment() -> None:
     s = Settings()
     assert s.auth_mode == "internal"  # fail-closed default, not "none"
     assert s.internal_token == ""
-    assert s.keycloak_issuer == ""  # never a localhost default (AGENTS.md rule 4)
+    assert s.keycloak_issuer == ""  # never a localhost default (ENGINEERING-RULES.md rule 4)
     assert s.keycloak_additional_issuers == ""
     assert s.keycloak_issuers() == []
     assert s.keycloak_jwks_url == ""

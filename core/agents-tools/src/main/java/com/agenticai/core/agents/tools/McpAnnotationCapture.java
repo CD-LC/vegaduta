@@ -2,6 +2,7 @@ package com.agenticai.core.agents.tools;
 
 import com.agenticai.core.agents.tools.classification.McpAnnotationClassifier;
 import com.agenticai.core.agents.tools.classification.McpToolHints;
+import com.agenticai.core.security.logging.LogSafe;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -80,7 +81,8 @@ final class McpAnnotationCapture {
             }
             classifier.forgetTools(scope, names);
         } catch (RuntimeException e) {
-            log.debug("Could not drop MCP tool annotations for scope '{}'", scope, e);
+            log.debug(
+                    "Could not drop MCP tool annotations for scope '{}'", LogSafe.clean(scope), e);
         }
     }
 }

@@ -15,7 +15,7 @@
 # `from __future__ import annotations` + modern generics, same raise-from
 # hygiene) and there is no case for them drifting. A single repo-root config
 # would express that better, but the repo root is shared, multi-agent-owned
-# territory (see CLAUDE.md scope rules) and the root would also pull
+# territory (see ENGINEERING-RULES.md scope rules) and the root would also pull
 # app-builder/, voice-agent/ and tools/ into scope on day one. If a root
 # config lands later, both service files should be deleted in that same
 # change, not left to shadow it (ruff uses the NEAREST config up the tree,
@@ -55,7 +55,7 @@ target-version = "py312"
 # DELIBERATELY NOT SELECTED - each of these is a several-hundred-violation
 # wall that would fight this repo's documented conventions, not improve them:
 #   D (pydocstyle)  - the house convention is multi-paragraph narrative
-#                     docstrings explaining WHY (see CLAUDE.md); D205/D400/
+#                     docstrings explaining WHY (see ENGINEERING-RULES.md); D205/D400/
 #                     D401 would flag essentially all of them.
 #   TRY             - TRY003 flags long exception messages; this codebase
 #                     deliberately writes long, actionable ones (see

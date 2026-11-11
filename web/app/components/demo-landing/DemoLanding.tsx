@@ -25,6 +25,7 @@ import SecuritySection from "./SecuritySection";
 import HeroOutcome from "./HeroOutcome";
 import SectionReach from "./SectionReach";
 import SiteFooter from "./SiteFooter";
+import PlatformEdgeBand from "./PlatformEdgeBand";
 import { useGeo, type LandingVariant } from "../../lib/geo";
 import { useJourney } from "../../lib/journey";
 // Reveal (../marketing/Reveal) and `motion` are deliberately NOT imported here
@@ -195,6 +196,10 @@ export default function DemoLanding({ variant: variantProp }: { variant?: Landin
           concluded that was the product. */}
       <SectionReach section="ledger">
         <CapabilityAtlas signupHref={journey.signupHref} />
+      </SectionReach>
+
+      <SectionReach section="platform-edge">
+        <PlatformEdgeBand />
       </SectionReach>
 
       {/* Category, stated once, immediately after the ledger (2026-09-12,

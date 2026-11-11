@@ -28,7 +28,7 @@
 # ENVIRONMENT
 # -----------
 #   CORE_BASE_URL      required. .xyz is STAGING, .ai is PRODUCTION
-#                      (repo root CLAUDE.md RULE 0 — they are separate stacks)
+#                      (ENGINEERING-RULES.md rule 4 — they are separate stacks)
 #   KEYCLOAK_BASE_URL  required
 #   REALM              default agentic-ai
 #   CLIENT_ID          default agentic-ai-web

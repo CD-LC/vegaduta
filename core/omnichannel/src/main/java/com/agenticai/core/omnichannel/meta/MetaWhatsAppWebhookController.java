@@ -21,6 +21,7 @@ import com.agenticai.core.omnichannel.whatsappvoice.VoiceNoteOutcome;
 import com.agenticai.core.omnichannel.whatsappvoice.WhatsAppAudioRef;
 import com.agenticai.core.omnichannel.whatsappvoice.WhatsAppVoiceNoteService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -181,8 +182,8 @@ public class MetaWhatsAppWebhookController {
         if (!"subscribe".equals(mode) || !tokenMatches) {
             log.warn(
                     "Rejected Meta webhook verification handshake (mode={}, token match={})",
-                    mode,
-                    tokenMatches);
+                    LogSafe.clean(mode),
+                    LogSafe.clean(tokenMatches));
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(challenge);
@@ -249,7 +250,9 @@ public class MetaWhatsAppWebhookController {
 
         TenantContext.set(
                 TenantContext.of(
-                        tenantSchema.get(), MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId, Set.of()));
+                        tenantSchema.get(),
+                        MetaWhatsAppReplyFlow.REQUESTED_BY_PREFIX + phoneNumberId,
+                        Set.of()));
         try {
             // resolveActive() throws MetaWhatsAppNotConfiguredException (mapped
             // to 400, caught below) if this tenant's credential was somehow

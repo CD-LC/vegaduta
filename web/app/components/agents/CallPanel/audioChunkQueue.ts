@@ -16,7 +16,6 @@ export interface AudioChunkQueueDeps {
   ) => Promise<VoiceChainResult>;
 }
 
-
 // Plays queued audio-chunk events one at a time, in the order they arrived
 // (the backend already guarantees wire order matches playback order - see
 // VoiceCallController#turn's javadoc on flatMapSequential). A chunk with no
@@ -37,7 +36,7 @@ export interface AudioChunkQueueDeps {
 // gesture, never a side effect of playback). The server already
 // synthesized chunk.audioBase64 via its own ElevenLabs -> Sarvam chain by
 // the time this chunk arrives (that leg isn't skipped by this client-side
-// change - see the CLAUDE.md-scoped task note this was built under), so
+// change - see the ENGINEERING-RULES.md-scoped task note this was built under), so
 // this is the client half of the local-TTS story; a future core-3 change
 // could let an edge-tier turn opt out of server synthesis entirely.
 // `callbacks.onSpeakStart` fires once, the first time playback of any

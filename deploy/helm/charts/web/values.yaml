@@ -112,7 +112,7 @@ env:
   npm_config_cache: /tmp/.npm
   # "1" shows plans/prices/upgrade/billing UI (hosted SaaS). "" = off (self-hosted default).
   NEXT_PUBLIC_BILLING_ENABLED: ""
-  # Signed-out pages: "oss" = technical open-source pages, no commercial content
+  # Signed-out pages: "oss" = technical source-available pages, no commercial content
   # (default); "classic" = the original marketing pages.
   NEXT_PUBLIC_SITE_MODE: "oss"
   # Absolute URL of the published documentation site; "" = in-app help at /docs.

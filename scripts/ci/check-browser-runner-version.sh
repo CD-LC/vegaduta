@@ -93,7 +93,9 @@ self_test() {
   expect "Dockerfile image tag drifted" 1 "$tmp/img"
   fixture "$tmp/pom";      edit "$tmp/pom/core/agents-browser/pom.xml" '/<artifactId>playwright<\/artifactId>/{n;s|<version>[^<]*</version>|<version>1.49.0</version>|;}'
   expect "pom.xml Java client drifted" 1 "$tmp/pom"
-  fixture "$tmp/lock";     edit "$tmp/lock/services/browser-runner/package-lock.json" 's/"version": "1\.63\.0"/"version": "1.49.0"/'
+  local pinned
+  pinned=$(sed -n 's/^[[:space:]]*"playwright"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$repo/services/browser-runner/package.json" | head -1)
+  fixture "$tmp/lock";     edit "$tmp/lock/services/browser-runner/package-lock.json" "s/\"version\": \"${pinned//./\\.}\"/\"version\": \"1.49.0\"/"
   expect "package-lock.json drifted" 1 "$tmp/lock"
   fixture "$tmp/gone";     rm "$tmp/gone/core/agents-browser/pom.xml"
   expect "missing file fails" 1 "$tmp/gone"

@@ -3,6 +3,7 @@ package com.agenticai.core.agents.version;
 import com.agenticai.core.agents.core.Agent;
 import com.agenticai.core.eventbus.WorkflowEventSignal;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.FeatureFlagService;
 import com.agenticai.core.tenancy.TenantSchemaResolver;
 import java.lang.reflect.Field;
@@ -310,7 +311,7 @@ public class AgentVersionResolutionService {
         try {
             return template.opsForValue().get(key);
         } catch (RuntimeException e) {
-            log.debug("Version-resolution cache read failed for {}", key, e);
+            log.debug("Version-resolution cache read failed for {}", LogSafe.clean(key), e);
             return null;
         }
     }
@@ -323,7 +324,7 @@ public class AgentVersionResolutionService {
         try {
             template.opsForValue().set(key, value, CACHE_TTL);
         } catch (RuntimeException e) {
-            log.debug("Version-resolution cache write failed for {}", key, e);
+            log.debug("Version-resolution cache write failed for {}", LogSafe.clean(key), e);
         }
     }
 
