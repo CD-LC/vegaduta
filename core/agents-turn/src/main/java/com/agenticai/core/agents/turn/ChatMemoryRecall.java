@@ -23,276 +23,266 @@ import org.springframework.beans.factory.ObjectProvider;
  */
 final class ChatMemoryRecall {
 
-    private static final Logger log = LoggerFactory.getLogger(AgentChatService.class);
+  private static final Logger log = LoggerFactory.getLogger(AgentChatService.class);
 
-    private final ObjectProvider<AgentMemoryService> agentMemoryService;
-    private final ObjectProvider<TenantMemoryService> tenantMemoryService;
-    private final AgentService agentService;
+  private final ObjectProvider<AgentMemoryService> agentMemoryService;
+  private final ObjectProvider<TenantMemoryService> tenantMemoryService;
+  private final AgentService agentService;
 
-    /**
-     * {@code app.chat.sse.memory-events.enabled}, owned by {@link AgentChatService}; a supplier
-     * because it is field-injected.
-     */
-    private final BooleanSupplier memoryEventsEnabled;
+  /**
+   * {@code app.chat.sse.memory-events.enabled}, owned by {@link AgentChatService}; a supplier
+   * because it is field-injected.
+   */
+  private final BooleanSupplier memoryEventsEnabled;
 
-    /**
-     * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for
-     * the lines that frame the recalled facts; the shipped text until {@link ChatServiceParts}
-     * wires the settings bean.
-     */
-    private volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
-            ResolvedDirectives.DEFAULTS_FOR_AGENT;
+  /**
+   * The prompt registry's view for an agent (its, its tenant's and the platform's overrides) for
+   * the lines that frame the recalled facts; the shipped text until {@link ChatServiceParts} wires
+   * the settings bean.
+   */
+  private volatile java.util.function.Function<UUID, ResolvedDirectives> prompts =
+      ResolvedDirectives.DEFAULTS_FOR_AGENT;
 
-    void usePrompts(java.util.function.Function<UUID, ResolvedDirectives> prompts) {
-        this.prompts = prompts == null ? ResolvedDirectives.DEFAULTS_FOR_AGENT : prompts;
+  void usePrompts(java.util.function.Function<UUID, ResolvedDirectives> prompts) {
+    this.prompts = prompts == null ? ResolvedDirectives.DEFAULTS_FOR_AGENT : prompts;
+  }
+
+  /** Conversation-level taint store; absent in slim test contexts (then no session taint). */
+  private volatile ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaint;
+
+  void useSessionTaint(
+      ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaint) {
+    this.sessionTaint = sessionTaint;
+  }
+
+  /**
+   * Seeds {@code taint} from the session's persisted marker and keeps the marker current (see
+   * {@link com.agenticai.core.agents.memory.SessionTaintStore}). Never throws.
+   */
+  void seedSessionTaint(com.agenticai.core.guardrails.taint.TurnTaint taint, String sessionId) {
+    ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> provider = sessionTaint;
+    if (provider == null) {
+      return;
     }
-
-    /** Conversation-level taint store; absent in slim test contexts (then no session taint). */
-    private volatile ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore>
-            sessionTaint;
-
-    void useSessionTaint(
-            ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> sessionTaint) {
-        this.sessionTaint = sessionTaint;
+    try {
+      com.agenticai.core.agents.memory.SessionTaintStore store = provider.getIfAvailable();
+      if (store != null) {
+        store.seedAndTrack(taint, sessionId);
+      }
+    } catch (RuntimeException e) {
+      log.warn("Could not apply the session taint marker", e);
     }
+  }
 
-    /**
-     * Seeds {@code taint} from the session's persisted marker and keeps the marker current (see
-     * {@link com.agenticai.core.agents.memory.SessionTaintStore}). Never throws.
-     */
-    void seedSessionTaint(com.agenticai.core.guardrails.taint.TurnTaint taint, String sessionId) {
-        ObjectProvider<com.agenticai.core.agents.memory.SessionTaintStore> provider = sessionTaint;
-        if (provider == null) {
-            return;
+  ChatMemoryRecall(
+      ObjectProvider<AgentMemoryService> agentMemoryService,
+      ObjectProvider<TenantMemoryService> tenantMemoryService,
+      AgentService agentService,
+      BooleanSupplier memoryEventsEnabled) {
+    this.agentMemoryService = agentMemoryService;
+    this.tenantMemoryService = tenantMemoryService;
+    this.agentService = agentService;
+    this.memoryEventsEnabled = memoryEventsEnabled;
+  }
+
+  /**
+   * Recalled long-term memories, as a standalone "Known facts about this user" block - the model
+   * still decides how (or whether) to use them, this just makes sure they're in context without
+   * requiring the model to proactively call a recall tool. Deliberately returned as its own text
+   * block instead of being concatenated onto the agent's system prompt (see {@link #chat}'s
+   * prompt-caching comment for why the split matters for Anthropic cache breakpoints). Returns
+   * {@code null} if the "knowledge" profile is off (no {@code AgentMemoryService} bean), recall
+   * throws (sidecar unreachable, etc.), or nothing relevant was found - a missing memory feature
+   * should never break chat.
+   */
+  String recallMemoryFactsBlock(UUID agentId, String subjectKey, String userMessage) {
+    return recallMemoryFactsBlock(agentId, subjectKey, userMessage, null);
+  }
+
+  /**
+   * As {@link #recallMemoryFactsBlock(UUID, String, String)}; additionally, on a step-event turn
+   * ({@code stepEvents} live and {@code app.chat.sse.memory-events.enabled}), reports once what was
+   * injected - block labels, counts and fact ids, never the text. The returned block is the same
+   * with or without an emitter, and a {@code null}/disabled emitter takes exactly the old path.
+   */
+  String recallMemoryFactsBlock(
+      UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
+    return recallMemoryFacts(agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId))
+        .block();
+  }
+
+  /**
+   * The recall outcome: the assembled block ({@code null} when nothing applied, same contract as
+   * {@link #recallMemoryFactsBlock}) and how many stored facts were recalled into it. The count is
+   * what lets the turn tell auto-injected retrieval - facts a {@code remember_fact} call or a
+   * shared tier wrote, so attacker-storable content - apart from the owner's own always-in-context
+   * blocks (persona, profile, notes), which ride in the same string but are not taint-worthy on
+   * their own.
+   */
+  record MemoryRecall(String block, int recalledFacts) {
+
+    /** Whether any private or shared fact was recalled into {@link #block()}. */
+    boolean hasRecalledFacts() {
+      return recalledFacts > 0;
+    }
+  }
+
+  /**
+   * As {@link #recallMemoryFacts(UUID, String, String, AgentStepEventEmitter, ResolvedDirectives)},
+   * with this turn's prompt view.
+   */
+  MemoryRecall recallMemoryFacts(
+      UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
+    return recallMemoryFacts(agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId));
+  }
+
+  /**
+   * As {@link #recallMemoryFactsBlock(UUID, String, String, AgentStepEventEmitter,
+   * ResolvedDirectives)}, returning the block with its fact count for taint marking (see {@link
+   * MemoryRecall}).
+   */
+  MemoryRecall recallMemoryFacts(
+      UUID agentId,
+      String subjectKey,
+      String userMessage,
+      AgentStepEventEmitter stepEvents,
+      ResolvedDirectives pd) {
+    StringBuilder block = new StringBuilder();
+    boolean hasUserBlocks = false;
+    boolean report = stepEvents != null && stepEvents.isEnabled() && memoryEventsEnabled();
+    List<String> usedBlockLabels = List.of();
+    int privateFacts = 0;
+    int sharedFacts = 0;
+    List<UUID> factIds = new ArrayList<>();
+
+    // User-editable always-in-context blocks (persona / user_profile / project_notes), item 11.
+    // Empty unless the user wrote some, so simple requests gain no tokens.
+    TenantMemoryService blockService = tenantMemoryService.getIfAvailable();
+    if (blockService != null) {
+      try {
+        // Gated on the agent's shareMemoryWithTenant opt-in, like the shared facts below,
+        // so
+        // persona / profile text never reaches an agent that did not opt into shared
+        // memory.
+        String blocks;
+        if (!agentService.isShareMemoryWithTenant(agentId)) {
+          blocks = null;
+        } else if (report) {
+          MemoryBlocks.Rendered rendered =
+              blockService.renderPromptBlocksWithLabels(subjectKey, userMessage);
+          blocks = rendered == null ? null : rendered.text();
+          if (rendered != null && rendered.labels() != null) {
+            usedBlockLabels = rendered.labels();
+          }
+        } else {
+          blocks = blockService.renderPromptBlocks(subjectKey, userMessage);
         }
-        try {
-            com.agenticai.core.agents.memory.SessionTaintStore store = provider.getIfAvailable();
-            if (store != null) {
-                store.seedAndTrack(taint, sessionId);
+        if (blocks != null) {
+          blocks = MemoryBlocks.withNotesHeader(blocks, pd.text(MemoryBlocks.NOTES_KEY));
+          block.append(blocks).append("\n\n");
+          hasUserBlocks = true;
+        }
+      } catch (Exception e) {
+        log.warn(
+            "Memory block render failed for subject '{}' - continuing without it",
+            LogSafe.clean(subjectKey),
+            e);
+      }
+    }
+
+    // One embedding of the message for both stores below: the sidecar is asked once, by
+    // whichever
+    // recall needs it first.
+    QueryEmbedding embedding = null;
+    AgentMemoryService memoryService = agentMemoryService.getIfAvailable();
+    if (memoryService != null) {
+      try {
+        embedding = memoryService.queryEmbedding(userMessage);
+        List<AgentMemoryEntry> memories =
+            memoryService.recall(agentId, subjectKey, userMessage, embedding);
+        if (!memories.isEmpty()) {
+          String factList =
+              memories.stream()
+                  .map(m -> "- " + m.content())
+                  .reduce((a, b) -> a + "\n" + b)
+                  .orElse("");
+          block.append(
+              pd.textOrShipped("memory.recall.private", java.util.Map.of("facts", factList)));
+          privateFacts = memories.size();
+          memories.forEach(m -> factIds.add(m.id()));
+        }
+      } catch (Exception e) {
+        log.warn(
+            "Long-term memory recall failed for agent {} subject '{}' - continuing" + " without it",
+            LogSafe.clean(agentId),
+            LogSafe.clean(subjectKey),
+            e);
+      }
+    }
+
+    // Shared cross-agent memory tier (#847) - only recalled when this agent opted in via
+    // shareMemoryWithTenant. Appended as a clearly-labeled second block rather than merged
+    // into the private-memory list above, so the model (and anyone reading logs/traces) can
+    // tell tenant-wide facts (contributed by any opted-in agent) apart from this agent's own
+    // private recall - see TenantMemoryService/RememberSharedFactToolCallback's javadoc.
+    TenantMemoryService tenantService = tenantMemoryService.getIfAvailable();
+    if (tenantService != null) {
+      try {
+        if (agentService.isShareMemoryWithTenant(agentId)) {
+          List<TenantMemoryEntry> sharedMemories =
+              tenantService.recall(
+                  subjectKey,
+                  userMessage,
+                  embedding != null ? embedding : tenantService.queryEmbedding(userMessage),
+                  agentId);
+          if (!sharedMemories.isEmpty()) {
+            String sharedFactList =
+                sharedMemories.stream()
+                    .map(m -> "- " + m.content())
+                    .reduce((a, b) -> a + "\n" + b)
+                    .orElse("");
+            if (!block.isEmpty()) {
+              block.append("\n\n");
             }
-        } catch (RuntimeException e) {
-            log.warn("Could not apply the session taint marker", e);
+            block.append(
+                pd.textOrShipped(
+                    "memory.recall.shared", java.util.Map.of("facts", sharedFactList)));
+            sharedFacts = sharedMemories.size();
+            sharedMemories.forEach(m -> factIds.add(m.id()));
+          }
         }
+      } catch (Exception e) {
+        log.warn(
+            "Shared tenant memory recall failed for agent {} subject '{}' - continuing"
+                + " without it",
+            LogSafe.clean(agentId),
+            LogSafe.clean(subjectKey),
+            e);
+      }
     }
 
-    ChatMemoryRecall(
-            ObjectProvider<AgentMemoryService> agentMemoryService,
-            ObjectProvider<TenantMemoryService> tenantMemoryService,
-            AgentService agentService,
-            BooleanSupplier memoryEventsEnabled) {
-        this.agentMemoryService = agentMemoryService;
-        this.tenantMemoryService = tenantMemoryService;
-        this.agentService = agentService;
-        this.memoryEventsEnabled = memoryEventsEnabled;
+    if (block.isEmpty()) {
+      return new MemoryRecall(null, 0);
     }
-
-    /**
-     * Recalled long-term memories, as a standalone "Known facts about this user" block - the model
-     * still decides how (or whether) to use them, this just makes sure they're in context without
-     * requiring the model to proactively call a recall tool. Deliberately returned as its own text
-     * block instead of being concatenated onto the agent's system prompt (see {@link #chat}'s
-     * prompt-caching comment for why the split matters for Anthropic cache breakpoints). Returns
-     * {@code null} if the "knowledge" profile is off (no {@code AgentMemoryService} bean), recall
-     * throws (sidecar unreachable, etc.), or nothing relevant was found - a missing memory feature
-     * should never break chat.
-     */
-    String recallMemoryFactsBlock(UUID agentId, String subjectKey, String userMessage) {
-        return recallMemoryFactsBlock(agentId, subjectKey, userMessage, null);
+    if (report) {
+      try {
+        stepEvents.memoryRecall(
+            hasUserBlocks ? usedBlockLabels.size() : 0,
+            hasUserBlocks ? usedBlockLabels : List.of(),
+            privateFacts,
+            sharedFacts,
+            factIds);
+      } catch (Exception e) {
+        log.debug("Could not emit the memory step event - continuing", e);
+      }
     }
+    // Only trim when user blocks were prepended (their separator can trail). With none, the
+    // text is byte-for-byte what it was before blocks existed.
+    return new MemoryRecall(
+        hasUserBlocks ? block.toString().strip() : block.toString(), privateFacts + sharedFacts);
+  }
 
-    /**
-     * As {@link #recallMemoryFactsBlock(UUID, String, String)}; additionally, on a step-event turn
-     * ({@code stepEvents} live and {@code app.chat.sse.memory-events.enabled}), reports once what
-     * was injected - block labels, counts and fact ids, never the text. The returned block is the
-     * same with or without an emitter, and a {@code null}/disabled emitter takes exactly the old
-     * path.
-     */
-    String recallMemoryFactsBlock(
-            UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
-        return recallMemoryFacts(
-                        agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId))
-                .block();
-    }
-
-    /**
-     * The recall outcome: the assembled block ({@code null} when nothing applied, same contract as
-     * {@link #recallMemoryFactsBlock}) and how many stored facts were recalled into it. The count
-     * is what lets the turn tell auto-injected retrieval - facts a {@code remember_fact} call or a
-     * shared tier wrote, so attacker-storable content - apart from the owner's own
-     * always-in-context blocks (persona, profile, notes), which ride in the same string but are not
-     * taint-worthy on their own.
-     */
-    record MemoryRecall(String block, int recalledFacts) {
-
-        /** Whether any private or shared fact was recalled into {@link #block()}. */
-        boolean hasRecalledFacts() {
-            return recalledFacts > 0;
-        }
-    }
-
-    /**
-     * As {@link #recallMemoryFacts(UUID, String, String, AgentStepEventEmitter,
-     * ResolvedDirectives)}, with this turn's prompt view.
-     */
-    MemoryRecall recallMemoryFacts(
-            UUID agentId, String subjectKey, String userMessage, AgentStepEventEmitter stepEvents) {
-        return recallMemoryFacts(
-                agentId, subjectKey, userMessage, stepEvents, prompts.apply(agentId));
-    }
-
-    /**
-     * As {@link #recallMemoryFactsBlock(UUID, String, String, AgentStepEventEmitter,
-     * ResolvedDirectives)}, returning the block with its fact count for taint marking (see {@link
-     * MemoryRecall}).
-     */
-    MemoryRecall recallMemoryFacts(
-            UUID agentId,
-            String subjectKey,
-            String userMessage,
-            AgentStepEventEmitter stepEvents,
-            ResolvedDirectives pd) {
-        StringBuilder block = new StringBuilder();
-        boolean hasUserBlocks = false;
-        boolean report = stepEvents != null && stepEvents.isEnabled() && memoryEventsEnabled();
-        List<String> usedBlockLabels = List.of();
-        int privateFacts = 0;
-        int sharedFacts = 0;
-        List<UUID> factIds = new ArrayList<>();
-
-        // User-editable always-in-context blocks (persona / user_profile / project_notes), item 11.
-        // Empty unless the user wrote some, so simple requests gain no tokens.
-        TenantMemoryService blockService = tenantMemoryService.getIfAvailable();
-        if (blockService != null) {
-            try {
-                // Gated on the agent's shareMemoryWithTenant opt-in, like the shared facts below,
-                // so
-                // persona / profile text never reaches an agent that did not opt into shared
-                // memory.
-                String blocks;
-                if (!agentService.isShareMemoryWithTenant(agentId)) {
-                    blocks = null;
-                } else if (report) {
-                    MemoryBlocks.Rendered rendered =
-                            blockService.renderPromptBlocksWithLabels(subjectKey, userMessage);
-                    blocks = rendered == null ? null : rendered.text();
-                    if (rendered != null && rendered.labels() != null) {
-                        usedBlockLabels = rendered.labels();
-                    }
-                } else {
-                    blocks = blockService.renderPromptBlocks(subjectKey, userMessage);
-                }
-                if (blocks != null) {
-                    blocks = MemoryBlocks.withNotesHeader(blocks, pd.text(MemoryBlocks.NOTES_KEY));
-                    block.append(blocks).append("\n\n");
-                    hasUserBlocks = true;
-                }
-            } catch (Exception e) {
-                log.warn(
-                        "Memory block render failed for subject '{}' - continuing without it",
-                        LogSafe.clean(subjectKey),
-                        e);
-            }
-        }
-
-        // One embedding of the message for both stores below: the sidecar is asked once, by
-        // whichever
-        // recall needs it first.
-        QueryEmbedding embedding = null;
-        AgentMemoryService memoryService = agentMemoryService.getIfAvailable();
-        if (memoryService != null) {
-            try {
-                embedding = memoryService.queryEmbedding(userMessage);
-                List<AgentMemoryEntry> memories =
-                        memoryService.recall(agentId, subjectKey, userMessage, embedding);
-                if (!memories.isEmpty()) {
-                    String factList =
-                            memories.stream()
-                                    .map(m -> "- " + m.content())
-                                    .reduce((a, b) -> a + "\n" + b)
-                                    .orElse("");
-                    block.append(
-                            pd.textOrShipped(
-                                    "memory.recall.private", java.util.Map.of("facts", factList)));
-                    privateFacts = memories.size();
-                    memories.forEach(m -> factIds.add(m.id()));
-                }
-            } catch (Exception e) {
-                log.warn(
-                        "Long-term memory recall failed for agent {} subject '{}' - continuing"
-                                + " without it",
-                        LogSafe.clean(agentId),
-                        LogSafe.clean(subjectKey),
-                        e);
-            }
-        }
-
-        // Shared cross-agent memory tier (#847) - only recalled when this agent opted in via
-        // shareMemoryWithTenant. Appended as a clearly-labeled second block rather than merged
-        // into the private-memory list above, so the model (and anyone reading logs/traces) can
-        // tell tenant-wide facts (contributed by any opted-in agent) apart from this agent's own
-        // private recall - see TenantMemoryService/RememberSharedFactToolCallback's javadoc.
-        TenantMemoryService tenantService = tenantMemoryService.getIfAvailable();
-        if (tenantService != null) {
-            try {
-                if (agentService.isShareMemoryWithTenant(agentId)) {
-                    List<TenantMemoryEntry> sharedMemories =
-                            tenantService.recall(
-                                    subjectKey,
-                                    userMessage,
-                                    embedding != null
-                                            ? embedding
-                                            : tenantService.queryEmbedding(userMessage),
-                                    agentId);
-                    if (!sharedMemories.isEmpty()) {
-                        String sharedFactList =
-                                sharedMemories.stream()
-                                        .map(m -> "- " + m.content())
-                                        .reduce((a, b) -> a + "\n" + b)
-                                        .orElse("");
-                        if (!block.isEmpty()) {
-                            block.append("\n\n");
-                        }
-                        block.append(
-                                pd.textOrShipped(
-                                        "memory.recall.shared",
-                                        java.util.Map.of("facts", sharedFactList)));
-                        sharedFacts = sharedMemories.size();
-                        sharedMemories.forEach(m -> factIds.add(m.id()));
-                    }
-                }
-            } catch (Exception e) {
-                log.warn(
-                        "Shared tenant memory recall failed for agent {} subject '{}' - continuing"
-                                + " without it",
-                        LogSafe.clean(agentId),
-                        LogSafe.clean(subjectKey),
-                        e);
-            }
-        }
-
-        if (block.isEmpty()) {
-            return new MemoryRecall(null, 0);
-        }
-        if (report) {
-            try {
-                stepEvents.memoryRecall(
-                        hasUserBlocks ? usedBlockLabels.size() : 0,
-                        hasUserBlocks ? usedBlockLabels : List.of(),
-                        privateFacts,
-                        sharedFacts,
-                        factIds);
-            } catch (Exception e) {
-                log.debug("Could not emit the memory step event - continuing", e);
-            }
-        }
-        // Only trim when user blocks were prepended (their separator can trail). With none, the
-        // text is byte-for-byte what it was before blocks existed.
-        return new MemoryRecall(
-                hasUserBlocks ? block.toString().strip() : block.toString(),
-                privateFacts + sharedFacts);
-    }
-
-    private boolean memoryEventsEnabled() {
-        return memoryEventsEnabled != null && memoryEventsEnabled.getAsBoolean();
-    }
+  private boolean memoryEventsEnabled() {
+    return memoryEventsEnabled != null && memoryEventsEnabled.getAsBoolean();
+  }
 }

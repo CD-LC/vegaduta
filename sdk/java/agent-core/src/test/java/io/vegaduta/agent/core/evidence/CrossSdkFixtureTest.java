@@ -30,14 +30,14 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 /**
  * Cross-SDK fixtures in {@code sdk/testdata/cross-sdk}: a chain (and a mandate chain) written by
- * the Python SDK must verify here, and the one written here must verify in Python
- * ({@code sdk/python-agent/tests/test_cross_sdk.py}). The Python chain is built from the same
- * source events as {@link #pythonSourceEvents()}, so besides verifying, this test asserts the Java
- * writer reproduces Python's hashes and HMAC signatures byte for byte.
+ * the Python SDK must verify here, and the one written here must verify in Python ({@code
+ * sdk/python-agent/tests/test_cross_sdk.py}). The Python chain is built from the same source events
+ * as {@link #pythonSourceEvents()}, so besides verifying, this test asserts the Java writer
+ * reproduces Python's hashes and HMAC signatures byte for byte.
  *
  * <p>Regenerate the Java half with {@code -Dvegaduta.fixtures.regenerate=true} (see {@link
- * #regenerateJavaFixtures()}). The file formats are described in the Python generator,
- * {@code sdk/python-agent/tests/cross_sdk_fixtures.py}.
+ * #regenerateJavaFixtures()}). The file formats are described in the Python generator, {@code
+ * sdk/python-agent/tests/cross_sdk_fixtures.py}.
  */
 class CrossSdkFixtureTest {
 
@@ -62,7 +62,8 @@ class CrossSdkFixtureTest {
     assertThat(signed.eventsChecked()).isEqualTo(6);
 
     ChainVerification anchored =
-        HashChainedAuditSink.verify(events, Optional.of(HMAC), anchors("python-chain.anchors.json"));
+        HashChainedAuditSink.verify(
+            events, Optional.of(HMAC), anchors("python-chain.anchors.json"));
     assertThat(anchored.ok()).as(anchored.message()).isTrue();
   }
 
@@ -130,8 +131,7 @@ class CrossSdkFixtureTest {
       assertThat(headOnly.ok()).as(name).isFalse();
       assertThat(headOnly.message()).contains("expectedHeadHash");
 
-      ChainVerification emptied =
-          HashChainedAuditSink.verify(List.of(), Optional.empty(), anchors);
+      ChainVerification emptied = HashChainedAuditSink.verify(List.of(), Optional.empty(), anchors);
       assertThat(emptied.ok()).isFalse();
       assertThat(emptied.message()).contains("anchor");
     }
@@ -188,8 +188,7 @@ class CrossSdkFixtureTest {
       // re-encoding what was decoded is byte-identical: one canonical text per mandate
       for (int i = 0; i < chain.size(); i++) {
         assertThat(chain.get(i).encode())
-            .isEqualTo(
-                Files.readAllLines(dir().resolve(file), StandardCharsets.UTF_8).get(i));
+            .isEqualTo(Files.readAllLines(dir().resolve(file), StandardCharsets.UTF_8).get(i));
       }
     }
   }
@@ -213,9 +212,9 @@ class CrossSdkFixtureTest {
   // ---- regeneration (explicit, never part of a normal run) -----------------------------------
 
   /**
-   * Writes {@code java-chain.jsonl}, {@code java-chain.anchors.json} and {@code
-   * java-mandates.txt}. The Java chain deliberately carries different events than the Python one so
-   * the two files are independent witnesses.
+   * Writes {@code java-chain.jsonl}, {@code java-chain.anchors.json} and {@code java-mandates.txt}.
+   * The Java chain deliberately carries different events than the Python one so the two files are
+   * independent witnesses.
    */
   @Test
   @EnabledIfSystemProperty(named = "vegaduta.fixtures.regenerate", matches = "true")
@@ -280,7 +279,8 @@ class CrossSdkFixtureTest {
       }
       p = p.getParent();
     }
-    throw new IllegalStateException("sdk/testdata/cross-sdk not found above " + Path.of("").toAbsolutePath());
+    throw new IllegalStateException(
+        "sdk/testdata/cross-sdk not found above " + Path.of("").toAbsolutePath());
   }
 
   private static List<AuditEvent> readChain(String file) throws IOException {
@@ -297,7 +297,10 @@ class CrossSdkFixtureTest {
     Map<String, String> m =
         JsonLite.readFlatObject(Files.readString(dir().resolve(file), StandardCharsets.UTF_8));
     return new ChainAnchors(
-        Long.parseLong(m.get("firstSeq")), m.get("firstPrev"), Long.parseLong(m.get("lastSeq")), m.get("headHash"));
+        Long.parseLong(m.get("firstSeq")),
+        m.get("firstPrev"),
+        Long.parseLong(m.get("lastSeq")),
+        m.get("headHash"));
   }
 
   private static AuditEvent lineToEvent(Map<String, String> line) {
@@ -355,7 +358,9 @@ class CrossSdkFixtureTest {
     putIfPresent(line, "sessionId", e.context().sessionId());
     putIfPresent(line, "correlationId", e.context().correlationId());
     if (!e.risks().isEmpty()) {
-      line.put("risks", String.join(",", new java.util.TreeSet<>(e.risks().stream().map(AsiRisk::id).toList())));
+      line.put(
+          "risks",
+          String.join(",", new java.util.TreeSet<>(e.risks().stream().map(AsiRisk::id).toList())));
     }
     e.attributes().forEach((k, v) -> line.put("attr." + k, v));
     return line;
@@ -367,7 +372,8 @@ class CrossSdkFixtureTest {
     }
   }
 
-  // ---- source events -----------------------------------------------------------------------------
+  // ---- source events
+  // -----------------------------------------------------------------------------
 
   private static AuditEvent event(
       long n,

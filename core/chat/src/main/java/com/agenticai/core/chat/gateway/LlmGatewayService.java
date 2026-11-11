@@ -51,159 +51,156 @@ import org.springframework.stereotype.Service;
 @Service
 public class LlmGatewayService {
 
-    private static final Logger log = LoggerFactory.getLogger(LlmGatewayService.class);
+  private static final Logger log = LoggerFactory.getLogger(LlmGatewayService.class);
 
-    private final ChatClientRegistry chatClientRegistry;
-    private final LlmGatewayBudgetService budgetService;
-    private final LlmGatewayRateLimiterService rateLimiterService;
-    private final TenantAiModelPreferenceService aiModelPreferenceService;
-    private final List<GatewayGovernanceAdvisor> governanceAdvisors;
+  private final ChatClientRegistry chatClientRegistry;
+  private final LlmGatewayBudgetService budgetService;
+  private final LlmGatewayRateLimiterService rateLimiterService;
+  private final TenantAiModelPreferenceService aiModelPreferenceService;
+  private final List<GatewayGovernanceAdvisor> governanceAdvisors;
 
-    public LlmGatewayService(
-            ChatClientRegistry chatClientRegistry,
-            LlmGatewayBudgetService budgetService,
-            LlmGatewayRateLimiterService rateLimiterService,
-            TenantAiModelPreferenceService aiModelPreferenceService,
-            // Every bean implementing the marker in the current context - an
-            // empty list in slim contexts (tests, a module that doesn't carry a
-            // governance impl) simply attaches nothing.
-            List<GatewayGovernanceAdvisor> governanceAdvisors) {
-        this.chatClientRegistry = chatClientRegistry;
-        this.budgetService = budgetService;
-        this.rateLimiterService = rateLimiterService;
-        this.aiModelPreferenceService = aiModelPreferenceService;
-        this.governanceAdvisors = governanceAdvisors;
+  public LlmGatewayService(
+      ChatClientRegistry chatClientRegistry,
+      LlmGatewayBudgetService budgetService,
+      LlmGatewayRateLimiterService rateLimiterService,
+      TenantAiModelPreferenceService aiModelPreferenceService,
+      // Every bean implementing the marker in the current context - an
+      // empty list in slim contexts (tests, a module that doesn't carry a
+      // governance impl) simply attaches nothing.
+      List<GatewayGovernanceAdvisor> governanceAdvisors) {
+    this.chatClientRegistry = chatClientRegistry;
+    this.budgetService = budgetService;
+    this.rateLimiterService = rateLimiterService;
+    this.aiModelPreferenceService = aiModelPreferenceService;
+    this.governanceAdvisors = governanceAdvisors;
+  }
+
+  /**
+   * Optional client reuse seam (see {@link GatewayClientMemo}); null = build a client per call, as
+   * always.
+   */
+  private volatile GatewayClientMemo clientMemo;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  public void setClientMemo(GatewayClientMemo clientMemo) {
+    this.clientMemo = clientMemo;
+  }
+
+  /**
+   * Resolves a governed {@link ChatClient} for one call - the drop-in replacement for every direct
+   * {@code chatClientRegistry.createClient(...)} call site this codebase had before #848 (see
+   * {@code AgentChatService}, {@code AssistService}, {@code GenerationParamsInferenceService},
+   * {@code WorkflowGraphGeneratorService}).
+   *
+   * @param tenantId the calling tenant, for budget/rate-limit scoping - null for an internal/system
+   *     call with no tenant context (both governance checks skip cleanly rather than erroring on
+   *     null; the AI Model Control override lookup below is skipped the same way).
+   * @throws LlmGatewayLimitExceededException if this tenant is over its monthly spend cap or
+   *     per-minute call rate - rejected before any network call to the provider is made.
+   */
+  public ChatClient resolveClient(String tenantId, GatewayCallSpec spec) {
+    return resolveClient(tenantId, spec, null);
+  }
+
+  /**
+   * As {@link #resolveClient(String, GatewayCallSpec)} for a caller that already resolved the
+   * tenant's effective plan for this turn: both governance checks use {@code knownPlan} instead of
+   * each reading it again (two plan lookups per client before). {@code null} reads the plan, as
+   * before.
+   */
+  public ChatClient resolveClient(
+      String tenantId, GatewayCallSpec spec, com.agenticai.core.security.TenantPlan knownPlan) {
+    com.agenticai.core.security.ImpersonationContext.assertNotImpersonating("llm-call");
+    if (knownPlan == null) {
+      budgetService.assertWithinBudget(tenantId);
+      rateLimiterService.assertWithinRateLimit(tenantId);
+    } else {
+      budgetService.assertWithinBudget(tenantId, knownPlan);
+      rateLimiterService.assertWithinRateLimit(tenantId, knownPlan);
     }
+    String model = resolveEffectiveModel(tenantId, spec);
+    GatewayClientMemo memo = clientMemo;
+    return memo == null
+        ? buildClient(spec, model)
+        : memo.get(tenantId, spec, model, () -> buildClient(spec, model));
+  }
 
-    /**
-     * Optional client reuse seam (see {@link GatewayClientMemo}); null = build a client per call,
-     * as always.
-     */
-    private volatile GatewayClientMemo clientMemo;
-
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
-    public void setClientMemo(GatewayClientMemo clientMemo) {
-        this.clientMemo = clientMemo;
+  private ChatClient buildClient(GatewayCallSpec spec, String model) {
+    ChatClient client =
+        chatClientRegistry.createClient(
+            spec.providerName(),
+            spec.apiKey(),
+            model,
+            spec.maxTokens(),
+            spec.temperature(),
+            spec.topP(),
+            spec.providerOptions());
+    if (governanceAdvisors.isEmpty()) {
+      return client;
     }
+    // mutate().defaultAdvisors(...) APPENDS to the provider factory's own
+    // defaults (same seam FreeTierChatClientService uses) - governance
+    // rides every resolved client without the factory knowing it exists.
+    return client.mutate().defaultAdvisors(governanceAdvisors.toArray(Advisor[]::new)).build();
+  }
 
-    /**
-     * Resolves a governed {@link ChatClient} for one call - the drop-in replacement for every
-     * direct {@code chatClientRegistry.createClient(...)} call site this codebase had before #848
-     * (see {@code AgentChatService}, {@code AssistService}, {@code
-     * GenerationParamsInferenceService}, {@code WorkflowGraphGeneratorService}).
-     *
-     * @param tenantId the calling tenant, for budget/rate-limit scoping - null for an
-     *     internal/system call with no tenant context (both governance checks skip cleanly rather
-     *     than erroring on null; the AI Model Control override lookup below is skipped the same
-     *     way).
-     * @throws LlmGatewayLimitExceededException if this tenant is over its monthly spend cap or
-     *     per-minute call rate - rejected before any network call to the provider is made.
-     */
-    public ChatClient resolveClient(String tenantId, GatewayCallSpec spec) {
-        return resolveClient(tenantId, spec, null);
+  /**
+   * "AI Model Control" settings page wiring - the actual routing decision point a tenant's saved
+   * model preference takes effect at. Looks up {@link TenantAiModelPreferenceService#resolve} for
+   * {@code spec.featureKey()} (falling back to {@link AiModelFeature#DEFAULT} - see that enum's
+   * javadoc for why that is every existing call site today) and, ONLY if a preference is stored AND
+   * its {@code providerName} matches {@code spec.providerName()}, substitutes the preference's
+   * {@code model} for {@code spec.model()}.
+   *
+   * <p>The provider-match requirement is deliberate, not a limitation to fix later: {@code
+   * spec.apiKey()} was already resolved by the caller (e.g. {@code
+   * AgentChatService#credentialResolver.resolveActiveKey}) for {@code spec.providerName()}
+   * specifically - a stored preference naming a DIFFERENT provider would need a different tenant
+   * credential this gateway has no way to fetch (that resolution lives in each caller's own module,
+   * several of which are outside this change's scope), and silently keeping the caller's original
+   * apiKey paired with a different provider's model would produce confusing upstream auth failures
+   * rather than a working override. A same-provider model swap (e.g. "use claude-opus instead of
+   * claude-sonnet for this feature") needs no new credential and always works; a cross-provider
+   * override is simply not-yet-applicable and falls back to {@code spec.model()} unchanged, logged
+   * at debug for visibility.
+   */
+  private String resolveEffectiveModel(String tenantId, GatewayCallSpec spec) {
+    Optional<AiModelPreference> preference =
+        aiModelPreferenceService.resolve(tenantId, spec.featureKey());
+    if (preference.isEmpty()) {
+      return spec.model();
     }
-
-    /**
-     * As {@link #resolveClient(String, GatewayCallSpec)} for a caller that already resolved the
-     * tenant's effective plan for this turn: both governance checks use {@code knownPlan} instead
-     * of each reading it again (two plan lookups per client before). {@code null} reads the plan,
-     * as before.
-     */
-    public ChatClient resolveClient(
-            String tenantId,
-            GatewayCallSpec spec,
-            com.agenticai.core.security.TenantPlan knownPlan) {
-        com.agenticai.core.security.ImpersonationContext.assertNotImpersonating("llm-call");
-        if (knownPlan == null) {
-            budgetService.assertWithinBudget(tenantId);
-            rateLimiterService.assertWithinRateLimit(tenantId);
-        } else {
-            budgetService.assertWithinBudget(tenantId, knownPlan);
-            rateLimiterService.assertWithinRateLimit(tenantId, knownPlan);
-        }
-        String model = resolveEffectiveModel(tenantId, spec);
-        GatewayClientMemo memo = clientMemo;
-        return memo == null
-                ? buildClient(spec, model)
-                : memo.get(tenantId, spec, model, () -> buildClient(spec, model));
+    AiModelPreference stored = preference.get();
+    ProviderName storedProvider;
+    try {
+      storedProvider = ProviderName.valueOf(stored.providerName());
+    } catch (IllegalArgumentException e) {
+      log.warn(
+          "Tenant '{}' AI Model Control override for feature '{}' names unknown"
+              + " providerName '{}' - ignoring it",
+          tenantId,
+          spec.featureKey(),
+          stored.providerName());
+      return spec.model();
     }
-
-    private ChatClient buildClient(GatewayCallSpec spec, String model) {
-        ChatClient client =
-                chatClientRegistry.createClient(
-                        spec.providerName(),
-                        spec.apiKey(),
-                        model,
-                        spec.maxTokens(),
-                        spec.temperature(),
-                        spec.topP(),
-                        spec.providerOptions());
-        if (governanceAdvisors.isEmpty()) {
-            return client;
-        }
-        // mutate().defaultAdvisors(...) APPENDS to the provider factory's own
-        // defaults (same seam FreeTierChatClientService uses) - governance
-        // rides every resolved client without the factory knowing it exists.
-        return client.mutate().defaultAdvisors(governanceAdvisors.toArray(Advisor[]::new)).build();
+    if (storedProvider != spec.providerName()) {
+      log.debug(
+          "Tenant '{}' AI Model Control override for feature '{}' targets provider {} but"
+              + " this call resolved provider {} (different BYOK credential required) -"
+              + " not applicable to this call, using {}",
+          tenantId,
+          spec.featureKey(),
+          storedProvider,
+          spec.providerName(),
+          spec.model());
+      return spec.model();
     }
-
-    /**
-     * "AI Model Control" settings page wiring - the actual routing decision point a tenant's saved
-     * model preference takes effect at. Looks up {@link TenantAiModelPreferenceService#resolve} for
-     * {@code spec.featureKey()} (falling back to {@link AiModelFeature#DEFAULT} - see that enum's
-     * javadoc for why that is every existing call site today) and, ONLY if a preference is stored
-     * AND its {@code providerName} matches {@code spec.providerName()}, substitutes the
-     * preference's {@code model} for {@code spec.model()}.
-     *
-     * <p>The provider-match requirement is deliberate, not a limitation to fix later: {@code
-     * spec.apiKey()} was already resolved by the caller (e.g. {@code
-     * AgentChatService#credentialResolver.resolveActiveKey}) for {@code spec.providerName()}
-     * specifically - a stored preference naming a DIFFERENT provider would need a different tenant
-     * credential this gateway has no way to fetch (that resolution lives in each caller's own
-     * module, several of which are outside this change's scope), and silently keeping the caller's
-     * original apiKey paired with a different provider's model would produce confusing upstream
-     * auth failures rather than a working override. A same-provider model swap (e.g. "use
-     * claude-opus instead of claude-sonnet for this feature") needs no new credential and always
-     * works; a cross-provider override is simply not-yet-applicable and falls back to {@code
-     * spec.model()} unchanged, logged at debug for visibility.
-     */
-    private String resolveEffectiveModel(String tenantId, GatewayCallSpec spec) {
-        Optional<AiModelPreference> preference =
-                aiModelPreferenceService.resolve(tenantId, spec.featureKey());
-        if (preference.isEmpty()) {
-            return spec.model();
-        }
-        AiModelPreference stored = preference.get();
-        ProviderName storedProvider;
-        try {
-            storedProvider = ProviderName.valueOf(stored.providerName());
-        } catch (IllegalArgumentException e) {
-            log.warn(
-                    "Tenant '{}' AI Model Control override for feature '{}' names unknown"
-                            + " providerName '{}' - ignoring it",
-                    tenantId,
-                    spec.featureKey(),
-                    stored.providerName());
-            return spec.model();
-        }
-        if (storedProvider != spec.providerName()) {
-            log.debug(
-                    "Tenant '{}' AI Model Control override for feature '{}' targets provider {} but"
-                        + " this call resolved provider {} (different BYOK credential required) -"
-                        + " not applicable to this call, using {}",
-                    tenantId,
-                    spec.featureKey(),
-                    storedProvider,
-                    spec.providerName(),
-                    spec.model());
-            return spec.model();
-        }
-        log.debug(
-                "Tenant '{}' AI Model Control override applied for feature '{}': model {} -> {}",
-                tenantId,
-                spec.featureKey(),
-                spec.model(),
-                stored.model());
-        return stored.model();
-    }
+    log.debug(
+        "Tenant '{}' AI Model Control override applied for feature '{}': model {} -> {}",
+        tenantId,
+        spec.featureKey(),
+        spec.model(),
+        stored.model());
+    return stored.model();
+  }
 }

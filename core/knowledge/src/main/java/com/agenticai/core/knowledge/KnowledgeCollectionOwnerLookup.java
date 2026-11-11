@@ -18,19 +18,19 @@ import org.springframework.stereotype.Component;
 @Profile("knowledge")
 public class KnowledgeCollectionOwnerLookup implements ResourceOwnerLookup {
 
-    private final KnowledgeCollectionRepository repository;
+  private final KnowledgeCollectionRepository repository;
 
-    public KnowledgeCollectionOwnerLookup(KnowledgeCollectionRepository repository) {
-        this.repository = repository;
-    }
+  public KnowledgeCollectionOwnerLookup(KnowledgeCollectionRepository repository) {
+    this.repository = repository;
+  }
 
-    @Override
-    public ResourceType supportedType() {
-        return ResourceType.KNOWLEDGE_COLLECTION;
-    }
+  @Override
+  public ResourceType supportedType() {
+    return ResourceType.KNOWLEDGE_COLLECTION;
+  }
 
-    @Override
-    public Optional<String> findCreatedBy(UUID resourceId) {
-        return repository.findById(resourceId).map(KnowledgeCollection::getCreatedBy);
-    }
+  @Override
+  public Optional<String> findCreatedBy(UUID resourceId) {
+    return repository.findById(resourceId).map(KnowledgeCollection::getCreatedBy);
+  }
 }

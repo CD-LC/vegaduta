@@ -1,10 +1,9 @@
 package io.vegaduta.agent.api.approval;
 
 /**
- * Decides who may approve or reject a request. The default (what {@code Governance} installs
- * unless told otherwise) applies the four-eyes rule: the requester may not decide their own
- * request. Hosts replace it to check roles or group membership, or opt out explicitly with {@link
- * #allowAny()}.
+ * Decides who may approve or reject a request. The default (what {@code Governance} installs unless
+ * told otherwise) applies the four-eyes rule: the requester may not decide their own request. Hosts
+ * replace it to check roles or group membership, or opt out explicitly with {@link #allowAny()}.
  */
 @FunctionalInterface
 public interface ApprovalDecisionAuthorizer {

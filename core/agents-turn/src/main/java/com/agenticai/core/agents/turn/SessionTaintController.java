@@ -32,93 +32,94 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/agents/{agentId}/chat/sessions/{sessionId}/taint")
 public class SessionTaintController {
 
-    private final AgentService agentService;
-    private final ObjectProvider<SessionTaintStore> store;
+  private final AgentService agentService;
+  private final ObjectProvider<SessionTaintStore> store;
 
-    public SessionTaintController(AgentService agentService, ObjectProvider<SessionTaintStore> store) {
-        this.agentService = agentService;
-        this.store = store;
-    }
+  public SessionTaintController(
+      AgentService agentService, ObjectProvider<SessionTaintStore> store) {
+    this.agentService = agentService;
+    this.store = store;
+  }
 
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> status(
-            @PathVariable UUID agentId,
-            @PathVariable String sessionId,
-            @RequestParam(required = false) String subject,
-            Principal principal,
-            Authentication authentication) {
-        agentService.requireAccess(agentId, PermissionLevel.RUNNER);
-        SessionTaintStore taintStore = store.getIfAvailable();
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("sessionId", sessionId);
-        body.put("persistenceEnabled", taintStore != null && taintStore.enabled());
-        if (taintStore == null) {
-            body.put("tainted", false);
-            return ResponseEntity.ok(body);
-        }
-        String scoped = scoped(agentId, sessionId, subject, principal, authentication);
-        taintStore
-                .load(scoped)
-                .ifPresentOrElse(
-                        m -> {
-                            body.put("tainted", true);
-                            body.put("sources", m.sources());
-                            body.put("firstTaintedAt", m.firstTaintedAt().toString());
-                            body.put("lastTaintedAt", m.lastTaintedAt().toString());
-                        },
-                        () -> body.put("tainted", false));
-        return ResponseEntity.ok(body);
+  @GetMapping
+  public ResponseEntity<Map<String, Object>> status(
+      @PathVariable UUID agentId,
+      @PathVariable String sessionId,
+      @RequestParam(required = false) String subject,
+      Principal principal,
+      Authentication authentication) {
+    agentService.requireAccess(agentId, PermissionLevel.RUNNER);
+    SessionTaintStore taintStore = store.getIfAvailable();
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("sessionId", sessionId);
+    body.put("persistenceEnabled", taintStore != null && taintStore.enabled());
+    if (taintStore == null) {
+      body.put("tainted", false);
+      return ResponseEntity.ok(body);
     }
+    String scoped = scoped(agentId, sessionId, subject, principal, authentication);
+    taintStore
+        .load(scoped)
+        .ifPresentOrElse(
+            m -> {
+              body.put("tainted", true);
+              body.put("sources", m.sources());
+              body.put("firstTaintedAt", m.firstTaintedAt().toString());
+              body.put("lastTaintedAt", m.lastTaintedAt().toString());
+            },
+            () -> body.put("tainted", false));
+    return ResponseEntity.ok(body);
+  }
 
-    @DeleteMapping
-    public ResponseEntity<Map<String, Object>> clear(
-            @PathVariable UUID agentId,
-            @PathVariable String sessionId,
-            @RequestParam(required = false) String subject,
-            Principal principal,
-            Authentication authentication) {
-        agentService.requireAccess(agentId, PermissionLevel.RUNNER);
-        SessionTaintStore taintStore = store.getIfAvailable();
-        if (taintStore == null) {
-            return ResponseEntity.ok(Map.of("sessionId", sessionId, "cleared", false));
-        }
-        String scoped = scoped(agentId, sessionId, subject, principal, authentication);
-        String actor = principal != null ? principal.getName() : "unknown";
-        boolean removed =
-                taintStore.clear(
-                        scoped,
-                        actor,
-                        agentId + "/" + sessionId + (subject != null ? " (for " + subject + ")" : ""));
-        return ResponseEntity.ok(Map.of("sessionId", sessionId, "cleared", removed));
+  @DeleteMapping
+  public ResponseEntity<Map<String, Object>> clear(
+      @PathVariable UUID agentId,
+      @PathVariable String sessionId,
+      @RequestParam(required = false) String subject,
+      Principal principal,
+      Authentication authentication) {
+    agentService.requireAccess(agentId, PermissionLevel.RUNNER);
+    SessionTaintStore taintStore = store.getIfAvailable();
+    if (taintStore == null) {
+      return ResponseEntity.ok(Map.of("sessionId", sessionId, "cleared", false));
     }
+    String scoped = scoped(agentId, sessionId, subject, principal, authentication);
+    String actor = principal != null ? principal.getName() : "unknown";
+    boolean removed =
+        taintStore.clear(
+            scoped,
+            actor,
+            agentId + "/" + sessionId + (subject != null ? " (for " + subject + ")" : ""));
+    return ResponseEntity.ok(Map.of("sessionId", sessionId, "cleared", removed));
+  }
 
-    private static String scoped(
-            UUID agentId,
-            String sessionId,
-            String subject,
-            Principal principal,
-            Authentication authentication) {
-        Principal effective = principal;
-        if (subject != null && !subject.isBlank()) {
-            if (!isTenantAdmin(authentication)) {
-                throw new org.springframework.security.access.AccessDeniedException(
-                        "only a tenant admin may act for another user");
-            }
-            effective = () -> subject;
-        }
-        return AgentChatSessionController.scopedMemorySessionId(agentId, sessionId, effective);
+  private static String scoped(
+      UUID agentId,
+      String sessionId,
+      String subject,
+      Principal principal,
+      Authentication authentication) {
+    Principal effective = principal;
+    if (subject != null && !subject.isBlank()) {
+      if (!isTenantAdmin(authentication)) {
+        throw new org.springframework.security.access.AccessDeniedException(
+            "only a tenant admin may act for another user");
+      }
+      effective = () -> subject;
     }
+    return AgentChatSessionController.scopedMemorySessionId(agentId, sessionId, effective);
+  }
 
-    private static boolean isTenantAdmin(Authentication authentication) {
-        if (authentication == null || authentication.getAuthorities() == null) {
-            return false;
-        }
-        for (GrantedAuthority a : authentication.getAuthorities()) {
-            String name = a.getAuthority();
-            if ("ROLE_tenant-admin".equals(name) || "ROLE_platform-admin".equals(name)) {
-                return true;
-            }
-        }
-        return false;
+  private static boolean isTenantAdmin(Authentication authentication) {
+    if (authentication == null || authentication.getAuthorities() == null) {
+      return false;
     }
+    for (GrantedAuthority a : authentication.getAuthorities()) {
+      String name = a.getAuthority();
+      if ("ROLE_tenant-admin".equals(name) || "ROLE_platform-admin".equals(name)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

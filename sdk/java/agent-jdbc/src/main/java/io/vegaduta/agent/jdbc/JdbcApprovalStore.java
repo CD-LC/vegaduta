@@ -32,8 +32,8 @@ public final class JdbcApprovalStore implements ApprovalStore {
           + ") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
   private static final String UPDATE =
-      "UPDATE vegaduta_approval SET status = ?, decided_at = ?, decided_by = ?, decision_reason = ?,"
-          + " result = ? WHERE id = ?";
+      "UPDATE vegaduta_approval SET status = ?, decided_at = ?, decided_by = ?, decision_reason ="
+          + " ?, result = ? WHERE id = ?";
 
   private static final String UPDATE_IF_STATUS = UPDATE + " AND status = ?";
 

@@ -1,12 +1,11 @@
 package com.agenticai.core.agents.memory;
 
-import com.agenticai.core.screen.ContentWriteScreen;
 import com.agenticai.core.graphmemory.EntityExtractionService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.graphmemory.GraphTriple;
 import com.agenticai.core.graphmemory.MemoryWriteArbitrationService;
 import com.agenticai.core.json.JsonMappers;
-import com.agenticai.core.knowledge.KnowledgeWriteScreen;
+import com.agenticai.core.screen.ContentWriteScreen;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
@@ -35,132 +34,130 @@ import org.springframework.ai.tool.definition.ToolDefinition;
  */
 public class RememberFactToolCallback implements ToolCallback {
 
-    private static final Logger log = LoggerFactory.getLogger(RememberFactToolCallback.class);
-    private static final ObjectMapper MAPPER = JsonMappers.plain();
+  private static final Logger log = LoggerFactory.getLogger(RememberFactToolCallback.class);
+  private static final ObjectMapper MAPPER = JsonMappers.plain();
 
-    private final AgentMemoryService memoryService;
-    private final UUID agentId;
-    private final String subjectKey;
-    private final GraphMemoryService graphMemoryService;
-    private final EntityExtractionService entityExtractionService;
-    private final MemoryWriteArbitrationService memoryWriteArbitrationService;
-    private final ChatClient chatClient;
+  private final AgentMemoryService memoryService;
+  private final UUID agentId;
+  private final String subjectKey;
+  private final GraphMemoryService graphMemoryService;
+  private final EntityExtractionService entityExtractionService;
+  private final MemoryWriteArbitrationService memoryWriteArbitrationService;
+  private final ChatClient chatClient;
 
-    public RememberFactToolCallback(
-            AgentMemoryService memoryService, UUID agentId, String subjectKey) {
-        this(memoryService, agentId, subjectKey, null, null, null, null);
-    }
+  public RememberFactToolCallback(
+      AgentMemoryService memoryService, UUID agentId, String subjectKey) {
+    this(memoryService, agentId, subjectKey, null, null, null, null);
+  }
 
-    public RememberFactToolCallback(
-            AgentMemoryService memoryService,
-            UUID agentId,
-            String subjectKey,
-            GraphMemoryService graphMemoryService,
-            EntityExtractionService entityExtractionService,
-            MemoryWriteArbitrationService memoryWriteArbitrationService,
-            ChatClient chatClient) {
-        this.memoryService = memoryService;
-        this.agentId = agentId;
-        this.subjectKey = subjectKey;
-        this.graphMemoryService = graphMemoryService;
-        this.entityExtractionService = entityExtractionService;
-        this.memoryWriteArbitrationService = memoryWriteArbitrationService;
-        this.chatClient = chatClient;
-    }
+  public RememberFactToolCallback(
+      AgentMemoryService memoryService,
+      UUID agentId,
+      String subjectKey,
+      GraphMemoryService graphMemoryService,
+      EntityExtractionService entityExtractionService,
+      MemoryWriteArbitrationService memoryWriteArbitrationService,
+      ChatClient chatClient) {
+    this.memoryService = memoryService;
+    this.agentId = agentId;
+    this.subjectKey = subjectKey;
+    this.graphMemoryService = graphMemoryService;
+    this.entityExtractionService = entityExtractionService;
+    this.memoryWriteArbitrationService = memoryWriteArbitrationService;
+    this.chatClient = chatClient;
+  }
 
-    @Override
-    public ToolDefinition getToolDefinition() {
-        return ToolDefinition.builder()
-                .name("remember_fact")
-                .description(
-                        "Saves a fact, preference, or correction about the current user so you'll still know it in "
-                                + "future conversations, not just this one. Use this when the user states a durable "
-                                + "preference (\"I prefer email over WhatsApp\"), a fact about themselves or their business "
-                                + "(\"my shop is only open on weekends\"), or corrects something you got wrong. Do not use "
-                                + "this for one-off details that only matter to the current message.")
-                .inputSchema(
-                        """
-                {
-                    "type": "object",
-                    "properties": {
-                        "fact": {
-                            "type": "string",
-                            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"Prefers to be contacted in the evening after 6pm\\")"
-                        }
-                    },
-                    "required": ["fact"]
-                }
-                """)
-                .build();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public String call(String toolInput) {
-        try {
-            Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
-            Object factValue = args.get("fact");
-            if (factValue == null || factValue.toString().isBlank()) {
-                return "{\"error\": \"fact is required\"}";
-            }
-            // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): a remembered fact is
-            // recalled into later turns, so a directive or a key written here outlives this turn.
-            var refusal = ContentWriteScreen.refusal(factValue.toString());
-            if (refusal.isPresent()) {
-                log.warn("remember_fact refused for agent {}: write screen tripped", agentId);
-                return errorJson(refusal.get());
-            }
-            UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString());
-            writeToGraphIfAvailable(factValue.toString());
-            return "{\"remembered\": true, \"memoryId\": \"" + memoryId + "\"}";
-        } catch (Exception e) {
-            log.warn("remember_fact tool call failed", e);
-            return errorJson("Failed to remember fact: " + e.getMessage());
+  @Override
+  public ToolDefinition getToolDefinition() {
+    return ToolDefinition.builder()
+        .name("remember_fact")
+        .description(
+            "Saves a fact, preference, or correction about the current user so you'll still know it"
+                + " in future conversations, not just this one. Use this when the user states a"
+                + " durable preference (\"I prefer email over WhatsApp\"), a fact about themselves"
+                + " or their business (\"my shop is only open on weekends\"), or corrects something"
+                + " you got wrong. Do not use this for one-off details that only matter to the"
+                + " current message.")
+        .inputSchema(
+            """
+{
+    "type": "object",
+    "properties": {
+        "fact": {
+            "type": "string",
+            "description": "The fact to remember, written as a short, self-contained statement (e.g. \\"Prefers to be contacted in the evening after 6pm\\")"
         }
-    }
+    },
+    "required": ["fact"]
+}
+""")
+        .build();
+  }
 
-    /**
-     * Best-effort, entirely optional: extracts and writes graph triples for this fact if the
-     * "graph-memory" profile is active and a chat context is available. Never throws - a failure or
-     * absence here must never affect {@code remember_fact}'s already-successful primary result, see
-     * this class's javadoc.
-     *
-     * <p>Master Roadmap 2026 item #11 (Memory write arbitration): the actual write goes through
-     * {@link MemoryWriteArbitrationService#arbitrateAndWrite} rather than calling {@code
-     * graphMemoryService.remember} directly - that service internally falls straight through to the
-     * exact same unconditional write whenever arbitration is disabled ({@code
-     * app.graph-memory.arbitration.enabled=false}, the default) or {@code
-     * memoryWriteArbitrationService} itself is null (matches this class's own older constructor),
-     * so this call is safe regardless of which optional pieces are wired up.
-     */
-    private void writeToGraphIfAvailable(String fact) {
-        if (graphMemoryService == null || entityExtractionService == null || chatClient == null) {
-            return;
-        }
-        try {
-            List<GraphTriple> triples =
-                    entityExtractionService.extractTriples(chatClient, fact, agentId);
-            if (memoryWriteArbitrationService != null) {
-                memoryWriteArbitrationService.arbitrateAndWrite(
-                        chatClient, graphMemoryService, agentId, subjectKey, triples);
-            } else {
-                graphMemoryService.remember(agentId, subjectKey, triples);
-            }
-        } catch (Exception e) {
-            log.warn(
-                    "Graph memory enrichment failed for remember_fact - vector memory is unaffected",
-                    e);
-        }
+  @Override
+  @SuppressWarnings("unchecked")
+  public String call(String toolInput) {
+    try {
+      Map<String, Object> args = MAPPER.readValue(toolInput, Map.class);
+      Object factValue = args.get("fact");
+      if (factValue == null || factValue.toString().isBlank()) {
+        return "{\"error\": \"fact is required\"}";
+      }
+      // Stored-injection / credential tripwire (ASI06, LLM04, LLM02): a remembered fact is
+      // recalled into later turns, so a directive or a key written here outlives this turn.
+      var refusal = ContentWriteScreen.refusal(factValue.toString());
+      if (refusal.isPresent()) {
+        log.warn("remember_fact refused for agent {}: write screen tripped", agentId);
+        return errorJson(refusal.get());
+      }
+      UUID memoryId = memoryService.remember(agentId, subjectKey, factValue.toString());
+      writeToGraphIfAvailable(factValue.toString());
+      return "{\"remembered\": true, \"memoryId\": \"" + memoryId + "\"}";
+    } catch (Exception e) {
+      log.warn("remember_fact tool call failed", e);
+      return errorJson("Failed to remember fact: " + e.getMessage());
     }
+  }
 
-    // Same bug class fixed in KnowledgeSearchToolCallback - hand-built
-    // "{\"error\": \"...\"}" strings break if the exception message
-    // contains a raw '"'.
-    private static String errorJson(String message) {
-        try {
-            return MAPPER.writeValueAsString(Map.of("error", message));
-        } catch (Exception e) {
-            return "{\"error\": \"error\"}";
-        }
+  /**
+   * Best-effort, entirely optional: extracts and writes graph triples for this fact if the
+   * "graph-memory" profile is active and a chat context is available. Never throws - a failure or
+   * absence here must never affect {@code remember_fact}'s already-successful primary result, see
+   * this class's javadoc.
+   *
+   * <p>Master Roadmap 2026 item #11 (Memory write arbitration): the actual write goes through
+   * {@link MemoryWriteArbitrationService#arbitrateAndWrite} rather than calling {@code
+   * graphMemoryService.remember} directly - that service internally falls straight through to the
+   * exact same unconditional write whenever arbitration is disabled ({@code
+   * app.graph-memory.arbitration.enabled=false}, the default) or {@code
+   * memoryWriteArbitrationService} itself is null (matches this class's own older constructor), so
+   * this call is safe regardless of which optional pieces are wired up.
+   */
+  private void writeToGraphIfAvailable(String fact) {
+    if (graphMemoryService == null || entityExtractionService == null || chatClient == null) {
+      return;
     }
+    try {
+      List<GraphTriple> triples = entityExtractionService.extractTriples(chatClient, fact, agentId);
+      if (memoryWriteArbitrationService != null) {
+        memoryWriteArbitrationService.arbitrateAndWrite(
+            chatClient, graphMemoryService, agentId, subjectKey, triples);
+      } else {
+        graphMemoryService.remember(agentId, subjectKey, triples);
+      }
+    } catch (Exception e) {
+      log.warn("Graph memory enrichment failed for remember_fact - vector memory is unaffected", e);
+    }
+  }
+
+  // Same bug class fixed in KnowledgeSearchToolCallback - hand-built
+  // "{\"error\": \"...\"}" strings break if the exception message
+  // contains a raw '"'.
+  private static String errorJson(String message) {
+    try {
+      return MAPPER.writeValueAsString(Map.of("error", message));
+    } catch (Exception e) {
+      return "{\"error\": \"error\"}";
+    }
+  }
 }

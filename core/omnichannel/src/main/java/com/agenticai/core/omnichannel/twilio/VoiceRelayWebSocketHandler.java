@@ -91,480 +91,464 @@ import reactor.core.scheduler.Scheduler;
  */
 public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(VoiceRelayWebSocketHandler.class);
-    private static final ObjectMapper MAPPER = JsonMappers.plain();
-    private static final String REQUESTED_BY_PREFIX = "system:voice-inbound:";
+  private static final Logger log = LoggerFactory.getLogger(VoiceRelayWebSocketHandler.class);
+  private static final ObjectMapper MAPPER = JsonMappers.plain();
+  private static final String REQUESTED_BY_PREFIX = "system:voice-inbound:";
 
-    private static final String ATTR_TENANT_SCHEMA = "voiceRelay.tenantSchema";
-    private static final String ATTR_AGENT_ID = "voiceRelay.agentId";
-    private static final String ATTR_MEMORY_SESSION_ID = "voiceRelay.memorySessionId";
-    private static final String ATTR_FROM = "voiceRelay.from";
-    private static final String ATTR_DIALED_NUMBER = "voiceRelay.dialedNumber";
-    private static final String ATTR_CALL_SID = "voiceRelay.callSid";
-    private static final String ATTR_CHANNEL_SESSION_ID = "voiceRelay.channelSessionId";
-    private static final String ATTR_SAFE_SESSION = "voiceRelay.safeSession";
-    private static final String ATTR_ACTIVE_SUBSCRIPTION = "voiceRelay.activeSubscription";
+  private static final String ATTR_TENANT_SCHEMA = "voiceRelay.tenantSchema";
+  private static final String ATTR_AGENT_ID = "voiceRelay.agentId";
+  private static final String ATTR_MEMORY_SESSION_ID = "voiceRelay.memorySessionId";
+  private static final String ATTR_FROM = "voiceRelay.from";
+  private static final String ATTR_DIALED_NUMBER = "voiceRelay.dialedNumber";
+  private static final String ATTR_CALL_SID = "voiceRelay.callSid";
+  private static final String ATTR_CHANNEL_SESSION_ID = "voiceRelay.channelSessionId";
+  private static final String ATTR_SAFE_SESSION = "voiceRelay.safeSession";
+  private static final String ATTR_ACTIVE_SUBSCRIPTION = "voiceRelay.activeSubscription";
 
-    private static final String VOICE_TICKET_SCOPE = "VOICE_TICKET";
+  private static final String VOICE_TICKET_SCOPE = "VOICE_TICKET";
 
-    private static final int SEND_TIME_LIMIT_MS = 10_000;
-    private static final int SEND_BUFFER_SIZE_LIMIT = 512 * 1024;
+  private static final int SEND_TIME_LIMIT_MS = 10_000;
+  private static final int SEND_BUFFER_SIZE_LIMIT = 512 * 1024;
 
-    private final TenantResolutionService tenantResolutionService;
-    private final ChannelSessionService channelSessionService;
-    private final AgentChatService agentChatService;
-    private final VoiceDtmfMappingService voiceDtmfMappingService;
-    private final VoiceNumberAgentService voiceNumberAgentService;
-    private final VoiceRelayTicketService voiceRelayTicketService;
-    // Makes a ticket single-use. Null only for the package-private test constructor below.
-    private final InboundMessageDedupService dedupService;
+  private final TenantResolutionService tenantResolutionService;
+  private final ChannelSessionService channelSessionService;
+  private final AgentChatService agentChatService;
+  private final VoiceDtmfMappingService voiceDtmfMappingService;
+  private final VoiceNumberAgentService voiceNumberAgentService;
+  private final VoiceRelayTicketService voiceRelayTicketService;
+  // Makes a ticket single-use. Null only for the package-private test constructor below.
+  private final InboundMessageDedupService dedupService;
 
-    /**
-     * Where a prompt's chat turn is subscribed; package-private so a test can pin it to one thread.
-     */
-    Scheduler promptScheduler = TenantAwareSchedulers.boundedElastic();
+  /**
+   * Where a prompt's chat turn is subscribed; package-private so a test can pin it to one thread.
+   */
+  Scheduler promptScheduler = TenantAwareSchedulers.boundedElastic();
 
-    /** For tests that exercise something other than ticket replay: tickets stay reusable. */
-    VoiceRelayWebSocketHandler(
-            TenantResolutionService tenantResolutionService,
-            ChannelSessionService channelSessionService,
-            AgentChatService agentChatService,
-            VoiceDtmfMappingService voiceDtmfMappingService,
-            VoiceNumberAgentService voiceNumberAgentService,
-            VoiceRelayTicketService voiceRelayTicketService) {
-        this(
-                tenantResolutionService,
-                channelSessionService,
-                agentChatService,
-                voiceDtmfMappingService,
-                voiceNumberAgentService,
-                voiceRelayTicketService,
-                null);
+  /** For tests that exercise something other than ticket replay: tickets stay reusable. */
+  VoiceRelayWebSocketHandler(
+      TenantResolutionService tenantResolutionService,
+      ChannelSessionService channelSessionService,
+      AgentChatService agentChatService,
+      VoiceDtmfMappingService voiceDtmfMappingService,
+      VoiceNumberAgentService voiceNumberAgentService,
+      VoiceRelayTicketService voiceRelayTicketService) {
+    this(
+        tenantResolutionService,
+        channelSessionService,
+        agentChatService,
+        voiceDtmfMappingService,
+        voiceNumberAgentService,
+        voiceRelayTicketService,
+        null);
+  }
+
+  public VoiceRelayWebSocketHandler(
+      TenantResolutionService tenantResolutionService,
+      ChannelSessionService channelSessionService,
+      AgentChatService agentChatService,
+      VoiceDtmfMappingService voiceDtmfMappingService,
+      VoiceNumberAgentService voiceNumberAgentService,
+      VoiceRelayTicketService voiceRelayTicketService,
+      InboundMessageDedupService dedupService) {
+    this.dedupService = dedupService;
+    this.voiceRelayTicketService = voiceRelayTicketService;
+    this.tenantResolutionService = tenantResolutionService;
+    this.channelSessionService = channelSessionService;
+    this.agentChatService = agentChatService;
+    this.voiceDtmfMappingService = voiceDtmfMappingService;
+    this.voiceNumberAgentService = voiceNumberAgentService;
+  }
+
+  @Override
+  protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+    JsonNode node;
+    try {
+      node = MAPPER.readTree(message.getPayload());
+    } catch (IOException e) {
+      log.warn(
+          "Malformed Conversation Relay message on session {}: {}",
+          session.getId(),
+          e.getMessage());
+      return;
+    }
+    String type = node.path("type").asText("");
+    switch (type) {
+      case "setup" -> handleSetup(session, node);
+      case "prompt" -> handlePrompt(session, node);
+      case "interrupt" -> disposeActive(session);
+      case "dtmf" -> handleDtmf(session, node);
+      case "error" ->
+          log.warn(
+              "Conversation Relay reported an error on session {}: {}",
+              session.getId(),
+              node.path("description").asText(""));
+      default ->
+          log.debug(
+              "Unhandled Conversation Relay message type '{}' on session {}",
+              type,
+              session.getId());
+    }
+  }
+
+  /**
+   * Mirrors {@code TwilioWebhookController#inboundWhatsApp}'s tenant resolution exactly (resolve
+   * schema from the unauthenticated {@code accountSid} claim, same as every channel with no JWT),
+   * then reuses the SAME pairing/default-agent machinery every other channel already has - {@link
+   * ChannelSessionService#resolveOrCreate} with {@link ChannelType#VOICE} and the caller's phone
+   * number as {@code externalId} (so the same caller's memory persists call to call, exactly like
+   * WhatsApp's phone-number-keyed sessions).
+   */
+  private void handleSetup(WebSocketSession session, JsonNode node) {
+    // Security audit 2026-09-18: nothing the frame CLAIMS is trusted any
+    // more. The tenant, call and caller come from the admission ticket the
+    // signature-verified inbound-call webhook minted; a socket without a
+    // valid one is closed before any tenant is resolved.
+    String presented = node.path("customParameters").path("ticket").asText("");
+    if (presented.isBlank()) {
+      presented = queryParam(session.getUri(), "ticket").orElse("");
+    }
+    Optional<VoiceRelayTicketService.Admission> admission =
+        voiceRelayTicketService.verify(presented);
+    if (admission.isEmpty() || !admission.get().callSid().equals(node.path("callSid").asText(""))) {
+      log.warn(
+          "Rejected voice relay setup on session {} - missing, expired or mismatched"
+              + " admission ticket",
+          session.getId());
+      closeQuietly(session);
+      return;
+    }
+    // Single-use: a ticket that was already presented is refused, so one captured from a log or
+    // a proxy cannot open a second socket during its 5-minute life. Claimed on the ticket's
+    // digest (each mint is unique), shared across replicas through the same Redis claim the
+    // webhooks use, and failing open on a Redis outage like they do.
+    if (dedupService != null
+        && !dedupService.tryClaim(VOICE_TICKET_SCOPE, ticketDigest(presented))) {
+      log.warn(
+          "Rejected voice relay setup on session {} - admission ticket was already used",
+          session.getId());
+      closeQuietly(session);
+      return;
+    }
+    String accountSid = admission.get().accountSid();
+    String callSid = admission.get().callSid();
+    String from = admission.get().from();
+    String dialedNumber = resolveDialedNumber(session, node);
+    session.getAttributes().put(ATTR_CALL_SID, callSid);
+    session.getAttributes().put(ATTR_FROM, from);
+    session.getAttributes().put(ATTR_DIALED_NUMBER, dialedNumber);
+
+    // No fallback to the default schema: an AccountSid that maps to no
+    // tenant is not "the public tenant's call", it is nobody's call.
+    Optional<String> resolvedSchema =
+        tenantResolutionService.resolveTenantSchema(ExternalAccountProvider.TWILIO, accountSid);
+    if (resolvedSchema.isEmpty()) {
+      log.warn(
+          "Rejected voice relay setup for call {} - Twilio account is not linked to any"
+              + " tenant",
+          callSid);
+      closeQuietly(session);
+      return;
+    }
+    String tenantSchema = resolvedSchema.get();
+
+    TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
+    try {
+      ChannelSession channelSession =
+          channelSessionService.resolveOrCreate(ChannelType.VOICE, from, "(voice call)");
+      if (!channelSession.isPaired()) {
+        log.warn(
+            "Unpaired voice caller {} on call {} - declining and ending session",
+            maskFrom(from),
+            callSid);
+        sendFinalTextAndEnd(
+            session,
+            "For security, an admin needs to approve this caller before I can help. "
+                + "Your pairing code is "
+                + channelSession.getPairingCode()
+                + ". Goodbye.",
+            "{\"reasonCode\":\"unpaired-caller\"}");
+        channelSessionService.markPairingNoticeSent(channelSession.getId());
+        return;
+      }
+      // Per-number routing. The ChannelSession above is keyed on the
+      // CALLER, so its stamped agent answers for "whoever this person
+      // last spoke to"; a tenant running sales and support on two
+      // numbers needs "whatever they dialled" to win instead.
+      // Overriding only the session attribute keeps the caller's
+      // conversation memory continuous while changing who answers -
+      // the same per-call mechanism handleDtmf uses, and deliberately
+      // NOT a rebind of the ChannelSession row. See VoiceNumberAgent.
+      UUID routedAgentId =
+          voiceNumberAgentService
+              .findAgentIdForNumber(dialedNumber)
+              .orElse(channelSession.getAgentId());
+
+      session.getAttributes().put(ATTR_TENANT_SCHEMA, tenantSchema);
+      session.getAttributes().put(ATTR_AGENT_ID, routedAgentId);
+      session.getAttributes().put(ATTR_MEMORY_SESSION_ID, channelSession.getSessionId());
+      session.getAttributes().put(ATTR_CHANNEL_SESSION_ID, channelSession.getId());
+      if (!routedAgentId.equals(channelSession.getAgentId())) {
+        log.info(
+            "Voice call {} routed by dialled number {} to agent {} (channel default was" + " {})",
+            callSid,
+            maskFrom(dialedNumber),
+            routedAgentId,
+            channelSession.getAgentId());
+      }
+      log.info(
+          "Voice call {} set up for tenant schema {} - agent {}",
+          callSid,
+          tenantSchema,
+          routedAgentId);
+    } catch (RuntimeException e) {
+      log.warn("Failed to set up voice relay session for call {}: {}", callSid, e.getMessage(), e);
+      sendFinalTextAndEnd(
+          session, "Sorry, something went wrong setting up this call. Goodbye.", null);
+    } finally {
+      TenantContext.clear();
+    }
+  }
+
+  /**
+   * Only acts once Twilio reports the caller's utterance is final ({@code last=true}) -
+   * partial/interim transcripts exist so a UI could show live captions, which this backend has no
+   * use for. Streams {@link AgentChatService#chat}'s tokens back as Conversation Relay {@code text}
+   * messages a sentence at a time (Twilio's own docs recommend streaming rather than waiting for
+   * the full reply, to cut perceived latency; the sentence-sized buffering is {@link
+   * SpeechStreamNormalizer}'s, and is what lets the markdown be stripped before Twilio's TTS reads
+   * it out), closing the turn with a final empty {@code last:true} token.
+   */
+  private void handlePrompt(WebSocketSession session, JsonNode node) {
+    if (!node.path("last").asBoolean(false)) {
+      return;
+    }
+    String text = node.path("voicePrompt").asText("");
+    if (text.isBlank()) {
+      return;
     }
 
-    public VoiceRelayWebSocketHandler(
-            TenantResolutionService tenantResolutionService,
-            ChannelSessionService channelSessionService,
-            AgentChatService agentChatService,
-            VoiceDtmfMappingService voiceDtmfMappingService,
-            VoiceNumberAgentService voiceNumberAgentService,
-            VoiceRelayTicketService voiceRelayTicketService,
-            InboundMessageDedupService dedupService) {
-        this.dedupService = dedupService;
-        this.voiceRelayTicketService = voiceRelayTicketService;
-        this.tenantResolutionService = tenantResolutionService;
-        this.channelSessionService = channelSessionService;
-        this.agentChatService = agentChatService;
-        this.voiceDtmfMappingService = voiceDtmfMappingService;
-        this.voiceNumberAgentService = voiceNumberAgentService;
+    var attrs = session.getAttributes();
+    String tenantSchema = (String) attrs.get(ATTR_TENANT_SCHEMA);
+    UUID agentId = (UUID) attrs.get(ATTR_AGENT_ID);
+    String memorySessionId = (String) attrs.get(ATTR_MEMORY_SESSION_ID);
+    String from = (String) attrs.get(ATTR_FROM);
+    if (tenantSchema == null || agentId == null) {
+      // setup never completed successfully (unpaired caller, or setup
+      // itself errored and already ended the session) - nothing to do.
+      return;
     }
 
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        JsonNode node;
-        try {
-            node = MAPPER.readTree(message.getPayload());
-        } catch (IOException e) {
-            log.warn(
-                    "Malformed Conversation Relay message on session {}: {}",
-                    session.getId(),
-                    e.getMessage());
-            return;
-        }
-        String type = node.path("type").asText("");
-        switch (type) {
-            case "setup" -> handleSetup(session, node);
-            case "prompt" -> handlePrompt(session, node);
-            case "interrupt" -> disposeActive(session);
-            case "dtmf" -> handleDtmf(session, node);
-            case "error" ->
-                    log.warn(
-                            "Conversation Relay reported an error on session {}: {}",
-                            session.getId(),
-                            node.path("description").asText(""));
-            default ->
-                    log.debug(
-                            "Unhandled Conversation Relay message type '{}' on session {}",
-                            type,
-                            session.getId());
-        }
+    disposeActive(session);
+
+    // One buffer per turn - see the class javadoc's "Spoken text is
+    // normalized". Deliberately NOT flushed on interrupt: disposing the
+    // subscription drops it with whatever it was still holding, which is
+    // exactly right when the caller has started speaking again.
+    SpeechStreamNormalizer speech = new SpeechStreamNormalizer();
+    Consumer<String> speak = spoken -> sendTextToken(session, spoken, false);
+
+    // The tenant is applied for the synchronous subscription only, and the pooled scheduler
+    // thread is put back as found. (It used to be set inside Flux.defer and cleared in
+    // doFinally, which runs on whichever thread delivers the terminal signal: the scheduler
+    // thread kept the tenant after the subscribe and ran unrelated work, possibly another
+    // tenant's, under it.)
+    // ADR-0022 stage 4: the turn context is built from the same explicit channel principal.
+    TenantContext caller = TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + from, Set.of());
+    TenantScope tenant = TenantScope.of(caller);
+    ChatTurnRequest turn = ChatTurnRequest.builder(agentId, memorySessionId, from, text).build();
+    TurnContext turnContext = TurnContext.forEntry(caller, turn);
+    turnContext.taint().mark("inbound:twilio_voice");
+    Disposable subscription =
+        TenantScopedFlux.subscribeInScope(tenant, () -> agentChatService.chat(turnContext, turn))
+            .subscribeOn(promptScheduler)
+            .subscribe(
+                token -> speech.accept(token, speak),
+                error -> {
+                  log.warn(
+                      "Voice relay chat error on call {}: {}",
+                      attrs.get(ATTR_CALL_SID),
+                      error.getMessage(),
+                      error);
+                  // Say the part of the answer that did arrive before
+                  // apologising for the rest - the caller had already heard
+                  // it before this path buffered. The leading space is what
+                  // keeps it from running into that partial sentence.
+                  speech.flush(speak);
+                  sendTextToken(session, " Sorry, I ran into a problem there.", true);
+                },
+                () -> {
+                  speech.flush(speak);
+                  sendTextToken(session, "", true);
+                });
+    attrs.put(ATTR_ACTIVE_SUBSCRIPTION, subscription);
+  }
+
+  /**
+   * Master Roadmap 2026 item #17 fast-follow - looks up the caller's pressed digit against this
+   * tenant's {@link VoiceDtmfMappingService} menu. A match swaps only this session's in-memory
+   * {@code ATTR_AGENT_ID} attribute (so the NEXT {@code prompt} routes to the new agent) and speaks
+   * a short confirmation; no match is a silent no-op - an unmapped digit (or a tenant that hasn't
+   * configured a menu at all) just means the caller keeps talking to whichever agent already
+   * answered, exactly like today. Deliberately does not touch the {@code ChannelSession} row (see
+   * {@link VoiceDtmfMapping}'s javadoc) - the switch is scoped to this one call.
+   */
+  private void handleDtmf(WebSocketSession session, JsonNode node) {
+    String digit = node.path("digit").asText("");
+    var attrs = session.getAttributes();
+    String tenantSchema = (String) attrs.get(ATTR_TENANT_SCHEMA);
+    if (tenantSchema == null || digit.isBlank()) {
+      return;
     }
-
-    /**
-     * Mirrors {@code TwilioWebhookController#inboundWhatsApp}'s tenant resolution exactly (resolve
-     * schema from the unauthenticated {@code accountSid} claim, same as every channel with no JWT),
-     * then reuses the SAME pairing/default-agent machinery every other channel already has - {@link
-     * ChannelSessionService#resolveOrCreate} with {@link ChannelType#VOICE} and the caller's phone
-     * number as {@code externalId} (so the same caller's memory persists call to call, exactly like
-     * WhatsApp's phone-number-keyed sessions).
-     */
-    private void handleSetup(WebSocketSession session, JsonNode node) {
-        // Security audit 2026-09-18: nothing the frame CLAIMS is trusted any
-        // more. The tenant, call and caller come from the admission ticket the
-        // signature-verified inbound-call webhook minted; a socket without a
-        // valid one is closed before any tenant is resolved.
-        String presented = node.path("customParameters").path("ticket").asText("");
-        if (presented.isBlank()) {
-            presented = queryParam(session.getUri(), "ticket").orElse("");
-        }
-        Optional<VoiceRelayTicketService.Admission> admission =
-                voiceRelayTicketService.verify(presented);
-        if (admission.isEmpty()
-                || !admission.get().callSid().equals(node.path("callSid").asText(""))) {
-            log.warn(
-                    "Rejected voice relay setup on session {} - missing, expired or mismatched"
-                            + " admission ticket",
-                    session.getId());
-            closeQuietly(session);
-            return;
-        }
-        // Single-use: a ticket that was already presented is refused, so one captured from a log or
-        // a proxy cannot open a second socket during its 5-minute life. Claimed on the ticket's
-        // digest (each mint is unique), shared across replicas through the same Redis claim the
-        // webhooks use, and failing open on a Redis outage like they do.
-        if (dedupService != null
-                && !dedupService.tryClaim(VOICE_TICKET_SCOPE, ticketDigest(presented))) {
-            log.warn(
-                    "Rejected voice relay setup on session {} - admission ticket was already used",
-                    session.getId());
-            closeQuietly(session);
-            return;
-        }
-        String accountSid = admission.get().accountSid();
-        String callSid = admission.get().callSid();
-        String from = admission.get().from();
-        String dialedNumber = resolveDialedNumber(session, node);
-        session.getAttributes().put(ATTR_CALL_SID, callSid);
-        session.getAttributes().put(ATTR_FROM, from);
-        session.getAttributes().put(ATTR_DIALED_NUMBER, dialedNumber);
-
-        // No fallback to the default schema: an AccountSid that maps to no
-        // tenant is not "the public tenant's call", it is nobody's call.
-        Optional<String> resolvedSchema =
-                tenantResolutionService.resolveTenantSchema(
-                        ExternalAccountProvider.TWILIO, accountSid);
-        if (resolvedSchema.isEmpty()) {
-            log.warn(
-                    "Rejected voice relay setup for call {} - Twilio account is not linked to any"
-                            + " tenant",
-                    callSid);
-            closeQuietly(session);
-            return;
-        }
-        String tenantSchema = resolvedSchema.get();
-
-        TenantContext.set(
-                TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + accountSid, Set.of()));
-        try {
-            ChannelSession channelSession =
-                    channelSessionService.resolveOrCreate(ChannelType.VOICE, from, "(voice call)");
-            if (!channelSession.isPaired()) {
-                log.warn(
-                        "Unpaired voice caller {} on call {} - declining and ending session",
-                        maskFrom(from),
-                        callSid);
-                sendFinalTextAndEnd(
-                        session,
-                        "For security, an admin needs to approve this caller before I can help. "
-                                + "Your pairing code is "
-                                + channelSession.getPairingCode()
-                                + ". Goodbye.",
-                        "{\"reasonCode\":\"unpaired-caller\"}");
-                channelSessionService.markPairingNoticeSent(channelSession.getId());
-                return;
-            }
-            // Per-number routing. The ChannelSession above is keyed on the
-            // CALLER, so its stamped agent answers for "whoever this person
-            // last spoke to"; a tenant running sales and support on two
-            // numbers needs "whatever they dialled" to win instead.
-            // Overriding only the session attribute keeps the caller's
-            // conversation memory continuous while changing who answers -
-            // the same per-call mechanism handleDtmf uses, and deliberately
-            // NOT a rebind of the ChannelSession row. See VoiceNumberAgent.
-            UUID routedAgentId =
-                    voiceNumberAgentService
-                            .findAgentIdForNumber(dialedNumber)
-                            .orElse(channelSession.getAgentId());
-
-            session.getAttributes().put(ATTR_TENANT_SCHEMA, tenantSchema);
-            session.getAttributes().put(ATTR_AGENT_ID, routedAgentId);
-            session.getAttributes().put(ATTR_MEMORY_SESSION_ID, channelSession.getSessionId());
-            session.getAttributes().put(ATTR_CHANNEL_SESSION_ID, channelSession.getId());
-            if (!routedAgentId.equals(channelSession.getAgentId())) {
+    TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + "dtmf", Set.of()));
+    try {
+      voiceDtmfMappingService
+          .findAgentIdForDigit(digit)
+          .ifPresent(
+              agentId -> {
+                attrs.put(ATTR_AGENT_ID, agentId);
                 log.info(
-                        "Voice call {} routed by dialled number {} to agent {} (channel default was"
-                                + " {})",
-                        callSid,
-                        maskFrom(dialedNumber),
-                        routedAgentId,
-                        channelSession.getAgentId());
-            }
-            log.info(
-                    "Voice call {} set up for tenant schema {} - agent {}",
-                    callSid,
-                    tenantSchema,
-                    routedAgentId);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Failed to set up voice relay session for call {}: {}",
-                    callSid,
-                    e.getMessage(),
-                    e);
-            sendFinalTextAndEnd(
-                    session, "Sorry, something went wrong setting up this call. Goodbye.", null);
-        } finally {
-            TenantContext.clear();
-        }
+                    "Voice call {} DTMF digit '{}' switched to agent {}",
+                    attrs.get(ATTR_CALL_SID),
+                    digit,
+                    agentId);
+                sendTextToken(session, "Connecting you now.", true);
+              });
+    } finally {
+      TenantContext.clear();
     }
+  }
 
-    /**
-     * Only acts once Twilio reports the caller's utterance is final ({@code last=true}) -
-     * partial/interim transcripts exist so a UI could show live captions, which this backend has no
-     * use for. Streams {@link AgentChatService#chat}'s tokens back as Conversation Relay {@code
-     * text} messages a sentence at a time (Twilio's own docs recommend streaming rather than
-     * waiting for the full reply, to cut perceived latency; the sentence-sized buffering is {@link
-     * SpeechStreamNormalizer}'s, and is what lets the markdown be stripped before Twilio's TTS
-     * reads it out), closing the turn with a final empty {@code last:true} token.
-     */
-    private void handlePrompt(WebSocketSession session, JsonNode node) {
-        if (!node.path("last").asBoolean(false)) {
-            return;
-        }
-        String text = node.path("voicePrompt").asText("");
-        if (text.isBlank()) {
-            return;
-        }
-
-        var attrs = session.getAttributes();
-        String tenantSchema = (String) attrs.get(ATTR_TENANT_SCHEMA);
-        UUID agentId = (UUID) attrs.get(ATTR_AGENT_ID);
-        String memorySessionId = (String) attrs.get(ATTR_MEMORY_SESSION_ID);
-        String from = (String) attrs.get(ATTR_FROM);
-        if (tenantSchema == null || agentId == null) {
-            // setup never completed successfully (unpaired caller, or setup
-            // itself errored and already ended the session) - nothing to do.
-            return;
-        }
-
-        disposeActive(session);
-
-        // One buffer per turn - see the class javadoc's "Spoken text is
-        // normalized". Deliberately NOT flushed on interrupt: disposing the
-        // subscription drops it with whatever it was still holding, which is
-        // exactly right when the caller has started speaking again.
-        SpeechStreamNormalizer speech = new SpeechStreamNormalizer();
-        Consumer<String> speak = spoken -> sendTextToken(session, spoken, false);
-
-        // The tenant is applied for the synchronous subscription only, and the pooled scheduler
-        // thread is put back as found. (It used to be set inside Flux.defer and cleared in
-        // doFinally, which runs on whichever thread delivers the terminal signal: the scheduler
-        // thread kept the tenant after the subscribe and ran unrelated work, possibly another
-        // tenant's, under it.)
-        // ADR-0022 stage 4: the turn context is built from the same explicit channel principal.
-        TenantContext caller = TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + from, Set.of());
-        TenantScope tenant = TenantScope.of(caller);
-        ChatTurnRequest turn =
-                ChatTurnRequest.builder(agentId, memorySessionId, from, text).build();
-        TurnContext turnContext = TurnContext.forEntry(caller, turn);
-        turnContext.taint().mark("inbound:twilio_voice");
-        Disposable subscription =
-                TenantScopedFlux.subscribeInScope(
-                                tenant, () -> agentChatService.chat(turnContext, turn))
-                        .subscribeOn(promptScheduler)
-                        .subscribe(
-                                token -> speech.accept(token, speak),
-                                error -> {
-                                    log.warn(
-                                            "Voice relay chat error on call {}: {}",
-                                            attrs.get(ATTR_CALL_SID),
-                                            error.getMessage(),
-                                            error);
-                                    // Say the part of the answer that did arrive before
-                                    // apologising for the rest - the caller had already heard
-                                    // it before this path buffered. The leading space is what
-                                    // keeps it from running into that partial sentence.
-                                    speech.flush(speak);
-                                    sendTextToken(
-                                            session, " Sorry, I ran into a problem there.", true);
-                                },
-                                () -> {
-                                    speech.flush(speak);
-                                    sendTextToken(session, "", true);
-                                });
-        attrs.put(ATTR_ACTIVE_SUBSCRIPTION, subscription);
+  /**
+   * Works out which of the tenant's numbers this caller actually dialled.
+   *
+   * <p>Read in priority order: the {@code to} field of Conversation Relay's own {@code setup}
+   * message, then a {@code ?to=} query parameter that {@link TwilioVoiceWebhookController} appends
+   * to the {@code wss://} URL it hands Twilio. Both are read because the query parameter is the
+   * half this codebase controls outright - it is derived from the {@code To} form field of an
+   * inbound webhook whose Twilio signature was already verified - whereas {@code setup.to} depends
+   * on Conversation Relay's own payload shape. Preferring {@code setup.to} keeps the common path
+   * working for a socket opened without the query parameter (an older TwiML response still cached
+   * at Twilio, say); the query parameter is the fallback that guarantees a value regardless.
+   *
+   * <p><b>Trust.</b> Neither source is authenticated - anyone who can open this socket can claim
+   * any {@code to} they like, exactly as they can already claim any {@code accountSid}. That does
+   * not widen the blast radius: a forged number can only select an agent the tenant has explicitly
+   * published on a phone line, which is precisely the set of agents already reachable by dialling
+   * one. It cannot reach an arbitrary agent, and it cannot bypass the pairing gate above, which
+   * runs first and is keyed on the caller. This is exactly why routing passes the NUMBER to a
+   * server-side lookup instead of letting the URL carry an {@code agentId} directly - the latter
+   * would have turned an unauthenticated socket into "reach any agent in the tenant".
+   */
+  private String resolveDialedNumber(WebSocketSession session, JsonNode node) {
+    String fromSetup = node.path("to").asText("");
+    if (!fromSetup.isBlank()) {
+      return fromSetup;
     }
+    return queryParam(session.getUri(), "to").orElse("");
+  }
 
-    /**
-     * Master Roadmap 2026 item #17 fast-follow - looks up the caller's pressed digit against this
-     * tenant's {@link VoiceDtmfMappingService} menu. A match swaps only this session's in-memory
-     * {@code ATTR_AGENT_ID} attribute (so the NEXT {@code prompt} routes to the new agent) and
-     * speaks a short confirmation; no match is a silent no-op - an unmapped digit (or a tenant that
-     * hasn't configured a menu at all) just means the caller keeps talking to whichever agent
-     * already answered, exactly like today. Deliberately does not touch the {@code ChannelSession}
-     * row (see {@link VoiceDtmfMapping}'s javadoc) - the switch is scoped to this one call.
-     */
-    private void handleDtmf(WebSocketSession session, JsonNode node) {
-        String digit = node.path("digit").asText("");
-        var attrs = session.getAttributes();
-        String tenantSchema = (String) attrs.get(ATTR_TENANT_SCHEMA);
-        if (tenantSchema == null || digit.isBlank()) {
-            return;
-        }
-        TenantContext.set(TenantContext.of(tenantSchema, REQUESTED_BY_PREFIX + "dtmf", Set.of()));
-        try {
-            voiceDtmfMappingService
-                    .findAgentIdForDigit(digit)
-                    .ifPresent(
-                            agentId -> {
-                                attrs.put(ATTR_AGENT_ID, agentId);
-                                log.info(
-                                        "Voice call {} DTMF digit '{}' switched to agent {}",
-                                        attrs.get(ATTR_CALL_SID),
-                                        digit,
-                                        agentId);
-                                sendTextToken(session, "Connecting you now.", true);
-                            });
-        } finally {
-            TenantContext.clear();
-        }
+  private static String ticketDigest(String ticket) {
+    try {
+      return HexFormat.of()
+          .formatHex(
+              MessageDigest.getInstance("SHA-256").digest(ticket.getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 is not available", e);
     }
+  }
 
-    /**
-     * Works out which of the tenant's numbers this caller actually dialled.
-     *
-     * <p>Read in priority order: the {@code to} field of Conversation Relay's own {@code setup}
-     * message, then a {@code ?to=} query parameter that {@link TwilioVoiceWebhookController}
-     * appends to the {@code wss://} URL it hands Twilio. Both are read because the query parameter
-     * is the half this codebase controls outright - it is derived from the {@code To} form field of
-     * an inbound webhook whose Twilio signature was already verified - whereas {@code setup.to}
-     * depends on Conversation Relay's own payload shape. Preferring {@code setup.to} keeps the
-     * common path working for a socket opened without the query parameter (an older TwiML response
-     * still cached at Twilio, say); the query parameter is the fallback that guarantees a value
-     * regardless.
-     *
-     * <p><b>Trust.</b> Neither source is authenticated - anyone who can open this socket can claim
-     * any {@code to} they like, exactly as they can already claim any {@code accountSid}. That does
-     * not widen the blast radius: a forged number can only select an agent the tenant has
-     * explicitly published on a phone line, which is precisely the set of agents already reachable
-     * by dialling one. It cannot reach an arbitrary agent, and it cannot bypass the pairing gate
-     * above, which runs first and is keyed on the caller. This is exactly why routing passes the
-     * NUMBER to a server-side lookup instead of letting the URL carry an {@code agentId} directly -
-     * the latter would have turned an unauthenticated socket into "reach any agent in the tenant".
-     */
-    private String resolveDialedNumber(WebSocketSession session, JsonNode node) {
-        String fromSetup = node.path("to").asText("");
-        if (!fromSetup.isBlank()) {
-            return fromSetup;
-        }
-        return queryParam(session.getUri(), "to").orElse("");
+  private static void closeQuietly(WebSocketSession session) {
+    try {
+      session.close(CloseStatus.POLICY_VIOLATION);
+    } catch (IOException | RuntimeException e) {
+      log.debug(
+          "Closing rejected voice relay session {} failed: {}", session.getId(), e.getMessage());
     }
+  }
 
-    private static String ticketDigest(String ticket) {
-        try {
-            return HexFormat.of()
-                    .formatHex(
-                            MessageDigest.getInstance("SHA-256")
-                                    .digest(ticket.getBytes(StandardCharsets.UTF_8)));
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is not available", e);
-        }
+  /**
+   * Minimal single-parameter query reader - not worth pulling a URI-builder dependency into this
+   * handler for one lookup.
+   */
+  private static Optional<String> queryParam(URI uri, String name) {
+    if (uri == null || uri.getRawQuery() == null) {
+      return Optional.empty();
     }
+    String prefix = name + "=";
+    for (String pair : uri.getRawQuery().split("&")) {
+      if (pair.startsWith(prefix)) {
+        return Optional.of(
+            URLDecoder.decode(pair.substring(prefix.length()), StandardCharsets.UTF_8));
+      }
+    }
+    return Optional.empty();
+  }
 
-    private static void closeQuietly(WebSocketSession session) {
-        try {
-            session.close(CloseStatus.POLICY_VIOLATION);
-        } catch (IOException | RuntimeException e) {
-            log.debug(
-                    "Closing rejected voice relay session {} failed: {}",
-                    session.getId(),
-                    e.getMessage());
-        }
+  private void disposeActive(WebSocketSession session) {
+    Object existing = session.getAttributes().remove(ATTR_ACTIVE_SUBSCRIPTION);
+    if (existing instanceof Disposable d && !d.isDisposed()) {
+      d.dispose();
     }
+  }
 
-    /**
-     * Minimal single-parameter query reader - not worth pulling a URI-builder dependency into this
-     * handler for one lookup.
-     */
-    private static Optional<String> queryParam(URI uri, String name) {
-        if (uri == null || uri.getRawQuery() == null) {
-            return Optional.empty();
-        }
-        String prefix = name + "=";
-        for (String pair : uri.getRawQuery().split("&")) {
-            if (pair.startsWith(prefix)) {
-                return Optional.of(
-                        URLDecoder.decode(pair.substring(prefix.length()), StandardCharsets.UTF_8));
-            }
-        }
-        return Optional.empty();
-    }
+  @Override
+  public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+    disposeActive(session);
+    log.debug("Voice relay WS session {} closed: {}", session.getId(), status);
+  }
 
-    private void disposeActive(WebSocketSession session) {
-        Object existing = session.getAttributes().remove(ATTR_ACTIVE_SUBSCRIPTION);
-        if (existing instanceof Disposable d && !d.isDisposed()) {
-            d.dispose();
-        }
-    }
+  private void sendTextToken(WebSocketSession session, String token, boolean last) {
+    ObjectNode msg = MAPPER.createObjectNode();
+    msg.put("type", "text");
+    msg.put("token", token);
+    msg.put("last", last);
+    send(session, msg);
+  }
 
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        disposeActive(session);
-        log.debug("Voice relay WS session {} closed: {}", session.getId(), status);
+  private void sendFinalTextAndEnd(WebSocketSession session, String message, String handoffData) {
+    sendTextToken(session, message, true);
+    ObjectNode end = MAPPER.createObjectNode();
+    end.put("type", "end");
+    if (handoffData != null) {
+      end.put("handoffData", handoffData);
     }
+    send(session, end);
+  }
 
-    private void sendTextToken(WebSocketSession session, String token, boolean last) {
-        ObjectNode msg = MAPPER.createObjectNode();
-        msg.put("type", "text");
-        msg.put("token", token);
-        msg.put("last", last);
-        send(session, msg);
+  private void send(WebSocketSession session, ObjectNode payload) {
+    try {
+      WebSocketSession safe = safe(session);
+      if (!safe.isOpen()) {
+        return;
+      }
+      safe.sendMessage(new TextMessage(MAPPER.writeValueAsString(payload)));
+    } catch (IOException e) {
+      log.warn(
+          "Failed to send Conversation Relay message on session {}: {}",
+          session.getId(),
+          e.getMessage());
     }
+  }
 
-    private void sendFinalTextAndEnd(WebSocketSession session, String message, String handoffData) {
-        sendTextToken(session, message, true);
-        ObjectNode end = MAPPER.createObjectNode();
-        end.put("type", "end");
-        if (handoffData != null) {
-            end.put("handoffData", handoffData);
-        }
-        send(session, end);
-    }
+  /**
+   * Spring's documented fix for concurrent {@code sendMessage} calls (background token stream vs.
+   * the container's own message thread) - see class javadoc's "Concurrency" section.
+   */
+  private WebSocketSession safe(WebSocketSession session) {
+    return (WebSocketSession)
+        session
+            .getAttributes()
+            .computeIfAbsent(
+                ATTR_SAFE_SESSION,
+                k ->
+                    new ConcurrentWebSocketSessionDecorator(
+                        session, SEND_TIME_LIMIT_MS, SEND_BUFFER_SIZE_LIMIT));
+  }
 
-    private void send(WebSocketSession session, ObjectNode payload) {
-        try {
-            WebSocketSession safe = safe(session);
-            if (!safe.isOpen()) {
-                return;
-            }
-            safe.sendMessage(new TextMessage(MAPPER.writeValueAsString(payload)));
-        } catch (IOException e) {
-            log.warn(
-                    "Failed to send Conversation Relay message on session {}: {}",
-                    session.getId(),
-                    e.getMessage());
-        }
+  private static String maskFrom(String from) {
+    if (from == null || from.length() < 4) {
+      return "***";
     }
-
-    /**
-     * Spring's documented fix for concurrent {@code sendMessage} calls (background token stream vs.
-     * the container's own message thread) - see class javadoc's "Concurrency" section.
-     */
-    private WebSocketSession safe(WebSocketSession session) {
-        return (WebSocketSession)
-                session.getAttributes()
-                        .computeIfAbsent(
-                                ATTR_SAFE_SESSION,
-                                k ->
-                                        new ConcurrentWebSocketSessionDecorator(
-                                                session,
-                                                SEND_TIME_LIMIT_MS,
-                                                SEND_BUFFER_SIZE_LIMIT));
-    }
-
-    private static String maskFrom(String from) {
-        if (from == null || from.length() < 4) {
-            return "***";
-        }
-        return "***" + from.substring(from.length() - 4);
-    }
+    return "***" + from.substring(from.length() - 4);
+  }
 }

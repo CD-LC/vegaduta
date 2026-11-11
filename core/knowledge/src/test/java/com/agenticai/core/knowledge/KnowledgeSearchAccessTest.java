@@ -29,203 +29,229 @@ import org.springframework.test.util.ReflectionTestUtils;
  * Central enforcement in {@link KnowledgeSearchService}: whatever reaches it (REST search, the
  * agent's {@code search_knowledge_base} tool, a workflow knowledge node, the MCP tool) is narrowed
  * to the collections the caller may read. Each collection uses a different embedding model, so
- * {@code sidecar.embedQuery(query, model)} reveals exactly which collections were actually searched.
+ * {@code sidecar.embedQuery(query, model)} reveals exactly which collections were actually
+ * searched.
  */
 class KnowledgeSearchAccessTest {
 
-    private static final String OWNER = "owner-sub";
-    private static final String MEMBER = "member-sub";
-    private static final String PRIVATE_MODEL = "private-model";
-    private static final String SHARED_MODEL = "shared-model";
-    private static final String TENANT_MODEL = "tenant-model";
+  private static final String OWNER = "owner-sub";
+  private static final String MEMBER = "member-sub";
+  private static final String PRIVATE_MODEL = "private-model";
+  private static final String SHARED_MODEL = "shared-model";
+  private static final String TENANT_MODEL = "tenant-model";
 
-    private SidecarClient sidecar;
-    private KnowledgeCollectionRepository collections;
-    private ResourceAccessService sharing;
-    private KnowledgeSearchService search;
-    private KnowledgeCollection privateCollection;
-    private KnowledgeCollection sharedCollection;
-    private KnowledgeCollection tenantCollection;
+  private SidecarClient sidecar;
+  private KnowledgeCollectionRepository collections;
+  private ResourceAccessService sharing;
+  private KnowledgeSearchService search;
+  private KnowledgeCollection privateCollection;
+  private KnowledgeCollection sharedCollection;
+  private KnowledgeCollection tenantCollection;
 
-    @BeforeEach
-    void setUp() {
-        sidecar = mock(SidecarClient.class);
-        collections = mock(KnowledgeCollectionRepository.class);
-        sharing = mock(ResourceAccessService.class);
-        when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any())).thenReturn(Map.of());
-        when(sidecar.embedQuery(anyString(), anyString())).thenReturn(new float[] {0.1f});
+  @BeforeEach
+  void setUp() {
+    sidecar = mock(SidecarClient.class);
+    collections = mock(KnowledgeCollectionRepository.class);
+    sharing = mock(ResourceAccessService.class);
+    when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any()))
+        .thenReturn(Map.of());
+    when(sidecar.embedQuery(anyString(), anyString())).thenReturn(new float[] {0.1f});
 
-        KnowledgeAccessService access = new KnowledgeAccessService(
-            collections, mock(KnowledgeDocumentRepository.class), sharing, mock(AuditLogService.class));
-        search = new KnowledgeSearchService(
-            sidecar, mock(JdbcTemplate.class), collections, mock(KnowledgeDocumentRepository.class), false);
-        search.setAccess(access);
+    KnowledgeAccessService access =
+        new KnowledgeAccessService(
+            collections,
+            mock(KnowledgeDocumentRepository.class),
+            sharing,
+            mock(AuditLogService.class));
+    search =
+        new KnowledgeSearchService(
+            sidecar,
+            mock(JdbcTemplate.class),
+            collections,
+            mock(KnowledgeDocumentRepository.class),
+            false);
+    search.setAccess(access);
 
-        privateCollection = collection(OWNER, KnowledgeVisibility.PRIVATE, PRIVATE_MODEL);
-        sharedCollection = collection(OWNER, KnowledgeVisibility.SHARED, SHARED_MODEL);
-        tenantCollection = collection(null, null, TENANT_MODEL); // a pre-V710 collection
-        List<KnowledgeCollection> all = List.of(privateCollection, sharedCollection, tenantCollection);
-        when(collections.findAll()).thenReturn(all);
-        when(collections.findAllById(any())).thenAnswer(inv -> {
-            Set<UUID> ids = Set.copyOf((java.util.Collection<UUID>) inv.getArgument(0));
-            return all.stream().filter(c -> ids.contains(c.getId())).toList();
-        });
+    privateCollection = collection(OWNER, KnowledgeVisibility.PRIVATE, PRIVATE_MODEL);
+    sharedCollection = collection(OWNER, KnowledgeVisibility.SHARED, SHARED_MODEL);
+    tenantCollection = collection(null, null, TENANT_MODEL); // a pre-V710 collection
+    List<KnowledgeCollection> all = List.of(privateCollection, sharedCollection, tenantCollection);
+    when(collections.findAll()).thenReturn(all);
+    when(collections.findAllById(any()))
+        .thenAnswer(
+            inv -> {
+              Set<UUID> ids = Set.copyOf((java.util.Collection<UUID>) inv.getArgument(0));
+              return all.stream().filter(c -> ids.contains(c.getId())).toList();
+            });
+  }
+
+  @AfterEach
+  void clearContext() {
+    TenantContext.clear();
+  }
+
+  private static KnowledgeCollection collection(
+      String owner, KnowledgeVisibility visibility, String model) {
+    KnowledgeCollection c =
+        new KnowledgeCollection("c-" + model, "d", null, model, "simple", owner, visibility);
+    ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
+    return c;
+  }
+
+  private void callAs(String subject, String... roles) {
+    TenantContext.set(TenantContext.of("tenant-1", subject, Set.of(roles)));
+  }
+
+  private void searched(String... models) {
+    for (String model : List.of(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL)) {
+      if (List.of(models).contains(model)) {
+        verify(sidecar).embedQuery("q", model);
+      } else {
+        verify(sidecar, never()).embedQuery("q", model);
+      }
     }
+  }
 
-    @AfterEach
-    void clearContext() {
-        TenantContext.clear();
-    }
+  @Test
+  void anUnscopedSearchByAMemberWithoutGrantsOnlyReachesTheTenantVisibleCollection() {
+    callAs(MEMBER);
 
-    private static KnowledgeCollection collection(String owner, KnowledgeVisibility visibility, String model) {
-        KnowledgeCollection c = new KnowledgeCollection("c-" + model, "d", null, model, "simple", owner, visibility);
-        ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
-        return c;
-    }
+    search.search("q", 5, Set.of());
 
-    private void callAs(String subject, String... roles) {
-        TenantContext.set(TenantContext.of("tenant-1", subject, Set.of(roles)));
-    }
+    searched(TENANT_MODEL);
+  }
 
-    private void searched(String... models) {
-        for (String model : List.of(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL)) {
-            if (List.of(models).contains(model)) {
-                verify(sidecar).embedQuery("q", model);
-            } else {
-                verify(sidecar, never()).embedQuery("q", model);
-            }
-        }
-    }
+  @Test
+  void theDefaultExistingCollectionStaysSearchableByAnyMemberWithNoGrantAtAll() {
+    callAs(MEMBER);
 
-    @Test
-    void anUnscopedSearchByAMemberWithoutGrantsOnlyReachesTheTenantVisibleCollection() {
-        callAs(MEMBER);
+    search.search("q", 5, Set.of(tenantCollection.getId()));
 
-        search.search("q", 5, Set.of());
+    searched(TENANT_MODEL);
+  }
 
-        searched(TENANT_MODEL);
-    }
+  @Test
+  void aMemberWhoNamesAPrivateCollectionGetsNothingAndNeverTriggersAnEmbedding() {
+    callAs(MEMBER);
 
-    @Test
-    void theDefaultExistingCollectionStaysSearchableByAnyMemberWithNoGrantAtAll() {
-        callAs(MEMBER);
+    assertTrue(search.search("q", 5, Set.of(privateCollection.getId())).isEmpty());
 
-        search.search("q", 5, Set.of(tenantCollection.getId()));
+    searched();
+  }
 
-        searched(TENANT_MODEL);
-    }
+  @Test
+  void theOwnerSearchesTheirOwnPrivateAndSharedCollections() {
+    callAs(OWNER);
 
-    @Test
-    void aMemberWhoNamesAPrivateCollectionGetsNothingAndNeverTriggersAnEmbedding() {
-        callAs(MEMBER);
+    search.search("q", 5, Set.of());
 
-        assertTrue(search.search("q", 5, Set.of(privateCollection.getId())).isEmpty());
+    searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
+  }
 
-        searched();
-    }
+  @Test
+  void aViewerGrantOpensExactlyTheSharedCollectionItNames() {
+    callAs(MEMBER);
+    when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
+        .thenReturn(
+            Map.of(
+                sharedCollection.getId(),
+                PermissionLevel.VIEWER,
+                privateCollection.getId(),
+                PermissionLevel.VIEWER));
 
-    @Test
-    void theOwnerSearchesTheirOwnPrivateAndSharedCollections() {
-        callAs(OWNER);
+    search.search("q", 5, Set.of());
 
-        search.search("q", 5, Set.of());
+    searched(SHARED_MODEL, TENANT_MODEL); // the grant on the PRIVATE one is dormant
+  }
 
-        searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
-    }
+  @Test
+  void anAgentTurnSearchesItsAllowListIntersectedWithTheInvokingUsersAccess() {
+    // The agent's builder allow-listed the private and the tenant collection; the invoking
+    // member can only read the tenant one, so only that one is searched.
+    callAs(MEMBER);
 
-    @Test
-    void aViewerGrantOpensExactlyTheSharedCollectionItNames() {
-        callAs(MEMBER);
-        when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
-            .thenReturn(Map.of(sharedCollection.getId(), PermissionLevel.VIEWER,
-                privateCollection.getId(), PermissionLevel.VIEWER));
+    search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
+    searched(TENANT_MODEL);
+  }
 
-        search.search("q", 5, Set.of());
+  @Test
+  void theSameAgentTurnReachesBothWhenTheInvokingUserIsTheOwner() {
+    callAs(OWNER);
 
-        searched(SHARED_MODEL, TENANT_MODEL); // the grant on the PRIVATE one is dormant
-    }
+    search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
 
-    @Test
-    void anAgentTurnSearchesItsAllowListIntersectedWithTheInvokingUsersAccess() {
-        // The agent's builder allow-listed the private and the tenant collection; the invoking
-        // member can only read the tenant one, so only that one is searched.
-        callAs(MEMBER);
+    searched(PRIVATE_MODEL, TENANT_MODEL);
+  }
 
-        search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
-        searched(TENANT_MODEL);
-    }
+  @Test
+  void anUnattendedRunWithoutAnOwnerBasisSeesTenantCollectionsOnly() {
+    callAs("system:agent-share:abc"); // synthetic subject: owns nothing, holds no grants
 
-    @Test
-    void theSameAgentTurnReachesBothWhenTheInvokingUserIsTheOwner() {
-        callAs(OWNER);
+    search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
 
-        search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
+    searched(TENANT_MODEL);
+  }
 
-        searched(PRIVATE_MODEL, TENANT_MODEL);
-    }
+  @Test
+  void anUnattendedRunActingAsTheAgentOwnerGetsTheOwnersAccessButNeverAdminOverride() {
+    callAs("system:schedule:nightly");
 
-    @Test
-    void anUnattendedRunWithoutAnOwnerBasisSeesTenantCollectionsOnly() {
-        callAs("system:agent-share:abc"); // synthetic subject: owns nothing, holds no grants
+    search.searchAs(
+        "q",
+        5,
+        Set.of(privateCollection.getId(), tenantCollection.getId()),
+        false,
+        KnowledgeAccessService.Principal.ofOwner(OWNER));
 
-        search.search("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()));
+    searched(PRIVATE_MODEL, TENANT_MODEL);
+  }
 
-        searched(TENANT_MODEL);
-    }
+  @Test
+  void anOwnerBasisWhoOwnsNothingGetsTenantCollectionsOnly() {
+    callAs("system:schedule:nightly");
 
-    @Test
-    void anUnattendedRunActingAsTheAgentOwnerGetsTheOwnersAccessButNeverAdminOverride() {
-        callAs("system:schedule:nightly");
+    search.searchAs("q", 5, Set.of(), false, KnowledgeAccessService.Principal.ofOwner(MEMBER));
 
-        search.searchAs("q", 5, Set.of(privateCollection.getId(), tenantCollection.getId()), false,
-            KnowledgeAccessService.Principal.ofOwner(OWNER));
+    searched(TENANT_MODEL);
+  }
 
-        searched(PRIVATE_MODEL, TENANT_MODEL);
-    }
+  @Test
+  void anMcpKeyContextCannotReachRestrictedCollectionsEvenWhenTheGrantExposesThem() {
+    callAs("mcp-external-key", "ROLE_mcp-external");
 
-    @Test
-    void anOwnerBasisWhoOwnsNothingGetsTenantCollectionsOnly() {
-        callAs("system:schedule:nightly");
+    assertTrue(
+        search
+            .search("q", 5, Set.of(privateCollection.getId(), sharedCollection.getId()))
+            .isEmpty());
 
-        search.searchAs("q", 5, Set.of(), false, KnowledgeAccessService.Principal.ofOwner(MEMBER));
+    searched();
+  }
 
-        searched(TENANT_MODEL);
-    }
+  @Test
+  void withNoCallerAtAllNothingIsSearchedNotEvenATenantCollection() {
+    TenantContext.clear();
 
-    @Test
-    void anMcpKeyContextCannotReachRestrictedCollectionsEvenWhenTheGrantExposesThem() {
-        callAs("mcp-external-key", "ROLE_mcp-external");
+    assertEquals(List.of(), search.search("q", 5, Set.of()));
 
-        assertTrue(search.search("q", 5, Set.of(privateCollection.getId(), sharedCollection.getId())).isEmpty());
+    searched();
+  }
 
-        searched();
-    }
+  @Test
+  void aTenantAdminReadsEverythingIncludingPrivate() {
+    callAs("admin-sub", "ROLE_tenant-admin");
+    when(sharing.isAdminFor(eq(ResourceType.KNOWLEDGE_COLLECTION), any())).thenReturn(true);
 
-    @Test
-    void withNoCallerAtAllNothingIsSearchedNotEvenATenantCollection() {
-        TenantContext.clear();
+    search.search("q", 5, Set.of());
 
-        assertEquals(List.of(), search.search("q", 5, Set.of()));
+    searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
+  }
 
-        searched();
-    }
+  @Test
+  void theExplicitSystemScopeReadsEverything() {
+    callAs("system:retention");
 
-    @Test
-    void aTenantAdminReadsEverythingIncludingPrivate() {
-        callAs("admin-sub", "ROLE_tenant-admin");
-        when(sharing.isAdminFor(eq(ResourceType.KNOWLEDGE_COLLECTION), any())).thenReturn(true);
+    search.searchAs("q", 5, Set.of(), false, KnowledgeAccessService.Principal.SYSTEM);
 
-        search.search("q", 5, Set.of());
-
-        searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
-    }
-
-    @Test
-    void theExplicitSystemScopeReadsEverything() {
-        callAs("system:retention");
-
-        search.searchAs("q", 5, Set.of(), false, KnowledgeAccessService.Principal.SYSTEM);
-
-        searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
-    }
+    searched(PRIVATE_MODEL, SHARED_MODEL, TENANT_MODEL);
+  }
 }

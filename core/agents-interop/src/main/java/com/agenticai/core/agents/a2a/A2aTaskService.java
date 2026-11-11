@@ -61,385 +61,365 @@ import reactor.core.publisher.Flux;
 @Service
 public class A2aTaskService {
 
-    private static final Logger log = LoggerFactory.getLogger(A2aTaskService.class);
-    static final String AUDIT_ACTION = "a2a.task.send";
-    static final String ANONYMOUS_ACTOR = "a2a-anonymous";
+  private static final Logger log = LoggerFactory.getLogger(A2aTaskService.class);
+  static final String AUDIT_ACTION = "a2a.task.send";
+  static final String ANONYMOUS_ACTOR = "a2a-anonymous";
 
-    private final AgentChatService agentChatService;
-    private final A2aTaskStore store;
-    private final AuditLogService auditLogService;
-    private final A2aProperties properties;
+  private final AgentChatService agentChatService;
+  private final A2aTaskStore store;
+  private final AuditLogService auditLogService;
+  private final A2aProperties properties;
 
-    /**
-     * Virtual threads, same choice {@code AgentChatService#preTurnExecutor} makes: an async A2A
-     * turn is almost entirely waiting on the LLM, and the semaphore below - not the pool - is what
-     * bounds concurrency.
-     */
-    private final ExecutorService asyncExecutor =
-            TenantAwareExecutors.newVirtualThreadPerTaskExecutor("a2a-task-service-");
+  /**
+   * Virtual threads, same choice {@code AgentChatService#preTurnExecutor} makes: an async A2A turn
+   * is almost entirely waiting on the LLM, and the semaphore below - not the pool - is what bounds
+   * concurrency.
+   */
+  private final ExecutorService asyncExecutor =
+      TenantAwareExecutors.newVirtualThreadPerTaskExecutor("a2a-task-service-");
 
-    /** Stop accepting async A2A work when the context closes (JAVA-026). */
-    @jakarta.annotation.PreDestroy
-    void shutdownAsyncExecutor() {
-        asyncExecutor.shutdown();
+  /** Stop accepting async A2A work when the context closes (JAVA-026). */
+  @jakarta.annotation.PreDestroy
+  void shutdownAsyncExecutor() {
+    asyncExecutor.shutdown();
+  }
+
+  private final Semaphore asyncSlots;
+  private final A2aHopRegistry hops;
+
+  public A2aTaskService(
+      AgentChatService agentChatService,
+      A2aTaskStore store,
+      AuditLogService auditLogService,
+      A2aProperties properties) {
+    this(agentChatService, store, auditLogService, properties, new A2aHopRegistry());
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  public A2aTaskService(
+      AgentChatService agentChatService,
+      A2aTaskStore store,
+      AuditLogService auditLogService,
+      A2aProperties properties,
+      A2aHopRegistry hops) {
+    this.hops = hops;
+    this.agentChatService = agentChatService;
+    this.store = store;
+    this.auditLogService = auditLogService;
+    this.properties = properties;
+    this.asyncSlots = new Semaphore(Math.max(1, properties.getMaxConcurrentAsyncTasks()));
+  }
+
+  /**
+   * Mints and registers a SUBMITTED task owned by the current caller. The owner is the bound {@link
+   * TenantContext} (tenant + subject) - what the store's {@link A2aTaskStore#find} will later
+   * demand back - falling back to the servlet {@link Principal} for the subject when security is on
+   * but no TenantContext was bound, and to null under the "insecure" profile.
+   */
+  public A2aTask create(
+      UUID agentId, String contextId, String userMessageId, String userText, Principal principal) {
+    return create(agentId, contextId, userMessageId, userText, principal, null);
+  }
+
+  /**
+   * As {@link #create(UUID, String, String, String, Principal)}, for a request that passed the
+   * message-security checks: {@code call} (hop and trace id) travels with the task, and {@link
+   * #run} hands it to the turn's outbound A2A tool so the next call is numbered one hop higher.
+   */
+  public A2aTask create(
+      UUID agentId,
+      String contextId,
+      String userMessageId,
+      String userText,
+      Principal principal,
+      A2aCallContext call) {
+    Optional<TenantContext> tenant = TenantContext.current();
+    String tenantId = tenant.map(TenantContext::getTenantId).orElse(null);
+    String subject =
+        tenant
+            .map(TenantContext::getSubject)
+            .filter(StringUtils::hasText)
+            .orElseGet(
+                () ->
+                    principal != null && StringUtils.hasText(principal.getName())
+                        ? principal.getName()
+                        : null);
+    A2aTask task =
+        new A2aTask(
+            UUID.randomUUID().toString(),
+            contextId,
+            agentId,
+            tenantId,
+            subject,
+            userMessageId,
+            userText);
+    task.callContext(call);
+    store.put(task);
+    // Redis mode: mirror the terminal snapshot (every terminal path completes this future);
+    // no-op in memory mode.
+    // The completing thread is often a Reactor/Netty one, so in redis mode the blocking Redis
+    // GET+SET is
+    // moved to a virtual thread; memory mode keeps the direct (no-op) call.
+    task.completion()
+        .whenComplete(
+            (ignored, err) -> {
+              if (store.isRedisBacked()) {
+                asyncExecutor.execute(() -> store.save(task));
+              } else {
+                store.save(task);
+              }
+            });
+    return task;
+  }
+
+  /**
+   * Starts the chat turn for {@code task} on the CURRENT thread (so {@link AgentChatService#chat}'s
+   * eager {@code TenantContext} capture sees the caller's context) and subscribes to its token
+   * stream. Returns the task's completion future; it completes normally on COMPLETED, FAILED and
+   * CANCELED alike - the outcome is in {@link A2aTask#snapshot()}, never in the future, so a waiter
+   * never has to unwrap an {@link ExecutionException}.
+   *
+   * @param onDelta invoked on the reactor thread for each token, AFTER it was appended to the task;
+   *     null when nobody streams.
+   */
+  public CompletableFuture<Void> run(A2aTask task, Consumer<String> onDelta) {
+    if (!task.markWorking()) {
+      // Canceled between create() and run() - nothing to start.
+      return task.completion();
     }
-
-    private final Semaphore asyncSlots;
-    private final A2aHopRegistry hops;
-
-    public A2aTaskService(
-            AgentChatService agentChatService,
-            A2aTaskStore store,
-            AuditLogService auditLogService,
-            A2aProperties properties) {
-        this(agentChatService, store, auditLogService, properties, new A2aHopRegistry());
-    }
-
-    @org.springframework.beans.factory.annotation.Autowired
-    public A2aTaskService(
-            AgentChatService agentChatService,
-            A2aTaskStore store,
-            AuditLogService auditLogService,
-            A2aProperties properties,
-            A2aHopRegistry hops) {
-        this.hops = hops;
-        this.agentChatService = agentChatService;
-        this.store = store;
-        this.auditLogService = auditLogService;
-        this.properties = properties;
-        this.asyncSlots = new Semaphore(Math.max(1, properties.getMaxConcurrentAsyncTasks()));
-    }
-
-    /**
-     * Mints and registers a SUBMITTED task owned by the current caller. The owner is the bound
-     * {@link TenantContext} (tenant + subject) - what the store's {@link A2aTaskStore#find} will
-     * later demand back - falling back to the servlet {@link Principal} for the subject when
-     * security is on but no TenantContext was bound, and to null under the "insecure" profile.
-     */
-    public A2aTask create(
-            UUID agentId,
-            String contextId,
-            String userMessageId,
-            String userText,
-            Principal principal) {
-        return create(agentId, contextId, userMessageId, userText, principal, null);
-    }
-
-    /**
-     * As {@link #create(UUID, String, String, String, Principal)}, for a request that passed the
-     * message-security checks: {@code call} (hop and trace id) travels with the task, and {@link
-     * #run} hands it to the turn's outbound A2A tool so the next call is numbered one hop higher.
-     */
-    public A2aTask create(
-            UUID agentId,
-            String contextId,
-            String userMessageId,
-            String userText,
-            Principal principal,
-            A2aCallContext call) {
-        Optional<TenantContext> tenant = TenantContext.current();
-        String tenantId = tenant.map(TenantContext::getTenantId).orElse(null);
-        String subject =
-                tenant.map(TenantContext::getSubject)
-                        .filter(StringUtils::hasText)
-                        .orElseGet(
-                                () ->
-                                        principal != null
-                                                        && StringUtils.hasText(principal.getName())
-                                                ? principal.getName()
-                                                : null);
-        A2aTask task =
-                new A2aTask(
-                        UUID.randomUUID().toString(),
-                        contextId,
-                        agentId,
-                        tenantId,
-                        subject,
-                        userMessageId,
-                        userText);
-        task.callContext(call);
-        store.put(task);
-        // Redis mode: mirror the terminal snapshot (every terminal path completes this future);
-        // no-op in memory mode.
-        // The completing thread is often a Reactor/Netty one, so in redis mode the blocking Redis
-        // GET+SET is
-        // moved to a virtual thread; memory mode keeps the direct (no-op) call.
-        task.completion()
-                .whenComplete(
-                        (ignored, err) -> {
-                            if (store.isRedisBacked()) {
-                                asyncExecutor.execute(() -> store.save(task));
-                            } else {
-                                store.save(task);
-                            }
-                        });
-        return task;
-    }
-
-    /**
-     * Starts the chat turn for {@code task} on the CURRENT thread (so {@link
-     * AgentChatService#chat}'s eager {@code TenantContext} capture sees the caller's context) and
-     * subscribes to its token stream. Returns the task's completion future; it completes normally
-     * on COMPLETED, FAILED and CANCELED alike - the outcome is in {@link A2aTask#snapshot()}, never
-     * in the future, so a waiter never has to unwrap an {@link ExecutionException}.
-     *
-     * @param onDelta invoked on the reactor thread for each token, AFTER it was appended to the
-     *     task; null when nobody streams.
-     */
-    public CompletableFuture<Void> run(A2aTask task, Consumer<String> onDelta) {
-        if (!task.markWorking()) {
-            // Canceled between create() and run() - nothing to start.
-            return task.completion();
-        }
-        store.save(task);
-        A2aCallContext call = task.callContext();
-        if (call != null) {
-            // Explicit hand-off to the turn's outbound tool (see A2aHopRegistry): keyed by the chat
-            // session id, set before the tools are resolved, released when the task ends.
-            String sessionKey = task.contextId();
-            if (!hops.register(sessionKey, call)) {
-                task.abort("Too many A2A turns are in flight on this server; retry later.");
-                return task.completion();
-            }
-            task.completion().whenComplete((ignored, err) -> hops.release(sessionKey));
-        }
-        // Long-term-memory subject: the caller's identity when known, else the
-        // context itself (memory then behaves session-scoped only - the same
-        // fallback AgentController#chat takes when no principal exists).
-        String subjectKey = task.subject() != null ? task.subject() : task.contextId();
-        Flux<String> tokens;
-        try {
-            ChatTurnRequest chatTurn =
-                    ChatTurnRequest.builder(
-                                    task.agentId(), task.contextId(), subjectKey, task.userText())
-                            .build();
-            TurnContext turnContext =
-                    TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
-            tokens = agentChatService.chat(turnContext, chatTurn);
-        } catch (RuntimeException setupFailure) {
-            // chat() validates eagerly (kill switch, budget, access) and throws
-            // synchronously for those; a synchronous throw must land in the
-            // task the same way an asynchronous onError would.
-            fail(task, setupFailure);
-            return task.completion();
-        }
-        // The terminal callbacks below run on whichever reactor/HTTP thread ends the stream, and
-        // write the tenant's audit log: re-apply the tenant this run started under (captured on the
-        // caller's thread), or the audit row fails against a schema-less thread and is silently
-        // lost.
-        TenantScope tenant = TenantScope.capture();
-        Disposable subscription =
-                tokens
-                        // The cancel/abort seam: A2aTask#cancel emits on this sink, which
-                        // completes the stream here before the disposal even lands.
-                        .takeUntilOther(task.cancelSignal().asMono())
-                        .subscribe(
-                                delta -> {
-                                    task.appendDelta(delta);
-                                    if (onDelta != null) {
-                                        onDelta.accept(delta);
-                                    }
-                                },
-                                error -> tenant.run(() -> fail(task, error)),
-                                () ->
-                                        tenant.run(
-                                                () -> {
-                                                    if (task.markCompleted()) {
-                                                        audit(
-                                                                task,
-                                                                AuditOutcome.SUCCESS,
-                                                                "completed");
-                                                    }
-                                                }));
-        task.attach(subscription);
+    store.save(task);
+    A2aCallContext call = task.callContext();
+    if (call != null) {
+      // Explicit hand-off to the turn's outbound tool (see A2aHopRegistry): keyed by the chat
+      // session id, set before the tools are resolved, released when the task ends.
+      String sessionKey = task.contextId();
+      if (!hops.register(sessionKey, call)) {
+        task.abort("Too many A2A turns are in flight on this server; retry later.");
         return task.completion();
+      }
+      task.completion().whenComplete((ignored, err) -> hops.release(sessionKey));
     }
+    // Long-term-memory subject: the caller's identity when known, else the
+    // context itself (memory then behaves session-scoped only - the same
+    // fallback AgentController#chat takes when no principal exists).
+    String subjectKey = task.subject() != null ? task.subject() : task.contextId();
+    Flux<String> tokens;
+    try {
+      ChatTurnRequest chatTurn =
+          ChatTurnRequest.builder(task.agentId(), task.contextId(), subjectKey, task.userText())
+              .build();
+      TurnContext turnContext =
+          TurnContext.forEntry(TenantContext.current().orElse(null), chatTurn);
+      tokens = agentChatService.chat(turnContext, chatTurn);
+    } catch (RuntimeException setupFailure) {
+      // chat() validates eagerly (kill switch, budget, access) and throws
+      // synchronously for those; a synchronous throw must land in the
+      // task the same way an asynchronous onError would.
+      fail(task, setupFailure);
+      return task.completion();
+    }
+    // The terminal callbacks below run on whichever reactor/HTTP thread ends the stream, and
+    // write the tenant's audit log: re-apply the tenant this run started under (captured on the
+    // caller's thread), or the audit row fails against a schema-less thread and is silently
+    // lost.
+    TenantScope tenant = TenantScope.capture();
+    Disposable subscription =
+        tokens
+            // The cancel/abort seam: A2aTask#cancel emits on this sink, which
+            // completes the stream here before the disposal even lands.
+            .takeUntilOther(task.cancelSignal().asMono())
+            .subscribe(
+                delta -> {
+                  task.appendDelta(delta);
+                  if (onDelta != null) {
+                    onDelta.accept(delta);
+                  }
+                },
+                error -> tenant.run(() -> fail(task, error)),
+                () ->
+                    tenant.run(
+                        () -> {
+                          if (task.markCompleted()) {
+                            audit(task, AuditOutcome.SUCCESS, "completed");
+                          }
+                        }));
+    task.attach(subscription);
+    return task.completion();
+  }
 
-    /**
-     * Non-blocking variant: re-binds the caller's {@link TenantContext} on a virtual thread and
-     * calls {@link #run} there. The context is captured HERE, on the request thread, because by the
-     * time the virtual thread starts the servlet filter that bound it may already have cleared it.
-     */
-    public void runAsync(A2aTask task) {
-        if (!asyncSlots.tryAcquire()) {
-            task.abort(
-                    "Too many non-blocking tasks in flight on this server; retry, or send without"
-                            + " returnImmediately.");
-            throw A2aError.internal(
-                    "too many non-blocking tasks in flight; retry later or use a blocking send");
-        }
-        Optional<TenantContext> captured = TenantContext.current();
-        asyncExecutor.execute(
-                () -> {
-                    captured.ifPresent(TenantContext::set);
-                    try {
-                        run(task, null).whenComplete((ignored, err) -> asyncSlots.release());
-                    } catch (RuntimeException e) {
-                        asyncSlots.release();
-                        fail(task, e);
-                    } finally {
-                        TenantContext.clear();
-                    }
-                });
+  /**
+   * Non-blocking variant: re-binds the caller's {@link TenantContext} on a virtual thread and calls
+   * {@link #run} there. The context is captured HERE, on the request thread, because by the time
+   * the virtual thread starts the servlet filter that bound it may already have cleared it.
+   */
+  public void runAsync(A2aTask task) {
+    if (!asyncSlots.tryAcquire()) {
+      task.abort(
+          "Too many non-blocking tasks in flight on this server; retry, or send without"
+              + " returnImmediately.");
+      throw A2aError.internal(
+          "too many non-blocking tasks in flight; retry later or use a blocking send");
     }
+    Optional<TenantContext> captured = TenantContext.current();
+    asyncExecutor.execute(
+        () -> {
+          captured.ifPresent(TenantContext::set);
+          try {
+            run(task, null).whenComplete((ignored, err) -> asyncSlots.release());
+          } catch (RuntimeException e) {
+            asyncSlots.release();
+            fail(task, e);
+          } finally {
+            TenantContext.clear();
+          }
+        });
+  }
 
-    /**
-     * Parks until the task is terminal or {@link A2aProperties#getBlockingTimeout()} elapses - a
-     * timeout ABORTS the turn (FAILED, stream cut) rather than leaving an orphan running for a
-     * reply nobody will collect.
-     */
-    public void awaitBlocking(A2aTask task) {
-        Duration timeout = properties.getBlockingTimeout();
-        try {
-            task.completion().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            log.warn(
-                    "A2A task {} (agent {}) exceeded the blocking timeout of {} - aborting",
-                    task.id(),
-                    task.agentId(),
-                    timeout);
-            task.abort("The agent did not finish within " + timeout.toSeconds() + " seconds.");
-            audit(task, AuditOutcome.FAILURE, "timed out after " + timeout);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            task.abort("The request was interrupted before the agent finished.");
-        } catch (ExecutionException e) {
-            // Unreachable by construction (the future only ever completes
-            // normally) - kept so a future refactor that changes that fails loudly here.
-            throw new IllegalStateException(
-                    "A2A task completion future failed unexpectedly", e.getCause());
-        }
+  /**
+   * Parks until the task is terminal or {@link A2aProperties#getBlockingTimeout()} elapses - a
+   * timeout ABORTS the turn (FAILED, stream cut) rather than leaving an orphan running for a reply
+   * nobody will collect.
+   */
+  public void awaitBlocking(A2aTask task) {
+    Duration timeout = properties.getBlockingTimeout();
+    try {
+      task.completion().get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+    } catch (TimeoutException e) {
+      log.warn(
+          "A2A task {} (agent {}) exceeded the blocking timeout of {} - aborting",
+          task.id(),
+          task.agentId(),
+          timeout);
+      task.abort("The agent did not finish within " + timeout.toSeconds() + " seconds.");
+      audit(task, AuditOutcome.FAILURE, "timed out after " + timeout);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      task.abort("The request was interrupted before the agent finished.");
+    } catch (ExecutionException e) {
+      // Unreachable by construction (the future only ever completes
+      // normally) - kept so a future refactor that changes that fails loudly here.
+      throw new IllegalStateException(
+          "A2A task completion future failed unexpectedly", e.getCause());
     }
+  }
 
-    /**
-     * @throws A2aError {@code -32001} when unknown, expired, or not owned by the caller.
-     */
-    public A2aTask get(String taskId, Principal principal) {
-        if (taskId != null && taskId.startsWith(A2aTask.OUTBOUND_ID_PREFIX)) {
-            // Outbound-call bookkeeping (A2aClientService) is not part of the inbound surface.
-            throw A2aError.taskNotFound(taskId);
-        }
-        return store.find(taskId, currentTenantId(), currentSubject(principal))
-                .orElseThrow(() -> A2aError.taskNotFound(taskId));
+  /**
+   * @throws A2aError {@code -32001} when unknown, expired, or not owned by the caller.
+   */
+  public A2aTask get(String taskId, Principal principal) {
+    if (taskId != null && taskId.startsWith(A2aTask.OUTBOUND_ID_PREFIX)) {
+      // Outbound-call bookkeeping (A2aClientService) is not part of the inbound surface.
+      throw A2aError.taskNotFound(taskId);
     }
+    return store
+        .find(taskId, currentTenantId(), currentSubject(principal))
+        .orElseThrow(() -> A2aError.taskNotFound(taskId));
+  }
 
-    /**
-     * The tenant's whole task set - every subject's, both directions - for the admin console
-     * ({@code A2aConsoleController}). The controller's {@code @PreAuthorize} manager check is what
-     * replaces the per-subject ownership rule {@link A2aTaskStore#find} applies on the protocol
-     * surface.
-     */
-    public List<A2aTask> consoleTasks() {
-        return store.listForTenant(currentTenantId());
-    }
+  /**
+   * The tenant's whole task set - every subject's, both directions - for the admin console ({@code
+   * A2aConsoleController}). The controller's {@code @PreAuthorize} manager check is what replaces
+   * the per-subject ownership rule {@link A2aTaskStore#find} applies on the protocol surface.
+   */
+  public List<A2aTask> consoleTasks() {
+    return store.listForTenant(currentTenantId());
+  }
 
-    /**
-     * @throws ResponseStatusException 404 when unknown, expired, or in another tenant.
-     */
-    public A2aTask consoleGet(String taskId) {
-        return store.findForTenant(taskId, currentTenantId())
-                .orElseThrow(
-                        () ->
-                                new ResponseStatusException(
-                                        HttpStatus.NOT_FOUND, "A2A task not found"));
-    }
+  /**
+   * @throws ResponseStatusException 404 when unknown, expired, or in another tenant.
+   */
+  public A2aTask consoleGet(String taskId) {
+    return store
+        .findForTenant(taskId, currentTenantId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "A2A task not found"));
+  }
 
-    /**
-     * Console cancel - same rules as the protocol path ({@link #cancel}): only a non-terminal task
-     * can be canceled, and a detached cross-replica record flips in Redis so the owner's heartbeat
-     * honours it. Outbound ({@code a2a-out-*}) records are bookkeeping over a remote whose state
-     * this deployment does not control; canceling one only annotates the local record, which is
-     * still the honest thing to show the operator who asked.
-     *
-     * @throws ResponseStatusException 404 unknown; 409 already terminal.
-     */
-    public A2aTask consoleCancel(String taskId) {
-        A2aTask task = consoleGet(taskId);
-        if (!task.cancel()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "A2A task "
-                            + taskId
-                            + " is already "
-                            + task.snapshot().state().wire(A2aVersion.V1_0));
-        }
-        store.save(task);
-        audit(task, AuditOutcome.SUCCESS, "canceled from the console");
-        return task;
+  /**
+   * Console cancel - same rules as the protocol path ({@link #cancel}): only a non-terminal task
+   * can be canceled, and a detached cross-replica record flips in Redis so the owner's heartbeat
+   * honours it. Outbound ({@code a2a-out-*}) records are bookkeeping over a remote whose state this
+   * deployment does not control; canceling one only annotates the local record, which is still the
+   * honest thing to show the operator who asked.
+   *
+   * @throws ResponseStatusException 404 unknown; 409 already terminal.
+   */
+  public A2aTask consoleCancel(String taskId) {
+    A2aTask task = consoleGet(taskId);
+    if (!task.cancel()) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "A2A task " + taskId + " is already " + task.snapshot().state().wire(A2aVersion.V1_0));
     }
+    store.save(task);
+    audit(task, AuditOutcome.SUCCESS, "canceled from the console");
+    return task;
+  }
 
-    /**
-     * @throws A2aError {@code -32001} when not found; {@code -32002} when the task already reached
-     *     a terminal state (the spec's TaskNotCancelable).
-     */
-    public A2aTask cancel(String taskId, Principal principal) {
-        A2aTask task = get(taskId, principal);
-        if (!task.cancel()) {
-            throw A2aError.taskNotCancelable(taskId, task.snapshot().state());
-        }
-        store.save(task);
-        audit(task, AuditOutcome.SUCCESS, "canceled by caller");
-        return task;
+  /**
+   * @throws A2aError {@code -32001} when not found; {@code -32002} when the task already reached a
+   *     terminal state (the spec's TaskNotCancelable).
+   */
+  public A2aTask cancel(String taskId, Principal principal) {
+    A2aTask task = get(taskId, principal);
+    if (!task.cancel()) {
+      throw A2aError.taskNotCancelable(taskId, task.snapshot().state());
     }
+    store.save(task);
+    audit(task, AuditOutcome.SUCCESS, "canceled by caller");
+    return task;
+  }
 
-    private void fail(A2aTask task, Throwable error) {
-        // The user-facing half only: getMessage() on an arbitrary upstream
-        // exception is raw internal detail (class names, provider JSON) and this
-        // string lands in a peer agent's transcript. Same helper, same reason,
-        // as AgentController's own mid-stream failure path.
-        String message = AgentChatStreamResponder.midStreamFailureMessage(error);
-        if (task.markFailed(message)) {
-            log.warn("A2A task {} (agent {}) failed", task.id(), task.agentId(), error);
-            audit(task, AuditOutcome.FAILURE, "failed: " + message);
-        }
+  private void fail(A2aTask task, Throwable error) {
+    // The user-facing half only: getMessage() on an arbitrary upstream
+    // exception is raw internal detail (class names, provider JSON) and this
+    // string lands in a peer agent's transcript. Same helper, same reason,
+    // as AgentController's own mid-stream failure path.
+    String message = AgentChatStreamResponder.midStreamFailureMessage(error);
+    if (task.markFailed(message)) {
+      log.warn("A2A task {} (agent {}) failed", task.id(), task.agentId(), error);
+      audit(task, AuditOutcome.FAILURE, "failed: " + message);
     }
+  }
 
-    /**
-     * Best-effort audit row, same "never let logging break the real call" posture {@code
-     * McpCallAgentToolCallback#recordAudit} takes - a failure writing the row must never change
-     * what the caller was about to receive.
-     */
-    private void audit(A2aTask task, AuditOutcome outcome, String detail) {
-        String actor = task.subject() != null ? task.subject() : ANONYMOUS_ACTOR;
-        try {
-            auditLogService.record(
-                    actor,
-                    AUDIT_ACTION,
-                    "Agent",
-                    task.agentId().toString(),
-                    outcome,
-                    "A2A task "
-                            + task.id()
-                            + " (context "
-                            + task.contextId()
-                            + ") "
-                            + detail
-                            + ".");
-        } catch (RuntimeException auditFailure) {
-            log.warn("Failed to record audit log entry for A2A task {}", task.id(), auditFailure);
-        }
+  /**
+   * Best-effort audit row, same "never let logging break the real call" posture {@code
+   * McpCallAgentToolCallback#recordAudit} takes - a failure writing the row must never change what
+   * the caller was about to receive.
+   */
+  private void audit(A2aTask task, AuditOutcome outcome, String detail) {
+    String actor = task.subject() != null ? task.subject() : ANONYMOUS_ACTOR;
+    try {
+      auditLogService.record(
+          actor,
+          AUDIT_ACTION,
+          "Agent",
+          task.agentId().toString(),
+          outcome,
+          "A2A task " + task.id() + " (context " + task.contextId() + ") " + detail + ".");
+    } catch (RuntimeException auditFailure) {
+      log.warn("Failed to record audit log entry for A2A task {}", task.id(), auditFailure);
     }
+  }
 
-    static String currentTenantId() {
-        return TenantContext.current().map(TenantContext::getTenantId).orElse(null);
-    }
+  static String currentTenantId() {
+    return TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+  }
 
-    static String currentSubject(Principal principal) {
-        return TenantContext.current()
-                .map(TenantContext::getSubject)
-                .filter(StringUtils::hasText)
-                .orElseGet(
-                        () ->
-                                principal != null && StringUtils.hasText(principal.getName())
-                                        ? principal.getName()
-                                        : null);
-    }
+  static String currentSubject(Principal principal) {
+    return TenantContext.current()
+        .map(TenantContext::getSubject)
+        .filter(StringUtils::hasText)
+        .orElseGet(
+            () ->
+                principal != null && StringUtils.hasText(principal.getName())
+                    ? principal.getName()
+                    : null);
+  }
 
-    /**
-     * Exposed for the controller's stream drain loop; see {@link
-     * A2aProperties#getBlockingTimeout()}.
-     */
-    Duration blockingTimeout() {
-        return properties.getBlockingTimeout();
-    }
+  /**
+   * Exposed for the controller's stream drain loop; see {@link A2aProperties#getBlockingTimeout()}.
+   */
+  Duration blockingTimeout() {
+    return properties.getBlockingTimeout();
+  }
 }

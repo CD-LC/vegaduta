@@ -18,80 +18,80 @@ import java.util.function.Consumer;
  */
 public final class TurnTaint {
 
-    /** Bound on remembered source labels; the turn stays tainted regardless. */
-    static final int MAX_SOURCES = 8;
+  /** Bound on remembered source labels; the turn stays tainted regardless. */
+  static final int MAX_SOURCES = 8;
 
-    /** Bound on distinct observe-mode reports per turn. */
-    static final int MAX_REPORTED = 32;
+  /** Bound on distinct observe-mode reports per turn. */
+  static final int MAX_REPORTED = 32;
 
-    private final List<String> sources = new ArrayList<>(2);
-    private final Set<String> reported = new HashSet<>();
-    private volatile boolean tainted;
-    private volatile Consumer<List<String>> listener;
+  private final List<String> sources = new ArrayList<>(2);
+  private final Set<String> reported = new HashSet<>();
+  private volatile boolean tainted;
+  private volatile Consumer<List<String>> listener;
 
-    /**
-     * Records that content from {@code source} (a tool name or channel label) entered the turn.
-     *
-     * @return true if this call is the one that tainted a previously clean turn
-     */
-    public boolean mark(String source) {
-        String label = source == null || source.isBlank() ? "unknown" : source;
-        boolean first;
-        boolean changed;
-        List<String> snapshot = null;
-        synchronized (sources) {
-            first = !tainted;
-            tainted = true;
-            changed = first;
-            if (sources.size() < MAX_SOURCES && !sources.contains(label)) {
-                sources.add(label);
-                changed = true;
-            }
-            if (changed && listener != null) {
-                snapshot = List.copyOf(sources);
-            }
-        }
-        Consumer<List<String>> l = listener;
-        if (snapshot != null && l != null) {
-            try {
-                l.accept(snapshot);
-            } catch (RuntimeException e) {
-                // A persistence hook must never break the turn that is being tainted.
-            }
-        }
-        return first;
+  /**
+   * Records that content from {@code source} (a tool name or channel label) entered the turn.
+   *
+   * @return true if this call is the one that tainted a previously clean turn
+   */
+  public boolean mark(String source) {
+    String label = source == null || source.isBlank() ? "unknown" : source;
+    boolean first;
+    boolean changed;
+    List<String> snapshot = null;
+    synchronized (sources) {
+      first = !tainted;
+      tainted = true;
+      changed = first;
+      if (sources.size() < MAX_SOURCES && !sources.contains(label)) {
+        sources.add(label);
+        changed = true;
+      }
+      if (changed && listener != null) {
+        snapshot = List.copyOf(sources);
+      }
     }
-
-    /**
-     * Registers the single hook told whenever the set of sources changes (the first mark, and each
-     * new source label after it) with a snapshot. The chat pipeline uses it to persist a session
-     * level taint marker (see {@code SessionTaintStore}) so a later turn of the same conversation
-     * starts tainted. Called on the marking thread, outside the lock; exceptions are swallowed.
-     * Replaces any earlier hook.
-     */
-    public void onChange(Consumer<List<String>> hook) {
-        this.listener = hook;
+    Consumer<List<String>> l = listener;
+    if (snapshot != null && l != null) {
+      try {
+        l.accept(snapshot);
+      } catch (RuntimeException e) {
+        // A persistence hook must never break the turn that is being tainted.
+      }
     }
+    return first;
+  }
 
-    /**
-     * True the first time {@code key} is reported on this turn, false afterwards. Observe mode uses
-     * it so a tainted turn writes one WARN and one audit row per tool, not one per call. Bounded:
-     * past {@link #MAX_REPORTED} distinct keys nothing more is reported (the meter still counts).
-     */
-    public boolean firstReport(String key) {
-        synchronized (reported) {
-            return reported.size() < MAX_REPORTED && reported.add(key == null ? "unknown" : key);
-        }
-    }
+  /**
+   * Registers the single hook told whenever the set of sources changes (the first mark, and each
+   * new source label after it) with a snapshot. The chat pipeline uses it to persist a session
+   * level taint marker (see {@code SessionTaintStore}) so a later turn of the same conversation
+   * starts tainted. Called on the marking thread, outside the lock; exceptions are swallowed.
+   * Replaces any earlier hook.
+   */
+  public void onChange(Consumer<List<String>> hook) {
+    this.listener = hook;
+  }
 
-    public boolean isTainted() {
-        return tainted;
+  /**
+   * True the first time {@code key} is reported on this turn, false afterwards. Observe mode uses
+   * it so a tainted turn writes one WARN and one audit row per tool, not one per call. Bounded:
+   * past {@link #MAX_REPORTED} distinct keys nothing more is reported (the meter still counts).
+   */
+  public boolean firstReport(String key) {
+    synchronized (reported) {
+      return reported.size() < MAX_REPORTED && reported.add(key == null ? "unknown" : key);
     }
+  }
 
-    /** Snapshot of the (bounded) sources that tainted this turn, in order of first appearance. */
-    public List<String> sources() {
-        synchronized (sources) {
-            return List.copyOf(sources);
-        }
+  public boolean isTainted() {
+    return tainted;
+  }
+
+  /** Snapshot of the (bounded) sources that tainted this turn, in order of first appearance. */
+  public List<String> sources() {
+    synchronized (sources) {
+      return List.copyOf(sources);
     }
+  }
 }

@@ -27,88 +27,88 @@ import org.springframework.web.bind.annotation.RestController;
 @Profile("knowledge")
 public class KnowledgeCollectionController {
 
-    private final KnowledgeCollectionService collectionService;
-    private final KnowledgeDocumentService documentService;
+  private final KnowledgeCollectionService collectionService;
+  private final KnowledgeDocumentService documentService;
 
-    public KnowledgeCollectionController(
-            KnowledgeCollectionService collectionService,
-            KnowledgeDocumentService documentService) {
-        this.collectionService = collectionService;
-        this.documentService = documentService;
-    }
+  public KnowledgeCollectionController(
+      KnowledgeCollectionService collectionService, KnowledgeDocumentService documentService) {
+    this.collectionService = collectionService;
+    this.documentService = documentService;
+  }
 
-    @PostMapping
-    public ResponseEntity<KnowledgeCollectionResponse> create(
-            @Valid @RequestBody KnowledgeCollectionCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(collectionService.create(request));
-    }
+  @PostMapping
+  public ResponseEntity<KnowledgeCollectionResponse> create(
+      @Valid @RequestBody KnowledgeCollectionCreateRequest request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(collectionService.create(request));
+  }
 
-    @GetMapping
-    public ResponseEntity<List<KnowledgeCollectionResponse>> list(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(
-            collectionService.listAll(),
-            limit, offset, 50, 500);
-    }
+  @GetMapping
+  public ResponseEntity<List<KnowledgeCollectionResponse>> list(
+      @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    return ListPaging.window(collectionService.listAll(), limit, offset, 50, 500);
+  }
 
-    // Multi-model ingestion - the fixed catalog KnowledgeCollectionsPanel's
-    // "Embedding model" dropdown renders. A literal path segment, not
-    // ambiguous with "/{collectionId}" below - Spring's path matcher always
-    // prefers the more specific literal match (see EmbeddingModelCatalog's
-    // javadoc for the model list itself).
-    @GetMapping("/embedding-models")
-    public ResponseEntity<List<EmbeddingModelCatalog.ModelOption>> embeddingModels(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(EmbeddingModelCatalog.all(), limit, offset, 100, 500);
-    }
+  // Multi-model ingestion - the fixed catalog KnowledgeCollectionsPanel's
+  // "Embedding model" dropdown renders. A literal path segment, not
+  // ambiguous with "/{collectionId}" below - Spring's path matcher always
+  // prefers the more specific literal match (see EmbeddingModelCatalog's
+  // javadoc for the model list itself).
+  @GetMapping("/embedding-models")
+  public ResponseEntity<List<EmbeddingModelCatalog.ModelOption>> embeddingModels(
+      @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    return ListPaging.window(EmbeddingModelCatalog.all(), limit, offset, 100, 500);
+  }
 
-    // RAG audit fix (2026-07-29) - the fixed catalog of Postgres text-search
-    // configurations a collection's keyword-search side can be created with
-    // (per-collection FTS language, migration V154). Same literal-path-
-    // segment reasoning as /embedding-models above.
-    @GetMapping("/text-search-configs")
-    public ResponseEntity<List<TextSearchConfigCatalog.ConfigOption>> textSearchConfigs(@RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
-        return ListPaging.window(TextSearchConfigCatalog.all(), limit, offset, 100, 500);
-    }
+  // RAG audit fix (2026-07-29) - the fixed catalog of Postgres text-search
+  // configurations a collection's keyword-search side can be created with
+  // (per-collection FTS language, migration V154). Same literal-path-
+  // segment reasoning as /embedding-models above.
+  @GetMapping("/text-search-configs")
+  public ResponseEntity<List<TextSearchConfigCatalog.ConfigOption>> textSearchConfigs(
+      @RequestParam(required = false) Integer limit, @RequestParam(required = false) Long offset) {
+    return ListPaging.window(TextSearchConfigCatalog.all(), limit, offset, 100, 500);
+  }
 
-    @GetMapping("/{collectionId}")
-    public KnowledgeCollectionResponse get(@PathVariable UUID collectionId) {
-        return collectionService.get(collectionId);
-    }
+  @GetMapping("/{collectionId}")
+  public KnowledgeCollectionResponse get(@PathVariable UUID collectionId) {
+    return collectionService.get(collectionId);
+  }
 
-    @PutMapping("/{collectionId}")
-    public KnowledgeCollectionResponse update(
-            @PathVariable UUID collectionId,
-            @Valid @RequestBody KnowledgeCollectionUpdateRequest request) {
-        return collectionService.update(collectionId, request);
-    }
+  @PutMapping("/{collectionId}")
+  public KnowledgeCollectionResponse update(
+      @PathVariable UUID collectionId,
+      @Valid @RequestBody KnowledgeCollectionUpdateRequest request) {
+    return collectionService.update(collectionId, request);
+  }
 
-    @DeleteMapping("/{collectionId}")
-    public ResponseEntity<Void> delete(@PathVariable UUID collectionId) {
-        collectionService.delete(collectionId);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{collectionId}")
+  public ResponseEntity<Void> delete(@PathVariable UUID collectionId) {
+    collectionService.delete(collectionId);
+    return ResponseEntity.noContent().build();
+  }
 
-    /**
-     * "Build the backend to make it real" - the real, persisted file table for this collection
-     * (every upload through both {@code KnowledgeController.upload} and {@code uploadAudio}, newest
-     * first), replacing the frontend's earlier session-only "recent uploads" list.
-     */
-    @GetMapping("/{collectionId}/documents")
-    public ResponseEntity<List<KnowledgeDocumentResponse>> documents(
-            @PathVariable UUID collectionId,
-            @RequestParam(required = false) Integer limit,
-            @RequestParam(required = false) Long offset) {
-        collectionService.requireReadable(collectionId);
-        List<KnowledgeDocumentResponse> rows =
-                documentService.listByCollection(collectionId, limit, offset);
-        // Truncation must be visible: X-Total-Count is the real count (queried only
-        // for a full or paged-in page), X-Has-More flags older rows - reach them with ?offset=.
-        return ListPaging.respond(
-                rows,
-                ListPaging.limit(
-                        limit,
-                        KnowledgeDocumentService.LIST_DEFAULT_LIMIT,
-                        KnowledgeDocumentService.LIST_MAX_LIMIT),
-                ListPaging.offset(offset),
-                () -> documentService.countByCollection(collectionId));
-    }
+  /**
+   * "Build the backend to make it real" - the real, persisted file table for this collection (every
+   * upload through both {@code KnowledgeController.upload} and {@code uploadAudio}, newest first),
+   * replacing the frontend's earlier session-only "recent uploads" list.
+   */
+  @GetMapping("/{collectionId}/documents")
+  public ResponseEntity<List<KnowledgeDocumentResponse>> documents(
+      @PathVariable UUID collectionId,
+      @RequestParam(required = false) Integer limit,
+      @RequestParam(required = false) Long offset) {
+    collectionService.requireReadable(collectionId);
+    List<KnowledgeDocumentResponse> rows =
+        documentService.listByCollection(collectionId, limit, offset);
+    // Truncation must be visible: X-Total-Count is the real count (queried only
+    // for a full or paged-in page), X-Has-More flags older rows - reach them with ?offset=.
+    return ListPaging.respond(
+        rows,
+        ListPaging.limit(
+            limit,
+            KnowledgeDocumentService.LIST_DEFAULT_LIMIT,
+            KnowledgeDocumentService.LIST_MAX_LIMIT),
+        ListPaging.offset(offset),
+        () -> documentService.countByCollection(collectionId));
+  }
 }

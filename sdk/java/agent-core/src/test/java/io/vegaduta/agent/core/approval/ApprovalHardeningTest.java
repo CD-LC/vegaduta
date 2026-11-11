@@ -37,7 +37,8 @@ import org.junit.jupiter.api.Test;
 /** Four-eyes default and opt-out, redacted failure results, compare-and-set across gates. */
 class ApprovalHardeningTest {
 
-  private static final RunContext CTX = RunContext.builder().tenantId("t1").principal("agent").build();
+  private static final RunContext CTX =
+      RunContext.builder().tenantId("t1").principal("agent").build();
   private static final String ACTION = "tool:pay";
 
   private final InMemoryAuditSink audit = new InMemoryAuditSink();
@@ -56,7 +57,8 @@ class ApprovalHardeningTest {
         Clock.systemUTC());
   }
 
-  private static ApprovalActionExecutor executor(java.util.function.Function<ApprovalRequest, String> body) {
+  private static ApprovalActionExecutor executor(
+      java.util.function.Function<ApprovalRequest, String> body) {
     return new ApprovalActionExecutor() {
       @Override
       public String actionType() {
@@ -75,8 +77,7 @@ class ApprovalHardeningTest {
   @Test
   void governanceDefaultsToFourEyes() {
     Governance governance = Governance.builder().build();
-    ApprovalRequest request =
-        governance.approvals().request(ACTION, "pay", "{}", CTX);
+    ApprovalRequest request = governance.approvals().request(ACTION, "pay", "{}", CTX);
     assertThat(request.requestedBy()).isEqualTo("agent");
     assertThatThrownBy(() -> governance.approvals().approve(request.id(), "agent"))
         .isInstanceOf(ApprovalNotAuthorizedException.class);
@@ -87,9 +88,7 @@ class ApprovalHardeningTest {
   @Test
   void optOutIsExplicit() {
     Governance viaPolicy =
-        Governance.builder()
-            .policy(GovernancePolicy.builder().fourEyes(false).build())
-            .build();
+        Governance.builder().policy(GovernancePolicy.builder().fourEyes(false).build()).build();
     ApprovalRequest a = viaPolicy.approvals().request(ACTION, "pay", "{}", CTX);
     assertThat(viaPolicy.approvals().approve(a.id(), "agent").status())
         .isEqualTo(ApprovalStatus.APPROVED);
@@ -105,7 +104,8 @@ class ApprovalHardeningTest {
   void permitAllIsTheSameOptOut() {
     ApprovalDecisionAuthorizer permitAll = ApprovalDecisionAuthorizer.permitAll();
     ApprovalRequest r =
-        ApprovalRequest.pending(ACTION, "s", "{}", CTX, Instant.now(), Instant.now().plusSeconds(60));
+        ApprovalRequest.pending(
+            ACTION, "s", "{}", CTX, Instant.now(), Instant.now().plusSeconds(60));
     permitAll.authorize(r, r.requestedBy());
   }
 

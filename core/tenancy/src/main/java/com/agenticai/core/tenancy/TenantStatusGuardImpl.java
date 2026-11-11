@@ -3,6 +3,7 @@ package com.agenticai.core.tenancy;
 import com.agenticai.core.security.HotpathCaches;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.TtlCache;
+import com.agenticai.core.security.logging.LogSafe;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,146 +47,143 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantStatusGuardImpl implements TenantStatusGuard {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantStatusGuardImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(TenantStatusGuardImpl.class);
 
-    private final TenantRepository tenantRepository;
-    private final PlatformKillSwitchRepository platformKillSwitchRepository;
-    private final DataSource dataSource;
-    private final TtlCache<Boolean> tenantUsable;
-    private final TtlCache<Boolean> platformUsable;
-    private final TenantMigrationFailures migrationFailures;
-    private final boolean failOpenOnSchemaCheckError;
+  private final TenantRepository tenantRepository;
+  private final PlatformKillSwitchRepository platformKillSwitchRepository;
+  private final DataSource dataSource;
+  private final TtlCache<Boolean> tenantUsable;
+  private final TtlCache<Boolean> platformUsable;
+  private final TenantMigrationFailures migrationFailures;
+  private final boolean failOpenOnSchemaCheckError;
 
-    public TenantStatusGuardImpl(
-            TenantRepository tenantRepository,
-            PlatformKillSwitchRepository platformKillSwitchRepository,
-            DataSource dataSource,
-            Duration statusCacheTtl) {
-        this(
-                tenantRepository,
-                platformKillSwitchRepository,
-                dataSource,
-                statusCacheTtl,
-                new TenantMigrationFailures(),
-                false);
+  public TenantStatusGuardImpl(
+      TenantRepository tenantRepository,
+      PlatformKillSwitchRepository platformKillSwitchRepository,
+      DataSource dataSource,
+      Duration statusCacheTtl) {
+    this(
+        tenantRepository,
+        platformKillSwitchRepository,
+        dataSource,
+        statusCacheTtl,
+        new TenantMigrationFailures(),
+        false);
+  }
+
+  @Autowired
+  public TenantStatusGuardImpl(
+      TenantRepository tenantRepository,
+      PlatformKillSwitchRepository platformKillSwitchRepository,
+      DataSource dataSource,
+      @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl,
+      TenantMigrationFailures migrationFailures,
+      @Value("${app.tenant.status-fail-open-on-schema-check-error:false}")
+          boolean failOpenOnSchemaCheckError) {
+    this.migrationFailures = migrationFailures;
+    this.failOpenOnSchemaCheckError = failOpenOnSchemaCheckError;
+    this.tenantRepository = tenantRepository;
+    this.platformKillSwitchRepository = platformKillSwitchRepository;
+    this.dataSource = dataSource;
+    // Both registered under the names TenantPlanEvictionListener /
+    // TenantEmergencyControlService evict on write - see class javadoc.
+    this.tenantUsable = new TtlCache<>(HotpathCaches.TENANT_STATUS, statusCacheTtl, 10_000);
+    this.platformUsable = new TtlCache<>(HotpathCaches.PLATFORM_STATUS, statusCacheTtl, 4);
+  }
+
+  /**
+   * #815 Governance follow-up (Fail-safe: platform + per-tenant kill switch) - the platform-wide
+   * check runs FIRST and short-circuits everything else, since a platform-stopped incident should
+   * never even reach a per-tenant lookup. Missing the singleton row (migration V76 not run) fails
+   * open (not stopped) rather than blocking every request on a config gap - same "never let an
+   * infra hiccup lock out the whole platform" posture as {@link #schemaExists}'s SQLException
+   * handling below.
+   */
+  @Override
+  public boolean isUsable(String tenantId) {
+    // One cached singleton read instead of a findById per request - the
+    // platform kill-switch write path evicts this entry the moment the
+    // row changes, so "stopped" is never served stale on this pod.
+    boolean platformStopped =
+        platformUsable.get(
+            TtlCache.key("platform", "usable"),
+            () ->
+                platformKillSwitchRepository
+                    .findById(PlatformKillSwitch.SINGLETON_ID)
+                    .map(PlatformKillSwitch::isStopped)
+                    .orElse(false));
+    if (platformStopped) {
+      return false;
     }
-
-    @Autowired
-    public TenantStatusGuardImpl(
-            TenantRepository tenantRepository,
-            PlatformKillSwitchRepository platformKillSwitchRepository,
-            DataSource dataSource,
-            @Value("${app.tenant.status-cache-ttl:10s}") Duration statusCacheTtl,
-            TenantMigrationFailures migrationFailures,
-            @Value("${app.tenant.status-fail-open-on-schema-check-error:false}")
-                    boolean failOpenOnSchemaCheckError) {
-        this.migrationFailures = migrationFailures;
-        this.failOpenOnSchemaCheckError = failOpenOnSchemaCheckError;
-        this.tenantRepository = tenantRepository;
-        this.platformKillSwitchRepository = platformKillSwitchRepository;
-        this.dataSource = dataSource;
-        // Both registered under the names TenantPlanEvictionListener /
-        // TenantEmergencyControlService evict on write - see class javadoc.
-        this.tenantUsable = new TtlCache<>(HotpathCaches.TENANT_STATUS, statusCacheTtl, 10_000);
-        this.platformUsable = new TtlCache<>(HotpathCaches.PLATFORM_STATUS, statusCacheTtl, 4);
+    // A schema whose startup migration failed is stale: refuse it until a later migration
+    // succeeds. Checked outside the TTL cache (an in-memory set lookup), so the moment a retry
+    // clears the mark the tenant is served again with no eviction needed.
+    if (migrationFailures.hasFailed(tenantId)) {
+      return false;
     }
+    return tenantUsable.get(TtlCache.key(tenantId, "usable"), () -> computeUsable(tenantId));
+  }
 
-    /**
-     * #815 Governance follow-up (Fail-safe: platform + per-tenant kill switch) - the platform-wide
-     * check runs FIRST and short-circuits everything else, since a platform-stopped incident should
-     * never even reach a per-tenant lookup. Missing the singleton row (migration V76 not run) fails
-     * open (not stopped) rather than blocking every request on a config gap - same "never let an
-     * infra hiccup lock out the whole platform" posture as {@link #schemaExists}'s SQLException
-     * handling below.
-     */
-    @Override
-    public boolean isUsable(String tenantId) {
-        // One cached singleton read instead of a findById per request - the
-        // platform kill-switch write path evicts this entry the moment the
-        // row changes, so "stopped" is never served stale on this pod.
-        boolean platformStopped =
-                platformUsable.get(
-                        TtlCache.key("platform", "usable"),
-                        () ->
-                                platformKillSwitchRepository
-                                        .findById(PlatformKillSwitch.SINGLETON_ID)
-                                        .map(PlatformKillSwitch::isStopped)
-                                        .orElse(false));
-        if (platformStopped) {
-            return false;
-        }
-        // A schema whose startup migration failed is stale: refuse it until a later migration
-        // succeeds. Checked outside the TTL cache (an in-memory set lookup), so the moment a retry
-        // clears the mark the tenant is served again with no eviction needed.
-        if (migrationFailures.hasFailed(tenantId)) {
-            return false;
-        }
-        return tenantUsable.get(TtlCache.key(tenantId, "usable"), () -> computeUsable(tenantId));
+  /**
+   * The uncached body of {@link #isUsable}'s per-tenant half - kept verbatim so the cache only
+   * wraps, never rewrites, the decision.
+   */
+  private boolean computeUsable(String tenantId) {
+    // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+    // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+    // reach another tenant's schema.
+    if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
+      log.warn(
+          "Rejecting a tenant claim that is not a canonical schema name (sanitised form differs)");
+      return false;
     }
+    // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
+    // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
+    // reach another tenant's schema.
+    if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
+      log.warn("Rejecting a tenant claim that is not a canonical schema name");
+      return false;
+    }
+    // A schema whose startup migration failed is stale: refuse it until a later migration
+    // succeeds. The flag is persisted on the tenant row (TenantMigrationFailures), so this sees
+    // failures recorded by ANY shape or pod; it sits inside the TTL cache and the recording pod
+    // evicts its own entry when it marks or clears.
+    if (migrationFailures.hasFailed(tenantId)) {
+      log.warn(
+          "Refusing tenant '{}': its schema migration failed and has not been retried"
+              + " successfully",
+          LogSafe.clean(tenantId));
+      return false;
+    }
+    return tenantRepository
+        .findBySchemaName(tenantId)
+        .map(tenant -> tenant.getStatus() == TenantStatus.ACTIVE && !tenant.isEmergencyStopped())
+        .orElseGet(() -> schemaExists(tenantId));
+  }
 
-    /**
-     * The uncached body of {@link #isUsable}'s per-tenant half - kept verbatim so the cache only
-     * wraps, never rewrites, the decision.
-     */
-    private boolean computeUsable(String tenantId) {
-        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
-        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
-        // reach another tenant's schema.
-        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
-            log.warn(
-                    "Rejecting a tenant claim that is not a canonical schema name (sanitised form differs)");
-            return false;
-        }
-        // The raw claim must already be a canonical schema name. The sanitizer is lossy ("Acme-Co"
-        // and "acme_co" both become "acme_co"), so a claim that only matches after sanitising could
-        // reach another tenant's schema.
-        if (tenantId == null || !SchemaNameSanitizer.sanitize(tenantId).equals(tenantId)) {
-            log.warn("Rejecting a tenant claim that is not a canonical schema name");
-            return false;
-        }
-        // A schema whose startup migration failed is stale: refuse it until a later migration
-        // succeeds. The flag is persisted on the tenant row (TenantMigrationFailures), so this sees
-        // failures recorded by ANY shape or pod; it sits inside the TTL cache and the recording pod
-        // evicts its own entry when it marks or clears.
-        if (migrationFailures.hasFailed(tenantId)) {
-            log.warn(
-                    "Refusing tenant '{}': its schema migration failed and has not been retried"
-                            + " successfully",
-                    LogSafe.clean(tenantId));
-            return false;
-        }
-        return tenantRepository
-                .findBySchemaName(tenantId)
-                .map(
-                        tenant ->
-                                tenant.getStatus() == TenantStatus.ACTIVE
-                                        && !tenant.isEmergencyStopped())
-                .orElseGet(() -> schemaExists(tenantId));
+  /**
+   * Fails CLOSED on any SQL error (logged, false) unless {@code
+   * app.tenant.status-fail-open-on-schema-check-error=true} restores the earlier fail-open
+   * behaviour. A denial is cached for the status TTL (10s by default) like any other answer.
+   */
+  private boolean schemaExists(String schemaName) {
+    try (Connection connection = dataSource.getConnection();
+        PreparedStatement statement =
+            connection.prepareStatement(
+                "SELECT 1 FROM information_schema.schemata WHERE schema_name = ?")) {
+      statement.setString(1, schemaName);
+      try (ResultSet resultSet = statement.executeQuery()) {
+        return resultSet.next();
+      }
+    } catch (SQLException e) {
+      log.warn(
+          "Could not verify schema existence for untracked tenant '{}' - {}",
+          schemaName,
+          failOpenOnSchemaCheckError
+              ? "allowing the request through (fail-open opt-in)"
+              : "refusing the request (fail-closed)",
+          e);
+      return failOpenOnSchemaCheckError;
     }
-
-    /**
-     * Fails CLOSED on any SQL error (logged, false) unless {@code
-     * app.tenant.status-fail-open-on-schema-check-error=true} restores the earlier fail-open
-     * behaviour. A denial is cached for the status TTL (10s by default) like any other answer.
-     */
-    private boolean schemaExists(String schemaName) {
-        try (Connection connection = dataSource.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(
-                                "SELECT 1 FROM information_schema.schemata WHERE schema_name = ?")) {
-            statement.setString(1, schemaName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next();
-            }
-        } catch (SQLException e) {
-            log.warn(
-                    "Could not verify schema existence for untracked tenant '{}' - {}",
-                    schemaName,
-                    failOpenOnSchemaCheckError
-                            ? "allowing the request through (fail-open opt-in)"
-                            : "refusing the request (fail-closed)",
-                    e);
-            return failOpenOnSchemaCheckError;
-        }
-    }
+  }
 }

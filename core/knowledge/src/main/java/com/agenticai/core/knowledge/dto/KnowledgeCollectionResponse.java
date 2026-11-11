@@ -35,26 +35,25 @@ public record KnowledgeCollectionResponse(
     // Migration V710 - who may read it (TENANT for every pre-existing collection) and the owner's
     // subject (null for a legacy collection).
     KnowledgeVisibility visibility,
-    String createdBy
-) {
-    public static KnowledgeCollectionResponse from(KnowledgeCollection collection, long fileCount, long chunkCount) {
-        return new KnowledgeCollectionResponse(
-            collection.getId(),
-            collection.getName(),
-            collection.getDescription(),
-            collection.getParentCollectionId(),
-            collection.isDefault(),
-            collection.getEmbeddingModel(),
-            collection.getTextSearchConfig(),
-            fileCount,
-            chunkCount,
-            collection.getCreatedAt(),
-            collection.getUpdatedAt(),
-            collection.getEmbeddingStatus(),
-            collection.getChunkSize(),
-            collection.getChunkOverlap(),
-            collection.getVisibility(),
-            collection.getCreatedBy()
-        );
-    }
+    String createdBy) {
+  public static KnowledgeCollectionResponse from(
+      KnowledgeCollection collection, long fileCount, long chunkCount) {
+    return new KnowledgeCollectionResponse(
+        collection.getId(),
+        collection.getName(),
+        collection.getDescription(),
+        collection.getParentCollectionId(),
+        collection.isDefault(),
+        collection.getEmbeddingModel(),
+        collection.getTextSearchConfig(),
+        fileCount,
+        chunkCount,
+        collection.getCreatedAt(),
+        collection.getUpdatedAt(),
+        collection.getEmbeddingStatus(),
+        collection.getChunkSize(),
+        collection.getChunkOverlap(),
+        collection.getVisibility(),
+        collection.getCreatedBy());
+  }
 }

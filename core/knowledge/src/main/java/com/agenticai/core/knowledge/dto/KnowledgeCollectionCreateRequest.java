@@ -8,11 +8,10 @@ import jakarta.validation.constraints.Size;
 import java.util.UUID;
 
 /**
- * Knowledge Stage F1. {@code description} isn't {@code @NotBlank} (some
- * users will skip it), but a blank description means Stage F2's
- * {@code list_knowledge_collections} tool has nothing meaningful to show a
- * model deciding whether this collection is relevant - worth surfacing in
- * the console UI as a strongly-encouraged field, not just an optional one.
+ * Knowledge Stage F1. {@code description} isn't {@code @NotBlank} (some users will skip it), but a
+ * blank description means Stage F2's {@code list_knowledge_collections} tool has nothing meaningful
+ * to show a model deciding whether this collection is relevant - worth surfacing in the console UI
+ * as a strongly-encouraged field, not just an optional one.
  */
 public record KnowledgeCollectionCreateRequest(
     @NotBlank @Size(max = 255) String name,
@@ -32,20 +31,34 @@ public record KnowledgeCollectionCreateRequest(
     @Min(0) @Max(199) Integer chunkOverlap,
     // Migration V710 - who may read it; null = TENANT (every member), the historic behaviour.
     // The creator becomes the owner either way.
-    KnowledgeVisibility visibility
-) {
-    /** Pre-V710 shape (chunking, no visibility) - kept so existing callers compile unchanged. */
-    public KnowledgeCollectionCreateRequest(
-        String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig,
-        Integer chunkSize, Integer chunkOverlap
-    ) {
-        this(name, description, parentCollectionId, embeddingModel, textSearchConfig, chunkSize, chunkOverlap, null);
-    }
+    KnowledgeVisibility visibility) {
+  /** Pre-V710 shape (chunking, no visibility) - kept so existing callers compile unchanged. */
+  public KnowledgeCollectionCreateRequest(
+      String name,
+      String description,
+      UUID parentCollectionId,
+      String embeddingModel,
+      String textSearchConfig,
+      Integer chunkSize,
+      Integer chunkOverlap) {
+    this(
+        name,
+        description,
+        parentCollectionId,
+        embeddingModel,
+        textSearchConfig,
+        chunkSize,
+        chunkOverlap,
+        null);
+  }
 
-    /** Pre-V361 shape - kept so existing callers (brief, demo studio) compile unchanged. */
-    public KnowledgeCollectionCreateRequest(
-        String name, String description, UUID parentCollectionId, String embeddingModel, String textSearchConfig
-    ) {
-        this(name, description, parentCollectionId, embeddingModel, textSearchConfig, null, null, null);
-    }
+  /** Pre-V361 shape - kept so existing callers (brief, demo studio) compile unchanged. */
+  public KnowledgeCollectionCreateRequest(
+      String name,
+      String description,
+      UUID parentCollectionId,
+      String embeddingModel,
+      String textSearchConfig) {
+    this(name, description, parentCollectionId, embeddingModel, textSearchConfig, null, null, null);
+  }
 }

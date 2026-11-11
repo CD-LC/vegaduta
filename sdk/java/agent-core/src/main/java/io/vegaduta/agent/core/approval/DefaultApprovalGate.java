@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * ApprovalNotificationBlockedException} (nobody would have seen it); a block at {@code
  * ON_APPROVAL_DECIDED} records the decision but does not execute the action. Decisions are
  * compare-and-set on the store ({@link ApprovalStore#saveIfStatus}), so of two concurrent approvals
- * exactly one executes and the other gets {@link ApprovalAlreadyDecidedException}; this holds across
- * gates and processes only if the store's {@code saveIfStatus} is atomic (see {@link
+ * exactly one executes and the other gets {@link ApprovalAlreadyDecidedException}; this holds
+ * across gates and processes only if the store's {@code saveIfStatus} is atomic (see {@link
  * ApprovalStore}). Decision reasons are bounded to {@value #MAX_REASON} characters. A failed
  * execution stores and audits {@link Text#failure the exception type and a redacted, bounded
  * message}, not the raw exception text.

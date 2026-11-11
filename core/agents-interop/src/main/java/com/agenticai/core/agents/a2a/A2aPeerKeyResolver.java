@@ -10,11 +10,11 @@ import java.util.Optional;
  */
 public interface A2aPeerKeyResolver {
 
-    /**
-     * @param cardUrl the caller's Agent Card URL, as the caller stated it
-     * @param keyId the {@code kid} the request's signature names
-     * @return the key, or empty when the card cannot be fetched, is not validly signed, names a
-     *     different key id, or is not on the operator's trusted-host list
-     */
-    Optional<PublicKey> resolve(String cardUrl, String keyId);
+  /**
+   * @param cardUrl the caller's Agent Card URL, as the caller stated it
+   * @param keyId the {@code kid} the request's signature names
+   * @return the key, or empty when the card cannot be fetched, is not validly signed, names a
+   *     different key id, or is not on the operator's trusted-host list
+   */
+  Optional<PublicKey> resolve(String cardUrl, String keyId);
 }

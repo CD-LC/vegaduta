@@ -31,8 +31,8 @@ public final class EuAiActEvidenceExporter implements EvidenceExporter {
   private static final String RETENTION_NOTE =
       "Retain these records for the period required by Art. 12(1) and Art. 19 (at least six months"
           + " unless Union or national law requires longer). The head hash and last sequence number"
-          + " are the integrity anchors for this bundle; store them separately and pass them back as"
-          + " expected anchors when verifying.";
+          + " are the integrity anchors for this bundle; store them separately and pass them back"
+          + " as expected anchors when verifying.";
 
   private final EvidenceBundle bundle;
 

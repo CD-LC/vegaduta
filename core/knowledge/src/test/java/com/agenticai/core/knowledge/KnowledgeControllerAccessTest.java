@@ -34,179 +34,196 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
- * REST enforcement in {@link KnowledgeController}: a member without a grant cannot search, download,
- * ingest, delete from or re-embed a restricted collection (404, nothing downstream touched), while a
- * pre-existing tenant-visible collection behaves exactly as before and grants open exactly what their
- * level says.
+ * REST enforcement in {@link KnowledgeController}: a member without a grant cannot search,
+ * download, ingest, delete from or re-embed a restricted collection (404, nothing downstream
+ * touched), while a pre-existing tenant-visible collection behaves exactly as before and grants
+ * open exactly what their level says.
  */
 class KnowledgeControllerAccessTest {
 
-    private static final String OWNER = "owner-sub";
-    private static final String MEMBER = "member-sub";
+  private static final String OWNER = "owner-sub";
+  private static final String MEMBER = "member-sub";
 
-    private KnowledgeCollectionRepository collections;
-    private KnowledgeDocumentRepository documents;
-    private ResourceAccessService sharing;
-    private KnowledgeIngestionService ingestion;
-    private KnowledgeSearchService searchService;
-    private KnowledgeCollectionService collectionService;
-    private KnowledgeDocumentService documentService;
-    private FileStorageService storage;
-    private KnowledgeReembedService reembed;
-    private KnowledgeController controller;
+  private KnowledgeCollectionRepository collections;
+  private KnowledgeDocumentRepository documents;
+  private ResourceAccessService sharing;
+  private KnowledgeIngestionService ingestion;
+  private KnowledgeSearchService searchService;
+  private KnowledgeCollectionService collectionService;
+  private KnowledgeDocumentService documentService;
+  private FileStorageService storage;
+  private KnowledgeReembedService reembed;
+  private KnowledgeController controller;
 
-    @BeforeEach
-    void setUp() {
-        collections = mock(KnowledgeCollectionRepository.class);
-        documents = mock(KnowledgeDocumentRepository.class);
-        sharing = mock(ResourceAccessService.class);
-        when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any())).thenReturn(Map.of());
-        ingestion = mock(KnowledgeIngestionService.class);
-        searchService = mock(KnowledgeSearchService.class);
-        collectionService = mock(KnowledgeCollectionService.class);
-        documentService = mock(KnowledgeDocumentService.class);
-        storage = mock(FileStorageService.class);
-        reembed = mock(KnowledgeReembedService.class);
-        KnowledgeAccessService access =
-            new KnowledgeAccessService(collections, documents, sharing, mock(AuditLogService.class));
-        controller = new KnowledgeController(
-            ingestion, searchService, collectionService, mock(KnowledgeIngestionJobService.class),
-            documentService, storage, reembed, mock(KnowledgeUrlIngester.class),
-            mock(DoclingConversionService.class), access);
-        TenantContext.set(TenantContext.of("tenant-1", MEMBER, Set.of()));
-    }
+  @BeforeEach
+  void setUp() {
+    collections = mock(KnowledgeCollectionRepository.class);
+    documents = mock(KnowledgeDocumentRepository.class);
+    sharing = mock(ResourceAccessService.class);
+    when(sharing.activeGrantLevels(eq(ResourceType.KNOWLEDGE_COLLECTION), any()))
+        .thenReturn(Map.of());
+    ingestion = mock(KnowledgeIngestionService.class);
+    searchService = mock(KnowledgeSearchService.class);
+    collectionService = mock(KnowledgeCollectionService.class);
+    documentService = mock(KnowledgeDocumentService.class);
+    storage = mock(FileStorageService.class);
+    reembed = mock(KnowledgeReembedService.class);
+    KnowledgeAccessService access =
+        new KnowledgeAccessService(collections, documents, sharing, mock(AuditLogService.class));
+    controller =
+        new KnowledgeController(
+            ingestion,
+            searchService,
+            collectionService,
+            mock(KnowledgeIngestionJobService.class),
+            documentService,
+            storage,
+            reembed,
+            mock(KnowledgeUrlIngester.class),
+            mock(DoclingConversionService.class),
+            access);
+    TenantContext.set(TenantContext.of("tenant-1", MEMBER, Set.of()));
+  }
 
-    @AfterEach
-    void clearContext() {
-        TenantContext.clear();
-    }
+  @AfterEach
+  void clearContext() {
+    TenantContext.clear();
+  }
 
-    private KnowledgeCollection collection(String owner, KnowledgeVisibility visibility) {
-        KnowledgeCollection c = new KnowledgeCollection("c", "d", null, "minilm-l6-v2", "simple", owner, visibility);
-        ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
-        when(collections.findById(c.getId())).thenReturn(Optional.of(c));
-        return c;
-    }
+  private KnowledgeCollection collection(String owner, KnowledgeVisibility visibility) {
+    KnowledgeCollection c =
+        new KnowledgeCollection("c", "d", null, "minilm-l6-v2", "simple", owner, visibility);
+    ReflectionTestUtils.setField(c, "id", UUID.randomUUID());
+    when(collections.findById(c.getId())).thenReturn(Optional.of(c));
+    return c;
+  }
 
-    private UUID documentIn(KnowledgeCollection c) {
-        KnowledgeDocument doc = mock(KnowledgeDocument.class);
-        when(doc.getCollectionId()).thenReturn(c.getId());
-        when(doc.getObjectKey()).thenReturn("knowledge-documents/x/report.pdf");
-        when(doc.getFilename()).thenReturn("report.pdf");
-        UUID id = UUID.randomUUID();
-        when(documents.findById(id)).thenReturn(Optional.of(doc));
-        when(documentService.getEntity(id)).thenReturn(doc);
-        return id;
-    }
+  private UUID documentIn(KnowledgeCollection c) {
+    KnowledgeDocument doc = mock(KnowledgeDocument.class);
+    when(doc.getCollectionId()).thenReturn(c.getId());
+    when(doc.getObjectKey()).thenReturn("knowledge-documents/x/report.pdf");
+    when(doc.getFilename()).thenReturn("report.pdf");
+    UUID id = UUID.randomUUID();
+    when(documents.findById(id)).thenReturn(Optional.of(doc));
+    when(documentService.getEntity(id)).thenReturn(doc);
+    return id;
+  }
 
-    // --- search --------------------------------------------------------------------------------
+  // --- search --------------------------------------------------------------------------------
 
-    @Test
-    void searchNamingAPrivateCollectionIs404AndNeverReachesTheSearchService() {
-        KnowledgeCollection secret = collection(OWNER, KnowledgeVisibility.PRIVATE);
+  @Test
+  void searchNamingAPrivateCollectionIs404AndNeverReachesTheSearchService() {
+    KnowledgeCollection secret = collection(OWNER, KnowledgeVisibility.PRIVATE);
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.search(
-            new SearchRequest("q", 5, Set.of(secret.getId()))));
+    assertThrows(
+        KnowledgeCollectionNotFoundException.class,
+        () -> controller.search(new SearchRequest("q", 5, Set.of(secret.getId()))));
 
-        verifyNoInteractions(searchService);
-    }
+    verifyNoInteractions(searchService);
+  }
 
-    @Test
-    void searchOnAnExistingTenantVisibleCollectionStillWorksWithNoGrant() {
-        KnowledgeCollection legacy = collection(null, null);
-        when(searchService.search(anyString(), anyInt(), any(), eq(false), any())).thenReturn(List.of());
+  @Test
+  void searchOnAnExistingTenantVisibleCollectionStillWorksWithNoGrant() {
+    KnowledgeCollection legacy = collection(null, null);
+    when(searchService.search(anyString(), anyInt(), any(), eq(false), any()))
+        .thenReturn(List.of());
 
-        controller.search(new SearchRequest("q", 5, Set.of(legacy.getId())));
+    controller.search(new SearchRequest("q", 5, Set.of(legacy.getId())));
 
-        verify(searchService).search("q", 5, Set.of(legacy.getId()), false, null);
-    }
+    verify(searchService).search("q", 5, Set.of(legacy.getId()), false, null);
+  }
 
-    @Test
-    void anUnscopedSearchIsLeftToTheSearchServiceToNarrow() {
-        controller.search(new SearchRequest("q", 5, null));
+  @Test
+  void anUnscopedSearchIsLeftToTheSearchServiceToNarrow() {
+    controller.search(new SearchRequest("q", 5, null));
 
-        verify(searchService).search("q", 5, null, false, null);
-    }
+    verify(searchService).search("q", 5, null, false, null);
+  }
 
-    // --- download / delete ---------------------------------------------------------------------
+  // --- download / delete ---------------------------------------------------------------------
 
-    @Test
-    void downloadingADocumentOfAPrivateCollectionIs404AndNeverReadsStorage() {
-        UUID doc = documentIn(collection(OWNER, KnowledgeVisibility.PRIVATE));
+  @Test
+  void downloadingADocumentOfAPrivateCollectionIs404AndNeverReadsStorage() {
+    UUID doc = documentIn(collection(OWNER, KnowledgeVisibility.PRIVATE));
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.downloadOriginalFile(doc));
+    assertThrows(
+        KnowledgeCollectionNotFoundException.class, () -> controller.downloadOriginalFile(doc));
 
-        verifyNoInteractions(storage);
-    }
+    verifyNoInteractions(storage);
+  }
 
-    @Test
-    void aViewerGrantAllowsDownloadButNotDelete() throws Exception {
-        KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
-        UUID doc = documentIn(team);
-        when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
-            .thenReturn(Map.of(team.getId(), PermissionLevel.VIEWER));
-        when(storage.get("knowledge-documents/x/report.pdf")).thenReturn(new ByteArrayInputStream(new byte[] {1, 2}));
+  @Test
+  void aViewerGrantAllowsDownloadButNotDelete() throws Exception {
+    KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
+    UUID doc = documentIn(team);
+    when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
+        .thenReturn(Map.of(team.getId(), PermissionLevel.VIEWER));
+    when(storage.get("knowledge-documents/x/report.pdf"))
+        .thenReturn(new ByteArrayInputStream(new byte[] {1, 2}));
 
-        ResponseEntity<byte[]> response = controller.downloadOriginalFile(doc);
-        assertEquals(2, response.getBody().length);
+    ResponseEntity<byte[]> response = controller.downloadOriginalFile(doc);
+    assertEquals(2, response.getBody().length);
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.deleteDocument(doc));
-        verify(documentService, never()).delete(any());
-    }
+    assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.deleteDocument(doc));
+    verify(documentService, never()).delete(any());
+  }
 
-    @Test
-    void anEditorGrantAllowsDeletingADocument() {
-        KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
-        UUID doc = documentIn(team);
-        when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
-            .thenReturn(Map.of(team.getId(), PermissionLevel.EDITOR));
+  @Test
+  void anEditorGrantAllowsDeletingADocument() {
+    KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
+    UUID doc = documentIn(team);
+    when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
+        .thenReturn(Map.of(team.getId(), PermissionLevel.EDITOR));
 
-        controller.deleteDocument(doc);
+    controller.deleteDocument(doc);
 
-        verify(documentService).delete(doc);
-    }
+    verify(documentService).delete(doc);
+  }
 
-    @Test
-    void deletingADocumentFromAPrivateCollectionIs404() {
-        UUID doc = documentIn(collection(OWNER, KnowledgeVisibility.PRIVATE));
+  @Test
+  void deletingADocumentFromAPrivateCollectionIs404() {
+    UUID doc = documentIn(collection(OWNER, KnowledgeVisibility.PRIVATE));
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.deleteDocument(doc));
+    assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.deleteDocument(doc));
 
-        verify(documentService, never()).delete(any());
-    }
+    verify(documentService, never()).delete(any());
+  }
 
-    // --- ingest / reembed ----------------------------------------------------------------------
+  // --- ingest / reembed ----------------------------------------------------------------------
 
-    @Test
-    void ingestingIntoACollectionWithOnlyAViewerGrantIs404AndNothingIsIngested() {
-        KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
-        when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
-            .thenReturn(Map.of(team.getId(), PermissionLevel.VIEWER));
+  @Test
+  void ingestingIntoACollectionWithOnlyAViewerGrantIs404AndNothingIsIngested() {
+    KnowledgeCollection team = collection(OWNER, KnowledgeVisibility.SHARED);
+    when(sharing.activeGrantLevels(ResourceType.KNOWLEDGE_COLLECTION, MEMBER))
+        .thenReturn(Map.of(team.getId(), PermissionLevel.VIEWER));
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.ingest(
-            new IngestRequest("src", "text", null, null, team.getId())));
+    assertThrows(
+        KnowledgeCollectionNotFoundException.class,
+        () -> controller.ingest(new IngestRequest("src", "text", null, null, team.getId())));
 
-        verifyNoInteractions(ingestion);
-    }
+    verifyNoInteractions(ingestion);
+  }
 
-    @Test
-    void ingestingIntoTheDefaultTenantVisibleCollectionStillWorks() {
-        KnowledgeCollection legacyDefault = collection(null, null);
-        when(collectionService.getDefaultCollectionId()).thenReturn(legacyDefault.getId());
-        when(collectionService.resolveChunking(any(), any(), any())).thenReturn(new Chunker.Settings(150, 30));
+  @Test
+  void ingestingIntoTheDefaultTenantVisibleCollectionStillWorks() {
+    KnowledgeCollection legacyDefault = collection(null, null);
+    when(collectionService.getDefaultCollectionId()).thenReturn(legacyDefault.getId());
+    when(collectionService.resolveChunking(any(), any(), any()))
+        .thenReturn(new Chunker.Settings(150, 30));
 
-        controller.ingest(new IngestRequest("src", "text", null, null, null));
+    controller.ingest(new IngestRequest("src", "text", null, null, null));
 
-        verify(ingestion).ingest(eq("src"), eq("text"), anyInt(), anyInt(), eq(legacyDefault.getId()));
-    }
+    verify(ingestion).ingest(eq("src"), eq("text"), anyInt(), anyInt(), eq(legacyDefault.getId()));
+  }
 
-    @Test
-    void reembedNeedsWriteAccess() {
-        KnowledgeCollection secret = collection(OWNER, KnowledgeVisibility.PRIVATE);
+  @Test
+  void reembedNeedsWriteAccess() {
+    KnowledgeCollection secret = collection(OWNER, KnowledgeVisibility.PRIVATE);
 
-        assertThrows(KnowledgeCollectionNotFoundException.class, () -> controller.reembed(
-            secret.getId(), new KnowledgeReembedRequest("mpnet-base-v2")));
+    assertThrows(
+        KnowledgeCollectionNotFoundException.class,
+        () -> controller.reembed(secret.getId(), new KnowledgeReembedRequest("mpnet-base-v2")));
 
-        verifyNoInteractions(reembed);
-    }
+    verifyNoInteractions(reembed);
+  }
 }

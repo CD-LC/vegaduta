@@ -3,9 +3,9 @@ package io.vegaduta.agent.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.vegaduta.agent.api.RunContext;
+import io.vegaduta.agent.api.approval.ApprovalActionExecutor;
 import io.vegaduta.agent.api.approval.ApprovalAlreadyDecidedException;
 import io.vegaduta.agent.api.approval.ApprovalDecisionAuthorizer;
-import io.vegaduta.agent.api.approval.ApprovalActionExecutor;
 import io.vegaduta.agent.api.approval.ApprovalRequest;
 import io.vegaduta.agent.api.approval.ApprovalStatus;
 import io.vegaduta.agent.api.audit.AuditSink;
@@ -51,7 +51,11 @@ class JdbcApprovalStoreCasTest {
         "tool:pay",
         "pay 42",
         "{\"order\":\"42\"}",
-        RunContext.builder().tenantId(tenant).principal("agent").runId("r-" + UUID.randomUUID()).build(),
+        RunContext.builder()
+            .tenantId(tenant)
+            .principal("agent")
+            .runId("r-" + UUID.randomUUID())
+            .build(),
         now,
         now.plusSeconds(3600));
   }

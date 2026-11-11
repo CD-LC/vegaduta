@@ -154,8 +154,7 @@ class ChainAnchorsTest {
 
   @Test
   void unchainedBundleHasNoAnchorsAndAnAnchorFailsIt() {
-    AuditEvent plain =
-        AuditEvent.builder("tool.call", "tool", "t").context(CTX).at(T0).build();
+    AuditEvent plain = AuditEvent.builder("tool.call", "tool", "t").context(CTX).at(T0).build();
     EvidenceBundle bundle = EvidenceBundle.of(List.of(plain));
     assertThat(bundle.firstSeq()).isEmpty();
     assertThat(bundle.lastSeq()).isEmpty();

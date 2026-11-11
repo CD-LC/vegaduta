@@ -153,8 +153,10 @@ public final class EvidenceBundle {
     return seqAnchor(firstChained);
   }
 
-  /** {@code chain.prev} of the first chained event: {@link HashChainedAuditSink#GENESIS} when the
-   * chain is verified from its start. */
+  /**
+   * {@code chain.prev} of the first chained event: {@link HashChainedAuditSink#GENESIS} when the
+   * chain is verified from its start.
+   */
   public Optional<String> firstPrev() {
     return attribute(firstChained, HashChainedAuditSink.PREV);
   }

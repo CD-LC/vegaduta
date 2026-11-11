@@ -17,17 +17,20 @@ public record KnowledgeCollectionUpdateRequest(
     @Min(0) @Max(199) Integer chunkOverlap,
     // Migration V710 - null leaves the visibility unchanged. Changing it needs the owner or an
     // administrator (an administrator only, for a legacy collection that has no owner).
-    KnowledgeVisibility visibility
-) {
-    /** Pre-V710 shape (chunking, no visibility) - kept so existing callers compile unchanged. */
-    public KnowledgeCollectionUpdateRequest(
-        String name, String description, UUID parentCollectionId, Integer chunkSize, Integer chunkOverlap
-    ) {
-        this(name, description, parentCollectionId, chunkSize, chunkOverlap, null);
-    }
+    KnowledgeVisibility visibility) {
+  /** Pre-V710 shape (chunking, no visibility) - kept so existing callers compile unchanged. */
+  public KnowledgeCollectionUpdateRequest(
+      String name,
+      String description,
+      UUID parentCollectionId,
+      Integer chunkSize,
+      Integer chunkOverlap) {
+    this(name, description, parentCollectionId, chunkSize, chunkOverlap, null);
+  }
 
-    /** Pre-V361 shape - kept so existing callers compile unchanged. */
-    public KnowledgeCollectionUpdateRequest(String name, String description, UUID parentCollectionId) {
-        this(name, description, parentCollectionId, null, null, null);
-    }
+  /** Pre-V361 shape - kept so existing callers compile unchanged. */
+  public KnowledgeCollectionUpdateRequest(
+      String name, String description, UUID parentCollectionId) {
+    this(name, description, parentCollectionId, null, null, null);
+  }
 }
