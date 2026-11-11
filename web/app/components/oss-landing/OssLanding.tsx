@@ -1,5 +1,20 @@
 import Link from "next/link";
-import { Apple, AppWindow, ArrowRight, Braces, Download, Puzzle, Server, Terminal } from "lucide-react";
+import {
+  Apple,
+  AppWindow,
+  ArrowRight,
+  Bot,
+  Braces,
+  Download,
+  Laptop,
+  Network,
+  Plug,
+  Puzzle,
+  Server,
+  ShoppingBag,
+  Terminal,
+  Workflow,
+} from "lucide-react";
 import BrandName from "../BrandName";
 import { commercialUrl, docPageHref, docsHref } from "../../lib/siteLinks";
 import { STATUS_LABEL, surfacesByGroup } from "../plugins/surfaces";
@@ -36,6 +51,39 @@ import {
 
 const OS_ICON = { macOS: Apple, Windows: AppWindow, Linux: Terminal } as const;
 const SUITE_ICON = [Server, Braces, Puzzle] as const;
+
+const EDGE: { icon: typeof Server; title: string; body: string }[] = [
+  {
+    icon: Laptop,
+    title: "Runs on your laptop",
+    body: "A personal install runs the whole platform on one machine - agents, workflows, voice and the console - no cloud bill, no ops team.",
+  },
+  {
+    icon: Bot,
+    title: "Open-weight models in one click",
+    body: "Point it at Ollama and agents run on open models for free - on-device audio, image and vision included. Add a provider key whenever you want hosted quality.",
+  },
+  {
+    icon: Plug,
+    title: "MCP in one click",
+    body: "Attach any MCP server from the console - tools, databases, APIs - and every agent can use them instantly. No YAML, no redeploy.",
+  },
+  {
+    icon: Network,
+    title: "A2A native",
+    body: "Agents talk to agents across vendors over the open A2A protocol - delegate, federate and interoperate instead of building another silo.",
+  },
+  {
+    icon: Workflow,
+    title: "Agents in full control",
+    body: "Autonomy tiers you set: approvals, budgets, guardrails and human-in-the-loop on every consequential action. Workflows run on a real engine.",
+  },
+  {
+    icon: ShoppingBag,
+    title: "Commerce ready",
+    body: "WhatsApp commerce, payments, invoices and customer-facing agents out of the box - the same turn pipeline your team uses internally.",
+  },
+];
 
 function Section({
   id,
@@ -98,9 +146,9 @@ export default function OssLanding() {
               <BrandName />: the complete suite for AI agents
             </h1>
             <p className="mb-0 mt-5 max-w-xl text-lg text-muted-foreground">
-              Run governed agents on your laptop, your team&rsquo;s server or Kubernetes — then reach them from your
-              IDE, browser, phone and your own code. One repository ships the platform, the governance SDKs, the
-              plugins, the apps and the installers.
+              AI free in your laptop — agents on open-weight models, zero spend. Run governed agents on your laptop,
+              your team&rsquo;s server or Kubernetes — then reach them from your IDE, browser, phone and your own code.
+              One repository ships the platform, the governance SDKs, the plugins, the apps and the installers.
             </p>
             <div className="mt-7 flex flex-wrap gap-3 text-sm">
               <Link
@@ -114,7 +162,7 @@ export default function OssLanding() {
                 rel="noopener noreferrer"
                 className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted"
               >
-                Open source on GitHub
+                Source on GitHub
               </a>
               <Link href="/try" className="rounded-md border border-border px-4 py-2 font-medium hover:bg-muted">
                 Try it live
@@ -154,6 +202,23 @@ export default function OssLanding() {
           </div>
         </section>
 
+        {/* Why this platform - the six advantages nobody else ships in one
+            install. Mirrors the marketing band of the same name. */}
+        <Section
+          id="platform-edge"
+          title="One platform. Every advantage."
+          lead="Most teams stitch five tools together to get here. VegaDūta ships it in one install."
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {EDGE.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="flex flex-col rounded-lg border border-border p-5">
+                <Icon className="mb-3 size-5 text-primary" aria-hidden="true" />
+                <h3 className="m-0 text-base font-semibold">{title}</h3>
+                <p className="m-0 mt-2 flex-1 text-sm text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
         {/* The suite, not just a platform — three pillars, each with the
             links that take the visitor where the artifacts live. */}
         <Section

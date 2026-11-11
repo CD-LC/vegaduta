@@ -57,7 +57,7 @@ extend-exclude = ["data"]
 # DELIBERATELY NOT SELECTED - each of these is a several-hundred-violation
 # wall that would fight this repo's documented conventions, not improve them:
 #   D (pydocstyle)  - the house convention is multi-paragraph narrative
-#                     docstrings explaining WHY (see CLAUDE.md); D205/D400/
+#                     docstrings explaining WHY (see ENGINEERING-RULES.md); D205/D400/
 #                     D401 would flag essentially all of them.
 #   TRY             - TRY003 flags long exception messages; this codebase
 #                     deliberately writes long, actionable ones.

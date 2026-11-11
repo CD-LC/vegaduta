@@ -1,5 +1,36 @@
 import { type Page, expect } from "@playwright/test";
+import { API_BASE_URL } from "./e2e-env";
 import { completeKeycloakLogin, expectSignedIn } from "./keycloak-login";
+import { seedConsoleSeenFlags, seedUserScopedTourFlags, subjectOfToken } from "./prod-auth-state";
+
+/**
+ * A brand-new tenant opens the console to first-visit overlays (language prompt, welcome tour, the
+ * "Build the agent" launch card) that sit over the page and swallow clicks. Arm the bare flags before any
+ * navigation, and return a reader for the bearer token the app sends to the API, whose `sub` the user-scoped
+ * tour keys need (see prod-auth-state.ts). Local stacks serve the API at E2E_API_BASE_URL, which is why this
+ * does not reuse prod-api.ts (it derives the API host from E2E_DOMAIN).
+ */
+async function armFirstVisitOverlays(page: Page): Promise<() => string | null> {
+  await seedConsoleSeenFlags(page);
+  let token: string | null = null;
+  page.on("request", (req) => {
+    if (!req.url().startsWith(API_BASE_URL)) return;
+    const auth = req.headers()["authorization"];
+    if (auth && /^bearer /i.test(auth)) token = auth.replace(/^bearer /i, "");
+  });
+  return () => token;
+}
+
+/** Seeds the user-scoped tour keys for the signed-in user and reloads so the overlays do not reopen. */
+async function quietFirstVisitOverlays(page: Page, readToken: () => string | null): Promise<void> {
+  const deadline = Date.now() + 20_000;
+  while (!readToken() && Date.now() < deadline) await page.waitForTimeout(250);
+  const subject = subjectOfToken(readToken());
+  if (!subject) return;
+  await seedUserScopedTourFlags(page, subject);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expectSignedIn(page);
+}
 
 export interface TestTenant {
   email: string;
@@ -45,6 +76,7 @@ export function freshIdentity(label: string): TestTenant {
  */
 export async function signUpFreshTenant(page: Page, label: string): Promise<TestTenant> {
   const identity = freshIdentity(label);
+  const readToken = await armFirstVisitOverlays(page);
 
   await page.goto("/signup");
   // The step-1 button and two labels were renamed between the hosted site and the self-hosted
@@ -77,6 +109,7 @@ export async function signUpFreshTenant(page: Page, label: string): Promise<Test
 
   await completeKeycloakLogin(page, identity.email, identity.password);
   await expectSignedIn(page);
+  await quietFirstVisitOverlays(page, readToken);
 
   return identity;
 }
@@ -88,8 +121,18 @@ export async function signUpFreshTenant(page: Page, label: string): Promise<Test
  * any particular deep link, matching how a real returning user would land.
  */
 export async function signIn(page: Page, identity: Pick<TestTenant, "email" | "password">) {
+  const readToken = await armFirstVisitOverlays(page);
   await page.goto("/");
-  await page.locator("header").getByRole("button", { name: "Sign in" }).click();
+  // A link on the OSS landing, a button on the classic site (same either/or as auth.spec.ts).
+  await page
+    .locator("header")
+    .getByRole("link", { name: "Sign in" })
+    .or(page.locator("header").getByRole("button", { name: "Sign in" }))
+    .click();
+  // /login renders the sign-in landing; the Keycloak redirect only fires on this deliberate click.
+  const continueToKeycloak = page.getByRole("button", { name: /continue to secure sign-in/i });
+  if (await continueToKeycloak.isVisible({ timeout: 5_000 }).catch(() => false)) await continueToKeycloak.click();
   await completeKeycloakLogin(page, identity.email, identity.password);
   await expectSignedIn(page);
+  await quietFirstVisitOverlays(page, readToken);
 }

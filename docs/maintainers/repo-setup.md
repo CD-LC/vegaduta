@@ -108,7 +108,7 @@ each with a reason (test-only code, false positive) so the list carries signal.
   re-run the scan and regenerate `.gitleaksignore` (fingerprints include the
   commit id).
 - Done on 2026-10-19: `main` was force-pushed to a clean linear history (see
-  the notice in `AGENTS.md`). Checkouts older than that must reset to
+  the notice in `ENGINEERING-RULES.md`). Checkouts older than that must reset to
   `origin/main` rather than pull or merge.
 - Applied Flyway migrations contain comments that name internal documents and
   people. They are checksum-bound (editing an applied migration fails Flyway

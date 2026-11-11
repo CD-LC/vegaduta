@@ -17,6 +17,7 @@ import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerNodeService;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerPort;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -123,7 +124,9 @@ public class MetaSocialWebhookController {
                                 webhookVerifyToken.getBytes(
                                         java.nio.charset.StandardCharsets.UTF_8));
         if (!"subscribe".equals(mode) || !tokenMatches) {
-            log.warn("Rejected Meta social webhook verification handshake (mode={})", mode);
+            log.warn(
+                    "Rejected Meta social webhook verification handshake (mode={})",
+                    LogSafe.clean(mode));
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(challenge);

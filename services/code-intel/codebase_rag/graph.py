@@ -35,6 +35,7 @@ from . import discovery
 from .config import Config
 from .graph_extract import FileExtraction, RawEdge, extract_file
 from .languages import detect_language
+from .resolve import TYPE_KINDS, ResolveCtx, reresolve_unchanged, resolve_edge
 from .routes_extract import extract_routes
 from .store import open_db  # WAL-vs-rollback fallback for network mounts
 
@@ -89,6 +90,8 @@ CREATE INDEX IF NOT EXISTS idx_routes_path ON api_routes(path);
 
 # Columns added after the original schema - ALTER TABLE in _migrate() keeps
 # existing index.db files valid (IF NOT EXISTS on CREATE never upgrades them).
+_EDGE_EXTRA_COLS = (("qualifier", "TEXT"),)  # call receiver; lets edges be re-resolved later
+
 _SYMBOL_EXTRA_COLS = (
     ("signature", "TEXT NOT NULL DEFAULT ''"),
     ("doc", "TEXT NOT NULL DEFAULT ''"),
@@ -108,6 +111,10 @@ class GraphStore:
         for col, decl in _SYMBOL_EXTRA_COLS:
             if col not in have:
                 self.conn.execute(f"ALTER TABLE graph_symbols ADD COLUMN {col} {decl}")  # nosec B608
+        have_e = {r[1] for r in self.conn.execute("PRAGMA table_info(graph_edges)")}
+        for col, decl in _EDGE_EXTRA_COLS:
+            if col not in have_e:
+                self.conn.execute(f"ALTER TABLE graph_edges ADD COLUMN {col} {decl}")  # nosec B608
         self.conn.commit()
 
     def close(self):
@@ -154,8 +161,8 @@ class GraphStore:
     def insert_edges(self, rows: list[tuple]) -> None:
         self.conn.executemany(
             "INSERT INTO graph_edges(src_path, src_symbol, edge_type, "
-            "target_name, target_path, target_symbol, confidence, line) "
-            "VALUES(?,?,?,?,?,?,?,?)",
+            "target_name, target_path, target_symbol, confidence, line, qualifier) "
+            "VALUES(?,?,?,?,?,?,?,?,?)",
             rows,
         )
 
@@ -221,17 +228,33 @@ def build_graph(cfg: Config, quiet: bool = False) -> dict:
         # into unchanged ones), so load it once, then resolve ONLY the
         # changed files' edges.
         symtab: dict[str, list[tuple[str, str]]] = {}  # name -> [(path, qname)]
-        for name, path, qname in store.conn.execute(
-            "SELECT name, path, qualified_name FROM graph_symbols"
+        classes: dict[str, list[tuple[str, str]]] = {}  # class-like name -> [(path, qname)]
+        for name, path, qname, kind in store.conn.execute(
+            "SELECT name, path, qualified_name, kind FROM graph_symbols"
         ):
             symtab.setdefault(name, []).append((path, qname))
+            if kind in TYPE_KINDS:
+                classes.setdefault(name, []).append((path, qname))
+        imports: dict[str, set[str]] = {}  # path -> module strings it imports
+        for src_path, target in store.conn.execute(
+            "SELECT src_path, target_name FROM graph_edges WHERE edge_type='imports'"
+        ):
+            imports.setdefault(src_path, set()).add(target)
+        for path, edges in pending_edges.items():
+            for e in edges:
+                if e.edge_type == "imports":
+                    imports.setdefault(path, set()).add(e.target_name)
+        ctx = ResolveCtx(symtab, classes, imports)
 
         rows: list[tuple] = []
         for path, edges in pending_edges.items():
             for e in edges:
-                rows.append(_resolve(e, path, symtab))
+                rows.append((*resolve_edge(e, path, symtab, ctx), e.qualifier))
         store.clear_edges_from(list(pending_edges.keys()))
         store.insert_edges(rows)
+        relinked = 0
+        if changed or gone:
+            relinked = reresolve_unchanged(store, set(pending_edges), symtab, ctx)
         store.commit()
 
         # Cross-file staleness: edges in UNCHANGED files pointing at names
@@ -239,43 +262,12 @@ def build_graph(cfg: Config, quiet: bool = False) -> dict:
         # target_name + resolved target re-checked at query time via joins;
         # a weekly/CI `--full` (delete graph_files) is the reconcile path.
         stats = graph_stats(cfg, store)
-        stats.update({"files_extracted": changed, "files_deleted": len(gone)})
+        stats.update(
+            {"files_extracted": changed, "files_deleted": len(gone), "edges_relinked": relinked}
+        )
         return stats
     finally:
         store.close()
-
-
-def _resolve(e: RawEdge, src_path: str, symtab: dict[str, list[tuple[str, str]]]) -> tuple:
-    """Fixed scope rules: same-file match -> 'local'; unique repo-wide
-    match -> 'global'; several matches -> 'ambiguous' (first 3 by path
-    order, deterministic); none -> 'external'."""
-    if e.edge_type in ("imports",):
-        return (src_path, None, e.edge_type, e.target_name, None, None, "external", e.line)
-    if e.edge_type == "contains":
-        return (
-            src_path,
-            e.src_qualified,
-            e.edge_type,
-            e.target_name,
-            src_path,
-            e.target_name,
-            "local",
-            e.line,
-        )
-
-    short = e.target_name.split(".")[-1]
-    candidates = symtab.get(short, [])
-    same_file = [c for c in candidates if c[0] == src_path]
-    if same_file:
-        tp, tq = same_file[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "local", e.line)
-    if len(candidates) == 1:
-        tp, tq = candidates[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "global", e.line)
-    if candidates:
-        tp, tq = sorted(candidates)[0]
-        return (src_path, e.src_qualified, e.edge_type, e.target_name, tp, tq, "ambiguous", e.line)
-    return (src_path, e.src_qualified, e.edge_type, e.target_name, None, None, "external", e.line)
 
 
 # ---------------------------------------------------------------------------

@@ -97,6 +97,12 @@ updates:
       semver-major-days: 14
     open-pull-requests-limit: 10
     labels: [dependencies, area/web]
+    ignore:
+      # 8.72.1 runs `next lint`'s type-aware pass out of heap (exit 134) at 4 GiB; retry on the next release.
+      - dependency-name: typescript-eslint
+        versions: ["8.72.1"]
+      - dependency-name: "@typescript-eslint/*"
+        versions: ["8.72.1"]
     commit-message:
       prefix: "build(deps)"
     groups:
@@ -232,6 +238,14 @@ updates:
     labels: [dependencies, area/deploy]
     commit-message:
       prefix: "build(deps)"
+    # The Python service images must run the interpreter their hashed lock files
+    # were compiled for and CI tests (services/lock-requirements.sh, PY_VERSION).
+    # A 3.14 -> 3.15 bump (#340) made the sidecar image unbuildable: the locked
+    # ctranslate2 has no cp315 wheel. Bump the interpreter deliberately, together
+    # with a re-lock, never through this group.
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     groups:
       base-images:
         update-types: [minor, patch]

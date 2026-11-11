@@ -8,31 +8,31 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
-### Changed
-
-- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
-  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
   12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
-  `load_skill` away. Other models are unchanged.
-
-- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
-  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
   150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
-  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
-
-- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
-  local bring-your-own provider) now keep all but a short list of standing tools behind
-  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
-  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
-  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
-  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   65/65 score.
-
-### Fixed
-
-- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
+  `load_skill` away. Other models are unchanged.
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  local bring-your-own provider) now keep all but a short list of standing tools behind
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   startup (the row is still never rewritten) instead of silently running the other model.
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
+### Added
+### Changed
+### Fixed
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+- Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
 
 ## [0.1.14] - 2026-10-30
 

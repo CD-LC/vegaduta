@@ -14,7 +14,7 @@ changing code.
 
 ### Opening the Setup app the first time
 
-The Setup app is not yet signed with a Developer ID or notarized, so macOS and Windows warn once. On macOS 15 and later,
+Releases whose Setup app is signed with a Developer ID and notarized (macOS) and signed with a code-signing certificate (Windows) open without these steps. A build that is not, such as a release made before signing was set up or one you packaged yourself, makes macOS and Windows warn once. On macOS 15 and later,
 double-click `VegaDuta Setup`, click **Done** on the "Apple could not verify..." message, open **System Settings > Privacy &
 Security**, scroll to *Security*, click **Open Anyway** next to "VegaDuta Setup was blocked" and confirm with your password.
 (Right-click > Open only works up to macOS 14.) In Terminal, `xattr -dr com.apple.quarantine "/Applications/VegaDuta Setup.app"`

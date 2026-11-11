@@ -2167,6 +2167,7 @@ export const ROUTE_NAMESPACES: Readonly<Record<string, readonly string[]>> = {
     "hcComponentsPluginsPluginsGallery",
     "hcComponentsTemplatesTemplatesPublicChrome"
   ],
+  "/preview-landing": [],
   "/pricing": [
     "billing",
     "hcBillingBillingPageClient",

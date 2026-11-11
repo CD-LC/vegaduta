@@ -50,7 +50,7 @@ function buildOss(BASE: string): string {
   const link = (href: string) => (href.startsWith("/") ? `${BASE}${href}` : href);
   return `# VegaDūta
 
-> VegaDūta is an open-source (${LICENSE_NAME}) multi-tenant agentic AI platform you run yourself: agents, tools, workflows with human approval steps, retrieval, channels, guardrails and audit logs. Source: ${REPO_URL}
+> VegaDūta is a source-available (${LICENSE_NAME}) multi-tenant agentic AI platform you run yourself: agents, tools, workflows with human approval steps, retrieval, channels, guardrails and audit logs. Source: ${REPO_URL}
 
 ## What it is
 
