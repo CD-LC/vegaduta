@@ -82,13 +82,9 @@ Release notes on GitHub are generated from the section for each version.
 - Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
 - **`strict` security posture profile.** `SPRING_PROFILES_ACTIVE=...,strict` (`application-strict.yml`) sets taint, MCP tool pinning, unclassified-tool handling, the confirmation-gate exemption list, trifecta enforcement and approval expiry to their fail-closed values; the base defaults are unchanged. At boot a `PostureReport` logs one WARN line listing every permissive governance setting that is active, and `StrictPostureTest` fails if the profile and the checked key list drift apart.
 
-### Added
-
 - **Measurement seams for agent memory, all behaviour-neutral by default.** (1) New setting `memory.recall.enabled` (tenant and agent scope; platform value `app.memory.limits.recall-enabled`, default `true` = today): switched off, a turn reads and injects no memory blocks, facts or shared facts, and the turn journal (a `memory_recall` GUARD event, written only while `app.turn-journal.enabled`) and `TurnContext.memoryRecall()` record which memory ids and block labels were injected, with counts and approximate tokens, never text. (2) The memory services (agent and tenant memory, the daily memory review) read time from a `memoryClock` bean (system UTC by default; `useClock(..)` in tests). (3) `app.metrics.turn-usage.enabled` (default `false`) keeps an in-process per-session tally of model-call tokens and latency (`TurnUsageCounter`) for evaluation harnesses, fed by the existing LLM metrics advisor with no extra call.
 
 - **`memory.write.enabled`, the write-side counterpart of `memory.recall.enabled`** (tenant and agent scope; platform value `app.memory.limits.write-enabled`, default `true` = unchanged). Switched off, `remember_fact` and `remember_shared_fact` answer that memory is disabled and save nothing, the conversation's rolling summary is not folded, and the lesson and preference learning loops file no proposals; the turn journal records a `memory_write_skipped` event (counts only, never text). It lets an evaluation run the same agent with memory fully off.
-
-### Fixed
 
 - **A tool's output can no longer pose as the platform's own control result.** The tool loop ended a turn with
   "waiting for approval" (or counted a spent budget) when any tool result merely *contained* `"approval_parked"` /
@@ -113,6 +109,10 @@ Release notes on GitHub are generated from the section for each version.
   negative counter, and one larger than what was left drove a live counter below zero, so the next spend started with
   credit the user never paid for. Refunds now go through one atomic script: dropped against an expired window, clamped
   at zero otherwise, expiry kept.
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 
 ## [0.1.14] - 2026-10-30
 
