@@ -48,9 +48,12 @@ test.describe("Console core smoke - agents, workflows, knowledge base", () => {
       // Fresh tenant has zero agents -> AgentWorkbench lands in draft mode
       // by default (no agents to auto-select).
       const agentName = `E2E Agent ${Date.now()}`;
-      await expect(page.getByRole("button", { name: "Save draft" })).toBeVisible({ timeout: 15_000 });
+      // The first-run checklist repeats "Save draft" as two disabled step buttons, so a name-only locator
+      // matches three elements. The real one is the create-agent tour target.
+      const saveDraft = page.locator('button[data-tour="create-agent"]', { hasText: "Save draft" });
+      await expect(saveDraft).toBeVisible({ timeout: 15_000 });
       await page.getByPlaceholder(/name this agent/i).fill(agentName);
-      await page.getByRole("button", { name: "Save draft" }).click();
+      await saveDraft.click();
 
       // Real success notice (role="status") + the agent is now "live".
       await expect(page.getByText(`"${agentName}" created.`)).toBeVisible({ timeout: 15_000 });
@@ -99,7 +102,8 @@ test.describe("Console core smoke - agents, workflows, knowledge base", () => {
       await page.goto("/workflows");
 
       const workflowName = `E2E Workflow ${Date.now()}`;
-      await page.getByRole("button", { name: "New workflow", exact: true }).click();
+      // A tenant with no workflows yet has this button twice (page header and empty state): either one opens the form.
+      await page.getByRole("button", { name: "New workflow", exact: true }).first().click();
       await page.getByPlaceholder(/New workflow name/i).fill(workflowName);
       await page.getByRole("button", { name: "Create workflow" }).click();
 

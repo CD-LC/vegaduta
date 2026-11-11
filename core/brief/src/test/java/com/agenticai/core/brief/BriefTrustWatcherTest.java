@@ -142,10 +142,28 @@ class BriefTrustWatcherTest {
         kit.trust.setRung(id, TrustRung.AUTONOMOUS);
         assertThat(rung()).isEqualTo("AUTONOMOUS");
 
-        watcher.onGuardrailViolation(strike("chat-session-1"));
-        watcher.onGuardrailViolation(strike("chat-session-2"));
-        awaitRung("TRUSTED");
-        Thread.sleep(400);
+        // "Queued together" means both strikes are on record before the first demotion runs.
+        // Driving it through
+        // onGuardrailViolation raced the real worker thread: when the worker finished the first
+        // demotion before the
+        // second strike was recorded, that second strike was (correctly) newer than the new rung
+        // and counted again.
+        // So record both strikes up front and run the worker's two queued jobs in order, on this
+        // thread.
+        data.recordStrike(
+                id,
+                agentId,
+                "path=input guardrail=PROFANITY session=chat-session-1 reason=profane input");
+        data.recordStrike(
+                id,
+                agentId,
+                "path=input guardrail=PROFANITY session=chat-session-2 reason=profane input");
+        Thread.sleep(
+                5); // the demotion must be strictly newer than both strikes, whatever the clock's
+        // resolution
+        Map<String, Object> evidence = Map.of("guardrail", "PROFANITY");
+        watcher.demoteForStrike("tenant_a", id, "two strikes", evidence, true);
+        watcher.demoteForStrike("tenant_a", id, "two strikes", evidence, true);
 
         assertThat(rung()).isEqualTo("TRUSTED");
         assertThat(kit.events.stream().filter(e -> "DEMOTED".equals(e.getKind()))).hasSize(1);

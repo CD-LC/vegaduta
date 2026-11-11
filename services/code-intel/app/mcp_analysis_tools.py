@@ -154,4 +154,29 @@ ANALYSIS_TOOLS: list[dict] = [
         "components) - architectural tangles to break.",
         "inputSchema": {"type": "object", "properties": {"repo_id": _repo_prop()}},
     },
+    {
+        "name": "security_scan",
+        "description": "Offline HEURISTIC security scan (regex + entropy, no "
+        "data-flow, no network): hard-coded secrets (values redacted), "
+        "dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe "
+        "deserialization, SQL concatenation, weak crypto, disabled TLS "
+        "verification) and a dependency inventory. No CVE matching. A "
+        "triage aid, not a replacement for CodeQL/gitleaks/Trivy.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "repo_id": _repo_prop(),
+                "categories": {
+                    "type": "array",
+                    "items": {"type": "string", "enum": ["secrets", "sinks", "dependencies"]},
+                },
+                "include_tests": {"type": "boolean"},
+                "min_severity": {
+                    "type": "string",
+                    "enum": ["info", "low", "medium", "high", "critical"],
+                },
+                "limit": {"type": "integer", "minimum": 1, "maximum": 5000},
+            },
+        },
+    },
 ]

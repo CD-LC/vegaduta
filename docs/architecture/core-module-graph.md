@@ -55,8 +55,13 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | elevenlabs | vendor | 45 | agents (test), agents-studio (test), agentspi, crypto, providers, security, speech, storage, tenancy | ElevenLabs TTS/voice clone/music |
 | eventbus | kernel | 23 | audit, crypto, mcp, security, tenancy |  |
 | google | vendor | 31 | agents (test), agentspi, crypto, guardrails, security, tenancy | Google Workspace OAuth + tools |
+<<<<<<< HEAD
 | graphmemory | kernel | 18 | chat, json, prompts, settings, tenancy |  |
 | guardrails | kernel | 128 | approval, audit, json, prompts, settings, tenancy |  |
+=======
+| graphmemory | kernel | 15 | chat, json, prompts, settings, tenancy |  |
+| guardrails | kernel | 129 | approval, audit, json, prompts, settings, tenancy |  |
+>>>>>>> origin/main
 | imagegen | vendor | 39 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
 | json | kernel | 3 | (none) |  |
 | knowledge | kernel (hosts vendor code) | 139 | audit, crypto, json, prompts, security, settings, sharing, storage, tenancy | embeddings / OCR / sidecar clients |

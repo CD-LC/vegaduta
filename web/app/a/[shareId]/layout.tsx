@@ -46,7 +46,7 @@ const SERVER_API_BASE =
   process.env.API_BASE_URL ||
   process.env.CORE_INTERNAL_URL ||
   getPublicEnv("NEXT_PUBLIC_API_BASE_URL") ||
-  "http://localhost:8080";
+  (process.env.NODE_ENV !== "production" ? "http://localhost:8080" : "");
 
 // agentName is anonymous-visitor-supplied text headed into <title>/OG tags.
 // Next.js escapes it (no injection risk), but control chars / newlines /
@@ -66,19 +66,14 @@ function cleanAgentName(raw: unknown): string | null {
   return oneLine.length > 80 ? `${oneLine.slice(0, 77)}…` : oneLine;
 }
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ shareId: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ shareId: string }> }): Promise<Metadata> {
   try {
     const { shareId } = await params;
     if (!shareId) return GENERIC_METADATA;
-    const res = await fetch(
-      `${SERVER_API_BASE}/api/demo/share/${encodeURIComponent(shareId)}`,
-      {
-        signal: AbortSignal.timeout(2000),
-        next: { revalidate: 60 },
-      }
-    );
+    const res = await fetch(`${SERVER_API_BASE}/api/demo/share/${encodeURIComponent(shareId)}`, {
+      signal: AbortSignal.timeout(2000),
+      next: { revalidate: 60 },
+    });
     if (!res.ok) return GENERIC_METADATA;
     const body = await res.json();
     const agentName = cleanAgentName(body?.agentName);

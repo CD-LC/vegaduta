@@ -149,6 +149,16 @@ class DirectBackend:
             return svc.hotspots(ctx, repo, days=b.get("days", 90), limit=b.get("limit", 30))
         if tail == ["import-cycles"]:
             return svc.import_cycles(ctx, repo)
+        if tail == ["security-scan"]:
+            cats = [c for c in str(b.get("categories", "")).split(",") if c.strip()]
+            return svc.security_scan(
+                ctx,
+                repo,
+                categories=cats or None,
+                include_tests=str(b.get("include_tests", False)).lower() == "true",
+                min_severity=b.get("min_severity", "low"),
+                limit=int(b.get("limit", 500)),
+            )
         if tail == ["workspaces"]:
             return svc.workspace_create(ctx, repo)
         if len(tail) == 3 and tail[0] == "workspaces" and tail[2] == "apply":
@@ -208,6 +218,7 @@ READ_ONLY_TOOL_NAMES = frozenset(
         "api_surface",
         "code_hotspots",
         "import_cycles",
+        "security_scan",
     }
 )
 
@@ -417,6 +428,18 @@ def dispatch(backend, name: str, args: dict):
         )
     if name == "import_cycles":
         return backend.call("GET", f"/repos/{repo}/import-cycles")
+    if name == "security_scan":
+        return backend.call(
+            "GET",
+            f"/repos/{repo}/security-scan",
+            {
+                "categories": ",".join(args.get("categories") or [])
+                or "secrets,sinks,dependencies",
+                "include_tests": bool(args.get("include_tests", False)),
+                "min_severity": args.get("min_severity", "low"),
+                "limit": args.get("limit", 500),
+            },
+        )
     if name == "create_workspace":
         return backend.call("POST", f"/repos/{repo}/workspaces", {})
     if name == "apply_files":

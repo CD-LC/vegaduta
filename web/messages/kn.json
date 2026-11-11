@@ -4046,7 +4046,13 @@
     "emptyTitle": "ಪರಿಶೀಲಿಸಲು ಏನೂ ಇಲ್ಲ",
     "policyOverrideButton": "ಪಾಲಿಸಿ ಓವರ್‌ರೈಡ್",
     "workflowNeedsLabel": "ಈ ವರ್ಕ್‌ಫ್ಲೋಗೆ ನಿಮ್ಮಿಂದ ಈ ಕೆಳಗಿನವುಗಳ ಅಗತ್ಯವಿದೆ",
-    "workflowNeedsHint": "ನೀವು ಅನುಮೋದಿಸಿದಾಗ ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಮುಂದಿನ ಹಂತಕ್ಕೆ ರವಾನಿಸಲಾಗುತ್ತದೆ."
+    "workflowNeedsHint": "ನೀವು ಅನುಮೋದಿಸಿದಾಗ ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಮುಂದಿನ ಹಂತಕ್ಕೆ ರವಾನಿಸಲಾಗುತ್ತದೆ.",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ಆಡಿಟ್ ಲಾಗ್",

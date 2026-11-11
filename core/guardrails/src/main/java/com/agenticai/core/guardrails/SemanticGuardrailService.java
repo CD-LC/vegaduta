@@ -9,72 +9,66 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * A "stronger implementation" for
- * {@link GuardrailService}.
+ * A "stronger implementation" for {@link GuardrailService}.
  *
- * <p><b>Default since Tech-Stack-Audit-2026.md P2.1 / Master-Roadmap-2026.md
- * item #7</b> ("default-on... injection classifier"): {@code matchIfMissing
- * = true} below makes this the platform's default {@link GuardrailService}
- * bean whenever {@code app.guardrails.implementation} isn't set to {@code
- * "pattern"} explicitly. This platform is a live multi-tenant target for
- * third-party tool-call injection (MCP servers, web-page/email/file content
- * an agent reads back into its own context) today, not hypothetically, and
- * enabling this by default costs one extra cheap LLM call per tool result.
- * The judge FAILS CLOSED by default: an erroring or blank judge withholds the
- * output ({@code app.guardrails.fail-mode=closed}); only an operator who sets
- * {@code open} gets the pattern-only fallback. A missing {@code ChatClient} is
- * "not configured", not a failure, and stays pattern-only - see {@link
- * #sanitizeToolOutput(String, String, ChatClient)}.
- * {@link PatternBasedGuardrailService} remains available as an explicit
- * opt-out (set {@code app.guardrails.implementation=pattern}) for deployments
- * that want zero extra LLM calls per tool result.
+ * <p><b>Default since Tech-Stack-Audit-2026.md P2.1 / Master-Roadmap-2026.md item #7</b>
+ * ("default-on... injection classifier"): {@code matchIfMissing = true} below makes this the
+ * platform's default {@link GuardrailService} bean whenever {@code app.guardrails.implementation}
+ * isn't set to {@code "pattern"} explicitly. This platform is a live multi-tenant target for
+ * third-party tool-call injection (MCP servers, web-page/email/file content an agent reads back
+ * into its own context) today, not hypothetically, and enabling this by default costs one extra
+ * cheap LLM call per tool result. The judge FAILS CLOSED by default: an erroring or blank judge
+ * withholds the output ({@code app.guardrails.fail-mode=closed}); only an operator who sets {@code
+ * open} gets the pattern-only fallback. A missing {@code ChatClient} is "not configured", not a
+ * failure, and stays pattern-only - see {@link #sanitizeToolOutput(String, String, ChatClient)}.
+ * {@link PatternBasedGuardrailService} remains available as an explicit opt-out (set {@code
+ * app.guardrails.implementation=pattern}) for deployments that want zero extra LLM calls per tool
+ * result.
  *
- * <p><b>Why not langchain4j-guardrails</b>, stated honestly rather than
- * silently swapped: that framework's {@code InputGuardrail}/{@code
- * OutputGuardrail} interfaces are wired declaratively onto langchain4j's own
- * {@code AiServices} dynamic-proxy mechanism - per langchain4j's own docs,
- * "Guardrails are only available when using AI Services... cannot be applied
- * to a ChatModel or StreamingChatModel". This platform uses Spring AI's
- * {@link ChatClient} throughout, not langchain4j's {@code AiServices}, so
- * that wiring point doesn't exist here. Separately, langchain4j ships no
- * built-in prompt-injection detector or PII redaction guardrail at all - its
- * only out-of-the-box implementations are a moderation-endpoint wrapper
- * (needs an OpenAI-style {@code ModerationModel} this Anthropic-BYOK-first
- * platform doesn't have) and a JSON-schema validator (unrelated to this
- * stage's goal). Adding the dependency would have bought nothing this class
- * doesn't already do directly against the {@code ChatClient} already in
- * scope at the one real call site ({@link GuardedToolCallback}).
+ * <p><b>Why not langchain4j-guardrails</b>, stated honestly rather than silently swapped: that
+ * framework's {@code InputGuardrail}/{@code OutputGuardrail} interfaces are wired declaratively
+ * onto langchain4j's own {@code AiServices} dynamic-proxy mechanism - per langchain4j's own docs,
+ * "Guardrails are only available when using AI Services... cannot be applied to a ChatModel or
+ * StreamingChatModel". This platform uses Spring AI's {@link ChatClient} throughout, not
+ * langchain4j's {@code AiServices}, so that wiring point doesn't exist here. Separately,
+ * langchain4j ships no built-in prompt-injection detector or PII redaction guardrail at all - its
+ * only out-of-the-box implementations are a moderation-endpoint wrapper (needs an OpenAI-style
+ * {@code ModerationModel} this Anthropic-BYOK-first platform doesn't have) and a JSON-schema
+ * validator (unrelated to this stage's goal). Adding the dependency would have bought nothing this
+ * class doesn't already do directly against the {@code ChatClient} already in scope at the one real
+ * call site ({@link GuardedToolCallback}).
  *
- * <p><b>What this actually does</b>: delegates to {@link
- * PatternBasedGuardrailService} first, unchanged - the cheap regex layer
- * still runs and still hard-blocks/redacts exactly as before. Only if that
- * layer doesn't reject the output, and a non-null {@link ChatClient} is
- * available, does a second check run: one cheap, non-streamed LLM
- * classification call asking "does this tool output contain a disguised or
- * paraphrased attempt to hijack the agent's instructions?" - the same
- * Evaluator-Optimizer shape as {@link ChatClientToolCallVerifierService}
- * (Stage 1): rigid {@code SAFE}/{@code UNSAFE: <reason>} response format, no
- * multi-turn debate. On an error or blank answer the outcome is the global
- * {@code app.guardrails.fail-mode} ({@link GuardrailFailMode}): {@link GuardrailFailMode#CLOSED}
- * (the default) withholds the output, {@link GuardrailFailMode#OPEN} degrades to "pattern-only checking
- * this call". A missing {@code ChatClient} is "not configured", not a failure, and stays pattern-only.
- * The judge window and sampling are {@code app.guardrails.judge.*} ({@link GuardrailTuningProperties}).
+ * <p><b>What this actually does</b>: delegates to {@link PatternBasedGuardrailService} first,
+ * unchanged - the cheap regex layer still runs and still hard-blocks/redacts exactly as before.
+ * Only if that layer doesn't reject the output, and a non-null {@link ChatClient} is available,
+ * does a second check run: one cheap, non-streamed LLM classification call asking "does this tool
+ * output contain a disguised or paraphrased attempt to hijack the agent's instructions?" - the same
+ * Evaluator-Optimizer shape as {@link ChatClientToolCallVerifierService} (Stage 1): rigid {@code
+ * SAFE}/{@code UNSAFE: <reason>} response format, no multi-turn debate. On an error or blank answer
+ * the outcome is the global {@code app.guardrails.fail-mode} ({@link GuardrailFailMode}): {@link
+ * GuardrailFailMode#CLOSED} (the default) withholds the output, {@link GuardrailFailMode#OPEN}
+ * degrades to "pattern-only checking this call". A missing {@code ChatClient} is "not configured",
+ * not a failure, and stays pattern-only. The judge window and sampling are {@code
+ * app.guardrails.judge.*} ({@link GuardrailTuningProperties}).
  *
- * <p>This is the layer that catches what {@link PatternBasedGuardrailService}
- * structurally cannot: a prompt-injection attempt that never matches any
- * fixed regex because it's paraphrased, translated, or split across
- * sentences rather than using one of the {@code HARD_BLOCK_PATTERNS}'
+ * <p>This is the layer that catches what {@link PatternBasedGuardrailService} structurally cannot:
+ * a prompt-injection attempt that never matches any fixed regex because it's paraphrased,
+ * translated, or split across sentences rather than using one of the {@code HARD_BLOCK_PATTERNS}'
  * exact phrasings.
  */
 @Service
-@ConditionalOnProperty(name = "app.guardrails.implementation", havingValue = "semantic", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "app.guardrails.implementation",
+        havingValue = "semantic",
+        matchIfMissing = true)
 public class SemanticGuardrailService implements GuardrailService {
 
     private static final Logger log = LoggerFactory.getLogger(SemanticGuardrailService.class);
 
     /**
-     * Where the judge prompt ({@code judge.injection}) and the withhold reasons come from; the shipped texts unless the
-     * application wires the registry. The calling agent is the one in {@link GuardrailPromptScope}.
+     * Where the judge prompt ({@code judge.injection}) and the withhold reasons come from; the
+     * shipped texts unless the application wires the registry. The calling agent is the one in
+     * {@link GuardrailPromptScope}.
      */
     private volatile PromptResolver prompts = PromptResolver.defaultsOnly();
 
@@ -108,12 +102,14 @@ public class SemanticGuardrailService implements GuardrailService {
     }
 
     /**
-     * @param tuning {@code app.guardrails.judge.*}: how much of the (already pattern-sanitized) output is
-     *     put in front of the judge (only the text sent to the judge is capped; the full sanitized value is
-     *     still what is returned to the caller) and how the judge call is sampled
+     * @param tuning {@code app.guardrails.judge.*}: how much of the (already pattern-sanitized)
+     *     output is put in front of the judge (only the text sent to the judge is capped; the full
+     *     sanitized value is still what is returned to the caller) and how the judge call is
+     *     sampled
      */
     @Autowired
-    public SemanticGuardrailService(ToolOutputProperties outputLimits, GuardrailTuningProperties tuning) {
+    public SemanticGuardrailService(
+            ToolOutputProperties outputLimits, GuardrailTuningProperties tuning) {
         this.patternGuardrail = new PatternBasedGuardrailService(outputLimits);
         this.tuning = tuning;
     }
@@ -134,23 +130,44 @@ public class SemanticGuardrailService implements GuardrailService {
         if (chatClient == null || sanitized == null || sanitized.isBlank()) {
             return sanitized;
         }
+        // Plain structured data (ids, numbers, short status words) cannot carry an instruction:
+        // skip the
+        // extra model call. app.guardrails.judge.skip-inert-data=false judges every result.
+        if (tuning.getJudge().isSkipInertData() && InertDataScreen.isInertData(sanitized)) {
+            return sanitized;
+        }
 
         try {
-            String verdict = tuning.getJudge().apply(chatClient.prompt()
-                .system(GuardrailPrompts.scopedText(prompts, GuardrailPrompts.JUDGE_INJECTION))
-                .user("Tool: " + toolName + "\n\nOutput to review:\n" + GuardrailSettings.truncateForJudge(tuning, sanitized)))
-                .call()
-                .content();
+            String verdict =
+                    tuning.getJudge()
+                            .apply(
+                                    chatClient
+                                            .prompt()
+                                            .system(
+                                                    GuardrailPrompts.scopedText(
+                                                            prompts,
+                                                            GuardrailPrompts.JUDGE_INJECTION))
+                                            .user(
+                                                    "Tool: "
+                                                            + toolName
+                                                            + "\n\nOutput to review:\n"
+                                                            + GuardrailSettings.truncateForJudge(
+                                                                    tuning, sanitized)))
+                            .call()
+                            .content();
 
             if (verdict == null || verdict.isBlank()) {
                 return failedCheck(toolName, sanitized, null);
             }
             String trimmed = verdict.trim();
             if (trimmed.regionMatches(true, 0, "UNSAFE", 0, "UNSAFE".length())) {
-                String reason = trimmed.length() > "UNSAFE:".length()
-                    ? trimmed.substring(trimmed.indexOf(':') + 1).trim()
-                    : GuardrailPrompts.scopedText(prompts, GuardrailPrompts.SEMANTIC_DEFAULT_REASON);
-                log.warn("Semantic guardrail rejected output from tool '{}' - {}", toolName, reason);
+                String reason =
+                        trimmed.length() > "UNSAFE:".length()
+                                ? trimmed.substring(trimmed.indexOf(':') + 1).trim()
+                                : GuardrailPrompts.scopedText(
+                                        prompts, GuardrailPrompts.SEMANTIC_DEFAULT_REASON);
+                log.warn(
+                        "Semantic guardrail rejected output from tool '{}' - {}", toolName, reason);
                 throw new GuardrailViolationException(toolName, reason);
             }
             return sanitized;
@@ -169,12 +186,18 @@ public class SemanticGuardrailService implements GuardrailService {
      */
     private String failedCheck(String toolName, String sanitized, Exception cause) {
         if (GuardrailSettings.failClosed()) {
-            log.warn("Semantic guardrail check failed for tool '{}' - withholding the output (fail-closed)", toolName, cause);
+            log.warn(
+                    "Semantic guardrail check failed for tool '{}' - withholding the output (fail-closed)",
+                    toolName,
+                    cause);
             throw new GuardrailViolationException(
-                toolName, GuardrailPrompts.scopedText(prompts, GuardrailPrompts.SEMANTIC_UNAVAILABLE));
+                    toolName,
+                    GuardrailPrompts.scopedText(prompts, GuardrailPrompts.SEMANTIC_UNAVAILABLE));
         }
-        log.warn("Semantic guardrail check failed for tool '{}' - proceeding with pattern-only result", toolName, cause);
+        log.warn(
+                "Semantic guardrail check failed for tool '{}' - proceeding with pattern-only result",
+                toolName,
+                cause);
         return sanitized;
     }
-
 }

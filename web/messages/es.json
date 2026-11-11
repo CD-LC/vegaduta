@@ -4026,7 +4026,13 @@
     "proposalGoalLabel": "LO QUE EL CENTINELA QUIERE EJECUTAR",
     "statusFilterLabel": "Filtrar por estado",
     "workflowNeedsHint": "Tus respuestas se enviarán al siguiente paso cuando apruebes.",
-    "workflowNeedsLabel": "Este flujo de trabajo necesita lo siguiente de ti"
+    "workflowNeedsLabel": "Este flujo de trabajo necesita lo siguiente de ti",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "Registro de auditoría",

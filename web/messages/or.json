@@ -3896,7 +3896,13 @@
     "emptyTitle": "ସମୀକ୍ଷା ପାଇଁ କିଛି ନାହିଁ",
     "policyOverrideButton": "ନୀତି ଓଭରରାଇଡ୍",
     "workflowNeedsLabel": "ଏହି ୱାର୍କଫ୍ଲୋ ଆପଣଙ୍କଠାରୁ ନିମ୍ନଲିଖିତ ଆବଶ୍ୟକ କରେ",
-    "workflowNeedsHint": "ଆପଣ ଅନୁମୋଦନ କଲେ ଆପଣଙ୍କ ଉତ୍ତର ପରବର୍ତ୍ତୀ ପଦକ୍ଷେପକୁ ପଠାଯିବ।"
+    "workflowNeedsHint": "ଆପଣ ଅନୁମୋଦନ କଲେ ଆପଣଙ୍କ ଉତ୍ତର ପରବର୍ତ୍ତୀ ପଦକ୍ଷେପକୁ ପଠାଯିବ।",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ଅଡିଟ୍ ଲଗ୍",

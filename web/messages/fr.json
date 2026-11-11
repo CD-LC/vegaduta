@@ -4046,7 +4046,13 @@
     "proposalGoalLabel": "CE QUE LA SENTINELLE VEUT EXÉCUTER",
     "statusFilterLabel": "Filtrer par statut",
     "workflowNeedsHint": "Vos réponses seront transmises à l'étape suivante dès votre approbation.",
-    "workflowNeedsLabel": "Ce workflow a besoin des éléments suivants"
+    "workflowNeedsLabel": "Ce workflow a besoin des éléments suivants",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "Journal d'audit",
