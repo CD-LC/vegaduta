@@ -8,35 +8,49 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+  (only the agent's own system prompt, procedures, custom instructions and tools - no standing directives,
   12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
   150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
   65/65 score.
   Measured in the sandbox container: a JavaScript execute drops from a median of about 90-155 ms to about 35-65 ms; Python is unchanged (about 35 ms).
+  The request extends the first turn's prompt, so a provider's prompt cache reuses it. Switch:
   `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
+  `APP_CHAT_PROMPT_PROFILE=full`) chooses how much the platform adds to what an agent sends the model:
   `SETTING_INVALID`. `SettingsExceptionHandler` had no `@Order`, so it tied with the generic fallback advice and
+  `app.approvals.continuation.native-tool-result` (`APP_APPROVALS_CONTINUATION_NATIVE_TOOL_RESULT`, default `true`);
+  `bare`. The prompt preview shows the profile's result.
   `checkCookiesAndSetTimer` from `authChecker.js`, which Keycloak 26.8 no longer exports, so the "signed in in
+  `full` (unchanged), `lean` (the standing instructions and skills list in their short wording) or `bare`
   `load_skill` away. Other models are unchanged.
   `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
   another tab" check never started. It now calls `startSessionPolling`, as Keycloak's own templates do.
+  approvals and audit run outside the prompt and stay on in all three. "Own tools" are the ones the owner
   carried the skills index and skill tools (about 700 tokens). Generic words are ignored, and "word" means the
+  chose: the agent's allowed tools and its attached tool servers; an agent with neither offers no tools in
   docx skill only next to file/document/format. Real skill requests still match.
   different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
   effective-settings endpoint (and any turn-time read that was not already in a transaction) queried the default
+  ends paused for an approval is no longer sampled by the background quality judge (its reply is the platform's
   executes), so the pre-check now runs only when a run produced no result, with the same validation message.
   is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
   local bring-your-own provider) now keep all but a short list of standing tools behind
   lost; it now has highest precedence, scoped to the two settings controllers.
   mapped Spring Security's `AccessDeniedException`. It now answers 403 with the generic permission message.
+  no skills list, no recalled memory, no built-in memory, skill, restore or scratchpad tools). Guardrails,
+  now replays that call to the model as a native assistant tool call followed by its tool result, and sends only a
   numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
   override, the next `GET /api/settings/effective` answered without it, so the console showed the old value after a
   reload. `JdbcSettingsStore.tenantValues()` and `agentValues()` now run in their own read-only transaction.
   runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
   schema instead of the tenant's, found no rows, and returned the platform value: a save answered with the
   separate node process before running it; the run itself is the parse (a module that does not parse never
+  short platform note instead of the parked-turn record, the outcome record and the full `<approval_result>` text.
   uses ("answer", "short", "use", "word"), so "What is the capital of France? Answer in one short sentence"
   startup (the row is still never rewritten) instead of silently running the other model.
   the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+  the note texts are `native-completed-message`, `native-failed-message` and `native-denied-message`. A turn that
   tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
+  waiting note), so that call no longer competes with the continuation on a single-slot local model.
 ### Added
 ### Changed
 - **A corrected fact now replaces the fact it corrects, and recall injects only relevant lines (memory eval gates G6, G11, G3).** The real-pipeline eval found that "I moved from Pune to Mumbai" was stored next to "I live in Pune" with both recalled, and that recall injected the top-k lines whatever their similarity. `agent_memory` and `tenant_memory` gain `superseded_by`, `superseded_at`, `supersedes_ids` and `updated_at` (migration V685, no backfill). With `app.memory.supersession.enabled` (default `true`) a new TRUSTED fact marks an older TRUSTED fact of the same person superseded when it is the same text told again (re-confirmed, no second row), when `remember_fact`'s new optional `replaces` names it (the tool schema offers the argument only while the flag is on; off is byte-identical), or when the embedding similarity is at least `app.memory.supersession.min-similarity` (0.85). A superseded row is never deleted: it stays on the Memory page (`FactView.supersededAt`), in the export and under erasure, and is left out of recall, the edge facts, the consolidation snapshot and the importer's duplicate check. A QUARANTINED fact records what it would replace and replaces nothing until a person approves it; an agent-written fact never replaces one the person typed or pinned. `app.memory.recall.min-similarity` (0.20) and `app.memory.recall.max-items` (3) put a relevance floor and a per-turn cap on the automatic recall of facts and episodes (the always-in-context memory blocks and the self-model line are untouched; `0` and `0` restore the previous behaviour). Measured on `PlatformMemoryEvalIT`, see `04-measurement-scorecard.md` Addendum F for the before/after gate table and what is still open.
@@ -138,12 +152,14 @@ Release notes on GitHub are generated from the section for each version.
 - Fraud detection: the client IP is now only the container-resolved peer address (X-Forwarded-For and X-Real-IP are no longer trusted and hostnames are never resolved), and the challenge flow issues an HMAC-signed, short-lived, single-use pass bound to tenant, IP and nonce that the interceptor verifies.
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 - **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Faster continuation after an approval.** The turn that continues a task after a human decided a held tool call
 - **JavaScript and TypeScript tool runs start one process, not two.** The sandbox parsed the source in a
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 - **Making a security setting weaker than the value it inherits returned HTTP 500** instead of the documented 400
 - **Ordinary questions no longer switch the skills block on.** The skill gate matched on words every question
 - **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+- **Prompt profile per agent.** `chat.prompt.profile` (workspace or agent setting; platform default
 - **Production web builds no longer fall back to localhost in crawler-facing output.** With no `NEXT_PUBLIC_SITE_URL`/`SITE_URL`, `metadataBase` is omitted and canonical/OG/alternate URLs are relative, `robots.txt` names no sitemap and `sitemap.xml` is empty (instead of advertising `http://localhost:3000`); the share-page layouts and the observability deep links no longer default to localhost in production. Development and test builds keep the localhost defaults. The six `approvalsPanel.trace*` keys (and the keys `de`/`pa` lacked) are now in every locale file with the English fallback, so `uiI18n.test.ts` passes again.
 - **The Keycloak login theme threw a script error on every login page.** `template.ftl` imported
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.

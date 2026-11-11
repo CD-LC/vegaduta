@@ -237,7 +237,11 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
-        boolean deferral = toolDeferral(agent, hostedChain);
+        // chat.prompt.profile: a bare turn offers the agent's own tools as they are, never behind a
+        // forced search_tools.
+        PromptProfile promptProfile = PromptProfileSettings.of(agent.getId());
+        context.modelTraits().promptProfile(promptProfile);
+        boolean deferral = promptProfile != PromptProfile.BARE && toolDeferral(agent, hostedChain);
         context.modelTraits().toolDeferral(deferral);
         context.modelTraits()
                 .leanSkillIndex(

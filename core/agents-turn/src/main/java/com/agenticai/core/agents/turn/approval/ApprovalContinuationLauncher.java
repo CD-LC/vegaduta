@@ -176,7 +176,7 @@ public class ApprovalContinuationLauncher implements ApprovalContinuationPort {
                                 continuation.sessionId(),
                                 continuation.subjectKey(),
                                 prompt.render(continuation))
-                        .continuation(continuation)
+                        .continuation(prompt.forReplay(continuation))
                         // The parked turn's run-scoped tool selection, if it had one: the task goes
                         // on with the same tools.
                         .toolNames(continuation.runToolNames())

@@ -133,6 +133,8 @@ class SettingsCatalogContractTest {
                                 new com.agenticai.core.agents.memorystore.CompetenceSettings(
                                         new com.agenticai.core.agents.memorystore
                                                 .CompetenceProperties()),
+                                new com.agenticai.core.agents.turn.PromptProfileSettings(
+                                        "full", null),
                                 new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
                                 new com.agenticai.core.agents.context.ContextCompactionSettings(
                                         new MockEnvironment()),
@@ -162,7 +164,7 @@ class SettingsCatalogContractTest {
 
     @Test
     void theCatalogIsTheCuratedSize() {
-        assertThat(registry.all()).hasSizeBetween(30, 80);
+        assertThat(registry.all()).hasSizeBetween(30, 90);
         assertThat(registry.all())
                 .extracting(SettingDefinition::key)
                 .contains(

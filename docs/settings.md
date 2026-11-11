@@ -201,6 +201,7 @@ L low, M medium, H high, S security. **Use site** is the code that must consult 
 | `chat.semanticCache.maxEntriesPerAgent` | i 10-5000 | L | T,A | `app.chat.semantic-cache.max-entries-per-agent` | **wired**: `SemanticResponseCacheService` prune after a write |
 | `chat.followUp.maxStickyTools` | i 0-20 | L | T,A | `app.chat.follow-up.max-sticky-tools` | **wired**: agents-turn `ChatClientSelection` builds the sticky policy per turn; `FollowUpTools#stickyTools` applies it |
 | `chat.followUp.keepPrimaryModel` | b | L | T,A | `app.chat.follow-up.keep-primary-model` | **wired**: `ChatClientSelection` -> `FollowUpTools#keepsPrimaryModel` |
+| `chat.prompt.profile` | e full,lean,bare | M | T,A | `app.chat.prompt-profile` | **wired**: agents-turn `ChatClientSelection` reads it per turn (`PromptProfileSettings#of`); `ChatPromptAssembler` and `PromptPreviewService` apply it to the tool list (`PromptProfileSettings#ownTools`) and the prompt blocks (`ChatSystemPromptComposer#forProfile`) |
 | `chat.toolLedger.enabled` | b | L | T | `app.chat.tool-ledger.enabled` | **wired** (workspace-wide: the stored record is replayed from the session history, which has no agent): agents-tools `AgentToolGuard` (recording, `ToolLedgerOverrides#effective`) and agents-turn `SessionMemoryService` (replay to the model and to the rolling summary) |
 | `chat.toolLedger.replayEnabled` | b | L | T | `app.chat.tool-ledger.replay-enabled` | **wired**: `SessionMemoryService` |
 | `chat.toolLedger.replayTurns` | i 0-20 | L | T | `app.chat.tool-ledger.replay-turns` | **wired**: `SessionMemoryService` |
@@ -424,6 +425,7 @@ Ask-AI assist, Evals / LLM-as-judge), which `AuxiliaryModelResolver` reads befor
 | `app.chat.follow-up.keep-primary-model` | A | `chat.followUp.keepPrimaryModel` |
 | `app.chat.follow-up.max-sticky-tools` | A | `chat.followUp.maxStickyTools` |
 | `app.chat.follow-up.short-message-chars` | B\* | candidate for a later pass: a message of at most 40 characters counts as a follow-up (0 turns the follow-up rules off); it is read before the per-turn policy exists, so there is no workspace or agent to resolve against yet; the other `chat.followUp.*` knobs are in the catalog |
+| `app.chat.prompt-profile` | A | `chat.prompt.profile` |
 | `app.chat.follow-up.sticky-tools-enabled` | A | `chat.followUp.stickyToolsEnabled` |
 | `app.chat.follow-up.sticky-tools-window` | A | `chat.followUp.stickyToolsWindow` |
 | `app.chat.limits.attachments.max-audio-bytes` | A | `chat.attachments.maxAudioMb` |

@@ -5,13 +5,13 @@ import com.agenticai.core.agents.job.AgentJobApprovalResumption;
 import com.agenticai.core.agents.job.AgentJobSession;
 import com.agenticai.core.agents.turn.ApprovalContinuation;
 import com.agenticai.core.agents.turn.ApprovalContinuation.Outcome;
+import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationClaims;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationFactory;
-import com.agenticai.core.agents.turn.ApprovalContinuationProperties;
 import com.agenticai.core.agents.turn.approval.ApprovalContinuationPrompt;
-import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.approval.ApprovalRequest;
 import com.agenticai.core.approval.ApprovalStatus;
+import com.agenticai.core.settings.SettingsResolver;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -28,25 +28,27 @@ import org.springframework.stereotype.Component;
  * ApprovalContinuationPrompt}), so there is one mechanism for "a human decided, carry on" and not
  * two.
  *
- * <p>The approval sweep resumes a parked job by dispatching an ordinary turn. Before this class that
- * turn re-sent the job's goal and relied on a 500-character note in the history for the result of
- * the approved tool. Now the first turn after a park is the continuation message: the job's goal
+ * <p>The approval sweep resumes a parked job by dispatching an ordinary turn. Before this class
+ * that turn re-sent the job's goal and relied on a 500-character note in the history for the result
+ * of the approved tool. Now the first turn after a park is the continuation message: the job's goal
  * restated, the approved tool's result in full (up to {@code
  * app.approvals.continuation.max-result-chars}), a failure or a denial as such, and the pipeline
  * selects tools for the goal and keeps the ones the job already used on offer.
  *
- * <p>Each decision is delivered once: the same one-shot claim the chat path uses
- * ({@link ApprovalContinuationClaims}) is taken per approval request, so a job resumed twice (a
- * retry, an orphan re-queue) is not told the same result twice. Anything that cannot be built - a
- * request recorded without a goal, Redis unavailable - yields no continuation, and the job resumes
- * the way it did before: the goal again, with the history note.
+ * <p>Each decision is delivered once: the same one-shot claim the chat path uses ({@link
+ * ApprovalContinuationClaims}) is taken per approval request, so a job resumed twice (a retry, an
+ * orphan re-queue) is not told the same result twice. Anything that cannot be built - a request
+ * recorded without a goal, Redis unavailable - yields no continuation, and the job resumes the way
+ * it did before: the goal again, with the history note.
  */
 @Component
 public class AgentJobApprovalResume implements AgentJobApprovalResumption {
 
     private static final Logger log = LoggerFactory.getLogger(AgentJobApprovalResume.class);
 
-    /** Most recent requests of a job considered, the bound {@code AgentJobApprovalLookup} offers. */
+    /**
+     * Most recent requests of a job considered, the bound {@code AgentJobApprovalLookup} offers.
+     */
     private final AgentJobApprovalLookup approvals;
 
     private final ApprovalContinuationFactory factory;
@@ -67,7 +69,10 @@ public class AgentJobApprovalResume implements AgentJobApprovalResumption {
         this.properties = properties;
     }
 
-    /** The settings catalog; optional: absent, {@code app.approvals.continuation.enabled} decides for every job. */
+    /**
+     * The settings catalog; optional: absent, {@code app.approvals.continuation.enabled} decides
+     * for every job.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSettingsResolver(SettingsResolver settings) {
         this.settings = settings;
@@ -106,7 +111,7 @@ public class AgentJobApprovalResume implements AgentJobApprovalResumption {
                 if (message.length() > 0) {
                     message.append("\n\n");
                 }
-                message.append(prompt.render(c));
+                message.append(prompt.renderText(c));
                 sticky.addAll(c.stickyTools());
             }
             ApprovalContinuation last = delivered.get(delivered.size() - 1);
@@ -146,21 +151,27 @@ public class AgentJobApprovalResume implements AgentJobApprovalResumption {
             return Optional.empty();
         }
         return switch (status) {
-            case APPROVED -> request.getExecutionResult() != null
-                    ? factory.build(request, Outcome.COMPLETED, request.getExecutionResult())
-                    : factory.build(
+            case APPROVED ->
+                    request.getExecutionResult() != null
+                            ? factory.build(
+                                    request, Outcome.COMPLETED, request.getExecutionResult())
+                            : factory.build(
+                                    request, Outcome.FAILED, properties.getResultNotRecordedText());
+            case EXECUTION_FAILED, DEAD_LETTERED ->
+                    request.getNextRetryAt() == null
+                            ? factory.build(
+                                    request,
+                                    Outcome.FAILED,
+                                    nullToEmpty(request.getExecutionError()))
+                            : Optional.empty();
+            case REJECTED ->
+                    factory.build(
                             request,
-                            Outcome.FAILED,
-                            properties.getResultNotRecordedText());
-            case EXECUTION_FAILED, DEAD_LETTERED -> request.getNextRetryAt() == null
-                    ? factory.build(request, Outcome.FAILED, nullToEmpty(request.getExecutionError()))
-                    : Optional.empty();
-            case REJECTED -> factory.build(
-                    request,
-                    Outcome.DENIED,
-                    request.getRejectionReason() == null || request.getRejectionReason().isBlank()
-                            ? properties.getNoReasonText()
-                            : request.getRejectionReason());
+                            Outcome.DENIED,
+                            request.getRejectionReason() == null
+                                            || request.getRejectionReason().isBlank()
+                                    ? properties.getNoReasonText()
+                                    : request.getRejectionReason());
             default -> Optional.empty();
         };
     }

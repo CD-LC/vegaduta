@@ -189,6 +189,29 @@ final class ChatSystemPromptComposer {
         return new Composed(systemPrompt, memoryBlock, List.copyOf(system), List.copyOf(memory));
     }
 
+    /** The memory-block parts a bare turn keeps: the ones the owner wrote, not the platform. */
+    private static final java.util.Set<String> OWNER_BLOCKS =
+            java.util.Set.of(PromptDirectiveRegistry.Keys.CUSTOM_INSTRUCTIONS, "hook.context_note");
+
+    /**
+     * {@code composed} as {@code profile} sends it. {@link PromptProfile#BARE} keeps the system
+     * text (the agent's prompt and procedures; the skills block is already absent because the skill
+     * tools are) and, of the per-turn block, only what the owner wrote: custom instructions and a
+     * hook's note. Every other profile returns {@code composed} unchanged.
+     */
+    static Composed forProfile(Composed composed, PromptProfile profile) {
+        if (profile != PromptProfile.BARE) {
+            return composed;
+        }
+        List<Block> kept =
+                composed.memoryBlocks().stream()
+                        .filter(b -> OWNER_BLOCKS.contains(b.id()))
+                        .toList();
+        String memoryBlock =
+                joinMemoryBlocks(kept.stream().map(Block::text).toArray(String[]::new));
+        return new Composed(composed.systemPrompt(), memoryBlock, composed.systemBlocks(), kept);
+    }
+
     private static void addResolved(List<Block> out, ResolvedPrompt r) {
         if (r != null && r.textOrNull() != null) {
             out.add(new Block(r.key(), r, r.text()));
