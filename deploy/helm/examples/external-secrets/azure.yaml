@@ -53,7 +53,7 @@ spec:
 # a GitOps prune): with the default Owner the Secret carries an ownerReference to the ExternalSecret and
 # Kubernetes garbage-collects it. deletionPolicy: Retain is a different thing: it keeps the Secret when the
 # value disappears from the store. Both are set here because losing this value makes every encrypted
-# credential in the database unreadable (AGENTS.md rule 5). Orphan also means that deleting the ExternalSecret
+# credential in the database unreadable (ENGINEERING-RULES.md rule 5). Orphan also means that deleting the ExternalSecret
 # leaves a Secret nobody refreshes. Rotate with APP_ENCRYPTION_KEY_PREVIOUS (see the production checklist),
 # never by overwriting the stored value. Behaviour per the ESO documentation; not run against ESO here.
 apiVersion: external-secrets.io/v1

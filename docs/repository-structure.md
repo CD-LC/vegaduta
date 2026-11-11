@@ -60,7 +60,7 @@ vegaduta/
 │                          gen-shapes.py (regenerates the tables in docs/deploy/DEPLOYMENT-SHAPES.md)
 ├── .github/               workflows, CODEOWNERS, Dependabot, labeler, issue/PR templates
 ├── Makefile               build / test / lint / gates / docs targets
-└── AGENTS.md, CONTRIBUTING.md, README.md, ROADMAP.md, CHANGELOG.md, GOVERNANCE.md,
+└── ENGINEERING-RULES.md, CONTRIBUTING.md, README.md, ROADMAP.md, CHANGELOG.md, GOVERNANCE.md,
     MAINTAINERS.md, SECURITY.md, SUPPORT.md, CODE_OF_CONDUCT.md, LICENSE, NOTICE, CITATION.cff
 ```
 
@@ -75,7 +75,7 @@ vegaduta/
 | Running a pilot with a customer | [Running a 30-day pilot](pilots/README.md) | [Cost and ROI](cost-and-roi.md) |
 | Using it from an editor, browser or phone | [Plugins, apps and mobile](plugins-and-apps.md) | MCP server in [Extending](extending.md) |
 | Extending the platform | [Extending](extending.md) | [Architecture](architecture/overview.md), module graph |
-| Contributing code | [CONTRIBUTING](https://github.com/CD-LC/vegaduta/blob/main/CONTRIBUTING.md), [AGENTS.md](https://github.com/CD-LC/vegaduta/blob/main/AGENTS.md) | `make gates` |
+| Contributing code | [CONTRIBUTING](https://github.com/CD-LC/vegaduta/blob/main/CONTRIBUTING.md), [ENGINEERING-RULES.md](https://github.com/CD-LC/vegaduta/blob/main/ENGINEERING-RULES.md) | `make gates` |
 | Maintaining or releasing | [Maintainers](maintainers/repo-setup.md) | [Releasing](maintainers/releasing.md), [Releasing the SDK](maintainers/releasing-sdk.md), [Publishing these docs](maintainers/docs-site.md) |
 
 ## The platform

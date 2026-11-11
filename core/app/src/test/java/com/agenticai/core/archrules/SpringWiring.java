@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * What Spring does with a class, answered from bytecode (ArchUnit) without starting a context.
  * Shared by {@link InjectableConstructorTest} and {@link UniqueBeanNamesTest}, the JVM-level checks
- * for the wiring failures that compile and unit-test cleanly but stop core at startup (AGENTS.md
- * rule 9).
+ * for the wiring failures that compile and unit-test cleanly but stop core at startup
+ * (ENGINEERING-RULES.md rule 9).
  */
 final class SpringWiring {
 

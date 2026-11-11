@@ -2,11 +2,13 @@ package com.agenticai.core.google;
 
 import com.agenticai.core.google.dto.GoogleConnectionResponse;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.publicurl.PublicWebUrl;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.net.URI;
+import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,10 +19,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * Two distinct surfaces, deliberately split by path prefix the same way Twilio/Meta split their
@@ -64,7 +62,8 @@ public class GoogleOAuthController {
     /**
      * {@code consoleRedirectUri} is the dedicated property when set, else {@code
      * <app.web.public-url>/admin/integrations}; blank when neither is configured (no localhost
-     * default, AGENTS.md rule 4) - {@link #redirectTo} then refuses with a message naming both.
+     * default, ENGINEERING-RULES.md rule 4) - {@link #redirectTo} then refuses with a message
+     * naming both.
      */
     public GoogleOAuthController(
             GoogleOAuthService oauthService,
@@ -142,10 +141,14 @@ public class GoogleOAuthController {
     @GetMapping("/api/channels/google/oauth-config")
     public java.util.Map<String, Object> oauthConfig() {
         return java.util.Map.of(
-                "configured", oauthService.isConfigured(),
-                "redirectUri", oauthService.redirectUri(),
-                "mode", oauthService.loopbackMode() ? "loopback" : "web",
-                "problem", oauthService.redirectNotLoopback() ? "redirect_not_loopback" : "");
+                "configured",
+                oauthService.isConfigured(),
+                "redirectUri",
+                oauthService.redirectUri(),
+                "mode",
+                oauthService.loopbackMode() ? "loopback" : "web",
+                "problem",
+                oauthService.redirectNotLoopback() ? "redirect_not_loopback" : "");
     }
 
     /**
@@ -194,7 +197,7 @@ public class GoogleOAuthController {
             }
         }
         if (error != null) {
-            log.info("Google OAuth consent was not completed: {}", error);
+            log.info("Google OAuth consent was not completed: {}", LogSafe.clean(error));
             if (decoded != null
                     && GoogleOAuthService.PURPOSE_YOUTUBE_READONLY.equals(decoded.purpose())) {
                 return redirectTo("connected", "youtube_skipped");

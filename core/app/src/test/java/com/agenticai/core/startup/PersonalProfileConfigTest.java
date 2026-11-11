@@ -16,11 +16,11 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Locks the {@code personal} profile (application-personal.yml): the shared contract property
- * names other areas read, their personal defaults, that each is env-overridable, and that the
- * file stays additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses
- * the shipped YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves
- * placeholders through a real {@link StandardEnvironment}.
+ * Locks the {@code personal} profile (application-personal.yml): the shared contract property names
+ * other areas read, their personal defaults, that each is env-overridable, and that the file stays
+ * additive (no localhost in a value, nothing that turns Kafka or Temporal on). Parses the shipped
+ * YAML with duplicate keys rejected, as Spring Boot's own loader does, and resolves placeholders
+ * through a real {@link StandardEnvironment}.
  */
 class PersonalProfileConfigTest {
 
@@ -54,7 +54,10 @@ class PersonalProfileConfigTest {
         assertThat(env.getProperty("app.guardrails.supervised.gate-read-only")).isEqualTo("false");
         assertThat(
                         org.springframework.boot.context.properties.bind.Binder.get(env)
-                                .bind("app.guardrails", com.agenticai.core.guardrails.GuardrailTuningProperties.class)
+                                .bind(
+                                        "app.guardrails",
+                                        com.agenticai.core.guardrails.GuardrailTuningProperties
+                                                .class)
                                 .get()
                                 .getSupervised()
                                 .isGateReadOnly())
@@ -64,7 +67,10 @@ class PersonalProfileConfigTest {
                         environment(Map.of("APP_GUARDRAILS_SUPERVISED_GATE_READ_ONLY", "true"))
                                 .getProperty("app.guardrails.supervised.gate-read-only"))
                 .isEqualTo("true");
-        assertThat(new com.agenticai.core.guardrails.GuardrailTuningProperties().getSupervised().isGateReadOnly())
+        assertThat(
+                        new com.agenticai.core.guardrails.GuardrailTuningProperties()
+                                .getSupervised()
+                                .isGateReadOnly())
                 .as("without this profile every call of a supervised agent is gated")
                 .isTrue();
     }
@@ -76,14 +82,20 @@ class PersonalProfileConfigTest {
         assertThat(env.getProperty("app.sidecar.enabled")).isEqualTo("false");
 
         StandardEnvironment rag =
-                environment(Map.of("APP_SIDECAR_ENABLED", "true", "APP_EMBEDDINGS_PROVIDER", "sidecar"));
+                environment(
+                        Map.of(
+                                "APP_SIDECAR_ENABLED",
+                                "true",
+                                "APP_EMBEDDINGS_PROVIDER",
+                                "sidecar"));
         assertThat(rag.getProperty("app.sidecar.enabled")).isEqualTo("true");
         assertThat(rag.getProperty("app.embeddings.provider")).isEqualTo("sidecar");
     }
 
     @Test
     void theInboundRateLimitStartsOnHereAndIsOffEverywhereElse() throws IOException {
-        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled")).isEqualTo("true");
+        assertThat(environment(Map.of()).getProperty("app.omnichannel.rate-limit.enabled"))
+                .isEqualTo("true");
         assertThat(
                         environment(Map.of("APP_OMNICHANNEL_RATE_LIMIT_ENABLED", "false"))
                                 .getProperty("app.omnichannel.rate-limit.enabled"))
@@ -135,7 +147,8 @@ class PersonalProfileConfigTest {
 
     @Test
     void noValueHardcodesLocalhostAndTheIssuerNeverFallsBackToIt() throws IOException {
-        // AGENTS.md rule 4: a token issuer and browser-facing URL never default to localhost.
+        // ENGINEERING-RULES.md rule 4: a token issuer and browser-facing URL never default to
+        // localhost.
         StandardEnvironment env = environment(Map.of());
         int checked = 0;
         for (PropertySource<?> source : env.getPropertySources()) {
@@ -152,11 +165,16 @@ class PersonalProfileConfigTest {
             }
         }
         // Guard against the loop silently matching no source (e.g. a renamed property source).
-        assertThat(checked).as("properties scanned from application-personal.yml").isGreaterThan(10);
+        assertThat(checked)
+                .as("properties scanned from application-personal.yml")
+                .isGreaterThan(10);
         assertThat(env.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .startsWith("urn:");
         assertThat(
-                        environment(Map.of("KEYCLOAK_ISSUER_URI", "https://auth.example.org/realms/x"))
+                        environment(
+                                        Map.of(
+                                                "KEYCLOAK_ISSUER_URI",
+                                                "https://auth.example.org/realms/x"))
                                 .getProperty(
                                         "spring.security.oauth2.resourceserver.jwt.issuer-uri"))
                 .isEqualTo("https://auth.example.org/realms/x");
@@ -166,8 +184,7 @@ class PersonalProfileConfigTest {
     void yamlHasNoDuplicateKeys() throws IOException {
         LoaderOptions options = new LoaderOptions();
         options.setAllowDuplicateKeys(false);
-        try (InputStream in =
-                getClass().getResourceAsStream("/application-personal.yml")) {
+        try (InputStream in = getClass().getResourceAsStream("/application-personal.yml")) {
             assertThat(in).isNotNull();
             assertThat(new Yaml(options).<Object>load(in)).isNotNull();
         }

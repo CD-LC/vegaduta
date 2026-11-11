@@ -7,7 +7,7 @@
 # not assemble one Spring context, and core/app's CoreApplicationTests needs a
 # live DB and silently skips without one. Bugs only a real boot catches include
 # duplicate @Configuration simple names, two constructors with no @Autowired,
-# and a phantom duplicate Flyway version from a stale target/ (AGENTS.md rules
+# and a phantom duplicate Flyway version from a stale target/ (ENGINEERING-RULES.md rules
 # 3 and 9). The jobs and worker shapes scan no REST controllers, so a component that needs a bean
 # only a controller provides (ApiGuideToolSource and ApiSpecProvider, v0.1.9) boots in the api and
 # crash-loops in core-jobs and core-worker: they are booted too, not just the api.
@@ -414,7 +414,7 @@ APP_ENV=(
   "REDIS_HOST=127.0.0.1" "REDIS_PORT=$REDIS_PORT" "REDIS_PASSWORD=$REDIS_PASSWORD"
   # EncryptionService refuses to boot without a 32-byte key; a fresh random one per run.
   "APP_ENCRYPTION_KEY=$BOOT_ENCRYPTION_KEY"
-  # No localhost default exists for the public console origin (AGENTS.md rule 4): with the `security`
+  # No localhost default exists for the public console origin (ENGINEERING-RULES.md rule 4): with the `security`
   # profile active the app refuses to start without it. The .invalid TLD is reserved and never resolves.
   "APP_WEB_PUBLIC_URL=https://app.bootcheck.invalid"
   "STORAGE_ACCESS_KEY=bootcheck-dummy" "STORAGE_SECRET_KEY=bootcheck-dummy-secret"

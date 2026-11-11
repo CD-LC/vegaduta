@@ -349,7 +349,7 @@ test.describe.serial("Agents area on the kind stage", () => {
     // KNOWN DEFECT: /agents (AgentWorkbench -> app/code-intel/lib.ts) calls GET http://localhost:8090/repos because
     // NEXT_PUBLIC_CODE_INTEL_URL defaults to http://localhost:8090 in deploy/compose/docker-compose.yml (line ~548),
     // docker-compose.build.yml (~50) and .env.example (PUBLIC_CODE_INTEL_URL); empty would use the core proxy.
-    test.fixme(local.length > 0, `browser-facing request to localhost (AGENTS.md rule 4): ${local.join(", ")}`);
+    test.fixme(local.length > 0, `browser-facing request to localhost (ENGINEERING-RULES.md rule 4): ${local.join(", ")}`);
     expect(local).toEqual([]);
   });
 });

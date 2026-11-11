@@ -4,6 +4,7 @@ import com.agenticai.core.agents.job.ownership.JobLeasePolicy;
 import com.agenticai.core.agents.job.ownership.JobOwnership;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.annotation.PreDestroy;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -28,49 +29,47 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Owns the bounded worker pool agent jobs actually run on, and the liveness
- * signal that lets other replicas tell a live job from an abandoned one.
+ * Owns the bounded worker pool agent jobs actually run on, and the liveness signal that lets other
+ * replicas tell a live job from an abandoned one.
  *
  * <h2>Why a dedicated bounded ThreadPoolExecutor on PLATFORM threads</h2>
- * Three plausible-looking alternatives are all wrong here, and this comment
- * exists because each of them will look like an obvious cleanup to someone
- * later:
+ *
+ * Three plausible-looking alternatives are all wrong here, and this comment exists because each of
+ * them will look like an obvious cleanup to someone later:
+ *
  * <ul>
- *   <li><b>Not {@code @Async}.</b> {@code spring.threads.virtual.enabled=true}
- *       in {@code application.yml}, which makes Boot replace {@code
- *       applicationTaskExecutor} with an UNBOUNDED virtual {@code
- *       SimpleAsyncTaskExecutor}. Twenty submissions would become twenty
- *       concurrent JPA workers against a Hikari pool of 15.</li>
- *   <li><b>Not the {@code @Scheduled} pool.</b> It is size 8, already shared by
- *       ~21 scheduled methods, and its own configuration comment warns against
- *       putting long-running work on it. A job holds its thread for minutes.</li>
- *   <li><b>Not a {@code Semaphore} plus virtual threads.</b> The bound IS the
- *       feature - it is what protects Hikari (15), PgBouncer (25) and the shared
- *       hosted-LLM pool from a burst of jobs. At four concurrent jobs of
- *       minute-scale duration, four parked platform threads is a rounding error,
- *       and a real thread is what makes {@code future.cancel(true)} able to
- *       interrupt a blocking call.</li>
+ *   <li><b>Not {@code @Async}.</b> {@code spring.threads.virtual.enabled=true} in {@code
+ *       application.yml}, which makes Boot replace {@code applicationTaskExecutor} with an
+ *       UNBOUNDED virtual {@code SimpleAsyncTaskExecutor}. Twenty submissions would become twenty
+ *       concurrent JPA workers against a Hikari pool of 15.
+ *   <li><b>Not the {@code @Scheduled} pool.</b> It is size 8, already shared by ~21 scheduled
+ *       methods, and its own configuration comment warns against putting long-running work on it. A
+ *       job holds its thread for minutes.
+ *   <li><b>Not a {@code Semaphore} plus virtual threads.</b> The bound IS the feature - it is what
+ *       protects Hikari (15), PgBouncer (25) and the shared hosted-LLM pool from a burst of jobs.
+ *       At four concurrent jobs of minute-scale duration, four parked platform threads is a
+ *       rounding error, and a real thread is what makes {@code future.cancel(true)} able to
+ *       interrupt a blocking call.
  * </ul>
  *
  * <h2>Rejection is normal, not an error</h2>
- * {@code POST} writes the durable QUEUED row FIRST and only then calls {@link
- * #tryDispatch}. A {@link RejectedExecutionException} is caught, logged at DEBUG
- * and the row simply stays QUEUED for {@link AgentJobRunner} to pick up. In-memory
- * dispatch is a LATENCY OPTIMISATION; <b>the {@code agent_job} table is the
- * queue.</b> That is also why a full pool must never become a 429 - nothing was
- * lost.
+ *
+ * {@code POST} writes the durable QUEUED row FIRST and only then calls {@link #tryDispatch}. A
+ * {@link RejectedExecutionException} is caught, logged at DEBUG and the row simply stays QUEUED for
+ * {@link AgentJobRunner} to pick up. In-memory dispatch is a LATENCY OPTIMISATION; <b>the {@code
+ * agent_job} table is the queue.</b> That is also why a full pool must never become a 429 - nothing
+ * was lost.
  *
  * <h2>The heartbeat runs here, not in AgentJobRunner</h2>
- * Only this class knows which jobs this replica is actually executing, and the
- * heartbeat must not consume one of the shared 8 scheduler threads every 15
- * seconds. It is a single daemon thread doing a handful of one-column UPDATEs.
- * It also doubles as the CANCEL OBSERVER: an operator on another replica can
- * only set {@code cancel_requested}, and this tick is where the owning replica
+ *
+ * Only this class knows which jobs this replica is actually executing, and the heartbeat must not
+ * consume one of the shared 8 scheduler threads every 15 seconds. It is a single daemon thread
+ * doing a handful of one-column UPDATEs. It also doubles as the CANCEL OBSERVER: an operator on
+ * another replica can only set {@code cancel_requested}, and this tick is where the owning replica
  * notices and interrupts the worker. With {@code
- * app.agent-jobs.interrupt-on-external-terminal=true} it observes a row
- * terminalised by another replica's deadline/orphan sweep the same way, which
- * is what makes the wall-clock deadline hold when the sweeping pod and the
- * executing pod are different (API/jobs split).
+ * app.agent-jobs.interrupt-on-external-terminal=true} it observes a row terminalised by another
+ * replica's deadline/orphan sweep the same way, which is what makes the wall-clock deadline hold
+ * when the sweeping pod and the executing pod are different (API/jobs split).
  */
 @Component
 public class AgentJobExecutor {
@@ -78,10 +77,9 @@ public class AgentJobExecutor {
     private static final Logger log = LoggerFactory.getLogger(AgentJobExecutor.class);
 
     /**
-     * host+pid, computed once. Written to {@code agent_job.owner_instance} so a
-     * boot sweep on replica A can never reap a job replica B is genuinely still
-     * running - the difference between crash recovery and cross-replica
-     * sabotage.
+     * host+pid, computed once. Written to {@code agent_job.owner_instance} so a boot sweep on
+     * replica A can never reap a job replica B is genuinely still running - the difference between
+     * crash recovery and cross-replica sabotage.
      */
     private static final String INSTANCE_ID = computeInstanceId();
 
@@ -92,17 +90,17 @@ public class AgentJobExecutor {
     private final AgentJobProperties properties;
 
     /**
-     * Jobs this replica is executing right now, by id. Read by {@link
-     * #stopLocally} (to interrupt) and by the heartbeat tick (to prove
-     * liveness). Holds the tenant id alongside the task because the heartbeat
-     * thread has no {@link TenantContext} of its own and must rebuild one per
-     * job before it can touch a tenant-scoped row.
+     * Jobs this replica is executing right now, by id. Read by {@link #stopLocally} (to interrupt)
+     * and by the heartbeat tick (to prove liveness). Holds the tenant id alongside the task because
+     * the heartbeat thread has no {@link TenantContext} of its own and must rebuild one per job
+     * before it can touch a tenant-scoped row.
      */
     private final Map<UUID, ActiveJob> active = new ConcurrentHashMap<>();
 
     /**
-     * Cross-replica ownership (app.agent-jobs.ownership.*). Optional setter so no constructor arity changes:
-     * null (unit tests, slim contexts) or disabled => every code path below is exactly the pre-ownership one.
+     * Cross-replica ownership (app.agent-jobs.ownership.*). Optional setter so no constructor arity
+     * changes: null (unit tests, slim contexts) or disabled => every code path below is exactly the
+     * pre-ownership one.
      */
     private volatile JobOwnership ownership;
 
@@ -112,10 +110,9 @@ public class AgentJobExecutor {
     }
 
     public AgentJobExecutor(
-        AgentJobRepository repository,
-        AgentJobExecution execution,
-        AgentJobProperties properties
-    ) {
+            AgentJobRepository repository,
+            AgentJobExecution execution,
+            AgentJobProperties properties) {
         this.repository = repository;
         this.execution = execution;
         this.properties = properties;
@@ -128,33 +125,38 @@ public class AgentJobExecutor {
         // leave the row QUEUED, which is the whole fallback mechanism. A
         // CallerRunsPolicy here would run a multi-minute LLM call on the servlet
         // request thread - exactly what this feature exists to avoid.
-        this.pool = TenantAwareExecutors.newThreadPool(
-            workers, workers,
-            60L, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(Math.max(1, properties.getQueueCapacity())),
-            new CustomizableThreadFactory("agent-job-"),
-            new ThreadPoolExecutor.AbortPolicy()
-        );
+        this.pool =
+                TenantAwareExecutors.newThreadPool(
+                        workers,
+                        workers,
+                        60L,
+                        TimeUnit.SECONDS,
+                        new ArrayBlockingQueue<>(Math.max(1, properties.getQueueCapacity())),
+                        new CustomizableThreadFactory("agent-job-"),
+                        new ThreadPoolExecutor.AbortPolicy());
 
-        this.heartbeatScheduler = TenantAwareExecutors.newScheduledThreadPool(
-            1, new CustomizableThreadFactory("agent-job-heartbeat-"));
-        // effectiveHeartbeatInterval() == getHeartbeatInterval() unless app.agent-jobs.ownership.enabled=true.
+        this.heartbeatScheduler =
+                TenantAwareExecutors.newScheduledThreadPool(
+                        1, new CustomizableThreadFactory("agent-job-heartbeat-"));
+        // effectiveHeartbeatInterval() == getHeartbeatInterval() unless
+        // app.agent-jobs.ownership.enabled=true.
         long intervalMs = Math.max(1_000L, properties.effectiveHeartbeatInterval().toMillis());
         this.heartbeatScheduler.scheduleWithFixedDelay(
-            this::heartbeatTick, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
+                this::heartbeatTick, intervalMs, intervalMs, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Best-effort hand-off of a QUEUED job to a local worker.
      *
-     * @return {@code false} when the pool and its queue are full, or when this
-     *     tenant already occupies its share of the workers. Either way the
-     *     caller leaves the row QUEUED; nothing is lost and nothing is an error.
+     * @return {@code false} when the pool and its queue are full, or when this tenant already
+     *     occupies its share of the workers. Either way the caller leaves the row QUEUED; nothing
+     *     is lost and nothing is an error.
      */
     public boolean tryDispatch(UUID jobId, String tenantId) {
         JobOwnership own = ownership;
         if (own != null && own.isShuttingDown()) {
-            // This process is going away: a job claimed now would only be interrupted. Leave the row QUEUED
+            // This process is going away: a job claimed now would only be interrupted. Leave the
+            // row QUEUED
             // for another replica.
             return false;
         }
@@ -165,31 +167,36 @@ public class AgentJobExecutor {
         }
         if (tenantActiveCount(tenantId) >= properties.getMaxConcurrentPerTenant()) {
             log.debug(
-                "Not dispatching agent job {} locally - tenant '{}' already occupies its share of the worker pool",
-                jobId, tenantId
-            );
+                    "Not dispatching agent job {} locally - tenant '{}' already occupies its share of the worker pool",
+                    LogSafe.clean(jobId),
+                    LogSafe.clean(tenantId));
             return false;
         }
 
-        FutureTask<Void> task = new FutureTask<>(() -> {
-            execution.run(jobId, tenantId);
-            return null;
-        });
+        FutureTask<Void> task =
+                new FutureTask<>(
+                        () -> {
+                            execution.run(jobId, tenantId);
+                            return null;
+                        });
         // Registered BEFORE submission, and removed by the wrapper below, so
         // there is no window where a running job is invisible to stopLocally.
         active.put(jobId, new ActiveJob(tenantId, task));
         try {
-            pool.execute(() -> {
-                try {
-                    task.run();
-                } finally {
-                    active.remove(jobId);
-                }
-            });
+            pool.execute(
+                    () -> {
+                        try {
+                            task.run();
+                        } finally {
+                            active.remove(jobId);
+                        }
+                    });
             return true;
         } catch (RejectedExecutionException poolFull) {
             active.remove(jobId);
-            log.debug("Agent job {} stays QUEUED - local worker pool is saturated (this is normal)", jobId);
+            log.debug(
+                    "Agent job {} stays QUEUED - local worker pool is saturated (this is normal)",
+                    jobId);
             return false;
         }
     }
@@ -197,12 +204,11 @@ public class AgentJobExecutor {
     /**
      * Interrupts the worker running {@code jobId} on THIS replica.
      *
-     * @return {@code true} only if this replica actually owned the job. A {@code
-     *     false} here is not a failure to cancel: the durable {@code
-     *     cancel_requested} flag has already been written by the caller and is
-     *     the authoritative signal. There is no cross-replica interrupt without
-     *     a message bus, and this workstream adds no bus - saying so plainly is
-     *     better than a method that pretends to have stopped something.
+     * @return {@code true} only if this replica actually owned the job. A {@code false} here is not
+     *     a failure to cancel: the durable {@code cancel_requested} flag has already been written
+     *     by the caller and is the authoritative signal. There is no cross-replica interrupt
+     *     without a message bus, and this workstream adds no bus - saying so plainly is better than
+     *     a method that pretends to have stopped something.
      */
     public boolean stopLocally(UUID jobId) {
         ActiveJob job = active.get(jobId);
@@ -229,13 +235,12 @@ public class AgentJobExecutor {
     }
 
     /** A job this replica is executing, as seen by the shutdown release. */
-    public record OwnedJob(UUID jobId, String tenantId) {
-    }
+    public record OwnedJob(UUID jobId, String tenantId) {}
 
     /**
-     * Shutdown step for ownership mode (see {@code AgentJobShutdownRelease}): stops the heartbeat tick for
-     * good, interrupts every local worker, and returns what was running so the caller can release the rows.
-     * Does NOT shut the pool down (the {@code @PreDestroy} hook still does).
+     * Shutdown step for ownership mode (see {@code AgentJobShutdownRelease}): stops the heartbeat
+     * tick for good, interrupts every local worker, and returns what was running so the caller can
+     * release the rows. Does NOT shut the pool down (the {@code @PreDestroy} hook still does).
      */
     public List<OwnedJob> quiesceForShutdown() {
         heartbeatScheduler.shutdownNow();
@@ -249,9 +254,12 @@ public class AgentJobExecutor {
             owned.add(new OwnedJob(entry.getKey(), entry.getValue().tenantId()));
             entry.getValue().task().cancel(true);
         }
-        // Bounded wait for the interrupted workers to actually leave `active`, so the release that follows is
-        // not racing a worker that is still unwinding. A worker stuck in non-interruptible I/O simply times
-        // out here: the release still happens (the adopter's claim is then a duplicate read-only call at worst;
+        // Bounded wait for the interrupted workers to actually leave `active`, so the release that
+        // follows is
+        // not racing a worker that is still unwinding. A worker stuck in non-interruptible I/O
+        // simply times
+        // out here: the release still happens (the adopter's claim is then a duplicate read-only
+        // call at worst;
         // durable calls are protected by the planner and the effect journal).
         long deadline = System.nanoTime() + properties.getQuiesceWorkerWait().toNanos();
         while (!active.isEmpty() && System.nanoTime() < deadline) {
@@ -267,8 +275,9 @@ public class AgentJobExecutor {
 
     /**
      * Whether the heartbeat scheduler has fully terminated. When {@code false} after {@link
-     * #quiesceForShutdown} (a tick was still inside a renewal), the caller re-asserts the lease release because
-     * that tick may have written {@code heartbeat_at = now} after the first release.
+     * #quiesceForShutdown} (a tick was still inside a renewal), the caller re-asserts the lease
+     * release because that tick may have written {@code heartbeat_at = now} after the first
+     * release.
      */
     public boolean heartbeatQuiesced() {
         return heartbeatScheduler.isTerminated();
@@ -280,13 +289,11 @@ public class AgentJobExecutor {
     }
 
     /**
-     * Proves liveness for every job this replica owns, and observes cancels
-     * requested elsewhere.
+     * Proves liveness for every job this replica owns, and observes cancels requested elsewhere.
      *
-     * <p>Every failure is swallowed per job: a heartbeat write that fails must
-     * never take down the scheduler thread, because losing the scheduler would
-     * make every other running job look abandoned to the orphan sweep - turning
-     * one transient DB blip into a mass reap.
+     * <p>Every failure is swallowed per job: a heartbeat write that fails must never take down the
+     * scheduler thread, because losing the scheduler would make every other running job look
+     * abandoned to the orphan sweep - turning one transient DB blip into a mass reap.
      */
     void heartbeatTick() {
         JobOwnership own = ownership;
@@ -306,12 +313,17 @@ public class AgentJobExecutor {
             TenantContext.set(TenantContext.of(tenantId, HEARTBEAT_ACTOR, Set.of()));
             try {
                 if (own != null && own.isEnabled()) {
-                    // Ownership mode: renew only while this replica still owns the RUNNING row. A miss that
-                    // proves another replica owns it means this worker is a zombie (it was adopted after a
+                    // Ownership mode: renew only while this replica still owns the RUNNING row. A
+                    // miss that
+                    // proves another replica owns it means this worker is a zombie (it was adopted
+                    // after a
                     // pause longer than the lease): stop it rather than run the job twice.
                     if (own.renew(jobId, now) == JobLeasePolicy.RenewOutcome.LOST) {
-                        log.warn("Agent job {} was adopted by another replica (lease lost) - interrupting its "
-                            + "worker on {}", jobId, own.ownerId());
+                        log.warn(
+                                "Agent job {} was adopted by another replica (lease lost) - interrupting its "
+                                        + "worker on {}",
+                                jobId,
+                                own.ownerId());
                         stopLocally(jobId);
                         continue;
                     }
@@ -319,19 +331,31 @@ public class AgentJobExecutor {
                     repository.touchHeartbeat(jobId, now);
                 }
                 if (Boolean.TRUE.equals(repository.isCancelRequested(jobId).orElse(false))) {
-                    log.info("Agent job {} has a pending cancel request - interrupting its worker on {}", jobId, INSTANCE_ID);
+                    log.info(
+                            "Agent job {} has a pending cancel request - interrupting its worker on {}",
+                            jobId,
+                            INSTANCE_ID);
                     stopLocally(jobId);
                 } else if (properties.isInterruptOnExternalTerminal()
-                    && repository.findStatusById(jobId).filter(AgentJobStatus::isTerminal).isPresent()) {
+                        && repository
+                                .findStatusById(jobId)
+                                .filter(AgentJobStatus::isTerminal)
+                                .isPresent()) {
                     // A sweep on ANOTHER replica (deadline, orphan) failed the row
                     // while this worker still runs it; the in-process stopLocally
                     // that sweep attempted could not reach us. The row is the
                     // signal, so stop burning a worker slot and an LLM call on it.
-                    log.info("Agent job {} was terminalised elsewhere - interrupting its worker on {}", jobId, INSTANCE_ID);
+                    log.info(
+                            "Agent job {} was terminalised elsewhere - interrupting its worker on {}",
+                            jobId,
+                            INSTANCE_ID);
                     stopLocally(jobId);
                 }
             } catch (RuntimeException e) {
-                log.warn("Heartbeat tick failed for agent job {} (job continues; may look stale to the orphan sweep)", jobId, e);
+                log.warn(
+                        "Heartbeat tick failed for agent job {} (job continues; may look stale to the orphan sweep)",
+                        jobId,
+                        e);
             } finally {
                 previous.ifPresentOrElse(TenantContext::set, TenantContext::clear);
             }
@@ -349,11 +373,10 @@ public class AgentJobExecutor {
     }
 
     /**
-     * Interrupts in-flight jobs on shutdown rather than waiting for them. A job
-     * killed mid-flight leaves a RUNNING row whose heartbeat stops, which the
-     * orphan sweep on this or any replica reaps into a FAILED row with a real
-     * error code - a strictly better outcome than blocking a container's
-     * shutdown grace period on a ten-minute LLM call.
+     * Interrupts in-flight jobs on shutdown rather than waiting for them. A job killed mid-flight
+     * leaves a RUNNING row whose heartbeat stops, which the orphan sweep on this or any replica
+     * reaps into a FAILED row with a real error code - a strictly better outcome than blocking a
+     * container's shutdown grace period on a ten-minute LLM call.
      */
     @PreDestroy
     void shutdown() {
@@ -383,6 +406,5 @@ public class AgentJobExecutor {
     }
 
     /** One locally-executing job: enough to interrupt it and to heartbeat for it. */
-    private record ActiveJob(String tenantId, FutureTask<Void> task) {
-    }
+    private record ActiveJob(String tenantId, FutureTask<Void> task) {}
 }

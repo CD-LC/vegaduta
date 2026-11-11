@@ -12,11 +12,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.SignalType;
 
 /**
- * The chat turn's hook into the lessons loop (mistakes and corrections), the same shape as
- * {@link SkillLearningGateway} so the two loops switch independently. Installed once at startup by
- * the lessons service; with no observer, or one that reports itself disabled
- * ({@code app.learning.lessons.enabled=false}, the default), {@link #observe} returns the very same
- * {@link Flux} it was given: not one operator is added to the turn.
+ * The chat turn's hook into the lessons loop (mistakes and corrections), the same shape as {@link
+ * SkillLearningGateway} so the two loops switch independently. Installed once at startup by the
+ * lessons service; with no observer, or one that reports itself disabled ({@code
+ * app.learning.lessons.enabled=false}, the default), {@link #observe} returns the very same {@link
+ * Flux} it was given: not one operator is added to the turn.
  */
 public final class LessonLearningGateway {
 
@@ -25,7 +25,9 @@ public final class LessonLearningGateway {
     /** The reply text kept for the observer; a longer answer is cut, never buffered unbounded. */
     static final int MAX_ANSWER_CHARS = 12_000;
 
-    /** Receives every observed turn on the thread that finished it; must be quick and never throw. */
+    /**
+     * Receives every observed turn on the thread that finished it; must be quick and never throw.
+     */
     public interface Observer {
         boolean enabled();
 
@@ -40,7 +42,10 @@ public final class LessonLearningGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }
@@ -50,7 +55,10 @@ public final class LessonLearningGateway {
         return o != null && o.enabled();
     }
 
-    /** Passes the reply through unchanged; the tenant travels as data in the outcome (AGENTS.md rule 12). */
+    /**
+     * Passes the reply through unchanged; the tenant travels as data in the outcome
+     * (ENGINEERING-RULES.md rule 12).
+     */
     public static Flux<String> observe(
             Flux<String> turn,
             UUID agentId,

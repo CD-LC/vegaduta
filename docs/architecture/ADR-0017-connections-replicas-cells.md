@@ -21,7 +21,7 @@ deferred two things on purpose: read replicas were never designed, and cells wer
 is genuinely saturated". This record decides what to do about the database as the shared ceiling, in the order
 the ceiling is reached, and fixes the criteria that say when each step is worth its cost.
 
-Constraints that do not move (AGENTS.md rules 6 and 8, ADR-0014 R1):
+Constraints that do not move (ENGINEERING-RULES.md rules 6 and 8, ADR-0014 R1):
 
 - The chat turn stays in one process. No step below may add a network hop between platform modules.
 - Tenants are Postgres schemas selected by `SET search_path` (via `Connection#setSchema` in
@@ -201,7 +201,7 @@ The API pod must not ask "which cell?" at request time. Routing happens before t
 | Shared hostname, tenant in token | An edge router forwards to the cell by a JWT-claim match on `tenant_id`. Stock ingress-nginx cannot match on a JWT claim; this needs an Envoy-based gateway (a Gateway API implementation, or Envoy with its JWT filter) or an auth proxy in front. | One proxy hop at the edge, which the ingress already is. It must be a data-plane proxy with a cached table, not a call into the application. Not available with the ingress controller the charts assume today. |
 | Programmatic clients | The API base URL returned at sign-in or tenant discovery points at the cell hostname. | None on later calls. |
 
-Per-tenant hostnames are not free of side effects. AGENTS.md rule 7 applies: every public issuer the browser
+Per-tenant hostnames are not free of side effects. ENGINEERING-RULES.md rule 7 applies: every public issuer the browser
 reaches Keycloak on must be listed in `KEYCLOAK_ADDITIONAL_ISSUERS`, so a hostname per tenant (or per cell) for
 Keycloak itself would make that list change with every cell; the intended shape is one stable public Keycloak
 hostname shared by all cells. Per-tenant application hostnames also multiply OAuth redirect URIs and allowed web
@@ -331,7 +331,7 @@ tenants on a dedicated database or cluster). That was wrong and is withdrawn. Co
 - **Route every `readOnly` transaction to a replica.** Rejected: the annotation does not mean stale-tolerant
   (4.1), and about 380 sites would change behaviour at once.
 - **An application-level cell router the API calls per request.** Rejected: a new hop on the turn path
-  (AGENTS.md rule 6).
+  (ENGINEERING-RULES.md rule 6).
 
 ## 8. Kill criteria
 
