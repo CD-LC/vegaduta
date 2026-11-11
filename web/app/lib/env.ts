@@ -236,7 +236,7 @@ export function getPublicPolicy(key: PublicPolicyKey): string | undefined {
 /**
  * The browser-facing core API origin, with the single dev fallback that used
  * to be copied into ~20 files as `|| "http://localhost:8080"`. In a
- * production build the value must be configured (AGENTS.md rule 4): a missing
+ * production build the value must be configured (ENGINEERING-RULES.md rule 4): a missing
  * NEXT_PUBLIC_API_BASE_URL is reported once and returns "" so calls fail
  * visibly against the page origin instead of quietly going to localhost.
  */

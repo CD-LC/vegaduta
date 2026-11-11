@@ -2426,7 +2426,7 @@ app:
     # in an e-mail (share links, billing/demo e-mails, OAuth console
     # redirects, studio apps) is built on it. Defined here ONCE; the
     # consuming classes read `${app.web.public-url:}` with an EMPTY default.
-    # NO localhost default on purpose (AGENTS.md rule 4). Compose passes
+    # NO localhost default on purpose (ENGINEERING-RULES.md rule 4). Compose passes
     # APP_WEB_PUBLIC_URL (from PUBLIC_APP_URL); PUBLIC_APP_URL alone also
     # works for a bare `mvn spring-boot:run`. PublicWebUrlStartupValidator
     # (core/security) refuses to start under the `security` profile while it
@@ -2655,7 +2655,7 @@ app:
       # ?google=connected|error query param) - the web console's own
       # integrations page, not this backend. Blank (the default) derives
       # <app.web.public-url>/admin/integrations; never a localhost default
-      # (AGENTS.md rule 4). Set only when the console lives elsewhere.
+      # (ENGINEERING-RULES.md rule 4). Set only when the console lives elsewhere.
       console-redirect-uri: ${GOOGLE_OAUTH_CONSOLE_REDIRECT_URI:}
   x:
     oauth:
@@ -2676,7 +2676,7 @@ app:
       # /admin/integrations, since X is modeled as a messaging channel here
       # alongside WhatsApp/Slack/Discord, not a Workspace-style integration.
       # Blank (the default) derives <app.web.public-url>/admin/channels;
-      # never a localhost default (AGENTS.md rule 4).
+      # never a localhost default (ENGINEERING-RULES.md rule 4).
       console-redirect-uri: ${X_OAUTH_CONSOLE_REDIRECT_URI:}
   atlassian:
     oauth:
@@ -2698,7 +2698,7 @@ app:
       # /admin/integrations or /admin/channels, since Atlassian is
       # configured from /tools like every other MCP connector. Blank (the
       # default) derives <app.web.public-url>/tools; never a localhost
-      # default (AGENTS.md rule 4).
+      # default (ENGINEERING-RULES.md rule 4).
       console-redirect-uri: ${ATLASSIAN_OAUTH_CONSOLE_REDIRECT_URI:}
   mcp:
     # MCP replica registry (read via @Value in McpOwnershipRegistryConfiguration; all OFF by default).
@@ -2905,7 +2905,7 @@ app:
       # needs mailinator.com's real, Playwright-scrapable inbox for Keycloak's
       # email-verification step (blocked since 2026-07-31, silently broke the
       # whole signup-dependent E2E surface for a month - see
-      # docs/AGENT-COORDINATION.md's 2026-08-30 E2E-triage entry). Set ONLY in
+      # the internal change log's 2026-08-30 E2E-triage entry). Set ONLY in
       # deploy/.env (staging) - MUST stay unset in deploy/.env.production.
       allowlist: ${SIGNUP_DISPOSABLE_EMAIL_BLOCK_ALLOWLIST:}
   billing:

@@ -70,8 +70,7 @@ import reactor.core.publisher.Flux;
  *       room. That worker is assumed to register for LiveKit's AUTOMATIC dispatch (no explicit
  *       {@code agent_name}) so it joins every room this endpoint creates with no explicit
  *       AgentDispatchService call needed here - see the {@code voice-agent} compose service's
- *       comment and {@code docs/AGENT-COORDINATION-2026-07-18.md} for the cross-scope flag on that
- *       assumption.
+ *       comment and {@code the internal change log} for the cross-scope flag on that assumption.
  *   <li>{@link #turn} - the pragmatic MVP answer to "how does the user's voice actually reach the
  *       agent". This is deliberately NOT wired through LiveKit's own media pipeline: LiveKit has no
  *       first-party Java server-side agent framework (its STT/TTS "Agents" ecosystem is Python/Node

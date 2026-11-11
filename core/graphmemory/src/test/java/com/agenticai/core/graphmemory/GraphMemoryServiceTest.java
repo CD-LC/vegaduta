@@ -37,12 +37,12 @@ import java.util.UUID;
  * GraphMemoryService#remember}/{@link GraphMemoryService#recallRelated}/{@link
  * GraphMemoryService#supersede}) had zero test coverage before this file existed. Scoping this
  * suite to the newly-added erasure method (rather than retrofitting the other three, which is a
- * separately-sized task of its own) is a deliberate, disclosed scope limit - see
- * AGENT-COORDINATION-2026-07-18.md for the tracked follow-up, not a silent gap. (F-19 later added
- * one {@link GraphMemoryService#remember}-path test here, but only to pin the escape-don't-corrupt
- * contract at an interpolation site the erasure tests don't reach - the broader
- * remember/recall/supersede behavioral coverage gap above still stands. The escaper itself has its
- * own dedicated suite, {@link CypherLiteralEscaperTest}.)
+ * separately-sized task of its own) is a deliberate, disclosed scope limit - see the internal
+ * change log for the tracked follow-up, not a silent gap. (F-19 later added one {@link
+ * GraphMemoryService#remember}-path test here, but only to pin the escape-don't-corrupt contract at
+ * an interpolation site the erasure tests don't reach - the broader remember/recall/supersede
+ * behavioral coverage gap above still stands. The escaper itself has its own dedicated suite,
+ * {@link CypherLiteralEscaperTest}.)
  *
  * <p>Mocks {@link JdbcTemplate}/{@link Connection}/{@link Statement}/{@link ResultSet} directly
  * rather than exercising a real AGE-enabled Postgres - this class's own javadoc already states

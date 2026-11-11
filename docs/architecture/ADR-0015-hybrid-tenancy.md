@@ -28,7 +28,7 @@ Most tenants in a self-serve product are small and idle. A few are large. One st
 over-isolates the long tail and under-serves the large tenants that would be better on dedicated resources
 anyway.
 
-Constraints that this design must keep (from AGENTS.md and ADR-0014):
+Constraints that this design must keep (from ENGINEERING-RULES.md and ADR-0014):
 
 - The chat hot path stays in one process. No new network hop between platform modules (rule 6). The placement
   decision for a request must be answered from memory.
