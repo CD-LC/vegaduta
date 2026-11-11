@@ -115,6 +115,9 @@ export function OssFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[1.2fr_2fr]">
         <div className="space-y-3 text-sm text-muted-foreground">
           <Logo size={28} />
+          <p className="m-0 max-w-sm">
+            <BrandName /> is source-available software released under the {LICENSE_NAME} license.
+          </p>
           <p className="m-0">
             Maintained by {LEGAL_ENTITY}
             {CIN_NUMBER ? ` (CIN ${CIN_NUMBER})` : ""}.
