@@ -115,3 +115,30 @@ function run(input) { return { touched: "never reached by the model" }; }
     outcome = r.execute("javascript", "acme", source, {}, 10_000, 256)
     assert outcome.ok
     assert outcome.result == {"touched": "never reached by the model"}
+
+
+def test_javascript_execute_spawns_one_node_process(as_root, tmp_path, monkeypatch) -> None:
+    calls = []
+    real_run = proc.run
+
+    def counting_run(*args, **kwargs):
+        calls.append(args[0][0])
+        return real_run(*args, **kwargs)
+
+    r = _runner(tmp_path)
+    r._node_permission_flag()  # the one-time flag probe is a process of its own, not a per-call one
+    monkeypatch.setattr(proc, "run", counting_run)
+    outcome = r.execute(
+        "javascript", "acme", "function run(i) { return i.a + i.b; }", {"a": 1, "b": 2}, 10_000, 256
+    )
+    assert outcome.ok and outcome.result == 3
+    # The parse is the run: no separate syntax-check process on the success path.
+    assert len(calls) == 1
+
+
+def test_javascript_execute_syntax_error_is_still_a_validation_error(as_root, tmp_path) -> None:
+    r = _runner(tmp_path)
+    outcome = r.execute("javascript", "acme", "function run(i) { return ; ]", None, 10_000, 256)
+    assert not outcome.ok
+    assert outcome.error_type == "VALIDATION"
+    assert "Syntax error" in outcome.error
