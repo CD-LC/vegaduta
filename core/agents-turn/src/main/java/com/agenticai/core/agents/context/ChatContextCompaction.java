@@ -7,10 +7,10 @@ import com.agenticai.core.agents.hosted.HostedChainLink;
 import com.agenticai.core.agents.tools.AgentStepEventEmitter;
 import com.agenticai.core.agents.tools.ToolCallLogService;
 import com.agenticai.core.agents.tools.context.RestoreToolResultToolCallback;
-import com.agenticai.core.providers.ProviderModelCatalogService;
-import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.prompts.PromptContext;
 import com.agenticai.core.prompts.PromptResolver;
+import com.agenticai.core.providers.ProviderModelCatalogService;
+import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.providers.ProviderName;
 import com.agenticai.core.security.TenantContext;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -81,9 +81,9 @@ public class ChatContextCompaction {
     private final int reserveOutputTokens;
 
     /**
-     * {@code app.context.compaction.*}: the token estimates, the window name rules and the size of a restored
-     * result. A hand-built instance keeps the shipped defaults, which is also what Spring supplies when the
-     * properties bean is absent.
+     * {@code app.context.compaction.*}: the token estimates, the window name rules and the size of
+     * a restored result. A hand-built instance keeps the shipped defaults, which is also what
+     * Spring supplies when the properties bean is absent.
      */
     private volatile ContextCompactionProperties tuning = ContextCompactionProperties.shipped();
 
@@ -95,8 +95,9 @@ public class ChatContextCompaction {
     private volatile com.agenticai.core.settings.SettingsResolver settings;
 
     /**
-     * The settings catalog, so a workspace's or an agent's {@code chat.compaction.*} decide when its prompts are
-     * compacted. Absent (hand-built instances): the {@code app.context.compaction.*} values.
+     * The settings catalog, so a workspace's or an agent's {@code chat.compaction.*} decide when
+     * its prompts are compacted. Absent (hand-built instances): the {@code
+     * app.context.compaction.*} values.
      */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void setSettings(com.agenticai.core.settings.SettingsResolver settings) {
@@ -109,21 +110,39 @@ public class ChatContextCompaction {
             ObjectProvider<ToolCallLogService> toolCallLogs,
             ObjectProvider<MeterRegistry> meterRegistry,
             @Value("${app.context.compaction.enabled:true}") boolean enabled,
-            @Value("${app.context.compaction.clear-at:" + ContextCompactionProperties.DEFAULT_CLEAR_AT + "}")
+            @Value(
+                            "${app.context.compaction.clear-at:"
+                                    + ContextCompactionProperties.DEFAULT_CLEAR_AT
+                                    + "}")
                     double clearAt,
-            @Value("${app.context.compaction.compact-at:" + ContextCompactionProperties.DEFAULT_COMPACT_AT + "}")
+            @Value(
+                            "${app.context.compaction.compact-at:"
+                                    + ContextCompactionProperties.DEFAULT_COMPACT_AT
+                                    + "}")
                     double compactAt,
-            @Value("${app.context.compaction.keep-recent-tool-results:" + ContextCompactionProperties.DEFAULT_KEEP_RECENT_TOOL_RESULTS + "}")
+            @Value(
+                            "${app.context.compaction.keep-recent-tool-results:"
+                                    + ContextCompactionProperties.DEFAULT_KEEP_RECENT_TOOL_RESULTS
+                                    + "}")
                     int keepRecentToolResults,
             @Value("${app.context.compaction.restore-tool-enabled:true}")
                     boolean restoreToolEnabled,
             @Value("${app.context.compaction.keep-recent-messages:6}") int keepRecentMessages,
-            @Value("${app.context.compaction.default-window-tokens:" + ContextCompactionProperties.DEFAULT_WINDOW_TOKENS + "}")
+            @Value(
+                            "${app.context.compaction.default-window-tokens:"
+                                    + ContextCompactionProperties.DEFAULT_WINDOW_TOKENS
+                                    + "}")
                     int defaultWindowTokens,
-            @Value("${app.context.compaction.summary-max-tokens:" + ContextCompactionProperties.DEFAULT_SUMMARY_TOKENS + "}")
+            @Value(
+                            "${app.context.compaction.summary-max-tokens:"
+                                    + ContextCompactionProperties.DEFAULT_SUMMARY_TOKENS
+                                    + "}")
                     int summaryMaxTokens,
             @Value("${app.context.compaction.max-summaries-per-run:3}") int maxSummariesPerRun,
-            @Value("${app.context.compaction.reserve-output-tokens:" + ContextCompactionProperties.DEFAULT_RESERVE_OUTPUT_TOKENS + "}")
+            @Value(
+                            "${app.context.compaction.reserve-output-tokens:"
+                                    + ContextCompactionProperties.DEFAULT_RESERVE_OUTPUT_TOKENS
+                                    + "}")
                     int reserveOutputTokens) {
         this.summarizer = summarizer;
         this.catalog = catalog;
@@ -155,7 +174,10 @@ public class ChatContextCompaction {
         this.prompts = prompts == null ? PromptResolver.defaultsOnly() : prompts;
     }
 
-    /** The wording for one run of {@code agentId}: its, its tenant's or the platform's override, else the shipped one. */
+    /**
+     * The wording for one run of {@code agentId}: its, its tenant's or the platform's override,
+     * else the shipped one.
+     */
     private ContextCompactionEngine.Texts textsFor(UUID agentId) {
         try {
             return ContextCompactionEngine.Texts.build(prompts, PromptContext.forAgent(agentId));
@@ -220,7 +242,8 @@ public class ChatContextCompaction {
                 ContextCompactionSettings.thresholds(
                         settings,
                         agentId,
-                        new ContextCompactionSettings.Thresholds(clearAt, compactAt, keepRecentToolResults));
+                        new ContextCompactionSettings.Thresholds(
+                                clearAt, compactAt, keepRecentToolResults));
         Params params =
                 new Params(
                         window,

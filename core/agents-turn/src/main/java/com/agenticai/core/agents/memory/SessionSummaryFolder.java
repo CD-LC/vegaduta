@@ -146,7 +146,7 @@ final class SessionSummaryFolder {
      */
     int foldWindowTurns() {
         return Math.min(
-                windowSettings.effective().maxTurns(),
+                windowSettings.current().maxTurns(),
                 SessionMemoryService.MAX_STORED_ENTRIES - SessionMemoryService.SUMMARY_FOLD_BATCH);
     }
 
