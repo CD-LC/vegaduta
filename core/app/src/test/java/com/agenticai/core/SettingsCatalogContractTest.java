@@ -97,20 +97,19 @@ class SettingsCatalogContractTest {
                         runtimeProps, rp, mock(ObjectProvider.class), mock(ObjectProvider.class));
         BehaviourSettingsCatalog behaviour =
                 new BehaviourSettingsCatalog(
-                                new ApprovalContinuationProperties(),
-                                new ApprovalExpiryProperties(),
-                                new ChatFinishProperties(),
-                                new LlmRetryProperties(),
-                                new ChatCacheProperties(),
-                                new FollowUpProperties(),
-                                new ContinuationProperties(),
-                                new ToolLoopProperties(),
-                                new RoutingSimpleProperties(),
-                                new MemoryLimitsProperties(),
-                                new GuardrailTuningProperties(),
-                                new AuxiliaryModelProperties())
-                        .withEpisodic(
-                                new com.agenticai.core.agents.memory.EpisodicMemoryProperties());
+                        new ApprovalContinuationProperties(),
+                        new ApprovalExpiryProperties(),
+                        new ChatFinishProperties(),
+                        new LlmRetryProperties(),
+                        new ChatCacheProperties(),
+                        new FollowUpProperties(),
+                        new ContinuationProperties(),
+                        new ToolLoopProperties(),
+                        new RoutingSimpleProperties(),
+                        new MemoryLimitsProperties(),
+                        new GuardrailTuningProperties(),
+                        new AuxiliaryModelProperties())
+                .withEpisodic(new com.agenticai.core.agents.memory.EpisodicMemoryProperties());
         registry =
                 new SettingsRegistry(
                         List.of(
@@ -133,6 +132,9 @@ class SettingsCatalogContractTest {
                                 new com.agenticai.core.agents.memorystore.CompetenceSettings(
                                         new com.agenticai.core.agents.memorystore
                                                 .CompetenceProperties()),
+                                new com.agenticai.core.agents.memory.HistoryWindowCatalog(),
+                                new com.agenticai.core.agents.context.ContextCompactionSettings(
+                                        new MockEnvironment()),
                                 new ProductControlsCatalog(
                                         new SemanticCacheProperties(),
                                         new ChatLimitsProperties(),
@@ -185,6 +187,9 @@ class SettingsCatalogContractTest {
     void theOwnerVisibleProductControlsAreInTheCatalogWithTheScopesTheirUseSitesHonour() {
         List<String> workspaceOnly =
                 List.of(
+                        "chat.history.maxTurns",
+                        "chat.history.maxChars",
+                        "chat.history.maxTokens",
                         "chat.toolLedger.enabled",
                         "chat.toolLedger.replayEnabled",
                         "chat.toolLedger.replayTurns",
@@ -208,7 +213,10 @@ class SettingsCatalogContractTest {
                         "chat.attachments.maxAudioMb",
                         "chat.attachments.maxVideoMb",
                         "chat.attachments.maxDocumentMb",
-                        "memory.edge.maxFacts");
+                        "memory.edge.maxFacts",
+                        "chat.compaction.clearAt",
+                        "chat.compaction.compactAt",
+                        "chat.compaction.keepRecentToolResults");
         for (String key : workspaceOnly) {
             assertThat(registry.require(key).scopes()).as(key).containsExactly(SettingScope.TENANT);
         }

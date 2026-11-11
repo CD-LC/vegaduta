@@ -10837,6 +10837,40 @@
           "description": "Total prompt tokens one reply's tool loop may send the model before it is told to stop calling tools and answer with what it has.",
           "help": "0 means no cap. Lower it to stop a runaway tool loop that keeps resending a large context; the per-turn tool-call limit bounds rounds, this bounds their size."
         }
+      },
+      "history": {
+        "maxTurns": {
+          "label": "Conversation history: turns",
+          "description": "How many of the newest messages of a conversation are sent to the model again with each new message.",
+          "help": "The history is the largest part of the prompt in a long conversation. Fewer turns mean fewer prompt tokens and a faster first word; older turns are kept in the rolling summary, not lost. Applies to the whole workspace."
+        },
+        "maxChars": {
+          "label": "Conversation history: characters",
+          "description": "The most characters of earlier messages that are sent to the model again with each new message.",
+          "help": "Older messages are left out once this is reached; the newest message is always sent. Lower it to cut prompt tokens and cost, raise it when the model forgets earlier details. Applies to the whole workspace."
+        },
+        "maxTokens": {
+          "label": "Conversation history: tokens",
+          "description": "The most estimated tokens of earlier messages that are sent to the model again with each new message.",
+          "help": "This bounds the history for every script, including those where one character is about one token. The stricter of this and the character limit applies. Applies to the whole workspace."
+        }
+      },
+      "compaction": {
+        "clearAt": {
+          "label": "Clear old tool results at",
+          "description": "The share of the model's context window at which older tool results are replaced by short notes the agent can restore.",
+          "help": "A lower share keeps prompts smaller and replies faster during long tasks; a higher share keeps more tool output in view. It is never applied above the summarise share."
+        },
+        "compactAt": {
+          "label": "Summarise old turns at",
+          "description": "The share of the model's context window at which the oldest turns are replaced by one summary.",
+          "help": "A lower share summarises sooner, which saves tokens and loses detail earlier. A higher share keeps the full conversation longer and costs more per call. The stored conversation is never deleted."
+        },
+        "keepRecentToolResults": {
+          "label": "Tool results always kept",
+          "description": "How many of the newest tool results are never cleared from the prompt.",
+          "help": "Raise it for tasks that compare several recent results; lower it to save tokens when results are large."
+        }
       }
     },
     "routing": {

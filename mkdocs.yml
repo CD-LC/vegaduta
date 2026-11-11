@@ -170,6 +170,7 @@ nav:
       - Provider modalities: architecture/MULTI-PROVIDER-MODALITY-ARCHITECTURE.md
       - LLM latency and model selection: architecture/LLM-LATENCY-AND-MODEL-SELECTION.md
       - Hot-path performance: architecture/HOT-PATH-PERFORMANCE.md
+      - Agent evaluation harness: benchmarks/README.md
       - Architecture bets (proposed): architecture/ARCHITECTURE-BETS-2026-10.md
       - Tenant sweep cost: architecture/TENANT-SWEEP-COST.md
       - Consumer secrets vault: architecture/CONSUMER-SECRETS-VAULT-2026-09-11.md

@@ -36,7 +36,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | agents-memory | kernel | 53 | agents, json, security, settings, tenancy |  |
 | agents-studio | kernel | 102 | agents, agents-tools (test), agents-turn, approval, chat, guardrails, json, knowledge, mcp, providers, rl, sdlc, security, sharing, tenancy |  |
 | agents-tools | kernel | 303 | agents, agents-turn, agentspi, approval, audit, chat, codeintel, devices, documentgen, eventbus, graphmemory, guardrails, json, knowledge, mcp, prompts, providers, sdlc, secrets, security, sharing, storage, tenancy |  |
-| agents-turn | kernel | 444 | agents, agents-budget, agents-memory, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
+| agents-turn | kernel | 447 | agents, agents-budget, agents-memory, approval, audit, chat, eventbus, graphmemory, guardrails, json, knowledge, prompts, providers, rl, security, settings, sharing, storage, tenancy |  |
 | agentspi | kernel | 17 | security |  |
 | app | distribution | 202 | admin, agents, agents-browser, agents-budget, agents-chatport, agents-interop, agents-jobs, agents-memory, agents-studio, agents-tools, agents-turn, app-config, approval, audit, billing, brief, chat, crypto, crypto-kms, devices, documentgen, **elevenlabs**, eventbus, **google**, guardrails, **imagegen**, json, knowledge, mcp, mcpserver, omnichannel, omnichannel-social, **payments**, platform, prompts, providers, quality, rl, **sarvam**, sdlc, secrets, security, settings, sharing, storage, templates, tenancy, voice, workflow, workflow-portability |  |
 | app-config | kernel | 8 | (none) |  |
@@ -56,13 +56,8 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | elevenlabs | vendor | 45 | agents (test), agents-studio (test), agentspi, crypto, providers, security, speech, storage, tenancy | ElevenLabs TTS/voice clone/music |
 | eventbus | kernel | 23 | audit, crypto, mcp, security, tenancy |  |
 | google | vendor | 31 | agents (test), agentspi, crypto, guardrails, security, tenancy | Google Workspace OAuth + tools |
-<<<<<<< HEAD
 | graphmemory | kernel | 16 | chat, json, prompts, settings, tenancy |  |
-| guardrails | kernel | 144 | approval, audit, json, prompts, settings, tenancy |  |
-=======
-| graphmemory | kernel | 15 | chat, json, prompts, settings, tenancy |  |
-| guardrails | kernel | 129 | approval, audit, json, prompts, settings, tenancy |  |
->>>>>>> origin/main
+| guardrails | kernel | 145 | approval, audit, json, prompts, settings, tenancy |  |
 | imagegen | vendor | 39 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
 | json | kernel | 2 | (none) |  |
 | knowledge | kernel (hosts vendor code) | 140 | crypto, json, prompts, security, settings, storage, tenancy | embeddings / OCR / sidecar clients |
