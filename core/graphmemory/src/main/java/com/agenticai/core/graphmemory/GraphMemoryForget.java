@@ -105,4 +105,45 @@ final class GraphMemoryForget {
                 ? GraphMemoryService.SHARED_AGENT_SENTINEL
                 : sanitize(agentId.toString());
     }
+
+    /**
+     * Counts then deletes ({@code DETACH DELETE}, which removes every attached edge too) all {@code
+     * Entity} vertices for {@code subjectKeyStr} - already sanitize()d by the caller - returning
+     * the pre-delete count. A subject's Entity vertex is very likely the endpoint of edges from
+     * other subjects' vertices too (shared entities), and this deliberately only removes the
+     * deleted subject's OWN vertices (filtered by subject_key): any edge whose OTHER endpoint
+     * belongs to a different subject simply loses that one edge, the other subject's own vertex is
+     * untouched.
+     */
+    static int eraseSubjectEdges(Statement st, String graphName, String subjectKeyStr)
+            throws SQLException {
+        int matched = 0;
+        try (ResultSet rs =
+                // codeql[java/sql-injection] -- every interpolated value is sanitize()d Cypher
+                // string content; the graph name comes from GraphMemorySchemaSupport, not input.
+                st.executeQuery(
+                        cypherCall(
+                                graphName,
+                                "MATCH (n:Entity {subject_key: '"
+                                        + subjectKeyStr
+                                        + "'}) RETURN count(n)",
+                                "vertex_count ag_catalog.agtype"))) {
+            if (rs != null && rs.next()) {
+                matched = GraphMemoryAgtype.parseAgtypeInt(rs.getString("vertex_count"));
+            }
+        }
+
+        if (matched > 0) {
+            // codeql[java/sql-injection] -- subjectKeyStr is sanitize()d Cypher string content; no
+            // user input reaches the query raw.
+            st.execute(
+                    cypherCall(
+                            graphName,
+                            "MATCH (n:Entity {subject_key: '"
+                                    + subjectKeyStr
+                                    + "'}) DETACH DELETE n",
+                            "v ag_catalog.agtype"));
+        }
+        return matched;
+    }
 }

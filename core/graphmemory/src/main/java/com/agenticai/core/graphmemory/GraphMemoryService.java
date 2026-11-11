@@ -1,6 +1,5 @@
 package com.agenticai.core.graphmemory;
 
-import static com.agenticai.core.graphmemory.GraphMemoryAgtype.parseAgtypeInt;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.buildSupersedeInvalidateCypher;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.cypherCall;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.sanitize;
@@ -18,7 +17,6 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Instant;
@@ -458,51 +456,7 @@ public class GraphMemoryService {
         String subjectKeyStr = sanitize(subjectKey);
 
         Integer erased =
-                onAge(
-                        st -> {
-                            int matched = 0;
-                            try (ResultSet rs =
-                                    // codeql[java/sql-injection] -- every interpolated value is
-                                    // sanitize()d Cypher string content; the graph name comes from
-                                    // GraphMemorySchemaSupport, not input.
-                                    st.executeQuery(
-                                            cypherCall(
-                                                    graphName,
-                                                    "MATCH (n:Entity {subject_key: '"
-                                                            + subjectKeyStr
-                                                            + "'}) RETURN count(n)",
-                                                    "vertex_count ag_catalog.agtype"))) {
-                                if (rs != null && rs.next()) {
-                                    matched = parseAgtypeInt(rs.getString("vertex_count"));
-                                }
-                            }
-
-                            if (matched > 0) {
-                                // DETACH DELETE removes the vertex AND every edge attached to it in
-                                // one
-                                // statement - a subject's Entity vertex is very likely the endpoint
-                                // of edges
-                                // from other subjects' vertices too (shared entities, e.g. a
-                                // company both
-                                // Priya and Raj are linked to), and this deliberately only removes
-                                // the
-                                // deleted subject's OWN vertices (already filtered by subject_key
-                                // above) -
-                                // any edge whose OTHER endpoint belongs to a different subject
-                                // simply loses
-                                // that one edge, the other subject's own vertex is untouched.
-                                // codeql[java/sql-injection] -- subjectKeyStr is sanitize()d
-                                // Cypher string content; no user input reaches the query raw.
-                                st.execute(
-                                        cypherCall(
-                                                graphName,
-                                                "MATCH (n:Entity {subject_key: '"
-                                                        + subjectKeyStr
-                                                        + "'}) DETACH DELETE n",
-                                                ONE_COLUMN));
-                            }
-                            return matched;
-                        });
+                onAge(st -> GraphMemoryForget.eraseSubjectEdges(st, graphName, subjectKeyStr));
 
         int erasedCount = erased == null ? 0 : erased;
         // No subject key in the line: this is reachable by every user (self-service forget-all) and
