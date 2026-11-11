@@ -518,6 +518,8 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
   /** Guarded, redirect-free, size-capped GET; also the verifier's JWKS fetcher. */
   private String guardedGet(String url) {
     URI uri = guard.check(url);
+    // codeql[java/ssrf] -- `uri` is SsrfGuard.check(url)'s validated result (allow-list +
+    // private-address rules); the bounded executor just sends it.
     return execute(
         HttpRequest.newBuilder(uri)
             .timeout(config.getRequestTimeout())

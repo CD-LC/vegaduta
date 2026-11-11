@@ -314,6 +314,9 @@ final class KnowledgeChunkScanner {
     params.add(limit);
 
     try {
+      // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
+      // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped); all values are bind
+      // params.
       return jdbcTemplate.query(
           sql,
           (rs, rowNum) ->

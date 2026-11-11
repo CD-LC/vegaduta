@@ -35,6 +35,8 @@ final class A2aBoundedHttp {
   String execute(HttpRequest request) {
     long deadlineNanos = System.nanoTime() + config.getRequestTimeout().toNanos();
     try {
+      // codeql[java/ssrf] -- the request URI was validated by SsrfGuard before the caller built
+      // this request (A2aClientService/A2aCardVerifier); this class only executes it.
       HttpResponse<InputStream> response =
           http.send(request, HttpResponse.BodyHandlers.ofInputStream());
       InputStream body = response.body();

@@ -118,6 +118,8 @@ public class A2aCardVerifier {
       }
       HttpGet get = new HttpGet(uri);
       get.addHeader("Accept", "application/json");
+      // codeql[java/ssrf] -- `uri` is the result of guard.validate(url) above (SsrfGuard); the
+      // client is SafeHttpClients.create(guard, ...) which re-checks every redirect.
       ClassicHttpResponse response = http.executeOpen(null, get, null);
       try {
         int status = response.getCode();
