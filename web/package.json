@@ -23,9 +23,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.3.1",
-    "@mediapipe/tasks-vision": "^1.1.1",
-    "@mlc-ai/web-llm": "^0.2.86",
+    "@huggingface/transformers": "^4.3.2",
+    "@mediapipe/tasks-vision": "^1.2.0",
+    "@mlc-ai/web-llm": "^0.2.87",
     "@radix-ui/react-accordion": "^1.3.1",
     "@radix-ui/react-alert-dialog": "^1.2.1",
     "@radix-ui/react-popover": "^1.3.1",
@@ -39,14 +39,14 @@
     "keycloak-js": "^25.0.6",
     "kokoro-js": "^1.2.1",
     "livekit-client": "^2.23.0",
-    "lucide-react": "^1.55.0",
-    "motion": "^14.6.0",
+    "lucide-react": "^1.66.0",
+    "motion": "^14.9.0",
     "next": "^16.4.3",
-    "onnxruntime-web": "^1.30.0",
+    "onnxruntime-web": "^1.31.1",
     "pino": "^10.4.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "simple-keyboard-layouts": "3.4.276",
+    "simple-keyboard-layouts": "3.4.279",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"
   },
@@ -56,10 +56,10 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
+    "@vitejs/plugin-react": "^6.2.0",
     "@vitest/coverage-v8": "^5.0.5",
     "axe-core": "^4.14.0",
     "eslint": "^10.13.0",
@@ -84,6 +84,9 @@
       "eslint": "$eslint"
     },
     "postcss": "^8.5.18",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   }
 }
