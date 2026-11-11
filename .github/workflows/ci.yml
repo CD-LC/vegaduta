@@ -170,7 +170,7 @@ jobs:
       # maven:3.9-eclipse-temurin-21 -> eclipse-temurin:21-jre). Newer JDKs (the
       # maintainers also build with 24) work too; the surefire argLine in
       # core/pom.xml carries the flags JDK 24 needs for Mockito self-attach.
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -238,7 +238,7 @@ jobs:
       # Throwaway CI-only key (base64 of 32 random bytes), minted per run:
       # EncryptionService refuses to start without one, nothing encrypted with
       # it leaves this job, and a literal key in the workflow would be a key in
-      # the repository (AGENTS.md rule 10) even if it never guarded anything.
+      # the repository (ENGINEERING-RULES.md rule 10) even if it never guarded anything.
       - name: Mint a per-run APP_ENCRYPTION_KEY
         run: echo "APP_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
 
@@ -266,13 +266,16 @@ jobs:
       # same Postgres image and Redis, waits for readiness and probes api routes that must answer
       # 401. The jobs and worker shapes scan no controllers and failed to start in v0.1.9 while
       # the api booted. It reuses the jars `verify` just built.
-      # Advisory for now: it has run locally but not yet on a runner. Remove continue-on-error
-      # once it has been green on main (audit item 1, docs/architecture/STRUCTURAL-AUDIT-2026-10-14.md).
+      # Blocking: it guards the v0.1.9 class of failure (jobs and worker shapes crash-looping
+      # while the api boots), so a red result must stop the merge.
       - name: "Boot check (packaged jars: api, migrate-only, jobs, worker; Postgres + Redis)"
-        continue-on-error: true
         env:
           BOOTCHECK_PG_IMAGE: vegaduta-postgres:ci
         run: bash scripts/ci/boot-check.sh --skip-build --keep-log
+
+      # Coverage ratchet (scripts/ci/coverage-gate.py): floors sit under today's measured values.
+      - name: Coverage floor (reactor and per module)
+        run: python3 scripts/ci/coverage-gate.py
 
       - name: Upload coverage report
         if: success() || failure()
@@ -307,7 +310,7 @@ jobs:
 
       # The SDK's floor is Java 17 (sdk/java/pom.xml <maven.compiler.release>), so CI builds
       # it on exactly 17: anything that compiles here compiles for every consumer.
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: "17"
@@ -315,14 +318,14 @@ jobs:
 
       # google-java-format needs a JDK 21 javac (current JDK 17 updates changed the
       # internals it uses), so the formatting gate runs on 21 and the build on 17.
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: "21"
       - name: spotless check (whole tree, Google style; JDK 21)
         working-directory: sdk/java
         run: mvn -B -ntp spotless:check
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: "17"
@@ -410,6 +413,9 @@ jobs:
       # app/lib/api/consumerContract.test.ts (in npm test) names the call sites.
       - name: web consumer contract is current
         run: node scripts/api-contract.mjs --check
+      # Locale coverage ratchet: a locale may not lose keys or fall further behind en.json.
+      - name: console i18n parity (ratchet)
+        run: npm run i18n:parity:check
       - run: npm test
       - run: npm run build
         env:
@@ -429,7 +435,7 @@ jobs:
           persist-credentials: false
           # Depth 2 so the changed-files ruff gate can diff HEAD^1..HEAD on a PR.
           fetch-depth: 2
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           # Matches the python:3.12-slim base of every service image.
           python-version: ${{ env.PYTHON_VERSION }}
@@ -456,8 +462,7 @@ jobs:
           ruff format --check --force-exclude "${files[@]}"
       - name: Ruff whole tree (sidecar, code-intel)
         run: ruff check services/sidecar services/code-intel
-      - name: Ruff whole tree (other services, advisory)
-        continue-on-error: true
+      - name: Ruff whole tree (other services)
         run: ruff check services/app-builder services/voice-agent services/rl-trainer services/tool-sandbox
 
       # The same hash-locked install as the sidecar Dockerfile: the torch
@@ -513,10 +518,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           version: "0.13.0"
           enable-cache: false
@@ -557,7 +562,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install
@@ -633,7 +638,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Generated SDKs match docs/api/openapi.json

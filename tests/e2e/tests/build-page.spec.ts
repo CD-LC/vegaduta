@@ -1,5 +1,14 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { tryRestoreConsoleSession } from "../helpers/prod-auth-state";
+import { signUpFreshTenant } from "../helpers/test-tenant";
+
+// Use the cached console session when there is one (deployed environments, see prod-auth-state.ts). Anywhere
+// else (a local or self-hosted stack) there is none, so sign up a throwaway tenant, as the other specs do;
+// otherwise /build redirects to the sign-in page and every signed-in test below fails on that.
+async function signedInConsole(page: Page): Promise<void> {
+  if (await tryRestoreConsoleSession(page).catch(() => false)) return;
+  await signUpFreshTenant(page, "build");
+}
 
 // VegaDūta App Builder (Build Page) E2E Suite
 //
@@ -19,9 +28,8 @@ import { tryRestoreConsoleSession } from "../helpers/prod-auth-state";
 
 test.describe("Build Page - Core Layout & Navigation", () => {
   test.beforeEach(async ({ page }) => {
-    // Attempt to restore authenticated console session
-    // If no cached session exists, tests will proceed with unauthenticated view
-    await tryRestoreConsoleSession(page).catch(() => {});
+    // Restore the cached console session, or sign up a throwaway tenant when there is none
+    await signedInConsole(page);
   });
 
   test("should render the build page with three main surface tabs", async ({ page }) => {
@@ -92,7 +100,7 @@ test.describe("Build Page - Core Layout & Navigation", () => {
 
 test.describe("Build Page - Agent Builder Surface", () => {
   test.beforeEach(async ({ page }) => {
-    await tryRestoreConsoleSession(page).catch(() => {});
+    await signedInConsole(page);
   });
 
   test("should display project creation interface", async ({ page }) => {
@@ -125,7 +133,7 @@ test.describe("Build Page - Agent Builder Surface", () => {
 
 test.describe("Build Page - App Projects Surface", () => {
   test.beforeEach(async ({ page }) => {
-    await tryRestoreConsoleSession(page).catch(() => {});
+    await signedInConsole(page);
   });
 
   test("should navigate to App projects tab and render project list UI", async ({ page }) => {
@@ -168,7 +176,7 @@ test.describe("Build Page - App Projects Surface", () => {
 
 test.describe("Build Page - GitHub Integration", () => {
   test.beforeEach(async ({ page }) => {
-    await tryRestoreConsoleSession(page).catch(() => {});
+    await signedInConsole(page);
   });
 
   test("should navigate to GitHub settings route (/build/github)", async ({ page }) => {
@@ -212,7 +220,7 @@ test.describe("Build Page - GitHub Integration", () => {
 
 test.describe("Build Page - Error Handling & Edge Cases", () => {
   test.beforeEach(async ({ page }) => {
-    await tryRestoreConsoleSession(page).catch(() => {});
+    await signedInConsole(page);
   });
 
   test("should not have console errors on initial page load", async ({ page }) => {
@@ -296,7 +304,7 @@ test.describe("Build Page - Error Handling & Edge Cases", () => {
 
 test.describe("Build Page - Accessibility", () => {
   test.beforeEach(async ({ page }) => {
-    await tryRestoreConsoleSession(page).catch(() => {});
+    await signedInConsole(page);
   });
 
   test("should have accessible tab controls", async ({ page }) => {

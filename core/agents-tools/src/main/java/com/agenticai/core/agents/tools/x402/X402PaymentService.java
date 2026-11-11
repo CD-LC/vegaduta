@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.x402;
 
+import com.agenticai.core.security.logging.LogSafe;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -204,9 +205,9 @@ public class X402PaymentService {
         if (!budget.tryReserve(tenantId, amount)) {
             log.warn(
                     "x402 payment of {} atomic units refused for tenant {}: rolling-day budget of {} reached",
-                    amount,
-                    tenantId,
-                    budget.budgetAtomic());
+                    LogSafe.clean(amount),
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(budget.budgetAtomic()));
             return Optional.empty();
         }
         try {

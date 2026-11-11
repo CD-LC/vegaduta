@@ -149,7 +149,7 @@ public class ToolClassificationRegistry {
             return derived.classify(tenantId, toolName).orElse(null);
         } catch (RuntimeException e) {
             // A lookup hiccup must never turn into a different decision than "unclassified".
-            log.debug("MCP annotation lookup failed for '{}'", toolName, e);
+            log.debug("MCP annotation lookup failed for '{}'", LogSafe.clean(toolName), e);
             return null;
         }
     }

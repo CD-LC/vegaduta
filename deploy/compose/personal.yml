@@ -357,7 +357,7 @@ services:
         condition: service_started
         restart: true
     # Runtime NEXT_PUBLIC_* (window.__ENV) with build-time fallback. Browser-facing URLs come
-    # from PUBLIC_* configuration only (AGENTS.md rule 4).
+    # from PUBLIC_* configuration only (ENGINEERING-RULES.md rule 4).
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:${CORE_HOST_PORT:-8080}}
       # Server-side only: where the console's same-origin sign-in proxy (/api/local-auth/*) reaches

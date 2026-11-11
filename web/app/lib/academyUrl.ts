@@ -14,7 +14,7 @@ import { getPublicEnv } from "./env";
 // here: every real build already sets it (docker-compose.domain.yml/.gcp.yml pin the per-env
 // academy host). Hosted deployments set NEXT_PUBLIC_ACADEMY_URL
 // to their public academy origin.
-// No localhost default (AGENTS.md rule 4): an OSS build without the env var
+// No localhost default (ENGINEERING-RULES.md rule 4): an OSS build without the env var
 // must never render a dead http://localhost:4100 link. The hosted Academy is
 // the public fallback for call sites that always render the link; compose
 // and Helm already default NEXT_PUBLIC_ACADEMY_URL to it, so the fallback is

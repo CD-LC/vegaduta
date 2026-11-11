@@ -29,7 +29,7 @@ Status is COMPUTED, never asserted:
   planned      no check passed AND the roadmap claims it as planned
   missing      no check passed and nothing claims it exists
 
-Honesty rule (mirrors AGENTS.md rule 11): a row must not say "implemented"
+Honesty rule (mirrors ENGINEERING-RULES.md rule 11): a row must not say "implemented"
 without file evidence in the tree, and rows for capabilities the protocols
 define but this codebase deliberately does not offer (A2A push notifications
 and tasks/resubscribe, AG-UI's binary transport and optional event types)

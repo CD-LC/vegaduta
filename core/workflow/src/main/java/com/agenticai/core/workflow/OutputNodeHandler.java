@@ -4,12 +4,13 @@ import static com.agenticai.core.workflow.WorkflowNodeSupport.safeLength;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.stringConfig;
 import static com.agenticai.core.workflow.WorkflowNodeSupport.truncate;
 
-import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
-import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.eventbus.WorkflowEventPublisher;
 import com.agenticai.core.omnichannel.ChannelException;
 import com.agenticai.core.omnichannel.trigger.InboundTriggerContext;
 import com.agenticai.core.omnichannel.trigger.WorkflowTriggerChannel;
+import com.agenticai.core.security.logging.LogSafe;
+import com.agenticai.core.workflow.WorkflowNodeExecutor.NodeExecutionResult;
+import com.agenticai.core.workflow.dto.WorkflowNodeDto;
 import com.agenticai.core.workflow.output.EmailOutputService;
 import com.agenticai.core.workflow.output.GoogleDriveOutputService;
 import com.agenticai.core.workflow.output.PdfOutputRenderer;
@@ -24,7 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-/** "output": delivers the result to a channel (log, event, file, email, Telegram, Teams, WhatsApp, Drive). */
+/**
+ * "output": delivers the result to a channel (log, event, file, email, Telegram, Teams, WhatsApp,
+ * Drive).
+ */
 @Component
 class OutputNodeHandler implements NodeHandler {
 
@@ -37,6 +41,7 @@ class OutputNodeHandler implements NodeHandler {
     private final WhatsAppOutputService whatsAppOutputService;
     private final GoogleDriveOutputService googleDriveOutputService;
     private final PdfOutputRenderer pdfOutputRenderer;
+
     OutputNodeHandler(
             WorkflowEventPublisher eventPublisher,
             EmailOutputService emailOutputService,
@@ -279,9 +284,9 @@ class OutputNodeHandler implements NodeHandler {
                 default -> {
                     log.info(
                             "Workflow '{}' run {} output: {}",
-                            workflowDefinitionName,
-                            runId,
-                            input);
+                            LogSafe.clean(workflowDefinitionName),
+                            LogSafe.clean(runId),
+                            LogSafe.clean(input));
                     logLines.add(
                             "Logged output ("
                                     + safeLength(input)

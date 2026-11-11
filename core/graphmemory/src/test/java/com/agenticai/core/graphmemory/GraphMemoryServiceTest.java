@@ -35,19 +35,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * GraphMemoryService#remember}/{@link GraphMemoryService#recallRelated}/{@link
  * GraphMemoryService#supersede}) had zero test coverage before this file existed. Scoping this
  * suite to the newly-added erasure method (rather than retrofitting the other three, which is a
- * separately-sized task of its own) is a deliberate, disclosed scope limit - see
- * AGENT-COORDINATION-2026-07-18.md for the tracked follow-up, not a silent gap. (F-19 later
- * added one {@link GraphMemoryService#remember}-path test here, but only to pin the
- * escape-don't-corrupt contract at an interpolation site the erasure tests don't reach - the
- * broader remember/recall/supersede behavioral coverage gap above still stands. The escaper
- * itself has its own dedicated suite, {@link CypherLiteralEscaperTest}.)
+ * separately-sized task of its own) is a deliberate, disclosed scope limit - see the internal
+ * change log for the tracked follow-up, not a silent gap. (F-19 later added one {@link
+ * GraphMemoryService#remember}-path test here, but only to pin the escape-don't-corrupt contract at
+ * an interpolation site the erasure tests don't reach - the broader remember/recall/supersede
+ * behavioral coverage gap above still stands. The escaper itself has its own dedicated suite,
+ * {@link CypherLiteralEscaperTest}.)
  *
  * <p>Mocks {@link JdbcTemplate}/{@link Connection}/{@link Statement}/{@link ResultSet} directly
  * rather than exercising a real AGE-enabled Postgres - this class's own javadoc already states
- * plainly that "isolated to one new module behind a profile" is the deliberate tradeoff here
- * (no real Postgres/AGE instance is reachable from this sandbox to verify the actual Cypher
- * execution against, the same honestly-disclosed ceiling this session's every other AGE-adjacent
- * claim has carried).
+ * plainly that "isolated to one new module behind a profile" is the deliberate tradeoff here (no
+ * real Postgres/AGE instance is reachable from this sandbox to verify the actual Cypher execution
+ * against, the same honestly-disclosed ceiling this session's every other AGE-adjacent claim has
+ * carried).
  */
 class GraphMemoryServiceTest {
 
@@ -79,14 +79,16 @@ class GraphMemoryServiceTest {
         // Spring's own fallback translation when no more specific SQLExceptionTranslator mapping
         // applies, which is exactly the untranslated case here since no real DataSource/dialect
         // is involved in this unit test.
-        when(jdbcTemplate.execute(any(ConnectionCallback.class))).thenAnswer(invocation -> {
-            ConnectionCallback<Object> callback = invocation.getArgument(0);
-            try {
-                return callback.doInConnection(connection);
-            } catch (SQLException e) {
-                throw new UncategorizedSQLException("execute", "", e);
-            }
-        });
+        when(jdbcTemplate.execute(any(ConnectionCallback.class)))
+                .thenAnswer(
+                        invocation -> {
+                            ConnectionCallback<Object> callback = invocation.getArgument(0);
+                            try {
+                                return callback.doInConnection(connection);
+                            } catch (SQLException e) {
+                                throw new UncategorizedSQLException("execute", "", e);
+                            }
+                        });
     }
 
     private ResultSet countResultReturning(String agtypeCount) throws SQLException {
@@ -127,7 +129,8 @@ class GraphMemoryServiceTest {
     }
 
     @Test
-    void subjectKeyIsEscapedIntoAnInertLiteralBeforeBeingInterpolatedIntoTheCypherQuery() throws SQLException {
+    void subjectKeyIsEscapedIntoAnInertLiteralBeforeBeingInterpolatedIntoTheCypherQuery()
+            throws SQLException {
         stubConnectionCallback();
         ResultSet countResult = countResultReturning("1");
         when(statement.executeQuery(contains("count(n)"))).thenReturn(countResult);
@@ -141,10 +144,11 @@ class GraphMemoryServiceTest {
         service.eraseSubject("evil'; MATCH (x) DETACH DELETE x; $$ --");
 
         verify(statement, atLeastOnce()).executeQuery(queryCaptor.capture());
-        String executedQuery = queryCaptor.getAllValues().stream()
-            .filter(q -> q.contains("ag_catalog.cypher"))
-            .findFirst()
-            .orElseThrow();
+        String executedQuery =
+                queryCaptor.getAllValues().stream()
+                        .filter(q -> q.contains("ag_catalog.cypher"))
+                        .findFirst()
+                        .orElseThrow();
         // The apostrophe survives, escaped - the raw break-out sequence never appears.
         assertThat(executedQuery).contains("evil\\'; MATCH");
         assertThat(executedQuery).doesNotContain("evil'; MATCH");
@@ -155,16 +159,18 @@ class GraphMemoryServiceTest {
     }
 
     @Test
-    void apostropheEntityNamesSurviveEscapingInsteadOfBeingStrippedOrCorrupted() throws SQLException {
+    void apostropheEntityNamesSurviveEscapingInsteadOfBeingStrippedOrCorrupted()
+            throws SQLException {
         stubConnectionCallback();
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
 
         service.remember(
-            UUID.randomUUID(), "subject-1",
-            List.of(new GraphTriple("O'Brien", "MANAGER_OF", "Raj"))
-        );
+                UUID.randomUUID(),
+                "subject-1",
+                List.of(new GraphTriple("O'Brien", "MANAGER_OF", "Raj")));
 
-        // The AGE load ($libdir/plugins path), then the vertex MERGE, then the edge CREATE (the open-edge check is a query).
+        // The AGE load ($libdir/plugins path), then the vertex MERGE, then the edge CREATE (the
+        // open-edge check is a query).
         verify(statement, times(3)).execute(sqlCaptor.capture());
         String mergeSql = sqlCaptor.getAllValues().get(1);
         // The old strip-based defense would have written the corrupted name "OBrien" into the
@@ -174,11 +180,11 @@ class GraphMemoryServiceTest {
     }
 
     /**
-     * Item-8 store-side verification: {@link MemoryWriteArbitrationService}'s UPDATE/MERGE
-     * path lands here. The order matters - the stale edge's {@code valid_to} stamp (temporal
-     * invalidation, never a DELETE) must run BEFORE the new triple's MERGE inside the same
-     * {@code LOAD 'age'} session, so a recalled "current state" never briefly contains both
-     * the old and new fact.
+     * Item-8 store-side verification: {@link MemoryWriteArbitrationService}'s UPDATE/MERGE path
+     * lands here. The order matters - the stale edge's {@code valid_to} stamp (temporal
+     * invalidation, never a DELETE) must run BEFORE the new triple's MERGE inside the same {@code
+     * LOAD 'age'} session, so a recalled "current state" never briefly contains both the old and
+     * new fact.
      */
     @Test
     void supersedeInvalidatesStaleEdgesThenMergesTheNewTriple() throws SQLException {
@@ -188,7 +194,8 @@ class GraphMemoryServiceTest {
 
         service.supersede(agentId, "subject-1", new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul"));
 
-        // The AGE load, the invalidation cypher, then the write (vertex MERGE + edge CREATE) - one session.
+        // The AGE load, the invalidation cypher, then the write (vertex MERGE + edge CREATE) - one
+        // session.
         verify(statement, times(4)).execute(sqlCaptor.capture());
         List<String> statements = sqlCaptor.getAllValues();
         assertThat(statements.get(0)).isEqualTo(LOAD_PLUGINS);
@@ -217,9 +224,9 @@ class GraphMemoryServiceTest {
     }
 
     /**
-     * The supersede fail-open contract: if the invalidate+merge statement itself fails, the
-     * NEW fact is still written via a plain {@link #remember} - a failed supersede may leave
-     * the stale edge valid a little longer but must never lose the correction.
+     * The supersede fail-open contract: if the invalidate+merge statement itself fails, the NEW
+     * fact is still written via a plain {@link #remember} - a failed supersede may leave the stale
+     * edge valid a little longer but must never lose the correction.
      */
     @Test
     void aFailedInvalidationStillWritesTheNewFactViaPlainMerge() throws SQLException {
@@ -227,23 +234,26 @@ class GraphMemoryServiceTest {
         // Fail only the statement carrying the valid_to stamp - the LOAD and, inside the
         // remember() fallback, the MERGE still succeed.
         org.mockito.Mockito.doThrow(new SQLException("AGE rejected the invalidation"))
-            .when(statement).execute(contains("valid_to"));
+                .when(statement)
+                .execute(contains("valid_to"));
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
 
-        service.supersede(UUID.randomUUID(), "subject-1", new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul"));
+        service.supersede(
+                UUID.randomUUID(), "subject-1", new GraphTriple("Priya", "MANAGER_OF_BY", "Rahul"));
 
         verify(statement, org.mockito.Mockito.atLeastOnce()).execute(sqlCaptor.capture());
         assertThat(sqlCaptor.getAllValues())
-            .anySatisfy(sql -> assertThat(sql).contains("MERGE").contains("Rahul"));
+                .anySatisfy(sql -> assertThat(sql).contains("MERGE").contains("Rahul"));
     }
 
     @Test
     void aQueryFailureIsNotSwallowed_erasureFailsClosedNotOpen() throws SQLException {
         stubConnectionCallback();
-        when(statement.executeQuery(contains("count(n)"))).thenThrow(new SQLException("AGE not loaded on this connection"));
+        when(statement.executeQuery(contains("count(n)")))
+                .thenThrow(new SQLException("AGE not loaded on this connection"));
 
         assertThatThrownBy(() -> service.eraseSubject("subject-123"))
-            .isInstanceOf(RuntimeException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     // ------------------------------------------------------------------
@@ -261,7 +271,8 @@ class GraphMemoryServiceTest {
         verify(jdbcTemplate, never()).execute(any(ConnectionCallback.class));
 
         // Erasure: fails loudly instead of targeting "ag_catalog_kg".
-        assertThatThrownBy(() -> service.eraseSubject("s")).isInstanceOf(MissingTenantContextException.class);
+        assertThatThrownBy(() -> service.eraseSubject("s"))
+                .isInstanceOf(MissingTenantContextException.class);
         verify(statement, never()).execute(anyString());
     }
 
@@ -277,7 +288,8 @@ class GraphMemoryServiceTest {
         verify(statement).executeQuery(contains("cypher('t_abcdefghijklmnopqrstuvwxyz_kg'"));
     }
 
-    // ---- forgetFactText (user-initiated forget sync, app.graph-memory.user-forget-sync.enabled) ----
+    // ---- forgetFactText (user-initiated forget sync, app.graph-memory.user-forget-sync.enabled)
+    // ----
 
     private ResultSet edgeRows(String... subjectRelationObject) throws SQLException {
         ResultSet rs = mock(ResultSet.class);
@@ -296,9 +308,12 @@ class GraphMemoryServiceTest {
             objects[i] = subjectRelationObject[i * 3 + 2];
         }
         if (rows > 0) {
-            when(rs.getString("subject")).thenReturn(subjects[0], java.util.Arrays.copyOfRange(subjects, 1, rows));
-            when(rs.getString("relation")).thenReturn(relations[0], java.util.Arrays.copyOfRange(relations, 1, rows));
-            when(rs.getString("object")).thenReturn(objects[0], java.util.Arrays.copyOfRange(objects, 1, rows));
+            when(rs.getString("subject"))
+                    .thenReturn(subjects[0], java.util.Arrays.copyOfRange(subjects, 1, rows));
+            when(rs.getString("relation"))
+                    .thenReturn(relations[0], java.util.Arrays.copyOfRange(relations, 1, rows));
+            when(rs.getString("object"))
+                    .thenReturn(objects[0], java.util.Arrays.copyOfRange(objects, 1, rows));
         }
         return rs;
     }
@@ -306,9 +321,14 @@ class GraphMemoryServiceTest {
     @Test
     void forgetFactTextInvalidatesOnlyEdgesTheDeletedTextNamesBothEndsOf() throws SQLException {
         stubConnectionCallback();
-        ResultSet edges = edgeRows(
-            "\"Priya\"", "\"MANAGER_OF_BY\"", "\"Raj\"",
-            "\"Priya\"", "\"WORKS_AT\"", "\"Acme\"");
+        ResultSet edges =
+                edgeRows(
+                        "\"Priya\"",
+                        "\"MANAGER_OF_BY\"",
+                        "\"Raj\"",
+                        "\"Priya\"",
+                        "\"WORKS_AT\"",
+                        "\"Acme\"");
         when(statement.executeQuery(contains("RETURN a.name, r.type, b.name"))).thenReturn(edges);
         ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
         UUID agentId = UUID.randomUUID();
@@ -335,8 +355,12 @@ class GraphMemoryServiceTest {
         ResultSet edges = edgeRows("\"Priya\"", "\"MANAGER_OF_BY\"", "\"Raj\"");
         when(statement.executeQuery(contains("RETURN a.name"))).thenReturn(edges);
 
-        int invalidated = service.forgetFactText(
-            "subject-1", UUID.randomUUID(), "Priya's manager is Raj", List.of("Raj has managed Priya since 2024"));
+        int invalidated =
+                service.forgetFactText(
+                        "subject-1",
+                        UUID.randomUUID(),
+                        "Priya's manager is Raj",
+                        List.of("Raj has managed Priya since 2024"));
 
         assertThat(invalidated).isZero();
         verify(statement, never()).execute(contains("SET r.valid_to"));
@@ -346,7 +370,8 @@ class GraphMemoryServiceTest {
     void forgetFactTextUsesTheSharedTierWhenNoAgentIsGiven() throws SQLException {
         stubConnectionCallback();
         ResultSet edges = edgeRows("\"User\"", "\"WORKS_AT\"", "\"Acme\"");
-        // The OSS AGE session helper may itself run a query on the connection, so match the edge listing only.
+        // The OSS AGE session helper may itself run a query on the connection, so match the edge
+        // listing only.
         when(statement.executeQuery(contains("RETURN a.name, r.type, b.name"))).thenReturn(edges);
 
         int invalidated = service.forgetFactText("subject-1", null, "I work at Acme");
@@ -354,8 +379,13 @@ class GraphMemoryServiceTest {
         assertThat(invalidated).isEqualTo(1);
         ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
         verify(statement, atLeastOnce()).executeQuery(queryCaptor.capture());
-        String listing = queryCaptor.getAllValues().stream().filter(q -> q.contains("RETURN a.name")).findFirst().orElseThrow();
-        assertThat(listing).contains("a.agent_id = '" + GraphMemoryService.SHARED_AGENT_SENTINEL + "'");
+        String listing =
+                queryCaptor.getAllValues().stream()
+                        .filter(q -> q.contains("RETURN a.name"))
+                        .findFirst()
+                        .orElseThrow();
+        assertThat(listing)
+                .contains("a.agent_id = '" + GraphMemoryService.SHARED_AGENT_SENTINEL + "'");
         assertThat(listing).contains("r.valid_to IS NULL");
         verify(statement).execute(contains("SET r.valid_to"));
     }
@@ -372,14 +402,19 @@ class GraphMemoryServiceTest {
         ResultSet first = edgeRows(fullPage);
         // The edge the fact supports only shows up on the second page.
         ResultSet second = edgeRows("\"Priya\"", "\"MANAGER_OF_BY\"", "\"Raj\"");
-        when(statement.executeQuery(contains("RETURN a.name, r.type, b.name"))).thenReturn(first, second);
+        when(statement.executeQuery(contains("RETURN a.name, r.type, b.name")))
+                .thenReturn(first, second);
 
-        int invalidated = service.forgetFactText("subject-1", UUID.randomUUID(), "Priya's manager is Raj");
+        int invalidated =
+                service.forgetFactText("subject-1", UUID.randomUUID(), "Priya's manager is Raj");
 
         assertThat(invalidated).isEqualTo(1);
         ArgumentCaptor<String> queryCaptor = ArgumentCaptor.forClass(String.class);
         verify(statement, atLeastOnce()).executeQuery(queryCaptor.capture());
-        List<String> listings = queryCaptor.getAllValues().stream().filter(q -> q.contains("RETURN a.name")).toList();
+        List<String> listings =
+                queryCaptor.getAllValues().stream()
+                        .filter(q -> q.contains("RETURN a.name"))
+                        .toList();
         assertThat(listings).hasSize(2);
         assertThat(listings.get(0)).contains("ORDER BY a.name, r.type, b.name SKIP 0 LIMIT 500");
         assertThat(listings.get(1)).contains("SKIP 500 LIMIT 500");
@@ -388,28 +423,41 @@ class GraphMemoryServiceTest {
     @Test
     void forgetFactTextFailsOpenAndIgnoresBlankInput() throws SQLException {
         assertThat(service.forgetFactText("subject-1", UUID.randomUUID(), "  ")).isZero();
-        assertThat(service.forgetFactText(" ", UUID.randomUUID(), "Priya's manager is Raj")).isZero();
+        assertThat(service.forgetFactText(" ", UUID.randomUUID(), "Priya's manager is Raj"))
+                .isZero();
         verify(jdbcTemplate, never()).execute(any(ConnectionCallback.class));
 
         stubConnectionCallback();
-        when(statement.executeQuery(contains("RETURN a.name"))).thenThrow(new SQLException("graph does not exist"));
-        assertThat(service.forgetFactText("subject-1", UUID.randomUUID(), "Priya's manager is Raj")).isZero();
+        when(statement.executeQuery(contains("RETURN a.name")))
+                .thenThrow(new SQLException("graph does not exist"));
+        assertThat(service.forgetFactText("subject-1", UUID.randomUUID(), "Priya's manager is Raj"))
+                .isZero();
     }
 
     @Test
     void factSupportsEdgeMatchesWholeNamesAndFirstPersonSelfOnly() {
-        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya's manager is Raj", "Priya", "Raj")).isTrue();
-        assertThat(GraphFactTextMatcher.factSupportsEdge("priya reports to RAJ", "Priya", "Raj")).isTrue();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya's manager is Raj", "Priya", "Raj"))
+                .isTrue();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("priya reports to RAJ", "Priya", "Raj"))
+                .isTrue();
         // Whole words only: "Raj" is not named by "Rajesh".
-        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya's manager is Rajesh", "Priya", "Raj")).isFalse();
-        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya likes tea", "Priya", "Raj")).isFalse();
+        assertThat(
+                        GraphFactTextMatcher.factSupportsEdge(
+                                "Priya's manager is Rajesh", "Priya", "Raj"))
+                .isFalse();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya likes tea", "Priya", "Raj"))
+                .isFalse();
         // First-person text stands in for a self entity, but only when the other end is named.
-        assertThat(GraphFactTextMatcher.factSupportsEdge("I work at Acme", "User", "Acme")).isTrue();
-        assertThat(GraphFactTextMatcher.factSupportsEdge("My shop is in Pune", "Pune", "the user")).isTrue();
-        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya works at Acme", "User", "Acme")).isFalse();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("I work at Acme", "User", "Acme"))
+                .isTrue();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("My shop is in Pune", "Pune", "the user"))
+                .isTrue();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("Priya works at Acme", "User", "Acme"))
+                .isFalse();
         assertThat(GraphFactTextMatcher.factSupportsEdge("I like tea", "User", "Acme")).isFalse();
         // Names that cannot be round-tripped safely are never matched.
-        assertThat(GraphFactTextMatcher.factSupportsEdge("a\\\\b knows Raj", "a\\\\b", "Raj")).isFalse();
+        assertThat(GraphFactTextMatcher.factSupportsEdge("a\\\\b knows Raj", "a\\\\b", "Raj"))
+                .isFalse();
         assertThat(GraphFactTextMatcher.factSupportsEdge(null, "Priya", "Raj")).isFalse();
         assertThat(GraphFactTextMatcher.factSupportsEdge("Priya and Raj", " ", "Raj")).isFalse();
     }

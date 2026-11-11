@@ -12,6 +12,7 @@ import com.agenticai.core.omnichannel.session.InboundMessageDedupService;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantScope;
 import com.agenticai.core.security.concurrent.TenantAwareSchedulers;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.speech.SpeechStreamNormalizer;
 import com.agenticai.core.tenancy.ExternalAccountProvider;
 import com.agenticai.core.tenancy.TenantResolutionService;
@@ -294,10 +295,10 @@ public class VoiceRelayWebSocketHandler extends TextWebSocketHandler {
                 log.info(
                         "Voice call {} routed by dialled number {} to agent {} (channel default was"
                                 + " {})",
-                        callSid,
+                        LogSafe.clean(callSid),
                         maskFrom(dialedNumber),
-                        routedAgentId,
-                        channelSession.getAgentId());
+                        LogSafe.clean(routedAgentId),
+                        LogSafe.clean(channelSession.getAgentId()));
             }
             log.info(
                     "Voice call {} set up for tenant schema {} - agent {}",
