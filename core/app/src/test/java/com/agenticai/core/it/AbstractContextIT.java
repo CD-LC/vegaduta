@@ -18,7 +18,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         properties = {
             "spring.profiles.active=security,knowledge,graph-memory",
             // Keycloak itself is never contacted; see the class javadoc. The issuer has no
-            // localhost default any more (AGENTS.md rule 4) and app.web.public-url must be set
+            // localhost default any more (ENGINEERING-RULES.md rule 4) and app.web.public-url must
+            // be set
             // under `security` (PublicWebUrlStartupValidator): non-routable test values.
             "spring.security.oauth2.resourceserver.jwt.issuer-uri=http://keycloak.invalid/realms/test",
             "app.web.public-url=http://app.invalid",

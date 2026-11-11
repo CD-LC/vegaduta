@@ -301,7 +301,7 @@ public class ResourceStateExceptionHandler {
     // this handler wiring was briefly reverted as unrelated scope creep for a
     // different task, then restored - the controller/exception classes these
     // map already exist in this shared working tree regardless of this
-    // handler's presence (see docs/AGENT-COORDINATION-2026-07-18.md /
+    // handler's presence (see the internal change log /
     // Maintainer note: this is a DIFFERENT session's in-progress feature, flagged
     // rather than owned here), so mapping them to correct HTTP statuses is
     // strictly safer than leaving them fall through to a generic 500 - it
