@@ -35,7 +35,7 @@ const SERVER_API_BASE =
   process.env.API_BASE_URL ||
   process.env.CORE_INTERNAL_URL ||
   getPublicEnv("NEXT_PUBLIC_API_BASE_URL") ||
-  "http://localhost:8080";
+  (process.env.NODE_ENV !== "production" ? "http://localhost:8080" : "");
 
 function cleanAgentName(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -49,16 +49,14 @@ function cleanAgentName(raw: unknown): string | null {
   return oneLine.length > 80 ? `${oneLine.slice(0, 77)}…` : oneLine;
 }
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ shareId: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ shareId: string }> }): Promise<Metadata> {
   try {
     const { shareId } = await params;
     if (!shareId) return GENERIC_METADATA;
-    const res = await fetch(
-      `${SERVER_API_BASE}/api/share/agents/${encodeURIComponent(shareId)}`,
-      { signal: AbortSignal.timeout(2000), next: { revalidate: 60 } }
-    );
+    const res = await fetch(`${SERVER_API_BASE}/api/share/agents/${encodeURIComponent(shareId)}`, {
+      signal: AbortSignal.timeout(2000),
+      next: { revalidate: 60 },
+    });
     if (!res.ok) return GENERIC_METADATA;
     const body = await res.json();
     const agentName = cleanAgentName(body?.agentName);
@@ -70,13 +68,10 @@ export async function generateMetadata(
     // Same control-character/length hygiene as the agent name - this is
     // tenant-typed text going into a <title>.
     const brandName = cleanAgentName(body?.brandDisplayName);
-    const title = brandName
-      ? `Chat with ${agentName} — ${brandName}`
-      : `Chat with ${agentName} — built with VegaDūta`;
+    const title = brandName ? `Chat with ${agentName} — ${brandName}` : `Chat with ${agentName} — built with VegaDūta`;
     const description = brandName
       ? `${agentName} is a live AI agent answering on behalf of ${brandName}. Talk to it right now.`
-      : `${agentName} is a live AI agent built on VegaDūta. ` +
-        "Talk to it right now, then build your own for free.";
+      : `${agentName} is a live AI agent built on VegaDūta. ` + "Talk to it right now, then build your own for free.";
     if (brandName) {
       // No VegaDūta og-image on a white-labeled unfurl - a text-only card
       // beats someone else's logo on the tenant's own share link.
