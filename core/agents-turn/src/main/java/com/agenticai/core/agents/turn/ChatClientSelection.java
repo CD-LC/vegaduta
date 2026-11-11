@@ -120,9 +120,17 @@ final class ChatClientSelection {
      * provider has no pool row, so the global {@code app.tools.search.enabled} decides.
      */
     boolean toolDeferral(Agent agent, List<HostedChainLink> hostedChain) {
-        return hostedChain != null
-                && !hostedChain.isEmpty()
-                && Boolean.TRUE.equals(hostedChain.get(0).toolDeferral());
+        if (hostedChain != null && !hostedChain.isEmpty()) {
+            HostedChainLink head = hostedChain.get(0);
+            // A local model reads its prompt slowly: it defers by default
+            // (app.chat.local-model.tool-deferral); the row's own switch can only add to that.
+            return Boolean.TRUE.equals(head.toolDeferral())
+                    || (head.localModel() && localModel.isToolDeferral());
+        }
+        return agent != null
+                && agent.getProviderName() != null
+                && localModel.isToolDeferral()
+                && localModel.isLocalProvider(agent.getProviderName().name());
     }
 
     Outcome select(
@@ -229,7 +237,17 @@ final class ChatClientSelection {
         }
         context.modelTraits().weakToolCaller(weakToolCaller(agent, hostedChain));
         context.modelTraits().stableToolSet(stableToolSet(agent, hostedChain));
-        context.modelTraits().toolDeferral(toolDeferral(agent, hostedChain));
+        boolean deferral = toolDeferral(agent, hostedChain);
+        context.modelTraits().toolDeferral(deferral);
+        context.modelTraits()
+                .leanSkillIndex(
+                        deferral
+                                ? new int[] {
+                                    localModel.getSkillsMaxSkills(),
+                                    localModel.getSkillsMaxBlockChars(),
+                                    localModel.getSkillsMaxDescriptionWords()
+                                }
+                                : null);
         // A short follow-up ("yes", "continue") carries no words to select tools or a model by: it
         // keeps
         // the tools the conversation already used and stays on the model that started the task. The

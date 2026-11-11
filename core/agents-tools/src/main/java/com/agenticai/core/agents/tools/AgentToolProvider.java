@@ -3,6 +3,7 @@ package com.agenticai.core.agents.tools;
 import com.agenticai.core.agents.core.AgentService;
 import com.agenticai.core.agents.core.ReasoningDepth;
 import com.agenticai.core.agents.crew.HandoffChain;
+import com.agenticai.core.agents.skills.SkillPromptBlock;
 import com.agenticai.core.agents.skills.SkillService;
 import com.agenticai.core.agents.skills.tools.LoadSkillToolCallback;
 import com.agenticai.core.agents.turn.TurnContext;
@@ -621,31 +622,31 @@ public class AgentToolProvider implements AgentToolPort {
         return skillsPromptBlock(agentId, tools, false);
     }
 
-    /**
-     * {@link #skillsPromptBlock(UUID, List)}; {@code compact} lists skills by name only
-     * (small-model mode, V501).
-     */
+    /** {@code compact}: skill names only (small-model mode, V501). */
     public String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact) {
-        if (tools == null
-                || tools.stream()
-                        .noneMatch(
-                                t ->
-                                        LoadSkillToolCallback.NAME.equals(
-                                                t.getToolDefinition().name()))) {
+        return skillsPromptBlock(agentId, tools, compact, null);
+    }
+
+    /** {@code lean} = {maxSkills, maxBlockChars, maxDescriptionWords} cuts the index. */
+    @Override
+    public String skillsPromptBlock(
+            UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
+        if (tools == null || tools.stream().noneMatch(AgentToolProvider::isLoadSkill)) {
             return "";
         }
         try {
             var skills = skillService.metadataForTurn(agentId);
             return compact
-                    ? com.agenticai.core.agents.skills.SkillPromptBlock.renderCompact(skills)
-                    : com.agenticai.core.agents.skills.SkillPromptBlock.render(skills);
+                    ? SkillPromptBlock.renderCompact(skills)
+                    : SkillPromptBlock.render(skills, lean);
         } catch (RuntimeException e) {
-            log.warn(
-                    "Could not build the skills prompt block for agent {}: {}",
-                    agentId,
-                    e.getMessage());
+            log.warn("Skills prompt block failed for agent {}: {}", agentId, e.getMessage());
             return "";
         }
+    }
+
+    private static boolean isLoadSkill(ToolCallback tool) {
+        return LoadSkillToolCallback.NAME.equals(tool.getToolDefinition().name());
     }
 
     /**

@@ -243,6 +243,19 @@ public class LocalLlmPoolBootstrap {
                     "Local LLM pool row '{}' ({}) already exists - bootstrap left it unchanged.",
                     label,
                     normalizedBase);
+            if (StringUtils.hasText(same.getModel()) && !model.equals(same.getModel())) {
+                // The row is deliberately never rewritten, so a changed
+                // app.local-llm.bootstrap.model
+                // (or LOCAL_LLM_MODEL) is silently ignored. Say so: the pool serves a different
+                // model than the one configured, which skews latency, quality and benchmarks.
+                log.warn(
+                        "Local LLM pool row '{}' serves model '{}' but bootstrap is configured for"
+                                + " '{}'. The existing row is kept; change it in Platform Admin to"
+                                + " switch models.",
+                        label,
+                        same.getModel(),
+                        model);
+            }
             return Outcome.ALREADY_PRESENT;
         }
 

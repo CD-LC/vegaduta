@@ -21,7 +21,7 @@ core/agents-turn/src/main/java/com/agenticai/core/agents/memory/SessionMemorySer
 core/agents-turn/src/main/java/com/agenticai/core/agents/memory/TenantMemoryService.java 667
 core/agents-turn/src/main/java/com/agenticai/core/agents/skills/SkillService.java 676
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/AgentChatService.java 702
-core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 674
+core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnDispatcher.java 669
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/ChatTurnExecutor.java 751
 core/agents-turn/src/main/java/com/agenticai/core/agents/turn/HostedChainFailover.java 703
 core/agents/src/main/java/com/agenticai/core/agents/core/AgentService.java 685
@@ -30,7 +30,6 @@ core/approval/src/test/java/com/agenticai/core/approval/HumanApprovalGateService
 core/chat/src/main/java/com/agenticai/core/chat/LlmModelSupport.java 678
 core/google/src/main/java/com/agenticai/core/google/GoogleOAuthService.java 692
 core/guardrails/src/main/java/com/agenticai/core/guardrails/GuardedToolCallback.java 853
-core/guardrails/src/test/java/com/agenticai/core/guardrails/GuardrailPromptRegistryTest.java 830
 core/mcpserver/src/test/java/com/agenticai/core/mcpserver/expose/McpExposedToolInvokerTest.java 718
 core/omnichannel/src/test/java/com/agenticai/core/omnichannel/whatsappvoice/WhatsAppVoiceNoteServiceTest.java 672
 core/platform/src/main/java/com/agenticai/core/platform/abuse/AbuseSignalService.java 730
