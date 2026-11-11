@@ -8,6 +8,8 @@ Release notes on GitHub are generated from the section for each version.
 
 ## [Unreleased]
 
+### Added
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 ### Fixed
 
 - **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
