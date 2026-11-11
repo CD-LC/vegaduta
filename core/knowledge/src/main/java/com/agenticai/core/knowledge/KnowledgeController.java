@@ -12,11 +12,9 @@ import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.agenticai.core.security.http.AttachmentDisposition;
 import com.agenticai.core.storage.FileStorageException;
 import com.agenticai.core.storage.FileStorageService;
+
 import jakarta.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -33,6 +31,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Stage 5 primitives (ingest/search over raw text) plus Stage 6's actual user-facing entry point:

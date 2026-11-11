@@ -1,9 +1,11 @@
 package com.agenticai.core.agents.turn;
 
 import com.agenticai.core.guardrails.taint.TurnTaint;
-import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Locale;
 
 /**
  * Policy seam for taint on INBOUND CHANNEL turns ({@code

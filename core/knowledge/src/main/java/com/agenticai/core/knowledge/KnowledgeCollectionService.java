@@ -6,14 +6,16 @@ import com.agenticai.core.knowledge.dto.KnowledgeCollectionUpdateRequest;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Knowledge Stage F1 - CRUD for {@link KnowledgeCollection} plus the two cross-cutting lookups

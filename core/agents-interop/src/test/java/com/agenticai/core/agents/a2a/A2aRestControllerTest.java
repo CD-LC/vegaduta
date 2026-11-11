@@ -18,10 +18,7 @@ import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.security.Principal;
-import java.time.Duration;
-import java.util.UUID;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +27,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
 import reactor.core.publisher.Flux;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.time.Duration;
+import java.util.UUID;
 
 /**
  * The A2A 1.0 HTTP+JSON/REST binding (spec section 11): success shapes, the section 5.4 HTTP status

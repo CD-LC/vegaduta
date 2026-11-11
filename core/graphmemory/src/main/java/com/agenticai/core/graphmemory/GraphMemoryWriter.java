@@ -4,12 +4,13 @@ import static com.agenticai.core.graphmemory.GraphMemoryAgtype.parseAgtypeInt;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.cypherCall;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.sanitize;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Locale;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Vertex/edge write path for {@link GraphMemoryService}, extracted to keep that class under the

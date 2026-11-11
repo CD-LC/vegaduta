@@ -1,12 +1,13 @@
 package com.agenticai.core.agents.a2a;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Hands the inbound call context of an A2A turn to the outbound {@code a2a_call_agent} tool of the

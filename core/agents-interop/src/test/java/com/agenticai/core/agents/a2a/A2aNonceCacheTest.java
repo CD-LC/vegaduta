@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.agenticai.core.agents.a2a.A2aInboundGuardTest.MutableClock;
 import com.agenticai.core.agents.a2a.A2aNonceCache.Claim;
-import java.time.Duration;
-import java.time.Instant;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.Instant;
 
 class A2aNonceCacheTest {
 

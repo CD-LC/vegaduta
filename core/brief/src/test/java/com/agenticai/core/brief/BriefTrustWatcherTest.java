@@ -14,6 +14,11 @@ import com.agenticai.core.guardrails.GuardrailViolationEvent;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.PgAdvisoryJobLock;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,13 +29,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 /**
- * Automatic demotion: a guardrail strike on an envoy agent (event) or a failed eval run (poll) lowers the brief one
- * rung through the real trust ladder, and quality-tooling replays never count as strikes.
+ * Automatic demotion: a guardrail strike on an envoy agent (event) or a failed eval run (poll)
+ * lowers the brief one rung through the real trust ladder, and quality-tooling replays never count
+ * as strikes.
  */
 class BriefTrustWatcherTest {
 
@@ -38,18 +41,24 @@ class BriefTrustWatcherTest {
     private final FakeProofData data = new FakeProofData();
     private final BriefBindingRepository bindings = mock(BriefBindingRepository.class);
     private final TenantSchemaIterator iterator = mock(TenantSchemaIterator.class);
+
     /** Runs the job inline, as the winning replica would. */
     private final PgAdvisoryJobLock jobLock = runsInline();
 
     private static PgAdvisoryJobLock runsInline() {
         PgAdvisoryJobLock lock = mock(PgAdvisoryJobLock.class);
-        org.mockito.Mockito.when(lock.tryRunExclusive(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any()))
-            .thenAnswer(inv -> {
-                inv.<Runnable>getArgument(1).run();
-                return true;
-            });
+        org.mockito.Mockito.when(
+                        lock.tryRunExclusive(
+                                org.mockito.ArgumentMatchers.anyString(),
+                                org.mockito.ArgumentMatchers.any()))
+                .thenAnswer(
+                        inv -> {
+                            inv.<Runnable>getArgument(1).run();
+                            return true;
+                        });
         return lock;
     }
+
     private BriefTrustWatcher watcher;
     private ProofLedgerService ledger;
     private UUID id;
@@ -57,15 +66,32 @@ class BriefTrustWatcherTest {
 
     @BeforeEach
     void applyAndPromoteToTrusted() {
-        ledger = new ProofLedgerService(kit.store, kit.ledger, kit.ports, data, kit.eventRepository, kit.mapper,
-            Clock.fixed(EnvoyKit.NOW, ZoneOffset.UTC));
-        watcher = new BriefTrustWatcher(bindings, kit.briefRepository, kit.ledger, data, ledger, kit.trust, kit.ports, iterator, jobLock);
+        ledger =
+                new ProofLedgerService(
+                        kit.store,
+                        kit.ledger,
+                        kit.ports,
+                        data,
+                        kit.eventRepository,
+                        kit.mapper,
+                        Clock.fixed(EnvoyKit.NOW, ZoneOffset.UTC));
+        watcher =
+                new BriefTrustWatcher(
+                        bindings,
+                        kit.briefRepository,
+                        kit.ledger,
+                        data,
+                        ledger,
+                        kit.trust,
+                        kit.ports,
+                        iterator,
+                        jobLock);
         id = kit.savedAndApplied(EnvoyKit.richBrief());
         agentId = kit.entityIdOf(id, "a1");
         kit.proof[0] = new InMemoryProofSource(InMemoryProofSource.strong(EnvoyKit.NOW));
         kit.trust.setRung(id, TrustRung.TRUSTED);
         when(bindings.findByKindAndEntityId(eq("AGENT"), anyString()))
-            .thenReturn(List.of(new BriefBindingEntity(id, "a1", "AGENT", agentId)));
+                .thenReturn(List.of(new BriefBindingEntity(id, "a1", "AGENT", agentId)));
         TenantContext.set(TenantContext.of("tenant_a", "chat-user", Set.of()));
     }
 
@@ -87,13 +113,15 @@ class BriefTrustWatcherTest {
     }
 
     private static GuardrailViolationEvent strike(String session) {
-        return new GuardrailViolationEvent(UUID.randomUUID(), session, true, "PROFANITY", "profane input", Instant.now());
+        return new GuardrailViolationEvent(
+                UUID.randomUUID(), session, true, "PROFANITY", "profane input", Instant.now());
     }
 
     // ------------------------------------------------------------------ the event
 
     @Test
-    void aGuardrailStrikeOnAnEnvoyAgentLowersTheBriefOneRungAndLeavesTheEvidence() throws InterruptedException {
+    void aGuardrailStrikeOnAnEnvoyAgentLowersTheBriefOneRungAndLeavesTheEvidence()
+            throws InterruptedException {
         watcher.onGuardrailViolation(strike("chat-session-1"));
 
         awaitRung("UNDER_WATCH");
@@ -106,7 +134,9 @@ class BriefTrustWatcherTest {
         assertThat(demoted.getEvidenceJson()).contains("Automatic demotion").contains("PROFANITY");
         // The strike itself is durable evidence, separate from the demotion.
         assertThat(data.strikeDetails).hasSize(1);
-        assertThat(data.strikeDetails.get(0)).contains("path=input").contains("guardrail=PROFANITY");
+        assertThat(data.strikeDetails.get(0))
+                .contains("path=input")
+                .contains("guardrail=PROFANITY");
     }
 
     @Test
@@ -125,7 +155,8 @@ class BriefTrustWatcherTest {
 
     @Test
     void aBrokenSiblingEntityDoesNotBlockTheProtectiveDemotion() {
-        // The agent the brief bound was deleted outside it: its tier cannot be read, the workflow still comes down.
+        // The agent the brief bound was deleted outside it: its tier cannot be read, the workflow
+        // still comes down.
         kit.ports.failOn.add("setAgentTier");
 
         watcher.demoteAs("tenant_a", id, "test", Map.of());
@@ -139,8 +170,12 @@ class BriefTrustWatcherTest {
         watcher.onGuardrailViolation(strike("chat-session-1"));
 
         awaitRung("UNDER_WATCH");
-        // UNDER_WATCH puts an approval before the tool and the output again (TRUSTED had only the irreversible output).
-        assertThat(TrustGraphMaterializer.approvalCount(kit.ports.graphs.get(kit.entityIdOf(id, "w1")))).isEqualTo(2);
+        // UNDER_WATCH puts an approval before the tool and the output again (TRUSTED had only the
+        // irreversible output).
+        assertThat(
+                        TrustGraphMaterializer.approvalCount(
+                                kit.ports.graphs.get(kit.entityIdOf(id, "w1"))))
+                .isEqualTo(2);
     }
 
     @Test
@@ -180,7 +215,8 @@ class BriefTrustWatcherTest {
     }
 
     @Test
-    void aBriefAlreadyAtTheBottomRungKeepsTheStrikeAsEvidenceButHasNothingToLower() throws InterruptedException {
+    void aBriefAlreadyAtTheBottomRungKeepsTheStrikeAsEvidenceButHasNothingToLower()
+            throws InterruptedException {
         kit.trust.setRung(id, TrustRung.UNDER_WATCH);
         int events = kit.events.size();
 
@@ -221,24 +257,41 @@ class BriefTrustWatcherTest {
 
         assertThat(change).isPresent();
         assertThat(rung()).isEqualTo("UNDER_WATCH");
-        assertThat(kit.events.get(kit.events.size() - 1).getEvidenceJson()).contains("guardrail strike");
+        assertThat(kit.events.get(kit.events.size() - 1).getEvidenceJson())
+                .contains("guardrail strike");
     }
 
     @Test
     void aFailedEvalRunSinceTheRungBeganLowersItAndSaysWhy() {
-        data.runs = List.of(new ProofData.EvalRunPoint("r-bad", Instant.now().plusSeconds(60), 0.42, 0.71, false, "FAILED"));
+        data.runs =
+                List.of(
+                        new ProofData.EvalRunPoint(
+                                "r-bad",
+                                Instant.now().plusSeconds(60),
+                                0.42,
+                                0.71,
+                                false,
+                                "FAILED"));
 
         Optional<?> change = watcher.check(kit.entity(id));
 
         assertThat(change).isPresent();
         assertThat(rung()).isEqualTo("UNDER_WATCH");
         assertThat(kit.events.get(kit.events.size() - 1).getEvidenceJson())
-            .contains("An eval run scored 0.42, below the quality gate of 0.71.");
+                .contains("An eval run scored 0.42, below the quality gate of 0.71.");
     }
 
     @Test
     void aFailedRunFromBeforeTheRungBeganIsNotABreach() {
-        data.runs = List.of(new ProofData.EvalRunPoint("r-old", Instant.now().minus(Duration.ofDays(3)), 0.42, 0.71, false, "FAILED"));
+        data.runs =
+                List.of(
+                        new ProofData.EvalRunPoint(
+                                "r-old",
+                                Instant.now().minus(Duration.ofDays(3)),
+                                0.42,
+                                0.71,
+                                false,
+                                "FAILED"));
 
         assertThat(watcher.check(kit.entity(id))).isEmpty();
         assertThat(rung()).isEqualTo("TRUSTED");
@@ -246,9 +299,17 @@ class BriefTrustWatcherTest {
 
     @Test
     void passingAndInconclusiveRunsAreNotABreach() {
-        data.runs = List.of(
-            new ProofData.EvalRunPoint("r1", Instant.now().plusSeconds(60), 0.90, 0.71, true, "PASSED"),
-            new ProofData.EvalRunPoint("r2", Instant.now().plusSeconds(61), 0.10, 0.71, false, "INCONCLUSIVE"));
+        data.runs =
+                List.of(
+                        new ProofData.EvalRunPoint(
+                                "r1", Instant.now().plusSeconds(60), 0.90, 0.71, true, "PASSED"),
+                        new ProofData.EvalRunPoint(
+                                "r2",
+                                Instant.now().plusSeconds(61),
+                                0.10,
+                                0.71,
+                                false,
+                                "INCONCLUSIVE"));
 
         assertThat(watcher.check(kit.entity(id))).isEmpty();
         assertThat(rung()).isEqualTo("TRUSTED");
@@ -256,7 +317,15 @@ class BriefTrustWatcherTest {
 
     @Test
     void nothingIsCheckedWhereNoGateIsArmedOrThePlanHasNoEvalRuns() {
-        data.runs = List.of(new ProofData.EvalRunPoint("r-bad", Instant.now().plusSeconds(60), 0.42, 0.71, false, "FAILED"));
+        data.runs =
+                List.of(
+                        new ProofData.EvalRunPoint(
+                                "r-bad",
+                                Instant.now().plusSeconds(60),
+                                0.42,
+                                0.71,
+                                false,
+                                "FAILED"));
         kit.ports.evalAllowed = false;
         assertThat(watcher.check(kit.entity(id))).isEmpty();
         assertThat(rung()).isEqualTo("TRUSTED");
@@ -268,12 +337,24 @@ class BriefTrustWatcherTest {
 
     @Test
     void thePollCoversEveryTenantAndLowersEveryBreachedBrief() {
-        doAnswer(call -> {
-            call.<Consumer<String>>getArgument(0).accept("tenant_a");
-            return null;
-        }).when(iterator).forEachActiveTenantSchema(org.mockito.ArgumentMatchers.any());
-        when(kit.briefRepository.findAllByOrderByUpdatedAtDesc()).thenReturn(List.copyOf(kit.briefs.values()));
-        data.runs = List.of(new ProofData.EvalRunPoint("r-bad", Instant.now().plusSeconds(60), 0.42, 0.71, false, "FAILED"));
+        doAnswer(
+                        call -> {
+                            call.<Consumer<String>>getArgument(0).accept("tenant_a");
+                            return null;
+                        })
+                .when(iterator)
+                .forEachActiveTenantSchema(org.mockito.ArgumentMatchers.any());
+        when(kit.briefRepository.findAllByOrderByUpdatedAtDesc())
+                .thenReturn(List.copyOf(kit.briefs.values()));
+        data.runs =
+                List.of(
+                        new ProofData.EvalRunPoint(
+                                "r-bad",
+                                Instant.now().plusSeconds(60),
+                                0.42,
+                                0.71,
+                                false,
+                                "FAILED"));
 
         watcher.poll();
 
@@ -284,14 +365,23 @@ class BriefTrustWatcherTest {
     @Test
     void thePollIsSkippedWhenAnotherReplicaHoldsTheJobLock() {
         PgAdvisoryJobLock busy = mock(PgAdvisoryJobLock.class);
-        when(busy.tryRunExclusive(anyString(), org.mockito.ArgumentMatchers.any())).thenReturn(false);
-        BriefTrustWatcher otherReplica = new BriefTrustWatcher(
-            bindings, kit.briefRepository, kit.ledger, data, ledger, kit.trust, kit.ports, iterator, busy);
+        when(busy.tryRunExclusive(anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(false);
+        BriefTrustWatcher otherReplica =
+                new BriefTrustWatcher(
+                        bindings,
+                        kit.briefRepository,
+                        kit.ledger,
+                        data,
+                        ledger,
+                        kit.trust,
+                        kit.ports,
+                        iterator,
+                        busy);
 
         otherReplica.poll();
 
         verify(busy).tryRunExclusive(eq("brief-trust-watcher"), org.mockito.ArgumentMatchers.any());
-        verify(iterator, never())
-            .forEachActiveTenantSchema(org.mockito.ArgumentMatchers.any());
+        verify(iterator, never()).forEachActiveTenantSchema(org.mockito.ArgumentMatchers.any());
     }
 }

@@ -4,18 +4,21 @@ import com.agenticai.core.mcp.McpConnectionPhase;
 import com.agenticai.core.mcp.McpRegistryService;
 import com.agenticai.core.mcp.dto.McpDynamicConfig;
 import com.agenticai.core.security.logging.LogSafe;
+
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.spec.McpClientTransport;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.tool.ToolCallback;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.tool.ToolCallback;
 
 /**
  * The bodies of {@link DynamicMcpConnectionManager#connect} (guards, transport, SDK handshake, tool

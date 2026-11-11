@@ -9,11 +9,7 @@ import com.agenticai.core.knowledge.rag.RankFusion;
 import com.agenticai.core.knowledge.rag.RetrievalOptions;
 import com.agenticai.core.settings.SettingContext;
 import com.agenticai.core.settings.SettingsResolver;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +18,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Master-Roadmap-2026.md item #2 (hybrid search + reranking), Platform- Tech-Stack-Audit-2026.md

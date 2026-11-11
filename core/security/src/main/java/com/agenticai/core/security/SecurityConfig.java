@@ -2,9 +2,9 @@ package com.agenticai.core.security;
 
 import com.agenticai.core.security.apikey.ApiKeyAuthFilter;
 import com.agenticai.core.security.apikey.TenantApiKeyAuthenticator;
+
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Optional;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,6 +34,9 @@ import org.springframework.security.oauth2.server.resource.web.authentication.Be
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Phase 0 Stage 3 - OAuth2 Resource Server validating Keycloak-issued JWTs.

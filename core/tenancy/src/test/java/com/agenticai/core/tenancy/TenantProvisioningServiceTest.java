@@ -25,6 +25,11 @@ import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.tenancy.dto.SignupRequest;
 import com.agenticai.core.tenancy.dto.SignupResponse;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,10 +38,8 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.sql.DataSource;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 /**
  * Zero test coverage existed for {@link TenantProvisioningService} before this. It is risk-bearing

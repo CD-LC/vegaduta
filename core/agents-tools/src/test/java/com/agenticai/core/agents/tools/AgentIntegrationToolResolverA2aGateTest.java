@@ -9,15 +9,17 @@ import static org.mockito.Mockito.when;
 
 import com.agenticai.core.agents.a2a.A2aRemoteAgentToolSource;
 import com.agenticai.core.agents.core.AgentService;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
 import org.springframework.beans.factory.ObjectProvider;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * a2a_call_agent is offered only when the outbound client bean exists, app.a2a.client.enabled is

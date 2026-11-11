@@ -1,6 +1,7 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.screen.ContentWriteScreen;
+
 import java.util.Optional;
 
 /**
