@@ -3,11 +3,13 @@ package com.agenticai.core.mcp.atlassian;
 import com.agenticai.core.mcp.McpConnectDispatcher;
 import com.agenticai.core.mcp.McpDynamicConnector;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.security.oauth.OAuthStateBinding;
 import com.agenticai.core.security.publicurl.PublicWebUrl;
-
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.net.URI;
+import java.util.Set;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -19,10 +21,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * Three surfaces, same split-by-path-prefix reasoning as {@code XOAuthController}/{@code
@@ -93,7 +91,7 @@ public class AtlassianOAuthController {
             @RequestParam(required = false) String error,
             @CookieValue(name = "vd_oauth_atlassian", required = false) String bindingCookie) {
         if (error != null) {
-            log.info("Atlassian OAuth consent was not completed: {}", error);
+            log.info("Atlassian OAuth consent was not completed: {}", LogSafe.clean(error));
             return redirectTo("error", "consent_declined");
         }
         if (code == null || state == null) {

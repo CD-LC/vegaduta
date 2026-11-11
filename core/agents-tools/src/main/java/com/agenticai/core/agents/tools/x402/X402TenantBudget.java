@@ -1,5 +1,6 @@
 package com.agenticai.core.agents.tools.x402;
 
+import com.agenticai.core.security.logging.LogSafe;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ final class X402TenantBudget {
             } catch (RuntimeException e) {
                 log.warn(
                         "x402 budget release failed for tenant {} - budget stays consumed (safe direction)",
-                        tenantId);
+                        LogSafe.clean(tenantId));
             }
             return;
         }
@@ -126,8 +127,8 @@ final class X402TenantBudget {
         } catch (RuntimeException e) {
             log.warn(
                     "x402 budget check failed for tenant {} - refusing the payment: {}",
-                    tenantId,
-                    e.toString());
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(e.toString()));
             if (incremented) {
                 try {
                     redis.opsForValue().decrement(current, amount);

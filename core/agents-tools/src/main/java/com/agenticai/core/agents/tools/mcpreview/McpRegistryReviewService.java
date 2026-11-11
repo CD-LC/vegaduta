@@ -7,6 +7,7 @@ import com.agenticai.core.mcp.McpServerRegistration;
 import com.agenticai.core.mcp.McpServerRegistrationNotFoundException;
 import com.agenticai.core.mcp.dto.McpServerRegistrationResponse;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.TenantSchemaIterator;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +83,10 @@ public class McpRegistryReviewService {
      * what the returned response reflects.
      */
     public McpServerRegistrationResponse approve(String tenantId, UUID id) {
-        log.info("Platform review: APPROVING MCP registration {} for tenant '{}'", id, tenantId);
+        log.info(
+                "Platform review: APPROVING MCP registration {} for tenant '{}'",
+                LogSafe.clean(id),
+                LogSafe.clean(tenantId));
         return withTenant(
                 tenantId,
                 () -> {
@@ -107,9 +111,9 @@ public class McpRegistryReviewService {
     public McpServerRegistrationResponse reject(String tenantId, UUID id, String reason) {
         log.info(
                 "Platform review: REJECTING MCP registration {} for tenant '{}' (reason: {})",
-                id,
-                tenantId,
-                reason);
+                LogSafe.clean(id),
+                LogSafe.clean(tenantId),
+                LogSafe.clean(reason));
         return withTenant(
                 tenantId,
                 () -> {

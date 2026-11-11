@@ -13,6 +13,7 @@ import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -60,8 +61,13 @@ import reactor.core.publisher.Flux;
 public class AgentShareController {
 
     private static final Logger log = LoggerFactory.getLogger(AgentShareController.class);
-    /** {@code app.chat.limits.share-turn-timeout}; a hand-built controller keeps the shipped default. */
+
+    /**
+     * {@code app.chat.limits.share-turn-timeout}; a hand-built controller keeps the shipped
+     * default.
+     */
     private volatile Duration turnTimeout = new ChatLimitsProperties().getShareTurnTimeout();
+
     private static final String REQUESTED_BY_PREFIX = "system:agent-share:";
 
     private final AgentShareService shareService;
@@ -70,10 +76,14 @@ public class AgentShareController {
     private final ProviderModelCatalogService providerModelCatalogService;
     private final ShareVisitorSessions visitorSessions;
 
-    /** Sets {@code app.chat.limits.share-turn-timeout}; until it is called the shipped default applies. */
+    /**
+     * Sets {@code app.chat.limits.share-turn-timeout}; until it is called the shipped default
+     * applies.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     public void useLimits(ChatLimitsProperties limits) {
-        this.turnTimeout = (limits == null ? new ChatLimitsProperties() : limits).getShareTurnTimeout();
+        this.turnTimeout =
+                (limits == null ? new ChatLimitsProperties() : limits).getShareTurnTimeout();
     }
 
     public AgentShareController(
@@ -297,9 +307,9 @@ public class AgentShareController {
                                         }
                                         log.warn(
                                                 "Agent share chat stream failed mid-response for"
-                                                    + " share {} after {} chars already streamed",
-                                                shareId,
-                                                emitted.length(),
+                                                        + " share {} after {} chars already streamed",
+                                                LogSafe.clean(shareId),
+                                                LogSafe.clean(emitted.length()),
                                                 e);
                                         return Flux.just(
                                                 AgentController.STREAM_ERROR_MARKER
@@ -414,7 +424,7 @@ public class AgentShareController {
                     } catch (TenantLimitExceededException e) {
                         log.warn(
                                 "Agent share chat turn failed - tenant limit exceeded for share {}",
-                                shareId,
+                                LogSafe.clean(shareId),
                                 e);
                         return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                                 .body(
@@ -427,7 +437,10 @@ public class AgentShareController {
                                                         + " exhausted. It will reset after 24"
                                                         + " hours."));
                     } catch (RuntimeException e) {
-                        log.warn("Agent share chat turn failed for share {}", shareId, e);
+                        log.warn(
+                                "Agent share chat turn failed for share {}",
+                                LogSafe.clean(shareId),
+                                e);
                         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                                 .body(Map.of("error", "upstream_failed"));
                     }
