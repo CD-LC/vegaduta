@@ -494,9 +494,11 @@ class Runner:
         *,
         ident: RunIdentity,
     ) -> ExecutionOutcome:
-        violations = jsvalidate.validate(source) + self._check_js_syntax(
-            language, source, work, ident
-        )
+        # Identifier policy first, in-process. The syntax half is NOT a separate node process any
+        # more: a module is parsed whole before any of it runs, so a source that does not parse
+        # never executes, and the run itself is the parse. Only a run that produced no result is
+        # re-checked below, to give the same VALIDATION message the pre-check used to.
+        violations = jsvalidate.validate(source)
         if violations:
             return ExecutionOutcome(
                 False,
@@ -530,7 +532,22 @@ class Runner:
             # the identifier policy were ever outsmarted.
             **self._isolation_kwargs(ident, None),
         )
-        return self._interpret(run, result_file, started)
+        outcome = self._interpret(run, result_file, started)
+        if not outcome.ok and not run.timed_out and run.exit_code not in (0, None):
+            try:
+                produced_nothing = result_file.stat().st_size == 0
+            except OSError:
+                produced_nothing = True
+            if produced_nothing:
+                syntax = self._check_js_syntax(language, source, work, ident)
+                if syntax:
+                    return ExecutionOutcome(
+                        False,
+                        error="; ".join(v.message for v in syntax),
+                        error_type="VALIDATION",
+                        duration_ms=_elapsed_ms(started),
+                    )
+        return outcome
 
     # -------------------------------------------------------------- shared
 
