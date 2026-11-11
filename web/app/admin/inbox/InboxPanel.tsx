@@ -283,7 +283,7 @@ export default function InboxPanel({
   ) : null;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {/* Stats strip - each card jumps to the matching view. */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {[
@@ -312,9 +312,9 @@ export default function InboxPanel({
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)_minmax(240px,300px)]">
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)_minmax(240px,300px)]">
         {/* Conversation list column */}
-        <div className={cn("min-w-0", selected && "hidden lg:block")}>
+        <div className={cn("flex min-w-0 min-h-0 flex-col", selected && "hidden lg:flex")}>
           <div className="mb-2 flex items-center gap-2">
             <div className="relative min-w-0 flex-1">
               <Search
@@ -387,18 +387,20 @@ export default function InboxPanel({
             </div>
           )}
 
-          {loaded && !loadFailed && items.length === 0 ? (
-            <EmptyState
-              icon={Headset}
-              title={tHC("s3")}
-              description={
-                view === "all" && !channel && !appliedQ
-                  ? "Nothing has arrived on any channel yet — inbound messages across WhatsApp, Telegram, email and the rest land here."
-                  : "Try widening the view, channel or search filters."
-              }
-            />
-          ) : (
-            <ul className="flex flex-col gap-2">
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {loaded && !loadFailed && items.length === 0 ? (
+              <EmptyState
+                className="h-full"
+                icon={Headset}
+                title={tHC("s3")}
+                description={
+                  view === "all" && !channel && !appliedQ
+                    ? "Nothing has arrived on any channel yet — inbound messages across WhatsApp, Telegram, email and the rest land here."
+                    : "Try widening the view, channel or search filters."
+                }
+              />
+            ) : (
+              <ul className="flex flex-col gap-2">
               {items.map((s) => (
                 <li key={s.sessionId}>
                   <button
@@ -443,8 +445,9 @@ export default function InboxPanel({
                   </button>
                 </li>
               ))}
-            </ul>
-          )}
+              </ul>
+            )}
+          </div>
           <PaginationControls
             // Server-side paging - the shared control is 1-based while the
             // backend page param is 0-based; converting at this boundary
@@ -463,9 +466,10 @@ export default function InboxPanel({
         </div>
 
         {/* Thread column */}
-        <div className={cn("min-w-0", !selected && "hidden lg:block")}>
+        <div className={cn("min-w-0 min-h-0", !selected && "hidden lg:block")}>
           {!selected ? (
             <EmptyState
+              className="h-full"
               icon={MessageSquare}
               title={tHC("s2")}
               description="Select a conversation to read its full two-way transcript, take it over, and reply as a human."
@@ -492,7 +496,7 @@ export default function InboxPanel({
         </div>
 
         {/* Details column (xl+) */}
-        <div className="hidden min-w-0 xl:block">
+        <div className="hidden min-w-0 min-h-0 overflow-y-auto xl:block">
           {detailsPane ?? (
             <div className="rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
               {tHC("s1")}

@@ -61,15 +61,17 @@ export type { NavItem, NavSection };
  * Playwright suite's heading assertions) instead of each page re-declaring
  * its own header chrome. `actions` is an optional slot for page-specific
  * buttons (e.g. "+ New Workflow") that belong next to the title, not
- * buried in page content. `wide`/`bleed` relax .app-content's max-width
- * for screens (the workflow canvas) that need the full viewport instead of
- * the console's usual centered reading column.
+ * buried in page content. Every page uses the full fluid width (`wide` is
+ * kept for API compatibility and is now a no-op); `bleed` additionally
+ * removes the shell's padding and chrome so screens like the workflow
+ * canvas own the whole viewport.
  */
 interface AppShellBodyProps {
   title?: ReactNode;
   eyebrow?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
+  /** @deprecated All pages are fluid width now; kept so callers don't break. */
   wide?: boolean;
   bleed?: boolean;
   collapsibleRail?: boolean;
@@ -92,7 +94,6 @@ function AppShellBody({
   eyebrow,
   actions = null,
   children,
-  wide = false,
   bleed: bleedProp = false,
   fillViewport = false,
   // Default true (2026-09-18): the whole rail collapses to icons everywhere,
@@ -383,7 +384,7 @@ function AppShellBody({
               ? "relative flex min-h-0 flex-1 flex-col overflow-hidden"
               : bleed
                 ? "relative flex flex-1 flex-col"
-                : `relative flex-1 px-4 py-6 sm:px-6 lg:px-8 ${wide ? "" : ""}`
+                : "relative flex-1 px-4 py-6 sm:px-6 lg:px-8"
           }
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -392,7 +393,7 @@ function AppShellBody({
           {bleed ? (
             <FeatureGate>{children}</FeatureGate>
           ) : (
-            <div className={`mx-auto w-full ${wide ? "max-w-none" : "max-w-7xl"}`}>
+            <div className="mx-auto w-full max-w-none">
               {/* >=80%/100% usage warning with the upgrade CTA - dismissible,
                   follows the user to every console page rather than only
                   warning people who happen to open /usage. Deliberately not

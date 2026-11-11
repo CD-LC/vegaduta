@@ -130,7 +130,7 @@ export function InboxThread({
         </div>
       )}
 
-      <div className="flex-1 space-y-2 overflow-y-auto p-3" style={{ minHeight: 240, maxHeight: 480 }}>
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-3">
         {transcriptFailed && (
           <div className="flex items-center justify-between gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
             <span>{tHC("s6")}</span>
