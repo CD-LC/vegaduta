@@ -20,6 +20,8 @@ public final class TurnModelTraits {
 
     private volatile boolean toolDeferral;
 
+    private volatile int[] leanSkillIndex;
+
     private volatile java.time.Duration streamIdleTimeout;
 
     /** True for a model whose tool-less reply may be an announced step it never took. */
@@ -58,6 +60,19 @@ public final class TurnModelTraits {
 
     public void toolDeferral(boolean deferral) {
         this.toolDeferral = deferral;
+    }
+
+    /**
+     * The size of the skill index this turn may carry as {@code {maxSkills, maxBlockChars,
+     * maxDescriptionWords}}, or null for the configured size. Set for a local model whose tools are
+     * deferred: its prompt must stay short.
+     */
+    public int[] leanSkillIndex() {
+        return leanSkillIndex;
+    }
+
+    public void leanSkillIndex(int[] limits) {
+        this.leanSkillIndex = limits;
     }
 
     /**

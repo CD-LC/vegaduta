@@ -399,7 +399,11 @@ final class ChatPromptAssembler {
         // advertisement and should read as part of the operating contract.
         String basePrompt = rlPromptOverride != null ? rlPromptOverride : agent.getSystemPrompt();
         String proceduresBlock = agentToolProvider.proceduresPromptBlock(agentId);
-        String skillsBlock = agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt);
+        int[] leanSkills = compactPrompt ? null : context.modelTraits().leanSkillIndex();
+        String skillsBlock =
+                leanSkills == null
+                        ? agentToolProvider.skillsPromptBlock(agentId, tools, compactPrompt)
+                        : agentToolProvider.skillsPromptBlock(agentId, tools, false, leanSkills);
         // Repairs any non-JSON tool-call arguments PERSISTED into history
         // from an earlier turn - see ArgumentSanitizingToolCallingManager
         // #sanitizeHistory's javadoc for the live incident this closes

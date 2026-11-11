@@ -798,3 +798,6 @@ Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the 
 ### Approval continuation latency (Devin, 2026-11-10)
 
 Opened a PR (`perf/approval-native-continuation`, stacked on `feat/agent-prompt-profile` #392): the continuation turn after an approval replays the decided call as a native assistant tool call + tool result with a short note (`app.approvals.continuation.native-tool-result`, default true), and a turn paused for an approval is no longer sampled by the quality judge. Verified: agents-turn 2,215 tests, app 771 tests, `make gates`, 65/65 eval runs on the local qwen3.5:9b stack. Worktree: /private/tmp/vd-approval-native.
+### Local-model latency and tokens (Claude Code, 2026-11-09)
+
+Branch `perf/lean-local-turns` (off `origin/main`): a local model's turn defers tools by default with a short always-on list and a 12-skill index, plain-data tool results skip the injection judge (`app.guardrails.judge.skip-inert-data`), and core warns when the pool row serves a different model than configured. Touches `agents-turn`, `agents-tools`, `guardrails`, `providers`, `app-config`. Not touched: sandbox, approval continuation, memory/skill gating.

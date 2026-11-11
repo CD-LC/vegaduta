@@ -145,6 +145,28 @@ class ToolSearchDeferralTest {
     }
 
     @Test
+    void aForcedLocalModelTurnKeepsOnlyTheShortLocalAlwaysOnList() {
+        ToolSearchDeferral deferral = new ToolSearchDeferral();
+        deferral.configure(false, 3, ToolSearchDeferral.DEFAULT_ALWAYS_ON, 6);
+        List<ToolCallback> tools = catalog(10);
+
+        List<String> forced =
+                names(deferral.apply(tools, AGENT, "s1", new RecordingWrapper(), null, true));
+        assertTrue(forced.contains("remember_fact"));
+        assertFalse(forced.contains("search_knowledge_base"));
+
+        deferral.configure(true, 3, ToolSearchDeferral.DEFAULT_ALWAYS_ON, 6);
+        List<String> global = names(deferral.apply(tools, AGENT, "s2", new RecordingWrapper()));
+        assertTrue(global.contains("search_knowledge_base"));
+
+        deferral.configureLocal("search_knowledge_base");
+        List<String> custom =
+                names(deferral.apply(tools, AGENT, "s3", new RecordingWrapper(), null, true));
+        assertTrue(custom.contains("search_knowledge_base"));
+        assertFalse(custom.contains("remember_fact"));
+    }
+
+    @Test
     void atOrUnderTheThresholdTheListIsReturnedUntouched() {
         List<ToolCallback> tools = catalog(0); // 4 tools
         RecordingWrapper wrapper = new RecordingWrapper();

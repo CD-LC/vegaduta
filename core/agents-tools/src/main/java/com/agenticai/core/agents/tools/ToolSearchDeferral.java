@@ -72,6 +72,16 @@ final class ToolSearchDeferral {
                     + "run_skill_script,propose_skill,improve_skill,ask_agent_*,delegate_to_specialist,run_subtasks,create_workflow,restore_tool_result,generate_document,"
                     + "local_shell,local_shell_read,workspace_list,workspace_read,workspace_search,workspace_write,workspace_edit,vegaduta_setup_guide,vegaduta_api_guide,local_desktop_*,run_desktop_recipe";
 
+    /**
+     * The standing tools a LOCAL model's deferred turn keeps visible (the turn is forced by the
+     * local-model default or the serving row's own switch): memory and the skill tools, plus {@code
+     * restore_tool_result}. The long list above would put twenty-odd schemas back in front of a
+     * model that reads its prompt at a few hundred tokens a second; everything else is one {@code
+     * search_tools} away. Mirrored as the default of {@code app.tools.search.local-always-on}.
+     */
+    static final String DEFAULT_LOCAL_ALWAYS_ON =
+            "remember_fact,recall_related_facts,restore_tool_result,load_skill,read_skill_file";
+
     static final int DEFAULT_THRESHOLD = 25;
     static final int DEFAULT_MAX_CARRY_OVER = 6;
 
@@ -99,6 +109,7 @@ final class ToolSearchDeferral {
     private volatile boolean enabled = false;
     private volatile int threshold = DEFAULT_THRESHOLD;
     private volatile List<String> alwaysOn = parseNames(DEFAULT_ALWAYS_ON);
+    private volatile List<String> localAlwaysOn = parseNames(DEFAULT_LOCAL_ALWAYS_ON);
     private volatile int maxCarryOver = DEFAULT_MAX_CARRY_OVER;
 
     void configure(boolean enabled, int threshold, String alwaysOnCsv, int maxCarryOver) {
@@ -107,6 +118,18 @@ final class ToolSearchDeferral {
         this.maxCarryOver = Math.max(0, maxCarryOver);
         // Last: a reader that sees enabled=true must also see the values above.
         this.enabled = enabled;
+    }
+
+    /**
+     * The always-on list of a forced (local-model) deferred turn; blank keeps {@link
+     * #DEFAULT_LOCAL_ALWAYS_ON}.
+     */
+    void configureLocal(String localAlwaysOnCsv) {
+        this.localAlwaysOn =
+                parseNames(
+                        localAlwaysOnCsv == null || localAlwaysOnCsv.isBlank()
+                                ? DEFAULT_LOCAL_ALWAYS_ON
+                                : localAlwaysOnCsv);
     }
 
     boolean isEnabled() {
@@ -177,7 +200,7 @@ final class ToolSearchDeferral {
         String key = ToolActivationRegistry.key(tenantId, agentId, sessionId);
         int carry = maxCarryOver;
         Set<String> carried = carry > 0 ? Set.copyOf(registry.recall(key, carry)) : Set.of();
-        List<String> keepVisible = alwaysOn;
+        List<String> keepVisible = forced ? localAlwaysOn : alwaysOn;
 
         SearchCatalogScreen screen = catalogScreen;
         List<ToolCallback> exposedInOrder = new ArrayList<>();

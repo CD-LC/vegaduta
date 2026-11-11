@@ -29,6 +29,29 @@ Release notes on GitHub are generated from the section for each version.
   approvals and audit run outside the prompt and stay on in all three. "Own tools" are the ones the owner
   chose: the agent's allowed tools and its attached tool servers; an agent with neither offers no tools in
   `bare`. The prompt preview shows the profile's result.
+- **A local model's deferred turn is also lean on tools and skills.** It keeps only memory and the skill
+  tools visible (`app.tools.search.local-always-on`, env `TOOL_SEARCH_LOCAL_ALWAYS_ON`) and lists at most
+  12 skills in 1,800 characters (`app.chat.local-model.skills-*`); everything else is one `search_tools` or
+  `load_skill` away. Other models are unchanged.
+
+- **Plain data skips the injection judge.** A tool result that is only structured data (JSON of ids,
+  numbers and strings of at most two short words) no longer costs the extra LLM judge call, about
+  150 ms per result on a local model; the regex layer still runs on it, and anything with prose goes to
+  the judge as before. `APP_GUARDRAILS_JUDGE_SKIP_INERT_DATA=false` judges every result.
+
+- **A local model's turn starts lean.** Turns on the install's own local model (Ollama pool row or a
+  local bring-your-own provider) now keep all but a short list of standing tools behind
+  `search_tools` / `call_tool` by default (`app.chat.local-model.tool-deferral`, env
+  `APP_CHAT_LOCAL_MODEL_TOOL_DEFERRAL`, `false` restores the old behaviour). The fixed tool set
+  is kept, so the prompt cache still holds. In our 65-task eval on a 9B model, config-equivalent
+  runs went from 5,089 to 2,311 tokens per run (plain questions 10,883 to 1,456) at the same
+  65/65 score.
+
+### Fixed
+
+- **A stale local-model pool row is now reported.** When the platform pool's local row serves a
+  different model than `LOCAL_LLM_MODEL` / `app.local-llm.bootstrap.model`, core logs a WARN at
+  startup (the row is still never rewritten) instead of silently running the other model.
 
 ## [0.1.14] - 2026-10-30
 
