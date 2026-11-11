@@ -76,12 +76,17 @@
             <script src="${script}" type="text/javascript"></script>
         </#list>
     </#if>
+    <#-- Keycloak 26.8's authChecker.js exports startSessionPolling (its own base and keycloak.v2 templates call it
+         exactly like this). The old checkCookiesAndSetTimer export is gone, so importing it threw a module error
+         on every login page and the "you signed in in another tab" check never started. -->
     <script type="module">
-        import { checkCookiesAndSetTimer } from "${url.resourcesPath}/js/authChecker.js";
+        <#outputformat "JavaScript">
+        import { startSessionPolling } from ${(url.resourcesPath + "/js/authChecker.js")?c};
 
-        checkCookiesAndSetTimer(
-          "${url.ssoLoginInOtherTabsUrl?no_esc}"
+        startSessionPolling(
+            ${url.ssoLoginInOtherTabsUrl?c}
         );
+        </#outputformat>
     </script>
 </head>
 
