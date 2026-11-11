@@ -9,6 +9,7 @@ Release notes on GitHub are generated from the section for each version.
 ## [Unreleased]
 
 ### Added
+- **code-intel: offline heuristic security scan.** New `GET /repos/{repo_id}/security-scan` and read-only MCP tool `security_scan` report hard-coded secrets (always redacted), dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe deserialization, SQL string building, weak crypto, disabled TLS verification) and a normalized dependency inventory (requirements, package.json/lock, pom.xml, go.mod). Deterministic, no network or LLM, tenant-scoped like the other analyses. It is a regex/entropy heuristic, not a replacement for CodeQL/gitleaks/Trivy, and does no CVE matching (an advisory-provider hook is provided for callers).
 - Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
 ### Fixed
 

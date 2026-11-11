@@ -110,3 +110,27 @@ def hotspots(repo_id: str, days: int = 90, limit: int = 30, ctx: TenantContext =
 def import_cycles(repo_id: str, ctx: TenantContext = Depends(tenant)):
     """File-level import-graph cycles (SCCs > 1)."""
     return service.import_cycles(ctx, repo_id)
+
+
+@router.get("/repos/{repo_id}/security-scan")
+def security_scan(
+    repo_id: str,
+    categories: str = "secrets,sinks,dependencies",
+    include_tests: bool = False,
+    min_severity: str = "low",
+    limit: int = 500,
+    ctx: TenantContext = Depends(tenant),
+):
+    """Offline HEURISTIC scan: hard-coded secrets (redacted), dangerous sinks
+    and a dependency inventory. No CVE matching; not a CodeQL/gitleaks/Trivy
+    replacement (see services/code-intel/README.md)."""
+    cats = [c.strip() for c in categories.split(",") if c.strip()]
+    sev = min_severity if min_severity in ("info", "low", "medium", "high", "critical") else "low"
+    return service.security_scan(
+        ctx,
+        repo_id,
+        categories=cats,
+        include_tests=include_tests,
+        min_severity=sev,
+        limit=min(max(limit, 1), 5000),
+    )
