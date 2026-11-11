@@ -37,7 +37,7 @@ it into services is not on this roadmap.
 | Item | Status |
 |---|---|
 | [Extending guide](docs/extending.md): tools from OpenAPI, MCP servers, `SKILL.md` skills, LLM providers, workflow nodes, channels | done (first version) |
-| [AGENTS.md](AGENTS.md) for AI coding agents | done |
+| [ENGINEERING-RULES.md](ENGINEERING-RULES.md) for contributors | done |
 | Runnable example for each extension point under `examples/` | planned |
 | Typed client SDKs (TypeScript, Python) generated from the OpenAPI description of the API | done (`sdk/`, regenerated from `docs/api/openapi.json`; drift checked in `make gates`) |
 | Java Agent SDK: governance for agents inside your own Java application ([ADR-0013](docs/architecture/ADR-0013-embeddable-agent-sdk.md)) | in progress (`sdk/java`; Maven Central publication pending) |

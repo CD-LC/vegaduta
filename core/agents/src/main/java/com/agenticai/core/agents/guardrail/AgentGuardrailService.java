@@ -7,6 +7,7 @@ import com.agenticai.core.guardrails.ContentGuardrailType;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.sharing.PermissionLevel;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.sharing.ResourceType;
@@ -116,7 +117,11 @@ public class AgentGuardrailService {
         agent.setUpdatedBy(TenantContext.current().map(ctx -> ctx.getSubject()).orElse(null));
         agentRepository.save(agent);
 
-        log.info("Updated guardrails for agent {}: {} (plan: {})", agentId, guardrailIds, plan);
+        log.info(
+                "Updated guardrails for agent {}: {} (plan: {})",
+                LogSafe.clean(agentId),
+                LogSafe.clean(guardrailIds),
+                LogSafe.clean(plan));
     }
 
     /**
@@ -186,7 +191,7 @@ public class AgentGuardrailService {
                     throw new GuardrailNotAvailableForPlanException(guardrailId, required.name());
                 }
             } catch (IllegalArgumentException ex) {
-                log.warn("Unknown guardrail type: {}", guardrailId);
+                log.warn("Unknown guardrail type: {}", LogSafe.clean(guardrailId));
                 // Don't fail on unknown guardrails - they may be future types
             }
         }

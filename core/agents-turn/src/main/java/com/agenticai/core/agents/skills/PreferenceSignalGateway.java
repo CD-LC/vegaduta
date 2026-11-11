@@ -8,10 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The one hook the chat turn has into the "preferences from behavior" learning loop. It hands over the person's
- * message at the START of the turn, never touches the reply stream, and costs one volatile read when the loop is
- * off ({@code app.learning.preferences.enabled=false}, the default). The observer must be quick (it runs on the
- * request thread) and do anything real on its own worker with the tenant carried in {@code scope} (AGENTS.md rule 12).
+ * The one hook the chat turn has into the "preferences from behavior" learning loop. It hands over
+ * the person's message at the START of the turn, never touches the reply stream, and costs one
+ * volatile read when the loop is off ({@code app.learning.preferences.enabled=false}, the default).
+ * The observer must be quick (it runs on the request thread) and do anything real on its own worker
+ * with the tenant carried in {@code scope} (ENGINEERING-RULES.md rule 12).
  */
 public final class PreferenceSignalGateway {
 
@@ -35,7 +36,10 @@ public final class PreferenceSignalGateway {
         observer = installed;
     }
 
-    /** True once an observer is installed, whether or not it reports itself enabled (the startup wiring check). */
+    /**
+     * True once an observer is installed, whether or not it reports itself enabled (the startup
+     * wiring check).
+     */
     public static boolean installed() {
         return observer != null;
     }
@@ -43,7 +47,11 @@ public final class PreferenceSignalGateway {
     public static void observe(
             UUID agentId, String sessionId, String userMessage, Optional<TenantContext> tenant) {
         Observer o = observer;
-        if (o == null || agentId == null || userMessage == null || userMessage.isBlank() || !o.enabled()) {
+        if (o == null
+                || agentId == null
+                || userMessage == null
+                || userMessage.isBlank()
+                || !o.enabled()) {
             return;
         }
         try {

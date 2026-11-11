@@ -8,7 +8,7 @@
 //
 // Deliberate sibling of tierRouter.ts, NOT an edit to it (tierRouter.ts and
 // tier1.ts are locked by a concurrent session as of this file's authorship —
-// see the coordination note in CLAUDE.md/AGENT-COORDINATION). This module
+// see the coordination note in ENGINEERING-RULES.md/the internal change log). This module
 // only ever READS tier0.ts's/tier1.ts's exported session primitives —
 // createTier0Session, createTier1Session, tier0Available, getTier1RunModel —
 // the exact same primitives tierRouter.ts itself is built on, so on-device

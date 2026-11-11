@@ -40,7 +40,7 @@ function templatesLoadError(err: any, fallback: string): string {
     return (
       "This account can't reach the template moderation API (403). Community Templates moderation needs the " +
       "MANAGE_TEMPLATES permission, which a platform-admin token does not carry. Ask engineering to allow " +
-      "ROLE_platform-admin on /api/admin/templates/** (tracked in docs/AGENT-COORDINATION.md)."
+      "ROLE_platform-admin on /api/admin/templates/** (tracked in the internal change log)."
     );
   }
   return err?.message || fallback;
