@@ -793,6 +793,8 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
 
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/billing/src/test` only (Razorpay SDK calls, Stripe HTTP calls, billing email service) plus a test-scope `okhttp-jvm` dependency in `core/billing/pom.xml`. No production code changed. `core/billing` is in the lean personal edition agent's row; this PR touches only new test files and the one pom entry. Worktree: `vegaduta-coverage-wt`.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/brief/src/test` only (section rules, validator rules, service, tune service, both controllers, prune, rehearsal port, entities). No production code changed. Stacked on the `core/billing` test PR (`test/coverage-plus-10`). Worktree: `vegaduta-coverage-wt`.
 - 2026-11-02, test-coverage agent: added JUnit tests under `core/omnichannel/src/test` only (operator inbox and escalation, contact service and controller, agent send/control/query ports, Meta Graph client, WhatsApp QR receive loop, edge relay controller, sandbox channel controller). No production code changed. Worktree: `vegaduta-coverage-wt`.
 ### Release signing (Claude Code, 2026-11-01)
 
@@ -802,3 +804,7 @@ Opened `feat/release-code-signing` (off `origin/main`): opt-in Developer ID sign
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
 Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the signed-in personal-edition suite: agent behaviour, turn inspector and feedback, MCP registration and tool selection, workflows, knowledge upload and retrieval, A2A-off checks, channels and the device pairing lifecycle. No product code changed. Verified: `make gates` passes; the personal suite passes on a local personal stack (79 passed, 4 skipped: three A2A positive-path checks need the A2A directory on, and the platform-admin check needs the owner to hold that role). Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-personal-e2e-wt.
+
+### Local work scan and rescue (Devin, 2026-11-05)
+
+Scanned every local worktree and stash for uncommitted or unpushed work. Uncommitted edits that belonged to open PRs were checked against those branches; three pieces had no PR and were moved onto branches: the e2e local-stack sign-in fixes here (`test/e2e-local-stack-signin`, off `origin/main`), a `BriefControllerTest` SSE race fix on `test/coverage-plus-10` (#334), and the eval suite 1.1.0 changelog on `feat/agent-eval-harness` (#365). Dirty worktrees were stashed with `devin-scan 2026-11-05` messages, nothing was dropped. Verified: `BriefControllerTest` 13/13; Playwright lists all 332 tests with these specs.

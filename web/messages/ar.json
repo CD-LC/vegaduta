@@ -3142,7 +3142,13 @@
     "proposalGoalLabel": "ما يرغب الحارس في تشغيله",
     "statusFilterLabel": "تصفية حسب الحالة",
     "workflowNeedsHint": "ستُمرَّر إجاباتك إلى الخطوة التالية عند الموافقة.",
-    "workflowNeedsLabel": "يتطلب مسار العمل هذا منك ما يلي"
+    "workflowNeedsLabel": "يتطلب مسار العمل هذا منك ما يلي",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "سجل التدقيق",
