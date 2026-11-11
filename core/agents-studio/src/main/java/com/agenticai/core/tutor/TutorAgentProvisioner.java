@@ -12,6 +12,7 @@ import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tutor.dto.TutorDtos.TutorAgentResponse;
 import java.time.Instant;
 import java.util.Comparator;
@@ -175,7 +176,10 @@ public class TutorAgentProvisioner {
                             + " Lessons, quizzes and reviews keep working without it.");
         }
         configure(created.id());
-        log.info("Tutor agent {} provisioned for a member of tenant '{}'", created.id(), tenantId);
+        log.info(
+                "Tutor agent {} provisioned for a member of tenant '{}'",
+                LogSafe.clean(created.id()),
+                LogSafe.clean(tenantId));
         // Re-query: if another replica created one at the same moment, everyone converges on the
         // oldest.
         UUID agentId = findTutor(owner).map(Agent::getId).orElse(created.id());

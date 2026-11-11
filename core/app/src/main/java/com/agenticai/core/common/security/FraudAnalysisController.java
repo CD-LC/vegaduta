@@ -1,5 +1,6 @@
 package com.agenticai.core.common.security;
 
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
@@ -176,9 +177,9 @@ public class FraudAnalysisController {
 
             log.info(
                     "IP {} blacklisted by admin {} for reason: {}",
-                    req.getIp(),
-                    adminId,
-                    req.getReason());
+                    LogSafe.clean(req.getIp()),
+                    LogSafe.clean(adminId),
+                    LogSafe.clean(req.getReason()));
 
             return ResponseEntity.ok(
                     Map.of(
@@ -221,9 +222,9 @@ public class FraudAnalysisController {
 
             log.info(
                     "User {} blacklisted by admin {} for reason: {}",
-                    userId,
-                    adminId,
-                    req.getReason());
+                    LogSafe.clean(userId),
+                    LogSafe.clean(adminId),
+                    LogSafe.clean(req.getReason()));
 
             return ResponseEntity.ok(
                     Map.of(

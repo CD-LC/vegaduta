@@ -1,6 +1,7 @@
 package com.agenticai.core.storage;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -417,8 +418,8 @@ public abstract class TenantScopedFileStorage implements FileStorageService {
         if (!properties.isLegacyUnprefixedFallback()) {
             log.warn(
                     "Refused un-prefixed legacy fallback for {} of key '{}' -"
-                        + " app.storage.legacy-unprefixed-fallback is off. If this object is real,"
-                        + " it predates tenant prefixing and needs a bucket migration.",
+                            + " app.storage.legacy-unprefixed-fallback is off. If this object is real,"
+                            + " it predates tenant prefixing and needs a bucket migration.",
                     operation,
                     key);
             return false;
@@ -427,9 +428,9 @@ public abstract class TenantScopedFileStorage implements FileStorageService {
         if (!allowed) {
             log.warn(
                     "Refused un-prefixed legacy fallback for {} of key '{}' - its prefix is not one"
-                        + " of the known legacy namespaces. The bare-key namespace is shared by ALL"
-                        + " tenants, so this fallback is allowlisted; see TenantScopedFileStorage's"
-                        + " javadoc.",
+                            + " of the known legacy namespaces. The bare-key namespace is shared by ALL"
+                            + " tenants, so this fallback is allowlisted; see TenantScopedFileStorage's"
+                            + " javadoc.",
                     operation,
                     key);
         }
@@ -462,11 +463,11 @@ public abstract class TenantScopedFileStorage implements FileStorageService {
                                     && !currentTenantId.equals(embeddedTenantId)) {
                                 log.error(
                                         "Blocked cross-tenant object storage access: key '{}' is"
-                                            + " scoped to tenant '{}', but the current request's"
-                                            + " TenantContext is tenant '{}'",
-                                        key,
-                                        embeddedTenantId,
-                                        currentTenantId);
+                                                + " scoped to tenant '{}', but the current request's"
+                                                + " TenantContext is tenant '{}'",
+                                        LogSafe.clean(key),
+                                        LogSafe.clean(embeddedTenantId),
+                                        LogSafe.clean(currentTenantId));
                                 throw new FileStorageException(
                                         "Object key '"
                                                 + key

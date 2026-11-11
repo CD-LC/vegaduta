@@ -6,6 +6,7 @@ import { CIN_NUMBER, LEGAL_ENTITY } from "../../lib/legalEntity";
 import { commercialUrl, docsHref, isExternalHref } from "../../lib/siteLinks";
 import { academyHref } from "../../lib/academyUrl";
 import { COMMUNITY_LINKS, CONTACT_EMAIL, LICENSE_NAME, REPO_URL, resourceLinks } from "./ossSite";
+import ThemePicker from "../ThemePicker";
 
 // Header and footer shared by the open-source public pages. Server component.
 // Brand mark, wordmark and operator details are the same sources the classic
@@ -83,6 +84,7 @@ export function OssHeader() {
           )}
         </nav>
         <div className="flex items-center gap-2 text-sm">
+          <ThemePicker />
           <Link href="/login" className="rounded-md px-3 py-1.5 text-muted-foreground hover:text-foreground">
             Sign in
           </Link>

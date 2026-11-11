@@ -820,6 +820,7 @@ writer), tenant migration **V683** (`memory_consolidation_runs`, `memory_tombsto
 `docs/architecture/core-module-graph.md`, ADR-0028 "as built" note. Known: WP4c introduced a
 package cycle `memorystore -> tenancy -> ... -> agents.memory -> memorystore` that
 `StructureRulesTest` now flags - pre-existing on the base branch, not from this change.
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/omnichannel/src/test` only (operator inbox and escalation, contact service and controller, agent send/control/query ports, Meta Graph client, WhatsApp QR receive loop, edge relay controller, sandbox channel controller). No production code changed. Worktree: `vegaduta-coverage-wt`.
 ### Release signing (Claude Code, 2026-11-01)
 
 Opened `feat/release-code-signing` (off `origin/main`): opt-in Developer ID signing, notarization and stapling for the macOS `.dmg`, a signed `.pkg`, and Authenticode signing for the Windows `.exe`, all driven by repository secrets that are not set yet, so a release without them is unchanged. Verified locally: the unsigned macOS and Windows paths, the signed path with a throwaway self-signed identity (hardened runtime, timestamp, strict verify), the unsigned `.pkg` commands, and `make gates`. Not verified: real Apple notarization, the Installer-signed `.pkg`, and the Azure signing step; they need credentials only the maintainers hold. Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-signing-wt.

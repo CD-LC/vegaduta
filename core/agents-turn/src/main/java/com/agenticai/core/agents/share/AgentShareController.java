@@ -14,6 +14,7 @@ import com.agenticai.core.providers.ProviderModelResponse;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -310,8 +311,8 @@ public class AgentShareController {
                                         log.warn(
                                                 "Agent share chat stream failed mid-response for"
                                                         + " share {} after {} chars already streamed",
-                                                shareId,
-                                                emitted.length(),
+                                                LogSafe.clean(shareId),
+                                                LogSafe.clean(emitted.length()),
                                                 e);
                                         return Flux.just(
                                                 AgentController.STREAM_ERROR_MARKER
@@ -427,7 +428,7 @@ public class AgentShareController {
                     } catch (TenantLimitExceededException e) {
                         log.warn(
                                 "Agent share chat turn failed - tenant limit exceeded for share {}",
-                                shareId,
+                                LogSafe.clean(shareId),
                                 e);
                         return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                                 .body(
@@ -440,7 +441,10 @@ public class AgentShareController {
                                                         + " exhausted. It will reset after 24"
                                                         + " hours."));
                     } catch (RuntimeException e) {
-                        log.warn("Agent share chat turn failed for share {}", shareId, e);
+                        log.warn(
+                                "Agent share chat turn failed for share {}",
+                                LogSafe.clean(shareId),
+                                e);
                         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                                 .body(Map.of("error", "upstream_failed"));
                     }

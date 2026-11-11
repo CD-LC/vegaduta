@@ -2,6 +2,7 @@ package com.agenticai.core.knowledge;
 
 import com.agenticai.core.knowledge.dto.IngestResponse;
 import com.agenticai.core.knowledge.dto.KnowledgeIngestionJobResponse;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.FileStorageService;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -106,9 +107,9 @@ public class KnowledgeIngestionJobService {
             log.warn(
                     "Failed to store original file for knowledge document {} ({}) - transcription"
                             + " will proceed without it: {}",
-                    document.getId(),
-                    filename,
-                    e.getMessage());
+                    LogSafe.clean(document.getId()),
+                    LogSafe.clean(filename),
+                    LogSafe.clean(e.getMessage()));
         }
     }
 

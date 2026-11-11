@@ -10,6 +10,7 @@ import com.agenticai.core.security.SpendControlsUnavailableException;
 import com.agenticai.core.security.SpendCounters;
 import com.agenticai.core.security.TenantLimitExceededException;
 import com.agenticai.core.security.TenantPlan;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.tenancy.PlatformSettingsService;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
@@ -523,14 +524,14 @@ public class FreeTierUsageLimiterService {
                 redisTemplate.expire(key, window);
                 log.warn(
                         "Hosted-pool token counter '{}' had no TTL (would never have reset) - repaired with a fresh {} expiry",
-                        key,
-                        window);
+                        LogSafe.clean(key),
+                        LogSafe.clean(window));
                 return true;
             }
         } catch (RuntimeException e) {
             log.debug(
                     "Hosted-pool token TTL repair failed for '{}' - leaving for the next read to retry",
-                    key,
+                    LogSafe.clean(key),
                     e);
         }
         return false;
@@ -605,7 +606,7 @@ public class FreeTierUsageLimiterService {
             }
             log.debug(
                     "Hosted-pool token counter write failed for '{}' - failing open, same posture as every other write in this class",
-                    key,
+                    LogSafe.clean(key),
                     e);
             return null;
         }

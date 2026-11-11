@@ -14,11 +14,12 @@ import com.agenticai.core.agents.memory.MessageRole;
 import com.agenticai.core.agents.memory.SessionMemoryService;
 import com.agenticai.core.agents.memory.TranscriptView;
 import com.agenticai.core.agents.tunables.BehaviourSettings;
-import com.agenticai.core.agents.turn.ChatCacheProperties;
 import com.agenticai.core.agents.turn.ChatCachePolicy;
+import com.agenticai.core.agents.turn.ChatCacheProperties;
 import com.agenticai.core.agents.turn.cache.LlmResponseCacheService;
 import com.agenticai.core.agents.turn.cache.SemanticResponseCacheService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.settings.SettingsResolver;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.time.Instant;
@@ -98,8 +99,9 @@ public class ChatBranchService {
     private final int maxNodesPerSession;
 
     /**
-     * What the response caches key on ({@code app.chat.cache.*}): the same policy the chat turn reads and
-     * writes them with, so a regenerate drops the entry that turn made. The shipped defaults until set.
+     * What the response caches key on ({@code app.chat.cache.*}): the same policy the chat turn
+     * reads and writes them with, so a regenerate drops the entry that turn made. The shipped
+     * defaults until set.
      */
     private volatile ChatCachePolicy cachePolicy = new ChatCachePolicy(new ChatCacheProperties());
 
@@ -112,7 +114,10 @@ public class ChatBranchService {
         this.cachePolicy = new ChatCachePolicy(cacheProperties, behaviour);
     }
 
-    /** The settings catalog, so a regenerate computes the key with the same {@code chat.cache.contextTurns} the turn used. */
+    /**
+     * The settings catalog, so a regenerate computes the key with the same {@code
+     * chat.cache.contextTurns} the turn used.
+     */
     @org.springframework.beans.factory.annotation.Autowired(required = false)
     void useSettings(ObjectProvider<SettingsResolver> resolver) {
         this.behaviour = BehaviourSettings.lazy(resolver::getIfAvailable);
@@ -252,8 +257,8 @@ public class ChatBranchService {
         } catch (RuntimeException e) {
             log.warn(
                     "Could not restore the active branch of session {} after a failed turn: {}",
-                    sessionId,
-                    e.toString());
+                    LogSafe.clean(sessionId),
+                    LogSafe.clean(e.toString()));
         }
     }
 
@@ -302,8 +307,8 @@ public class ChatBranchService {
             log.warn(
                     "Could not restore the active branch of session {} after a turn that appended"
                             + " nothing: {}",
-                    sessionId,
-                    e.toString());
+                    LogSafe.clean(sessionId),
+                    LogSafe.clean(e.toString()));
         }
     }
 
@@ -421,8 +426,8 @@ public class ChatBranchService {
             log.warn(
                     "Chat branching: session {} is at its node limit ({}); new turns are not"
                             + " recorded in the tree",
-                    base.sessionId(),
-                    maxNodesPerSession);
+                    LogSafe.clean(base.sessionId()),
+                    LogSafe.clean(maxNodesPerSession));
             return new Snapshot(base, nodes, byId, path);
         }
         UUID anchor = alignment.anchorIndex() < 0 ? null : path.get(alignment.anchorIndex()).id();
@@ -483,8 +488,10 @@ public class ChatBranchService {
         if (liveId == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Session not found.");
         }
-        // The branch tree stores role and text only, so a turn's tool record (ChatTurn#tools) is carried
-        // over from the live transcript for every turn that is unchanged - which is every turn before an
+        // The branch tree stores role and text only, so a turn's tool record (ChatTurn#tools) is
+        // carried
+        // over from the live transcript for every turn that is unchanged - which is every turn
+        // before an
         // edit or a regenerate. Turns of another branch the live list never held have none.
         sessionMemory.replaceHistory(
                 liveId, withToolRecords(toTurns(path), sessionMemory.getFullHistory(liveId)));
@@ -508,8 +515,9 @@ public class ChatBranchService {
     }
 
     /**
-     * Drops the cached reply of the message being regenerated. {@code before} is the conversation up to it,
-     * so the key is the very one the chat turn read and wrote (the cache keys on the conversation too).
+     * Drops the cached reply of the message being regenerated. {@code before} is the conversation
+     * up to it, so the key is the very one the chat turn read and wrote (the cache keys on the
+     * conversation too).
      */
     private void evictCachedReply(UUID agentId, String userText, List<ChatTurn> before) {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
@@ -550,7 +558,10 @@ public class ChatBranchService {
         return new ChatBranchStore.State(base.agentId(), base.sessionId(), owner, leaf, reuse);
     }
 
-    /** {@code turns}, each with the tool record of the same turn (same position, role and text) in {@code live}. */
+    /**
+     * {@code turns}, each with the tool record of the same turn (same position, role and text) in
+     * {@code live}.
+     */
     static List<ChatTurn> withToolRecords(List<ChatTurn> turns, List<ChatTurn> live) {
         if (live == null || live.isEmpty()) {
             return turns;

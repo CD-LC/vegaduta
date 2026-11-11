@@ -1,6 +1,7 @@
 package com.agenticai.core.common.security;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -72,7 +73,9 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
 
         if (tenantId == null) {
             // Anonymous/tenant-less request (public endpoints): nothing to key on.
-            log.debug("No tenant context for {} - fraud checks skipped", requestCtx.path);
+            log.debug(
+                    "No tenant context for {} - fraud checks skipped",
+                    LogSafe.clean(requestCtx.path));
             return true;
         }
 
@@ -95,9 +98,9 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
         if (decision.isSuspicious() && !enforce && !isBlacklisted(clientCtx)) {
             log.warn(
                     "Fraud detection (observe-only) would {} {} {}",
-                    decision,
-                    requestCtx.method,
-                    requestCtx.path);
+                    LogSafe.clean(decision),
+                    LogSafe.clean(requestCtx.method),
+                    LogSafe.clean(requestCtx.path));
             return true;
         }
 

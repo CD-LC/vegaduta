@@ -10,6 +10,7 @@ import com.agenticai.core.agents.memory.TenantMemoryEntry;
 import com.agenticai.core.agents.memory.TenantMemoryService;
 import com.agenticai.core.graphmemory.GraphMemoryService;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.sharing.PermissionLevel;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -361,8 +362,9 @@ public class UserMemoryController {
         log.info(
                 "Self-service forget-all: tenant={} subject#={} agentFacts={} (ok={}) sharedAndBlocks={} (ok={}) "
                         + "graphEntities={} (ok={}) otherStores={} (ok={})",
-                TenantContext.current().map(TenantContext::getTenantId).orElse("unknown"),
-                subjectFingerprint(subject),
+                LogSafe.clean(
+                        TenantContext.current().map(TenantContext::getTenantId).orElse("unknown")),
+                LogSafe.clean(subjectFingerprint(subject)),
                 agentFacts,
                 agentErased,
                 sharedAndBlocks,

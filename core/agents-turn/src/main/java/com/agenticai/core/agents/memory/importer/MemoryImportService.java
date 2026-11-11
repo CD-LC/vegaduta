@@ -21,6 +21,7 @@ import com.agenticai.core.agents.usermemory.UserMemoryFactService;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.sharing.ResourceAccessDeniedException;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -407,10 +408,10 @@ public class MemoryImportService {
         String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse("unknown");
         log.info(
                 "Memory import: tenant={} source={} saved={} skipped={}",
-                tenantId,
-                source,
-                saved,
-                skippedCount);
+                LogSafe.clean(tenantId),
+                LogSafe.clean(source),
+                LogSafe.clean(saved),
+                LogSafe.clean(skippedCount));
         try {
             AuditLogService audit = auditLogService.getIfAvailable();
             if (audit != null) {
