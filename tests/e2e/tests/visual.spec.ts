@@ -47,6 +47,35 @@ function filterOutWeatherFetchRaceNoise(errors: string[]): string[] {
 // which project (chromium / mobile-chrome) executes the file.
 
 /**
+ * Make the page's colours the same on every run, the way a visitor would: by choosing a theme.
+ *
+ * Without a choice the theme is not a constant. ThemeProvider rolls light or dark at random per visit ("random on
+ * user visits until they set it explicitly") and WeatherThemeEngine then picks an accent from live IP-geolocation
+ * and weather lookups, so against a baseline taken at another time or place nearly every pixel differs (ratio
+ * ~0.95). Setting the explicit-choice keys (light mode, the default accent) is what ThemePicker does and turns
+ * both off. The two lookups are also answered locally, so no real request leaves the browser.
+ */
+async function pinTheme(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    try {
+      window.localStorage.setItem("agentic_theme_mode", "light");
+      window.localStorage.setItem("agentic_theme_mode_explicit", "1");
+      window.localStorage.setItem("agentic_theme_accent", "indigo");
+      window.localStorage.setItem("agentic_theme_accent_user_set", "1");
+    } catch {
+      /* storage blocked: the test would then see the random roll, which is what it was before */
+    }
+  });
+  const cors = { "access-control-allow-origin": "*" };
+  await page.route(/get\.geojs\.io\/v1\/ip\/geo\.json/, (route) =>
+    route.fulfill({ json: { latitude: "0", longitude: "0", timezone: "Etc/Invalid" }, headers: cors })
+  );
+  await page.route(/api\.open-meteo\.com\//, (route) =>
+    route.fulfill({ json: { current_weather: { is_day: 1, weathercode: 0 } }, headers: cors })
+  );
+}
+
+/**
  * Neutralizes the landing page's continuous-motion demo widgets so a
  * full-page screenshot is actually deterministic, without deleting
  * coverage of the static parts of the page.
@@ -76,8 +105,8 @@ function filterOutWeatherFetchRaceNoise(errors: string[]): string[] {
  */
 async function stabilizeLandingForScreenshot(page: Page): Promise<void> {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await pinTheme(page);
   await page.goto("/");
-
   // Scroll all the way down and back so any `whileInView` (IntersectionObserver-
   // gated, `viewport: { once: true }`) reveal further down the page - e.g. the
   // closing CTA section - has genuinely fired at least once, rather than
@@ -169,10 +198,18 @@ test.describe("Keycloak login page", () => {
   test("login page screenshot + no uncaught console errors", async ({ page }) => {
     const errors = collectConsoleErrors(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
+    await pinTheme(page);
     await page.goto("/");
     // Sign-in only lives in the header now (see auth.spec.ts) - the footer's
     // "Company" column that used to hold this button was removed.
-    await page.locator("header").getByRole("button", { name: "Sign in" }).click();
+    // A link on the OSS landing, a button on the classic site (same either/or as auth.spec.ts).
+    await page
+      .locator("header")
+      .getByRole("link", { name: "Sign in" })
+      .or(page.locator("header").getByRole("button", { name: "Sign in" }))
+      .click();
+    // /login renders the sign-in landing; the Keycloak redirect only fires on this deliberate click (see auth.spec.ts).
+    await page.getByRole("button", { name: /continue to secure sign-in/i }).click();
     await page.waitForURL(AUTH_HOST_RE, { timeout: 30_000 });
     await page.waitForLoadState("networkidle");
 

@@ -9,9 +9,13 @@ Release notes on GitHub are generated from the section for each version.
 ## [Unreleased]
 
 ### Added
-- Settings catalog: a workspace can set its own conversation replay window (`chat.history.maxTurns`, `chat.history.maxChars`, `chat.history.maxTokens`; before, only a platform admin could), and a workspace or an agent can set when a long prompt is compacted (`chat.compaction.clearAt`, `chat.compaction.compactAt`, `chat.compaction.keepRecentToolResults`). Labels for the new settings are English in every locale for now.
-
 ### Changed
+### Fixed
+- **Code intelligence now builds a real call graph for Java and resolves calls by receiver.** Java (and other grammars with a `method_invocation`-style call node) stored every call as a fake symbol and recorded no `calls` edge, so callers, callees, impact, dead-code and hotspots were empty or wrong for the platform's main language (on `core/guardrails`: 11,606 symbols and 0 call edges before, 1,664 symbols and 10,221 call edges now). Calls now carry their receiver, so `map.get(k)` or `Pattern.compile(x)` no longer point at an unrelated in-repo method of the same name (ambiguous Python call edges on `services/code-intel` fell from 494 to 119). Edges in unchanged files are re-linked when another file adds or removes a symbol, instead of waiting for a full rebuild.
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
+- Release signing for the Setup app: the macOS `.dmg` (and a new `.pkg`) can be Developer ID signed, notarized and stapled, and the Windows `.exe` Authenticode-signed, by `release.yml` when the signing secrets are set. With none set the release builds what it built before. See `docs/maintainers/release-signing.md`.
+- Settings catalog: a workspace can set its own conversation replay window (`chat.history.maxTurns`, `chat.history.maxChars`, `chat.history.maxTokens`; before, only a platform admin could), and a workspace or an agent can set when a long prompt is compacted (`chat.compaction.clearAt`, `chat.compaction.compactAt`, `chat.compaction.keepRecentToolResults`). Labels for the new settings are English in every locale for now.
+- Tenant status guard sanitises the schema name in its schema-check failure log line (`LogSafe.clean`).
 - The cumulative prompt-token cap of one reply's tool loop (`app.chat.tools.max-prompt-tokens-per-turn`, setting `chat.toolLoop.maxPromptTokensPerTurn`) now defaults to 1,000,000 (200,000 in the `personal` profile) instead of uncapped. A reply that passes it is told to stop calling tools and answer with what it has. Set `APP_CHAT_TOOLS_MAX_PROMPT_TOKENS_PER_TURN=0`, or the setting to 0, to remove the cap.
 
 ## [0.1.14] - 2026-10-30

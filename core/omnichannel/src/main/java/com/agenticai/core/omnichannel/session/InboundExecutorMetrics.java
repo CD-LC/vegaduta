@@ -1,5 +1,6 @@
 package com.agenticai.core.omnichannel.session;
 
+import com.agenticai.core.security.logging.LogSafe;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,11 @@ final class InboundExecutorMetrics {
     }
 
     void reject(String channel, String reason, String tenant) {
-        log.warn("Inbound {} task rejected ({} cap reached, tenant={})", channel, reason, tenant);
+        log.warn(
+                "Inbound {} task rejected ({} cap reached, tenant={})",
+                LogSafe.clean(channel),
+                LogSafe.clean(reason),
+                LogSafe.clean(tenant));
         count("rejected_" + reason, channel);
     }
 

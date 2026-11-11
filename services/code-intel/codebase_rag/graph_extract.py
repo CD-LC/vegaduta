@@ -61,6 +61,10 @@ class RawEdge:
     edge_type: str  # calls | imports | inherits | contains
     target_name: str  # unresolved name / module string
     line: int
+    # Receiver of a call (`repo` in `repo.save()`, `this`/`self`/`super`, a class
+    # name for `Util.f()`); "?" when the receiver is an expression (`a().b()`),
+    # None for a bare `f()` or a non-call edge. graph.py uses it to resolve.
+    qualifier: str | None = None
 
 
 @dataclass
@@ -72,14 +76,57 @@ class FileExtraction:
     edges: list[RawEdge] = field(default_factory=list)
 
 
-# Node-type fragments for call sites across tree-sitter grammars.
-CALL_TYPE_FRAGMENTS = (
-    "call_expression",
-    "method_invocation",
-    "function_call",
-    "invocation_expression",
-    "call",
+# Node types that are call sites across tree-sitter grammars. EXACT types plus
+# the `*_call` / `*_invocation` families: a plain substring test is wrong here
+# because the definition fragment "method" also matched Java's
+# `method_invocation`, turning every call into a bogus symbol with no call edge.
+CALL_NODE_TYPES = frozenset(
+    {
+        "call_expression",
+        "call",
+        "function_call",
+        "function_call_expression",
+        "member_call_expression",
+        "scoped_call_expression",
+        "nullsafe_member_call_expression",
+        "invocation_expression",
+        "method_invocation",
+        "method_call",
+        "macro_invocation",
+        "new_expression",
+        "object_creation_expression",
+    }
 )
+CREATION_NODE_TYPES = frozenset({"new_expression", "object_creation_expression"})
+
+
+def is_call_type(t: str) -> bool:
+    return t in CALL_NODE_TYPES or t.endswith(
+        ("_call", "_call_expression", "_invocation", "_invocation_expression")
+    )
+
+
+# Definition fragments that are short and generic: matched whole (or as a
+# `_suffix`), never as a substring, so `method` does not swallow
+# `method_invocation` / `method_reference` and `module` does not swallow
+# `module_import`.
+_GENERIC_DEFINITION_FRAGMENTS = frozenset(
+    {"module", "method", "implementation", "subroutine", "destructor"}
+)
+
+
+def is_definition_type(t: str) -> bool:
+    if is_call_type(t) or "reference" in t or "import" in t:
+        return False
+    for f in DEFINITION_TYPE_FRAGMENTS:
+        if f in _GENERIC_DEFINITION_FRAGMENTS:
+            if t == f or t.endswith("_" + f):
+                return True
+        elif f in t:
+            return True
+    return False
+
+
 # Inheritance clause node types across grammars.
 INHERIT_TYPE_FRAGMENTS = (
     "superclass",
@@ -177,10 +224,12 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
         head = node.type.split("_")[0]
         return _KIND_MAP.get(head, head)
 
-    def call_name(node) -> str | None:
-        """Identifier being invoked: rightmost name of the callee part."""
+    def call_parts(node) -> tuple[str | None, str | None]:
+        """(identifier being invoked, receiver). The name is the rightmost
+        identifier of the callee; the receiver is the identifier left of it
+        (`repo` in `this.repo.save()`), "?" for an expression receiver."""
         callee = None
-        for f in ("function", "name", "constructor"):
+        for f in ("function", "name", "constructor", "macro", "type"):
             try:
                 callee = node.child_by_field_name(f)
             except Exception:
@@ -190,10 +239,32 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
         if callee is None and node.named_child_count:
             callee = node.named_children[0]
         if callee is None:
-            return None
+            return None, None
         txt = node_text(callee)
         m = re.findall(r"[A-Za-z_][A-Za-z0-9_]*", txt)
-        return m[-1] if m else None
+        if not m:
+            return None, None
+        name = m[-1]
+        if node.type in CREATION_NODE_TYPES:
+            return name, None
+        recv = None
+        try:
+            obj = node.child_by_field_name("object")
+        except Exception:
+            obj = None
+        if obj is not None:
+            recv = node_text(obj).strip()
+        elif re.search(r"\.|::|->", txt):
+            recv = (
+                re.split(r"\.|::|->", txt)[-2].strip()
+                if len(re.split(r"\.|::|->", txt)) > 1
+                else None
+            )
+        if recv is None:
+            return name, None
+        if re.fullmatch(r"[A-Za-z_][\w]*(?:(?:\.|::|->)[A-Za-z_][\w]*)*", recv):
+            return name, re.split(r"\.|::|->", recv)[-1]
+        return name, "?"
 
     def signature_of(node) -> str:
         """First line of the definition's source, trimmed - `def foo(a, b):`,
@@ -256,7 +327,7 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
     def walk(node, scope: list[str], enclosing: str | None):
         for child in node.named_children:
             t = child.type
-            if any(f in t for f in DEFINITION_TYPE_FRAGMENTS):
+            if is_definition_type(t):
                 name = def_name(child)
                 if name:
                     qname = ".".join(scope + [name])  # noqa: RUF005
@@ -299,10 +370,12 @@ def _ts_extract(text: str, path: str, language: str) -> FileExtraction | None:
                             RawEdge(enclosing, "inherits", base, child.start_point[0] + 1)
                         )
                 continue
-            if any(f in t for f in CALL_TYPE_FRAGMENTS):
-                cname = call_name(child)
+            if is_call_type(t):
+                cname, qual = call_parts(child)
                 if cname and cname not in _KEYWORDS and enclosing:
-                    fx.edges.append(RawEdge(enclosing, "calls", cname, child.start_point[0] + 1))
+                    fx.edges.append(
+                        RawEdge(enclosing, "calls", cname, child.start_point[0] + 1, qual)
+                    )
             elif enclosing and _is_reference_node(child, t, REF_TYPES, REF_PARENT_TYPES):
                 # Value/type-position use: `Foo` in a type annotation, `.bar`
                 # in a member access, a constant in an expression. These feed

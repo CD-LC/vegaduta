@@ -4,7 +4,7 @@
 |---|---|
 | **Status** | Proposed. Stages 1-3 implemented (see section 2.5), stages 4 and 6 implemented (see section 2.6): compiled and unit-tested, **not yet benchmarked** at 32 users (section 2.4 requires that before stages 2-4 are called healthy). |
 | **Date** | 2026-10-16 |
-| **Relates to** | AGENTS.md rules 6 and 12, [ADR-0016](ADR-0016-search-path-round-trips.md) (the JDBC boundary), [HOT-PATH-PERFORMANCE.md](HOT-PATH-PERFORMANCE.md) section 4a (the 32-user rule), [ADR-0020](ADR-0020-turn-journal.md) |
+| **Relates to** | ENGINEERING-RULES.md rules 6 and 12, [ADR-0016](ADR-0016-search-path-round-trips.md) (the JDBC boundary), [HOT-PATH-PERFORMANCE.md](HOT-PATH-PERFORMANCE.md) section 4a (the 32-user rule), [ADR-0020](ADR-0020-turn-journal.md) |
 | **Code** | `core/security/.../TenantContext.java`, `TenantScope.java`; `core/agents-turn/.../TurnContext.java`, `AgentChatService.java`, `ChatTurnPreflight.java`, `RlArmSelection.java`, `ChatClientSelection.java`, `ChatPromptAssembler.java`, `ChatTurnDispatcher.java`, `ChatTurnExecutor.java` (+ `FastStreamTurn.java`, `FastStreamRecovery.java`), `BufferedTurnRunner.java` (+ `BufferedTurnCalls.java`), `TenantScopedFlux.java`; `core/agents-tools/.../tools/AgentToolProvider.java`, `tools/TenantContextPropagatingToolCallback.java`; `core/tenancy/.../TenantSchemaResolver.java` |
 
 ## 1. Context

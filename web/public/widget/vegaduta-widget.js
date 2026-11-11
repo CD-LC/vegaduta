@@ -70,7 +70,7 @@
  * # deleted.                                                                  #
  * ############################################################################
  *
- * RULE 0 (CLAUDE.md): no localhost, ever, in a browser-facing URL. This file
+ * rule 4 (ENGINEERING-RULES.md): no localhost, ever, in a browser-facing URL. This file
  * has NO baked base URL at all - it derives its own origin from the <script
  * src> that loaded it (see resolveOrigin). That is structurally stronger than
  * a NEXT_PUBLIC_* constant: NEXT_PUBLIC_API_BASE_URL is baked at BUILD time and

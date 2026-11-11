@@ -235,7 +235,7 @@ server relays opaque hex and stays dumb — that's what keeps it small.
   ever needed is the Mobile SDK app owning phone-side BLE, which is exactly a
   `MobileDevice` feature, not this one.
 
-## 8. Build order & ownership (per CLAUDE.md roster)
+## 8. Build order & ownership (per ENGINEERING-RULES.md roster)
 
 | # | Piece | Owner | Depends on |
 |---|---|---|---|

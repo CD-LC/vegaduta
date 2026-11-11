@@ -292,7 +292,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          # The `security` profile has no default for this on purpose (AGENTS.md rule 4: a
+          # The `security` profile has no default for this on purpose (ENGINEERING-RULES.md rule 4: a
           # token issuer never falls back to localhost). With app.auth.mode=local there is no
           # external issuer, so personal supplies a URN that names none and can never resolve:
           # if something still tried Keycloak discovery it would fail closed, not reach a

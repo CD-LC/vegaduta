@@ -152,7 +152,7 @@ forever).
 | postMessage contract | `web/app/components/widget/embedProtocol.ts` | **Hand-maintained pair** with the loader — the loader cannot import TypeScript. Change both in the same commit; bump `PROTOCOL_VERSION`. |
 | Demo harness | `web/public/widget/demo.html` | Same-origin test page; works even before the XFO fix lands. |
 
-## Rule 0 (CLAUDE.md): why there is no baked base URL
+## Rule 4 (ENGINEERING-RULES.md): why there is no baked base URL
 
 `NEXT_PUBLIC_API_BASE_URL` is baked at build time and defaults to
 `http://localhost:8080` in `web/Dockerfile` — for a widget that failure mode

@@ -61,7 +61,7 @@ We do not add a GraphQL endpoint over the platform's domain. The reasons are spe
    keys carry `PERM_*` scopes matched the same way. A single `POST /graphql` endpoint bypasses all of it, so every
    resolver and field would need its own authorization, written again and kept in step with the REST checks.
 2. **Tenancy is a ThreadLocal schema switch.** GraphQL Java resolves fields on executors and batches them with
-   DataLoader. Each hop has to carry `TenantScope` (rule 12 in `AGENTS.md`); one missed hop runs a query in the wrong
+   DataLoader. Each hop has to carry `TenantScope` (rule 12 in `ENGINEERING-RULES.md`); one missed hop runs a query in the wrong
    tenant's schema or fails closed. REST handlers run on the request thread.
 3. **Unbounded query cost.** A nested query over agents, runs, messages and knowledge documents can fan out into
    thousands of database calls in one request. Defending against that needs depth and complexity limits, persisted

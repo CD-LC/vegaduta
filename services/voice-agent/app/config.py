@@ -45,7 +45,7 @@ def _env_float(name: str, default: float) -> float:
 # never hands its URL to a browser; it only ever dials LiveKit itself as a
 # second server-side client, same network relationship LiveKitEgressService
 # has to LiveKit's Egress API (http://livekit:7880/twirp/...) - so per
-# CLAUDE.md's RULE 0, this is one of the internal-only exceptions that
+# ENGINEERING-RULES.md rule 4, this is one of the internal-only exceptions that
 # correctly stays off the public domain.
 LIVEKIT_URL = _env("LIVEKIT_URL", "ws://livekit:7880")
 #

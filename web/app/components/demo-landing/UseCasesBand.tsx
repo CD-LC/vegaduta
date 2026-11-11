@@ -48,7 +48,7 @@
 //
 // Beacons: usecases_try_click / usecases_recipe_click are new names — they
 // need adding to core's LandingEventController.ALLOWED_EVENTS(_ORDERED)
-// before they count (core-3 scope; flagged in AGENT-COORDINATION). Until
+// before they count (core-3 scope; flagged in the internal change log). Until
 // then they 204-drop by design — same convention as oss_try_click.
 
 import { Fragment } from "react";
@@ -138,8 +138,17 @@ export default function UseCasesBand() {
                 <div className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2">
                   {uc.flow.map((node, i) => (
                     <Fragment key={`${node}-${i}`}>
-                      {i > 0 && <ArrowRight className="size-3 shrink-0" style={{ color: "var(--mkt-ink-3)" }} aria-hidden="true" />}
-                      <span className="mkt-badge mkt-ink-3 whitespace-nowrap rounded-full border px-2 py-0.5" style={{ borderColor: "var(--mkt-line)" }}>
+                      {i > 0 && (
+                        <ArrowRight
+                          className="size-3 shrink-0"
+                          style={{ color: "var(--mkt-ink-3)" }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span
+                        className="mkt-badge mkt-ink-3 whitespace-nowrap rounded-full border px-2 py-0.5"
+                        style={{ borderColor: "var(--mkt-line)" }}
+                      >
                         {t(`uc_n_${node}`)}
                       </span>
                     </Fragment>
