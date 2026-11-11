@@ -27,6 +27,34 @@ const SKIP_REASON =
   "personal smoke: run it with playwright.personal.config.ts against a personal stack";
 
 /**
+ * A fresh browser profile has never answered the first-run welcome tour, so its modal covers the console. Mark the
+ * owner's tour as done with the same user-scoped localStorage keys the console writes (web/app/components/tour/
+ * storage.ts), writing only keys that are not set yet, so a real choice is never overwritten.
+ */
+async function suppressFirstRunTour(page: Page, accessToken: string) {
+  let sub: string | null = null;
+  try {
+    const payload = JSON.parse(Buffer.from(accessToken.split(".")[1] || "", "base64url").toString("utf8")) as {
+      sub?: unknown;
+    };
+    sub = typeof payload.sub === "string" ? payload.sub : null;
+  } catch {
+    sub = null;
+  }
+  await page.context().addInitScript((scopedSub: string | null) => {
+    try {
+      const keys = ["vd_tour_status", "vd_tour_seen_security", "vd_tour_ended"];
+      const scoped = scopedSub ? keys.map((k) => `${k}:${scopedSub}`) : [];
+      for (const k of [...keys, ...scoped]) {
+        if (localStorage.getItem(k) === null) localStorage.setItem(k, k.startsWith("vd_tour_status") ? "done" : "1");
+      }
+    } catch {
+      // Storage blocked: the tour simply shows, as it would for any visitor.
+    }
+  }, sub);
+}
+
+/**
  * `owner`: a page signed in as the owner through the console's own same-origin /api/local-auth/login proxy
  * (the refresh token lands in an HttpOnly cookie, exactly as the sign-in form does). Identical to the fixture
  * in personal-edition.spec.ts, duplicated deliberately: the two suites must not share edits.
@@ -49,6 +77,8 @@ const test = base.extend<{ owner: Page }>({
       res.status(),
       "owner sign-in through /api/local-auth/login (is first-run setup finished?)",
     ).toBe(200);
+    const body = (await res.json()) as { accessToken?: string };
+    await suppressFirstRunTour(page, body.accessToken || "");
     await use(page);
   },
 });
@@ -179,8 +209,8 @@ test.describe("personal smoke: signed in as the owner", () => {
     owner,
   }) => {
     await owner.goto("/edge");
-    await expect(owner.getByText(/On-device image generation/)).toBeVisible();
-    await expect(owner.getByText(/On-device audio generation/)).toBeVisible();
+    await expect(owner.getByText(/On-device image generation/).first()).toBeVisible();
+    await expect(owner.getByText(/On-device audio generation/).first()).toBeVisible();
   });
 
   test("picking a non-Latin language opens its on-screen keyboard; it types into the composer and closes", async ({
@@ -205,9 +235,12 @@ test.describe("personal smoke: signed in as the owner", () => {
     ).toBeVisible({ timeout: 15_000 });
     // Focus the composer, press one letter key (क is in the Hindi default layer), prove it was typed into the
     // input that had focus — the board's pointerdown keeps focus there.
-    const composer = owner.locator("textarea:visible").first();
+    // The composer is disabled while the assistant's model loads, and a disabled textarea cannot take focus,
+    // so wait for it to be ready before focusing: the board types into document.activeElement.
+    const composer = owner.getByLabel(/ask or tell me what to do/i).first();
+    await expect(composer, "the assistant composer never became ready").toBeEnabled({ timeout: 30_000 });
     await composer.focus();
-    await board.getByRole("button", { name: "क" }).click();
+    await board.getByRole("button", { name: "क", exact: true }).click();
     await expect(composer).toHaveValue(/क/);
     // Regression for the pointer-capture bug that swallowed the close click.
     await board.getByRole("button", { name: "Close keyboard" }).click();
