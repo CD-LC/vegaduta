@@ -1613,7 +1613,7 @@ services:
     # single-user and stays on the loopback port; agent traffic is
     # service-to-service over agent-io. `nnp` only: third-party image that
     # may start as root.
-    image: ghcr.io/tashfeenahmed/freellmapi:latest@sha256:3b744d6714737f2d0c8fe90cdd8517966f22acf615d44cc222c792d40ef9b0a9
+    image: ghcr.io/tashfeenahmed/freellmapi:latest@sha256:23584d6a12a4eebb468af65db52e27112018ed6d00326dd76e353e72e345dca9
     profiles: ["freellmapi"]
     <<: [*restart, *logging, *nnp]
     environment:
