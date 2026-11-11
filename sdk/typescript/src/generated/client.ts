@@ -11776,7 +11776,7 @@ export class ShareApi {
    * List.
    * `GET /api/knowledge/{resourceKind}/{resourceId}/grants`
    */
-  list2(resourceKind: string, resourceId: string, options?: CallOptions): Promise<T.ShareController_GrantResponse[]> {
+  list2(resourceKind: string, resourceId: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.ShareController_GrantResponse[]> {
     return this.http.request<T.ShareController_GrantResponse[]>({ ...options, method: "GET", path: `/api/knowledge/${encodeURIComponent(String(resourceKind))}/${encodeURIComponent(String(resourceId))}/grants` });
   }
 
@@ -11800,7 +11800,7 @@ export class ShareApi {
    * List.
    * `GET /api/{resourceKind}/{resourceId}/grants`
    */
-  list(resourceKind: string, resourceId: string, options?: CallOptions): Promise<T.ShareController_GrantResponse[]> {
+  list(resourceKind: string, resourceId: string, options?: CallOptions<{ limit?: number; offset?: number }, HeaderParams>): Promise<T.ShareController_GrantResponse[]> {
     return this.http.request<T.ShareController_GrantResponse[]>({ ...options, method: "GET", path: `/api/${encodeURIComponent(String(resourceKind))}/${encodeURIComponent(String(resourceId))}/grants` });
   }
 

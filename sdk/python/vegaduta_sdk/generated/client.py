@@ -9972,12 +9972,12 @@ class ShareApi:
     def __init__(self, http: HttpClient) -> None:
         self._http = http
 
-    def list_2(self, resource_kind: str, resource_id: str) -> List[m.ShareController_GrantResponse]:
+    def list_2(self, resource_kind: str, resource_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ShareController_GrantResponse]:
         """List.
 
         GET /api/knowledge/{resourceKind}/{resourceId}/grants
         """
-        return self._http.request("GET", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants")
+        return self._http.request("GET", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", query={"limit": limit, "offset": offset})
 
     def grant_2(self, resource_kind: str, resource_id: str, body: m.ShareController_GrantRequest, *, idempotency_key: Optional[str] = None) -> m.ShareController_GrantResponse:
         """Grant.
@@ -9993,12 +9993,12 @@ class ShareApi:
         """
         return self._http.request("DELETE", f"/api/knowledge/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants/{quote_path(grant_id)}", response="void")
 
-    def list(self, resource_kind: str, resource_id: str) -> List[m.ShareController_GrantResponse]:
+    def list(self, resource_kind: str, resource_id: str, *, limit: Optional[int] = None, offset: Optional[int] = None) -> List[m.ShareController_GrantResponse]:
         """List.
 
         GET /api/{resourceKind}/{resourceId}/grants
         """
-        return self._http.request("GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants")
+        return self._http.request("GET", f"/api/{quote_path(resource_kind)}/{quote_path(resource_id)}/grants", query={"limit": limit, "offset": offset})
 
     def grant(self, resource_kind: str, resource_id: str, body: m.ShareController_GrantRequest, *, idempotency_key: Optional[str] = None) -> m.ShareController_GrantResponse:
         """Grant.
