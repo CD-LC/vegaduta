@@ -11,6 +11,9 @@ Release notes on GitHub are generated from the section for each version.
 ### Added
 
 - **code-intel: offline heuristic security scan.** New `GET /repos/{repo_id}/security-scan` and read-only MCP tool `security_scan` report hard-coded secrets (always redacted), dangerous sinks in Python/JS/TS/Java (command exec, eval, unsafe deserialization, SQL string building, weak crypto, disabled TLS verification) and a normalized dependency inventory (requirements, package.json/lock, pom.xml, go.mod). Deterministic, no network or LLM, tenant-scoped like the other analyses. It is a regex/entropy heuristic, not a replacement for CodeQL/gitleaks/Trivy, and does no CVE matching (an advisory-provider hook is provided for callers).
+### Fixed
+
+- **Licence wording is accurate.** The platform is source-available under the Business Source License 1.1 (free to self-host in production; converts to Apache-2.0 four years after each release), not OSI open source. README, site metadata, `llms.txt`, About, footer and the free-launch copy now say so. `sdk/` stays Apache-2.0.
 
 ## [0.1.14] - 2026-10-30
 
