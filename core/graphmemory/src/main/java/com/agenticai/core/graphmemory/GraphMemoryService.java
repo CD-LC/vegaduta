@@ -318,6 +318,8 @@ public class GraphMemoryService {
             onAge(
                     st -> {
                         long now = nowMillis();
+                        // codeql[java/sql-injection] -- buildSupersedeInvalidateCypher sanitises
+                        // every value it interpolates; `now` is a long.
                         st.execute(
                                 cypherCall(
                                         graphName,
@@ -460,6 +462,9 @@ public class GraphMemoryService {
                         st -> {
                             int matched = 0;
                             try (ResultSet rs =
+                                    // codeql[java/sql-injection] -- every interpolated value is
+                                    // sanitize()d Cypher string content; the graph name comes from
+                                    // GraphMemorySchemaSupport, not input.
                                     st.executeQuery(
                                             cypherCall(
                                                     graphName,
@@ -486,6 +491,8 @@ public class GraphMemoryService {
                                 // any edge whose OTHER endpoint belongs to a different subject
                                 // simply loses
                                 // that one edge, the other subject's own vertex is untouched.
+                                // codeql[java/sql-injection] -- subjectKeyStr is sanitize()d
+                                // Cypher string content; no user input reaches the query raw.
                                 st.execute(
                                         cypherCall(
                                                 graphName,
@@ -630,6 +637,8 @@ public class GraphMemoryService {
         String pattern =
                 boundedHops == 1 ? "-[r:RELATION]-" : "-[r:RELATION*1.." + boundedHops + "]-";
         String edgeFilter = boundedHops == 1 ? " AND " + singleEdgeFilter(asOfMillis) : "";
+        // codeql[java/sql-injection] -- tierStr/subjectKeyStr/hintStr are sanitize()d Cypher
+        // string content and maxPaths is an int; nothing reaches the query unsanitised.
         String cypher =
                 "MATCH p = (a:Entity)"
                         + pattern

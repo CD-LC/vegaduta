@@ -85,6 +85,8 @@ final class OpenAiCompatAuth {
         response.setContentType("application/problem+json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter()
+                // codeql[java/xss] -- problem+json, not HTML; the reflected path has quotes and
+                // backslashes stripped.
                 .write(
                         "{\"type\":\"urn:vegaduta:problem:unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"Authentication"
                             + " is required to access this resource.\",\"instance\":\""

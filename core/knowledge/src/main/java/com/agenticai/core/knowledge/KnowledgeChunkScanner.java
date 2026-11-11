@@ -372,6 +372,9 @@ final class KnowledgeChunkScanner {
         com.fasterxml.jackson.databind.ObjectMapper mapper =
                 com.agenticai.core.json.JsonMappers.plain();
         try {
+            // codeql[java/sql-injection] -- `table` is a schema-qualified identifier from
+            // KnowledgeSchemaSupport.qualifiedTableName (double-quote escaped); ids bind as
+            // ?::uuid[].
             jdbcTemplate.query(
                     "SELECT id, metadata->'screen_flags' AS flags FROM "
                             + table

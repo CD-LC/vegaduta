@@ -42,7 +42,10 @@ final class A2aBoundedHttp {
             // built
             // this request (A2aClientService/A2aCardVerifier); this class only executes it.
             HttpResponse<InputStream> response =
-                    http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                    http.send(
+                            request,
+                            HttpResponse.BodyHandlers
+                                    .ofInputStream()); // codeql[java/ssrf] -- see guard note above
             InputStream body = response.body();
             // HttpRequest.timeout() only covers up to the response headers; this watchdog closes
             // the stream if the body is still being read when the same budget runs out.

@@ -118,6 +118,7 @@ public class A2aCardVerifier {
             } catch (SsrfBlockedException e) {
                 throw new IOException("refused: " + e.getMessage());
             }
+            // codeql[java/ssrf] -- `uri` is SsrfGuard.validate(url)'s result, checked above.
             HttpGet get = new HttpGet(uri);
             get.addHeader("Accept", "application/json");
             // codeql[java/ssrf] -- `uri` is the result of guard.validate(url) above (SsrfGuard);

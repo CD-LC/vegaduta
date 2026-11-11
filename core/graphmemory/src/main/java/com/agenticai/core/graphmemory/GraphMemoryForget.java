@@ -60,6 +60,8 @@ final class GraphMemoryForget {
         for (int page = 0; page < forget.getScanMaxPages(); page++) {
             int rows = 0;
             try (ResultSet rs =
+                    // codeql[java/sql-injection] -- tierStr/subjectKeyStr are sanitize()d Cypher
+                    // string content; SKIP/LIMIT are ints.
                     st.executeQuery(
                             cypherCall(
                                     graphName,
@@ -86,6 +88,8 @@ final class GraphMemoryForget {
         }
         int count = 0;
         for (ValidEdge edge : edgesOnlyThisFactSupports(edges, factText, otherFactTexts)) {
+            // codeql[java/sql-injection] -- buildForgetInvalidateCypher sanitises every value it
+            // interpolates; `now` is a long.
             st.execute(
                     cypherCall(
                             graphName,

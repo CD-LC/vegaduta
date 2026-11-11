@@ -535,6 +535,7 @@ public class A2aClientService implements A2aRemoteAgentToolSource {
         // codeql[java/ssrf] -- `uri` is SsrfGuard.check(url)'s validated result (allow-list +
         // private-address rules); the bounded executor just sends it.
         return execute(
+                // codeql[java/ssrf] -- `uri` is SsrfGuard.check(url)'s validated result, above.
                 HttpRequest.newBuilder(uri)
                         .timeout(config.getRequestTimeout())
                         .header("Accept", "application/json")

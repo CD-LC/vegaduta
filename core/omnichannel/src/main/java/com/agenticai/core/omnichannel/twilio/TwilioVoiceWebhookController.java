@@ -206,6 +206,8 @@ public class TwilioVoiceWebhookController {
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_XML)
                     .body(
+                            // codeql[java/xss] -- response is application/xml and wssUrl is
+                            // escapeXml()'d below.
                             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                     + "<Response><Connect><ConversationRelay url=\""
                                     + escapeXml(wssUrl)
