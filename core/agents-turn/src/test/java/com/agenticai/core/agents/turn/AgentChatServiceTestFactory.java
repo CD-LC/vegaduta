@@ -33,10 +33,8 @@ import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.sharing.ResourceAccessService;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.FeatureFlagService;
-
-import org.springframework.beans.factory.ObjectProvider;
-
 import java.time.Duration;
+import org.springframework.beans.factory.ObjectProvider;
 
 /**
  * Builds an {@link AgentChatService} from the flat, pre-facade argument list the hand-built test

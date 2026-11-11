@@ -18,3 +18,4 @@ public enum ResourceType {
      */
     KNOWLEDGE_COLLECTION
 }
+

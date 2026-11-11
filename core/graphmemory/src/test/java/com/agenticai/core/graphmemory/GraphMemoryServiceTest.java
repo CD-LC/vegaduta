@@ -15,15 +15,6 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.tenancy.AgeSessionSupport;
 import com.agenticai.core.tenancy.MissingTenantContextException;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.jdbc.UncategorizedSQLException;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +22,13 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * {@link GraphMemoryService#eraseSubject}-focused coverage - the rest of this class ({@link

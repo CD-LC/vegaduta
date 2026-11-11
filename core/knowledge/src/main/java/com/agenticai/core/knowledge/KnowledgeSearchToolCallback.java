@@ -3,16 +3,14 @@ package com.agenticai.core.knowledge;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.definition.ToolDefinition;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.definition.ToolDefinition;
 
 /**
  * Stage 6: exposes KnowledgeSearchService as a native Spring AI tool, so an agent can call it

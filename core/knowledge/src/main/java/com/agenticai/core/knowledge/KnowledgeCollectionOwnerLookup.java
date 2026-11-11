@@ -2,12 +2,10 @@ package com.agenticai.core.knowledge;
 
 import com.agenticai.core.sharing.ResourceOwnerLookup;
 import com.agenticai.core.sharing.ResourceType;
-
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 /**
  * The {@code core/knowledge} adapter for core/sharing's {@link ResourceOwnerLookup} seam, so {@code

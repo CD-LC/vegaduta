@@ -4,9 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.Test;
-
 import java.util.regex.Pattern;
+import org.junit.jupiter.api.Test;
 
 /**
  * {@link SchemaNameSanitizer} is the one shared place every raw tenant identifier (a JWT {@code

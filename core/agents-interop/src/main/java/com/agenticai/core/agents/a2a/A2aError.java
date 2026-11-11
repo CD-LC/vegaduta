@@ -147,3 +147,4 @@ public class A2aError extends RuntimeException {
                 java.util.Map.of("hop", hop, "maxHops", max));
     }
 }
+

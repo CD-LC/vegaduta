@@ -4,20 +4,17 @@ import com.agenticai.core.security.HotpathCaches;
 import com.agenticai.core.security.TenantStatusGuard;
 import com.agenticai.core.security.TtlCache;
 import com.agenticai.core.security.logging.LogSafe;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
-
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * The real {@link TenantStatusGuard} implementation - see that interface's javadoc for why it lives

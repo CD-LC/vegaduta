@@ -26,15 +26,6 @@ import com.agenticai.core.rl.domain.PolicyDimension;
 import com.agenticai.core.security.TenantContext;
 import com.agenticai.core.security.TenantPlan;
 import com.agenticai.core.security.TenantScope;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.tool.ToolCallback;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +35,13 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.tool.ToolCallback;
 
 /**
  * Builds everything the model call needs for one turn - attachments and vision metering, the three

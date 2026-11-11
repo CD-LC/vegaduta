@@ -4,10 +4,6 @@ import com.agenticai.core.knowledge.CitationSpans.Span;
 import com.agenticai.core.knowledge.dto.SearchResultResponse;
 import com.agenticai.core.knowledge.rag.ParentChunkStore;
 import com.agenticai.core.knowledge.rag.ParentExpander;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Post-retrieval stages of {@link KnowledgeSearchService} - fusion, rerank, parent expansion,
