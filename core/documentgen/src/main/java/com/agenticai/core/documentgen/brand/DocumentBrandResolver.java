@@ -1,6 +1,7 @@
 package com.agenticai.core.documentgen.brand;
 
 import com.agenticai.core.security.TenantLimits;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.storage.FileStorageService;
 import com.agenticai.core.tenancy.TenantBrandingLogoController;
 import java.io.IOException;
@@ -26,84 +27,88 @@ import org.springframework.stereotype.Component;
 @Component
 public class DocumentBrandResolver {
 
-  private static final Logger log = LoggerFactory.getLogger(DocumentBrandResolver.class);
-  private static final int MAX_LOGO_BYTES = 2 * 1024 * 1024;
-  private static final DocumentBrand PLATFORM =
-      new DocumentBrand("", loadPlatformLogo(), true, true);
+    private static final Logger log = LoggerFactory.getLogger(DocumentBrandResolver.class);
+    private static final int MAX_LOGO_BYTES = 2 * 1024 * 1024;
+    private static final DocumentBrand PLATFORM =
+            new DocumentBrand("", loadPlatformLogo(), true, true);
 
-  private final ObjectProvider<TenantLimits> tenantLimits;
-  private final ObjectProvider<FileStorageService> storage;
+    private final ObjectProvider<TenantLimits> tenantLimits;
+    private final ObjectProvider<FileStorageService> storage;
 
-  public DocumentBrandResolver(
-      ObjectProvider<TenantLimits> tenantLimits, ObjectProvider<FileStorageService> storage) {
-    this.tenantLimits = tenantLimits;
-    this.storage = storage;
-  }
-
-  /** The VegaDuta brand, for callers with no tenant. */
-  public static DocumentBrand platform() {
-    return PLATFORM;
-  }
-
-  public DocumentBrand resolve(String tenantId) {
-    if (tenantId == null || tenantId.isBlank()) {
-      return PLATFORM;
+    public DocumentBrandResolver(
+            ObjectProvider<TenantLimits> tenantLimits, ObjectProvider<FileStorageService> storage) {
+        this.tenantLimits = tenantLimits;
+        this.storage = storage;
     }
-    try {
-      TenantLimits limits = tenantLimits.getIfAvailable();
-      if (limits == null) {
+
+    /** The VegaDuta brand, for callers with no tenant. */
+    public static DocumentBrand platform() {
         return PLATFORM;
-      }
-      Optional<String> name =
-          limits.brandDisplayName(tenantId).map(String::trim).filter(n -> !n.isEmpty());
-      Optional<String> logoUrl = limits.brandLogoUrl(tenantId);
-      if (name.isEmpty() && logoUrl.isEmpty()) {
-        return PLATFORM;
-      }
-      byte[] logo = null;
-      boolean png = true;
-      String key =
-          logoUrl.map(url -> TenantBrandingLogoController.objectKeyFor(url, tenantId)).orElse(null);
-      if (key != null && (key.endsWith(".png") || key.endsWith(".jpg") || key.endsWith(".jpeg"))) {
-        logo = readLogo(key);
-        png = key.endsWith(".png");
-      }
-      if (logo == null && name.isEmpty()) {
-        // Only an unembeddable logo (SVG/WebP/external): show the platform brand rather than
-        // nothing.
-        return PLATFORM;
-      }
-      return new DocumentBrand(name.orElse(""), logo, png, false);
-    } catch (RuntimeException e) {
-      log.warn(
-          "Document branding lookup failed for tenant {} - using the platform brand: {}",
-          tenantId,
-          e.toString());
-      return PLATFORM;
     }
-  }
 
-  private byte[] readLogo(String key) {
-    FileStorageService files = storage.getIfAvailable();
-    if (files == null) {
-      return null;
+    public DocumentBrand resolve(String tenantId) {
+        if (tenantId == null || tenantId.isBlank()) {
+            return PLATFORM;
+        }
+        try {
+            TenantLimits limits = tenantLimits.getIfAvailable();
+            if (limits == null) {
+                return PLATFORM;
+            }
+            Optional<String> name =
+                    limits.brandDisplayName(tenantId).map(String::trim).filter(n -> !n.isEmpty());
+            Optional<String> logoUrl = limits.brandLogoUrl(tenantId);
+            if (name.isEmpty() && logoUrl.isEmpty()) {
+                return PLATFORM;
+            }
+            byte[] logo = null;
+            boolean png = true;
+            String key =
+                    logoUrl.map(url -> TenantBrandingLogoController.objectKeyFor(url, tenantId))
+                            .orElse(null);
+            if (key != null
+                    && (key.endsWith(".png") || key.endsWith(".jpg") || key.endsWith(".jpeg"))) {
+                logo = readLogo(key);
+                png = key.endsWith(".png");
+            }
+            if (logo == null && name.isEmpty()) {
+                // Only an unembeddable logo (SVG/WebP/external): show the platform brand rather
+                // than nothing.
+                return PLATFORM;
+            }
+            return new DocumentBrand(name.orElse(""), logo, png, false);
+        } catch (RuntimeException e) {
+            log.warn(
+                    "Document branding lookup failed for tenant {} - using the platform brand: {}",
+                    LogSafe.clean(tenantId),
+                    LogSafe.clean(e.toString()));
+            return PLATFORM;
+        }
     }
-    try (InputStream in = files.get(key)) {
-      byte[] bytes = in.readNBytes(MAX_LOGO_BYTES + 1);
-      return bytes.length > MAX_LOGO_BYTES || bytes.length == 0 ? null : bytes;
-    } catch (IOException | RuntimeException e) {
-      log.warn(
-          "Tenant brand logo {} unreadable - document gets the name only: {}", key, e.toString());
-      return null;
-    }
-  }
 
-  private static byte[] loadPlatformLogo() {
-    try (InputStream in =
-        DocumentBrandResolver.class.getResourceAsStream("/brand/vegaduta-wordmark.png")) {
-      return in == null ? null : in.readAllBytes();
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
+    private byte[] readLogo(String key) {
+        FileStorageService files = storage.getIfAvailable();
+        if (files == null) {
+            return null;
+        }
+        try (InputStream in = files.get(key)) {
+            byte[] bytes = in.readNBytes(MAX_LOGO_BYTES + 1);
+            return bytes.length > MAX_LOGO_BYTES || bytes.length == 0 ? null : bytes;
+        } catch (IOException | RuntimeException e) {
+            log.warn(
+                    "Tenant brand logo {} unreadable - document gets the name only: {}",
+                    key,
+                    e.toString());
+            return null;
+        }
     }
-  }
+
+    private static byte[] loadPlatformLogo() {
+        try (InputStream in =
+                DocumentBrandResolver.class.getResourceAsStream("/brand/vegaduta-wordmark.png")) {
+            return in == null ? null : in.readAllBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 }

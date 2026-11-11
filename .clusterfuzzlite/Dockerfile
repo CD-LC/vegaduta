@@ -1,7 +1,7 @@
 # ClusterFuzzLite build environment for the Jazzer fuzz targets.
 # base-builder-jvm ships JDK 15 + the Jazzer driver/agent; the reactor needs
 # JDK 21 + Maven, so both are installed here (Temurin pinned by sha256).
-FROM gcr.io/oss-fuzz-base/base-builder-jvm
+FROM gcr.io/oss-fuzz-base/base-builder-jvm@sha256:bd13a763de1a0fb22099442094e7e0049657a8c47f01e9d7af8bb849e0ad4699
 
 RUN apt-get update && apt-get install -y --no-install-recommends maven curl ca-certificates \
     && curl -fsSL -o /tmp/jdk.tar.gz \

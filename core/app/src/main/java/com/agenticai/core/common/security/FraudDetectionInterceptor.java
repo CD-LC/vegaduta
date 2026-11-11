@@ -1,6 +1,7 @@
 package com.agenticai.core.common.security;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,24 +45,13 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
   private final ObjectMapper objectMapper;
   private final boolean enforce;
 
-  public FraudDetectionInterceptor(
-      AbuseDetectionService abuseDetectionService,
-      ObjectMapper objectMapper,
-      @Value("${fraud-detection.enforce:false}") boolean enforce) {
-    this.abuseDetectionService = abuseDetectionService;
-    this.objectMapper = objectMapper;
-    this.enforce = enforce;
-  }
-
-  @Override
-  public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object handler)
-      throws IOException {
-
-    RequestContext requestCtx = RequestContext.fromRequest(req);
-
-    // Skip fraud checks for certain endpoints
-    if (shouldSkipFraudCheck(requestCtx.path)) {
-      return true;
+    public FraudDetectionInterceptor(
+            AbuseDetectionService abuseDetectionService,
+            ObjectMapper objectMapper,
+            @Value("${fraud-detection.enforce:false}") boolean enforce) {
+        this.abuseDetectionService = abuseDetectionService;
+        this.objectMapper = objectMapper;
+        this.enforce = enforce;
     }
 
     // Tenant and user from TenantContext (set by TenantContextFilter from
@@ -89,17 +79,13 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
       return true;
     }
 
-    // Explicit blacklist entries are administrative decisions and are always enforced; everything
-    // else is a
-    // heuristic that only enforces when fraud-detection.enforce=true (see the class javadoc).
-    if (decision.isSuspicious() && !enforce && !isBlacklisted(clientCtx)) {
-      log.warn(
-          "Fraud detection (observe-only) would {} {} {}",
-          decision,
-          requestCtx.method,
-          requestCtx.path);
-      return true;
-    }
+        if (tenantId == null) {
+            // Anonymous/tenant-less request (public endpoints): nothing to key on.
+            log.debug(
+                    "No tenant context for {} - fraud checks skipped",
+                    LogSafe.clean(requestCtx.path));
+            return true;
+        }
 
     // Enforce decision
     if (decision == FraudDecision.BLOCK) {
@@ -119,56 +105,113 @@ public class FraudDetectionInterceptor implements HandlerInterceptor {
         log.error("Error writing fraud block response", e);
       }
 
-      log.warn("Request blocked by fraud detection: {} ({})", clientCtx, requestCtx);
-      return false;
-    }
+        // Explicit blacklist entries are administrative decisions and are always enforced;
+        // everything else is a
+        // heuristic that only enforces when fraud-detection.enforce=true (see the class javadoc).
+        if (decision.isSuspicious() && !enforce && !isBlacklisted(clientCtx)) {
+            log.warn(
+                    "Fraud detection (observe-only) would {} {} {}",
+                    LogSafe.clean(decision),
+                    LogSafe.clean(requestCtx.method),
+                    LogSafe.clean(requestCtx.path));
+            return true;
+        }
 
     if (decision == FraudDecision.CHALLENGE) {
       String nonce = abuseDetectionService.generateChallengeNonce(tenantId, userId, clientCtx.ip);
 
-      res.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      res.setHeader("X-Fraud-Challenge", "HCAPTCHA");
-      res.setHeader("X-Challenge-Nonce", nonce);
-      res.setHeader(
-          "X-Challenge-Expires",
-          String.valueOf(System.currentTimeMillis() + 5 * 60 * 1000)); // 5 minutes
-      res.setContentType("application/json");
+            try {
+                Map<String, Object> body =
+                        Map.of(
+                                "error", "fraud_detected_request_blocked",
+                                "message",
+                                        "Your request has been blocked due to suspicious activity. Please try again later.");
+                res.getWriter().write(objectMapper.writeValueAsString(body));
+            } catch (IOException e) {
+                log.error("Error writing fraud block response", e);
+            }
 
-      try {
-        Map<String, Object> body =
-            Map.of(
-                "error", "fraud_challenge_required",
-                "message", "Please verify you're not a bot",
-                "challenge_nonce", nonce,
-                "challenge_type", "HCAPTCHA",
-                "expires_in", 300 // seconds
-                );
-        res.getWriter().write(objectMapper.writeValueAsString(body));
-      } catch (IOException e) {
-        log.error("Error writing fraud challenge response", e);
-      }
+            log.warn("Request blocked by fraud detection: {} ({})", clientCtx, requestCtx);
+            return false;
+        }
 
-      log.info("Challenge issued by fraud detection: {} (nonce: {})", clientCtx, nonce);
-      return false;
+        if (decision == FraudDecision.CHALLENGE) {
+            String nonce =
+                    abuseDetectionService.generateChallengeNonce(tenantId, userId, clientCtx.ip);
+
+            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            res.setHeader("X-Fraud-Challenge", "HCAPTCHA");
+            res.setHeader("X-Challenge-Nonce", nonce);
+            res.setHeader(
+                    "X-Challenge-Expires",
+                    String.valueOf(System.currentTimeMillis() + 5 * 60 * 1000)); // 5 minutes
+            res.setContentType("application/json");
+
+            try {
+                Map<String, Object> body =
+                        Map.of(
+                                "error", "fraud_challenge_required",
+                                "message", "Please verify you're not a bot",
+                                "challenge_nonce", nonce,
+                                "challenge_type", "HCAPTCHA",
+                                "expires_in", 300 // seconds
+                                );
+                res.getWriter().write(objectMapper.writeValueAsString(body));
+            } catch (IOException e) {
+                log.error("Error writing fraud challenge response", e);
+            }
+
+            log.info("Challenge issued by fraud detection: {} (nonce: {})", clientCtx, nonce);
+            return false;
+        }
+
+        // Decision is ALLOW - proceed with request
+        // Store challenge pass token if provided (for tracking verified challenges)
+        String challengePass = req.getHeader("X-Challenge-Pass");
+        if (challengePass != null) {
+            req.setAttribute("fraudChallengePassed", true);
+        }
+
+        return true;
     }
 
-    // Decision is ALLOW - proceed with request
-    // Store challenge pass token if provided (for tracking verified challenges)
-    String challengePass = req.getHeader("X-Challenge-Pass");
-    if (challengePass != null) {
-      req.setAttribute("fraudChallengePassed", true);
+    private boolean isBlacklisted(ClientContext clientCtx) {
+        try {
+            return abuseDetectionService.isIpBlacklisted(clientCtx.tenantId, clientCtx.ip)
+                    || (clientCtx.userId != null
+                            && abuseDetectionService.isUserBlacklisted(
+                                    clientCtx.tenantId, clientCtx.userId));
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
-    return true;
-  }
+    /** Determine if this request should be skipped from fraud checks. */
+    private boolean shouldSkipFraudCheck(String path) {
+        // Always skip health checks and actuators
+        if (path.startsWith("/actuator/")
+                || path.equals("/health")
+                || path.equals("/health/live")) {
+            return true;
+        }
 
-  private boolean isBlacklisted(ClientContext clientCtx) {
-    try {
-      return abuseDetectionService.isIpBlacklisted(clientCtx.tenantId, clientCtx.ip)
-          || (clientCtx.userId != null
-              && abuseDetectionService.isUserBlacklisted(clientCtx.tenantId, clientCtx.userId));
-    } catch (RuntimeException e) {
-      return false;
+        // Skip internal/admin endpoints (they have their own auth)
+        if (path.startsWith("/api/internal/") && !path.startsWith("/api/internal/abuse/")) {
+            return true;
+        }
+
+        // Skip static resources
+        if (path.startsWith("/static/")
+                || path.startsWith("/assets/")
+                || path.endsWith(".css")
+                || path.endsWith(".js")
+                || path.endsWith(".jpg")
+                || path.endsWith(".png")
+                || path.endsWith(".gif")) {
+            return true;
+        }
+
+        return false;
     }
   }
 

@@ -1,5 +1,6 @@
 package com.agenticai.core.omnichannel.session;
 
+import com.agenticai.core.security.logging.LogSafe;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,28 +12,32 @@ import org.slf4j.LoggerFactory;
  */
 final class InboundExecutorMetrics {
 
-  private static final Logger log = LoggerFactory.getLogger(InboundChannelExecutor.class);
-  private static final String METRIC = "omnichannel.inbound.executor";
+    private static final Logger log = LoggerFactory.getLogger(InboundChannelExecutor.class);
+    private static final String METRIC = "omnichannel.inbound.executor";
 
-  private final MeterRegistry registry;
+    private final MeterRegistry registry;
 
-  InboundExecutorMetrics(MeterRegistry registry) {
-    this.registry = registry;
-  }
-
-  void reject(String channel, String reason, String tenant) {
-    log.warn("Inbound {} task rejected ({} cap reached, tenant={})", channel, reason, tenant);
-    count("rejected_" + reason, channel);
-  }
-
-  void count(String outcome, String channel) {
-    if (registry == null) {
-      return;
+    InboundExecutorMetrics(MeterRegistry registry) {
+        this.registry = registry;
     }
-    try {
-      registry.counter(METRIC, "outcome", outcome, "channel", channel).increment();
-    } catch (RuntimeException ignored) {
-      // metrics must never break message handling
+
+    void reject(String channel, String reason, String tenant) {
+        log.warn(
+                "Inbound {} task rejected ({} cap reached, tenant={})",
+                LogSafe.clean(channel),
+                LogSafe.clean(reason),
+                LogSafe.clean(tenant));
+        count("rejected_" + reason, channel);
     }
-  }
+
+    void count(String outcome, String channel) {
+        if (registry == null) {
+            return;
+        }
+        try {
+            registry.counter(METRIC, "outcome", outcome, "channel", channel).increment();
+        } catch (RuntimeException ignored) {
+            // metrics must never break message handling
+        }
+    }
 }

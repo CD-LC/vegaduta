@@ -3,6 +3,7 @@ package com.agenticai.core.chat.gateway;
 import com.agenticai.core.audit.AuditLogService;
 import com.agenticai.core.audit.AuditOutcome;
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -83,174 +84,179 @@ import reactor.core.publisher.Flux;
 @Component
 public class LlmGatewayContentPolicyAdvisor implements GatewayGovernanceAdvisor {
 
-  private static final Logger log = LoggerFactory.getLogger(LlmGatewayContentPolicyAdvisor.class);
+    private static final Logger log = LoggerFactory.getLogger(LlmGatewayContentPolicyAdvisor.class);
 
-  static final int ORDER = -1500;
+    static final int ORDER = -1500;
 
-  /**
-   * Advisor-context marker set once the policy has been applied to a request - see class javadoc.
-   */
-  static final String APPLIED_CONTEXT_KEY = "llmGateway.contentPolicy.applied";
+    /**
+     * Advisor-context marker set once the policy has been applied to a request - see class javadoc.
+     */
+    static final String APPLIED_CONTEXT_KEY = "llmGateway.contentPolicy.applied";
 
-  private static final String AUDIT_ACTOR = "system:llm-gateway-content-policy";
-  private static final String AUDIT_ACTION_FLAGGED = "llm.gateway.injection_flag";
-  private static final String AUDIT_ACTION_BLOCKED = "llm.gateway.injection_block";
-  private static final String AUDIT_TARGET_TYPE = "tenant";
+    private static final String AUDIT_ACTOR = "system:llm-gateway-content-policy";
+    private static final String AUDIT_ACTION_FLAGGED = "llm.gateway.injection_flag";
+    private static final String AUDIT_ACTION_BLOCKED = "llm.gateway.injection_block";
+    private static final String AUDIT_TARGET_TYPE = "tenant";
 
-  private final LlmGatewayContentPolicyService policyService;
-  private final AuditLogService auditLogService;
+    private final LlmGatewayContentPolicyService policyService;
+    private final AuditLogService auditLogService;
 
-  public LlmGatewayContentPolicyAdvisor(
-      LlmGatewayContentPolicyService policyService, AuditLogService auditLogService) {
-    this.policyService = policyService;
-    this.auditLogService = auditLogService;
-  }
-
-  @Override
-  public String getName() {
-    return "LlmGatewayContentPolicyAdvisor";
-  }
-
-  @Override
-  public int getOrder() {
-    return ORDER;
-  }
-
-  @Override
-  public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
-    return chain.nextCall(applyPolicy(request));
-  }
-
-  /**
-   * Unlike {@link #adviseCall}, a thrown {@link LlmGatewayContentPolicyViolationException} from
-   * {@link #applyPolicy} must not escape this method synchronously - {@code
-   * streamAdvisorChain.nextStream(...)} is expected to signal failure reactively, same reasoning
-   * {@link com.agenticai.core.chat.LlmMetricsAdvisor}'s own stream path documents for cross-thread
-   * concerns - so a BLOCK verdict is surfaced as {@link Flux#error(Throwable)} instead of a
-   * synchronous throw.
-   */
-  @Override
-  public Flux<ChatClientResponse> adviseStream(
-      ChatClientRequest request, StreamAdvisorChain chain) {
-    ChatClientRequest processed;
-    try {
-      processed = applyPolicy(request);
-    } catch (RuntimeException blocked) {
-      return Flux.error(blocked);
-    }
-    return chain.nextStream(processed);
-  }
-
-  /**
-   * @return {@code request} unchanged when there is no tenant context (an internal/system call),
-   *     the policy was already applied further up this chain, or both master switches are off;
-   *     otherwise a copy carrying {@link #APPLIED_CONTEXT_KEY} whose {@link UserMessage}s carry
-   *     redacted text (when PII redaction is on and something matched).
-   * @throws LlmGatewayContentPolicyViolationException if injection screening is on, set to {@link
-   *     LlmGatewayContentPolicyAction#BLOCK}, and a current-turn {@link UserMessage} is flagged.
-   */
-  private ChatClientRequest applyPolicy(ChatClientRequest request) {
-    String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
-    if (tenantId == null) {
-      return request;
-    }
-    if (request.context() != null && request.context().containsKey(APPLIED_CONTEXT_KEY)) {
-      return request;
-    }
-    LlmGatewayContentPolicy policy = policyService.resolve(tenantId);
-    if (!policy.isPiiRedactionEnabled() && !policy.isInjectionScreeningEnabled()) {
-      return request;
+    public LlmGatewayContentPolicyAdvisor(
+            LlmGatewayContentPolicyService policyService, AuditLogService auditLogService) {
+        this.policyService = policyService;
+        this.auditLogService = auditLogService;
     }
 
-    Prompt prompt = request.prompt();
-    List<Message> messages = prompt.getInstructions();
+    @Override
+    public String getName() {
+        return "LlmGatewayContentPolicyAdvisor";
+    }
 
-    if (policy.isInjectionScreeningEnabled()) {
-      for (int i = currentTurnStart(messages); i < messages.size(); i++) {
-        if (!(messages.get(i) instanceof UserMessage userMessage)) {
-          continue;
+    @Override
+    public int getOrder() {
+        return ORDER;
+    }
+
+    @Override
+    public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+        return chain.nextCall(applyPolicy(request));
+    }
+
+    /**
+     * Unlike {@link #adviseCall}, a thrown {@link LlmGatewayContentPolicyViolationException} from
+     * {@link #applyPolicy} must not escape this method synchronously - {@code
+     * streamAdvisorChain.nextStream(...)} is expected to signal failure reactively, same reasoning
+     * {@link com.agenticai.core.chat.LlmMetricsAdvisor}'s own stream path documents for
+     * cross-thread concerns - so a BLOCK verdict is surfaced as {@link Flux#error(Throwable)}
+     * instead of a synchronous throw.
+     */
+    @Override
+    public Flux<ChatClientResponse> adviseStream(
+            ChatClientRequest request, StreamAdvisorChain chain) {
+        ChatClientRequest processed;
+        try {
+            processed = applyPolicy(request);
+        } catch (RuntimeException blocked) {
+            return Flux.error(blocked);
         }
-        LlmGatewayPromptInjectionScreener.Verdict verdict =
-            LlmGatewayPromptInjectionScreener.screen(userMessage.getText());
-        if (verdict.suspect()) {
-          // Throws when this tenant's policy is BLOCK - see handleFlaggedInjection.
-          // One audit row per request, not per matching message.
-          handleFlaggedInjection(tenantId, policy, verdict.reason());
-          break;
+        return chain.nextStream(processed);
+    }
+
+    /**
+     * @return {@code request} unchanged when there is no tenant context (an internal/system call),
+     *     the policy was already applied further up this chain, or both master switches are off;
+     *     otherwise a copy carrying {@link #APPLIED_CONTEXT_KEY} whose {@link UserMessage}s carry
+     *     redacted text (when PII redaction is on and something matched).
+     * @throws LlmGatewayContentPolicyViolationException if injection screening is on, set to {@link
+     *     LlmGatewayContentPolicyAction#BLOCK}, and a current-turn {@link UserMessage} is flagged.
+     */
+    private ChatClientRequest applyPolicy(ChatClientRequest request) {
+        String tenantId = TenantContext.current().map(TenantContext::getTenantId).orElse(null);
+        if (tenantId == null) {
+            return request;
         }
-      }
-    }
-
-    List<Message> rewritten = null;
-    if (policy.isPiiRedactionEnabled()) {
-      Set<LlmGatewayPiiCategory> categories = policy.enabledPiiCategories();
-      for (int i = 0; i < messages.size(); i++) {
-        if (!(messages.get(i) instanceof UserMessage userMessage)) {
-          continue;
+        if (request.context() != null && request.context().containsKey(APPLIED_CONTEXT_KEY)) {
+            return request;
         }
-        String text = userMessage.getText();
-        String redacted = LlmGatewayPiiRedactor.redact(text, categories);
-        if (!Objects.equals(redacted, text)) {
-          if (rewritten == null) {
-            rewritten = new ArrayList<>(messages);
-          }
-          rewritten.set(i, userMessage.mutate().text(redacted).build());
+        LlmGatewayContentPolicy policy = policyService.resolve(tenantId);
+        if (!policy.isPiiRedactionEnabled() && !policy.isInjectionScreeningEnabled()) {
+            return request;
         }
-      }
+
+        Prompt prompt = request.prompt();
+        List<Message> messages = prompt.getInstructions();
+
+        if (policy.isInjectionScreeningEnabled()) {
+            for (int i = currentTurnStart(messages); i < messages.size(); i++) {
+                if (!(messages.get(i) instanceof UserMessage userMessage)) {
+                    continue;
+                }
+                LlmGatewayPromptInjectionScreener.Verdict verdict =
+                        LlmGatewayPromptInjectionScreener.screen(userMessage.getText());
+                if (verdict.suspect()) {
+                    // Throws when this tenant's policy is BLOCK - see handleFlaggedInjection.
+                    // One audit row per request, not per matching message.
+                    handleFlaggedInjection(tenantId, policy, verdict.reason());
+                    break;
+                }
+            }
+        }
+
+        List<Message> rewritten = null;
+        if (policy.isPiiRedactionEnabled()) {
+            Set<LlmGatewayPiiCategory> categories = policy.enabledPiiCategories();
+            for (int i = 0; i < messages.size(); i++) {
+                if (!(messages.get(i) instanceof UserMessage userMessage)) {
+                    continue;
+                }
+                String text = userMessage.getText();
+                String redacted = LlmGatewayPiiRedactor.redact(text, categories);
+                if (!Objects.equals(redacted, text)) {
+                    if (rewritten == null) {
+                        rewritten = new ArrayList<>(messages);
+                    }
+                    rewritten.set(i, userMessage.mutate().text(redacted).build());
+                }
+            }
+        }
+
+        ChatClientRequest.Builder out = request.mutate().context(APPLIED_CONTEXT_KEY, Boolean.TRUE);
+        if (rewritten != null) {
+            out.prompt(new Prompt(rewritten, prompt.getOptions()));
+        }
+        return out.build();
     }
 
-    ChatClientRequest.Builder out = request.mutate().context(APPLIED_CONTEXT_KEY, Boolean.TRUE);
-    if (rewritten != null) {
-      out.prompt(new Prompt(rewritten, prompt.getOptions()));
+    /**
+     * Index of the first message of the current turn: everything after the last {@link
+     * AssistantMessage}. Earlier {@link UserMessage}s are replayed conversation history that was
+     * already screened when it was the current turn - re-screening it on every later turn would
+     * re-audit the same flagged message once per turn for the rest of the session. A single-shot
+     * prompt (no assistant message) is screened in full. PII redaction is NOT limited this way:
+     * history is re-sent to the provider each turn, so it must be redacted each time.
+     */
+    static int currentTurnStart(List<Message> messages) {
+        for (int i = messages.size() - 1; i >= 0; i--) {
+            if (messages.get(i) instanceof AssistantMessage) {
+                return i + 1;
+            }
+        }
+        return 0;
     }
-    return out.build();
-  }
 
-  /**
-   * Index of the first message of the current turn: everything after the last {@link
-   * AssistantMessage}. Earlier {@link UserMessage}s are replayed conversation history that was
-   * already screened when it was the current turn - re-screening it on every later turn would
-   * re-audit the same flagged message once per turn for the rest of the session. A single-shot
-   * prompt (no assistant message) is screened in full. PII redaction is NOT limited this way:
-   * history is re-sent to the provider each turn, so it must be redacted each time.
-   */
-  static int currentTurnStart(List<Message> messages) {
-    for (int i = messages.size() - 1; i >= 0; i--) {
-      if (messages.get(i) instanceof AssistantMessage) {
-        return i + 1;
-      }
+    /**
+     * Always audit-logs the flag first (best-effort - an audit-write failure must not itself block
+     * or fail-open a request differently than the policy already dictates), then throws for {@code
+     * BLOCK} tenants only.
+     */
+    private void handleFlaggedInjection(
+            String tenantId, LlmGatewayContentPolicy policy, String reason) {
+        boolean block = policy.getInjectionScreeningAction() == LlmGatewayContentPolicyAction.BLOCK;
+        try {
+            auditLogService.record(
+                    AUDIT_ACTOR,
+                    block ? AUDIT_ACTION_BLOCKED : AUDIT_ACTION_FLAGGED,
+                    AUDIT_TARGET_TYPE,
+                    tenantId,
+                    AuditOutcome.FAILURE,
+                    "LLM gateway inbound content flagged ("
+                            + (block ? "BLOCK" : "FLAG")
+                            + "): "
+                            + reason);
+        } catch (RuntimeException e) {
+            log.warn(
+                    "LLM gateway content-policy audit write failed for tenant {} - continuing",
+                    LogSafe.clean(tenantId),
+                    e);
+        }
+        if (block) {
+            throw new LlmGatewayContentPolicyViolationException(
+                    "This request was blocked by the tenant's prompt-injection screening policy: "
+                            + reason);
+        }
+        log.info(
+                "LLM gateway flagged suspected prompt injection for tenant {} (mode FLAG, call proceeds): {}",
+                LogSafe.clean(tenantId),
+                LogSafe.clean(reason));
     }
-    return 0;
-  }
-
-  /**
-   * Always audit-logs the flag first (best-effort - an audit-write failure must not itself block or
-   * fail-open a request differently than the policy already dictates), then throws for {@code
-   * BLOCK} tenants only.
-   */
-  private void handleFlaggedInjection(
-      String tenantId, LlmGatewayContentPolicy policy, String reason) {
-    boolean block = policy.getInjectionScreeningAction() == LlmGatewayContentPolicyAction.BLOCK;
-    try {
-      auditLogService.record(
-          AUDIT_ACTOR,
-          block ? AUDIT_ACTION_BLOCKED : AUDIT_ACTION_FLAGGED,
-          AUDIT_TARGET_TYPE,
-          tenantId,
-          AuditOutcome.FAILURE,
-          "LLM gateway inbound content flagged (" + (block ? "BLOCK" : "FLAG") + "): " + reason);
-    } catch (RuntimeException e) {
-      log.warn(
-          "LLM gateway content-policy audit write failed for tenant {} - continuing", tenantId, e);
-    }
-    if (block) {
-      throw new LlmGatewayContentPolicyViolationException(
-          "This request was blocked by the tenant's prompt-injection screening policy: " + reason);
-    }
-    log.info(
-        "LLM gateway flagged suspected prompt injection for tenant {} (mode FLAG, call proceeds):"
-            + " {}",
-        tenantId,
-        reason);
-  }
 }

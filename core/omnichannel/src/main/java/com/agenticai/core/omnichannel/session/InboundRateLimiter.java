@@ -1,6 +1,7 @@
 package com.agenticai.core.omnichannel.session;
 
 import com.agenticai.core.security.TenantContext;
+import com.agenticai.core.security.logging.LogSafe;
 import com.agenticai.core.security.ratelimit.RedisFixedWindowCounter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -50,83 +51,93 @@ import org.springframework.stereotype.Component;
 @Component
 public class InboundRateLimiter {
 
-  private static final Logger log = LoggerFactory.getLogger(InboundRateLimiter.class);
-  private static final String KEY_PREFIX = "agentic:inbound-rate:";
-  private static final Duration WINDOW = Duration.ofMinutes(1);
+    private static final Logger log = LoggerFactory.getLogger(InboundRateLimiter.class);
+    private static final String KEY_PREFIX = "agentic:inbound-rate:";
+    private static final Duration WINDOW = Duration.ofMinutes(1);
 
-  private final ObjectProvider<StringRedisTemplate> redis;
-  private final boolean enabled;
-  private final long perSenderPerMinute;
-  private final long perChannelPerMinute;
+    private final ObjectProvider<StringRedisTemplate> redis;
+    private final boolean enabled;
+    private final long perSenderPerMinute;
+    private final long perChannelPerMinute;
 
-  public InboundRateLimiter(
-      ObjectProvider<StringRedisTemplate> redis,
-      @Value("${app.omnichannel.rate-limit.enabled:false}") boolean enabled,
-      @Value("${app.omnichannel.rate-limit.per-sender-per-minute:20}") long perSenderPerMinute,
-      @Value("${app.omnichannel.rate-limit.per-channel-per-minute:600}") long perChannelPerMinute) {
-    this.redis = redis;
-    this.enabled = enabled;
-    this.perSenderPerMinute = perSenderPerMinute;
-    this.perChannelPerMinute = perChannelPerMinute;
-  }
+    public InboundRateLimiter(
+            ObjectProvider<StringRedisTemplate> redis,
+            @Value("${app.omnichannel.rate-limit.enabled:false}") boolean enabled,
+            @Value("${app.omnichannel.rate-limit.per-sender-per-minute:20}")
+                    long perSenderPerMinute,
+            @Value("${app.omnichannel.rate-limit.per-channel-per-minute:600}")
+                    long perChannelPerMinute) {
+        this.redis = redis;
+        this.enabled = enabled;
+        this.perSenderPerMinute = perSenderPerMinute;
+        this.perChannelPerMinute = perChannelPerMinute;
+    }
 
-  /**
-   * Counts one inbound message from {@code senderId} on {@code channel} and throws {@link
-   * InboundRateLimitedException} when it is over a cap. The channel counter is only charged for a
-   * message the sender's own counter let through, so a flooding sender cannot use up the room of
-   * everyone else on the channel.
-   */
-  public void checkOrThrow(ChannelType channel, String senderId) {
-    if (!enabled || channel == ChannelType.VOICE || senderId == null || senderId.isBlank()) {
-      return;
+    /**
+     * Counts one inbound message from {@code senderId} on {@code channel} and throws {@link
+     * InboundRateLimitedException} when it is over a cap. The channel counter is only charged for a
+     * message the sender's own counter let through, so a flooding sender cannot use up the room of
+     * everyone else on the channel.
+     */
+    public void checkOrThrow(ChannelType channel, String senderId) {
+        if (!enabled || channel == ChannelType.VOICE || senderId == null || senderId.isBlank()) {
+            return;
+        }
+        String tenant =
+                TenantContext.current().map(TenantContext::getTenantId).orElse("__no-tenant__");
+        StringRedisTemplate template = redis.getIfAvailable();
+        if (perSenderPerMinute > 0) {
+            RedisFixedWindowCounter.Usage usage =
+                    RedisFixedWindowCounter.acquire(
+                            template,
+                            KEY_PREFIX
+                                    + "s:"
+                                    + tenant
+                                    + ":"
+                                    + channel.name()
+                                    + ":"
+                                    + fingerprint(senderId),
+                            perSenderPerMinute,
+                            WINDOW);
+            if (!usage.allowed()) {
+                log.info(
+                        "Inbound {} sender over {} messages/min on tenant {}",
+                        LogSafe.clean(channel),
+                        LogSafe.clean(perSenderPerMinute),
+                        LogSafe.clean(tenant));
+                throw new InboundRateLimitedException(usage.resetSeconds(), false);
+            }
+        }
+        if (perChannelPerMinute > 0) {
+            RedisFixedWindowCounter.Usage usage =
+                    RedisFixedWindowCounter.acquire(
+                            template,
+                            KEY_PREFIX + "c:" + tenant + ":" + channel.name(),
+                            perChannelPerMinute,
+                            WINDOW);
+            if (!usage.allowed()) {
+                log.warn(
+                        "Inbound {} channel over {} messages/min on tenant {}",
+                        LogSafe.clean(channel),
+                        LogSafe.clean(perChannelPerMinute),
+                        LogSafe.clean(tenant));
+                throw new InboundRateLimitedException(usage.resetSeconds(), true);
+            }
+        }
     }
-    String tenant = TenantContext.current().map(TenantContext::getTenantId).orElse("__no-tenant__");
-    StringRedisTemplate template = redis.getIfAvailable();
-    if (perSenderPerMinute > 0) {
-      RedisFixedWindowCounter.Usage usage =
-          RedisFixedWindowCounter.acquire(
-              template,
-              KEY_PREFIX + "s:" + tenant + ":" + channel.name() + ":" + fingerprint(senderId),
-              perSenderPerMinute,
-              WINDOW);
-      if (!usage.allowed()) {
-        log.info(
-            "Inbound {} sender over {} messages/min on tenant {}",
-            channel,
-            perSenderPerMinute,
-            tenant);
-        throw new InboundRateLimitedException(usage.resetSeconds(), false);
-      }
-    }
-    if (perChannelPerMinute > 0) {
-      RedisFixedWindowCounter.Usage usage =
-          RedisFixedWindowCounter.acquire(
-              template,
-              KEY_PREFIX + "c:" + tenant + ":" + channel.name(),
-              perChannelPerMinute,
-              WINDOW);
-      if (!usage.allowed()) {
-        log.warn(
-            "Inbound {} channel over {} messages/min on tenant {}",
-            channel,
-            perChannelPerMinute,
-            tenant);
-        throw new InboundRateLimitedException(usage.resetSeconds(), true);
-      }
-    }
-  }
 
-  /**
-   * First 16 hex chars of SHA-256: enough to keep senders apart, nothing a person could be read
-   * from.
-   */
-  static String fingerprint(String senderId) {
-    try {
-      byte[] digest =
-          MessageDigest.getInstance("SHA-256").digest(senderId.getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(digest, 0, 8);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException("SHA-256 is required by the JDK", e);
+    /**
+     * First 16 hex chars of SHA-256: enough to keep senders apart, nothing a person could be read
+     * from.
+     */
+    static String fingerprint(String senderId) {
+        try {
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(senderId.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest, 0, 8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is required by the JDK", e);
+        }
     }
-  }
 }

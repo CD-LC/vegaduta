@@ -1,5 +1,6 @@
 package com.agenticai.core.mcpserver;
 
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,81 +32,79 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 class McpOriginValidationFilter extends OncePerRequestFilter {
 
-  enum Mode {
-    ENFORCE,
-    REPORT,
-    OFF;
+    enum Mode {
+        ENFORCE,
+        REPORT,
+        OFF;
 
-    static Mode parse(String raw) {
-      if (raw == null) {
-        return ENFORCE;
-      }
-      return switch (raw.trim().toLowerCase(Locale.ROOT)) {
-        case "off", "false" -> OFF;
-        case "report", "warn" -> REPORT;
-        default -> ENFORCE;
-      };
+        static Mode parse(String raw) {
+            if (raw == null) {
+                return ENFORCE;
+            }
+            return switch (raw.trim().toLowerCase(Locale.ROOT)) {
+                case "off", "false" -> OFF;
+                case "report", "warn" -> REPORT;
+                default -> ENFORCE;
+            };
+        }
     }
-  }
 
-  private static final Logger log = LoggerFactory.getLogger(McpOriginValidationFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(McpOriginValidationFilter.class);
 
-  private final Mode mode;
-  private final Set<String> allowed;
+    private final Mode mode;
+    private final Set<String> allowed;
 
-  McpOriginValidationFilter(Mode mode, String allowedCsv) {
-    this.mode = mode;
-    this.allowed =
-        allowedCsv == null
-            ? Set.of()
-            : Arrays.stream(allowedCsv.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(McpOriginValidationFilter::normalize)
-                .collect(Collectors.toUnmodifiableSet());
-  }
-
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws ServletException, IOException {
-    String origin = request.getHeader("Origin");
-    if (mode == Mode.OFF || origin == null || isAllowed(origin)) {
-      chain.doFilter(request, response);
-      return;
+    McpOriginValidationFilter(Mode mode, String allowedCsv) {
+        this.mode = mode;
+        this.allowed =
+                allowedCsv == null
+                        ? Set.of()
+                        : Arrays.stream(allowedCsv.split(","))
+                                .map(String::trim)
+                                .filter(s -> !s.isEmpty())
+                                .map(McpOriginValidationFilter::normalize)
+                                .collect(Collectors.toUnmodifiableSet());
     }
-    log.warn(
-        "Inbound MCP request with disallowed Origin '{}' ({})",
-        sanitize(origin),
-        mode == Mode.ENFORCE ? "rejected" : "report-only");
-    if (mode == Mode.REPORT) {
-      chain.doFilter(request, response);
-      return;
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String origin = request.getHeader("Origin");
+        if (mode == Mode.OFF || origin == null || isAllowed(origin)) {
+            chain.doFilter(request, response);
+            return;
+        }
+        log.warn(
+                "Inbound MCP request with disallowed Origin '{}' ({})",
+                sanitize(origin),
+                LogSafe.clean(mode == Mode.ENFORCE ? "rejected" : "report-only"));
+        if (mode == Mode.REPORT) {
+            chain.doFilter(request, response);
+            return;
+        }
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter()
+                .write(
+                        "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Forbidden: Origin not allowed.\"}}");
     }
-    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response
-        .getWriter()
-        .write(
-            "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"Forbidden: Origin not"
-                + " allowed.\"}}");
-  }
 
-  boolean isAllowed(String origin) {
-    return allowed.contains(normalize(origin));
-  }
-
-  /** Scheme and host are case-insensitive, a trailing slash is not part of an origin. */
-  static String normalize(String origin) {
-    String s = origin.trim();
-    while (s.endsWith("/")) {
-      s = s.substring(0, s.length() - 1);
+    boolean isAllowed(String origin) {
+        return allowed.contains(normalize(origin));
     }
-    return s.toLowerCase(Locale.ROOT);
-  }
 
-  private static String sanitize(String value) {
-    String v = value.length() > 200 ? value.substring(0, 200) : value;
-    return v.replaceAll("[\\r\\n]", "_");
-  }
+    /** Scheme and host are case-insensitive, a trailing slash is not part of an origin. */
+    static String normalize(String origin) {
+        String s = origin.trim();
+        while (s.endsWith("/")) {
+            s = s.substring(0, s.length() - 1);
+        }
+        return s.toLowerCase(Locale.ROOT);
+    }
+
+    private static String sanitize(String value) {
+        String v = value.length() > 200 ? value.substring(0, 200) : value;
+        return LogSafe.clean(v);
+    }
 }

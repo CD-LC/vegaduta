@@ -1,5 +1,6 @@
 package com.agenticai.core.common.security;
 
+import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
@@ -31,333 +32,344 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/internal/abuse")
 @RequiredArgsConstructor
 public class FraudAnalysisController {
-  /**
-   * Tenant-admin (or platform-admin) only: these endpoints read and mutate tenant-wide block lists.
-   */
-  static final String TENANT_ADMIN = "hasAnyAuthority('ROLE_tenant-admin', 'ROLE_platform-admin')";
+    /**
+     * Tenant-admin (or platform-admin) only: these endpoints read and mutate tenant-wide block
+     * lists.
+     */
+    static final String TENANT_ADMIN =
+            "hasAnyAuthority('ROLE_tenant-admin', 'ROLE_platform-admin')";
 
-  private final AbuseDetectionService abuseDetectionService;
-  private final ChallengeNonceRepository challengeNonceRepo;
-  private final IpBlacklistRepository ipBlacklistRepo;
-  private final UserBlacklistRepository userBlacklistRepo;
-  private final HCaptchaClient hCaptchaClient;
+    private final AbuseDetectionService abuseDetectionService;
+    private final ChallengeNonceRepository challengeNonceRepo;
+    private final IpBlacklistRepository ipBlacklistRepo;
+    private final UserBlacklistRepository userBlacklistRepo;
+    private final HCaptchaClient hCaptchaClient;
 
-  /**
-   * Verify hCaptcha token and issue a challenge-pass token. Called by frontend after user completes
-   * CAPTCHA challenge.
-   */
-  @PostMapping("/verify-captcha")
-  public ResponseEntity<Map<String, Object>> verifyCaptcha(
-      @RequestBody HCaptchaVerifyRequest req, HttpServletRequest httpReq) {
+    /**
+     * Verify hCaptcha token and issue a challenge-pass token. Called by frontend after user
+     * completes CAPTCHA challenge.
+     */
+    @PostMapping("/verify-captcha")
+    public ResponseEntity<Map<String, Object>> verifyCaptcha(
+            @RequestBody HCaptchaVerifyRequest req, HttpServletRequest httpReq) {
 
-    UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
-    if (tenantId == null) {
-      return ResponseEntity.status(400).body(Map.of("error", "Missing tenant context"));
+        UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
+        if (tenantId == null) {
+            return ResponseEntity.status(400).body(Map.of("error", "Missing tenant context"));
+        }
+
+        // Validate inputs
+        if (req.getNonce() == null || req.getNonce().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("error", "Missing challenge nonce"));
+        }
+
+        if (req.getToken() == null || req.getToken().isEmpty()) {
+            return ResponseEntity.status(400).body(Map.of("error", "Missing hCaptcha token"));
+        }
+
+        try {
+            // Find and validate the challenge nonce
+            ChallengeNonce nonce =
+                    challengeNonceRepo.findValidNonce(req.getNonce(), tenantId).orElse(null);
+
+            if (nonce == null) {
+                log.warn("Invalid or expired challenge nonce");
+                return ResponseEntity.status(400)
+                        .body(Map.of("error", "Invalid or expired challenge. Please try again."));
+            }
+
+            // Verify the hCaptcha token with hCaptcha servers
+            String clientIp = extractClientIp(httpReq);
+            HCaptchaClient.HCaptchaVerifyResponse hcaptchaResponse =
+                    hCaptchaClient.verify(req.getToken(), clientIp);
+
+            if (!hcaptchaResponse.isSuccess()) {
+                log.warn("hCaptcha verification failed: {}", hcaptchaResponse.getErrorCodes());
+                return ResponseEntity.status(400)
+                        .body(
+                                Map.of(
+                                        "error", "CAPTCHA verification failed",
+                                        "message", "Please try the CAPTCHA again"));
+            }
+
+            // Mark nonce as verified
+            nonce.setVerifiedAt(Instant.now());
+            try {
+                nonce.setVerifiedByIp(InetAddress.getByName(clientIp));
+            } catch (Exception e) {
+                log.warn("Failed to parse client IP for verification: {}", LogSafe.clean(clientIp));
+            }
+            challengeNonceRepo.save(nonce);
+
+            // Generate a challenge-pass token (JWT or opaque token in production)
+            String passToken = generateChallengePassToken(tenantId, nonce);
+
+            log.info("Challenge verified successfully");
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",
+                            true,
+                            "message",
+                            "Challenge verified successfully",
+                            "challenge_pass_token",
+                            passToken,
+                            "expires_in",
+                            3600 // 1 hour in seconds
+                            ));
+
+        } catch (HCaptchaClient.HCaptchaException e) {
+            log.error("hCaptcha verification error", e);
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", "Verification service error. Please try again."));
+        } catch (Exception e) {
+            log.error("Unexpected error during challenge verification", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
+        }
     }
 
-    // Validate inputs
-    if (req.getNonce() == null || req.getNonce().isEmpty()) {
-      return ResponseEntity.status(400).body(Map.of("error", "Missing challenge nonce"));
-    }
+    /** Get abuse status and statistics for the tenant. */
+    @GetMapping("/status")
+    @PreAuthorize(TENANT_ADMIN)
+    public ResponseEntity<Map<String, Object>> getAbuseStatus(HttpServletRequest req) {
+        UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
+        if (tenantId == null) {
+            return ResponseEntity.status(400).body(Map.of("error", "Missing tenant context"));
+        }
 
-    if (req.getToken() == null || req.getToken().isEmpty()) {
-      return ResponseEntity.status(400).body(Map.of("error", "Missing hCaptcha token"));
-    }
+        String clientIp = extractClientIp(req);
 
-    try {
-      // Find and validate the challenge nonce
-      ChallengeNonce nonce =
-          challengeNonceRepo.findValidNonce(req.getNonce(), tenantId).orElse(null);
-
-      if (nonce == null) {
-        log.warn("Invalid or expired challenge nonce");
-        return ResponseEntity.status(400)
-            .body(Map.of("error", "Invalid or expired challenge. Please try again."));
-      }
-
-      // Verify the hCaptcha token with hCaptcha servers
-      String clientIp = extractClientIp(httpReq);
-      HCaptchaClient.HCaptchaVerifyResponse hcaptchaResponse =
-          hCaptchaClient.verify(req.getToken(), clientIp);
-
-      if (!hcaptchaResponse.isSuccess()) {
-        log.warn("hCaptcha verification failed: {}", hcaptchaResponse.getErrorCodes());
-        return ResponseEntity.status(400)
-            .body(
+        return ResponseEntity.ok(
                 Map.of(
-                    "error", "CAPTCHA verification failed",
-                    "message", "Please try the CAPTCHA again"));
-      }
-
-      // Mark nonce as verified
-      nonce.setVerifiedAt(Instant.now());
-      try {
-        nonce.setVerifiedByIp(InetAddress.getByName(clientIp));
-      } catch (Exception e) {
-        log.warn("Failed to parse client IP for verification: {}", clientIp);
-      }
-      challengeNonceRepo.save(nonce);
-
-      // Generate a challenge-pass token (JWT or opaque token in production)
-      String passToken = generateChallengePassToken(tenantId, nonce);
-
-      log.info("Challenge verified successfully");
-
-      return ResponseEntity.ok(
-          Map.of(
-              "success",
-              true,
-              "message",
-              "Challenge verified successfully",
-              "challenge_pass_token",
-              passToken,
-              "expires_in",
-              3600 // 1 hour in seconds
-              ));
-
-    } catch (HCaptchaClient.HCaptchaException e) {
-      log.error("hCaptcha verification error", e);
-      return ResponseEntity.status(500)
-          .body(Map.of("error", "Verification service error. Please try again."));
-    } catch (Exception e) {
-      log.error("Unexpected error during challenge verification", e);
-      return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
-    }
-  }
-
-  /** Get abuse status and statistics for the tenant. */
-  @GetMapping("/status")
-  @PreAuthorize(TENANT_ADMIN)
-  public ResponseEntity<Map<String, Object>> getAbuseStatus(HttpServletRequest req) {
-    UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
-    if (tenantId == null) {
-      return ResponseEntity.status(400).body(Map.of("error", "Missing tenant context"));
+                        "tenant_id", tenantId.toString(),
+                        "client_ip", clientIp,
+                        "ip_blacklisted",
+                                abuseDetectionService.isIpBlacklisted(tenantId, parseIp(clientIp)),
+                        "active_ip_blocks", ipBlacklistRepo.countActive(tenantId),
+                        "active_user_blocks", userBlacklistRepo.countActive(tenantId),
+                        "timestamp", Instant.now().toString()));
     }
 
-    String clientIp = extractClientIp(req);
+    /** Admin: Manually blacklist an IP. */
+    @PostMapping("/blacklist/ip")
+    @PreAuthorize(TENANT_ADMIN)
+    public ResponseEntity<Map<String, Object>> blacklistIp(
+            @RequestBody BlacklistIpRequest req, HttpServletRequest httpReq) {
 
-    return ResponseEntity.ok(
-        Map.of(
-            "tenant_id", tenantId.toString(),
-            "client_ip", clientIp,
-            "ip_blacklisted", abuseDetectionService.isIpBlacklisted(tenantId, parseIp(clientIp)),
-            "active_ip_blocks", ipBlacklistRepo.countActive(tenantId),
-            "active_user_blocks", userBlacklistRepo.countActive(tenantId),
-            "timestamp", Instant.now().toString()));
-  }
+        UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
+        UUID adminId = FraudTenantIds.currentUser().orElse(null);
 
-  /** Admin: Manually blacklist an IP. */
-  @PostMapping("/blacklist/ip")
-  @PreAuthorize(TENANT_ADMIN)
-  public ResponseEntity<Map<String, Object>> blacklistIp(
-      @RequestBody BlacklistIpRequest req, HttpServletRequest httpReq) {
+        if (tenantId == null || adminId == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "Unauthorized"));
+        }
 
-    UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
-    UUID adminId = FraudTenantIds.currentUser().orElse(null);
+        try {
+            InetAddress ipAddress = InetAddress.getByName(req.getIp());
 
-    if (tenantId == null || adminId == null) {
-      return ResponseEntity.status(403).body(Map.of("error", "Unauthorized"));
+            abuseDetectionService.blacklistIp(
+                    tenantId,
+                    ipAddress,
+                    req.getReason(),
+                    req.getDurationMinutes() > 0 ? req.getDurationMinutes() : 60);
+
+            log.info(
+                    "IP {} blacklisted by admin {} for reason: {}",
+                    LogSafe.clean(req.getIp()),
+                    LogSafe.clean(adminId),
+                    LogSafe.clean(req.getReason()));
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",
+                            true,
+                            "message",
+                            "IP blacklisted successfully",
+                            "ip",
+                            req.getIp(),
+                            "expires_in_minutes",
+                            req.getDurationMinutes()));
+        } catch (Exception e) {
+            log.error("Error blacklisting IP", e);
+            return ResponseEntity.status(400).body(Map.of("error", "Invalid IP address"));
+        }
     }
 
-    try {
-      InetAddress ipAddress = InetAddress.getByName(req.getIp());
+    /** Admin: Manually blacklist a user. */
+    @PostMapping("/blacklist/user")
+    @PreAuthorize(TENANT_ADMIN)
+    public ResponseEntity<Map<String, Object>> blacklistUser(
+            @RequestBody BlacklistUserRequest req, HttpServletRequest httpReq) {
 
-      abuseDetectionService.blacklistIp(
-          tenantId,
-          ipAddress,
-          req.getReason(),
-          req.getDurationMinutes() > 0 ? req.getDurationMinutes() : 60);
+        UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
+        UUID adminId = FraudTenantIds.currentUser().orElse(null);
 
-      log.info(
-          "IP {} blacklisted by admin {} for reason: {}", req.getIp(), adminId, req.getReason());
+        if (tenantId == null || adminId == null) {
+            return ResponseEntity.status(403).body(Map.of("error", "Unauthorized"));
+        }
 
-      return ResponseEntity.ok(
-          Map.of(
-              "success",
-              true,
-              "message",
-              "IP blacklisted successfully",
-              "ip",
-              req.getIp(),
-              "expires_in_minutes",
-              req.getDurationMinutes()));
-    } catch (Exception e) {
-      log.error("Error blacklisting IP", e);
-      return ResponseEntity.status(400).body(Map.of("error", "Invalid IP address"));
-    }
-  }
+        try {
+            UUID userId = UUID.fromString(req.getUserId());
 
-  /** Admin: Manually blacklist a user. */
-  @PostMapping("/blacklist/user")
-  @PreAuthorize(TENANT_ADMIN)
-  public ResponseEntity<Map<String, Object>> blacklistUser(
-      @RequestBody BlacklistUserRequest req, HttpServletRequest httpReq) {
+            abuseDetectionService.blacklistUser(
+                    tenantId,
+                    userId,
+                    req.getReason(),
+                    req.getDurationMinutes() > 0 ? req.getDurationMinutes() : 60,
+                    adminId);
 
-    UUID tenantId = FraudTenantIds.currentTenant().orElse(null);
-    UUID adminId = FraudTenantIds.currentUser().orElse(null);
+            log.info(
+                    "User {} blacklisted by admin {} for reason: {}",
+                    LogSafe.clean(userId),
+                    LogSafe.clean(adminId),
+                    LogSafe.clean(req.getReason()));
 
-    if (tenantId == null || adminId == null) {
-      return ResponseEntity.status(403).body(Map.of("error", "Unauthorized"));
-    }
-
-    try {
-      UUID userId = UUID.fromString(req.getUserId());
-
-      abuseDetectionService.blacklistUser(
-          tenantId,
-          userId,
-          req.getReason(),
-          req.getDurationMinutes() > 0 ? req.getDurationMinutes() : 60,
-          adminId);
-
-      log.info("User {} blacklisted by admin {} for reason: {}", userId, adminId, req.getReason());
-
-      return ResponseEntity.ok(
-          Map.of(
-              "success",
-              true,
-              "message",
-              "User blacklisted successfully",
-              "user_id",
-              userId.toString(),
-              "expires_in_minutes",
-              req.getDurationMinutes()));
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(400).body(Map.of("error", "Invalid user ID"));
-    } catch (Exception e) {
-      log.error("Error blacklisting user", e);
-      return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
-    }
-  }
-
-  /** Generate a challenge-pass token (opaque token or JWT in production). */
-  private String generateChallengePassToken(UUID tenantId, ChallengeNonce nonce) {
-    // In production, generate a signed JWT or opaque token that can be validated on next request
-    // For now, return a simple token format: tenant_id.nonce_id.timestamp
-    return tenantId.toString().substring(0, 8)
-        + "."
-        + nonce.getId().substring(0, 8)
-        + "."
-        + System.currentTimeMillis();
-  }
-
-  /** Extract client IP from request, handling proxies. */
-  private String extractClientIp(HttpServletRequest req) {
-    String xForwardedFor = req.getHeader("X-Forwarded-For");
-    if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-      return xForwardedFor.split(",")[0].trim();
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success",
+                            true,
+                            "message",
+                            "User blacklisted successfully",
+                            "user_id",
+                            userId.toString(),
+                            "expires_in_minutes",
+                            req.getDurationMinutes()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body(Map.of("error", "Invalid user ID"));
+        } catch (Exception e) {
+            log.error("Error blacklisting user", e);
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
+        }
     }
 
-    String xRealIp = req.getHeader("X-Real-IP");
-    if (xRealIp != null && !xRealIp.isEmpty()) {
-      return xRealIp;
+    /** Generate a challenge-pass token (opaque token or JWT in production). */
+    private String generateChallengePassToken(UUID tenantId, ChallengeNonce nonce) {
+        // In production, generate a signed JWT or opaque token that can be validated on next
+        // request
+        // For now, return a simple token format: tenant_id.nonce_id.timestamp
+        return tenantId.toString().substring(0, 8)
+                + "."
+                + nonce.getId().substring(0, 8)
+                + "."
+                + System.currentTimeMillis();
     }
 
-    return req.getRemoteAddr();
-  }
+    /** Extract client IP from request, handling proxies. */
+    private String extractClientIp(HttpServletRequest req) {
+        String xForwardedFor = req.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
 
-  /** Parse IP string to InetAddress. */
-  private InetAddress parseIp(String ipStr) {
-    try {
-      return InetAddress.getByName(ipStr);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Invalid IP: " + ipStr);
-    }
-  }
+        String xRealIp = req.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
 
-  // ========== DTOs ==========
-
-  public static class HCaptchaVerifyRequest {
-    @JsonProperty("nonce")
-    private String nonce;
-
-    @JsonProperty("token")
-    private String token;
-
-    public String getNonce() {
-      return nonce;
+        return req.getRemoteAddr();
     }
 
-    public void setNonce(String nonce) {
-      this.nonce = nonce;
+    /** Parse IP string to InetAddress. */
+    private InetAddress parseIp(String ipStr) {
+        try {
+            return InetAddress.getByName(ipStr);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid IP: " + ipStr);
+        }
     }
 
-    public String getToken() {
-      return token;
+    // ========== DTOs ==========
+
+    public static class HCaptchaVerifyRequest {
+        @JsonProperty("nonce")
+        private String nonce;
+
+        @JsonProperty("token")
+        private String token;
+
+        public String getNonce() {
+            return nonce;
+        }
+
+        public void setNonce(String nonce) {
+            this.nonce = nonce;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
     }
 
-    public void setToken(String token) {
-      this.token = token;
-    }
-  }
+    public static class BlacklistIpRequest {
+        @JsonProperty("ip")
+        private String ip;
 
-  public static class BlacklistIpRequest {
-    @JsonProperty("ip")
-    private String ip;
+        @JsonProperty("reason")
+        private String reason;
 
-    @JsonProperty("reason")
-    private String reason;
+        @JsonProperty("duration_minutes")
+        private int durationMinutes = 60;
 
-    @JsonProperty("duration_minutes")
-    private int durationMinutes = 60;
+        public String getIp() {
+            return ip;
+        }
 
-    public String getIp() {
-      return ip;
-    }
+        public void setIp(String ip) {
+            this.ip = ip;
+        }
 
-    public void setIp(String ip) {
-      this.ip = ip;
-    }
+        public String getReason() {
+            return reason;
+        }
 
-    public String getReason() {
-      return reason;
-    }
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
 
-    public void setReason(String reason) {
-      this.reason = reason;
-    }
+        public int getDurationMinutes() {
+            return durationMinutes;
+        }
 
-    public int getDurationMinutes() {
-      return durationMinutes;
-    }
-
-    public void setDurationMinutes(int durationMinutes) {
-      this.durationMinutes = durationMinutes;
-    }
-  }
-
-  public static class BlacklistUserRequest {
-    @JsonProperty("user_id")
-    private String userId;
-
-    @JsonProperty("reason")
-    private String reason;
-
-    @JsonProperty("duration_minutes")
-    private int durationMinutes = 60;
-
-    public String getUserId() {
-      return userId;
+        public void setDurationMinutes(int durationMinutes) {
+            this.durationMinutes = durationMinutes;
+        }
     }
 
-    public void setUserId(String userId) {
-      this.userId = userId;
-    }
+    public static class BlacklistUserRequest {
+        @JsonProperty("user_id")
+        private String userId;
 
-    public String getReason() {
-      return reason;
-    }
+        @JsonProperty("reason")
+        private String reason;
 
-    public void setReason(String reason) {
-      this.reason = reason;
-    }
+        @JsonProperty("duration_minutes")
+        private int durationMinutes = 60;
 
-    public int getDurationMinutes() {
-      return durationMinutes;
-    }
+        public String getUserId() {
+            return userId;
+        }
 
-    public void setDurationMinutes(int durationMinutes) {
-      this.durationMinutes = durationMinutes;
+        public void setUserId(String userId) {
+            this.userId = userId;
+        }
+
+        public String getReason() {
+            return reason;
+        }
+
+        public void setReason(String reason) {
+            this.reason = reason;
+        }
+
+        public int getDurationMinutes() {
+            return durationMinutes;
+        }
+
+        public void setDurationMinutes(int durationMinutes) {
+            this.durationMinutes = durationMinutes;
+        }
     }
-  }
 }

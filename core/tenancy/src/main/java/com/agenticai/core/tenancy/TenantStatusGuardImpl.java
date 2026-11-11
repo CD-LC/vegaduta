@@ -178,7 +178,7 @@ public class TenantStatusGuardImpl implements TenantStatusGuard {
     } catch (SQLException e) {
       log.warn(
           "Could not verify schema existence for untracked tenant '{}' - {}",
-          schemaName,
+          LogSafe.clean(schemaName),
           failOpenOnSchemaCheckError
               ? "allowing the request through (fail-open opt-in)"
               : "refusing the request (fail-closed)",

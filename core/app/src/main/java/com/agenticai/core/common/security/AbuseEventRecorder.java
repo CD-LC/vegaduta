@@ -1,5 +1,6 @@
 package com.agenticai.core.common.security;
 
+import com.agenticai.core.security.logging.LogSafe;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.time.Instant;
@@ -23,50 +24,53 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnProperty(name = FraudDetectionConfig.ENABLED_PROPERTY, havingValue = "true")
 public class AbuseEventRecorder {
 
-  private static final Logger log = LoggerFactory.getLogger(AbuseEventRecorder.class);
+    private static final Logger log = LoggerFactory.getLogger(AbuseEventRecorder.class);
 
-  private final AbuseEventRepository abuseEventRepo;
-  private final IpBlacklistRepository ipBlacklistRepo;
+    private final AbuseEventRepository abuseEventRepo;
+    private final IpBlacklistRepository ipBlacklistRepo;
 
-  public AbuseEventRecorder(
-      AbuseEventRepository abuseEventRepo, IpBlacklistRepository ipBlacklistRepo) {
-    this.abuseEventRepo = abuseEventRepo;
-    this.ipBlacklistRepo = ipBlacklistRepo;
-  }
-
-  /** Persists one abuse event. */
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void recordEvent(
-      ClientContext clientCtx, String challengeNonce, String reason, FraudDecision decision) {
-    AbuseEvent event =
-        new AbuseEvent(
-            clientCtx.tenantId,
-            reason,
-            decision == FraudDecision.BLOCK ? "CRITICAL" : "HIGH",
-            clientCtx.ip,
-            reason,
-            decision.name());
-    event.setUserId(clientCtx.userId);
-    event.setUserAgent(clientCtx.userAgent);
-    event.setTlsJa3Fingerprint(clientCtx.tlsFingerprint);
-    event.setChallengeNonce(challengeNonce);
-    abuseEventRepo.save(event);
-  }
-
-  /** Blacklists an IP unless an active entry already exists. */
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void blacklistIp(UUID tenantId, InetAddress ip, String reason, int durationMinutes) {
-    if (ipBlacklistRepo.isBlacklisted(tenantId, ip)) {
-      return;
+    public AbuseEventRecorder(
+            AbuseEventRepository abuseEventRepo, IpBlacklistRepository ipBlacklistRepo) {
+        this.abuseEventRepo = abuseEventRepo;
+        this.ipBlacklistRepo = ipBlacklistRepo;
     }
-    IpBlacklist blacklist =
-        new IpBlacklist(
-            tenantId,
-            ip,
-            reason,
-            "SYSTEM",
-            Instant.now().plus(Duration.ofMinutes(durationMinutes)));
-    ipBlacklistRepo.save(blacklist);
-    log.warn("IP blacklisted for reason: {} ({}min)", reason, durationMinutes);
-  }
+
+    /** Persists one abuse event. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordEvent(
+            ClientContext clientCtx, String challengeNonce, String reason, FraudDecision decision) {
+        AbuseEvent event =
+                new AbuseEvent(
+                        clientCtx.tenantId,
+                        reason,
+                        decision == FraudDecision.BLOCK ? "CRITICAL" : "HIGH",
+                        clientCtx.ip,
+                        reason,
+                        decision.name());
+        event.setUserId(clientCtx.userId);
+        event.setUserAgent(clientCtx.userAgent);
+        event.setTlsJa3Fingerprint(clientCtx.tlsFingerprint);
+        event.setChallengeNonce(challengeNonce);
+        abuseEventRepo.save(event);
+    }
+
+    /** Blacklists an IP unless an active entry already exists. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void blacklistIp(UUID tenantId, InetAddress ip, String reason, int durationMinutes) {
+        if (ipBlacklistRepo.isBlacklisted(tenantId, ip)) {
+            return;
+        }
+        IpBlacklist blacklist =
+                new IpBlacklist(
+                        tenantId,
+                        ip,
+                        reason,
+                        "SYSTEM",
+                        Instant.now().plus(Duration.ofMinutes(durationMinutes)));
+        ipBlacklistRepo.save(blacklist);
+        log.warn(
+                "IP blacklisted for reason: {} ({}min)",
+                LogSafe.clean(reason),
+                LogSafe.clean(durationMinutes));
+    }
 }

@@ -1,5 +1,6 @@
 package com.agenticai.core.security;
 
+import com.agenticai.core.security.logging.LogSafe;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -31,73 +32,71 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  */
 public class AuditingAccessDeniedHandler implements AccessDeniedHandler {
 
-  private static final Logger log = LoggerFactory.getLogger(AuditingAccessDeniedHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(AuditingAccessDeniedHandler.class);
 
-  private final List<AccessDeniedEventListener> listeners;
-  private final String tenantClaim;
+    private final List<AccessDeniedEventListener> listeners;
+    private final String tenantClaim;
 
-  public AuditingAccessDeniedHandler(List<AccessDeniedEventListener> listeners) {
-    this(listeners, JwtClaimPaths.DEFAULT_TENANT_CLAIM);
-  }
-
-  /**
-   * @param tenantClaim the JWT claim carrying the tenant/schema id the denial is audited against -
-   *     {@code app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank falls back to
-   *     the Keycloak default.
-   */
-  public AuditingAccessDeniedHandler(
-      List<AccessDeniedEventListener> listeners, String tenantClaim) {
-    this.listeners = listeners == null ? List.of() : List.copyOf(listeners);
-    this.tenantClaim =
-        (tenantClaim == null || tenantClaim.isBlank())
-            ? JwtClaimPaths.DEFAULT_TENANT_CLAIM
-            : tenantClaim;
-  }
-
-  @Override
-  public void handle(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      AccessDeniedException accessDeniedException)
-      throws IOException {
-    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    response
-        .getWriter()
-        .write(
-            "{\"timestamp\":\""
-                + java.time.Instant.now()
-                + "\",\"status\":403,\"error\":\"You do not have permission to perform this"
-                + " action.\"}");
-
-    if (listeners.isEmpty()) {
-      return;
+    public AuditingAccessDeniedHandler(List<AccessDeniedEventListener> listeners) {
+        this(listeners, JwtClaimPaths.DEFAULT_TENANT_CLAIM);
     }
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String tenantId = null;
-    String subject = null;
-    if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-      tenantId = JwtClaimPaths.valueAsString(jwtAuth.getToken(), tenantClaim);
-      subject = jwtAuth.getToken().getSubject();
-    } else if (authentication != null) {
-      subject = authentication.getName();
+
+    /**
+     * @param tenantClaim the JWT claim carrying the tenant/schema id the denial is audited against
+     *     - {@code app.security.oidc.tenant-claim} (see {@link OidcClaimMapping}); blank falls back
+     *     to the Keycloak default.
+     */
+    public AuditingAccessDeniedHandler(
+            List<AccessDeniedEventListener> listeners, String tenantClaim) {
+        this.listeners = listeners == null ? List.of() : List.copyOf(listeners);
+        this.tenantClaim =
+                (tenantClaim == null || tenantClaim.isBlank())
+                        ? JwtClaimPaths.DEFAULT_TENANT_CLAIM
+                        : tenantClaim;
     }
-    for (AccessDeniedEventListener listener : listeners) {
-      try {
-        listener.onAccessDenied(
-            tenantId,
-            subject,
-            request.getMethod(),
-            LogMasking.path(request.getRequestURI()),
-            accessDeniedException.getMessage());
-      } catch (RuntimeException e) {
-        log.warn(
-            "AccessDeniedEventListener {} threw while recording a denial of {} {} - continuing",
-            listener.getClass().getSimpleName(),
-            request.getMethod(),
-            LogMasking.path(request.getRequestURI()),
-            e);
-      }
+
+    @Override
+    public void handle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AccessDeniedException accessDeniedException)
+            throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter()
+                .write(
+                        "{\"timestamp\":\""
+                                + java.time.Instant.now()
+                                + "\",\"status\":403,\"error\":\"You do not have permission to perform this action.\"}");
+
+        if (listeners.isEmpty()) {
+            return;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String tenantId = null;
+        String subject = null;
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            tenantId = JwtClaimPaths.valueAsString(jwtAuth.getToken(), tenantClaim);
+            subject = jwtAuth.getToken().getSubject();
+        } else if (authentication != null) {
+            subject = authentication.getName();
+        }
+        for (AccessDeniedEventListener listener : listeners) {
+            try {
+                listener.onAccessDenied(
+                        tenantId,
+                        subject,
+                        request.getMethod(),
+                        LogMasking.path(request.getRequestURI()),
+                        accessDeniedException.getMessage());
+            } catch (RuntimeException e) {
+                log.warn(
+                        "AccessDeniedEventListener {} threw while recording a denial of {} {} - continuing",
+                        LogSafe.clean(listener.getClass().getSimpleName()),
+                        LogSafe.clean(request.getMethod()),
+                        LogSafe.clean(LogMasking.path(request.getRequestURI())),
+                        e);
+            }
+        }
     }
-  }
 }
