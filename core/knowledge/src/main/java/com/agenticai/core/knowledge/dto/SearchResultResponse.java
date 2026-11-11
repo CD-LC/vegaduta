@@ -1,9 +1,9 @@
 package com.agenticai.core.knowledge.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.List;
 import java.util.UUID;
+
 
 /**
  * {@code documentId} (Stage 5, KB multi-modal storage - nullable: chunks ingested before migration

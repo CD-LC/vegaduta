@@ -3,13 +3,13 @@ package com.agenticai.core.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.function.Consumer;
 
 /** SEC-056: the azp check used to wave through any token that simply omitted azp. */
 class SecurityConfigJwtValidatorTest {

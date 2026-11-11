@@ -2,6 +2,7 @@ package com.agenticai.core.security;
 
 import java.util.Locale;
 
+
 /**
  * The one definition of "this tenant id names the legacy default schema or a platform/system
  * schema, so it is never a tenant". Shared by {@link TenantContextFilter} (early 403 for JWT,

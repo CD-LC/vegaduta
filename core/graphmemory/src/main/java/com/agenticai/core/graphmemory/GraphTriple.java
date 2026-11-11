@@ -2,6 +2,7 @@ package com.agenticai.core.graphmemory;
 
 import com.agenticai.core.screen.ContentWriteScreen;
 
+
 /**
  * One extracted (subject, relation, object) fact - e.g. {@code ("Priya", "MANAGER_OF_BY", "Raj")}
  * from "Priya's manager is Raj". See {@link EntityExtractionService}.

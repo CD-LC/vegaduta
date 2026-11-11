@@ -7,7 +7,11 @@ import com.agenticai.core.guardrails.taint.TurnTaint;
 import com.agenticai.core.json.JsonMappers;
 import com.agenticai.core.security.logging.LogSafe;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -15,11 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Conversation-level taint ({@code app.agents.taint.session-persistence}). A turn's {@link

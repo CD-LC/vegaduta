@@ -5,9 +5,9 @@ import com.agenticai.core.knowledge.dto.KnowledgeCollectionResponse;
 import com.agenticai.core.knowledge.dto.KnowledgeCollectionUpdateRequest;
 import com.agenticai.core.knowledge.dto.KnowledgeDocumentResponse;
 import com.agenticai.core.tenancy.ListPaging;
-
 import jakarta.validation.Valid;
-
+import java.util.List;
+import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.UUID;
 
 /** Knowledge Stage F1 - CRUD for the collections {@code KnowledgeController.upload} files into. */
 @RestController

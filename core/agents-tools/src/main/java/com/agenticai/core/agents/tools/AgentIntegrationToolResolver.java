@@ -14,16 +14,15 @@ import com.agenticai.core.billing.commerce.CheckoutSessionService;
 import com.agenticai.core.sdlc.E2bCredentialService;
 import com.agenticai.core.sdlc.SdlcSandboxService;
 import com.agenticai.core.storage.FileStorageService;
-
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.tool.ToolCallback;
-import org.springframework.beans.factory.ObjectProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.beans.factory.ObjectProvider;
+
 
 /**
  * Tool-resolution group extracted from {@link AgentToolProvider} (extract-only, no behavior

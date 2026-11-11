@@ -1,7 +1,6 @@
 package com.agenticai.core.agents.a2a;
 
 import com.agenticai.core.security.concurrent.TenantAwareExecutors;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Redirect-free, size-capped, deadline-bounded HTTP exchange for the outbound A2A client: the

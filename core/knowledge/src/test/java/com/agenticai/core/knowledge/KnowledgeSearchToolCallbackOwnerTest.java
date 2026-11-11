@@ -10,12 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.agenticai.core.knowledge.KnowledgeAccessService.Principal;
-
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.junit.jupiter.api.Test;
+
 
 /** The unattended-run seam of the {@code search_knowledge_base} tool ({@code asOwner}). */
 class KnowledgeSearchToolCallbackOwnerTest {

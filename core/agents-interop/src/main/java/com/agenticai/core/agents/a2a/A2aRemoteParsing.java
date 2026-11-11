@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import java.util.Locale;
+
 
 /** Reads a remote agent's replies in either A2A dialect, for {@link A2aClientService}. */
 final class A2aRemoteParsing {

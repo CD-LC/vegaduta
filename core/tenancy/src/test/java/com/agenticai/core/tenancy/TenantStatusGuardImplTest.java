@@ -11,17 +11,15 @@ import static org.mockito.Mockito.when;
 import com.agenticai.core.security.AccountType;
 import com.agenticai.core.security.ExperienceMode;
 import com.agenticai.core.security.TenantPlan;
-
-import org.junit.jupiter.api.Test;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Optional;
-
 import javax.sql.DataSource;
+import org.junit.jupiter.api.Test;
+
 
 /**
  * Zero test coverage existed for {@link TenantStatusGuardImpl} before this - the actual access

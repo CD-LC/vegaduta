@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+
 /**
  * The one regex tripwire for text that is about to be PERSISTED where a later model turn will read
  * it back: agent memory ({@code remember_fact}), graph memory, knowledge collections.

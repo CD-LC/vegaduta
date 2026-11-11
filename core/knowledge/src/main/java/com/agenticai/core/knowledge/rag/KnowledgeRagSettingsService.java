@@ -5,7 +5,9 @@ import com.agenticai.core.knowledge.KnowledgeCollectionRepository;
 import com.agenticai.core.knowledge.KnowledgeSchemaSupport;
 import com.agenticai.core.knowledge.rag.RagDtos.RagSettingsResponse;
 import com.agenticai.core.knowledge.rag.RagDtos.RagSettingsUpdateRequest;
-
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -15,9 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * A collection's retrieval-quality settings - today just the parent-child opt-in, stored in {@code

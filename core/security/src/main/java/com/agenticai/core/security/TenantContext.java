@@ -3,6 +3,7 @@ package com.agenticai.core.security;
 import java.util.Optional;
 import java.util.Set;
 
+
 /**
  * Per-request holder of who the caller is - populated from the validated JWT by {@link
  * TenantContextFilter} once Phase 0 Stage 3's "security" profile is active. Read-only from the rest

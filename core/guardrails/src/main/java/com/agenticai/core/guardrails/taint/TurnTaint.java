@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+
 /**
  * Taint state for ONE agent turn: has any content an outsider could have authored entered the
  * model's context during this turn, and from where.

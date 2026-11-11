@@ -2,9 +2,9 @@ package com.agenticai.core.knowledge.dto;
 
 import com.agenticai.core.knowledge.KnowledgeCollection;
 import com.agenticai.core.knowledge.KnowledgeVisibility;
-
 import java.time.Instant;
 import java.util.UUID;
+
 
 public record KnowledgeCollectionResponse(
         UUID id,

@@ -3,11 +3,11 @@ package com.agenticai.core.agents.a2a;
 import com.agenticai.core.json.JsonMappers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+
 
 /**
  * The {@code a2a_call_agent} built-in: delegate one question or task to an EXTERNAL agent that

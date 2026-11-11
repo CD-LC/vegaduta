@@ -1,8 +1,8 @@
 package com.agenticai.core.knowledge;
 
 import com.agenticai.core.screen.ContentWriteScreen;
-
 import java.util.Optional;
+
 
 /**
  * Write-time screen for text an AGENT is about to persist into a knowledge collection ({@code

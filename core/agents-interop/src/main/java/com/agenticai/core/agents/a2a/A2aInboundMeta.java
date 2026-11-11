@@ -1,8 +1,8 @@
 package com.agenticai.core.agents.a2a;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.function.Function;
+
 
 /**
  * The parts of an inbound HTTP request the message-security checks need, taken once at the

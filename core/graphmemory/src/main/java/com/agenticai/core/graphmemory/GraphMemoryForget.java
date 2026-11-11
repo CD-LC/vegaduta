@@ -7,13 +7,13 @@ import static com.agenticai.core.graphmemory.GraphMemoryCypher.cypherCall;
 import static com.agenticai.core.graphmemory.GraphMemoryCypher.sanitize;
 
 import com.agenticai.core.graphmemory.GraphFactTextMatcher.ValidEdge;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 
 /**
  * Paged scan-and-invalidate work behind {@link GraphMemoryService#forgetFactText}, extracted to
