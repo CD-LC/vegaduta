@@ -56,7 +56,7 @@ ADR-0011 section 2.1 and is mirrored by the ArchUnit rules in
 | eventbus | kernel | 23 | audit, crypto, mcp, security, tenancy |  |
 | google | vendor | 31 | agents (test), agentspi, crypto, guardrails, security, tenancy | Google Workspace OAuth + tools |
 | graphmemory | kernel | 15 | chat, json, prompts, settings, tenancy |  |
-| guardrails | kernel | 128 | approval, audit, json, prompts, settings, tenancy |  |
+| guardrails | kernel | 129 | approval, audit, json, prompts, settings, tenancy |  |
 | imagegen | vendor | 39 | agents (test), agents-studio (test), agentspi, prompts, providers, security, storage, tenancy | Image/video generation backends |
 | json | kernel | 2 | (none) |  |
 | knowledge | kernel (hosts vendor code) | 135 | crypto, json, prompts, security, settings, storage, tenancy | embeddings / OCR / sidecar clients |

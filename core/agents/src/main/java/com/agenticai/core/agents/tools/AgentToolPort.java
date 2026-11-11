@@ -9,9 +9,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
- * Port (ADR-0023): the tool list an agent's chat call gets. The kernel and the turn path (the
- * agent controller, the edge tool endpoints, {@code AgentChatService} and its turn collaborators,
- * {@link TrifectaEnforcementService}) depend on this interface; the implementation is {@code
+ * Port (ADR-0023): the tool list an agent's chat call gets. The kernel and the turn path (the agent
+ * controller, the edge tool endpoints, {@code AgentChatService} and its turn collaborators, {@link
+ * TrifectaEnforcementService}) depend on this interface; the implementation is {@code
  * AgentToolProvider} in core/agents-tools, which owns the tool resolvers, the MCP connection
  * manager and every built-in tool. Each method behaves exactly as the implementation documents it;
  * see that class for the details.
@@ -66,7 +66,9 @@ public interface AgentToolPort {
             ChatClient chatClient,
             HandoffChain chain);
 
-    /** The tools the agent can use, as descriptors (the agent tools endpoint, allow-list checks). */
+    /**
+     * The tools the agent can use, as descriptors (the agent tools endpoint, allow-list checks).
+     */
     List<ToolDescriptor> listAvailableToolsFor(UUID agentId);
 
     /** Whether any MCP tool is offered to this agent for this turn. */
@@ -78,6 +80,15 @@ public interface AgentToolPort {
 
     /** The skills block of the system prompt, compact for small models when asked. */
     String skillsPromptBlock(UUID agentId, List<ToolCallback> tools, boolean compact);
+
+    /**
+     * As above with a cut-down index: {@code lean} = {@code {maxSkills, maxBlockChars,
+     * maxDescriptionWords}} (null = the configured size). Used for a local model's deferred turn.
+     */
+    default String skillsPromptBlock(
+            UUID agentId, List<ToolCallback> tools, boolean compact, int[] lean) {
+        return skillsPromptBlock(agentId, tools, compact);
+    }
 
     /** The procedures block of the system prompt. */
     String proceduresPromptBlock(UUID agentId);
