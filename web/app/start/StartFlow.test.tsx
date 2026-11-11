@@ -120,7 +120,9 @@ describe("StartFlow", () => {
     expect(h.api.createAgent).toHaveBeenCalledWith(
       expect.objectContaining({ name: "clientCallToActionsName", providerName: "ANTHROPIC", experienceMode: "SIMPLE" })
     );
-    expect(h.send).toHaveBeenCalledWith("onboarding_agent_created");
+    // The beacon is flushed by a passive effect after the commit that shows the "try"
+    // step, so it can land a tick after the DOM changes: wait for it, don't assume it.
+    await waitFor(() => expect(h.send).toHaveBeenCalledWith("onboarding_agent_created"));
 
     // step 3: the sample question is in the box, not sent
     const chat = await screen.findByTestId("chat");

@@ -26,6 +26,15 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 # package-lock.json is in sync with package.json again (verified with a clean
 # `npm ci`, 2026-09-29), so this is back to the reproducible install.
+#
+# onnxruntime-node (a transitive dependency of kokoro-js / transformers.js) has an
+# install script that downloads a CUDA build from github.com/microsoft/onnxruntime
+# releases. The console never loads it: it is aliased out of every bundle
+# (next.config.js) and the browser TTS path uses onnxruntime-web. The download made
+# every image build depend on that host being up (a 504 failed the E2E and load-gate
+# jobs on main, 2026-11-08), so skip it. ONNXRUNTIME_NODE_INSTALL is read by
+# onnxruntime-node >= 1.22, the _CUDA name by 1.21 (kokoro-js pins that one).
+ENV ONNXRUNTIME_NODE_INSTALL=skip ONNXRUNTIME_NODE_INSTALL_CUDA=skip
 RUN npm ci --no-audit --no-fund
 
 COPY . .
