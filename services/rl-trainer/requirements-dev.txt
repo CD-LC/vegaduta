@@ -7,4 +7,4 @@
 # fastapi.testclient needs httpx and tests/test_auth.py needs cryptography;
 # both are already exact-pinned in requirements.txt (httpx directly,
 # cryptography via PyJWT[crypto]), so pytest is the only test-only addition.
-pytest==9.1.1
+pytest==9.2.0
