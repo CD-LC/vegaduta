@@ -2940,7 +2940,13 @@
     "auditTrailLabel": "ऑडिट ट्रेल",
     "retriedLabel": "{count} बेर पुनः प्रयास कएल गेल{plural}",
     "nextAttemptSuffix": ", अगला प्रयास {time}",
-    "executionResultLabel": "निष्पादन परिणाम"
+    "executionResultLabel": "निष्पादन परिणाम",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ऑडिट लॉग",

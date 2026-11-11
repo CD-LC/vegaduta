@@ -2901,7 +2901,13 @@
     "auditTrailLabel": "ᱚᱰᱤᱴ ᱴᱨᱮᱞ",
     "retriedLabel": "{count} ᱫᱷᱟᱣ ᱠᱚᱥᱤᱥ ᱦᱩᱭᱮᱱᱟ{plural}",
     "nextAttemptSuffix": ", ᱟᱨᱦᱚᱸ ᱠᱚᱥᱤᱥ {time}",
-    "executionResultLabel": "ᱠᱟᱹᱢᱤ ᱨᱮᱭᱟᱜ ᱯᱷᱚᱞ"
+    "executionResultLabel": "ᱠᱟᱹᱢᱤ ᱨᱮᱭᱟᱜ ᱯᱷᱚᱞ",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "ᱚᱰᱤᱴ ᱞᱚᱜᱽ",

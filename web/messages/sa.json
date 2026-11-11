@@ -2592,7 +2592,13 @@
     "unknownActor": "अज्ञातः",
     "itemLabelRequests": "अभ्यर्थनाः",
     "selectRequestHint": "समीक्षार्थम् अभ्यर्थनां चिनोतु।",
-    "requestedByRow": "{name}-याचितम्"
+    "requestedByRow": "{name}-याचितम्",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "लेखापरीक्षणपञ्जिका",

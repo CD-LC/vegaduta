@@ -2941,7 +2941,13 @@
     "auditTrailLabel": "অডিট ট্রেল",
     "retriedLabel": "{count} রক্ অমুক হোৎনখ্রে{plural}",
     "nextAttemptSuffix": ", মতুংগী হোৎনবা {time}",
-    "executionResultLabel": "একজিকিউসনগী মহৈ"
+    "executionResultLabel": "একজিকিউসনগী মহৈ",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "অডিট লগ",

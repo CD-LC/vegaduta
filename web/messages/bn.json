@@ -3039,7 +3039,13 @@
     "auditTrailLabel": "অডিট ট্রেল",
     "retriedLabel": "পুনরায় চেষ্টা করা হয়েছে {count} বার",
     "nextAttemptSuffix": ", পরবর্তী চেষ্টা {time}",
-    "executionResultLabel": "এক্সিকিউশনের ফলাফল"
+    "executionResultLabel": "এক্সিকিউশনের ফলাফল",
+    "traceLabel": "What the agent executed after this decision",
+    "traceLoading": "Loading the trace...",
+    "traceUnavailable": "No trace is available for this request (or you do not have access to the agent).",
+    "traceOk": "ran",
+    "traceFailed": "failed",
+    "traceTruncated": "Only the first calls are shown."
   },
   "auditLogPanel": {
     "title": "অডিট লগ",
