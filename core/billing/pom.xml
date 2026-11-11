@@ -59,6 +59,14 @@
       <artifactId>razorpay-java</artifactId>
       <version>1.4.10</version>
     </dependency>
+    <!-- razorpay-java needs OkHttp's classes to be loadable; under OkHttp 5 (pinned in
+         core/pom.xml) they live in okhttp-jvm. At runtime core/chat supplies it; tests that
+         mock the Razorpay SDK need it on this module's own classpath. -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp-jvm</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
