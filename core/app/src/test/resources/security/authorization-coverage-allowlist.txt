@@ -156,6 +156,7 @@ POST /api/workflows/{workflowId}/versions/rollback  # HANDLER: WorkflowVersionCo
 POST /api/workflows/{workflowId}/versions/{versionNumber}/promote  # HANDLER: WorkflowVersionController (EDITOR)
 POST /api/workflows/{workflowId}/versions/{versionNumber}/restore  # HANDLER: WorkflowService (EDITOR + assertEditable)
 POST /api/{resourceKind:agents|workflows}/{resourceId}/grants  # HANDLER: ResourceAccessService.grant requireOwnerOrAdmin (resource owner or tenant-admin)
+POST /api/knowledge/{resourceKind:collections}/{resourceId}/grants  # HANDLER: ResourceAccessService.grant requireOwnerOrAdmin (resource owner or tenant-admin)
 PUT /api/account/phone  # MEMBER: the caller's own account (AccountController currentUser)
 PUT /api/agents/{agentId}/quality/datasets/{datasetId}  # HANDLER: QualityAgentAccessGate (EDITOR)
 PUT /api/agents/{agentId}/quality/datasets/{datasetId}/cases/{caseId}  # HANDLER: QualityAgentAccessGate (EDITOR)

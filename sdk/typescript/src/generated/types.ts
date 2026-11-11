@@ -4524,6 +4524,7 @@ export interface KnowledgeCollectionCreateRequest {
   textSearchConfig?: string;
   chunkSize?: number;
   chunkOverlap?: number;
+  visibility?: KnowledgeVisibility;
 }
 
 export interface KnowledgeCollectionResponse {
@@ -4541,6 +4542,8 @@ export interface KnowledgeCollectionResponse {
   embeddingStatus?: string;
   chunkSize?: number;
   chunkOverlap?: number;
+  visibility?: KnowledgeVisibility;
+  createdBy?: string;
 }
 
 export interface KnowledgeCollectionUpdateRequest {
@@ -4549,6 +4552,7 @@ export interface KnowledgeCollectionUpdateRequest {
   parentCollectionId?: string;
   chunkSize?: number;
   chunkOverlap?: number;
+  visibility?: KnowledgeVisibility;
 }
 
 export interface KnowledgeConnectorController_ConnectorUpdateRequest {
@@ -4637,6 +4641,8 @@ export interface KnowledgeUrlIngester_UrlIngestResult {
   documentId?: string;
   document?: boolean;
 }
+
+export type KnowledgeVisibility = "PRIVATE" | "TENANT" | "SHARED";
 
 export interface LandingEventController_LandingEventRequest {
   event?: string;
@@ -8282,7 +8288,7 @@ export interface ResolvedPrompt {
   estimatedTokens?: number;
 }
 
-export type ResourceType = "AGENT" | "WORKFLOW";
+export type ResourceType = "AGENT" | "WORKFLOW" | "KNOWLEDGE_COLLECTION";
 
 export interface ResumableChatStreamService_TurnSnapshot {
   turnId?: string;
@@ -8814,6 +8820,7 @@ export interface SearchResultResponse {
   startChar?: number;
   endChar?: number;
   quote?: string;
+  screenFlags?: string[];
 }
 
 export type SecretKind = "API_KEY" | "PASSWORD" | "TOKEN" | "BASIC_AUTH" | "CUSTOM";

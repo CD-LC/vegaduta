@@ -11677,6 +11677,30 @@ export class SessionConfigApi {
   }
 }
 
+export class SessionTaintApi {
+  private readonly http: HttpClient;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+  }
+
+  /**
+   * Status.
+   * `GET /api/agents/{agentId}/chat/sessions/{sessionId}/taint`
+   */
+  status(agentId: string, sessionId: string, options?: CallOptions<{ subject?: string }, HeaderParams>): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "GET", path: `/api/agents/${encodeURIComponent(String(agentId))}/chat/sessions/${encodeURIComponent(String(sessionId))}/taint` });
+  }
+
+  /**
+   * Clear.
+   * `DELETE /api/agents/{agentId}/chat/sessions/{sessionId}/taint`
+   */
+  clear(agentId: string, sessionId: string, options?: CallOptions<{ subject?: string }, HeaderParams>): Promise<Record<string, unknown>> {
+    return this.http.request<Record<string, unknown>>({ ...options, method: "DELETE", path: `/api/agents/${encodeURIComponent(String(agentId))}/chat/sessions/${encodeURIComponent(String(sessionId))}/taint` });
+  }
+}
+
 export class SettingsApi {
   private readonly http: HttpClient;
 
@@ -11746,6 +11770,30 @@ export class ShareApi {
 
   constructor(http: HttpClient) {
     this.http = http;
+  }
+
+  /**
+   * List.
+   * `GET /api/knowledge/{resourceKind}/{resourceId}/grants`
+   */
+  list2(resourceKind: string, resourceId: string, options?: CallOptions): Promise<T.ShareController_GrantResponse[]> {
+    return this.http.request<T.ShareController_GrantResponse[]>({ ...options, method: "GET", path: `/api/knowledge/${encodeURIComponent(String(resourceKind))}/${encodeURIComponent(String(resourceId))}/grants` });
+  }
+
+  /**
+   * Grant.
+   * `POST /api/knowledge/{resourceKind}/{resourceId}/grants`
+   */
+  grant2(resourceKind: string, resourceId: string, body: T.ShareController_GrantRequest, options?: CallOptions<QueryParams, { "Idempotency-Key"?: string }>): Promise<T.ShareController_GrantResponse> {
+    return this.http.request<T.ShareController_GrantResponse>({ ...options, method: "POST", path: `/api/knowledge/${encodeURIComponent(String(resourceKind))}/${encodeURIComponent(String(resourceId))}/grants`, body });
+  }
+
+  /**
+   * Revoke.
+   * `DELETE /api/knowledge/{resourceKind}/{resourceId}/grants/{grantId}`
+   */
+  revoke2(resourceKind: string, resourceId: string, grantId: string, options?: CallOptions): Promise<void> {
+    return this.http.request<void>({ ...options, method: "DELETE", path: `/api/knowledge/${encodeURIComponent(String(resourceKind))}/${encodeURIComponent(String(resourceId))}/grants/${encodeURIComponent(String(grantId))}`, response: "void" });
   }
 
   /**
@@ -16064,6 +16112,7 @@ export class VegadutaClient {
   readonly scimProvisioning: ScimProvisioningApi;
   readonly secretVault: SecretVaultApi;
   readonly sessionConfig: SessionConfigApi;
+  readonly sessionTaint: SessionTaintApi;
   readonly settings: SettingsApi;
   readonly share: ShareApi;
   readonly sharedWithMe: SharedWithMeApi;
@@ -16406,6 +16455,7 @@ export class VegadutaClient {
     this.scimProvisioning = new ScimProvisioningApi(this.http);
     this.secretVault = new SecretVaultApi(this.http);
     this.sessionConfig = new SessionConfigApi(this.http);
+    this.sessionTaint = new SessionTaintApi(this.http);
     this.settings = new SettingsApi(this.http);
     this.share = new ShareApi(this.http);
     this.sharedWithMe = new SharedWithMeApi(this.http);
