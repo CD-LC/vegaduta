@@ -791,6 +791,8 @@ broken links. Worktree: /private/tmp/vd-dbdocs.
 
 Audited every place that states the project license against `LICENSE` (BUSL-1.1; `sdk/` is Apache-2.0; each version converts to Apache-2.0 four years after release). The license itself is unchanged. Corrected statements that called the platform Apache-2.0, said the public repository was not published yet, and the Helm and private-package metadata that declared Apache-2.0. Verified: `make gates`, `make helm-lint`, and the web tests for the touched pages.
 
+- 2026-11-02, test-coverage agent: added JUnit tests under `core/agents-studio/src/test` only (Magic Studio planner and controller, sandbox music controller, app-builder controllers and service auth, Redis coding task store, platform query rewriter, face enrollment, demo agent seeder). No production code changed. Worktree: `vegaduta-coverage-wt`.
+
 ### Personal e2e coverage (Claude Code, 2026-11-01)
 
 Opened a test-only PR (`test/personal-e2e-coverage`, off `origin/main`) for the signed-in personal-edition suite: agent behaviour, turn inspector and feedback, MCP registration and tool selection, workflows, knowledge upload and retrieval, A2A-off checks, channels and the device pairing lifecycle. No product code changed. Verified: `make gates` passes; the personal suite passes on a local personal stack (79 passed, 4 skipped: three A2A positive-path checks need the A2A directory on, and the platform-admin check needs the owner to hold that role). Worktree: /Users/mroads/Documents/GitHub/CD-LC/vegaduta-personal-e2e-wt.
